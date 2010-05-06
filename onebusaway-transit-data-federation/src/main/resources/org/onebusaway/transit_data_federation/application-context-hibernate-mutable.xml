@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <!--
+        We define here a second SessionFactory (a Hibernate interface to a database) for dynamic, mutable data. The
+        DataSource and SessionFactory used by default throughout the transit-data-federation module is static in the
+        sense that once data is initially written to the database in the bundle creation process, the database is for
+        the most part read-only from that point on. This makes versioning different instances of transit data bundles,
+        as we can just reboot the server pointing to a new database.
+    -->
+    <!--
+        However, there is some dynamically generated data, like archived real-time arrival data, that we'd like to store
+        in the database as well. This data isn't versioned in the sense that it can be kept in one database that doesn't
+        change even when a new version of the underlying transit data bundle is swapped in. To facilitate this, we
+        create a separate DataSource and SessionFactory that is used to read and write mutable data. Note that we add a
+        "mutable" qualifier to the SessionFactory so that Components can more easily auto-wire the appropriate session
+        factory.
+    -->
+
+    <import resource="classpath:org/onebusaway/container/application-context-caching.xml" />
+
+    <!-- Hibernate session factory -->
+    <bean id="mutableSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean" primary="false">
+        <qualifier value="mutable" />
+        <property name="dataSource" ref="mutableDataSource" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.use_sql_comments">true</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.generate_statistics">true</prop>
+                <prop key="hibernate.cache.use_structured_entries">true</prop>
+                <prop key="hibernate.jdbc.batch_size">1000</prop>
+            </props>
+        </property>
+        <property name="annotatedClasses">
+            <list>
+                <value>org.onebusaway.transit_data_federation.model.predictions.TripTimePrediction</value>
+            </list>
+        </property>
+        <property name="mappingLocations">
+            <list>
+                <value>classpath:org/onebusaway/transit_data_federation/impl/predictions/TripTimePredictionDaoImpl.hibernate.xml
+                </value>
+            </list>
+        </property>
+        <property name="cacheProvider">
+            <bean class="org.onebusaway.container.spring.EhCacheProvider">
+                <property name="cacheManager" ref="cacheManager" />
+            </bean>
+        </property>
+    </bean>
+
+    <!-- -->
+    <bean id="mutableTransactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="mutableSessionFactory" />
+    </bean>
+
+    <!-- -->
+    <tx:annotation-driven transaction-manager="mutableTransactionManager" />
+
+</beans>

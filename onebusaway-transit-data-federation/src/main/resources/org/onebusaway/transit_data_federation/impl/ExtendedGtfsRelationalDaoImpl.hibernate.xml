@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <query name="latLonBoundsForStopsByAgencyId" read-only="true">
+        SELECT stop.id.agencyId, min(stop.lat), min(stop.lon), max(stop.lat), max(stop.lon)
+        FROM Stop stop
+        GROUP BY stop.id.agencyId
+    </query>
+    <query name="serviceIdsForAgencyId" read-only="true">
+        SELECT stop.id FROM Stop stop WHERE stop.id.agencyId = :agencyId
+    </query>
+    <query name="stopIdsForAgencyId" read-only="true">
+        SELECT stop.id FROM Stop stop WHERE stop.id.agencyId = :agencyId
+    </query>
+    <query name="routeIdsForAgencyId" read-only="true">
+        SELECT route.id FROM RouteCollection route WHERE route.id.agencyId = :agencyId
+    </query>
+    <query name="getRoutesForStop" read-only="true">
+        SELECT route FROM
+        Route route,
+        Trip trip,
+        StopTime stopTime
+        WHERE
+        stopTime.stop = :stop
+        AND stopTime.trip = trip
+        AND trip.route = route
+        GROUP BY route.id.agencyId, route.id.id
+    </query>
+    <query name="stopTimesByBlockId" read-only="true">
+        SELECT st
+        FROM StopTime st
+        WHERE st.trip.id.agencyId = :agencyId AND
+        st.trip.blockId = :blockId
+    </query>
+    <query name="stopTimesByTripIds" read-only="true">
+        SELECT st FROM StopTime st WHERE st.trip.id IN (:tripIds)
+    </query>
+    <query name="shapePointIdsForRoutes" read-only="true">
+        SELECT trip.shapeId FROM Trip trip where trip.route IN (:routes) GROUP BY trip.shapeId.agencyId, trip.shapeId.id
+    </query>
+</hibernate-mapping>

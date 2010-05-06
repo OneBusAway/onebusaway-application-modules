@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<query name="tripTimePredictionsForTripServiceDateAndTimeRange" read-only="true">
+      SELECT p FROM TripTimePrediction p WHERE p.tripId = :tripId AND p.serviceDate = :serviceDate AND :fromTime &lt;= p.time AND p.time &lt;= :toTime 
+    </query>
+    <query name="tripTimePredictionsForVehicleAndTimeRange" read-only="true">
+      SELECT p FROM TripTimePrediction p WHERE p.vehicleId = :vehicleId AND :fromTime &lt;= p.time AND p.time &lt;= :toTime
+    </query> 
+</hibernate-mapping>
