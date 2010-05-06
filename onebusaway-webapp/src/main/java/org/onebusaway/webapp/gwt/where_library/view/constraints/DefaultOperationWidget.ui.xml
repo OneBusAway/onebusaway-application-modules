@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- RefineViewWidget.ui.xml -->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <g:HTMLPanel>
+
+        <p>
+            Use this tool to find real-time arrival information for public transit stops from all the
+            <a href="agencies.action">transit agencies</a> supported by OneBusAway.
+        </p>
+        <p>
+            You can quickly search for stops by <em>address</em>, <em>route</em>, or <em>stop number</em>.
+            You can also zoom into the map to see stops for a specific location.
+        </p>
+        <g:FlowPanel ui:field="_defaultSearchLocationPanel" />
+        
+
+    </g:HTMLPanel>
+
+</ui:UiBinder>

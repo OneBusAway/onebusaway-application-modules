@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- RefineViewWidget.ui.xml -->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:my='urn:import:org.onebusaway.webapp.gwt.where_library.view' xmlns:oba="urn:import:org.onebusaway.webapp.gwt.oba_application.view">
+
+    <ui:with field='res' type='org.onebusaway.webapp.gwt.login_widget.LoginWidgetResources' />
+
+    <ui:style>
+        .imagePanel {
+        margin-bottom: 1em;
+        }
+        
+        .labelPanel {
+        margin-bottom: 0.5em;
+        }
+        
+        .textBox {
+        width: 340px;
+        }
+
+        .okButton {
+        margin-top: 5px;
+        font-size: 1.5em;
+        }
+
+        .cancelPanel {
+        text-align:
+        right;
+        }
+
+        .cancelButton {
+        font-size: 0.8em;
+        }
+    </ui:style>
+
+    <g:HTMLPanel>
+        <g:FormPanel ui:field="_formPanel">
+            <g:HTMLPanel>
+                <div class="{style.imagePanel}">
+                    <g:Image ui:field="_openIdLink" resource='{res.providerAOL}' />
+                </div>
+                <div class="{style.labelPanel}">
+                    Your AOL Screen Name:
+                </div>
+                <div>
+                    <g:TextBox addStyleNames="{style.textBox}" ui:field="_textBox" />
+                </div>
+                <div>
+                    <g:SubmitButton addStyleNames="{style.okButton}" ui:field="_okButton">Sign In</g:SubmitButton>
+                </div>
+                <div class="{style.cancelPanel}">
+                    <g:Button addStyleNames="{style.cancelButton}" ui:field="_cancelButton">Use Another Account</g:Button>
+                </div>
+            </g:HTMLPanel>
+        </g:FormPanel>
+    </g:HTMLPanel>
+
+</ui:UiBinder>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+
+<!DOCTYPE struts PUBLIC 
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+    <constant name="struts.convention.action.suffix" value="Action" />
+    <constant name="struts.convention.action.mapAllMatches" value="true" />
+    <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.webapp.actions" />
+    <constant name="struts.convention.action.checkImplementsAction" value="false" />
+
+    <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />
+
+    <package name="onebusaway-webapp-default" extends="struts-default">
+
+        <interceptors>
+            <interceptor name="current-user" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />
+            <interceptor name="phone-number-login" class="org.onebusaway.presentation.impl.users.PhoneNumberLoginInterceptor" />
+            <interceptor name="textmarks-session" class="org.onebusaway.webapp.impl.TextmarksSessionInterceptor" />
+            <interceptor-stack name="onebusaway-webapp-stack">
+                <interceptor-ref name="defaultStack" />
+                <interceptor-ref name="current-user" />
+            </interceptor-stack>
+            <interceptor-stack name="onebusaway-webapp-textmarks-stack">
+                <interceptor-ref name="defaultStack" />
+                <interceptor-ref name="phone-number-login" />
+                <interceptor-ref name="textmarks-session" />
+                <interceptor-ref name="current-user" />
+            </interceptor-stack>
+        </interceptors>
+
+        <global-results>
+            <result name="ServiceException">/WEB-INF/content/exception.jspx</result>
+            <result name="NoSuchStopServiceException">/WEB-INF/content/exception-noSuchStop.jspx</result>
+            <result name="NoSuchTripServiceException">/WEB-INF/content/exception-noSuchTrip.jspx</result>
+            <result name="InvalidArgumentServiceException">/WEB-INF/content/exception-invalidArgument.jspx</result>
+            <result name="OutOfServiceAreaServiceException">/WEB-INF/content/exception-outOfServiceArea.jspx</result>
+            <result name="MultipleServiceAreasServiceException">/WEB-INF/content/exception-multipleServiceAreas.jspx</result>
+            <result name="NoSuchAgencyServiceException">/WEB-INF/content/exception-noSuchAgency.jspx</result>
+        </global-results>
+
+        <global-exception-mappings>
+            <exception-mapping exception="org.onebusaway.exceptions.ServiceException" result="ServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.NoSuchStopServiceException" result="NoSuchStopServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.NoSuchTripServiceException" result="NoSuchTripServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.InvalidArgumentServiceException" result="InvalidArgumentServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.OutOfServiceAreaServiceException" result="OutOfServiceAreaServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.MultipleServiceAreasServiceException" result="MultipleServiceAreasServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.NoSuchAgencyServiceException" result="NoSuchAgencyServiceException" />
+        </global-exception-mappings>
+
+    </package>
+
+</struts>

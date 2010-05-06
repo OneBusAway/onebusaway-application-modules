@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>User Info</title>
+  <script type="text/javascript"                                  
+          src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g"><jsp:text></jsp:text></script>
+  <script type="text/javascript"
+          src="org.onebusaway.webapp.gwt.SearchLocationLibrary.nocache.js"><jsp:text></jsp:text></script>
+
+</head>
+<body>
+
+<s:if test="user">
+<s:push value="user">
+<h2>User Info</h2>
+
+<div>
+	<s:if test="! anonymous">
+	  <h4>You are currently logged in</h4>
+	  <p><s:a namespace="/" action="logout">Click here to logout</s:a></p>
+	</s:if>
+
+    <div class="section">
+	<h4>Privacy Settings</h4>
+	<p>In order to make using OneBusAway more convenient, we can remember various preferences,
+	such as your default search area and your bookmarked stops. We understand that some users
+	would rather OneBusAway not remember any of these preferences due to privacy concerns.  You
+	can control your privacy settings here.</p>
+	
+	<p><span class="label">Current Settings:</span>
+	  <s:if test="rememberPreferencesEnabled">Preferences <span class="bold">ARE</span> saved</s:if>
+	  <s:else>Prefenences <span class="bold">ARE NOT</span> saved</s:else>
+	</p>
+	
+	<p>
+	  <s:url var="url" action="set-remember-preferences">
+		<s:param name="enabled" value="! rememberPreferencesEnabled"/>
+	  </s:url>
+	  <s:a href="%{url}">
+	  	<s:if test="rememberPreferencesEnabled">I DON'T want my preferences to be saved</s:if>
+	  	<s:else>I DO want my preferences to be saved</s:else>  
+	  </s:a>
+	</p>
+    </div>
+	
+	<div class="section">
+	<h4>Default Search Location</h4>
+	<p>We use your default search location to give you transit information appropriate to your area.</p>
+	<p><span class="label">Your Default Search Location:</span>
+	  <s:if test="hasDefaultLocation()">
+	  	<s:url var="url" value="/where/standard/index.html#m(location)lat(%{defaultLocationLat})lon(%{defaultLocationLon})accuracy(5)"/>
+		<s:a href="%{url}"><s:property value="defaultLocationName"/></s:a> 
+	  </s:if>
+	  <s:else>Not Set</s:else>
+	</p>
+	
+	<p id="changeSearchLocation"><jsp:text> </jsp:text></p>
+	
+	<s:if test="hasDefaultLocation()">
+	<p><s:a action="clear-default-search-location">Clear your default search location</s:a></p>
+	</s:if>
+	</div>
+
+	<s:if test="admin">
+		<div class="section">	
+		<h4>Admin</h4>
+	 	<p>You are an admin.  Use <a href="../admin/index.action">your powers</a> wisely.</p>
+	 	</div>
+	</s:if>
+	
+	<div class="section">
+		<h4>More to come...</h4>
+		<p>Including bookmarks, route preferences, notification settings, and more.</p>
+	</div>
+	
+</div>
+
+</s:push>
+</s:if>
+<s:else>
+There is no user currently logged in.
+</s:else>
+
+</body>
+</html>

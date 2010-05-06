@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <!-- This turns on automatic annotation configuration -->
+    <context:annotation-config />
+
+    <import resource="classpath:org/onebusaway/users/application-context.xml" />
+    <import resource="classpath:org/onebusaway/geocoder/application-context.xml" />
+    <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
+
+    <bean id="propertyOverrides" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.webapp.cacheManager</prop>
+            </props>
+        </property>
+    </bean>
+
+    <context:component-scan base-package="org.onebusaway.webapp.impl" />
+
+    <sec:http>
+        <sec:intercept-url pattern="/sms/**" filters="none" />
+        <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR" />
+        <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1" />
+        <sec:form-login />
+        <sec:http-basic />
+        <sec:remember-me />
+        <sec:logout invalidate-session="false" logout-url="/logout.action" />
+    </sec:http>
+
+    <bean id="autoUserProcessingFilter" class="org.onebusaway.users.impl.authentication.AutoUserProcessingFilter">
+        <sec:custom-filter position="ANONYMOUS_FILTER" />
+        <property name="pathsToExclude">
+            <list>
+                <value>/sms</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="go" class="org.onebusaway.users.impl.authentication.DefaultUserAuthenticationProvider">
+        <sec:custom-authentication-provider />
+    </bean>
+
+    <bean id="servletContext" class="org.springframework.web.context.support.ServletContextFactoryBean" />
+
+    <bean id="clientBundleFactory" class="org.onebusaway.webapp.impl.resources.ClientBundleFactory">
+        <property name="prefix" value="/resources.action?id=" />
+        <property name="servletContext" ref="servletContext" />
+        <property name="resources">
+            <list>
+                <value>org.onebusaway.webapp.resources.OneBusAwayCommonResources</value>
+                <value>org.onebusaway.webapp.resources.WhereStandardResources</value>
+                <value>org.onebusaway.webapp.resources.WhereIPhoneResources</value>
+                <value>org.onebusaway.webapp.resources.WhereTextResources</value>
+                <value>org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryResources</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="geocoderImpl" class="org.onebusaway.geocoder.impl.DatabaseCachingGeocoderImpl" primary="true">
+        <property name="geocoderService" ref="externalGeocoderImpl" />
+    </bean>
+
+    <bean id="whereMessages" class="org.onebusaway.webapp.impl.TypedMessagesFactory">
+        <property name="messagesClass" value="org.onebusaway.webapp.gwt.where_library.WhereMessages" />
+    </bean>
+
+    <bean id="openid_plugin" class="org.onebusaway.users.impl.authentication.OpenIdAuthenticationPlugin" />
+    <bean id="oauth_twitter_plugin" class="org.onebusaway.users.impl.authentication.OAuthAuthenticationPlugin" />
+
+    <bean id="loginManager" class="org.onebusaway.users.impl.authentication.LoginManager">
+        <property name="plugins">
+            <map>
+                <entry key="openid" value-ref="openid_plugin" />
+                <entry key="oauth_twitter" value-ref="oauth_twitter_plugin" />
+            </map>
+        </property>
+    </bean>
+</beans>

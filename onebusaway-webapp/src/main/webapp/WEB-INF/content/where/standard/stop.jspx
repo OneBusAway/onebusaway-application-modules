@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags" xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<s:set name="now" value="getNow()" />
+<head>
+  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.css.url}" />
+  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.standardStopCss.url}" />
+  <meta http-equiv="Refresh" content="60" />
+<title><s:iterator value="result.stops" status="stopsIter">
+    <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if> - Stop # <s:property value="code" />
+    <s:if test="!#stopsIter.last">, </s:if>
+</s:iterator></title>
+</head>
+<body>
+
+<div id="container">
+<div class="panel">
+
+<div class="arrivalsStopInfo"><s:iterator value="result.stops" status="stopsIter">
+
+<s:set name="mapUrl">
+index.html#p(index)m(location)lat(<s:property value="lat" />)lon(<s:property value="lon" />)accuracy(8)stop(<s:property value="id" />)
+</s:set>
+	<div>
+		<div class="arrivalsStopAddress"><s:a href="%{mapUrl}"><s:property value="name" /></s:a></div>
+		<div class="arrivalsStopNumber"><s:a href="%{mapUrl}">Stop # <s:property value="code" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if></s:a></div>
+	</div>
+    <s:if test="!#stopsIter.last">
+        <small>and</small>
+    </s:if>
+</s:iterator></div>
+
+<p style="text-align: center;"><b>Love OneBusAway?</b>  Show your support and <a href="http://www.seattle20.com/awards/vote.aspx">vote for us</a> as<br/><i>Best Non-Profit Startup</i> in the Seattle 2.0 Awards.  <a href="http://www.seattle20.com/awards/vote.aspx">Vote now!</a></p>
+
+<s:if test="filtered">
+    <div class="arrivalsFilterPanel"><s:url var="removeFilterUrl" includeParams="get">
+        <s:param name="route" value="%{'all'}" />
+    </s:url><s:a href="%{removeFilterUrl}">Show all arrivals</s:a></div>
+</s:if>
+
+<table class="arrivalsTable">
+    <tr class="arrivalsHeader">
+        <td class="arrivalsRouteColumn"><s:url var="url" includeParams="get">
+            <s:param name="order">route</s:param>
+        </s:url><s:a href="%{url}">route</s:a></td>
+        <td class="arrivalsDestinationColumn"><s:url var="url" includeParams="get">
+            <s:param name="order">dest</s:param>
+        </s:url><s:a href="%{url}">destination</s:a></td>
+        <td class="arrivalsStatusColumn"><s:url var="url" includeParams="get">
+            <s:param name="order">time</s:param>
+        </s:url><s:a href="%{url}">minutes</s:a></td>
+    </tr>
+    <s:iterator value="result.arrivalsAndDepartures">
+    	<s:set name="route" value="trip.route" />
+        <s:set name="arrivalsStatusLabelStyle" value="getArrivalStatusLabelStyle(top,#now)" />
+        <tr class="arrivalsRow">
+        	<jsp:element name="td">
+        	  <jsp:attribute name="class">arrivalsRouteEntry<s:if test="isLongRouteName(#route)"> arrivalsRouteLongNameEntry</s:if></jsp:attribute>
+              <s:url var="url" includeParams="get">
+                  <s:param name="route" value="#route.id" />
+              </s:url>
+              <s:a href="%{url}">
+            	<oba:routeName value="#route"/>
+              </s:a>
+            </jsp:element>
+            <td>
+            <div>
+            <div class="arrivalsDestinationEntry">
+                <s:url var="tripUrl" action="trip" includeParams="none">
+                    <s:param name="id" value="trip.id" />
+                    <s:param name="stop" value="stopId" />
+                </s:url>
+                <s:a href="%{tripUrl}"><s:property value="trip.tripHeadsign" /></s:a>
+            </div>
+            <div class="arrivalsTimePanel"><span class="arrivalsTimeEntry"><oba:date
+                value="getTimeAsDate(computeBestArrivalTime())" format="hh:mm" /></span> - <jsp:element name="span">
+                <jsp:attribute name="class">
+                    <s:property value="#arrivalsStatusLabelStyle" />
+                </jsp:attribute>
+                <s:property value="getArrivalLabel(top,#now)" />
+            </jsp:element><s:if test="status == 'reroute'"> + <span class="snow"><a href="http://transit.metrokc.gov/up/rr/adverseweather.html">snow</a></span></s:if></div>
+            </div>
+            </td>
+            <jsp:element name="td">
+                <jsp:attribute name="class">
+                    arrivalsStatusEntry
+                    <s:property value="#arrivalsStatusLabelStyle" />
+                    <s:if test="isArrivalNow(top,#now)"> arrivalStatusNow</s:if>
+                </jsp:attribute>
+                <s:a href="notification.html#tripId(%{trip.id})stopId(%{stopId})">
+                	<s:property value="getMinutesLabel(top,#now)" />
+                </s:a>
+            </jsp:element>
+        </tr>
+    </s:iterator>
+
+    <s:if test="result.predictedArrivals.empty">
+        <tr>
+            <td colspan="3">
+            <div id="arrivalsNoScheduledArrivals">No scheduled arrivals in the next 30 minutes.</div>
+            </td>
+        </tr>
+    </s:if>
+</table>
+
+<div class="arrivalsStatusUpdates">Last Update: <oba:date value="getTimeAsDate(#now)" format="hh:mm aa" /></div>
+
+<div class="arrivalsNearbyStops">
+<div>Nearby stops:</div>
+<s:iterator value="result.nearbyStops">
+    <s:url var="nearbyStopUrl" action="stop" includeParams="none">
+        <s:param name="id" value="id" />
+    </s:url>
+    <div><s:a href="%{nearbyStopUrl}">
+        <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if>
+    </s:a></div>
+</s:iterator></div>
+
+<div class="p"><s:iterator value="result.stops" status="stopsIter">
+    <s:url var="scheduleUrl" action="schedule" includeParams="none">
+        <s:param name="id" value="id" />
+    </s:url>
+    <s:a href="%{scheduleUrl}">See the full schedule for this stop (# <s:property value="code" />)</s:a>
+    <s:if test="!#stopsIter.last">
+        <br />
+    </s:if>
+</s:iterator></div>
+
+<div class="p">
+	<s:a href="%{refineSearchUrl}">See multiple stops or filter routes</s:a> | <s:a href="index.html">Search for another stop</s:a>
+</div>
+
+<jsp:include page="/WEB-INF/content/snippets/agencies-attribution.jspx">
+	<jsp:param name="containerClass" value="agenciesSection" />
+</jsp:include>
+
+</div>
+</div>
+
+</body>
+</html>

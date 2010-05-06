@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Register Your Account</title>
+
+</head>
+<body>
+
+<h2>Register Your Account</h2>
+
+<s:if test="user.anonymous">
+
+<ul>
+	<s:url var="googleOpenId" value="/services/login/openid" includeParams="none">
+		<s:param name="url">https://www.google.com/accounts/o8/id</s:param>
+		<s:param name="target">${pageContext.request.contextPath}/login-handler.action</s:param>
+	</s:url>
+	<li><s:a href="%{googleOpenId}">Google OpenId</s:a></li>
+</ul>
+
+</s:if>
+<s:else>
+<p>Your account is already registered.  Check out your <a href="user/index.action">User Settings</a> for more information.</p>
+</s:else>
+
+
+</body>
+</html>

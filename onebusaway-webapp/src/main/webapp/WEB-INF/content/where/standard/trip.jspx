@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<link rel="stylesheet" type="text/css" media="all" href="${resources.WhereStandardResources.tripCss.url}" />
+<title>Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /> - Trip # <s:property
+    value="result.trip.id" /></title>
+</head>
+<body>
+
+<div id="container">
+<div id="tripPanel">
+<s:push value="result">
+
+    <div class="tripPanelHeader">
+    <div class="tripPanelHeaderRoute">Route <s:property value="trip.route.shortName" /> - <s:property value="trip.tripHeadsign" /></div>
+    <div class="tripPanelHeaderTripId">Trip # <s:property value="trip.id" /></div>
+    </div>
+    
+
+    <div class="block tripPanelRealtimeInfo">
+    <div><span class="tripPanelLabel">Real-time status:</span> <s:if test="numberOfPredictions==0">
+        <span>No info available from the bus</span>
+    </s:if> <s:if test="numberOfPredictions > 0"><jsp:element name="span">
+                <jsp:attribute name="class">
+                    <s:property value="getGoalDeviationLabelStyle(top)" />
+                </jsp:attribute>
+                <s:property value="getGoalDeviationLabel(top)" />
+            </jsp:element></s:if></div>
+
+    <s:if test="schedule.previousTrip != null">
+        <div class="block">Incoming Route: <a href="trip.action?id=${schedule.previousTrip.id}"><oba:routeName
+            value="schedule.previousTrip.route" /> - <s:property
+            value="schedule.previousTrip.tripHeadsign" /></a></div>
+    </s:if>
+
+    <div class="block">
+    
+    <oba:group value="schedule.stopTimes" var="groups">
+        <s:property value="departureTime / 300" />
+    </oba:group>
+
+    <table>
+        <s:iterator value="#groups">
+            <s:iterator status="groupStatus">
+                <tr>
+                    <td class="TripPage-TimeColumn"><s:if test="#groupStatus.first">
+                        <span class="TripPage-ArrivalTime"> <oba:date format="hh:mm aa"
+                            value="getStopTime(top)" /></span>
+                    </s:if></td>
+                    <td class="TripPage-StopColumn"><a href="stop.action?id=${stop.id}"><s:property value="stop.name" /></a></td>
+                </tr>
+            </s:iterator>
+        </s:iterator>
+    </table>
+    </div>
+
+    <s:if test="schedule.nextTrip != null">
+        <div class="block">Continues as Route: <a href="trip.action?id=${schedule.nextTrip.id}"><oba:routeName
+            value="schedule.nextTrip.route" /> - <s:property
+            value="schedule.nextTrip.tripHeadsign" /></a></div>
+    </s:if>
+
+    </div>
+
+</s:push>
+</div>
+</div>
+
+</body>
+</html>

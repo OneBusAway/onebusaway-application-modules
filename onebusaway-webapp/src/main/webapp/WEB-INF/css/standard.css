@@ -1,0 +1,882 @@
+/*
+ * Copyright 2008 Brian Ferris
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+ 
+@url logoUrl getLogoImage;
+
+body {
+	background: #fff;
+	font-size: 16px;
+	line-height: 20px;
+	color: #000;
+}
+
+/****
+ *
+ ****/
+ 
+div#wrapper {
+	border-top: 5px solid #78AA36;
+	clear: left;
+}
+
+div#container {
+	position: relative;
+	width: 940px;
+	margin: 0 auto;
+	padding: 0
+}
+
+div#header {
+	position: relative;
+	height: 32px;
+	margin: 0 auto 36px;
+	padding: 0;
+	border-bottom: 1px solid #ccc;
+}
+
+/****
+ *
+ ****/
+
+ul.tabs {
+	font-size: 13px;
+	float: right;
+	margin: 0;
+	list-style: none outside none;
+}
+
+ul.tabs li {
+	display: block;
+	float: left;
+	line-height: 1
+}
+
+ul.tabs li a {
+	display: block;
+	font-weight: bold;
+	width: 90px;
+	text-align: center;
+	padding: 8px 0px 8px 0px;
+	border-left: 1px solid #eee;
+	text-decoration: none;
+	color: #333;
+	cursor: pointer
+}
+
+ul.tabs li.current a {
+	background: #78AA36;
+	color: #fff;
+	border: 0;
+	margin: 0;
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, .25);
+	text-align: center;
+	\-webkit-border-bottom-left-radius: 3px;
+	\-webkit-border-bottom-right-radius: 3px;
+	\-moz-border-radius: 0 0 3px 3px;
+	position: relative;
+	z-index: 2
+}
+
+ul.tabs li span {
+	display: block;
+	font-size: 16px;
+	line-height: 1;
+	font-weight: bold
+}
+
+a#headerTitle, a#headerTitle:visited {
+	font-weight: bold;
+	font-size: 32px;
+	position: relative;
+	top: 5px;
+	color: black;
+	text-decoration: none;
+}
+
+/****
+ *
+ ****/
+ 
+p {
+	margin:0 0 1em;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	color: #333;
+	font-weight: bold
+}
+
+h1,h2,h3 {
+	letter-spacing: -1px
+}
+
+h1 {
+	font-size: 45px;
+	line-height: 1;
+	margin: 0 0 9px
+}
+
+h2 {
+	font-size: 30px;
+	line-height: 1.2;
+	margin: 9px 0
+}
+
+h3 {
+	font-size: 24px;
+	line-height: 1;
+	margin: 3px 0 9px
+}
+
+h4 {
+	font-size: 18px;
+	line-height: 1;
+	margin: 0
+}
+
+h5 {
+	font-size: 14px;
+	line-height: 18px
+}
+
+h6 {
+	font-size: 13px;
+	line-height: 18px
+}
+
+/****
+ *
+ ****/
+.column-row,.row {
+	margin: 0 0 18px -20px
+}
+
+.column,.columns {
+	float: left;
+	display: inline;
+	margin: 0 0 0 20px
+}
+
+.column-row:after,.row:after,.clearfix:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden
+}
+
+* html .column-row,* html .row,* html .clearfix {
+	height: 1%
+}
+
+.column-row,.row,.clearfix {
+	display: inline-block
+}
+
+.column-row,.row,.clearfix {
+	display: block
+}
+
+.one-third {
+	width: 300px
+}
+ 
+
+/****
+ *
+ ****/
+
+div.page-header {
+	width: 100%;
+	position: relative;
+	margin: 0 0 31px;
+	padding: 36px 0 27px;
+	border-bottom: 5px solid #eee;
+	clear: both;
+	background-position: right bottom;
+	background-repeat: no-repeat
+}
+
+div.page-header h1 {
+	display: block;
+	font-size: 81px;
+	line-height: 1;
+	font-weight: bold;
+	letter-spacing: -3px;
+	margin: 0;
+	color: #222
+}
+
+div.page-header h2 {
+	margin: 6px 0 0;
+	font-size: 24px;
+	line-height: 1.25;
+	color: #777;
+	font-weight: normal;
+	letter-spacing: 0
+}
+
+div.home-header {
+	background: logoUrl no-repeat scroll 100% bottom transparent;
+}
+
+table#tools {
+  width: 100%;	
+}
+
+td.tool {
+	text-align: center;
+	padding-bottom: 20px;
+}
+
+td.tool .toolLabel {
+	margin-top: 10px;
+	font-weight: bold;
+	font-size: 1.5em;
+}
+
+td.tool a, td.tool a:hover, td.tool a:visited {
+	color: #78AA36;
+}
+
+img.thumbnail {
+	float: left;
+	margin-right: 15px;
+}
+
+/*****
+ *
+ ****/
+#page {
+	height: 100%;
+}
+
+.left_content {
+	text-align: left;
+}
+
+#default_panel {
+	text-align: left;
+	margin: 0 auto;
+	width: 500px;
+}
+
+#default_panel h1 {
+	font-size: 36pt;
+	text-align: center;
+}
+
+#default_panel h2 {
+	font-size: 18pt;
+	text-align: center;
+}
+
+#default_panel img {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
+#default_panel li {
+	margin-top: 10px;
+}
+
+table#tools_extended {
+  width: 100%;
+}
+
+table#tools_extended td {
+  width: 33%;
+  padding-right: 1em;
+  padding-bottom: 2em;
+}
+
+table#tools_extended img {
+	float: left;
+	margin-right: 10px;
+}
+
+ul.benefits li {
+	margin-top: 15px;
+}
+
+h2.phone_number {
+	display: block;
+	font-size: 32pt;
+	text-align: center;
+}
+
+div.p {
+	margin-bottom: 1em;
+}
+
+.stopIdentificationImages {
+	margin-bottom: 10px;
+}
+
+img#stopIdImage01 {
+	float: left;
+	margin-right: 10px;
+}
+
+img#stopIdImage02 {
+	float: left;
+}
+
+.clear {
+	clear: both;
+}
+
+/****
+ * Arrivals Styling
+ ****/
+
+.panel {
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.arrivalsStopInfo {
+	border: 1px solid #A5A5A5;
+	background-color: #ffffff;
+	display: block;
+	margin: 10px 5px 10px 5px;
+	padding: 5px 5px 5px 5px;
+	cursor: pointer;
+}
+
+.arrivalsStopInfo a:link {
+	color: black;
+}
+
+.arrivalsStopInfo a:visited {
+	color: black;
+}
+
+.arrivalsStopAddress {
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+}
+
+.arrivalsStopNumber {
+	font-size: 12pt;
+	text-align: center;
+}
+
+.arrivalsTable {
+	background-color: #E3E3E3;
+	border-top-style: groove;
+	border-bottom-style: groove;
+	border-width: 1px 0px 1px;
+	margin: 10px 0px 0px 0px;
+	padding-left: 0px;
+	padding-top: 0px;
+	border-collapse: collapse;
+}
+
+.arrivalsTable tr {
+	border-bottom: 1px groove #000000;
+}
+
+.arrivalsTable td {
+	text-align: center;
+}
+
+.arrivalsHeader a {
+	font-size: 8pt;
+}
+
+.arrivalsHeader a:link {
+	color: #225F20;
+}
+
+.arrivalsHeader a:visited {
+	color: #225F20;
+}
+
+.arrivalsRouteColumn {
+	width: 100px;
+}
+
+.arrivalsRouteColumn span {
+	cursor: pointer;
+}
+
+.arrivalsDestinationColumn {
+	width: 300px;
+}
+
+.arrivalsDestinationColumn span {
+	cursor: pointer;
+}
+
+.arrivalsStatusColumn {
+	width: 100px;
+}
+
+.arrivalsStatusColumn span {
+	cursor: pointer;
+}
+
+.arrivalsRow>td {
+	border-top: 1px solid #000000;
+	padding-top: 5px;
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-bottom: 5px;
+}
+
+.arrivalsRouteEntry {
+	font-size: 20pt;
+}
+
+.arrivalsRouteEntry a:link {
+	color: black;
+	text-decoration: none;
+}
+
+.arrivalsRouteEntry a:visited {
+	color: black;
+	text-decoration: none;
+}
+
+.arrivalsDestinationEntry {
+	font-size: 12pt;
+	text-align: center;
+}
+
+.arrivalsDestinationEntry a:link {
+	color: black;
+}
+
+.arrivalsDestinationEntry a:visited {
+	color: black;
+}
+
+.arrivalsTimePanel {
+	font-size: 10pt;
+}
+
+.arrivalsTimeEntry {
+	color: #777777;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.arrivalsLabelEntry {
+	font-size: 10pt;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.arrivalsStatusEntry {
+	font-size: 20pt;
+}
+
+.arrivalStatusDefault {
+	color: green;
+}
+
+.arrivalStatusDeparted {
+	color: green;
+}
+
+.arrivalStatusNoInfo {
+	color: green;
+}
+
+.arrivalStatusEarly {
+	color: red;
+}
+
+.arrivalStatusCancelled {
+	color: red;
+	font-weight: bold;
+}
+
+.arrivalStatusDelayed {
+	color: blue;
+}
+
+.arrivalStatusDefault {
+	color: green;
+}
+
+.arrivalStatusNow {
+	font-size: 18pt;
+}
+
+.arrivalsAlarmEntry {
+	text-align: center;
+}
+
+.arrivalsAlarmEntry img {
+	border: 0;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.arrivalsFilterPanel {
+	margin-top: 10px;
+	font-size: 10pt;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+#arrivalsKey {
+	margin-top: 10px;
+	font-size: 10pt;
+}
+
+.arrivalsStatusUpdates {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	font-size: 10pt;
+	font-weight: bold;
+	vertical-align: center;
+}
+
+.arrivalsRefreshButton {
+	margin: 5px 5px 5px 5px;
+}
+
+.arrivalsNearbyStops {
+	margin: 10px 5px 10px 5px;
+	font-size: 12pt;
+}
+
+.arrivalsSearchForStops {
+	margin-top: 10px;
+	font-size: 12pt;
+}
+
+#arrivalsNoScheduledArrivals {
+	margin: 10px;
+	font-weight: bold;
+}
+
+/****
+ *
+ ****/
+ 
+#stopSchedulePanel {
+	text-align: left;
+	margin-left: 10px;
+}
+
+#stopSchedulePanel>table {
+	border-collapse: collapse;
+}
+
+#stopSchedulePanel>table>tbody>tr>td {
+	vertical-align: top;
+	text-align: center;
+}
+
+.stopScheduleStop {
+	padding-top: 10px;
+	padding-left: 30px;
+}
+
+.stopScheduleStopInfo {
+	display: block;
+	cursor: pointer;
+	margin-bottom: 20px;
+}
+
+.stopScheduleStopAddress {
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.stopScheduleStopNumber {
+	font-weight: bold;
+	font-size: 16px;
+}
+
+.stopScheduleDate {
+	margin-bottom: 20px;
+}
+
+.stopScheduleDate > span {
+	font-weight: bold;
+	color: green;
+}
+
+.stopScheduleStopInfo a:link {
+	color: black;
+}
+
+.stopScheduleStopInfo a:visited {
+	color: black;
+}
+
+.stopScheduleRouteEntry {
+	margin-bottom: 10px;
+}
+
+.stopScheduleRouteHeader {
+	border-bottom: 1px solid black;
+	margin-bottom: 5px;
+	font-weight: bold;
+	font-size: 16pt;
+	text-align: left;
+}
+
+table.stopScheduleRouteTable>tbody>tr>td {
+	vertical-align: top;
+	padding-right: 20px;
+}
+
+.stopScheduleAmPmKey {
+	vertical-align: top;
+	font-weight: bold;
+	padding-top: 4px;
+	padding-right: 4px;
+	color: green;
+}
+
+.stopScheduleAmPmValues {
+	vertical-align: top;
+}
+
+.stopScheduleHoursTable {
+	margin-top: 5px;	
+}
+
+.stopScheduleHoursTable tr td {
+	padding-bottom: 5px;	
+}
+
+.stopScheduleHoursKey {
+	font-weight: bold;
+	text-align: right;
+	padding-right: 5px;
+}
+
+.stopScheduleHoursValues {
+
+}
+
+.stopScheduleMinutes {
+	margin-right: 10px;
+}
+
+.stopScheduleStop {
+	text-align: left;
+}
+
+.stopScheduleNearbyStops>div.header {
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.stopScheduleCalendars {
+	margin-top: 10px;
+	padding: 5px;
+	border: 2px solid gray;
+	width: 280px;
+}
+
+.stopScheduleCalendars>table>tbody>tr>td {
+	vertical-align: top;
+	text-align: center;
+	padding: 5px;
+}
+
+.stopScheduleCalendarsHeader {
+	text-align: center;
+	font-weight: bold;
+	font-size: 16pt;
+	margin-bottom: 10pt;
+}
+
+.stopScheduleCalendar {
+	font-size: 10pt;
+	text-align: center;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	float: left;
+}
+
+.stopScheduleCalendar>table {
+	font-size: 10pt;
+	text-align: center;
+}
+
+.stopScheduleCalendar td {
+	text-align: center;
+	padding: 1px;	
+}
+
+.stopScheduleCalendarHeader {
+	font-weight: bold;
+}
+
+.calendarGroup1 {
+	background-color: white;
+}
+
+.calendarGroup2 {
+	background-color: #BFFFBF;
+}
+
+.calendarGroup3 {
+	background-color: #BFE4FF;
+}
+
+.calendarGroup4 {
+	background-color: #FFDFBF;
+}
+
+.calendarGroup5 {
+	background-color: #FFBFBF;
+}
+
+.calendarGroup6 {
+	background-color: #80C9FF;
+}
+
+.calendarGroup7 {
+	background-color: #80FF80;
+}
+
+.calendarGroup8 {
+	background-color: #FFC080;
+}
+
+.calendarGroup9 {
+	background-color: #FF8080;
+}
+
+.calendarGroup10 {
+	background-color: #FFBFBF;
+}
+
+.calendarGroup11 {
+	background-color: #FFBFBF;
+}
+
+.calendarGroup12 {
+	background-color: #FFBFBF;
+}
+
+/****
+ *
+ ****/
+
+#tripPanel {
+	text-align: left;
+	margin-left: 20px;
+	padding-top: 20px;	
+}
+
+#tripPanel .block {
+	margin-top: 1em;
+}
+
+.tripTable tr td {
+	padding: 5px;
+}
+
+.tripPanelHeader {
+	border-bottom: 1px solid black;
+}
+
+.tripPanelHeaderRoute {
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.tripPanelHeaderTripId {
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.tripPanelLabel {
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+.tripPanelStatusSuspended {
+	font-weight: bold;
+	color: red;
+}
+
+.tripPanelStatusSuspendedDescription {
+	margin-top: 1em;
+}
+
+.tripStatusDefault {
+	color: green;
+}
+
+.tripStatusEarly {
+	color: red;
+}
+
+.tripStatusDelayed {
+	color: blue;
+}
+
+.snow a:link {
+	color: red;
+}
+
+.snow a:visited {
+	color: red;
+}
+
+td.TripPage-TimeColumn {
+	text-align: right;
+	padding-right: 1em;
+}
+
+.TripPage-ArrivalTime {
+	font-weight: bold;
+}
+
+/****
+ *
+ ****/
+ 
+.notificationOptions {
+	margin-top: 1em;
+	font-size: 1.25em;
+}
+
+.notificationMinutesBeforeTextBox {
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  width: 2em;
+  text-align: center;
+  font-size: 1em;
+}
+
+.notificationMethodsPanel {
+  margin-top: 0.5em;
+}
+
+.notificationDefaultsPanel {
+  margin-top: 0.5em;
+}
+
+.explore {
+	font-weight: bold;
+}

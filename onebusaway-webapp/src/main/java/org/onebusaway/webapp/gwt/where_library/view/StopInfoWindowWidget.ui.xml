@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- RefineViewWidget.ui.xml -->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:my='urn:import:org.onebusaway.webapp.gwt.where_library.view'>
+
+    <ui:with field="_css" type="org.onebusaway.webapp.gwt.where_library.view.StopFinderCssResource"/>
+    
+    <g:HTMLPanel addStyleNames="{_css.stopInfoWindowPanel}">
+        <div ui:field="_stopName" />
+        <div ui:field="_stopDescription" />
+        <g:FlowPanel ui:field="_stopLinks" />
+        <div class="{_css.stopInfoWindowRoutesPanel}">
+            <div>Routes:</div>
+            <g:FlowPanel ui:field="_routesPanel" />
+        </div>
+    </g:HTMLPanel>
+
+</ui:UiBinder>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<jsp:root version="1.2"
+	xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:s="/struts-tags"
+	xmlns:oba="/oba-tags"
+	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
+<jsp:directive.page contentType="text/html" />
+
+<head>
+  <title><decorator:title default="One Bus Away" /></title>
+  <link rel="stylesheet" type="text/css" media="all" href="${resources.OneBusAwayCommonResources.commonCss.url}"/>
+  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereStandardResources.css.url}"/>
+  <link rel="icon" type="image/png" href="${resources.OneBusAwayCommonResources.imageBusIcon.url}"/>
+  <decorator:head />
+</head>
+
+<body>
+
+<div id="wrapper">
+<div id="container">
+
+<div id="header">
+
+<ul id="mainNav" class="tabs">
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <c:if test="${param.selectedNavLink == 'home'}">current</c:if>
+  </jsp:attribute>
+  <a href="${pageContext.request.contextPath}/">Home</a>
+</jsp:element>
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <c:if test="${param.selectedNavLink == 'tools'}">current</c:if>
+  </jsp:attribute>
+  <a href="${pageContext.request.contextPath}/where/">Tools</a>
+</jsp:element>
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <c:if test="${param.selectedNavLink == 'research'}">current</c:if>
+  </jsp:attribute>
+  <a href="${pageContext.request.contextPath}/research/index.html">Research</a>
+</jsp:element>
+
+<!-- 
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <c:if test="${param.selectedNavLink == 'blog'}">current</c:if>
+  </jsp:attribute>
+  <a href="http://onebusaway.blogspot.com/">Blog</a>
+</jsp:element>
+-->
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <c:if test="${param.selectedNavLink == 'contact'}">current</c:if>
+  </jsp:attribute>
+  <a href="${pageContext.request.contextPath}/contact.html">Contact Us</a>
+</jsp:element>
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <c:if test="${param.selectedNavLink == 'user'}">current</c:if>
+  </jsp:attribute>
+  <a href="${pageContext.request.contextPath}/user/index.action">Settings</a>
+</jsp:element>
+
+</ul>
+
+<a id="headerTitle" href="${pageContext.request.contextPath}/">OneBusAway</a>
+
+</div>
+
+<decorator:body />
+  
+</div>
+</div>
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-2423527-7");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+
+</body>
+	
+</jsp:root>
