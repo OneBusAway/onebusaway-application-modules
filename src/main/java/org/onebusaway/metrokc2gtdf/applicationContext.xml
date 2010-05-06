@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <bean id="replacements" class="org.onebusaway.metrokc2gtdf.calendar.TripScheduleReplacementFactoryBean">
+        <property name="path" value="${scheduleReplacements}" />
+    </bean>
+    <bean id="cancellations" class="org.onebusaway.metrokc2gtdf.calendar.TripScheduleCancellationFactoryBean">
+        <property name="path" value="${scheduleCancellations}" />
+    </bean>
+    <bean id="calendarManager" class="org.onebusaway.metrokc2gtdf.calendar.CalendarManager">
+        <property name="replacementStrategy" ref="replacements" />
+        <property name="cancellationStrategy" ref="cancellations" />
+    </bean>
+    <bean id="metroKCDataFeedToGoogleTransitDataFeed" class="org.onebusaway.metrokc2gtdf.MetroKCDataFeedToGoogleTransitDataFeed">
+        <property name="inputDirectory" value="${inputDirectory}" />
+        <property name="outputDirectory" value="${outputDirectory}" />
+        <property name="projection" ref="projectionService" />
+        <property name="calendarManager" ref="calendarManager" />
+        <property name="locationNamingStrategy" ref="locationNamingStrategy" />
+    </bean>
+</beans>

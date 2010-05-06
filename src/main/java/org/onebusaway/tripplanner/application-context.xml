@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <!--  -->
+    <context:component-scan base-package="org.onebusaway.tripplanner.impl" />
+
+    <!--  -->
+    <bean id="tripPlannerConstants" class="org.onebusaway.tripplanner.model.TripPlannerConstants" />
+
+    <!--  -->
+    <bean id="walkPlannerGraphBuilderImpl" class="org.onebusaway.tripplanner.impl.WalkPlannerGraphFactoryBean"
+        lazy-init="true">
+        <property name="path" ref="streetMapsFile" />
+        <property name="projectionService" ref="projectionService" />
+    </bean>
+
+    <!--  -->
+    <bean id="walkPlannerGraph" class="org.onebusaway.common.spring.CachedSerializedBeanFactory" lazy-init="true">
+        <property name="beanName" value="walkPlannerGraphBuilderImpl" />
+        <property name="file" ref="walkPlannerGraphCacheFile" />
+        <property name="singleton" value="true" />
+    </bean>
+
+    <!--  -->
+    <bean id="walkPlannerServiceImpl" class="org.onebusaway.tripplanner.impl.WalkPlannerServiceImpl" lazy-init="true">
+        <property name="walkPlannerGraph" ref="walkPlannerGraph" />
+        <property name="tripPlannerConstants" ref="tripPlannerConstants" />
+    </bean>
+
+    <!--  -->
+    <bean id="stopTransferWalkPlannerServiceCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="stopTransferWalkPlannerServiceCache" />
+        <property name="maxElementsInMemory" value="400" />
+        <property name="eternal" value="true" />
+        <property name="overflowToDisk" value="true" />
+        <property name="diskPersistent" value="true" />
+    </bean>
+
+    <!--  -->
+    <bean id="stopTransferWalkPlannerServiceImpl" class="org.onebusaway.tripplanner.impl.StopTransferWalkPlannerServiceImpl"
+        lazy-init="true">
+        <property name="walkPlannerService" ref="walkPlannerServiceImpl" />
+        <property name="cache" ref="stopTransferWalkPlannerServiceCache" />
+    </bean>
+
+    <!--  -->
+    <bean id="tripPlannerGraphBuilderImpl" class="org.onebusaway.tripplanner.impl.TripPlannerGraphFactoryBean"
+        lazy-init="true">
+        <property name="tripPlannerConstants" ref="tripPlannerConstants" />
+        <property name="stopTransferWalkPlannerService" ref="stopTransferWalkPlannerServiceImpl" />
+    </bean>
+
+    <!--  -->
+    <bean id="tripPlannerGraph" class="org.onebusaway.common.spring.CachedSerializedBeanFactory" lazy-init="true">
+        <property name="beanName" value="tripPlannerGraphBuilderImpl" />
+        <property name="file" ref="tripPlannerGraphCacheFile" />
+        <property name="singleton" value="true" />
+    </bean>
+
+    <!--  -->
+    <bean id="tripPlannerServiceImpl" class="org.onebusaway.tripplanner.impl.TripPlannerServiceImpl" lazy-init="true">
+        <property name="tripPlannerGraph" ref="tripPlannerGraph" />
+    </bean>
+
+    <!--  -->
+    <bean id="minTripTimeServiceImpl" class="org.onebusaway.tripplanner.impl.MinTripTimeServiceImpl" lazy-init="true">
+        <property name="tripPlannerGraph" ref="tripPlannerGraph" />
+        <property name="tripPlannerConstants" ref="tripPlannerConstants" />
+    </bean>
+</beans>
