@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="org.onebusaway">
+
+    <class name="org.onebusaway.gtfs.model.Agency" table="gtfs_agencies" mutable="false">
+        <id name="id" type="string" length="50" />
+        <property name="lang" />
+        <property name="name" />
+        <property name="phone" />
+        <property name="timezone" />
+        <property name="url" />
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.FareAttribute" table="gtfs_fare_attributes" mutable="false">
+        <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <key-property name="agencyId" length="50" />
+            <key-property name="id" />
+        </composite-id>
+        <property name="price" />
+        <property name="currencyType" />
+        <property name="paymentMethod" />
+        <property name="transfers" />
+        <property name="transferDuration" />
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.FareRule" table="gtfs_fare_rules" mutable="false">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>
+        <many-to-one name="fare" not-null="true">
+            <column name="fare_agencyId" length="50" />
+            <column name="fare_id" />
+        </many-to-one>
+        <many-to-one name="route" not-null="true">
+            <column name="route_agencyId" length="50" />
+            <column name="route_id" />
+        </many-to-one>
+        <property name="originId" />
+        <property name="destinationId" />
+        <property name="containsId" />
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.Frequency" table="gtfs_frequencies" mutable="false">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>
+        <many-to-one name="trip" not-null="true">
+            <column name="trip_agencyId" length="50" />
+            <column name="trip_id" />
+        </many-to-one>
+        <property name="startTime" />
+        <property name="endTime" />
+        <property name="headwaySecs" />
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.Route" table="gtfs_routes" mutable="false">
+        <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <key-property name="agencyId" length="50" />
+            <key-property name="id" />
+        </composite-id>
+        <property name="desc" column="description" />
+        <property name="shortName" />
+        <property name="longName" />
+        <property name="type" />
+        <property name="url" />
+        <property name="color" />
+        <property name="textColor" />
+        <many-to-one name="agency" not-null="true" />
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.ServiceCalendar" table="gtfs_calendars" mutable="false">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>
+        <property name="monday" />
+        <property name="tuesday" />
+        <property name="wednesday" />
+        <property name="thursday" />
+        <property name="friday" />
+        <property name="saturday" />
+        <property name="sunday" />
+        <property name="startDate" />
+        <property name="endDate" />
+        <component name="serviceId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="serviceId_agencyId" index="serviceId" length="50" />
+            <property name="id" column="serviceId_id" index="serviceId" />
+        </component>
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.ServiceCalendarDate" table="gtfs_calendar_dates" mutable="false">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>
+        <property name="date" />
+        <property name="exceptionType" />
+        <component name="serviceId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="serviceId_agencyId" index="serviceId" length="50" />
+            <property name="id" column="serviceId_id" index="serviceId" />
+        </component>
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.ShapePoint" table="gtfs_shape_points" mutable="false">
+        <cache usage="read-only" />
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>
+        <property name="sequence" />
+        <property name="distTraveled" />
+        <property name="lat" />
+        <property name="lon" />
+        <component name="shapeId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="shapeId_agencyId" index="shapeId" length="50" />
+            <property name="id" column="shapeId_id" index="shapeId" />
+        </component>
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.Stop" table="gtfs_stops" mutable="false">
+        <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <key-property name="agencyId" length="50" />
+            <key-property name="id" />
+        </composite-id>
+        <property name="code" />
+        <property name="name" />
+        <property name="desc" column="description" />
+        <property name="lat" />
+        <property name="lon" />
+        <property name="zoneId" />
+        <property name="url" />
+        <property name="locationType" />
+        <property name="parentStation" />
+        <property name="direction" />
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.StopTime" table="gtfs_stop_times" mutable="false">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>
+        <many-to-one name="stop" not-null="true">
+            <column name="stop_agencyId" length="50" />
+            <column name="stop_id" />
+        </many-to-one>
+        <many-to-one name="trip" not-null="true">
+            <column name="trip_agencyId" length="50" />
+            <column name="trip_id" />
+        </many-to-one>
+
+        <property name="stopSequence" />
+        <property name="arrivalTime" />
+        <property name="departureTime" />
+        <property name="stopHeadsign" />
+        <property name="routeShortName" />
+        <property name="pickupType" />
+        <property name="dropOffType" />
+        <property name="shapeDistTraveled" />
+
+    </class>
+
+    <class name="org.onebusaway.gtfs.model.Transfer" table="gtfs_transfers" mutable="false">
+        <id name="id" column="gid" type="int" length="11" unsaved-value="null">
+            <generator class="native" />
+        </id>
+        <many-to-one name="fromStop" not-null="true">
+            <column name="fromStop_agencyId" length="50" />
+            <column name="fromStop_id" />
+        </many-to-one>
+        <many-to-one name="toStop" not-null="true">
+            <column name="toStop_agencyId" length="50" />
+            <column name="toStop_id" />
+        </many-to-one>
+        <property name="transferType" />
+        <property name="minTransferTime" />
+    </class>
+  
+    <class name="org.onebusaway.gtfs.model.Trip" table="gtfs_trips" mutable="false">
+
+        <composite-id name="id" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <key-property name="agencyId" length="50" />
+            <key-property name="id" />
+        </composite-id>
+
+        <many-to-one name="route" not-null="true">
+            <column name="route_agencyId" length="50" />
+            <column name="route_id" />
+        </many-to-one>
+
+        <component name="serviceId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="serviceId_agencyId" index="serviceId" length="50" />
+            <property name="id" column="serviceId_id" index="serviceId" />
+        </component>
+
+        <component name="shapeId" class="org.onebusaway.gtfs.model.AgencyAndId">
+            <property name="agencyId" column="shapeId_agencyId" length="50" />
+            <property name="id" column="shapeId_id" />
+        </component>
+
+        <property name="tripShortName" />
+        <property name="tripHeadsign" />
+        <property name="routeShortName" />
+        <property name="directionId" />
+        <property name="blockId" index="blockId" />
+        <property name="blockSequenceId" />
+    </class>
+
+
+</hibernate-mapping>

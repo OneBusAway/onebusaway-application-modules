@@ -1,0 +1,169 @@
+<!ELEMENT dataset (
+    gtfs_agencies*,
+    gtfs_calendar_dates*,
+    gtfs_calendars*,
+    gtfs_fare_attributes*,
+    gtfs_fare_rules*,
+    gtfs_frequencies*,
+    gtfs_routes*,
+    gtfs_shape_points*,
+    gtfs_stop_times*,
+    gtfs_stops*,
+    gtfs_transfers*,
+    gtfs_trips*)>
+
+<!ELEMENT gtfs_agencies EMPTY>
+<!ATTLIST gtfs_agencies
+    id CDATA #REQUIRED
+    lang CDATA #IMPLIED
+    name CDATA #IMPLIED
+    phone CDATA #IMPLIED
+    timezone CDATA #IMPLIED
+    url CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_calendar_dates EMPTY>
+<!ATTLIST gtfs_calendar_dates
+    gid CDATA #REQUIRED
+    date CDATA #IMPLIED
+    exceptionType CDATA #IMPLIED
+    serviceId_agencyId CDATA #IMPLIED
+    serviceId_id CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_calendars EMPTY>
+<!ATTLIST gtfs_calendars
+    gid CDATA #REQUIRED
+    monday CDATA #IMPLIED
+    tuesday CDATA #IMPLIED
+    wednesday CDATA #IMPLIED
+    thursday CDATA #IMPLIED
+    friday CDATA #IMPLIED
+    saturday CDATA #IMPLIED
+    sunday CDATA #IMPLIED
+    startDate CDATA #IMPLIED
+    endDate CDATA #IMPLIED
+    serviceId_agencyId CDATA #IMPLIED
+    serviceId_id CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_fare_attributes EMPTY>
+<!ATTLIST gtfs_fare_attributes
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    price CDATA #IMPLIED
+    currencyType CDATA #IMPLIED
+    paymentMethod CDATA #IMPLIED
+    transfers CDATA #IMPLIED
+    transferDuration CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_fare_rules EMPTY>
+<!ATTLIST gtfs_fare_rules
+    gid CDATA #REQUIRED
+    fare_agencyId CDATA #IMPLIED
+    fare_id CDATA #IMPLIED
+    route_agencyId CDATA #IMPLIED
+    route_id CDATA #IMPLIED
+    originId CDATA #IMPLIED
+    destinationId CDATA #IMPLIED
+    containsId CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_frequencies EMPTY>
+<!ATTLIST gtfs_frequencies
+    gid CDATA #REQUIRED
+    trip_agencyId CDATA #IMPLIED
+    trip_id CDATA #IMPLIED
+    startTime CDATA #IMPLIED
+    endTime CDATA #IMPLIED
+    headwaySecs CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_routes EMPTY>
+<!ATTLIST gtfs_routes
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    description CDATA #IMPLIED
+    shortName CDATA #IMPLIED
+    longName CDATA #IMPLIED
+    type CDATA #IMPLIED
+    url CDATA #IMPLIED
+    color CDATA #IMPLIED
+    textColor CDATA #IMPLIED
+    agency CDATA #REQUIRED
+>
+
+<!ELEMENT gtfs_shape_points EMPTY>
+<!ATTLIST gtfs_shape_points
+    gid CDATA #REQUIRED
+    sequence CDATA #IMPLIED
+    distTraveled CDATA #IMPLIED
+    lat CDATA #IMPLIED
+    lon CDATA #IMPLIED
+    shapeId_agencyId CDATA #IMPLIED
+    shapeId_id CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_stop_times EMPTY>
+<!ATTLIST gtfs_stop_times
+    gid CDATA #REQUIRED
+    stop_agencyId CDATA #IMPLIED
+    stop_id CDATA #IMPLIED
+    trip_agencyId CDATA #IMPLIED
+    trip_id CDATA #IMPLIED
+    stopSequence CDATA #IMPLIED
+    arrivalTime CDATA #IMPLIED
+    departureTime CDATA #IMPLIED
+    stopHeadsign CDATA #IMPLIED
+    routeShortName CDATA #IMPLIED
+    pickupType CDATA #IMPLIED
+    dropOffType CDATA #IMPLIED
+    shapeDistTraveled CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_stops EMPTY>
+<!ATTLIST gtfs_stops
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    code CDATA #IMPLIED
+    name CDATA #IMPLIED
+    description CDATA #IMPLIED
+    lat CDATA #IMPLIED
+    lon CDATA #IMPLIED
+    zoneId CDATA #IMPLIED
+    url CDATA #IMPLIED
+    locationType CDATA #IMPLIED
+    parentStation CDATA #IMPLIED
+    direction CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_transfers EMPTY>
+<!ATTLIST gtfs_transfers
+    gid CDATA #REQUIRED
+    fromStop_agencyId CDATA #IMPLIED
+    fromStop_id CDATA #IMPLIED
+    toStop_agencyId CDATA #IMPLIED
+    toStop_id CDATA #IMPLIED
+    transferType CDATA #IMPLIED
+    minTransferTime CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_trips EMPTY>
+<!ATTLIST gtfs_trips
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    route_agencyId CDATA #IMPLIED
+    route_id CDATA #IMPLIED
+    serviceId_agencyId CDATA #IMPLIED
+    serviceId_id CDATA #IMPLIED
+    shapeId_agencyId CDATA #IMPLIED
+    shapeId_id CDATA #IMPLIED
+    tripShortName CDATA #IMPLIED
+    tripHeadsign CDATA #IMPLIED
+    routeShortName CDATA #IMPLIED
+    directionId CDATA #IMPLIED
+    blockId CDATA #IMPLIED
+    blockSequenceId CDATA #IMPLIED
+>
+

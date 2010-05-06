@@ -1,0 +1,335 @@
+/*
+ * Copyright 2008 Brian Ferris
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+body {
+	margin: 0;
+	padding: 0;
+	display: block;
+	font-family: Helvetica, sans-serif;
+	text-align: center;
+}
+
+#header {
+	text-align: left;
+	border-bottom: 1px solid #cccccc;
+	font-size: 13px;
+	padding-top: 5px;
+	padding-left: 5px;
+	padding-bottom: 5px;
+	padding-top: 5px;
+}
+
+#header span {
+	margin-right: 0.73em;
+}
+
+#default_panel {
+	text-align: left;
+	margin: 0 auto;
+	width: 500px;
+}
+
+#default_panel h1 {
+	font-size: 36pt;
+	text-align: center;
+}
+
+#default_panel h2 {
+	font-size: 18pt;
+	text-align: center;
+}
+
+#default_panel img {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
+#default_panel li {
+	margin-top: 10px;
+}
+
+#three_ways {
+	font-size: 18pt;
+	font-weight: bold;
+}
+
+#three_ways img {
+	display: inline;
+	margin-right: 10px;
+	vertical-align: middle;
+	margin-bottom: 5px;
+}
+
+ul.benefits li {
+	margin-top: 15px;	
+}
+
+h2.phone_number {
+	display: block;
+	font-size: 32pt;
+	text-align: center;
+}
+
+
+/****
+ * Arrivals Styling
+ ****/
+
+.panel {
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.arrivalsStopInfo {
+	border: 1px solid #A5A5A5;
+	background-color: #ffffff;
+	display: block;
+	margin: 10px 5px 10px 5px;
+	padding: 5px 5px 5px 5px;
+	cursor: pointer;
+	
+}
+
+.arrivalsStopInfo a:link {
+	color: black;
+}
+
+.arrivalsStopInfo a:visited {
+	color: black;
+}
+
+.arrivalsStopAddress {
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+}
+
+.arrivalsStopNumber {
+	font-size: 12pt;
+	text-align: center;
+}
+
+.arrivalsTable {
+	background-color: #E3E3E3;
+	border-top-style: groove;
+	border-bottom-style: groove;
+	border-width: 1px 0px 1px;
+	margin: 10px 0px 0px 0px;
+	padding-left: 0px;
+	padding-top: 0px;
+	text-align: center;
+	border-collapse: collapse;
+}
+
+.arrivalsTable tr {
+	border-bottom: 1px groove #000000;
+}
+
+.arrivalsHeader a {
+	font-size: 8pt;
+}
+
+.arrivalsHeader a:link {
+	color: #225F20;
+}
+
+.arrivalsHeader a:visited {
+	color: #225F20;
+}
+
+.arrivalsRouteColumn {
+	width: 100px;
+}
+
+.arrivalsRouteColumn span {
+	cursor: pointer;
+}
+
+.arrivalsDestinationColumn {
+	width: 300px;
+}
+
+.arrivalsDestinationColumn span {
+	cursor: pointer;
+}
+
+.arrivalsStatusColumn {
+	width: 100px;
+}
+
+.arrivalsStatusColumn span {
+	cursor: pointer;
+}
+
+.arrivalsRow>td {
+	border-top: 1px solid #000000;
+	padding-top: 5px;
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-bottom: 5px;
+}
+
+.arrivalsRouteEntry {
+	font-size: 20pt;
+}
+
+.arrivalsRouteEntry a:link {
+	color: black;
+	text-decoration: none;
+}
+
+.arrivalsRouteEntry a:visited {
+	color: black;
+	text-decoration: none;	
+}
+
+.arrivalsDestinationEntry {
+	font-size: 12pt;
+	text-align: center;
+}
+
+.arrivalsTimePanel {
+	font-size: 10pt;
+}
+
+.arrivalsTimeEntry {
+	color: #777777;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.arrivalsLabelEntry {
+	font-size: 10pt;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.arrivalsStatusEntry {
+	font-size: 20pt;
+}
+
+.arrivalStatusDefault {
+	color: green;
+}
+
+.arrivalStatusDeparted {
+	color: green;
+}
+
+.arrivalStatusNoInfo {
+	color: green;
+}
+
+.arrivalStatusEarly {
+	color: red;
+}
+
+.arrivalStatusDelayed {
+	color: blue;
+}
+
+.arrivalStatusDefault {
+	color: green;
+}
+
+.arrivalStatusNow {
+	font-size: 18pt;
+}
+
+.arrivalsFilterPanel {
+	margin-top: 10px;
+	font-size: 10pt;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+#arrivalsKey {
+	margin-top: 10px;
+	font-size: 10pt;
+}
+
+.arrivalsStatusUpdates {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	font-size: 10pt;
+	font-weight: bold;
+	vertical-align: center;
+}
+
+.arrivalsRefreshButton {
+	margin: 5px 5px 5px 5px;
+}
+
+.arrivalsNearbyStops {
+	margin: 10px 5px 10px 5px;
+	font-size: 12pt;
+}
+
+.arrivalsSearchForStops {
+	margin-top: 10px;
+	font-size: 12pt;
+}
+
+
+#arrivalsNoScheduledArrivals {
+	margin: 10px;
+	font-weight: bold;
+}
+
+/****
+ *
+ ****/
+ 
+#stopSchedulePanel {
+	text-align: left;
+}
+
+ 
+.stopScheduleRouteEntry {
+  margin-bottom: 10px;
+}
+
+.stopScheduleRouteHeader {
+	border-bottom: 1px solid black;
+    margin-bottom: 5px;
+    font-weight: bold;
+  	font-size: 20pt;
+}
+
+.stopScheduleRouteTable {
+	vertical-align: top;
+}
+
+.stopScheduleAmPmKey {
+	vertical-align: top;
+	font-weight: bold;
+  	font-size: 14pt;
+}
+
+.stopScheduleAmPmValues {
+  vertical-align: top;
+}
+
+.stopScheduleHoursKey {
+	font-weight: bold;
+  	font-size: 14pt;
+}
+
+.stopScheduleMinutes {
+  margin-right: 5px;
+}

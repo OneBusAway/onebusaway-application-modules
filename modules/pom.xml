@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.onebusaway</groupId>
+    <artifactId>onebusaway-modules</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <modules>
+        <module>onebusaway-api-webapp</module>
+        <module>onebusaway-container</module>
+        <module>onebusaway-core</module>
+        <module>onebusaway-federations</module>
+        <module>onebusaway-geocoder</module>
+        <module>onebusaway-geospatial</module>
+        <module>onebusaway-gtfs</module>
+        <module>onebusaway-gtfs-diff</module>
+        <module>onebusaway-gtfs-examples</module>
+        <module>onebusaway-gtfs-hibernate</module>
+        <module>onebusaway-gtfs-hibernate-examples</module>
+        <module>onebusaway-kcmetro-core</module>
+        <module>onebusaway-kcmetro-tcip</module>
+        <module>onebusaway-kcmetro2gtfs</module>
+        <module>onebusaway-layers</module>
+        <module>onebusaway-phone</module>
+        <module>onebusaway-presentation</module>
+        <module>onebusaway-tcip</module>
+        <module>onebusaway-testing</module>
+        <module>onebusaway-transit-data</module>
+        <module>onebusaway-transit-data-federation</module>
+        <module>onebusaway-transit-data-federation-webapp</module>
+        <module>onebusaway-users</module>
+        <module>onebusaway-webapp</module>
+    </modules>
+
+</project>

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<s:set name="stop" value="result.stop" />
+<head>
+<title><s:property value="#stop.name" /> - <s:property value="#stop.direction" /> bound - Stop # <s:property
+    value="#stop.code" /></title>
+</head>
+<body>
+
+<div id="content">
+
+<div id="stopSchedulePanel">
+
+<table>
+    <tr>
+        <td>
+
+        <div class="stopScheduleCalendars">
+        <div class="stopScheduleCalendarsHeader">Service Calendar</div>
+        <table>
+            <s:iterator value="getRows(getStopCalendarDaysByFormatKey(result.calendarDays,'MMMMM yyyy'),2)">
+                <tr>
+                    <s:iterator value="top">
+                        <td>
+                        <div class="stopScheduleCalendar">
+                        <div class="stopScheduleCalendarHeader"><span><s:property value="first" /></span></div>
+                        <table>
+                            <tr class="stopScheduleCalendarRowHeader">
+                                <td>Su</td>
+                                <td>Mo</td>
+                                <td>Tu</td>
+                                <td>We</td>
+                                <td>Th</td>
+                                <td>Fr</td>
+                                <td>Sa</td>
+                            </tr>
+                            <s:iterator value="getStopCalendarDaysByFormatKey(second,'WW')">
+                                <tr class="stopScheduleRow">
+                                    <s:iterator var="day" value="{'Sun','Mon','Tue','Wed','Thu','Fri','Sat' }">
+                                        <td><s:iterator
+                                            value="getStopCalendarDaysByFormatKeyAndValue(second,'EE',#day)">
+                                            <jsp:element name="div">
+                        <jsp:attribute name="class">calendarGroup<s:property value="group" />
+                            </jsp:attribute>
+                            <s:url var="scheduleUrl" action="schedule" includeParams="none">
+                                <s:param name="id" value="#stop.id" />
+                                <s:param name="date">
+                                    <s:date format="yyyy-MM-dd" name="date" />
+                                </s:param>
+                            </s:url>
+                            <s:a href="%{scheduleUrl}">
+                                <s:date format='d' name="date" />
+                            </s:a>
+                        </jsp:element>
+                                        </s:iterator></td>
+                                    </s:iterator>
+                                </tr>
+                            </s:iterator>
+                        </table>
+                        </div>
+                        </td>
+                    </s:iterator>
+                </tr>
+            </s:iterator>
+        </table>
+        <div class="p">Click on a calendar entry to see the schedule for that day.</div>
+        <div>Days with the same schedule are grouped by color.</div>
+        </div>
+
+        </td>
+        <td>
+
+        <div class="stopScheduleStop">
+
+        <div class="stopScheduleStopInfo"><jsp:element name="a">
+<jsp:attribute name="href">index.html#p(index)m(stop)lat(<s:property value="#stop.lat" />)lon(<s:property
+                    value="#stop.lon" />)accuracy(8)stop(<s:property value="#stop.id" />)</jsp:attribute>
+<div class="stopScheduleStopAddress"><s:property value="#stop.name" /></div>
+<div class="stopScheduleStopNumber">Stop # <s:property value="#stop.code" /> - <s:property value="#stop.direction" />
+bound</div>
+</jsp:element></div>
+
+        <s:url var="realtimeUrl" action="stop" includeParams="none">
+            <s:param name="id" value="#stop.id" />
+        </s:url>
+
+        <div class="stopScheduleDate">Schedule for <span><s:date format="EEEE, MMMM d, yyyy"
+            name="result.date" /></span>. For real-time arrival info, <s:a href="%{realtimeUrl}">click here</s:a>.</div>
+
+        <s:iterator value="result.routes">
+            <div class="stopScheduleRouteEntry">
+            <div class="stopScheduleRouteHeader"><span class="stopScheduleRouteName"><s:property
+                value="route.shortName" /></span> - <span class="stopScheduleRouteDescription"><s:property value="route.longName" /></span></div>
+
+            <table class="stopScheduleRouteTable">
+                <tr>
+                    <s:iterator value="getStopTimesByFormatKey(stopTimes,'aa')">
+                        <td>
+                        <table>
+                            <tr>
+                                <td class="stopScheduleAmPmKey"><s:property value="first" /></td>
+                                <td class="stopScheduleAmPmValues">
+                                <table class="stopScheduleHoursTable">
+                                    <s:iterator value="getStopTimesByFormatKey(second,'h')">
+                                        <tr>
+                                            <td class="stopScheduleHoursKey"><s:property value="first" />:</td>
+                                            <td class="stopScheduleHoursValues"><s:iterator value="second">
+                                                <a class="stopScheduleMinutes"
+                                                    href="trip.action?id=${tripId}&amp;stopId=${stop.id}"><s:date
+                                                    format="mm" name="departureDate" /></a>
+                                            </s:iterator></td>
+                                        </tr>
+                                    </s:iterator>
+                                </table>
+                                </td>
+                            </tr>
+                        </table>
+                        </td>
+                    </s:iterator>
+                </tr>
+            </table>
+
+            </div>
+        </s:iterator>
+
+
+        <div class="stopScheduleNearbyStops">
+        <div class="header">Nearby stops:</div>
+        <s:iterator value="#stop.nearbyStops">
+            <s:url var="nearbyStopUrl" action="schedule" includeParams="none">
+                <s:param name="id" value="id" />
+            </s:url>
+            <div><s:a href="%{nearbyStopUrl}">
+                <s:property value="name" /> - <s:property value="direction" /> bound
+    </s:a></div>
+        </s:iterator></div>
+
+        <div class="arrivalsSearchForStops"><s:a href="index.html">Search for another stop</s:a></div>
+        </div>
+        </td>
+    </tr>
+</table>
+
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>onebusaway</name>
+	<comment></comment>
+	<projects>
+		<project>edu.washington.cs.rse.geospatial</project>
+		<project>edu.washington.cs.rse.collections</project>
+		<project>struts2-rest-plugin</project>
+		<project>struts2-core</project>
+		<project>struts2-plugins</project>
+		<project>struts2-parent</project>
+		<project>struts2-spring-plugin</project>
+		<project>struts2-convention-plugin</project>
+		<project>struts2-sitemesh-plugin</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.wst.common.project.facet.core.builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.wst.validation.validationbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.maven.ide.eclipse.maven2Builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.wst.common.modulecore.ModuleCoreNature</nature>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.maven.ide.eclipse.maven2Nature</nature>
+		<nature>org.eclipse.jem.workbench.JavaEMFNature</nature>
+		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
+	</natures>
+</projectDescription>

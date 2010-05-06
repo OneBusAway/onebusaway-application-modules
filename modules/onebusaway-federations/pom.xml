@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.onebusaway</groupId>
+    <artifactId>onebusaway-federations</artifactId>
+    <packaging>jar</packaging>
+    <version>0.0.1-SNAPSHOT</version>
+    
+    <parent>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-modules</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-container</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-geospatial</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- RTree Spatial Index -->
+        <dependency>
+            <groupId>com.infomatiq</groupId>
+            <artifactId>jsi</artifactId>
+            <version>1.0b2p1</version>
+        </dependency>
+        <dependency>
+            <groupId>trove</groupId>
+            <artifactId>trove</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.7</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+</project>

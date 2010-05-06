@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<query name="routeCollectionsByStop" read-only="true">
+	  SELECT rc
+	    FROM RouteCollection rc, 
+          StopTime stopTime
+        WHERE
+          stopTime.stop = :stop
+          AND stopTime.trip.route IN elements(rc.routes)
+        GROUP BY rc.id.agencyId, rc.id.id
+    </query>
+    <query name="routeCollectionsForRoutes" read-only="true">
+      SELECT rc FROM RouteCollection rc left join rc.routes as route WHERE route in (:routes)
+    </query>
+    <query name="tripTimePredictionsForTripServiceDateAndTimeRange" read-only="true">
+      SELECT p FROM TripTimePrediction p WHERE p.tripId = :tripId AND p.serviceDate = :serviceDate AND :fromTime &lt;= p.time AND p.time &lt;= :toTime 
+    </query>
+</hibernate-mapping>

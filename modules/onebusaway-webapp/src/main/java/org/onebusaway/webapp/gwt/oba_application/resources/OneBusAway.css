@@ -1,0 +1,393 @@
+/*
+ * Copyright 2008 Brian Ferris
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+@url bubbleLeftUrl getBubbleLeft;
+@url bubbleRightUrl getBubbleRight;
+
+html,body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: white;
+	font-family: Helvetica, sans-serif;
+	height: 100%;
+	overflow: hidden;
+	text-align: left;
+}
+
+img {
+	border: 0;
+}
+
+.ClearPanel {
+	clear: both;
+	height: 1px;
+}
+
+#content {
+	height: 100%;
+}
+
+.OneBusAway {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
+.OneBusAway-MapWrapper {
+	position: relative;
+	left: 25em;
+	margin-left: 0;
+	margin-right: 25em;
+}
+
+.OneBusAway-Map {
+	height: 100%;
+	width: 100%;
+}
+
+.OneBusAway-Wrapper {
+	position: relative;	
+}
+
+.OneBusAway-ResultsWrapper {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 25em;
+	overflow: auto;
+	z-index: 2;
+}
+
+.OneBusAway-ResultsPanel {
+	margin: 1em;
+}
+
+.SearchWidget {
+	background-color: #CADFF4;
+	border-top: 3px solid #CCCCCC;
+	border-bottom: 3px solid #CCCCCC;
+	padding-top: 1em;
+	padding-bottom: 0;
+}
+
+.SearchWidget-SearchPanel {
+	height: 2.5em;
+}
+
+.SearchWidget-SearchPanel>div {
+	float: left;
+	margin-right: 0.75em;
+	width: 25em;
+	height: 2.5em;
+}
+
+.SearchWidget-SearchPanel>div.SearchWidget-ButtonPanel {
+	width: 8em;
+}
+
+.SearchWidget-Label {
+	text-align: right;
+	width: 7em;
+	padding-right: 0.75em;
+}
+
+.SearchWidget-TextBoxPanel {
+	position: relative;
+	left: 7.75em;
+	top: -1.3em;
+	width: 17.25em;
+	text-align: right;
+}
+
+.SearchWidget-TextBox {
+	width: 98%;
+}
+
+.SearchWidget-TextBox-UsingLocation {
+	color: #770000;
+}
+
+.SearchWidget-ExamplePanel {
+	position: relative;
+	left: 7.75em;
+	top: -1.3em;
+	width: 17.25em;
+}
+
+.SearchWidget-ExampleLabel {
+	color: #777777;
+	font-size: 0.8em;
+}
+
+.SearchWidget-ButtonPanel>button{
+	display: block;
+}
+	
+.SearchWidget-ShowOptionsButton {
+	font-size: 0.8em;
+}
+
+.SearchWidget-OptionsPanel {
+	clear: both;
+	margin-top: 10px;
+}
+
+.SearchWidget table {
+	border-collapse: collapse;
+}
+
+.SearchWidget-OptionsGrid {
+	border-collapse: collapse;
+	padding: 0;
+}
+
+.SearchWidget-OptionsGrid-Column0 {
+	width: 7em;
+	text-align: right;
+	padding-right: 0.75em;
+}
+
+.SearchWidget-OptionsGrid-Column1 {
+	width: 17.25em;
+	text-align: left;
+	padding: 0;
+}
+
+.SearchWidget-OptionsGrid-Column2 {
+	width: 7m;
+	text-align: right;
+	padding-right: 0.75em;
+}
+
+.SearchWidget-OptionsGrid-Column3 {
+	width: 17.25em;
+	text-align: left;
+	padding: 0;
+}
+
+.SearchWidget-StartDateTextBox {
+	width: 5em;
+	margin-right: 0.5em;
+}
+
+.SearchWidget-StartTimeTextBox {
+	width: 5em;
+}
+
+.SearchWidget-TripTimeTextBox {
+	width: 11em;
+}
+
+.gwt-ProgressBar-shell {
+	margin-top: 10px;
+	border: 2px solid #CCCCCC;
+	background-color: #eeeeee;
+	height: 14pt;
+	width: 97%;
+}
+
+.gwt-ProgressBar-shell .gwt-ProgressBar-bar {
+	background-color: rgb(87, 91, 175);
+}
+
+.gwt-ProgressBar-shell .gwt-ProgressBar-text {
+	padding: 0px;
+	margin: 0px;
+	color: white;
+}
+
+/****
+ * Address Lookup
+ ****/
+.AddressLookup {
+	margin: 10px;
+	color: red;
+}
+
+.AddressLookup-Address {
+	margin-top: 10px;
+	color: black;
+}
+
+/****
+ * Results Filter
+ ****/
+.ResultsFilter {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	font-size: 0.8em;
+	text-align: center;
+}
+
+.ResultsFilter-Label {
+	font-weight: bold;
+}
+
+.ResultsFilter-Button {
+	margin-left: 5px;
+}
+
+/****
+ * Results Table
+ ****/
+.ResultsTableWidget {
+	margin-left: 5px;
+}
+
+.ResultsTableWidget-TablePanel {
+	margin-top: 5px;
+}
+
+.ResultsTableWidget-ResultsTable {
+	width: 100%;
+	border-collapse: collapse;
+	padding: 0;
+}
+
+.ResultsTableWidget-ResultsTable-HeaderRow {
+	color: red;
+	font-size: 0.8em;
+	font-weight: bold;
+}
+
+.ResultsTableWidget-ResultsTable-HeaderRow-Rating {
+	text-align: center;
+}
+
+.ResultsTableWidget-ResultsTable-HeaderRow-Distance {
+	text-align: center;
+}
+
+.ResultsTableWidget-ResultsTable-LabelColumn {
+	text-align: center;
+	font-weight: bold;
+	font-size: 0.8em;
+	width: 5%;
+}
+
+.ResultsTableWidget-ResultsTable-NameColumn {
+	width: 60%;
+}
+
+.ResultsTableWidget-ResultsTable-RatingColumn {
+	width: 15%;
+	text-align: center;
+}
+
+.ResultsTableWidget-ResultsTable-TimeColumn {
+	width: 20%;
+	text-align: center;
+}
+
+.ResultsTableWidget-NavigationWidget {
+	font-size: 0.8em;
+	width: 100%;
+}
+
+.ResultsTableWidget-NavigationWidget td {
+	width: 33%;
+}
+
+.ResultsTableWidget-NavigationWidget .ItemCountPanel {
+	text-align: left;
+}
+
+.ResultsTableWidget-NavigationWidget .ItemCountPanel .ItemCount {
+	color: blue;
+}
+
+.ResultsTableWidget-NavigationWidget .PagesPanel {
+	text-align: center;
+}
+
+.ResultsTableWidget-NavigationWidget .PrevNextPanel {
+	text-align: right;
+}
+
+.ResultsTableWidget-Minimized {
+	background-color: #CADFF4;
+	border: 3px solid #CCCCCC;
+	margin-top: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 20px;
+	padding: 5px;
+	text-align: center;
+	font-weight: bold;
+}
+
+.OneBusAway-YelpPanel {
+	margin-top: 5px;
+	text-align: center;
+}
+
+.ActiveResult {
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.ActiveResult-NamePanel {
+	margin-bottom: 5px;
+}
+
+.ActiveResult-Name {
+	font-weight: bold;
+}
+
+.ActiveResult-RatingPanel {
+	margin-top: 10px;
+}
+
+.ActiveResult-TravelTime {
+	margin-top: 10px;
+}
+
+.ActiveResult-DirectionsPanel {
+	margin-top: 10px;
+}
+
+.TripPlanResultsTable {
+	margin-left: 5px;
+	margin-top: 5px;
+}
+
+.ColorGradientControl {
+  width: 200px;
+  background-color: white;
+  opacity: 0.75;
+  padding: 5px;
+  border: 1px solid black;
+}
+
+.ColorGradientControl-LabelGrid {
+	font-weight: bold;
+	width: 100%;	
+}
+
+.ColorGradientControl-LabelGrid-Left {
+	text-align: left;
+}
+
+.ColorGradientControl-LabelGrid-Right {
+	text-align: right;
+}
+
+.ColorGradientControl-ColorGrid {
+	width: 100%;
+	border-collapse: collapse;
+	padding: 0;
+	opacity: .66;
+}

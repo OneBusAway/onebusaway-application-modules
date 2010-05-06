@@ -1,0 +1,621 @@
+/*
+ * Copyright 2008 Brian Ferris
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
+ html, body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: white;
+	font-family: Helvetica, sans-serif;
+}
+
+#header {
+	text-align: left;
+	border-bottom: 1px solid #cccccc;
+	font-size: 13px;
+	padding-top: 5px;
+	padding-left: 5px;
+	padding-bottom: 5px;
+	padding-top: 5px;
+}
+
+#header span {
+	margin-right: 0.73em;
+}
+
+#page {
+	height: 100%;
+}
+
+#default_panel {
+	text-align: left;
+	margin: 0 auto;
+	width: 500px;
+}
+
+#default_panel h1 {
+	font-size: 36pt;
+	text-align: center;
+}
+
+#default_panel h2 {
+	font-size: 18pt;
+	text-align: center;
+}
+
+#default_panel img {
+	margin-left: auto;
+	margin-right: auto;
+	display: block;
+}
+
+#default_panel li {
+	margin-top: 10px;
+}
+
+#three_ways {
+	font-size: 18pt;
+	font-weight: bold;
+}
+
+#three_ways img {
+	display: inline;
+	margin-right: 10px;
+	vertical-align: middle;
+	margin-bottom: 5px;
+}
+
+ul.benefits li {
+	margin-top: 15px;
+}
+
+h2.phone_number {
+	display: block;
+	font-size: 32pt;
+	text-align: center;
+}
+
+div.p {
+	margin-bottom: 1em;
+}
+
+.stopIdentificationImages {
+	margin-bottom: 10px;
+}
+
+img#stopIdImage01 {
+	float: left;
+	margin-right: 10px;
+}
+
+img#stopIdImage02 {
+	float: left;
+}
+
+.clear {
+	clear: both;
+}
+
+/****
+ * Arrivals Styling
+ ****/
+
+.panel {
+	width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.arrivalsStopInfo {
+	border: 1px solid #A5A5A5;
+	background-color: #ffffff;
+	display: block;
+	margin: 10px 5px 10px 5px;
+	padding: 5px 5px 5px 5px;
+	cursor: pointer;
+}
+
+.arrivalsStopInfo a:link {
+	color: black;
+}
+
+.arrivalsStopInfo a:visited {
+	color: black;
+}
+
+.arrivalsStopAddress {
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+}
+
+.arrivalsStopNumber {
+	font-size: 12pt;
+	text-align: center;
+}
+
+.arrivalsTable {
+	background-color: #E3E3E3;
+	border-top-style: groove;
+	border-bottom-style: groove;
+	border-width: 1px 0px 1px;
+	margin: 10px 0px 0px 0px;
+	padding-left: 0px;
+	padding-top: 0px;
+	text-align: center;
+	border-collapse: collapse;
+}
+
+.arrivalsTable tr {
+	border-bottom: 1px groove #000000;
+}
+
+.arrivalsHeader a {
+	font-size: 8pt;
+}
+
+.arrivalsHeader a:link {
+	color: #225F20;
+}
+
+.arrivalsHeader a:visited {
+	color: #225F20;
+}
+
+.arrivalsRouteColumn {
+	width: 100px;
+}
+
+.arrivalsRouteColumn span {
+	cursor: pointer;
+}
+
+.arrivalsDestinationColumn {
+	width: 300px;
+}
+
+.arrivalsDestinationColumn span {
+	cursor: pointer;
+}
+
+.arrivalsStatusColumn {
+	width: 100px;
+}
+
+.arrivalsStatusColumn span {
+	cursor: pointer;
+}
+
+.arrivalsRow>td {
+	border-top: 1px solid #000000;
+	padding-top: 5px;
+	padding-left: 0px;
+	padding-right: 0px;
+	padding-bottom: 5px;
+}
+
+.arrivalsRouteEntry {
+	font-size: 20pt;
+}
+
+.arrivalsRouteEntry a:link {
+	color: black;
+	text-decoration: none;
+}
+
+.arrivalsRouteEntry a:visited {
+	color: black;
+	text-decoration: none;
+}
+
+.arrivalsDestinationEntry {
+	font-size: 12pt;
+	text-align: center;
+}
+
+.arrivalsDestinationEntry a:link {
+	color: black;
+}
+
+.arrivalsDestinationEntry a:visited {
+	color: black;
+}
+
+.arrivalsTimePanel {
+	font-size: 10pt;
+}
+
+.arrivalsTimeEntry {
+	color: #777777;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.arrivalsLabelEntry {
+	font-size: 10pt;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.arrivalsStatusEntry {
+	font-size: 20pt;
+}
+
+.arrivalStatusDefault {
+	color: green;
+}
+
+.arrivalStatusDeparted {
+	color: green;
+}
+
+.arrivalStatusNoInfo {
+	color: green;
+}
+
+.arrivalStatusEarly {
+	color: red;
+}
+
+.arrivalStatusCancelled {
+	color: red;
+	font-weight: bold;
+}
+
+.arrivalStatusDelayed {
+	color: blue;
+}
+
+.arrivalStatusDefault {
+	color: green;
+}
+
+.arrivalStatusNow {
+	font-size: 18pt;
+}
+
+.arrivalsAlarmEntry {
+	text-align: center;
+}
+
+.arrivalsAlarmEntry img {
+	border: 0;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+
+.arrivalsFilterPanel {
+	margin-top: 10px;
+	font-size: 10pt;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+#arrivalsKey {
+	margin-top: 10px;
+	font-size: 10pt;
+}
+
+.arrivalsStatusUpdates {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	font-size: 10pt;
+	font-weight: bold;
+	vertical-align: center;
+}
+
+.arrivalsRefreshButton {
+	margin: 5px 5px 5px 5px;
+}
+
+.arrivalsNearbyStops {
+	margin: 10px 5px 10px 5px;
+	font-size: 12pt;
+}
+
+.arrivalsSearchForStops {
+	margin-top: 10px;
+	font-size: 12pt;
+}
+
+#arrivalsNoScheduledArrivals {
+	margin: 10px;
+	font-weight: bold;
+}
+
+/****
+ *
+ ****/
+ 
+#stopSchedulePanel {
+	text-align: left;
+	margin-left: 10px;
+}
+
+#stopSchedulePanel>table {
+	border-collapse: collapse;
+}
+
+#stopSchedulePanel>table>tbody>tr>td {
+	vertical-align: top;
+}
+
+.stopScheduleStop {
+	padding-top: 10px;
+	padding-left: 30px;
+}
+
+.stopScheduleStopInfo {
+	display: block;
+	cursor: pointer;
+	margin-bottom: 20px;
+}
+
+.stopScheduleStopAddress {
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.stopScheduleStopNumber {
+	font-weight: bold;
+	font-size: 16px;
+}
+
+.stopScheduleDate {
+	margin-bottom: 20px;
+}
+
+.stopScheduleDate > span {
+	font-weight: bold;
+	color: green;
+}
+
+.stopScheduleStopInfo a:link {
+	color: black;
+}
+
+.stopScheduleStopInfo a:visited {
+	color: black;
+}
+
+.stopScheduleRouteEntry {
+	margin-bottom: 10px;
+}
+
+.stopScheduleRouteHeader {
+	border-bottom: 1px solid black;
+	margin-bottom: 5px;
+	font-weight: bold;
+	font-size: 16pt;
+}
+
+table.stopScheduleRouteTable>tbody>tr>td {
+	vertical-align: top;
+	padding-right: 20px;
+}
+
+.stopScheduleAmPmKey {
+	vertical-align: top;
+	font-weight: bold;
+	padding-top: 4px;
+	padding-right: 4px;
+	color: green;
+}
+
+.stopScheduleAmPmValues {
+	vertical-align: top;
+}
+
+.stopScheduleHoursKey {
+	font-weight: bold;
+	text-align: right;
+	padding-right: 5px;
+}
+
+.stopScheduleHoursValues {
+
+}
+
+.stopScheduleMinutes {
+	margin-right: 10px;
+}
+
+.stopScheduleNearbyStops>div.header {
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.stopScheduleCalendars {
+	margin-top: 10px;
+	width: 310px;
+	padding: 10px;
+	border: 2px solid gray;
+	width: 310px;
+}
+
+.stopScheduleCalendars>table>tbody>tr>td {
+	vertical-align: top;
+}
+
+.stopScheduleCalendarsHeader {
+	text-align: center;
+	font-weight: bold;
+	font-size: 16pt;
+	margin-bottom: 10pt;
+}
+
+.stopScheduleCalendar {
+	font-size: 10pt;
+	text-align: center;
+	width: 146px;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	float: left;
+}
+
+.stopScheduleCalendar>table {
+	font-size: 10pt;
+	text-align: center;
+}
+
+.stopScheduleCalendarHeader {
+	font-weight: bold;
+}
+
+.calendarGroup1 {
+	background-color: white;
+}
+
+.calendarGroup2 {
+	background-color: #BFFFBF;
+}
+
+.calendarGroup3 {
+	background-color: #BFE4FF;
+}
+
+.calendarGroup4 {
+	background-color: #FFDFBF;
+}
+
+.calendarGroup5 {
+	background-color: #FFBFBF;
+}
+
+.calendarGroup6 {
+	background-color: #80C9FF;
+}
+
+.calendarGroup7 {
+	background-color: #80FF80;
+}
+
+.calendarGroup8 {
+	background-color: #FFC080;
+}
+
+.calendarGroup9 {
+	background-color: #FF8080;
+}
+
+.calendarGroup10 {
+	background-color: #FFBFBF;
+}
+
+.calendarGroup11 {
+	background-color: #FFBFBF;
+}
+
+.calendarGroup12 {
+	background-color: #FFBFBF;
+}
+
+/****
+ *
+ ****/
+
+#tripPanel {
+	text-align: left;
+	margin-left: 20px;
+	padding-top: 20px;	
+}
+
+#tripPanel .block {
+	margin-top: 1em;
+}
+
+.tripPanelHeader {
+	border-bottom: 1px solid black;
+}
+
+.tripPanelHeaderRoute {
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.tripPanelHeaderTripId {
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.tripPanelLabel {
+	font-weight: bold;
+	margin-right: 5px;
+}
+
+.tripPanelStatusSuspended {
+	font-weight: bold;
+	color: red;
+}
+
+.tripPanelStatusSuspendedDescription {
+	margin-top: 1em;
+}
+
+.tripStatusDefault {
+	color: green;
+}
+
+.tripStatusEarly {
+	color: red;
+}
+
+.tripStatusDelayed {
+	color: blue;
+}
+
+.snow a:link {
+	color: red;
+}
+
+.snow a:visited {
+	color: red;
+}
+
+td.TripPage-TimeColumn {
+	text-align: right;
+	padding-right: 1em;
+}
+
+.TripPage-ArrivalTime {
+	font-weight: bold;
+}
+
+/****
+ *
+ ****/
+ 
+.notificationOptions {
+	margin-top: 1em;
+	font-size: 1.25em;
+}
+
+.notificationMinutesBeforeTextBox {
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  width: 2em;
+  text-align: center;
+  font-size: 1em;
+}
+
+.notificationMethodsPanel {
+  margin-top: 0.5em;
+}
+
+.notificationDefaultsPanel {
+  margin-top: 0.5em;
+}

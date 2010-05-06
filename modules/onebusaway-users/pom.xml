@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.onebusaway</groupId>
+    <artifactId>onebusaway-users</artifactId>
+    <packaging>jar</packaging>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-modules</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+        <spring-security.version>2.0.4</spring-security.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-container</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Spring Security -->
+        <dependency>
+            <artifactId>spring-security-acl</artifactId>
+            <version>${spring-security.version}</version>
+            <groupId>org.springframework.security</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring-security.version}</version>
+            <groupId>org.springframework.security</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>spring-security-core-tiger</artifactId>
+            <version>${spring-security.version}</version>
+            <groupId>org.springframework.security</groupId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.4</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.4</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

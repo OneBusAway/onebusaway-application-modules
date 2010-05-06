@@ -1,0 +1,139 @@
+<!ELEMENT dataset (
+    gtfs_agencies*,
+    gtfs_calendar_dates*,
+    gtfs_calendars*,
+    gtfs_routes*,
+    gtfs_shape_points*,
+    gtfs_stop_times*,
+    gtfs_stops*,
+    gtfs_trips*,
+    where_route_collections*,
+    where_route_collections_gtfs_routes*)>
+
+<!ELEMENT gtfs_agencies EMPTY>
+<!ATTLIST gtfs_agencies
+    id CDATA #REQUIRED
+    lang CDATA #IMPLIED
+    name CDATA #IMPLIED
+    phone CDATA #IMPLIED
+    timezone CDATA #IMPLIED
+    url CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_calendar_dates EMPTY>
+<!ATTLIST gtfs_calendar_dates
+    gid CDATA #REQUIRED
+    date CDATA #IMPLIED
+    exceptionType CDATA #REQUIRED
+    agencyId CDATA #IMPLIED
+    id CDATA #IMPLIED
+>
+
+<!ELEMENT gtfs_calendars EMPTY>
+<!ATTLIST gtfs_calendars
+    gid CDATA #REQUIRED
+    endDate CDATA #IMPLIED
+    friday CDATA #REQUIRED
+    monday CDATA #REQUIRED
+    saturday CDATA #REQUIRED
+    agencyId CDATA #IMPLIED
+    id CDATA #IMPLIED
+    startDate CDATA #IMPLIED
+    sunday CDATA #REQUIRED
+    thursday CDATA #REQUIRED
+    tuesday CDATA #REQUIRED
+    wednesday CDATA #REQUIRED
+>
+
+<!ELEMENT gtfs_routes EMPTY>
+<!ATTLIST gtfs_routes
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    color CDATA #IMPLIED
+    description CDATA #IMPLIED
+    longName CDATA #IMPLIED
+    shortName CDATA #IMPLIED
+    textColor CDATA #IMPLIED
+    type CDATA #REQUIRED
+    url CDATA #IMPLIED
+    agency_id CDATA #REQUIRED
+>
+
+<!ELEMENT gtfs_shape_points EMPTY>
+<!ATTLIST gtfs_shape_points
+    sequence CDATA #REQUIRED
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    distTraveled CDATA #REQUIRED
+    lat CDATA #REQUIRED
+    lon CDATA #REQUIRED
+>
+
+<!ELEMENT gtfs_stop_times EMPTY>
+<!ATTLIST gtfs_stop_times
+    id CDATA #REQUIRED
+    arrivalTime CDATA #REQUIRED
+    departureTime CDATA #REQUIRED
+    dropOffType CDATA #REQUIRED
+    pickupType CDATA #REQUIRED
+    routeShortName CDATA #IMPLIED
+    shapeDistanceTraveled CDATA #REQUIRED
+    stopHeadsign CDATA #IMPLIED
+    stopSequence CDATA #REQUIRED
+    stop_agencyId CDATA #REQUIRED
+    stop_id CDATA #REQUIRED
+    trip_agencyId CDATA #REQUIRED
+    trip_id CDATA #REQUIRED
+>
+
+<!ELEMENT gtfs_stops EMPTY>
+<!ATTLIST gtfs_stops
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    code CDATA #IMPLIED
+    description CDATA #IMPLIED
+    direction CDATA #IMPLIED
+    lat CDATA #REQUIRED
+    locationType CDATA #REQUIRED
+    lon CDATA #REQUIRED
+    name CDATA #IMPLIED
+    parentStation CDATA #REQUIRED
+    url CDATA #IMPLIED
+    zoneId CDATA #REQUIRED
+>
+
+<!ELEMENT gtfs_trips EMPTY>
+<!ATTLIST gtfs_trips
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    blockId CDATA #IMPLIED
+    blockSequenceId CDATA #REQUIRED
+    directionId CDATA #IMPLIED
+    routeShortName CDATA #IMPLIED
+    serviceId_agencyId CDATA #REQUIRED
+    serviceId_id CDATA #REQUIRED
+    shapeId_agencyId CDATA #IMPLIED
+    shapeId_id CDATA #IMPLIED
+    tripHeadsign CDATA #IMPLIED
+    tripShortName CDATA #IMPLIED
+    route_agencyId CDATA #REQUIRED
+    route_id CDATA #REQUIRED
+>
+
+<!ELEMENT where_route_collections EMPTY>
+<!ATTLIST where_route_collections
+    agencyId CDATA #REQUIRED
+    id CDATA #REQUIRED
+    longName CDATA #IMPLIED
+    shortName CDATA #IMPLIED
+>
+
+<!ELEMENT where_route_collections_gtfs_routes EMPTY>
+<!ATTLIST where_route_collections_gtfs_routes
+    where_route_collections_agencyId CDATA #REQUIRED
+    where_route_collections_id CDATA #REQUIRED
+    routes_agencyId CDATA #REQUIRED
+    routes_id CDATA #REQUIRED
+    sequence CDATA #REQUIRED
+>
+

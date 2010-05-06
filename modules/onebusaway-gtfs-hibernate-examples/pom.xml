@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <artifactId>onebusaway-modules</artifactId>
+        <groupId>org.onebusaway</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.onebusaway</groupId>
+    <artifactId>onebusaway-gtfs-hibernate-examples</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <repositories>
+        <repository>
+            <id>releases.developer.onebusaway.org</id>
+            <url>http://developer.onebusaway.org/maven/repository/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>snapshots.developer.onebusaway.org</id>
+            <url>http://developer.onebusaway.org/maven/snapshot-repository/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-gtfs-hibernate</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>1.9.0-rc4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>3.1.14</version>
+        </dependency>
+    </dependencies>
+
+</project>

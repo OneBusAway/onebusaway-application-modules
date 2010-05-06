@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <import resource="classpath:org/onebusaway/gtfs/application-context.xml" />
+
+    <bean id="gtfsBundle" class="org.onebusaway.gtfs.model.GtfsServiceBundle">
+        <property name="path" ref="bundlePath" />
+    </bean>
+
+    <bean id="calendarServiceDataFactory" class="org.onebusaway.gtfs.impl.SerializedCalendarServiceDataFactoryImpl"
+        primary="true">
+        <property name="path">
+            <bean factory-bean="gtfsBundle" factory-method="getCalendarServiceDataPath" />
+        </property>
+    </bean>
+
+    <bean id="kcmetroTcipHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+        <property name="target" value="hibernateAnnotatedClasses" />
+        <property name="values">
+            <list>
+                <value>org.onebusaway.kcmetro.model.TimepointToStopMapping
+                </value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="kcmetroTcipDao" class="org.onebusaway.kcmetro_tcip.impl.KCMetroTcipDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="piStopPointETAServlet" class="org.onebusaway.kcmetro_tcip.impl.PiStopPointETAServlet" />
+
+    <bean id="timepointPredictionToPiSchedAdherenceCountdownServiceImpl" class="org.onebusaway.kcmetro_tcip.impl.TimepointPredictionToPiSchedAdherenceCountdownServiceImpl">
+        <property name="listener" ref="piStopPointETAServlet" />
+        <property name="timepointToStopMappingsByTrackerTripIdCache">
+            <bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+                <property name="cacheManager" ref="cacheManager" />
+                <property name="cacheName"
+                    value="org.onebusaway.kcmetro_tcip.impl.TimepointPredictionToPiSchedAdherenceCountdownServiceImpl.timepointToStopMappingsByTrackerTripIdCache" />
+                <!-- Analysis has shown that > 99% of trips ids are repeated within 5 minutes, we make it 10 just in case -->                    
+                <property name="timeToIdle" value="600" />
+                <!-- Underlying data doesn't change, so time to live is infinity -->
+                <property name="timeToLive" value="0" />
+                <!-- Analysis has shown that the maximum number of active trips is under 1400 -->
+                <property name="maxElementsInMemory" value="1400" />
+                <property name="overflowToDisk" value="false" />
+                <property name="diskPersistent" value="false" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="kcmetroTcipBundle" class="org.onebusaway.kcmetro_tcip.Bundle">
+        <property name="path" ref="bundlePath" />
+    </bean>
+
+    <bean id="timepointPredictionService" class="org.onebusaway.kcmetro_tcip.impl.TimepointPredictionServiceImpl"
+        init-method="startup" destroy-method="shtudown">
+        <property name="listener" ref="timepointPredictionToPiSchedAdherenceCountdownServiceImpl" />
+        <property name="defaultAgencyId" value="1" />
+        <property name="tripIdMappingPath">
+            <bean factory-bean="kcmetroTcipBundle" factory-method="getTripIdMappingPath" />
+        </property>
+    </bean>
+    
+    <bean id="kcmetroTcipJmxStatisticsBean" class="org.onebusaway.kcmetro_tcip.impl.StatisticsMBean"/>
+
+    <bean id="server" class="org.onebusaway.tcip.services.TcipServer" init-method="start" destroy-method="stop">
+        <property name="servletMappings">
+            <list>
+                <bean class="org.onebusaway.tcip.services.TcipServletMapping">
+                    <property name="messageType" value="org.onebusaway.tcip.model.PiStopPointETASub" />
+                    <property name="servlet" ref="piStopPointETAServlet" />
+                </bean>
+            </list>
+        </property>
+        <property name="port" value="9900" />
+    </bean>
+
+</beans>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <import resource="classpath:org/onebusaway/gtfs/application-context.xml" />
+
+    <bean id="gtfsBundle" class="org.onebusaway.gtfs.model.GtfsServiceBundle">
+        <property name="path" ref="bundlePath" />
+    </bean>
+
+    <bean id="bundle" class="org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle">
+        <property name="path" ref="bundlePath" />
+    </bean>
+
+    <bean id="transitDataFederationHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+        <property name="target" value="hibernateAnnotatedClasses" />
+        <property name="values">
+            <list>
+                <value>org.onebusaway.transit_data_federation.model.RouteCollection
+                </value>
+                <value>org.onebusaway.transit_data_federation.model.predictions.TripTimePrediction
+                </value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="transitDataFederationHibernateMappingLocations" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+        <property name="target" value="hibernateMappingLocations" />
+        <property name="values">
+            <list>
+                <value>classpath:org/onebusaway/transit_data_federation/impl/TransitDataFederationDaoImpl.hibernate.xml
+                </value>
+            </list>
+        </property>
+    </bean>
+
+    <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
+
+    <bean id="transitDataFederationDaoImpl" class="org.onebusaway.transit_data_federation.impl.TransitDataFederationDaoImpl"
+        primary="true" />
+    <bean id="transitDataFederationMutableDaoImpl" class="org.onebusaway.transit_data_federation.impl.TransitDataFederationMutableDaoImpl" />
+
+    <bean id="tripTimePredictionServiceImpl" class="org.onebusaway.transit_data_federation.impl.predictions.TripTimePredictionServiceImpl">
+        <property name="tripTimePredictionsCache">
+            <bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+                <property name="cacheManager" ref="cacheManager" />
+                <property name="cacheName"
+                    value="org.onebusaway.transit_data_federation.impl.predictions.TripTimePredictionServiceImpl.tripTimePredictionsCache" />
+                <property name="maxElementsInMemory" value="1400" />
+                <property name="eternal" value="false" />
+                <property name="timeToLive" value="0" />
+                <property name="timeToIdle" value="480" />
+                <property name="overflowToDisk" value="true" />
+                <property name="diskPersistent" value="false" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="stopTimePredictionServiceImpl" class="org.onebusaway.transit_data_federation.impl.predictions.StopTimePredictionServiceImpl">
+        <property name="tripStopTimePredictionsCache">
+            <bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+                <property name="cacheManager" ref="cacheManager" />
+                <property name="cacheName" value="org.onebusaway.transit_data_federation.impl.predictions.StopTimePredictionServiceImpl.tripStopTimePredictionsCache" />
+                <property name="maxElementsInMemory" value="1400" />
+                <property name="eternal" value="false" />
+                <property name="timeToLive" value="0" />
+                <property name="timeToIdle" value="480" />
+                <property name="overflowToDisk" value="true" />
+                <property name="diskPersistent" value="false" />
+            </bean>
+        </property>
+        <property name="stopTimePredictionSources" ref="stopTimePredictionSources" />
+        <property name="tripTimePredictionService" ref="tripTimePredictionServiceImpl" />
+    </bean>
+
+    <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
+
+    <bean id="routeSearchIndexPath" factory-bean="bundle" factory-method="getRouteSearchIndexPath" />
+    <bean id="stopSearchIndexPath" factory-bean="bundle" factory-method="getStopSearchIndexPath" />
+    <bean id="walkPlannerGraphPath" factory-bean="bundle" factory-method="getWalkPlannerGraphPath" />
+    <bean id="tripPlannerGraphPath" factory-bean="bundle" factory-method="getTripPlannerGraphPath" />
+
+
+    <bean id="calendarServiceDataFactory" class="org.onebusaway.gtfs.impl.SerializedCalendarServiceDataFactoryImpl"
+        primary="true">
+        <property name="path">
+            <bean factory-bean="gtfsBundle" factory-method="getCalendarServiceDataPath" />
+        </property>
+    </bean>
+
+    <bean id="walkPlannerGraph" class="org.onebusaway.container.spring.SerializedFactoryBean">
+        <property name="objectType" value="org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph" />
+        <property name="path" ref="walkPlannerGraphPath" />
+    </bean>
+
+    <bean id="tripPlannerGraph" class="org.onebusaway.container.spring.SerializedFactoryBean">
+        <property name="objectType" value="org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph" />
+        <property name="path" ref="tripPlannerGraphPath" />
+    </bean>
+
+    <bean id="routeCollectionSearchServiceImpl" class="org.onebusaway.transit_data_federation.impl.RouteCollectionSearchServiceImpl">
+        <property name="indexPath" ref="routeSearchIndexPath" />
+    </bean>
+
+    <bean id="stopSearchServiceImpl" class="org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl">
+        <property name="indexPath" ref="stopSearchIndexPath" />
+    </bean>
+
+    <!-- Controls startup of various services marked with @PostConstruct and @PreDestroy -->
+    <bean id="initDestroyProcessor" class="org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor">
+        <property name="initAnnotationType" value="org.onebusaway.container.spring.PostConstruct" />
+        <property name="destroyAnnotationType" value="org.onebusaway.container.spring.PreDestroy" />
+    </bean>
+
+</beans>
