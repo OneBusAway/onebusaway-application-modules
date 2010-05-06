@@ -1,0 +1,247 @@
+/*
+ * Copyright 2008 Brian Ferris
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+body {
+	margin: 0;
+	padding: 0;
+	background: white;
+	font-family: Helvetica, sans-serif;
+}
+
+a {
+	color: #0000cc;
+}
+
+#content {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	text-align: center;
+}
+
+#error {
+	margin-top: 10px;
+	color: red;
+}
+
+#noSuchRouteError {
+	padding: 10px 10px 10px 10px;
+	color: red;
+}
+
+.topPanel {
+	width: 100%;
+	padding-top: 10px;
+	padding-bottom: 0px;
+}
+
+.busLogo {
+	vertical-align: middle;
+}
+
+#title {
+	font-weight: bold;
+	font-size: 20pt;
+	padding-left: 15px;
+	text-align: left;
+}
+
+.welcome {
+	padding: 0px 10px 0px 10px;
+}
+
+.stopIdentificationPanel {
+	margin: 10px 10px 10px 10px;
+}
+
+.stopIdentificationPanel img {
+	margin-top: 10px;
+	border: 1px solid #000000;
+}
+
+.searchPanel {
+	margin-left: 0px;
+}
+
+.searchForStopsTabPanel .gwt-TabBarItem-wrapper {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-right: 30px;
+}
+
+.searchForStopsTabPanel .gwt-TabBarItem {
+	cursor: pointer;
+	text-decoration: underline;
+	color: #0000cc;
+}
+
+.searchForStopsTabPanel .gwt-TabBarItem-selected {
+	cursor: default;
+	text-decoration: none;
+	font-weight: bold;
+	color: #000000;
+}
+
+.searchExample {
+	margin-top: 3px;
+	font-size: 75%;
+	color: gray;
+}
+
+.middlePanel {
+	text-align: right;
+	margin: 0;
+	padding: 5px 15px 0px 5px;
+	border-bottom: 3px solid #cccccc;
+}
+
+.redoSearchForStopsInArea {
+	cursor: pointer;
+}
+
+.redoSearchForStopsInArea span {
+	text-decoration: underline;
+}
+
+.resultsPanel {
+	width: 350 px;
+}
+
+.addressPanel {
+	padding: 10px 10px 10px 10px;
+	text-align: left;
+}
+
+.addressList {
+	margin-top: 1em;
+}
+
+.addressListEntry {
+	cursor: pointer;
+	margin-top: 1em;
+	text-decoration: underline;
+}
+
+.addressListEntryIcon {
+	margin-right: 10px;
+}
+
+.addressMap {
+	width: 500px;
+	min-height: 300px;
+	height: 100%;
+}
+
+.addressInfoWindow {
+	font-size: 10pt;
+}
+
+.routePanel {
+	padding: 10px 10px 10px 10px;
+}
+
+#routeNumber {
+	font-weight: bold;
+}
+
+#routeSelection {
+	margin-top: 10px;
+}
+
+.routeTree {
+	margin-top: 10px;
+}
+
+.routeTreeScheduleType {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.routeTreeDestination {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.routeTreeTime {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.routeTreeTimeSelected {
+	color: green;
+}
+
+/****
+ * Stops Styling
+ ****/
+.stopSearchResults {
+	margin-top: 10px;
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.redoSearchForStopsInArea img {
+	margin-right: 5px;
+	vertical-align: middle;
+}
+
+.tooManyStopsMessage {
+	padding: 10px 10px 10px 10px;
+	color: #BB0000;
+}
+
+.tooManyStopsMessageLink {
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.stopPanel {
+	font-size: 10pt;
+	text-align: left;
+}
+
+.stopRoutesPanel {
+	margin-top: 10px;
+	max-width: 258px;
+}
+
+.stopRouteEntry {
+	border: 2px solid #000000;
+	margin-top: 5px;
+	margin-right: 5px;
+	padding: 2px;
+	float: left;
+	width: 25px;
+	font-weight: bold;
+	text-align: center;
+	cursor: pointer;
+}
+
+.stopRealTimeLink {
+	margin-top: 10px;
+}
+
+/****
+ * Update
+ ****/
+ 
+.update {
+	margin-top: 10px;
+}
+
+.update em {
+	color: green;
+}
+
