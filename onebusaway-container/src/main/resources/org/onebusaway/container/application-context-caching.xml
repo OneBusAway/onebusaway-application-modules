@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <import resource="classpath:org/onebusaway/container/application-context-common.xml"/>
+
+    <bean id="ehCacheDiskStorePath" class="java.lang.String" autowire-candidate="false">
+        <constructor-arg value="java.io.tmpdir/cache-onebusaway" />
+    </bean>
+    
+    <bean id="ehCacheConfiguration" class="org.onebusaway.container.spring.EhCacheConfigurationFactoryBean">
+        <property name="configLocation" value="classpath:org/onebusaway/container/ehcache.xml" />
+        <property name="diskStorePath" ref="ehCacheDiskStorePath" />
+    </bean>
+
+    <bean id="cacheManager" class="org.onebusaway.container.spring.EhCacheManagerFactoryBean">
+        <property name="configuration" ref="ehCacheConfiguration" />
+        <property name="cacheManagerName" value="org.onebusaway.cacheManager"/>
+    </bean>
+
+    <bean id="cacheableKeyFactories" class="org.onebusaway.container.spring.MapFactoryBean" />
+
+    <bean id="cacheableInterceptor" class="org.onebusaway.container.cache.CacheableInterceptor">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheKeyFactories" ref="cacheableKeyFactories" />
+    </bean>
+
+</beans>
