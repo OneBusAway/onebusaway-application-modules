@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+
+<!DOCTYPE struts PUBLIC 
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+    <package name="standard" namespace="/where/standard" extends="struts-default">
+
+        <global-results>
+            <result name="Exception">/jsp/where/standard/exception.jspx</result>
+        </global-results>
+
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="Exception" />
+        </global-exception-mappings>
+
+        <action name="stop" class="edu.washington.cs.rse.transit.web.oba.common.actions.StopByNumberAction">
+            <result>/jsp/where/standard/stop.jspx</result>
+        </action>
+
+    </package>
+
+    <package name="iphone" namespace="/where/iphone" extends="struts-default">
+
+        <global-results>
+            <result name="Exception">/jsp/where/iphone/exception.jspx</result>
+        </global-results>
+
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="Exception" />
+        </global-exception-mappings>
+
+        <action name="index">
+            <result>/jsp/where/iphone/index.jspx</result>
+        </action>
+
+        <action name="stops">
+            <result type="redirect">index.action</result>
+        </action>
+
+        <action name="stopIdentification">
+            <result>/jsp/where/iphone/stopIdentification.jspx</result>
+        </action>
+
+        <action name="searchByStopNumber">
+            <result type="redirect">index.action</result>
+        </action>
+
+        <action name="stop" class="edu.washington.cs.rse.transit.web.oba.common.actions.StopByNumberAction">
+            <result>/jsp/where/iphone/stop.jspx</result>
+        </action>
+
+        <action name="searchByRouteNumber">
+            <result type="redirect">index.action</result>
+        </action>
+
+        <action name="stopsByRoute" class="edu.washington.cs.rse.transit.web.oba.common.actions.StopsByRouteAction">
+            <result>/jsp/where/iphone/stopsByRoute.jspx</result>
+            <result name="stop" type="redirect">stop.action?id=${stopId}</result>
+        </action>
+
+    </package>
+
+    <package name="text" namespace="/where/text" extends="struts-default">
+
+        <global-results>
+            <result name="Exception">/jsp/where/text/exception.jspx</result>
+        </global-results>
+
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="Exception" />
+        </global-exception-mappings>
+
+        <action name="index">
+            <result>/jsp/where/text/index.jspx</result>
+        </action>
+
+        <action name="stopIdentification">
+            <result>/jsp/where/text/stopIdentification.jspx</result>
+        </action>
+
+        <action name="stop" class="edu.washington.cs.rse.transit.web.oba.common.actions.StopByNumberAction">
+            <result>/jsp/where/text/stop.jspx</result>
+        </action>
+
+        <action name="stopsByRoute" class="edu.washington.cs.rse.transit.web.oba.common.actions.StopsByRouteAction">
+            <result>/jsp/where/text/stopsByRoute.jspx</result>
+            <result name="stop" type="redirect">stop.action?id=${stopId}</result>
+        </action>
+
+    </package>
+
+</struts>

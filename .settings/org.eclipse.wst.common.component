@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+	<wb-module deploy-name="edu.washington.cs.rse.transit">
+		<wb-resource deploy-path="/" source-path="/src/main/webapp"/>
+		<wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/java"/>
+<wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/edu.washington.cs.rse.collections/edu.washington.cs.rse.collections">
+<dependency-type>uses</dependency-type>
+</dependent-module>
+<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/edu.washington.cs.rse.geospatial/edu.washington.cs.rse.geospatial">
+<dependency-type>uses</dependency-type>
+</dependent-module>
+<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/edu.washington.cs.rse.text/edu.washington.cs.rse.text">
+<dependency-type>uses</dependency-type>
+</dependent-module>
+<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/org.traditionalcake.probablecalls/org.traditionalcake.probablecalls">
+<dependency-type>uses</dependency-type>
+</dependent-module>
+		<!--
+			<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/edu.washington.cs.rse/edu.washington.cs.rse">
+			<dependency-type>uses</dependency-type>
+			</dependent-module>
+			<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/com.intel.research.uwar.patterns/com.intel.research.uwar.patterns">
+			<dependency-type>uses</dependency-type>
+			</dependent-module>
+		-->
+		<!-- <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/> -->
+		<property name="java-output-path" value="target-eclipse/classes"/>
+		<property name="context-root" value="edu.washington.cs.rse.transit"/>
+	</wb-module>
+</project-modules>
