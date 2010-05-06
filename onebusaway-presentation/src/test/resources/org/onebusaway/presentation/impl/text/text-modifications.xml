@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<text-modifications>
+    <replacement from="dog" to="cat" />
+    <replacement from="left" to="right" />
+    <replacement from="(\d+)" to="#\1" />
+    <replacement from="\(" to="left paren" atWordBoundary="false" />
+    <replacement from="\)" to="right paren" atWordBoundary="false" />
+</text-modifications>
