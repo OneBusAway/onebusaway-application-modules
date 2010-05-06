@@ -4,12 +4,11 @@
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-container</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.1-SNAPSHOT</version>
 
     <parent>
         <groupId>org.onebusaway</groupId>
-        <artifactId>onebusaway</artifactId>
-        <version>1.0.6</version>
+        <artifactId>onebusaway-application-modules</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <dependencies>

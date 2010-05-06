@@ -3,9 +3,9 @@
     xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>onebusaway</artifactId>
+        <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>1.0.6</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-phone-webapp</artifactId>

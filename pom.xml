@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
@@ -52,6 +53,12 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <scm>
+        <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</connection>
+        <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</developerConnection>
+        <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/trunk</url>
+    </scm>
+
     <modules>
         <module>onebusaway-api-webapp</module>
         <module>onebusaway-cli</module>
@@ -61,9 +68,7 @@
         <module>onebusaway-federations-webapp</module>
         <module>onebusaway-geocoder</module>
         <module>onebusaway-geospatial</module>
-        <module>onebusaway-gtfs-diff</module>
         <module>onebusaway-gtfs-hibernate-spring</module>
-        <module>onebusaway-gtfs-transformer</module>
         <module>onebusaway-integration-tests</module>
         <module>onebusaway-phone</module>
         <module>onebusaway-phone-webapp</module>
@@ -73,5 +78,5 @@
         <module>onebusaway-transit-data-federation</module>
         <module>onebusaway-users</module>
         <module>onebusaway-webapp</module>
-  </modules>
+    </modules>
 </project>

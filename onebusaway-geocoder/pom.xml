@@ -1,15 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <artifactId>onebusaway</artifactId>
+        <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>1.0.6</version>
-        <relativePath>../onebusaway</relativePath>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-geocoder</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>

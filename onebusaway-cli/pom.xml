@@ -3,13 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-cli</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
 
     <parent>
-        <artifactId>onebusaway</artifactId>
+        <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>1.0.6</version>
-        <relativePath>../onebusaway</relativePath>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     
     <repositories>
