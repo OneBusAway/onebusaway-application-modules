@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<context:component-scan base-package="edu.washington.cs.rse.transit.common" />
+
+	<aop:aspectj-autoproxy />
+
+	<!-- Hibernate session factory -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<qualifier value="main" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">edu.washington.cs.rse.transit.common.CustomHibernateDialect</prop>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.use_sql_comments">true</prop>
+				<prop key="hibernate.cache.use_query_cache">true</prop>
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<prop key="hibernate.generate_statistics">true</prop>
+				<prop key="hibernate.cache.use_structured_entries">true</prop>
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+			</props>
+		</property>
+
+		<property name="annotatedClasses">
+			<list>
+				<value>edu.washington.cs.rse.transit.common.model.aggregate.Layer</value>
+				<value>edu.washington.cs.rse.transit.common.model.aggregate.Region</value>
+				<value>edu.washington.cs.rse.transit.common.model.aggregate.ServicePatternTimeBlock</value>
+				<value>edu.washington.cs.rse.transit.common.model.aggregate.StopRegion</value>
+				<value>edu.washington.cs.rse.transit.common.model.aggregate.StopTimepointInterpolation</value>
+				<value>edu.washington.cs.rse.transit.common.model.BlockTrip</value>
+				<value>edu.washington.cs.rse.transit.common.model.ChangeDate</value>
+                <value>edu.washington.cs.rse.transit.common.model.LocationBookmarks</value>                
+				<value>edu.washington.cs.rse.transit.common.model.OrderedPatternStops</value>
+				<value>edu.washington.cs.rse.transit.common.model.PatternEventSequence</value>
+				<value>edu.washington.cs.rse.transit.common.model.PatternTimepoints</value>
+				<value>edu.washington.cs.rse.transit.common.model.TPI</value>
+				<value>edu.washington.cs.rse.transit.common.model.Route</value>
+				<value>edu.washington.cs.rse.transit.common.model.ServicePattern</value>
+				<value>edu.washington.cs.rse.transit.common.model.StreetName</value>
+				<value>edu.washington.cs.rse.transit.common.model.StopLocation</value>
+				<value>edu.washington.cs.rse.transit.common.model.StopTime</value>
+				<value>edu.washington.cs.rse.transit.common.model.Timepoint</value>
+				<value>edu.washington.cs.rse.transit.common.model.TPI</value>
+				<value>edu.washington.cs.rse.transit.common.model.TPIPath</value>
+				<value>edu.washington.cs.rse.transit.common.model.TransLink</value>
+				<value>edu.washington.cs.rse.transit.common.model.TransLinkShapePoint</value>
+				<value>edu.washington.cs.rse.transit.common.model.TransNode</value>
+				<value>edu.washington.cs.rse.transit.common.model.Trip</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- CACHES -->
+
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:ehcache-spring.xml" />
+		<property name="cacheManagerName" value="edu.washington.cs.rse.transit.cacheManager" />
+	</bean>
+
+	<!-- COMMON RESOURCES -->
+
+	<bean id="myBusServiceImpl" class="edu.washington.cs.rse.transit.common.impl.mybus.MyBusServiceImpl" />
+
+	<bean id="myBusBulkServiceImpl" class="edu.washington.cs.rse.transit.common.impl.mybus.MyBusBulkServiceImpl">
+		<property name="myBusService" ref="myBusServiceImpl" />
+		<property name="cacheManager" ref="cacheManager" />
+	</bean>
+
+	<bean id="timepointSchedulingServiceImpl"
+		class="edu.washington.cs.rse.transit.common.impl.TimepointSchedulingServiceImpl">
+		<property name="myBusService" ref="myBusBulkServiceImpl" />
+	</bean>
+
+</beans>
+
