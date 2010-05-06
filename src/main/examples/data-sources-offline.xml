@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <!--  -->
+    <bean id="gtfsInputLocation" class="java.io.File">
+        <constructor-arg value="/Users/bdferris/l10n/org.onebusaway/data/MetroKCData-20081107-gtfs" />
+    </bean>
+    <bean id="gtfsFeedId" class="java.lang.String">
+        <constructor-arg value="metrokc" />
+    </bean>
+
+    <!-- OpenStreetMaps Data Source -->
+    <bean id="streetMapsFile" class="java.io.File">
+        <constructor-arg value="/Users/bdferris/l10n/org.onebusaway/data/PathData/king.osm" />
+    </bean>
+
+    <bean id="walkPlannerGraphCacheFile" class="java.io.File">
+        <constructor-arg value="/tmp/WalkPlannerGraph.tmp" />
+    </bean>
+
+    <bean id="tripPlannerGraphCacheFile" class="java.io.File">
+        <constructor-arg value="/tmp/TripPlannerGraph.tmp" />
+    </bean>
+
+    <!-- -->
+    <bean id="citiesLayer" class="org.onebusaway.common.model.LayerAndRegionsFactoryBean">
+        <property name="layerName" value="Cities" />
+        <property name="layerSequence" value="0" />
+        <property name="resources"
+            value="file:/Users/bdferris/l10n/org.onebusaway/data/LocationLabels-Simplified/Cities/PugetSoundCities.kml" />
+    </bean>
+    <bean id="neighborhoodLayer" class="org.onebusaway.common.model.LayerAndRegionsFactoryBean">
+        <property name="layerName" value="Neighborhoods" />
+        <property name="layerSequence" value="1" />
+        <property name="resources"
+            value="file:/Users/bdferris/l10n/org.onebusaway/data/LocationLabels-Simplified/Neighborhoods/SeattleNeighborhoodsFromSeattleCityClerksOffice.kml" />
+    </bean>
+    <bean id="smallNeighborhoodLayer" class="org.onebusaway.common.model.LayerAndRegionsFactoryBean">
+        <property name="layerName" value="Small Neighborhoods" />
+        <property name="layerSequence" value="2" />
+        <property name="resources">
+            <value>
+                file:/Users/bdferris/l10n/org.onebusaway/data/LocationLabels-Simplified/SmallNeighborhoods/SeattleNeighborhoodsFromSeattleCityClerksOffice.kml
+                file:/Users/bdferris/l10n/org.onebusaway/data/LocationLabels-Simplified/SmallNeighborhoods/MyExtraLabels.kml
+            </value>
+        </property>
+    </bean>
+    <bean id="placesLayer" class="org.onebusaway.common.model.LayerAndRegionsFactoryBean">
+        <property name="layerName" value="Places" />
+        <property name="layerSequence" value="3" />
+        <property name="resources"
+            value="file:/Users/bdferris/l10n/org.onebusaway/data/LocationLabels-Simplified/Places/Docks.kml" />
+    </bean>
+
+    <!-- -->
+    <bean id="layersAndRegions" class="org.onebusaway.common.model.LayersAndRegions">
+        <property name="layersAndRegions">
+            <list>
+                <ref bean="citiesLayer" />
+                <ref bean="neighborhoodLayer" />
+                <ref bean="smallNeighborhoodLayer" />
+                <ref bean="placesLayer" />
+            </list>
+        </property>
+    </bean>
+
+</beans>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <!-- -->
+    <bean id="workingDir" class="java.io.File" init-method="mkdirs">
+        <constructor-arg value="/tmp/onebusaway.org" />
+    </bean>
+    <bean id="cacheWorkingDir" class="java.io.File" init-method="mkdirs">
+        <constructor-arg value="/tmp/onebusaway.org/cache" />
+    </bean>
+
+    <!--  -->
+    <bean id="initDestroyProcessor" class="org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor">
+        <property name="initAnnotationType" value="org.onebusaway.common.spring.PostConstruct" />
+        <property name="destroyAnnotationType" value="org.onebusaway.common.spring.PreDestroy" />
+    </bean>
+
+    <bean id="serviceCalendarDataCacheFile" class="java.io.File">
+        <constructor-arg value="/Users/bdferris/l10n/org.onebusaway/data/cache/CalendarServiceData.obj" />
+    </bean>
+
+    <bean id="walkPlannerGraphCacheFile" class="java.io.File">
+        <constructor-arg value="/Users/bdferris/l10n/org.onebusaway/data/cache/WalkPlannerGraph.obj" />
+    </bean>
+
+    <bean id="tripPlannerGraphCacheFile" class="java.io.File">
+        <constructor-arg value="/Users/bdferris/l10n/org.onebusaway/data/cache/TripPlannerGraph.obj" />
+    </bean>
+
+    <!--  -->
+    <bean id="audioFactory" class="org.onebusaway.where.phone.AudioFactory">
+        <property name="outputDirectory" value="/var/lib/asterisk/sounds/bustracker" />
+    </bean>
+
+    <!--  -->
+    <bean id="destinationAbberviations" class="org.onebusaway.common.replacement.DirectReplacementStrategy">
+        <qualifier value="destinationAbbreviations" />
+        <property name="replacementsFromFile" value="/Users/bdferris/l10n/org.onebusaway/data/DestinationAbbreviations.txt" />
+    </bean>
+
+    <!--  -->
+    <bean id="locationNamingSplitStrategy" class="org.onebusaway.where.impl.DefaultLocationNamingSplitStrategy" />
+
+</beans>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="org.onebusaway">
+        <wb-resource deploy-path="/" source-path="/src/main/webapp"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+<dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/edu.washington.cs.rse.geospatial/edu.washington.cs.rse.geospatial">
+<dependency-type>uses</dependency-type>
+</dependent-module>
+        <property name="java-output-path" value="target-eclipse/classes"/>
+        <property name="context-root" value="org.onebusaway"/>
+    </wb-module>
+</project-modules>

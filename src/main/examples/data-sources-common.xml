@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <!--  -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://127.0.01/org_onebusaway_metrokc" />
+        <property name="username" value="USERNAME" />
+        <property name="password" value="PASSWORD" />
+    </bean>
+
+    <!-- -->
+    <bean id="projection" class="edu.washington.cs.rse.geospatial.DefaultProjection">
+        <constructor-arg value="nad83:4601 +units=us-ft" />
+    </bean>
+
+    <!-- -->
+    <bean id="projectionService" class="org.onebusaway.common.impl.ProjectionServiceImpl">
+        <property name="projection" ref="projection" />
+    </bean>
+    
+    <!-- -->
+    <bean id="serviceCalendarDataCacheFile" class="java.io.File">
+        <constructor-arg value="/Users/bdferris/l10n/org.onebusaway/data/cache/ServiceCalendarData.obj" />
+    </bean>
+
+</beans>

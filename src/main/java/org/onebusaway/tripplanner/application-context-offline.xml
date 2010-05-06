@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <bean id="tripPlannerOfflineTasks" class="org.onebusaway.tripplanner.TripPlannerOfflineTasks">
+        <property name="tasks">
+            <list>
+                <!-- <ref bean="walkPlannerGraphTask" /> -->
+                <ref bean="tripPlannerGraphTask" />
+            </list>
+        </property>
+    </bean>
+
+    <!--  -->
+    <bean id="walkPlannerGraphTask" class="org.onebusaway.tripplanner.offline.WalkPlannerGraphTask">
+        <property name="openStreetMapInputPath" ref="streetMapsFile" />
+        <property name="outputPath" ref="walkPlannerGraphCacheFile" />
+        <property name="projectionService" ref="projectionService" />
+    </bean>
+
+    <!--  -->
+    <bean id="tripPlannerGraphTask" class="org.onebusaway.tripplanner.offline.TripPlannerGraphTask">
+        <property name="outputPath" ref="tripPlannerGraphCacheFile" />
+    </bean>
+
+    <!--  -->
+    <bean id="walkPlannerGraph" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="targetSource">
+            <bean class="org.onebusaway.common.spring.SerializedLazyCreationTargetSource">
+                <property name="path" ref="walkPlannerGraphCacheFile" />
+                <property name="initMethod" value="initialize" />
+            </bean>
+        </property>
+        <property name="proxyInterfaces" value="org.onebusaway.tripplanner.services.WalkPlannerGraph" />
+    </bean>
+    <bean id="walkPlannerServiceImpl" class="org.onebusaway.tripplanner.impl.WalkPlannerServiceImpl">
+        <property name="walkPlannerGraph" ref="walkPlannerGraph" />
+    </bean>
+    <bean id="stopWalkPlannerServiceImpl" class="org.onebusaway.tripplanner.impl.StopWalkPlannerServiceImpl">
+        <property name="walkPlannerService" ref="walkPlannerServiceImpl" />
+    </bean>
+    
+    <bean id="stopWalkPlanCache" class="org.onebusaway.tripplanner.offline.StopWalkPlanCache" />
+    
+    <bean id="tripPlannerGraph" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="targetSource">
+            <bean class="org.onebusaway.common.spring.SerializedLazyCreationTargetSource">
+                <property name="path" ref="tripPlannerGraphCacheFile" />
+                <property name="initMethod" value="initialize" />
+            </bean>
+        </property>
+        <property name="proxyInterfaces" value="org.onebusaway.tripplanner.services.TripPlannerGraph" />
+    </bean>
+</beans>

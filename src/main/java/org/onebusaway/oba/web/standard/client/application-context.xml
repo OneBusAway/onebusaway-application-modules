@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <!-- Model Layer -->
+
+    <bean id="resultsModel" class="org.onebusaway.oba.web.standard.client.model.ResultsModel" />
+    <bean id="timedRegionModel" class="org.onebusaway.oba.web.standard.client.model.TimedRegionModel" />
+
+    <!-- View Layer -->
+
+    <bean id="mapWidget" class="com.google.gwt.maps.client.MapWidget">
+        <constructor-arg index="0">
+            <bean class="org.onebusaway.oba.web.standard.client.model.LatLngFactory">
+                <property name="lat" value="47.601533" />
+                <property name="lng" value="-122.32933" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg index="1" value="11" />
+    </bean>
+
+    <bean id="mapOverlayManager" class="org.onebusaway.common.web.common.client.MapOverlayManager">
+        <property name="mapWidget" ref="mapWidget" />
+    </bean>
+
+    <bean id="searchWidget" class="org.onebusaway.oba.web.standard.client.view.SearchWidget" />
+    <bean id="resultsFilterWidget" class="org.onebusaway.oba.web.standard.client.view.ResultsFilterWidget" />
+    <bean id="resultsTableWidget" class="org.onebusaway.oba.web.standard.client.view.ResultsTableWidget">
+        <property name="resultsModel" ref="resultsModel" />
+        <property name="mapOverlayManager" ref="mapOverlayManager" />
+    </bean>
+
+    <bean id="mainPage" class="org.onebusaway.oba.web.standard.client.view.MainPage">
+        <property name="mapWidget" ref="mapWidget" />
+        <property name="searchWidget" ref="searchWidget" />
+        <property name="resultsFilterWidget" ref="resultsFilterWidget" />
+        <property name="geocoderHandler" ref="geocoderHandler" />
+        <property name="oneBusAwayHandler" ref="oneBusAwayHandler" />
+    </bean>
+
+    <bean id="timedRegionOverlayManager" class="org.onebusaway.oba.web.standard.client.view.TimedRegionOverlayManager">
+        <property name="mapOverlayManager" ref="mapOverlayManager" />
+    </bean>
+
+    <!-- Control Layer -->
+
+    <bean id="localSearchProvider" class="org.onebusaway.oba.web.standard.client.search.YelpLocalSearchProvider">
+        <constructor-arg value="VJYMvEAOfkqDeyHh4C9gTg" index="0"/>
+        <property name="timeout" value="10000" />
+    </bean>
+
+    <bean id="geocoderHandler" class="org.onebusaway.oba.web.standard.client.control.GeocoderResultHandler">
+        <property name="constraintsSource" ref="searchWidget" />
+        <property name="oneBusAwayHandler" ref="oneBusAwayHandler" />
+        <property name="mapOverlayManager" ref="mapOverlayManager" />
+    </bean>
+
+    <bean id="oneBusAwayHandler" class="org.onebusaway.oba.web.standard.client.control.OneBusAwayHandler">
+        <property name="localSearchProvider" ref="localSearchProvider" />
+        <property name="resultsModel" ref="resultsModel" />
+        <property name="mapOverlayManager" ref="mapOverlayManager" />
+        <property name="timedRegionModel" ref="timedRegionModel" />
+    </bean>
+
+    <bean id="resultsFilterController" class="org.onebusaway.oba.web.standard.client.control.ResultsFilterController">
+        <property name="resultsFilterWidget" ref="resultsFilterWidget" />
+        <property name="resultsModel" ref="resultsModel" />
+        <property name="timedRegionModel" ref="timedRegionModel" />
+    </bean>
+
+    <bean id="directionsHandler" class="org.onebusaway.oba.web.standard.client.control.DirectionsHandler">
+        <property name="mapOverlayManager" ref="mapOverlayManager" />
+    </bean>
+
+</beans>

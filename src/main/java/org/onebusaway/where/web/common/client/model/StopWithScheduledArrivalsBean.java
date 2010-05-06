@@ -1,0 +1,46 @@
+/*
+ * Copyright 2008 Brian Ferris
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.onebusaway.where.web.common.client.model;
+
+import org.onebusaway.common.web.common.client.model.ApplicationBean;
+
+import java.util.List;
+
+public class StopWithScheduledArrivalsBean extends ApplicationBean {
+
+    private static final long serialVersionUID = 1L;
+
+    private StopAreaBean _stop;
+
+    private List<DepartureBean> _arrivals;
+
+    public StopWithScheduledArrivalsBean() {
+
+    }
+
+    public StopWithScheduledArrivalsBean(StopAreaBean bean, List<DepartureBean> arrivals) {
+        _stop = bean;
+        _arrivals = arrivals;
+    }
+
+    public StopAreaBean getStop() {
+        return _stop;
+    }
+
+    public List<DepartureBean> getPredictedArrivals() {
+        return _arrivals;
+    }
+}

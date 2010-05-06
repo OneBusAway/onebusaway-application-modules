@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+
+<!DOCTYPE struts PUBLIC 
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+    <!-- -->
+    <package name="onebusaway" extends="struts-default" abstract="true">
+
+        <result-types>
+            <result-type name="json" class="com.googlecode.jsonplugin.JSONResult">
+                <param name="callbackParameter">callback</param>
+            </result-type>
+        </result-types>
+
+        <interceptors>
+            <interceptor-stack name="onebusaway-stack">
+                <interceptor-ref name="exception">
+                    <param name="logEnabled">true</param>
+                    <param name="logLevel">ERROR</param>
+                </interceptor-ref>
+                <interceptor-ref name="alias" />
+                <interceptor-ref name="servletConfig" />
+                <interceptor-ref name="prepare" />
+                <interceptor-ref name="i18n" />
+                <interceptor-ref name="chain" />
+                <interceptor-ref name="debugging" />
+                <interceptor-ref name="profiling" />
+                <interceptor-ref name="scopedModelDriven" />
+                <interceptor-ref name="modelDriven" />
+                <interceptor-ref name="fileUpload" />
+                <interceptor-ref name="checkbox" />
+                <interceptor-ref name="staticParams" />
+                <interceptor-ref name="actionMappingParams" />
+                <interceptor-ref name="params">
+                    <param name="excludeParams">dojo\..*</param>
+                </interceptor-ref>
+                <interceptor-ref name="conversionError" />
+                <interceptor-ref name="validation">
+                    <param name="excludeMethods">input,back,cancel,browse</param>
+                </interceptor-ref>
+                <interceptor-ref name="workflow">
+                    <param name="excludeMethods">input,back,cancel,browse</param>
+                </interceptor-ref>
+            </interceptor-stack>
+        </interceptors>
+
+        <default-interceptor-ref name="onebusaway-stack" />
+
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="Exception" />
+        </global-exception-mappings>
+
+    </package>
+
+    <!--  -->
+    <package name="standard" namespace="/where/standard" extends="onebusaway">
+        <global-results>
+            <result name="Exception">/jsp/where/standard/exception.jspx</result>
+        </global-results>
+        <action name="stop" class="org.onebusaway.where.web.actions.StopByNumberAction">
+            <result>/jsp/where/standard/stop.jspx</result>
+        </action>
+        <action name="trip" class="org.onebusaway.where.web.actions.TripAction">
+            <result>/jsp/where/standard/trip.jspx</result>
+        </action>
+        <action name="schedule" class="org.onebusaway.where.web.actions.ScheduleByStopAction">
+            <result>/jsp/where/standard/schedule.jspx</result>
+        </action>
+        <action name="stop-debug" class="org.onebusaway.where.web.actions.StopByNumberDebugAction">
+            <result>/jsp/where/standard/stop-debug.jspx</result>
+        </action>
+        <action name="set-cancelled-routes" class="org.onebusaway.where.web.actions.SetCancelledRoutesAction">
+        </action>
+    </package>
+
+    <!-- -->
+    <package name="iphone" namespace="/where/iphone" extends="onebusaway">
+        <global-results>
+            <result name="Exception">/jsp/where/iphone/exception.jspx</result>
+        </global-results>
+        <action name="index">
+            <result>/jsp/where/iphone/index.jspx</result>
+        </action>
+        <action name="stops">
+            <result type="redirect">index.action</result>
+        </action>
+        <action name="stopIdentification">
+            <result>/jsp/where/iphone/stopIdentification.jspx</result>
+        </action>
+        <action name="searchByStopNumber">
+            <result type="redirect">index.action</result>
+        </action>
+        <action name="stop" class="org.onebusaway.where.web.actions.StopByNumberAction">
+            <result>/jsp/where/iphone/stop.jspx</result>
+        </action>
+        <action name="stop-info" class="org.onebusaway.where.web.actions.StopAction">
+            <result>/jsp/where/iphone/stop-info.jspx</result>
+        </action>
+        <action name="stop-kml" class="org.onebusaway.where.web.actions.StopAction">
+            <result>/jsp/where/iphone/stop-kml.jspx</result>
+        </action>
+        <action name="trip" class="org.onebusaway.where.web.actions.TripAction">
+            <result>/jsp/where/iphone/trip.jspx</result>
+        </action>
+        <action name="searchByRouteNumber">
+            <result type="redirect">index.action</result>
+        </action>
+        <action name="stopsByRoute" class="org.onebusaway.where.web.actions.StopsByRouteAction">
+            <result>/jsp/where/iphone/stopsByRoute.jspx</result>
+            <result name="stop" type="redirect">stop.action?id=${stopId}</result>
+        </action>
+    </package>
+
+    <!-- -->
+    <package name="text" namespace="/where/text" extends="onebusaway">
+        <global-results>
+            <result name="Exception">/jsp/where/text/exception.jspx</result>
+        </global-results>
+        <action name="index">
+            <result>/jsp/where/text/index.jspx</result>
+        </action>
+        <action name="stopIdentification">
+            <result>/jsp/where/text/stopIdentification.jspx</result>
+        </action>
+        <action name="stop" class="org.onebusaway.where.web.actions.StopByNumberAction">
+            <result>/jsp/where/text/stop.jspx</result>
+        </action>
+        <action name="stopsByRoute" class="org.onebusaway.where.web.actions.StopsByRouteAction">
+            <result>/jsp/where/text/stopsByRoute.jspx</result>
+            <result name="stop" type="redirect">stop.action?id=${stopId}</result>
+        </action>
+    </package>
+
+    <!-- -->
+    <package name="sms" namespace="/where/sms" extends="onebusaway">
+        <global-results>
+            <result name="Exception">/jsp/where/sms/exception.jspx</result>
+        </global-results>
+        <action name="stop" class="org.onebusaway.where.web.sms.actions.StopByTextmarkAction">
+            <result>/jsp/where/sms/stop.jspx</result>
+            <result name="input">/jsp/where/sms/input.jspx</result>
+        </action>
+    </package>
+
+    <!-- -->
+    <package name="api" namespace="/where/api" extends="onebusaway">
+        <action name="departures" class="org.onebusaway.where.web.api.actions.DeparturesByStopIdAction">
+            <result name="json" type="json" />
+        </action>
+    </package>
+    
+    <!--  -->
+    <package name="status" namespace="/where/status" extends="onebusaway">
+        <global-results>
+            <result name="Exception">/jsp/where/standard/exception.jspx</result>
+        </global-results>
+        <action name="index" class="org.onebusaway.where.web.actions.StatusIndexAction">
+            <result>/jsp/where/status/index.jspx</result>
+        </action>
+        <action name="setCancelledRoutes" class="org.onebusaway.where.web.actions.SetCancelledRoutesAction">
+            <result type="redirectAction">index</result>
+        </action>
+        <action name="setReroutedRoutes" class="org.onebusaway.where.web.actions.SetReroutedRoutesAction">
+            <result type="redirectAction">index</result>
+        </action>
+    </package>
+</struts>

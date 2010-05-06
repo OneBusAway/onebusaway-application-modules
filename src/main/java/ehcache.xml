@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<ehcache>
+
+    <diskStore path="/tmp/onebusaway.org/cache/hibernate" />
+
+    <!--  Entity Caches -->
+
+    <cache name="org.onebusaway.gtfs.model.Agency" maxElementsInMemory="5" eternal="true" overflowToDisk="true" />
+    <cache name="org.onebusaway.gtfs.model.CalendarDate" maxElementsInMemory="50" eternal="true" overflowToDisk="true" />
+    <cache name="org.onebusaway.gtfs.model.Route" maxElementsInMemory="50" eternal="true" overflowToDisk="true" />
+    <cache name="org.onebusaway.gtfs.model.ServiceCalendar" maxElementsInMemory="50" eternal="true"
+        overflowToDisk="true" />
+    <cache name="org.onebusaway.gtfs.model.ShapePoint" maxElementsInMemory="5" eternal="true" overflowToDisk="true" />
+    <cache name="org.onebusaway.gtfs.model.Stop" maxElementsInMemory="500" eternal="true" overflowToDisk="true" />
+    <cache name="org.onebusaway.gtfs.model.StopTime" maxElementsInMemory="500" eternal="true" overflowToDisk="false" />
+    <cache name="org.onebusaway.gtfs.model.Trip" maxElementsInMemory="100" eternal="true" overflowToDisk="false" />
+
+    <!--  Default Cache -->
+    <defaultCache maxElementsInMemory="50" eternal="true" overflowToDisk="true" diskPersistent="true" />
+
+</ehcache>
+

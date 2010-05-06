@@ -1,0 +1,9 @@
+#Fri Dec 12 13:41:18 PST 2008
+eclipse.preferences.version=1
+formatter_profile=_org.onebusaway Format
+formatter_settings_version=11
+org.eclipse.jdt.ui.ignorelowercasenames=true
+org.eclipse.jdt.ui.importorder=org.onebusaway;edu;com;junit;net;org;java;javax;
+org.eclipse.jdt.ui.ondemandthreshold=99
+org.eclipse.jdt.ui.staticondemandthreshold=99
+org.eclipse.jdt.ui.text.custom_code_templates=<?xml version\="1.0" encoding\="UTF-8"?><templates/>

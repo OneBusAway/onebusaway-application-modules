@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <query name="allCalendars" read-only="true">FROM ServiceCalendar</query>
+    <query name="allStops" read-only="true">SELECT stop FROM Stop stop</query>
+    <query name="tripsByBlockId" read-only="true">SELECT trip FROM Trip trip WHERE trip.blockId = :blockId</query>
+    <query name="stopTimesByBlockId" read-only="true">
+        SELECT st
+        FROM StopTime st
+        WHERE st.trip.blockId = :blockId
+    </query>
+</hibernate-mapping>
