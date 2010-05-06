@@ -1,0 +1,46 @@
+/*
+ * Copyright 2008 Brian Ferris
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package edu.washington.cs.rse.transit.common.model;
+
+public abstract class IdentityBean extends EntityBean implements IHasId {
+
+    private static final long serialVersionUID = 1L;
+
+    public abstract void setId(int id);
+
+    protected int compareToById(IdentityBean o) {
+        int id1 = getId();
+        int id2 = o.getId();
+        return id1 == id2 ? 0 : (id1 < id2 ? -1 : 1);
+    }
+
+    /***************************************************************************
+     * {@link Object}
+     **************************************************************************/
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof IdentityBean))
+            return false;
+        IdentityBean entity = (IdentityBean) obj;
+        return getId() == entity.getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return getId();
+    }
+}
