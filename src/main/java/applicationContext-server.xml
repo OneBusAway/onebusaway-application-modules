@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <context:component-scan base-package="edu.washington.cs.rse.transit.web.oba.common.server" />
+    <context:component-scan base-package="edu.washington.cs.rse.transit.phone" />
+    
+    <bean id="initDestroyProcessor" class="org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor">
+        <property name="initAnnotationType" value="edu.washington.cs.rse.transit.common.spring.PostConstruct" />
+        <property name="destroyAnnotationType" value="edu.washington.cs.rse.transit.common.spring.PreDestroy" />
+    </bean>
+
+    <!-- WEB RESOURCES -->
+
+    <bean id="oneBusAwayServiceImpl"
+        class="edu.washington.cs.rse.transit.web.oba.common.server.OneBusAwayServiceImpl">
+        <property name="cacheManager" ref="cacheManager" />
+    </bean>
+
+    <bean id="oneBusAwayMessages" class="edu.washington.cs.rse.transit.web.oba.gwt.GWTMessagesFactory">
+        <property name="type" value="edu.washington.cs.rse.transit.web.oba.common.client.OneBusAwayMessages" />
+    </bean>
+
+    <!-- 
+        <bean id="immutableResourceBundleFactory" class="edu.washington.cs.rse.transit.web.oba.gwt.ImmutableResourceBundleFactory">
+        <property name="prefix" value="/resources" />
+        <property name="resources">
+        <map>
+        <entry key="common"
+        value="edu.washington.cs.rse.transit.web.oba.common.resources.OneBusAwayCommonResources" />
+        </map>
+        </property>
+        </bean>
+        
+    -->
+
+    <!-- PHONE RESOURCES -->
+
+    <bean id="myxworkConfiguration" class="edu.washington.cs.rse.transit.XWorkConfigurationFactoryBean">
+        <property name="xmlConfigurationSource" value="edu/washington/cs/rse/transit/phone/xwork.xml" />
+    </bean>
+
+    <bean id="agiServer" class="org.asteriskjava.fastagi.DefaultAgiServer">
+        <property name="mappingStrategy" ref="mappingStrategy" />
+        <property name="port" value="8001" />
+    </bean>
+
+    <bean id="mappingStrategy" class="org.asteriskjava.fastagi.SimpleMappingStrategy">
+        <property name="mappings">
+            <map>
+                <entry key="index.agi" value-ref="agiEntryPoint" />
+            </map>
+        </property>
+    </bean>
+
+    <bean id="agiEntryPoint" class="org.traditionalcake.probablecalls.AgiEntryPoint">
+        <property name="action" value="/welcome" />
+        <property name="configuration" ref="myxworkConfiguration" />
+        <property name="pauseBetweenActions" value="500" />
+    </bean>
+
+    <bean id="agiTemplateSource"
+        class="org.traditionalcake.probablecalls.agitemplates.ClasspathScanningAgiTemplateSource">
+        <property name="scanPackage" value="edu.washington.cs.rse.transit.phone.templates" />
+    </bean>
+
+
+    <bean id="org.traditionalcake.probablecalls.agitemplates.AgiTemplateDispatcher"
+        class="org.traditionalcake.probablecalls.agitemplates.AgiTemplateDispatcher">
+        <property name="templateSource" ref="agiTemplateSource" />
+    </bean>
+
+    <bean id="agiServerThread" class="org.asteriskjava.fastagi.AgiServerThread" init-method="startup"
+        destroy-method="shutdown">
+        <property name="agiServer" ref="agiServer" />
+    </bean>
+
+</beans>
+
