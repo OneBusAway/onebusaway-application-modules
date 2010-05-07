@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.impl;
 
-import org.onebusaway.container.spring.PostConstruct;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
@@ -22,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+
+import javax.annotation.PostConstruct;
 
 @Component
 class WhereGeospatialServiceImpl implements GeospatialBeanService {

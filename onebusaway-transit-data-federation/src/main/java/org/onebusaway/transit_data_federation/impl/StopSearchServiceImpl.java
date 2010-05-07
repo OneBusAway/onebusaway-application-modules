@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.impl;
 
-import org.onebusaway.container.spring.PostConstruct;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.offline.GenerateStopSearchIndexTask;
 import org.onebusaway.transit_data_federation.model.SearchResult;
@@ -27,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 @Component
 public class StopSearchServiceImpl implements StopSearchService {

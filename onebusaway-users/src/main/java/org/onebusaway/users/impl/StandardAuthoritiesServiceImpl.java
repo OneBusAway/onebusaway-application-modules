@@ -1,6 +1,5 @@
 package org.onebusaway.users.impl;
 
-import org.onebusaway.container.spring.PostConstruct;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserDao;
@@ -13,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
 
 @Component
 class StandardAuthoritiesServiceImpl implements StandardAuthoritiesService {

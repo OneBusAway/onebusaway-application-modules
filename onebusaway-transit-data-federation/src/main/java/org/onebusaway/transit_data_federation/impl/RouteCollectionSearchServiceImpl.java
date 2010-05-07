@@ -1,10 +1,13 @@
 package org.onebusaway.transit_data_federation.impl;
 
-import org.onebusaway.container.spring.PostConstruct;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.offline.GenerateRouteCollectionSearchIndexTask;
-import org.onebusaway.transit_data_federation.model.SearchResult;
-import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -19,14 +22,11 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TopDocCollector;
 import org.apache.lucene.search.TopDocs;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.offline.GenerateRouteCollectionSearchIndexTask;
+import org.onebusaway.transit_data_federation.model.SearchResult;
+import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class RouteCollectionSearchServiceImpl implements
