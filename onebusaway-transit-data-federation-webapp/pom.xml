@@ -4,13 +4,11 @@
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-transit-data-federation-webapp</artifactId>
     <packaging>war</packaging>
-    <version>0.0.1-SNAPSHOT</version>
 
     <parent>
         <groupId>org.onebusaway</groupId>
-        <artifactId>onebusaway</artifactId>
-        <version>1.0.6</version>
-        <relativePath>../onebusaway</relativePath>
+        <artifactId>onebusaway-application-modules</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <dependencies>

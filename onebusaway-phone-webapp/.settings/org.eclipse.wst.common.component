@@ -36,6 +36,9 @@
         <dependent-module archiveName="collections.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/collections/collections">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="onebusaway-probablecalls.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/onebusaway-probablecalls/onebusaway-probablecalls">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="onebusaway-phone-webapp"/>
         <property name="java-output-path" value="/onebusaway-phone-webapp/target/classes"/>
     </wb-module>

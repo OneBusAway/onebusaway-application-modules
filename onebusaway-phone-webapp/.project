@@ -14,6 +14,7 @@
 		<project>onebusaway-container</project>
 		<project>onebusaway-geocoder</project>
 		<project>collections</project>
+		<project>onebusaway-probablecalls</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
