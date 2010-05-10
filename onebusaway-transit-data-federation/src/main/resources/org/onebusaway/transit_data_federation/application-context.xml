@@ -18,10 +18,4 @@
 
     <import resource="classpath:org/onebusaway/transit_data_federation/application-context-services.xml" />
 
-    <!-- Controls startup of various services marked with @PostConstruct and @PreDestroy -->
-    <bean id="initDestroyProcessor" class="org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor">
-        <property name="initAnnotationType" value="org.onebusaway.container.spring.PostConstruct" />
-        <property name="destroyAnnotationType" value="org.onebusaway.container.spring.PreDestroy" />
-    </bean>
-
 </beans>
