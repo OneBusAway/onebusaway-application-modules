@@ -20,15 +20,8 @@
 	<!-- Inherit the core Web Toolkit stuff -->
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.i18n.I18N" />
-	<inherits name="org.onebusaway.webapp.gwt.StopAndRouteSelection" />
-	<!-- This does not work as you might expect: <inherits name="org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication" /-->
+	<inherits name="org.onebusaway.webapp.gwt.WhereLibrary" />
 
-    <source path="where_refineview" />
+    <source path="stop_and_route_selection" />
 
-	<!-- Specify the app entry point class -->
-	<entry-point class='org.onebusaway.webapp.gwt.where_refineview.WhereStopFinderRefineViewApplication' />
-    
-    <!-- Temporary for development -->
-    <set-configuration-property name="CssResource.style" value="pretty"/>
-    
 </module>

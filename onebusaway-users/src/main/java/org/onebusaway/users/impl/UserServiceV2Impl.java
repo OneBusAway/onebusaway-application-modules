@@ -3,6 +3,7 @@ package org.onebusaway.users.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -70,7 +71,7 @@ public class UserServiceV2Impl implements UserService {
     UserBean bean = new UserBean();
 
     UserPropertiesV2 properties = getProperties(user);
-    
+
     bean.setUserId(Integer.toString(user.getId()));
     bean.setRememberPreferencesEnabled(properties.isRememberPreferencesEnabled());
 
@@ -83,7 +84,7 @@ public class UserServiceV2Impl implements UserService {
 
     List<String> stopIds = _lastSelectedStopService.getLastSelectedStopsForUser(user.getId());
     bean.setLastSelectedStopIds(stopIds);
-    
+
     for (Bookmark bookmark : properties.getBookmarks()) {
       BookmarkBean bookmarkBean = new BookmarkBean();
       bookmarkBean.setId(bookmark.getId());
@@ -131,7 +132,7 @@ public class UserServiceV2Impl implements UserService {
       double lon) {
 
     UserPropertiesV2 properties = getProperties(user);
-    
+
     if (!properties.isRememberPreferencesEnabled())
       return;
 
@@ -148,13 +149,13 @@ public class UserServiceV2Impl implements UserService {
   }
 
   @Override
-  public void addStopBookmark(User user, String name, List<String> stopIds,
+  public int addStopBookmark(User user, String name, List<String> stopIds,
       RouteFilter filter) {
 
     UserPropertiesV2 properties = getProperties(user);
 
     if (!properties.isRememberPreferencesEnabled())
-      return;
+      return -1;
 
     int maxId = 0;
     for (Bookmark bookmark : properties.getBookmarks())
@@ -164,10 +165,34 @@ public class UserServiceV2Impl implements UserService {
     properties.getBookmarks().add(bookmark);
 
     _userDao.saveOrUpdateUser(user);
+
+    return bookmark.getId();
   }
 
   @Override
-  public void deleteStopBookmarks(User user, int index) {
+  public void updateStopBookmark(User user, int id, String name,
+      List<String> stopIds, RouteFilter routeFilter) {
+
+    UserPropertiesV2 properties = getProperties(user);
+    
+    if (!properties.isRememberPreferencesEnabled())
+      return;
+    
+    List<Bookmark> bookmarks = properties.getBookmarks();
+
+    for (int index = 0; index < bookmarks.size(); index++) {
+      Bookmark bookmark = bookmarks.get(index);
+      if (bookmark.getId() == id) {
+        bookmark = new Bookmark(id, name, stopIds, routeFilter);
+        bookmarks.set(index, bookmark);
+        _userDao.saveOrUpdateUser(user);
+        return;
+      }
+    }
+  }
+
+  @Override
+  public void deleteStopBookmarks(User user, int id) {
     UserPropertiesV2 properties = getProperties(user);
 
     // Why don't we have a check for stateless user here? If the user wants to
@@ -177,11 +202,18 @@ public class UserServiceV2Impl implements UserService {
       _log.warn("Attempt to delete bookmark for stateless user.  They shouldn't have bookmarks in the first place.  User="
           + user.getId());
 
-    List<Bookmark> bookmarks = properties.getBookmarks();
-    if( 0 <= index && index < bookmarks.size()) {
-      bookmarks.remove(index);
-      _userDao.saveOrUpdateUser(user);
+    boolean modified = false;
+
+    for (Iterator<Bookmark> it = properties.getBookmarks().iterator(); it.hasNext();) {
+      Bookmark bookmark = it.next();
+      if (bookmark.getId() == id) {
+        it.remove();
+        modified = true;
+      }
     }
+
+    if (modified)
+      _userDao.saveOrUpdateUser(user);
   }
 
   @Override

@@ -18,27 +18,18 @@
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Bookmarks</title>
+<title>Bookmark</title>
+<script type="text/javascript"                                  
+	src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g"><jsp:text></jsp:text></script>
+<script type="text/javascript"
+    src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;gwt=1&amp;key=ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g"><jsp:text></jsp:text></script>
+        
+<script type="text/javascript"
+	src="org.onebusaway.webapp.gwt.BookmarkEdit.nocache.js"><jsp:text></jsp:text></script>
+
 </head>
 <body>
-
-<h2>Bookmarks</h2>
-
-<s:if test="bookmarks.empty">
-<p>You don't have any bookmarks saved.</p>
-</s:if>
-
-<s:iterator value="bookmarks">
-	<p>
-		<h3><s:a href="bookmark.action?id=%{id}"><s:property value="getBookmarkName(top)"/></s:a></h3>
-		<ul>
-			<s:iterator value="stops">
-				<li><s:property value="name"/></li>
-			</s:iterator>
-		</ul>
-		<p><s:a href="bookmark-edit.action?id=%{id}">Edit</s:a> | <s:a href="bookmark-delete.action?id=%{id}">Delete</s:a></p>
-	</p>
-</s:iterator>
-
+<div id="content">
+</div>
 </body>
 </html>

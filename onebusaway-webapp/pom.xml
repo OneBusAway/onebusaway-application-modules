@@ -169,26 +169,23 @@
                 <version>1.3-SNAPSHOT</version>
                 <configuration>
                     <modules>
+                        <module>org.onebusaway.webapp.gwt.AgenciesMap</module>
+                        <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
+                        <module>org.onebusaway.webapp.gwt.LoginWidget</module>
                         <module>org.onebusaway.webapp.gwt.MobileApplication</module>
+                        <module>org.onebusaway.webapp.gwt.NotificationWidgetApplication</module>
+                        <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
+                        <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
+                        <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
+                        <module>org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</module>
                     </modules>
+                    <gwtVersion>${gwtVersion}</gwtVersion>
                     <webappDirectory>${project.build.directory}/gwt</webappDirectory>
                     <hostedWebapp>${project.build.directory}/gwt</hostedWebapp>
                 </configuration>
                 <executions>
                     <execution>
                         <id>compile</id>
-                        <configuration>
-                            <modules>
-                                <module>org.onebusaway.webapp.gwt.MobileApplication</module>
-                                <module>org.onebusaway.webapp.gwt.NotificationWidgetApplication</module>
-                                <module>org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</module>
-                                <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
-                                <module>org.onebusaway.webapp.gwt.AgenciesMap</module>
-                                <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
-                                <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
-                            </modules>
-                            <gwtVersion>${gwtVersion}</gwtVersion>
-                        </configuration>
                         <goals>
                             <goal>compile</goal>
                         </goals>
@@ -202,6 +199,18 @@
                 <configuration>
                     <webResources>
                         <resource>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.AgenciesMap</directory>
+                            <targetPath>where/standard</targetPath>
+                        </resource>
+                        <resource>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.BookmarkEditApplication</directory>
+                            <targetPath>where/standard</targetPath>
+                        </resource>
+                        <resource>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.LoginWidget</directory>
+                            <targetPath></targetPath>
+                        </resource>
+                        <resource>
                             <directory>target/gwt/org.onebusaway.webapp.gwt.MobileApplication</directory>
                             <targetPath>where/mobile</targetPath>
                         </resource>
@@ -210,24 +219,20 @@
                             <targetPath>where/standard</targetPath>
                         </resource>
                         <resource>
-                            <directory>target/gwt/org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</directory>
-                            <targetPath>where/standard</targetPath>
-                        </resource>
-                        <resource>
-                            <directory>target/gwt/org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</directory>
-                            <targetPath>where/standard</targetPath>
-                        </resource>
-                        <resource>
-                            <directory>target/gwt/org.onebusaway.webapp.gwt.AgenciesMap</directory>
-                            <targetPath>where/standard</targetPath>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
+                            <targetPath>explore/onebusaway</targetPath>
                         </resource>
                         <resource>
                             <directory>target/gwt/org.onebusaway.webapp.gwt.SearchLocationLibrary</directory>
                             <targetPath>user</targetPath>
                         </resource>
                         <resource>
-                            <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
-                            <targetPath>explore/onebusaway</targetPath>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</directory>
+                            <targetPath>where/standard</targetPath>
+                        </resource>
+                        <resource>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</directory>
+                            <targetPath>where/standard</targetPath>
                         </resource>
                     </webResources>
                 </configuration>

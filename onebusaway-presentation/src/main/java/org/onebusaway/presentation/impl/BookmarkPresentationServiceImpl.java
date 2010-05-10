@@ -31,6 +31,7 @@ public class BookmarkPresentationServiceImpl implements
 
     for (BookmarkBean bookmark : bookmarks) {
       BookmarkWithStopsBean bean = new BookmarkWithStopsBean();
+      bean.setId(bookmark.getId());
       bean.setName(bookmark.getName());
       bean.setStops(getStopsForStopIds(bookmark.getStopIds()));
       bean.setRouteFilter(bookmark.getRouteFilter());

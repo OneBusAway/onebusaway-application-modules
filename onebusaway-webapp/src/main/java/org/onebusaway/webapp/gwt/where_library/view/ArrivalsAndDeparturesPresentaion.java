@@ -1,13 +1,15 @@
 package org.onebusaway.webapp.gwt.where_library.view;
 
+import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.webapp.gwt.where_library.WhereLibrary;
 import org.onebusaway.webapp.gwt.where_library.WhereMessages;
 import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryCssResource;
 
 import com.google.gwt.core.client.GWT;
 
-public class ArrivalsAndDeparturesMethods {
+public class ArrivalsAndDeparturesPresentaion {
 
   private static final String CANCELLED = "cancelled";
   
@@ -15,11 +17,11 @@ public class ArrivalsAndDeparturesMethods {
 
   private WhereMessages _messages;
   
-  public ArrivalsAndDeparturesMethods() {
+  public ArrivalsAndDeparturesPresentaion() {
     
   }
   
-  public ArrivalsAndDeparturesMethods(boolean useDefaultResources) {
+  public ArrivalsAndDeparturesPresentaion(boolean useDefaultResources) {
     if( useDefaultResources ) {
       _css = WhereLibrary.INSTANCE.getCss();
       _messages = GWT.create(WhereMessages.class);
@@ -38,14 +40,14 @@ public class ArrivalsAndDeparturesMethods {
    * Returns a text label like "4 minutes late" or "departed 2 minutes early"
    * 
    * @param pab
-   * @param now
    * @return
    */
-  public String getArrivalLabel(ArrivalAndDepartureBean pab, long now) {
+  public String getArrivalLabel(ArrivalAndDepartureBean pab) {
 
     if (CANCELLED.equals(pab.getStatus()))
       return "suspended";
 
+    long now = System.currentTimeMillis();
     long predicted = pab.getPredictedArrivalTime();
     long scheduled = pab.getScheduledArrivalTime();
 
@@ -74,11 +76,12 @@ public class ArrivalsAndDeparturesMethods {
     }
   }
 
-  public String getArrivalStatusLabelStyle(ArrivalAndDepartureBean pab, long now) {
+  public String getArrivalStatusLabelStyle(ArrivalAndDepartureBean pab) {
 
     if (CANCELLED.equals(pab.getStatus()))
       return _css.arrivalStatusCancelled();
 
+    long now = System.currentTimeMillis();
     long predicted = pab.getPredictedArrivalTime();
     long scheduled = pab.getScheduledArrivalTime();
 
@@ -113,20 +116,23 @@ public class ArrivalsAndDeparturesMethods {
     }
   }
 
-  public String getMinutesLabel(ArrivalAndDepartureBean pab, long now) {
+  public String getMinutesLabel(ArrivalAndDepartureBean pab) {
+    
+    long now = System.currentTimeMillis();
 
     if (CANCELLED.equals(pab.getStatus()))
       return "-";
 
-    boolean isNow = isArrivalNow(pab, now);
+    boolean isNow = isArrivalNow(pab);
     long t = getBestArrivalTime(pab);
     int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
     return isNow ? "NOW" : Integer.toString(minutes);
   }
 
-  public boolean isArrivalNow(ArrivalAndDepartureBean pab, long now) {
+  public boolean isArrivalNow(ArrivalAndDepartureBean pab) {
     if (CANCELLED.equals(pab.getStatus()))
       return true;
+    long now = System.currentTimeMillis();
     long t = getBestArrivalTime(pab);
     int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
     return Math.abs(minutes) <= 1;
@@ -137,5 +143,10 @@ public class ArrivalsAndDeparturesMethods {
     if (pab.hasPredictedArrivalTime())
       t = pab.getPredictedArrivalTime();
     return t;
+  }
+  
+  public boolean isLongRouteName(RouteBean route) {
+    String name = RoutePresenter.getNameForRoute(route);
+    return RoutePresenter.isRouteNameLong(name);
   }
 }

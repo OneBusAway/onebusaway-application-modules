@@ -134,17 +134,35 @@ public class UserServiceV1Impl implements UserService {
   }
 
   @Override
-  public void addStopBookmark(User user, String name, List<String> stopIds,
+  public int addStopBookmark(User user, String name, List<String> stopIds,
       RouteFilter filter) {
+
+    UserPropertiesV1 properties = getProperties(user);
+
+    if (!properties.isRememberPreferencesEnabled())
+      return -1;
+
+    properties.getBookmarkedStopIds().addAll(stopIds);
+
+    _userDao.saveOrUpdateUser(user);
+
+    return properties.getBookmarkedStopIds().size() - 1;
+  }
+
+  @Override
+  public void updateStopBookmark(User user, int id, String name,
+      List<String> stopIds, RouteFilter routeFilter) {
 
     UserPropertiesV1 properties = getProperties(user);
 
     if (!properties.isRememberPreferencesEnabled())
       return;
 
-    properties.getBookmarkedStopIds().addAll(stopIds);
-
-    _userDao.saveOrUpdateUser(user);
+    List<String> bookmarks = properties.getBookmarkedStopIds();
+    if (0 <= id && id < bookmarks.size()) {
+      bookmarks.set(id, stopIds.get(0));
+      _userDao.saveOrUpdateUser(user);
+    }
   }
 
   @Override
@@ -342,4 +360,5 @@ public class UserServiceV1Impl implements UserService {
   public UserPropertiesMigrationStatus getUserPropertiesMigrationStatus() {
     return _userPropertiesMigration.getUserPropertiesBulkMigrationStatus();
   }
+
 }

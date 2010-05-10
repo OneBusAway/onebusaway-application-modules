@@ -28,7 +28,7 @@ import org.onebusaway.webapp.gwt.common.widgets.DivPanel;
 import org.onebusaway.webapp.gwt.common.widgets.DivWidget;
 import org.onebusaway.webapp.gwt.common.widgets.SpanWidget;
 import org.onebusaway.webapp.gwt.where_library.pages.WhereCommonPage;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesMethods;
+import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Anchor;
@@ -43,12 +43,12 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
 
   private FlexTable _arrivalsAndDeparturesTable = new FlexTable();
 
-  private ArrivalsAndDeparturesMethods _methods;
+  private ArrivalsAndDeparturesPresentaion _methods;
 
   private DivPanel _widget = new DivPanel();
 
   public ArrivalsAndDeparturesWidget(ContextManager contextManager) {
-    _methods = new ArrivalsAndDeparturesMethods(true);
+    _methods = new ArrivalsAndDeparturesPresentaion(true);
     setup();
   }
 
@@ -141,9 +141,8 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
     String time = _timeFormat.format(new Date(bean.computeBestDepartureTime()));
     timeAndStatusPanel.add(new SpanWidget(time, "arrivalsTimeEntry"));
     timeAndStatusPanel.add(new SpanWidget(" - "));
-    String arrivalStatusLabelStyle = _methods.getArrivalStatusLabelStyle(bean,
-        now);
-    timeAndStatusPanel.add(new SpanWidget(_methods.getArrivalLabel(bean, now),
+    String arrivalStatusLabelStyle = _methods.getArrivalStatusLabelStyle(bean);
+    timeAndStatusPanel.add(new SpanWidget(_methods.getArrivalLabel(bean),
         arrivalStatusLabelStyle));
     _arrivalsAndDeparturesTable.setWidget(rowIndex, 1, divPanel);
 
@@ -151,11 +150,10 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
         "arrivalsStatusEntry");
     _arrivalsAndDeparturesTable.getCellFormatter().addStyleName(rowIndex, 2,
         arrivalStatusLabelStyle);
-    if (_methods.isArrivalNow(bean, now))
+    if (_methods.isArrivalNow(bean))
       _arrivalsAndDeparturesTable.getCellFormatter().addStyleName(rowIndex, 2,
           "arrivalStatusNow");
 
-    _arrivalsAndDeparturesTable.setText(1, 2, _methods.getMinutesLabel(bean,
-        now));
+    _arrivalsAndDeparturesTable.setText(1, 2, _methods.getMinutesLabel(bean));
   }
 }

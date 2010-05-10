@@ -10,11 +10,21 @@ public final class BookmarkWithStopsBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private int id;
+
   private String name;
 
   private List<StopBean> stops;
 
   private RouteFilterBean routeFilter;
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
 
   public String getName() {
     return name;

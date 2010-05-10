@@ -8,7 +8,15 @@ public final class RouteFilter implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private final Set<String> routeIds = new HashSet<String>();
+  private final Set<String> routeIds;
+
+  public RouteFilter() {
+    this(new HashSet<String>());
+  }
+
+  public RouteFilter(Set<String> routeIds) {
+    this.routeIds = new HashSet<String>(routeIds);
+  }
 
   public Set<String> getRouteIds() {
     return routeIds;

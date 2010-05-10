@@ -1,6 +1,6 @@
 package org.onebusaway.users.impl.internal;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.ehcache.Cache;
@@ -21,7 +21,7 @@ public class LastSelectedStopServiceImpl implements LastSelectedStopService {
   public List<String> getLastSelectedStopsForUser(Integer userId) {
     Element element = _cache.get(userId);
     if( element == null)
-      return Collections.emptyList();
+      return new ArrayList<String>();
     return (List<String>) element.getValue();
   }
 

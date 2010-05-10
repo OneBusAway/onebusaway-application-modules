@@ -66,7 +66,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     User user = getCurrentUserInternal();
     if (user == null)
       return null;
-    return _userService.getUserAsBean(user);
+    UserBean bean = _userService.getUserAsBean(user);
+    return bean;
   }
 
   @Override
@@ -87,12 +88,22 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
-  public void addStopBookmark(String name, List<String> stopIds,
+  public int addStopBookmark(String name, List<String> stopIds,
       RouteFilter filter) {
     User user = getCurrentUserInternal();
     if (user == null)
+      return -1;
+    return _userService.addStopBookmark(user, name, stopIds, filter);
+  }
+
+  @Override
+  public void updateStopBookmark(int id, String name, List<String> stopIds,
+      RouteFilter routeFilter) {
+
+    User user = getCurrentUserInternal();
+    if (user == null)
       return;
-    _userService.addStopBookmark(user, name, stopIds, filter);
+    _userService.updateStopBookmark(user, id, name, stopIds, routeFilter);
   }
 
   @Override
@@ -187,4 +198,5 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     // Log out the current user
     SecurityContextHolder.getContext().setAuthentication(null);
   }
+
 }

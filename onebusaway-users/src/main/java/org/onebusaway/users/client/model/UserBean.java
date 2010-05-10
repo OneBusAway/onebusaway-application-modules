@@ -2,7 +2,6 @@ package org.onebusaway.users.client.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class UserBean implements Serializable {
@@ -21,7 +20,7 @@ public class UserBean implements Serializable {
 
   private double defaultLocationLon;
 
-  private List<String> lastSelectedStopIds = Collections.emptyList();
+  private List<String> lastSelectedStopIds = new ArrayList<String>();
 
   private List<BookmarkBean> bookmarks = new ArrayList<BookmarkBean>();
 

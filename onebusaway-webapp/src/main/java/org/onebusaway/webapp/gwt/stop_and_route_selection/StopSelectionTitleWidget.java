@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.gwt.where_refineview;
+package org.onebusaway.webapp.gwt.stop_and_route_selection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

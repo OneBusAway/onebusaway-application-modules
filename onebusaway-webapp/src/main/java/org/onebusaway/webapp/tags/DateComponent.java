@@ -59,7 +59,12 @@ public class DateComponent extends ContextBean {
     
     if( obj instanceof Long) 
       obj = new Date((Long) obj);
-
+    else if( obj instanceof String) {
+      String v = (String) obj;
+      if( v.equals("now"))
+        obj = new Date();
+    }
+    
     if (obj instanceof Date) {
 
       try {

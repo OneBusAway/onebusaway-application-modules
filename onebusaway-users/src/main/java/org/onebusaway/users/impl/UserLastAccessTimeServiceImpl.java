@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -15,15 +14,22 @@ import javax.annotation.PreDestroy;
 
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.services.UserDao;
+import org.onebusaway.users.services.UserLastAccessTimeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class UserLastAccessTimeServiceImpl {
+@Component
+public class UserLastAccessTimeServiceImpl implements UserLastAccessTimeService {
+
+  private Logger _log = LoggerFactory.getLogger(UserLastAccessTimeServiceImpl.class);
 
   private Map<Integer, Long> _lastAccessByUserId = new ConcurrentHashMap<Integer, Long>();
 
-  private UserDao _userDao;
+  private ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
 
-  private ScheduledFuture<?> _task;
+  private UserDao _userDao;
 
   private long _evictionThreshold = 15 * 60 * 1000;
 
@@ -45,17 +51,16 @@ public class UserLastAccessTimeServiceImpl {
   public int getNumberOfActiveUsers() {
     return _lastAccessByUserId.size();
   }
-  
+
   @PostConstruct
   public void start() {
-    ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
-    _task = _executor.scheduleAtFixedRate(new EvictionRunner(),
-        _evictionFrequency, _evictionFrequency, TimeUnit.MILLISECONDS);
+    _executor.scheduleAtFixedRate(new EvictionRunner(), _evictionFrequency,
+        _evictionFrequency, TimeUnit.MILLISECONDS);
   }
 
   @PreDestroy
   public void stop() {
-    _task.cancel(true);
+    _executor.shutdownNow();
   }
 
   public void handleAccessForUser(int userId, long accessTime) {
@@ -65,6 +70,8 @@ public class UserLastAccessTimeServiceImpl {
       User user = _userDao.getUserForId(userId);
       user.setLastAccessTime(new Date(accessTime));
       _userDao.saveOrUpdateUser(user);
+      if (_log.isDebugEnabled())
+        _log.debug("user last access set " + userId);
     }
   }
 
@@ -73,13 +80,18 @@ public class UserLastAccessTimeServiceImpl {
     @Override
     public void run() {
       long now = System.currentTimeMillis();
+      int count = 0;
       for (Iterator<Map.Entry<Integer, Long>> it = _lastAccessByUserId.entrySet().iterator(); it.hasNext();) {
         Entry<Integer, Long> entry = it.next();
-        if (entry.getValue() + _evictionThreshold < now)
+        if (entry.getValue() + _evictionThreshold < now) {
           it.remove();
+          count++;
+        }
         if (Thread.interrupted())
           return;
       }
+      if (_log.isDebugEnabled())
+        _log.debug("users evicted: " + count);
     }
   }
 

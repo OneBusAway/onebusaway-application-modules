@@ -21,12 +21,11 @@
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.i18n.I18N" />
 	<inherits name="org.onebusaway.webapp.gwt.StopAndRouteSelection" />
-	<!-- This does not work as you might expect: <inherits name="org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication" /-->
 
-    <source path="where_refineview" />
+    <source path="bookmark_edit" />
 
 	<!-- Specify the app entry point class -->
-	<entry-point class='org.onebusaway.webapp.gwt.where_refineview.WhereStopFinderRefineViewApplication' />
+	<entry-point class='org.onebusaway.webapp.gwt.bookmark_edit.BookmarkEditApplication' />
     
     <!-- Temporary for development -->
     <set-configuration-property name="CssResource.style" value="pretty"/>

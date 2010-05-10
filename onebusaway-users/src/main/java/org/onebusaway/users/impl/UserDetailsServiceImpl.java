@@ -1,10 +1,12 @@
 package org.onebusaway.users.impl;
 
 import org.onebusaway.users.model.IndexedUserDetails;
+import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.IndexedUserDetailsService;
 import org.onebusaway.users.services.StandardAuthoritiesService;
+import org.onebusaway.users.services.UserLastAccessTimeService;
 import org.onebusaway.users.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -21,6 +23,8 @@ public class UserDetailsServiceImpl implements UserDetailsService,
 
   private StandardAuthoritiesService _authoritiesService;
 
+  private UserLastAccessTimeService _userLastAccessTimeService;
+
   @Autowired
   public void setUserService(UserService userService) {
     _userService = userService;
@@ -30,6 +34,11 @@ public class UserDetailsServiceImpl implements UserDetailsService,
   public void setAuthoritiesService(
       StandardAuthoritiesService authoritiesService) {
     _authoritiesService = authoritiesService;
+  }
+  
+  @Autowired
+  public void setUserLastAccessTimeService(UserLastAccessTimeService userLastAccessTimeService) {
+    _userLastAccessTimeService = userLastAccessTimeService;
   }
 
   /****
@@ -63,7 +72,9 @@ public class UserDetailsServiceImpl implements UserDetailsService,
 
     if (userIndex == null)
       throw new UsernameNotFoundException(key.toString());
-
+    
+    setLastAccessTimeForUser(userIndex);
+    
     return new IndexedUserDetailsImpl(_authoritiesService, userIndex);
   }
 
@@ -73,7 +84,15 @@ public class UserDetailsServiceImpl implements UserDetailsService,
 
     UserIndex userIndex = _userService.getOrCreateUserForIndexKey(key,
         credentials, isAnonymous);
+    
+    setLastAccessTimeForUser(userIndex);
+    
     return new IndexedUserDetailsImpl(_authoritiesService, userIndex);
+  }
+
+  private void setLastAccessTimeForUser(UserIndex userIndex) {
+    User user = userIndex.getUser();
+    _userLastAccessTimeService.handleAccessForUser(user.getId(), System.currentTimeMillis());
   }
 
   @Override

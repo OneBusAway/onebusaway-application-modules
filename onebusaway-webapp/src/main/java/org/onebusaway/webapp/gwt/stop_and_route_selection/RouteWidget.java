@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.gwt.where_refineview;
+package org.onebusaway.webapp.gwt.stop_and_route_selection;
 
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.RouteBean;

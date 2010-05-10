@@ -34,6 +34,12 @@
 	color: black;
 }
 
+.arrivalsStopAddress {
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+}
+
 .arrivalsStopAddress a {
 	font-size: 16pt;
 	font-weight: bold;

@@ -20,7 +20,7 @@ import org.onebusaway.webapp.gwt.viewkit.ListViewModel;
 import org.onebusaway.webapp.gwt.viewkit.ListViewRow;
 import org.onebusaway.webapp.gwt.viewkit.NavigationController;
 import org.onebusaway.webapp.gwt.viewkit.ListViewRow.ListViewRowStyle;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesMethods;
+import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -31,7 +31,7 @@ public class StopWithArrivalsAndDeparturesListViewModel extends ListViewModel {
 
   private static final MobileApplicationCssResource _css = MobileApplicationResources.INSTANCE.getCSS();
 
-  private static final ArrivalsAndDeparturesMethods _methods = new ArrivalsAndDeparturesMethods(
+  private static final ArrivalsAndDeparturesPresentaion _methods = new ArrivalsAndDeparturesPresentaion(
       true);
 
   private static final DateTimeFormat _timeFormat = DateTimeFormat.getShortTimeFormat();
@@ -141,10 +141,9 @@ public class StopWithArrivalsAndDeparturesListViewModel extends ListViewModel {
     long bestTime = getBestTime(bean);
 
     String arrivalTime = _timeFormat.format(new Date(bestTime));
-    String arrivalLabel = _methods.getArrivalLabel(bean, currentTime);
-    String minuteLabel = _methods.getMinutesLabel(bean, currentTime);
-    String arrivalLabelStyle = _methods.getArrivalStatusLabelStyle(bean,
-        currentTime);
+    String arrivalLabel = _methods.getArrivalLabel(bean);
+    String minuteLabel = _methods.getMinutesLabel(bean);
+    String arrivalLabelStyle = _methods.getArrivalStatusLabelStyle(bean);
 
     Grid row = new Grid(1, 3);
     row.addStyleName(_css.ArrivalEntry());

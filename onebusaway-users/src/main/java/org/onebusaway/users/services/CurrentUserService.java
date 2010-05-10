@@ -22,12 +22,22 @@ public interface CurrentUserService {
 
   public void setLastSelectedStopIds(List<String> stopIds);
 
-  public void addStopBookmark(String name, List<String> stopIds, RouteFilter filter);
+  /**
+   * @param name
+   * @param stopIds
+   * @param filter
+   * @return the newly created bookmark id
+   */
+  public int addStopBookmark(String name, List<String> stopIds, RouteFilter filter);
+  
+  public void updateStopBookmark(int id, String name, List<String> stopIds,
+      RouteFilter routeFilter);
 
-  public void deleteStopBookmarks(int index);
+  public void deleteStopBookmarks(int id);
 
   public void deleteCurrentUser();
 
   public void enableAdminRole();
+
 
 }

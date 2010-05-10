@@ -21,7 +21,10 @@
   <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.css.url}" />
   <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.standardStopCss.url}" />
   <meta http-equiv="Refresh" content="60" />
-  <title><jsp:include page="arrivals-title-head-snippet.jspx"/></title>
+  <title>
+    <s:if test="bookmarkName != null">Bookmark - <s:property value="bookmarkName"/></s:if>
+    <s:else><jsp:include page="arrivals-title-head-snippet.jspx"/></s:else>
+  </title>
 </head>
 <body>
 
@@ -29,15 +32,16 @@
 <div class="panel">
 
 <!-- The Arrivals and Departures Title Header -->
-<jsp:include page="arrivals-title-snippet.jspx"/>
+<s:if test="bookmarkName != null">
+  <div class="arrivalsStopInfo">
+    <div class="arrivalsStopAddress"><s:property value="bookmarkName"/></div>	
+  </div>
+</s:if>
+<s:else>
+  <jsp:include page="arrivals-title-snippet.jspx"/>
+</s:else>
 
 <p style="text-align: center;"><b>Love OneBusAway?</b>  Show your support and <a href="http://www.seattle20.com/awards/vote.aspx">vote for us</a> as<br/><i>Best Non-Profit Startup</i> in the Seattle 2.0 Awards.  <a href="http://www.seattle20.com/awards/vote.aspx">Vote now!</a></p>
-
-<s:if test="filtered">
-    <div class="arrivalsFilterPanel"><s:url var="removeFilterUrl" includeParams="get">
-        <s:param name="route" value="%{'all'}" />
-    </s:url><s:a href="%{removeFilterUrl}">Show all arrivals</s:a></div>
-</s:if>
 
 <!-- The Arrivals and Departures Table -->
 <jsp:include page="arrivals-table-snippet.jspx"/>

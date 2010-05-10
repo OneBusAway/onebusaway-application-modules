@@ -19,7 +19,9 @@
 <head>
 <title>Login Options</title>
 <script type="text/javascript"
-          src="org.onebusaway.webapp.gwt.LoginWidget.nocache.js"><jsp:text></jsp:text></script>
+		src="http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php" ><jsp:text></jsp:text></script>
+<script type="text/javascript"
+        src="org.onebusaway.webapp.gwt.LoginWidget.nocache.js"><jsp:text></jsp:text></script>
 </head>
 <body>
 
@@ -30,4 +32,4 @@
 </div>
 
 </body>
-</html>
+	</html>

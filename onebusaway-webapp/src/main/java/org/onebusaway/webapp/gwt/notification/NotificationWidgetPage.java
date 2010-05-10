@@ -36,7 +36,7 @@ import org.onebusaway.webapp.gwt.where_library.WhereLibrary;
 import org.onebusaway.webapp.gwt.where_library.pages.WhereCommonPage;
 import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryStandardStopCssResource;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappServiceAsync;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesMethods;
+import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -81,7 +81,7 @@ public class NotificationWidgetPage extends WhereCommonPage {
 
   private Grid _arrivalsAndDeparturesTable = new Grid(2, 3);
 
-  private ArrivalsAndDeparturesMethods _methods;
+  private ArrivalsAndDeparturesPresentaion _methods;
 
   private List<NotificationMethod> _notificationMethods = new ArrayList<NotificationMethod>();
 
@@ -92,7 +92,7 @@ public class NotificationWidgetPage extends WhereCommonPage {
   private ArrivalAndDepartureBean _departureBean = null;
 
   public NotificationWidgetPage(ContextManager contextManager) {
-    _methods = new ArrivalsAndDeparturesMethods(true);
+    _methods = new ArrivalsAndDeparturesPresentaion(true);
     _notificationMethods.add(new SoundNotificationMethod());
     _notificationMethods.add(new PopupNotificationMethod());
   }
@@ -302,9 +302,8 @@ public class NotificationWidgetPage extends WhereCommonPage {
     String time = _timeFormat.format(new Date(bean.computeBestDepartureTime()));
     timeAndStatusPanel.add(new SpanWidget(time, _stopCss.arrivalsTimeEntry()));
     timeAndStatusPanel.add(new SpanWidget(" - "));
-    String arrivalStatusLabelStyle = _methods.getArrivalStatusLabelStyle(bean,
-        now);
-    timeAndStatusPanel.add(new SpanWidget(_methods.getArrivalLabel(bean, now),
+    String arrivalStatusLabelStyle = _methods.getArrivalStatusLabelStyle(bean);
+    timeAndStatusPanel.add(new SpanWidget(_methods.getArrivalLabel(bean),
         arrivalStatusLabelStyle));
     _arrivalsAndDeparturesTable.setWidget(1, 1, divPanel);
 
@@ -312,12 +311,11 @@ public class NotificationWidgetPage extends WhereCommonPage {
         _stopCss.arrivalsStatusEntry());
     _arrivalsAndDeparturesTable.getCellFormatter().addStyleName(1, 2,
         arrivalStatusLabelStyle);
-    if (_methods.isArrivalNow(bean, now))
+    if (_methods.isArrivalNow(bean))
       _arrivalsAndDeparturesTable.getCellFormatter().addStyleName(1, 2,
           _stopCss.arrivalStatusNow());
 
-    _arrivalsAndDeparturesTable.setText(1, 2, _methods.getMinutesLabel(bean,
-        now));
+    _arrivalsAndDeparturesTable.setText(1, 2, _methods.getMinutesLabel(bean));
   }
 
   private void refreshAlarm() {
