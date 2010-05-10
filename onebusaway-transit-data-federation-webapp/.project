@@ -4,6 +4,16 @@
 	<comment></comment>
 	<projects>
 		<project>onebusaway</project>
+		<project>onebusaway-transit-data-federation</project>
+		<project>onebusaway-container</project>
+		<project>onebusaway-core</project>
+		<project>onebusaway-federations</project>
+		<project>onebusaway-gtfs-hibernate-spring</project>
+		<project>onebusaway-geospatial</project>
+		<project>onebusaway-transit-data</project>
+		<project>collections</project>
+		<project>onebusaway-gtfs</project>
+		<project>onebusaway-gtfs-hibernate</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
