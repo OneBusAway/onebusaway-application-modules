@@ -28,7 +28,7 @@
 <div id="container">
 <div class="panel">
 
-<!-- The Arrivals and Departures Title Header -->
+<!-- The Arrivals Title Header -->
 <jsp:include page="arrivals-title-snippet.jspx"/>
 
 <p style="text-align: center;"><b>Love OneBusAway?</b>  Show your support and <a href="http://www.seattle20.com/awards/vote.aspx">vote for us</a> as<br/><i>Best Non-Profit Startup</i> in the Seattle 2.0 Awards.  <a href="http://www.seattle20.com/awards/vote.aspx">Vote now!</a></p>

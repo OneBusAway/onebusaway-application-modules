@@ -76,6 +76,13 @@
 	<p><s:a action="clear-default-search-location">Clear your default search location</s:a></p>
 	</s:if>
 	</div>
+	
+	<s:if test="! anonymous && rememberPreferencesEnabled">
+	  <div class="section">	
+		  <h4>Bookmarks</h4>
+	 	  <p><a href="../where/standard/bookmarks.action">Check out your bookmarks</a></p>
+	 	</div>
+	</s:if>
 
 	<s:if test="admin">
 		<div class="section">	
