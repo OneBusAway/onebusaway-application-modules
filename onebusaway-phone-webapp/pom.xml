@@ -38,7 +38,7 @@
                 <executions>
                     <execution>
                         <id>copy-resources</id>
-                        <phase>process-resources</phase>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
