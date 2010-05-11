@@ -133,6 +133,11 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
+  public String registerPhoneNumber(String phoneNumber) {
+    return "12345678";
+  }
+
+  @Override
   public void enableAdminRole() {
     User user = getCurrentUserInternal();
     if (user == null)
@@ -198,5 +203,4 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     // Log out the current user
     SecurityContextHolder.getContext().setAuthentication(null);
   }
-
 }

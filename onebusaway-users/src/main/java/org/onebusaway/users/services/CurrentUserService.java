@@ -28,16 +28,22 @@ public interface CurrentUserService {
    * @param filter
    * @return the newly created bookmark id
    */
-  public int addStopBookmark(String name, List<String> stopIds, RouteFilter filter);
-  
+  public int addStopBookmark(String name, List<String> stopIds,
+      RouteFilter filter);
+
   public void updateStopBookmark(int id, String name, List<String> stopIds,
       RouteFilter routeFilter);
 
   public void deleteStopBookmarks(int id);
 
+  /**
+   * @param phoneNumber the phone number to register to the current user
+   * @return the access code that must be used validate the phoneNumber
+   */
+  public String registerPhoneNumber(String phoneNumber);
+
   public void deleteCurrentUser();
 
   public void enableAdminRole();
-
 
 }
