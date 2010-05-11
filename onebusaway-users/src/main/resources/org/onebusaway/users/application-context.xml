@@ -45,7 +45,7 @@
         <property name="proxyInterface" value="org.onebusaway.users.services.UserService" />
         <property name="invocationHandler">
             <bean class="org.onebusaway.users.impl.UserServiceVersionedInvocationHandler">
-                <property name="preferredVersion" value="2" />
+                <property name="preferredVersion" value="1" />
                 <property name="userServiceV1">
                     <bean class="org.onebusaway.users.impl.UserServiceV1Impl" />
                 </property>
