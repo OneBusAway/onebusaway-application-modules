@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import edu.washington.cs.rse.collections.graph.DirectedGraph;
 
 @Component

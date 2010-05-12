@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,7 +32,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import edu.washington.cs.rse.text.DateLibrary;
 
 public class StopTimeServiceImplTest {

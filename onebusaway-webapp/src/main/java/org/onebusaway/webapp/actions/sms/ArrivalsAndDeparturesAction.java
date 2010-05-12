@@ -2,6 +2,7 @@ package org.onebusaway.webapp.actions.sms;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -18,8 +19,6 @@ import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TripBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction {
 
