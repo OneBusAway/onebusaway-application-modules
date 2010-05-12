@@ -1,11 +1,11 @@
 package org.onebusaway.geocoder.model;
 
-import org.hibernate.annotations.AccessType;
-
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.AccessType;
 
 @Entity
 @Table(name = "oba_geocoder_results")
@@ -15,7 +15,7 @@ public class GeocoderResultsEntity {
   @Id
   private String location;
 
-  @Column(columnDefinition="BLOB")
+  @Lob
   private GeocoderResults results;
 
   public String getLocation() {
