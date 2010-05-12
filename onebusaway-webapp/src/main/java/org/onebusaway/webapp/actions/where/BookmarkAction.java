@@ -76,7 +76,7 @@ public class BookmarkAction extends AbstractAction implements
       return INPUT;
     
     String name = bookmark.getName();
-    if( name != null & name.length() > 0)
+    if( name != null && name.length() > 0)
       _bookmarkName = name;
     
     _model.setStopIds(bookmark.getStopIds());
