@@ -77,7 +77,7 @@
 	</s:if>
 	</div>
 	
-	<s:if test="! anonymous && rememberPreferencesEnabled">
+	<s:if test="! anonymous and rememberPreferencesEnabled">
 	  <div class="section">	
 		  <h4>Bookmarks</h4>
 	 	  <p><a href="../where/standard/bookmarks.action">Check out your bookmarks</a></p>
