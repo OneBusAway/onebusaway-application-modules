@@ -119,6 +119,10 @@ public class ArrivalsForStopNumberTest extends PhoneTestSupport {
       return true;
     if (value.matches("scheduled in less than one minute"))
       return true;
+    if (value.matches("scheduled one minute ago"))
+      return true;
+    if (value.matches("scheduled \\d+ minutes ago"))
+      return true;
     return false;
   }
 }
