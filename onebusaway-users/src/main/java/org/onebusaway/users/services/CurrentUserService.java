@@ -43,6 +43,8 @@ public interface CurrentUserService {
   public String registerPhoneNumber(String phoneNumber);
 
   public void deleteCurrentUser();
+  
+  public void resetCurrentUser();
 
   public void enableAdminRole();
 

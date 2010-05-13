@@ -16,7 +16,7 @@ public class ResetAction extends AbstractRedirectAction {
 
   @Override
   public String execute() {
-    _currentUserService.deleteCurrentUser();
+    _currentUserService.resetCurrentUser();
     return SUCCESS;
   }
 }

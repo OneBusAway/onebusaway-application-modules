@@ -11,7 +11,9 @@ import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.properties.RouteFilter;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.users.services.StandardAuthoritiesService;
+import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserService;
+import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.Authentication;
 import org.springframework.security.context.SecurityContextHolder;
@@ -24,6 +26,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   private StandardAuthoritiesService _authoritiesService;
 
+  private UserIndexRegistrationService _userIndexRegistrationService;
+
   @Autowired
   public void setUserService(UserService service) {
     _userService = service;
@@ -33,6 +37,12 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   public void setAuthoritiesService(
       StandardAuthoritiesService authoritiesService) {
     _authoritiesService = authoritiesService;
+  }
+
+  @Autowired
+  public void setUserIndexRegistrationService(
+      UserIndexRegistrationService userIndexRegistrationService) {
+    _userIndexRegistrationService = userIndexRegistrationService;
   }
 
   @Override
@@ -134,7 +144,14 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public String registerPhoneNumber(String phoneNumber) {
-    return "12345678";
+    User user = getCurrentUserInternal();
+    int code = (int) (Math.random() * 8999 + 1000);
+    String codeAsString = Integer.toString(code);
+    phoneNumber = PhoneNumberLibrary.normalizePhoneNumber(phoneNumber);
+    UserIndexKey key = new UserIndexKey(UserIndexTypes.PHONE_NUMBER, phoneNumber);
+    _userIndexRegistrationService.setRegistrationForUserIndexKey(key,user.getId(),
+        codeAsString);
+    return codeAsString;
   }
 
   @Override
@@ -153,6 +170,16 @@ public class CurrentUserServiceImpl implements CurrentUserService {
       return;
 
     _userService.deleteUser(user);
+
+    refreshCurrentUser();
+  }
+
+  public void resetCurrentUser() {
+    User user = getCurrentUserInternal();
+    if (user == null)
+      return;
+
+    _userService.resetUser(user);
 
     refreshCurrentUser();
   }

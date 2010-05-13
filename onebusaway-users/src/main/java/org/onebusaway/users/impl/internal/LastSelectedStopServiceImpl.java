@@ -7,8 +7,12 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 import org.onebusaway.users.services.internal.LastSelectedStopService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LastSelectedStopServiceImpl implements LastSelectedStopService {
+  
+  private static Logger _log = LoggerFactory.getLogger(LastSelectedStopServiceImpl.class);
 
   private Cache _cache;
 
@@ -20,14 +24,23 @@ public class LastSelectedStopServiceImpl implements LastSelectedStopService {
   @Override
   public List<String> getLastSelectedStopsForUser(Integer userId) {
     Element element = _cache.get(userId);
-    if( element == null)
+    if( element == null) {
+      _log.info("getting: userId=" + userId + " stopIds=none");
       return new ArrayList<String>();
+    }
+    _log.info("getting: userId=" + userId + " stopIds=" + element.getValue());
     return (List<String>) element.getValue();
   }
 
   @Override
   public void setLastSelectedStopsForUser(Integer userId, List<String> stopIds) {
     Element element = new Element(userId, stopIds);
+    _log.info("putting: userId=" + userId + " stopIds=" + stopIds);
     _cache.put(element);
+  }
+
+  @Override
+  public void clearLastSelectedStopForUser(Integer userId) {
+    _cache.remove(userId);
   }
 }

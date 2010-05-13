@@ -21,17 +21,25 @@ import org.onebusaway.users.impl.authentication.twitter.TwitterUser;
 import org.onebusaway.users.services.validation.SecretSource;
 import org.xml.sax.SAXException;
 
-public class OAuthAuthenticationPlugin implements AuthenticationPlugin {
+public class TwitterAuthenticationPlugin implements AuthenticationPlugin {
 
-  private static final String CONSUMER = OAuthAuthenticationPlugin.class.getName()
+  private static final String CONSUMER = TwitterAuthenticationPlugin.class.getName()
       + ".consumer";
 
-  private static final String PROVIDER = OAuthAuthenticationPlugin.class.getName()
+  private static final String PROVIDER = TwitterAuthenticationPlugin.class.getName()
       + ".provider";
 
-  private String _consumerKey = "6NW3xfaLuqH9SQNmK1Erlg";
+  private String _consumerKey = "";
 
-  private String _consumerSecret = "aZajXvYWswF8DvZV7znFAgFN2zRLVEpupQwDBJsxTM";
+  private String _consumerSecret = "";
+  
+  public void setConsumerKey(String consumerKey) {
+    _consumerKey = consumerKey;
+  }
+  
+  public void setConsumerSecret(String consumerSecret) {
+    _consumerSecret = consumerSecret;
+  }
 
   @Override
   public void init(SecretSource secrets) {

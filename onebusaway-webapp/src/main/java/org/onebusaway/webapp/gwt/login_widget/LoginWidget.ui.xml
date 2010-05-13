@@ -27,24 +27,29 @@
                         </a>
                     </td>
                     <td>
-                        <a ui:field="_twitterLink">
-                            <g:Image resource='{res.providerTwitter}' />
+                        <a ui:field="_facebookLink">
+                            <g:Image resource='{res.providerFacebook}' />
                         </a>
                     </td>
                 </tr>
                 <tr>
+                    <td>
+                        <a ui:field="_twitterLink">
+                            <g:Image resource='{res.providerTwitter}' />
+                        </a>
+                    </td>
                     <td>
                         <a ui:field="_yahooLink">
                             <g:Image resource='{res.providerYahoo}' />
                         </a>
                     </td>
+                </tr>
+                <tr>
                     <td>
                         <oba:AnchorPanel ui:field="_aolLink" href="#">
                             <g:Image resource='{res.providerAOL}' />
                         </oba:AnchorPanel>
                     </td>
-                </tr>
-                <tr>
                     <td>
                         <oba:AnchorPanel ui:field="_openIdLink" href="#">
                             <g:Image resource='{res.providerOpenID}' />

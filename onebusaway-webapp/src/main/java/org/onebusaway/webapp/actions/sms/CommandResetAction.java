@@ -29,7 +29,7 @@ public class CommandResetAction extends AbstractTextmarksAction {
 
     } else {
       _defaultSearchLocationService.clearDefaultLocationForCurrentUser();
-      _currentUserService.deleteCurrentUser();
+      _currentUserService.resetCurrentUser();
       clearNextActions();
     }
 

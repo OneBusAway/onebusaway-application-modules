@@ -192,6 +192,13 @@ public class UserServiceV2Impl implements UserService {
   }
 
   @Override
+  public void resetUser(User user) {
+    user.setProperties(new UserPropertiesV2());
+    _userDao.saveOrUpdateUser(user);
+    _lastSelectedStopService.clearLastSelectedStopForUser(user.getId());
+  }
+
+  @Override
   public void deleteStopBookmarks(User user, int id) {
     UserPropertiesV2 properties = getProperties(user);
 
@@ -383,5 +390,6 @@ public class UserServiceV2Impl implements UserService {
   private RouteFilterBean getRouteFilterAsBean(RouteFilter routeFilter) {
     return new RouteFilterBean(routeFilter.getRouteIds());
   }
+
 
 }

@@ -7,6 +7,9 @@ public interface LoginWidgetResources extends ClientBundle {
 
   @Source("Provider-AOL.png")
   ImageResource providerAOL();
+  
+  @Source("Provider-Facebook.png")
+  ImageResource providerFacebook();
 
   @Source("Provider-Google.png")
   ImageResource providerGoogle();

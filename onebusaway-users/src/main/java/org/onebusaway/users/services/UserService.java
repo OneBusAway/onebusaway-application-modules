@@ -45,6 +45,8 @@ public interface UserService {
 
   public void deleteUser(User user);
 
+  public void resetUser(User user);
+
   public boolean isAnonymous(User user);
 
   public boolean isAdministrator(User user);

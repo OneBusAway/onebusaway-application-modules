@@ -23,6 +23,7 @@
     <import resource="classpath:org/onebusaway/geocoder/application-context.xml" />
     <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
 
+    <!-- 
     <bean id="propertyOverrides" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
         <property name="properties">
             <props>
@@ -30,6 +31,7 @@
             </props>
         </property>
     </bean>
+    -->
 
     <context:component-scan base-package="org.onebusaway.webapp.impl" />
 
@@ -81,13 +83,15 @@
     </bean>
 
     <bean id="openid_plugin" class="org.onebusaway.users.impl.authentication.OpenIdAuthenticationPlugin" />
-    <bean id="oauth_twitter_plugin" class="org.onebusaway.users.impl.authentication.OAuthAuthenticationPlugin" />
+    <bean id="twitter_plugin" class="org.onebusaway.users.impl.authentication.TwitterAuthenticationPlugin" />
+    <bean id="facebook_plugin" class="org.onebusaway.users.impl.authentication.FacebookAuthenticationPlugin"/>
 
     <bean id="loginManager" class="org.onebusaway.users.impl.authentication.LoginManager">
         <property name="plugins">
             <map>
                 <entry key="openid" value-ref="openid_plugin" />
-                <entry key="oauth_twitter" value-ref="oauth_twitter_plugin" />
+                <entry key="twitter" value-ref="twitter_plugin" />
+                <entry key="facebook" value-ref="facebook_plugin" />
             </map>
         </property>
     </bean>

@@ -2,6 +2,7 @@ package org.onebusaway.presentation.impl.users;
 
 import java.util.Map;
 
+import org.onebusaway.users.impl.PhoneNumberLibrary;
 import org.onebusaway.users.impl.authentication.DefaultUserAuthenticationToken;
 import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.model.UserIndex;
@@ -43,7 +44,7 @@ public class PhoneNumberLoginInterceptor extends AbstractInterceptor {
     Map<String, Object> params = context.getParameters();
     String phoneNumber = getPhoneNumber(params);
 
-    phoneNumber = normalizePhoneNumber(phoneNumber);
+    phoneNumber = PhoneNumberLibrary.normalizePhoneNumber(phoneNumber);
 
     if (phoneNumber != null && phoneNumber.length() > 0) {
 
@@ -83,16 +84,6 @@ public class PhoneNumberLoginInterceptor extends AbstractInterceptor {
     }
 
     return null;
-  }
-
-  private String normalizePhoneNumber(String phoneNumber) {
-    if (phoneNumber == null)
-      return phoneNumber;
-    if (phoneNumber.startsWith("+"))
-      phoneNumber = phoneNumber.substring(1);
-    if (phoneNumber.length() == 10)
-      phoneNumber = "1" + phoneNumber;
-    return phoneNumber;
   }
 
   private boolean isCurrentUserLoggedInWithKey(UserIndexKey key) {

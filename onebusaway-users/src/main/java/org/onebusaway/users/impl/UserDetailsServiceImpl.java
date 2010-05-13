@@ -99,6 +99,6 @@ public class UserDetailsServiceImpl implements UserDetailsService,
   public void resetUserForIndexKey(UserIndexKey key) {
     UserIndex index = _userService.getUserIndexForId(key);
     if( index != null)
-      _userService.deleteUser(index.getUser());
+      _userService.resetUser(index.getUser());
   }
 }

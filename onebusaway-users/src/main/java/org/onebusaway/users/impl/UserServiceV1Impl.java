@@ -69,7 +69,8 @@ public class UserServiceV1Impl implements UserService {
     bean.setDefaultLocationLat(properties.getDefaultLocationLat());
     bean.setDefaultLocationLon(properties.getDefaultLocationLon());
 
-    bean.setLastSelectedStopIds(Arrays.asList(properties.getLastSelectedStopId()));
+    if( properties.getLastSelectedStopId() != null)
+      bean.setLastSelectedStopIds(Arrays.asList(properties.getLastSelectedStopId()));
 
     int bookmarkIndex = 0;
     for (String stopId : properties.getBookmarkedStopIds()) {
@@ -198,6 +199,12 @@ public class UserServiceV1Impl implements UserService {
       properties.setLastSelectedStopId(stopId);
       _userDao.saveOrUpdateUser(user);
     }
+  }
+  
+  @Override
+  public void resetUser(User user) {
+    user.setProperties(new UserPropertiesV1());
+    _userDao.saveOrUpdateUser(user);
   }
 
   @Override
@@ -360,5 +367,4 @@ public class UserServiceV1Impl implements UserService {
   public UserPropertiesMigrationStatus getUserPropertiesMigrationStatus() {
     return _userPropertiesMigration.getUserPropertiesBulkMigrationStatus();
   }
-
 }

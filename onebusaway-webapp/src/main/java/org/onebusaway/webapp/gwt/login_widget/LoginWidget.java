@@ -27,6 +27,9 @@ public class LoginWidget extends Composite {
 
   @UiField
   AnchorElement _googleLink;
+  
+  @UiField
+  AnchorElement _facebookLink;
 
   @UiField
   AnchorElement _twitterLink;
@@ -52,7 +55,9 @@ public class LoginWidget extends Composite {
 
     setOpenIdHref(_googleLink, "https://www.google.com/accounts/o8/id");
     setOpenIdHref(_yahooLink, "http://yahoo.com/");
-    _twitterLink.setHref(_baseUrl + "/twitter_oauth?target=" + _target);
+    _facebookLink.setHref(_baseUrl + "/facebook?target=" + _target);
+    _twitterLink.setHref(_baseUrl + "/twitter?target=" + _target);
+    
   }
 
   @UiHandler("_aolLink")

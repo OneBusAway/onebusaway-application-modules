@@ -45,7 +45,7 @@
         <property name="proxyInterface" value="org.onebusaway.users.services.UserService" />
         <property name="invocationHandler">
             <bean class="org.onebusaway.users.impl.UserServiceVersionedInvocationHandler">
-                <property name="preferredVersion" value="1" />
+                <property name="preferredVersion" value="2" />
                 <property name="userServiceV1">
                     <bean class="org.onebusaway.users.impl.UserServiceV1Impl" />
                 </property>
@@ -56,7 +56,7 @@
         </property>
     </bean>
 
-    <bean id="lastSelectedStopServiceCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+    <bean id="lastSelectedStopServiceCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.impl.internal.LastSelectedStopServiceImpl.cache" />
         <property name="maxElementsInMemory" value="1000" />
@@ -69,6 +69,21 @@
 
     <bean id="lastSelectedStopServiceImpl" class="org.onebusaway.users.impl.internal.LastSelectedStopServiceImpl">
         <property name="cache" ref="lastSelectedStopServiceCache"/>
+    </bean>
+    
+    <bean id="userIndexRegistrationServiceCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.users.impl.internal.LastSelectedStopServiceImpl.cache" />
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="900" />
+        <property name="overflowToDisk" value="true" />
+        <property name="diskPersistent" value="false" />
+    </bean>
+
+    <bean id="userIndexRegistrationServiceImpl" class="org.onebusaway.users.impl.internal.UserIndexRegistrationServiceImpl">
+        <property name="cache" ref="userIndexRegistrationServiceCache"/>
     </bean>
 
 </beans>
