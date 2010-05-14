@@ -7,6 +7,7 @@ import net.sf.ehcache.CacheException;
 import net.sf.ehcache.config.Configuration;
 import net.sf.ehcache.config.ConfigurationFactory;
 import net.sf.ehcache.config.DiskStoreConfiguration;
+import net.sf.ehcache.config.TerracottaConfigConfiguration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,12 +26,18 @@ public class EhCacheConfigurationFactoryBean implements FactoryBean,
 
   private String diskStorePath;
 
+  private String terracottaUrl;
+
   public void setConfigLocation(Resource configLocation) {
     this.configLocation = configLocation;
   }
 
   public void setDiskStorePath(File diskStorePath) {
     this.diskStorePath = diskStorePath.getPath();
+  }
+  
+  public void setTerracottaUrl(String terracottaUrl) {
+    this.terracottaUrl = terracottaUrl;
   }
 
   public void afterPropertiesSet() throws IOException, CacheException {
@@ -42,6 +49,12 @@ public class EhCacheConfigurationFactoryBean implements FactoryBean,
       dsConfig.setPath(this.diskStorePath);
       logger.info("diskStorePath (translated)=" + dsConfig.getPath());
       configuration.addDiskStore(dsConfig);
+    }
+    if( this.terracottaUrl != null) {
+      logger.info("terracottaUrl=" + this.terracottaUrl);
+      TerracottaConfigConfiguration tcConfig = new TerracottaConfigConfiguration();
+      tcConfig.setUrl(this.terracottaUrl);
+      configuration.addTerracottaConfig(tcConfig);
     }
   }
 
