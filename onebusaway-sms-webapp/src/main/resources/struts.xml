@@ -15,22 +15,24 @@
 
     <constant name="struts.convention.action.suffix" value="Action" />
     <constant name="struts.convention.action.mapAllMatches" value="true" />
-    <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.webapp.actions" />
+    <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.sms.actions" />
     <constant name="struts.convention.action.checkImplementsAction" value="false" />
 
-    <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />
+    <constant name="struts.convention.default.parent.package" value="onebusaway-sms-webapp-default" />
 
-    <package name="onebusaway-webapp-default" extends="struts-default">
+    <package name="onebusaway-sms-webapp-default" extends="struts-default">
 
         <interceptors>
-            <interceptor name="current-user" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />
-            <interceptor-stack name="onebusaway-webapp-stack">
+            <interceptor name="phone-number-login" class="org.onebusaway.presentation.impl.users.PhoneNumberLoginInterceptor" />
+            <interceptor name="textmarks-session" class="org.onebusaway.sms.impl.TextmarksSessionInterceptor" />
+            <interceptor-stack name="onebusaway-sms-webapp-stack">
                 <interceptor-ref name="defaultStack" />
-                <interceptor-ref name="current-user" />
+                <interceptor-ref name="phone-number-login" />
+                <interceptor-ref name="textmarks-session" />
             </interceptor-stack>
         </interceptors>
         
-        <default-interceptor-ref name="onebusaway-webapp-stack"/>
+        <default-interceptor-ref name="onebusaway-sms-webapp-stack"/>
 
         <global-results>
             <result name="ServiceException">/WEB-INF/content/exception.jspx</result>

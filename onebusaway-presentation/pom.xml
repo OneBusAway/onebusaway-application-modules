@@ -11,10 +11,6 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <properties>
-        <struts-version>2.1.8.1</struts-version>
-    </properties>
-
     <dependencies>
 
         <dependency>
@@ -47,7 +43,11 @@
             <artifactId>struts2-core</artifactId>
             <version>${struts-version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.struts</groupId>
+            <artifactId>struts2-spring-plugin</artifactId>
+            <version>${struts-version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.struts</groupId>
             <artifactId>struts2-convention-plugin</artifactId>

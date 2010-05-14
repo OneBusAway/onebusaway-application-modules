@@ -7,9 +7,7 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <spring-security.version>2.0.4</spring-security.version>
-        <gwtVersion>2.0.0</gwtVersion>
-        <struts-version>2.1.8.1</struts-version>
+        <gwt-version>2.0.0</gwt-version>
     </properties>
 
     <parent>
@@ -23,50 +21,14 @@
         <!-- OneBusAway Dependencies -->
         <dependency>
             <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-users</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-transit-data</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-presentation</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-geocoder</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-
-        <!--
-            <dependency> <groupId>org.traditionalcake</groupId> <artifactId>every-last-login</artifactId>
-            <version>0.0.1-SNAPSHOT</version> </dependency>
-        -->
-
-        <!--  Struts 2 -->
-        <dependency>
-            <groupId>org.apache.struts</groupId>
-            <artifactId>struts2-core</artifactId>
-            <version>${struts-version}</version>
-        </dependency>
+        
+        <!-- Struts2 Dependencies -->
         <dependency>
             <groupId>org.apache.struts</groupId>
             <artifactId>struts2-sitemesh-plugin</artifactId>
-            <version>${struts-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.struts</groupId>
-            <artifactId>struts2-spring-plugin</artifactId>
-            <version>${struts-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.struts</groupId>
-            <artifactId>struts2-convention-plugin</artifactId>
             <version>${struts-version}</version>
         </dependency>
 
@@ -91,13 +53,13 @@
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-servlet</artifactId>
-            <version>${gwtVersion}</version>
+            <version>${gwt-version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
-            <version>${gwtVersion}</version>
+            <version>${gwt-version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -200,7 +162,7 @@
                         <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
                         <module>org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</module>
                     </modules>
-                    <gwtVersion>${gwtVersion}</gwtVersion>
+                    <gwtVersion>${gwt-version}</gwtVersion>
                     <webappDirectory>${project.build.directory}/gwt</webappDirectory>
                     <hostedWebapp>${project.build.directory}/gwt</hostedWebapp>
                 </configuration>
