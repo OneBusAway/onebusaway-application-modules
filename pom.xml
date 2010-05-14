@@ -10,6 +10,11 @@
     <artifactId>onebusaway-application-modules</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
+    
+    <!-- Common Software Dependency Versions -->
+    <properties>
+        <struts-version>2.1.8.1</struts-version>
+    </properties>
 
     <repositories>
         <repository>
