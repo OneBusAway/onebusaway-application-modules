@@ -7,8 +7,8 @@
 
     <ui:style>
         .panel {
-          border: 1px solid black;
-          padding: 5px;
+          margin-top: 1em;
+          margin-bottom: 1em;
           width: 350px;
         }
         .table td {

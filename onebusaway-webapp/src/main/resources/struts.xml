@@ -37,6 +37,8 @@
                 <interceptor-ref name="current-user" />
             </interceptor-stack>
         </interceptors>
+        
+        <default-interceptor-ref name="onebusaway-webapp-stack"/>
 
         <global-results>
             <result name="ServiceException">/WEB-INF/content/exception.jspx</result>

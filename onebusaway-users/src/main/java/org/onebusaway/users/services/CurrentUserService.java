@@ -7,7 +7,11 @@ import org.onebusaway.users.model.properties.RouteFilter;
 
 public interface CurrentUserService {
 
-  public void handleLogin(String type, String id);
+  public void handleRegistration(String type, String id, String credentials);
+
+  public void handleLogin(String type, String id, String credentials);
+
+  public void handleAddAccount(String type, String id, String credentials);
 
   public boolean hasCurrentUser();
 
@@ -38,12 +42,19 @@ public interface CurrentUserService {
 
   /**
    * @param phoneNumber the phone number to register to the current user
-   * @return the access code that must be used validate the phoneNumber
+   * @return the registration code that must be used validate the phoneNumber
    */
   public String registerPhoneNumber(String phoneNumber);
 
+  /**
+   * 
+   * @param registrationCode
+   * @return true if the registration was successful, otherwise false
+   */
+  public boolean completePhoneNumberRegistration(String registrationCode);
+
   public void deleteCurrentUser();
-  
+
   public void resetCurrentUser();
 
   public void enableAdminRole();

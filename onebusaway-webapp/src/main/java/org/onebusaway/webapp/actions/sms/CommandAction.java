@@ -8,6 +8,7 @@ import org.apache.struts2.convention.annotation.Results;
     @Result(type = "chain", name = "command-bookmark", location = "command-bookmark"),
     @Result(type = "chain", name = "command-bookmarks", location = "command-bookmarks"),
     @Result(type = "chain", name = "command-setSearchLocation", location = "command-set-search-location"),
+    @Result(type = "chain", name = "command-register", location = "command-register"),
     @Result(type = "chain", name = "command-reset", location = "command-reset")})
 public class CommandAction extends AbstractTextmarksAction {
 

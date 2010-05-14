@@ -9,20 +9,20 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserProperties;
 import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.properties.UserPropertiesV2;
-import org.onebusaway.users.services.UserService;
+import org.onebusaway.users.services.UserPropertiesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-@ManagedResource("org.onebusaway.users.impl:name=UserServiceVersionedInvocationHandler")
-public class UserServiceVersionedInvocationHandler implements InvocationHandler {
+@ManagedResource("org.onebusaway.users.impl:name=UserPropertiesServiceVersionedInvocationHandler")
+public class UserPropertiesServiceVersionedInvocationHandler implements InvocationHandler {
 
-  private static Logger _log = LoggerFactory.getLogger(UserServiceVersionedInvocationHandler.class);
+  private static Logger _log = LoggerFactory.getLogger(UserPropertiesServiceVersionedInvocationHandler.class);
 
-  private UserService _userServiceV1;
+  private UserPropertiesService _userServiceV1;
 
-  private UserService _userServiceV2;
+  private UserPropertiesService _userServiceV2;
 
   private int _preferredVersion = -1;
 
@@ -30,11 +30,11 @@ public class UserServiceVersionedInvocationHandler implements InvocationHandler 
 
   private AtomicInteger _v2References = new AtomicInteger();
 
-  public void setUserServiceV1(UserService userServiceV1) {
+  public void setUserPropertiesServiceV1(UserPropertiesService userServiceV1) {
     _userServiceV1 = userServiceV1;
   }
 
-  public void setUserServiceV2(UserService userServiceV2) {
+  public void setUserPropertiesServiceV2(UserPropertiesService userServiceV2) {
     _userServiceV2 = userServiceV2;
   }
 
@@ -55,11 +55,11 @@ public class UserServiceVersionedInvocationHandler implements InvocationHandler 
   @Override
   public Object invoke(Object proxy, Method method, Object[] args)
       throws Throwable {
-    UserService service = getServiceForUserArgs(args);
+    UserPropertiesService service = getServiceForUserArgs(args);
     return method.invoke(service, args);
   }
 
-  private UserService getServiceForUserArgs(Object[] args) {
+  private UserPropertiesService getServiceForUserArgs(Object[] args) {
 
     if (_preferredVersion != -1)
       return getServiceForVersion(_preferredVersion);
@@ -93,7 +93,7 @@ public class UserServiceVersionedInvocationHandler implements InvocationHandler 
     return 0;
   }
 
-  private UserService getServiceForVersion(int maxVersion) {
+  private UserPropertiesService getServiceForVersion(int maxVersion) {
     switch (maxVersion) {
       case 1:
       default:

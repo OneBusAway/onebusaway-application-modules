@@ -3,6 +3,7 @@ package org.onebusaway.users.impl.authentication;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -32,11 +33,11 @@ public class TwitterAuthenticationPlugin implements AuthenticationPlugin {
   private String _consumerKey = "";
 
   private String _consumerSecret = "";
-  
+
   public void setConsumerKey(String consumerKey) {
     _consumerKey = consumerKey;
   }
-  
+
   public void setConsumerSecret(String consumerSecret) {
     _consumerSecret = consumerSecret;
   }
@@ -126,12 +127,13 @@ public class TwitterAuthenticationPlugin implements AuthenticationPlugin {
         digester.push(user);
         digester.addBeanPropertySetter("user/id");
         digester.addBeanPropertySetter("user/name");
-        digester.addBeanPropertySetter("user/screen_name","screenName");
+        digester.addBeanPropertySetter("user/screen_name", "screenName");
         digester.parse(request.getInputStream());
 
         if (user.getId() != null) {
           AuthenticationResult result = new AuthenticationResult(
-              EResultCode.SUCCESS, "oauth_twitter", user.getId());
+              EResultCode.SUCCESS, "twitter", user.getId(),
+              UUID.randomUUID().toString());
           LoginManager.handleResult(httpReq, httpResp, result);
           return;
         }
@@ -145,7 +147,7 @@ public class TwitterAuthenticationPlugin implements AuthenticationPlugin {
     }
 
     AuthenticationResult result = new AuthenticationResult(
-        EResultCode.AUTHENTICATION_FAILED, "oauth_twitter");
+        EResultCode.AUTHENTICATION_FAILED, "twitter");
     LoginManager.handleResult(httpReq, httpResp, result);
   }
 

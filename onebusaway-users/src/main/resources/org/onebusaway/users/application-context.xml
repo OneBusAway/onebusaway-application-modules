@@ -41,16 +41,16 @@
 
     <context:component-scan base-package="org.onebusaway.users.impl" />
 
-    <bean id="userService" class="org.onebusaway.container.spring.ProxyFactoryBean" primary="true">
-        <property name="proxyInterface" value="org.onebusaway.users.services.UserService" />
+    <bean id="userPropertiesService" class="org.onebusaway.container.spring.ProxyFactoryBean" primary="true">
+        <property name="proxyInterface" value="org.onebusaway.users.services.UserPropertiesService" />
         <property name="invocationHandler">
-            <bean class="org.onebusaway.users.impl.UserServiceVersionedInvocationHandler">
+            <bean class="org.onebusaway.users.impl.UserPropertiesServiceVersionedInvocationHandler">
                 <property name="preferredVersion" value="2" />
-                <property name="userServiceV1">
-                    <bean class="org.onebusaway.users.impl.UserServiceV1Impl" />
+                <property name="userPropertiesServiceV1">
+                    <bean class="org.onebusaway.users.impl.UserPropertiesServiceV1Impl" />
                 </property>
-                <property name="userServiceV2">
-                    <bean class="org.onebusaway.users.impl.UserServiceV2Impl" />
+                <property name="userPropertiesServiceV2">
+                    <bean class="org.onebusaway.users.impl.UserPropertiesServiceV2Impl" />
                 </property>
             </bean>
         </property>

@@ -2,8 +2,8 @@ package org.onebusaway.webapp.actions.admin;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.UserPropertiesMigrationStatus;
+import org.onebusaway.users.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;

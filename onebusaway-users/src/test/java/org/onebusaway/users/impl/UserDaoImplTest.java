@@ -154,18 +154,17 @@ public class UserDaoImplTest {
     user.setCreationTime(new Date());
     user.setProperties(new UserPropertiesV2());
     user.getRoles().add(userRole);
-    _dao.saveOrUpdateUser(user);
-
-    assertEquals(1, _dao.getNumberOfUsers());
 
     UserIndexKey key = new UserIndexKey("phone", "2065551234");
 
     UserIndex index = new UserIndex();
     index.setId(key);
     index.setUser(user);
-    user.addUserIndex(index);
-    
-    _dao.saveOrUpdateUserIndex(index);
+    user.getUserIndices().add(index);
+
+    _dao.saveOrUpdateUser(user);
+
+    assertEquals(1, _dao.getNumberOfUsers());
 
     UserIndex index2 = _dao.getUserIndexForId(key);
     assertEquals(key, index2.getId());
@@ -176,5 +175,38 @@ public class UserDaoImplTest {
     assertEquals(0, _dao.getNumberOfUsers());
     index2 = _dao.getUserIndexForId(key);
     assertNull(index2);
+  }
+
+  @Test
+  public void testTransitionUserIndex() {
+
+    User userA = new User();
+    userA.setCreationTime(new Date());
+    userA.setProperties(new UserPropertiesV2());
+
+    UserIndex index = new UserIndex();
+    index.setId(new UserIndexKey("test", "A"));
+    index.setUser(userA);
+    userA.getUserIndices().add(index);
+
+    _dao.saveOrUpdateUser(userA);
+
+    User userB = new User();
+    userB.setCreationTime(new Date());
+    userB.setProperties(new UserPropertiesV2());
+
+    _dao.saveOrUpdateUser(userB);
+
+    assertEquals(1, _dao.getUserForId(userA.getId()).getUserIndices().size());
+    assertEquals(0, _dao.getUserForId(userB.getId()).getUserIndices().size());
+
+    index.setUser(userB);
+    userA.getUserIndices().remove(index);
+    userB.getUserIndices().add(index);
+
+    _dao.saveOrUpdateUsers(userA, userB);
+
+    assertEquals(0, _dao.getUserForId(userA.getId()).getUserIndices().size());
+    assertEquals(1, _dao.getUserForId(userB.getId()).getUserIndices().size());
   }
 }

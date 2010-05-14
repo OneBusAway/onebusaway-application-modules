@@ -18,7 +18,7 @@ import com.opensymphony.xwork2.ActionSupport;
 
 @Results( {@Result(type = "redirectAction", params = {
     "actionName", "/user/index"})})
-public class LoginHandlerAction extends ActionSupport {
+public class RegistrationHandlerAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
@@ -30,7 +30,7 @@ public class LoginHandlerAction extends ActionSupport {
   public void setCurrentUserService(CurrentUserService currentUserService) {
     _currentUserService = currentUserService;
   }
-  
+
   @Autowired
   public void setRememberMeServices(TokenBasedRememberMeServices rememberMeServices) {
     _rememberMeServices = rememberMeServices;
@@ -38,11 +38,10 @@ public class LoginHandlerAction extends ActionSupport {
 
   @Override
   public String execute() {
-    
     HttpServletRequest request = ServletActionContext.getRequest();
-    HttpServletResponse response = ServletActionContext.getResponse();
-    
+
     AuthenticationResult result = LoginManager.getResult(request);
+    HttpServletResponse response = ServletActionContext.getResponse();
 
     if (result == null)
       return INPUT;
@@ -50,9 +49,9 @@ public class LoginHandlerAction extends ActionSupport {
     switch (result.getCode()) {
       case SUCCESS:
         
-        _currentUserService.handleLogin(result.getProvider(),
+        _currentUserService.handleRegistration(result.getProvider(),
             result.getIdentity(), result.getCredentials());
-        
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if( authentication != null)
           _rememberMeServices.onLoginSuccess(request, response, authentication);

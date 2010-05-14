@@ -16,6 +16,8 @@ public interface UserDao {
   public User getUserForId(int id);
 
   public void saveOrUpdateUser(User user);
+  
+  public void saveOrUpdateUsers(User... users);
 
   public void deleteUser(User user);
 
@@ -28,7 +30,4 @@ public interface UserDao {
   public int getNumberOfUsersWithRole(UserRole role);
 
   public UserIndex getUserIndexForId(UserIndexKey key);
-
-  public void saveOrUpdateUserIndex(UserIndex userIndex);
-
 }

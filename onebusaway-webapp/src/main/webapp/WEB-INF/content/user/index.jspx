@@ -35,6 +35,9 @@
 	  <h4>You are currently logged in</h4>
 	  <p><s:a namespace="/" action="logout">Click here to logout</s:a></p>
 	</s:if>
+	<s:else>
+	  <p>You can <s:a namespace="/" action="login">login</s:a> to an existing account</p>
+	</s:else>
 
     <div class="section">
 	<h4>Privacy Settings</h4>
@@ -77,12 +80,28 @@
 	</s:if>
 	</div>
 	
-	<s:if test="! anonymous and rememberPreferencesEnabled">
-	  <div class="section">	
+	<s:if test="! anonymous">
+	  <s:if test="rememberPreferencesEnabled">
+	    <div class="section">	
 		  <h4>Bookmarks</h4>
 	 	  <p><a href="../where/standard/bookmarks.action">Check out your bookmarks</a></p>
 	 	</div>
+	  </s:if>
 	</s:if>
+	<s:else>
+	  <div class="section">	
+        <h4>Register Your Account</h4>
+        <s:url var="registrationUrl" namespace="/" action="login">
+          <s:param name="mode">registration</s:param>
+        </s:url>
+        <p>You can <s:a href="%{registrationUrl}">register your account</s:a>, or <s:a namespace="/" action="login">login to an existing account</s:a>.  Why get a registered account?  You can:</p>
+        <ul>
+          <li>Manage your stop bookmarks on the web and then access them on your phone</li>
+          <li>Save and access your preferences across multiple computers</li>
+          <li>More features to come</li>
+        </ul>
+      </div>
+	</s:else>
 
 	<s:if test="admin">
 		<div class="section">	
@@ -92,8 +111,17 @@
 	</s:if>
 	
 	<div class="section">
-		<h4>More to come...</h4>
-		<p>Including bookmarks, route preferences, notification settings, and more.</p>
+		<h4>Details</h4>
+		<ul>
+		  <li><span class="label">User #:</span> <s:property value="userId"/></li>
+		  <li><span class="label">User Indices:</span>
+		    <ul>
+		      <s:iterator value="indices">
+		        <li><span class="label"><s:property value="type"/>:</span> <s:property value="value"/></li>
+		      </s:iterator>
+		    </ul>
+		  </li>
+		</ul>
 	</div>
 	
 </div>

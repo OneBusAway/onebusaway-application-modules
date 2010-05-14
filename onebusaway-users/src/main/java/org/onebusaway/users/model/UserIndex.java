@@ -20,6 +20,14 @@ public class UserIndex implements Serializable {
   @Id
   private UserIndexKey id;
 
+  /**
+   * Credentials encapsulate some secret specific to a UserIndex. For most of
+   * the indices, it's just a randomly generated string that is generated when a
+   * UserIndex is created so that it can be used in RememberMe cookie generation
+   * to keep you from being able to generate a RememberMe cookie using known
+   * information. However, for a username + password situation, it could also
+   * be the password of some form. 
+   */
   private String credentials;
 
   @ManyToOne(fetch = FetchType.EAGER)

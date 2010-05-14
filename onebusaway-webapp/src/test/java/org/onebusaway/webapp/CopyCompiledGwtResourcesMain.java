@@ -66,8 +66,11 @@ public class CopyCompiledGwtResourcesMain {
     File[] files = sourceDirectory.listFiles();
     if (files == null)
       return;
-    for (File file : files)
-      copyFile(file, new File(targetDirectory, file.getName()));
+    for (File file : files) {
+      File targetFile = new File(targetDirectory, file.getName());
+      if( ! targetFile.exists() || file.lastModified() > targetFile.lastModified())
+      copyFile(file, targetFile);
+    }
   }
 
   private static void copyFile(File srcFile, File dstFile) throws IOException {

@@ -61,6 +61,7 @@ public class SimplePhoneClient {
 
     DefaultAgiClient client = new DefaultAgiClient(host, port, script);
     client.setCallerId(callerId);
+    client.setNetworkScript("index.agi");
     client.run();
   }
 

@@ -13,12 +13,15 @@ public class Commands {
 
   public static final String BOOKMARKS = "bookmarks";
   
+  public static final String REGISTER = "register";
+  
   public static final String RESET = "reset";
 
   static {
     addCommand(HELP);
     addCommand(SET_SEARCH_LOCATION);
     addCommand(BOOKMARKS);
+    addCommand(REGISTER);
     addCommand(RESET);
   }
 

@@ -1,6 +1,7 @@
 package org.onebusaway.users.impl;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -27,6 +28,10 @@ class UserDaoImpl implements UserDao {
     _template = new HibernateTemplate(sessionFactory);
   }
 
+  public HibernateTemplate getHibernateTemplate() {
+    return _template;
+  }
+  
   @Override
   public int getNumberOfUsers() {
     List<?> values = _template.findByNamedQuery("numberOfUsers");
@@ -37,6 +42,7 @@ class UserDaoImpl implements UserDao {
   }
 
   @SuppressWarnings("unchecked")
+  @Override
   public List<Integer> getAllUsersIds(final int firstResult,
       final int maxResults) {
     return (List<Integer>) _template.execute(new HibernateCallback() {
@@ -56,14 +62,25 @@ class UserDaoImpl implements UserDao {
     return (User) _template.get(User.class, id);
   }
 
+  @Override
   public void saveOrUpdateUser(User user) {
     _template.saveOrUpdate(user);
   }
+  
+  @Override
+  public void saveOrUpdateUsers(User... users) {
+    List<User> list = new ArrayList<User>(users.length);
+    for( User user : users)
+      list.add(user);
+    _template.saveOrUpdateAll(list);
+  }
 
+  @Override
   public void deleteUser(User user) {
     _template.delete(user);
   }
 
+  @Override
   public int getNumberOfUserRoles() {
     List<?> values = _template.findByNamedQuery("numberOfUserRoles");
     if (values == null || values.size() == 0)
@@ -82,19 +99,18 @@ class UserDaoImpl implements UserDao {
     return v.intValue();
   }
 
+  @Override
   public UserRole getUserRoleForName(String name) {
     return (UserRole) _template.get(UserRole.class, name);
   }
 
+  @Override
   public void saveOrUpdateUserRole(UserRole userRole) {
     _template.saveOrUpdate(userRole);
   }
 
+  @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return (UserIndex) _template.get(UserIndex.class, key);
-  }
-
-  public void saveOrUpdateUserIndex(UserIndex userIndex) {
-    _template.save(userIndex);
   }
 }

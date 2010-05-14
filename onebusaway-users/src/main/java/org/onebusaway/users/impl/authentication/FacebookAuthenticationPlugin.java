@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,11 +26,11 @@ public class FacebookAuthenticationPlugin implements AuthenticationPlugin {
   private String _clientId = "";
 
   private String _clientSecret = "";
-  
+
   public void setClientId(String clientId) {
     _clientId = clientId;
   }
-  
+
   public void setClientSecret(String clientSecret) {
     _clientSecret = clientSecret;
   }
@@ -70,8 +71,8 @@ public class FacebookAuthenticationPlugin implements AuthenticationPlugin {
     String code = httpReq.getParameter("code");
     URL url = new URL(
         "https://graph.facebook.com/oauth/access_token?client_id=" + _clientId
-            + "&redirect_uri=" + returnToUrl + "&client_secret=" + _clientSecret
-            + "&code=" + code);
+            + "&redirect_uri=" + returnToUrl + "&client_secret="
+            + _clientSecret + "&code=" + code);
 
     HttpURLConnection request = (HttpURLConnection) url.openConnection();
 
@@ -120,7 +121,8 @@ public class FacebookAuthenticationPlugin implements AuthenticationPlugin {
       String userId = json.getString("id");
 
       AuthenticationResult result = new AuthenticationResult(
-          EResultCode.SUCCESS, UserIndexTypes.FACEBOOK, userId);
+          EResultCode.SUCCESS, UserIndexTypes.FACEBOOK, userId,
+          UUID.randomUUID().toString());
       LoginManager.handleResult(httpReq, httpResp, result);
       return;
 

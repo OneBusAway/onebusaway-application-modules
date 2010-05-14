@@ -3,6 +3,7 @@ package org.onebusaway.users.impl.authentication;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -126,7 +127,8 @@ public class OpenIdAuthenticationPlugin implements AuthenticationPlugin {
       Identifier verified = verification.getVerifiedId();
       if (verified != null) {
         AuthenticationResult result = new AuthenticationResult(
-            EResultCode.SUCCESS, "openid", verified.getIdentifier());
+            EResultCode.SUCCESS, "openid", verified.getIdentifier(),
+            UUID.randomUUID().toString());
         LoginManager.handleResult(httpReq, httpResp, result);
         return;
       }

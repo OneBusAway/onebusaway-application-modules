@@ -51,7 +51,7 @@ public class User extends IdentityBean<Integer> {
   @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
   private Set<UserRole> roles = new HashSet<UserRole>();
 
-  @OneToMany(cascade = {CascadeType.REMOVE}, mappedBy = "user", fetch = FetchType.EAGER)
+  @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "user", fetch = FetchType.EAGER)
   private Set<UserIndex> userIndices = new HashSet<UserIndex>();
 
   public Integer getId() {
@@ -108,14 +108,6 @@ public class User extends IdentityBean<Integer> {
 
   public void setUserIndices(Set<UserIndex> userIndices) {
     this.userIndices = userIndices;
-  }
-
-  public void addUserIndex(UserIndex index) {
-    if (index.getUser() != null && !index.getUser().equals(this))
-      throw new IllegalArgumentException(
-          "attempt to add already assigned UserIndex to new User");
-    index.setUser(this);
-    userIndices.add(index);
   }
 
   @Override

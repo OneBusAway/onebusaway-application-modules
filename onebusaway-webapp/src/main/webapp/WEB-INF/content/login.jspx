@@ -17,19 +17,78 @@
 <html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Login Options</title>
-<script type="text/javascript"
-		src="http://static.ak.connect.facebook.com/js/api_lib/v0.4/FeatureLoader.js.php" ><jsp:text></jsp:text></script>
+
+<s:if test="mode == 'registration'">
+<title>Register Your Account</title>
+</s:if>
+<s:elseif test="mode == 'add-account'">
+<title>Add an Account</title>
+</s:elseif>
+<s:else>
+<title>Login</title>
+</s:else>
+
 <script type="text/javascript"
         src="org.onebusaway.webapp.gwt.LoginWidget.nocache.js"><jsp:text></jsp:text></script>
 </head>
 <body>
 
+<s:if test="mode == 'registration'">
+<h2>Register Your Account</h2>
+</s:if>
+<s:elseif test="mode == 'add-account'">
+<h2>Add an Account</h2>
+</s:elseif>
+<s:else>
 <h2>Login</h2>
+</s:else>
 
+<s:if test="user.anonymous">
+
+<p>Login using your account from one of the providers listed below:</p>
+
+<p>
 <div id="login_widget">
   <!-- Content will be supplied by the GWT LoginWidget -->
 </div>
+</p>
+
+<h3>"Where do I type my username and password?"</h3>
+
+<p>If you're like us, you probably have accounts for websites all over the web, including some of the popular
+sites listed above.  Instead of making you remember one more username and password for our site, we want to let
+you login with an account you already have.</p>
+
+<p>Using technologies like <a href="http://openid.net/">OpenID</a> and <a href="http://oauth.net/">OAuth</a>,
+you can safely and securely login and verify your identity to our site and others on the web using your existing
+account.</p>
+
+<h3>"How do I login?"</h3>
+
+<p>Click one of the login providers shown above, and you'll be taken to that site, where you can login with your
+existing username and password.  Then you'll be redirected back here.</p>
+
+<h3>"What about my privacy?"</h3>
+
+<p>We don't share any information about you or your usage of OneBusAway with any of the login providers listed above.
+We also don't request any information other than your authenticated user id from any of the listed login providers.
+Your privacy is important to us and we'll do our best to protect your private information.</p>
+
+</s:if>
+<s:else>
+
+<s:if test="mode == 'registration'">
+<p>Your account is already registered.  Check out your <a href="user/index.action">User Settings</a> for more information.</p>
+</s:if>
+<s:elseif test="mode == 'add-account'">
+
+</s:elseif>
+<s:else>
+<p>Your are already logged in.  Click to <a href="logout.action">logout</a>.</p>
+</s:else>
+
+</s:else>
+
 
 </body>
-	</html>
+</html>
