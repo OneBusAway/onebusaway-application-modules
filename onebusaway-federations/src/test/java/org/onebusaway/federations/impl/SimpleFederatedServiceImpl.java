@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.federations.CoordinateBoundsTestBean;
+import org.onebusaway.federations.EntityIdTestBean;
 import org.onebusaway.federations.SimpleFederatedService;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 
@@ -62,6 +63,12 @@ public class SimpleFederatedServiceImpl implements SimpleFederatedService {
 
   @Override
   public String getValueForValueAndId(String value, String entityId) {
+    return _value;
+  }
+  
+
+  @Override
+  public String getValueForValueBean(EntityIdTestBean value) {
     return _value;
   }
 

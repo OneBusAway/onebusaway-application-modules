@@ -27,6 +27,9 @@ public interface SimpleFederatedService extends FederatedService {
   @FederatedByEntityIdMethod(argument=1)
   public String getValueForValueAndId(String value, String entityId);
   
+  @FederatedByEntityIdMethod(propertyExpression="id")
+  public String getValueForValueBean(EntityIdTestBean value);
+  
   @FederatedByEntityIdsMethod
   public String getValueForIds(Set<String> entityId);
   

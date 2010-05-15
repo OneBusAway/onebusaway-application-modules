@@ -31,6 +31,7 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TripBean;
 import org.onebusaway.transit_data.model.TripDetailsBean;
+import org.onebusaway.transit_data.model.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.TripStatusBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.TripsForBoundsQueryBean;
@@ -233,26 +234,44 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public TripDetailsBean getTripDetails(String tripId) throws ServiceException {
-    AgencyAndId id = convertAgencyAndId(tripId);
-    TripBean trip = _tripBeanService.getTripForId(id);
-    if (trip == null)
-      return null;
-    TripStopTimesBean stopTimes = _tripStopTimesBeanService.getStopTimesForTrip(id);
-    return new TripDetailsBean(trip, stopTimes);
-  }
+  public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query)
+      throws ServiceException {
 
-  @Override
-  public TripDetailsBean getSpecificTripDetails(String tripId, Date serviceDate,
-      Date time) throws ServiceException {
+    String tripId = query.getTripId();
+    Date serviceDate = query.getServiceDate();
+    Date time = query.getTime();
+
     AgencyAndId id = convertAgencyAndId(tripId);
-    TripBean trip = _tripBeanService.getTripForId(id);
-    if (trip == null)
+
+    TripBean trip = null;
+    TripStopTimesBean stopTimes = null;
+    TripStatusBean status = null;
+
+    boolean missing = false;
+    
+    if (query.isIncludeTripBean()) {
+      trip = _tripBeanService.getTripForId(id);
+      if( trip == null)
+        missing = true;
+    }
+
+    if (query.isIncludeTripSchedule()) {
+      stopTimes = _tripStopTimesBeanService.getStopTimesForTrip(id);
+      if( stopTimes == null)
+        missing = true;
+    }
+
+    if (query.isIncludeTripStatus()) {
+      status = _tripStatusBeanService.getTripStatusForTripId(id,
+          serviceDate.getTime(), time.getTime());
+      if( status == null)
+        missing = true;
+    }
+
+    if( missing )
       return null;
-    TripStopTimesBean stopTimes = _tripStopTimesBeanService.getStopTimesForTrip(id);
-    TripStatusBean status = _tripStatusBeanService.getTripStatusForTripId(id,
-        serviceDate.getTime(), time.getTime());
-    return new TripDetailsBean(trip, stopTimes, status);
+    
+    return new TripDetailsBean(tripId, trip, stopTimes, status);
   }
 
   @Override
@@ -309,5 +328,4 @@ class TransitDataServiceImpl implements TransitDataService {
       converted.add(convertAgencyAndId(id));
     return converted;
   }
-
 }

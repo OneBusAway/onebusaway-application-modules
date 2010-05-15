@@ -24,6 +24,7 @@ import org.apache.struts2.convention.annotation.Actions;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.TripDetailsBean;
+import org.onebusaway.transit_data.model.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.TripStatusBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
@@ -85,7 +86,11 @@ public class TripAction extends ActionSupport {
     if (_id == null)
       return INPUT;
 
-    _tripDetails = _service.getSpecificTripDetails(_id, _serviceDate, _time);
+    TripDetailsQueryBean query = new TripDetailsQueryBean();
+    query.setTripId(_id);
+    query.setServiceDate(_serviceDate);
+    query.setTime(_time);
+    _tripDetails = _service.getSpecificTripDetails(query);
 
     if (_tripDetails == null)
       throw new NoSuchTripServiceException(_id);

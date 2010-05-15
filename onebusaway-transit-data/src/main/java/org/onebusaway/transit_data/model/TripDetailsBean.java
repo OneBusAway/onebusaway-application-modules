@@ -18,15 +18,15 @@ public final class TripDetailsBean implements Serializable {
 
   }
 
-  public TripDetailsBean(TripBean trip, TripStopTimesBean schedule) {
-    this.tripId = trip.getId();
+  public TripDetailsBean(String tripId, TripBean trip, TripStopTimesBean schedule) {
+    this.tripId = tripId;
     this.trip = trip;
     this.schedule = schedule;
   }
 
-  public TripDetailsBean(TripBean trip, TripStopTimesBean schedule,
+  public TripDetailsBean(String tripId, TripBean trip, TripStopTimesBean schedule,
       TripStatusBean status) {
-    this(trip, schedule);
+    this(tripId, trip, schedule);
     this.status = status;
   }
 

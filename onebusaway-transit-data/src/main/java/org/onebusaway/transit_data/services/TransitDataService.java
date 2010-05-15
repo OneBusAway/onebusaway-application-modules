@@ -28,6 +28,7 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TripBean;
 import org.onebusaway.transit_data.model.TripDetailsBean;
+import org.onebusaway.transit_data.model.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
@@ -48,12 +49,8 @@ public interface TransitDataService extends FederatedService {
   @FederatedByEntityIdMethod
   public TripBean getTrip(String tripId) throws ServiceException;
 
-  @FederatedByEntityIdMethod
-  public TripDetailsBean getTripDetails(String tripId) throws ServiceException;
-
-  @FederatedByEntityIdMethod
-  public TripDetailsBean getSpecificTripDetails(String tripId, Date serviceDate,
-      Date time) throws ServiceException;
+  @FederatedByEntityIdMethod(propertyExpression="tripId")
+  public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query) throws ServiceException;
 
   @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
   public ListBean<TripDetailsBean> getTripsForBounds(

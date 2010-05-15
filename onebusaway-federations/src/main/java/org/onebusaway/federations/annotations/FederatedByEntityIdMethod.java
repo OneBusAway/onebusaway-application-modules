@@ -9,4 +9,5 @@ import java.lang.annotation.Target;
 @Target(value = ElementType.METHOD)
 public @interface FederatedByEntityIdMethod {
   public int argument() default 0;
+  public String propertyExpression() default "";
 }
