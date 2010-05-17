@@ -175,10 +175,10 @@ public class UserServiceImpl implements UserService {
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return _userDao.getUserIndexForId(key);
   }
-  
 
   @Override
-  public UserIndex addUserIndexToUser(User user, UserIndexKey key, String credentials) {
+  public UserIndex addUserIndexToUser(User user, UserIndexKey key,
+      String credentials) {
     UserIndex index = new UserIndex();
     index.setId(key);
     index.setCredentials(credentials);
@@ -186,6 +186,19 @@ public class UserServiceImpl implements UserService {
     user.getUserIndices().add(index);
     _userDao.saveOrUpdateUser(user);
     return index;
+  }
+
+  @Override
+  public void removeUserIndexForUser(User user, UserIndexKey key) {
+    for (UserIndex index : user.getUserIndices()) {
+      if (index.getId().equals(key)) {
+        _userDao.deleteUserIndex(index);
+        index.setUser(null);
+        user.getUserIndices().remove(index);
+        _userDao.saveOrUpdateUser(user);
+        return;
+      }
+    }
   }
 
   @Override
@@ -230,6 +243,9 @@ public class UserServiceImpl implements UserService {
       String registrationCode) {
 
     UserRegistration registration = _userIndexRegistrationService.getRegistrationForUserIndexKey(userIndex.getId());
+    if (registration == null)
+      return null;
+
     String expectedCode = registration.getRegistrationCode();
     if (!expectedCode.equals(registrationCode))
       return null;
@@ -239,7 +255,13 @@ public class UserServiceImpl implements UserService {
       return null;
 
     User phoneUser = userIndex.getUser();
-    
+
+    /**
+     * If the user index is already registered, our work is done
+     */
+    if (phoneUser.equals(targetUser))
+      return userIndex;
+
     /**
      * If the phone user only has one index (the phoneNumber index), we merge
      * the phone user with the registration target user. Otherwise, we keep the

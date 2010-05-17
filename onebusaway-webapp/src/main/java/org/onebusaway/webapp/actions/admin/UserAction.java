@@ -1,11 +1,8 @@
 package org.onebusaway.webapp.actions.admin;
 
 import org.onebusaway.users.client.model.UserBean;
-import org.onebusaway.users.model.IndexedUserDetails;
-import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
-import org.onebusaway.users.services.IndexedUserDetailsService;
 import org.onebusaway.users.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,8 +12,6 @@ public class UserAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
-  private IndexedUserDetailsService _userIndexService;
-
   private String _type;
 
   private String _id;
@@ -24,11 +19,6 @@ public class UserAction extends ActionSupport {
   private UserService _userService;
 
   private UserBean _user;
-
-  @Autowired
-  public void setIndexedUserDetailsService(IndexedUserDetailsService service) {
-    _userIndexService = service;
-  }
 
   @Autowired
   public void setUserService(UserService userService) {
@@ -51,14 +41,12 @@ public class UserAction extends ActionSupport {
   public String execute() {
 
     UserIndexKey key = new UserIndexKey(_type, _id);
-    IndexedUserDetails details = _userIndexService.getUserForIndexKey(key);
-    if (details == null)
+    UserIndex userIndex = _userService.getUserIndexForId(key);
+    if (userIndex == null)
       return INPUT;
-    
-    UserIndex index = details.getUserIndex();
-    User user = index.getUser();
-    _user = _userService.getUserAsBean(user);
-    
+
+    _user = _userService.getUserAsBean(userIndex.getUser());
+
     return SUCCESS;
   }
 }

@@ -9,7 +9,9 @@ import org.apache.struts2.convention.annotation.Results;
     @Result(type = "chain", name = "command-bookmarks", location = "command-bookmarks"),
     @Result(type = "chain", name = "command-setSearchLocation", location = "command-set-search-location"),
     @Result(type = "chain", name = "command-register", location = "command-register"),
-    @Result(type = "chain", name = "command-reset", location = "command-reset")})
+    @Result(type = "chain", name = "command-reset", location = "command-reset"),
+    @Result(type = "chain", name = "command-debug", location = "command-debug")
+    })
 public class CommandAction extends AbstractTextmarksAction {
 
   private static final long serialVersionUID = 1L;

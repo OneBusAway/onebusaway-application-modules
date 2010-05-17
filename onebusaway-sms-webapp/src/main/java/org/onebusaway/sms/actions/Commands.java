@@ -16,6 +16,8 @@ public class Commands {
   public static final String REGISTER = "register";
   
   public static final String RESET = "reset";
+  
+  public static final String DEBUG = "debug";
 
   static {
     addCommand(HELP);
@@ -23,6 +25,7 @@ public class Commands {
     addCommand(BOOKMARKS);
     addCommand(REGISTER);
     addCommand(RESET);
+    addCommand(DEBUG);
   }
 
   private static void addCommand(String command) {

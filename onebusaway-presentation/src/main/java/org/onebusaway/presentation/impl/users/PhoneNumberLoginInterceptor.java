@@ -5,7 +5,6 @@ import java.util.Map;
 import org.onebusaway.users.impl.PhoneNumberLibrary;
 import org.onebusaway.users.impl.authentication.DefaultUserAuthenticationToken;
 import org.onebusaway.users.model.IndexedUserDetails;
-import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.IndexedUserDetailsService;
 import org.onebusaway.users.services.UserIndexTypes;
@@ -98,7 +97,7 @@ public class PhoneNumberLoginInterceptor extends AbstractInterceptor {
       return false;
 
     IndexedUserDetails details = (IndexedUserDetails) principal;
-    UserIndex index = details.getUserIndex();
-    return index.getId().equals(key);
+    UserIndexKey indexKey = details.getUserIndexKey();
+    return indexKey.equals(key);
   }
 }

@@ -90,9 +90,4 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
     this.defaultLocationLon = Double.NaN;
     this.defaultLocationName = null;
   }
-
-  @Override
-  public UserProperties deepCopy() {
-    return new UserPropertiesV2(this);
-  }
 }

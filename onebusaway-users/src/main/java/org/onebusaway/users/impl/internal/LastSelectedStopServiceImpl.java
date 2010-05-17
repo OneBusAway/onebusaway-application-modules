@@ -25,17 +25,20 @@ public class LastSelectedStopServiceImpl implements LastSelectedStopService {
   public List<String> getLastSelectedStopsForUser(Integer userId) {
     Element element = _cache.get(userId);
     if( element == null) {
-      _log.info("getting: userId=" + userId + " stopIds=none");
+      if( _log.isDebugEnabled() )
+        _log.debug("getting: userId=" + userId + " stopIds=none");
       return new ArrayList<String>();
     }
-    _log.info("getting: userId=" + userId + " stopIds=" + element.getValue());
+    if( _log.isDebugEnabled() )
+      _log.debug("getting: userId=" + userId + " stopIds=" + element.getValue());
     return (List<String>) element.getValue();
   }
 
   @Override
   public void setLastSelectedStopsForUser(Integer userId, List<String> stopIds) {
     Element element = new Element(userId, stopIds);
-    _log.info("putting: userId=" + userId + " stopIds=" + stopIds);
+    if( _log.isDebugEnabled() )
+      _log.debug("putting: userId=" + userId + " stopIds=" + stopIds);
     _cache.put(element);
   }
 

@@ -1,5 +1,7 @@
 package org.onebusaway.users.model;
 
-public interface UserProperties {
-  public UserProperties deepCopy();
+import java.io.Serializable;
+
+public interface UserProperties extends Serializable {
+
 }

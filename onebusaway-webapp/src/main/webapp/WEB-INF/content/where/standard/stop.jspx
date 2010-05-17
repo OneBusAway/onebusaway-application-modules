@@ -69,7 +69,7 @@
 		<s:param name="stopId" value="id"/>
 		<s:param name="routeId" value="routes"/>
 	</s:url>
-	<s:a href="refineview.html?%{stopAndRouteIdsAsUrlParams}">See multiple stops or filter routes</s:a> <s:if test="! user.anonymous">| <s:a href="%{bookmarksUrl}">Add a bookmark</s:a> </s:if>| <s:a href="index.html">Search for another stop</s:a>
+	<s:a href="refineview.html?%{stopAndRouteIdsAsUrlParams}">See multiple stops or filter routes</s:a> <s:if test="! anonymousUser">| <s:a href="%{bookmarksUrl}">Add a bookmark</s:a> </s:if>| <s:a href="index.html">Search for another stop</s:a>
 </div>
 
 <jsp:include page="/WEB-INF/content/snippets/agencies-attribution.jspx">

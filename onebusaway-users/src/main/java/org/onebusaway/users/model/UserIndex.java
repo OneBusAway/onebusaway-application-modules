@@ -1,6 +1,8 @@
 package org.onebusaway.users.model;
 
 import org.hibernate.annotations.AccessType;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import java.io.Serializable;
 
@@ -13,6 +15,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "oba_user_indices")
 @AccessType("field")
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class UserIndex implements Serializable {
 
   private static final long serialVersionUID = 1L;

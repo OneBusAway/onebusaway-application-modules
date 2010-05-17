@@ -3,19 +3,26 @@ package org.onebusaway.users.services;
 import java.util.List;
 
 import org.onebusaway.users.client.model.UserBean;
+import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.properties.RouteFilter;
 
 public interface CurrentUserService {
+
+  public boolean hasCurrentUser();
+
+  public UserBean getCurrentUser();
+
+  /**
+   * @return true if the current user is anonymous or if there is no current
+   *         user
+   */
+  public boolean isCurrentUserAnonymous();
 
   public void handleRegistration(String type, String id, String credentials);
 
   public void handleLogin(String type, String id, String credentials);
 
   public void handleAddAccount(String type, String id, String credentials);
-
-  public boolean hasCurrentUser();
-
-  public UserBean getCurrentUser();
 
   public void setRememberUserPreferencesEnabled(
       boolean rememberUserPreferencesEnabled);
@@ -52,6 +59,8 @@ public interface CurrentUserService {
    * @return true if the registration was successful, otherwise false
    */
   public boolean completePhoneNumberRegistration(String registrationCode);
+  
+  public void removeUserIndex(UserIndexKey key);
 
   public void deleteCurrentUser();
 

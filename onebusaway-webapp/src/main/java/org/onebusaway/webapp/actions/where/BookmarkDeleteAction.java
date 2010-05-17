@@ -1,5 +1,7 @@
 package org.onebusaway.webapp.actions.where;
 
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Actions;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.webapp.actions.AbstractAction;
@@ -16,6 +18,10 @@ public class BookmarkDeleteAction extends AbstractAction {
   }
 
   @Override
+  @Actions( {
+    @Action(value = "/where/standard/bookmark-delete"),
+    @Action(value = "/where/iphone/bookmark-delete"),
+    @Action(value = "/where/text/bookmark-delete")})
   public String execute() {
     _currentUserService.deleteStopBookmarks(_id);
     return SUCCESS;

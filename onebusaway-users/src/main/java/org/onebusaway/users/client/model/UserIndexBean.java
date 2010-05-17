@@ -2,7 +2,7 @@ package org.onebusaway.users.client.model;
 
 import java.io.Serializable;
 
-public final class UserIndexBean implements Serializable {
+public final class UserIndexBean implements Serializable, Comparable<UserIndexBean> {
 
   private static final long serialVersionUID = 1L;
 
@@ -24,5 +24,13 @@ public final class UserIndexBean implements Serializable {
 
   public void setValue(String value) {
     this.value = value;
+  }
+
+  @Override
+  public int compareTo(UserIndexBean o) {
+    int c = type.compareTo(o.type);
+    if( c == 0 )
+      c = value.compareTo(o.value);
+    return c;
   }
 }

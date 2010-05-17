@@ -15,6 +15,8 @@ public interface UserService {
       String credentials, boolean isAnonymous);
   
   public UserIndex addUserIndexToUser(User user, UserIndexKey key, String credentials);
+  
+  public void removeUserIndexForUser(User user, UserIndexKey key);
 
   public UserBean getUserAsBean(User user);
 
@@ -38,4 +40,6 @@ public interface UserService {
 
   public UserIndex completePhoneNumberRegistration(UserIndex userIndex,
       String registrationCode);
+
+  
 }

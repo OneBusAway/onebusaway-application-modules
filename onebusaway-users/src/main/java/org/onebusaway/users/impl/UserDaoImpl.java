@@ -113,4 +113,9 @@ class UserDaoImpl implements UserDao {
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return (UserIndex) _template.get(UserIndex.class, key);
   }
+
+  @Override
+  public void deleteUserIndex(UserIndex index) {
+    _template.delete(index);
+  }
 }

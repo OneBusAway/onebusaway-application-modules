@@ -43,7 +43,7 @@
 <h2>Login</h2>
 </s:else>
 
-<s:if test="user.anonymous">
+<s:if test="anonymousUser">
 
 <p>Login using your account from one of the providers listed below:</p>
 

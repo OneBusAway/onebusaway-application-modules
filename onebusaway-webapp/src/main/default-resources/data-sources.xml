@@ -40,15 +40,6 @@
         <property name="postalCode" value="98105"/>
     </bean>
 
-    <!-- SMS abbreviations are used to shorten names when displaying text in SMS results -->
-    <bean id="smsAbbreviationsFactory" class="org.onebusaway.presentation.impl.text.XmlTextModificationsFactory">
-        <property name="resource" value="classpath:sms-destination-abbreviations.xml" />
-    </bean>
-
-    <bean id="smsAbbreviations" factory-bean="smsAbbreviationsFactory" factory-method="create">
-        <qualifier value="smsDestinationAbbreviations" />
-    </bean>
-
     <!--
         Allows configuration of a default service area for searches when the user hasn't already specified a search area
     -->

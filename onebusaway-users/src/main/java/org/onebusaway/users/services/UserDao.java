@@ -30,4 +30,6 @@ public interface UserDao {
   public int getNumberOfUsersWithRole(UserRole role);
 
   public UserIndex getUserIndexForId(UserIndexKey key);
+  
+  public void deleteUserIndex(UserIndex index);
 }

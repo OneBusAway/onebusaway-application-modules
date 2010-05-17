@@ -17,8 +17,64 @@
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
     <import resource="classpath:org/onebusaway/container/application-context.xml" />
+    
+    <bean id="userIndexCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.users.model.UserIndex" />
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="120" />
+        <property name="overflowToDisk" value="false" />
+        <property name="diskPersistent" value="false" />
+    </bean>
 
-    <bean id="usersHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+    <bean id="userCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.users.model.User" />
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="120" />
+        <property name="overflowToDisk" value="false" />
+        <property name="diskPersistent" value="false" />
+    </bean>
+    
+    <bean id="userIndicesCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.users.model.User.userIndices" />
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="120" />
+        <property name="overflowToDisk" value="false" />
+        <property name="diskPersistent" value="false" />
+    </bean>
+
+    <bean id="userRolesCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.users.model.User.roles" />
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="120" />
+        <property name="overflowToDisk" value="false" />
+        <property name="diskPersistent" value="false" />
+    </bean>
+
+    <bean id="userRoleCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.users.model.UserRole" />
+        <property name="maxElementsInMemory" value="5" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="0" />
+        <property name="overflowToDisk" value="false" />
+        <property name="diskPersistent" value="false" />
+    </bean>
+
+    <bean id="usersHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor"
+        depends-on="userIndexCache,userCache,userIndicesCache,userRolesCache,userRoleCache">
         <property name="target" value="hibernateAnnotatedClasses" />
         <property name="values">
             <list>
@@ -55,6 +111,21 @@
             </bean>
         </property>
     </bean>
+    
+    <bean id="userLastAccessTimeServiceCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.users.impl.internal.UserLastAccessTimeServiceImpl.cache" />
+        <property name="maxElementsInMemory" value="1000" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="900" />
+        <property name="overflowToDisk" value="true" />
+        <property name="diskPersistent" value="false" />
+    </bean>
+    
+    <bean id="userLastAccessTimeServiceImpl" class="org.onebusaway.users.impl.internal.UserLastAccessTimeServiceImpl">
+        <property name="cache" ref="userLastAccessTimeServiceCache" />
+    </bean>
 
     <bean id="lastSelectedStopServiceCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
@@ -68,9 +139,9 @@
     </bean>
 
     <bean id="lastSelectedStopServiceImpl" class="org.onebusaway.users.impl.internal.LastSelectedStopServiceImpl">
-        <property name="cache" ref="lastSelectedStopServiceCache"/>
+        <property name="cache" ref="lastSelectedStopServiceCache" />
     </bean>
-    
+
     <bean id="userIndexRegistrationServiceCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.impl.internal.LastSelectedStopServiceImpl.cache" />
@@ -83,7 +154,7 @@
     </bean>
 
     <bean id="userIndexRegistrationServiceImpl" class="org.onebusaway.users.impl.internal.UserIndexRegistrationServiceImpl">
-        <property name="cache" ref="userIndexRegistrationServiceCache"/>
+        <property name="cache" ref="userIndexRegistrationServiceCache" />
     </bean>
 
 </beans>

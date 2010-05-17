@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright 2008 Brian Ferris
+  Copyright 2009 Brian Ferris
 
   Licensed under the Apache License, Version 2.0 (the "License"); you may not
   use this file except in compliance with the License. You may obtain a copy of
@@ -14,21 +14,28 @@
   License for the specific language governing permissions and limitations under
   the License.
 -->
-<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+	xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Phone Number Registration</title>
-  
+<title>Debug</title>
 </head>
 <body>
 
-<h2>Phone Number Registration</h2>
-
-<p>To complete registration of your phone number, text the following to 41411:</p>
-
-<p>"onebus #register <s:property value="code"/>"</p>
-
-<p>Once registration is complete, <s:a action="index">return to your settings page</s:a>.</p>
-
+<div class="section">
+  <h4>Details</h4>
+  <ul>
+    <li><span class="label">User #:</span> <s:property value="model.userId"/></li>
+    <li><span class="label">User Indices:</span>
+      <ul>
+      <s:iterator value="model.indices">
+        <li><span class="label"><s:property value="type"/>:</span> <s:property value="value"/></li>
+      </s:iterator>
+      </ul>
+    </li>
+  </ul>
+</div>
+	
 </body>
 </html>

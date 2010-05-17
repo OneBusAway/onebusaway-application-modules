@@ -100,9 +100,4 @@ public class UserPropertiesV1 implements Serializable, UserProperties {
     this.defaultLocationName = null;
     this.lastSelectedStopId = null;
   }
-
-  @Override
-  public UserProperties deepCopy() {
-    return new UserPropertiesV1(this);
-  }
 }

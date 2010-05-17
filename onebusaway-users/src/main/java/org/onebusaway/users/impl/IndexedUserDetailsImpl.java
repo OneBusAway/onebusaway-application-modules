@@ -3,6 +3,7 @@ package org.onebusaway.users.impl;
 import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
+import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 
@@ -15,7 +16,7 @@ public class IndexedUserDetailsImpl extends
 
   private static final long serialVersionUID = 1L;
 
-  private UserIndex _userIndex;
+  private UserIndexKey _userIndexKey;
 
   public IndexedUserDetailsImpl(StandardAuthoritiesService authoritiesService,
       UserIndex userIndex) {
@@ -23,15 +24,20 @@ public class IndexedUserDetailsImpl extends
         true, true, getGrantedAuthoritiesForUser(authoritiesService,
             userIndex.getUser()));
 
-    _userIndex = userIndex;
+    _userIndexKey = userIndex.getId();
   }
 
-  public UserIndex getUserIndex() {
-    return _userIndex;
+  public UserIndexKey getUserIndexKey() {
+    return _userIndexKey;
   }
 
-  public User getUser() {
-    return _userIndex.getUser();
+  public boolean isAnonymous() {
+    GrantedAuthority[] authorities = getAuthorities();
+    for (GrantedAuthority authority : authorities) {
+      if (authority.getAuthority().equals(StandardAuthoritiesService.ANONYMOUS))
+        return true;
+    }
+    return false;
   }
 
   private static GrantedAuthority[] getGrantedAuthoritiesForUser(

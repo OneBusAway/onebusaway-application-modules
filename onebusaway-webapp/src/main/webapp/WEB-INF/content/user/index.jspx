@@ -14,7 +14,7 @@
   License for the specific language governing permissions and limitations under
   the License.
 -->
-<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags" xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
 <title>User Info</title>
@@ -26,7 +26,6 @@
 </head>
 <body>
 
-<s:if test="user">
 <s:push value="user">
 <h2>User Info</h2>
 
@@ -87,6 +86,31 @@
 	 	  <p><a href="../where/standard/bookmarks.action">Check out your bookmarks</a></p>
 	 	</div>
 	  </s:if>
+	  
+	  <div class="section">
+	  
+	  <h4>Phone Numbers</h4>
+	  <s:if test="phoneIndices.empty">
+	    <p>You have no registered phone numbers.</p>
+	  </s:if>
+	  <s:else>
+	  	<p>Your registered phone numbers:</p>
+	  	<ul>
+	  		<s:iterator value="phoneIndices">
+	  		    <s:url var="removePhoneNumberUrl" action="remove-phone-number">
+	  		    	<s:param name="phoneNumber" value="value"/>
+	  		    </s:url>
+	  			<li><oba:phoneNumber value="value"/> - <s:a href="%{removePhoneNumberUrl}">delete</s:a></li>
+	  		</s:iterator>
+	  	</ul>
+	  </s:else>
+	  <p>Register a phone number:</p>
+	  <form method="POST" action="phone-number-registration.action">
+	    <input type="text" name="phoneNumber"/> <input type="submit" value="Submit"/>
+	  </form>
+	  
+	  </div>
+	  
 	</s:if>
 	<s:else>
 	  <div class="section">	
@@ -127,10 +151,6 @@
 </div>
 
 </s:push>
-</s:if>
-<s:else>
-There is no user currently logged in.
-</s:else>
 
 </body>
 </html>

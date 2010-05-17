@@ -49,6 +49,28 @@ public class CurrentUserServiceImpl implements CurrentUserService {
    ****/
 
   @Override
+  public boolean isCurrentUserAnonymous() {
+    IndexedUserDetails details = getCurrentUserDetails();
+    if (details == null)
+      return true;
+    return details.isAnonymous();
+  }
+
+  @Override
+  public boolean hasCurrentUser() {
+    return getCurrentUserInternal() != null;
+  }
+
+  @Override
+  public UserBean getCurrentUser() {
+    User user = getCurrentUserInternal();
+    if (user == null)
+      return null;
+    UserBean bean = _userService.getUserAsBean(user);
+    return bean;
+  }
+
+  @Override
   public void handleLogin(String type, String id, String credentials) {
 
     UserIndexKey key = new UserIndexKey(type, id);
@@ -92,20 +114,6 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     setCurrentUserInternal(index);
-  }
-
-  @Override
-  public boolean hasCurrentUser() {
-    return getCurrentUserInternal() != null;
-  }
-
-  @Override
-  public UserBean getCurrentUser() {
-    User user = getCurrentUserInternal();
-    if (user == null)
-      return null;
-    UserBean bean = _userService.getUserAsBean(user);
-    return bean;
   }
 
   @Override
@@ -180,7 +188,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   @Override
   public boolean completePhoneNumberRegistration(String registrationCode) {
 
-    UserIndex userIndex = getCurrentUserIndexInternal();
+    UserIndex userIndex = getCurrentUserIndexInternal(true);
     if (userIndex == null)
       return false;
 
@@ -201,7 +209,18 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     if (user == null)
       return;
     _userService.enableAdminRoleForUser(user, true);
-    refreshCurrentUser();
+    clearCurrentUser();
+  }
+
+  @Override
+  public void removeUserIndex(UserIndexKey key) {
+    UserIndex index = getCurrentUserIndexInternal(false);
+    if (index == null)
+      return;
+    boolean removingCurrentUserIndex = index.getId().equals(key);
+    _userService.removeUserIndexForUser(index.getUser(), key);
+    if (removingCurrentUserIndex)
+      clearCurrentUser();
   }
 
   @Override
@@ -209,10 +228,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     User user = getCurrentUserInternal();
     if (user == null)
       return;
-
     _userService.deleteUser(user);
 
-    refreshCurrentUser();
+    clearCurrentUser();
   }
 
   public void resetCurrentUser() {
@@ -222,7 +240,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
     _userService.resetUser(user);
 
-    refreshCurrentUser();
+    clearCurrentUser();
   }
 
   /****
@@ -231,7 +249,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   private User getCurrentUserInternal() {
 
-    UserIndex userIndex = getCurrentUserIndexInternal();
+    UserIndex userIndex = getCurrentUserIndexInternal(true);
     if (userIndex == null)
       return null;
     return userIndex.getUser();
@@ -242,7 +260,22 @@ public class CurrentUserServiceImpl implements CurrentUserService {
    * 
    * @return
    */
-  UserIndex getCurrentUserIndexInternal() {
+  private UserIndex getCurrentUserIndexInternal(boolean createIfNeeded) {
+
+    IndexedUserDetails details = getCurrentUserDetails();
+
+    if (details == null)
+      return null;
+
+    if (createIfNeeded)
+      return _userService.getOrCreateUserForIndexKey(details.getUserIndexKey(),
+          details.getPassword(), details.isAnonymous());
+    else
+      return _userService.getUserIndexForId(details.getUserIndexKey());
+  }
+
+  private IndexedUserDetails getCurrentUserDetails() {
+
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication == null)
@@ -252,11 +285,11 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     // the RememberMe authentication service puts it
     Object principal = authentication.getPrincipal();
     if (principal instanceof IndexedUserDetails)
-      return getDetailsObjectAsUserIndex(principal);
+      return (IndexedUserDetails) principal;
 
     Object details = authentication.getDetails();
     if (details instanceof IndexedUserDetails)
-      return getDetailsObjectAsUserIndex(details);
+      return (IndexedUserDetails) details;
 
     return null;
   }
@@ -271,16 +304,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     SecurityContextHolder.getContext().setAuthentication(token);
   }
 
-  private UserIndex getDetailsObjectAsUserIndex(Object details) {
-    if (details == null)
-      return null;
-    IndexedUserDetails wrapper = (IndexedUserDetails) details;
-    return wrapper.getUserIndex();
-  }
-
-  private void refreshCurrentUser() {
+  private void clearCurrentUser() {
     // Log out the current user
     SecurityContextHolder.getContext().setAuthentication(null);
   }
-
 }

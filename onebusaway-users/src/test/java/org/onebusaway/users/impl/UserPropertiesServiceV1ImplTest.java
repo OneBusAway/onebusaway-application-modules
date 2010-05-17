@@ -1,27 +1,19 @@
 package org.onebusaway.users.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.users.model.User;
-import org.onebusaway.users.model.UserIndex;
-import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserPropertiesV1;
 import org.onebusaway.users.model.properties.RouteFilter;
 import org.onebusaway.users.services.BookmarkException;
-import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserDao;
 
 public class UserPropertiesServiceV1ImplTest {
