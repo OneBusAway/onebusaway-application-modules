@@ -18,13 +18,9 @@
 
     <import resource="classpath:org/onebusaway/container/application-context-common.xml"/>
 
-    <bean id="ehCacheDiskStorePath" class="java.lang.String" autowire-candidate="false">
-        <constructor-arg value="java.io.tmpdir/cache-onebusaway" />
-    </bean>
-    
     <bean id="ehCacheConfiguration" class="org.onebusaway.container.spring.EhCacheConfigurationFactoryBean">
         <property name="configLocation" value="classpath:org/onebusaway/container/ehcache.xml" />
-        <property name="diskStorePath" ref="ehCacheDiskStorePath" />
+        <property name="diskStorePath" value="java.io.tmpdir/cache-onebusaway" />
     </bean>
 
     <bean id="cacheManager" class="org.onebusaway.container.spring.EhCacheManagerFactoryBean">

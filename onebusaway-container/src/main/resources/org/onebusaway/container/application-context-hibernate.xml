@@ -16,10 +16,16 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
-    <import resource="classpath:org/onebusaway/container/application-context-caching.xml"/>
+    <import resource="classpath:org/onebusaway/container/application-context-caching.xml" />
 
-    <bean id="ehCacheProvider" class="org.onebusaway.container.spring.EhCacheProvider">
-        <property name="cacheManager" ref="cacheManager" />
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="org.onebusaway.container.spring.EhCacheRegionFactory"/>
+        <property name="targetMethod" value="setStaticCacheManagerInstance"/>
+        <property name="arguments">
+            <list>
+                <ref bean="cacheManager"/>
+            </list>
+        </property>
     </bean>
 
     <bean id="hibernateProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
@@ -27,10 +33,11 @@
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.show_sql">true</prop>
                 <prop key="hibernate.use_sql_comments">true</prop>
                 <prop key="hibernate.cache.use_query_cache">false</prop>
                 <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.cache.region.factory_class">org.onebusaway.container.spring.EhCacheRegionFactory</prop>
                 <prop key="hibernate.generate_statistics">true</prop>
                 <prop key="hibernate.cache.use_structured_entries">true</prop>
                 <prop key="hibernate.jdbc.batch_size">1000</prop>
@@ -39,15 +46,16 @@
     </bean>
     <bean id="hibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListFactoryBean" />
     <bean id="hibernateMappingLocations" class="org.onebusaway.container.spring.ListFactoryBean" />
+    <bean id="hibernateDependencies" class="org.onebusaway.container.spring.ListFactoryBean" />
 
     <!-- Hibernate session factory -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean" primary="true">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
+        primary="true">
         <qualifier value="main" />
         <property name="dataSource" ref="dataSource" />
         <property name="hibernateProperties" ref="hibernateProperties" />
         <property name="annotatedClasses" ref="hibernateAnnotatedClasses" />
         <property name="mappingLocations" ref="hibernateMappingLocations" />
-        <property name="cacheProvider" ref="ehCacheProvider"/>
     </bean>
 
     <!-- -->
