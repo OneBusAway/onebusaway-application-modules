@@ -94,7 +94,6 @@ public class FederatedServiceMethodInvocationHandlerFactoryTest {
     FederatedServiceMethodInvocationHandler handler = _factory.getHandlerForMethod(method);
     FederatedByCoordinateBoundsMethodInvocationHandlerImpl impl = (FederatedByCoordinateBoundsMethodInvocationHandlerImpl) handler;
     assertEquals(0, impl.getArgumentIndex());
-    assertEquals("bounds", impl.getExpression().getPath());
   }
 
   @Test
@@ -105,6 +104,7 @@ public class FederatedServiceMethodInvocationHandlerFactoryTest {
     FederatedServiceMethodInvocationHandler handler = _factory.getHandlerForMethod(method);
     FederatedByCoordinateBoundsMethodInvocationHandlerImpl impl = (FederatedByCoordinateBoundsMethodInvocationHandlerImpl) handler;
     assertEquals(0, impl.getArgumentIndex());
+    assertEquals("bounds", impl.getExpression().getPath());
   }
 
   @Test
