@@ -1,13 +1,16 @@
 package org.onebusaway.presentation.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.presentation.model.BookmarkWithStopsBean;
 import org.onebusaway.presentation.services.BookmarkPresentationService;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.BookmarkBean;
+import org.onebusaway.users.client.model.RouteFilterBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +37,7 @@ public class BookmarkPresentationServiceImpl implements
       bean.setId(bookmark.getId());
       bean.setName(bookmark.getName());
       bean.setStops(getStopsForStopIds(bookmark.getStopIds()));
-      bean.setRouteFilter(bookmark.getRouteFilter());
+      bean.setRoutes(getRoutesForRouteFilter(bookmark.getRouteFilter()));
       beans.add(bean);
     }
 
@@ -63,6 +66,14 @@ public class BookmarkPresentationServiceImpl implements
     return b.toString();
   }
 
+  @Override
+  public String getNameForBookmark(BookmarkWithStopsBean bookmark) {
+    String name = bookmark.getName();
+    if (name != null)
+      return name;
+    return getNameForStops(bookmark.getStops());
+  }
+
   /****
    * Private Methods
    ****/
@@ -77,11 +88,14 @@ public class BookmarkPresentationServiceImpl implements
     return stops;
   }
 
-  @Override
-  public String getNameForBookmark(BookmarkWithStopsBean bookmark) {
-    String name = bookmark.getName();
-    if (name != null)
-      return name;
-    return getNameForStops(bookmark.getStops());
+  private List<RouteBean> getRoutesForRouteFilter(RouteFilterBean routeFilter) {
+    List<RouteBean> routes = new ArrayList<RouteBean>();
+    for (String routeId : routeFilter.getRouteIds()) {
+      RouteBean route = _transitDataService.getRouteForId(routeId);
+      if (route != null)
+        routes.add(route);
+    }
+    Collections.sort(routes, new RouteNameComparator());
+    return routes;
   }
 }

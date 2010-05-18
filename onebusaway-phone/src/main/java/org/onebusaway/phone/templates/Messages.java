@@ -24,6 +24,16 @@ public class Messages {
   public static final String HOW_TO_GO_BACK = "HOW_TO_GO_BACK";
 
   public static final String TO_REPEAT = "TO_REPEAT";
+  
+  /****
+   * Registration
+   ****/
+  
+  public static final String REGISTRATION_INSTRUCTIONS = "REGISTRATION_INSTRUCTIONS";
+  
+  public static final String INVALID_REGISTRATION_CODE = "INVALID_REGISTRATION_CODE";
+  
+  public static final String REGISTRATION_SUCCESSFUL = "REGISTRATION_SUCCESSFUL";
 
   /***************************************************************************
    * Welcome Action

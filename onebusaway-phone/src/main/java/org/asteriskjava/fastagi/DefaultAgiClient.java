@@ -32,7 +32,7 @@ public class DefaultAgiClient {
   public DefaultAgiClient(String host, int port, AgiClientScript clientScript) {
     setHost(host);
     setPort(port);
-    setScript(script);
+    setScript(clientScript);
   }
 
   public void setHost(String host) {

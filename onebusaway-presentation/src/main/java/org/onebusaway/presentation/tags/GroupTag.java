@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.tags;
+package org.onebusaway.presentation.tags;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

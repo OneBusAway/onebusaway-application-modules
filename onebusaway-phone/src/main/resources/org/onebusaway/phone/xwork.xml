@@ -23,8 +23,7 @@
 
 
         <interceptors>
-            <interceptor name="integrationTesting" class="org.onebusaway.phone.impl.IntegrationTestingInterceptor"/>
-            <interceptor name="requestContext" class="org.onebusaway.presentation.impl.users.RequestContextInterceptor" />
+            <interceptor name="integrationTesting" class="org.onebusaway.phone.impl.IntegrationTestingInterceptor" />
             <interceptor name="callerIdLogin" class="org.onebusaway.presentation.impl.users.PhoneNumberLoginInterceptor">
                 <param name="phoneNumberParameterName">userId</param>
             </interceptor>
@@ -32,8 +31,7 @@
 
             <interceptor-stack name="phoneCustomStack">
                 <interceptor-ref name="defaultStack" />
-                <interceptor-ref name="integrationTesting"/>
-                <interceptor-ref name="requestContext"/>
+                <interceptor-ref name="integrationTesting" />
                 <interceptor-ref name="callerIdLogin" />
                 <interceptor-ref name="currentUser" />
             </interceptor-stack>
@@ -41,8 +39,9 @@
 
         <default-interceptor-ref name="phoneCustomStack" />
 
-        <action name="/welcome" class="org.onebusaway.phone.actions.DefaultAction">
+        <action name="/welcome" class="org.onebusaway.phone.actions.WelcomeAction">
             <result>/welcome</result>
+            <result name="registration" type="chain">/registration</result>
         </action>
 
         <action name="/index" class="org.onebusaway.phone.actions.DefaultAction">
@@ -56,6 +55,23 @@
         <action name="/most_recent" class="org.onebusaway.phone.actions.stops.MostRecentStopAction">
             <result type="chain">/stop/arrivalsAndDeparturesForStopId</result>
             <result type="message" name="input">NO_MOST_RECENT</result>
+        </action>
+
+        <action name="/registration" class="org.onebusaway.phone.actions.DefaultAction">
+            <result>/registration</result>
+            <result name="complete" type="chain">/welcome</result>
+        </action>
+
+        <action name="/handle-registration" class="org.onebusaway.phone.actions.RegistrationHandleAction">
+            <result type="message">
+                <param name="message">REGISTRATION_SUCCESSFUL</param>
+                <param name="nextAction">/welcome</param>
+            </result>
+            <result type="message" name="input">INVALID_REGISTRATION_CODE</result>
+        </action>
+
+        <action name="/cancel-registration" class="org.onebusaway.phone.actions.RegistrationCancelAction">
+            <result type="chain">/welcome</result>
         </action>
 
         <!--  Generic Help Message  -->
@@ -72,7 +88,7 @@
 
         <action name="/stop/byCode" class="org.onebusaway.phone.actions.stops.StopForCodeAction">
             <result type="chain">/stop/arrivalsAndDeparturesForStopId</result>
-            <result name="input" type="message">INVALID_STOP_NUMBER</result>            
+            <result name="input" type="message">INVALID_STOP_NUMBER</result>
             <result name="noStopsFound" type="message">NO_STOPS_WERE_FOUND</result>
             <result name="multipleStopsFound">/stops/multipleStopsFound</result>
             <result name="needDefaultSearchLocation">/settings/needDefaultSearchLocation</result>
@@ -111,7 +127,7 @@
             <result name="multipleRoutesFound">/search/multipleRoutesFound</result>
             <result name="needsDefaultSearchLocation">/settings/needDefaultSearchLocation</result>
         </action>
-        
+
         <action name="/search/stopsForRoute" class="org.onebusaway.phone.actions.search.StopsForRouteAction">
             <result>/search/navigation</result>
             <result name="stopFound">/search/stopFound</result>
@@ -121,7 +137,7 @@
             <result name="stopFound">/search/stopFound</result>
             <result>/search/navigation</result>
         </action>
-        
+
         <action name="/search/navigate-down" class="org.onebusaway.phone.actions.search.NavigateDownAction">
             <result name="stopFound">/search/stopFound</result>
             <result>/search/navigation</result>
@@ -158,7 +174,7 @@
         <action name="/settings/setDefaultSearchLocation" class="org.onebusaway.phone.actions.settings.SetDefaultSearchLocationAction">
             <result>/settings/setDefaultSearchLocation</result>
         </action>
-        
+
         <action name="/settings/setRememberPreferences" class="org.onebusaway.phone.actions.settings.SetRememerPreferencesAction">
             <result type="message">PREFERENCES_SET</result>
         </action>

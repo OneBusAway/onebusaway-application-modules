@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.impl;
+package org.onebusaway.presentation.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,7 +12,6 @@ import java.util.TimeZone;
 
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.presentation.client.RoutePresenter;
-import org.onebusaway.presentation.impl.AgencyPresenter;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -22,20 +21,9 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.utility.text.NaturalStringOrder;
-import org.onebusaway.webapp.gwt.where_library.WhereMessages;
-import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryCssResource;
-import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryResources;
-import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
-import org.onebusaway.webapp.impl.resources.ClientBundleFactory;
-import org.onebusaway.webapp.services.ArrivalsAndDeparturesModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-@Component
-@Scope("request")
-public class ArrivalsAndDeparturesModelImpl implements
-    ArrivalsAndDeparturesModel {
+public class ArrivalsAndDeparturesModel {
 
   private static final OrderConstraint SORT_BY_TIME = new SortByTime();
 
@@ -48,8 +36,6 @@ public class ArrivalsAndDeparturesModelImpl implements
   private CurrentUserService _currentUserService;
 
   private DefaultSearchLocationService _defaultSearchLocationService;
-
-  private ArrivalsAndDeparturesPresentaion _arrivalsAndDeparturesPresentation = new ArrivalsAndDeparturesPresentaion();
 
   private List<String> _stopIds;
 
@@ -90,18 +76,6 @@ public class ArrivalsAndDeparturesModelImpl implements
     _defaultSearchLocationService = defaultSearchLocationService;
   }
 
-  @Autowired
-  public void setWhereMessages(WhereMessages messages) {
-    _arrivalsAndDeparturesPresentation.setMessages(messages);
-  }
-
-  @Autowired
-  public void setClientBundleFactory(ClientBundleFactory factory) {
-    WhereLibraryResources resources = factory.getBundleForType(WhereLibraryResources.class);
-    WhereLibraryCssResource css = resources.getCss();
-    _arrivalsAndDeparturesPresentation.setCss(css);
-  }
-
   public void setStopIds(List<String> stopIds) {
     _stopIds = stopIds;
   }
@@ -122,7 +96,7 @@ public class ArrivalsAndDeparturesModelImpl implements
     return true;
   }
 
-  public void setTime(Date time) {
+  public void setTargetTime(Date time) {
     _time = time;
   }
 
@@ -132,6 +106,10 @@ public class ArrivalsAndDeparturesModelImpl implements
 
   public void setMinutesAfter(int minutesAfter) {
     _minutesAfter = minutesAfter;
+  }
+  
+  public boolean isMissingData() {
+    return _stopIds == null || _stopIds.isEmpty();
   }
 
   public void process() {
@@ -161,21 +139,10 @@ public class ArrivalsAndDeparturesModelImpl implements
     updateCurrentUser();
   }
 
-  /****
-   * {@link ArrivalsAndDeparturesModel} Interface
-   ****/
-
-  @Override
   public TimeZone getTimeZone() {
     return _timeZone;
   }
 
-  @Override
-  public ArrivalsAndDeparturesPresentaion getArrivalsAndDeparturesPresentation() {
-    return _arrivalsAndDeparturesPresentation;
-  }
-
-  @Override
   public StopsWithArrivalsAndDeparturesBean getResult() {
     return _result;
   }
@@ -184,7 +151,6 @@ public class ArrivalsAndDeparturesModelImpl implements
     return _filtered;
   }
 
-  @Override
   public List<AgencyBean> getAgencies() {
     return _agencies;
   }

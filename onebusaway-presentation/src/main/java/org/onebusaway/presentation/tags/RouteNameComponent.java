@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.tags;
+package org.onebusaway.presentation.tags;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -11,13 +11,13 @@ import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
 
-public class RouteDescriptionComponent extends ContextBean {
+public class RouteNameComponent extends ContextBean {
 
-  private static final Logger LOG = LoggerFactory.getLogger(RouteDescriptionComponent.class);
+  private static final Logger LOG = LoggerFactory.getLogger(RouteNameComponent.class);
 
   private String _value;
 
-  public RouteDescriptionComponent(ValueStack stack) {
+  public RouteNameComponent(ValueStack stack) {
     super(stack);
   }
 
@@ -40,10 +40,9 @@ public class RouteDescriptionComponent extends ContextBean {
 
     if (obj instanceof RouteBean) {
       RouteBean route = (RouteBean) obj;
-      String value = RoutePresenter.getDescriptionForRoute(route);
+      String name = RoutePresenter.getNameForRoute(route);
       try {
-        if( value != null)
-          writer.write(value);
+        writer.write(name);
       } catch (IOException e) {
         LOG.error("Could not write out Text tag", e);
       }

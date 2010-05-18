@@ -29,15 +29,20 @@
 </s:if>
 
 <s:iterator value="bookmarks">
-	<p>
+	<div class="bookmarkSection">
 		<h3><s:a href="bookmark.action?id=%{id}"><s:property value="getBookmarkName(top)"/></s:a></h3>
 		<ul>
 			<s:iterator value="stops">
 				<li><s:property value="name"/></li>
 			</s:iterator>
+			<s:if test="! routes.empty">
+				<li><s:iterator value="routes" status="status">
+				  <s:if test="#status.index &gt; 0"><jsp:text>, </jsp:text></s:if><oba:routeName/>
+				</s:iterator></li>
+			</s:if>
 		</ul>
 		<p><s:a href="bookmark-edit.action?id=%{id}">Edit</s:a> | <s:a href="bookmark-delete.action?id=%{id}">Delete</s:a></p>
-	</p>
+	</div>
 </s:iterator>
 
 </body>

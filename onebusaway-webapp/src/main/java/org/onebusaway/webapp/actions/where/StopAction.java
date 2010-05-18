@@ -25,14 +25,14 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.webapp.services.ArrivalsAndDeparturesModel;
+import org.onebusaway.webapp.impl.WebappArrivalsAndDeparturesModel;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
 public class StopAction extends AbstractWhereAction implements
-    ModelDriven<ArrivalsAndDeparturesModel> {
+    ModelDriven<WebappArrivalsAndDeparturesModel> {
 
   private static final long serialVersionUID = 1L;
 
@@ -42,10 +42,10 @@ public class StopAction extends AbstractWhereAction implements
 
   private boolean _needsRedirect = false;
 
-  private ArrivalsAndDeparturesModel _model;
+  private WebappArrivalsAndDeparturesModel _model;
   
   @Autowired
-  public void setModel(ArrivalsAndDeparturesModel model) {
+  public void setModel(WebappArrivalsAndDeparturesModel model) {
     _model = model;
   }
 
@@ -104,7 +104,7 @@ public class StopAction extends AbstractWhereAction implements
 
   @TypeConversion(converter = "org.onebusaway.webapp.actions.where.DateTimeConverter")
   public void setTime(Date time) {
-    _model.setTime(time);
+    _model.setTargetTime(time);
   }
 
   public void setMinutesBefore(int minutesBefore) {
@@ -115,7 +115,8 @@ public class StopAction extends AbstractWhereAction implements
     _model.setMinutesAfter(minutesAfter);
   }
 
-  public ArrivalsAndDeparturesModel getModel() {
+  @Override
+  public WebappArrivalsAndDeparturesModel getModel() {
     return _model;
   }
 

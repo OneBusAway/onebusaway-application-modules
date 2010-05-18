@@ -7,26 +7,25 @@ import org.apache.struts2.convention.annotation.Actions;
 import org.onebusaway.users.client.model.BookmarkBean;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.webapp.actions.AbstractAction;
-import org.onebusaway.webapp.impl.ArrivalsAndDeparturesModelImpl;
-import org.onebusaway.webapp.services.ArrivalsAndDeparturesModel;
+import org.onebusaway.webapp.impl.WebappArrivalsAndDeparturesModel;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
 public class BookmarkAction extends AbstractAction implements
-    ModelDriven<ArrivalsAndDeparturesModel> {
+    ModelDriven<WebappArrivalsAndDeparturesModel> {
 
   private static final long serialVersionUID = 1L;
 
   private int _id = -1;
 
-  private ArrivalsAndDeparturesModelImpl _model;
+  private WebappArrivalsAndDeparturesModel _model;
 
   private String _bookmarkName;
 
   @Autowired
-  public void setModel(ArrivalsAndDeparturesModelImpl model) {
+  public void setModel(WebappArrivalsAndDeparturesModel model) {
     _model = model;
   }
 
@@ -41,7 +40,7 @@ public class BookmarkAction extends AbstractAction implements
 
   @TypeConversion(converter = "org.onebusaway.webapp.actions.where.DateTimeConverter")
   public void setTime(Date time) {
-    _model.setTime(time);
+    _model.setTargetTime(time);
   }
 
   public void setMinutesBefore(int minutesBefore) {
@@ -53,7 +52,7 @@ public class BookmarkAction extends AbstractAction implements
   }
 
   @Override
-  public ArrivalsAndDeparturesModel getModel() {
+  public WebappArrivalsAndDeparturesModel getModel() {
     return _model;
   }
   

@@ -24,6 +24,11 @@ public class UserIndexRegistrationServiceImpl implements
   public void clearRegistrationForUserIndexKey(UserIndexKey key) {
     _cache.remove(key);
   }
+  
+  @Override
+  public boolean hasRegistrationForUserIndexKey(UserIndexKey userIndexKey) {
+    return _cache.get(userIndexKey) != null;
+  }
 
   @Override
   public UserRegistration getRegistrationForUserIndexKey(UserIndexKey key) {
@@ -40,4 +45,6 @@ public class UserIndexRegistrationServiceImpl implements
         registrationCode));
     _cache.put(element);
   }
+
+
 }

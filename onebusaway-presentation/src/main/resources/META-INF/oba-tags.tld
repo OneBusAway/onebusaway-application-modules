@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <taglib xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0"
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd">
+    <display-name>OneBusAway Tags</display-name>
     <tlib-version>1</tlib-version>
     <short-name>oba</short-name>
     <uri>/oba-tags</uri>
     <tag>
         <name>group</name>
-        <tag-class>org.onebusaway.webapp.tags.GroupTag</tag-class>
+        <tag-class>org.onebusaway.presentation.tags.GroupTag</tag-class>
         <body-content>JSP</body-content>
         <attribute>
             <name>value</name>
@@ -22,7 +23,8 @@
     </tag>
     <tag>
         <name>name</name>
-        <tag-class>org.onebusaway.webapp.tags.NameTag</tag-class>
+        <tag-class>org.onebusaway.presentation.tags.NameTag</tag-class>
+        <body-content>empty</body-content>
         <attribute>
             <name>value</name>
             <required>false</required>
@@ -32,7 +34,8 @@
     </tag>
     <tag>
         <name>routeName</name>
-        <tag-class>org.onebusaway.webapp.tags.RouteNameTag</tag-class>
+        <tag-class>org.onebusaway.presentation.tags.RouteNameTag</tag-class>
+        <body-content>empty</body-content>
         <attribute>
             <name>value</name>
             <required>false</required>
@@ -42,7 +45,8 @@
     </tag>
     <tag>
         <name>routeDescription</name>
-        <tag-class>org.onebusaway.webapp.tags.RouteDescriptionTag</tag-class>
+        <tag-class>org.onebusaway.presentation.tags.RouteDescriptionTag</tag-class>
+        <body-content>empty</body-content>
         <attribute>
             <name>value</name>
             <required>false</required>
@@ -52,7 +56,8 @@
     </tag>
     <tag>
         <name>phoneNumber</name>
-        <tag-class>org.onebusaway.webapp.tags.PhoneNumberTag</tag-class>
+        <tag-class>org.onebusaway.presentation.tags.PhoneNumberTag</tag-class>
+        <body-content>empty</body-content>
         <attribute>
             <name>value</name>
             <required>false</required>
@@ -62,7 +67,8 @@
     </tag>
     <tag>
         <name>date</name>
-        <tag-class>org.onebusaway.webapp.tags.DateTag</tag-class>
+        <tag-class>org.onebusaway.presentation.tags.DateTag</tag-class>
+        <body-content>empty</body-content>
         <attribute>
             <name>format</name>
             <required>true</required>

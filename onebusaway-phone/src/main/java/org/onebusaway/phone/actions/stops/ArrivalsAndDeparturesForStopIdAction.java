@@ -15,61 +15,46 @@
  */
 package org.onebusaway.phone.actions.stops;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.onebusaway.phone.actions.AbstractAction;
-import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
+import org.onebusaway.phone.impl.PhoneArrivalsAndDeparturesModel;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
 
 public class ArrivalsAndDeparturesForStopIdAction extends AbstractAction
-    implements ModelDriven<StopsWithArrivalsAndDeparturesBean> {
+    implements ModelDriven<PhoneArrivalsAndDeparturesModel> {
 
   private static final long serialVersionUID = 1L;
 
-  private List<String> _stopIds = new ArrayList<String>();
+  private PhoneArrivalsAndDeparturesModel _model;
 
-  private StopsWithArrivalsAndDeparturesBean _result;
+  @Autowired
+  public void setModel(PhoneArrivalsAndDeparturesModel model) {
+    _model = model;
+  }
 
   public void setStopIds(List<String> stopIds) {
-    _stopIds.addAll(stopIds);
+    _model.setStopIds(stopIds);
   }
 
-  public StopsWithArrivalsAndDeparturesBean getModel() {
-    return _result;
+  public void setRouteIds(Set<String> routeIds) {
+    _model.setRouteFilter(routeIds);
   }
 
-  public void setModel(StopsWithArrivalsAndDeparturesBean result) {
-    _result = result;
+  public PhoneArrivalsAndDeparturesModel getModel() {
+    return _model;
   }
-  
+
   public String execute() throws Exception {
-    
-    if( _stopIds.isEmpty() )
+
+    if (_model.isMissingData())
       return INPUT;
-    
-    Calendar c = Calendar.getInstance();
-    Date now = new Date();
 
-    c.setTime(now);
-    c.add(Calendar.MINUTE, -5);
-    Date timeFrom = c.getTime();
+    _model.process();
 
-    c.setTime(now);
-    c.add(Calendar.MINUTE, 35);
-    Date timeTo = c.getTime();
-
-    _result = _transitDataService.getStopsWithArrivalsAndDepartures(_stopIds,
-        timeFrom, timeTo);
-
-    if (_result == null)
-      return INPUT;
-    
-    _currentUserService.setLastSelectedStopIds(_stopIds);
-    
     return SUCCESS;
   }
 }

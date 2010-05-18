@@ -25,7 +25,7 @@
     src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;gwt=1&amp;key=ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g"><jsp:text></jsp:text></script>
         
 <script type="text/javascript"
-	src="org.onebusaway.webapp.gwt.BookmarkEdit.nocache.js"><jsp:text></jsp:text></script>
+	src="org.onebusaway.webapp.gwt.BookmarkEditApplication.nocache.js"><jsp:text></jsp:text></script>
 
 </head>
 <body>

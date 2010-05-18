@@ -37,9 +37,11 @@ public interface UserService {
   public UserPropertiesMigrationStatus getUserPropertiesMigrationStatus();
 
   public String registerPhoneNumber(User user, String phoneNumber);
+  
+  public boolean hasPhoneNumberRegistration(UserIndexKey userIndexKey);
 
   public UserIndex completePhoneNumberRegistration(UserIndex userIndex,
       String registrationCode);
-
   
+  public void clearPhoneNumberRegistration(UserIndexKey userIndexKey);
 }

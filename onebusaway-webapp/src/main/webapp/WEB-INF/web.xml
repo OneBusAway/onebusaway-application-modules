@@ -103,11 +103,6 @@
         <url-pattern>/services/login/*</url-pattern>
     </servlet-mapping>
 
-    <taglib>
-        <taglib-uri>/oba-tags</taglib-uri>
-        <taglib-location>/WEB-INF/oba-tags.tld</taglib-location>
-    </taglib>
-
     <!-- Welcome file lists -->
     <welcome-file-list>
         <welcome-file>index.action</welcome-file>

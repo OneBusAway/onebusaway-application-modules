@@ -250,7 +250,6 @@ public class SimplePhoneClient {
     
     @Override
     public void keyTyped(KeyEvent e) {
-      System.out.println("key=" + e.getKeyChar());
       _script.pushChar(e.getKeyChar());
     }
   }

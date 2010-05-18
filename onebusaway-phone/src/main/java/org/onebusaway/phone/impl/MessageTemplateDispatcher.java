@@ -11,21 +11,32 @@ public class MessageTemplateDispatcher extends AgiTemplateDispatcher {
 
   private static final long serialVersionUID = 1L;
 
-  private MessageSource _messageSource;
+  private String _message;
+
+  private String _nextAction;
   
   public static final String DEFAULT_PARAM = "message";
 
   public void setMessage(String message) {
-    _messageSource = new MessageSource(message);
+    _message = message;
+  }
+  
+  public void setNextAction(String nextAction) {
+    _nextAction = nextAction;
+  }
+  
+  public String getNextAction() {
+    return _nextAction;
   }
 
   @Override
   protected AgiActionName executeTemplate(ActionContext context,
       AgiTemplate template) throws Exception {
 
-    if (_messageSource != null) {
+    if (_message != null) {
       ValueStack stack = context.getValueStack();
-      stack.push(_messageSource);
+      MessageSource source = new MessageSource(_message,_nextAction);
+      stack.push(source);
     }
 
     return super.executeTemplate(context, template);
@@ -34,14 +45,24 @@ public class MessageTemplateDispatcher extends AgiTemplateDispatcher {
   public static class MessageSource {
 
     private String _message;
+    
+    private String _nextAction;
 
-    public MessageSource(String message) {
+    public MessageSource(String message, String nextAction) {
       _message = message;
+      _nextAction = nextAction;
     }
 
     public String getMessage() {
       return _message;
     }
+    
+    public void setNextAction(String nextAction) {
+      _nextAction = nextAction;
+    }
+    
+    public String getNextAction() {
+      return _nextAction;
+    }
   }
-
 }

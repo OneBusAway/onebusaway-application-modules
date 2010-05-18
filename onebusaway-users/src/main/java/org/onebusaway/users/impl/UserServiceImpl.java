@@ -239,6 +239,11 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public boolean hasPhoneNumberRegistration(UserIndexKey userIndexKey) {
+    return _userIndexRegistrationService.hasRegistrationForUserIndexKey(userIndexKey);
+  }
+
+  @Override
   public UserIndex completePhoneNumberRegistration(UserIndex userIndex,
       String registrationCode) {
 
@@ -249,6 +254,12 @@ public class UserServiceImpl implements UserService {
     String expectedCode = registration.getRegistrationCode();
     if (!expectedCode.equals(registrationCode))
       return null;
+
+    /**
+     * At this point, we have a valid registration code. We may safely clear the
+     * registration
+     */
+    _userIndexRegistrationService.clearRegistrationForUserIndexKey(userIndex.getId());
 
     User targetUser = _userDao.getUserForId(registration.getUserId());
     if (targetUser == null)
@@ -281,6 +292,11 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public void clearPhoneNumberRegistration(UserIndexKey userIndexKey) {
+    _userIndexRegistrationService.clearRegistrationForUserIndexKey(userIndexKey);
+  }
+
+  @Override
   public void startUserPropertiesMigration() {
     _userPropertiesMigration.startUserPropertiesBulkMigration(_userPropertiesService.getUserPropertiesType());
   }
@@ -306,4 +322,5 @@ public class UserServiceImpl implements UserService {
 
     targetUser.setRoles(roles);
   }
+
 }

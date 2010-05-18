@@ -41,6 +41,8 @@
             
         <h3>Name</h3>
         
+        <p>This is an optional nickname you can give a bookmark:</p>
+        
         <p>
         <g:TextBox ui:field="_bookmarkName" addStyleNames="{style.bookmarkName}" />
         </p>

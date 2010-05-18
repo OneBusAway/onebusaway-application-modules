@@ -14,7 +14,10 @@
   License for the specific language governing permissions and limitations under
   the License.
 -->
-<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags" xmlns:oba="/oba-tags">
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	  xmlns:c="http://java.sun.com/jsp/jstl/core"
+	  xmlns:oba="/oba-tags"
+	  xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <s:set name="now" value="getNow()" />
 <head>
@@ -30,8 +33,6 @@
 
 <!-- The Arrivals Title Header -->
 <jsp:include page="arrivals-title-snippet.jspx"/>
-
-<p style="text-align: center;"><b>Love OneBusAway?</b>  Show your support and <a href="http://www.seattle20.com/awards/vote.aspx">vote for us</a> as<br/><i>Best Non-Profit Startup</i> in the Seattle 2.0 Awards.  <a href="http://www.seattle20.com/awards/vote.aspx">Vote now!</a></p>
 
 <s:if test="filtered">
     <div class="arrivalsFilterPanel"><s:url var="removeFilterUrl" includeParams="get">
@@ -65,7 +66,6 @@
 
 <div class="p">
 	<s:url var="bookmarksUrl" action="bookmark-create" includeParams="none">
-		<s:param name="name" value="result.stops[0].name" />
 		<s:param name="stopId" value="id"/>
 		<s:param name="routeId" value="routes"/>
 	</s:url>

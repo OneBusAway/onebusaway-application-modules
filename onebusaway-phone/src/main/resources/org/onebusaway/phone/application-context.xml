@@ -21,6 +21,8 @@
 
     <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
     <import resource="classpath:org/onebusaway/geocoder/application-context.xml"/>
+    
+    <context:component-scan base-package="org.onebusaway.phone.impl" />
 
     <bean id="myxworkConfiguration" class="org.onebusaway.phone.XWorkConfigurationFactoryBean">
         <property name="xmlConfigurationSource" value="org/onebusaway/phone/xwork.xml" />
@@ -45,7 +47,7 @@
         </property>
     </bean>
 
-    <bean id="agiEntryPoint" class="org.onebusaway.probablecalls.AgiEntryPoint">
+    <bean id="agiEntryPoint" class="org.onebusaway.phone.impl.CustomAgiEntryPoint">
         <property name="action" value="/welcome" />
         <property name="configuration" ref="myxworkConfiguration" />
         <property name="pauseBetweenActions" value="500" />

@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.onebusaway.phone.impl.PhoneArrivalsAndDeparturesModel;
 import org.onebusaway.phone.templates.Messages;
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.presentation.impl.AgencyPresenter;
@@ -68,9 +69,10 @@ public class ArrivalsAndDeparturesTemplate extends AbstractAgiTemplate {
   public void buildTemplate(ActionContext context) {
 
     ValueStack valueStack = context.getValueStack();
-    StopsWithArrivalsAndDeparturesBean model = (StopsWithArrivalsAndDeparturesBean) valueStack.findValue("model");
-
-    buildPredictedArrivalsTemplate(model.getArrivalsAndDepartures());
+    PhoneArrivalsAndDeparturesModel model = (PhoneArrivalsAndDeparturesModel) valueStack.findValue("model");
+    StopsWithArrivalsAndDeparturesBean result = model.getResult();
+    
+    buildPredictedArrivalsTemplate(result.getArrivalsAndDepartures());
 
     addMessage(Messages.ARRIVAL_INFO_ON_SPECIFIC_ROUTE);
     AgiActionName byRouteAction = addActionWithParameterFromMatch("1(\\d+)#",
@@ -79,7 +81,7 @@ public class ArrivalsAndDeparturesTemplate extends AbstractAgiTemplate {
 
     addMessage(Messages.ARRIVAL_INFO_BOOKMARK_THIS_LOCATION);
     AgiActionName bookmarkAction = addAction("2", "/stop/bookmark");
-    bookmarkAction.putParam("stops", model.getStops());
+    bookmarkAction.putParam("stops", result.getStops());
 
     addMessage(Messages.ARRIVAL_INFO_RETURN_TO_MAIN_MENU);
     addAction("3", "/index");

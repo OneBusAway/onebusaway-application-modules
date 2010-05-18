@@ -50,8 +50,6 @@ public class TextmarksSessionInterceptor extends AbstractInterceptor {
     Map<String, Object> originalSession = context.getSession();
     context.setSession(persistentSession);
     
-    
-    
     XWorkRequestAttributes attributes = new XWorkRequestAttributes(context, sessionId);
     RequestAttributes originalAttributes = RequestContextHolder.getRequestAttributes();
     RequestContextHolder.setRequestAttributes(attributes);

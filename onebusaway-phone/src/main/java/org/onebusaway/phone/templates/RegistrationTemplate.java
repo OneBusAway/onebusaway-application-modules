@@ -19,34 +19,22 @@ import org.onebusaway.probablecalls.agitemplates.AbstractAgiTemplate;
 import org.onebusaway.probablecalls.agitemplates.AgiTemplateId;
 
 import com.opensymphony.xwork2.ActionContext;
-import com.opensymphony.xwork2.util.ValueStack;
 
-@AgiTemplateId("/message_and_back")
-public class MessageAndBackTemplate extends AbstractAgiTemplate {
+@AgiTemplateId("/registration")
+public class RegistrationTemplate extends AbstractAgiTemplate {
 
   private static final long serialVersionUID = 1L;
-
-  public MessageAndBackTemplate() {
-    super(true);
-  }
 
   @Override
   public void buildTemplate(ActionContext context) {
 
-    ValueStack stack = context.getValueStack();
-    String message = stack.findString("message");
-    String nextAction = stack.findString("nextAction");
+    addMessage(Messages.REGISTRATION_INSTRUCTIONS);
+    addMessage(Messages.TO_REPEAT);
 
-    if (message != null)
-      addMessage(message);
-    else
-      System.err.println("no message specified");
+    addActionWithParameterFromMatch("(\\d*)#", "/handle-registration", "code",
+        1);
+    addAction("\\*", "/cancel-registration");
 
-    if (nextAction != null) {
-      setNextAction(nextAction);
-    } else {
-      addAction(".*\\*", "/back");
-      setNextAction("/back");
-    }
+    setNextAction("/registration");
   }
 }

@@ -39,7 +39,6 @@ public class DateTimeConverter extends StrutsTypeConverter {
       try {
         return _format.parse(values[0]);
       } catch (ParseException e) {
-        e.printStackTrace();
         throw new TypeConversionException(e);
       }
     }

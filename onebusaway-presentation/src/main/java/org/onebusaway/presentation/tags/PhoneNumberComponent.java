@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.tags;
+package org.onebusaway.presentation.tags;
 
 import java.io.IOException;
 import java.io.Writer;

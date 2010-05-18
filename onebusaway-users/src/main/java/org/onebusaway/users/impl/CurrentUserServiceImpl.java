@@ -186,6 +186,14 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
+  public boolean hasPhoneNumberRegistration() {
+    IndexedUserDetails details = getCurrentUserDetails();
+    if (details == null)
+      return false;
+    return _userService.hasPhoneNumberRegistration(details.getUserIndexKey());
+  }
+
+  @Override
   public boolean completePhoneNumberRegistration(String registrationCode) {
 
     UserIndex userIndex = getCurrentUserIndexInternal(true);
@@ -201,6 +209,14 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     setCurrentUserInternal(userIndex);
 
     return true;
+  }
+
+  @Override
+  public void clearPhoneNumberRegistration() {
+    IndexedUserDetails details = getCurrentUserDetails();
+    if (details == null)
+      return;
+    _userService.clearPhoneNumberRegistration(details.getUserIndexKey());
   }
 
   @Override

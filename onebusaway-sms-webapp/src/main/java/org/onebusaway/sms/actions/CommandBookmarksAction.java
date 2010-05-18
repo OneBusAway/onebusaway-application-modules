@@ -2,6 +2,7 @@ package org.onebusaway.sms.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.presentation.model.BookmarkWithStopsBean;
@@ -22,7 +23,15 @@ public class CommandBookmarksAction extends AbstractTextmarksAction {
 
   private List<BookmarkWithStopsBean> _bookmarks = new ArrayList<BookmarkWithStopsBean>();
 
+  /**
+   * Used when chaining to "arrivals-and-departures"
+   */
   private List<String> _stopIds;
+
+  /**
+   * Used when chaining to "arrivals-and-departures"
+   */
+  private Set<String> _routeFilter;
 
   @Autowired
   public void setBookmarkPresentationService(
@@ -42,15 +51,19 @@ public class CommandBookmarksAction extends AbstractTextmarksAction {
     return _stopIds;
   }
 
+  public Set<String> getRouteFilter() {
+    return _routeFilter;
+  }
+
   @Override
   public String execute() throws ServiceException, BookmarkException {
 
     UserBean currentUser = _currentUserService.getCurrentUser();
-    
+
     if (_arg != null && _arg.length() > 0) {
 
       if (_arg.startsWith("add")) {
-        
+
         List<String> lastSelectedStopIds = currentUser.getLastSelectedStopIds();
         if (!lastSelectedStopIds.isEmpty()) {
           String name = _bookmarkPresentationService.getNameForStopIds(lastSelectedStopIds);
@@ -78,6 +91,7 @@ public class CommandBookmarksAction extends AbstractTextmarksAction {
 
         BookmarkBean bookmark = bookmarks.get(index);
         _stopIds = bookmark.getStopIds();
+        _routeFilter = bookmark.getRouteFilter().getRouteIds();
 
         return "arrivals-and-departures";
       }

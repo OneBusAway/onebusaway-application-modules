@@ -57,7 +57,7 @@ public class XWorkRequestAttributes extends AbstractRequestAttributes {
   @Override
   public void registerDestructionCallback(String name, Runnable callback,
       int scope) {
-    throw new UnsupportedOperationException();
+    
   }
 
   /****
@@ -66,7 +66,7 @@ public class XWorkRequestAttributes extends AbstractRequestAttributes {
 
   @Override
   protected void updateAccessedSessionAttributes() {
-
+    
   }
 
   private Map<String, Object> getScopedMap(int scope) {

@@ -1,9 +1,6 @@
 package org.onebusaway.sms.actions;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -11,77 +8,61 @@ import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.presentation.client.RoutePresenter;
-import org.onebusaway.presentation.impl.ArrivalAndDepartureComparator;
-import org.onebusaway.presentation.services.text.TextModification;
+import org.onebusaway.sms.impl.SmsArrivalsAndDeparturesModel;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TripBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
-public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction {
+import com.opensymphony.xwork2.ModelDriven;
+
+public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction
+    implements ModelDriven<SmsArrivalsAndDeparturesModel> {
 
   private static final long serialVersionUID = 1L;
 
-  private TextModification _abbreviations;
-
-  private List<String> _stopIds = new ArrayList<String>();
-
-  private StopsWithArrivalsAndDeparturesBean _result;
-
   private String[] _args;
 
+  private SmsArrivalsAndDeparturesModel _model;
+
   @Autowired
-  public void setDestinationAbbreviations(
-      @Qualifier("smsDestinationAbbreviations") TextModification strategy) {
-    _abbreviations = strategy;
+  public void setModel(SmsArrivalsAndDeparturesModel model) {
+    _model = model;
   }
 
   public void setStopId(String stopId) {
-    _stopIds.add(stopId);
+    _model.setStopIds(Arrays.asList(stopId));
   }
 
   public void setStopIds(List<String> stopIds) {
-    _stopIds.addAll(stopIds);
+    _model.setStopIds(stopIds);
+  }
+  
+  public void setRouteFilter(Set<String> routeIds) {
+    _model.setRouteFilter(routeIds);
   }
 
   public void setArgs(String[] args) {
     _args = args;
   }
 
-  public StopsWithArrivalsAndDeparturesBean getResult() {
-    return _result;
+  @Override
+  public SmsArrivalsAndDeparturesModel getModel() {
+    return _model;
   }
 
   @Override
   public String execute() throws ServiceException {
-    
-    if( _stopIds.isEmpty() )
+
+    if (_model.isMissingData())
       return INPUT;
 
-    Calendar c = Calendar.getInstance();
-    Date now = new Date();
+    _model.process();
 
-    c.setTime(now);
-    c.add(Calendar.MINUTE, -5);
-    Date timeFrom = c.getTime();
-
-    c.setTime(now);
-    c.add(Calendar.MINUTE, 35);
-    Date timeTo = c.getTime();
-
-    _result = _transitDataService.getStopsWithArrivalsAndDepartures(_stopIds,
-        timeFrom, timeTo);
-
+    // Since we have route numbers, not ids, we have to do ad-hoc filtering
     if (_args != null && _args.length > 0)
       filterArrivalsAndDeparturesByRoute(_args);
-
-    // Sort results
-    Collections.sort(_result.getArrivalsAndDepartures(),
-        new ArrivalAndDepartureComparator());
-
-    _currentUserService.setLastSelectedStopIds(_stopIds);
 
     return SUCCESS;
   }
@@ -97,7 +78,8 @@ public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction {
         routes.add(routeName);
     }
 
-    Iterator<ArrivalAndDepartureBean> it = _result.getArrivalsAndDepartures().iterator();
+    StopsWithArrivalsAndDeparturesBean result = _model.getResult();
+    Iterator<ArrivalAndDepartureBean> it = result.getArrivalsAndDepartures().iterator();
 
     while (it.hasNext()) {
       ArrivalAndDepartureBean bean = it.next();
@@ -109,20 +91,4 @@ public class ArrivalsAndDeparturesAction extends AbstractTextmarksAction {
     }
   }
 
-  public long getNow() {
-    return System.currentTimeMillis();
-  }
-
-  public String getMinutesLabel(ArrivalAndDepartureBean pab, long now) {
-    long t = pab.getScheduledDepartureTime();
-    if (pab.hasPredictedDepartureTime())
-      t = pab.getPredictedDepartureTime();
-    int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
-    boolean isNow = Math.abs(minutes) <= 1;
-    return isNow ? "NOW" : (Integer.toString(minutes) + "m");
-  }
-
-  public String abbreviate(String destination) {
-    return _abbreviations.modify(destination);
-  }
 }

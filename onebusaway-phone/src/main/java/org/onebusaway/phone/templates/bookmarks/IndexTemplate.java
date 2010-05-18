@@ -15,7 +15,9 @@
  */
 package org.onebusaway.phone.templates.bookmarks;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.onebusaway.phone.templates.Messages;
 import org.onebusaway.presentation.model.BookmarkWithStopsBean;
@@ -54,9 +56,14 @@ public class IndexTemplate extends AbstractBookmarkTemplate {
 
         AgiActionName stopAction = addAction(toPress,
             "/stop/arrivalsAndDeparturesForStopId");
+
         List<String> stopIds = CollectionsLibrary.map(bookmark.getStops(),
             "id", String.class);
+        Set<String> routeIds = new HashSet<String>(CollectionsLibrary.map(
+            bookmark.getRoutes(), "id", String.class));
+
         stopAction.putParam("stopIds", stopIds);
+        stopAction.putParam("routeIds", routeIds);
 
         addBookmarkDescription(bookmark);
 

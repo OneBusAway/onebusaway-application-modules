@@ -3,8 +3,8 @@ package org.onebusaway.presentation.model;
 import java.io.Serializable;
 import java.util.List;
 
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.users.client.model.RouteFilterBean;
 
 public final class BookmarkWithStopsBean implements Serializable {
 
@@ -16,7 +16,7 @@ public final class BookmarkWithStopsBean implements Serializable {
 
   private List<StopBean> stops;
 
-  private RouteFilterBean routeFilter;
+  private List<RouteBean> routes;
 
   public int getId() {
     return id;
@@ -42,11 +42,11 @@ public final class BookmarkWithStopsBean implements Serializable {
     this.stops = stops;
   }
 
-  public RouteFilterBean getRouteFilter() {
-    return routeFilter;
+  public List<RouteBean> getRoutes() {
+    return routes;
   }
 
-  public void setRouteFilter(RouteFilterBean routeFilter) {
-    this.routeFilter = routeFilter;
-  }
+  public void setRoutes(List<RouteBean> routes) {
+    this.routes = routes;
+  }  
 }

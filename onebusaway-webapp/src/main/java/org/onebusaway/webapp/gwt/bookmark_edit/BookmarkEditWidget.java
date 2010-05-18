@@ -1,6 +1,8 @@
 package org.onebusaway.webapp.gwt.bookmark_edit;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.users.client.model.BookmarkBean;
@@ -59,8 +61,18 @@ public class BookmarkEditWidget extends AbstractStopAndRouteSelectionWidget {
     String[] stopIds = _stopsById.keySet().toArray(new String[0]);
     b.setParameter("stopId", stopIds);
 
-    String[] routeIds = _routeSelectionById.keySet().toArray(new String[0]);
-    b.setParameter("routeId", routeIds);
+    boolean allRoutesIncluded = true;
+    List<String> routeIds = new ArrayList<String>();
+    
+    for( Map.Entry<String,Boolean> entry : _routeSelectionById.entrySet() ) {
+      if( entry.getValue())
+        routeIds.add(entry.getKey());
+      else
+        allRoutesIncluded = false;
+    }
+    
+    if( ! allRoutesIncluded )
+      b.setParameter("routeId", routeIds.toArray(new String[routeIds.size()]));
 
     Location.assign(b.buildString());
   }

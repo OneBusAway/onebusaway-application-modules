@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.tags;
+package org.onebusaway.presentation.tags;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -8,14 +8,14 @@ import org.apache.struts2.views.jsp.ContextBeanTag;
 
 import com.opensymphony.xwork2.util.ValueStack;
 
-public class PhoneNumberTag extends ContextBeanTag {
+public class RouteDescriptionTag extends ContextBeanTag {
 
   private static final long serialVersionUID = 1L;
 
   protected String _value;
 
   public Component getBean(ValueStack stack, HttpServletRequest req, HttpServletResponse res) {
-    return new PhoneNumberComponent(stack);
+    return new RouteDescriptionComponent(stack);
   }
 
   public void setValue(String value) {
@@ -24,7 +24,8 @@ public class PhoneNumberTag extends ContextBeanTag {
 
   protected void populateParams() {
     super.populateParams();
-    PhoneNumberComponent tag = (PhoneNumberComponent) getComponent();
+
+    RouteDescriptionComponent tag = (RouteDescriptionComponent) getComponent();
     tag.setValue(_value);
   }
 }

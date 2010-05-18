@@ -52,13 +52,17 @@ public interface CurrentUserService {
    * @return the registration code that must be used validate the phoneNumber
    */
   public String registerPhoneNumber(String phoneNumber);
-
+  
+  public boolean hasPhoneNumberRegistration();
+  
   /**
    * 
    * @param registrationCode
    * @return true if the registration was successful, otherwise false
    */
   public boolean completePhoneNumberRegistration(String registrationCode);
+  
+  public void clearPhoneNumberRegistration();
   
   public void removeUserIndex(UserIndexKey key);
 

@@ -12,7 +12,7 @@ import org.onebusaway.users.model.properties.RouteFilter;
 import org.onebusaway.webapp.actions.AbstractAction;
 
 @Results( {@Result(type = "redirectAction", params = {
-    "actionName", "bookmark-edit","parse","true","id","${bookmarkId}"})})
+    "actionName", "bookmarks"})})
 public class BookmarkUpdateAction extends AbstractAction {
 
   private static final long serialVersionUID = 1L;
