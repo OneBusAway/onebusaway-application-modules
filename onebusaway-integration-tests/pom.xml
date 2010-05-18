@@ -13,6 +13,19 @@
         <tomcat-version>5.5.29</tomcat-version>
     </properties>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>terracotta-snapshots</id>
+            <url>http://www.terracotta.org/download/reflector/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
     <dependencies>
         <!--
             Even though this is referenced by onebusaway-transit-data-federation-webapp, we include it directly since we
@@ -28,7 +41,7 @@
             <artifactId>onebusaway-phone</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-federations-webapp</artifactId>
@@ -81,9 +94,17 @@
             <groupId>org.seleniumhq.selenium.client-drivers</groupId>
             <artifactId>selenium-java-client-driver</artifactId>
             <version>1.0.2</version>
-            <scope>test</scope>
         </dependency>
-
+        <dependency>
+        	<groupId>org.codehaus.cargo</groupId>
+        	<artifactId>cargo-core-container-tomcat</artifactId>
+        	<version>1.0.1-beta-2</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.codehaus.cargo</groupId>
+        	<artifactId>cargo-core-api-generic</artifactId>
+        	<version>1.0.1-beta-2</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -155,6 +176,26 @@
                                 <argument>jdbc:hsqldb:hsql://localhost/org_onebusaway_database_users</argument>
                             </arguments>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.terracotta.maven.plugins</groupId>
+                <artifactId>tc-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>terracotta-start</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                    </execution>
+                    <execution>
+                        <id>terracotta-stop</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <phase>post-integration-test</phase>
                     </execution>
                 </executions>
             </plugin>
