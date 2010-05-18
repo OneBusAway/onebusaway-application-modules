@@ -45,5 +45,8 @@
 	</div>
 </s:iterator>
 
+<p>Want to add more bookmarks?  <a href="index.html">Search for stops</a> like you normally would and look for
+the "Add a bookmark link" at the bottom.</p>
+
 </body>
 </html>

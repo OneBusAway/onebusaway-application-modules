@@ -24,9 +24,17 @@
 
 <h2>Phone Number Registration</h2>
 
-<p>To complete registration of your phone number, text the following to 41411:</p>
+<p>To complete registration of your phone number, do one of the following:</p>
 
-<p>"onebus #register <s:property value="code"/>"</p>
+<ul>
+  <li>
+    <p>Call <span class="sms">206-456-0609</span> and enter your registration code: <s:property value="code"/></p>
+  </li>
+  <li><p>or</p></li>
+  <li>
+    <p>Text the following to <span class="sms">41411</span>: "onebus #register <s:property value="code"/>"</p>
+  </li>
+</ul>
 
 <p>Once registration is complete, <s:a action="index">return to your settings page</s:a>.</p>
 
