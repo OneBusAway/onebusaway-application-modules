@@ -23,14 +23,10 @@
     <import resource="classpath:org/onebusaway/geocoder/application-context.xml" />
     <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
 
-    <!-- 
-    <bean id="propertyOverrides" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
-        <property name="properties">
-            <props>
-                <prop key="cacheManager.cacheManagerName">org.onebusaway.webapp.cacheManager</prop>
-            </props>
-        </property>
-    </bean>
+    <!--
+        <bean id="propertyOverrides" class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+        <property name="properties"> <props> <prop
+        key="cacheManager.cacheManagerName">org.onebusaway.webapp.cacheManager</prop> </props> </property> </bean>
     -->
 
     <context:component-scan base-package="org.onebusaway.webapp.impl" />
@@ -47,10 +43,40 @@
 
     <bean id="autoUserProcessingFilter" class="org.onebusaway.users.impl.authentication.AutoUserProcessingFilter">
         <sec:custom-filter position="ANONYMOUS_FILTER" />
-        <property name="pathsToExclude">
-            <list>
-                <value>/sms</value>
-            </list>
+        <!-- Map the more prolific bots to existing accounts so they don't repeatedly create new users -->
+        <property name="userAgentMapping">
+            <map>
+                <entry key="googlebot">
+                    <bean class="org.onebusaway.users.model.UserIndexKey">
+                        <constructor-arg value="bot" />
+                        <constructor-arg value="google" />
+                    </bean>
+                </entry>
+                <entry key="msnbot">
+                    <bean class="org.onebusaway.users.model.UserIndexKey">
+                        <constructor-arg value="bot" />
+                        <constructor-arg value="msn" />
+                    </bean>
+                </entry>
+                <entry key="yandex">
+                    <bean class="org.onebusaway.users.model.UserIndexKey">
+                        <constructor-arg value="bot" />
+                        <constructor-arg value="yandex" />
+                    </bean>
+                </entry>
+                <entry key="sogou">
+                    <bean class="org.onebusaway.users.model.UserIndexKey">
+                        <constructor-arg value="bot" />
+                        <constructor-arg value="sogou" />
+                    </bean>
+                </entry>
+                <entry key="twiceler">
+                    <bean class="org.onebusaway.users.model.UserIndexKey">
+                        <constructor-arg value="bot" />
+                        <constructor-arg value="cuil" />
+                    </bean>
+                </entry>
+            </map>
         </property>
     </bean>
 
@@ -84,7 +110,7 @@
 
     <bean id="openid_plugin" class="org.onebusaway.users.impl.authentication.OpenIdAuthenticationPlugin" />
     <bean id="twitter_plugin" class="org.onebusaway.users.impl.authentication.TwitterAuthenticationPlugin" />
-    <bean id="facebook_plugin" class="org.onebusaway.users.impl.authentication.FacebookAuthenticationPlugin"/>
+    <bean id="facebook_plugin" class="org.onebusaway.users.impl.authentication.FacebookAuthenticationPlugin" />
 
     <bean id="loginManager" class="org.onebusaway.users.impl.authentication.LoginManager">
         <property name="plugins">

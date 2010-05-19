@@ -2,7 +2,9 @@ package org.onebusaway.users.impl.authentication;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.FilterChain;
@@ -43,6 +45,8 @@ public class AutoUserProcessingFilter extends SpringSecurityFilter {
 
   private List<String> _pathsToExclude = new ArrayList<String>();
 
+  private Map<String, UserIndexKey> _userAgentMapping = new HashMap<String, UserIndexKey>();
+
   public void afterPropertiesSet() throws Exception {
     Assert.hasLength(key);
   }
@@ -62,9 +66,13 @@ public class AutoUserProcessingFilter extends SpringSecurityFilter {
     _pathsToExclude = pathsToExclude;
   }
 
+  public void setUserAgentMapping(Map<String, UserIndexKey> userAgentMapping) {
+    _userAgentMapping = userAgentMapping;
+  }
+
   protected Authentication createAuthentication(HttpServletRequest request) {
 
-    UserIndexKey principal = PrincipalFactory.createPrincipal();
+    UserIndexKey principal = getPrincipal(request);
     UUID credentials = UUID.randomUUID();
 
     IndexedUserDetails details = _userDetailsService.getOrCreateUserForIndexKey(
@@ -84,7 +92,7 @@ public class AutoUserProcessingFilter extends SpringSecurityFilter {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (authentication == null && ! isPathExcluded(request)) {
+    if (authentication == null && !isPathExcluded(request)) {
 
       authentication = createAuthentication(request);
       SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -123,12 +131,28 @@ public class AutoUserProcessingFilter extends SpringSecurityFilter {
     this.key = key;
   }
 
+  protected UserIndexKey getPrincipal(HttpServletRequest request) {
+
+    String userAgent = request.getHeader("User-Agent");
+
+    if (userAgent != null && userAgent.length() > 0) {
+      userAgent = userAgent.toLowerCase();
+
+      for (Map.Entry<String, UserIndexKey> entry : _userAgentMapping.entrySet()) {
+        if (userAgent.contains(entry.getKey()))
+          return entry.getValue();
+      }
+    }
+
+    return PrincipalFactory.createPrincipal();
+  }
+
   private boolean isPathExcluded(HttpServletRequest request) {
 
     String path = request.getServletPath();
     if (path == null || path.length() == 0)
       return false;
-    
+
     for (String toExclude : _pathsToExclude) {
       if (path.startsWith(toExclude))
         return true;
