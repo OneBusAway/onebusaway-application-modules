@@ -38,6 +38,7 @@
     <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
         <property name="properties">
             <props>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.transit_data_federation_webapp.cacheManager</prop>
                 <prop key="tripTimePredictionServiceImpl.persistTripTimePredictions">false</prop>
             </props>
         </property>

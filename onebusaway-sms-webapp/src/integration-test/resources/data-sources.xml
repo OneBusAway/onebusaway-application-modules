@@ -36,11 +36,11 @@
             </props>
         </property>
     </bean>
-
+    
     <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
         <property name="properties">
             <props>
-                <prop key="cacheManager.cacheManagerName">org.onebusaway.webapp.cacheManager</prop>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.sms_webapp.cacheManager</prop>
             </props>
         </property>
     </bean>
@@ -57,17 +57,14 @@
         <property name="postalCode" value="98105" />
     </bean>
 
-    <bean id="serviceArea" class="org.onebusaway.presentation.impl.DefaultServiceAreaServiceImpl" />
-
-    <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl">
-        <property name="providers">
-            <list>
-                <bean class="org.onebusaway.users.impl.validation.KeyValidationProviderV1Impl">
-                    <property name="privateSalt" value="blah" />
-                </bean>
-            </list>
-        </property>
-        <property name="defaultProviderId" value="v1" />
+    <bean id="smsAbbreviationsFactory" class="org.onebusaway.presentation.impl.text.XmlTextModificationsFactory">
+        <property name="resource" value="classpath:sms-destination-abbreviations.xml" />
     </bean>
+
+    <bean id="smsAbbreviations" factory-bean="smsAbbreviationsFactory" factory-method="create">
+        <qualifier value="smsDestinationAbbreviations" />
+    </bean>
+
+    <bean id="serviceArea" class="org.onebusaway.presentation.impl.DefaultServiceAreaServiceImpl" />
 
 </beans>

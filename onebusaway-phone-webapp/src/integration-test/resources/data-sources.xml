@@ -36,12 +36,14 @@
             </props>
         </property>
     </bean>
-    
-    <bean id="cacheManager" class="org.onebusaway.container.spring.EhCacheManagerFactoryBean">
-        <property name="configuration" ref="ehCacheConfiguration" />
-        <property name="cacheManagerName" value="org.onebusaway.phone_webapp.cacheManager" />
-    </bean>
 
+    <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.phone_webapp.cacheManager</prop>
+            </props>
+        </property>
+    </bean>
     <!--
         The Geocoder is used in the SMS interface for determining your default search location. The DefaultGeocoderImpl
         doesn't actually do much geocoding... it's just there for testing
