@@ -18,14 +18,13 @@ package org.onebusaway.phone.actions.bookmarks;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.phone.actions.AbstractAction;
 import org.onebusaway.presentation.services.BookmarkPresentationService;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.users.model.properties.RouteFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import edu.washington.cs.rse.collections.CollectionsLibrary;
 
 @Component
 public class BookmarkStopAction extends AbstractAction {
@@ -61,7 +60,7 @@ public class BookmarkStopAction extends AbstractAction {
     if (_stops.isEmpty())
       return INPUT;
     String name = _bookmarkPresentationService.getNameForStops(_stops);
-    List<String> stopIds = CollectionsLibrary.map(_stops, "id", String.class);
+    List<String> stopIds = MappingLibrary.map(_stops, "id", String.class);
     _currentUserService.addStopBookmark(name, stopIds, new RouteFilter());
     return SUCCESS;
   }

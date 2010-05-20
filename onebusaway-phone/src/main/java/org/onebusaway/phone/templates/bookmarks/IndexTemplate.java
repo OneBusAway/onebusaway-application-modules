@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.phone.templates.Messages;
 import org.onebusaway.presentation.model.BookmarkWithStopsBean;
 import org.onebusaway.probablecalls.AgiActionName;
@@ -26,8 +27,6 @@ import org.onebusaway.probablecalls.agitemplates.AgiTemplateId;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.util.ValueStack;
-
-import edu.washington.cs.rse.collections.CollectionsLibrary;
 
 @AgiTemplateId("/bookmarks/index")
 public class IndexTemplate extends AbstractBookmarkTemplate {
@@ -57,9 +56,9 @@ public class IndexTemplate extends AbstractBookmarkTemplate {
         AgiActionName stopAction = addAction(toPress,
             "/stop/arrivalsAndDeparturesForStopId");
 
-        List<String> stopIds = CollectionsLibrary.map(bookmark.getStops(),
-            "id", String.class);
-        Set<String> routeIds = new HashSet<String>(CollectionsLibrary.map(
+        List<String> stopIds = MappingLibrary.map(bookmark.getStops(), "id",
+            String.class);
+        Set<String> routeIds = new HashSet<String>(MappingLibrary.map(
             bookmark.getRoutes(), "id", String.class));
 
         stopAction.putParam("stopIds", stopIds);
