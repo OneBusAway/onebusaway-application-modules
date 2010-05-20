@@ -3,6 +3,10 @@
  */
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlannerServiceImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
@@ -10,20 +14,14 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
-
-import edu.washington.cs.rse.collections.tuple.FastPair;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.HashMap;
-import java.util.Map;
 
 class StopWalkPlanCache {
 
   @Autowired
   private WalkPlannerService _walkPlanner;
 
-  private Map<FastPair<StopEntry>, WalkPlan> _cache = new HashMap<FastPair<StopEntry>, WalkPlan>();
+  private Map<Pair<StopEntry>, WalkPlan> _cache = new HashMap<Pair<StopEntry>, WalkPlan>();
 
   private int _cacheHits = 0;
 
@@ -44,7 +42,7 @@ class StopWalkPlanCache {
     return _totalHits;
   }
 
-  public WalkPlan getWalkPlanForStopToStop(FastPair<StopEntry> pair)
+  public WalkPlan getWalkPlanForStopToStop(Pair<StopEntry> pair)
       throws NoPathException {
 
     _totalHits++;

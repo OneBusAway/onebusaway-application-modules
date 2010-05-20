@@ -26,6 +26,7 @@ import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.TransitDataConstants;
+import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.onebusaway.transit_data_federation.impl.StopGraphComparator;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.StopSequence;
@@ -42,8 +43,6 @@ import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import edu.washington.cs.rse.collections.graph.DirectedGraph;
 
 @Component
 class RouteBeanServiceImpl implements RouteBeanService {

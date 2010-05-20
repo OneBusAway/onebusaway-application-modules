@@ -3,16 +3,14 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
-
-import edu.washington.cs.rse.collections.graph.DirectedGraph;
-
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.onebusaway.gtfs.model.Stop;
+import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
 
 public class StopGraphComparator implements Comparator<Stop> {
 

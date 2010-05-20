@@ -1,5 +1,16 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
@@ -14,22 +25,11 @@ import org.onebusaway.transit_data_federation.services.tripplanner.offline.StopT
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.washington.cs.rse.collections.FactoryMap;
 import edu.washington.cs.rse.collections.stats.Min;
-import edu.washington.cs.rse.collections.tuple.FastPair;
 import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
-
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class StopTransfersTripPlannerGraphTaskImpl implements
     StopTransfersTripPlannerGraphTask {
@@ -38,7 +38,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
   private StopWalkPlanCache _cachedStopTransferWalkPlanner = new StopWalkPlanCache();
 
-  private Map<FastPair<AgencyAndId>, Double> _cachedStopDistance = new HashMap<FastPair<AgencyAndId>, Double>();
+  private Map<Pair<AgencyAndId>, Double> _cachedStopDistance = new HashMap<Pair<AgencyAndId>, Double>();
 
   private TripPlannerGraphImpl _graph;
 
@@ -113,7 +113,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
    */
   private void processStopTransfers(StopSequenceData data) {
 
-    Map<FastPair<StopEntry>, Transfer> activeTransfers = new HashMap<FastPair<StopEntry>, Transfer>();
+    Map<Pair<StopEntry>, Transfer> activeTransfers = new HashMap<Pair<StopEntry>, Transfer>();
 
     int entryIndex = 0;
 
@@ -127,7 +127,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
       Map<StopEntryImpl, List<StopEntry>> potentialTransfers = computePotentialTransfers(key);
 
       // Keep only the best transfers
-      Map<FastPair<StopEntry>, Transfer> bestTransfers = getBestTransfers(
+      Map<Pair<StopEntry>, Transfer> bestTransfers = getBestTransfers(
           potentialTransfers, data, key);
       activeTransfers.putAll(bestTransfers);
 
@@ -137,8 +137,8 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
         -122.31671333312988, 47.67492405709021, -122.27989196777344);
 
     // Store all the transfers
-    for (Map.Entry<FastPair<StopEntry>, Transfer> entry : activeTransfers.entrySet()) {
-      FastPair<StopEntry> transfer = entry.getKey();
+    for (Map.Entry<Pair<StopEntry>, Transfer> entry : activeTransfers.entrySet()) {
+      Pair<StopEntry> transfer = entry.getKey();
       Transfer t = entry.getValue();
       double distance = t.getWalkingDistance();
       StopEntryImpl fromStop = (StopEntryImpl) transfer.getFirst();
@@ -185,7 +185,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
     return transfers;
   }
 
-  private Map<FastPair<StopEntry>, Transfer> getBestTransfers(
+  private Map<Pair<StopEntry>, Transfer> getBestTransfers(
       Map<StopEntryImpl, List<StopEntry>> potentialTransferStartPointsByEndPoint,
       StopSequenceData data, StopSequenceKey key) {
 
@@ -198,7 +198,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
     Map<StopEntry, Map<StopEntry, Integer>> newStopsAndPotentialTransferEndPoints = getPotentialTransfersToNewRoutes(
         potentialTransferStartPointsByEndPoint, data, key);
 
-    Map<FastPair<StopEntry>, Transfer> bestTransfers = new HashMap<FastPair<StopEntry>, Transfer>();
+    Map<Pair<StopEntry>, Transfer> bestTransfers = new HashMap<Pair<StopEntry>, Transfer>();
 
     StopSequenceStats stats = data.getStatsForSequence(key);
 
@@ -338,7 +338,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
       Map<StopEntry, Integer> potentialTransferEndPointsWithTravelTimes,
       StopSequenceKey key, StopSequenceStats stats) {
 
-    Map<FastPair<Stop>, Min<Transfer>> minsByTransferPoint = new FactoryMap<FastPair<Stop>, Min<Transfer>>(
+    Map<Pair<Stop>, Min<Transfer>> minsByTransferPoint = new FactoryMap<Pair<Stop>, Min<Transfer>>(
         new Min<Transfer>());
 
     for (Map.Entry<StopEntry, Integer> entry : potentialTransferEndPointsWithTravelTimes.entrySet()) {
@@ -348,7 +348,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
       for (StopEntry transferFromEntry : potentialTransferStartPointsByEndPoint.get(transferToEntry)) {
 
-        FastPair<StopEntry> pair = FastPair.createPair(transferFromEntry,
+        Pair<StopEntry> pair = Tuples.pair(transferFromEntry,
             transferToEntry);
 
         int index = key.getIndexOfStop(transferFromEntry);
@@ -367,7 +367,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
     List<Transfer> transfers = new ArrayList<Transfer>();
 
-    for (Map.Entry<FastPair<Stop>, Min<Transfer>> entry : minsByTransferPoint.entrySet()) {
+    for (Map.Entry<Pair<Stop>, Min<Transfer>> entry : minsByTransferPoint.entrySet()) {
       Min<Transfer> min = entry.getValue();
       transfers.addAll(min.getMinElements());
     }
@@ -382,7 +382,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
     AgencyAndId stopIdA = stopA.getId();
     AgencyAndId stopIdB = stopB.getId();
-    FastPair<AgencyAndId> pair = FastPair.createPair(stopIdA, stopIdB);
+    Pair<AgencyAndId> pair = Tuples.pair(stopIdA, stopIdB);
 
     if (stopIdA.compareTo(stopIdB) > 0)
       pair = pair.swap();
@@ -399,7 +399,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
   private void optimisticallyUpdateTransferWalkingDistanceAndKeepBest(
       List<Transfer> transfers,
-      Map<FastPair<StopEntry>, Transfer> resultingBestTransfers) {
+      Map<Pair<StopEntry>, Transfer> resultingBestTransfers) {
 
     double minT = Double.POSITIVE_INFINITY;
     Transfer minTransfer = null;
@@ -428,20 +428,20 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
     }
 
     if (minTransfer != null) {
-      FastPair<StopEntry> stops = minTransfer.getStops();
+      Pair<StopEntry> stops = minTransfer.getStops();
       resultingBestTransfers.put(stops, minTransfer);
     }
   }
 
   private class Transfer implements Comparable<Transfer> {
 
-    private FastPair<StopEntry> _stops;
+    private Pair<StopEntry> _stops;
 
     private double _busTime;
 
     private double _walkingDistance;
 
-    public Transfer(FastPair<StopEntry> pair, double busTime,
+    public Transfer(Pair<StopEntry> pair, double busTime,
         double walkingDistance) {
       _stops = pair;
       _busTime = busTime;
@@ -456,7 +456,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
       return _walkingDistance;
     }
 
-    public FastPair<StopEntry> getStops() {
+    public Pair<StopEntry> getStops() {
       return _stops;
     }
 
