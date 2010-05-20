@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
+import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.NameBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -17,8 +18,6 @@ import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.TransitDataConstants;
 import org.onebusaway.utility.text.NaturalStringOrder;
-
-import edu.washington.cs.rse.collections.CollectionsLibrary;
 
 public class StopsForRouteAction extends AbstractWhereAction {
 
@@ -68,7 +67,7 @@ public class StopsForRouteAction extends AbstractWhereAction {
     _route = _transitDataService.getRouteForId(_id);
     StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(_id);
 
-    Map<String, StopGroupingBean> groupingsByType = CollectionsLibrary.mapToValue(
+    Map<String, StopGroupingBean> groupingsByType = MappingLibrary.mapToValue(
         stopsForRoute.getStopGroupings(), "type", String.class);
     StopGroupingBean byDirection = groupingsByType.get(TransitDataConstants.STOP_GROUPING_TYPE_DIRECTION);
 
@@ -85,7 +84,7 @@ public class StopsForRouteAction extends AbstractWhereAction {
       List<StopGroupBean> groups = byDirection.getStopGroups();
       if (_groupIndex < 0 && groups.size() <= _groupIndex)
         return INPUT;
-      Map<String, StopBean> stopById = CollectionsLibrary.mapToValue(
+      Map<String, StopBean> stopById = MappingLibrary.mapToValue(
           stopsForRoute.getStops(), "id", String.class);
 
       StopGroupBean stopGroup = groups.get(_groupIndex);

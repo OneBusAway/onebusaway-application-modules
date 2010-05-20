@@ -9,6 +9,8 @@ import java.util.TimeZone;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
+import org.onebusaway.collections.tuple.T2;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.transit_data.model.StopCalendarDayBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
@@ -20,9 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.conversion.annotations.Conversion;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
-
-import edu.washington.cs.rse.collections.adapter.IAdapter;
-import edu.washington.cs.rse.collections.tuple.T2;
 
 @Conversion
 public class ScheduleAction extends ActionSupport {
@@ -134,6 +133,10 @@ public class ScheduleAction extends ActionSupport {
   /****
    * Private Methods
    ****/
+  
+  private static interface IAdapter<FROM, TO> {
+    public TO adapt(FROM source);
+  }
 
   private static Date getShiftedDateStatic(Date date) {
     Calendar c = Calendar.getInstance();
@@ -174,7 +177,7 @@ public class ScheduleAction extends ActionSupport {
         if (tuple != null && !tuple.getSecond().isEmpty())
           tuples.add(tuple);
         List<T> beans = new ArrayList<T>();
-        tuple = T2.create(key, beans);
+        tuple = Tuples.tuple(key, beans);
       }
       tuple.getSecond().add(bean);
     }
