@@ -50,11 +50,22 @@ public class PhoneTestSupport extends PhoneClient {
   }
 
   public boolean waitForText(String match, int maxSteps) {
+    return waitForText(match, maxSteps,false);
+  }
+  
+  public boolean waitForText(String match, int maxSteps, boolean printOnMatchNoutFound) {
+    StringBuilder b= new StringBuilder();
     for (int i = 0; i < maxSteps; i++) {
       String text = getReplyAsText(false);
       if (text.contains(match))
         return true;
+      if( printOnMatchNoutFound )
+        b.append(text).append("\n");
       sendDefaultResponse();
+    }
+    if( printOnMatchNoutFound ) {
+      System.err.println("expected: " + match);
+      System.err.println("found: " + b.toString());
     }
     return false;
   }
