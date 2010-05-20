@@ -1,6 +1,9 @@
 package org.onebusaway.container;
 
-import edu.washington.cs.rse.collections.CollectionsLibrary;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -10,9 +13,6 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class ContainerLibrary {
 
   private static final String CLASSPATH_PREFIX = "classpath:";
@@ -20,15 +20,20 @@ public class ContainerLibrary {
   private static final String FILE_PREFIX = "file:";
 
   public static ConfigurableApplicationContext createContext(String... paths) {
-    return createContext(CollectionsLibrary.getArrayAsIterable(paths));
+    List<String> list = new ArrayList<String>();
+    for (String path : paths)
+      list.add(path);
+    return createContext(list);
   }
 
-  public static ConfigurableApplicationContext createContext(Iterable<String> paths) {
+  public static ConfigurableApplicationContext createContext(
+      Iterable<String> paths) {
     return createContext(paths, new HashMap<String, BeanDefinition>());
   }
-  
-  public static ConfigurableApplicationContext createContext(Iterable<String> paths,Map<String,BeanDefinition> additionalBeans) {
-    
+
+  public static ConfigurableApplicationContext createContext(
+      Iterable<String> paths, Map<String, BeanDefinition> additionalBeans) {
+
     GenericApplicationContext ctx = new GenericApplicationContext();
     XmlBeanDefinitionReader xmlReader = new XmlBeanDefinitionReader(ctx);
 
@@ -43,17 +48,18 @@ public class ContainerLibrary {
         xmlReader.loadBeanDefinitions(new ClassPathResource(path));
       }
     }
-    
-    for( Map.Entry<String,BeanDefinition> entry : additionalBeans.entrySet() )
+
+    for (Map.Entry<String, BeanDefinition> entry : additionalBeans.entrySet())
       ctx.registerBeanDefinition(entry.getKey(), entry.getValue());
-    
+
     ctx.refresh();
     ctx.registerShutdownHook();
     return ctx;
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> T getBeanOfType(ApplicationContext context, Class<T> beanType) {
+  public static <T> T getBeanOfType(ApplicationContext context,
+      Class<T> beanType) {
     Map<String, T> beans = context.getBeansOfType(beanType);
     if (beans.size() == 0)
       throw new IllegalStateException("no beans of type " + beanType.getName());

@@ -21,8 +21,8 @@ import java.util.List;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-
-import edu.washington.cs.rse.collections.tuple.T2;
+import org.onebusaway.collections.tuple.T2;
+import org.onebusaway.collections.tuple.Tuples;
 
 @Aspect
 public class CacheableInterceptor extends AbstractCacheableMethodCallManager {
@@ -65,7 +65,7 @@ public class CacheableInterceptor extends AbstractCacheableMethodCallManager {
     for (Method m : methods) {
       Cacheable c = m.getAnnotation(Cacheable.class);
       if (c != null)
-        return T2.create(m, c);
+        return Tuples.tuple(m, c);
     }
     return null;
   }

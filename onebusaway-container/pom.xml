@@ -18,6 +18,13 @@
             <artifactId>onebusaway-core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+                
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-collections</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+        
 
         <!-- Caching Support -->
         <dependency>
@@ -110,12 +117,6 @@
             <artifactId>servlet-api</artifactId>
             <version>2.4</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>edu.washington.cs.rse</groupId>
-            <artifactId>collections</artifactId>
-            <version>1.0.5-SNAPSHOT</version>
         </dependency>
 
         <dependency>
