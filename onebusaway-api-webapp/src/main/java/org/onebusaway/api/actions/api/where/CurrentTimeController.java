@@ -3,7 +3,8 @@ package org.onebusaway.api.actions.api.where;
 import java.util.Date;
 
 import org.onebusaway.api.actions.api.ApiActionSupport;
-import org.onebusaway.transit_data.model.TimeBean;
+import org.onebusaway.api.model.TimeBean;
+import org.onebusaway.utility.DateLibrary;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 
@@ -22,7 +23,9 @@ public class CurrentTimeController extends ApiActionSupport {
     if( ! isVersion(V1))
       return setUnknownVersionResponse();
     
-    TimeBean time = new TimeBean(new Date());
+    Date date = new Date();
+    String readableTime = DateLibrary.getTimeAsIso8601String(date);
+    TimeBean time = new TimeBean(date,readableTime);
     return setOkResponse(time);
   }
 }

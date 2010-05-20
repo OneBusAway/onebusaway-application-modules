@@ -5,21 +5,23 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.text.ParseException;
+import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.junit.Test;
 import org.onebusaway.api.model.ResponseBean;
-import org.onebusaway.transit_data.model.TimeBean;
+import org.onebusaway.api.model.TimeBean;
+import org.onebusaway.utility.DateLibrary;
 
 public class CurrentTimeControllerTest {
-  
+
   @Test
   public void test() throws ParseException {
 
     CurrentTimeController controller = new CurrentTimeController();
 
     long t = System.currentTimeMillis();
-    
+
     DefaultHttpHeaders headers = controller.index();
     assertEquals(200, headers.getStatus());
 
@@ -32,6 +34,11 @@ public class CurrentTimeControllerTest {
     assertNotNull(time);
 
     long delta = Math.abs(time.getTime() - t);
-    assertTrue("check that time delta is within limits: delta=" + delta, delta < 100);
+    assertTrue("check that time delta is within limits: delta=" + delta,
+        delta < 100);
+
+    String readableTime = DateLibrary.getTimeAsIso8601String(new Date(
+        time.getTime()));
+    assertEquals(readableTime, time.getReadableTime());
   }
 }

@@ -7,7 +7,7 @@ import java.util.Date;
 
 import org.junit.Test;
 import org.onebusaway.integration.api.AbstractApiSupport;
-import org.onebusaway.transit_data.model.TimeBean;
+import org.onebusaway.utility.DateLibrary;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -22,8 +22,8 @@ public class CurrentTimeTest extends AbstractApiSupport {
     long delta = Math.abs(time - System.currentTimeMillis());
     assertTrue("comparing time delta: " + delta, delta < 1000);
 
-    TimeBean timeBean = new TimeBean(new Date(time));
-    assertEquals("compare readable time", timeBean.getReadableTime(), getText(
-        data, "readableTime"));
+    String readableTime = DateLibrary.getTimeAsIso8601String(new Date(time));
+    assertEquals("compare readable time", readableTime, getText(data,
+        "readableTime"));
   }
 }
