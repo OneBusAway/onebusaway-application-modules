@@ -14,6 +14,9 @@
 
     <properties>
         <tomcat-version>5.5.29</tomcat-version>
+        <cargo.servlet.port>9500</cargo.servlet.port>
+        <cargo.tomcat.ajp.port>9501</cargo.tomcat.ajp.port>
+        <cargo.rmi.port>9502</cargo.rmi.port>
     </properties>
 
     <dependencies>
@@ -76,6 +79,11 @@
                 <configuration>
                     <configuration>
                         <home>${project.build.directory}/tomcat5x/container</home>
+                        <properties>
+                            <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
+                            <cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+                            <cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
+                        </properties>
                     </configuration>
                     <container>
                         <containerId>tomcat5x</containerId>
@@ -112,7 +120,7 @@
                                         <properties>
                                             <context>onebusaway-federations-webapp</context>
                                         </properties>
-                                        <pingURL>http://localhost:8080/onebusaway-federations-webapp/remoting/index.action</pingURL>
+                                        <pingURL>http://localhost:${cargo.servlet.port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
                                     </deployable>
                                 </deployables>
                             </deployer>
@@ -172,6 +180,9 @@
                             <includes>
                                 <include>org/onebusaway/integration/**</include>
                             </includes>
+                            <systemPropertyVariables>
+                                <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
+                            </systemPropertyVariables>
                         </configuration>
                     </execution>
                 </executions>
