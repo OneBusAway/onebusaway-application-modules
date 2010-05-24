@@ -103,8 +103,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void resetUser(User user) {
-    user.setProperties(_userPropertiesService.createDefaultProperties());
-    _userDao.saveOrUpdateUser(user);
+    _userPropertiesService.resetUser(user);
   }
 
   @Override

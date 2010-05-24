@@ -15,6 +15,31 @@
     <!-- Common Software Dependency Versions -->
     <properties>
         <struts-version>2.1.8.1</struts-version>
+
+        <!--  These properties are primarily used in configuring joint integration tests -->
+        <org.onebusaway.federations_webapp.port>9900</org.onebusaway.federations_webapp.port>
+        <org.onebusaway.federations_webapp.ajp_port>9901</org.onebusaway.federations_webapp.ajp_port>
+        <org.onebusaway.federations_webapp.rmi_port>9902</org.onebusaway.federations_webapp.rmi_port>
+
+        <org.onebusaway.transit_data_federation_webapp.port>9905</org.onebusaway.transit_data_federation_webapp.port>
+        <org.onebusaway.transit_data_federation_webapp.ajp_port>9906</org.onebusaway.transit_data_federation_webapp.ajp_port>
+        <org.onebusaway.transit_data_federation_webapp.rmi_port>9907</org.onebusaway.transit_data_federation_webapp.rmi_port>
+
+        <org.onebusaway.api_webapp.port>9910</org.onebusaway.api_webapp.port>
+        <org.onebusaway.api_webapp.ajp_port>9911</org.onebusaway.api_webapp.ajp_port>
+        <org.onebusaway.api_webapp.rmi_port>9912</org.onebusaway.api_webapp.rmi_port>
+
+        <org.onebusaway.sms_webapp.port>9915</org.onebusaway.sms_webapp.port>
+        <org.onebusaway.sms_webapp.ajp_port>9916</org.onebusaway.sms_webapp.ajp_port>
+        <org.onebusaway.sms_webapp.rmi_port>9917</org.onebusaway.sms_webapp.rmi_port>
+
+        <org.onebusaway.phone_webapp.port>9920</org.onebusaway.phone_webapp.port>
+        <org.onebusaway.phone_webapp.ajp_port>9921</org.onebusaway.phone_webapp.ajp_port>
+        <org.onebusaway.phone_webapp.rmi_port>9922</org.onebusaway.phone_webapp.rmi_port>
+
+        <org.onebusaway.webapp.port>9925</org.onebusaway.webapp.port>
+        <org.onebusaway.webapp.ajp_port>9926</org.onebusaway.webapp.ajp_port>
+        <org.onebusaway.webapp.rmi_port>9927</org.onebusaway.webapp.rmi_port>
     </properties>
 
     <repositories>
@@ -65,7 +90,8 @@
 
     <scm>
         <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</connection>
-        <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</developerConnection>
+        <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk
+        </developerConnection>
         <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/trunk</url>
     </scm>
 
@@ -104,6 +130,53 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>2.5</version>
+                    <!-- By default, we exclude anything in the org.onebusaway.integration package from regular unit test -->
+                    <configuration>
+                        <excludes>
+                            <exclude>org/onebusaway/integration/**</exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <!--
+                            Instead, we add a special integration-test execution that runs any tests in the
+                            org.onebusaway.integration package
+                        -->
+                        <execution>
+                            <id>integration-tests</id>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <configuration>
+                                <skip>false</skip>
+                                <excludes>
+                                    <exclude>none</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>org/onebusaway/integration/**/*Test.java</include>
+                                </includes>
+                                <!-- We also define some test system properties -->
+                                <systemPropertyVariables>
+                                    <org.onebusaway.federations_webapp.port>${org.onebusaway.federations_webapp.port}</org.onebusaway.federations_webapp.port>
+                                    <org.onebusaway.transit_data_federation_webapp.port>${org.onebusaway.transit_data_federation_webapp.port}</org.onebusaway.transit_data_federation_webapp.port>
+                                    <org.onebusaway.api_webapp.port>${org.onebusaway.api_webapp.port}</org.onebusaway.api_webapp.port>
+                                    <org.onebusaway.phone_webapp.port>${org.onebusaway.phone_webapp.port}</org.onebusaway.phone_webapp.port>
+                                    <org.onebusaway.sms_webapp.port>${org.onebusaway.sms_webapp.port}</org.onebusaway.sms_webapp.port>
+                                    <org.onebusaway.webapp.port>${org.onebusaway.webapp.port}</org.onebusaway.webapp.port>
+                                </systemPropertyVariables>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>2.1-beta-1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.cargo</groupId>
+                    <artifactId>cargo-maven2-plugin</artifactId>
+                    <version>1.0.1-beta-3</version>
                 </plugin>
             </plugins>
         </pluginManagement>

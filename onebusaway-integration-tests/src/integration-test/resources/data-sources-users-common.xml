@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+        
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+        <property name="url" value="jdbc:hsqldb:hsql://localhost/org_onebusaway_database_users" />
+        <property name="username" value="sa" />
+        <property name="password" value="" />
+    </bean>
+
+    <bean id="webappHibernateProperties" class="org.onebusaway.container.spring.PropertiesBeanPostProcessor">
+        <property name="target" value="hibernateProperties" />
+        <property name="properties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.webapp.sharedCacheManager</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!--
+        The Geocoder is used in the SMS interface for determining your default search location. The DefaultGeocoderImpl
+        doesn't actually do much geocoding... it's just there for testing
+    -->
+    <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.impl.FixedGeocoderImpl">
+        <property name="lat" value="47.65475043477393" />
+        <property name="lon" value="-122.3078727722168" />
+        <property name="city" value="Seattle" />
+        <property name="state" value="WA" />
+        <property name="postalCode" value="98105" />
+    </bean>
+
+    <bean id="serviceArea" class="org.onebusaway.presentation.impl.DefaultServiceAreaServiceImpl" />
+
+    <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="ehCacheConfiguration.configLocation">classpath:org/onebusaway/container/ehcache-terracotta.xml</prop>
+                <prop key="ehCacheConfiguration.terracottaUrl">localhost:9510</prop>
+
+                <prop key="lastSelectedStopServiceCache.overflowToDisk">false</prop>
+                <prop key="lastSelectedStopServiceCache.terracottaClustered">true</prop>
+
+                <prop key="userLastAccessTimeServiceCache.overflowToDisk">false</prop>
+                <prop key="userLastAccessTimeServiceCache.terracottaClustered">true</prop>
+
+                <prop key="userIndexCache.terracottaClustered">true</prop>
+                <prop key="userCache.terracottaClustered">true</prop>
+                <prop key="userIndicesCache.terracottaClustered">true</prop>
+                <prop key="userRolesCache.terracottaClustered">true</prop>
+                <prop key="userRoleCache.terracottaClustered">true</prop>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.sharedCacheManager</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>

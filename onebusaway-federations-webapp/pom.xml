@@ -14,9 +14,6 @@
 
     <properties>
         <tomcat-version>5.5.29</tomcat-version>
-        <cargo.servlet.port>9500</cargo.servlet.port>
-        <cargo.tomcat.ajp.port>9501</cargo.tomcat.ajp.port>
-        <cargo.rmi.port>9502</cargo.rmi.port>
     </properties>
 
     <dependencies>
@@ -80,9 +77,9 @@
                     <configuration>
                         <home>${project.build.directory}/tomcat5x/container</home>
                         <properties>
-                            <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
-                            <cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
-                            <cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
+                            <cargo.servlet.port>${org.onebusaway.federations_webapp.port}</cargo.servlet.port>
+                            <cargo.tomcat.ajp.port>${org.onebusaway.federations_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                            <cargo.rmi.port>${org.onebusaway.federations_webapp.rmi_port}</cargo.rmi.port>
                         </properties>
                     </configuration>
                     <container>
@@ -120,7 +117,7 @@
                                         <properties>
                                             <context>onebusaway-federations-webapp</context>
                                         </properties>
-                                        <pingURL>http://localhost:${cargo.servlet.port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
+                                        <pingURL>http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
                                     </deployable>
                                 </deployables>
                             </deployer>
@@ -154,36 +151,6 @@
                         <goals>
                             <goal>stop-server</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>org/onebusaway/integration/**</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>integration-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                            <excludes>
-                                <exclude>none</exclude>
-                            </excludes>
-                            <includes>
-                                <include>org/onebusaway/integration/**</include>
-                            </includes>
-                            <systemPropertyVariables>
-                                <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
-                            </systemPropertyVariables>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

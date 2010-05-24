@@ -9,7 +9,7 @@ public class WebInterfaceTest extends SeleneseTestCase {
 
   @Before
   public void setUp() throws Exception {
-    String port = System.getProperty("cargo.servlet.port", "8080");
+    String port = System.getProperty("org.onebusaway.federations_webapp.port", "8080");
     System.out.println("port=" + port);
     setUp("http://localhost:" + port + "/", "*firefox");
   }

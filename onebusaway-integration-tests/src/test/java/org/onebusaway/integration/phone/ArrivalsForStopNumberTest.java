@@ -54,12 +54,20 @@ public class ArrivalsForStopNumberTest extends PhoneTestSupport {
       if (checkArrivals) {
         // There should be at least one arrival for the 15
         assertEquals(sayAlpha("route"), getReplyAsText());
-        assertEquals(sayAlpha("15"), getReplyAsText());
+        
+        String reply = getReplyAsText();
+        assertTrue(reply.equals(sayAlpha("15"))
+            || reply.equals(sayAlpha("15 express")));
+        
         assertEquals(sayAlpha("to"), getReplyAsText());
-        assertEquals(sayAlpha("Downtown Seattle"), getReplyAsText());
-        String value = getReplyAsText();
-        assertTrue("checking arrival string: " + value,
-            isValidArrialString(value));
+
+        reply = getReplyAsText();
+        assertTrue(reply.equals(sayAlpha("Downtown Seattle"))
+            || reply.equals(sayAlpha("Downtown Seattle - Express")));
+
+        reply = getReplyAsText();
+        assertTrue("checking arrival string: " + reply,
+            isValidArrialString(reply));
       }
 
       // But there may be more
@@ -68,9 +76,13 @@ public class ArrivalsForStopNumberTest extends PhoneTestSupport {
       while (true) {
         next = getReplyAsText();
         if (next.equals(sayAlpha("route"))) {
-          assertEquals(sayAlpha("15"), getReplyAsText());
+          String reply = getReplyAsText();
+          assertTrue(reply.equals(sayAlpha("15"))
+              || reply.equals(sayAlpha("15 express")));
           assertEquals(sayAlpha("to"), getReplyAsText());
-          assertEquals(sayAlpha("Downtown Seattle"), getReplyAsText());
+          reply = getReplyAsText();
+          assertTrue(reply.equals(sayAlpha("Downtown Seattle"))
+              || reply.equals(sayAlpha("Downtown Seattle - Express")));
           String value = getReplyAsText();
           assertTrue("checking arrival string: " + value,
               isValidArrialString(value));

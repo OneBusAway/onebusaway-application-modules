@@ -11,6 +11,7 @@
 
     <properties>
         <tomcat-version>5.5.29</tomcat-version>
+        <cargo.jvmargs>-Xmx1G -XX:MaxPermSize=256m</cargo.jvmargs>
     </properties>
 
     <pluginRepositories>
@@ -68,6 +69,12 @@
         </dependency>
         <dependency>
             <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-sms-webapp</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-webapp</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <type>war</type>
@@ -95,16 +102,6 @@
             <artifactId>selenium-java-client-driver</artifactId>
             <version>1.0.2</version>
         </dependency>
-        <dependency>
-        	<groupId>org.codehaus.cargo</groupId>
-        	<artifactId>cargo-core-container-tomcat</artifactId>
-        	<version>1.0.1-beta-2</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.codehaus.cargo</groupId>
-        	<artifactId>cargo-core-api-generic</artifactId>
-        	<version>1.0.1-beta-2</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -129,7 +126,7 @@
                                 <argument>-Donebusaway_prefix=${basedir}</argument>
                                 <argument>org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreatorMain
                                 </argument>
-                                <argument>${basedir}/src/test/data/bundle.xml</argument>
+                                <argument>${basedir}/src/integration-test/resources/bundle.xml</argument>
                                 <argument>${project.build.directory}/transit-data-bundle</argument>
                             </arguments>
                         </configuration>
@@ -203,16 +200,12 @@
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
                 <configuration>
-                    <configuration>
-                        <home>${project.build.directory}/tomcat5x/container</home>
-                        <properties>
-                            <cargo.jvmargs>-Xmx1G -XX:MaxPermSize=256m</cargo.jvmargs>
-                        </properties>
-                    </configuration>
                     <container>
                         <containerId>tomcat5x</containerId>
                         <systemProperties>
                             <onebusaway_prefix>${basedir}</onebusaway_prefix>
+                            <org.onebusaway.federations_webapp.port>${org.onebusaway.federations_webapp.port}</org.onebusaway.federations_webapp.port>
+                            <org.onebusaway.transit_data_federation_webapp.port>${org.onebusaway.transit_data_federation_webapp.port}</org.onebusaway.transit_data_federation_webapp.port>
                         </systemProperties>
                         <zipUrlInstaller>
                             <url>http://developer.onebusaway.org/dist/apache-tomcat-${tomcat-version}.zip</url>
@@ -223,83 +216,194 @@
                     <wait>false</wait>
                 </configuration>
                 <executions>
+                    <!--
+                        Here's the deal. Instead of starting one Tomcat servlet container instance to run all the
+                        webapps, we break each off into its own Tomcat instance. Why? In practice, we break them apart
+                        on the production server as well, so it better reflects the actual deployment. More importantly,
+                        it makes it easier to manage caching using Ehcache and Terracotta. We share a number of cache
+                        instances across webapp intances. Normally, it's tricky to make that work using Ehcache, because
+                        it does not play well when each webapp is loaded with a separate class-loader. Additionally,
+                        Terracotta distributed caching does not work in this case either.
+                    -->
                     <execution>
-                        <id>start-container</id>
+                        <id>start-container-federations-webapp</id>
                         <phase>pre-integration-test</phase>
                         <goals>
                             <goal>start</goal>
                         </goals>
-                    </execution>
-                    <execution>
-                        <id>deploy-service-registry</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>deployer-deploy</goal>
-                        </goals>
                         <configuration>
-                            <deployer>
-                                <type>installed</type>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/federations-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.federations_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.federations_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.federations_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
                                 <deployables>
                                     <deployable>
                                         <groupId>org.onebusaway</groupId>
                                         <artifactId>onebusaway-federations-webapp</artifactId>
                                         <type>war</type>
-                                        <properties>
-                                            <context>onebusaway-federations-webapp</context>
-                                        </properties>
-                                        <pingURL>http://localhost:8080/onebusaway-federations-webapp/remoting/index.action
-                                        </pingURL>
+                                        <pingURL>http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
                                     </deployable>
+                                </deployables>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>start-container-transit-data-federation-webapp</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/transit-data-federation-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.transit_data_federation_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.transit_data_federation_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.transit_data_federation_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                                <deployables>
                                     <deployable>
                                         <groupId>org.onebusaway</groupId>
                                         <artifactId>onebusaway-transit-data-federation-webapp</artifactId>
                                         <type>war</type>
-                                        <location>${basedir}/../onebusaway-transit-data-federation-webapp/target/onebusaway-transit-data-federation-webapp-integration-test.war
-                                        </location>
                                         <properties>
                                             <context>onebusaway-transit-data-federation-webapp</context>
                                         </properties>
-                                        <pingURL>http://localhost:8080/onebusaway-transit-data-federation-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-transit-data-federation-webapp/target/onebusaway-transit-data-federation-webapp-integration-test.war</location>
+                                        <pingURL>http://localhost:${org.onebusaway.transit_data_federation_webapp.port}/onebusaway-transit-data-federation-webapp/</pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
+                                </deployables>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>start-container-api-webapp</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/api-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.api_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.api_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.api_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                                <deployables>
                                     <deployable>
                                         <groupId>org.onebusaway</groupId>
                                         <artifactId>onebusaway-api-webapp</artifactId>
                                         <type>war</type>
-                                        <location>${basedir}/../onebusaway-api-webapp/target/onebusaway-api-webapp-integration-test.war
-                                        </location>
                                         <properties>
                                             <context>onebusaway-api-webapp</context>
                                         </properties>
-                                        <pingURL>http://localhost:8080/onebusaway-api-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-api-webapp/target/onebusaway-api-webapp-integration-test.war</location>
+                                        <pingURL>http://localhost:${org.onebusaway.api_webapp.port}/onebusaway-api-webapp/</pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
+                                </deployables>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>start-container-phone-webapp</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/phone-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.phone_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.phone_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.phone_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                                <deployables>
                                     <deployable>
                                         <groupId>org.onebusaway</groupId>
                                         <artifactId>onebusaway-phone-webapp</artifactId>
                                         <type>war</type>
-                                        <location>${basedir}/../onebusaway-phone-webapp/target/onebusaway-phone-webapp-integration-test.war
-                                        </location>
                                         <properties>
                                             <context>onebusaway-phone-webapp</context>
                                         </properties>
-                                        <pingURL>http://localhost:8080/onebusaway-phone-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-phone-webapp/target/onebusaway-phone-webapp-integration-test.war</location>
+                                        <pingURL>http://localhost:${org.onebusaway.phone_webapp.port}/onebusaway-phone-webapp/</pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
+                                </deployables>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>start-container-sms-webapp</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/sms-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.sms_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.sms_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.sms_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                                <deployables>
+                                    <deployable>
+                                        <groupId>org.onebusaway</groupId>
+                                        <artifactId>onebusaway-sms-webapp</artifactId>
+                                        <type>war</type>
+                                        <properties>
+                                            <context>onebusaway-sms-webapp</context>
+                                        </properties>
+                                        <location>${basedir}/../onebusaway-sms-webapp/target/onebusaway-sms-webapp-integration-test.war</location>
+                                        <pingURL>http://localhost:${org.onebusaway.sms_webapp.port}/onebusaway-sms-webapp/</pingURL>
+                                        <pingTimeout>60000</pingTimeout>
+                                    </deployable>
+                                </deployables>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>start-container-webapp</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                                <deployables>
                                     <deployable>
                                         <groupId>org.onebusaway</groupId>
                                         <artifactId>onebusaway-webapp</artifactId>
                                         <type>war</type>
-                                        <location>${basedir}/../onebusaway-webapp/target/onebusaway-webapp-integration-test.war
-                                        </location>
                                         <properties>
                                             <context>onebusaway-webapp</context>
                                         </properties>
-                                        <pingURL>http://localhost:8080/onebusaway-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-webapp/target/onebusaway-webapp-integration-test.war</location>
+                                        <pingURL>http://localhost:${org.onebusaway.webapp.port}/onebusaway-webapp/</pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
                                 </deployables>
-                            </deployer>
+                            </configuration>
                         </configuration>
                     </execution>
                     <execution>
@@ -330,33 +434,6 @@
                         <goals>
                             <goal>stop-server</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>org/onebusaway/integration/**</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>integration-tests</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>test</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                            <excludes>
-                                <exclude>none</exclude>
-                            </excludes>
-                            <includes>
-                                <include>org/onebusaway/integration/**/*Test.java</include>
-                            </includes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

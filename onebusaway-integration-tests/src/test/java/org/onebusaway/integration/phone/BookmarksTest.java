@@ -59,12 +59,18 @@ public class BookmarksTest extends PhoneTestSupport {
 
       // There should be at least one arrival for the 15
       assertEquals(sayAlpha("route"), getReplyAsText());
-      assertEquals(sayAlpha("15"), getReplyAsText());
+      
+      String reply = getReplyAsText();
+      assertTrue(reply.equals(sayAlpha("15")) || reply.equals(sayAlpha("15 express")));
+      
       assertEquals(sayAlpha("to"), getReplyAsText());
-      assertEquals(sayAlpha("Downtown Seattle"), getReplyAsText());
-      String value = getReplyAsText();
-      assertTrue("checking arrival string: " + value,
-          ArrivalsForStopNumberTest.isValidArrialString(value));
+      
+      reply = getReplyAsText();
+      assertTrue(reply.equals(sayAlpha("Downtown Seattle")) || reply.equals(sayAlpha("Downtown Seattle - Express")));
+      
+      reply = getReplyAsText();
+      assertTrue("checking arrival string: " + reply,
+          ArrivalsForStopNumberTest.isValidArrialString(reply));
     }
 
   }

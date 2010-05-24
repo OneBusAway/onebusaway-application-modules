@@ -15,8 +15,13 @@ import org.onebusaway.container.cache.CacheableMethodKeyFactory;
 public class TransitDataServiceCachingInterceptor extends
     AbstractCacheableMethodCallManager {
 
+  @Around("execution(* org.onebusaway.transit_data.services.TransitDataService.getRoute(..))")
+  public Object getRoute(ProceedingJoinPoint pjp) throws Throwable {
+    return super.evaluate(pjp);
+  }
+  
   @Around("execution(* org.onebusaway.transit_data.services.TransitDataService.getStop(..))")
-  public Object doBasicProfiling(ProceedingJoinPoint pjp) throws Throwable {
+  public Object getStop(ProceedingJoinPoint pjp) throws Throwable {
     return super.evaluate(pjp);
   }
 

@@ -36,9 +36,9 @@ public class ArrivalsAndDeparturesForStopTest extends AbstractApiSupport {
 
     for (Element el : arrivalsAndDepartures) {
       assertTrue(getText(el, "routeId").matches("^\\d+_\\d+$"));
-      assertTrue(getText(el, "routeShortName").matches("^\\d+$"));
+      assertTrue(getText(el, "routeShortName").matches("^\\d+E{0,1}$"));
       assertTrue(getText(el, "tripId").matches("^\\d+_\\d+$"));
-      assertTrue(getText(el, "tripHeadsign").matches("^[\\w\\s]+$"));
+      assertTrue(getText(el, "tripHeadsign").matches("^[-\\w\\s]+$"));
       assertEquals("1_13721", getText(el, "stopId"));
 
       assertTrue(Math.abs(getLong(el, "scheduledArrivalTime") - t) < delta);

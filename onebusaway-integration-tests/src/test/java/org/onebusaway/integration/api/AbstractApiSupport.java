@@ -24,7 +24,8 @@ import org.w3c.dom.NodeList;
 public abstract class AbstractApiSupport {
 
   protected String getBaseUrl() {
-    return "http://localhost:8080/onebusaway-api-webapp";
+    String port = System.getProperty("org.onebusaway.api_webapp.port","9910");
+    return "http://localhost:" + port + "/onebusaway-api-webapp";
   }
 
   protected URL getUrl(String request) {

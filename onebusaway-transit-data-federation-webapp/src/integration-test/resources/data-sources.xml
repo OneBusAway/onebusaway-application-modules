@@ -46,7 +46,7 @@
 
     <!-- Federated Service Registry -->
     <bean id="serviceRegistry" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-        <property name="serviceUrl" value="http://localhost:8080/onebusaway-federations-webapp/remoting/service-registry" />
+        <property name="serviceUrl" value="http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/service-registry" />
         <property name="serviceInterface" value="org.onebusaway.federations.FederatedServiceRegistry" />
     </bean>
 
@@ -55,7 +55,7 @@
         <property name="registry" ref="serviceRegistry" />
         <property name="serviceClass" value="org.onebusaway.transit_data.services.TransitDataService" />
         <property name="serviceUrl"
-            value="http://localhost:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
+            value="http://localhost:${org.onebusaway.transit_data_federation_webapp.port}/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
     </bean>
 
 </beans>

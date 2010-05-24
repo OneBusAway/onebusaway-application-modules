@@ -34,7 +34,7 @@
     </bean>
 
     <bean id="gtfs_kingcountymetro" class="org.onebusaway.transit_data_federation.bundle.model.GtfsBundle">
-        <property name="path" value="${onebusaway_prefix}/src/test/data/king_county_metro.zip" />
+        <property name="path" value="${onebusaway_prefix}/src/integration-test/resources/king_county_metro.zip" />
         <property name="defaultAgencyId" value="1" />
         <property name="agencyIdMappings">
             <map>
@@ -61,7 +61,7 @@
     </bean>
 
     <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.FileBasedOpenStreetMapProviderImpl">
-        <property name="path" value="${onebusaway_prefix}/src/test/data/kcm.osm.gz" />
+        <property name="path" value="${onebusaway_prefix}/src/integration-test/resources/kcm.osm.gz" />
     </bean>
 
 </beans>

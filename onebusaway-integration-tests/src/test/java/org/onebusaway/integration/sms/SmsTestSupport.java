@@ -10,10 +10,11 @@ public class SmsTestSupport extends CustomDefaultSelenium {
 
   private String _phoneNumber = "%2B12065551234";
 
-  private String _prefix = "/onebusaway-webapp";
+  private String _prefix = "/onebusaway-sms-webapp";
 
   public SmsTestSupport() {
-    super("http://localhost:8080/", "*firefox");
+    super("http://localhost:"
+        + System.getProperty("org.onebusaway.sms_webapp.port", "9915") + "/", "*firefox");
   }
 
   public void setUserId(String userId) {

@@ -83,7 +83,7 @@ public class BookmarksTest {
     
     sms.url("%23bookmarks");
     assertTrue(sms.isTextPresent("1: 15th Ave NW & NW Market St"));
-    assertTrue(sms.isTextPresent("1: 15th Ave NW & NW Leary Way"));
+    assertTrue(sms.isTextPresent("2: 15th Ave NW & NW Leary Way"));
     assertTrue(sms.isTextPresent("Text \"onebus #bookmark num\" to see bookmark."));
     
     sms.stop();

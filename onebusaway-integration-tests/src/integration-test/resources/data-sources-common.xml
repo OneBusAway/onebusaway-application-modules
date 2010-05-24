@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <!-- Federated Service Registry -->
+    <bean id="serviceRegistry" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+        <property name="serviceUrl"
+            value="http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/service-registry" />
+        <property name="serviceInterface" value="org.onebusaway.federations.FederatedServiceRegistry" />
+    </bean>
+
+    <bean id="transitDataService" class="org.onebusaway.federations.FederatedServiceFactoryBean">
+        <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
+        <property name="collection">
+            <bean class="org.onebusaway.federations.impl.DynamicFederatedServiceCollectionImpl">
+                <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
+                <property name="registry" ref="serviceRegistry" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="transitDataServiceCaching" class="org.onebusaway.presentation.impl.transit_data.TransitDataServiceCachingInterceptor">
+        <property name="cacheManager" ref="cacheManager" />
+    </bean>
+    
+    <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl">
+        <property name="providers">
+            <list>
+                <bean class="org.onebusaway.users.impl.validation.KeyValidationProviderV1Impl">
+                    <property name="privateSalt" value="blah" />
+                </bean>
+            </list>
+        </property>
+        <property name="defaultProviderId" value="v1" />
+    </bean>
+
+</beans>

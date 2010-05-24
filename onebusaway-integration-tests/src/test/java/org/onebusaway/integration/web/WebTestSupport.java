@@ -9,7 +9,9 @@ public class WebTestSupport extends CustomDefaultSelenium {
   private String _prefix = "/onebusaway-webapp";
 
   public WebTestSupport() {
-    super("http://localhost:8080/", "*firefox");
+    super("http://localhost:"
+        + System.getProperty("org.onebusaway.webapp.port", "9925") + "/",
+        "*firefox");
   }
 
   public void setPrefix(String prefix) {
