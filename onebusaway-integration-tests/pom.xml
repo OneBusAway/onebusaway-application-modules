@@ -14,6 +14,20 @@
         <cargo.jvmargs>-Xmx1G -XX:MaxPermSize=256m</cargo.jvmargs>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>Codehaus Snapshots</id>
+            <url>http://snapshots.repository.codehaus.org/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+
     <pluginRepositories>
         <pluginRepository>
             <id>terracotta-snapshots</id>
@@ -24,6 +38,16 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>Codehaus Snapshots</id>
+            <url>http://snapshots.repository.codehaus.org/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>  <!-- Workaround for MNG-2974, see note below -->
+            </releases>
         </pluginRepository>
     </pluginRepositories>
 
@@ -142,16 +166,14 @@
                 http://svn.codehaus.org/mojo/trunk/sandbox/maven-hsqldb-plugin To get it to build, I had to add a
                 reference to the codehaus snapshots repository to find a rerference to mojo-sandbox, as described here:
 
-                http://mojo.codehaus.org/using-sandbox-plugins.html
-                
-                Additionally, I modified the plugin to use hsqldb-2.0.0, since that's what we're using everywhere else
+                http://mojo.codehaus.org/using-sandbox-plugins.html Additionally, I modified the plugin to use
+                hsqldb-2.0.0, since that's what we're using everywhere else
             -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>maven-hsqldb-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <executions>
-
                     <execution>
                         <id>user-database</id>
                         <phase>pre-integration-test</phase>
@@ -193,8 +215,10 @@
                         <containerId>tomcat5x</containerId>
                         <systemProperties>
                             <onebusaway_prefix>${basedir}</onebusaway_prefix>
-                            <org.onebusaway.federations_webapp.port>${org.onebusaway.federations_webapp.port}</org.onebusaway.federations_webapp.port>
-                            <org.onebusaway.transit_data_federation_webapp.port>${org.onebusaway.transit_data_federation_webapp.port}</org.onebusaway.transit_data_federation_webapp.port>
+                            <org.onebusaway.federations_webapp.port>${org.onebusaway.federations_webapp.port}
+                            </org.onebusaway.federations_webapp.port>
+                            <org.onebusaway.transit_data_federation_webapp.port>${org.onebusaway.transit_data_federation_webapp.port}
+                            </org.onebusaway.transit_data_federation_webapp.port>
                         </systemProperties>
                         <zipUrlInstaller>
                             <url>http://developer.onebusaway.org/dist/apache-tomcat-${tomcat-version}.zip</url>
@@ -226,7 +250,8 @@
                                 <properties>
                                     <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.federations_webapp.port}</cargo.servlet.port>
-                                    <cargo.tomcat.ajp.port>${org.onebusaway.federations_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.federations_webapp.ajp_port}
+                                    </cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.federations_webapp.rmi_port}</cargo.rmi.port>
                                 </properties>
                                 <deployables>
@@ -234,7 +259,8 @@
                                         <groupId>org.onebusaway</groupId>
                                         <artifactId>onebusaway-federations-webapp</artifactId>
                                         <type>war</type>
-                                        <pingURL>http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
+                                        <pingURL>http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/index.action
+                                        </pingURL>
                                     </deployable>
                                 </deployables>
                             </configuration>
@@ -251,9 +277,12 @@
                                 <home>${project.build.directory}/tomcat5x/transit-data-federation-webapp</home>
                                 <properties>
                                     <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
-                                    <cargo.servlet.port>${org.onebusaway.transit_data_federation_webapp.port}</cargo.servlet.port>
-                                    <cargo.tomcat.ajp.port>${org.onebusaway.transit_data_federation_webapp.ajp_port}</cargo.tomcat.ajp.port>
-                                    <cargo.rmi.port>${org.onebusaway.transit_data_federation_webapp.rmi_port}</cargo.rmi.port>
+                                    <cargo.servlet.port>${org.onebusaway.transit_data_federation_webapp.port}
+                                    </cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.transit_data_federation_webapp.ajp_port}
+                                    </cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.transit_data_federation_webapp.rmi_port}
+                                    </cargo.rmi.port>
                                 </properties>
                                 <deployables>
                                     <deployable>
@@ -263,8 +292,10 @@
                                         <properties>
                                             <context>onebusaway-transit-data-federation-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-transit-data-federation-webapp/target/onebusaway-transit-data-federation-webapp-integration-test.war</location>
-                                        <pingURL>http://localhost:${org.onebusaway.transit_data_federation_webapp.port}/onebusaway-transit-data-federation-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-transit-data-federation-webapp/target/onebusaway-transit-data-federation-webapp-integration-test.war
+                                        </location>
+                                        <pingURL>http://localhost:${org.onebusaway.transit_data_federation_webapp.port}/onebusaway-transit-data-federation-webapp/
+                                        </pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
                                 </deployables>
@@ -294,8 +325,10 @@
                                         <properties>
                                             <context>onebusaway-api-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-api-webapp/target/onebusaway-api-webapp-integration-test.war</location>
-                                        <pingURL>http://localhost:${org.onebusaway.api_webapp.port}/onebusaway-api-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-api-webapp/target/onebusaway-api-webapp-integration-test.war
+                                        </location>
+                                        <pingURL>http://localhost:${org.onebusaway.api_webapp.port}/onebusaway-api-webapp/
+                                        </pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
                                 </deployables>
@@ -314,7 +347,8 @@
                                 <properties>
                                     <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.phone_webapp.port}</cargo.servlet.port>
-                                    <cargo.tomcat.ajp.port>${org.onebusaway.phone_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.phone_webapp.ajp_port}
+                                    </cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.phone_webapp.rmi_port}</cargo.rmi.port>
                                 </properties>
                                 <deployables>
@@ -325,8 +359,10 @@
                                         <properties>
                                             <context>onebusaway-phone-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-phone-webapp/target/onebusaway-phone-webapp-integration-test.war</location>
-                                        <pingURL>http://localhost:${org.onebusaway.phone_webapp.port}/onebusaway-phone-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-phone-webapp/target/onebusaway-phone-webapp-integration-test.war
+                                        </location>
+                                        <pingURL>http://localhost:${org.onebusaway.phone_webapp.port}/onebusaway-phone-webapp/
+                                        </pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
                                 </deployables>
@@ -356,8 +392,10 @@
                                         <properties>
                                             <context>onebusaway-sms-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-sms-webapp/target/onebusaway-sms-webapp-integration-test.war</location>
-                                        <pingURL>http://localhost:${org.onebusaway.sms_webapp.port}/onebusaway-sms-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-sms-webapp/target/onebusaway-sms-webapp-integration-test.war
+                                        </location>
+                                        <pingURL>http://localhost:${org.onebusaway.sms_webapp.port}/onebusaway-sms-webapp/
+                                        </pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
                                 </deployables>
@@ -387,8 +425,10 @@
                                         <properties>
                                             <context>onebusaway-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-webapp/target/onebusaway-webapp-integration-test.war</location>
-                                        <pingURL>http://localhost:${org.onebusaway.webapp.port}/onebusaway-webapp/</pingURL>
+                                        <location>${basedir}/../onebusaway-webapp/target/onebusaway-webapp-integration-test.war
+                                        </location>
+                                        <pingURL>http://localhost:${org.onebusaway.webapp.port}/onebusaway-webapp/
+                                        </pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
                                 </deployables>
