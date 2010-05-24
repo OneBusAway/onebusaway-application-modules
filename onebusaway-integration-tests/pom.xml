@@ -131,47 +131,36 @@
                             </arguments>
                         </configuration>
                     </execution>
+                </executions>
+            </plugin>
+            <!--
+                The maven-hsqldb-plugin is a codehaus sandbox maven plugin that I found for starting up a temporary
+                hsqldb server. We use this functionality to start the onebusaway user database server that can be used
+                across all the user interface servlet containers for integration testing. The code for the plugin is
+                licensed under the Apache 2.0 License and can be found at:
+
+                http://svn.codehaus.org/mojo/trunk/sandbox/maven-hsqldb-plugin To get it to build, I had to add a
+                reference to the codehaus snapshots repository to find a rerference to mojo-sandbox, as described here:
+
+                http://mojo.codehaus.org/using-sandbox-plugins.html
+                
+                Additionally, I modified the plugin to use hsqldb-2.0.0, since that's what we're using everywhere else
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>maven-hsqldb-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <executions>
+
                     <execution>
-                        <id>user-database-startup</id>
+                        <id>user-database</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>exec</goal>
+                            <goal>run</goal>
                         </goals>
                         <configuration>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-classpath</argument>
-                                <classpath />
-                                <arguments>org.onebusaway.cli.DaemonizerMain</arguments>
-                                <argument>-daemonize</argument>
-                                <argument>-pidFile</argument>
-                                <argument>${project.build.directory}/org_onebusaway_database_users.pid</argument>
-                                <argument>-outputFile</argument>
-                                <argument>${project.build.directory}/org_onebusaway_database_users.out</argument>
-                                <argument>-errorFile</argument>
-                                <argument>&amp;1</argument>
-                                <argument>-mainClass</argument>
-                                <argument>org.hsqldb.server.Server</argument>
-                                <argument>-args</argument>
-                                <argument>--database.0 file:${project.build.directory}/org_onebusaway_database_user
-                                    --dbname.0 org_onebusaway_database_users"</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>user-database-shutdown</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>java</executable>
-                            <arguments>
-                                <argument>-classpath</argument>
-                                <classpath />
-                                <arguments>org.onebusaway.integration.HsqldbShutdownMain</arguments>
-                                <argument>jdbc:hsqldb:hsql://localhost/org_onebusaway_database_users</argument>
-                            </arguments>
+                            <deleteOnExit>true</deleteOnExit>
+                            <dbName>org_onebusaway_database_users</dbName>
                         </configuration>
                     </execution>
                 </executions>
@@ -405,12 +394,6 @@
                                 </deployables>
                             </configuration>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
