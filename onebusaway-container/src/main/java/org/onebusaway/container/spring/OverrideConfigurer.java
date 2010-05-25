@@ -2,6 +2,8 @@ package org.onebusaway.container.spring;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,8 @@ import org.springframework.core.PriorityOrdered;
 
 public class OverrideConfigurer implements BeanFactoryPostProcessor,
     PriorityOrdered {
+
+  private static final Pattern _propertySubstitution = Pattern.compile("\\$\\{(.*?)\\}");
 
   private static Logger _log = LoggerFactory.getLogger(OverrideConfigurer.class);
 
@@ -52,7 +56,7 @@ public class OverrideConfigurer implements BeanFactoryPostProcessor,
   @Override
   public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
       throws BeansException {
-    processMap(beanFactory,_map);
+    processMap(beanFactory, _map);
   }
 
   /****
@@ -65,7 +69,7 @@ public class OverrideConfigurer implements BeanFactoryPostProcessor,
     for (Map.Entry<String, Object> entry : map.entrySet()) {
       String key = entry.getKey();
       Object value = processValue(entry.getValue());
-      
+
       try {
         processKey(beanFactory, key, value);
       } catch (BeansException ex) {
@@ -79,20 +83,26 @@ public class OverrideConfigurer implements BeanFactoryPostProcessor,
       }
     }
   }
-  
+
   protected Object processValue(Object value) {
-    if( value instanceof String) {
+    if (value instanceof String) {
       String v = (String) value;
-      if( v.startsWith("${") && v.endsWith("}")) {
-        String propName = v.substring(2,v.length() - 1);
+
+      Matcher m = _propertySubstitution.matcher(v);
+      StringBuffer sb = new StringBuffer();
+      while (m.find()) {
+        String propName = m.group(1);
         String propValue = System.getProperty(propName);
-        if( propValue != null)
-          value = propValue;
+        if (propValue != null)
+          m.appendReplacement(sb, propValue);
+        else
+          m.appendReplacement(sb, "${" + propName + "}");
       }
+      m.appendTail(sb);
+      value = sb.toString();
     }
     return value;
   }
-
 
   protected void processKey(ConfigurableListableBeanFactory factory,
       String key, Object value) throws BeansException {

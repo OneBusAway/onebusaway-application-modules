@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<tc:tc-config xmlns:tc="http://www.terracotta.org/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.terracotta.org/schema/terracotta-5.xsd">
+
+    <servers>
+        <server>
+            <dso-port>${terracotta.port}</dso-port>
+        </server>
+    </servers>
+
+</tc:tc-config>
