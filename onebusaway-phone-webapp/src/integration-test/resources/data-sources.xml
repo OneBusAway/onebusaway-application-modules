@@ -5,8 +5,8 @@
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-    <import resource="file:${onebusaway_prefix}/src/integration-test/resources/data-sources-common.xml"/>
-    <import resource="file:${onebusaway_prefix}/src/integration-test/resources/data-sources-users-common.xml"/>
+    <import resource="file:${onebusaway_prefix}/src/integration-test/resources/data-sources-common.xml" />
+    <import resource="file:${onebusaway_prefix}/src/integration-test/resources/data-sources-users-common.xml" />
 
     <bean id="pronunciationFactory" class="org.onebusaway.presentation.impl.text.XmlTextModificationsFactory">
         <property name="resource" value="classpath:pronunciations.xml" />
@@ -27,6 +27,14 @@
 
     <bean id="directionPronunciation" class="org.onebusaway.phone.impl.DirectionPronunciation">
         <qualifier value="directionPronunciation" />
+    </bean>
+
+    <bean class="org.onebusaway.container.spring.OverrideConfigurer">
+        <property name="map">
+            <map>
+                <entry key="agiServer.port" value="${org.onebusaway.phone_webapp.agi_port}"/>
+            </map>
+        </property>
     </bean>
 
 </beans>

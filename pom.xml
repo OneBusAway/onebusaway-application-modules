@@ -36,6 +36,7 @@
         <org.onebusaway.phone_webapp.port>9920</org.onebusaway.phone_webapp.port>
         <org.onebusaway.phone_webapp.ajp_port>9921</org.onebusaway.phone_webapp.ajp_port>
         <org.onebusaway.phone_webapp.rmi_port>9922</org.onebusaway.phone_webapp.rmi_port>
+        <org.onebusaway.phone_webapp.agi_port>9923</org.onebusaway.phone_webapp.agi_port>
 
         <org.onebusaway.webapp.port>9925</org.onebusaway.webapp.port>
         <org.onebusaway.webapp.ajp_port>9926</org.onebusaway.webapp.ajp_port>
@@ -161,6 +162,7 @@
                                     <org.onebusaway.transit_data_federation_webapp.port>${org.onebusaway.transit_data_federation_webapp.port}</org.onebusaway.transit_data_federation_webapp.port>
                                     <org.onebusaway.api_webapp.port>${org.onebusaway.api_webapp.port}</org.onebusaway.api_webapp.port>
                                     <org.onebusaway.phone_webapp.port>${org.onebusaway.phone_webapp.port}</org.onebusaway.phone_webapp.port>
+                                    <org.onebusaway.phone_webapp.agi_port>${org.onebusaway.phone_webapp.agi_port}</org.onebusaway.phone_webapp.agi_port>
                                     <org.onebusaway.sms_webapp.port>${org.onebusaway.sms_webapp.port}</org.onebusaway.sms_webapp.port>
                                     <org.onebusaway.webapp.port>${org.onebusaway.webapp.port}</org.onebusaway.webapp.port>
                                 </systemPropertyVariables>

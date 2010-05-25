@@ -16,7 +16,8 @@ public class PhoneTestSupport extends PhoneClient {
 
   public PhoneTestSupport() {
     setHost("localhost");
-    setPort(8001);
+    String port = System.getProperty("org.onebusaway.phone_webapp.agi_port","9923");
+    setPort(Integer.parseInt(port));
     setCallerId("2065551234");
     setNetworkScript("index.agi");
     setResetUser(true);

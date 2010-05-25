@@ -64,7 +64,8 @@ public class OverrideConfigurer implements BeanFactoryPostProcessor,
 
     for (Map.Entry<String, Object> entry : map.entrySet()) {
       String key = entry.getKey();
-      Object value = entry.getValue();
+      Object value = processValue(entry.getValue());
+      
       try {
         processKey(beanFactory, key, value);
       } catch (BeansException ex) {
@@ -78,6 +79,20 @@ public class OverrideConfigurer implements BeanFactoryPostProcessor,
       }
     }
   }
+  
+  protected Object processValue(Object value) {
+    if( value instanceof String) {
+      String v = (String) value;
+      if( v.startsWith("${") && v.endsWith("}")) {
+        String propName = v.substring(2,v.length() - 1);
+        String propValue = System.getProperty(propName);
+        if( propValue != null)
+          value = propValue;
+      }
+    }
+    return value;
+  }
+
 
   protected void processKey(ConfigurableListableBeanFactory factory,
       String key, Object value) throws BeansException {
