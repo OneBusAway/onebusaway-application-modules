@@ -11,10 +11,28 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
+/**
+ * Similar in spirit to Spring's {@link PropertyOverrideConfigurer}, our
+ * {@link OverrideConfigurer} accepts a {@code map} property that a {@link Map}
+ * of String keys of the form "beanName.propertyName" and values that are
+ * arbitrary Java objects, including references to other Spring beans. This is
+ * more powerful than {@link PropertyOverrideConfigurer}, which only allows
+ * String values.
+ * 
+ * Because this is a {@link BeanPostProcessor}, property expressions in keys or
+ * values (ex. {@code "$ some.java.property}"}) will not be expanded if you are
+ * using a {@link PropertyPlaceholderConfigurer}. We do some basic property
+ * expansion on our own to alleviate this behavior.
+ * 
+ * @author bdferris
+ */
 public class OverrideConfigurer implements BeanFactoryPostProcessor,
     PriorityOrdered {
 
