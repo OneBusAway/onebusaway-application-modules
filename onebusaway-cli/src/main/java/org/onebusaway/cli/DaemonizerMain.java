@@ -6,6 +6,15 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 
+/**
+ * Convenience class for daemonizing an arbitrary Java main method. Simply call
+ * the {@link DaemonizerMain} class as your main class and specify a {@code
+ * -mainClass some.package.YourMainClass} command line argument and an optional
+ * {@code -args "arg1 arg2"} to specify command line arguments to your main
+ * class and your target main class will automatically be daemonized.
+ * 
+ * @author bdferris
+ */
 public class DaemonizerMain {
 
   private static final String ARG_MAIN_CLASS = "mainClass";

@@ -18,6 +18,19 @@ import com.sun.akuma.Daemon;
 import com.sun.akuma.JavaVMArguments;
 import com.sun.jna.StringArray;
 
+/**
+ * Supports portable daemonization of a Java process. Uses the Sakuma wrapper of
+ * LIBC to perform daemonization, so will only work on systems that have LIBC.
+ * Works with the {@code commons-cli} command-line-interface argument parsing to
+ * define and process command line arguments defining daemonization parameters
+ * like a pid file, jvm args, and process output log files.
+ * 
+ * See {@link #buildOptions(Options)} and
+ * {@link #handleDaemonization(CommandLine)} for convenience methods to perform
+ * daemonization.
+ * 
+ * @author bdferris
+ */
 public class Daemonizer {
 
   private static final String ARG_DAEMONIZE = "daemonize";
@@ -46,6 +59,14 @@ public class Daemonizer {
 
   private Collection<String> _jvmArgs;
 
+  /**
+   * Add common daemonization command line arguments to a {@code commons-cli}
+   * {@link Options} collection.
+   * 
+   * @param options we add command line options to this target options
+   *          collection
+   * @return the same target options collection
+   */
   public static Options buildOptions(Options options) {
     options.addOption(ARG_JVM_ARGS, true, "custom jvm args for the daemon");
     options.addOption(ARG_OUTPUT_FILE, true,
@@ -59,6 +80,12 @@ public class Daemonizer {
     return options;
   }
 
+  /**
+   * Convenience method to handle daemonization of a command line Java program
+   * 
+   * @param cli parsed command line option values
+   * @return true if daemonization was performed
+   */
   public static boolean handleDaemonization(CommandLine cli) throws Exception {
 
     if (cli.hasOption(ARG_DAEMONIZE)) {
@@ -233,7 +260,7 @@ public class Daemonizer {
 
       // prepare for a fork
       String exe = getCurrentExecutable();
-      if( _exe != null)
+      if (_exe != null)
         exe = _exe;
 
       StringArray sa = new StringArray(args.toArray(new String[args.size()]));
