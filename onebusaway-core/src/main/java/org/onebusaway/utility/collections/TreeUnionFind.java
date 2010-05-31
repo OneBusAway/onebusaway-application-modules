@@ -23,6 +23,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Simple tree-based union find data structure.
+ * 
+ * @author bdferris
+ */
 public class TreeUnionFind<T> {
 
   private static final long serialVersionUID = 1L;
@@ -32,7 +37,7 @@ public class TreeUnionFind<T> {
   public interface Sentry {
 
   }
-  
+
   public boolean contains(T target) {
     return _elementToSentry.containsKey(target);
   }

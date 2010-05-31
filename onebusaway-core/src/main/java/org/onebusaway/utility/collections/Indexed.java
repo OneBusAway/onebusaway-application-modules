@@ -20,6 +20,14 @@ package org.onebusaway.utility.collections;
 
 import java.io.Serializable;
 
+/**
+ * A wrapper class for an object that add an integer index parameter that can be
+ * used to apply a {@link Comparable} sort order to an arbitrary type.
+ * 
+ * @author bdferris
+ * 
+ * @param <T>
+ */
 public class Indexed<T> implements Comparable<Indexed<T>>, Serializable {
 
   private static final long serialVersionUID = 1L;

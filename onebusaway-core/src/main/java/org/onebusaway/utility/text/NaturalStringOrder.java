@@ -3,12 +3,15 @@ package org.onebusaway.utility.text;
 import java.text.Collator;
 
 /**
- * Utility class for common String operations. Written by Stephen Friedrich
+ * Utility class for natural string order operations (a1 < a2 < a10). Written by
+ * Stephen Friedrich
  * (http://weblogs.java.net/blog/skelvin/archive/2006/01/natural_string.html).
  * No license specified? Code found at
  * http://svn.atlassian.com/fisheye/browse/public
  * /contrib/confluence/linking-plugin
  * /trunk/src/java/com/eekboom/utils/Strings.java?r=1322&%40annotateMode=none
+ * 
+ * TODO: Determine license situation
  */
 public class NaturalStringOrder {
   /**

@@ -4,7 +4,6 @@ import static org.onebusaway.utility.InterpolationLibrary.interpolate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.onebusaway.utility.InterpolationLibrary.EOutOfRangeStrategy;
 
 import org.junit.Test;
 
