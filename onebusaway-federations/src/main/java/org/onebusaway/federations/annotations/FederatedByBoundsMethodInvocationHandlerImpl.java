@@ -7,6 +7,12 @@ import org.onebusaway.federations.FederatedServiceCollection;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Provides a {@link FederatedServiceMethodInvocationHandler} implementation for
+ * the {@link FederatedByBoundsMethod} annotation.
+ * 
+ * @author bdferris
+ */
 class FederatedByBoundsMethodInvocationHandlerImpl implements FederatedServiceMethodInvocationHandler {
 
   private int _lat1ArgumentIndex;

@@ -25,6 +25,17 @@ import com.caucho.hessian.client.HessianConnectionException;
 import com.caucho.hessian.client.HessianProxyFactory;
 import com.caucho.hessian.client.HessianRuntimeException;
 
+/**
+ * A dynamic {@link FederatedServiceCollection} implementation. Service
+ * instances are periodically queried from a {@link FederatedServiceRegistry}
+ * instance given a target service interface + parameters and our service
+ * collection is updated as is appropriate. It's assumed that all services
+ * published by the {@link FederatedServiceRegistry} have been exported as a
+ * Hessian rpc service, as we'll be using {@link HessianProxyFactory} to create
+ * proxy service instances from the service urls.
+ * 
+ * @author bdferris
+ */
 public class DynamicFederatedServiceCollectionImpl extends
     AbstractFederatedServiceCollectionWrapperImpl {
 

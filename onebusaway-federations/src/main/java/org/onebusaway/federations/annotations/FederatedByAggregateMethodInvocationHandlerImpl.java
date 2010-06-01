@@ -11,6 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Provides a {@link FederatedServiceMethodInvocationHandler} implementation for
+ * the {@link FederatedByAggregateMethod} annotation.
+ * 
+ * @author bdferris
+ */
 class FederatedByAggregateMethodInvocationHandlerImpl implements FederatedServiceMethodInvocationHandler {
 
   private EMethodAggregationType _aggregationType;

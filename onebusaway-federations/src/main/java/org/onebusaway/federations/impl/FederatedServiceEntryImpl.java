@@ -6,6 +6,12 @@ import java.util.Map;
 
 import org.onebusaway.federations.FederatedServiceRegistryEntry;
 
+/**
+ * Federated service registry entry helper class for
+ * {@link FederatedServiceRegistryImpl}
+ * 
+ * @author bdferris
+ */
 public class FederatedServiceEntryImpl {
 
   private final String _serviceUrl;
@@ -29,6 +35,14 @@ public class FederatedServiceEntryImpl {
     _enabled = enabled;
   }
 
+  /**
+   * Determines if a particular service entry is applicable for a set of target
+   * properties. A service is applicable if the service has property values
+   * equals to all those specified in {@code properties}.
+   * 
+   * @param properties
+   * @return
+   */
   public boolean isApplicable(Map<String, String> properties) {
 
     for (Map.Entry<String, String> entry : properties.entrySet()) {
@@ -57,7 +71,7 @@ public class FederatedServiceEntryImpl {
   public String getServiceUrl() {
     return _serviceUrl;
   }
-  
+
   public String getServiceClass() {
     return _serviceClass;
   }

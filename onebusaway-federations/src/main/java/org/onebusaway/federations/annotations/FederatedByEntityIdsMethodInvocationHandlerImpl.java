@@ -9,6 +9,12 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Provides a {@link FederatedServiceMethodInvocationHandler} implementation for
+ * the {@link FederatedByEntityIdsMethod} annotation.
+ * 
+ * @author bdferris
+ */
 class FederatedByEntityIdsMethodInvocationHandlerImpl implements
     FederatedServiceMethodInvocationHandler {
 

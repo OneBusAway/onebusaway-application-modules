@@ -9,6 +9,18 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Periodically publishes service registration information to a
+ * {@link FederatedServiceRegistry} on a fixed interval. In combination with
+ * {@link FederatedServiceRegistryConstants#KEY_REGISTRATION_EXPIRES_AFTER}, we
+ * can implement some basic fail-over capabilities in the service registry such
+ * that a registry entry is automatically removed after a certain period of time
+ * if the service hasn't been heard from in a while (ex. the service has
+ * crashed).
+ * 
+ * @author bdferris
+ * @see FederatedServiceRegistryConstants#KEY_REGISTRATION_EXPIRES_AFTER
+ */
 public class FederatedServiceRegistration {
 
   private static Logger _log = LoggerFactory.getLogger(FederatedServiceRegistration.class);

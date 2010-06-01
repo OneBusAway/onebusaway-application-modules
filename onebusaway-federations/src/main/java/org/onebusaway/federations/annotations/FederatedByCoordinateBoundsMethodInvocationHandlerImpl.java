@@ -9,6 +9,12 @@ import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.FederatedServiceCollection;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 
+/**
+ * Provides a {@link FederatedServiceMethodInvocationHandler} implementation for
+ * the {@link FederatedByCoordinateBoundsMethod} annotation.
+ * 
+ * @author bdferris
+ */
 class FederatedByCoordinateBoundsMethodInvocationHandlerImpl implements
     FederatedServiceMethodInvocationHandler {
 

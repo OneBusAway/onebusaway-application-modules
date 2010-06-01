@@ -4,6 +4,20 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This factory can be used to examine a Method signature and create an
+ * appropriate {@link FederatedServiceMethodInvocationHandler} based on method
+ * annotations. See the list of supported annotations below.
+ * 
+ * @author bdferris
+ * @see FederatedByAgencyIdMethod
+ * @see FederatedByAggregateMethod
+ * @see FederatedByBoundsMethod
+ * @see FederatedByCoordinateBoundsMethod
+ * @see FederatedByEntityIdMethod
+ * @see FederatedByEntityIdsMethod
+ * @see FederatedByLocationMethod
+ */
 public class FederatedServiceMethodInvocationHandlerFactory {
 
   public FederatedServiceMethodInvocationHandler getHandlerForMethod(

@@ -7,8 +7,25 @@ import java.util.Map;
 
 import org.onebusaway.federations.annotations.FederatedServiceMethodInvocationHandler;
 import org.onebusaway.federations.annotations.FederatedServiceMethodInvocationHandlerFactory;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
+/**
+ * A Spring {@link FactoryBean} for creating a proxied service interface that
+ * virtually dispatches to a set of {@link FederatedService} instances, as
+ * contained by a {@link FederatedServiceCollection}.
+ * 
+ * <pre class="code">
+ * <bean class="org.onebusaway.federations.FederatedServiceFactoryBean">
+ *   <property name="serviceInterface" value="some.package.SomeServiceInterface"/>
+ *   <proeprty name="collection" ref="federatedServiceCollectionImpl" />
+ * </bean>
+ * </pre>
+ * 
+ * @author bdferris
+ * @see FederatedService
+ * @see FederatedServiceCollection
+ */
 public class FederatedServiceFactoryBean extends AbstractFactoryBean {
 
   private static FederatedServiceMethodInvocationHandlerFactory _handlerFactory = new FederatedServiceMethodInvocationHandlerFactory();

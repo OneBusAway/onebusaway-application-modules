@@ -4,6 +4,14 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Information about a {@link FederatedServiceRegistry} entry. This is just a
+ * static Java bean. Editing values in an entry returned by a
+ * {@link FederatedServiceRegistry} will not update values in the registry
+ * itself.
+ * 
+ * @author bdferris
+ */
 public final class FederatedServiceRegistryEntry implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -28,6 +36,9 @@ public final class FederatedServiceRegistryEntry implements Serializable {
     this.enabled = enabled;
   }
 
+  /**
+   * @return the resource locator url for the service entry
+   */
   public String getServiceUrl() {
     return serviceUrl;
   }
@@ -36,6 +47,9 @@ public final class FederatedServiceRegistryEntry implements Serializable {
     this.serviceUrl = serviceUrl;
   }
 
+  /**
+   * @return the service class type for the service entry
+   */
   public String getServiceClass() {
     return serviceClass;
   }
@@ -44,6 +58,9 @@ public final class FederatedServiceRegistryEntry implements Serializable {
     this.serviceClass = serviceClass;
   }
 
+  /**
+   * @return properties for the service entry
+   */
   public Map<String, String> getProperties() {
     return properties;
   }
@@ -52,6 +69,9 @@ public final class FederatedServiceRegistryEntry implements Serializable {
     this.properties = properties;
   }
 
+  /**
+   * @return true if the service entry is enabled, otherwise false
+   */
   public boolean isEnabled() {
     return enabled;
   }

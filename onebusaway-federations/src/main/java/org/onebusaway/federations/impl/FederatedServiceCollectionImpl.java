@@ -19,13 +19,32 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-public class FederatedServiceCollectionImpl implements FederatedServiceCollection {
+/**
+ * A basic {@link FederatedServiceCollection} implementation that provides
+ * methods for query a set of {@link FederatedService} instances. See the static
+ * factory method {@link #create(List, Class)} for a convenient way of
+ * constructing a {@link FederatedServiceCollectionImpl} from a set of
+ * {@link FederatedService} instances of a particular type.
+ * 
+ * @author bdferris
+ * @see FederatedService
+ * @see FederatedServiceCollection
+ */
+public class FederatedServiceCollectionImpl implements
+    FederatedServiceCollection {
 
   private Set<FederatedService> _services;
 
   private Map<String, FederatedService> _servicesByAgencyId = new HashMap<String, FederatedService>();
 
   private STRtree _tree;
+
+  public static <T extends FederatedService> FederatedServiceCollectionImpl create(
+      List<T> serviceProviders, Class<T> serviceInterface) {
+    Map<FederatedService, Map<String, List<CoordinateBounds>>> map = FederatedServiceLibrary.getFederatedServiceAgencyCoverage(
+        serviceProviders, serviceInterface);
+    return new FederatedServiceCollectionImpl(map);
+  }
 
   public FederatedServiceCollectionImpl(
       Map<FederatedService, Map<String, List<CoordinateBounds>>> services) {
@@ -45,12 +64,13 @@ public class FederatedServiceCollectionImpl implements FederatedServiceCollectio
         _servicesByAgencyId.put(agencyId, service);
 
         for (CoordinateBounds rc : coverage) {
-          Envelope env = new Envelope(rc.getMinLon(), rc.getMaxLon(), rc.getMinLat(), rc.getMaxLat());
+          Envelope env = new Envelope(rc.getMinLon(), rc.getMaxLon(),
+              rc.getMinLat(), rc.getMaxLat());
           _tree.insert(env, service);
         }
       }
     }
-    
+
     _tree.build();
   }
 
@@ -99,7 +119,7 @@ public class FederatedServiceCollectionImpl implements FederatedServiceCollectio
   @Override
   public FederatedService getServiceForBounds(double lat1, double lon1,
       double lat2, double lon2) throws ServiceAreaServiceException {
-    Envelope rectangle = new Envelope(lon1,lon2,lat1,lat2);
+    Envelope rectangle = new Envelope(lon1, lon2, lat1, lat2);
     return getProviderForRectangle(rectangle);
   }
 
@@ -116,7 +136,7 @@ public class FederatedServiceCollectionImpl implements FederatedServiceCollectio
   private FederatedService getProviderForRectangle(Envelope env)
       throws ServiceAreaServiceException {
     ProviderCollector collector = new ProviderCollector();
-    if( _tree.size() != 0)
+    if (_tree.size() != 0)
       _tree.query(env, collector);
     Set<FederatedService> providers = collector.getProviders();
     return getProviderFromProviders(providers);

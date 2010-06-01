@@ -14,17 +14,17 @@ public class LazyFederatedServiceCollectionImpl extends
 
   private Logger _logger = LoggerFactory.getLogger(LazyFederatedServiceCollectionImpl.class);
 
-  private List<?> _serviceProviders;
+  private List<? extends FederatedService> _serviceProviders;
 
-  private Class<?> _serviceInterface;
+  private Class<? extends FederatedService> _serviceInterface;
 
   private volatile FederatedServiceCollection _registry = null;
 
-  public void setServiceProviders(List<?> serviceProviders) {
+  public void setServiceProviders(List<? extends FederatedService> serviceProviders) {
     _serviceProviders = serviceProviders;
   }
 
-  public void setServiceInterface(Class<?> serviceInterface) {
+  public void setServiceInterface(Class<? extends FederatedService> serviceInterface) {
     _serviceInterface = serviceInterface;
   }
 

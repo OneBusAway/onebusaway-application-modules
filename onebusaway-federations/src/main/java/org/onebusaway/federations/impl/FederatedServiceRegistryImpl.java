@@ -16,6 +16,14 @@ import org.onebusaway.federations.FederatedServiceRegistryEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Basic {@link FederatedServiceRegistry} implementation that implements
+ * features such as
+ * {@link FederatedServiceRegistryConstants#KEY_REGISTRATION_EXPIRES_AFTER}.
+ * 
+ * @author bdferris
+ * @see FederatedServiceRegistry
+ */
 public class FederatedServiceRegistryImpl implements FederatedServiceRegistry {
 
   private static Logger _log = LoggerFactory.getLogger(FederatedServiceRegistryImpl.class);

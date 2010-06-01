@@ -7,6 +7,12 @@ import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.FederatedServiceCollection;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 
+/**
+ * {@link FederatedServiceCollection} wrapper class that allows one to pass
+ * calls from one collection instance to another.
+ * 
+ * @author bdferris
+ */
 public abstract class AbstractFederatedServiceCollectionWrapperImpl implements
     FederatedServiceCollection {
 
