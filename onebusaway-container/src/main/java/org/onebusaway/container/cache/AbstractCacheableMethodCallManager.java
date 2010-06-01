@@ -30,6 +30,18 @@ import net.sf.ehcache.Element;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 
+/**
+ * Abstract support class providing functionality for caching the output of
+ * arbitrary method calls, using the arguments to the method to generate the
+ * cache key.
+ * 
+ * EhCache is used as the backing cache store.
+ * 
+ * @author bdferris
+ * @see Cacheable
+ * @see CacheableInterceptor
+ * @see CacheableMethodKeyFactory
+ */
 public abstract class AbstractCacheableMethodCallManager {
 
   private CacheManager _cacheManager;

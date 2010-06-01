@@ -18,7 +18,7 @@
 
     <import resource="classpath:org/onebusaway/container/application-context.xml" />
     
-    <bean id="userIndexCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+    <bean id="userIndexCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.model.UserIndex" />
         <property name="maxElementsInMemory" value="1000" />
@@ -29,7 +29,7 @@
         <property name="diskPersistent" value="false" />
     </bean>
 
-    <bean id="userCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+    <bean id="userCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.model.User" />
         <property name="maxElementsInMemory" value="1000" />
@@ -40,7 +40,7 @@
         <property name="diskPersistent" value="false" />
     </bean>
     
-    <bean id="userIndicesCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+    <bean id="userIndicesCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.model.User.userIndices" />
         <property name="maxElementsInMemory" value="1000" />
@@ -51,7 +51,7 @@
         <property name="diskPersistent" value="false" />
     </bean>
 
-    <bean id="userRolesCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+    <bean id="userRolesCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.model.User.roles" />
         <property name="maxElementsInMemory" value="1000" />
@@ -62,7 +62,7 @@
         <property name="diskPersistent" value="false" />
     </bean>
 
-    <bean id="userRoleCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+    <bean id="userRoleCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.model.UserRole" />
         <property name="maxElementsInMemory" value="5" />
@@ -73,8 +73,7 @@
         <property name="diskPersistent" value="false" />
     </bean>
 
-    <bean id="usersHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor"
-        depends-on="userIndexCache,userCache,userIndicesCache,userRolesCache,userRoleCache">
+    <bean id="usersHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
         <property name="target" value="hibernateAnnotatedClasses" />
         <property name="values">
             <list>
@@ -112,7 +111,7 @@
         </property>
     </bean>
     
-    <bean id="userLastAccessTimeServiceCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+    <bean id="userLastAccessTimeServiceCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.impl.internal.UserLastAccessTimeServiceImpl.cache" />
         <property name="maxElementsInMemory" value="1000" />
@@ -127,7 +126,7 @@
         <property name="cache" ref="userLastAccessTimeServiceCache" />
     </bean>
 
-    <bean id="lastSelectedStopServiceCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+    <bean id="lastSelectedStopServiceCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.impl.internal.LastSelectedStopServiceImpl.cache" />
         <property name="maxElementsInMemory" value="1000" />
@@ -142,7 +141,7 @@
         <property name="cache" ref="lastSelectedStopServiceCache" />
     </bean>
 
-    <bean id="userIndexRegistrationServiceCache" class="org.onebusaway.container.spring.EhCacheFactoryBean">
+    <bean id="userIndexRegistrationServiceCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.impl.internal.LastSelectedStopServiceImpl.cache" />
         <property name="maxElementsInMemory" value="1000" />

@@ -16,20 +16,41 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
-    <import resource="classpath:org/onebusaway/container/application-context-common.xml"/>
+    <import resource="classpath:org/onebusaway/container/application-context-common.xml" />
 
-    <bean id="ehCacheConfiguration" class="org.onebusaway.container.spring.EhCacheConfigurationFactoryBean">
+    <!--
+        Typically, EhCache is configured with an "ehcache.xml" resource file. That approach doesn't work so well when
+        various cache configurations need to be managed across project modules. So instead, we configure EhCache
+        programmatically in Spring. There are a number of factory classes in the
+        "org.onebusaway.container.spring.ehcache" package to assist in the process. Here, we create the main
+        ehCacheConfiguration object with some cache defaults and a diskstore path, which we can override programatically
+        as needed.
+    -->
+    <bean id="ehCacheConfiguration" class="org.onebusaway.container.spring.ehcache.EhCacheConfigurationFactoryBean">
         <property name="configLocation" value="classpath:org/onebusaway/container/ehcache.xml" />
         <property name="diskStorePath" value="java.io.tmpdir/cache-onebusaway" />
     </bean>
 
-    <bean id="cacheManager" class="org.onebusaway.container.spring.EhCacheManagerFactoryBean">
+    <!--
+        The EhCache CacheManager instance. Caches can be dynamically added to the CacheManager with
+        org.onebusaway.container.spring.ehcache.EhCacheFactoryBean bean factories.
+    -->
+    <bean id="cacheManager" class="org.onebusaway.container.spring.ehcache.EhCacheManagerFactoryBean">
         <property name="configuration" ref="ehCacheConfiguration" />
-        <property name="cacheManagerName" value="org.onebusaway.cacheManager"/>
+        <property name="cacheManagerName" value="org.onebusaway.cacheManager" />
     </bean>
 
-    <bean id="cacheableKeyFactories" class="org.onebusaway.container.spring.MapFactoryBean" />
+    <!--
+        This empty map can be extended with BeanPostProcessors to add additional cacheable key factories to the
+        CacheableInterceptor
+    -->
+    <bean id="cacheableKeyFactories" class="org.springframework.beans.factory.config.MapFactoryBean">
+        <property name="sourceMap">
+            <map />
+        </property>
+    </bean>
 
+    <!-- Here we set up support for @Cacheable annotations -->
     <bean id="cacheableInterceptor" class="org.onebusaway.container.cache.CacheableInterceptor">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheKeyFactories" ref="cacheableKeyFactories" />

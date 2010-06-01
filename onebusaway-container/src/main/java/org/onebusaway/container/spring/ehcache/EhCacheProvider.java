@@ -1,4 +1,4 @@
-package org.onebusaway.container.spring;
+package org.onebusaway.container.spring.ehcache;
 
 import java.util.Properties;
 
@@ -11,6 +11,15 @@ import org.hibernate.cache.CacheException;
 import org.hibernate.cache.CacheProvider;
 import org.hibernate.cache.Timestamper;
 
+/**
+ * Provides an EhCache-based Hibernate {@link CacheProvider} implementation that
+ * supports directly setting the {@link CacheManager} from an existing manager
+ * instance. The {@link CacheProvider} implementation provided by EhCache only
+ * supports configuration from classpath resources.
+ * 
+ * @author bdferris
+ * @see EhCacheManagerFactoryBean
+ */
 @SuppressWarnings("deprecation")
 public class EhCacheProvider implements CacheProvider {
 
@@ -21,7 +30,7 @@ public class EhCacheProvider implements CacheProvider {
   public void setCacheManager(CacheManager cacheManager) {
     this.cacheManager = cacheManager;
   }
-  
+
   @Override
   public Cache buildCache(String name, Properties properties)
       throws CacheException {

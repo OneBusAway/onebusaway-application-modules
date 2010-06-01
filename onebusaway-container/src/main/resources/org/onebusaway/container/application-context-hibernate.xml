@@ -18,16 +18,24 @@
 
     <import resource="classpath:org/onebusaway/container/application-context-caching.xml" />
 
+    <!--
+        See documentation in org.onebusaway.container.spring.ehcache.EhCacheRegionFactory regarding why we have to go
+        through these static CacheManager instance shenanigans
+    -->
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="targetClass" value="org.onebusaway.container.spring.EhCacheRegionFactory"/>
-        <property name="targetMethod" value="setStaticCacheManagerInstance"/>
+        <property name="targetClass" value="org.onebusaway.container.spring.ehcache.EhCacheRegionFactory" />
+        <property name="targetMethod" value="setStaticCacheManagerInstance" />
         <property name="arguments">
             <list>
-                <ref bean="cacheManager"/>
+                <ref bean="cacheManager" />
             </list>
         </property>
     </bean>
 
+    <!--
+        Common Hibernate properties, can be extended and overriden with
+        org.onebusaway.container.spring.PropertiesBeanPostProcessor
+    -->
     <bean id="hibernateProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
         <property name="properties">
             <props>
@@ -37,18 +45,36 @@
                 <prop key="hibernate.use_sql_comments">true</prop>
                 <prop key="hibernate.cache.use_query_cache">false</prop>
                 <prop key="hibernate.cache.use_second_level_cache">true</prop>
-                <prop key="hibernate.cache.region.factory_class">org.onebusaway.container.spring.EhCacheRegionFactory</prop>
+                <prop key="hibernate.cache.region.factory_class">org.onebusaway.container.spring.ehcache.EhCacheRegionFactory</prop>
                 <prop key="hibernate.generate_statistics">true</prop>
                 <prop key="hibernate.cache.use_structured_entries">true</prop>
                 <prop key="hibernate.jdbc.batch_size">1000</prop>
             </props>
         </property>
     </bean>
-    <bean id="hibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListFactoryBean" />
-    <bean id="hibernateMappingLocations" class="org.onebusaway.container.spring.ListFactoryBean" />
-    <bean id="hibernateDependencies" class="org.onebusaway.container.spring.ListFactoryBean" />
 
-    <!-- Hibernate session factory -->
+    <!--
+        List of Hibernate annotated classes: classes configured for Hibernate using annotations, as opposed to a
+        Hibernate xml mapping file. This list can be extended by other modules with an
+        org.onebusaway.container.spring.ListBeanPostProcessor
+    -->
+    <bean id="hibernateAnnotatedClasses" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list />
+        </property>
+    </bean>
+
+    <!--
+        List of Hibernate xml mapping files, which control the mapping of Java objects in Hibernate. This list can be
+        extended by other modules with an org.onebusaway.container.spring.ListBeanPostProcessor
+    -->
+    <bean id="hibernateMappingLocations" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list />
+        </property>
+    </bean>
+
+    <!-- Hibernate session factory, where all the pieces above are wired together -->
     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
         primary="true">
         <qualifier value="main" />

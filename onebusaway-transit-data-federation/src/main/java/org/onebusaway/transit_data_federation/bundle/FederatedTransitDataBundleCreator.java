@@ -3,10 +3,8 @@ package org.onebusaway.transit_data_federation.bundle;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.SessionFactory;
@@ -22,8 +20,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.offline.StopT
 import org.onebusaway.transit_data_federation.services.tripplanner.offline.TripPlannerGraphTask;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -63,10 +59,10 @@ public class FederatedTransitDataBundleCreator {
     if (_stagesToSkip.contains(Stages.GTFS))
       paths.add("classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-extra.xml");
 
-    Map<String, BeanDefinition> additionalBeans = getAdditionalBeanDefinitions();
+    // Set the bundlePath system property
+    System.setProperty("bundlePath", _outputPath.getAbsolutePath());
 
-    ConfigurableApplicationContext context = ContainerLibrary.createContext(
-        paths, additionalBeans);
+    ConfigurableApplicationContext context = ContainerLibrary.createContext(paths);
 
     GtfsServiceBundle gtfsBundle = ContainerLibrary.getBeanOfType(context,
         GtfsServiceBundle.class);
@@ -132,11 +128,11 @@ public class FederatedTransitDataBundleCreator {
     context.stop();
     context.close();
     context = null;
-    
+
     if (wants(Stages.PRE_CACHE)) {
 
       clearExistingCacheFiles(bundle);
-      
+
       List<String> cacheContextPaths = new ArrayList<String>();
       cacheContextPaths.add("classpath:org/onebusaway/transit_data_federation/application-context-services.xml");
       cacheContextPaths.add("classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator.xml");
@@ -145,7 +141,7 @@ public class FederatedTransitDataBundleCreator {
       cacheContextPaths.add("classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-extra.xml");
 
       ConfigurableApplicationContext cacheContext = ContainerLibrary.createContext(
-          cacheContextPaths, additionalBeans);
+          cacheContextPaths);
 
       PreCacheTask task = new PreCacheTask();
       cacheContext.getAutowireCapableBeanFactory().autowireBean(task);
@@ -154,30 +150,20 @@ public class FederatedTransitDataBundleCreator {
   }
 
   private void clearExistingCacheFiles(FederatedTransitDataBundle bundle) {
-    
+
     File cacheDir = bundle.getCachePath();
-    
-    if( ! cacheDir.exists() )
+
+    if (!cacheDir.exists())
       return;
-    
+
     File[] files = cacheDir.listFiles();
-    if( files == null)
+    if (files == null)
       return;
-    
-    for( File file : files) {
-      if( file.isFile())
+
+    for (File file : files) {
+      if (file.isFile())
         file.delete();
     }
-  }
-
-  private Map<String, BeanDefinition> getAdditionalBeanDefinitions() {
-    Map<String, BeanDefinition> additionalBeans = new HashMap<String, BeanDefinition>();
-
-    BeanDefinitionBuilder bundlePath = BeanDefinitionBuilder.genericBeanDefinition(File.class);
-    bundlePath.addConstructorArgValue(_outputPath.getAbsolutePath());
-    additionalBeans.put("bundlePath", bundlePath.getBeanDefinition());
-
-    return additionalBeans;
   }
 
   private boolean wants(Stages stage) {

@@ -24,6 +24,14 @@ import org.aspectj.lang.annotation.Aspect;
 import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.collections.tuple.Tuples;
 
+/**
+ * Implements an {@link Aspect} aware interceptor that intercepts calls to
+ * methods annotated with {@link Cacheable} and returns a cached result when
+ * available or calls the underlying method when not.
+ * 
+ * @author bdferris
+ * @see Cacheable
+ */
 @Aspect
 public class CacheableInterceptor extends AbstractCacheableMethodCallManager {
 

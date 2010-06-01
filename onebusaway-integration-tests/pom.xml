@@ -268,10 +268,9 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/federations-webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.federations_webapp.port}</cargo.servlet.port>
-                                    <cargo.tomcat.ajp.port>${org.onebusaway.federations_webapp.ajp_port}
-                                    </cargo.tomcat.ajp.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.federations_webapp.ajp_port}</cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.federations_webapp.rmi_port}</cargo.rmi.port>
                                 </properties>
                                 <deployables>
@@ -279,8 +278,7 @@
                                         <groupId>org.onebusaway</groupId>
                                         <artifactId>onebusaway-federations-webapp</artifactId>
                                         <type>war</type>
-                                        <pingURL>http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/index.action
-                                        </pingURL>
+                                        <pingURL>http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
                                     </deployable>
                                 </deployables>
                             </configuration>
@@ -296,13 +294,10 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/transit-data-federation-webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
-                                    <cargo.servlet.port>${org.onebusaway.transit_data_federation_webapp.port}
-                                    </cargo.servlet.port>
-                                    <cargo.tomcat.ajp.port>${org.onebusaway.transit_data_federation_webapp.ajp_port}
-                                    </cargo.tomcat.ajp.port>
-                                    <cargo.rmi.port>${org.onebusaway.transit_data_federation_webapp.rmi_port}
-                                    </cargo.rmi.port>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.transit_data_federation_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.transit_data_federation_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.transit_data_federation_webapp.rmi_port}</cargo.rmi.port>
                                 </properties>
                                 <deployables>
                                     <deployable>
@@ -312,10 +307,8 @@
                                         <properties>
                                             <context>onebusaway-transit-data-federation-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-transit-data-federation-webapp/target/onebusaway-transit-data-federation-webapp-integration-test.war
-                                        </location>
-                                        <pingURL>http://localhost:${org.onebusaway.transit_data_federation_webapp.port}/onebusaway-transit-data-federation-webapp/
-                                        </pingURL>
+                                        <location>${basedir}/../onebusaway-transit-data-federation-webapp/target/onebusaway-transit-data-federation-webapp-integration-test.war</location>
+                                        <pingURL>http://localhost:${org.onebusaway.transit_data_federation_webapp.port}/onebusaway-transit-data-federation-webapp/</pingURL>
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
                                 </deployables>
@@ -332,7 +325,7 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/api-webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.api_webapp.port}</cargo.servlet.port>
                                     <cargo.tomcat.ajp.port>${org.onebusaway.api_webapp.ajp_port}</cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.api_webapp.rmi_port}</cargo.rmi.port>
@@ -365,7 +358,7 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/phone-webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.phone_webapp.port}</cargo.servlet.port>
                                     <cargo.tomcat.ajp.port>${org.onebusaway.phone_webapp.ajp_port}
                                     </cargo.tomcat.ajp.port>
@@ -399,7 +392,7 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/sms-webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.sms_webapp.port}</cargo.servlet.port>
                                     <cargo.tomcat.ajp.port>${org.onebusaway.sms_webapp.ajp_port}</cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.sms_webapp.rmi_port}</cargo.rmi.port>
@@ -432,7 +425,7 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${carog.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.webapp.port}</cargo.servlet.port>
                                     <cargo.tomcat.ajp.port>${org.onebusaway.webapp.ajp_port}</cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.webapp.rmi_port}</cargo.rmi.port>
@@ -452,6 +445,119 @@
                                         <pingTimeout>60000</pingTimeout>
                                     </deployable>
                                 </deployables>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <!--
+                        I wish there was an easier, less verbose way of shutting down all the individual containers, but
+                        I don't know of one.
+                    -->
+                    <execution>
+                        <id>stop-container-webapp</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-container-sms-webapp</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/sms-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.sms_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.sms_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.sms_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-container-phone-webapp</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/phone-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.phone_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.phone_webapp.ajp_port}
+                                    </cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.phone_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-container-api-webapp</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/api-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.api_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.api_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.api_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-container-transit-data-federation-webapp</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/transit-data-federation-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.transit_data_federation_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.transit_data_federation_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.transit_data_federation_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
+                            </configuration>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop-container-federations-webapp</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <configuration>
+                                <home>${project.build.directory}/tomcat5x/federations-webapp</home>
+                                <properties>
+                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.servlet.port>${org.onebusaway.federations_webapp.port}</cargo.servlet.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.federations_webapp.ajp_port}</cargo.tomcat.ajp.port>
+                                    <cargo.rmi.port>${org.onebusaway.federations_webapp.rmi_port}</cargo.rmi.port>
+                                </properties>
                             </configuration>
                         </configuration>
                     </execution>

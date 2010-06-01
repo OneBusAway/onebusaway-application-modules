@@ -1,12 +1,20 @@
 package org.onebusaway.container.spring;
 
+import java.util.Properties;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.core.Ordered;
 
-import java.util.Properties;
-
+/**
+ * A Spring {@link BeanPostProcessor} to add additional values to
+ * already-created {@link Properties} object.
+ * 
+ * @author bdferris
+ * @see ListBeanPostProcessor
+ * @see PropertiesBeanPostProcessor
+ */
 public class PropertiesBeanPostProcessor implements BeanPostProcessor, Ordered {
 
   private int _order;
@@ -51,8 +59,7 @@ public class PropertiesBeanPostProcessor implements BeanPostProcessor, Ordered {
       if (obj instanceof Properties) {
         Properties properties = (Properties) obj;
         properties.putAll(_properties);
-      }
-      else if( obj instanceof PropertiesFactoryBean) {
+      } else if (obj instanceof PropertiesFactoryBean) {
         PropertiesFactoryBean factory = (PropertiesFactoryBean) obj;
         System.out.println(factory);
       }

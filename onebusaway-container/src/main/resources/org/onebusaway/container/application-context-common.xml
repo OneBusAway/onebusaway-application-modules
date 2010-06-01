@@ -21,8 +21,13 @@
 
     <!--  -->
     <aop:aspectj-autoproxy />
-
-    <!-- Provides support for specifying "${some.java.system.property}" for bean values -->
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+    
+    <!--
+        Provides support for specifying "${some.java.system.property}" for bean values. We set the priority pretty low
+        so that this BeanFactoryPostProcessor will run before all other BeanFactoryPostProcessors
+    -->
+    <bean name="defaultPropertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="order" value="-1" />
+    </bean>
 
 </beans>

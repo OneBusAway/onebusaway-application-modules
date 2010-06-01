@@ -1,10 +1,17 @@
 package org.onebusaway.container.spring;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A Spring {@link FactoryBean} for creating a {@link List} object.
+ * 
+ * @author bdferris
+ * @see MapFactoryBean 
+ */
 public class ListFactoryBean extends AbstractFactoryBean {
 
   private List<Object> _values = new ArrayList<Object>();

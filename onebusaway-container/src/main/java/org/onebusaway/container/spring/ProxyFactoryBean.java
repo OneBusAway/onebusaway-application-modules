@@ -3,8 +3,16 @@ package org.onebusaway.container.spring;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
+/**
+ * A Spring {@link FactoryBean} for instantiating a {@link Proxy} instance with
+ * a specified target interface type and a {@link InvocationHandler}.
+ * 
+ * @author bdferris
+ * 
+ */
 public class ProxyFactoryBean extends AbstractFactoryBean {
 
   private Class<?> _proxyInterface;

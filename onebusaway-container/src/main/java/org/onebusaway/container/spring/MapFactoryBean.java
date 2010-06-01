@@ -1,10 +1,18 @@
 package org.onebusaway.container.spring;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+/**
+ * A Spring {@link FactoryBean} for creating a {@link List} object.
+ * 
+ * @author bdferris
+ * @see MapFactoryBean
+ */
 public class MapFactoryBean extends AbstractFactoryBean {
 
   private Map<Object, Object> _values = new HashMap<Object, Object>();

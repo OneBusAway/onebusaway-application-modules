@@ -13,12 +13,29 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
+/**
+ * Convenient methods for instantiating a {@link ConfigurableApplicationContext}
+ * Spring application container. For more details on the Spring application
+ * container, check out:
+ * 
+ * http://www.springsource.org/
+ * 
+ * @author bdferris
+ * 
+ */
 public class ContainerLibrary {
 
   private static final String CLASSPATH_PREFIX = "classpath:";
 
   private static final String FILE_PREFIX = "file:";
 
+  /**
+   * See {@link #createContext(Iterable, Map)}
+   * 
+   * @param paths resource paths
+   * @return a Spring application container context created from the specified
+   *         resources
+   */
   public static ConfigurableApplicationContext createContext(String... paths) {
     List<String> list = new ArrayList<String>();
     for (String path : paths)
@@ -26,11 +43,32 @@ public class ContainerLibrary {
     return createContext(list);
   }
 
+  /**
+   * See {@link #createContext(Iterable, Map)}
+   * 
+   * @param paths resource paths
+   * @return a Spring application container context created from the specified
+   *         resources
+   */
   public static ConfigurableApplicationContext createContext(
       Iterable<String> paths) {
     return createContext(paths, new HashMap<String, BeanDefinition>());
   }
 
+  /**
+   * Construct and instantiate a Spring application container from the specified
+   * resources. By default, paths are treated as references to classpath
+   * resources, but you can prefix with {@value #FILE_PREFIX} to specify a
+   * file-path resource or {@value #CLASSPATH_PREFIX} to specifically specify a
+   * classpath resource.
+   * 
+   * 
+   * A shutdown hook is automatically registered for the application context.
+   * 
+   * @param paths resource paths
+   * @param additionalBeans additional bean defintions to include in the context
+   * @return a Spring application container context
+   */
   public static ConfigurableApplicationContext createContext(
       Iterable<String> paths, Map<String, BeanDefinition> additionalBeans) {
 

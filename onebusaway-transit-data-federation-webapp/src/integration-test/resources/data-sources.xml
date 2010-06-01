@@ -31,11 +31,16 @@
         </property>
     </bean>
 
-    <bean id="bundlePath" class="java.io.File">
-        <constructor-arg value="${onebusaway_prefix}/target/transit-data-bundle" />
+    <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
+        <property name="order" value="-2" />
+        <property name="properties">
+            <props>
+                <prop key="bundlePath">${onebusaway_prefix}/target/transit-data-bundle</prop>
+            </props>
+        </property>
     </bean>
 
-    <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
         <property name="properties">
             <props>
                 <prop key="cacheManager.cacheManagerName">org.onebusaway.transit_data_federation_webapp.cacheManager</prop>
@@ -46,7 +51,8 @@
 
     <!-- Federated Service Registry -->
     <bean id="serviceRegistry" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-        <property name="serviceUrl" value="http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/service-registry" />
+        <property name="serviceUrl"
+            value="http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/service-registry" />
         <property name="serviceInterface" value="org.onebusaway.federations.FederatedServiceRegistry" />
     </bean>
 

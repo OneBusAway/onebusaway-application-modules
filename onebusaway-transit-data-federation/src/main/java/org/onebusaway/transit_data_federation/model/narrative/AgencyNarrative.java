@@ -2,9 +2,7 @@ package org.onebusaway.transit_data_federation.model.narrative;
 
 import java.io.Serializable;
 
-import org.onebusaway.container.model.upgradeable.Upgradeable;
-
-public final class AgencyNarrative implements Serializable, Upgradeable {
+public final class AgencyNarrative implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

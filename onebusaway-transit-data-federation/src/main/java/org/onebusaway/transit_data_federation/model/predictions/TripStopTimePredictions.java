@@ -12,9 +12,9 @@ import java.util.TreeMap;
 
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.onebusaway.utility.InterpolationStrategy;
-import org.onebusaway.utility.InterpolationLibrary.EOutOfRangeStrategy;
 
 public final class TripStopTimePredictions implements Serializable {
 

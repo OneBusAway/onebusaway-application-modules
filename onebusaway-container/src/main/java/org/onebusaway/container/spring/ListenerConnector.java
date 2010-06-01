@@ -7,6 +7,14 @@ import javax.annotation.PreDestroy;
 
 import org.onebusaway.container.model.HasListeners;
 
+/**
+ * Spring convenience class for wiring up {@link HasListeners} listener
+ * containers with listener objects. Specify an arbitrary number of source
+ * containers and listeners and they will be wired up in a {@link PostConstruct}
+ * phase.
+ * 
+ * @author bdferris
+ */
 public class ListenerConnector<T> {
 
   private HasListeners<T> _source;

@@ -4,7 +4,7 @@
     xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-        
+
     <!-- Database Connection Configuration -->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
@@ -21,9 +21,14 @@
             </props>
         </property>
     </bean>
-    
-    <bean id="bundlePath" class="java.io.File">
-        <constructor-arg value="target/bundle"/>
+
+    <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
+        <property name="order" value="-2" />
+        <property name="properties">
+            <props>
+                <prop key="bundlePath">target/bundle</prop>
+            </props>
+        </property>
     </bean>
 
 </beans>

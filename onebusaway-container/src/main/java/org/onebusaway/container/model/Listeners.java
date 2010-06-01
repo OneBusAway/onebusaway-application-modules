@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Convenience container for a collection of typed listener objects
+ * 
+ * @author bdferris
+ * @see HasListeners
+ */
 public class Listeners<T> implements Iterable<T>, HasListeners<T> {
 
   private List<T> _listeners = new ArrayList<T>();

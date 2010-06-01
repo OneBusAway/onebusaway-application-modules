@@ -21,6 +21,14 @@ import org.springframework.core.Ordered;
 
 import java.util.List;
 
+/**
+ * A Spring {@link BeanPostProcessor} to add additional values to
+ * already-created {@link List} object.
+ * 
+ * @author bdferris
+ * @see MapBeanPostProcessor
+ * @see PropertiesBeanPostProcessor
+ */
 public class ListBeanPostProcessor implements BeanPostProcessor, Ordered {
 
   private int _order;
@@ -66,8 +74,7 @@ public class ListBeanPostProcessor implements BeanPostProcessor, Ordered {
       if (obj instanceof List) {
         List<Object> objects = (List<Object>) obj;
         objects.addAll(_values);
-      }
-      else if( obj instanceof ListFactoryBean) {
+      } else if (obj instanceof ListFactoryBean) {
         ListFactoryBean factory = (ListFactoryBean) obj;
         factory.addValues(_values);
       }

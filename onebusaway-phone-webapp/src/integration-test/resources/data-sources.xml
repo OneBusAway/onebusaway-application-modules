@@ -29,11 +29,11 @@
         <qualifier value="directionPronunciation" />
     </bean>
 
-    <bean class="org.onebusaway.container.spring.OverrideConfigurer">
-        <property name="map">
-            <map>
-                <entry key="agiServer.port" value="${org.onebusaway.phone_webapp.agi_port}"/>
-            </map>
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="agiServer.port">${org.onebusaway.phone_webapp.agi_port}</prop>
+            </props>
         </property>
     </bean>
 

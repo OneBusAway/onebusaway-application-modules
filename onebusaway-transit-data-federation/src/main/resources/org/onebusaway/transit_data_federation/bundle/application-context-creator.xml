@@ -43,7 +43,7 @@
     <bean id="calendarServiceDataTask" class="org.onebusaway.transit_data_federation.impl.offline.CalendarServiceDataTask" />
 
     <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
-        <property name="regionSource">
+        <property name="regionsSource">
             <bean class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.GtfsStopRegionsSourceImpl"/>
         </property>
     </bean>

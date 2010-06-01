@@ -1,8 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.predictions;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
-import org.onebusaway.utility.InterpolationLibrary.EOutOfRangeStrategy;
 
 import java.io.Serializable;
 import java.util.SortedMap;

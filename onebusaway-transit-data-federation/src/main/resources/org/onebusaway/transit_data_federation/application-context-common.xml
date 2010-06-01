@@ -17,21 +17,21 @@
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
     <import resource="classpath:org/onebusaway/gtfs/application-context.xml" />
-    
+
     <bean id="gtfsBundle" class="org.onebusaway.gtfs.model.GtfsServiceBundle">
-        <property name="path" ref="bundlePath" />
+        <property name="path" value="${bundlePath}" />
     </bean>
 
     <bean id="bundle" class="org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle">
-        <property name="path" ref="bundlePath" />
+        <property name="path" value="${bundlePath}" />
     </bean>
 
-    <bean id="ehCacheDiskStorePath" class="org.onebusaway.container.spring.PathFactoryBean">
-        <property name="path">
-            <list>
-                <ref bean="bundlePath" />
-                <value>cache</value>
-            </list>
+    <!-- Override the default ehcache diskstore path -->
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="ehCacheConfiguration.diskStorePath">${bundlePath}/cache</prop>
+            </props>
         </property>
     </bean>
 

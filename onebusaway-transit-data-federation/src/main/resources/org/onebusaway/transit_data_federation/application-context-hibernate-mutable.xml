@@ -63,7 +63,7 @@
             </list>
         </property>
         <property name="cacheProvider">
-            <bean class="org.onebusaway.container.spring.EhCacheProvider">
+            <bean class="org.onebusaway.container.spring.ehcache.EhCacheProvider">
                 <property name="cacheManager" ref="cacheManager" />
             </bean>
         </property>

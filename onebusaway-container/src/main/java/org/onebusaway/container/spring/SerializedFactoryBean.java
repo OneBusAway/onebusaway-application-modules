@@ -2,11 +2,18 @@ package org.onebusaway.container.spring;
 
 import org.onebusaway.utility.ObjectSerializationLibrary;
 
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import java.io.File;
 import java.lang.reflect.Method;
 
+/**
+ * A Spring {@link FactoryBean} for instantiating a serialized object from a
+ * File.
+ * 
+ * @author bdferris
+ */
 public class SerializedFactoryBean extends AbstractFactoryBean {
 
   private File _path;

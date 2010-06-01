@@ -8,6 +8,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * An implementation of {@link RotationStrategy} that writes output to file
+ * whose named is specified using a format processed using the the
+ * {@link SimpleDateFormat} class. This allows one to get standard time-based
+ * file rotation with whatever time granularity and formatting you may desire.
+ * 
+ * @author bdferris
+ */
 public class TimeRotationStrategy implements RotationStrategy {
 
   private DateFormat _timeFormat;
@@ -27,7 +35,8 @@ public class TimeRotationStrategy implements RotationStrategy {
     return new FileWriter(new File(_lastFormat), true);
   }
 
-  public Writer getNextWriter(Writer writer, int charactersWritten) throws IOException {
+  public Writer getNextWriter(Writer writer, int charactersWritten)
+      throws IOException {
     String format = _timeFormat.format(new Date());
     if (_lastFormat.equals(format))
       return writer;

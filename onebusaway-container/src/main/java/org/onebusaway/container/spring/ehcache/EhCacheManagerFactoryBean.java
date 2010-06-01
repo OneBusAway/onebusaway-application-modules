@@ -1,4 +1,4 @@
-package org.onebusaway.container.spring;
+package org.onebusaway.container.spring.ehcache;
 
 import java.io.IOException;
 
@@ -8,12 +8,23 @@ import net.sf.ehcache.config.Configuration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 
+/**
+ * * A Spring {@link FactoryBean} for programmatically creating an EhCache
+ * {@link CacheManager}, specifically allowing us to pass in a
+ * {@link Configuration} directly. The existing factory bean implementation
+ * provided by Spring directly does not allow one to programmatically specify
+ * the {@link Configuration} directly, which makes it difficult to dynamically
+ * configure the cache using a spring application context config.
+ * 
+ * @author bdferris
+ * @see EhCacheConfigurationFactoryBean
+ * @see EhCacheFactoryBean
+ */
 public class EhCacheManagerFactoryBean implements FactoryBean,
     InitializingBean, DisposableBean {
 

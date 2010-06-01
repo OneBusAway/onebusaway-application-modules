@@ -7,6 +7,12 @@ import org.springframework.aop.target.AbstractLazyCreationTargetSource;
 import java.io.File;
 import java.lang.reflect.Method;
 
+/**
+ * A Spring {@link FactoryBean} for lazily instantiating a serialized bean from
+ * a file as needed
+ * 
+ * @author bdferris
+ */
 public class SerializedLazyCreationTargetSource extends
     AbstractLazyCreationTargetSource {
 

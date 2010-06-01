@@ -8,6 +8,15 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
+/**
+ * Utility class that pops up a simple Swing dialog with a "Stop" button that
+ * will cause your program to gracefully exit when pressed. Useful when you need
+ * a convenient way during testing for stopping a command-line program that
+ * would typically run forever by default.
+ * 
+ * @author bdferris
+ * 
+ */
 public class StopButtonService {
 
   private String _name;
@@ -26,7 +35,7 @@ public class StopButtonService {
         System.exit(0);
       }
     });
-    button.setMinimumSize(new Dimension(500,200));
+    button.setMinimumSize(new Dimension(500, 200));
     frame.getContentPane().add(button);
     frame.pack();
     frame.setVisible(true);

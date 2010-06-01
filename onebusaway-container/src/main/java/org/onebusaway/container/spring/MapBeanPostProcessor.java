@@ -15,12 +15,20 @@
  */
 package org.onebusaway.container.spring;
 
+import java.util.Map;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.Ordered;
 
-import java.util.Map;
-
+/**
+ * A Spring {@link BeanPostProcessor} to add additional values to
+ * already-created {@link Map} object.
+ * 
+ * @author bdferris
+ * @see ListBeanPostProcessor
+ * @see PropertiesBeanPostProcessor
+ */
 public class MapBeanPostProcessor implements BeanPostProcessor, Ordered {
 
   private int _order;

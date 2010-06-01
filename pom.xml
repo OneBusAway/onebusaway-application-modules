@@ -166,6 +166,8 @@
                                     <org.onebusaway.sms_webapp.port>${org.onebusaway.sms_webapp.port}</org.onebusaway.sms_webapp.port>
                                     <org.onebusaway.webapp.port>${org.onebusaway.webapp.port}</org.onebusaway.webapp.port>
                                 </systemPropertyVariables>
+                                <!-- Don't stop the build if integration tests fail because we still want post-integration-test cleanup to run -->
+                                <testFailureIgnore>true</testFailureIgnore>
                             </configuration>
                         </execution>
                     </executions>

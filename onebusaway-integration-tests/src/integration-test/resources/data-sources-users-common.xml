@@ -21,14 +21,6 @@
         </property>
     </bean>
 
-    <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
-        <property name="properties">
-            <props>
-                <prop key="cacheManager.cacheManagerName">org.onebusaway.webapp.sharedCacheManager</prop>
-            </props>
-        </property>
-    </bean>
-
     <!--
         The Geocoder is used in the SMS interface for determining your default search location. The DefaultGeocoderImpl
         doesn't actually do much geocoding... it's just there for testing
@@ -43,25 +35,25 @@
 
     <bean id="serviceArea" class="org.onebusaway.presentation.impl.DefaultServiceAreaServiceImpl" />
 
-    <bean class="org.onebusaway.container.spring.OverrideConfigurer">
-        <property name="map">
-            <map>
-                <entry key="ehCacheConfiguration.configLocation" value="classpath:org/onebusaway/container/ehcache-terracotta.xml" />
-                <entry key="ehCacheConfiguration.terracottaUrl" value="localhost:${terracotta.port}" />
-                
-                <entry key="lastSelectedStopServiceCache.overflowToDisk" value="false" />
-                <entry key="lastSelectedStopServiceCache.terracottaClustered" value="true" />
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="ehCacheConfiguration.configLocation">classpath:org/onebusaway/container/ehcache-terracotta.xml</prop>
+                <prop key="ehCacheConfiguration.terracottaUrl">localhost:${terracotta.port}</prop>
 
-                <entry key="userLastAccessTimeServiceCache.overflowToDisk" value="false" />
-                <entry key="userLastAccessTimeServiceCache.terracottaClustered" value="true" />
+                <prop key="lastSelectedStopServiceCache.overflowToDisk">false</prop>
+                <prop key="lastSelectedStopServiceCache.terracottaClustered">true</prop>
 
-                <entry key="userIndexCache.terracottaClustered" value="true" />
-                <entry key="userCache.terracottaClustered" value="true" />
-                <entry key="userIndicesCache.terracottaClustered" value="true" />
-                <entry key="userRolesCache.terracottaClustered" value="true" />
-                <entry key="userRoleCache.terracottaClustered" value="true" />
-                <entry key="cacheManager.cacheManagerName" value="org.onebusaway.sharedCacheManager" />
-            </map>
+                <prop key="userLastAccessTimeServiceCache.overflowToDisk">false</prop>
+                <prop key="userLastAccessTimeServiceCache.terracottaClustered">true</prop>
+
+                <prop key="userIndexCache.terracottaClustered">true</prop>
+                <prop key="userCache.terracottaClustered">true</prop>
+                <prop key="userIndicesCache.terracottaClustered">true</prop>
+                <prop key="userRolesCache.terracottaClustered">true</prop>
+                <prop key="userRoleCache.terracottaClustered">true</prop>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.sharedCacheManager</prop>
+            </props>
         </property>
     </bean>
 
