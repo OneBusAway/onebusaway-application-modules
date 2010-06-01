@@ -5,6 +5,7 @@
     <servers>
         <server>
             <dso-port>${terracotta.port}</dso-port>
+            <jmx-port>${terracotta.jmx_port}</jmx-port>
         </server>
     </servers>
 

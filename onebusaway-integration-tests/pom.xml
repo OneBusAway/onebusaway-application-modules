@@ -14,6 +14,7 @@
         <cargo.jvmargs>-Xmx1G -XX:MaxPermSize=256m</cargo.jvmargs>
         <hsqldb.port>9930</hsqldb.port>
         <terracotta.port>9931</terracotta.port>
+        <terracotta.jmx_port>9932</terracotta.jmx_port>
     </properties>
 
     <repositories>
