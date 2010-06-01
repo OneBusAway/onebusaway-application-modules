@@ -17,7 +17,7 @@
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
     <import resource="classpath:org/onebusaway/container/application-context.xml" />
-    
+
     <bean id="userIndexCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.model.UserIndex" />
@@ -39,7 +39,7 @@
         <property name="overflowToDisk" value="false" />
         <property name="diskPersistent" value="false" />
     </bean>
-    
+
     <bean id="userIndicesCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.model.User.userIndices" />
@@ -71,6 +71,18 @@
         <property name="timeToIdle" value="0" />
         <property name="overflowToDisk" value="false" />
         <property name="diskPersistent" value="false" />
+    </bean>
+
+    <!--
+        Ensure that the second-level caches are created before the HibernateSessionFactory is instantiated, otherwise
+        Hibernate will use defualt cache entries for our User classes
+    -->
+    <bean class="org.onebusaway.container.spring.DependencyConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="sessionFactory">userIndexCache,userCache,userIndicesCache,userRolesCache,userRoleCache</prop>
+            </props>
+        </property>
     </bean>
 
     <bean id="usersHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
@@ -110,7 +122,7 @@
             </bean>
         </property>
     </bean>
-    
+
     <bean id="userLastAccessTimeServiceCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.users.impl.internal.UserLastAccessTimeServiceImpl.cache" />
@@ -121,7 +133,7 @@
         <property name="overflowToDisk" value="true" />
         <property name="diskPersistent" value="false" />
     </bean>
-    
+
     <bean id="userLastAccessTimeServiceImpl" class="org.onebusaway.users.impl.internal.UserLastAccessTimeServiceImpl">
         <property name="cache" ref="userLastAccessTimeServiceCache" />
     </bean>
@@ -155,5 +167,6 @@
     <bean id="userIndexRegistrationServiceImpl" class="org.onebusaway.users.impl.internal.UserIndexRegistrationServiceImpl">
         <property name="cache" ref="userIndexRegistrationServiceCache" />
     </bean>
+
 
 </beans>
