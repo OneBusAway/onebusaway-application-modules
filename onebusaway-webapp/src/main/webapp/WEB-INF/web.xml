@@ -96,7 +96,11 @@
     </servlet-mapping>
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>org.onebusaway.users.impl.authentication.LoginServlet</servlet-class>
+        <servlet-class>org.onebusaway.everylastlogin.server.LoginServlet</servlet-class>
+        <init-param>
+            <param-name>loginManagerFactory</param-name>
+            <param-value>org.onebusaway.users.impl.SpringLoginManagerFactory</param-value>
+        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>

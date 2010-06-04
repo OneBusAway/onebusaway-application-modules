@@ -1,6 +1,6 @@
 package org.onebusaway.webapp.resources;
 
-import org.onebusaway.webapp.services.resources.WebappSource;
+import org.onebusaway.presentation.services.resources.WebappSource;
 
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
@@ -46,4 +46,7 @@ public interface WhereStandardResources extends ClientBundle {
   
   @WebappSource("/images/index/Logo.cache.png")
   public ImageResource getLogoImage();
+  
+  @WebappSource("/images/Feedback.png")
+  public ImageResource getFeedback();
 }

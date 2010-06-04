@@ -15,6 +15,7 @@
     <!-- Common Software Dependency Versions -->
     <properties>
         <struts-version>2.1.8.1</struts-version>
+        <gwt-version>2.0.0</gwt-version>
 
         <!--  These properties are primarily used in configuring joint integration tests -->
         <org.onebusaway.federations_webapp.port>9900</org.onebusaway.federations_webapp.port>

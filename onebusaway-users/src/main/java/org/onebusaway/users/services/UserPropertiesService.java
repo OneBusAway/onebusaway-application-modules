@@ -44,4 +44,8 @@ public interface UserPropertiesService {
   public void resetUser(User user);
 
   public void mergeProperties(User sourceUser, User targetUser);
+  
+  public <T> T getAdditionalPropertyForUser(User user, String propertyName);
+  
+  public void setAdditionalPropertyForUser(User user, String propertyName, Object propertyValue);
 }

@@ -94,6 +94,12 @@
 </div>
 </div>
 
+<div id="feedback">
+  <a href="http://onebusaway.ideascale.com">
+    <img src="${resources.WhereStandardResources.feedback.url}"/>
+  </a>
+</div>
+
 <!-- Google Analytics -->
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

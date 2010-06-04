@@ -139,6 +139,11 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public List<String> getUserIndexKeyValuesForKeyType(String keyType) {
+    return _userDao.getUserIndexKeyValuesForKeyType(keyType);
+  }
+
+  @Override
   public UserIndex getOrCreateUserForIndexKey(UserIndexKey key,
       String credentials, boolean isAnonymous) {
 
@@ -202,6 +207,9 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void mergeUsers(User sourceUser, User targetUser) {
+
+    if (sourceUser.equals(targetUser))
+      return;
 
     if (sourceUser.getCreationTime().before(targetUser.getCreationTime()))
       targetUser.setCreationTime(sourceUser.getCreationTime());
@@ -305,6 +313,19 @@ public class UserServiceImpl implements UserService {
     return _userPropertiesMigration.getUserPropertiesBulkMigrationStatus();
   }
 
+  @Override
+  public <T> T getAdditionalPropertyForUser(User user, String propertyName) {
+    return _userPropertiesService.getAdditionalPropertyForUser(user,
+        propertyName);
+  }
+
+  @Override
+  public void setAdditionalPropertyForUser(User user, String propertyName,
+      Object propertyValue) {
+    _userPropertiesService.setAdditionalPropertyForUser(user, propertyName,
+        propertyValue);
+  }
+
   /****
    * Private Methods
    ****/
@@ -321,5 +342,4 @@ public class UserServiceImpl implements UserService {
 
     targetUser.setRoles(roles);
   }
-
 }

@@ -29,7 +29,20 @@
 </s:else>
 
 <script type="text/javascript"
-        src="org.onebusaway.webapp.gwt.LoginWidget.nocache.js"><jsp:text></jsp:text></script>
+        src="org.onebusaway.everylastlogin.LoginWidget.nocache.js"><jsp:text></jsp:text></script>
+<script type="text/javascript">
+  window.onload = function () {
+      var intervalId = null;
+      /* It takes some time for the GWT LoginWidget iframe to initialize */
+      intervalId = setInterval(function() {
+    	  if(typeof(everylastlogin) !== 'undefined') {
+            var prefix = '${pageContext.request.contextPath}';
+            everylastlogin.LoginWidgetLibrary.createWidget('login_widget',prefix+'/services/login',prefix+'/login-handler.action');
+            clearInterval(intervalId);
+          }
+      },10);	  
+  };
+</script>
 </head>
 <body>
 

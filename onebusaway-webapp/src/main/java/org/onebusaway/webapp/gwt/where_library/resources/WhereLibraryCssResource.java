@@ -1,6 +1,6 @@
 package org.onebusaway.webapp.gwt.where_library.resources;
 
-import org.onebusaway.webapp.services.resources.WebappImportedWithPrefix;
+import org.onebusaway.presentation.services.resources.WebappImportedWithPrefix;
 
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.CssResource.ImportedWithPrefix;

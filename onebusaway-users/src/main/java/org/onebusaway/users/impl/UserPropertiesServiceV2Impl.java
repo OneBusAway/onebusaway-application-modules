@@ -201,7 +201,22 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   public void mergeProperties(User sourceUser, User targetUser) {
     mergeProperties(getProperties(sourceUser), getProperties(targetUser));
   }
-  
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T getAdditionalPropertyForUser(User user, String propertyName) {
+    UserPropertiesV2 properties = getProperties(user);
+    return (T) properties.getAdditionalProperties().get(propertyName);
+  }
+
+  @Override
+  public void setAdditionalPropertyForUser(User user, String propertyName,
+      Object propertyValue) {
+    UserPropertiesV2 properties = getProperties(user);
+    properties.getAdditionalProperties().put(propertyName, propertyValue);
+    _userDao.saveOrUpdateUser(user);
+  }
+
   /****
    * Private Methods
    ****/

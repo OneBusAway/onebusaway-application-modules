@@ -80,7 +80,7 @@
 
     <bean id="servletContext" class="org.springframework.web.context.support.ServletContextFactoryBean" />
 
-    <bean id="clientBundleFactory" class="org.onebusaway.webapp.impl.resources.ClientBundleFactory">
+    <bean id="clientBundleFactory" class="org.onebusaway.presentation.impl.resources.ClientBundleFactory">
         <property name="prefix" value="/resources.action?id=" />
         <property name="servletContext" ref="servletContext" />
         <property name="resources">
@@ -102,11 +102,11 @@
         <property name="messagesClass" value="org.onebusaway.webapp.gwt.where_library.WhereMessages" />
     </bean>
 
-    <bean id="openid_plugin" class="org.onebusaway.users.impl.authentication.OpenIdAuthenticationPlugin" />
-    <bean id="twitter_plugin" class="org.onebusaway.users.impl.authentication.TwitterAuthenticationPlugin" />
-    <bean id="facebook_plugin" class="org.onebusaway.users.impl.authentication.FacebookAuthenticationPlugin" />
+    <bean id="openid_plugin" class="org.onebusaway.everylastlogin.server.OpenIdAuthenticationPlugin" />
+    <bean id="twitter_plugin" class="org.onebusaway.everylastlogin.server.TwitterAuthenticationPlugin" />
+    <bean id="facebook_plugin" class="org.onebusaway.everylastlogin.server.FacebookAuthenticationPlugin" />
 
-    <bean id="loginManager" class="org.onebusaway.users.impl.authentication.LoginManager">
+    <bean id="loginManager" class="org.onebusaway.everylastlogin.server.LoginManager">
         <property name="plugins">
             <map>
                 <entry key="openid" value-ref="openid_plugin" />

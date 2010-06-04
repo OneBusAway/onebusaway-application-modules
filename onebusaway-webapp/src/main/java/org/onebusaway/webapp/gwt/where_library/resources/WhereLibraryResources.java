@@ -1,6 +1,6 @@
 package org.onebusaway.webapp.gwt.where_library.resources;
 
-import org.onebusaway.webapp.services.resources.WebappSource;
+import org.onebusaway.presentation.services.resources.WebappSource;
 
 import com.google.gwt.resources.client.ClientBundle;
 

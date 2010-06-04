@@ -5,8 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.onebusaway.users.impl.authentication.AuthenticationResult;
-import org.onebusaway.users.impl.authentication.LoginManager;
+import org.onebusaway.everylastlogin.server.AuthenticationResult;
+import org.onebusaway.everylastlogin.server.LoginManager;
 import org.onebusaway.users.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 

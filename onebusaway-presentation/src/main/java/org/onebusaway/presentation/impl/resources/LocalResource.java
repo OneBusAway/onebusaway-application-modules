@@ -13,15 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.onebusaway.webapp.resources;
+package org.onebusaway.presentation.impl.resources;
 
-import org.onebusaway.presentation.services.resources.WebappSource;
+import java.net.URL;
 
-import com.google.gwt.resources.client.ClientBundle;
-import com.google.gwt.resources.client.CssResource;
+public interface LocalResource {
 
-public interface WhereTextResources extends ClientBundle {
+  public URL getLocalUrl();
 
-  @WebappSource("/WEB-INF/css/where-text.css")
-  public CssResource getCss();
+  public long getLastModifiedTime();
 }

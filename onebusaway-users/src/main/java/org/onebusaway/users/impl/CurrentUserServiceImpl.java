@@ -71,7 +71,13 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
-  public void handleLogin(String type, String id, String credentials) {
+  public UserIndex getCurrentUserAsUserIndex(boolean useAnonymousUser) {
+    return getCurrentUserIndexInternal(useAnonymousUser);
+  }
+
+  @Override
+  public boolean handleLogin(String type, String id, String credentials,
+      boolean registerIfNewUser) {
 
     UserIndexKey key = new UserIndexKey(type, id);
     UserIndex index = _userService.getUserIndexForId(key);
@@ -79,6 +85,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
     // New user?
     if (!exists) {
+
+      if (!registerIfNewUser)
+        return false;
 
       index = _userService.getOrCreateUserForIndexKey(key, credentials, false);
       User newUser = index.getUser();
@@ -89,11 +98,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     }
 
     setCurrentUserInternal(index);
-  }
 
-  @Override
-  public void handleRegistration(String type, String id, String credentials) {
-    handleLogin(type, id, credentials);
+    return true;
   }
 
   @Override
@@ -324,4 +330,5 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     // Log out the current user
     SecurityContextHolder.getContext().setAuthentication(null);
   }
+
 }

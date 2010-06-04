@@ -25,6 +25,12 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-everylastlogin</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        
         <!-- Struts2 Dependencies -->
         <dependency>
             <groupId>org.apache.struts</groupId>
@@ -78,12 +84,6 @@
             <groupId>com.allen_sauer.gwt</groupId>
             <artifactId>gwt-voices</artifactId>
             <version>1.7.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.cssparser</groupId>
-            <artifactId>cssparser</artifactId>
-            <version>0.9.5</version>
         </dependency>
 
         <dependency>
@@ -154,7 +154,6 @@
                     <modules>
                         <module>org.onebusaway.webapp.gwt.AgenciesMap</module>
                         <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
-                        <module>org.onebusaway.webapp.gwt.LoginWidget</module>
                         <module>org.onebusaway.webapp.gwt.MobileApplication</module>
                         <module>org.onebusaway.webapp.gwt.NotificationWidgetApplication</module>
                         <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
@@ -178,6 +177,33 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.onebusaway</groupId>
+                                    <artifactId>onebusaway-everylastlogin</artifactId>
+                                    <classifier>gwtloginwidget</classifier>
+                                    <version>0.0.1-SNAPSHOT</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/gwt/LoginWidget</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <webResources>
@@ -190,7 +216,7 @@
                             <targetPath>where/standard</targetPath>
                         </resource>
                         <resource>
-                            <directory>target/gwt/org.onebusaway.webapp.gwt.LoginWidget</directory>
+                            <directory>${project.build.directory}/gwt/LoginWidget</directory>
                             <targetPath></targetPath>
                         </resource>
                         <resource>

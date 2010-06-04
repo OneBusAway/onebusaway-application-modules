@@ -31,7 +31,7 @@ class UserDaoImpl implements UserDao {
   public HibernateTemplate getHibernateTemplate() {
     return _template;
   }
-  
+
   @Override
   public int getNumberOfUsers() {
     List<?> values = _template.findByNamedQuery("numberOfUsers");
@@ -66,11 +66,11 @@ class UserDaoImpl implements UserDao {
   public void saveOrUpdateUser(User user) {
     _template.saveOrUpdate(user);
   }
-  
+
   @Override
   public void saveOrUpdateUsers(User... users) {
     List<User> list = new ArrayList<User>(users.length);
-    for( User user : users)
+    for (User user : users)
       list.add(user);
     _template.saveOrUpdateAll(list);
   }
@@ -109,6 +109,13 @@ class UserDaoImpl implements UserDao {
     _template.saveOrUpdate(userRole);
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<String> getUserIndexKeyValuesForKeyType(String keyType) {
+    return _template.findByNamedQueryAndNamedParam(
+        "userIndexKeyValuesForKeyType", "type", keyType);
+  }
+
   @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return (UserIndex) _template.get(UserIndex.class, key);
@@ -118,4 +125,5 @@ class UserDaoImpl implements UserDao {
   public void deleteUserIndex(UserIndex index) {
     _template.delete(index);
   }
+
 }

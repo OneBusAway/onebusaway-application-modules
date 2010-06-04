@@ -1,11 +1,11 @@
 package org.onebusaway.webapp.impl;
 
 import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
+import org.onebusaway.presentation.impl.resources.ClientBundleFactory;
 import org.onebusaway.webapp.gwt.where_library.WhereMessages;
 import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryCssResource;
 import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryResources;
 import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
-import org.onebusaway.webapp.impl.resources.ClientBundleFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

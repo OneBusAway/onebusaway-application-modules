@@ -183,6 +183,17 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
     mergeProperties(getProperties(sourceUser), getProperties(targetUser));
   }
 
+  @Override
+  public <T> T getAdditionalPropertyForUser(User user, String propertyName) {
+    return null;
+  }
+
+  @Override
+  public void setAdditionalPropertyForUser(User user, String propertyName,
+      Object propertyValue) {
+    
+  }
+
   /****
    * Private Methods
    ****/

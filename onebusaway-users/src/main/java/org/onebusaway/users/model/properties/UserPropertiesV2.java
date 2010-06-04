@@ -2,7 +2,9 @@ package org.onebusaway.users.model.properties;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.users.model.UserProperties;
 
@@ -23,6 +25,8 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
   private double defaultLocationLon = Double.NaN;
 
   private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
+  
+  private Map<String,Object> additionalProperties = new HashMap<String, Object>();
 
   public UserPropertiesV2() {
 
@@ -84,10 +88,21 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
     this.bookmarks = bookmarks;
   }
 
+  public Map<String, Object> getAdditionalProperties() {
+    if( additionalProperties == null)
+      additionalProperties = new HashMap<String, Object>();
+    return additionalProperties;
+  }
+
+  public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
   public void clear() {
     this.bookmarks = new ArrayList<Bookmark>();
     this.defaultLocationLat = Double.NaN;
     this.defaultLocationLon = Double.NaN;
     this.defaultLocationName = null;
+    this.additionalProperties = new HashMap<String, Object>();
   }
 }

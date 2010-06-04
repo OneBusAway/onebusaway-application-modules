@@ -11,4 +11,7 @@
         SELECT count(*) FROM User user left join user.roles as role
         WHERE role = :role
     </query>
+    <query name="userIndexKeyValuesForKeyType" read-only="true">
+        SELECT index.id.value FROM UserIndex index WHERE index.id.type = :type
+    </query>
 </hibernate-mapping>
