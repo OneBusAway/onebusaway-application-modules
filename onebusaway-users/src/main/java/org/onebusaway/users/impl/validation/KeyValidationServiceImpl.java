@@ -45,21 +45,21 @@ class KeyValidationServiceImpl implements KeyValidationService {
    ****/
 
   @Override
-  public String generateKey(String value) {
-    return generateKey(_defaultProviderId, value);
+  public String generateKeyWithDefaultProvider(String value, String... arguments) {
+    return generateKey(_defaultProviderId, value, arguments);
   }
 
   @Override
-  public String generateKey(String providerId, String value) {
+  public String generateKey(String providerId, String value, String... arguments) {
     KeyValidationProvider provider = _providers.get(providerId);
     if (provider == null)
       throw new IllegalStateException("no api key validation provider with id="
           + providerId);
-    return providerId + "_" + provider.generateKey(value);
+    return providerId + "_" + provider.generateKey(value, arguments);
   }
 
   @Override
-  public boolean isValidKey(String key) {
+  public boolean isValidKey(String key, String... arguments) {
     if (_keys.contains(key))
       return true;
     int index = key.indexOf('_');
@@ -70,11 +70,11 @@ class KeyValidationServiceImpl implements KeyValidationService {
     KeyValidationProvider provider = _providers.get(providerId);
     if (provider == null)
       return false;
-    return provider.isValidKey(subKey);
+    return provider.isValidKey(subKey,arguments);
   }
 
   @Override
-  public Map<String, String> getKeyInfo(String key) {
+  public Map<String, String> getKeyInfo(String key, String... arguments) {
     
     Map<String,String> info = new HashMap<String, String>();
     info.put("key",key);
@@ -99,7 +99,7 @@ class KeyValidationServiceImpl implements KeyValidationService {
       return info;
     }
     
-    provider.getKeyInfo(subKey,info);
+    provider.getKeyInfo(info,subKey,arguments);
     
     return info;
   }

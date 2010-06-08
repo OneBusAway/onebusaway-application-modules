@@ -17,97 +17,9 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 <title>One Bus Away</title>
+<meta http-equiv="Refresh" content="0;url=index.action" />
 </head>
 <body>
-
-<div id="content" class="index_content">
-
-<div class="page-header home-header">
-<h1>Where is your bus?</h1>
-<h2>Let's find out.  We provide easy access to real-time transit<br/>information for the Puget Sound region and beyond.</h2>
-</div>
-
-<div class="column-row">
-
-<div class="one-third column">
-<h3 style="color: red">News</h3>
-
-<p>Read about the <a href="http://onebusaway.blogspot.com/2010/03/big-changes-to-onebusaway-pierce.html">big changes</a> to OneBusAway, including support for Pierce Transit.</p>
-
-<h3>Our Goal</h3>
-
-<p>We want to make it easier to use public transit by
-providing easy access to schedule and real-time
-arrival information for the buses and trains you ride
-every day.</p>
-
-<p>We provide:</p>
-
-<ul>
-<li>Real-time arrival information for a <a href="where/standard/agencies.action">number of transit agencies</a>.</li>
-<li>Arrival info for every bus stop.</li>
-<li>Easy access to information across a variety of devices.</li>
-</ul>
-
-<p>Why? We're riders just like you and we don't like
-waiting for the bus any more than we have to.</p>
-</div>
-
-<div class="one-third column">
-<h3>Our Tools</h3>
-<p><a href="where/">Our tools</a> are available across  a number of interfaces:</p>
-<p>
-<table id="tools">
-  <tr>
-    <td class="tool">
-      <div><a href="where/standard/index.html"><img src="${resources.WhereStandardResources.toolWeb.url}" /></a></div>
-      <div class="toolLabel"><a href="where/standard/index.html">Web</a></div>
-    </td>
-    <td class="tool">
-      <div><a href="where/phone.html"><img src="${resources.WhereStandardResources.toolPhone.url}" /></a></div>
-      <div class="toolLabel"><a href="where/phone.html">Phone</a></div>
-    </td>
-    <td class="tool">
-      <div><a href="where/sms.html"><img src="${resources.WhereStandardResources.toolSMS.url}" /></a></div>
-      <div class="toolLabel"><a href="where/sms.html">SMS</a></div>
-    </td>
-  </tr>
-  <tr>
-    <td class="tool">
-      <div><a href="where/iphone.html"><img src="${resources.WhereStandardResources.toolIPhone.url}" /></a></div>
-      <div class="toolLabel"><a href="where/iphone.html">iPhone</a></div>
-    </td>
-    <td class="tool">
-      <div><a href="where/android.html"><img src="${resources.WhereStandardResources.toolAndroid.url}" /></a></div>
-      <div class="toolLabel"><a href="where/android.html">Android</a></div>
-    </td>
-    <td class="tool">
-      <div><a href="where/mobile-web.html"><img src="${resources.WhereStandardResources.toolMobileWeb.url}" /></a></div>
-      <div class="toolLabel"><a href="where/mobile-web.html">Mobile</a></div>
-    </td>
-  </tr>
-</table>
-</p>
-
-</div>
-<div class="one-third column">
-<h3>Our Research</h3>
-
-<p><a href="explore/onebusaway/"><img src="where/Explore2.cache.png"/></a></p>
-
-<p>OneBusAway was started by students at the University of Washington, and it supports
-research on improving the usability of public transportation, such as the
-<a href="explore/onebusaway/">Explore Tool</a> shown above.  Check out
-our <a href="research/index.html">research page</a> for more information.</p>
-
-<p>Our work is all <a href="http://code.google.com/p/onebusaway">open-source software</a>,
-so that others may reuse and build upon our efforts.</p>
-
-</div>
-
-</div>
-
-</div>
 
 </body>
 </html>

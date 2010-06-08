@@ -43,7 +43,25 @@ public interface UserService {
 
   public boolean isAdministrator(User user);
 
+  /**
+   * Enable the admin role for a User. For admin bootstrapping, we have a check
+   * that will only allow you to set an admin role if no other admins exist.
+   * This would be useful for marking the very first user in a system as admin.
+   * 
+   * @param user the user to mark as an admin
+   * @param onlyIfNoOtherAdmins when true, will only add the admin role if no
+   *          other users are marked as admin
+   */
   public void enableAdminRoleForUser(User user, boolean onlyIfNoOtherAdmins);
+
+  /**
+   * Remove the admin role for a User.
+   * 
+   * @param user
+   * @param onlyIfOtherAdmins when true, will only remove the admin role if at
+   *          least one other user is marked as admin
+   */
+  public void disableAdminRoleForUser(User user, boolean onlyIfOtherAdmins);
 
   public void mergeUsers(User sourceUser, User targetUser);
 

@@ -3,7 +3,7 @@ package org.onebusaway.users.services;
 import java.util.List;
 
 import org.onebusaway.users.client.model.UserBean;
-import org.onebusaway.users.impl.authentication.AutoUserProcessingFilter;
+import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.properties.RouteFilter;
@@ -38,9 +38,9 @@ public interface CurrentUserService {
    * @param credentials {@link UserIndex} credentials
    * @param registerIfNewUser if true, automatically register a new user if one
    *          does not exist already
-   * @return true if the user was successfully logged in, otherwise false
+   * @return the details of the logged in user on success, otherwise null
    */
-  public boolean handleLogin(String type, String id, String credentials,
+  public IndexedUserDetails handleLogin(String type, String id, String credentials,
       boolean registerIfNewUser);
 
   public void handleAddAccount(String type, String id, String credentials);

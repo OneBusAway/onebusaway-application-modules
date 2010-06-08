@@ -1,4 +1,4 @@
-package org.onebusaway.webapp;
+package org.onebusaway.presentation.impl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -23,10 +25,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class CopyCompiledGwtResourcesMain {
+
+  private static final Pattern _pattern = Pattern.compile("\\$\\{([^}]+)\\}");
+
   public static void main(String[] args) throws Exception {
 
     if (args.length != 1) {
-      System.err.println("usage: onebusaway-webapp-target-dir");
+      System.err.println("usage: webapp-target-dir");
       System.exit(-1);
     }
 
@@ -53,23 +58,52 @@ public class CopyCompiledGwtResourcesMain {
       Node targetPathNode = xpath(resourceNode, "targetPath", Node.class);
       String directory = directoryNode.getTextContent();
       String targetPath = targetPathNode.getTextContent();
-      System.out.println("direectory=" + directory);
+
+      directory = resolveValue(directory);
+
+      System.out.println("directory=" + directory);
       System.out.println("targetPath=" + targetPath);
       copyFiles(new File(directory), new File(webappDirectory, targetPath));
     }
   }
 
+  private static String resolveValue(String value) {
+    Matcher m = _pattern.matcher(value);
+    StringBuffer sb = new StringBuffer();
+    while (m.find()) {
+      String property = m.group(1);
+      String propertyValue = System.getProperty(property);
+      if (propertyValue == null && property.equals("project.build.directory")) {
+        propertyValue = "target";
+      } else {
+        propertyValue = resolveValue(propertyValue);
+      }
+      m.appendReplacement(sb, propertyValue);
+    }
+    m.appendTail(sb);
+    return sb.toString();
+  }
+
   private static void copyFiles(File sourceDirectory, File targetDirectory)
       throws IOException {
+
     if (!(sourceDirectory.exists() && sourceDirectory.isDirectory()))
       return;
+
+    if (!targetDirectory.exists())
+      targetDirectory.mkdirs();
+
     File[] files = sourceDirectory.listFiles();
     if (files == null)
       return;
     for (File file : files) {
       File targetFile = new File(targetDirectory, file.getName());
-      if( ! targetFile.exists() || file.lastModified() > targetFile.lastModified())
-      copyFile(file, targetFile);
+      if (!targetFile.exists()
+          || file.lastModified() > targetFile.lastModified())
+        if (file.isDirectory())
+          copyFiles(file, targetFile);
+        else
+          copyFile(file, targetFile);
     }
   }
 
@@ -83,7 +117,7 @@ public class CopyCompiledGwtResourcesMain {
       int rc = in.read(buffer);
       if (rc == -1)
         break;
-      if( rc > 0)
+      if (rc > 0)
         out.write(buffer, 0, rc);
     }
     in.close();

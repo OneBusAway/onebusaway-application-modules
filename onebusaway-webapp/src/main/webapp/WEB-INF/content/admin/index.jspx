@@ -25,8 +25,10 @@
 <h2>Operations</h2>
 
 <ul>
+    <li><s:a namespace="/" action="logout">Logout</s:a></li>
 	<li><a href="user-properties-migration.action">User Properties Migration</a></li>
 	<li><span class="label">API Key Generator:</span><form action="api-key-generator.action"><input type="text" name="value"/><input type="submit" value="Submit"/></form></li>
+    <li><a href="create-login.action">Create a New Login</a></li>
 </ul>
 
 

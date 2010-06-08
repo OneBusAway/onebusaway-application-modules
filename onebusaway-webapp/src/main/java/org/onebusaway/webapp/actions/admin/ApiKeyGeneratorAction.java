@@ -33,7 +33,7 @@ public class ApiKeyGeneratorAction extends ActionSupport {
   @Override
   public String execute() {
 
-    _key = _validationService.generateKey(_value);
+    _key = _validationService.generateKeyWithDefaultProvider(_value);
 
     return SUCCESS;
   }

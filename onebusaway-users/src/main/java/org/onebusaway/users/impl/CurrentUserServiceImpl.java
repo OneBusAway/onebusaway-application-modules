@@ -76,8 +76,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
-  public boolean handleLogin(String type, String id, String credentials,
-      boolean registerIfNewUser) {
+  public IndexedUserDetails handleLogin(String type, String id,
+      String credentials, boolean registerIfNewUser) {
 
     UserIndexKey key = new UserIndexKey(type, id);
     UserIndex index = _userService.getUserIndexForId(key);
@@ -87,19 +87,17 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     if (!exists) {
 
       if (!registerIfNewUser)
-        return false;
+        return null;
 
       index = _userService.getOrCreateUserForIndexKey(key, credentials, false);
       User newUser = index.getUser();
 
       User oldUser = getCurrentUserInternal();
-      if (_userService.isAnonymous(oldUser))
+      if (oldUser != null && _userService.isAnonymous(oldUser))
         _userService.mergeUsers(oldUser, newUser);
     }
 
-    setCurrentUserInternal(index);
-
-    return true;
+    return new IndexedUserDetailsImpl(_authoritiesService, index);
   }
 
   @Override

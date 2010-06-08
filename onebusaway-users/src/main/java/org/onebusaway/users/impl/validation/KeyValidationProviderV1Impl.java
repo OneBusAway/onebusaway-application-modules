@@ -17,16 +17,16 @@ class KeyValidationProviderV1Impl implements KeyValidationProvider {
     return "v1";
   }
 
-  public String generateKey(String input) {
+  public String generateKey(String input, String... arguments) {
     return DigesterSignature.generateKey(_privateSalt, input);
   }
 
-  public boolean isValidKey(String key) {
+  public boolean isValidKey(String key, String... arguments) {
     return DigesterSignature.isValidKey(_privateSalt, key);
   }
 
   @Override
-  public void getKeyInfo(String subKey, Map<String, String> info) {
+  public void getKeyInfo(Map<String, String> info, String subKey, String... arguments) {
     String value = DigesterSignature.getDecodedValue(subKey);
     info.put("decodedValue", value);
   }

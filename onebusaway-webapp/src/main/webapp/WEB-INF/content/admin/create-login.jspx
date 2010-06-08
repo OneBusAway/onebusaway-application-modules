@@ -14,15 +14,22 @@
   License for the specific language governing permissions and limitations under
   the License.
 -->
-<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Login Options</title>
-
+<title>Create Login</title>
 </head>
 <body>
 
-<h2>Authentication Error</h2>
+<h1>Create a Login</h1>
+
+<s:form method="post" action="create-login!submit">
+  <s:textfield name="userName" value="%{userName}" label="UserName"/>
+  <s:password name="password" value="%{password}" label="Password"/>
+  <s:password name="password2" value="%{password2}" label="Confirm password"/>
+  <s:submit name="submit" value="Submit"/>
+</s:form>
 
 </body>
 </html>

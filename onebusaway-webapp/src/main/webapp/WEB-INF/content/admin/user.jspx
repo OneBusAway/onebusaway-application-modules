@@ -47,8 +47,6 @@
 <h4>Bookmarked Stops</h4>
 <p>bookmarked stop ids: <s:property value="bookmarkedStopIds" /></p>
 
-<b>here - <s:property value="top"/></b>
-
 <h4>Roles</h4>
 <ul>
     <li><span class="label">anonymous:</span> <s:property
@@ -68,6 +66,14 @@
     </s:iterator>
 </ul>
 </div>
+
+<h4>Actions</h4>
+<ul>
+    <s:url var="deleteUserUrl" action="delete-user">
+        <s:param name="userId" value="%{userId}"/>
+    </s:url>
+    <li><s:a href="%{deleteUserUrl}">Delete</s:a></li>
+</ul>
 
 </s:push>
 

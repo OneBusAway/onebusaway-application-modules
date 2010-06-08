@@ -138,6 +138,22 @@ public class UserServiceImpl implements UserService {
       _userDao.saveOrUpdateUser(user);
   }
 
+  public void disableAdminRoleForUser(User user, boolean onlyIfOtherAdmins) {
+
+    UserRole adminRole = _authoritiesService.getUserRoleForName(StandardAuthoritiesService.ADMINISTRATOR);
+
+    if (onlyIfOtherAdmins) {
+      int count = _userDao.getNumberOfUsersWithRole(adminRole);
+      if (count < 2)
+        return;
+    }
+    
+    Set<UserRole> roles = user.getRoles();
+
+    if (roles.remove(adminRole))
+      _userDao.saveOrUpdateUser(user);
+  }
+
   @Override
   public List<String> getUserIndexKeyValuesForKeyType(String keyType) {
     return _userDao.getUserIndexKeyValuesForKeyType(keyType);

@@ -37,7 +37,7 @@
       intervalId = setInterval(function() {
     	  if(typeof(everylastlogin) !== 'undefined') {
             var prefix = '${pageContext.request.contextPath}';
-            everylastlogin.LoginWidgetLibrary.createWidget('login_widget',prefix+'/services/login',prefix+'/login-handler.action');
+            everylastlogin.LoginWidgetLibrary.createWidget('login_widget',prefix+'/services/login',prefix+'/everylastlogin_login');
             clearInterval(intervalId);
           }
       },10);	  

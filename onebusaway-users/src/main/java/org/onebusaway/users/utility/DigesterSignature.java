@@ -2,8 +2,6 @@ package org.onebusaway.users.utility;
 
 import org.apache.commons.codec.binary.Base64;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class DigesterSignature {
@@ -11,7 +9,7 @@ public class DigesterSignature {
 
   public static String generateKey(String salt, String input) {
 
-    byte[] signature = digestValue(salt,input.getBytes());
+    byte[] signature = Digester.digestValue(ALGORITHM,salt.getBytes(),input.getBytes());
 
     Base64 coder = new Base64();
 
@@ -33,7 +31,7 @@ public class DigesterSignature {
 
     byte[] rawInput = coder.decode(encodedValue.getBytes());
 
-    byte[] actualSignature = digestValue(salt,rawInput);
+    byte[] actualSignature = Digester.digestValue(ALGORITHM,salt.getBytes(),rawInput);
     byte[] expectedSignature = coder.decode(encodedSig.getBytes());
 
     return Arrays.equals(actualSignature, expectedSignature);
@@ -47,17 +45,5 @@ public class DigesterSignature {
 
     byte[] rawInput = coder.decode(encodedValue.getBytes());
     return new String(rawInput);
-  }
-
-  private static byte[] digestValue(String salt, byte[] input) {
-    try {
-      MessageDigest digest = MessageDigest.getInstance(ALGORITHM);
-      digest.update(salt.getBytes());
-      digest.update(input);
-      byte[] signature = digest.digest();
-      return signature;
-    } catch (NoSuchAlgorithmException ex) {
-      throw new IllegalStateException(ex);
-    }
   }
 }

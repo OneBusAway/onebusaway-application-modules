@@ -130,7 +130,7 @@
 	<s:if test="admin">
 		<div class="section">	
 		<h4>Admin</h4>
-	 	<p>You are an admin.  Use <a href="../admin/index.action">your powers</a> wisely.</p>
+	 	<p>You are an admin.  Use <s:a namespace="/admin" action="index">your powers</s:a> wisely.</p>
 	 	</div>
 	</s:if>
 	

@@ -4,11 +4,11 @@ import java.util.Map;
 
 public interface KeyValidationService {
   
-  public String generateKey(String input);
+  public String generateKeyWithDefaultProvider(String input, String... arguments);
 
-  public String generateKey(String providerId, String input);
+  public String generateKey(String providerId, String input, String... arguments);
 
-  public boolean isValidKey(String key);
+  public boolean isValidKey(String key, String... arguments);
   
-  public Map<String,String> getKeyInfo(String key);
+  public Map<String,String> getKeyInfo(String key, String... arguments);
 }
