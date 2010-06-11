@@ -20,11 +20,12 @@
     <context:annotation-config />
 
     <import resource="classpath:org/onebusaway/users/application-context.xml" />
+    <import resource="classpath:org/onebusaway/users/application-context-security.xml" />
     <import resource="classpath:org/onebusaway/geocoder/application-context.xml" />
     <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
-    
+
     <context:component-scan base-package="org.onebusaway.webapp.impl" />
-    
+
     <sec:http>
         <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR" />
         <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1" />
@@ -32,54 +33,16 @@
         <sec:logout invalidate-session="false" logout-url="/logout.action" />
     </sec:http>
 
-    <bean id="userIndexAuthenticationFilter" class="org.onebusaway.users.impl.authentication.IndexedUserAuthenticationProcessorFilter">
-        <property name="defaultTargetUrl" value="/index.action" />
-        <property name="authenticationManager" ref="_authenticationManager" />
-        <property name="filterProcessesUrl" value="/userIndex_login" />
-        <sec:custom-filter after="AUTHENTICATION_PROCESSING_FILTER" />
+    <bean id="autoUserAuthenticationFilter" class="org.onebusaway.users.impl.authentication.AutoUserProcessingFilter">
+        <sec:custom-filter position="ANONYMOUS_FILTER" />
     </bean>
 
-    <bean id="everyLastLoginAuthenticationFilter" class="org.onebusaway.users.impl.authentication.EveryLastLoginAuthenticationProcessorFilter">
-        <property name="defaultTargetUrl" value="/index.action" />
-        <property name="authenticationManager" ref="_authenticationManager" />
-        <property name="filterProcessesUrl" value="/everylastlogin_login" />
-        <sec:custom-filter before="BASIC_PROCESSING_FILTER" />
-    </bean>
-
-    <bean id="passwordEncoderV1" class="org.onebusaway.users.impl.authentication.VersionedPasswordEncoder">
-        <property name="versionId" value="v1" />
-        <property name="passwordEncoder">
-            <bean class="org.springframework.security.providers.encoding.ShaPasswordEncoder">
-                <constructor-arg value="256" />
-                <property name="encodeHashAsBase64" value="true" />
-            </bean>
-        </property>
-    </bean>
-
-    <bean id="indexedUserDetailsSaltSourceImpl" class="org.onebusaway.users.impl.authentication.IndexedUserDetailsSaltSourceImpl" />
-
-    <bean id="daoAuthenticationProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
-        <property name="userDetailsService" ref="userDetailsServiceImpl" />
-        <property name="passwordEncoder" ref="passwordEncoderV1" />
-        <property name="saltSource" ref="indexedUserDetailsSaltSourceImpl" />
-        <sec:custom-authentication-provider />
-    </bean>
-
-    <bean id="defaultUserAuthenticationProvider" class="org.onebusaway.users.impl.authentication.DefaultUserAuthenticationProvider">
-        <sec:custom-authentication-provider />
-    </bean>
-
-    <bean id="openid_plugin" class="org.onebusaway.everylastlogin.server.OpenIdAuthenticationPlugin" />
-    <bean id="twitter_plugin" class="org.onebusaway.everylastlogin.server.TwitterAuthenticationPlugin" />
-    <bean id="facebook_plugin" class="org.onebusaway.everylastlogin.server.FacebookAuthenticationPlugin" />
-
-    <bean id="loginManager" class="org.onebusaway.everylastlogin.server.LoginManager">
-        <property name="plugins">
-            <map>
-                <entry key="openid" value-ref="openid_plugin" />
-                <entry key="twitter" value-ref="twitter_plugin" />
-                <entry key="facebook" value-ref="facebook_plugin" />
-            </map>
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="userIndexAuthenticationFilter.defaultTargetUrl">/user/index.action</prop>
+                <prop key="everyLastLoginAuthenticationFilter.defaultTargetUrl">/user/index.action</prop>
+            </props>
         </property>
     </bean>
 

@@ -57,27 +57,21 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
-  public boolean hasCurrentUser() {
-    return getCurrentUserInternal() != null;
-  }
-
-  @Override
   public UserBean getCurrentUser() {
-    User user = getCurrentUserInternal();
-    if (user == null)
+    UserIndex userIndex = getCurrentUserIndexInternal();
+    if (userIndex == null)
       return null;
-    UserBean bean = _userService.getUserAsBean(user);
-    return bean;
+    return _userService.getUserAsBean(userIndex.getUser());
   }
 
   @Override
-  public UserIndex getCurrentUserAsUserIndex(boolean useAnonymousUser) {
-    return getCurrentUserIndexInternal(useAnonymousUser);
+  public UserIndex getCurrentUserAsUserIndex() {
+    return getCurrentUserIndexInternal();
   }
 
   @Override
   public IndexedUserDetails handleLogin(String type, String id,
-      String credentials, boolean registerIfNewUser) {
+      String credentials, boolean isAnonymous, boolean registerIfNewUser) {
 
     UserIndexKey key = new UserIndexKey(type, id);
     UserIndex index = _userService.getUserIndexForId(key);
@@ -101,23 +95,44 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
-  public void handleAddAccount(String type, String id, String credentials) {
+  public IndexedUserDetails handleRegistration(String type, String id,
+      String credentials, boolean isAnonymous) {
+
+    UserIndexKey key = new UserIndexKey(type, id);
+    UserIndex index = _userService.getOrCreateUserForIndexKey(key, credentials,
+        isAnonymous);
+
+    User oldUser = getCurrentUserInternal();
+    if (oldUser != null && _userService.isAnonymous(oldUser))
+      _userService.mergeUsers(oldUser, index.getUser());
+
+    return new IndexedUserDetailsImpl(_authoritiesService, index);
+  }
+
+  @Override
+  public IndexedUserDetails handleAddAccount(String type, String id,
+      String credentials, boolean isAnonymous) {
 
     UserIndexKey key = new UserIndexKey(type, id);
     UserIndex index = _userService.getUserIndexForId(key);
     boolean exists = index != null;
 
+    User currentUser = getCurrentUserInternal();
     // New user?
     if (exists) {
-      User existingUser = index.getUser();
-      User currentUser = getCurrentUserInternal();
-      _userService.mergeUsers(existingUser, currentUser);
+      if (currentUser != null) {
+        User existingUser = index.getUser();
+        _userService.mergeUsers(existingUser, currentUser);
+      }
     } else {
-      User currentUser = getCurrentUserInternal();
-      index = _userService.addUserIndexToUser(currentUser, key, credentials);
+      if (currentUser != null)
+        index = _userService.addUserIndexToUser(currentUser, key, credentials);
+      else
+        index = _userService.getOrCreateUserForIndexKey(key, credentials,
+            isAnonymous);
     }
 
-    setCurrentUserInternal(index);
+    return new IndexedUserDetailsImpl(_authoritiesService, index);
   }
 
   @Override
@@ -200,7 +215,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   @Override
   public boolean completePhoneNumberRegistration(String registrationCode) {
 
-    UserIndex userIndex = getCurrentUserIndexInternal(true);
+    UserIndex userIndex = getCurrentUserIndexInternal();
     if (userIndex == null)
       return false;
 
@@ -234,7 +249,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public void removeUserIndex(UserIndexKey key) {
-    UserIndex index = getCurrentUserIndexInternal(false);
+    UserIndex index = getCurrentUserIndexInternal();
     if (index == null)
       return;
     boolean removingCurrentUserIndex = index.getId().equals(key);
@@ -269,7 +284,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   private User getCurrentUserInternal() {
 
-    UserIndex userIndex = getCurrentUserIndexInternal(true);
+    UserIndex userIndex = getCurrentUserIndexInternal();
     if (userIndex == null)
       return null;
     return userIndex.getUser();
@@ -280,18 +295,14 @@ public class CurrentUserServiceImpl implements CurrentUserService {
    * 
    * @return
    */
-  private UserIndex getCurrentUserIndexInternal(boolean createIfNeeded) {
+  private UserIndex getCurrentUserIndexInternal() {
 
     IndexedUserDetails details = getCurrentUserDetails();
 
     if (details == null)
       return null;
 
-    if (createIfNeeded)
-      return _userService.getOrCreateUserForIndexKey(details.getUserIndexKey(),
-          details.getPassword(), details.isAnonymous());
-    else
-      return _userService.getUserIndexForId(details.getUserIndexKey());
+    return _userService.getUserIndexForId(details.getUserIndexKey());
   }
 
   private IndexedUserDetails getCurrentUserDetails() {
@@ -328,5 +339,4 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     // Log out the current user
     SecurityContextHolder.getContext().setAuthentication(null);
   }
-
 }

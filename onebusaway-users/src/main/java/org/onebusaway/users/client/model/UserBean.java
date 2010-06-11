@@ -16,19 +16,19 @@ public class UserBean implements Serializable {
 
   private String defaultLocationName;
 
-  private double defaultLocationLat;
+  private double defaultLocationLat = Double.NaN;
 
-  private double defaultLocationLon;
+  private double defaultLocationLon = Double.NaN;
 
   private List<String> lastSelectedStopIds = new ArrayList<String>();
 
   private List<BookmarkBean> bookmarks = new ArrayList<BookmarkBean>();
+  
+  private boolean anonymous = true;
 
-  private boolean anonymous;
+  private boolean admin = false;
 
-  private boolean admin;
-
-  private List<UserIndexBean> indices;
+  private List<UserIndexBean> indices = new ArrayList<UserIndexBean>();
 
   public String getUserId() {
     return userId;

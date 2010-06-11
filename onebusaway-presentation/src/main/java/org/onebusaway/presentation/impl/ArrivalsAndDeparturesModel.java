@@ -107,7 +107,7 @@ public class ArrivalsAndDeparturesModel {
   public void setMinutesAfter(int minutesAfter) {
     _minutesAfter = minutesAfter;
   }
-  
+
   public boolean isMissingData() {
     return _stopIds == null || _stopIds.isEmpty();
   }
@@ -191,17 +191,14 @@ public class ArrivalsAndDeparturesModel {
 
   private void updateCurrentUser() {
     // Save the last selected stop id
-    if (_currentUserService.hasCurrentUser()) {
+    _currentUserService.setLastSelectedStopIds(_stopIds);
 
-      _currentUserService.setLastSelectedStopIds(_stopIds);
-
-      UserBean user = _currentUserService.getCurrentUser();
-      if (!user.hasDefaultLocation()) {
-        List<StopBean> stops = _result.getStops();
-        StopBean stop = stops.get(0);
-        _defaultSearchLocationService.setDefaultLocationForCurrentUser(
-            stop.getName(), stop.getLat(), stop.getLon());
-      }
+    UserBean user = _currentUserService.getCurrentUser();
+    if (!user.hasDefaultLocation()) {
+      List<StopBean> stops = _result.getStops();
+      StopBean stop = stops.get(0);
+      _defaultSearchLocationService.setDefaultLocationForCurrentUser(
+          stop.getName(), stop.getLat(), stop.getLon());
     }
   }
 

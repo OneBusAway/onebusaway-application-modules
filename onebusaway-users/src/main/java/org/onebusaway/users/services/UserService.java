@@ -34,7 +34,7 @@ public interface UserService {
   public void removeUserIndexForUser(User user, UserIndexKey key);
 
   public UserBean getUserAsBean(User user);
-
+  
   public void deleteUser(User user);
 
   public void resetUser(User user);

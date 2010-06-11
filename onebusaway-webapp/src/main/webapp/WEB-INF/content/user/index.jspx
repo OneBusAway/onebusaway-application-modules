@@ -35,7 +35,11 @@
 	  <p><s:a namespace="/" action="logout">Click here to logout</s:a></p>
 	</s:if>
 	<s:else>
-	  <p>You can <s:a namespace="/" action="login">login</s:a> to an existing account</p>
+      <s:url var="targetUrl" namespace="/user" action="index"/>
+      <s:url var="loginUrl" namespace="/" action="login">
+        <s:param name="target" value="%{targetUrl}"/>
+      </s:url>
+	  <p>You can <s:a href="%{loginUrl}">login</s:a> to an existing account</p>
 	</s:else>
 
     <div class="section">

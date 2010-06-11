@@ -37,7 +37,7 @@ public class AddAccountHandlerAction extends ActionSupport {
     switch (result.getCode()) {
       case SUCCESS:
         _currentUserService.handleAddAccount(result.getProvider(),
-            result.getIdentity(), result.getCredentials());
+            result.getIdentity(), result.getCredentials(), false);
         return SUCCESS;
       case NO_SUCH_PROVIDER:
       case AUTHENTICATION_FAILED:

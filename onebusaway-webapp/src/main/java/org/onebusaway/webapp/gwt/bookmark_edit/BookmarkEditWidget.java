@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.presentation.client.UrlBuilder;
 import org.onebusaway.users.client.model.BookmarkBean;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.webapp.gwt.stop_and_route_selection.AbstractStopAndRouteSelectionWidget;
@@ -12,8 +13,6 @@ import org.onebusaway.webapp.gwt.where_library.UserContext;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.http.client.URL;
-import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -48,22 +47,17 @@ public class BookmarkEditWidget extends AbstractStopAndRouteSelectionWidget {
   void handleShowCustomViewClick(ClickEvent e) {
     e.preventDefault();
 
-    UrlBuilder b = Location.createUrlBuilder();
+    UrlBuilder b = UrlBuilder.createFromLocation();
 
     String path = Location.getPath();
     path = path.replace("bookmark-edit.action", "bookmark-update.action");
     b.setPath(path);
 
     String name = _bookmarkName.getText();
-    if (name.length() > 0) {
-      System.out.println(name);
-      //name = URL.encodeComponent(name);
-      //System.out.println(name);
+    if (name.length() > 0)
       b.setParameter("name", name);
-    }
 
     String[] stopIds = _stopsById.keySet().toArray(new String[0]);
-    escapeValues(stopIds);
     b.setParameter("stopId", stopIds);
 
     boolean allRoutesIncluded = true;
@@ -78,22 +72,16 @@ public class BookmarkEditWidget extends AbstractStopAndRouteSelectionWidget {
 
     if (!allRoutesIncluded) {
       String[] routeIdsArray = routeIds.toArray(new String[routeIds.size()]);
-      escapeValues(routeIdsArray);
       b.setParameter("routeId", routeIdsArray);
     }
 
     System.out.println(b.buildString());
-    // Location.assign(b.buildString());
+    Location.assign(b.buildString());
   }
 
   /****
    *
    ****/
-
-  private void escapeValues(String[] values) {
-    for (int i = 0; i < values.length; i++)
-      values[i] = URL.encodeComponent(values[i]);
-  }
 
   private void loadBookmark() {
     _bookmarkId = Integer.parseInt(Location.getParameter("id"));

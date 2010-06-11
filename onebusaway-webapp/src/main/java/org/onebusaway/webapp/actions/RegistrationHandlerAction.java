@@ -50,7 +50,7 @@ public class RegistrationHandlerAction extends ActionSupport {
       case SUCCESS:
         
         _currentUserService.handleLogin(result.getProvider(),
-            result.getIdentity(), result.getCredentials(),true);
+            result.getIdentity(), result.getCredentials(),false, true);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if( authentication != null)

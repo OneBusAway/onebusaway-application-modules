@@ -10,8 +10,6 @@ import org.onebusaway.users.model.properties.RouteFilter;
 
 public interface CurrentUserService {
 
-  public boolean hasCurrentUser();
-
   /**
    * @return the current user. If no user is currently logged in, we return an
    *         anonymous user
@@ -19,11 +17,9 @@ public interface CurrentUserService {
   public UserBean getCurrentUser();
 
   /**
-   * @param useAnonymousUser if no user is logged in and {@code
-   *          useAnonymousUser} is true, we return an anonymous user object
    * @return the current user
    */
-  public UserIndex getCurrentUserAsUserIndex(boolean useAnonymousUser);
+  public UserIndex getCurrentUserAsUserIndex();
 
   /**
    * @return true if the current user is anonymous or if there is no current
@@ -36,14 +32,19 @@ public interface CurrentUserService {
    * @param type the {@link UserIndexKey} type
    * @param id the {@link UserIndexKey} id
    * @param credentials {@link UserIndex} credentials
+   * @param isAnonymous TODO
    * @param registerIfNewUser if true, automatically register a new user if one
    *          does not exist already
    * @return the details of the logged in user on success, otherwise null
    */
-  public IndexedUserDetails handleLogin(String type, String id, String credentials,
-      boolean registerIfNewUser);
+  public IndexedUserDetails handleLogin(String type, String id,
+      String credentials, boolean isAnonymous, boolean registerIfNewUser);
+  
+  public IndexedUserDetails handleRegistration(String type, String id,
+      String credentials, boolean isAnonymous);
 
-  public void handleAddAccount(String type, String id, String credentials);
+  public IndexedUserDetails handleAddAccount(String type, String id,
+      String credentials, boolean isAnonymous);
 
   public void setRememberUserPreferencesEnabled(
       boolean rememberUserPreferencesEnabled);

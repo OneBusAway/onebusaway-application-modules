@@ -43,7 +43,7 @@ public class DeleteUserAction extends ActionSupport {
     if (user == null)
       return INPUT;
 
-    UserIndex currentUserIndex = _currentUserService.getCurrentUserAsUserIndex(false);
+    UserIndex currentUserIndex = _currentUserService.getCurrentUserAsUserIndex();
     if( currentUserIndex != null) {
       User currentUser = currentUserIndex.getUser();
       if( currentUser.equals(user))
