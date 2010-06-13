@@ -72,7 +72,7 @@ public class ExtendedGtfsRelationalDaoImpl extends
 
     List<AgencyAndId> validShapePointIds = new ArrayList<AgencyAndId>();
     for (AgencyAndId shapePointId : shapePointIds) {
-      if (shapePointId.hasValues())
+      if (shapePointId != null && shapePointId.hasValues())
         validShapePointIds.add(shapePointId);
     }
 

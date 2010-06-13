@@ -179,6 +179,8 @@ public class SimplePhoneClient {
           }
         }
 
+      } else {
+        System.out.println(firstLine);
       }
 
       char result = 0;

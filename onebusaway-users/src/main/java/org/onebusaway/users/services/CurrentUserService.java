@@ -26,6 +26,9 @@ public interface CurrentUserService {
    *         user
    */
   public boolean isCurrentUserAnonymous();
+  
+  public IndexedUserDetails getIndexedUserDetailsForUser(String type, String id,
+      String credentials, boolean isAnonymous, String mode);
 
   /**
    * 

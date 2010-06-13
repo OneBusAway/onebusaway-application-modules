@@ -39,7 +39,7 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
     </s:url><s:a href="%{removeFilterUrl}">Show all arrivals</s:a></div>
 </s:if>
 
-<s:if test="result.predictedArrivals.empty">
+<s:if test="result.arrivalsAndDepartures.empty">
     <tr>
         <td colspan="3">
         <div id="arrivalsNoScheduledArrivals">No scheduled arrivals in the next 30 minutes.</div>
@@ -63,7 +63,7 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
         </tr>
         <s:iterator value="result.arrivalsAndDepartures">
         	<s:set name="route" value="trip.route"/>
-            <s:set name="arrivalsStatusLabelStyle" value="getArrivalStatusLabelStyle(top,#now)" />
+            <s:set name="arrivalsStatusLabelStyle" value="arrivalsAndDeparturesPresentation.getArrivalStatusLabelStyle(top)" />
             <tr class="arrivalsRow">
                 <td class="arrivalsRouteEntry"><s:url var="url" includeParams="get">
                     <s:param name="route" value="#route.id" />
@@ -75,21 +75,26 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
                 <jsp:attribute name="class">
                     arrivalsStatusEntry
                     <s:property value="#arrivalsStatusLabelStyle" />
-                    <s:if test="isArrivalNow(top,#now)"> arrivalStatusNow</s:if>
+                    <s:if test="arrivalsAndDeparturesPresentation.isArrivalNow(top)"> arrivalStatusNow</s:if>
                 </jsp:attribute>
-                <s:property value="getMinutesLabel(top,#now)" />
+                <s:property value="arrivalsAndDeparturesPresentation.getMinutesLabel(top)" />
             </jsp:element>
 
                 <td>
                 <div>
                 <div class="arrivalsDestinationEntry"><s:property value="trip.tripHeadsign" /></div>
-                <div class="arrivalsTimePanel"><span class="arrivalsTimeEntry"><s:date
-                    name="getTimeAsDate(computeBestArrivalTime())" format="hh:mm" /></span> - <jsp:element name="span">
-                <jsp:attribute name="class">
-                    <s:property value="#arrivalsStatusLabelStyle" />
-                </jsp:attribute>
-                <s:property value="getArrivalLabel(top,#now)" />
-            </jsp:element></div>
+                <div class="arrivalsTimePanel">
+                  <span class="arrivalsTimeEntry">
+                    <oba:date value="computeBestArrivalTime()" format="hh:mm" />
+                  </span>
+                  <jsp:text> - </jsp:text>
+                  <jsp:element name="span">
+                    <jsp:attribute name="class">
+                      <s:property value="#arrivalsStatusLabelStyle" />
+                    </jsp:attribute>
+                    <s:property value="arrivalsAndDeparturesPresentation.getArrivalLabel(top)" />
+                  </jsp:element>
+                </div>
                 </div>
                 </td>
             </tr>

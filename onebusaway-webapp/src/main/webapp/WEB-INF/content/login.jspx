@@ -59,6 +59,10 @@
 
 <s:if test="anonymousUser">
 
+<s:if test="failure">
+<p class="login_failure">There was a problem with your login.</p>
+</s:if>
+
 <p>Login using your account from one of the providers listed below:</p>
 
 <p>

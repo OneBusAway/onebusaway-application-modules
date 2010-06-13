@@ -1,9 +1,13 @@
 package org.onebusaway.users.impl.authentication;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.onebusaway.everylastlogin.server.AuthenticationResult;
 import org.onebusaway.everylastlogin.server.LoginManager;
+import org.onebusaway.everylastlogin.server.AuthenticationResult.EResultCode;
 import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,56 +19,59 @@ import org.springframework.security.ui.FilterChainOrder;
 public class EveryLastLoginAuthenticationProcessorFilter extends
     AbstractProcessingFilter {
 
-  private enum Mode {
-    LOGIN, REGISTRATION, ADD_ACCOUNT
-  }
-
   private CurrentUserService _currentUserService;
-
-  private boolean _registerIfNewUser = true;
 
   @Autowired
   public void setCurrentUserService(CurrentUserService currentUserService) {
     _currentUserService = currentUserService;
   }
 
-  public void setRegisterIfNewUser(boolean registerIfNewUser) {
-    _registerIfNewUser = registerIfNewUser;
-  }
-
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request)
       throws AuthenticationException {
 
+    String mode = request.getParameter("mode");
+
     AuthenticationResult result = LoginManager.getResult(request);
     if (result == null)
-      return null;
+      throw new EveryLastLoginAuthenticationException(
+          "AuthenticationResult not found", mode);
 
-    Mode mode = getModeForRequest(request);
+    if (result.getCode() != EResultCode.SUCCESS)
+      throw new EveryLastLoginAuthenticationException(
+          "AuthenticationResult failure", mode);
 
-    IndexedUserDetails details = applyAuthenticationResultForMode(result, mode);
+    IndexedUserDetails details = _currentUserService.getIndexedUserDetailsForUser(
+        result.getProvider(), result.getIdentity(), result.getCredentials(),
+        false, mode);
 
     if (details == null)
-      return null;
+      throw new EveryLastLoginAuthenticationException("could not get user details", mode);
 
     return new DefaultUserAuthenticationToken(details);
   }
 
-  private IndexedUserDetails applyAuthenticationResultForMode(
-      AuthenticationResult result, Mode mode) {
-    switch (mode) {
-      case LOGIN:
-        return _currentUserService.handleLogin(result.getProvider(),
-            result.getIdentity(), result.getCredentials(), false,
-            _registerIfNewUser);
-      case REGISTRATION:
-        return _currentUserService.handleRegistration(result.getProvider(),
-            result.getIdentity(), result.getCredentials(), false);
-      case ADD_ACCOUNT:
-        return _currentUserService.handleAddAccount(result.getProvider(),
-            result.getIdentity(), result.getCredentials(), false);
+  protected String determineFailureUrl(HttpServletRequest request,
+      AuthenticationException failed) {
+
+    String failureUrl = super.determineFailureUrl(request, failed);
+
+    if (failed instanceof EveryLastLoginAuthenticationException) {
+      EveryLastLoginAuthenticationException ex = (EveryLastLoginAuthenticationException) failed;
+      String mode = ex.getMode();
+      if (mode != null) {
+        String prefix = "?";
+        if (failureUrl.contains(prefix))
+          prefix = "&";
+        try {
+          failureUrl += prefix + "mode=" + URLEncoder.encode(mode, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+          throw new IllegalStateException(e);
+        }
+      }
     }
-    throw new IllegalStateException("unknown mode=" + mode);
+
+    return failureUrl;
   }
 
   @Override
@@ -75,16 +82,5 @@ public class EveryLastLoginAuthenticationProcessorFilter extends
   @Override
   public int getOrder() {
     return FilterChainOrder.AUTHENTICATION_PROCESSING_FILTER;
-  }
-
-  private Mode getModeForRequest(HttpServletRequest request) {
-    String mode = request.getParameter("mode");
-    if (mode == null)
-      return Mode.LOGIN;
-    if (mode.equals("registration"))
-      return Mode.REGISTRATION;
-    if (mode.equals("add-account"))
-      return Mode.ADD_ACCOUNT;
-    return Mode.LOGIN;
   }
 }

@@ -441,6 +441,8 @@ public class TripPlannerGraphTaskImpl implements TripPlannerGraphTask {
         if (prev != null) {
           Stop s1 = prev.getStop();
           Stop s2 = stopTime.getStop();
+          if( s1 == null || s2 == null)
+            throw new IllegalStateException("no stops for stopTimes: st1=" + prev.getId() + " st2=" + stopTime.getId());
           shapeDistanceTraveled += DistanceLibrary.distance(s1, s2);
         }
 

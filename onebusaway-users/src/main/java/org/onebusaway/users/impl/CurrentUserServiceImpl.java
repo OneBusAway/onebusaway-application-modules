@@ -21,6 +21,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class CurrentUserServiceImpl implements CurrentUserService {
 
+  private enum Mode {
+    LOGIN, REGISTRATION, ADD_ACCOUNT
+  };
+
   private UserService _userService;
 
   private UserPropertiesService _userPropertiesService;
@@ -67,6 +71,21 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   @Override
   public UserIndex getCurrentUserAsUserIndex() {
     return getCurrentUserIndexInternal();
+  }
+
+  @Override
+  public IndexedUserDetails getIndexedUserDetailsForUser(String type,
+      String id, String credentials, boolean isAnonymous, String mode) {
+    Mode m = getModeForRequest(mode);
+    switch (m) {
+      case LOGIN:
+        return handleLogin(type, id, credentials, isAnonymous, true);
+      case REGISTRATION:
+        return handleRegistration(type, id, credentials, isAnonymous);
+      case ADD_ACCOUNT:
+        return handleAddAccount(type, id, credentials, isAnonymous);
+    }
+    throw new IllegalStateException("unknown mode: " + mode + " " + m);
   }
 
   @Override
@@ -338,5 +357,15 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   private void clearCurrentUser() {
     // Log out the current user
     SecurityContextHolder.getContext().setAuthentication(null);
+  }
+
+  private Mode getModeForRequest(String mode) {
+    if (mode == null)
+      return Mode.LOGIN;
+    if (mode.equals("registration"))
+      return Mode.REGISTRATION;
+    if (mode.equals("add-account"))
+      return Mode.ADD_ACCOUNT;
+    return Mode.LOGIN;
   }
 }

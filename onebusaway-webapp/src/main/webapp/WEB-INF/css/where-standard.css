@@ -370,7 +370,12 @@ div.agencyDisclaimerContent {
  *
  ****/
  
+.login_failure {
+  color: red;	
+}
+ 
 div#feedback {
+  display: none;
   position: absolute;
   top: 350px;
   left: 0px;

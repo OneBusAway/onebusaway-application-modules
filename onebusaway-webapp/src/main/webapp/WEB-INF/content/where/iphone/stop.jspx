@@ -14,7 +14,10 @@
   License for the specific language governing permissions and limitations under
   the License.
 -->
-<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags" xmlns:oba="/oba-tags">
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:s="/struts-tags"
+      xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <s:set name="now" value="getNow()" />
 <head>
@@ -52,7 +55,7 @@
     </tr>
     <s:iterator value="result.arrivalsAndDepartures">
     	<s:set name="route" value="trip.route"/>
-        <s:set name="arrivalsStatusLabelStyle" value="getArrivalStatusLabelStyle(top,#now)" />
+        <s:set name="arrivalsStatusLabelStyle" value="arrivalsAndDeparturesPresentation.getArrivalStatusLabelStyle(top)" />
         <tr class="arrivalsRow">
             <jsp:element name="td">
         	  <jsp:attribute name="class">arrivalsRouteEntry<s:if test="isLongRouteName(#route)"> arrivalsRouteLongNameEntry</s:if></jsp:attribute>
@@ -70,25 +73,28 @@
                 <s:param name="stop" value="stopId" />
             </s:url> <s:a href="%{tripUrl}">
                 <s:property value="trip.tripHeadsign" />
-            </s:a></div>
-            <div class="arrivalsTimePanel"><span class="arrivalsTimeEntry"><s:date
-                name="getTimeAsDate(computeBestArrivalTime())" format="hh:mm" /></span> - <jsp:element name="span">
+            </s:a></div>            
+            <div class="arrivalsTimePanel">
+              <span class="arrivalsTimeEntry">
+                <oba:date value="computeBestArrivalTime()" format="hh:mm" />
+              </span>
+              <jsp:text> - </jsp:text>
+              <jsp:element name="span">
                 <jsp:attribute name="class">
                     <s:property value="#arrivalsStatusLabelStyle" />
                 </jsp:attribute>
-                <s:property value="getArrivalLabel(top,#now)" />
-            </jsp:element><s:if test="status == 'reroute'"> + <span class="snow"><a
-                    href="http://transit.metrokc.gov/up/rr/adverseweather.html">snow</a></span>
-            </s:if></div>
+                <s:property value="arrivalsAndDeparturesPresentation.getArrivalLabel(top)" />
+              </jsp:element>
+            </div>
             </div>
             </td>
             <jsp:element name="td">
                 <jsp:attribute name="class">
                     arrivalsStatusEntry
                     <s:property value="#arrivalsStatusLabelStyle" />
-                    <s:if test="isArrivalNow(top,#now)"> arrivalStatusNow</s:if>
+                    <s:if test="arrivalsAndDeparturesPresentation.isArrivalNow(top)"> arrivalStatusNow</s:if>
                 </jsp:attribute>
-                <s:property value="getMinutesLabel(top,#now)" />
+                <s:property value="arrivalsAndDeparturesPresentation.getMinutesLabel(top)" />
             </jsp:element>
         </tr>
     </s:iterator>
@@ -104,7 +110,7 @@
 
 </table>
 
-<div class="arrivalsStatusUpdates">Last Update: <s:date name="getTimeAsDate(#now)" format="hh:mm aa" /></div>
+<div class="arrivalsStatusUpdates">Last Update: <oba:date value="'now'" format="hh:mm aa" /></div>
 
 
 <h3>Nearby stops:</h3>

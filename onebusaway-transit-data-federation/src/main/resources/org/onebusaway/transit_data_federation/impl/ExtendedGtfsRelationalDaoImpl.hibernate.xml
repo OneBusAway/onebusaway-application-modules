@@ -36,6 +36,10 @@
         SELECT st FROM StopTime st WHERE st.trip.id IN (:tripIds)
     </query>
     <query name="shapePointIdsForRoutes" read-only="true">
-        SELECT trip.shapeId FROM Trip trip where trip.route IN (:routes) GROUP BY trip.shapeId.agencyId, trip.shapeId.id
+        SELECT trip.shapeId
+          FROM Trip trip
+          WHERE trip.route IN (:routes)
+          AND trip.shapeId IS NOT NULL
+          GROUP BY trip.shapeId.agencyId, trip.shapeId.id
     </query>
 </hibernate-mapping>

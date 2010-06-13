@@ -1,7 +1,9 @@
 package org.onebusaway.transit_data_federation.bundle;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -79,7 +81,7 @@ public class GtfsPolylineMain {
       StopToPolygonEntityHandler handler = new StopToPolygonEntityHandler(2500);
 
       for (GtfsBundle bundle : bundles.getBundles()) {
-        System.out.println(bundle.getPath());
+        System.err.println(bundle.getPath());
         GtfsReader reader = new GtfsReader();
         reader.addEntityHandler(handler);
         reader.setInputLocation(bundle.getPath());
@@ -91,10 +93,14 @@ public class GtfsPolylineMain {
       Geometry geometry = handler.getGeometry();
       UTMProjection proj = handler.getProjection();
 
-      System.out.println("polygon");
+      PrintWriter out = new PrintWriter(new FileWriter(outputPath));
+      
+      out.println("polygon");
       AtomicInteger index = new AtomicInteger();
-      printGeometry(geometry, proj, index);
-      System.out.println("END");
+      printGeometry(out, geometry, proj, index);
+      out.println("END");
+      
+      out.close();
 
     } catch (ParseException ex) {
       System.err.println(ex.getLocalizedMessage());
@@ -105,40 +111,40 @@ public class GtfsPolylineMain {
     System.exit(0);
   }
 
-  private void printGeometry(Geometry geometry, UTMProjection proj,
+  private void printGeometry(PrintWriter out, Geometry geometry, UTMProjection proj,
       AtomicInteger index) {
     if (geometry instanceof Polygon)
-      printPolygon((Polygon) geometry, proj, index);
+      printPolygon(out,(Polygon) geometry, proj, index);
     else if (geometry instanceof MultiPolygon)
-      printMultiPolygon((MultiPolygon) geometry, proj, index);
+      printMultiPolygon(out,(MultiPolygon) geometry, proj, index);
     else
-      System.out.println("unknown geometry: " + geometry);
+      System.err.println("unknown geometry: " + geometry);
   }
 
-  private void printMultiPolygon(MultiPolygon multi, UTMProjection proj,
+  private void printMultiPolygon(PrintWriter out, MultiPolygon multi, UTMProjection proj,
       AtomicInteger index) {
     for (int i = 0; i < multi.getNumGeometries(); i++)
-      printGeometry(multi.getGeometryN(i), proj, index);
+      printGeometry(out,multi.getGeometryN(i), proj, index);
   }
 
-  private void printPolygon(Polygon poly, UTMProjection proj,
+  private void printPolygon(PrintWriter out, Polygon poly, UTMProjection proj,
       AtomicInteger index) {
-    System.out.println(index.incrementAndGet());
-    printLineString(proj, poly.getExteriorRing());
-    System.out.println("END");
+    out.println(index.incrementAndGet());
+    printLineString(out,proj, poly.getExteriorRing());
+    out.println("END");
     for (int i = 0; i < poly.getNumInteriorRing(); i++) {
-      System.out.println("!" + index.incrementAndGet());
-      printLineString(proj, poly.getInteriorRingN(i));
-      System.out.println("END");
+      out.println("!" + index.incrementAndGet());
+      printLineString(out,proj, poly.getInteriorRingN(i));
+      out.println("END");
     }
   }
 
-  private void printLineString(UTMProjection proj, LineString line) {
+  private void printLineString(PrintWriter out, UTMProjection proj, LineString line) {
     for (int i = 0; i < line.getNumPoints(); i++) {
       Point point = line.getPointN(i);
       GeoPoint p = new GeoPoint(proj, point.getX(), point.getY(), 0);
       CoordinatePoint c = p.getCoordinates();
-      System.out.println(c.getLon() + " " + c.getLat());
+      out.println(c.getLon() + " " + c.getLat());
     }
   }
 
