@@ -1,6 +1,8 @@
-package org.onebusaway.transit_data.model;
+package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
+
+import org.onebusaway.transit_data.model.TripStopTimesBean;
 
 public final class TripDetailsBean implements Serializable {
 

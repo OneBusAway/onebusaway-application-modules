@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data.model;
+package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
 

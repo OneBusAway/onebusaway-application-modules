@@ -10,14 +10,14 @@ import org.onebusaway.api.model.transit.TripDetailsV2Bean;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
-public class TripDetailsController extends ApiActionSupport {
+public class TripForVehicleController extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
 
@@ -28,17 +28,15 @@ public class TripDetailsController extends ApiActionSupport {
 
   private String _id;
 
-  private Date _serviceDate = new Date();
-
   private Date _time = new Date();
   
-  private boolean _includeTrip = true;
+  private boolean _includeTrip = false;
 
-  private boolean _includeSchedule = true;
+  private boolean _includeSchedule = false;
   
   private boolean _includeStatus = true;
 
-  public TripDetailsController() {
+  public TripForVehicleController() {
     super(V2);
   }
 
@@ -49,11 +47,6 @@ public class TripDetailsController extends ApiActionSupport {
 
   public String getId() {
     return _id;
-  }
-
-  @TypeConversion(converter = "org.onebusaway.api.impl.DateConverter")
-  public void setServiceDate(Date date) {
-    _serviceDate = date;
   }
 
   @TypeConversion(converter = "org.onebusaway.api.impl.DateTimeConverter")
@@ -81,9 +74,8 @@ public class TripDetailsController extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
     
-    TripDetailsQueryBean query = new TripDetailsQueryBean();
-    query.setTripId(_id);
-    query.setServiceDate(_serviceDate);
+    TripForVehicleQueryBean query = new TripForVehicleQueryBean();
+    query.setVehicleId(_id);
     query.setTime(_time);
     
     TripDetailsInclusionBean inclusion = query.getInclusion();
@@ -91,7 +83,7 @@ public class TripDetailsController extends ApiActionSupport {
     inclusion.setIncludeTripSchedule(_includeSchedule);
     inclusion.setIncludeTripStatus(_includeStatus);
 
-    TripDetailsBean trip = _service.getSpecificTripDetails(query);
+    TripDetailsBean trip = _service.getTripDetailsForVehicleAndTime(query);
 
     if (trip == null)
       return setResourceNotFoundResponse();

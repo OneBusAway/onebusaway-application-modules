@@ -26,16 +26,17 @@ import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.TripBean;
-import org.onebusaway.transit_data.model.TripDetailsBean;
-import org.onebusaway.transit_data.model.TripDetailsQueryBean;
-import org.onebusaway.transit_data.model.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
+import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 
 public interface TransitDataService extends FederatedService {
 
@@ -49,12 +50,17 @@ public interface TransitDataService extends FederatedService {
   @FederatedByEntityIdMethod
   public TripBean getTrip(String tripId) throws ServiceException;
 
-  @FederatedByEntityIdMethod(propertyExpression="tripId")
-  public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query) throws ServiceException;
+  @FederatedByEntityIdMethod(propertyExpression = "tripId")
+  public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query)
+      throws ServiceException;
 
   @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query);
+
+  @FederatedByEntityIdMethod(propertyExpression="vehicleId")
+  public TripDetailsBean getTripDetailsForVehicleAndTime(
+      TripForVehicleQueryBean query);
 
   @FederatedByEntityIdMethod
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(

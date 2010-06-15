@@ -6,7 +6,7 @@ import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.EntryWithReferencesBean;
 import org.onebusaway.api.model.transit.TripV2Bean;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.TripBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 

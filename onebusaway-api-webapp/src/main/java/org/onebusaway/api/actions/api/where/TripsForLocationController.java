@@ -10,8 +10,9 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.TripDetailsBean;
-import org.onebusaway.transit_data.model.TripsForBoundsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
+import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -96,9 +97,12 @@ public class TripsForLocationController extends ApiActionSupport {
     query.setBounds(bounds);
     query.setTime(time);
     query.setMaxCount(_maxCount.getMaxCount());
-    query.setIncludeTripBeans(_includeTrips);
-    query.setIncludeTripSchedules(_includeSchedules);
-
+    
+    TripDetailsInclusionBean inclusion = query.getInclusion();
+    inclusion.setIncludeTripBean(_includeTrips);
+    inclusion.setIncludeTripSchedule(_includeSchedules);
+    inclusion.setIncludeTripStatus(true);
+    
     ListBean<TripDetailsBean> trips = _service.getTripsForBounds(query);
 
     BeanFactoryV2 factory = getBeanFactoryV2();

@@ -23,11 +23,11 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.TripDetailsBean;
-import org.onebusaway.transit_data.model.TripDetailsQueryBean;
-import org.onebusaway.transit_data.model.TripStatusBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 

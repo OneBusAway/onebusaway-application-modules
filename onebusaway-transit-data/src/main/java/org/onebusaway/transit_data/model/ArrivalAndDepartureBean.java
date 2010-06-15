@@ -15,6 +15,8 @@
  */
 package org.onebusaway.transit_data.model;
 
+import org.onebusaway.transit_data.model.trips.TripBean;
+
 public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private static final long serialVersionUID = 2L;

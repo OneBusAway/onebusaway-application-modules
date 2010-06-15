@@ -120,7 +120,7 @@ public class TripPlannerGraphTaskImpl implements TripPlannerGraphTask {
 
     Collection<Route> routes = _gtfsDao.getAllRoutes();
     int routeIndex = 0;
-
+    
     for (Route route : routes) {
 
       System.out.println("routes: " + (routeIndex++) + "/" + routes.size());

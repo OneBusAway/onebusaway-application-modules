@@ -33,7 +33,7 @@ import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TransitDataConstants;
-import org.onebusaway.transit_data.model.TripBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 

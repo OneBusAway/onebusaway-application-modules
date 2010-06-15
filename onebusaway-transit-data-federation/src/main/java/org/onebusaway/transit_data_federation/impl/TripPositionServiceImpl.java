@@ -13,6 +13,7 @@ import org.onebusaway.transit_data_federation.model.TripPosition;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.model.predictions.ScheduleDeviation;
+import org.onebusaway.transit_data_federation.model.predictions.TripTimePrediction;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.TripPositionService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
@@ -42,8 +43,7 @@ public class TripPositionServiceImpl implements TripPositionService {
   }
 
   @Autowired
-  public void setNarrativeService(
-      NarrativeService narrativeService) {
+  public void setNarrativeService(NarrativeService narrativeService) {
     _narrativeService = narrativeService;
   }
 
@@ -51,29 +51,55 @@ public class TripPositionServiceImpl implements TripPositionService {
   public void setShapePointService(ShapePointService shapePointService) {
     _shapePointService = shapePointService;
   }
-  
-  public void setInterpolateWhenNoShapeInfoPresent(boolean interpolateWhenNoShapeInfoPresent) {
+
+  public void setInterpolateWhenNoShapeInfoPresent(
+      boolean interpolateWhenNoShapeInfoPresent) {
     _interpolateWhenNoShapeInfoPresent = interpolateWhenNoShapeInfoPresent;
   }
 
   public TripPosition getPositionForTripInstance(
       TripInstanceProxy tripInstance, long targetTime) {
-    
-    TripPosition position = new TripPosition();
 
+    ScheduleDeviation scheduleDeviation = _tripTimePredictionService.getScheduledDeviationPrediction(
+        tripInstance.getTrip().getId(), tripInstance.getServiceDate(),
+        targetTime);
+
+    return getTripPosition(tripInstance, scheduleDeviation, targetTime);
+  }
+
+  @Override
+  public TripPosition getPositionForTripInstance(
+      TripInstanceProxy tripInstance, TripTimePrediction prediction,
+      long targetTime) {
+
+    ScheduleDeviation scheduleDeviation = new ScheduleDeviation();
+    scheduleDeviation.setPredicted(true);
+    scheduleDeviation.setScheduleDeviation(prediction.getScheduleDeviation());
+    scheduleDeviation.setVehicleId(prediction.getVehicleId());
+
+    return getTripPosition(tripInstance, scheduleDeviation, targetTime);
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private TripPosition getTripPosition(TripInstanceProxy tripInstance,
+      ScheduleDeviation scheduleDeviation, long targetTime) {
     TripEntry tripEntry = tripInstance.getTrip();
     long serviceDate = tripInstance.getServiceDate();
-    ScheduleDeviation scheduleDeviation = _tripTimePredictionService.getScheduledDeviationPrediction(
-        tripEntry.getId(), serviceDate, targetTime);
+
+    TripPosition position = new TripPosition();
 
     position.setScheduleDeviation(scheduleDeviation);
-    
-    int effectiveScheduledTime = (int) ((targetTime - serviceDate) / 1000) - scheduleDeviation.getScheduleDeviation();
+
+    int effectiveScheduledTime = (int) ((targetTime - serviceDate) / 1000)
+        - scheduleDeviation.getScheduleDeviation();
     List<StopTimeEntry> stopTimes = tripEntry.getStopTimes();
     StopTimeOp stopTimeOp = StopTimeOp.DEPARTURE;
 
-    int index = StopTimeSearchOperations.searchForStopTime(stopTimes, effectiveScheduledTime,
-        stopTimeOp);
+    int index = StopTimeSearchOperations.searchForStopTime(stopTimes,
+        effectiveScheduledTime, stopTimeOp);
 
     // Did we have a direct hit?
     if (0 <= index && index < stopTimes.size()) {
@@ -81,7 +107,8 @@ public class TripPositionServiceImpl implements TripPositionService {
       if (stopTime.getArrivalTime() <= effectiveScheduledTime
           && effectiveScheduledTime <= stopTime.getDepartureTime()) {
         StopEntry stop = stopTime.getStop();
-        CoordinatePoint location = new CoordinatePoint(stop.getStopLat(), stop.getStopLon());
+        CoordinatePoint location = new CoordinatePoint(stop.getStopLat(),
+            stop.getStopLon());
         position.setPosition(location);
         return position;
       }
@@ -118,15 +145,15 @@ public class TripPositionServiceImpl implements TripPositionService {
       if (!shapePoints.isEmpty()) {
         ShapePointIndex shapePointIndexMethod = getShapeDistanceTraveled(
             beforeStopTime, afterStopTime, ratio);
-         CoordinatePoint location = shapePointIndexMethod.getPoint(shapePoints);
-         position.setPosition(location);
-         return position;
+        CoordinatePoint location = shapePointIndexMethod.getPoint(shapePoints);
+        position.setPosition(location);
+        return position;
       }
     }
 
-    if( ! _interpolateWhenNoShapeInfoPresent )
+    if (!_interpolateWhenNoShapeInfoPresent)
       return null;
-    
+
     StopEntry beforeStop = before.getStop();
     StopEntry afterStop = after.getStop();
     double latFrom = beforeStop.getStopLat();
@@ -135,7 +162,7 @@ public class TripPositionServiceImpl implements TripPositionService {
     double lonTo = afterStop.getStopLon();
     double lat = (latTo - latFrom) * ratio + latFrom;
     double lon = (lonTo - lonFrom) * ratio + lonFrom;
-    
+
     CoordinatePoint location = new CoordinatePoint(lat, lon);
     position.setPosition(location);
     return position;

@@ -1,7 +1,7 @@
 package org.onebusaway.transit_data.model.tripplanner;
 
 import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.TripBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 
 public class BlockTransferSegmentBean extends TripSegmentBean {
 

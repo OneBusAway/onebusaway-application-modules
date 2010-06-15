@@ -1,8 +1,9 @@
-package org.onebusaway.transit_data.model;
+package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.transit_data.model.QueryBean;
 
 @QueryBean
 public final class TripsForBoundsQueryBean implements Serializable {
@@ -15,9 +16,7 @@ public final class TripsForBoundsQueryBean implements Serializable {
 
   private int maxCount = 0;
 
-  private boolean includeTripBeans = false;
-
-  private boolean includeTripSchedules = false;
+  private TripDetailsInclusionBean inclusion = new TripDetailsInclusionBean();
 
   public CoordinateBounds getBounds() {
     return bounds;
@@ -43,20 +42,11 @@ public final class TripsForBoundsQueryBean implements Serializable {
     this.maxCount = maxCount;
   }
 
-  public boolean isIncludeTripBeans() {
-    return includeTripBeans;
+  public TripDetailsInclusionBean getInclusion() {
+    return inclusion;
   }
 
-  public void setIncludeTripBeans(boolean includeTripBeans) {
-    this.includeTripBeans = includeTripBeans;
+  public void setInclusion(TripDetailsInclusionBean inclusion) {
+    this.inclusion = inclusion;
   }
-
-  public boolean isIncludeTripSchedules() {
-    return includeTripSchedules;
-  }
-
-  public void setIncludeTripSchedules(boolean includeTripSchedules) {
-    this.includeTripSchedules = includeTripSchedules;
-  }
-
 }

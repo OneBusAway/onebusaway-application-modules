@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.TripBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;

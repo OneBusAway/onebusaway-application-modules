@@ -23,11 +23,11 @@ import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.TripBean;
-import org.onebusaway.transit_data.model.TripDetailsBean;
-import org.onebusaway.transit_data.model.TripStatusBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
 public class BeanFactoryV2 {
 

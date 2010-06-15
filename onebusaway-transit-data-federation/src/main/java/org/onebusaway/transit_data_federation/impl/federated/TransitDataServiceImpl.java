@@ -29,18 +29,20 @@ import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.TripBean;
-import org.onebusaway.transit_data.model.TripDetailsBean;
-import org.onebusaway.transit_data.model.TripDetailsQueryBean;
-import org.onebusaway.transit_data.model.TripStatusBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
-import org.onebusaway.transit_data.model.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
@@ -249,28 +251,30 @@ class TransitDataServiceImpl implements TransitDataService {
 
     boolean missing = false;
     
-    if (query.isIncludeTripBean()) {
+    TripDetailsInclusionBean inclusion = query.getInclusion();
+
+    if (inclusion.isIncludeTripBean()) {
       trip = _tripBeanService.getTripForId(id);
-      if( trip == null)
+      if (trip == null)
         missing = true;
     }
 
-    if (query.isIncludeTripSchedule()) {
+    if (inclusion.isIncludeTripSchedule()) {
       stopTimes = _tripStopTimesBeanService.getStopTimesForTrip(id);
-      if( stopTimes == null)
+      if (stopTimes == null)
         missing = true;
     }
 
-    if (query.isIncludeTripStatus()) {
+    if (inclusion.isIncludeTripStatus()) {
       status = _tripStatusBeanService.getTripStatusForTripId(id,
           serviceDate.getTime(), time.getTime());
-      if( status == null)
+      if (status == null)
         missing = true;
     }
 
-    if( missing )
+    if (missing)
       return null;
-    
+
     return new TripDetailsBean(tripId, trip, stopTimes, status);
   }
 
@@ -278,6 +282,12 @@ class TransitDataServiceImpl implements TransitDataService {
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
     return _tripStatusBeanService.getActiveTripForBounds(query);
+  }
+
+  @Override
+  public TripDetailsBean getTripDetailsForVehicleAndTime(TripForVehicleQueryBean query) {
+    AgencyAndId id = convertAgencyAndId(query.getVehicleId());
+    return _tripStatusBeanService.getTripStatusForVehicleAndTime(id, query.getTime().getTime(),query.getInclusion());
   }
 
   @Override

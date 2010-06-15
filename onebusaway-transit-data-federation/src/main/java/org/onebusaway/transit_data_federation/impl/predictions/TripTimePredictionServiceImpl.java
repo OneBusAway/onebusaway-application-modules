@@ -155,11 +155,10 @@ public class TripTimePredictionServiceImpl implements TripTimePredictionService 
     ServiceDateAndId id = new ServiceDateAndId(serviceDate, tripId);
     _tripTimePredictionCache.put(new Element(id, entry));
   }
-
+  
   @Override
-  public StopTimeEntry getClosestStopForVehicleAndTime(AgencyAndId vehicleId,
-      long time) {
-
+  public TripTimePrediction getTripTimePredictionForVehicleAndTime(AgencyAndId vehicleId, long time) {
+    
     long fromTime = time - TIME_WINDOW;
     long toTime = time + TIME_WINDOW;
 
@@ -172,11 +171,21 @@ public class TripTimePredictionServiceImpl implements TripTimePredictionService 
       min.add(offset, prediction);
     }
 
-    if (min.isEmpty()) {
+    if (min.isEmpty())
       return null;
-    }
 
-    TripTimePrediction prediction = min.getMinElement();
+    return min.getMinElement();
+  }
+
+  @Override
+  public StopTimeEntry getClosestStopForVehicleAndTime(AgencyAndId vehicleId,
+      long time) {
+
+    TripTimePrediction prediction = getTripTimePredictionForVehicleAndTime(vehicleId, time);
+    
+    if( prediction == null)
+      return null;
+    
     long serviceDate = prediction.getServiceDate();
 
     Min<StopTimeEntry> closestStopTimes = new Min<StopTimeEntry>();

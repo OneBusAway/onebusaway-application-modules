@@ -18,6 +18,10 @@ public interface TripTimePredictionService {
    * @param scheduleDeviation - the schedule deviation in seconds
    */
   public void putScheduleDeviationPrediction(TripTimePrediction prediction);
-  
-  public StopTimeEntry getClosestStopForVehicleAndTime(AgencyAndId vehicleId, long time);
+
+  public TripTimePrediction getTripTimePredictionForVehicleAndTime(
+      AgencyAndId vehicleId, long time);
+
+  public StopTimeEntry getClosestStopForVehicleAndTime(AgencyAndId vehicleId,
+      long time);
 }

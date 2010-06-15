@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.transit_data.model.trips.TripBean;
+
 public final class TripStopTimesBean implements Serializable {
 
   private static final long serialVersionUID = 1L;

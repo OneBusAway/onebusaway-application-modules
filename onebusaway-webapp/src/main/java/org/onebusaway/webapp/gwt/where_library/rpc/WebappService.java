@@ -30,8 +30,6 @@ import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data.model.TripDetailsBean;
-import org.onebusaway.transit_data.model.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTransitTimeResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
@@ -39,6 +37,8 @@ import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.users.client.model.UserBean;
 
 import com.google.gwt.user.client.rpc.RemoteService;

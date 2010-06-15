@@ -19,10 +19,10 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.TripBean;
-import org.onebusaway.transit_data.model.TripDetailsBean;
-import org.onebusaway.transit_data.model.TripStatusBean;
-import org.onebusaway.transit_data.model.TripsForBoundsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.webapp.gwt.common.MapOverlayManager;
 import org.onebusaway.webapp.gwt.common.PageException;
 import org.onebusaway.webapp.gwt.common.context.Context;
@@ -96,7 +96,7 @@ public class IndexPage extends WhereCommonPage {
     TripsForBoundsQueryBean query = new TripsForBoundsQueryBean();
     query.setBounds(bounds);
     query.setTime(System.currentTimeMillis());
-    query.setIncludeTripBeans(true);
+    query.getInclusion().setIncludeTripBean(true);
 
     WebappServiceAsync service = WebappServiceAsync.SERVICE;
     service.getTripsForBounds(query, _handler);
