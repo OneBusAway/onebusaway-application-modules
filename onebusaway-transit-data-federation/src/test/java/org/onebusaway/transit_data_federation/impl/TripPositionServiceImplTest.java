@@ -80,9 +80,9 @@ public class TripPositionServiceImplTest {
     Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeC)).thenReturn(
         stnC);
 
-    double[] lats = {47.5, 47.6, 47.5};
-    double[] lons = {-122.5, -122.4, -122.3};
-    double[] distTraveled = {0, 100, 200};
+    double[] lats = {47.5, 47.56, 47.6, 47.54, 47.5};
+    double[] lons = {-122.5, -122.45, -122.4, -122.35, -122.3};
+    double[] distTraveled = {0, 50, 100, 150, 200};
     ShapePoints shapePoints = shapePoints("shape", lats, lons, distTraveled);
     Mockito.when(
         _shapePointService.getShapePointsForShapeId(tripNarrative.getShapeId())).thenReturn(
@@ -102,51 +102,78 @@ public class TripPositionServiceImplTest {
 
     assertEquals(47.5, position.getPosition().getLat(), epsilon);
     assertEquals(-122.5, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeA,position.getClosestStop());
+    assertEquals(0,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1060 * 1000);
 
     assertEquals(47.5, position.getPosition().getLat(), epsilon);
     assertEquals(-122.5, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeA,position.getClosestStop());
+    assertEquals(0,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1090 * 1000);
 
     assertEquals(47.5, position.getPosition().getLat(), epsilon);
     assertEquals(-122.5, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeA,position.getClosestStop());
+    assertEquals(0,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1105 * 1000);
 
-    assertEquals(47.55, position.getPosition().getLat(), epsilon);
+    assertEquals(47.56, position.getPosition().getLat(), epsilon);
     assertEquals(-122.45, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeB,position.getClosestStop());
+    assertEquals(15,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1110 * 1000);
 
-    assertEquals(47.566, position.getPosition().getLat(), epsilon);
+    assertEquals(47.57333, position.getPosition().getLat(), epsilon);
     assertEquals(-122.433, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeB,position.getClosestStop());
+    assertEquals(10,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1120 * 1000);
 
     assertEquals(47.6, position.getPosition().getLat(), epsilon);
     assertEquals(-122.4, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeB,position.getClosestStop());
+    assertEquals(0,position.getClosestStopTimeOffset());
+    
+    position = _service.getPositionForTripInstance(tripInstance, 1135 * 1000);
+
+    assertEquals(47.57, position.getPosition().getLat(), epsilon);
+    assertEquals(-122.375, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeB,position.getClosestStop());
+    assertEquals(-15,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1150 * 1000);
 
-    assertEquals(47.55, position.getPosition().getLat(), epsilon);
+    assertEquals(47.54, position.getPosition().getLat(), epsilon);
     assertEquals(-122.35, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeC,position.getClosestStop());
+    assertEquals(30,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1180 * 1000);
 
     assertEquals(47.5, position.getPosition().getLat(), epsilon);
     assertEquals(-122.3, position.getPosition().getLon(), epsilon);
-
+    assertEquals(stopTimeC,position.getClosestStop());
+    assertEquals(0,position.getClosestStopTimeOffset());
+    
     position = _service.getPositionForTripInstance(tripInstance, 1195 * 1000);
 
     assertEquals(47.5, position.getPosition().getLat(), epsilon);
     assertEquals(-122.3, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeC,position.getClosestStop());
+    assertEquals(0,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1210 * 1000);
 
     assertEquals(47.5, position.getPosition().getLat(), epsilon);
     assertEquals(-122.3, position.getPosition().getLon(), epsilon);
+    assertEquals(stopTimeC,position.getClosestStop());
+    assertEquals(0,position.getClosestStopTimeOffset());
 
     position = _service.getPositionForTripInstance(tripInstance, 1211 * 1000);
 

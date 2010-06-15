@@ -86,6 +86,7 @@ public class TripPositionServiceImpl implements TripPositionService {
 
   private TripPosition getTripPosition(TripInstanceProxy tripInstance,
       ScheduleDeviation scheduleDeviation, long targetTime) {
+    
     TripEntry tripEntry = tripInstance.getTrip();
     long serviceDate = tripInstance.getServiceDate();
 
@@ -110,6 +111,8 @@ public class TripPositionServiceImpl implements TripPositionService {
         CoordinatePoint location = new CoordinatePoint(stop.getStopLat(),
             stop.getStopLon());
         position.setPosition(location);
+        position.setClosestStop(stopTime);
+        position.setClosestStopTimeOffset(0);
         return position;
       }
     }
@@ -132,6 +135,18 @@ public class TripPositionServiceImpl implements TripPositionService {
 
     int fromTime = before.getDepartureTime();
     int toTime = after.getArrivalTime();
+    
+    int fromTimeOffset = fromTime - effectiveScheduledTime;
+    int toTimeOffset = toTime - effectiveScheduledTime;
+    
+    if( Math.abs(fromTimeOffset) < Math.abs(toTimeOffset)) {
+      position.setClosestStop(before);
+      position.setClosestStopTimeOffset(fromTimeOffset);
+    }
+    else {
+      position.setClosestStop(after);
+      position.setClosestStopTimeOffset(toTimeOffset);
+    }
 
     double ratio = (effectiveScheduledTime - fromTime)
         / ((double) (toTime - fromTime));

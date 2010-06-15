@@ -209,6 +209,13 @@ public class BeanFactoryV2 {
     bean.setServiceDate(tripStatus.getServiceDate());
     bean.setVehicleId(tripStatus.getVehicleId());
 
+    StopBean stop = tripStatus.getClosestStop();
+    if( stop != null) {
+      bean.setClosestStop(stop.getId());
+      addToReferences(stop);
+      bean.setClosestStopTimeOffset(tripStatus.getClosestStopTimeOffset());
+    }
+    
     return bean;
   }
 

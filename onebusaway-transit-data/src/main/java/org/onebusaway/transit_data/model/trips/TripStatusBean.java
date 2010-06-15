@@ -3,6 +3,7 @@ package org.onebusaway.transit_data.model.trips;
 import java.io.Serializable;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.transit_data.model.StopBean;
 
 public final class TripStatusBean implements Serializable {
 
@@ -19,6 +20,10 @@ public final class TripStatusBean implements Serializable {
   private boolean predicted = false;
   
   private String vehicleId;
+  
+  private StopBean closestStop;
+  
+  private int closestStopTimeOffset;
   
   public String getStatus() {
     return status;
@@ -66,5 +71,35 @@ public final class TripStatusBean implements Serializable {
 
   public void setVehicleId(String vehicleId) {
     this.vehicleId = vehicleId;
-  }  
+  }
+
+  public StopBean getClosestStop() {
+    return closestStop;
+  }
+
+  public void setClosestStop(StopBean closestStop) {
+    this.closestStop = closestStop;
+  }
+
+  /**
+   * The time offset, in seconds, from the closest stop to the current position
+   * of the transit vehicle among the stop times of the current trip. If the
+   * number is positive, the stop is coming up. If negative, the stop has
+   * already been passed.
+   * 
+   * @return time, in seconds
+   */
+  public int getClosestStopTimeOffset() {
+    return closestStopTimeOffset;
+  }
+
+  /**
+   * See description in {@link #getClosestStopTimeOffset()}.
+   * 
+   * @param closestStopTimeOffset the time offset from the closest stop, in
+   *          seconds
+   */
+  public void setClosestStopTimeOffset(int closestStopTimeOffset) {
+    this.closestStopTimeOffset = closestStopTimeOffset;
+  }
 }

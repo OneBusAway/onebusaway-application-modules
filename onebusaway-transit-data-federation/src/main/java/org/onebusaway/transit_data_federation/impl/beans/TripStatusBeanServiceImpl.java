@@ -17,6 +17,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceIdIntervals;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
@@ -31,11 +32,13 @@ import org.onebusaway.transit_data_federation.model.predictions.TripTimePredicti
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.TripPositionService;
+import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStatusBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
 import org.onebusaway.transit_data_federation.services.predictions.TripTimePredictionService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
@@ -59,6 +62,8 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
   private TripStopTimesBeanService _tripStopTimesBeanService;
 
   private TripTimePredictionService _tripTimePredictionService;
+  
+  private StopBeanService _stopBeanService;
 
   private static final long TIME_WINDOW = 30 * 60 * 1000;
 
@@ -92,6 +97,11 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
   public void setTripTimePredictionService(
       TripTimePredictionService tripTimePredictionService) {
     _tripTimePredictionService = tripTimePredictionService;
+  }
+  
+  @Autowired
+  public void setStopBeanService(StopBeanService stopBeanService) {
+    _stopBeanService = stopBeanService;
   }
 
   public TripStatusBean getTripStatusForTripId(AgencyAndId tripId,
@@ -253,6 +263,12 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
       AgencyAndId vid = sd.getVehicleId();
       if (vid != null)
         bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
+      StopTimeEntry stop = tripPosition.getClosestStop();
+      if( stop != null) {
+        StopBean stopBean = _stopBeanService.getStopForId(stop.getStop().getId());
+        bean.setClosestStop(stopBean);
+        bean.setClosestStopTimeOffset(tripPosition.getClosestStopTimeOffset());
+      }
     } else {
       bean.setPredicted(false);
     }

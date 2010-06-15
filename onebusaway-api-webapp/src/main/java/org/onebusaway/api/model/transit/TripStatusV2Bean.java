@@ -17,6 +17,10 @@ public final class TripStatusV2Bean implements Serializable {
   private int scheduleDeviation;
   
   private String vehicleId;
+  
+  private String closestStop;
+  
+  private int closestStopTimeOffset;
 
   public long getServiceDate() {
     return serviceDate;
@@ -56,5 +60,21 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setVehicleId(String vehicleId) {
     this.vehicleId = vehicleId;
+  }
+
+  public String getClosestStop() {
+    return closestStop;
+  }
+
+  public void setClosestStop(String closestStop) {
+    this.closestStop = closestStop;
+  }
+
+  public int getClosestStopTimeOffset() {
+    return closestStopTimeOffset;
+  }
+
+  public void setClosestStopTimeOffset(int closestStopTimeOffset) {
+    this.closestStopTimeOffset = closestStopTimeOffset;
   }
 }
