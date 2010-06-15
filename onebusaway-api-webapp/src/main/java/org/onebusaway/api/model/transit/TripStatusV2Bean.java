@@ -15,6 +15,8 @@ public final class TripStatusV2Bean implements Serializable {
   private boolean predicted = false;
 
   private int scheduleDeviation;
+  
+  private String vehicleId;
 
   public long getServiceDate() {
     return serviceDate;
@@ -48,4 +50,11 @@ public final class TripStatusV2Bean implements Serializable {
     this.scheduleDeviation = scheduleDeviation;
   }
 
+  public String getVehicleId() {
+    return vehicleId;
+  }
+
+  public void setVehicleId(String vehicleId) {
+    this.vehicleId = vehicleId;
+  }
 }

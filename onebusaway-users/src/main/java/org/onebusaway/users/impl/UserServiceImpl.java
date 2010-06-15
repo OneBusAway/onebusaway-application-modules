@@ -329,9 +329,10 @@ public class UserServiceImpl implements UserService {
     return _userPropertiesMigration.getUserPropertiesBulkMigrationStatus();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T> T getAdditionalPropertyForUser(User user, String propertyName) {
-    return _userPropertiesService.getAdditionalPropertyForUser(user,
+    return (T) _userPropertiesService.getAdditionalPropertyForUser(user,
         propertyName);
   }
 

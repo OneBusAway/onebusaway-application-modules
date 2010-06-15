@@ -131,6 +131,7 @@ public class TripTimePredictionServiceImpl implements TripTimePredictionService 
     ScheduleDeviation sd = new ScheduleDeviation();
     sd.setPredicted(true);
     sd.setScheduleDeviation(deviation);
+    sd.setVehicleId(cacheEntry.getVehicleId());
     return sd;
   }
 

@@ -207,6 +207,7 @@ public class BeanFactoryV2 {
     bean.setPredicted(tripStatus.isPredicted());
     bean.setScheduleDeviation(tripStatus.getScheduleDeviation());
     bean.setServiceDate(tripStatus.getServiceDate());
+    bean.setVehicleId(tripStatus.getVehicleId());
 
     return bean;
   }
