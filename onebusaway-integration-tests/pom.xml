@@ -206,6 +206,7 @@
             <plugin>
                 <groupId>org.terracotta.maven.plugins</groupId>
                 <artifactId>tc-maven-plugin</artifactId>
+                <version>1.5.2</version>
                 <executions>
                     <execution>
                         <id>terracotta-start</id>
