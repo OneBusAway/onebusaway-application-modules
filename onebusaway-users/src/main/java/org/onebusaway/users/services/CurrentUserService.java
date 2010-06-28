@@ -27,6 +27,11 @@ public interface CurrentUserService {
    */
   public boolean isCurrentUserAnonymous();
   
+  /**
+   * @return true if the current user is an admin
+   */
+  public boolean isCurrentUserAdmin();
+  
   public IndexedUserDetails getIndexedUserDetailsForUser(String type, String id,
       String credentials, boolean isAnonymous, String mode);
 

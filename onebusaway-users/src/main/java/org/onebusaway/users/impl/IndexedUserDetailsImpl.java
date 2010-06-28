@@ -32,9 +32,17 @@ public class IndexedUserDetailsImpl extends
   }
 
   public boolean isAnonymous() {
+    return hasAuthority(StandardAuthoritiesService.ANONYMOUS);
+  }
+
+  public boolean isAdmin() {
+    return hasAuthority(StandardAuthoritiesService.ADMINISTRATOR);
+  }
+
+  private boolean hasAuthority(String authorityToCheck) {
     GrantedAuthority[] authorities = getAuthorities();
     for (GrantedAuthority authority : authorities) {
-      if (authority.getAuthority().equals(StandardAuthoritiesService.ANONYMOUS))
+      if (authority.getAuthority().equals(authorityToCheck))
         return true;
     }
     return false;

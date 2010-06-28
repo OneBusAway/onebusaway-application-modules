@@ -59,6 +59,14 @@ public class CurrentUserServiceImpl implements CurrentUserService {
       return true;
     return details.isAnonymous();
   }
+  
+  @Override
+  public boolean isCurrentUserAdmin() {
+    IndexedUserDetails details = getCurrentUserDetails();
+    if (details == null)
+      return true;
+    return details.isAdmin();
+  }
 
   @Override
   public UserBean getCurrentUser() {
