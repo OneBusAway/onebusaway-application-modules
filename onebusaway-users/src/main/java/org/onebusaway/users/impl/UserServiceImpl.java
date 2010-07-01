@@ -64,6 +64,11 @@ public class UserServiceImpl implements UserService {
   /****
    * {@link UserService} Interface
    ****/
+  
+  @Override
+  public int getNumberOfUsers() {
+    return _userDao.getNumberOfUsers();
+  }
 
   @Override
   public User getUserForId(int userId) {

@@ -8,6 +8,8 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 
 public interface UserService {
+  
+  public int getNumberOfUsers();
 
   public User getUserForId(int userId);
 

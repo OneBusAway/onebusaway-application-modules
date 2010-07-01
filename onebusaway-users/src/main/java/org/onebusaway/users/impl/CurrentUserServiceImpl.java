@@ -64,7 +64,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   public boolean isCurrentUserAdmin() {
     IndexedUserDetails details = getCurrentUserDetails();
     if (details == null)
-      return true;
+      return false;
     return details.isAdmin();
   }
 
