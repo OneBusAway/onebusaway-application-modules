@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
   /****
    * {@link UserService} Interface
    ****/
-  
+
   @Override
   public int getNumberOfUsers() {
     return _userDao.getNumberOfUsers();
@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
       if (count < 2)
         return;
     }
-    
+
     Set<UserRole> roles = user.getRoles();
 
     if (roles.remove(adminRole))
@@ -224,6 +224,12 @@ public class UserServiceImpl implements UserService {
         return;
       }
     }
+  }
+
+  @Override
+  public void setCredentialsForUserIndex(UserIndex userIndex, String credentials) {
+    userIndex.setCredentials(credentials);
+    _userDao.saveOrUpdateUserIndex(userIndex);
   }
 
   @Override
@@ -364,4 +370,5 @@ public class UserServiceImpl implements UserService {
 
     targetUser.setRoles(roles);
   }
+
 }

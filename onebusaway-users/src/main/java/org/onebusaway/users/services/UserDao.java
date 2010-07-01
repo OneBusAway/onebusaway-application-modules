@@ -38,6 +38,8 @@ public interface UserDao {
   public List<String> getUserIndexKeyValuesForKeyType(String keyType);
 
   public UserIndex getUserIndexForId(UserIndexKey key);
+  
+  public void saveOrUpdateUserIndex(UserIndex userIndex);
 
   public void deleteUserIndex(UserIndex index);
 }

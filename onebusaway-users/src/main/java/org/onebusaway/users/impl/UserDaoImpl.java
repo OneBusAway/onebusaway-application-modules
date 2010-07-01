@@ -122,6 +122,11 @@ class UserDaoImpl implements UserDao {
   }
 
   @Override
+  public void saveOrUpdateUserIndex(UserIndex userIndex) {
+    _template.saveOrUpdate(userIndex);
+  }
+
+  @Override
   public void deleteUserIndex(UserIndex index) {
     _template.delete(index);
   }

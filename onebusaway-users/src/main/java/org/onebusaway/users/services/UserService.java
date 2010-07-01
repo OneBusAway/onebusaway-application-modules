@@ -34,6 +34,8 @@ public interface UserService {
       String credentials);
 
   public void removeUserIndexForUser(User user, UserIndexKey key);
+  
+  public void setCredentialsForUserIndex(UserIndex userIndex, String credentials);
 
   public UserBean getUserAsBean(User user);
   
