@@ -1,5 +1,11 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -8,15 +14,8 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Component
 class ShapeBeanServiceImpl implements ShapeBeanService {
@@ -52,7 +51,7 @@ class ShapeBeanServiceImpl implements ShapeBeanService {
       ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(shapeId);
       double[] lats = shapePoints.getLats();
       double[] lons = shapePoints.getLons();
-
+      
       CoordinatePoint prev = null;
 
       for (int i = 0; i < shapePoints.getSize(); i++) {
@@ -66,8 +65,10 @@ class ShapeBeanServiceImpl implements ShapeBeanService {
             currentLine.clear();
           }
         }
+
+        if( prev == null || ! prev.equals(loc))
+          currentLine.add(loc);
         
-        currentLine.add(loc);
         prev = loc;
       }
 

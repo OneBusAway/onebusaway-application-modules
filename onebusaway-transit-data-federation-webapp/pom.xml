@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-transit-data-federation</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
