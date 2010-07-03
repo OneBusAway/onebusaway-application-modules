@@ -6,6 +6,8 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.RouteV2Bean;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
@@ -100,13 +102,31 @@ public class RoutesForLocationController extends ApiActionSupport {
     routesQuery.setMaxCount(maxCount);
     routesQuery.setType(EQueryType.BOUNDS_OR_CLOSEST);
 
-    RoutesBean result = _service.getRoutes(routesQuery);
+    try {
+      RoutesBean result = _service.getRoutes(routesQuery);
+      return transformResult(result);
+    } catch (OutOfServiceAreaServiceException ex) {
+      return transformOutOfRangeResult();
+    }
+  }
 
+  private DefaultHttpHeaders transformResult(RoutesBean result) {
     if (isVersion(V1)) {
       return setOkResponse(result);
     } else if (isVersion(V2)) {
       BeanFactoryV2 factory = getBeanFactoryV2();
       return setOkResponse(factory.getResponse(result));
+    } else {
+      return setUnknownVersionResponse();
+    }
+  }
+
+  private DefaultHttpHeaders transformOutOfRangeResult() {
+    if (isVersion(V1)) {
+      return setOkResponse(new RoutesBean());
+    } else if (isVersion(V2)) {
+      BeanFactoryV2 factory = getBeanFactoryV2();
+      return setOkResponse(factory.getEmptyList(RouteV2Bean.class, true));
     } else {
       return setUnknownVersionResponse();
     }

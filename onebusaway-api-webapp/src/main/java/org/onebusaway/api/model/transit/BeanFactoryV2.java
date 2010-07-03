@@ -109,7 +109,7 @@ public class BeanFactoryV2 {
     List<StopV2Bean> beans = new ArrayList<StopV2Bean>();
     for (StopBean stop : result.getStops())
       beans.add(getStop(stop));
-    return list(beans, result.isLimitExceeded());
+    return list(beans, result.isLimitExceeded(),false);
   }
 
   public ListWithReferencesBean<TripDetailsV2Bean> getTripDetailsResponse(
@@ -124,6 +124,10 @@ public class BeanFactoryV2 {
   public ListWithReferencesBean<String> getEntityIdsResponse(
       ListBean<String> ids) {
     return list(ids.getList(), ids.isLimitExceeded());
+  }
+  
+  public <T> ListWithReferencesBean<T> getEmptyList(Class<T> type, boolean outOfRange) {
+    return list(new ArrayList<T>(),false,outOfRange);
   }
 
   /****
@@ -470,6 +474,10 @@ public class BeanFactoryV2 {
 
   private <T> ListWithReferencesBean<T> list(List<T> list, boolean limitExceeded) {
     return new ListWithReferencesBean<T>(list, limitExceeded, _references);
+  }
+  
+  private <T> ListWithReferencesBean<T> list(List<T> list, boolean limitExceeded, boolean outOfRange) {
+    return new ListWithRangeAndReferencesBean<T>(list, limitExceeded, outOfRange, _references);
   }
 
   private <T> List<T> filter(List<T> beans) {

@@ -3,7 +3,7 @@ package org.onebusaway.api.model.transit;
 import java.io.Serializable;
 import java.util.List;
 
-public final class ListWithReferencesBean<T> implements Serializable {
+public class ListWithReferencesBean<T> implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

@@ -7,6 +7,7 @@ import org.onebusaway.api.model.transit.AgencyV2Bean;
 import org.onebusaway.api.model.transit.AgencyWithCoverageV2Bean;
 import org.onebusaway.api.model.transit.ArrivalAndDepartureV2Bean;
 import org.onebusaway.api.model.transit.EntryWithReferencesBean;
+import org.onebusaway.api.model.transit.ListWithRangeAndReferencesBean;
 import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.ReferencesBean;
 import org.onebusaway.api.model.transit.RouteV2Bean;
@@ -55,6 +56,7 @@ public class CustomXStreamHandler extends XStreamHandler {
 
     xstream.alias("entryWithReferences", EntryWithReferencesBean.class);
     xstream.alias("listWithReferences", ListWithReferencesBean.class);
+    xstream.alias("listWithRangeAndReferences", ListWithRangeAndReferencesBean.class);
     xstream.alias("references", ReferencesBean.class);
 
     xstream.alias("agency", AgencyV2Bean.class);

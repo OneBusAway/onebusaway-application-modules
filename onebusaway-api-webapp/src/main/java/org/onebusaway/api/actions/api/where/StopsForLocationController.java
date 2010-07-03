@@ -6,6 +6,8 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.StopV2Bean;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
@@ -97,13 +99,31 @@ public class StopsForLocationController extends ApiActionSupport {
       searchQuery.setType(EQueryType.BOUNDS_OR_CLOSEST);
     }
 
-    StopsBean result = _service.getStops(searchQuery);
+    try {
+      StopsBean result = _service.getStops(searchQuery);
+      return transformResult(result);
+    } catch (OutOfServiceAreaServiceException ex) {
+      return transformOutOfRangeResult();
+    }
+  }
 
+  private DefaultHttpHeaders transformResult(StopsBean result) {
     if (isVersion(V1)) {
       return setOkResponse(result);
     } else if (isVersion(V2)) {
       BeanFactoryV2 factory = getBeanFactoryV2();
       return setOkResponse(factory.getResponse(result));
+    } else {
+      return setUnknownVersionResponse();
+    }
+  }
+
+  private DefaultHttpHeaders transformOutOfRangeResult() {
+    if (isVersion(V1)) {
+      return setOkResponse(new StopsBean());
+    } else if (isVersion(V2)) {
+      BeanFactoryV2 factory = getBeanFactoryV2();
+      return setOkResponse(factory.getEmptyList(StopV2Bean.class, true));
     } else {
       return setUnknownVersionResponse();
     }

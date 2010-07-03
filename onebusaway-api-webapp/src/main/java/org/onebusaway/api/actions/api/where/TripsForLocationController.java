@@ -6,6 +6,8 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.TripDetailsV2Bean;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
@@ -97,16 +99,20 @@ public class TripsForLocationController extends ApiActionSupport {
     query.setBounds(bounds);
     query.setTime(time);
     query.setMaxCount(_maxCount.getMaxCount());
-    
+
     TripDetailsInclusionBean inclusion = query.getInclusion();
     inclusion.setIncludeTripBean(_includeTrips);
     inclusion.setIncludeTripSchedule(_includeSchedules);
     inclusion.setIncludeTripStatus(true);
-    
-    ListBean<TripDetailsBean> trips = _service.getTripsForBounds(query);
 
     BeanFactoryV2 factory = getBeanFactoryV2();
-    return setOkResponse(factory.getTripDetailsResponse(trips));
+
+    try {
+      ListBean<TripDetailsBean> trips = _service.getTripsForBounds(query);
+      return setOkResponse(factory.getTripDetailsResponse(trips));
+    } catch (OutOfServiceAreaServiceException ex) {
+      return setOkResponse(factory.getEmptyList(TripDetailsV2Bean.class, true));
+    }
   }
 
   private CoordinateBounds getSearchBounds() {
