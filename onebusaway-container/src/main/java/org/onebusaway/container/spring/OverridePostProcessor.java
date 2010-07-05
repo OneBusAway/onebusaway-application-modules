@@ -9,9 +9,31 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 
+/**
+ * A link {@link BeanPostProcessor} that allows one to set and override bean
+ * properties in a flexible ways before the bean is initialized. This is similar
+ * to the functionality of {@link PropertyOverrideConfigurer}, except that it is
+ * a Spring bean post processor as opposed to a factory bean, which determines
+ * execution order in the application context construction lifecycle and allows
+ * one to use bean references for overriding bean properties as opposed to just
+ * string values.
+ * 
+ * A simple example:
+ * 
+ * <pre class="code">&lt;bean class="org.onebusaway.container.spring.OverridePostProcessor"&gt;
+ *   &lt;property name="map"&gt;
+ *     &lt;map&gt;
+ *       &lt;entry key="beanName.beanProperty" value ="someValue" /&gt;
+ *     &lt;/map&gt;
+ *   &lt;/property&gt;
+ * &lt;/bean&gt;</pre>
+ * 
+ * @author bdferris
+ */
 public class OverridePostProcessor implements BeanPostProcessor,
     PriorityOrdered {
 

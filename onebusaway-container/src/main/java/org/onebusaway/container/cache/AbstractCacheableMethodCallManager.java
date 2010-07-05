@@ -16,6 +16,7 @@
 package org.onebusaway.container.cache;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import net.sf.ehcache.Element;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.onebusaway.collections.PropertyPathExpression;
 
 /**
  * Abstract support class providing functionality for caching the output of
@@ -103,11 +105,44 @@ public abstract class AbstractCacheableMethodCallManager {
 
   protected CacheableMethodKeyFactory getCacheableMethodKeyFactoryForMethod(
       Method m) {
+
     Class<?>[] parameters = m.getParameterTypes();
+    Annotation[][] annotations = m.getParameterAnnotations();
+
     CacheableObjectKeyFactory[] keyFactories = new CacheableObjectKeyFactory[parameters.length];
-    for (int i = 0; i < parameters.length; i++)
-      keyFactories[i] = getKeyFactoryForParameterType(parameters[i]);
+    for (int i = 0; i < parameters.length; i++) {
+      CacheableArgument cacheableArgumentAnnotation = getCacheableArgumentAnnotation(annotations[i]);
+      if (cacheableArgumentAnnotation != null)
+        keyFactories[i] = getKeyFactoryForCacheableArgumentAnnotation(parameters[i],cacheableArgumentAnnotation);
+      else
+        keyFactories[i] = getKeyFactoryForParameterType(parameters[i]);
+    }
     return new DefaultCacheableKeyFactory(keyFactories);
+  }
+
+  protected CacheableArgument getCacheableArgumentAnnotation(
+      Annotation[] annotations) {
+    for (Annotation annotation : annotations) {
+      if (annotation instanceof CacheableArgument)
+        return (CacheableArgument) annotation;
+    }
+    return null;
+  }
+
+  protected CacheableObjectKeyFactory getKeyFactoryForCacheableArgumentAnnotation(
+      Class<?> type, CacheableArgument cacheableArgumentAnnotation) {
+    
+    String keyProperty = cacheableArgumentAnnotation.keyProperty();
+    
+    if( ! (keyProperty == null || keyProperty.equals(""))) {
+      PropertyPathExpression expression = new PropertyPathExpression(keyProperty);
+      type = expression.initialize(type);
+      CacheableObjectKeyFactory factory = getKeyFactoryForParameterType(type);
+      return new PropertyPathExpressionCacheableObjectKeyFactory(expression, factory);
+    }
+
+    // Nothing interesting defined in the annotation?  Apply the default behavior
+    return getKeyFactoryForParameterType(type);
   }
 
   protected CacheableObjectKeyFactory getKeyFactoryForParameterType(

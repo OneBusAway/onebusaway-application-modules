@@ -17,6 +17,8 @@ public class DefaultCacheableObjectKeyFactory implements
   private static final long serialVersionUID = 1L;
 
   public Serializable createKey(Object object) {
+    if( object instanceof Serializable)
+      return (Serializable) object;
     return object.toString();
   }
 }
