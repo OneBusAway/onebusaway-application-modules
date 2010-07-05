@@ -102,7 +102,7 @@ public class BeanFactoryV2 {
     List<RouteV2Bean> beans = new ArrayList<RouteV2Bean>();
     for (RouteBean route : result.getRoutes())
       beans.add(getRoute(route));
-    return list(beans, result.isLimitExceeded());
+    return list(beans, result.isLimitExceeded(),false);
   }
 
   public ListWithReferencesBean<StopV2Bean> getResponse(StopsBean result) {
@@ -118,7 +118,7 @@ public class BeanFactoryV2 {
     List<TripDetailsV2Bean> beans = new ArrayList<TripDetailsV2Bean>();
     for (TripDetailsBean trip : trips.getList())
       beans.add(getTripDetails(trip));
-    return list(beans, trips.isLimitExceeded());
+    return list(beans, trips.isLimitExceeded(),false);
   }
 
   public ListWithReferencesBean<String> getEntityIdsResponse(
