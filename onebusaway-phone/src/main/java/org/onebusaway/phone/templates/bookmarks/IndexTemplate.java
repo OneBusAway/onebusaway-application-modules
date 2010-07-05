@@ -56,8 +56,7 @@ public class IndexTemplate extends AbstractBookmarkTemplate {
         AgiActionName stopAction = addAction(toPress,
             "/stop/arrivalsAndDeparturesForStopId");
 
-        List<String> stopIds = MappingLibrary.map(bookmark.getStops(), "id",
-            String.class);
+        List<String> stopIds = MappingLibrary.map(bookmark.getStops(), "id");
         Set<String> routeIds = new HashSet<String>(MappingLibrary.map(
             bookmark.getRoutes(), "id", String.class));
 
