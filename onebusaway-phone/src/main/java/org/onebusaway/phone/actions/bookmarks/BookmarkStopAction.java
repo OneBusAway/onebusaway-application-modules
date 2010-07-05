@@ -55,13 +55,18 @@ public class BookmarkStopAction extends AbstractAction {
 
   @Override
   public String execute() throws Exception {
+    
     if (_currentUser != null && !_currentUser.isRememberPreferencesEnabled())
       return "preferences_disabled";
     if (_stops.isEmpty())
       return INPUT;
     String name = _bookmarkPresentationService.getNameForStops(_stops);
-    List<String> stopIds = MappingLibrary.map(_stops, "id", String.class);
+    
+    List<String> stopIds = MappingLibrary.map(_stops, "id");
     _currentUserService.addStopBookmark(name, stopIds, new RouteFilter());
+    
+    logUserInteraction("stopIds",stopIds);
+    
     return SUCCESS;
   }
 }

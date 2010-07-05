@@ -59,13 +59,34 @@ public class CurrentUserServiceImpl implements CurrentUserService {
       return true;
     return details.isAnonymous();
   }
-  
+
   @Override
   public boolean isCurrentUserAdmin() {
     IndexedUserDetails details = getCurrentUserDetails();
     if (details == null)
       return false;
     return details.isAdmin();
+  }
+  
+  @Override
+  public IndexedUserDetails getCurrentUserDetails() {
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null)
+      return null;
+
+    // The principal really shouldn't be a UserDetails object, yet that is where
+    // the RememberMe authentication service puts it
+    Object principal = authentication.getPrincipal();
+    if (principal instanceof IndexedUserDetails)
+      return (IndexedUserDetails) principal;
+
+    Object details = authentication.getDetails();
+    if (details instanceof IndexedUserDetails)
+      return (IndexedUserDetails) details;
+
+    return null;
   }
 
   @Override
@@ -332,25 +353,6 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     return _userService.getUserIndexForId(details.getUserIndexKey());
   }
 
-  private IndexedUserDetails getCurrentUserDetails() {
-
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    if (authentication == null)
-      return null;
-
-    // The principal really shouldn't be a UserDetails object, yet that is where
-    // the RememberMe authentication service puts it
-    Object principal = authentication.getPrincipal();
-    if (principal instanceof IndexedUserDetails)
-      return (IndexedUserDetails) principal;
-
-    Object details = authentication.getDetails();
-    if (details instanceof IndexedUserDetails)
-      return (IndexedUserDetails) details;
-
-    return null;
-  }
 
   private void setCurrentUserInternal(UserIndex userIndex) {
 

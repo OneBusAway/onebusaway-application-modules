@@ -8,7 +8,12 @@ import org.onebusaway.presentation.services.ServiceAreaService;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
+import org.onebusaway.users.services.logging.UserInteractionLoggingService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.ActionProxy;
 
 public abstract class AbstractAction extends NextActionSupport {
 
@@ -19,6 +24,8 @@ public abstract class AbstractAction extends NextActionSupport {
   protected CurrentUserService _currentUserService;
 
   private ServiceAreaService _serviceAreaService;
+
+  protected UserInteractionLoggingService _userInteractionLoggingService;
 
   public void setSession(Map<String, Object> session) {
     _session = session;
@@ -38,7 +45,13 @@ public abstract class AbstractAction extends NextActionSupport {
   public void setCurrentUserService(CurrentUserService currentUserService) {
     _currentUserService = currentUserService;
   }
-  
+
+  @Autowired
+  public void setUserInteractionLoggingService(
+      UserInteractionLoggingService userInteractionLoggingService) {
+    _userInteractionLoggingService = userInteractionLoggingService;
+  }
+
   public boolean isAnonymousUser() {
     return _currentUserService.isCurrentUserAnonymous();
   }
@@ -50,5 +63,30 @@ public abstract class AbstractAction extends NextActionSupport {
   protected CoordinateBounds getServiceArea() {
     UserBean user = _currentUserService.getCurrentUser();
     return _serviceAreaService.getServiceArea(user, _session);
+  }
+
+  protected void logUserInteraction(Object... objects) {
+
+    Map<String, Object> entry = _userInteractionLoggingService.isInteractionLoggedForCurrentUser();
+
+    if (entry == null)
+      return;
+
+    ActionContext context = ActionContext.getContext();
+    ActionInvocation invocation = context.getActionInvocation();
+    ActionProxy proxy = invocation.getProxy();
+
+    entry.put("interface","web");
+    entry.put("namespace", proxy.getNamespace());
+    entry.put("actionName", proxy.getActionName());
+    entry.put("method", proxy.getMethod());
+    
+    if( objects.length % 2 != 0 )
+      throw new IllegalStateException("expected an even number of arguments");
+      
+    for( int i=0; i<objects.length; i+= 2)
+      entry.put(objects[i].toString(),objects[i+1]);
+
+    _userInteractionLoggingService.logInteraction(entry);
   }
 }

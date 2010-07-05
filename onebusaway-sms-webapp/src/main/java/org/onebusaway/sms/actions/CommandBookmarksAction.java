@@ -70,6 +70,9 @@ public class CommandBookmarksAction extends AbstractTextmarksAction {
           _currentUserService.addStopBookmark(name, lastSelectedStopIds,
               new RouteFilter());
         }
+        
+        logUserInteraction("bookmark","added","stopIds",lastSelectedStopIds);
+        
         return "added";
       }
 
@@ -92,12 +95,16 @@ public class CommandBookmarksAction extends AbstractTextmarksAction {
         BookmarkBean bookmark = bookmarks.get(index);
         _stopIds = bookmark.getStopIds();
         _routeFilter = bookmark.getRouteFilter().getRouteIds();
+        
+        logUserInteraction("stopIds",_stopIds,"routeIds",_routeFilter);
 
         return "arrivals-and-departures";
       }
     }
 
     _bookmarks = _bookmarkPresentationService.getBookmarksWithStops(currentUser.getBookmarks());
+    
+    logUserInteraction();
 
     return SUCCESS;
   }

@@ -43,7 +43,7 @@ public class StopAction extends AbstractWhereAction implements
   private boolean _needsRedirect = false;
 
   private WebappArrivalsAndDeparturesModel _model;
-  
+
   @Autowired
   public void setModel(WebappArrivalsAndDeparturesModel model) {
     _model = model;
@@ -134,6 +134,9 @@ public class StopAction extends AbstractWhereAction implements
       return "redirect";
 
     _model.process();
+
+    logUserInteraction("stopIds", _model.getStopIds(), "routeIds",
+        _model.getRouteFilter());
 
     return SUCCESS;
   }

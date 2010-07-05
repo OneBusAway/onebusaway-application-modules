@@ -18,9 +18,7 @@ package org.onebusaway.phone.actions;
 import org.onebusaway.users.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
-
-public class WelcomeAction extends ActionSupport {
+public class WelcomeAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
     
@@ -33,6 +31,7 @@ public class WelcomeAction extends ActionSupport {
     
     @Override
     public String execute() {
+      logUserInteraction();
       if( _currentUserService.hasPhoneNumberRegistration() )
         return "registration";
       return SUCCESS;

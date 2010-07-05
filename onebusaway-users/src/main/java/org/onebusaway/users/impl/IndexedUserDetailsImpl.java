@@ -14,7 +14,7 @@ import java.util.Set;
 public class IndexedUserDetailsImpl extends
     org.springframework.security.userdetails.User implements IndexedUserDetails {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private UserIndexKey _userIndexKey;
 
@@ -37,6 +37,32 @@ public class IndexedUserDetailsImpl extends
 
   public boolean isAdmin() {
     return hasAuthority(StandardAuthoritiesService.ADMINISTRATOR);
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = super.hashCode();
+    result = prime * result
+        + ((_userIndexKey == null) ? 0 : _userIndexKey.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!super.equals(obj))
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    IndexedUserDetailsImpl other = (IndexedUserDetailsImpl) obj;
+    if (_userIndexKey == null) {
+      if (other._userIndexKey != null)
+        return false;
+    } else if (!_userIndexKey.equals(other._userIndexKey))
+      return false;
+    return true;
   }
 
   private boolean hasAuthority(String authorityToCheck) {

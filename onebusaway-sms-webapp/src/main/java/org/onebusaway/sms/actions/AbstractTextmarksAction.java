@@ -1,5 +1,7 @@
 package org.onebusaway.sms.actions;
 
+import java.util.Map;
+
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.InterceptorRefs;
 import org.apache.struts2.convention.annotation.Result;
@@ -7,7 +9,12 @@ import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.presentation.impl.NextActionSupport;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.services.CurrentUserService;
+import org.onebusaway.users.services.logging.UserInteractionLoggingService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.ActionProxy;
 
 @InterceptorRefs( {@InterceptorRef("onebusaway-sms-webapp-stack")})
 @Results( {
@@ -27,6 +34,8 @@ public class AbstractTextmarksAction extends NextActionSupport {
 
   protected String _text;
 
+  private UserInteractionLoggingService _userInteractionLoggingService;
+
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
@@ -37,6 +46,12 @@ public class AbstractTextmarksAction extends NextActionSupport {
     _currentUserService = currentUserService;
   }
 
+  @Autowired
+  public void setUserInteractionLoggingService(
+      UserInteractionLoggingService userInteractionLoggingService) {
+    _userInteractionLoggingService = userInteractionLoggingService;
+  }
+  
   public void setMessage(String message) {
     if (_text == null)
       _text = message.trim();
@@ -48,5 +63,30 @@ public class AbstractTextmarksAction extends NextActionSupport {
 
   public String getText() {
     return _text;
+  }
+  
+  protected void logUserInteraction(Object... objects) {
+
+    Map<String, Object> entry = _userInteractionLoggingService.isInteractionLoggedForCurrentUser();
+
+    if (entry == null)
+      return;
+
+    ActionContext context = ActionContext.getContext();
+    ActionInvocation invocation = context.getActionInvocation();
+    ActionProxy proxy = invocation.getProxy();
+
+    entry.put("interface", "sms");
+    entry.put("namespace", proxy.getNamespace());
+    entry.put("actionName", proxy.getActionName());
+    entry.put("method", proxy.getMethod());
+    
+    if( objects.length % 2 != 0 )
+      throw new IllegalStateException("expected an even number of arguments");
+      
+    for( int i=0; i<objects.length; i+= 2)
+      entry.put(objects[i].toString(),objects[i+1]);
+
+    _userInteractionLoggingService.logInteraction(entry);
   }
 }

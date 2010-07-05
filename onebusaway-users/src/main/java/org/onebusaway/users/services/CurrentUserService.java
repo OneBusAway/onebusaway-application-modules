@@ -9,6 +9,11 @@ import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.properties.RouteFilter;
 
 public interface CurrentUserService {
+  
+  /**
+   * @return null if no user is currently logged in
+   */
+  public IndexedUserDetails getCurrentUserDetails();
 
   /**
    * @return the current user. If no user is currently logged in, we return an

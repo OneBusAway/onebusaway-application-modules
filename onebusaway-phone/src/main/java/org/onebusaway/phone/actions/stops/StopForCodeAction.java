@@ -42,33 +42,35 @@ public class StopForCodeAction extends AbstractAction {
   public List<String> getStopIds() {
     return _stopIds;
   }
-  
+
   public List<StopBean> getStops() {
     return _stops;
   }
-  
+
   public String execute() throws Exception {
 
     CoordinateBounds bounds = getDefaultSearchArea();
     if (bounds == null)
       return NEEDS_DEFAULT_SEARCH_LOCATION;
-    
-    if( _stopCode == null || _stopCode.length() == 0)
+
+    if (_stopCode == null || _stopCode.length() == 0)
       return INPUT;
-    
+
     SearchQueryBean searchQuery = new SearchQueryBean();
     searchQuery.setBounds(bounds);
     searchQuery.setMaxCount(5);
     searchQuery.setType(EQueryType.BOUNDS_OR_CLOSEST);
     searchQuery.setQuery(_stopCode);
-    
+
     StopsBean stopsBean = _transitDataService.getStops(searchQuery);
 
     _stops = stopsBean.getStops();
 
+    logUserInteraction("query", _stopCode);
+
     if (_stops.size() == 0) {
       return "noStopsFound";
-    } else if (_stops.size() == 1 ) {
+    } else if (_stops.size() == 1) {
       StopBean stop = _stops.get(0);
       _stopIds = Arrays.asList(stop.getId());
       return SUCCESS;

@@ -15,19 +15,18 @@
  */
 package org.onebusaway.phone.actions.stops;
 
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-
-import com.opensymphony.xwork2.ActionSupport;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ArrivalsAndDeparturesForRouteAction extends ActionSupport {
+import org.onebusaway.phone.actions.AbstractAction;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
+
+public class ArrivalsAndDeparturesForRouteAction extends AbstractAction {
 
   private static final long serialVersionUID = 1L;
 
@@ -64,6 +63,8 @@ public class ArrivalsAndDeparturesForRouteAction extends ActionSupport {
 
     _model = new StopWithArrivalsAndDeparturesBean(_model.getStop(), arrivals,
         _model.getNearbyStops());
+    
+    logUserInteraction("routeIds",routeIds);
 
     return SUCCESS;
   }

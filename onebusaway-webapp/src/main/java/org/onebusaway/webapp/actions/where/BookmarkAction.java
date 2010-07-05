@@ -1,6 +1,8 @@
 package org.onebusaway.webapp.actions.where;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
@@ -55,7 +57,7 @@ public class BookmarkAction extends AbstractAction implements
   public WebappArrivalsAndDeparturesModel getModel() {
     return _model;
   }
-  
+
   public String getBookmarkName() {
     return _bookmarkName;
   }
@@ -73,14 +75,19 @@ public class BookmarkAction extends AbstractAction implements
     BookmarkBean bookmark = getBookmark();
     if (bookmark == null)
       return INPUT;
-    
+
     String name = bookmark.getName();
-    if( name != null && name.length() > 0)
+    if (name != null && name.length() > 0)
       _bookmarkName = name;
-    
-    _model.setStopIds(bookmark.getStopIds());
-    _model.setRouteFilter(bookmark.getRouteFilter().getRouteIds());
+
+    List<String> stopIds = bookmark.getStopIds();
+    Set<String> routeIds = bookmark.getRouteFilter().getRouteIds();
+
+    _model.setStopIds(stopIds);
+    _model.setRouteFilter(routeIds);
     _model.process();
+
+    logUserInteraction("stopIds", stopIds, "routeIds", routeIds);
 
     return SUCCESS;
   }

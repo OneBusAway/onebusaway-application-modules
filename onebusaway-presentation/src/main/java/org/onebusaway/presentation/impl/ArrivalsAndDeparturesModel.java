@@ -79,9 +79,17 @@ public class ArrivalsAndDeparturesModel {
   public void setStopIds(List<String> stopIds) {
     _stopIds = stopIds;
   }
+  
+  public List<String> getStopIds() {
+    return _stopIds;
+  }
 
   public void setRouteFilter(Set<String> routeFilter) {
     _routeFilter = routeFilter;
+  }
+  
+  public Set<String> getRouteFilter() {
+    return _routeFilter;
   }
 
   public boolean setOrderFromString(String order) {

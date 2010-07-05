@@ -68,7 +68,8 @@ public class StopByNumberAction extends AbstractTextmarksAction {
       return INPUT;
 
     UserBean currentUser = _currentUserService.getCurrentUser();
-    CoordinateBounds serviceArea = _serviceAreaService.getServiceArea(currentUser, _session);
+    CoordinateBounds serviceArea = _serviceAreaService.getServiceArea(
+        currentUser, _session);
 
     if (serviceArea == null) {
       pushNextAction("stop-by-number", "text", _text);
@@ -86,6 +87,8 @@ public class StopByNumberAction extends AbstractTextmarksAction {
     StopsBean results = _transitDataService.getStops(searchQuery);
 
     _stops = results.getStops();
+
+    logUserInteraction("stopQuery", _stopQuery);
 
     int stopIndex = 0;
 
