@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -46,7 +47,7 @@ class RouteServiceImpl implements RouteService {
   }
 
   @Cacheable
-  public AgencyAndId getRouteCollectionIdForRoute(Route route) {
+  public AgencyAndId getRouteCollectionIdForRoute(@CacheableArgument(keyProperty="id") Route route) {
     RouteCollection routeCollection = _whereDao.getRouteCollectionForRoute(route);
     if (routeCollection == null)
       return null;
