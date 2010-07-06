@@ -61,6 +61,16 @@
             <version>1.1.2</version>
         </dependency>
 
+        <!--
+            The main reason we include this is so that it override the 1.8.x hsqldb included by other dependencies and
+            so that it will be included in the integration-test war.  There may be a better way.
+        -->
+        <dependency>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
