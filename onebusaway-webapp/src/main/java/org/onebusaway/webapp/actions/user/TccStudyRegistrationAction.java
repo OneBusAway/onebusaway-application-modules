@@ -1,12 +1,15 @@
 package org.onebusaway.webapp.actions.user;
 
 import java.io.InputStream;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.util.ServletContextAware;
+import org.onebusaway.users.model.IndexedUserDetails;
+import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.CurrentUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +59,16 @@ public class TccStudyRegistrationAction extends ActionSupport implements
   @Override
   public String execute() {
     try {
-      _currentUserService.handleAddAccount("tccStudyId", _id, "", false);
+      IndexedUserDetails details = _currentUserService.getCurrentUserDetails();
+      String id = null;
+      if( details == null) {
+        id = UUID.randomUUID().toString();
+      }
+      else {
+        UserIndexKey key = details.getUserIndexKey();
+        id = key.getType() + "|" + key.getValue();
+      }
+      _currentUserService.handleAddAccount("tccStudyId", id, _id, false);
     } catch (Exception ex) {
       _log.warn("error registering tcc study id", ex);
     }

@@ -71,6 +71,16 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public List<Integer> getAllUserIds() {
+    return _userDao.getAllUserIds();
+  }
+
+  @Override
+  public List<Integer> getAllUsersIds(int offset, int limit) {
+    return _userDao.getAllUsersIds(offset, limit);
+  }
+
+  @Override
   public User getUserForId(int userId) {
     return _userDao.getUserForId(userId);
   }
@@ -370,5 +380,4 @@ public class UserServiceImpl implements UserService {
 
     targetUser.setRoles(roles);
   }
-
 }

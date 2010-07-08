@@ -43,6 +43,12 @@ class UserDaoImpl implements UserDao {
 
   @SuppressWarnings("unchecked")
   @Override
+  public List<Integer> getAllUserIds() {
+    return _template.find("SELECT user.id FROM User user");
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
   public List<Integer> getAllUsersIds(final int firstResult,
       final int maxResults) {
     return (List<Integer>) _template.execute(new HibernateCallback() {

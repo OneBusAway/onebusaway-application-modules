@@ -10,6 +10,8 @@ import org.onebusaway.users.model.UserRole;
 public interface UserDao {
 
   public int getNumberOfUsers();
+  
+  public List<Integer> getAllUserIds();
 
   public List<Integer> getAllUsersIds(int offset, int limit);
 

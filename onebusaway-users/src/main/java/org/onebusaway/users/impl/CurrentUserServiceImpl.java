@@ -161,11 +161,12 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   public IndexedUserDetails handleAddAccount(String type, String id,
       String credentials, boolean isAnonymous) {
 
+    User currentUser = getCurrentUserInternal();
+    
     UserIndexKey key = new UserIndexKey(type, id);
     UserIndex index = _userService.getUserIndexForId(key);
     boolean exists = index != null;
-
-    User currentUser = getCurrentUserInternal();
+    
     // New user?
     if (exists) {
       if (currentUser != null) {

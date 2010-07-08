@@ -38,6 +38,7 @@ public class TccUserStudyInteractionLoggingIndicatorImpl implements
       if (id.getType().equals("tccStudyId")) {
         Map<String, Object> entry = new HashMap<String, Object>();
         entry.put("tccStudyId", id.getValue());
+        entry.put("credentials", index.getCredentials());
         return entry;
       }
     }

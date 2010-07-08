@@ -10,6 +10,10 @@ import org.onebusaway.users.model.UserIndexKey;
 public interface UserService {
   
   public int getNumberOfUsers();
+  
+  public List<Integer> getAllUserIds();
+
+  public List<Integer> getAllUsersIds(int offset, int limit);
 
   public User getUserForId(int userId);
 
@@ -86,4 +90,5 @@ public interface UserService {
 
   public void setAdditionalPropertyForUser(User user, String propertyName,
       Object propertyValue);
+
 }

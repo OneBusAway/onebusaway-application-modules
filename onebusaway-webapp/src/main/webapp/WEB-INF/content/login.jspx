@@ -65,11 +65,25 @@
 
 <p>Login using your account from one of the providers listed below:</p>
 
-<p>
-<div id="login_widget">
-  <!-- Content will be supplied by the GWT LoginWidget -->
-</div>
-</p>
+<table>
+  <tr>
+    <td>
+      <div id="login_widget">
+        <!-- Content will be supplied by the GWT LoginWidget -->
+      </div>
+    </td>
+    <td>
+      <h4>Simple Login</h4>
+      <s:form action="/userIndex_login" method="put">
+        <s:textfield name="j_username"/>
+        <s:password name="j_password"/>
+        <s:checkbox name="_spring_security_remember_me" value="true" label="Remember Me"/>
+        <s:hidden name="j_indexType" value="username"/>
+        <s:submit value="Login"/>
+      </s:form>
+    </td>
+  </tr>
+</table>
 
 <h3>"Where do I type my username and password?"</h3>
 
