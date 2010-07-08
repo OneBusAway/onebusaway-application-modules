@@ -25,8 +25,8 @@ public class YahooGeocoderImplTest {
 
     GeocoderResult result = records.get(0);
 
-    assertEquals(47.663640, result.getLatitude(), 0.000001);
-    assertEquals(-122.298869, result.getLongitude(), 0.000001);
+    assertEquals(47.663355, result.getLatitude(), 0.001);
+    assertEquals(-122.298259, result.getLongitude(), 0.001);
     assertEquals("",result.getAddress());
     assertEquals("Seattle", result.getCity());
     assertEquals("WA", result.getAdministrativeArea());
