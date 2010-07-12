@@ -27,8 +27,8 @@
 
             <g:FormPanel ui:field="_formPanel" addStyleNames="{style.form}">
                 <g:FlowPanel>
-                    <g:TextBox ui:field="_textBox" />
-                    <g:SubmitButton>Set Location</g:SubmitButton>
+                    <g:TextBox ui:field="_textBox" name="location"/>
+                    <g:SubmitButton ui:field="_submitButton">Set Location</g:SubmitButton>
                     <g:Button ui:field="_cancelButton">Cancel</g:Button>
                 </g:FlowPanel>
             </g:FormPanel>

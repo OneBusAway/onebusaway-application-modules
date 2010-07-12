@@ -28,11 +28,16 @@ public class WebTestSupport extends CustomDefaultSelenium {
     stop();
   }
 
-  public void url(String message) {
+  @Override
+  public void open(String message) {
+    open(url(message), true);
+  }
+
+  protected String url(String url) {
     StringBuilder b = new StringBuilder();
     if (_prefix != null)
       b.append(_prefix);
-    b.append(message);
-    open(b.toString(), true);
+    b.append(url);
+    return b.toString();
   }
 }

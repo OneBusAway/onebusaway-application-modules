@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
@@ -40,6 +41,9 @@ public class SetInitialSearchLocationPopupPanel {
 
   @UiField
   TextBox _textBox;
+  
+  @UiField
+  SubmitButton _submitButton;
 
   @UiField
   Button _cancelButton;
@@ -54,6 +58,7 @@ public class SetInitialSearchLocationPopupPanel {
 
     _errorPanel.setVisible(false);
 
+    _formPanel.getElement().setId("setLocationForm");
     _formPanel.addSubmitHandler(new SubmitHandler() {
 
       @Override
@@ -67,6 +72,8 @@ public class SetInitialSearchLocationPopupPanel {
         }
       }
     });
+    
+    _submitButton.getElement().setId("setLocationButton");
 
     _cancelButton.addClickHandler(new ClickHandler() {
       @Override

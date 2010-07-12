@@ -53,32 +53,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.1-beta-1</version>
-                <configuration>
-                    <packagingExcludes>data-sources.xml</packagingExcludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>war</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>integration-test</classifier>
-                            <webappDirectory>${project.build.directory}/${project.build.finalName}-integration-test</webappDirectory>
-                            <webResources>
-                                <resource>
-                                    <directory>${basedir}/src/integration-test/resources</directory>
-                                    <targetPath>WEB-INF/classes</targetPath>
-                                </resource>
-                            </webResources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 

@@ -252,24 +252,6 @@
                         </resource>
                     </webResources>
                 </configuration>
-                <executions>
-                    <execution>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>war</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>integration-test</classifier>
-                            <webappDirectory>${project.build.directory}/${project.build.finalName}-integration-test</webappDirectory>
-                            <webResources>
-                                <resource>
-                                    <directory>${basedir}/src/integration-test/resources</directory>
-                                    <targetPath>WEB-INF/classes</targetPath>
-                                </resource>
-                            </webResources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

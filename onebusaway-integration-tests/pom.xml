@@ -133,7 +133,34 @@
     </dependencies>
 
     <build>
+        <finalName>onebusaway-integration-tests</finalName>
         <plugins>
+            <!--
+                We create custom integration-test versions of all the webapp wars that include custom resources and
+                data-sources for our integration-testing setup
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assemblies/onebusaway-api-webapp.xml</descriptor>
+                                <descriptor>src/assemblies/onebusaway-phone-webapp.xml</descriptor>
+                                <descriptor>src/assemblies/onebusaway-sms-webapp.xml</descriptor>
+                                <descriptor>src/assemblies/onebusaway-transit-data-federation-webapp.xml</descriptor>
+                                <descriptor>src/assemblies/onebusaway-webapp.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Next build a graph bundle using our integration-test data sources (currently, a reduced set of KCM data) -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -160,6 +187,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Start up an embedded database for sharing the user database between webapps -->
             <plugin>
                 <groupId>org.onebusaway.plugins</groupId>
                 <artifactId>maven-hsqldb-plugin</artifactId>
@@ -172,13 +200,14 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <deleteOnExit>true</deleteOnExit>
+                            <deleteOnEntry>true</deleteOnEntry>
                             <dbName>org_onebusaway_database_users</dbName>
                             <port>${hsqldb.port}</port>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <!-- Setup the config for the terracotta distributed cache -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
@@ -203,6 +232,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Startup the terracotta distributed cache -->
             <plugin>
                 <groupId>org.terracotta.maven.plugins</groupId>
                 <artifactId>tc-maven-plugin</artifactId>
@@ -230,6 +260,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Start up all the webapps using the cargo plugin -->
             <plugin>
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
@@ -311,7 +342,7 @@
                                         <properties>
                                             <context>onebusaway-transit-data-federation-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-transit-data-federation-webapp/target/onebusaway-transit-data-federation-webapp-integration-test.war</location>
+                                        <location>${project.build.directory}/onebusaway-integration-tests-onebusaway-transit-data-federation-webapp.war</location>
                                         <pingURL>http://localhost:${org.onebusaway.transit_data_federation_webapp.port}/onebusaway-transit-data-federation-webapp/</pingURL>
                                         <pingTimeout>${ping_timeout}</pingTimeout>
                                     </deployable>
@@ -342,7 +373,7 @@
                                         <properties>
                                             <context>onebusaway-api-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-api-webapp/target/onebusaway-api-webapp-integration-test.war
+                                        <location>${project.build.directory}/onebusaway-integration-tests-onebusaway-api-webapp.war
                                         </location>
                                         <pingURL>http://localhost:${org.onebusaway.api_webapp.port}/onebusaway-api-webapp/
                                         </pingURL>
@@ -376,7 +407,7 @@
                                         <properties>
                                             <context>onebusaway-phone-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-phone-webapp/target/onebusaway-phone-webapp-integration-test.war
+                                        <location>${project.build.directory}/onebusaway-integration-tests-onebusaway-phone-webapp.war
                                         </location>
                                         <pingURL>http://localhost:${org.onebusaway.phone_webapp.port}/onebusaway-phone-webapp/
                                         </pingURL>
@@ -409,7 +440,7 @@
                                         <properties>
                                             <context>onebusaway-sms-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-sms-webapp/target/onebusaway-sms-webapp-integration-test.war
+                                        <location>${project.build.directory}/onebusaway-integration-tests-onebusaway-sms-webapp.war
                                         </location>
                                         <pingURL>http://localhost:${org.onebusaway.sms_webapp.port}/onebusaway-sms-webapp/
                                         </pingURL>
@@ -442,7 +473,7 @@
                                         <properties>
                                             <context>onebusaway-webapp</context>
                                         </properties>
-                                        <location>${basedir}/../onebusaway-webapp/target/onebusaway-webapp-integration-test.war
+                                        <location>${project.build.directory}/onebusaway-integration-tests-onebusaway-webapp.war
                                         </location>
                                         <pingURL>http://localhost:${org.onebusaway.webapp.port}/onebusaway-webapp/
                                         </pingURL>
@@ -567,6 +598,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Start up the selenium server, which we used for web-based integration tests -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>selenium-maven-plugin</artifactId>
