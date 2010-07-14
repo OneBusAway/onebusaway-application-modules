@@ -24,6 +24,7 @@
 
     <bean id="transitDataServiceCaching" class="org.onebusaway.presentation.impl.transit_data.TransitDataServiceCachingInterceptor">
         <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheableMethodKeyFactoryManager" ref="cacheableMethodKeyFactoryManager" />
     </bean>
     
     <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl">
