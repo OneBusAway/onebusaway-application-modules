@@ -90,6 +90,14 @@ public class SphericalGeometryLibrary {
     return new CoordinateBounds(latFrom, lonFrom, latTo, lonTo);
   }
 
+  /**
+   * 
+   * @param lat
+   * @param lon
+   * @param latOffset
+   * @param lonOffset
+   * @return CoordinateBounds(lat-latOffser,lon-lonOffset,lat+latOffset,lon+lonOffset)
+   */
   public static final CoordinateBounds boundsFromLatLonOffset(double lat,
       double lon, double latOffset, double lonOffset) {
     double latFrom = lat - latOffset;

@@ -31,7 +31,7 @@ public class PropertyPathExpressionCacheableObjectKeyFactory implements
     _objectKeyFactory = objectKeyFactory;
   }
 
-  public Serializable createKey(Object object) {
+  public CacheKeyInfo createKey(Object object) {
     object = _expression.invoke(object);
     return _objectKeyFactory.createKey(object);
   }

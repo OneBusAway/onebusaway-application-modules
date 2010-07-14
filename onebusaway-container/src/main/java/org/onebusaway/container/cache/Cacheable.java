@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
  * using the arguments to the method as the cache key.
  * 
  * Method calls are intercepted using an Aspect-oriented interceptor, as
- * implemented in {@link CacheableInterceptor}. The bulk of the caching
- * mechanism is provided by {@link AbstractCacheableMethodCallManager}, which
+ * implemented in {@link CacheableAnnotationInterceptor}. The bulk of the caching
+ * mechanism is provided by {@link CacheableMethodManager}, which
  * handles the actual task of generating a cache key for a particular method
  * call, determining if a cached results exists, and generating a fresh result
  * as needed by completing the underlying method call. EhCache is used as the
@@ -28,19 +28,13 @@ import java.lang.annotation.Target;
  * argument, unless otherwise specified with a {@link CacheableKey} annotation.
  * 
  * @author bdferris
- * @see CacheableInterceptor
+ * @see CacheableAnnotationInterceptor
  * @see CacheableMethodKeyFactory
- * @see AbstractCacheableMethodCallManager
+ * @see CacheableMethodManager
  */
 @Retention(value = RetentionPolicy.RUNTIME)
 @Target(value = ElementType.METHOD)
 public @interface Cacheable {
-
-  /**
-   * @return the name of the cache to use. Defaults to
-   *         "package.Class.methodName"
-   */
-  String name() default "";
 
   /**
    * @return a factory class for creating cache keys from method arguments

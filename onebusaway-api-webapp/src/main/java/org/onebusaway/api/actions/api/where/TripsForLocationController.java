@@ -5,12 +5,12 @@ import java.io.IOException;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
+import org.onebusaway.api.impl.SearchBoundsFactory;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.TripDetailsV2Bean;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -28,14 +28,8 @@ public class TripsForLocationController extends ApiActionSupport {
 
   @Autowired
   private TransitDataService _service;
-
-  private double _lat;
-
-  private double _lon;
-
-  private double _latSpan;
-
-  private double _lonSpan;
+  
+  private SearchBoundsFactory _searchBoundsFactory = new SearchBoundsFactory(MAX_BOUNDS_RADIUS);
 
   private long _time = 0;
 
@@ -50,19 +44,23 @@ public class TripsForLocationController extends ApiActionSupport {
   }
 
   public void setLat(double lat) {
-    _lat = lat;
+    _searchBoundsFactory.setLat(lat);
   }
 
   public void setLon(double lon) {
-    _lon = lon;
+    _searchBoundsFactory.setLon(lon);
+  }
+  
+  public void setRadius(double radius) {
+    _searchBoundsFactory.setRadius(radius);
   }
 
   public void setLatSpan(double latSpan) {
-    _latSpan = latSpan;
+    _searchBoundsFactory.setLatSpan(latSpan);
   }
 
   public void setLonSpan(double lonSpan) {
-    _lonSpan = lonSpan;
+    _searchBoundsFactory.setLonSpan(lonSpan);
   }
 
   public void setTime(long time) {
@@ -89,7 +87,7 @@ public class TripsForLocationController extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    CoordinateBounds bounds = getSearchBounds();
+    CoordinateBounds bounds = _searchBoundsFactory.createBounds();
 
     long time = System.currentTimeMillis();
     if (_time != 0)
@@ -113,17 +111,5 @@ public class TripsForLocationController extends ApiActionSupport {
     } catch (OutOfServiceAreaServiceException ex) {
       return setOkResponse(factory.getEmptyList(TripDetailsV2Bean.class, true));
     }
-  }
-
-  private CoordinateBounds getSearchBounds() {
-
-    CoordinateBounds maxBounds = SphericalGeometryLibrary.bounds(_lat, _lon,
-        MAX_BOUNDS_RADIUS);
-    _latSpan = Math.min(_latSpan, maxBounds.getMaxLat() - maxBounds.getMinLat());
-    _lonSpan = Math.min(_lonSpan, maxBounds.getMaxLon() - maxBounds.getMinLon());
-
-    return SphericalGeometryLibrary.boundsFromLatLonOffset(_lat, _lon,
-        _latSpan / 2, _lonSpan / 2);
-
   }
 }

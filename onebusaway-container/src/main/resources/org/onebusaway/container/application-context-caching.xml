@@ -49,11 +49,20 @@
             <map />
         </property>
     </bean>
+    
+    <bean id="cacheableMethodKeyFactoryManager" class="org.onebusaway.container.cache.CacheableMethodKeyFactoryManager">
+        <property name="cacheKeyFactories" ref="cacheableKeyFactories" />
+    </bean>
+    
+    <bean id="cacheableMethodManager" class="org.onebusaway.container.cache.CacheableMethodManager">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheableMethodKeyFactoryManager" ref="cacheableMethodKeyFactoryManager" />
+    </bean>
 
     <!-- Here we set up support for @Cacheable annotations -->
-    <bean id="cacheableInterceptor" class="org.onebusaway.container.cache.CacheableInterceptor">
+    <bean id="cacheableAnnotationInterceptor" class="org.onebusaway.container.cache.CacheableAnnotationInterceptor">
         <property name="cacheManager" ref="cacheManager" />
-        <property name="cacheKeyFactories" ref="cacheableKeyFactories" />
+        <property name="cacheableMethodKeyFactoryManager" ref="cacheableMethodKeyFactoryManager" />
     </bean>
 
 </beans>

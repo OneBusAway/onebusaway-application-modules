@@ -15,5 +15,5 @@ import java.io.Serializable;
  * @see DefaultCacheableKeyFactory
  */
 public interface CacheableMethodKeyFactory {
-  public Serializable createKey(ProceedingJoinPoint point);
+  public CacheKeyInfo createKey(ProceedingJoinPoint point);
 }

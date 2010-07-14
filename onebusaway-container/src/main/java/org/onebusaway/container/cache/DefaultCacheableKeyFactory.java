@@ -29,17 +29,30 @@ public class DefaultCacheableKeyFactory implements CacheableMethodKeyFactory,
     _keyFactories = keyFactories;
   }
 
-  public Serializable createKey(ProceedingJoinPoint point) {
+  public int getNumberOfObjectKeyFactories() {
+    return _keyFactories.length;
+  }
+
+  public CacheableObjectKeyFactory getObjectKeyFactory(int i) {
+    return _keyFactories[i];
+  }
+
+  @Override
+  public CacheKeyInfo createKey(ProceedingJoinPoint point) {
     Object[] args = point.getArgs();
     if (args.length != _keyFactories.length)
       throw new IllegalArgumentException();
     KeyImpl keys = new KeyImpl(args.length);
-    for (int i = 0; i < args.length; i++)
-      keys.set(i, _keyFactories[i].createKey(args[i]));
-    return keys;
+    boolean refreshCache = false;
+    for (int i = 0; i < args.length; i++) {
+      CacheKeyInfo keyInfo = _keyFactories[i].createKey(args[i]);
+      keys.set(i, keyInfo.getKey());
+      refreshCache |= keyInfo.isCacheRefreshIndicated();
+    }
+    return new CacheKeyInfo(keys, refreshCache);
   }
 
-  private static class KeyImpl implements Serializable {
+  static class KeyImpl implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -47,6 +60,10 @@ public class DefaultCacheableKeyFactory implements CacheableMethodKeyFactory,
 
     public KeyImpl(int entries) {
       _keys = new Serializable[entries];
+    }
+
+    public KeyImpl(Serializable[] keys) {
+      _keys = keys;
     }
 
     public void set(int index, Serializable key) {
@@ -71,4 +88,5 @@ public class DefaultCacheableKeyFactory implements CacheableMethodKeyFactory,
       return Arrays.toString(_keys);
     }
   }
+
 }

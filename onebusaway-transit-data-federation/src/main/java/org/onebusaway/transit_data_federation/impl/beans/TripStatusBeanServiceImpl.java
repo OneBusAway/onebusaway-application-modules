@@ -205,7 +205,7 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     }
 
     List<TripDetailsBean> results = new ArrayList<TripDetailsBean>();
-
+    
     for (TripInstanceProxy tripInstance : tripInstances) {
 
       TripPosition tripPosition = _tripPositionService.getPositionForTripInstance(

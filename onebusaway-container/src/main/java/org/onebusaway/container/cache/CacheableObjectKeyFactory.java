@@ -11,5 +11,5 @@ import java.io.Serializable;
  * @see DefaultCacheableObjectKeyFactory
  */
 public interface CacheableObjectKeyFactory {
-  public Serializable createKey(Object object);
+  public CacheKeyInfo createKey(Object object);
 }
