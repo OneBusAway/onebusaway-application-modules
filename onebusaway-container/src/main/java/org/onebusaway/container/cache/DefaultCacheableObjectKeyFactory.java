@@ -18,6 +18,14 @@ public class DefaultCacheableObjectKeyFactory implements
 
   private boolean _cacheRefreshCheck = false;
 
+  /**
+   * Set to true if we should check the object value to indicate a cache
+   * refresh. A cache refresh will be flagged if the object value is equal to
+   * {@link Boolean#TRUE}.
+   * 
+   * @param cacheRefreshCheck true if the object argument should be examined to
+   *          flag a cache refresh
+   */
   public void setCacheRefreshCheck(boolean cacheRefreshCheck) {
     _cacheRefreshCheck = cacheRefreshCheck;
   }
@@ -29,9 +37,9 @@ public class DefaultCacheableObjectKeyFactory implements
   public CacheKeyInfo createKey(Object object) {
 
     if (_cacheRefreshCheck) {
-      
+
       boolean refreshCache = Boolean.TRUE.equals(object);
-      
+
       /**
        * We short-circuit the cache key to Boolean.FALSE, no matter the actual
        * key value so that the resulting cache key will be the same wether a

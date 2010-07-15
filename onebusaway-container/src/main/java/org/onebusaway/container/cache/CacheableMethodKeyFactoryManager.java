@@ -30,16 +30,19 @@ import org.onebusaway.collections.PropertyPathExpression;
 import org.springframework.stereotype.Component;
 
 /**
- * Abstract support class providing functionality for caching the output of
- * arbitrary method calls, using the arguments to the method to generate the
- * cache key.
- * 
- * EhCache is used as the backing cache store.
+ * Support class that determines the caching policy for a particular method by
+ * producing a {@link CacheableMethodKeyFactory} for that method. We make use of
+ * {@link Cacheable}, {@link CacheableArgument}, and {@link CacheableKey}
+ * annotations to allow customization of the default key factory behavior, as
+ * well as directly setting behavior using methods such as
+ * {@link #setCacheKeyFactories(Map)} and
+ * {@link #putCacheRefreshIndicatorArgumentIndexForMethod(Method, int)}.
  * 
  * @author bdferris
- * @see Cacheable
- * @see CacheableAnnotationInterceptor
  * @see CacheableMethodKeyFactory
+ * @see Cacheable
+ * @see CacheableArgument
+ * @see CacheableKey
  */
 @Component
 public class CacheableMethodKeyFactoryManager {

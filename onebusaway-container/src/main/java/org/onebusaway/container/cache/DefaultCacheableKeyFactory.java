@@ -6,12 +6,15 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 /**
- * Factory for producing a {@link Serializable} cache key from a
+ * Factory for producing a {@link CacheKeyInfo} cache key from a
  * {@link ProceedingJoinPoint} method invocation. The default implementation
  * considers each argument to the method invocation and applies a
  * {@link CacheableObjectKeyFactory} to produce a {@link Serializable} key value
  * for that argument. An array of those {@link Serializable} key values are
- * composed together to make the final cache key.
+ * composed together to make the final cache key. The
+ * {@link CacheKeyInfo#isCacheRefreshIndicated()} cache refresh indicators from
+ * each argument key are ORed together to produce a refresh indicator for the
+ * entire method.
  * 
  * @author bdferris
  * @see Cacheable#keyFactory()

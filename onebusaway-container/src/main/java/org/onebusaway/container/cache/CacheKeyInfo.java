@@ -2,6 +2,15 @@ package org.onebusaway.container.cache;
 
 import java.io.Serializable;
 
+/**
+ * Encapsulates cache key information, including the cache key for a particular
+ * method call and whether the cache should be refreshed for a particular method
+ * call.
+ * 
+ * @author bdferris
+ * @see CacheableMethodKeyFactory
+ * @see CacheableObjectKeyFactory 
+ */
 public final class CacheKeyInfo implements Serializable {
 
   private static final long serialVersionUID = 1L;
