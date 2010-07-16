@@ -1,16 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.walkplanner.offline;
 
-import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.transit_data_federation.model.ProjectedPoint;
-import org.onebusaway.transit_data_federation.services.serialization.EntryCallback;
-import org.onebusaway.transit_data_federation.services.serialization.EntryIdAndCallback;
-import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry;
-import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
-
-import com.infomatiq.jsi.IntProcedure;
-import com.infomatiq.jsi.Rectangle;
-import com.infomatiq.jsi.rtree.RTree;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -20,7 +9,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.transit_data_federation.model.ProjectedPoint;
+import org.onebusaway.transit_data_federation.services.serialization.EntryCallback;
+import org.onebusaway.transit_data_federation.services.serialization.EntryIdAndCallback;
+import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry;
+import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
+
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.ItemVisitor;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 public class WalkPlannerGraphImpl implements Serializable, WalkPlannerGraph {
 
@@ -28,31 +27,32 @@ public class WalkPlannerGraphImpl implements Serializable, WalkPlannerGraph {
 
   private transient static ReadHelper _helper;
 
-  private transient RTree _tree = null;
+  private transient STRtree _tree = null;
 
   private List<WalkNodeEntryImpl> _nodes;
 
   public WalkPlannerGraphImpl() {
     this(0);
   }
-  
+
   public WalkPlannerGraphImpl(int size) {
     _nodes = new ArrayList<WalkNodeEntryImpl>(size);
   }
 
   public void initialize() {
     if (_tree == null) {
-      _tree = new RTree();
-      _tree.init(new Properties());
+      _tree = new STRtree(_nodes.size());
 
       for (int i = 0; i < _nodes.size(); i++) {
         WalkNodeEntryImpl node = _nodes.get(i);
         ProjectedPoint loc = node.getLocation();
-        float x = (float) loc.getLon();
-        float y = (float) loc.getLat();
-        Rectangle r = new Rectangle(x, y, x, y);
-        _tree.add(r, i);
+        double x = loc.getLon();
+        double y = loc.getLat();
+        Envelope r = new Envelope(x, x, y, y);
+        _tree.insert(r, node);
       }
+
+      _tree.build();
     }
   }
 
@@ -60,22 +60,21 @@ public class WalkPlannerGraphImpl implements Serializable, WalkPlannerGraph {
     return Collections.unmodifiableList(_nodes);
   }
 
-  public WalkNodeEntryImpl addNode(int id, ProjectedPoint location){
+  public WalkNodeEntryImpl addNode(int id, ProjectedPoint location) {
     WalkNodeEntryImpl node = new WalkNodeEntryImpl(id, location);
     _nodes.add(node);
     return node;
   }
 
   public Collection<WalkNodeEntry> getNodesByLocation(CoordinateBounds bounds) {
-    Rectangle r = new Rectangle((float) bounds.getMinLon(),
-        (float) bounds.getMinLat(), (float) bounds.getMaxLon(),
-        (float) bounds.getMaxLat());
+    Envelope r = new Envelope(bounds.getMinLon(), bounds.getMaxLon(),
+        bounds.getMinLat(), bounds.getMaxLat());
     Go go = new Go();
-    _tree.intersects(r, go);
+    _tree.query(r, go);
     return go.getNodes();
   }
 
-  private class Go implements IntProcedure {
+  private class Go implements ItemVisitor {
 
     private List<WalkNodeEntry> _nodesInRange = new ArrayList<WalkNodeEntry>();
 
@@ -83,9 +82,9 @@ public class WalkPlannerGraphImpl implements Serializable, WalkPlannerGraph {
       return _nodesInRange;
     }
 
-    public boolean execute(int index) {
-      _nodesInRange.add(_nodes.get(index));
-      return true;
+    @Override
+    public void visitItem(Object obj) {
+      _nodesInRange.add((WalkNodeEntry) obj);
     }
   }
 

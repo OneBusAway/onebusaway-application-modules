@@ -96,19 +96,6 @@
             <version>1.2</version>
         </dependency>
 
-
-        <!-- RTree Spatial Index -->
-        <dependency>
-            <groupId>com.infomatiq</groupId>
-            <artifactId>jsi</artifactId>
-            <version>1.0b2p1</version>
-        </dependency>
-        <dependency>
-            <groupId>trove</groupId>
-            <artifactId>trove</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

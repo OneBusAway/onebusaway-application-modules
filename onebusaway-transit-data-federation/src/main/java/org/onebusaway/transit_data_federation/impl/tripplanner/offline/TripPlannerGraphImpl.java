@@ -1,20 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.serialization.EntryCallback;
-import org.onebusaway.transit_data_federation.services.serialization.EntryIdAndCallback;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
-
-import edu.washington.cs.rse.collections.adapter.IAdapter;
-import edu.washington.cs.rse.collections.adapter.IterableAdapter;
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
-
-import com.infomatiq.jsi.IntProcedure;
-import com.infomatiq.jsi.Rectangle;
-import com.infomatiq.jsi.rtree.RTree;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -22,7 +7,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.serialization.EntryCallback;
+import org.onebusaway.transit_data_federation.services.serialization.EntryIdAndCallback;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
+
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.ItemVisitor;
+import com.vividsolutions.jts.index.strtree.STRtree;
+
+import edu.washington.cs.rse.collections.adapter.IAdapter;
+import edu.washington.cs.rse.collections.adapter.IterableAdapter;
+import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
 
 public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
 
@@ -38,7 +37,7 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
 
   private List<TripEntryImpl> _trips = new ArrayList<TripEntryImpl>();
 
-  private transient RTree _stopLocationTree = null;
+  private transient STRtree _stopLocationTree = null;
 
   private transient Map<AgencyAndId, TripEntryImpl> _tripEntriesById = new HashMap<AgencyAndId, TripEntryImpl>();
 
@@ -54,17 +53,18 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
     if (_stopLocationTree == null) {
       System.out.println("initializing trip planner graph...");
 
-      _stopLocationTree = new RTree();
-      _stopLocationTree.init(new Properties());
+      _stopLocationTree = new STRtree(_stops.size());
 
       for (int i = 0; i < _stops.size(); i++) {
         StopEntry stop = _stops.get(i);
-        float x = (float) stop.getStopLon();
-        float y = (float) stop.getStopLat();
-        Rectangle r = new Rectangle(x, y, x, y);
-        _stopLocationTree.add(r, i);
+        double x = stop.getStopLon();
+        double y = stop.getStopLat();
+        Envelope r = new Envelope(x, x, y, y);
+        _stopLocationTree.insert(r, stop);
       }
 
+      _stopLocationTree.build();
+      
       System.out.println("  stops=" + _stops.size());
       System.out.println("  trips= " + _trips.size());
     }
@@ -149,15 +149,14 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
 
   @Override
   public List<StopEntry> getStopsByLocation(CoordinateRectangle bounds) {
-    Rectangle r = new Rectangle((float) bounds.getMinLon(),
-        (float) bounds.getMinLat(), (float) bounds.getMaxLon(),
-        (float) bounds.getMaxLat());
+    Envelope r = new Envelope(bounds.getMinLon(), bounds.getMaxLon(),
+        bounds.getMinLat(), bounds.getMaxLat());
     StopRTreeVisitor go = new StopRTreeVisitor();
-    _stopLocationTree.intersects(r, go);
+    _stopLocationTree.query(r, go);
     return go.getStops();
   }
 
-  private class StopRTreeVisitor implements IntProcedure {
+  private class StopRTreeVisitor implements ItemVisitor {
 
     private List<StopEntry> _nearbyStops = new ArrayList<StopEntry>();
 
@@ -165,9 +164,9 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
       return _nearbyStops;
     }
 
-    public boolean execute(int id) {
-      _nearbyStops.add(_stops.get(id));
-      return true;
+    @Override
+    public void visitItem(Object obj) {
+      _nearbyStops.add((StopEntry) obj);
     }
   }
 
