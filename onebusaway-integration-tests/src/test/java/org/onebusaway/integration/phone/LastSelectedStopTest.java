@@ -10,8 +10,7 @@ public class LastSelectedStopTest extends PhoneTestSupport {
   @Test
   public void test() {
 
-    int hourOfDay = TestSupport.getHourOfDay();
-    boolean checkArrivals = 5 <= hourOfDay && hourOfDay < 24;
+    boolean checkArrivals = TestSupport.checkArrivalsForRoute15();
 
     assertTrue(waitForText(
         "To check your most recent stop, please press five.", 20));

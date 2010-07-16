@@ -29,7 +29,7 @@
 
 <form action="stops.action">
 <div><s:textfield cssClass="inputTextbox" name="code" /></div>
-<div><input type="submit" class="inputButton" value="Search By Stop Number" /></div>
+<div><input id="stops_submit" type="submit" class="inputButton" value="Search By Stop Number" /></div>
 </form>
 
 <p>If your stop is missing its number or you are not at the stop, you can also search by
@@ -39,7 +39,7 @@ bus route.</p>
 
 <form action="routes.action">
 <div><input type="text" class="inputTextbox" name="query" /></div>
-<div><input type="submit" class="inputButton" value="Search By Route" /></div>
+<div><input id="routes_submit" type="submit" class="inputButton" value="Search By Route" /></div>
 </form>
 
 <h2>Other Links:</h2>

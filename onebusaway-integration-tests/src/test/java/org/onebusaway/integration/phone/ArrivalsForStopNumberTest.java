@@ -46,8 +46,7 @@ public class ArrivalsForStopNumberTest extends PhoneTestSupport {
 
     assertEquals("WAIT FOR DIGIT 500", getReplyAsText());
 
-    int hourOfDay = TestSupport.getHourOfDay();
-    boolean checkArrivals = 5 <= hourOfDay && hourOfDay < 24;
+    boolean checkArrivals = TestSupport.checkArrivalsForRoute15();
 
     // Make sure it actually repeats
     for (int i = 0; i < 2; i++) {

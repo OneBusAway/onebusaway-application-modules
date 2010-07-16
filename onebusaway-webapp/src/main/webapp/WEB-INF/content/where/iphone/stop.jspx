@@ -112,7 +112,7 @@
 
 <div class="arrivalsStatusUpdates">Last Update: <oba:date value="'now'" format="hh:mm aa" /></div>
 
-
+<div id="nearby_stops">
 <h3>Nearby stops:</h3>
 
 <ul class="buttons"><s:iterator value="result.nearbyStops">
@@ -127,6 +127,7 @@
     </s:a>
     </li>
 </s:iterator></ul>
+</div>
 
 <ul class="buttons"><li><s:url var="url" action="index" includeParams="none" /><s:a href="%{url}">Search for another stop</s:a></li></ul>
 

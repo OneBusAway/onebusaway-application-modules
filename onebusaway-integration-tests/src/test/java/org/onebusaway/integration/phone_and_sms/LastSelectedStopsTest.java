@@ -38,8 +38,8 @@ public class LastSelectedStopsTest {
     assertTrue(sms.isTextPresent("Please enter your zip code so we can provide results appropriate to your location."));
 
     sms.url("98105");
-    int hourOfDay = TestSupport.getHourOfDay();
-    boolean checkArrivals = 5 <= hourOfDay && hourOfDay < 24;
+
+    boolean checkArrivals = TestSupport.checkArrivalsForRoute15();
     if (checkArrivals)
       assertTrue(sms.isTextPresent("15 DwntwnSeattle:"));
     

@@ -24,7 +24,7 @@
 <h2><oba:routeName value="route"/> - <oba:routeDescription value="route"/></h2>
 
 <s:if test="! directionNames.isEmpty()">
-
+<div id="directions_of_travel">
 <h3>Stops for direction of travel:</h3>
 
 <ul class="buttons">
@@ -35,8 +35,11 @@
   <li><s:a href="%{url}"><oba:name /></s:a></li>
 </s:iterator>
 </ul>
+</div>
+
 </s:if>
 
+<div id="stops_for_route">
 <h3>Stops:</h3>
 <ul class="buttons">
 <s:iterator value="stops">	
@@ -46,6 +49,7 @@
 	<li><s:a href="%{url}"><s:property value="name" /></s:a></li>
 </s:iterator>
 </ul>
+</div>
 
 </body>
 </html>

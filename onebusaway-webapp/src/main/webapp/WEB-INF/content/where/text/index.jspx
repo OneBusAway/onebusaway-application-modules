@@ -24,17 +24,17 @@
 
 <div class="label">You can search for stops by number.  Enter a stop number to search:</div>
 
-<form action="stops.action">
+<form id="stops_form" action="stops.action">
 <div><input type="text" class="inputTextbox" name="code" /></div>
-<div><input type="submit" class="inputButton" value="Submit" /></div>
+<div><input id="stops_submit" type="submit" class="inputButton" value="Submit" /></div>
 </form>
 
 <div class="label">If your stop is missing a posted schedule or you are not at the stop, you can also search by
 bus route number:</div>
 
-<form action="routes.action">
+<form id="routes_form" action="routes.action">
 <div><input type="text" class="inputTextbox" name="query" /></div>
-<div><input type="submit" class="inputButton" value="Submit" /></div>
+<div><input id="routes_submit" type="submit" class="inputButton" value="Submit" /></div>
 </form>
 
 <p>Change your <a href="user/index.action">personal settings.</a></p>

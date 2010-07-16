@@ -52,8 +52,7 @@ public class BookmarksTest extends PhoneTestSupport {
 
     assertEquals("WAIT FOR DIGIT 500", getReplyAsText());
 
-    int hourOfDay = TestSupport.getHourOfDay();
-    boolean checkArrivals = 5 <= hourOfDay && hourOfDay < 24;
+    boolean checkArrivals = TestSupport.checkArrivalsForRoute15();
 
     if (checkArrivals) {
 

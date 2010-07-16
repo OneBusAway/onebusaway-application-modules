@@ -26,8 +26,7 @@ public class ArrivalsAndDeparturesForStopTest extends AbstractApiSupport {
         "arrivalsAndDepartures/arrivalAndDeparture");
 
     if (arrivalsAndDepartures.isEmpty()) {
-      int hour = TestSupport.getHourOfDay();
-      if (6 <= hour && hour <= 22)
+      if( TestSupport.checkArrivalsForRoute15())
         fail("expected arrivals in this time range");
     }
 
