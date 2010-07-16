@@ -17,15 +17,13 @@
 <jsp:root version="1.2"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
-	xmlns:s="/struts-tags"
 	xmlns:oba="/oba-tags"
 	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
 <jsp:directive.page contentType="text/html" />
 
 <head>
   <title><decorator:title default="One Bus Away" /></title>
-  <link rel="stylesheet" type="text/css" media="all" href="${resources.OneBusAwayCommonResources.commonCss.url}"/>
-  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereStandardResources.css.url}"/>
+  <link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath}/p/Stylesheet.action?raw=true"/>
   <link rel="icon" type="image/png" href="${resources.OneBusAwayCommonResources.imageBusIcon.url}"/>
   <decorator:head />
 </head>
@@ -50,30 +48,21 @@
   <jsp:attribute name="class">
     <c:if test="${param.selectedNavLink == 'tools'}">current</c:if>
   </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/where/">Tools</a>
+  <a href="${pageContext.request.contextPath}/p/Tools.action">Tools</a>
 </jsp:element>
 
 <jsp:element name="li">
   <jsp:attribute name="class">
     <c:if test="${param.selectedNavLink == 'research'}">current</c:if>
   </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/research/index.html">Research</a>
+  <a href="${pageContext.request.contextPath}/p/Research.action">Research</a>
 </jsp:element>
-
-<!-- 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <c:if test="${param.selectedNavLink == 'blog'}">current</c:if>
-  </jsp:attribute>
-  <a href="http://onebusaway.blogspot.com/">Blog</a>
-</jsp:element>
--->
 
 <jsp:element name="li">
   <jsp:attribute name="class">
     <c:if test="${param.selectedNavLink == 'contact'}">current</c:if>
   </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/contact.html">Contact Us</a>
+  <a href="${pageContext.request.contextPath}/p/ContactUs.action">Contact Us</a>
 </jsp:element>
 
 <jsp:element name="li">

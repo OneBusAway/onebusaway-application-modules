@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Copyright 2008 Brian Ferris
 
@@ -13,17 +14,22 @@
   License for the specific language governing permissions and limitations under
   the License.
 -->
-<html xmlns:jsp="http://java.sun.com/JSP/Page"
-      xmlns:c="http://java.sun.com/jsp/jstl/core"
-     xmlns:s="/struts-tags"
-     xmlns:wiki="/oba-wiki-tags">
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:s="/struts-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>One Bus Away</title>
+  <title>OneBusAway - <s:property value="page.title"/></title>
 </head>
 <body>
 
-<wiki:wiki name="Index" />
+<h2 class="wikiTitle"><s:property value="page.title"/></h2>
+
+<div class="wiki">
+  <s:property escape="false" value="renderedContent"/>
+</div>
+
+<s:if test="admin">
+  <p><s:a href="%{editLink}">Edit this page</s:a></p>
+</s:if>
 
 </body>
 </html>

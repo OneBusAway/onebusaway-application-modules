@@ -23,7 +23,7 @@
     </decorator>
 
     <decorator name="main-tools" page="main-tools.jspx">
-        <pattern>/where/*</pattern>
+        <pattern>/p/Tools*</pattern>
     </decorator>
 
     <decorator name="iphone" page="iphone.jspx">
@@ -40,11 +40,11 @@
     </decorator>
 
     <decorator name="main-research" page="main-research.jspx">
-        <pattern>/research/*</pattern>
+        <pattern>/p/Research*</pattern>
     </decorator>
 
     <decorator name="main-contact" page="main-contact.jspx">
-        <pattern>/contact*</pattern>
+        <pattern>/p/ContactUs*</pattern>
     </decorator>
     
     <decorator name="main-user" page="main-user.jspx">
