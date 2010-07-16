@@ -11,7 +11,7 @@ public class DefaultSearchLocationTest extends WebTestSupport {
    */
   @Test
   public void testFromStop() {
-    
+
     open("/logout.action");
 
     open("/user/index.action");
@@ -22,40 +22,45 @@ public class DefaultSearchLocationTest extends WebTestSupport {
     open("/user/index.action");
     assertTrue(isTextPresent("Your Default Search Location:15th Ave NW & NW Market St"));
   }
-  
+
   /**
    * Entering your location on startup also works
    */
   @Test
   public void testFromZipCodeEntry() throws InterruptedException {
-    
+
     open("/logout.action");
 
     open("/user/index.action");
     assertTrue(isTextPresent("Your Default Search Location:Not Set"));
-    
+
     open("/where/standard/");
-    
-    // Let the AJAX popup
-    Thread.sleep(2000);
-    
+
+    // Wait for the AJAX popup
+    waitForCondition(
+        "selenium.isTextPresent(\"It looks like this is your first time using OneBusAway.\")",
+        "10000");
+
     assertTrue(isTextPresent("It looks like this is your first time using OneBusAway."));
-    
+
     type("location", "98107");
     click("setLocationButton");
-    
-    Thread.sleep(2000);
-    
+
+    // Wait for the AJAX popup
+    waitForCondition(
+        "selenium.isTextPresent(\"Seattle, WA 98107, USA\")",
+        "10000");
+
     open("/user/index.action");
     assertTrue(isTextPresent("Your Default Search Location:Seattle, WA 98107, USA"));
   }
-  
+
   /**
    * Finally, you can adjust your personal settings directly
    */
   @Test
   public void testFromDirectChange() throws InterruptedException {
-    
+
     open("/logout.action");
 
     open("/user/index.action");
