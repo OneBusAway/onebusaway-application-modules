@@ -48,11 +48,6 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   }
 
   @Override
-  public UserProperties createDefaultProperties() {
-    return new UserPropertiesV2();
-  }
-
-  @Override
   public Class<? extends UserProperties> getUserPropertiesType() {
     return UserPropertiesV2.class;
   }
@@ -83,6 +78,12 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
       bean.addBookmark(bookmarkBean);
     }
 
+    return bean;
+  }
+
+  @Override
+  public UserBean getAnonymousUserAsBean(UserBean bean) {
+    bean.setRememberPreferencesEnabled(true);
     return bean;
   }
 

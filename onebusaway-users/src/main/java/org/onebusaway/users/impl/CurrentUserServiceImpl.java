@@ -3,7 +3,6 @@ package org.onebusaway.users.impl;
 import java.util.List;
 
 import org.onebusaway.users.client.model.UserBean;
-import org.onebusaway.users.impl.authentication.DefaultUserAuthenticationToken;
 import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
@@ -14,8 +13,6 @@ import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserPropertiesService;
 import org.onebusaway.users.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,6 +27,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   private UserPropertiesService _userPropertiesService;
 
   private StandardAuthoritiesService _authoritiesService;
+
+  private CurrentUserStrategy _currentUserStrategy;
 
   @Autowired
   public void setUserService(UserService service) {
@@ -47,6 +46,11 @@ public class CurrentUserServiceImpl implements CurrentUserService {
       StandardAuthoritiesService authoritiesService) {
     _authoritiesService = authoritiesService;
   }
+  
+  @Autowired
+  public void setCurrentUserStrategy(CurrentUserStrategy currentUserStrategy) {
+    _currentUserStrategy = currentUserStrategy;
+  }
 
   /****
    * {@link CurrentUserService} Interface
@@ -54,7 +58,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public boolean isCurrentUserAnonymous() {
-    IndexedUserDetails details = getCurrentUserDetails();
+    IndexedUserDetails details = _currentUserStrategy.getCurrentUserDetails(false);
     if (details == null)
       return true;
     return details.isAnonymous();
@@ -62,36 +66,20 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public boolean isCurrentUserAdmin() {
-    IndexedUserDetails details = getCurrentUserDetails();
+    IndexedUserDetails details = _currentUserStrategy.getCurrentUserDetails(false);
     if (details == null)
       return false;
     return details.isAdmin();
   }
-  
+
   @Override
   public IndexedUserDetails getCurrentUserDetails() {
-
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    if (authentication == null)
-      return null;
-
-    // The principal really shouldn't be a UserDetails object, yet that is where
-    // the RememberMe authentication service puts it
-    Object principal = authentication.getPrincipal();
-    if (principal instanceof IndexedUserDetails)
-      return (IndexedUserDetails) principal;
-
-    Object details = authentication.getDetails();
-    if (details instanceof IndexedUserDetails)
-      return (IndexedUserDetails) details;
-
-    return null;
+    return _currentUserStrategy.getCurrentUserDetails(false);
   }
 
   @Override
   public UserBean getCurrentUser() {
-    UserIndex userIndex = getCurrentUserIndexInternal();
+    UserIndex userIndex = _currentUserStrategy.getCurrentUserIndex(false);
     if (userIndex == null)
       return null;
     return _userService.getUserAsBean(userIndex.getUser());
@@ -99,7 +87,12 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public UserIndex getCurrentUserAsUserIndex() {
-    return getCurrentUserIndexInternal();
+    return _currentUserStrategy.getCurrentUserIndex(false);
+  }
+
+  @Override
+  public UserBean getAnonymousUser() {
+    return _userService.getAnonymousUser();
   }
 
   @Override
@@ -134,7 +127,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
       index = _userService.getOrCreateUserForIndexKey(key, credentials, false);
       User newUser = index.getUser();
 
-      User oldUser = getCurrentUserInternal();
+      User oldUser = _currentUserStrategy.getCurrentUser(false);
       if (oldUser != null && _userService.isAnonymous(oldUser))
         _userService.mergeUsers(oldUser, newUser);
     }
@@ -150,7 +143,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     UserIndex index = _userService.getOrCreateUserForIndexKey(key, credentials,
         isAnonymous);
 
-    User oldUser = getCurrentUserInternal();
+    User oldUser = _currentUserStrategy.getCurrentUser(false);
     if (oldUser != null && _userService.isAnonymous(oldUser))
       _userService.mergeUsers(oldUser, index.getUser());
 
@@ -161,12 +154,12 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   public IndexedUserDetails handleAddAccount(String type, String id,
       String credentials, boolean isAnonymous) {
 
-    User currentUser = getCurrentUserInternal();
-    
+    User currentUser = _currentUserStrategy.getCurrentUser(false);
+
     UserIndexKey key = new UserIndexKey(type, id);
     UserIndex index = _userService.getUserIndexForId(key);
     boolean exists = index != null;
-    
+
     // New user?
     if (exists) {
       if (currentUser != null) {
@@ -187,7 +180,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   @Override
   public void setDefaultLocation(String locationName, double lat, double lon) {
 
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(true);
     if (user == null)
       return;
     _userPropertiesService.setDefaultLocation(user, locationName, lat, lon);
@@ -195,7 +188,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public void clearDefaultLocation() {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(false);
     if (user == null)
       return;
     _userPropertiesService.clearDefaultLocation(user);
@@ -204,7 +197,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   @Override
   public int addStopBookmark(String name, List<String> stopIds,
       RouteFilter filter) {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(true);
     if (user == null)
       return -1;
     return _userPropertiesService.addStopBookmark(user, name, stopIds, filter);
@@ -214,7 +207,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   public void updateStopBookmark(int id, String name, List<String> stopIds,
       RouteFilter routeFilter) {
 
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(false);
     if (user == null)
       return;
     _userPropertiesService.updateStopBookmark(user, id, name, stopIds,
@@ -223,7 +216,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public void deleteStopBookmarks(int index) {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(false);
     if (user == null)
       return;
     _userPropertiesService.deleteStopBookmarks(user, index);
@@ -231,7 +224,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public void setLastSelectedStopIds(List<String> stopIds) {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(true);
     if (user == null)
       return;
     _userPropertiesService.setLastSelectedStopIds(user, stopIds);
@@ -240,7 +233,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   @Override
   public void setRememberUserPreferencesEnabled(
       boolean rememberPreferencesEnabled) {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(true);
     if (user == null)
       return;
     _userPropertiesService.setRememberUserPreferencesEnabled(user,
@@ -249,13 +242,13 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public String registerPhoneNumber(String phoneNumber) {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(true);
     return _userService.registerPhoneNumber(user, phoneNumber);
   }
 
   @Override
   public boolean hasPhoneNumberRegistration() {
-    IndexedUserDetails details = getCurrentUserDetails();
+    IndexedUserDetails details = _currentUserStrategy.getCurrentUserDetails(false);
     if (details == null)
       return false;
     return _userService.hasPhoneNumberRegistration(details.getUserIndexKey());
@@ -264,7 +257,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   @Override
   public boolean completePhoneNumberRegistration(String registrationCode) {
 
-    UserIndex userIndex = getCurrentUserIndexInternal();
+    UserIndex userIndex = _currentUserStrategy.getCurrentUserIndex(false);
     if (userIndex == null)
       return false;
 
@@ -274,14 +267,14 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     if (userIndex == null)
       return false;
 
-    setCurrentUserInternal(userIndex);
+    _currentUserStrategy.setCurrentUser(userIndex);
 
     return true;
   }
 
   @Override
   public void clearPhoneNumberRegistration() {
-    IndexedUserDetails details = getCurrentUserDetails();
+    IndexedUserDetails details = _currentUserStrategy.getCurrentUserDetails(false);
     if (details == null)
       return;
     _userService.clearPhoneNumberRegistration(details.getUserIndexKey());
@@ -289,86 +282,46 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public void enableAdminRole() {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(true);
     if (user == null)
       return;
     _userService.enableAdminRoleForUser(user, true);
-    clearCurrentUser();
+    _currentUserStrategy.clearCurrentUser();
   }
 
   @Override
   public void removeUserIndex(UserIndexKey key) {
-    UserIndex index = getCurrentUserIndexInternal();
+    UserIndex index = _currentUserStrategy.getCurrentUserIndex(false);
     if (index == null)
       return;
     boolean removingCurrentUserIndex = index.getId().equals(key);
     _userService.removeUserIndexForUser(index.getUser(), key);
     if (removingCurrentUserIndex)
-      clearCurrentUser();
+      _currentUserStrategy.clearCurrentUser();
   }
 
   @Override
   public void deleteCurrentUser() {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(false);
     if (user == null)
       return;
     _userService.deleteUser(user);
 
-    clearCurrentUser();
+    _currentUserStrategy.clearCurrentUser();
   }
 
   public void resetCurrentUser() {
-    User user = getCurrentUserInternal();
+    User user = _currentUserStrategy.getCurrentUser(false);
     if (user == null)
       return;
 
     _userService.resetUser(user);
-
-    clearCurrentUser();
+    _currentUserStrategy.clearCurrentUser();
   }
 
   /****
    * Private Methods
    ****/
-
-  private User getCurrentUserInternal() {
-
-    UserIndex userIndex = getCurrentUserIndexInternal();
-    if (userIndex == null)
-      return null;
-    return userIndex.getUser();
-  }
-
-  /**
-   * We make this package accessible to support testing
-   * 
-   * @return
-   */
-  private UserIndex getCurrentUserIndexInternal() {
-
-    IndexedUserDetails details = getCurrentUserDetails();
-
-    if (details == null)
-      return null;
-
-    return _userService.getUserIndexForId(details.getUserIndexKey());
-  }
-
-
-  private void setCurrentUserInternal(UserIndex userIndex) {
-
-    IndexedUserDetails userDetails = new IndexedUserDetailsImpl(
-        _authoritiesService, userIndex);
-
-    DefaultUserAuthenticationToken token = new DefaultUserAuthenticationToken(
-        userDetails);
-    SecurityContextHolder.getContext().setAuthentication(token);
-  }
-
-  private void clearCurrentUser() {
-    // Log out the current user
-    SecurityContextHolder.getContext().setAuthentication(null);
-  }
 
   private Mode getModeForRequest(String mode) {
     if (mode == null)
@@ -379,4 +332,5 @@ public class CurrentUserServiceImpl implements CurrentUserService {
       return Mode.ADD_ACCOUNT;
     return Mode.LOGIN;
   }
+
 }

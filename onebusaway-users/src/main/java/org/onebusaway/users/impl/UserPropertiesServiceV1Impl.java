@@ -37,11 +37,6 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
   }
 
   @Override
-  public UserProperties createDefaultProperties() {
-    return new UserPropertiesV1();
-  }
-
-  @Override
   public Class<? extends UserProperties> getUserPropertiesType() {
     return UserPropertiesV1.class;
   }
@@ -71,6 +66,12 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
       bean.addBookmark(bookmark);
     }
 
+    return bean;
+  }
+
+  @Override
+  public UserBean getAnonymousUserAsBean(UserBean bean) {
+    bean.setRememberPreferencesEnabled(true);
     return bean;
   }
 
@@ -191,7 +192,7 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
   @Override
   public void setAdditionalPropertyForUser(User user, String propertyName,
       Object propertyValue) {
-    
+
   }
 
   /****

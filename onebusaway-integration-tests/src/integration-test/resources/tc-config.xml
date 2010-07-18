@@ -6,7 +6,14 @@
         <server>
             <dso-port>${terracotta.port}</dso-port>
             <jmx-port>${terracotta.jmx_port}</jmx-port>
+            <data>${terracotta.dir}/server-data</data>
+            <logs>${terracotta.dir}/server-logs</logs>
+            <statistics>${terracotta.dir}/server-statistics</statistics>
         </server>
     </servers>
+
+    <clients>
+        <logs>${terracotta.dir}/client-logs-%i-%(app_name)</logs>
+    </clients>
 
 </tc:tc-config>

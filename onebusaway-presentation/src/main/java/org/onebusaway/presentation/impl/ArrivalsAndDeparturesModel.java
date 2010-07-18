@@ -202,7 +202,7 @@ public class ArrivalsAndDeparturesModel {
     _currentUserService.setLastSelectedStopIds(_stopIds);
 
     UserBean user = _currentUserService.getCurrentUser();
-    if (!user.hasDefaultLocation()) {
+    if (user == null || !user.hasDefaultLocation()) {
       List<StopBean> stops = _result.getStops();
       StopBean stop = stops.get(0);
       _defaultSearchLocationService.setDefaultLocationForCurrentUser(

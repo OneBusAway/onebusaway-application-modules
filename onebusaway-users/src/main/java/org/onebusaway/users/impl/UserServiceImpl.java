@@ -76,8 +76,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<Integer> getAllUsersIds(int offset, int limit) {
-    return _userDao.getAllUsersIds(offset, limit);
+  public List<Integer> getAllUserIdsInRange(int offset, int limit) {
+    return _userDao.getAllUserIdsInRange(offset, limit);
   }
 
   @Override
@@ -112,6 +112,20 @@ public class UserServiceImpl implements UserService {
     }
 
     _userPropertiesService.getUserAsBean(user, bean);
+
+    return bean;
+  }
+
+  @Override
+  public UserBean getAnonymousUser() {
+
+    UserBean bean = new UserBean();
+    bean.setUserId("-1");
+
+    bean.setAnonymous(true);
+    bean.setAdmin(false);
+
+    _userPropertiesService.getAnonymousUserAsBean(bean);
 
     return bean;
   }

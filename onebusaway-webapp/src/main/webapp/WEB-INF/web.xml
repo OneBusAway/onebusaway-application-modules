@@ -28,6 +28,10 @@
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
     <filter>
+        <filter-name>requestAndResponseContextFilter</filter-name>
+        <filter-class>org.onebusaway.users.impl.RequestAndResponseContextFilter</filter-class>
+    </filter>
+    <filter>
         <filter-name>action2-cleanup</filter-name>
         <filter-class>org.apache.struts2.dispatcher.ActionContextCleanUp</filter-class>
     </filter>
@@ -39,20 +43,12 @@
         <filter-name>action2</filter-name>
         <filter-class>org.apache.struts2.dispatcher.FilterDispatcher</filter-class>
     </filter>
-    <filter>
-        <filter-name>ResponseHeaderFilter</filter-name>
-        <filter-class>org.onebusaway.webapp.impl.ResponseHeaderFilter</filter-class>
-        <init-param>
-            <param-name>Cache-Control</param-name>
-            <param-value>max-age=22896000</param-value>
-        </init-param>
-        <init-param>
-            <param-name>:match</param-name>
-            <param-value>^.*\.cache\.(html|js|png|gif|jpg|css)$</param-value>
-        </init-param>
-    </filter>
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>requestAndResponseContextFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     <filter-mapping>
@@ -62,14 +58,10 @@
     <filter-mapping>
         <filter-name>sitemesh</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping>    
+    </filter-mapping>
     <filter-mapping>
         <filter-name>action2</filter-name>
         <url-pattern>*.action</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>ResponseHeaderFilter</filter-name>
-        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
     <!-- Listeners -->

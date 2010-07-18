@@ -44,7 +44,7 @@ class WebappServiceImpl implements WebappService {
   private TransitDataService _transitDataService;
 
   @Autowired
-  private CurrentUserService _currentuserService;
+  private CurrentUserService _currentUserService;
 
   @Autowired
   private OneBusAwayService _oneBusAwayService;
@@ -58,7 +58,10 @@ class WebappServiceImpl implements WebappService {
 
   @Override
   public UserBean getCurrentUser() {
-    return _currentuserService.getCurrentUser();
+    UserBean user = _currentUserService.getCurrentUser();
+    if( user == null)
+      user = _currentUserService.getAnonymousUser();
+    return user;
   }
 
   @Override
@@ -66,13 +69,13 @@ class WebappServiceImpl implements WebappService {
       double lon) {
     _defaultSearchLocationService.setDefaultLocationForCurrentUser(
         locationName, lat, lon);
-    return _currentuserService.getCurrentUser();
+    return getCurrentUser();
   }
 
   @Override
   public UserBean clearDefaultLocationForUser() {
     _defaultSearchLocationService.clearDefaultLocationForCurrentUser();
-    return _currentuserService.getCurrentUser();
+    return getCurrentUser();
   }
 
   @Override

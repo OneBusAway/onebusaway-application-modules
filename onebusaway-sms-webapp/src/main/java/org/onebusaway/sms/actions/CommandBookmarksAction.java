@@ -63,7 +63,10 @@ public class CommandBookmarksAction extends AbstractTextmarksAction {
     if (_arg != null && _arg.length() > 0) {
 
       if (_arg.startsWith("add")) {
-
+        
+        if( currentUser == null)
+          return "noUser";
+        
         List<String> lastSelectedStopIds = currentUser.getLastSelectedStopIds();
         if (!lastSelectedStopIds.isEmpty()) {
           String name = _bookmarkPresentationService.getNameForStopIds(lastSelectedStopIds);

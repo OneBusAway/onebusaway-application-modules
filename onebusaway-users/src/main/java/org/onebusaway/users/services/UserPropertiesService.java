@@ -9,11 +9,11 @@ import org.onebusaway.users.model.properties.RouteFilter;
 
 public interface UserPropertiesService {
 
-  public UserProperties createDefaultProperties();
-
   public Class<? extends UserProperties> getUserPropertiesType();
 
   public UserBean getUserAsBean(User user, UserBean bean);
+  
+  public UserBean getAnonymousUserAsBean(UserBean bean);
 
   public void setRememberUserPreferencesEnabled(User user,
       boolean rememberUserPreferencesEnabled);

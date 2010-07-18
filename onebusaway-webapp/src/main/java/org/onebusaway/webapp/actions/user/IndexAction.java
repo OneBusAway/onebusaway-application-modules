@@ -8,26 +8,17 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.client.model.UserIndexBean;
-import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.users.services.UserIndexTypes;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.onebusaway.webapp.actions.AbstractAction;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 
-public class IndexAction extends ActionSupport implements
+public class IndexAction extends AbstractAction implements
     ModelDriven<IndexModel> {
 
   private static final long serialVersionUID = 1L;
 
-  private CurrentUserService _currentUserService;
-
   private IndexModel _model = new IndexModel();
-
-  @Autowired
-  public void setCurrentUserService(CurrentUserService userDataService) {
-    _currentUserService = userDataService;
-  }
 
   @Override
   public IndexModel getModel() {
@@ -41,10 +32,7 @@ public class IndexAction extends ActionSupport implements
       @Action(value = "/where/text/user/index")})
   public String execute() {
 
-    UserBean user = _currentUserService.getCurrentUser();
-
-    if (user == null)
-      return ERROR;
+    UserBean user = getCurrentUser();
 
     _model.setUser(user);
 
@@ -53,11 +41,11 @@ public class IndexAction extends ActionSupport implements
       if (index.getType().equals(UserIndexTypes.PHONE_NUMBER))
         phoneIndices.add(index);
     }
-    
+
     Collections.sort(phoneIndices);
-    
+
     _model.setPhoneIndices(phoneIndices);
-    
+
     return SUCCESS;
   }
 }

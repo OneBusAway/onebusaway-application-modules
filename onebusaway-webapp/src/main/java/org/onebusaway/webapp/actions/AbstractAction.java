@@ -61,8 +61,14 @@ public abstract class AbstractAction extends NextActionSupport {
    ****/
 
   protected CoordinateBounds getServiceArea() {
+    return _serviceAreaService.getServiceArea();
+  }
+
+  protected UserBean getCurrentUser() {
     UserBean user = _currentUserService.getCurrentUser();
-    return _serviceAreaService.getServiceArea(user, _session);
+    if (user == null)
+      user = _currentUserService.getAnonymousUser();
+    return user;
   }
 
   protected void logUserInteraction(Object... objects) {
@@ -76,16 +82,16 @@ public abstract class AbstractAction extends NextActionSupport {
     ActionInvocation invocation = context.getActionInvocation();
     ActionProxy proxy = invocation.getProxy();
 
-    entry.put("interface","web");
+    entry.put("interface", "web");
     entry.put("namespace", proxy.getNamespace());
     entry.put("actionName", proxy.getActionName());
     entry.put("method", proxy.getMethod());
-    
-    if( objects.length % 2 != 0 )
+
+    if (objects.length % 2 != 0)
       throw new IllegalStateException("expected an even number of arguments");
-      
-    for( int i=0; i<objects.length; i+= 2)
-      entry.put(objects[i].toString(),objects[i+1]);
+
+    for (int i = 0; i < objects.length; i += 2)
+      entry.put(objects[i].toString(), objects[i + 1]);
 
     _userInteractionLoggingService.logInteraction(entry);
   }

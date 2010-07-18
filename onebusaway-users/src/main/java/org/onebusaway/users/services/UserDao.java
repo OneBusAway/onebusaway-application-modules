@@ -13,7 +13,7 @@ public interface UserDao {
   
   public List<Integer> getAllUserIds();
 
-  public List<Integer> getAllUsersIds(int offset, int limit);
+  public List<Integer> getAllUserIdsInRange(int offset, int limit);
 
   public User getUserForId(int id);
 

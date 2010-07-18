@@ -117,7 +117,7 @@ public class UserPropertiesMigrationBulkOperation<T extends UserProperties> {
       int usersConverted = 0;
 
       try {
-        List<Integer> userIds = _dao.getAllUsersIds(_offset, FETCH_LIMIT);
+        List<Integer> userIds = _dao.getAllUserIdsInRange(_offset, FETCH_LIMIT);
 
         for (int userId : userIds) {
           User user = _dao.getUserForId(userId);

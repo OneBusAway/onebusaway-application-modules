@@ -35,7 +35,7 @@ public class BookmarksAction extends AbstractAction {
       @Action(value = "/where/iphone/bookmarks"),
       @Action(value = "/where/text/bookmarks")})
   public String execute() {
-    UserBean user = _currentUserService.getCurrentUser();
+    UserBean user = getCurrentUser();
     List<BookmarkBean> bookmarks = user.getBookmarks();
     _bookmarks = _bookmarkPresentationService.getBookmarksWithStops(bookmarks);
     return SUCCESS;

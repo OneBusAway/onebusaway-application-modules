@@ -63,10 +63,7 @@ public class AbstractAction extends ActionSupport implements CurrentUserAware {
   }
 
   protected CoordinateBounds getDefaultSearchArea() {
-
-    ActionContext context = ActionContext.getContext();
-    return _serviceAreaService.getServiceArea(_currentUser,
-        context.getSession());
+    return _serviceAreaService.getServiceArea();
   }
 
   protected void logUserInteraction(Object... objects) {

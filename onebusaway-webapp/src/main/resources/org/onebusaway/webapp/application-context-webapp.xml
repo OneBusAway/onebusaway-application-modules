@@ -26,16 +26,18 @@
 
     <context:component-scan base-package="org.onebusaway.webapp.impl" />
 
+    <!--
+        Override the current user strategy of the CurrentUserService with one that will automatically create as user as
+        needed and set a Remember Me cookie to remember that user for the future
+    -->
+    <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.AutoUserCurrentUserStrategyImpl" primary="true" />
+
     <sec:http>
         <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR" />
         <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1" />
         <sec:remember-me />
         <sec:logout invalidate-session="false" logout-url="/logout.action" />
     </sec:http>
-
-    <bean id="autoUserAuthenticationFilter" class="org.onebusaway.users.impl.authentication.AutoUserProcessingFilter">
-        <sec:custom-filter position="ANONYMOUS_FILTER" />
-    </bean>
 
     <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
         <property name="properties">

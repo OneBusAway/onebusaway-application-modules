@@ -107,7 +107,9 @@
     </bean>
 
     <context:component-scan base-package="org.onebusaway.users.impl" />
-
+    
+    <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.CurrentUserStrategyImpl"/>
+    
     <bean id="userPropertiesService" class="org.onebusaway.container.spring.ProxyFactoryBean" primary="true">
         <property name="proxyInterface" value="org.onebusaway.users.services.UserPropertiesService" />
         <property name="invocationHandler">

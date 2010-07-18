@@ -13,7 +13,7 @@ public interface UserService {
   
   public List<Integer> getAllUserIds();
 
-  public List<Integer> getAllUsersIds(int offset, int limit);
+  public List<Integer> getAllUserIdsInRange(int offset, int limit);
 
   public User getUserForId(int userId);
 
@@ -42,6 +42,8 @@ public interface UserService {
   public void setCredentialsForUserIndex(UserIndex userIndex, String credentials);
 
   public UserBean getUserAsBean(User user);
+  
+  public UserBean getAnonymousUser();
   
   public void deleteUser(User user);
 
@@ -90,5 +92,7 @@ public interface UserService {
 
   public void setAdditionalPropertyForUser(User user, String propertyName,
       Object propertyValue);
+
+  
 
 }

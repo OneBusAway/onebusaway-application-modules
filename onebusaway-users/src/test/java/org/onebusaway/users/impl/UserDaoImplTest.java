@@ -135,7 +135,7 @@ public class UserDaoImplTest {
     final int limit = 20;
 
     for (int i = 0; i < n; i += limit) {
-      List<Integer> pageOfIds = _dao.getAllUsersIds(i, limit);
+      List<Integer> pageOfIds = _dao.getAllUserIdsInRange(i, limit);
       assertTrue(pageOfIds.size() <= limit);
       retreivedIds.addAll(pageOfIds);
     }

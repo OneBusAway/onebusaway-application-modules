@@ -93,7 +93,7 @@ public class BookmarkAction extends AbstractAction implements
   }
 
   private BookmarkBean getBookmark() {
-    UserBean user = _currentUserService.getCurrentUser();
+    UserBean user = getCurrentUser();
     for (BookmarkBean bookmark : user.getBookmarks()) {
       if (bookmark.getId() == _id)
         return bookmark;

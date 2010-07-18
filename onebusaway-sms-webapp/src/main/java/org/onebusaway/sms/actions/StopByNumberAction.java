@@ -9,7 +9,6 @@ import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.SearchQueryBean.EQueryType;
-import org.onebusaway.users.client.model.UserBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class StopByNumberAction extends AbstractTextmarksAction {
@@ -67,9 +66,7 @@ public class StopByNumberAction extends AbstractTextmarksAction {
     if (tokens.length == 0)
       return INPUT;
 
-    UserBean currentUser = _currentUserService.getCurrentUser();
-    CoordinateBounds serviceArea = _serviceAreaService.getServiceArea(
-        currentUser, _session);
+    CoordinateBounds serviceArea = _serviceAreaService.getServiceArea();
 
     if (serviceArea == null) {
       pushNextAction("stop-by-number", "text", _text);

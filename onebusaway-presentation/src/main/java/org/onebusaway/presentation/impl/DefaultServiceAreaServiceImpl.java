@@ -1,13 +1,11 @@
 package org.onebusaway.presentation.impl;
 
-import java.util.Map;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.presentation.model.DefaultSearchLocation;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.presentation.services.ServiceAreaService;
-import org.onebusaway.users.client.model.UserBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DefaultServiceAreaServiceImpl implements ServiceAreaService {
@@ -42,8 +40,7 @@ public class DefaultServiceAreaServiceImpl implements ServiceAreaService {
     _defaultSearchLocationService = defaultSearchLocationService;
   }
 
-  public CoordinateBounds getServiceArea(UserBean currentUser,
-      Map<String, Object> session) {
+  public CoordinateBounds getServiceArea() {
 
     DefaultSearchLocation location = _defaultSearchLocationService.getDefaultSearchLocationForCurrentUser();
 

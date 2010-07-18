@@ -49,7 +49,7 @@ class UserDaoImpl implements UserDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<Integer> getAllUsersIds(final int firstResult,
+  public List<Integer> getAllUserIdsInRange(final int firstResult,
       final int maxResults) {
     return (List<Integer>) _template.execute(new HibernateCallback() {
       @Override

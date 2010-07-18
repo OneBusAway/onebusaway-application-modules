@@ -28,7 +28,8 @@ public class CurrentUserInterceptor extends AbstractInterceptor {
     if (action instanceof CurrentUserAware) {
       CurrentUserAware currentUserAware = (CurrentUserAware) action;
       UserBean currentUser = _currentUserService.getCurrentUser();
-      currentUserAware.setCurrentUser(currentUser);
+      if( currentUser != null)
+        currentUserAware.setCurrentUser(currentUser);
     }
 
     return invocation.invoke();

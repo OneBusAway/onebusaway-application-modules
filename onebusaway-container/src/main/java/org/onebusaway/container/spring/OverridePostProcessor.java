@@ -8,6 +8,8 @@ import java.util.Map;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.PropertyOverrideConfigurer;
 import org.springframework.core.Ordered;
@@ -27,7 +29,7 @@ import org.springframework.core.PriorityOrdered;
  * <pre class="code">&lt;bean class="org.onebusaway.container.spring.OverridePostProcessor"&gt;
  *   &lt;property name="map"&gt;
  *     &lt;map&gt;
- *       &lt;entry key="beanName.beanProperty" value ="someValue" /&gt;
+ *       &lt;entry key="beanName.beanProperty" value ="someOtherBeanName" /&gt;
  *     &lt;/map&gt;
  *   &lt;/property&gt;
  * &lt;/bean&gt;</pre>
@@ -35,13 +37,15 @@ import org.springframework.core.PriorityOrdered;
  * @author bdferris
  */
 public class OverridePostProcessor implements BeanPostProcessor,
-    PriorityOrdered {
+    PriorityOrdered, BeanFactoryAware {
 
   private Map<String, List<PropertyEntry>> _propertyEntriesByBeanName = new HashMap<String, List<PropertyEntry>>();
 
   private int _order = Ordered.LOWEST_PRECEDENCE - 2;
 
-  public void setMap(Map<String, Object> map) {
+  private BeanFactory _beanFactory;
+
+  public void setMap(Map<String, String> map) {
     processMap(map);
   }
 
@@ -55,13 +59,21 @@ public class OverridePostProcessor implements BeanPostProcessor,
   }
 
   @Override
+  public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+    _beanFactory = beanFactory;
+  }
+
+  @Override
   public Object postProcessBeforeInitialization(Object bean, String beanName)
       throws BeansException {
     List<PropertyEntry> entries = _propertyEntriesByBeanName.get(beanName);
     if (entries != null) {
       for (PropertyEntry entry : entries) {
         BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(bean);
-        wrapper.setPropertyValue(entry.propertyName, entry.value);
+        Object value = _beanFactory.getBean(entry.value);
+        if( value == null)
+          throw new IllegalStateException("could not find bean with name: " + entry.value);
+        wrapper.setPropertyValue(entry.propertyName, value);
       }
     }
     return bean;
@@ -73,8 +85,8 @@ public class OverridePostProcessor implements BeanPostProcessor,
     return bean;
   }
 
-  private void processMap(Map<String, Object> map) {
-    for (Map.Entry<String, Object> entry : map.entrySet()) {
+  private void processMap(Map<String, String> map) {
+    for (Map.Entry<String, String> entry : map.entrySet()) {
       String key = entry.getKey();
       int index = key.indexOf('.');
       if (index == -1)
@@ -92,12 +104,12 @@ public class OverridePostProcessor implements BeanPostProcessor,
   }
 
   private static class PropertyEntry {
-    public PropertyEntry(String propertyName, Object value) {
+    public PropertyEntry(String propertyName, String value) {
       this.propertyName = propertyName;
       this.value = value;
     }
 
     private String propertyName;
-    private Object value;
+    private String value;
   }
 }

@@ -3,7 +3,9 @@ package org.onebusaway.users.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,6 +45,29 @@ public class UserServiceImplTest {
   public void tearDown() {
     SecurityContext context = SecurityContextHolder.getContext();
     context.setAuthentication(null);
+  }
+  
+  @Test
+  public void testGetNumberOfUsers() {
+    Mockito.when(_userDao.getNumberOfUsers()).thenReturn(5);
+    assertEquals(5,_service.getNumberOfUsers());
+    Mockito.verify(_userDao).getNumberOfUsers();
+  }
+  
+  @Test
+  public void getAllUserIds() {
+    List<Integer> ids = Arrays.asList(1,2,3);
+    Mockito.when(_userDao.getAllUserIds()).thenReturn(ids);
+    assertEquals(ids,_service.getAllUserIds());
+    Mockito.verify(_userDao).getAllUserIds();
+  }
+  
+  @Test
+  public void getAllUserIdsForRange() {
+    List<Integer> ids = Arrays.asList(1,2,3);
+    Mockito.when(_userDao.getAllUserIdsInRange(0,3)).thenReturn(ids);
+    assertEquals(ids,_service.getAllUserIdsInRange(0,3));
+    Mockito.verify(_userDao).getAllUserIdsInRange(0,3);
   }
 
   @Test

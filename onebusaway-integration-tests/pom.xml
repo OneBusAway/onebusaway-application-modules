@@ -15,6 +15,7 @@
         <hsqldb.port>9930</hsqldb.port>
         <terracotta.port>9931</terracotta.port>
         <terracotta.jmx_port>9932</terracotta.jmx_port>
+        <terracotta.dir>${project.build.directory}/terracotta</terracotta.dir>
         <!-- This value is in milliseconds, so 5 minutes... thing run slow on the CI server  -->
         <ping_timeout>300000</ping_timeout>
     </properties>
@@ -201,7 +202,7 @@
                         </goals>
                         <configuration>
                             <deleteOnEntry>true</deleteOnEntry>
-                            <dbName>org_onebusaway_database_users</dbName>
+                            <dbName>${project.build.directory}/org_onebusaway_database_users</dbName>
                             <port>${hsqldb.port}</port>
                         </configuration>
                     </execution>
@@ -360,7 +361,7 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/api-webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs} -Dapp_name=onebusaway-api-webapp</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.api_webapp.port}</cargo.servlet.port>
                                     <cargo.tomcat.ajp.port>${org.onebusaway.api_webapp.ajp_port}</cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.api_webapp.rmi_port}</cargo.rmi.port>
@@ -393,10 +394,9 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/phone-webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs} -Dapp_name=onebusaway-phone-webapp</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.phone_webapp.port}</cargo.servlet.port>
-                                    <cargo.tomcat.ajp.port>${org.onebusaway.phone_webapp.ajp_port}
-                                    </cargo.tomcat.ajp.port>
+                                    <cargo.tomcat.ajp.port>${org.onebusaway.phone_webapp.ajp_port}</cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.phone_webapp.rmi_port}</cargo.rmi.port>
                                 </properties>
                                 <deployables>
@@ -427,7 +427,7 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/sms-webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs} -Dapp_name=onebusaway-sms-webapp</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.sms_webapp.port}</cargo.servlet.port>
                                     <cargo.tomcat.ajp.port>${org.onebusaway.sms_webapp.ajp_port}</cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.sms_webapp.rmi_port}</cargo.rmi.port>
@@ -460,7 +460,7 @@
                             <configuration>
                                 <home>${project.build.directory}/tomcat5x/webapp</home>
                                 <properties>
-                                    <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
+                                    <cargo.jvmargs>${cargo.jvmargs} -Dapp_name=onebusaway-webapp</cargo.jvmargs>
                                     <cargo.servlet.port>${org.onebusaway.webapp.port}</cargo.servlet.port>
                                     <cargo.tomcat.ajp.port>${org.onebusaway.webapp.ajp_port}</cargo.tomcat.ajp.port>
                                     <cargo.rmi.port>${org.onebusaway.webapp.rmi_port}</cargo.rmi.port>

@@ -9,15 +9,14 @@ import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.properties.RouteFilter;
 
 public interface CurrentUserService {
-  
+
   /**
    * @return null if no user is currently logged in
    */
   public IndexedUserDetails getCurrentUserDetails();
 
   /**
-   * @return the current user. If no user is currently logged in, we return an
-   *         anonymous user
+   * @return the current user, or null if no user is currently logged in
    */
   public UserBean getCurrentUser();
 
@@ -26,19 +25,21 @@ public interface CurrentUserService {
    */
   public UserIndex getCurrentUserAsUserIndex();
 
+  public UserBean getAnonymousUser();
+
   /**
    * @return true if the current user is anonymous or if there is no current
    *         user
    */
   public boolean isCurrentUserAnonymous();
-  
+
   /**
    * @return true if the current user is an admin
    */
   public boolean isCurrentUserAdmin();
-  
-  public IndexedUserDetails getIndexedUserDetailsForUser(String type, String id,
-      String credentials, boolean isAnonymous, String mode);
+
+  public IndexedUserDetails getIndexedUserDetailsForUser(String type,
+      String id, String credentials, boolean isAnonymous, String mode);
 
   /**
    * 
@@ -52,7 +53,7 @@ public interface CurrentUserService {
    */
   public IndexedUserDetails handleLogin(String type, String id,
       String credentials, boolean isAnonymous, boolean registerIfNewUser);
-  
+
   public IndexedUserDetails handleRegistration(String type, String id,
       String credentials, boolean isAnonymous);
 

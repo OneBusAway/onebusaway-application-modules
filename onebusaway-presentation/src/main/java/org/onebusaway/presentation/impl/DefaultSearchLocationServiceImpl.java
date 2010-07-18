@@ -28,7 +28,7 @@ public class DefaultSearchLocationServiceImpl implements
 
     UserBean user = _currentUserService.getCurrentUser();
 
-    if (user.hasDefaultLocation()) {
+    if (user != null && user.hasDefaultLocation()) {
       return new DefaultSearchLocation(user.getDefaultLocationName(),
           user.getDefaultLocationLat(), user.getDefaultLocationLon(), false);
     }
