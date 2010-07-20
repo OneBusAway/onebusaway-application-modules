@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.predictions;
+package org.onebusaway.transit_data_federation.impl.realtime;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduleAdherenceRecord;
+import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +27,8 @@ public class BlockToTripScheduleAdherenceInterpolation {
     _transitGraphDao = transitGraphDao;
   }
 
-  public List<ScheduleAdherenceRecord> interpolate(
-      ScheduleAdherenceRecord record) {
+  public List<VehiclePositionRecord> interpolate(
+      VehiclePositionRecord record) {
 
     long serviceDate = record.getServiceDate();
     long currentTime = record.getCurrentTime();
@@ -42,11 +42,11 @@ public class BlockToTripScheduleAdherenceInterpolation {
     List<TripEntry> trips = getTripsInTimeRangeForBlock(record.getBlockId(),
         timeFrom, timeTo);
 
-    List<ScheduleAdherenceRecord> records = new ArrayList<ScheduleAdherenceRecord>(
+    List<VehiclePositionRecord> records = new ArrayList<VehiclePositionRecord>(
         trips.size());
 
     for (TripEntry trip : trips) {
-      ScheduleAdherenceRecord r = new ScheduleAdherenceRecord(record);
+      VehiclePositionRecord r = new VehiclePositionRecord(record);
       r.setTripId(trip.getId());
       records.add(r);
     }

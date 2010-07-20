@@ -18,7 +18,7 @@ import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.predictions.StopTimePredictionService;
+import org.onebusaway.transit_data_federation.services.realtime.StopRealtimeService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
@@ -37,7 +37,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   private StopTimeService _stopTimeService;
 
   @Autowired
-  private StopTimePredictionService _stopTimePredictionService;
+  private StopRealtimeService _stopTimePredictionService;
 
   @Autowired
   private NarrativeService _narrativeService;
@@ -75,7 +75,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     List<StopTimeInstanceProxy> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
         id, from, to);
-    _stopTimePredictionService.applyPredictions(stis);
+    _stopTimePredictionService.applyRealtimeData(stis, System.currentTimeMillis());
 
     List<ArrivalAndDepartureBean> beans = new ArrayList<ArrivalAndDepartureBean>();
     for (StopTimeInstanceProxy sti : stis)

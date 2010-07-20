@@ -53,12 +53,12 @@
         </property>
         <property name="annotatedClasses">
             <list>
-                <value>org.onebusaway.transit_data_federation.model.predictions.TripTimePrediction</value>
+                <value>org.onebusaway.transit_data_federation.impl.realtime.TripPositionRecord</value>
             </list>
         </property>
         <property name="mappingLocations">
             <list>
-                <value>classpath:org/onebusaway/transit_data_federation/impl/predictions/TripTimePredictionDaoImpl.hibernate.xml
+                <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/TripPositionRecordDaoImpl.hibernate.xml
                 </value>
             </list>
         </property>

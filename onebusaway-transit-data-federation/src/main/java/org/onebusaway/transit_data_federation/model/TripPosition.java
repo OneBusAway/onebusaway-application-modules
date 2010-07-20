@@ -1,37 +1,63 @@
 package org.onebusaway.transit_data_federation.model;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.transit_data_federation.model.predictions.ScheduleDeviation;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 
 /**
- * Vehicle position information for a particular trip. The
- * {@link #getScheduleDeviation()} schedule deviation information provides
- * information about whether the position information is from real-time data or
- * from schedule data.
+ * Vehicle position information for a particular trip.
  * 
  * @author bdferris
- * 
  */
 public class TripPosition {
 
-  private ScheduleDeviation scheduleDeviation;
+  private AgencyAndId tripId;
+
+  private long serviceDate;
+
+  private boolean predicted;
 
   private CoordinatePoint position;
+
+  private int scheduleDeviation;
+
+  private AgencyAndId vehicleId;
 
   private StopTimeEntry closestStop;
 
   private int closestStopTimeOffset;
 
-  /**
-   * @return schedule deviation for the current trip at this position
-   */
-  public ScheduleDeviation getScheduleDeviation() {
-    return scheduleDeviation;
+  public TripPosition() {
+
   }
 
-  public void setScheduleDeviation(ScheduleDeviation scheduleDeviation) {
-    this.scheduleDeviation = scheduleDeviation;
+  public AgencyAndId getTripId() {
+    return tripId;
+  }
+
+  public void setTripId(AgencyAndId tripId) {
+    this.tripId = tripId;
+  }
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
+  }
+
+  /**
+   * If real-time data is not avaialble, schedule deviation will be zero
+   * 
+   * @return true if the schedule deviation data is from real-time data
+   */
+  public boolean isPredicted() {
+    return predicted;
+  }
+
+  public void setPredicted(boolean predicted) {
+    this.predicted = predicted;
   }
 
   /**
@@ -43,6 +69,34 @@ public class TripPosition {
 
   public void setPosition(CoordinatePoint position) {
     this.position = position;
+  }
+
+  /**
+   * If {@link #isPredicted()} is false, indicating no real-time data is
+   * available, schedule deviation will be zero.
+   * 
+   * @return schedule deviation, in seconds, (+deviation is late, -deviation is
+   *         early)
+   */
+  public int getScheduleDeviation() {
+    return scheduleDeviation;
+  }
+
+  /**
+   * 
+   * @param scheduleDeviation schedule deviation, in seconds, (+deviation is
+   *          late, -deviation is early)
+   */
+  public void setScheduleDeviation(int scheduleDeviation) {
+    this.scheduleDeviation = scheduleDeviation;
+  }
+
+  public AgencyAndId getVehicleId() {
+    return vehicleId;
+  }
+
+  public void setVehicleId(AgencyAndId vehicleId) {
+    this.vehicleId = vehicleId;
   }
 
   /**

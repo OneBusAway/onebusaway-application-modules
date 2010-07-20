@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.model.predictions;
+package org.onebusaway.transit_data_federation.impl.realtime;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -24,12 +24,12 @@ import org.onebusaway.gtfs.model.AgencyAndId;
  * 
  */
 @Entity
-@Table(name = "transit_data_trip_time_predictions")
-@org.hibernate.annotations.Table(appliesTo = "transit_data_trip_time_predictions", indexes = {@Index(name = "vehicle_and_time", columnNames = {
+@Table(name = "transit_data_trip_position_records")
+@org.hibernate.annotations.Table(appliesTo = "transit_data_trip_position_records", indexes = {@Index(name = "vehicle_and_time", columnNames = {
     "vehicle_agencyId", "vehicle_id", "time"})})
 @org.hibernate.annotations.Entity(mutable = false)
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
-public class TripTimePrediction {
+public class TripPositionRecord {
 
   @Id
   @GeneratedValue
@@ -53,7 +53,7 @@ public class TripTimePrediction {
       @AttributeOverride(name = "id", column = @Column(name = "vehicle_id"))})
   private final AgencyAndId vehicleId;
 
-  public TripTimePrediction(AgencyAndId tripId, long serviceDate, long time,
+  public TripPositionRecord(AgencyAndId tripId, long serviceDate, long time,
       int scheduleDeviation, AgencyAndId vehicleId) {
     this.tripId = tripId;
     this.serviceDate = serviceDate;
@@ -62,7 +62,7 @@ public class TripTimePrediction {
     this.vehicleId = vehicleId;
   }
 
-  public TripTimePrediction() {
+  public TripPositionRecord() {
     tripId = null;
     serviceDate = 0;
     time = 0;
@@ -144,7 +144,7 @@ public class TripTimePrediction {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    TripTimePrediction other = (TripTimePrediction) obj;
+    TripPositionRecord other = (TripPositionRecord) obj;
     if (id != other.id)
       return false;
     if (scheduleDeviation != other.scheduleDeviation)

@@ -27,16 +27,13 @@ import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
 import org.onebusaway.transit_data_federation.model.TripPosition;
-import org.onebusaway.transit_data_federation.model.predictions.ScheduleDeviation;
-import org.onebusaway.transit_data_federation.model.predictions.TripTimePrediction;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.TripPositionService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStatusBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
-import org.onebusaway.transit_data_federation.services.predictions.TripTimePredictionService;
+import org.onebusaway.transit_data_federation.services.realtime.TripPositionService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
@@ -61,8 +58,6 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
 
   private TripStopTimesBeanService _tripStopTimesBeanService;
 
-  private TripTimePredictionService _tripTimePredictionService;
-  
   private StopBeanService _stopBeanService;
 
   private static final long TIME_WINDOW = 30 * 60 * 1000;
@@ -94,12 +89,6 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
   }
 
   @Autowired
-  public void setTripTimePredictionService(
-      TripTimePredictionService tripTimePredictionService) {
-    _tripTimePredictionService = tripTimePredictionService;
-  }
-  
-  @Autowired
   public void setStopBeanService(StopBeanService stopBeanService) {
     _stopBeanService = stopBeanService;
   }
@@ -119,20 +108,20 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     TripPosition tripPosition = _tripPositionService.getPositionForTripInstance(
         tripInstance, time);
 
-    return getTrip(tripInstance, tripPosition);
+    return getTripPositionAsStatusBean(serviceDate, tripPosition);
   }
 
   @Override
   public TripDetailsBean getTripStatusForVehicleAndTime(AgencyAndId vehicleId,
       long time, TripDetailsInclusionBean inclusion) {
 
-    TripTimePrediction prediction = _tripTimePredictionService.getTripTimePredictionForVehicleAndTime(
+    TripPosition position = _tripPositionService.getPositionForVehicleAndTime(
         vehicleId, time);
 
-    if (prediction == null)
+    if (position == null)
       return null;
 
-    AgencyAndId tripId = prediction.getTripId();
+    AgencyAndId tripId = position.getTripId();
 
     TripEntry tripEntry = _graph.getTripEntryForId(tripId);
     if (tripEntry == null)
@@ -152,15 +141,7 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     }
 
     if (inclusion.isIncludeTripStatus()) {
-
-      TripInstanceProxy tripInstance = new TripInstanceProxy(tripEntry,
-          prediction.getServiceDate());
-
-      TripPosition tripPosition = _tripPositionService.getPositionForTripInstance(
-          tripInstance, time);
-
-      TripStatusBean status = getTrip(tripInstance, tripPosition);
-
+      TripStatusBean status = getTripPositionAsStatusBean(position.getServiceDate(), position);
       details.setStatus(status);
     }
 
@@ -205,7 +186,7 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     }
 
     List<TripDetailsBean> results = new ArrayList<TripDetailsBean>();
-    
+
     for (TripInstanceProxy tripInstance : tripInstances) {
 
       TripPosition tripPosition = _tripPositionService.getPositionForTripInstance(
@@ -225,14 +206,14 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
         details.setTripId(AgencyAndIdLibrary.convertToString(trip.getId()));
 
         if (inclusion.isIncludeTripStatus()) {
-          TripStatusBean status = getTrip(tripInstance, tripPosition);
+          TripStatusBean status = getTripPositionAsStatusBean(tripPosition.getServiceDate(), tripPosition);
           details.setStatus(status);
         }
 
         if (inclusion.isIncludeTripBean())
           details.setTrip(_tripBeanService.getTripForId(trip.getId()));
 
-        if (inclusion.isIncludeTripSchedule() )
+        if (inclusion.isIncludeTripSchedule())
           details.setSchedule(_tripStopTimesBeanService.getStopTimesForTrip(trip.getId()));
 
         results.add(details);
@@ -246,25 +227,24 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
    * Private Methods
    ****/
 
-  private TripStatusBean getTrip(TripInstanceProxy tripInstance,
-      TripPosition tripPosition) {
+  private TripStatusBean getTripPositionAsStatusBean(long serviceDate, TripPosition tripPosition) {
 
     TripStatusBean bean = new TripStatusBean();
 
     bean.setStatus("default");
-    bean.setServiceDate(tripInstance.getServiceDate());
-
+    bean.setServiceDate(serviceDate);
+    
     if (tripPosition != null) {
+      
       CoordinatePoint location = tripPosition.getPosition();
-      ScheduleDeviation sd = tripPosition.getScheduleDeviation();
       bean.setPosition(location);
-      bean.setScheduleDeviation(sd.getScheduleDeviation());
-      bean.setPredicted(sd.isPredicted());
-      AgencyAndId vid = sd.getVehicleId();
+      bean.setScheduleDeviation(tripPosition.getScheduleDeviation());
+      bean.setPredicted(tripPosition.isPredicted());
+      AgencyAndId vid = tripPosition.getVehicleId();
       if (vid != null)
         bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
       StopTimeEntry stop = tripPosition.getClosestStop();
-      if( stop != null) {
+      if (stop != null) {
         StopBean stopBean = _stopBeanService.getStopForId(stop.getStop().getId());
         bean.setClosestStop(stopBean);
         bean.setClosestStopTimeOffset(tripPosition.getClosestStopTimeOffset());

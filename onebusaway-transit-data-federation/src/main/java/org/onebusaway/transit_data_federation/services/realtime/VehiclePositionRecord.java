@@ -5,7 +5,28 @@ import java.io.Serializable;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-public class ScheduleAdherenceRecord implements Serializable {
+/**
+ * Vehicle position records are the key data structure for passing real-time
+ * position data about a transit vehicle from an external data source into
+ * OneBusAway. It tries to capture a variety of fields that might be present in
+ * an AVL stream:
+ * 
+ * <ul>
+ * <li>block id</li>
+ * <li>trip id</li>
+ * <li>vehicle id</li>
+ * <li>position</li>
+ * <li>schedule adherence</li>
+ * <li>arrival data relative to a timepoint</li>
+ * </ul>
+ * 
+ * Not all of these fields will necessarily be set by the AVL source, so we may
+ * have to be flexible in how we process the data.
+ * 
+ * @author bdferris
+ * @see VehiclePositionListener
+ */
+public class VehiclePositionRecord implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -21,6 +42,9 @@ public class ScheduleAdherenceRecord implements Serializable {
 
   private long currentTime;
 
+  /**
+   * schedule deviation, in seconds, (+deviation is late, -deviation is early)
+   */
   private int scheduleDeviation;
 
   private AgencyAndId timepointId;
@@ -35,11 +59,11 @@ public class ScheduleAdherenceRecord implements Serializable {
    */
   private int timepointPredictedTime;
 
-  public ScheduleAdherenceRecord() {
+  public VehiclePositionRecord() {
 
   }
 
-  public ScheduleAdherenceRecord(ScheduleAdherenceRecord r) {
+  public VehiclePositionRecord(VehiclePositionRecord r) {
     this.blockId = r.blockId;
     this.currentLocation = r.currentLocation;
     this.currentTime = r.currentTime;

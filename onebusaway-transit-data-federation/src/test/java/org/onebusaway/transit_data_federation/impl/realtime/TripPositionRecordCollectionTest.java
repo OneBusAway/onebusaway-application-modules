@@ -1,23 +1,25 @@
-package org.onebusaway.transit_data_federation.impl.predictions;
+package org.onebusaway.transit_data_federation.impl.realtime;
 
 import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class TripTimePredictionsEntryTest {
+import org.junit.Test;
+import org.onebusaway.gtfs.model.AgencyAndId;
+
+public class TripPositionRecordCollectionTest {
 
   @Test
-  public void test() {
+  public void test01() {
 
     SortedMap<Long, Integer> m = new TreeMap<Long, Integer>();
     m.put(250L, 10);
     m.put(500L, 18);
     m.put(750L, 15);
 
-    TripTimePredictionsEntry entry = new TripTimePredictionsEntry(200, 800, m, null);
+    TripPositionRecordCollection entry = new TripPositionRecordCollection(200,
+        800, m);
 
     assertEquals(200, entry.getFromTime());
     assertEquals(800, entry.getToTime());
@@ -32,7 +34,7 @@ public class TripTimePredictionsEntryTest {
     assertEquals(15, entry.getScheduleDeviationForTargetTime(750));
     assertEquals(15, entry.getScheduleDeviationForTargetTime(800));
 
-    entry = entry.addPrediction(600, 20, 300);
+    entry = entry.addRecord(record(600, 20), 300);
 
     assertEquals(400, entry.getFromTime());
     assertEquals(700, entry.getToTime());
@@ -44,7 +46,7 @@ public class TripTimePredictionsEntryTest {
     assertEquals(20, entry.getScheduleDeviationForTargetTime(650));
     assertEquals(20, entry.getScheduleDeviationForTargetTime(700));
 
-    entry = entry.addPrediction(1000, 14, 400);
+    entry = entry.addRecord(record(1000, 14), 400);
 
     assertEquals(600, entry.getFromTime());
     assertEquals(1000, entry.getToTime());
@@ -55,7 +57,7 @@ public class TripTimePredictionsEntryTest {
   }
 
   @Test
-  public void go() {
+  public void test02() {
 
     SortedMap<Long, Integer> m = new TreeMap<Long, Integer>();
 
@@ -77,9 +79,18 @@ public class TripTimePredictionsEntryTest {
     m.put(1256015573500L, -1);
     m.put(1256015636443L, -1);
 
-    TripTimePredictionsEntry entry = new TripTimePredictionsEntry(m.firstKey(), m.lastKey(), m, null);
-    
+    TripPositionRecordCollection entry = new TripPositionRecordCollection(
+        m.firstKey(), m.lastKey(), m);
+
     int deviation = entry.getScheduleDeviationForTargetTime(1256015757567L);
-    assertEquals(-1,deviation);
+    assertEquals(-1, deviation);
+  }
+
+  private TripPositionRecord record(long recordTime, int scheduleDeviation) {
+    AgencyAndId tripId = null;
+    long serviceDate = 0;
+    AgencyAndId vehicleId = null;
+    return new TripPositionRecord(tripId, serviceDate, recordTime,
+        scheduleDeviation, vehicleId);
   }
 }

@@ -1,5 +1,13 @@
 package org.onebusaway.transit_data_federation.impl;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Stop;
@@ -8,24 +16,14 @@ import org.onebusaway.transit_data_federation.model.LocationBookmarks;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.StopSequence;
 import org.onebusaway.transit_data_federation.model.StopSequenceBlock;
-import org.onebusaway.transit_data_federation.model.predictions.TripTimePrediction;
 import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
-
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 class TransitDataFederationDaoImpl implements TransitDataFederationDao {
@@ -166,17 +164,6 @@ class TransitDataFederationDaoImpl implements TransitDataFederationDao {
     if (routeCollections.size() > 1)
       _log.warn("multiple route collections for route id=" + route.getId());
     return routeCollections.get(0);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public List<TripTimePrediction> getTripTimePredictionsForTripServiceDateAndTimeRange(
-      AgencyAndId tripId, long serviceDate, long fromTime, long toTime) {
-    String[] paramNames = {"tripId", "serviceDate", "fromTime", "toTime"};
-    Object[] paramValues = {tripId, serviceDate, fromTime, toTime};
-    return _template.findByNamedQueryAndNamedParam(
-        "tripTimePredictionsForTripServiceDateAndTimeRange", paramNames,
-        paramValues);
   }
 
   @SuppressWarnings("unchecked")

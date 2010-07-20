@@ -24,15 +24,15 @@ import org.onebusaway.container.model.Listeners;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.calendar.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduleAdherenceListener;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduleAdherenceRecord;
+import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionListener;
+import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class TimepointPredictionServiceImpl implements
-    HasListeners<ScheduleAdherenceListener> {
+    HasListeners<VehiclePositionListener> {
 
   private final Logger _log = LoggerFactory.getLogger(TimepointPredictionServiceImpl.class);
 
@@ -42,7 +42,7 @@ public class TimepointPredictionServiceImpl implements
 
   private TimepointPredictionReceiver _receiver;
 
-  private Listeners<ScheduleAdherenceListener> _listeners = new Listeners<ScheduleAdherenceListener>();
+  private Listeners<VehiclePositionListener> _listeners = new Listeners<VehiclePositionListener>();
 
   private String _serverName = TIMEPOINT_PREDICTION_SERVER_NAME;
 
@@ -97,12 +97,12 @@ public class TimepointPredictionServiceImpl implements
   }
 
   @Override
-  public void addListener(ScheduleAdherenceListener listener) {
+  public void addListener(VehiclePositionListener listener) {
     _listeners.addListener(listener);
   }
 
   @Override
-  public void removeListener(ScheduleAdherenceListener listener) {
+  public void removeListener(VehiclePositionListener listener) {
     _listeners.removeListener(listener);
   }
 
@@ -223,10 +223,10 @@ public class TimepointPredictionServiceImpl implements
     Date from = new Date(t - 30 * 60 * 1000);
     Date to = new Date(t + 30 * 60 * 1000);
 
-    List<ScheduleAdherenceRecord> records = new ArrayList<ScheduleAdherenceRecord>();
+    List<VehiclePositionRecord> records = new ArrayList<VehiclePositionRecord>();
 
     for (List<TimepointPrediction> recordsForTrip : predictionsByTripId.values()) {
-      ScheduleAdherenceRecord record = getBestScheduleAdherenceRecord(recordsForTrip);
+      VehiclePositionRecord record = getBestScheduleAdherenceRecord(recordsForTrip);
       List<Date> dates = _blockCalendarService.getServiceDatesWithinRangeForBlockId(
           record.getBlockId(), from, to);
       if (dates.size() != 1)
@@ -235,17 +235,16 @@ public class TimepointPredictionServiceImpl implements
       records.add(record);
     }
 
-    for (ScheduleAdherenceListener listener : _listeners)
-      listener.handleScheduleAdherenceRecords(records);
-
+    for (VehiclePositionListener listener : _listeners)
+      listener.handleVehiclePositionRecords(records);
   }
 
-  private ScheduleAdherenceRecord getBestScheduleAdherenceRecord(
+  private VehiclePositionRecord getBestScheduleAdherenceRecord(
       List<TimepointPrediction> recordsForTrip) {
 
     TimepointPrediction best = getBestTimepointPrediction(recordsForTrip);
 
-    ScheduleAdherenceRecord r = new ScheduleAdherenceRecord();
+    VehiclePositionRecord r = new VehiclePositionRecord();
     r.setBlockId(best.getBlockId());
     r.setCurrentTime(System.currentTimeMillis());
     r.setScheduleDeviation(best.getScheduleDeviation());

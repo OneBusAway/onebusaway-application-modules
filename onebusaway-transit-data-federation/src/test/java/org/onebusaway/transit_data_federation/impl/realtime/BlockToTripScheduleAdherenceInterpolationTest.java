@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.predictions;
+package org.onebusaway.transit_data_federation.impl.realtime;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,10 +11,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.DateSupport;
+import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduleAdherenceRecord;
+import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
@@ -54,19 +55,19 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     Date serviceDate = DateSupport.date("2010-03-30 00:00");
     Date currentTime = DateSupport.date("2010-03-30 07:25");
 
-    ScheduleAdherenceRecord record = new ScheduleAdherenceRecord();
+    VehiclePositionRecord record = new VehiclePositionRecord();
     record.setBlockId(blockId);
     record.setServiceDate(serviceDate.getTime());
     record.setCurrentTime(currentTime.getTime());
     record.setScheduleDeviation(5 * 60);
 
-    List<ScheduleAdherenceRecord> records = _service.interpolate(record);
+    List<VehiclePositionRecord> records = _service.interpolate(record);
     assertEquals(2, records.size());
 
-    ScheduleAdherenceRecord recordA = records.get(0);
+    VehiclePositionRecord recordA = records.get(0);
     assertEquals(tripA.getId(), recordA.getTripId());
 
-    ScheduleAdherenceRecord recordB = records.get(1);
+    VehiclePositionRecord recordB = records.get(1);
     assertEquals(tripB.getId(), recordB.getTripId());
 
     /****
@@ -76,7 +77,7 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     serviceDate = DateSupport.date("2010-03-30 00:00");
     currentTime = DateSupport.date("2010-03-30 08:45");
 
-    record = new ScheduleAdherenceRecord();
+    record = new VehiclePositionRecord();
     record.setBlockId(blockId);
     record.setServiceDate(serviceDate.getTime());
     record.setCurrentTime(currentTime.getTime());
@@ -96,7 +97,7 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     serviceDate = DateSupport.date("2010-03-30 00:00");
     currentTime = DateSupport.date("2010-03-30 08:45");
 
-    record = new ScheduleAdherenceRecord();
+    record = new VehiclePositionRecord();
     record.setBlockId(blockId);
     record.setServiceDate(serviceDate.getTime());
     record.setCurrentTime(currentTime.getTime());

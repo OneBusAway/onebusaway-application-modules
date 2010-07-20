@@ -21,57 +21,21 @@
 
     <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
 
-    <bean id="tripTimePredictionServiceImpl" class="org.onebusaway.transit_data_federation.impl.predictions.TripTimePredictionServiceImpl">
-        <property name="tripTimePredictionsCache">
-            <bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
-                <property name="cacheManager" ref="cacheManager" />
-                <property name="cacheName"
-                    value="org.onebusaway.transit_data_federation.impl.predictions.TripTimePredictionServiceImpl.tripTimePredictionsCache" />
-                <property name="maxElementsInMemory" value="1400" />
-                <property name="eternal" value="false" />
-                <property name="timeToLive" value="0" />
-                <property name="timeToIdle" value="480" />
-                <property name="overflowToDisk" value="true" />
-                <property name="diskPersistent" value="false" />
-            </bean>
-        </property>
-        <property name="persistTripTimePredictions" value="true" />
+    <bean id="tripPositionRecordCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName"
+            value="org.onebusaway.transit_data_federation.impl.realtime.TripPositionServiceImpl.tripPositionRecordCache" />
+        <property name="maxElementsInMemory" value="1400" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="480" />
+        <property name="overflowToDisk" value="true" />
+        <property name="diskPersistent" value="false" />
     </bean>
 
-    <!-- 
-    <bean id="stopTimePredictionServiceImpl" class="org.onebusaway.transit_data_federation.impl.predictions.StopTimePredictionServiceImpl">
-        <property name="tripStopTimePredictionsCache">
-            <bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
-                <property name="cacheManager" ref="cacheManager" />
-                <property name="cacheName"
-                    value="org.onebusaway.transit_data_federation.impl.predictions.StopTimePredictionServiceImpl.tripStopTimePredictionsCache" />
-                <property name="maxElementsInMemory" value="1400" />
-                <property name="eternal" value="false" />
-                <property name="timeToLive" value="0" />
-                <property name="timeToIdle" value="480" />
-                <property name="overflowToDisk" value="true" />
-                <property name="diskPersistent" value="false" />
-            </bean>
-        </property>
-        <property name="tripTimePredictionService" ref="tripTimePredictionServiceImpl" />
-    </bean>
-    -->
-
-    <bean id="stopTimePredictionServiceImpl" class="org.onebusaway.transit_data_federation.impl.predictions.TripScheduleAdherenceStopTimePredictionServiceImpl">
-        <property name="tripStopTimePredictionsCache">
-            <bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
-                <property name="cacheManager" ref="cacheManager" />
-                <property name="cacheName"
-                    value="org.onebusaway.transit_data_federation.impl.predictions.StopTimePredictionServiceImpl.tripStopTimePredictionsCache" />
-                <property name="maxElementsInMemory" value="1400" />
-                <property name="eternal" value="false" />
-                <property name="timeToLive" value="0" />
-                <property name="timeToIdle" value="480" />
-                <property name="overflowToDisk" value="true" />
-                <property name="diskPersistent" value="false" />
-            </bean>
-        </property>
-        <property name="tripTimePredictionService" ref="tripTimePredictionServiceImpl" />
+    <bean id="tripPositionServiceImpl" class="org.onebusaway.transit_data_federation.impl.realtime.TripPositionServiceImpl">
+        <property name="tripPositionRecordCache" ref="tripPositionRecordCache" />
+        <property name="persistTripPositionRecords" value="true" />
     </bean>
 
     <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />

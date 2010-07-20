@@ -1,5 +1,7 @@
 package org.onebusaway.transit_data_federation.services;
 
+import java.util.List;
+
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Stop;
@@ -8,9 +10,6 @@ import org.onebusaway.transit_data_federation.model.LocationBookmarks;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.StopSequence;
 import org.onebusaway.transit_data_federation.model.StopSequenceBlock;
-import org.onebusaway.transit_data_federation.model.predictions.TripTimePrediction;
-
-import java.util.List;
 
 public interface TransitDataFederationDao {
 
@@ -41,8 +40,6 @@ public interface TransitDataFederationDao {
   public List<StopSequenceBlock> getStopSequenceBlocksByRoute(Route route);
 
   public List<StopSequenceBlock> getStopSequenceBlocksByStop(Stop stop);
-  
-  public List<TripTimePrediction> getTripTimePredictionsForTripServiceDateAndTimeRange(AgencyAndId tripId, long serviceDate, long fromTime, long toTime);
   
   public List<AgencyAndId> getShapeIdsForStop(Stop stop);
 }

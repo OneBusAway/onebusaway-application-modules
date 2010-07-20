@@ -22,10 +22,10 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.calendar.BlockCalendarService;
-import org.onebusaway.transit_data_federation.impl.predictions.BlockToTripScheduleAdherenceInterpolation;
+import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduleAdherenceListener;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduleAdherenceRecord;
+import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionListener;
+import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime.orbcad:name=OrbcadRecordFtpSource")
 public abstract class AbstractOrbcadRecordSource implements
-    HasListeners<ScheduleAdherenceListener> {
+    HasListeners<VehiclePositionListener> {
 
   private static final int REFRESH_INTERVAL_IN_SECONDS = 30;
 
@@ -43,13 +43,13 @@ public abstract class AbstractOrbcadRecordSource implements
 
   protected ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
 
-  private List<ScheduleAdherenceRecord> _records = new ArrayList<ScheduleAdherenceRecord>();
+  private List<VehiclePositionRecord> _records = new ArrayList<VehiclePositionRecord>();
 
   private int _refreshInterval = REFRESH_INTERVAL_IN_SECONDS;
 
   private long _lastRefresh = 0;
 
-  private Listeners<ScheduleAdherenceListener> _listeners = new Listeners<ScheduleAdherenceListener>();
+  private Listeners<VehiclePositionListener> _listeners = new Listeners<VehiclePositionListener>();
 
   private Map<String, String> _blockIdMapping = new HashMap<String, String>();
 
@@ -96,12 +96,12 @@ public abstract class AbstractOrbcadRecordSource implements
   }
 
   @Override
-  public void addListener(ScheduleAdherenceListener listener) {
+  public void addListener(VehiclePositionListener listener) {
     _listeners.addListener(listener);
   }
 
   @Override
-  public void removeListener(ScheduleAdherenceListener listener) {
+  public void removeListener(VehiclePositionListener listener) {
     _listeners.removeListener(listener);
   }
 
@@ -262,9 +262,9 @@ public abstract class AbstractOrbcadRecordSource implements
 
         handleRefresh();
 
-        for (ScheduleAdherenceListener listener : _listeners) {
+        for (VehiclePositionListener listener : _listeners) {
           try {
-            listener.handleScheduleAdherenceRecords(_records);
+            listener.handleVehiclePositionRecords(_records);
           } catch (Throwable ex) {
             _log.warn("error passing schedule adherence records to listener",
                 ex);
@@ -313,7 +313,7 @@ public abstract class AbstractOrbcadRecordSource implements
         return;
       }
 
-      ScheduleAdherenceRecord message = new ScheduleAdherenceRecord();
+      VehiclePositionRecord message = new VehiclePositionRecord();
 
       message.setBlockId(blockId);
 
@@ -331,7 +331,7 @@ public abstract class AbstractOrbcadRecordSource implements
         message.setCurrentLocation(new CoordinatePoint(record.getLat(),
             record.getLon()));
       
-      List<ScheduleAdherenceRecord> messages = _interpolation.interpolate(message);
+      List<VehiclePositionRecord> messages = _interpolation.interpolate(message);
 
       _records.addAll(messages);
       _recordsValid++;
