@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.bundle;
+package org.onebusaway.transit_data_federation.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;

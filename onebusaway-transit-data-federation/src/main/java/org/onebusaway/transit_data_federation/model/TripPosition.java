@@ -4,6 +4,15 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.model.predictions.ScheduleDeviation;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 
+/**
+ * Vehicle position information for a particular trip. The
+ * {@link #getScheduleDeviation()} schedule deviation information provides
+ * information about whether the position information is from real-time data or
+ * from schedule data.
+ * 
+ * @author bdferris
+ * 
+ */
 public class TripPosition {
 
   private ScheduleDeviation scheduleDeviation;
@@ -14,6 +23,9 @@ public class TripPosition {
 
   private int closestStopTimeOffset;
 
+  /**
+   * @return schedule deviation for the current trip at this position
+   */
   public ScheduleDeviation getScheduleDeviation() {
     return scheduleDeviation;
   }
@@ -22,6 +34,9 @@ public class TripPosition {
     this.scheduleDeviation = scheduleDeviation;
   }
 
+  /**
+   * @return the trip position
+   */
   public CoordinatePoint getPosition() {
     return position;
   }

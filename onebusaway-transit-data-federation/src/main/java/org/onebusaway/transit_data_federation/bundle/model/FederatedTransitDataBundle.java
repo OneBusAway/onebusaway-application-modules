@@ -2,6 +2,15 @@ package org.onebusaway.transit_data_federation.bundle.model;
 
 import java.io.File;
 
+import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreator;
+
+/**
+ * Captures the file structure of various file artifacts of a federated transit
+ * data bundle. All artifact file paths are relative to a base path.
+ * 
+ * @author bdferris
+ * @see FederatedTransitDataBundleCreator
+ */
 public class FederatedTransitDataBundle {
 
   private File _path;
@@ -37,12 +46,12 @@ public class FederatedTransitDataBundle {
   public File getTripPlannerGraphPath() {
     return new File(_path, "TripPlannerGraph.obj");
   }
-  
+
   public File getNarrativeProviderPath() {
     return new File(_path, "NarrativeProvider.obj");
   }
-  
+
   public File getCachePath() {
-    return new File(_path,"cache");
+    return new File(_path, "cache");
   }
 }

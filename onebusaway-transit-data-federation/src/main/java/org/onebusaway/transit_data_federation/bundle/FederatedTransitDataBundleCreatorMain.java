@@ -15,6 +15,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Command line tool for federated transit data bundle creator. Allows
+ * {@link FederatedTransitDataBundleCreator} to configured and run from the
+ * command line.
+ * 
+ * @author bdferris
+ * @see FederatedTransitDataBundleCreator
+ */
 public class FederatedTransitDataBundleCreatorMain {
 
   private static final String ARG_SKIP_TO = "skipTo";

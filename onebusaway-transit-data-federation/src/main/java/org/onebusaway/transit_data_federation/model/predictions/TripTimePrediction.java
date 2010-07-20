@@ -14,10 +14,19 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
+/**
+ * A trip time prediction is a database-serializable record that captures the
+ * real-time position and schedule deviation for a transit vehicle at a
+ * particular point in time. The record includes trip instance data and vehicle
+ * id where available.
+ * 
+ * @author bdferris
+ * 
+ */
 @Entity
 @Table(name = "transit_data_trip_time_predictions")
 @org.hibernate.annotations.Table(appliesTo = "transit_data_trip_time_predictions", indexes = {@Index(name = "vehicle_and_time", columnNames = {
-    "vehicle_agencyId", "vehicle_id","time"})})
+    "vehicle_agencyId", "vehicle_id", "time"})})
 @org.hibernate.annotations.Entity(mutable = false)
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class TripTimePrediction {
@@ -61,27 +70,47 @@ public class TripTimePrediction {
     vehicleId = null;
   }
 
+  /**
+   * @return a generated numeric id for this record
+   */
   public int getId() {
     return id;
   }
 
+  /**
+   * @return the trip id of the transit trip
+   */
   public AgencyAndId getTripId() {
     return tripId;
   }
 
+  /**
+   * @return the service date for the trip instance (Unix-time)
+   */
   public long getServiceDate() {
     return serviceDate;
   }
 
+  /**
+   * @return the time the record was recorded (Unix-time)
+   */
   public long getTime() {
     return time;
   }
 
+  /**
+   * @return schedule deviation, in seconds, (+deviation is late, -deviation is
+   *         early)
+   */
   public int getScheduleDeviation() {
     return scheduleDeviation;
   }
 
-  @Index(name="vehicleId")
+  /**
+   * @return the vehicle id of the transit vehicle servicing the trip, when
+   *         available
+   */
+  @Index(name = "vehicleId")
   public AgencyAndId getVehicleId() {
     return this.vehicleId;
   }

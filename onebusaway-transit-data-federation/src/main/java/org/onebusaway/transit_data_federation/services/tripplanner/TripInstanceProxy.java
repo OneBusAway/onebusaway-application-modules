@@ -1,5 +1,13 @@
 package org.onebusaway.transit_data_federation.services.tripplanner;
 
+/**
+ * A trip instance is the combination of a {@link TripEntry} and a service date
+ * for which that trip is active. The "service date" is the "midnight time" from
+ * which the {@link StopTimeEntry} entries are relative.
+ * 
+ * @author bdferris
+ * @see TripEntry
+ */
 public class TripInstanceProxy {
 
   private final TripEntry _trip;
@@ -17,6 +25,12 @@ public class TripInstanceProxy {
     return _trip;
   }
 
+  /**
+   * The service date that the trip instance is operating. This is the
+   * "midnight" time relative to the stop times for the trip.
+   * 
+   * @return the service date on which the trip is operating (Unix-time)
+   */
   public long getServiceDate() {
     return _serviceDate;
   }
@@ -45,7 +59,7 @@ public class TripInstanceProxy {
       return false;
     return true;
   }
-  
+
   @Override
   public String toString() {
     return _trip.toString() + " " + _serviceDate;

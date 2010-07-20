@@ -68,7 +68,9 @@ public class StopTimeInstanceProxy {
   }
 
   /**
-   * Set the predicted arrival offset, in seconds
+   * Set the predicted arrival offset, in seconds. The predicted arrival time
+   * offset is additive, which means a positive value indicates a vehicle is
+   * running late, while a negative value indicates a vehicle is running early.
    * 
    * @param offset in seconds
    */
@@ -78,6 +80,10 @@ public class StopTimeInstanceProxy {
   }
 
   /**
+   * The predicted arrival time offset is additive, which means a positive value
+   * indicates a vehicle is running late, while a negative value indicates a
+   * vehicle is running early.
+   * 
    * @return the predicted arrival offset, in seconds
    */
   public int getPredictedArrivalOffset() {
@@ -89,7 +95,10 @@ public class StopTimeInstanceProxy {
   }
 
   /**
-   * Set the predicted departure offset, in seconds
+   * Set the predicted departure offset, in seconds. The predicted departure
+   * time offset is additive, which means a positive value indicates a vehicle
+   * is running late, while a negative value indicates a vehicle is running
+   * early.
    * 
    * @param offset in seconds
    */
@@ -99,6 +108,9 @@ public class StopTimeInstanceProxy {
   }
 
   /**
+   * The predicted departure time offset is additive, which means a positive value
+   * indicates a vehicle is running late, while a negative value indicates a
+   * vehicle is running early.
    * @return the predicted departure offset, in seconds
    */
   public int getPredictedDepartureOffset() {
