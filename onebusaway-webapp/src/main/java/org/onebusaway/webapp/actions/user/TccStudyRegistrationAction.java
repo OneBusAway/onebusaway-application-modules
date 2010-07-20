@@ -68,6 +68,7 @@ public class TccStudyRegistrationAction extends ActionSupport implements
         UserIndexKey key = details.getUserIndexKey();
         id = key.getType() + "|" + key.getValue();
       }
+      _currentUserService.getCurrentUser(true);
       _currentUserService.handleAddAccount("tccStudyId", id, _id, false);
     } catch (Exception ex) {
       _log.warn("error registering tcc study id", ex);
