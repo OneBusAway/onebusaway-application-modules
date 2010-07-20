@@ -21,6 +21,12 @@ public interface CurrentUserService {
   public UserBean getCurrentUser();
 
   /**
+   * @return the current user, creating the user as appropriate or returning
+   *         null if no user is logged in
+   */
+  public UserBean getCurrentUser(boolean createUserIfAppropriate);
+
+  /**
    * @return the current user
    */
   public UserIndex getCurrentUserAsUserIndex();

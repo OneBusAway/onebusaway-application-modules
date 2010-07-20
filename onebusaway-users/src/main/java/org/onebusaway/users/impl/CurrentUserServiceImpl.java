@@ -79,7 +79,12 @@ public class CurrentUserServiceImpl implements CurrentUserService {
 
   @Override
   public UserBean getCurrentUser() {
-    UserIndex userIndex = _currentUserStrategy.getCurrentUserIndex(false);
+    return getCurrentUser(false);
+  }
+
+  @Override
+  public UserBean getCurrentUser(boolean createUserIfAppropriate) {
+    UserIndex userIndex = _currentUserStrategy.getCurrentUserIndex(createUserIfAppropriate);
     if (userIndex == null)
       return null;
     return _userService.getUserAsBean(userIndex.getUser());
