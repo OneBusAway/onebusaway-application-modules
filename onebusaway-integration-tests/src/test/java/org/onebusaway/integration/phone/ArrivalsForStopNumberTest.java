@@ -126,6 +126,8 @@ public class ArrivalsForStopNumberTest extends PhoneTestSupport {
       return true;
     if (value.matches("departed \\d+ minutes ago"))
       return true;
+    if (value.matches("departed one minute ago"))
+      return true;
     if (value.matches("scheduled in \\d+ minutes"))
       return true;
     if (value.matches("scheduled in \\d+ minutes"))
