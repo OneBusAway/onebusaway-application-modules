@@ -570,14 +570,14 @@ public class TripPositionServiceImpl implements TripPositionService,
     if (targetTime + offset < System.currentTimeMillis()
         && _persistTripPositionRecords) {
 
+      _tripPositionRecordPersistentStoreAccessCount.incrementAndGet();
+      
       List<TripPositionRecord> predictions = _tripPositionRecordDao.getTripPositionRecordsForTripServiceDateAndTimeRange(
           serviceDateAndId.getId(), serviceDateAndId.getServiceDate(),
           fromTime, toTime);
-
-      for (TripPositionRecord prediction : predictions)
-        scheduleDeviations.put(prediction.getTime(),
-            prediction.getScheduleDeviation());
-      _tripPositionRecordPersistentStoreAccessCount.incrementAndGet();
+      
+      if( !predictions.isEmpty() )
+        return TripPositionRecordCollection.createFromRecords(predictions);      
     }
 
     return new TripPositionRecordCollection(fromTime, toTime,
