@@ -1,65 +1,62 @@
 package org.onebusaway.transit_data_federation.model;
 
-import com.vividsolutions.jts.geom.Point;
-
-import org.hibernate.annotations.AccessType;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Type;
-
-import org.onebusaway.container.model.IdentityBean;
-
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import org.onebusaway.container.model.IdentityBean;
+import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
 
-@Entity
-@Table(name = "where_stop_sequence_blocks")
-@AccessType("field")
-@org.hibernate.annotations.Entity(mutable = false)
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
-public class StopSequenceBlock extends IdentityBean<StopSequenceBlockKey> {
+import com.vividsolutions.jts.geom.Point;
+
+/**
+ * A stop sequence collection contains a list of {@link StopSequence} sequences
+ * that are headed in the same direction for a particular
+ * {@link RouteCollection}, along with a general description of the destinations
+ * for those stop sequences and general start and stop locations for the
+ * sequences. Typically a stop sequence collection will be generated for each
+ * direction of travel for a particular route.
+ * 
+ * @author bdferris
+ * @see StopSequence
+ * @see StopSequenceCollectionService
+ */
+public class StopSequenceCollection extends IdentityBean<StopSequenceCollectionKey> {
 
   private static final long serialVersionUID = 1L;
 
-  @Id
-  @AccessType("property")
-  private StopSequenceBlockKey id;
+  private StopSequenceCollectionKey id;
 
   private String description;
 
-  @ManyToMany(fetch = FetchType.EAGER)
   private List<StopSequence> stopSequences;
 
   private double startLat;
 
   private double startLon;
 
-  @Type(type = "org.hibernatespatial.GeometryUserType")
-  @Column(columnDefinition = "GEOMETRY")
   private Point startLocation;
 
   private double endLat;
 
   private double endLon;
 
-  @Type(type = "org.hibernatespatial.GeometryUserType")
-  @Column(columnDefinition = "GEOMETRY")
   private Point endLocation;
 
-  public StopSequenceBlockKey getId() {
+  public StopSequenceCollectionKey getId() {
     return id;
   }
 
-  public void setId(StopSequenceBlockKey id) {
+  public void setId(StopSequenceCollectionKey id) {
     this.id = id;
   }
 
+  /**
+   * Typically, the most frequently mentioned trip headsign for all the trips
+   * that correspond to the stop sequences in the block is used as the general
+   * destination description.
+   * 
+   * @return a description of the general destination for the stop sequences in
+   *         the block
+   */
   public String getDescription() {
     return description;
   }
@@ -68,6 +65,10 @@ public class StopSequenceBlock extends IdentityBean<StopSequenceBlockKey> {
     this.description = description;
   }
 
+  /**
+   * 
+   * @return the list of all stop sequences in the block
+   */
   public List<StopSequence> getStopSequences() {
     return stopSequences;
   }

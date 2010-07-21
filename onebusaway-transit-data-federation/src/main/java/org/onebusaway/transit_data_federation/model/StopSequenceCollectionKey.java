@@ -15,28 +15,28 @@
  */
 package org.onebusaway.transit_data_federation.model;
 
-import org.onebusaway.gtfs.model.Route;
-
 import java.io.Serializable;
 
-import javax.persistence.Embeddable;
-import javax.persistence.ManyToOne;
+import org.onebusaway.gtfs.model.Route;
 
-@Embeddable
-public class StopSequenceBlockKey implements Serializable {
+/**
+ * 
+ * @author bdferris
+ *
+ */
+public class StopSequenceCollectionKey implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  @ManyToOne
   private Route route;
 
   private String id;
 
-  public StopSequenceBlockKey() {
+  public StopSequenceCollectionKey() {
 
   }
 
-  public StopSequenceBlockKey(Route route, String id) {
+  public StopSequenceCollectionKey(Route route, String id) {
     this.route = route;
     this.id = id;
     this.id = id;
@@ -60,10 +60,10 @@ public class StopSequenceBlockKey implements Serializable {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof StopSequenceBlockKey))
+    if (obj == null || !(obj instanceof StopSequenceCollectionKey))
       return false;
 
-    StopSequenceBlockKey spbk = (StopSequenceBlockKey) obj;
+    StopSequenceCollectionKey spbk = (StopSequenceCollectionKey) obj;
     return this.route.equals(spbk.route) && this.id.equals(spbk.id);
   }
 

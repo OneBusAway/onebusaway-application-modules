@@ -30,10 +30,10 @@ import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.onebusaway.transit_data_federation.impl.StopGraphComparator;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.StopSequence;
-import org.onebusaway.transit_data_federation.model.StopSequenceBlock;
+import org.onebusaway.transit_data_federation.model.StopSequenceCollection;
 import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.RouteService;
-import org.onebusaway.transit_data_federation.services.StopSequenceBlocksService;
+import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
@@ -61,7 +61,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
 
   private StopSequencesService _stopSequencesService;
 
-  private StopSequenceBlocksService _stopSequenceBlocksService;
+  private StopSequenceCollectionService _stopSequenceBlocksService;
 
   @Autowired
   public void setGtfsDao(ExtendedGtfsRelationalDao gtfsDao) {
@@ -101,7 +101,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
 
   @Autowired
   public void setStopSequencesBlocksService(
-      StopSequenceBlocksService stopSequenceBlocksService) {
+      StopSequenceCollectionService stopSequenceBlocksService) {
     _stopSequenceBlocksService = stopSequenceBlocksService;
   }
 
@@ -197,9 +197,9 @@ class RouteBeanServiceImpl implements RouteBeanService {
 
     List<StopSequence> sequences = _stopSequencesService.getStopSequencesForTrips(stopTimesByTrip);
 
-    List<StopSequenceBlock> blocks = _stopSequenceBlocksService.getStopSequencesAsBlocks(sequences);
+    List<StopSequenceCollection> blocks = _stopSequenceBlocksService.getStopSequencesAsBlocks(sequences);
 
-    for (StopSequenceBlock block : blocks) {
+    for (StopSequenceCollection block : blocks) {
 
       NameBean name = new NameBean(NameBeanTypes.DESTINATION,
           block.getDescription());
@@ -225,7 +225,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
     return result;
   }
 
-  private List<Stop> getStopsInOrder(StopSequenceBlock block) {
+  private List<Stop> getStopsInOrder(StopSequenceCollection block) {
     DirectedGraph<Stop> graph = new DirectedGraph<Stop>();
     for (StopSequence sequence : block.getStopSequences()) {
       Stop prev = null;
@@ -244,7 +244,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
   }
 
   private Set<AgencyAndId> getShapeIdsForStopSequenceBlock(
-      StopSequenceBlock block) {
+      StopSequenceCollection block) {
     Set<AgencyAndId> shapeIds = new HashSet<AgencyAndId>();
     for (StopSequence sequence : block.getStopSequences()) {
       for (Trip trip : sequence.getTrips()) {

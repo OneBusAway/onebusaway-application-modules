@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.model;
+package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;

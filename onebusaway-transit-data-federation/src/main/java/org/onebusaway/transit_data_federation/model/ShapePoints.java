@@ -2,9 +2,17 @@ package org.onebusaway.transit_data_federation.model;
 
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.ShapePoint;
 
 import java.io.Serializable;
 
+/**
+ * A more memory efficient data structure for capturing a sequence of
+ * {@link ShapePoint} objects
+ * 
+ * @author bdferris
+ * @see ShapePoint
+ */
 public class ShapePoints implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -20,7 +28,7 @@ public class ShapePoints implements Serializable {
   public int getSize() {
     return lats.length;
   }
-  
+
   public boolean isEmpty() {
     return getSize() == 0;
   }
@@ -64,17 +72,18 @@ public class ShapePoints implements Serializable {
 
     int n = distTraveled.length;
 
-    if (distTraveled[n-1] > 0)
+    if (distTraveled[n - 1] > 0)
       return;
-    
+
     double totalDistanceTraveled = 0;
     double prevLat = lats[0];
     double prevLon = lons[0];
-    
-    for( int i=1; i<n; i++) {
+
+    for (int i = 1; i < n; i++) {
       double curLat = lats[i];
       double curLon = lons[i];
-      totalDistanceTraveled += SphericalGeometryLibrary.distance(prevLat, prevLon, curLat, curLon);
+      totalDistanceTraveled += SphericalGeometryLibrary.distance(prevLat,
+          prevLon, curLat, curLon);
       distTraveled[i] = totalDistanceTraveled;
       prevLat = curLat;
       prevLon = curLon;

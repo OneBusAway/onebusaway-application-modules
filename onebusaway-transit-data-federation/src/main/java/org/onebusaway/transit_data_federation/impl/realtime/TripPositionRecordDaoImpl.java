@@ -12,6 +12,14 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * Implemenation class for {@link TripPositionRecordDao} that manages persisting
+ * {@link TripPositionRecord} records to a Hibernate-managed data-store.
+ * 
+ * @author bdferris
+ * @see TripPositionRecordDao
+ * @see TripPositionRecord
+ */
 @Component
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime:name=TripPositionRecordDaoImpl")
 public class TripPositionRecordDaoImpl implements TripPositionRecordDao {

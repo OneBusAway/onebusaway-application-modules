@@ -17,12 +17,12 @@ import org.onebusaway.transit_data_federation.TransitDataFederationBaseTestSuppo
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.TripPosition;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
 import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;

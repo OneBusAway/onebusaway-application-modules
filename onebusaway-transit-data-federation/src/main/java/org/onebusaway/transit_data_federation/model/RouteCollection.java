@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.model;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
+import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
 
 import org.hibernate.annotations.AccessType;
 import org.hibernate.annotations.Cache;
@@ -26,7 +27,7 @@ import javax.persistence.Table;
  * of the same route (local vs express).
  * 
  * @author bdferris
- * 
+ * @see RouteCollectionSearchService
  */
 @Entity
 @Table(name = "where_route_collections")

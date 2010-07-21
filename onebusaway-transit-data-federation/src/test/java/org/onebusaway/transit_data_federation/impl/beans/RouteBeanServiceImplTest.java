@@ -29,7 +29,7 @@ import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.RouteService;
-import org.onebusaway.transit_data_federation.services.StopSequenceBlocksService;
+import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
@@ -54,7 +54,7 @@ public class RouteBeanServiceImplTest {
 
   private StopBeanService _stopBeanService;
 
-  private StopSequenceBlocksService _stopSequenceBlocksService;
+  private StopSequenceCollectionService _stopSequenceBlocksService;
 
   @Before
   public void setup() {

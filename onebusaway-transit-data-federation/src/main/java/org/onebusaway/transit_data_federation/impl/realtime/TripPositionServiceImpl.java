@@ -25,13 +25,13 @@ import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
 import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.TripPosition;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.StopRealtimeService;
+import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
 import org.onebusaway.transit_data_federation.services.realtime.TripPositionService;
 import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionListener;
 import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
@@ -46,6 +46,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
 import edu.washington.cs.rse.collections.FactoryMap;
+import edu.washington.cs.rse.collections.stats.Min;
 
 /**
  * Implementation for {@link TripPositionService}. Keeps a recent cache of
@@ -328,12 +329,17 @@ public class TripPositionServiceImpl implements TripPositionService,
 
     if (records.isEmpty())
       return null;
+    
+    Min<TripPositionRecord> closest = new Min<TripPositionRecord>();
+    for( TripPositionRecord record : records) {
+      closest.add(Math.abs(record.getTime() - time),record);
+    }
 
-    TripPositionRecord first = records.get(0);
+    TripPositionRecord representative = closest.getMinElement();
 
-    TripEntry tripEntry = _transitGraphDao.getTripEntryForId(first.getTripId());
+    TripEntry tripEntry = _transitGraphDao.getTripEntryForId(representative.getTripId());
     TripInstanceProxy tripInstance = new TripInstanceProxy(tripEntry,
-        first.getServiceDate());
+        representative.getServiceDate());
 
     TripPositionRecordCollection collection = TripPositionRecordCollection.createFromRecords(records);
 

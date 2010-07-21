@@ -6,8 +6,24 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInsta
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Service methods for determing the set of active stop times at a particular
+ * stop and time.
+ * 
+ * @author bdferris
+ * @see StopTimeInstanceProxy
+ */
 public interface StopTimeService {
 
+  /**
+   * Determines the set of active stop time instances at a given stop, taking
+   * into account information like active service dates, etc
+   * 
+   * @param stopId the starget stop id
+   * @param from
+   * @param to
+   * @return the set of active stop time instances in the specified time range
+   */
   public List<StopTimeInstanceProxy> getStopTimeInstancesInTimeRange(
       AgencyAndId stopId, Date from, Date to);
 }

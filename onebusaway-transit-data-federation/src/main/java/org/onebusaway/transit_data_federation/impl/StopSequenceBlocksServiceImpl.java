@@ -13,9 +13,9 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
 import org.onebusaway.transit_data_federation.model.StopSequence;
-import org.onebusaway.transit_data_federation.model.StopSequenceBlock;
-import org.onebusaway.transit_data_federation.model.StopSequenceBlockKey;
-import org.onebusaway.transit_data_federation.services.StopSequenceBlocksService;
+import org.onebusaway.transit_data_federation.model.StopSequenceCollection;
+import org.onebusaway.transit_data_federation.model.StopSequenceCollectionKey;
+import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ import edu.washington.cs.rse.collections.stats.Max;
 import edu.washington.cs.rse.collections.tuple.Pair;
 
 /**
- * Construct a set of {@link StopSequenceBlock} blocks for each route. A block
+ * Construct a set of {@link StopSequenceCollection} blocks for each route. A block
  * contains a set of {@link StopSequence} sequences that are headed in the same
  * direction for a particular route, along with a general description of the
  * destinations for those stop sequences and general start and stop locations
@@ -37,7 +37,7 @@ import edu.washington.cs.rse.collections.tuple.Pair;
  * @author bdferris
  */
 @Component
-public class StopSequenceBlocksServiceImpl implements StopSequenceBlocksService {
+public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionService {
 
   private static final double SERVICE_PATTERN_TRIP_COUNT_RATIO_MIN = 0.2;
 
@@ -56,13 +56,13 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceBlocksService 
    * @seeorg.onebusaway.transit_data_federation.impl.StopSequenceBlocksService#
    * getStopSequencesAsBlocks(java.util.List)
    */
-  public List<StopSequenceBlock> getStopSequencesAsBlocks(
+  public List<StopSequenceCollection> getStopSequencesAsBlocks(
       List<StopSequence> sequences) {
 
     pruneEmptyStopSequences(sequences);
 
     if (sequences.isEmpty())
-      return new ArrayList<StopSequenceBlock>();
+      return new ArrayList<StopSequenceCollection>();
 
     Map<StopSequence, PatternStats> sequenceStats = getStatsForStopSequences(sequences);
     Map<String, List<StopSequence>> sequenceGroups = getGroupsForStopSequences(sequences);
@@ -224,7 +224,7 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceBlocksService 
    * @param sequencesByStopSequenceBlockId
    * @return
    */
-  private List<StopSequenceBlock> constructBlocks(
+  private List<StopSequenceCollection> constructBlocks(
       Map<StopSequence, PatternStats> sequenceStats,
       Map<String, List<StopSequence>> sequencesByStopSequenceBlockId) {
 
@@ -274,7 +274,7 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceBlocksService 
       }
     }
 
-    List<StopSequenceBlock> blocks = new ArrayList<StopSequenceBlock>();
+    List<StopSequenceCollection> blocks = new ArrayList<StopSequenceCollection>();
 
     for (Map.Entry<String, String> entry : directionToName.entrySet()) {
 
@@ -285,12 +285,12 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceBlocksService 
       Segment segment = segments.get(direction);
 
       // System.out.println("  " + direction + " => " + name);
-      StopSequenceBlock block = new StopSequenceBlock();
+      StopSequenceCollection block = new StopSequenceCollection();
 
       if (segment.fromLat == 0.0)
         throw new IllegalStateException("what?");
 
-      StopSequenceBlockKey key = new StopSequenceBlockKey(null, direction);
+      StopSequenceCollectionKey key = new StopSequenceCollectionKey(null, direction);
       block.setId(key);
       block.setDescription(name);
       block.setStopSequences(patterns);

@@ -1,7 +1,6 @@
 package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.model.TripPosition;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
 
 /**

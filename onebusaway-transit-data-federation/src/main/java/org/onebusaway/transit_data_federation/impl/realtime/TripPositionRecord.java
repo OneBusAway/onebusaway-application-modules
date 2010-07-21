@@ -20,8 +20,9 @@ import org.onebusaway.gtfs.model.AgencyAndId;
  * particular point in time. The record includes trip instance data and vehicle
  * id where available.
  * 
- * @author bdferris
+ * This class is mean for internal use.
  * 
+ * @author bdferris
  */
 @Entity
 @Table(name = "transit_data_trip_position_records")
