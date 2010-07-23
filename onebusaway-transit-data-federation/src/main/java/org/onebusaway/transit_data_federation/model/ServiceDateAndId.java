@@ -8,7 +8,7 @@ import java.io.Serializable;
  * Combines an {@link AgencyAndId} id with a service date. Typically, the id is
  * either a trip id or a block id. The service date is the "midnight" start-time
  * of a service date on which the trip is operating. Recall that "midnight" is
- * relative to the timezone the trip or block is operating in (as opposed to the
+ * relative to the time-zone the trip or block is operating in (as opposed to the
  * one the server process is operating in) and to any trickiness with DST, as
  * defined in the GTFS spec.
  * 

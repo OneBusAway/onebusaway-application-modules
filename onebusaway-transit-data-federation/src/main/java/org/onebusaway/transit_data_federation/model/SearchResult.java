@@ -2,6 +2,14 @@ package org.onebusaway.transit_data_federation.model;
 
 import java.util.List;
 
+/**
+ * A search results captures a list of results along with the scores for each
+ * result.
+ * 
+ * @author bdferris
+ * 
+ * @param <T> the result type
+ */
 public class SearchResult<T> {
 
   private List<T> _results;
@@ -20,7 +28,7 @@ public class SearchResult<T> {
   public T getResult(int index) {
     return _results.get(index);
   }
-  
+
   public List<T> getResults() {
     return _results;
   }

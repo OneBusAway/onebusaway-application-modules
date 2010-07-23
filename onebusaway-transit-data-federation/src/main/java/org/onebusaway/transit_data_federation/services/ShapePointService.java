@@ -1,8 +1,17 @@
 package org.onebusaway.transit_data_federation.services;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 
+/**
+ * Service for looking up {@link ShapePoint}
+ * 
+ * @author bdferris
+ * 
+ *@see ShapePoint
+ *@see ShapePoints
+ */
 public interface ShapePointService {
 
   /**

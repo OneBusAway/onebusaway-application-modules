@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
-import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,18 +19,19 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
-
 @Component
 class WhereGeospatialServiceImpl implements GeospatialBeanService {
 
-  @Autowired
   private GtfsRelationalDao _dao;
 
   private volatile boolean _initialized = false;
 
   private STRtree _tree;
+  
+  @Autowired
+  public void setGtfsRelationalDao(GtfsRelationalDao dao) {
+    _dao = dao;
+  }
 
   @PostConstruct
   public void initialize() {
@@ -64,23 +65,15 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
    * {@link RouteBeanService} Interface
    ****/
 
-  public List<AgencyAndId> getStopsByLocation(double lat, double lon,
-      double radius) {
-    CoordinateRectangle bounds = DistanceLibrary.bounds(new CoordinatePoint(
-        lat, lon), radius);
-    return getStopsByBounds(bounds.getMinLat(), bounds.getMinLon(),
-        bounds.getMaxLat(), bounds.getMaxLon());
-  }
-
-  public List<AgencyAndId> getStopsByBounds(double lat1, double lon1,
-      double lat2, double lon2) {
-
+  @Override
+  public List<AgencyAndId> getStopsByBounds(CoordinateBounds bounds) {
+    
     initialize();
 
-    float xMin = (float) Math.min(lon1, lon2);
-    float yMin = (float) Math.min(lat1, lat2);
-    float xMax = (float) Math.max(lon1, lon2);
-    float yMax = (float) Math.max(lat1, lat2);
+    double xMin = bounds.getMinLon();
+    double yMin = bounds.getMinLat();
+    double xMax = bounds.getMaxLon();
+    double yMax = bounds.getMaxLat();
 
     TreeVisistor v = new TreeVisistor();
     _tree.query(new Envelope(xMin,xMax,yMin,yMax), v);

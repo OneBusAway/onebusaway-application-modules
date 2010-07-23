@@ -115,9 +115,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
     CoordinateBounds bounds = query.getBounds();
 
-    List<AgencyAndId> stops = _whereGeospatialService.getStopsByBounds(
-        bounds.getMinLat(), bounds.getMinLon(), bounds.getMaxLat(),
-        bounds.getMaxLon());
+    List<AgencyAndId> stops = _whereGeospatialService.getStopsByBounds(bounds);
 
     Set<RouteBean> routes = new HashSet<RouteBean>();
     for (AgencyAndId stopId : stops) {

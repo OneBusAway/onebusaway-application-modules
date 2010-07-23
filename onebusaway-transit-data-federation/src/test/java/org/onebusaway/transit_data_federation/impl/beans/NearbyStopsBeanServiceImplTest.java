@@ -9,6 +9,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -43,9 +45,9 @@ public class NearbyStopsBeanServiceImplTest {
     stopIds.add(stopIdA);
     stopIds.add(stopIdB);
 
-    Mockito.when(
-        _geoBeanService.getStopsByLocation(stop.getLat(), stop.getLon(), 400)).thenReturn(
-        stopIds);
+    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(stop.getLat(),
+        stop.getLon(), 400);
+    Mockito.when(_geoBeanService.getStopsByBounds(bounds)).thenReturn(stopIds);
 
     List<AgencyAndId> nearby = _service.getNearbyStops(stop, 400);
     assertEquals(1, nearby.size());

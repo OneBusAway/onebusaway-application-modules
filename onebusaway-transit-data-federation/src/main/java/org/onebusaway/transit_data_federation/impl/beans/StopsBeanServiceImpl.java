@@ -63,10 +63,9 @@ class StopsBeanServiceImpl implements StopsBeanService {
   private StopsBean getStopsByBounds(SearchQueryBean queryBean)
       throws ServiceException {
 
-    CoordinateBounds b = queryBean.getBounds();
+    CoordinateBounds bounds = queryBean.getBounds();
 
-    List<AgencyAndId> stopIds = _geospatialBeanService.getStopsByBounds(
-        b.getMinLat(), b.getMinLon(), b.getMaxLat(), b.getMaxLon());
+    List<AgencyAndId> stopIds = _geospatialBeanService.getStopsByBounds(bounds);
 
     boolean limitExceeded = BeanServiceSupport.checkLimitExceeded(stopIds,
         queryBean.getMaxCount());
