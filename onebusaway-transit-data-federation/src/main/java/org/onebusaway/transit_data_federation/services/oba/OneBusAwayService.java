@@ -8,7 +8,27 @@ import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 
 import java.util.List;
 
+/**
+ * Service methods for the "one bus ride away" transit-shed calculation aka what
+ * are all the places we can get to from a certain starting point in a
+ * particular amount of time.
+ * 
+ * @author bdferris
+ * 
+ */
 public interface OneBusAwayService {
+
+  /**
+   * Given a set of stops with min-travel time already determined, and a set of
+   * nearby places, complete the best plan calculation for each by looking for
+   * valid walking paths from stops to places and keeping the shortest paths.
+   * 
+   * @param constraints
+   * @param travelTimes
+   * @param localResults
+   * @return
+   * @throws ServiceException
+   */
   public List<TimedPlaceBean> getLocalPaths(
       OneBusAwayConstraintsBean constraints,
       MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)

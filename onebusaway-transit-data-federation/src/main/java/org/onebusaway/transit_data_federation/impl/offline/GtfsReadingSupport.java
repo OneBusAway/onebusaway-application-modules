@@ -12,14 +12,44 @@ import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
 import org.onebusaway.transit_data_federation.services.offline.EntityReplacementStrategy;
 import org.springframework.context.ApplicationContext;
 
+/**
+ * Convenience methods for reading multiple gtfs feeds, as defined by a
+ * {@link GtfsBundles} entry in an {@link ApplicationContext}, into a common
+ * data store, with addition of {@link EntityReplacementStrategy}.
+ * 
+ * @author bdferris
+ * @see GtfsBundles
+ * @see GtfsMultiReaderImpl
+ * @see EntityReplacementStrategy
+ */
 public class GtfsReadingSupport {
 
+  /**
+   * Supplies a default entity schema factory to
+   * {@link #readGtfsIntoStore(ApplicationContext, GenericMutableDao, DefaultEntitySchemaFactory)}
+   * 
+   * @param context
+   * @param store
+   * @throws IOException
+   */
   public static void readGtfsIntoStore(ApplicationContext context,
       GenericMutableDao store) throws IOException {
     readGtfsIntoStore(context, store,
         GtfsEntitySchemaFactory.createEntitySchemaFactory());
   }
 
+  /**
+   * Read gtfs, as defined by {@link GtfsBundles} entries in the application
+   * context, into the specified data store. Gtfs will be read in quasi-paralle
+   * mode using {@link GtfsMultiReaderImpl}. Any
+   * {@link EntityReplacementStrategy} strategies defined in the application
+   * context will be applied as well.
+   * 
+   * @param context
+   * @param store
+   * @param factory
+   * @throws IOException
+   */
   public static void readGtfsIntoStore(ApplicationContext context,
       GenericMutableDao store, DefaultEntitySchemaFactory factory)
       throws IOException {
@@ -54,6 +84,13 @@ public class GtfsReadingSupport {
     multiReader.run();
   }
 
+  /**
+   * Looks for instances of {@link GtfsBundles} or {@link GtfsBundle} in the
+   * application context.
+   * 
+   * @param context
+   * @return
+   */
   private static GtfsBundles getGtfsBundles(ApplicationContext context) {
 
     GtfsBundles bundles = (GtfsBundles) context.getBean("gtfs-bundles");

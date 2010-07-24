@@ -30,7 +30,9 @@ import edu.washington.cs.rse.collections.stats.Counter;
  * facilitated by the use of an {@link EntityReplacementStrategy}.
  * 
  * @author bdferris
- * 
+ * @see EntityReplacementStrategy
+ * @see GtfsReader
+ * @see GtfsReadingSupport
  */
 public class GtfsMultiReaderImpl implements Runnable {
 
@@ -111,6 +113,10 @@ public class GtfsMultiReaderImpl implements Runnable {
    * Private Methods
    ****/
 
+  /**
+   * Custom {@link GenericMutableDao} instance that intercepts methods so that
+   * the entity replacement strategy can be applied.
+   */
   private class StoreImpl extends GenericMutableDaoWrapper {
 
     public StoreImpl(GenericMutableDao source) {
@@ -119,14 +125,14 @@ public class GtfsMultiReaderImpl implements Runnable {
 
     @Override
     public <T> T getEntityForId(Class<T> type, Serializable id) {
-      
+
       Serializable replacementId = _entityReplacementStrategy.getReplacementEntityId(
           type, id);
-      
+
       if (replacementId != null) {
 
         T entity = super.getEntityForId(type, replacementId);
-        
+
         if (entity != null)
           return entity;
 

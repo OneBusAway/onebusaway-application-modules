@@ -13,8 +13,16 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
+import org.onebusaway.transit_data_federation.impl.offline.EntityReplacementStrategyFactory;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
+/**
+ * Given a stop-consolidation list, verifies that the specified stops still
+ * exist in the target GTFS feeds.
+ * 
+ * @author bdferris
+ * @see EntityReplacementStrategyFactory
+ */
 public class GtfsStopReplacementVerificationMain {
 
   @SuppressWarnings("unchecked")
@@ -30,7 +38,7 @@ public class GtfsStopReplacementVerificationMain {
     for (int i = 1; i < args.length; i += 2) {
 
       GtfsReader reader = new GtfsReader();
-      reader.setDefaultAgencyId(args[i+1]);
+      reader.setDefaultAgencyId(args[i + 1]);
       reader.setInputLocation(new File(args[i]));
       reader.getEntityClasses().retainAll(
           Arrays.asList(Agency.class, Stop.class));

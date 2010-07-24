@@ -18,6 +18,13 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 
+/**
+ * Utility script to compute the set of stops from a gtfs feed that fall within
+ * a more complex polygon boundary
+ * 
+ * @author bdferris
+ * @ssee GtfsStopsInRegionMain
+ */
 public class GtfsStopsInPolygonMain {
   
   private static GeometryFactory _factory = new GeometryFactory();

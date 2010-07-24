@@ -35,7 +35,15 @@ import edu.washington.cs.rse.geospatial.UTMLibrary;
 import edu.washington.cs.rse.geospatial.UTMProjection;
 import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
-public class GtfsPolylineMain {
+/**
+ * Utility script to compute a polygon boundary for the set of stops in a GTFS,
+ * useful for passing to an OpenStreetMap script for extracting an appropriate
+ * subset of a larger OSM document.
+ * 
+ * @author bdferris
+ * 
+ */
+public class ComputePolylineBoundaryForGtfsStopsMain {
 
   private static final String ARG_FORMAT = "format";
 
@@ -46,7 +54,7 @@ public class GtfsPolylineMain {
   public static void main(String[] args) throws IOException,
       ClassNotFoundException {
 
-    GtfsPolylineMain main = new GtfsPolylineMain();
+    ComputePolylineBoundaryForGtfsStopsMain main = new ComputePolylineBoundaryForGtfsStopsMain();
     main.run(args);
   }
 
@@ -94,12 +102,12 @@ public class GtfsPolylineMain {
       UTMProjection proj = handler.getProjection();
 
       PrintWriter out = new PrintWriter(new FileWriter(outputPath));
-      
+
       out.println("polygon");
       AtomicInteger index = new AtomicInteger();
       printGeometry(out, geometry, proj, index);
       out.println("END");
-      
+
       out.close();
 
     } catch (ParseException ex) {
@@ -111,35 +119,36 @@ public class GtfsPolylineMain {
     System.exit(0);
   }
 
-  private void printGeometry(PrintWriter out, Geometry geometry, UTMProjection proj,
-      AtomicInteger index) {
+  private void printGeometry(PrintWriter out, Geometry geometry,
+      UTMProjection proj, AtomicInteger index) {
     if (geometry instanceof Polygon)
-      printPolygon(out,(Polygon) geometry, proj, index);
+      printPolygon(out, (Polygon) geometry, proj, index);
     else if (geometry instanceof MultiPolygon)
-      printMultiPolygon(out,(MultiPolygon) geometry, proj, index);
+      printMultiPolygon(out, (MultiPolygon) geometry, proj, index);
     else
       System.err.println("unknown geometry: " + geometry);
   }
 
-  private void printMultiPolygon(PrintWriter out, MultiPolygon multi, UTMProjection proj,
-      AtomicInteger index) {
+  private void printMultiPolygon(PrintWriter out, MultiPolygon multi,
+      UTMProjection proj, AtomicInteger index) {
     for (int i = 0; i < multi.getNumGeometries(); i++)
-      printGeometry(out,multi.getGeometryN(i), proj, index);
+      printGeometry(out, multi.getGeometryN(i), proj, index);
   }
 
   private void printPolygon(PrintWriter out, Polygon poly, UTMProjection proj,
       AtomicInteger index) {
     out.println(index.incrementAndGet());
-    printLineString(out,proj, poly.getExteriorRing());
+    printLineString(out, proj, poly.getExteriorRing());
     out.println("END");
     for (int i = 0; i < poly.getNumInteriorRing(); i++) {
       out.println("!" + index.incrementAndGet());
-      printLineString(out,proj, poly.getInteriorRingN(i));
+      printLineString(out, proj, poly.getInteriorRingN(i));
       out.println("END");
     }
   }
 
-  private void printLineString(PrintWriter out, UTMProjection proj, LineString line) {
+  private void printLineString(PrintWriter out, UTMProjection proj,
+      LineString line) {
     for (int i = 0; i < line.getNumPoints(); i++) {
       Point point = line.getPointN(i);
       GeoPoint p = new GeoPoint(proj, point.getX(), point.getY(), 0);

@@ -1,25 +1,34 @@
 package org.onebusaway.transit_data_federation.impl.offline;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.transit_data_federation.model.RouteCollection;
-import org.onebusaway.transit_data_federation.services.RunnableWithOutputPath;
-import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryParser.ParseException;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.Route;
+import org.onebusaway.transit_data_federation.impl.RouteCollectionSearchServiceImpl;
+import org.onebusaway.transit_data_federation.model.RouteCollection;
+import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
+import org.onebusaway.transit_data_federation.services.RunnableWithOutputPath;
+import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Generate the underlying Lucene search index for route collection searches that will power
+ * {@link RouteCollectionSearchServiceImpl} and {@link RouteCollectionSearchService}.
+ * 
+ * @author bdferris
+ * @see RouteCollectionSearchService
+ * @see RouteCollectionSearchServiceImpl
+ */
 @Component
 public class GenerateRouteCollectionSearchIndexTask implements RunnableWithOutputPath {
 

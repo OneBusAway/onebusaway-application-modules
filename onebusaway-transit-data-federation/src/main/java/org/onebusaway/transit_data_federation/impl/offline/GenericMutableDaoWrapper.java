@@ -6,6 +6,16 @@ import java.util.Collection;
 import org.onebusaway.gtfs.model.IdentityBean;
 import org.onebusaway.gtfs.services.GenericMutableDao;
 
+/**
+ * Support class that provides an implementation of {@link GenericMutableDao}
+ * where all methods calls are passed to an underlying wrapped instance of
+ * {@link GenericMutableDao}. Useful for when you want to selectively override
+ * the behavior of individual {@link GenericMutableDao} methods of an existing
+ * instance.
+ * 
+ * @author bdferris
+ * 
+ */
 public class GenericMutableDaoWrapper implements GenericMutableDao {
 
   protected GenericMutableDao _source;

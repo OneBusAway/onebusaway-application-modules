@@ -9,6 +9,13 @@ import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 
+/**
+ * Utility script to compute the set of stops from a gtfs feed that fall within
+ * a simple lat-lon rectangular bounding box.
+ * 
+ * @author bdferris
+ * @see GtfsStopsInPolygonMain
+ */
 public class GtfsStopsInRegionMain {
 
   @SuppressWarnings("unchecked")

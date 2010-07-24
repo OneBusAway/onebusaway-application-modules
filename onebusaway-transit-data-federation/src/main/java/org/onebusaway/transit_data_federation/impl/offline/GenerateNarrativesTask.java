@@ -19,6 +19,7 @@ import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.impl.narrative.NarrativeProviderImpl;
+import org.onebusaway.transit_data_federation.impl.narrative.NarrativeServiceImpl;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
 import org.onebusaway.transit_data_federation.model.modifications.Modifications;
 import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
@@ -27,6 +28,7 @@ import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +39,16 @@ import cern.jet.stat.Descriptive;
 import edu.washington.cs.rse.geospatial.DPoint;
 import edu.washington.cs.rse.geospatial.Geometry;
 
+/**
+ * Precomputes all the link narrative objects that will power
+ * {@link NarrativeService} and powered by a link {@link NarrativeProviderImpl}
+ * and {@link NarrativeServiceImpl}
+ * 
+ * @author bdferris
+ * @see NarrativeService
+ * @see NarrativeServiceImpl
+ * @see NarrativeProviderImpl
+ */
 public class GenerateNarrativesTask implements Runnable {
 
   private Logger _log = LoggerFactory.getLogger(GenerateNarrativesTask.class);
@@ -194,13 +206,13 @@ public class GenerateNarrativesTask implements Runnable {
   }
 
   private TripNarrative getTripNarrative(Trip trip) {
-    
+
     String headsign = trip.getTripHeadsign();
-    if( headsign == null) {
+    if (headsign == null) {
       Route route = trip.getRoute();
       headsign = route.getLongName();
     }
-    
+
     TripNarrative.Builder builder = TripNarrative.builder();
     builder.setDirectionId(deduplicate(trip.getDirectionId()));
     builder.setRouteShortName(deduplicate(trip.getRouteShortName()));

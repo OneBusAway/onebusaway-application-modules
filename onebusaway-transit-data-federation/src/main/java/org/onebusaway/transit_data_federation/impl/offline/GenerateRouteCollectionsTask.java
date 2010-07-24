@@ -19,6 +19,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Compute {@link RouteCollection} objects from {@link Route} instances. Recall
+ * that route collections are virtual route objects that bundle potentially
+ * multiple underlying {@link Route} objects with the same short name.
+ * 
+ * This addresses the fact that some agencies break up what riders would
+ * consider a single route into multiple route entries according to their own
+ * organizational methods (different direction, different levels of service,
+ * express vs local, etc)
+ * 
+ * @author bdferris
+ */
 @Component
 public class GenerateRouteCollectionsTask implements Runnable {
 
@@ -83,7 +95,7 @@ public class GenerateRouteCollectionsTask implements Runnable {
     if (id == null || id.length() == 0)
       throw new IllegalStateException("no short or long name for route "
           + route.getId());
-    id = id.replace('/','_');
+    id = id.replace('/', '_');
     id = id.replace('\\', '_');
     return id;
   }

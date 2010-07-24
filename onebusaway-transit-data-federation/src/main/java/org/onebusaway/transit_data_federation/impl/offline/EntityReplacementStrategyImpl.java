@@ -6,6 +6,14 @@ import java.util.Map;
 
 import org.onebusaway.transit_data_federation.services.offline.EntityReplacementStrategy;
 
+/**
+ * {@link EntityReplacementStrategy} implementation that is used to map entity
+ * ids for a particular type.
+ * 
+ * @author bdferris
+ * @see EntityReplacementStrategy
+ * @see EntityReplacementStrategyFactory
+ */
 public class EntityReplacementStrategyImpl implements EntityReplacementStrategy {
 
   private Map<Class<?>, Map<Serializable, Serializable>> _entityReplacement = new HashMap<Class<?>, Map<Serializable, Serializable>>();

@@ -6,11 +6,26 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * Given an instantiated and running instance of a federated transit data
+ * bundle, we pre-cache a number of expensive data operations so that the cache
+ * will be hot for eventual deployment.
+ * 
+ * That includes caching {@link StopBean}, {@link RouteBean} and
+ * {@link StopsForRouteBean} objects, which in turn cache a number of other
+ * things.
+ * 
+ * @author bdferris
+ * 
+ */
 public class PreCacheTask implements Runnable {
 
   private static Logger _log = LoggerFactory.getLogger(PreCacheTask.class);

@@ -12,6 +12,11 @@ import org.onebusaway.gtfs.csv.schema.BeanWrapper;
 import org.onebusaway.gtfs.csv.schema.DefaultEntitySchemaFactory;
 import org.onebusaway.gtfs.csv.schema.beans.CsvEntityMappingBean;
 
+/**
+ * Field mapping to add a field to the serialized csv fields of an object 
+ * @author bdferris
+ *
+ */
 class GenericAdditionalFieldMapping extends AbstractFieldMapping {
 
   private Map<Object, Object> _valuesById = new HashMap<Object, Object>();
