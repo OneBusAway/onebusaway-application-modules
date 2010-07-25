@@ -2,6 +2,17 @@ package org.onebusaway.transit_data_federation.model.narrative;
 
 import java.io.Serializable;
 
+import org.onebusaway.gtfs.model.Stop;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+
+/**
+ * Stop narrative information. Really only includes the direction of travel /
+ * orientation a stop relative to the street.
+ * 
+ * @author bdferris
+ * @see Stop
+ * @see NarrativeService
+ */
 public final class StopNarrative implements Serializable {
 
   private static final long serialVersionUID = 1L;

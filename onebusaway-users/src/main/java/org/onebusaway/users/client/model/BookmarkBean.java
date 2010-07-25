@@ -3,6 +3,13 @@ package org.onebusaway.users.client.model;
 import java.io.Serializable;
 import java.util.List;
 
+import org.onebusaway.users.model.properties.Bookmark;
+
+/**
+ * 
+ * @author bdferris
+ * @see Bookmark
+ */
 public final class BookmarkBean implements Serializable {
 
   private static final long serialVersionUID = 1L;

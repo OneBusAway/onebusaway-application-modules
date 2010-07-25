@@ -4,7 +4,7 @@
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-transit-data</artifactId>
     <packaging>jar</packaging>
-    
+
     <parent>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-application-modules</artifactId>
@@ -12,6 +12,11 @@
     </parent>
 
     <dependencies>
+
+        <!--
+            Note that there is no dependency on GTFS here. We abstract it away. You shouldn't go adding it unless you
+            have a very good reason.
+        -->
 
         <dependency>
             <groupId>org.onebusaway</groupId>
@@ -46,5 +51,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

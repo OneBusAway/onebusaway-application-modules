@@ -3,6 +3,7 @@ package org.onebusaway.transit_data.model;
 import java.io.Serializable;
 
 public class AgencyBean implements Serializable {
+  
   private static final long serialVersionUID = 1L;
 
   private String id;

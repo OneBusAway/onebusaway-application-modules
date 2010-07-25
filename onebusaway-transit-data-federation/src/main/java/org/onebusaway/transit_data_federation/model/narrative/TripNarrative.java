@@ -1,9 +1,19 @@
 package org.onebusaway.transit_data_federation.model.narrative;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.Trip;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 
 import java.io.Serializable;
 
+/**
+ * Trip narrative information. Includes information about the trip short name,
+ * trip headsign, route shortname override, direction, and shape id.
+ * 
+ * @author bdferris
+ * @see Trip
+ * @see NarrativeService
+ */
 public final class TripNarrative implements Serializable {
 
   private static final long serialVersionUID = 1L;

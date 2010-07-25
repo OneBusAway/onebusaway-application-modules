@@ -20,9 +20,10 @@ import java.io.Serializable;
 import org.onebusaway.gtfs.model.Route;
 
 /**
+ * Uniquely identifies a {@link StopSequenceCollection}
  * 
  * @author bdferris
- *
+ * 
  */
 public class StopSequenceCollectionKey implements Serializable {
 

@@ -4,6 +4,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.transit_data_federation.impl.offline.GenerateNarrativesTask;
+
+/**
+ * Used for overriding values during narrative generation to spot-fix bad values
+ * in the underlying data.
+ * 
+ * @author bdferris
+ *  
+ * @see Modification
+ * @see GenerateNarrativesTask
+ */
 public class Modifications {
 
   private Map<String, Object> _modificationsByKey = new HashMap<String, Object>();

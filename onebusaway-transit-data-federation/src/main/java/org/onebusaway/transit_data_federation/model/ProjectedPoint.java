@@ -6,6 +6,13 @@ import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 import java.io.Serializable;
 
+/**
+ * Simple point class that keeps both the global lat-lon representation and the
+ * projected x-y representation for faster distance calculations.
+ * 
+ * @author bdferris
+ * 
+ */
 public class ProjectedPoint implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -59,7 +66,7 @@ public class ProjectedPoint implements Serializable {
   }
 
   private static final double p2(double x) {
-    return x*x;
+    return x * x;
   }
 
   /****

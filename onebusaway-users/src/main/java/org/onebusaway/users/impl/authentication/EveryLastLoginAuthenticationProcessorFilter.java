@@ -41,7 +41,7 @@ public class EveryLastLoginAuthenticationProcessorFilter extends
       throw new EveryLastLoginAuthenticationException(
           "AuthenticationResult failure", mode);
 
-    IndexedUserDetails details = _currentUserService.getIndexedUserDetailsForUser(
+    IndexedUserDetails details = _currentUserService.handleUserAction(
         result.getProvider(), result.getIdentity(), result.getCredentials(),
         false, mode);
 

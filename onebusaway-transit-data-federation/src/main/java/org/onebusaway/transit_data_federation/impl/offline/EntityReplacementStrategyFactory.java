@@ -62,7 +62,7 @@ public class EntityReplacementStrategyFactory {
 
       while ((line = reader.readLine()) != null) {
         line = line.trim();
-        if (line.length() == 0 || line.startsWith("#"))
+        if (line.length() == 0 || line.startsWith("#") || line.startsWith("{{{") || line.startsWith("}}}"))
           continue;
         String[] tokens = line.split("\\s+");
         List<AgencyAndId> ids = new ArrayList<AgencyAndId>();

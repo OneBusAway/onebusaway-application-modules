@@ -2,6 +2,17 @@ package org.onebusaway.transit_data_federation.model.narrative;
 
 import java.io.Serializable;
 
+import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+
+/**
+ * Stop time narrative information. Includes information about the stop
+ * headsign, route shortname and shape distance travelled.
+ * 
+ * @author bdferris
+ * @see StopTime
+ * @see NarrativeService
+ */
 public final class StopTimeNarrative implements Serializable {
 
   private static final long serialVersionUID = 1L;

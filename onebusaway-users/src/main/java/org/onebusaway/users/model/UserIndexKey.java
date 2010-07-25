@@ -21,15 +21,25 @@ import java.util.Comparator;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+import org.onebusaway.users.services.UserIndexTypes;
+
+/**
+ * A type+value tuple that uniquely identifies a {@link UserIndex} object. See
+ * {@link UserIndexTypes} for common user index type values.
+ * 
+ * @author bdferris
+ * @see UserIndex
+ * @see UserIndexTypes
+ */
 @Embeddable
 public class UserIndexKey implements Serializable, Comparable<UserIndexKey> {
 
   private static final long serialVersionUID = 1L;
 
-  @Column(columnDefinition="VARCHAR(50)")
+  @Column(columnDefinition = "VARCHAR(50)")
   private String type;
 
-  @Column(columnDefinition="VARCHAR(200)")
+  @Column(columnDefinition = "VARCHAR(200)")
   private String value;
 
   public UserIndexKey() {
@@ -37,16 +47,16 @@ public class UserIndexKey implements Serializable, Comparable<UserIndexKey> {
   }
 
   public UserIndexKey(String type, String value) {
-    if( type == null )
+    if (type == null)
       throw new IllegalArgumentException("type cannot be null");
-    if( value == null )
+    if (value == null)
       throw new IllegalArgumentException("type cannot be null");
-    if( type.indexOf('_') != -1)
+    if (type.indexOf('_') != -1)
       throw new IllegalArgumentException("type cannot contain \"_\" character");
     this.type = type;
     this.value = value;
   }
-  
+
   public static UserIndexKey parseString(String userIndexKey) {
     int index = userIndexKey.indexOf('_');
     if (index == -1)
@@ -56,11 +66,11 @@ public class UserIndexKey implements Serializable, Comparable<UserIndexKey> {
     String value = userIndexKey.substring(index + 1);
     return new UserIndexKey(type, value);
   }
-  
+
   public String getType() {
     return type;
   }
-  
+
   public String getValue() {
     return value;
   }

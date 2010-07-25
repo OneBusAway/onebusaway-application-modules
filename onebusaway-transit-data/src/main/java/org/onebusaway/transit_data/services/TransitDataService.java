@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
@@ -38,79 +39,230 @@ import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 
+/**
+ * The {@link TransitDataService} is the primary interface separating
+ * user-interface modules that access transit data from the data providers that
+ * contain the data.
+ * 
+ * The service is a {@link FederatedService}, which means that multiple
+ * {@link TransitDataService} instances covering transit agencies across the
+ * county can be stitched into one virtual service that seamlessly passes calls
+ * to the appropriate underlying instance. As such, you'll notice that all the
+ * service methods here are annotated with @FederatedBy... annotations that give
+ * hints how the method should be dispatched between multiple instances.
+ * 
+ * Note that all methods return "bean" objects, which are POJOs designed for
+ * flexibility in over-the-wire serialization for RPC and are separate from the
+ * underlying representations in the datastore.
+ * 
+ * @author bdferris
+ * 
+ */
 public interface TransitDataService extends FederatedService {
 
+  /**
+   * The coverage area for each agency is generally the lat-lon bounds of all
+   * stops served by that agency.
+   * 
+   * @return the list of all transit agencies in the service, along with their
+   *         coverage information.
+   * @throws ServiceException
+   */
   @FederatedByAggregateMethod
   public List<AgencyWithCoverageBean> getAgenciesWithCoverage()
       throws ServiceException;
 
+  /**
+   * @param agencyId
+   * @return the agency with the specified id, or null if not found
+   * @throws ServiceException
+   */
   @FederatedByAgencyIdMethod
   public AgencyBean getAgency(String agencyId) throws ServiceException;
 
+  /**
+   * @param query specifies the bounds of the query and an optional route name
+   *          query
+   * @return return all routes matching the specified query
+   * @throws ServiceException
+   */
+  @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
+  public RoutesBean getRoutes(SearchQueryBean query) throws ServiceException;
+
+  /**
+   * 
+   * @param routeId
+   * @return the route with specified id, or null if not found
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod
+  public RouteBean getRouteForId(String routeId) throws ServiceException;
+
+  /**
+   * @param agencyId
+   * @return the list of all route ids for the specified agency id
+   */
+  @FederatedByAgencyIdMethod
+  public ListBean<String> getRouteIdsForAgencyId(String agencyId);
+
+  /**
+   * @param routeId
+   * @return the stops for the specified route, or null if not found
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod
+  public StopsForRouteBean getStopsForRoute(String routeId)
+      throws ServiceException;
+
+  /**
+   * @param tripId
+   * @return the trip with the specifid id, or null if not found
+   * @throws ServiceException
+   */
   @FederatedByEntityIdMethod
   public TripBean getTrip(String tripId) throws ServiceException;
 
+  /**
+   * @param query details about which trip to query, and what to include in the
+   *          response
+   * @return trip details for trip matching the specified query, or null if not
+   *         found
+   * @throws ServiceException
+   */
   @FederatedByEntityIdMethod(propertyExpression = "tripId")
   public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query)
       throws ServiceException;
 
+  /**
+   * @param query determines the time and location of the query
+   * @return trips details for the trips matching the specified bounds query
+   */
   @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query);
 
-  @FederatedByEntityIdMethod(propertyExpression="vehicleId")
+  /**
+   * 
+   * @param query determines the vehicle and time of the trip query
+   * @return trip details for the trip matching the specified query, or null if
+   *         not found
+   */
+  @FederatedByEntityIdMethod(propertyExpression = "vehicleId")
   public TripDetailsBean getTripDetailsForVehicleAndTime(
       TripForVehicleQueryBean query);
 
+  /**
+   * @param stopId
+   * @param timeFrom
+   * @param timeTo
+   * @return stop with arrival and departure information for the specified stop
+   *         and time range, or null if not found
+   * @throws ServiceException
+   */
   @FederatedByEntityIdMethod
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
       String stopId, Date timeFrom, Date timeTo) throws ServiceException;
 
-  // Note that this used to be java.lang.Iterable, but that confused Hessian
+  /**
+   * @param stopIds
+   * @param timeFrom
+   * @param timeTo
+   * @return stops with arrival and departure information for the specified
+   *         stops and time range
+   * @throws ServiceException
+   * @throws NoSuchStopServiceException if one of the specified stops could not
+   *           be found
+   */
   @FederatedByEntityIdsMethod
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
       Collection<String> stopIds, Date timeFrom, Date timeTo)
       throws ServiceException;
 
+  /**
+   * @param stopId
+   * @param date
+   * @return retrieve the full schedule for the stop on the specified date
+   * @throws ServiceException
+   */
   @FederatedByEntityIdMethod
   public StopScheduleBean getScheduleForStop(String stopId, Date date)
       throws ServiceException;
 
+  /**
+   * 
+   * @param query determines the query bounds, along with an optional stop code
+   * @return find all stops within the specified bounds query
+   * @throws ServiceException
+   */
   @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
   public StopsBean getStops(SearchQueryBean query) throws ServiceException;
 
+  /**
+   * @param stopId
+   * @return the stop with the specified id, or null if not found
+   * @throws ServiceException
+   */
   @FederatedByEntityIdMethod
   public StopBean getStop(String stopId) throws ServiceException;
 
-  @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
-  public RoutesBean getRoutes(SearchQueryBean query) throws ServiceException;
-
+  /**
+   * @param agencyId
+   * @return the list of all stops operated by the specified agency
+   */
   @FederatedByAgencyIdMethod
   public ListBean<String> getStopIdsForAgencyId(String agencyId);
 
-  @FederatedByEntityIdMethod
-  public RouteBean getRouteForId(String routeId) throws ServiceException;
-
-  @FederatedByAgencyIdMethod
-  public ListBean<String> getRouteIdsForAgencyId(String agencyId);
-
-  @FederatedByEntityIdMethod
-  public StopsForRouteBean getStopsForRoute(String routeId)
-      throws ServiceException;
-
+  /**
+   * 
+   * @param shapeId
+   * @return an encoded polyline of the shape with the specified id, or null if
+   *         not found
+   */
   @FederatedByEntityIdMethod
   public EncodedPolylineBean getShapeForId(String shapeId);
 
+  /**
+   * 
+   * @param latFrom
+   * @param lonFrom
+   * @param latTo
+   * @param lonTo
+   * @param constraints
+   * @return a list of trip plans computed between the two locations with the
+   *         specified constraints
+   * @throws ServiceException
+   */
   @FederatedByBoundsMethod
   public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
       double latTo, double lonTo, TripPlannerConstraintsBean constraints)
       throws ServiceException;
 
+  /**
+   * 
+   * @param lat
+   * @param lon
+   * @param constraints
+   * @return min travel time transit-shed computation to a list of stops from
+   *         the specified starting location with the specified travel
+   *         constraints
+   * @throws ServiceException
+   */
   @FederatedByLocationMethod
   public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(double lat,
       double lon, OneBusAwayConstraintsBean constraints)
       throws ServiceException;
 
+  /**
+   * 
+   * @param agencyId
+   * @param constraints
+   * @param minTravelTimeToStops
+   * @param localResults
+   * @return finish off the transit-shed computation by computing last-mile
+   *         walking paths to target locations from min-travel-time-to-stops
+   *         results
+   * @throws ServiceException
+   */
   @FederatedByAgencyIdMethod
   public List<TimedPlaceBean> getLocalPaths(String agencyId,
       OneBusAwayConstraintsBean constraints,

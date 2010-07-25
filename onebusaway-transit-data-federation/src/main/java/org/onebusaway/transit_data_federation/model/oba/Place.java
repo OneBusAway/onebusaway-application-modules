@@ -17,6 +17,12 @@ package org.onebusaway.transit_data_federation.model.oba;
 
 import org.onebusaway.container.model.IdentityBean;
 
+/**
+ * A place is something with a street address that we find directions to in the
+ * "one bus ride away" explore tool.
+ * 
+ * @author bdferris
+ */
 public class Place extends IdentityBean<String> {
 
   private static final long serialVersionUID = 1L;

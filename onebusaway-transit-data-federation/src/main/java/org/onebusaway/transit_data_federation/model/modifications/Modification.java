@@ -1,5 +1,12 @@
 package org.onebusaway.transit_data_federation.model.modifications;
 
+/**
+ * Captures a modification to a entity with specified type and id, where the
+ * entity's specified property will be set to the specified value.
+ * 
+ * @author bdferris
+ * @see Modifications
+ */
 public class Modification {
 
   private Class<?> type;

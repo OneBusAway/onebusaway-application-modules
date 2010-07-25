@@ -8,6 +8,13 @@ import java.util.Map;
 
 import org.onebusaway.users.model.UserProperties;
 
+/**
+ * DO NO RENAME OR MOVE THIS CLASS. Serialized instances of this class will be
+ * around forever.
+ * 
+ * @author bdferris
+ * @see UserProperties
+ */
 public class UserPropertiesV2 implements Serializable, UserProperties {
 
   private static final long serialVersionUID = 1L;

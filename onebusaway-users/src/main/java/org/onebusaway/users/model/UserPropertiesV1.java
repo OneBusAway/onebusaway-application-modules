@@ -4,6 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * DO NO RENAME OR MOVE THIS CLASS. Serialized instances of this class will be
+ * around forever.
+ * 
+ * @author bdferris
+ * @see UserProperties
+ */
 public class UserPropertiesV1 implements Serializable, UserProperties {
 
   private static final long serialVersionUID = 1L;

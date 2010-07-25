@@ -3,6 +3,8 @@ package org.onebusaway.users.model;
 import org.hibernate.annotations.AccessType;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.onebusaway.users.services.UserIndexTypes;
+import org.onebusaway.users.services.UserService;
 
 import java.io.Serializable;
 
@@ -12,10 +14,29 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+/**
+ * A database-serialized linkage between some type-value id index (see
+ * {@link UserIndexKey}) and a {@link User} account. Each {@link UserIndex}
+ * refers to just one {@link User} account but each user account potentially has
+ * multiple user indices.
+ * 
+ * Each user index also has an type-specific credentials value that can be used
+ * to authenticate a user using the specified user index. See
+ * {@link UserIndexTypes} for a set of common user index types used in the
+ * system.
+ * 
+ * See discussion in the document for the {@link User} class.
+ * 
+ * @author bdferris
+ * @see UserIndexKey
+ * @see User
+ * @see UserService
+ * @see UserIndexTypes
+ */
 @Entity
 @Table(name = "oba_user_indices")
 @AccessType("field")
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class UserIndex implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -28,8 +49,8 @@ public class UserIndex implements Serializable {
    * the indices, it's just a randomly generated string that is generated when a
    * UserIndex is created so that it can be used in RememberMe cookie generation
    * to keep you from being able to generate a RememberMe cookie using known
-   * information. However, for a username + password situation, it could also
-   * be the password of some form. 
+   * information. However, for a username + password situation, it could also be
+   * the password of some form.
    */
   private String credentials;
 

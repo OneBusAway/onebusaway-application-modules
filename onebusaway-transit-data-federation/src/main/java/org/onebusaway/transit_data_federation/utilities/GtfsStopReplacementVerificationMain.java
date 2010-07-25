@@ -52,7 +52,7 @@ public class GtfsStopReplacementVerificationMain {
     String line = null;
 
     while ((line = reader.readLine()) != null) {
-      if (line.startsWith("#"))
+      if (line.startsWith("#") || line.startsWith("{{{") || line.startsWith("}}}") || line.length() == 0)
         continue;
       String[] tokens = line.split("\\s+");
       AgencyAndId id = AgencyAndIdLibrary.convertFromString(tokens[0]);

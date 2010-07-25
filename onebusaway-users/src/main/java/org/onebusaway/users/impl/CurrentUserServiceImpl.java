@@ -101,7 +101,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
-  public IndexedUserDetails getIndexedUserDetailsForUser(String type,
+  public IndexedUserDetails handleUserAction(String type,
       String id, String credentials, boolean isAnonymous, String mode) {
     Mode m = getModeForRequest(mode);
     switch (m) {
@@ -331,9 +331,9 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   private Mode getModeForRequest(String mode) {
     if (mode == null)
       return Mode.LOGIN;
-    if (mode.equals("registration"))
+    if (mode.equals(MODE_REGISTRATION))
       return Mode.REGISTRATION;
-    if (mode.equals("add-account"))
+    if (mode.equals(MODE_ADD_ACCOUNT))
       return Mode.ADD_ACCOUNT;
     return Mode.LOGIN;
   }
