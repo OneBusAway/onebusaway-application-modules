@@ -18,7 +18,7 @@
         <property name="username" value="sa" />
         <property name="password" value="" />
     </bean>
-    
+
     <bean id="webappHibernateProperties" class="org.onebusaway.container.spring.PropertiesBeanPostProcessor">
         <property name="target" value="hibernateProperties" />
         <property name="properties">
@@ -33,15 +33,25 @@
         doesn't actually do much geocoding... it's just there for testing
     -->
     <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.impl.FixedGeocoderImpl">
-        <property name="lat" value="47.65475043477393"/>
-        <property name="lon" value="-122.3078727722168"/>
-        <property name="city" value="Seattle"/>
-        <property name="state" value="WA"/>
-        <property name="postalCode" value="98105"/>
+        <property name="lat" value="47.65475043477393" />
+        <property name="lon" value="-122.3078727722168" />
+        <property name="city" value="Seattle" />
+        <property name="state" value="WA" />
+        <property name="postalCode" value="98105" />
     </bean>
 
     <!--
         Allows configuration of a default service area for searches when the user hasn't already specified a search area
     -->
     <bean id="serviceArea" class="org.onebusaway.presentation.impl.DefaultServiceAreaServiceImpl" />
+
+    <bean id="wikiDocumentService" class="org.onebusaway.wiki.xwiki.impl.XWikiDocumentServiceImpl">
+        <property name="xwikiUrl" value="http://wiki.onebusaway.org" />
+    </bean>
+
+    <bean id="wikiRenderingService" class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl">
+        <property name="wikiDocumentViewUrl" value="/onebusaway-webapp/p/%{documentName}.action" />
+        <property name="wikiDocumentEditUrl" value="http://wiki.onebusaway.org/bin/edit/Main/%{documentName}" />
+        <property name="wikiAttachmentUrl" value="http://wiki.onebusaway.org/bin/download/Main/%{documentName}/%{attachmentName}" />
+    </bean>
 </beans>
