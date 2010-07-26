@@ -18,6 +18,14 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
+    <repositories>
+        <!-- Required for the xwiki-rendering-macros -->
+        <repository>
+            <id>xwiki</id>
+            <url>http://maven.xwiki.org/releases</url>
+        </repository>
+    </repositories>
+
     <dependencies>
 
         <!-- OneBusAway Dependencies -->
