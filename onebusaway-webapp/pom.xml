@@ -137,23 +137,11 @@
             <artifactId>onebusaway-wiki-integration-xwiki-struts-macros</artifactId>
             <version>${xwiki.integration.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>org.xwiki.platform</groupId>
-            <artifactId>xwiki-core-rendering-macro-code</artifactId>
-            <version>${xwiki.version}</version>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-wiki-integration-xwiki-macros</artifactId>
+            <version>${xwiki.integration.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.xwiki.platform</groupId>
-            <artifactId>xwiki-core-rendering-macro-html</artifactId>
-            <version>${xwiki.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.xwiki.platform</groupId>
-            <artifactId>xwiki-core-rendering-macro-toc</artifactId>
-            <version>${xwiki.version}</version>
-        </dependency>
-
 
         <dependency>
             <groupId>junit</groupId>
