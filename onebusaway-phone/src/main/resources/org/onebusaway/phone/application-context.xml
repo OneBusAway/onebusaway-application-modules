@@ -20,8 +20,8 @@
     <context:annotation-config />
 
     <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
-    <import resource="classpath:org/onebusaway/geocoder/application-context.xml"/>
-    
+    <import resource="classpath:org/onebusaway/geocoder/application-context.xml" />
+
     <context:component-scan base-package="org.onebusaway.phone.impl" />
 
     <bean id="myxworkConfiguration" class="org.onebusaway.phone.XWorkConfigurationFactoryBean">
@@ -53,15 +53,22 @@
         <property name="pauseBetweenActions" value="500" />
     </bean>
 
-    
     <bean id="agiTemplateSource" class="org.onebusaway.probablecalls.agitemplates.ClasspathScanningAgiTemplateSource">
         <property name="scanPackage" value="org.onebusaway.phone.templates" />
     </bean>
-    
+
     <bean id="agiTemplateRegistry" class="org.onebusaway.probablecalls.agitemplates.AgiTemplateRegistry">
         <property name="source" ref="agiTemplateSource" />
     </bean>
 
     <bean id="textToSpeechFactory" class="org.onebusaway.probablecalls.agitemplates.DefaultTextToSpeechFactory" />
+
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.phone.cacheManager</prop>
+            </props>
+        </property>
+    </bean>
 
 </beans>

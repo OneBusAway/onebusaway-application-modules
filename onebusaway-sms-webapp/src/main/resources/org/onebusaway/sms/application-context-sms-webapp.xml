@@ -25,9 +25,16 @@
 
     <context:component-scan base-package="org.onebusaway.sms.impl" />
 
-
     <bean id="geocoderImpl" class="org.onebusaway.geocoder.impl.DatabaseCachingGeocoderImpl" primary="true">
         <property name="geocoderService" ref="externalGeocoderImpl" />
+    </bean>
+
+    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+        <property name="properties">
+            <props>
+                <prop key="cacheManager.cacheManagerName">org.onebusaway.sms_webapp.cacheManager</prop>
+            </props>
+        </property>
     </bean>
 
 </beans>
