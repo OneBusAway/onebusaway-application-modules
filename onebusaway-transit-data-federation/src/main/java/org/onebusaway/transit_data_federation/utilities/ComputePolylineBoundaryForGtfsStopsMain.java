@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.utilities;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
   private static final String ARG_FORMAT = "format";
 
   private enum EFormat {
-    OSM, XML, ENCODED
+    OSM, XML, ENCODED, TEXT
   };
 
   public static void main(String[] args) throws IOException,
@@ -75,20 +76,12 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
         System.exit(-1);
       }
 
-      List<String> contextPaths = new ArrayList<String>();
-      for (int i = 0; i < remainingArgs.length - 1; i++)
-        contextPaths.add("file:" + remainingArgs[i]);
-      ConfigurableApplicationContext context = ContainerLibrary.createContext(contextPaths);
-
-      File outputPath = new File(remainingArgs[remainingArgs.length - 1]);
-
+      List<GtfsBundle> bundles = getGtfsBundlesFromCommandLine(remainingArgs);
       EFormat format = getFormat(commandLine);
-
-      GtfsBundles bundles = (GtfsBundles) context.getBean("gtfs-bundles");
 
       StopToPolygonEntityHandler handler = new StopToPolygonEntityHandler(2500);
 
-      for (GtfsBundle bundle : bundles.getBundles()) {
+      for (GtfsBundle bundle : bundles) {
         System.err.println(bundle.getPath());
         GtfsReader reader = new GtfsReader();
         reader.addEntityHandler(handler);
@@ -98,15 +91,16 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
         reader.readEntities(Stop.class);
       }
 
-      Geometry geometry = handler.getGeometry();
-      UTMProjection proj = handler.getProjection();
+      PrintWriter out = getOutputAsPrinter(remainingArgs[remainingArgs.length - 1]);
 
-      PrintWriter out = new PrintWriter(new FileWriter(outputPath));
-
-      out.println("polygon");
-      AtomicInteger index = new AtomicInteger();
-      printGeometry(out, geometry, proj, index);
-      out.println("END");
+      switch (format) {
+        case OSM:
+          handleOutputAsOSMPolygon(out, handler);
+          break;
+        case TEXT:
+          handleOutputAsText(out, handler);
+          break;
+      }
 
       out.close();
 
@@ -119,41 +113,100 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
     System.exit(0);
   }
 
+  private PrintWriter getOutputAsPrinter(String path) throws IOException {
+    if (path.equals("-"))
+      return new PrintWriter(new OutputStreamWriter(System.out));
+    return new PrintWriter(new FileWriter(path));
+  }
+
+  private void handleOutputAsOSMPolygon(PrintWriter out,
+      StopToPolygonEntityHandler handler) throws IOException {
+
+    Geometry geometry = handler.getGeometry();
+    UTMProjection proj = handler.getProjection();
+
+    out.println("polygon");
+    AtomicInteger index = new AtomicInteger();
+    printGeometry(out, geometry, proj, index, false);
+    out.println("END");
+
+  }
+
+  private void handleOutputAsText(PrintWriter out,
+      StopToPolygonEntityHandler handler) {
+
+    Geometry geometry = handler.getGeometry();
+    UTMProjection proj = handler.getProjection();
+
+    out.println("polygon");
+    AtomicInteger index = new AtomicInteger();
+    printGeometry(out, geometry, proj, index, true);
+    out.println("END");
+  }
+
+  private List<GtfsBundle> getGtfsBundlesFromCommandLine(String[] args) {
+
+    List<GtfsBundle> allBundles = new ArrayList<GtfsBundle>();
+    List<String> contextPaths = new ArrayList<String>();
+
+    for (int i = 0; i < args.length - 1; i++) {
+      if (args[i].endsWith(".xml"))
+        contextPaths.add("file:" + args[i]);
+      else {
+        GtfsBundle bundle = new GtfsBundle();
+        bundle.setPath(new File(args[i]));
+        bundle.setDefaultAgencyId(Integer.toString(i));
+        allBundles.add(bundle);
+      }
+    }
+
+    if (!contextPaths.isEmpty()) {
+      ConfigurableApplicationContext context = ContainerLibrary.createContext(contextPaths);
+      GtfsBundles bundles = (GtfsBundles) context.getBean("gtfs-bundles");
+      allBundles.addAll(bundles.getBundles());
+    }
+
+    return allBundles;
+  }
+
   private void printGeometry(PrintWriter out, Geometry geometry,
-      UTMProjection proj, AtomicInteger index) {
+      UTMProjection proj, AtomicInteger index, boolean latFirst) {
     if (geometry instanceof Polygon)
-      printPolygon(out, (Polygon) geometry, proj, index);
+      printPolygon(out, (Polygon) geometry, proj, index, latFirst);
     else if (geometry instanceof MultiPolygon)
-      printMultiPolygon(out, (MultiPolygon) geometry, proj, index);
+      printMultiPolygon(out, (MultiPolygon) geometry, proj, index, latFirst);
     else
       System.err.println("unknown geometry: " + geometry);
   }
 
   private void printMultiPolygon(PrintWriter out, MultiPolygon multi,
-      UTMProjection proj, AtomicInteger index) {
+      UTMProjection proj, AtomicInteger index, boolean latFirst) {
     for (int i = 0; i < multi.getNumGeometries(); i++)
-      printGeometry(out, multi.getGeometryN(i), proj, index);
+      printGeometry(out, multi.getGeometryN(i), proj, index, latFirst);
   }
 
   private void printPolygon(PrintWriter out, Polygon poly, UTMProjection proj,
-      AtomicInteger index) {
+      AtomicInteger index, boolean latFirst) {
     out.println(index.incrementAndGet());
-    printLineString(out, proj, poly.getExteriorRing());
+    printLineString(out, proj, poly.getExteriorRing(), latFirst);
     out.println("END");
     for (int i = 0; i < poly.getNumInteriorRing(); i++) {
       out.println("!" + index.incrementAndGet());
-      printLineString(out, proj, poly.getInteriorRingN(i));
+      printLineString(out, proj, poly.getInteriorRingN(i), latFirst);
       out.println("END");
     }
   }
 
   private void printLineString(PrintWriter out, UTMProjection proj,
-      LineString line) {
+      LineString line, boolean latFirst) {
     for (int i = 0; i < line.getNumPoints(); i++) {
       Point point = line.getPointN(i);
       GeoPoint p = new GeoPoint(proj, point.getX(), point.getY(), 0);
       CoordinatePoint c = p.getCoordinates();
-      out.println(c.getLon() + " " + c.getLat());
+      if (latFirst)
+        out.println(c.getLat() + " " + c.getLon());
+      else
+        out.println(c.getLon() + " " + c.getLat());
     }
   }
 
@@ -173,6 +226,8 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
       return EFormat.OSM;
     else if (format.equals("xml"))
       return EFormat.XML;
+    else if (format.equals("text"))
+      return EFormat.TEXT;
     else if (format.equals("encoded"))
       return EFormat.ENCODED;
     throw new IllegalStateException("unknown format: " + format);
