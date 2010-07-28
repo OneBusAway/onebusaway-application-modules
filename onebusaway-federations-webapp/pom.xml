@@ -74,6 +74,26 @@
     <build>
         <finalName>onebusaway-federations-webapp</finalName>
         <plugins>
+            <!-- Configure integration test system properties-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>integration-tests</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <!-- We also define some test system properties -->
+                            <systemPropertyVariables>
+                                <org.onebusaway.federations_webapp.port>${org.onebusaway.federations_webapp.port}</org.onebusaway.federations_webapp.port>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
