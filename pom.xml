@@ -16,32 +16,6 @@
     <properties>
         <struts-version>2.1.8.1</struts-version>
         <gwt-version>2.0.0</gwt-version>
-
-        <!--  These properties are primarily used in configuring joint integration tests -->
-        <org.onebusaway.federations_webapp.port>9900</org.onebusaway.federations_webapp.port>
-        <org.onebusaway.federations_webapp.ajp_port>9901</org.onebusaway.federations_webapp.ajp_port>
-        <org.onebusaway.federations_webapp.rmi_port>9902</org.onebusaway.federations_webapp.rmi_port>
-
-        <org.onebusaway.transit_data_federation_webapp.port>9905</org.onebusaway.transit_data_federation_webapp.port>
-        <org.onebusaway.transit_data_federation_webapp.ajp_port>9906</org.onebusaway.transit_data_federation_webapp.ajp_port>
-        <org.onebusaway.transit_data_federation_webapp.rmi_port>9907</org.onebusaway.transit_data_federation_webapp.rmi_port>
-
-        <org.onebusaway.api_webapp.port>9910</org.onebusaway.api_webapp.port>
-        <org.onebusaway.api_webapp.ajp_port>9911</org.onebusaway.api_webapp.ajp_port>
-        <org.onebusaway.api_webapp.rmi_port>9912</org.onebusaway.api_webapp.rmi_port>
-
-        <org.onebusaway.sms_webapp.port>9915</org.onebusaway.sms_webapp.port>
-        <org.onebusaway.sms_webapp.ajp_port>9916</org.onebusaway.sms_webapp.ajp_port>
-        <org.onebusaway.sms_webapp.rmi_port>9917</org.onebusaway.sms_webapp.rmi_port>
-
-        <org.onebusaway.phone_webapp.port>9920</org.onebusaway.phone_webapp.port>
-        <org.onebusaway.phone_webapp.ajp_port>9921</org.onebusaway.phone_webapp.ajp_port>
-        <org.onebusaway.phone_webapp.rmi_port>9922</org.onebusaway.phone_webapp.rmi_port>
-        <org.onebusaway.phone_webapp.agi_port>9923</org.onebusaway.phone_webapp.agi_port>
-
-        <org.onebusaway.webapp.port>9925</org.onebusaway.webapp.port>
-        <org.onebusaway.webapp.ajp_port>9926</org.onebusaway.webapp.ajp_port>
-        <org.onebusaway.webapp.rmi_port>9927</org.onebusaway.webapp.rmi_port>
     </properties>
 
     <repositories>
@@ -107,7 +81,6 @@
         <module>onebusaway-geocoder</module>
         <module>onebusaway-geospatial</module>
         <module>onebusaway-gtfs-hibernate-spring</module>
-        <module>onebusaway-integration-tests</module>
         <module>onebusaway-phone</module>
         <module>onebusaway-phone-webapp</module>
         <module>onebusaway-presentation</module>
@@ -199,16 +172,6 @@
                                 <includes>
                                     <include>org/onebusaway/integration/**/*Test.java</include>
                                 </includes>
-                                <!-- We also define some test system properties -->
-                                <systemPropertyVariables>
-                                    <org.onebusaway.federations_webapp.port>${org.onebusaway.federations_webapp.port}</org.onebusaway.federations_webapp.port>
-                                    <org.onebusaway.transit_data_federation_webapp.port>${org.onebusaway.transit_data_federation_webapp.port}</org.onebusaway.transit_data_federation_webapp.port>
-                                    <org.onebusaway.api_webapp.port>${org.onebusaway.api_webapp.port}</org.onebusaway.api_webapp.port>
-                                    <org.onebusaway.phone_webapp.port>${org.onebusaway.phone_webapp.port}</org.onebusaway.phone_webapp.port>
-                                    <org.onebusaway.phone_webapp.agi_port>${org.onebusaway.phone_webapp.agi_port}</org.onebusaway.phone_webapp.agi_port>
-                                    <org.onebusaway.sms_webapp.port>${org.onebusaway.sms_webapp.port}</org.onebusaway.sms_webapp.port>
-                                    <org.onebusaway.webapp.port>${org.onebusaway.webapp.port}</org.onebusaway.webapp.port>
-                                </systemPropertyVariables>
                                 <!-- Don't stop the build if integration tests fail because we still want post-integration-test cleanup to run -->
                                 <testFailureIgnore>true</testFailureIgnore>
                             </configuration>

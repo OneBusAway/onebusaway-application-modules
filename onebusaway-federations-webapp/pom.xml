@@ -14,6 +14,10 @@
 
     <properties>
         <tomcat-version>5.5.29</tomcat-version>
+        <!--  These properties are primarily used in configuring joint integration tests -->
+        <org.onebusaway.federations_webapp.port>9900</org.onebusaway.federations_webapp.port>
+        <org.onebusaway.federations_webapp.ajp_port>9901</org.onebusaway.federations_webapp.ajp_port>
+        <org.onebusaway.federations_webapp.rmi_port>9902</org.onebusaway.federations_webapp.rmi_port>
     </properties>
 
     <dependencies>
