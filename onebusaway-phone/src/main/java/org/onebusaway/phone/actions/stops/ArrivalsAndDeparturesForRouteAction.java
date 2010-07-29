@@ -21,10 +21,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.phone.actions.AbstractAction;
+import org.onebusaway.phone.impl.PhoneArrivalsAndDeparturesModel;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 
 public class ArrivalsAndDeparturesForRouteAction extends AbstractAction {
 
@@ -32,17 +33,17 @@ public class ArrivalsAndDeparturesForRouteAction extends AbstractAction {
 
   private String _route;
 
-  private StopWithArrivalsAndDeparturesBean _model;
+  private PhoneArrivalsAndDeparturesModel _model;
 
   public void setRoute(String route) {
     _route = route;
   }
 
-  public StopWithArrivalsAndDeparturesBean getModel() {
+  public PhoneArrivalsAndDeparturesModel getModel() {
     return _model;
   }
 
-  public void setModel(StopWithArrivalsAndDeparturesBean model) {
+  public void setModel(PhoneArrivalsAndDeparturesModel model) {
     _model = model;
   }
 
@@ -53,7 +54,8 @@ public class ArrivalsAndDeparturesForRouteAction extends AbstractAction {
 
     List<ArrivalAndDepartureBean> arrivals = new ArrayList<ArrivalAndDepartureBean>();
 
-    for (ArrivalAndDepartureBean pab : _model.getArrivalsAndDepartures()) {
+    StopsWithArrivalsAndDeparturesBean m = _model.getResult();
+    for (ArrivalAndDepartureBean pab : m.getArrivalsAndDepartures()) {
       RouteBean route = pab.getTrip().getRoute();
       if (routeIds.contains(route.getId())
           || _route.equals(route.getShortName())) {
@@ -61,20 +63,22 @@ public class ArrivalsAndDeparturesForRouteAction extends AbstractAction {
       }
     }
 
-    _model = new StopWithArrivalsAndDeparturesBean(_model.getStop(), arrivals,
-        _model.getNearbyStops());
-    
-    logUserInteraction("routeIds",routeIds);
+    m = new StopsWithArrivalsAndDeparturesBean(m.getStops(), arrivals,
+        m.getNearbyStops());
+
+    logUserInteraction("routeIds", routeIds);
 
     return SUCCESS;
   }
 
   private Set<String> getRouteIdsForMatchingRoutes() {
-    StopBean stop = _model.getStop();
+    StopsWithArrivalsAndDeparturesBean result = _model.getResult();
     Set<String> ids = new HashSet<String>();
-    for (RouteBean route : stop.getRoutes()) {
-      if (route.getShortName().equals(_route))
-        ids.add(route.getId());
+    for (StopBean stop : result.getStops()) {
+      for (RouteBean route : stop.getRoutes()) {
+        if (route.getShortName().equals(_route))
+          ids.add(route.getId());
+      }
     }
     return ids;
   }
