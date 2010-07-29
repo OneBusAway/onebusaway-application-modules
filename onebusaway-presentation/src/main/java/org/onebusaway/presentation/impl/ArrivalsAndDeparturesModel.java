@@ -79,7 +79,7 @@ public class ArrivalsAndDeparturesModel {
   public void setStopIds(List<String> stopIds) {
     _stopIds = stopIds;
   }
-  
+
   public List<String> getStopIds() {
     return _stopIds;
   }
@@ -87,7 +87,7 @@ public class ArrivalsAndDeparturesModel {
   public void setRouteFilter(Set<String> routeFilter) {
     _routeFilter = routeFilter;
   }
-  
+
   public Set<String> getRouteFilter() {
     return _routeFilter;
   }
@@ -153,6 +153,10 @@ public class ArrivalsAndDeparturesModel {
 
   public StopsWithArrivalsAndDeparturesBean getResult() {
     return _result;
+  }
+
+  public void setResult(StopsWithArrivalsAndDeparturesBean result) {
+    _result = result;
   }
 
   public boolean isFiltered() {
