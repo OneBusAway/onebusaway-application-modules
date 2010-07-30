@@ -29,12 +29,4 @@
         <property name="geocoderService" ref="externalGeocoderImpl" />
     </bean>
 
-    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
-        <property name="properties">
-            <props>
-                <prop key="cacheManager.cacheManagerName">org.onebusaway.sms_webapp.cacheManager</prop>
-            </props>
-        </property>
-    </bean>
-
 </beans>

@@ -74,12 +74,4 @@
         <property name="messagesClass" value="org.onebusaway.webapp.gwt.where_library.WhereMessages" />
     </bean>
 
-    <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
-        <property name="properties">
-            <props>
-                <prop key="cacheManager.cacheManagerName">org.onebusaway.webapp.cacheManager</prop>
-            </props>
-        </property>
-    </bean>
-
 </beans>
