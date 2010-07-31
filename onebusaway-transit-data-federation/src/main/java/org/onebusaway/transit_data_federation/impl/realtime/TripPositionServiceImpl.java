@@ -292,6 +292,11 @@ public class TripPositionServiceImpl implements TripPositionService,
           serviceDateAndId, targetTime);
 
       for (StopTimeInstanceProxy sti : entry.getValue()) {
+        
+        // Only apply real-time data if there is data to apply
+        if( collection.isEmpty() )
+          continue;
+        
         int scheduleDeviation = collection.getScheduleDeviationForTargetTime(targetTime);
         sti.setPredictedArrivalOffset(scheduleDeviation);
         sti.setPredictedDepartureOffset(scheduleDeviation);
