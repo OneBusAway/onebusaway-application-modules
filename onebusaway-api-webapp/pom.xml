@@ -27,7 +27,11 @@
             <artifactId>onebusaway-presentation</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-siri-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <!-- RMI-like service for wiring up services between VMs -->
         <dependency>
             <groupId>com.caucho</groupId>

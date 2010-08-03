@@ -22,6 +22,8 @@ public final class TripBean implements Serializable {
 
   private String directionId;
 
+  private String blockId;
+
   public TripBean() {
 
   }
@@ -90,5 +92,13 @@ public final class TripBean implements Serializable {
 
   public void setDirectionId(String directionId) {
     this.directionId = directionId;
+  }
+
+  public void setBlockId(String blockId) {
+    this.blockId = blockId;
+  }
+  
+  public String getBlockId() {
+    return blockId;
   }
 }

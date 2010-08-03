@@ -14,6 +14,8 @@ public final class TripStatusBean implements Serializable {
   private long serviceDate;
 
   private CoordinatePoint position;
+  
+  private double distanceAlongRoute;
 
   private int scheduleDeviation;
 
@@ -101,5 +103,21 @@ public final class TripStatusBean implements Serializable {
    */
   public void setClosestStopTimeOffset(int closestStopTimeOffset) {
     this.closestStopTimeOffset = closestStopTimeOffset;
+  }
+
+  /**
+   * See description in {@link #getDistanceAlongRoute()}.
+   * @param distanceAlongRoute
+   */
+  public void setDistanceAlongRoute(double distanceAlongRoute) {
+    this.distanceAlongRoute = distanceAlongRoute;
+  }
+
+  /**
+   * The vehicle's distance along the route.
+   * @return distance, in meters
+   */
+  public double getDistanceAlongRoute() {
+    return distanceAlongRoute;
   }
 }

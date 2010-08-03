@@ -24,7 +24,7 @@ public class TransitDataServiceExceptionInterceptor {
       throw ex;
     } catch (Throwable ex) {
       _log.error("error executing TransitDataService method", ex);
-      throw new ServiceException();
+      throw new ServiceException(ex);
     }
   }
 }

@@ -25,6 +25,7 @@ import org.onebusaway.api.model.transit.TripV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.siri.model.VehicleLocation;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -77,6 +78,8 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("agencyWithCoverage", AgencyWithCoverageV2Bean.class);
     xstream.alias("stopsForRoute",StopsForRouteV2Bean.class);
 
+    xstream.alias("VehicleLocation",VehicleLocation.class);
+    
     return xstream;
   }
 

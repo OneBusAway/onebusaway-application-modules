@@ -71,6 +71,8 @@ public class TripBeanServiceImpl implements TripBeanService {
 
     tripBean.setDirectionId(tripNarrative.getDirectionId());
 
+    tripBean.setBlockId(tripNarrative.getBlockId());
+    
     return tripBean;
   }
 
