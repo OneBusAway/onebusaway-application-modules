@@ -109,7 +109,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setScheduledDepartureTime(sti.getDepartureTime());
 
     if (sti.hasPredictedArrivalOffset())
-      pab.setPredictedArrivalTime(sti.getDepartureTime()
+      pab.setPredictedArrivalTime(sti.getArrivalTime()
           + sti.getPredictedArrivalOffset() * 1000);
 
     if (sti.hasPredictedDepartureOffset())

@@ -21,7 +21,7 @@
 <jsp:directive.page contentType="text/html" />
 	<s:if test="! agencies.empty">
 		<div class="${param.containerClass}">
-		  <div>Schedule and arrival data provided by <s:iterator
+		  <div class="${param.containerClass}_header">Schedule and arrival data provided by <s:iterator
 			value="agencies" status="iter">
 			<s:if test="#iter.index > 0 and #iter.last">and </s:if>
 			<s:if test="url != ''">

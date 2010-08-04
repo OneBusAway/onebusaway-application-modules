@@ -208,19 +208,25 @@ public interface WhereMessages extends Messages {
    * Arrivals and Departures Fields
    ****/
   
+  public String arrivedEarly(int minutes);
+  
   public String departedEarly(int minutes);
 
   public String early(int minutes);
   
+  public String arrivedOnTime();
+  
   public String departedOnTime();
 
   public String onTime();
+  
+  public String arrivedLate(int minutes);
 
   public String departedLate(int minutes);
 
   public String delayed(int minutes);
-  
-  public String scheduledDeparture();
 
   public String scheduledArrival();
+  
+  public String scheduledDeparture();
 }

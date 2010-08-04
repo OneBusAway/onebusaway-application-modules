@@ -115,6 +115,14 @@ public class StopAction extends AbstractWhereAction implements
     _model.setMinutesAfter(minutesAfter);
   }
 
+  public void setShowArrivals(boolean showArrivals) {
+    _model.setShowArrivals(showArrivals);
+  }
+
+  public boolean isShowArrivals() {
+    return _model.isShowArrivals();
+  }
+
   @Override
   public WebappArrivalsAndDeparturesModel getModel() {
     return _model;

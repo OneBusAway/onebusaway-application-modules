@@ -118,8 +118,6 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
 
   private void addArrivalsAndDeparture(ArrivalAndDepartureBean bean) {
 
-    long now = System.currentTimeMillis();
-    
     int rowIndex = _arrivalsAndDeparturesTable.getRowCount();
 
     TripBean trip = bean.getTrip();
@@ -141,8 +139,8 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
     String time = _timeFormat.format(new Date(bean.computeBestDepartureTime()));
     timeAndStatusPanel.add(new SpanWidget(time, "arrivalsTimeEntry"));
     timeAndStatusPanel.add(new SpanWidget(" - "));
-    String arrivalStatusLabelStyle = _methods.getArrivalStatusLabelStyle(bean);
-    timeAndStatusPanel.add(new SpanWidget(_methods.getArrivalLabel(bean),
+    String arrivalStatusLabelStyle = _methods.getStatusLabelStyle(bean);
+    timeAndStatusPanel.add(new SpanWidget(_methods.getStatusLabel(bean),
         arrivalStatusLabelStyle));
     _arrivalsAndDeparturesTable.setWidget(rowIndex, 1, divPanel);
 
@@ -150,7 +148,7 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
         "arrivalsStatusEntry");
     _arrivalsAndDeparturesTable.getCellFormatter().addStyleName(rowIndex, 2,
         arrivalStatusLabelStyle);
-    if (_methods.isArrivalNow(bean))
+    if (_methods.isNow(bean))
       _arrivalsAndDeparturesTable.getCellFormatter().addStyleName(rowIndex, 2,
           "arrivalStatusNow");
 

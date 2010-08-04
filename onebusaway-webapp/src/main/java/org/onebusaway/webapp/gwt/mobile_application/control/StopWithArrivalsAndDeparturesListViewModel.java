@@ -141,9 +141,9 @@ public class StopWithArrivalsAndDeparturesListViewModel extends ListViewModel {
     long bestTime = getBestTime(bean);
 
     String arrivalTime = _timeFormat.format(new Date(bestTime));
-    String arrivalLabel = _methods.getArrivalLabel(bean);
+    String arrivalLabel = _methods.getStatusLabel(bean);
     String minuteLabel = _methods.getMinutesLabel(bean);
-    String arrivalLabelStyle = _methods.getArrivalStatusLabelStyle(bean);
+    String arrivalLabelStyle = _methods.getStatusLabelStyle(bean);
 
     Grid row = new Grid(1, 3);
     row.addStyleName(_css.ArrivalEntry());

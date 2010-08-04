@@ -31,4 +31,12 @@ public class WebappArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel
   public ArrivalsAndDeparturesPresentaion getArrivalsAndDeparturesPresentation() {
     return _arrivalsAndDeparturesPresentation;
   }
+  
+  public void setShowArrivals(boolean showArrivals){
+    _arrivalsAndDeparturesPresentation.setShowArrivals(showArrivals);
+  }
+  
+  public boolean isShowArrivals() {
+    return _arrivalsAndDeparturesPresentation.isShowArrivals();
+  }
 }

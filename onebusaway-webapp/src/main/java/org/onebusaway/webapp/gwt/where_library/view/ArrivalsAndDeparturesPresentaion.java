@@ -12,17 +12,19 @@ import com.google.gwt.core.client.GWT;
 public class ArrivalsAndDeparturesPresentaion {
 
   private static final String CANCELLED = "cancelled";
-  
+
   private WhereLibraryCssResource _css;
 
   private WhereMessages _messages;
-  
+
+  private boolean _showArrivals = false;
+
   public ArrivalsAndDeparturesPresentaion() {
-    
+
   }
-  
+
   public ArrivalsAndDeparturesPresentaion(boolean useDefaultResources) {
-    if( useDefaultResources ) {
+    if (useDefaultResources) {
       _css = WhereLibrary.INSTANCE.getCss();
       _messages = GWT.create(WhereMessages.class);
     }
@@ -31,9 +33,17 @@ public class ArrivalsAndDeparturesPresentaion {
   public void setMessages(WhereMessages messages) {
     _messages = messages;
   }
-  
+
   public void setCss(WhereLibraryCssResource css) {
     _css = css;
+  }
+
+  public void setShowArrivals(boolean showArrivals) {
+    _showArrivals = showArrivals;
+  }
+
+  public boolean isShowArrivals() {
+    return _showArrivals;
   }
 
   /**
@@ -42,52 +52,62 @@ public class ArrivalsAndDeparturesPresentaion {
    * @param pab
    * @return
    */
-  public String getArrivalLabel(ArrivalAndDepartureBean pab) {
+  public String getStatusLabel(ArrivalAndDepartureBean pab) {
 
     if (CANCELLED.equals(pab.getStatus()))
       return "suspended";
 
     long now = System.currentTimeMillis();
-    long predicted = pab.getPredictedArrivalTime();
-    long scheduled = pab.getScheduledArrivalTime();
+    long predicted = getPredictedTime(pab);
+    long scheduled = getScheduledTime(pab);
 
     if (predicted > 0) {
 
-      double diff = ((pab.getPredictedArrivalTime() - pab.getScheduledArrivalTime()) / (1000.0 * 60));
+      double diff = ((predicted - scheduled) / (1000.0 * 60));
       int minutes = (int) Math.abs(Math.round(diff));
 
-      boolean departed = predicted < now;
+      boolean pastTense = predicted < now;
 
       if (diff < -1.5) {
-        return departed ? _messages.departedEarly(minutes)
-            : _messages.early(minutes);
+        if (pastTense)
+          return _showArrivals ? _messages.arrivedEarly(minutes)
+              : _messages.departedEarly(minutes);
+        else
+          return _messages.early(minutes);
       } else if (diff < 1.5) {
-        return departed ? _messages.departedOnTime() : _messages.onTime();
+        if (pastTense)
+          return _showArrivals ? _messages.arrivedOnTime()
+              : _messages.departedOnTime();
+        else
+          return _messages.onTime();
       } else {
-        return departed ? _messages.departedLate(minutes)
-            : _messages.delayed(minutes);
+        if (pastTense)
+          return _showArrivals ? _messages.arrivedLate(minutes)
+              : _messages.departedLate(minutes);
+        else
+          return _messages.delayed(minutes);
       }
 
     } else {
-      if (scheduled < now)
-        return _messages.scheduledDeparture();
-      else
+      if (_showArrivals)
         return _messages.scheduledArrival();
+      else
+        return _messages.scheduledDeparture();
     }
   }
 
-  public String getArrivalStatusLabelStyle(ArrivalAndDepartureBean pab) {
+  public String getStatusLabelStyle(ArrivalAndDepartureBean pab) {
 
     if (CANCELLED.equals(pab.getStatus()))
       return _css.arrivalStatusCancelled();
 
     long now = System.currentTimeMillis();
-    long predicted = pab.getPredictedArrivalTime();
-    long scheduled = pab.getScheduledArrivalTime();
+    long predicted = getPredictedTime(pab);
+    long scheduled = getScheduledTime(pab);
 
     if (predicted > 0) {
 
-      double diff = ((pab.getPredictedArrivalTime() - pab.getScheduledArrivalTime()) / (1000.0 * 60));
+      double diff = ((predicted - scheduled) / (1000.0 * 60));
 
       if (predicted < now) {
 
@@ -116,37 +136,57 @@ public class ArrivalsAndDeparturesPresentaion {
     }
   }
 
+  public long getBestTime(ArrivalAndDepartureBean pab) {
+    long t = getScheduledTime(pab);
+    if (hasPredictedTime(pab))
+      t = getPredictedTime(pab);
+    return t;
+  }
+
   public String getMinutesLabel(ArrivalAndDepartureBean pab) {
-    
+
     long now = System.currentTimeMillis();
 
     if (CANCELLED.equals(pab.getStatus()))
       return "-";
 
-    boolean isNow = isArrivalNow(pab);
-    long t = getBestArrivalTime(pab);
+    boolean isNow = isNow(pab);
+    long t = getBestTime(pab);
     int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
     return isNow ? "NOW" : Integer.toString(minutes);
   }
 
-  public boolean isArrivalNow(ArrivalAndDepartureBean pab) {
+  public boolean isNow(ArrivalAndDepartureBean pab) {
     if (CANCELLED.equals(pab.getStatus()))
       return true;
     long now = System.currentTimeMillis();
-    long t = getBestArrivalTime(pab);
+    long t = getBestTime(pab);
     int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
     return Math.abs(minutes) <= 1;
   }
 
-  private long getBestArrivalTime(ArrivalAndDepartureBean pab) {
-    long t = pab.getScheduledArrivalTime();
-    if (pab.hasPredictedArrivalTime())
-      t = pab.getPredictedArrivalTime();
-    return t;
-  }
-  
   public boolean isLongRouteName(RouteBean route) {
     String name = RoutePresenter.getNameForRoute(route);
     return RoutePresenter.isRouteNameLong(name);
   }
+
+  /****
+   * Private Methods
+   ****/
+
+  private boolean hasPredictedTime(ArrivalAndDepartureBean pab) {
+    return _showArrivals ? pab.hasPredictedArrivalTime()
+        : pab.hasPredictedDepartureTime();
+  }
+
+  private long getPredictedTime(ArrivalAndDepartureBean pab) {
+    return _showArrivals ? pab.getPredictedArrivalTime()
+        : pab.getPredictedDepartureTime();
+  }
+
+  private long getScheduledTime(ArrivalAndDepartureBean pab) {
+    return _showArrivals ? pab.getScheduledArrivalTime()
+        : pab.getScheduledDepartureTime();
+  }
+
 }

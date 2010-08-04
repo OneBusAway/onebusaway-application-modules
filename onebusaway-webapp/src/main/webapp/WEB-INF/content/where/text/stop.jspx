@@ -63,7 +63,7 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
         </tr>
         <s:iterator value="result.arrivalsAndDepartures">
         	<s:set name="route" value="trip.route"/>
-            <s:set name="arrivalsStatusLabelStyle" value="arrivalsAndDeparturesPresentation.getArrivalStatusLabelStyle(top)" />
+            <s:set name="arrivalsStatusLabelStyle" value="arrivalsAndDeparturesPresentation.getStatusLabelStyle(top)" />
             <tr class="arrivalsRow">
                 <td class="arrivalsRouteEntry"><s:url var="url" includeParams="get">
                     <s:param name="route" value="#route.id" />
@@ -75,7 +75,7 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
                 <jsp:attribute name="class">
                     arrivalsStatusEntry
                     <s:property value="#arrivalsStatusLabelStyle" />
-                    <s:if test="arrivalsAndDeparturesPresentation.isArrivalNow(top)"> arrivalStatusNow</s:if>
+                    <s:if test="arrivalsAndDeparturesPresentation.isNow(top)"> arrivalStatusNow</s:if>
                 </jsp:attribute>
                 <s:property value="arrivalsAndDeparturesPresentation.getMinutesLabel(top)" />
             </jsp:element>
@@ -85,14 +85,14 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
                 <div class="arrivalsDestinationEntry"><s:property value="trip.tripHeadsign" /></div>
                 <div class="arrivalsTimePanel">
                   <span class="arrivalsTimeEntry">
-                    <oba:date value="computeBestArrivalTime()" format="hh:mm" />
+                    <oba:date value="arrivalsAndDeparturesPresentation.getBestTime(top)" format="hh:mm" />
                   </span>
                   <jsp:text> - </jsp:text>
                   <jsp:element name="span">
                     <jsp:attribute name="class">
                       <s:property value="#arrivalsStatusLabelStyle" />
                     </jsp:attribute>
-                    <s:property value="arrivalsAndDeparturesPresentation.getArrivalLabel(top)" />
+                    <s:property value="arrivalsAndDeparturesPresentation.getStatusLabel(top)" />
                   </jsp:element>
                 </div>
                 </div>
@@ -104,7 +104,17 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
 
 </s:else>
 
-<div class="arrivalsStatusUpdates">Last Update: <s:date name="getTimeAsDate(#now)" format="hh:mm aa" /></div>
+<div class="arrivalsStatusUpdates">Last Update: <oba:date value="'now'" format="hh:mm aa" /></div>
+
+<p>
+  <s:url var="url" action="stop" includeParams="get">
+    <s:param name="showArrivals" value="! showArrivals"/>
+  </s:url>
+  <s:a href="%{url}">
+    <s:if test="showArrivals">Show departure times</s:if>
+    <s:else>Show arrival times</s:else>
+  </s:a>
+</p>
 
 <div class="arrivalsNearbyStops">
 <div>Nearby stops:</div>
