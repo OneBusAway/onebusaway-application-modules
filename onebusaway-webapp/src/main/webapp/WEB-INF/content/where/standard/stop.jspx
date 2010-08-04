@@ -56,7 +56,7 @@
 </s:iterator></div>
 -->
 
-<div class="stop_links">
+<div id="nearbyStops" class="stop_links">
 <h4>Nearby stops:</h4>
 <ul>
 <s:iterator value="result.nearbyStops">
@@ -69,7 +69,7 @@
 </s:iterator></ul>
 </div>
 
-<div class="stop_links">
+<div id="otherOptions" class="stop_links">
 <h4>Other options:</h4>
 <ul>
   <s:iterator value="result.stops" status="stopsIter">
