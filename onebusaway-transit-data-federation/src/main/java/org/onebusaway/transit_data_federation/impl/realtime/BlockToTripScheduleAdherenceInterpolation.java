@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,7 @@
-package org.onebusaway.transit_data_federation.services.realtime;
+package org.onebusaway.realtime.api;
 
 import java.io.Serializable;
 
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
 /**
@@ -38,7 +37,9 @@ public class VehiclePositionRecord implements Serializable {
 
   private AgencyAndId vehicleId;
 
-  private CoordinatePoint currentLocation;
+  private double currentLocationLat = Double.NaN;
+
+  private double currentLocationLon = Double.NaN;
 
   private long currentTime;
 
@@ -65,7 +66,8 @@ public class VehiclePositionRecord implements Serializable {
 
   public VehiclePositionRecord(VehiclePositionRecord r) {
     this.blockId = r.blockId;
-    this.currentLocation = r.currentLocation;
+    this.currentLocationLat = r.currentLocationLat;
+    this.currentLocationLon = r.currentLocationLon;
     this.currentTime = r.currentTime;
     this.scheduleDeviation = r.scheduleDeviation;
     this.serviceDate = r.serviceDate;
@@ -108,12 +110,20 @@ public class VehiclePositionRecord implements Serializable {
     this.vehicleId = vehicleId;
   }
 
-  public CoordinatePoint getCurrentLocation() {
-    return currentLocation;
+  public double getCurrentLocationLat() {
+    return currentLocationLat;
   }
 
-  public void setCurrentLocation(CoordinatePoint currentLocation) {
-    this.currentLocation = currentLocation;
+  public void setCurrentLocationLat(double currentLocationLat) {
+    this.currentLocationLat = currentLocationLat;
+  }
+
+  public double getCurrentLocationLon() {
+    return currentLocationLon;
+  }
+
+  public void setCurrentLocationLon(double currentLocationLon) {
+    this.currentLocationLon = currentLocationLon;
   }
 
   public long getCurrentTime() {

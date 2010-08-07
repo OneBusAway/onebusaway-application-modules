@@ -10,12 +10,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.DateSupport;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 

@@ -4,7 +4,6 @@
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-transit-data-federation</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.1-SNAPSHOT</version>
 
     <parent>
         <groupId>org.onebusaway</groupId>
@@ -17,17 +16,22 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-gtfs-hibernate-spring</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-container</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-transit-data</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-realtime-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -111,7 +115,7 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-testing</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

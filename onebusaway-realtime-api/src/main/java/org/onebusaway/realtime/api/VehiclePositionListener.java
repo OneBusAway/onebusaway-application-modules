@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.services.realtime;
+package org.onebusaway.realtime.api;
 
 import java.util.List;
 

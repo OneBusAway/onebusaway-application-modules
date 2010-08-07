@@ -19,6 +19,8 @@ import net.sf.ehcache.Element;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehiclePositionListener;
+import org.onebusaway.realtime.api.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.impl.shapes.DistanceTraveledShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations;
@@ -33,8 +35,6 @@ import org.onebusaway.transit_data_federation.services.narrative.NarrativeServic
 import org.onebusaway.transit_data_federation.services.realtime.StopRealtimeService;
 import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
 import org.onebusaway.transit_data_federation.services.realtime.TripPositionService;
-import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionListener;
-import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;

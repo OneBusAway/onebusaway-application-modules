@@ -13,9 +13,10 @@ import org.onebusaway.gtfs.csv.schema.DefaultEntitySchemaFactory;
 import org.onebusaway.gtfs.csv.schema.beans.CsvEntityMappingBean;
 
 /**
- * Field mapping to add a field to the serialized csv fields of an object 
+ * Field mapping to add a field to the serialized csv fields of an object
+ * 
  * @author bdferris
- *
+ * 
  */
 class GenericAdditionalFieldMapping extends AbstractFieldMapping {
 
@@ -25,9 +26,9 @@ class GenericAdditionalFieldMapping extends AbstractFieldMapping {
       Class<?> entityType, String csvFieldName, String objFieldName) {
 
     GenericAdditionalFieldMapping fieldMapping = new GenericAdditionalFieldMapping(
-        csvFieldName, objFieldName);
+        entityType, csvFieldName, objFieldName);
 
-    // Move this to the end of the list! 
+    // Move this to the end of the list!
     fieldMapping.setOrder(100);
 
     CsvEntityMappingBean mappingBean = new CsvEntityMappingBean(entityType);
@@ -35,8 +36,9 @@ class GenericAdditionalFieldMapping extends AbstractFieldMapping {
     factory.addBean(mappingBean);
   }
 
-  public GenericAdditionalFieldMapping(String csvFieldName, String objFieldName) {
-    super(csvFieldName, objFieldName, false);
+  public GenericAdditionalFieldMapping(Class<?> entityType,
+      String csvFieldName, String objFieldName) {
+    super(entityType, csvFieldName, objFieldName, false);
   }
 
   @Override

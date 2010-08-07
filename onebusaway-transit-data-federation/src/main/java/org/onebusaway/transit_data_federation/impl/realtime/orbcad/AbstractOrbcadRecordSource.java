@@ -18,14 +18,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.onebusaway.container.model.HasListeners;
 import org.onebusaway.container.model.Listeners;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehiclePositionListener;
+import org.onebusaway.realtime.api.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.impl.calendar.BlockCalendarService;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionListener;
-import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -327,9 +326,10 @@ public abstract class AbstractOrbcadRecordSource implements
       message.setVehicleId(new AgencyAndId(blockId.getAgencyId(),
           Integer.toString(record.getVehicleId())));
 
-      if (record.hasLat() && record.hasLon())
-        message.setCurrentLocation(new CoordinatePoint(record.getLat(),
-            record.getLon()));
+      if (record.hasLat() && record.hasLon()) {
+        message.setCurrentLocationLat(record.getLat());
+        message.setCurrentLocationLon(record.getLon());
+      }
       
       List<VehiclePositionRecord> messages = _interpolation.interpolate(message);
 
