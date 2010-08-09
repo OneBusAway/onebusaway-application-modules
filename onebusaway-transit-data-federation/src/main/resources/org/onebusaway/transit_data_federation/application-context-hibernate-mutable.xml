@@ -33,12 +33,9 @@
     -->
 
     <import resource="classpath:org/onebusaway/container/application-context-caching.xml" />
-
-    <!-- Hibernate session factory -->
-    <bean id="mutableSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean" primary="false">
-        <qualifier value="mutable" />
-        <property name="dataSource" ref="mutableDataSource" />
-        <property name="hibernateProperties">
+    
+	<bean id="hibernatePropertiesMutable" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="properties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
@@ -51,6 +48,12 @@
                 <prop key="hibernate.jdbc.batch_size">1000</prop>
             </props>
         </property>
+    </bean>
+    <!-- Hibernate session factory -->
+    <bean id="mutableSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean" primary="false">
+        <qualifier value="mutable" />
+        <property name="dataSource" ref="mutableDataSource" />
+        <property name="hibernateProperties" ref="hibernatePropertiesMutable" />
         <property name="annotatedClasses">
             <list>
                 <value>org.onebusaway.transit_data_federation.impl.realtime.TripPositionRecord</value>
