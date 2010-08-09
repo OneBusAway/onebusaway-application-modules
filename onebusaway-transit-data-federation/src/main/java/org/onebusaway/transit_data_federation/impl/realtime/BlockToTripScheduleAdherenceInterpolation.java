@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.VehiclePositionRecord;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
@@ -27,8 +27,8 @@ public class BlockToTripScheduleAdherenceInterpolation {
     _transitGraphDao = transitGraphDao;
   }
 
-  public List<VehiclePositionRecord> interpolate(
-      VehiclePositionRecord record) {
+  public List<VehicleLocationRecord> interpolate(
+      VehicleLocationRecord record) {
 
     long serviceDate = record.getServiceDate();
     long currentTime = record.getCurrentTime();
@@ -42,11 +42,11 @@ public class BlockToTripScheduleAdherenceInterpolation {
     List<TripEntry> trips = getTripsInTimeRangeForBlock(record.getBlockId(),
         timeFrom, timeTo);
 
-    List<VehiclePositionRecord> records = new ArrayList<VehiclePositionRecord>(
+    List<VehicleLocationRecord> records = new ArrayList<VehicleLocationRecord>(
         trips.size());
 
     for (TripEntry trip : trips) {
-      VehiclePositionRecord r = new VehiclePositionRecord(record);
+      VehicleLocationRecord r = new VehicleLocationRecord(record);
       r.setTripId(trip.getId());
       records.add(r);
     }

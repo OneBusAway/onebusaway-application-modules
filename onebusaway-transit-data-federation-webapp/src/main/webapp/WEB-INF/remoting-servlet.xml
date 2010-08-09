@@ -18,12 +18,12 @@
 
     <!-- <import resource="remoting-servlet-extra.xml" /> -->
 
-    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
+    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" />
     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
-    
+
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
-    <bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter"/>
-    
+    <bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter" />
+
     <context:component-scan base-package="org.onebusaway.transit_data_federation_webapp.controllers" />
 
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
@@ -34,6 +34,11 @@
     <bean name="/transit-data-service" class="org.springframework.remoting.caucho.HessianServiceExporter">
         <property name="service" ref="transitDataServiceImpl" />
         <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
+    </bean>
+
+    <bean name="/vehicle-position-service" class="org.springframework.remoting.caucho.HessianServiceExporter">
+        <property name="service" ref="tripPositionServiceImpl" />
+        <property name="serviceInterface" value="org.onebusaway.realtime.api.VehiclePositionListener" />
     </bean>
 
 </beans>

@@ -5,8 +5,8 @@ import java.io.Serializable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
 /**
- * Vehicle position records are the key data structure for passing real-time
- * position data about a transit vehicle from an external data source into
+ * Vehicle location records are the key data structure for passing real-time
+ * location data about a transit vehicle from an external data source into
  * OneBusAway. It tries to capture a variety of fields that might be present in
  * an AVL stream:
  * 
@@ -14,7 +14,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
  * <li>block id</li>
  * <li>trip id</li>
  * <li>vehicle id</li>
- * <li>position</li>
+ * <li>location</li>
  * <li>schedule adherence</li>
  * <li>arrival data relative to a timepoint</li>
  * </ul>
@@ -23,9 +23,9 @@ import org.onebusaway.gtfs.model.AgencyAndId;
  * have to be flexible in how we process the data.
  * 
  * @author bdferris
- * @see VehiclePositionListener
+ * @see VehicleLocationListener
  */
-public class VehiclePositionRecord implements Serializable {
+public class VehicleLocationRecord implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -44,9 +44,28 @@ public class VehiclePositionRecord implements Serializable {
   private long currentTime;
 
   /**
+   * 
+   */
+  private boolean scheduleDeviationSet = false;
+
+  /**
    * schedule deviation, in seconds, (+deviation is late, -deviation is early)
    */
   private int scheduleDeviation;
+
+  /**
+   * 
+   */
+  private boolean positionDeviationSet = false;
+
+  /**
+   * position deviation, in meters, (+deviation is late, -deviation is early)
+   */
+  private double positionDeviation;
+
+  /**
+   * 
+   */
 
   private AgencyAndId timepointId;
 
@@ -60,15 +79,18 @@ public class VehiclePositionRecord implements Serializable {
    */
   private int timepointPredictedTime;
 
-  public VehiclePositionRecord() {
+  public VehicleLocationRecord() {
 
   }
 
-  public VehiclePositionRecord(VehiclePositionRecord r) {
+  public VehicleLocationRecord(VehicleLocationRecord r) {
     this.blockId = r.blockId;
     this.currentLocationLat = r.currentLocationLat;
     this.currentLocationLon = r.currentLocationLon;
     this.currentTime = r.currentTime;
+    this.positionDeviationSet = r.positionDeviationSet;
+    this.positionDeviation = r.positionDeviation;
+    this.scheduleDeviationSet = r.scheduleDeviationSet;
     this.scheduleDeviation = r.scheduleDeviation;
     this.serviceDate = r.serviceDate;
     this.timepointId = r.timepointId;
@@ -135,6 +157,17 @@ public class VehiclePositionRecord implements Serializable {
   }
 
   /**
+   * @return true if schedule deviation information has been provided
+   */
+  public boolean isScheduleDeviationSet() {
+    return scheduleDeviationSet;
+  }
+
+  public void setScheduleDeviationSet(boolean scheduleDeviationSet) {
+    this.scheduleDeviationSet = scheduleDeviationSet;
+  }
+
+  /**
    * 
    * @return schedule deviation, in seconds, (+deviation is late, -deviation is
    *         early)
@@ -149,7 +182,38 @@ public class VehiclePositionRecord implements Serializable {
    *          early)
    */
   public void setScheduleDeviation(int scheduleDeviation) {
+    this.scheduleDeviationSet = true;
     this.scheduleDeviation = scheduleDeviation;
+  }
+
+  /**
+   * @return true if position deviation information has been provided
+   */
+  public boolean isPositionDeviationSet() {
+    return positionDeviationSet;
+  }
+
+  public void setPositionDeviationSet(boolean positionDeviationSet) {
+    this.positionDeviationSet = positionDeviationSet;
+  }
+
+  /**
+   * @return position deviation, in meters, (+deviation is late, -deviation is
+   *         early)
+   */
+
+  public double getPositionDeviation() {
+    return positionDeviation;
+  }
+
+  /**
+   * 
+   * @param positionDeviation - in meters (+deviation is late, -deviation is
+   *          early)
+   */
+  public void setPositionDeviation(double positionDeviation) {
+    this.positionDeviationSet = true;
+    this.positionDeviation = positionDeviation;
   }
 
   public AgencyAndId getTimepointId() {

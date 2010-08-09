@@ -20,8 +20,8 @@ import org.onebusaway.container.model.HasListeners;
 import org.onebusaway.container.model.Listeners;
 import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.VehiclePositionListener;
-import org.onebusaway.realtime.api.VehiclePositionRecord;
+import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.calendar.BlockCalendarService;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
@@ -34,7 +34,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime.orbcad:name=OrbcadRecordFtpSource")
 public abstract class AbstractOrbcadRecordSource implements
-    HasListeners<VehiclePositionListener> {
+    HasListeners<VehicleLocationListener> {
 
   private static final int REFRESH_INTERVAL_IN_SECONDS = 30;
 
@@ -42,13 +42,13 @@ public abstract class AbstractOrbcadRecordSource implements
 
   protected ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
 
-  private List<VehiclePositionRecord> _records = new ArrayList<VehiclePositionRecord>();
+  private List<VehicleLocationRecord> _records = new ArrayList<VehicleLocationRecord>();
 
   private int _refreshInterval = REFRESH_INTERVAL_IN_SECONDS;
 
   private long _lastRefresh = 0;
 
-  private Listeners<VehiclePositionListener> _listeners = new Listeners<VehiclePositionListener>();
+  private Listeners<VehicleLocationListener> _listeners = new Listeners<VehicleLocationListener>();
 
   private Map<String, String> _blockIdMapping = new HashMap<String, String>();
 
@@ -95,12 +95,12 @@ public abstract class AbstractOrbcadRecordSource implements
   }
 
   @Override
-  public void addListener(VehiclePositionListener listener) {
+  public void addListener(VehicleLocationListener listener) {
     _listeners.addListener(listener);
   }
 
   @Override
-  public void removeListener(VehiclePositionListener listener) {
+  public void removeListener(VehicleLocationListener listener) {
     _listeners.removeListener(listener);
   }
 
@@ -261,9 +261,9 @@ public abstract class AbstractOrbcadRecordSource implements
 
         handleRefresh();
 
-        for (VehiclePositionListener listener : _listeners) {
+        for (VehicleLocationListener listener : _listeners) {
           try {
-            listener.handleVehiclePositionRecords(_records);
+            listener.handleVehicleLocationRecords(_records);
           } catch (Throwable ex) {
             _log.warn("error passing schedule adherence records to listener",
                 ex);
@@ -312,7 +312,7 @@ public abstract class AbstractOrbcadRecordSource implements
         return;
       }
 
-      VehiclePositionRecord message = new VehiclePositionRecord();
+      VehicleLocationRecord message = new VehicleLocationRecord();
 
       message.setBlockId(blockId);
 
@@ -331,7 +331,7 @@ public abstract class AbstractOrbcadRecordSource implements
         message.setCurrentLocationLon(record.getLon());
       }
       
-      List<VehiclePositionRecord> messages = _interpolation.interpolate(message);
+      List<VehicleLocationRecord> messages = _interpolation.interpolate(message);
 
       _records.addAll(messages);
       _recordsValid++;

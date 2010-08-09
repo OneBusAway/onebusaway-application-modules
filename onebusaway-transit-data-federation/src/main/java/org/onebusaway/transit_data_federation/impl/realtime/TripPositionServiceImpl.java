@@ -19,8 +19,8 @@ import net.sf.ehcache.Element;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.VehiclePositionListener;
-import org.onebusaway.realtime.api.VehiclePositionRecord;
+import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.shapes.DistanceTraveledShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations;
@@ -59,7 +59,7 @@ import edu.washington.cs.rse.collections.stats.Min;
 @Component
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime:name=TripPositionServiceImpl")
 public class TripPositionServiceImpl implements TripPositionService,
-    StopRealtimeService, VehiclePositionListener {
+    StopRealtimeService, VehicleLocationListener {
 
   /**
    * The radius of the search window we'll use for finding
@@ -251,17 +251,17 @@ public class TripPositionServiceImpl implements TripPositionService,
   }
 
   /****
-   * {@link VehiclePositionListener} Interface
+   * {@link VehicleLocationListener} Interface
    ****/
 
-  public void handleVehiclePositionRecords(List<VehiclePositionRecord> records) {
+  public void handleVehicleLocationRecords(List<VehicleLocationRecord> records) {
 
-    Map<ServiceDateAndId, List<VehiclePositionRecord>> recordsByTripId = getVehiclePositionRecordsByServiceDateAndTripId(records);
+    Map<ServiceDateAndId, List<VehicleLocationRecord>> recordsByTripId = getVehiclePositionRecordsByServiceDateAndTripId(records);
 
-    for (Map.Entry<ServiceDateAndId, List<VehiclePositionRecord>> entry : recordsByTripId.entrySet()) {
+    for (Map.Entry<ServiceDateAndId, List<VehicleLocationRecord>> entry : recordsByTripId.entrySet()) {
 
       ServiceDateAndId tripId = entry.getKey();
-      for (VehiclePositionRecord record : entry.getValue()) {
+      for (VehicleLocationRecord record : entry.getValue()) {
 
         long timeOfRecord = record.getCurrentTime();
         int scheduleDeviation = record.getScheduleDeviation();
@@ -355,17 +355,17 @@ public class TripPositionServiceImpl implements TripPositionService,
    * Private Methods
    ****/
 
-  private Map<ServiceDateAndId, List<VehiclePositionRecord>> getVehiclePositionRecordsByServiceDateAndTripId(
-      List<VehiclePositionRecord> records) {
+  private Map<ServiceDateAndId, List<VehicleLocationRecord>> getVehiclePositionRecordsByServiceDateAndTripId(
+      List<VehicleLocationRecord> records) {
 
-    Map<ServiceDateAndId, List<VehiclePositionRecord>> r = new HashMap<ServiceDateAndId, List<VehiclePositionRecord>>();
+    Map<ServiceDateAndId, List<VehicleLocationRecord>> r = new HashMap<ServiceDateAndId, List<VehicleLocationRecord>>();
 
-    for (VehiclePositionRecord record : records) {
+    for (VehicleLocationRecord record : records) {
       ServiceDateAndId id = new ServiceDateAndId(record.getServiceDate(),
           record.getTripId());
-      List<VehiclePositionRecord> recordsForId = r.get(id);
+      List<VehicleLocationRecord> recordsForId = r.get(id);
       if (recordsForId == null) {
-        recordsForId = new ArrayList<VehiclePositionRecord>();
+        recordsForId = new ArrayList<VehicleLocationRecord>();
         r.put(id, recordsForId);
       }
       recordsForId.add(record);

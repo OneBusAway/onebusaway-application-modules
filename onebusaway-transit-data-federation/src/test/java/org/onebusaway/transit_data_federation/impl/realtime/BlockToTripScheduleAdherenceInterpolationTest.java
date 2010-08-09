@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.VehiclePositionRecord;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.DateSupport;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
@@ -55,19 +55,19 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     Date serviceDate = DateSupport.date("2010-03-30 00:00");
     Date currentTime = DateSupport.date("2010-03-30 07:25");
 
-    VehiclePositionRecord record = new VehiclePositionRecord();
+    VehicleLocationRecord record = new VehicleLocationRecord();
     record.setBlockId(blockId);
     record.setServiceDate(serviceDate.getTime());
     record.setCurrentTime(currentTime.getTime());
     record.setScheduleDeviation(5 * 60);
 
-    List<VehiclePositionRecord> records = _service.interpolate(record);
+    List<VehicleLocationRecord> records = _service.interpolate(record);
     assertEquals(2, records.size());
 
-    VehiclePositionRecord recordA = records.get(0);
+    VehicleLocationRecord recordA = records.get(0);
     assertEquals(tripA.getId(), recordA.getTripId());
 
-    VehiclePositionRecord recordB = records.get(1);
+    VehicleLocationRecord recordB = records.get(1);
     assertEquals(tripB.getId(), recordB.getTripId());
 
     /****
@@ -77,7 +77,7 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     serviceDate = DateSupport.date("2010-03-30 00:00");
     currentTime = DateSupport.date("2010-03-30 08:45");
 
-    record = new VehiclePositionRecord();
+    record = new VehicleLocationRecord();
     record.setBlockId(blockId);
     record.setServiceDate(serviceDate.getTime());
     record.setCurrentTime(currentTime.getTime());
@@ -97,7 +97,7 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     serviceDate = DateSupport.date("2010-03-30 00:00");
     currentTime = DateSupport.date("2010-03-30 08:45");
 
-    record = new VehiclePositionRecord();
+    record = new VehicleLocationRecord();
     record.setBlockId(blockId);
     record.setServiceDate(serviceDate.getTime());
     record.setCurrentTime(currentTime.getTime());

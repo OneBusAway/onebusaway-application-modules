@@ -13,7 +13,7 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.onebusaway.realtime.api.VehiclePositionRecord;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.TransitDataFederationBaseTestSupport;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
@@ -65,19 +65,19 @@ public class TripPositionServiceImplTest {
     StopTimeEntry stopTime = stopTime(0, stop, trip, 30, 90);
     long serviceDate = t - 20 * 1000;
 
-    VehiclePositionRecord vprA = new VehiclePositionRecord();
+    VehicleLocationRecord vprA = new VehicleLocationRecord();
     vprA.setTripId(trip.getId());
     vprA.setScheduleDeviation(120);
     vprA.setCurrentTime(t - 10 * 1000);
     vprA.setServiceDate(serviceDate);
 
-    VehiclePositionRecord vprB = new VehiclePositionRecord();
+    VehicleLocationRecord vprB = new VehicleLocationRecord();
     vprB.setTripId(trip.getId());
     vprB.setScheduleDeviation(130);
     vprB.setCurrentTime(t - 5 * 1000);
     vprB.setServiceDate(serviceDate);
 
-    _service.handleVehiclePositionRecords(Arrays.asList(vprA, vprB));
+    _service.handleVehicleLocationRecords(Arrays.asList(vprA, vprB));
 
     StopTimeInstanceProxy sti = new StopTimeInstanceProxy(stopTime, serviceDate);
 
