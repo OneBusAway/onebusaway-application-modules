@@ -38,6 +38,16 @@
             <groupId>org.opentripplanner</groupId>
             <artifactId>opentripplanner-graph-builder</artifactId>
             <version>0.4-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -66,27 +76,11 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- We support HSQLDB out of the box -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>3.1.14</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>hsqldb</groupId>
+            <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
-            <version>2.0.0</version>
-            <scope>test</scope>
         </dependency>
-
-        <!-- Normally you'd only use this in testing, but we're using it for db serialization for our data bundles -->
-        <!-- 
-        <dependency>
-            <groupId>org.dbunit</groupId>
-            <artifactId>dbunit</artifactId>
-            <version>2.4.4</version>
-        </dependency>
-        -->
 
         <dependency>
             <groupId>org.apache.lucene</groupId>
@@ -101,28 +95,19 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>1.8.0</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-testing</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.5.6</version>
-            <!--<scope>test</scope>-->
         </dependency>
 
     </dependencies>

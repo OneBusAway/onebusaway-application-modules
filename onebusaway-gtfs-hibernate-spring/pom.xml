@@ -5,24 +5,22 @@
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-gtfs-hibernate-spring</artifactId>
     <name>onebusaway-gtfs-hibernate-spring</name>
-    <version>0.0.1-SNAPSHOT</version>
 
     <parent>
-        <artifactId>onebusaway</artifactId>
+        <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>1.0.6</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-gtfs-hibernate</artifactId>
-            <version>1.1.4</version>
         </dependency>
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-container</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

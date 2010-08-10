@@ -57,7 +57,18 @@ public class XWorkRequestAttributes extends AbstractRequestAttributes {
   @Override
   public void registerDestructionCallback(String name, Runnable callback,
       int scope) {
-    
+
+  }
+
+  @Override
+  public Object resolveReference(String key) {
+    if (REFERENCE_REQUEST.equals(key)) {
+      return getScopedMap(SCOPE_REQUEST);
+    } else if (REFERENCE_SESSION.equals(key)) {
+      return getScopedMap(SCOPE_SESSION);
+    } else {
+      return null;
+    }
   }
 
   /****
@@ -66,7 +77,7 @@ public class XWorkRequestAttributes extends AbstractRequestAttributes {
 
   @Override
   protected void updateAccessedSessionAttributes() {
-    
+
   }
 
   private Map<String, Object> getScopedMap(int scope) {
@@ -81,4 +92,5 @@ public class XWorkRequestAttributes extends AbstractRequestAttributes {
         throw new IllegalStateException("unknown scope=" + scope);
     }
   }
+
 }
