@@ -26,6 +26,8 @@ public final class TripStatusBean implements Serializable {
   private StopBean closestStop;
   
   private int closestStopTimeOffset;
+
+  private long time;
   
   public String getStatus() {
     return status;
@@ -119,5 +121,16 @@ public final class TripStatusBean implements Serializable {
    */
   public double getDistanceAlongRoute() {
     return distanceAlongRoute;
+  }
+
+  public void setTime(long time) {
+    this.time = time;
+  }
+
+  /**
+   * @return the time we last heard from the bus (Unix-time)
+   */
+  public long getTime() {
+    return time;
   }
 }

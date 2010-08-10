@@ -27,6 +27,8 @@ public class TripPosition {
 
   private int closestStopTimeOffset;
 
+  private long time;
+
   public TripPosition() {
 
   }
@@ -133,5 +135,16 @@ public class TripPosition {
    */
   public void setClosestStopTimeOffset(int closestStopTimeOffset) {
     this.closestStopTimeOffset = closestStopTimeOffset;
+  }
+
+  /**
+   * @return the time we last heard from the bus (Unix-time)
+   */
+  public long getTime() {
+    return time;
+  }
+
+  public void setTime(long time) {
+    this.time = time;
   }
 }

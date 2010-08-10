@@ -233,6 +233,7 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
 
     bean.setStatus("default");
     bean.setServiceDate(serviceDate);
+    bean.setTime(tripPosition.getTime());
     
     if (tripPosition != null) {
       

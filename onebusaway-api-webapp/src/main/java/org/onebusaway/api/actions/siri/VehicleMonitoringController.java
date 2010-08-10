@@ -1,7 +1,6 @@
 package org.onebusaway.api.actions.siri;
 
 import org.onebusaway.siri.model.MonitoredVehicleJourney;
-import org.onebusaway.siri.model.ProgressBetweenStops;
 import org.onebusaway.siri.model.ServiceDelivery;
 import org.onebusaway.siri.model.VehicleActivity;
 import org.onebusaway.siri.model.VehicleLocation;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,11 +34,11 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class VehicleMonitoringController implements ModelDriven<ServiceDelivery>, ServletRequestAware {
 
-  private ServiceDelivery response;
-  private HttpServletRequest request;
+  private ServiceDelivery _response;
+  private HttpServletRequest _request;
   
   @Autowired  
-  private TransitDataService service;
+  private TransitDataService _transitDataService;
   
   /**
    * This is the default action for 
@@ -48,10 +48,10 @@ public class VehicleMonitoringController implements ModelDriven<ServiceDelivery>
   public DefaultHttpHeaders index() throws IOException {
     
     /* find the vehicle */
-    String vehicleId = request.getParameter("vehicleId");
-    String agencyId = request.getParameter("agencyId");
+    String vehicleId = _request.getParameter("vehicleId");
+    String agencyId = _request.getParameter("agencyId");
     
-    AgencyBean agency = service.getAgency(agencyId);
+    AgencyBean agency = _transitDataService.getAgency(agencyId);
     TimeZone timeZone = TimeZone.getTimeZone(agency.getTimezone());
     Calendar now = Calendar.getInstance(timeZone);
     
@@ -64,38 +64,37 @@ public class VehicleMonitoringController implements ModelDriven<ServiceDelivery>
     inclusion.setIncludeTripSchedule(true);
     inclusion.setIncludeTripStatus(true);
 
-    TripDetailsBean trip = service.getTripDetailsForVehicleAndTime(query);
+    TripDetailsBean trip = _transitDataService.getTripDetailsForVehicleAndTime(query);
     
     if (trip == null)
       return null;
     
-    response = new ServiceDelivery();
-    response.ResponseTimestamp = now;
+    _response = new ServiceDelivery();
+    _response.ResponseTimestamp = now;
     
-    response.ProducerRef = request.getServerName();
-    response.VehicleMonitoringDelivery = new VehicleMonitoringDelivery();
-    response.VehicleMonitoringDelivery.ResponseTimestamp = response.ResponseTimestamp;
-    response.VehicleMonitoringDelivery.SubscriberRef = request.getRemoteAddr();
+    _response.ProducerRef = _request.getServerName();
+    _response.VehicleMonitoringDelivery = new VehicleMonitoringDelivery();
+    _response.VehicleMonitoringDelivery.ResponseTimestamp = _response.ResponseTimestamp;
+    _response.VehicleMonitoringDelivery.SubscriberRef = _request.getRemoteAddr();
 
     VehicleActivity activity = new VehicleActivity();
 
     TripStatusBean status = trip.getStatus();
-    double totalDistance = status.getDistanceAlongRoute();
     
+    Calendar time = Calendar.getInstance();
+    time.setTime(new Date(status.getTime()));
     
-    activity.RecordedAtTime = now; //fixme: get this from somewhere
+    activity.RecordedAtTime = time;
     activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
-    activity.MonitoredVehicleJourney.Bearing = 0; //fixme: get this
     activity.MonitoredVehicleJourney.BlockRef = trip.getTrip().getBlockId();
     activity.MonitoredVehicleJourney.CourseOfJourneyRef = trip.getTripId();
     VehicleLocation location = new VehicleLocation();
-    location.Latitude = 0; //fixme: get this
-    location.Longitude = 0; //fixme: get this
-    location.Precision = 0; //fixme: get this
+    location.Latitude = status.getPosition().getLat();
+    location.Longitude = status.getPosition().getLon();
     
     activity.MonitoredVehicleJourney.VehicleLocation = location;
-    response.VehicleMonitoringDelivery.deliveries = new ArrayList<VehicleActivity>();
-    response.VehicleMonitoringDelivery.deliveries.add(activity);
+    _response.VehicleMonitoringDelivery.deliveries = new ArrayList<VehicleActivity>();
+    _response.VehicleMonitoringDelivery.deliveries.add(activity);
     
     return new DefaultHttpHeaders();
   }
@@ -103,22 +102,22 @@ public class VehicleMonitoringController implements ModelDriven<ServiceDelivery>
   
   @Override
   public ServiceDelivery getModel() {
-    return response;
+    return _response;
   }
 
   @Override
   public void setServletRequest(HttpServletRequest request) {
-    this.request = request;
+    this._request = request;
   }
 
 
   public void setService(TransitDataService service) {
-    this.service = service;
+    this._transitDataService = service;
   }
 
 
   public TransitDataService getService() {
-    return service;
+    return _transitDataService;
   }
 
 }

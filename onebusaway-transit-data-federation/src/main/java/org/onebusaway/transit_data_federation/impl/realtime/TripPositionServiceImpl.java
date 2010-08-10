@@ -436,6 +436,8 @@ public class TripPositionServiceImpl implements TripPositionService,
 
     position.setVehicleId(records.getVehicleId());
 
+    position.setTime(records.getToTime());
+    
     /**
      * Let's interpolate the position of the transit vehicle.
      * 
