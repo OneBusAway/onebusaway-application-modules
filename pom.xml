@@ -83,12 +83,12 @@
         <module>onebusaway-geocoder</module>
         <module>onebusaway-geospatial</module>
         <module>onebusaway-gtfs-hibernate-spring</module>
+        <module>onebusaway-gwt-common</module>
         <module>onebusaway-phone</module>
         <module>onebusaway-phone-webapp</module>
         <module>onebusaway-presentation</module>
         <module>onebusaway-sms-webapp</module>
         <module>onebusaway-realtime-api</module>
-        <!-- <module>onebusaway-testing</module> -->
         <module>onebusaway-transit-data</module>
         <module>onebusaway-transit-data-federation</module>
         <module>onebusaway-transit-data-federation-webapp</module>
