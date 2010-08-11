@@ -254,6 +254,18 @@ public class TripPositionServiceImpl implements TripPositionService,
    * {@link VehicleLocationListener} Interface
    ****/
 
+  public void handleVehicleLocationRecord(VehicleLocationRecord record) {
+    AgencyAndId tripId = record.getTripId();
+    long timeOfRecord = record.getCurrentTime();
+      int scheduleDeviation = record.getScheduleDeviation();
+
+    TripPositionRecord tripPositionRecord = new TripPositionRecord(
+        tripId, record.getServiceDate() , timeOfRecord,
+        scheduleDeviation, record.getVehicleId());
+
+      putTripPositionRecord(tripPositionRecord);
+  }
+
   public void handleVehicleLocationRecords(List<VehicleLocationRecord> records) {
 
     Map<ServiceDateAndId, List<VehicleLocationRecord>> recordsByTripId = getVehiclePositionRecordsByServiceDateAndTripId(records);
