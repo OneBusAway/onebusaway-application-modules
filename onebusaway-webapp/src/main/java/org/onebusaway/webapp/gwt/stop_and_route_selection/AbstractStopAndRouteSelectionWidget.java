@@ -16,14 +16,12 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.webapp.gwt.common.context.Context;
 import org.onebusaway.webapp.gwt.common.context.ContextImpl;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappServiceAsync;
-import org.onebusaway.webapp.gwt.where_library.view.StopFinderCssResource;
-import org.onebusaway.webapp.gwt.where_library.view.StopFinderInterface;
+import org.onebusaway.webapp.gwt.where_library.stop_info_widget.StopInfoWidget;
+import org.onebusaway.webapp.gwt.where_library.stop_info_widget.StopInfoWidgetHandler;
 import org.onebusaway.webapp.gwt.where_library.view.StopFinderPresenter;
 import org.onebusaway.webapp.gwt.where_library.view.StopFinderWidget;
-import org.onebusaway.webapp.gwt.where_library.view.StopInfoWindowWidget;
 import org.onebusaway.webapp.gwt.where_library.view.constraints.OperationContext;
 import org.onebusaway.webapp.gwt.where_library.view.constraints.OperationHandler;
-import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -42,7 +40,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ModalLayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 
 public class AbstractStopAndRouteSelectionWidget extends Composite {
 
@@ -142,12 +139,12 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
    ****/
 
   protected void initialize() {
-    _addStopAnchor.setHref("#addStop");    
+    _addStopAnchor.setHref("#addStop");
   }
 
   protected void setStopsAndRoutes(Collection<String> stopIds,
       Collection<String> routeIds) {
-    
+
     if (routeIds.isEmpty()) {
       _routesSelectedByDefault = true;
     } else {
@@ -155,7 +152,7 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
       for (String routeId : routeIds)
         _routeSelectionById.put(routeId, Boolean.TRUE);
     }
-    
+
     StopHandler stopHandler = new StopHandler();
     for (String stopId : stopIds) {
       _service.getStop(stopId, stopHandler);
@@ -197,21 +194,15 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
       setTitleWidget(new StopSelectionTitleWidget(_dialog));
       hideLinksPanel();
     }
-
-    @Override
-    protected Widget getStopInfoWindowWidget(StopBean stop,
-        StopFinderCssResource css) {
-      return new StopInfoWindowWidgetExtension(_stopFinder, _transitMapManager,
-          stop, css);
-    }
+    
+    
   }
 
-  private class StopInfoWindowWidgetExtension extends StopInfoWindowWidget {
+  private class StopInfoWindowWidgetExtension extends StopInfoWidget {
 
-    public StopInfoWindowWidgetExtension(StopFinderInterface stopFinder,
-        TransitMapManager transitMapManager, StopBean stop,
-        StopFinderCssResource css) {
-      super(stopFinder, transitMapManager, stop, css);
+    public StopInfoWindowWidgetExtension(StopInfoWidgetHandler handler,
+        StopBean stop) {
+      super(handler, stop);
     }
 
     @Override

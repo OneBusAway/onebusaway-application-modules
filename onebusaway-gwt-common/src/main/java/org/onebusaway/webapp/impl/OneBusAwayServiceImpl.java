@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.impl.oba;
+package org.onebusaway.webapp.impl;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,7 @@ import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.services.oba.OneBusAwayService;
+import org.onebusaway.webapp.services.OneBusAwayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:my='urn:import:org.onebusaway.webapp.gwt.where_library.view'>
+
+        <ui:style type="org.onebusaway.webapp.gwt.where_library.stop_info_widget.StopInfoWidgetCssResource">
+        
+        .stopInfoWindowPanel {
+        font-size: 10pt;
+        text-align: left;
+        }
+
+        .stopInfoWindowRoutesPanel {
+        margin-top: 10px;
+        max-width: 228px;
+        overflow: auto;
+        }
+
+        .stopInfoWindowRoutesSubPanel {
+        overflow: auto;
+        }
+
+        .stopInfoWindowRouteShortNameEntry {
+        border: 2px solid #000000;
+        margin-top: 5px;
+        margin-right: 5px;
+        padding: 2px;
+        float: left;
+        width: 25px;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        }
+
+        .stopInfoWindowRouteLongNameEntry {
+        border: 2px solid #000000;
+        margin-top: 5px;
+        padding: 2px;
+        font-weight: bold;
+        text-align: center;
+        }
+
+        .stopInfoWindowRouteReallyLongNameEntry {
+        font-size: 0.8em;
+        }
+
+    </ui:style>
+    
+    <g:HTMLPanel addStyleNames="{style.stopInfoWindowPanel}">
+        <div ui:field="_stopName" />
+        <div ui:field="_stopDescription" />
+        <g:FlowPanel ui:field="_stopLinks">
+            <g:FlowPanel>
+            <g:Anchor href="#" ui:field="_realtimeLink">Real-time arrival info</g:Anchor>
+            </g:FlowPanel>
+            <g:FlowPanel>
+            <g:Anchor href="#" ui:field="_scheduleLink">Complete timetable</g:Anchor>
+            </g:FlowPanel>
+        </g:FlowPanel>
+        <div class="{style.stopInfoWindowRoutesPanel}">
+            <div>Routes:</div>
+            <g:FlowPanel ui:field="_routesPanel" />
+        </div>
+    </g:HTMLPanel>
+
+</ui:UiBinder>

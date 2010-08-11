@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.services.oba;
+package org.onebusaway.webapp.services;
 
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;

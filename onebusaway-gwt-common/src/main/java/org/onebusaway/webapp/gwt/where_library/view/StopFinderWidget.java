@@ -1,6 +1,9 @@
 package org.onebusaway.webapp.gwt.where_library.view;
 
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.webapp.gwt.where_library.stop_info_widget.StopInfoWidget;
+import org.onebusaway.webapp.gwt.where_library.stop_info_widget.StopInfoWidgetHandler;
 import org.onebusaway.webapp.gwt.where_library.view.events.StopClickedEvent;
 import org.onebusaway.webapp.gwt.where_library.view.events.StopClickedHandler;
 import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
@@ -49,10 +52,10 @@ public class StopFinderWidget extends Composite {
 
   @UiField
   TextBox _searchTextBox;
-  
+
   @UiField
   FlowPanel _linksPanel;
-  
+
   @UiField
   Anchor _currentLinkAnchor;
 
@@ -61,7 +64,7 @@ public class StopFinderWidget extends Composite {
 
   @UiField
   MapWidgetComposite _mapPanel;
-  
+
   @UiField
   StopFinderCssResource style;
 
@@ -96,7 +99,7 @@ public class StopFinderWidget extends Composite {
         StopBean stop = event.getStop();
         InfoWindow window = _map.getInfoWindow();
         LatLng point = LatLng.newInstance(stop.getLat(), stop.getLon());
-        Widget widget = getStopInfoWindowWidget(stop,style);
+        Widget widget = getStopInfoWindowWidget(stop);
         window.open(point, new InfoWindowContent(widget));
       }
     });
@@ -117,7 +120,7 @@ public class StopFinderWidget extends Composite {
   public TransitMapManager getTransitMapManager() {
     return _transitMapManager;
   }
-  
+
   public StopFinderCssResource getCss() {
     return style;
   }
@@ -175,23 +178,48 @@ public class StopFinderWidget extends Composite {
 
     _stopFinder.query(value);
   }
-  
+
   @UiHandler("_currentLinkAnchor")
   void onCurrentLinkAnchorMouseOver(MouseOverEvent event) {
     String url = _stopFinder.getCurrentViewAsUrl();
     _currentLinkAnchor.setHref(url);
   }
-
-
-  protected Widget getStopInfoWindowWidget(StopBean stop, StopFinderCssResource css) {
-    return new StopInfoWindowWidget(_stopFinder, _transitMapManager, stop,css);
-  }
   
+  protected StopInfoWidgetHandler getStopInfoWidgetHandler() {
+    return new StopInfoWidgetHandlerImpl();
+  }
+
+  protected Widget getStopInfoWindowWidget(StopBean stop) {
+    return new StopInfoWidget(getStopInfoWidgetHandler(), stop);
+  }
+
   protected void hideLinksPanel() {
     _linksPanel.setVisible(false);
   }
 
   interface MyUiBinder extends UiBinder<Widget, StopFinderWidget> {
+  }
+
+  private class StopInfoWidgetHandlerImpl implements StopInfoWidgetHandler {
+
+    @Override
+    public void handleRealTimeLinkClicked() {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void handleRouteClicked(RouteBean route) {
+      // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void handleScheduleLinkClicked() {
+      // TODO Auto-generated method stub
+
+    }
+
   }
 
 }

@@ -31,7 +31,7 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappService;
-import org.onebusaway.webapp.services.oba.OneBusAwayService;
+import org.onebusaway.webapp.services.OneBusAwayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

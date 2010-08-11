@@ -60,9 +60,14 @@ public class CommonLibrary implements EntryPoint {
     }
 
     String path = Location.getPath();
+    
     if (path.startsWith("/onebusaway-webapp"))
       return Location.getProtocol() + "//" + Location.getHost()
           + "/onebusaway-webapp";
+    
+    if (path.startsWith("/onebusaway-nyc-webapp"))
+      return Location.getProtocol() + "//" + Location.getHost()
+          + "/onebusaway-nyc-webapp";
 
     return Location.getProtocol() + "//" + Location.getHost();
   }

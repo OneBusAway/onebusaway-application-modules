@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.gwt.where_library.view;
+package org.onebusaway.webapp.gwt.where_library.stop_info_widget;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,6 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.webapp.gwt.common.widgets.DivWidget;
 import org.onebusaway.webapp.gwt.common.widgets.SpanWidget;
-import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -17,12 +16,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
-public class StopInfoWindowWidget extends Composite {
+public class StopInfoWidget extends Composite {
 
   private static MyUiBinder _uiBinder = GWT.create(MyUiBinder.class);
 
@@ -31,26 +30,28 @@ public class StopInfoWindowWidget extends Composite {
 
   @UiField
   DivElement _stopDescription;
-
+  
   @UiField
   FlowPanel _stopLinks;
 
   @UiField
+  Anchor _realtimeLink;
+  
+  @UiField
+  Anchor _scheduleLink;
+
+  @UiField
   FlowPanel _routesPanel;
 
-  @UiField(provided=true)
-  final StopFinderCssResource _css;
+  @UiField
+  StopInfoWidgetCssResource style;
 
-  private StopFinderInterface _stopFinder;
+  private StopInfoWidgetHandler _handler;
 
-  private TransitMapManager _transitMapManager;
+  public StopInfoWidget(StopInfoWidgetHandler handler,
+      StopBean stop) {
+    _handler = handler;
 
-  public StopInfoWindowWidget(StopFinderInterface stopFinder,
-      TransitMapManager transitMapManager, StopBean stop, StopFinderCssResource css) {
-    _css = css;
-    _stopFinder = stopFinder;
-    _transitMapManager = transitMapManager;
-    
     initWidget(_uiBinder.createAndBindUi(this));
 
     handleTitleForStop(stop);
@@ -73,19 +74,19 @@ public class StopInfoWindowWidget extends Composite {
 
   protected void handleLinksForStopInfoWindow(StopBean bean) {
 
-    RouteBean r = _transitMapManager.getSelectedRoute();
-    String href = "stop.action?id=" + bean.getId().toString();
-
-    if (r != null)
-      href = href + "&route=" + r.getId();
-
-    String html = "<div><a href=\"" + href
-        + "\">Real-time arrival info</a></div>";
-
-    String html2 = "<div><a href=\"schedule.action?id=" + bean.getId()
-        + "\">Complete timetable</a></div>";
-
-    _stopLinks.add(new HTML(html + html2));
+    _realtimeLink.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent arg0) {
+        _handler.handleRealTimeLinkClicked();
+      }
+    });
+    
+    _scheduleLink.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent arg0) {
+        _handler.handleScheduleLinkClicked();
+      }
+    });
   }
 
   protected FlowPanel getStopLinksPanel() {
@@ -113,15 +114,15 @@ public class StopInfoWindowWidget extends Composite {
     if (!shortNameRoutes.isEmpty()) {
 
       FlowPanel shortNameRoutesPanel = new FlowPanel();
-      shortNameRoutesPanel.addStyleName(_css.stopInfoWindowRoutesSubPanel());
+      shortNameRoutesPanel.addStyleName(style.stopInfoWindowRoutesSubPanel());
       _routesPanel.add(shortNameRoutesPanel);
 
       for (final RouteBean route : shortNameRoutes) {
         SpanWidget w = new SpanWidget(RoutePresenter.getNameForRoute(route));
-        w.addStyleName(_css.stopInfoWindowRouteShortNameEntry());
+        w.addStyleName(style.stopInfoWindowRouteShortNameEntry());
         w.addClickHandler(new ClickHandler() {
           public void onClick(ClickEvent arg0) {
-            _stopFinder.queryRoute(route.getId());
+            _handler.handleRouteClicked(route);
           }
         });
         shortNameRoutesPanel.add(w);
@@ -131,18 +132,18 @@ public class StopInfoWindowWidget extends Composite {
     if (!longNameRoutes.isEmpty()) {
 
       FlowPanel longNameRoutesPanel = new FlowPanel();
-      longNameRoutesPanel.addStyleName(_css.stopInfoWindowRoutesSubPanel());
+      longNameRoutesPanel.addStyleName(style.stopInfoWindowRoutesSubPanel());
       _routesPanel.add(longNameRoutesPanel);
 
       for (final RouteBean route : longNameRoutes) {
         String name = RoutePresenter.getNameForRoute(route);
         DivWidget w = new DivWidget(name);
-        w.addStyleName(_css.stopInfoWindowRouteLongNameEntry());
+        w.addStyleName(style.stopInfoWindowRouteLongNameEntry());
         if (name.length() > 10)
-          w.addStyleName(_css.stopInfoWindowRouteReallyLongNameEntry());
+          w.addStyleName(style.stopInfoWindowRouteReallyLongNameEntry());
         w.addClickHandler(new ClickHandler() {
           public void onClick(ClickEvent arg0) {
-            _stopFinder.queryRoute(route.getId());
+            _handler.handleRouteClicked(route);
           }
         });
         longNameRoutesPanel.add(w);
@@ -150,6 +151,6 @@ public class StopInfoWindowWidget extends Composite {
     }
   }
 
-  interface MyUiBinder extends UiBinder<Widget, StopInfoWindowWidget> {
+  interface MyUiBinder extends UiBinder<Widget, StopInfoWidget> {
   }
 }
