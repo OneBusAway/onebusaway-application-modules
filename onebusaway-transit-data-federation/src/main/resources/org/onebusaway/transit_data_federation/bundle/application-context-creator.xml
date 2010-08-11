@@ -35,37 +35,6 @@
         </property>
     </bean>
 
-    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="gtfs" />
-        <property name="task">
-            <bean class="org.onebusaway.transit_data_federation.bundle.tasks.LoadGtfsTask" />
-        </property>
-    </bean>
-    
-    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="route_collections" />
-        <property name="after" value="gtfs"/>
-        <property name="task">
-            <bean class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionsTask" />
-        </property>
-    </bean>
-    
-    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="route_search_index" />
-        <property name="after" value="route_collections"/>
-        <property name="task">
-            <bean class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionSearchIndexTask" />
-        </property>
-    </bean>
-
-    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="stop_search_index" />
-        <property name="after" value="route_search_index"/>
-        <property name="task">
-            <bean class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateStopSearchIndexTask" />
-        </property>
-    </bean>
-
     <bean id="generateRouteCollectionsTask" class="org.onebusaway.transit_data_federation.impl.offline.GenerateRouteCollectionsTask" />
     <bean id="generateRouteSearchIndexTask" class="org.onebusaway.transit_data_federation.impl.offline.GenerateRouteCollectionSearchIndexTask" />
     <bean id="generateStopSearchIndexTask" class="org.onebusaway.transit_data_federation.impl.offline.GenerateStopSearchIndexTask" />
