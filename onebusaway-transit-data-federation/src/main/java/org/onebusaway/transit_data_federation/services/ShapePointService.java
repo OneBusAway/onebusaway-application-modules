@@ -16,7 +16,7 @@ public interface ShapePointService {
 
   /**
    * @param shapeId the target shape id
-   * @return the set of shape points for the specified shape id
+   * @return the set of shape points for the specified shape id, or null if the shape was not found
    */
   public ShapePoints getShapePointsForShapeId(AgencyAndId shapeId);
 }
