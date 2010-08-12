@@ -30,6 +30,8 @@ class ShapeBeanServiceImpl implements ShapeBeanService {
   @Cacheable
   public EncodedPolylineBean getPolylineForShapeId(AgencyAndId id) {
     ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(id);
+    if( shapePoints == null)
+      return null;
     return PolylineEncoder.createEncodings(shapePoints.getLats(),
         shapePoints.getLons(), -1);
   }

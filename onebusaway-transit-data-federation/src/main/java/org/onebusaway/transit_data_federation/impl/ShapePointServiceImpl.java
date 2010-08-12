@@ -26,6 +26,10 @@ class ShapePointServiceImpl implements ShapePointService {
   public ShapePoints getShapePointsForShapeId(AgencyAndId shapeId) {
 
     List<ShapePoint> shapePoints = _gtfsDao.getShapePointsForShapeId(shapeId);
+    
+    if( shapePoints.isEmpty() )
+      return null;
+    
     int n = shapePoints.size();
 
     double[] lat = new double[n];
