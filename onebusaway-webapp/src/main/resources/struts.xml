@@ -23,8 +23,10 @@
     <package name="onebusaway-webapp-default" extends="struts-default">
 
         <interceptors>
+            <interceptor name="is-setup" class="org.onebusaway.webapp.actions.IsSetupInterceptor" />
             <interceptor name="current-user" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />
             <interceptor-stack name="onebusaway-webapp-stack">
+                <interceptor-ref name="is-setup" />
                 <interceptor-ref name="defaultStack" />
                 <interceptor-ref name="current-user" />
             </interceptor-stack>
@@ -40,6 +42,7 @@
             <result name="OutOfServiceAreaServiceException">/WEB-INF/content/exception-outOfServiceArea.jspx</result>
             <result name="MultipleServiceAreasServiceException">/WEB-INF/content/exception-multipleServiceAreas.jspx</result>
             <result name="NoSuchAgencyServiceException">/WEB-INF/content/exception-noSuchAgency.jspx</result>
+			<result name="NotSetup" type="redirectAction">/setup/setup</result>
         </global-results>
 
         <global-exception-mappings>

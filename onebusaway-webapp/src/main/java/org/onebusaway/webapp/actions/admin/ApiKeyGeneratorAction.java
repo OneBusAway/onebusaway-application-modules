@@ -1,6 +1,12 @@
 package org.onebusaway.webapp.actions.admin;
 
+import org.onebusaway.users.model.UserIndex;
+import org.onebusaway.users.model.UserIndexKey;
+import org.onebusaway.users.services.UserIndexTypes;
+import org.onebusaway.users.services.UserPropertiesService;
+import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.validation.KeyValidationService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -13,27 +19,33 @@ public class ApiKeyGeneratorAction extends ActionSupport {
   @Autowired
   private KeyValidationService _validationService;
 
-  private String _value;
+  @Autowired
+  private UserService _userService;
 
-  private String _key;
+  @Autowired
+  private UserPropertiesService _propertiesService;
+  
+  private long _interval;
+
 
   @RequiredFieldValidator
-  public void setValue(String value) {
-    _value = value;
+  public void setInterval(long value) {
+    _interval = value;
   }
   
-  public String getValue() {
-    return _value;
-  }
-
-  public String getKey() {
-    return _key;
+  public long getValue() {
+    return _interval;
   }
 
   @Override
   public String execute() {
-
-    _key = _validationService.generateKeyWithDefaultProvider(_value);
+    String apiKey = _validationService.generateKeyWithDefaultProvider("");;
+    UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, apiKey);
+    
+    _userService.getUserIndexForId(key);
+    
+    UserIndex userIndex = _userService.getOrCreateUserForIndexKey(key, apiKey, false);
+    _propertiesService.authorizeApi(userIndex.getUser(), _interval);
 
     return SUCCESS;
   }

@@ -259,4 +259,9 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
     return new RouteFilterBean(routeFilter.getRouteIds());
   }
 
+  @Override
+  public void authorizeApi(User user, long minRequestInteval) {
+      setAdditionalPropertyForUser(user, "minRequestInterval", minRequestInteval); 
+  }
+
 }

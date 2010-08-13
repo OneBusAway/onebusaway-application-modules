@@ -394,4 +394,9 @@ public class UserServiceImpl implements UserService {
 
     targetUser.setRoles(roles);
   }
+
+  @Override
+  public int getNumberOfUsersForRole(UserRole role) {
+    return _userDao.getNumberOfUsersWithRole(role);
+  }
 }

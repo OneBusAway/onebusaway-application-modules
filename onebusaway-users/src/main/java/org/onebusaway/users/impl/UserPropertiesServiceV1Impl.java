@@ -233,4 +233,9 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
 
     destProps.setBookmarkedStopIds(bookmarks);
   }
+
+  @Override
+  public void authorizeApi(User user, long minRequestInteval) {
+    throw new IllegalStateException("V1 user properties don't support api keys");
+  }
 }

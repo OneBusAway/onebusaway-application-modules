@@ -6,6 +6,7 @@ import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
+import org.onebusaway.users.model.UserRole;
 
 /**
  * Service methods for performing operations on user accounts.
@@ -255,5 +256,7 @@ public interface UserService {
    */
   public void setAdditionalPropertyForUser(User user, String propertyName,
       Object propertyValue);
+
+  public int getNumberOfUsersForRole(UserRole role);
 
 }

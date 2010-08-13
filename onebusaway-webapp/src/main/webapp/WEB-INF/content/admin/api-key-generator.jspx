@@ -24,8 +24,7 @@
 
 <h2>API Key</h2>
 <p>
-<span class="label">Value:</span> <s:property value="value"/><br/>
-<span class="label">Key:</span> <s:property value="key"/>
+<span class="label">Key:</span> <s:property value="value"/><br/>
 </p>
 
 </body>

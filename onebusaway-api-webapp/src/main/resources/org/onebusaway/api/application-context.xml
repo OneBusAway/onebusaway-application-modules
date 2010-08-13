@@ -16,6 +16,7 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
+	<import resource="classpath:org/onebusaway/users/application-context.xml" />
     <!-- This turns on automatic annotation configuration -->
     <context:annotation-config />
 
