@@ -1,7 +1,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.offline.GenerateStopSearchIndexTask;
+import org.onebusaway.transit_data_federation.bundle.tasks.GenerateStopSearchIndexTask;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.StopSearchService;
 

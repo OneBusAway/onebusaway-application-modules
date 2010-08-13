@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.offline;
+package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreatorTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author bdferris
  * 
  */
-public class PreCacheTask implements Runnable {
+public class PreCacheTask implements FederatedTransitDataBundleCreatorTask {
 
   private static Logger _log = LoggerFactory.getLogger(PreCacheTask.class);
 

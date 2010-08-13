@@ -3,35 +3,20 @@ package org.onebusaway.transit_data_federation.bundle;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import org.hibernate.SessionFactory;
 import org.onebusaway.container.ContainerLibrary;
-import org.onebusaway.gtfs.impl.HibernateGtfsRelationalDaoImpl;
-import org.onebusaway.gtfs.model.GtfsServiceBundle;
-import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.ServiceCalendar;
-import org.onebusaway.gtfs.model.ServiceCalendarDate;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
-import org.onebusaway.transit_data_federation.impl.offline.GtfsReadingSupport;
-import org.onebusaway.transit_data_federation.impl.offline.PreCacheTask;
-import org.onebusaway.transit_data_federation.model.RouteCollection;
-import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.services.RunnableWithOutputPath;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
-import org.onebusaway.transit_data_federation.services.tripplanner.offline.StopTransfersTripPlannerGraphTask;
-import org.onebusaway.transit_data_federation.services.tripplanner.offline.TripPlannerGraphTask;
-import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
-import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.onebusaway.transit_data_federation.bundle.model.TaskDefinition;
+import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 /**
  * The primary method for building a new federated transit data bundle, which is
@@ -50,80 +35,74 @@ import org.springframework.context.ConfigurableApplicationContext;
  * 
  * The build process is configured using Spring and additional context config
  * paths can be specified to add to the Spring container (see
- * {@link #setContextPaths(List)}). The core config is kept in the resource:
+ * {@link #setPreBundleContextPaths(List)}). The core config is kept in the
+ * resource:
  * 
- * {@value #PRIMARY_APPLICATION_CONTEXT_RESOURCE}
+ * {@value #PRE_BUNDLE_RESOURCE}
  * 
  * @author bdferris
  * @see FederatedTransitDataBundleCreatorMain
  */
 public class FederatedTransitDataBundleCreator {
 
-  private static final String PRIMARY_APPLICATION_CONTEXT_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator.xml";
+  private static final String PRE_BUNDLE_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-pre-bundle.xml";
 
-  public enum Stages {
-    /**
-     * Process GTFS and load it into the database
-     */
-    GTFS,
-    /**
-     * Consolidate multiple {@link Route} instances that all refer to the same
-     * semantic route into {@link RouteCollection} objects
-     */
-    ROUTE_COLLECTIONS,
-    /**
-     * Generate the search index from {@link RouteCollection} short and long
-     * name to route instance
-     */
-    ROUTE_SEARCH_INDEX,
-    /**
-     * Generate the search index from {@link Stop} name and code to stop
-     * instance
-     */
-    STOP_SEARCH_INDEX,
-    /**
-     * Compile {@link ServiceCalendar} and {@link ServiceCalendarDate}
-     * information into an optimized {@link CalendarServiceData} data structure
-     */
-    CALENDAR_SERVICE,
-    /**
-     * Construct the walk planner graph
-     */
-    WALK_GRAPH,
-    /**
-     * Construct the trip planner graph
-     */
-    TRIP_GRAPH,
-    /**
-     * Construct the optimized set of transfer points in the transit graph
-     */
-    STOP_TRANSFERS,
-    /**
-     * Construct the set of {@link StopNarrative}, {@link TripNarrative}, and
-     * {@link StopTimeNarrative} objects.
-     */
-    NARRATIVES,
-    /**
-     * Pre-cache many of the expensive to construct responses
-     */
-    PRE_CACHE
-  }
+  private static final String POST_BUNDLE_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-post-bundle.xml";
 
-  private List<File> _contextPaths;
+  private List<File> _contextPaths = new ArrayList<File>();
+
+  private List<File> _preBundleContextPaths = new ArrayList<File>();
+
+  private List<File> _postBundleContextPaths = new ArrayList<File>();
 
   private File _outputPath;
 
-  private Set<Stages> _stagesToSkip = new HashSet<Stages>();
+  private Set<String> _skipTasks = new HashSet<String>();
+
+  private Set<String> _onlyTasks = new HashSet<String>();
+
+  private Set<String> _postBundleSkipTasks = new HashSet<String>();
+
+  private Set<String> _postBundleOnlyTasks = new HashSet<String>();
+
+  private String _skipToTask;
+
+  private boolean _skipApplied = false;
+
+  private Set<String> _visitedTasks = new HashSet<String>();
 
   /**
-   * Additional context path that will be added when constructing the Spring
+   * Additional context paths that will be added when constructing the Spring
    * container that controls the build process. See
    * {@link ContainerLibrary#createContext(Iterable)}.
    * 
    * @param contextPaths additional Spring context paths to add to the container
    */
-  public void setContextPaths(List<File> contextPaths) {
-    _contextPaths = contextPaths;
+
+  public void setContextPaths(List<File> paths) {
+    _contextPaths = paths;
+  }
+
+  /**
+   * Additional pre-bundle-construction context paths that will be added when
+   * constructing the Spring container that controls the build process. See
+   * {@link ContainerLibrary#createContext(Iterable)}.
+   * 
+   * @param contextPaths additional Spring context paths to add to the container
+   */
+  public void setPreBundleContextPaths(List<File> contextPaths) {
+    _preBundleContextPaths = contextPaths;
+  }
+
+  /**
+   * Additional post-bundle-construction context paths that will be added when
+   * constructing the Spring container that controls the build process. See
+   * {@link ContainerLibrary#createContext(Iterable)}.
+   * 
+   * @param contextPaths additional Spring context paths to add to the container
+   */
+  public void setPostBundleContextPaths(List<File> contextPaths) {
+    _postBundleContextPaths = contextPaths;
   }
 
   /**
@@ -134,13 +113,16 @@ public class FederatedTransitDataBundleCreator {
     _outputPath = outputPath;
   }
 
-  /**
-   * The specified stage will be skipped in the bundle build process
-   * 
-   * @param stage state to skip
-   */
-  public void setStageToSkip(Stages stage) {
-    _stagesToSkip.add(stage);
+  public void addTaskToOnlyRun(String onlyTask) {
+    _onlyTasks.add(onlyTask);
+  }
+
+  public void addTaskToSkip(String taskToSkip) {
+    _skipTasks.add(taskToSkip);
+  }
+
+  public void setSkipToTask(String taskName) {
+    _skipToTask = taskName;
   }
 
   /**
@@ -148,8 +130,10 @@ public class FederatedTransitDataBundleCreator {
    * 
    * @throws IOException
    * @throws ClassNotFoundException
+   * @throws UnknownTaskException
    */
-  public void run() throws IOException, ClassNotFoundException {
+  public void run() throws IOException, ClassNotFoundException,
+      UnknownTaskException {
 
     _outputPath.mkdirs();
 
@@ -159,89 +143,57 @@ public class FederatedTransitDataBundleCreator {
      */
     System.setProperty("bundlePath", _outputPath.getAbsolutePath());
 
-    ConfigurableApplicationContext context = createApplicationContext();
+    List<String> preBundlePaths = getPrimaryApplicatonContextPaths();
+    runTasks(preBundlePaths, true, true, _skipTasks, _onlyTasks);
 
-    GtfsServiceBundle gtfsBundle = ContainerLibrary.getBeanOfType(context,
-        GtfsServiceBundle.class);
-    FederatedTransitDataBundle bundle = ContainerLibrary.getBeanOfType(context,
-        FederatedTransitDataBundle.class);
+    List<String> postBundlePaths = getPostBundleApplicatonContextPaths();
+    runTasks(postBundlePaths, false, true, _postBundleSkipTasks,
+        _postBundleOnlyTasks);
+  }
 
-    if (wants(Stages.GTFS))
-      loadGtfsIntoDatabase(context);
+  private void runTasks(List<String> applicationContextPaths,
+      boolean checkDatabase, boolean clearCacheFiles, Set<String> skipTasks,
+      Set<String> onlyTasks) throws UnknownTaskException {
 
-    if (wants(Stages.ROUTE_COLLECTIONS)) {
-      Runnable generateRouteCollectionsTask = (Runnable) context.getBean("generateRouteCollectionsTask");
-      generateRouteCollectionsTask.run();
+    ConfigurableApplicationContext context = ContainerLibrary.createContext(applicationContextPaths);
+
+    Map<String, TaskDefinition> taskDefinitionsByTaskName = new HashMap<String, TaskDefinition>();
+    List<String> taskNames = getTaskList(context, taskDefinitionsByTaskName,
+        skipTasks, onlyTasks);
+
+    if (checkDatabase)
+      createOrUpdateDatabaseSchemaAsNeeded(context, taskNames);
+
+    if (clearCacheFiles) {
+      FederatedTransitDataBundle bundle = context.getBean(FederatedTransitDataBundle.class);
+      clearExistingCacheFiles(bundle);
     }
 
-    if (wants(Stages.ROUTE_SEARCH_INDEX)) {
-      RunnableWithOutputPath generateRouteCollectionsSearchIndex = (RunnableWithOutputPath) context.getBean("generateRouteSearchIndexTask");
-      generateRouteCollectionsSearchIndex.setOutputPath(bundle.getRouteSearchIndexPath());
-      generateRouteCollectionsSearchIndex.run();
-    }
-
-    if (wants(Stages.STOP_SEARCH_INDEX)) {
-      RunnableWithOutputPath generateStopSearchIndex = (RunnableWithOutputPath) context.getBean("generateStopSearchIndexTask");
-      generateStopSearchIndex.setOutputPath(bundle.getStopSearchIndexPath());
-      generateStopSearchIndex.run();
-    }
-
-    if (wants(Stages.CALENDAR_SERVICE)) {
-      RunnableWithOutputPath task = (RunnableWithOutputPath) context.getBean("calendarServiceDataTask");
-      task.setOutputPath(gtfsBundle.getCalendarServiceDataPath());
+    for (String taskName : taskNames) {
+      System.out.println("== " + taskName + " =====>");
+      TaskDefinition def = taskDefinitionsByTaskName.get(taskName);
+      Runnable task = def.getTask();
+      if (task == null)
+        throw new IllegalStateException("unknown task bean with name: "
+            + taskName);
       task.run();
-    }
-
-    if (wants(Stages.WALK_GRAPH)) {
-      RunnableWithOutputPath walkPlannerGraphTask = (RunnableWithOutputPath) context.getBean("generateWalkPlannerGraphTask");
-      walkPlannerGraphTask.setOutputPath(bundle.getWalkPlannerGraphPath());
-      walkPlannerGraphTask.run();
-    }
-
-    if (wants(Stages.TRIP_GRAPH)) {
-      TripPlannerGraphTask task = (TripPlannerGraphTask) context.getBean("generateTripPlannerGraphTask");
-      task.setOutputPath(bundle.getTripPlannerGraphPath());
-      task.run();
-    }
-
-    if (wants(Stages.STOP_TRANSFERS)) {
-      WalkPlannerGraph walkPlannerGraph = ObjectSerializationLibrary.readObject(bundle.getWalkPlannerGraphPath());
-      TripPlannerGraph graph = ObjectSerializationLibrary.readObject(bundle.getTripPlannerGraphPath());
-
-      StopTransfersTripPlannerGraphTask task = (StopTransfersTripPlannerGraphTask) context.getBean("generateStopTransfersTripPlannerGraphTask");
-      task.setWalkPlannerGraph(walkPlannerGraph);
-      task.setTripPlannerGraph(graph);
-      task.setOutputPath(bundle.getTripPlannerGraphPath());
-      task.run();
-    }
-
-    if (wants(Stages.NARRATIVES)) {
-
-      Runnable stopTimeTask = (Runnable) context.getBean("generateNarrativesTask");
-      stopTimeTask.run();
     }
 
     // We don't need this context anymore
     context.stop();
     context.close();
     context = null;
+  }
 
-    if (wants(Stages.PRE_CACHE)) {
+  private void createOrUpdateDatabaseSchemaAsNeeded(
+      ConfigurableApplicationContext context, List<String> taskNames) {
+    LocalSessionFactoryBean factory = context.getBean(LocalSessionFactoryBean.class);
 
-      clearExistingCacheFiles(bundle);
-
-      List<String> cacheContextPaths = new ArrayList<String>();
-      cacheContextPaths.add("classpath:org/onebusaway/transit_data_federation/application-context-services.xml");
-      cacheContextPaths.add(PRIMARY_APPLICATION_CONTEXT_RESOURCE);
-      for (File contextPath : _contextPaths)
-        cacheContextPaths.add("file:" + contextPath);
-      cacheContextPaths.add("classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-extra.xml");
-
-      ConfigurableApplicationContext cacheContext = ContainerLibrary.createContext(cacheContextPaths);
-
-      PreCacheTask task = new PreCacheTask();
-      cacheContext.getAutowireCapableBeanFactory().autowireBean(task);
-      task.run();
+    if (taskNames.contains("gtfs")) {
+      factory.dropDatabaseSchema();
+      factory.createDatabaseSchema();
+    } else {
+      factory.updateDatabaseSchema();
     }
   }
 
@@ -249,17 +201,29 @@ public class FederatedTransitDataBundleCreator {
    * Private Methods
    ****/
 
-  private ConfigurableApplicationContext createApplicationContext() {
+  private List<String> getPrimaryApplicatonContextPaths() {
     List<String> paths = new ArrayList<String>();
-    paths.add(PRIMARY_APPLICATION_CONTEXT_RESOURCE);
+    paths.add(PRE_BUNDLE_RESOURCE);
     for (File contextPath : _contextPaths)
       paths.add("file:" + contextPath);
+    for (File contextPath : _preBundleContextPaths)
+      paths.add("file:" + contextPath);
+    return paths;
+  }
 
-    if (_stagesToSkip.contains(Stages.GTFS))
-      paths.add("classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-extra.xml");
+  private List<String> getPostBundleApplicatonContextPaths() {
 
-    ConfigurableApplicationContext context = ContainerLibrary.createContext(paths);
-    return context;
+    List<String> paths = new ArrayList<String>();
+
+    paths.add("classpath:org/onebusaway/transit_data_federation/application-context-services.xml");
+    paths.add(PRE_BUNDLE_RESOURCE);
+    paths.add(POST_BUNDLE_RESOURCE);
+    for (File contextPath : _contextPaths)
+      paths.add("file:" + contextPath);
+    for (File contextPath : _postBundleContextPaths)
+      paths.add("file:" + contextPath);
+
+    return paths;
   }
 
   private void clearExistingCacheFiles(FederatedTransitDataBundle bundle) {
@@ -279,18 +243,69 @@ public class FederatedTransitDataBundleCreator {
     }
   }
 
-  private boolean wants(Stages stage) {
-    boolean wants = !_stagesToSkip.contains(stage);
-    if (wants)
-      System.out.println("== " + stage + " =====>");
-    return wants;
+  private List<String> getTaskList(ApplicationContext context,
+      Map<String, TaskDefinition> taskDefinitionsByTaskName,
+      Set<String> skipTasks, Set<String> onlyTasks) throws UnknownTaskException {
+
+    Map<String, TaskDefinition> taskDefinitions = context.getBeansOfType(TaskDefinition.class);
+
+    DirectedGraph<String> graph = new DirectedGraph<String>();
+
+    for (TaskDefinition taskDefinition : taskDefinitions.values()) {
+      String taskName = taskDefinition.getTaskName();
+
+      if (!_visitedTasks.add(taskName))
+        continue;
+
+      taskDefinitionsByTaskName.put(taskName, taskDefinition);
+      graph.addNode(taskName);
+
+      String before = taskDefinition.getBeforeTaskName();
+      if (before != null)
+        graph.addEdge(taskName, before);
+
+      String after = taskDefinition.getAfterTaskName();
+      if (after != null)
+        graph.addEdge(after, taskName);
+    }
+
+    List<String> taskNames = graph.getTopologicalSort(null);
+    return getReducedTaskList(taskNames, skipTasks, onlyTasks);
   }
 
-  private void loadGtfsIntoDatabase(ApplicationContext context)
-      throws IOException {
-    HibernateGtfsRelationalDaoImpl store = new HibernateGtfsRelationalDaoImpl();
-    SessionFactory sessionFactory = (SessionFactory) context.getBean("sessionFactory");
-    store.setSessionFactory(sessionFactory);
-    GtfsReadingSupport.readGtfsIntoStore(context, store);
+  private List<String> getReducedTaskList(List<String> tasks,
+      Set<String> skipTasks, Set<String> onlyTasks) throws UnknownTaskException {
+
+    // Check task names first
+
+    for (String task : onlyTasks) {
+      if (!tasks.contains(task))
+        throw new UnknownTaskException(task);
+    }
+
+    for (String task : skipTasks) {
+      if (!tasks.contains(task))
+        throw new UnknownTaskException(task);
+    }
+
+    if (_skipToTask != null) {
+      int index = tasks.indexOf(_skipToTask);
+      if (index == -1) {
+        if (!_skipApplied)
+          tasks.clear();
+      } else {
+        for (int i = 0; i < index; i++)
+          tasks.remove(0);
+        _skipApplied = true;
+      }
+
+    }
+
+    if (!onlyTasks.isEmpty())
+      tasks.retainAll(onlyTasks);
+
+    tasks.removeAll(skipTasks);
+
+    return tasks;
   }
 }

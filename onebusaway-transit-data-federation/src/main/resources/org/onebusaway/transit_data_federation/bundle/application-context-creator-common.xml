@@ -15,12 +15,10 @@
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-    <import resource="classpath:org/onebusaway/transit_data_federation/application-context-common.xml" />
-
     <!-- Database Connection Configuration -->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-        <property name="url" value="jdbc:hsqldb:mem:org_onebusaway_bundle_temporary" />
+        <property name="url" value="jdbc:hsqldb:file:${bundlePath}/org_onebusaway_transit_data" />
         <property name="username" value="sa" />
         <property name="password" value="" />
     </bean>
@@ -29,30 +27,10 @@
         <property name="target" value="hibernateProperties" />
         <property name="properties">
             <props>
-                <prop key="hibernate.hbm2ddl.auto">create</prop>
+                <prop key="hibernate.hbm2ddl.auto"></prop>
                 <prop key="hibernate.cache.use_second_level_cache">false</prop>
             </props>
         </property>
     </bean>
-
-    <bean id="generateRouteCollectionsTask" class="org.onebusaway.transit_data_federation.impl.offline.GenerateRouteCollectionsTask" />
-    <bean id="generateRouteSearchIndexTask" class="org.onebusaway.transit_data_federation.impl.offline.GenerateRouteCollectionSearchIndexTask" />
-    <bean id="generateStopSearchIndexTask" class="org.onebusaway.transit_data_federation.impl.offline.GenerateStopSearchIndexTask" />
-    <bean id="generateNarrativesTask" class="org.onebusaway.transit_data_federation.impl.offline.GenerateNarrativesTask" />
-
-    <bean id="calendarServiceDataTask" class="org.onebusaway.transit_data_federation.impl.offline.CalendarServiceDataTask" />
-
-    <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
-        <property name="regionsSource">
-            <bean class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.GtfsStopRegionsSourceImpl" />
-        </property>
-    </bean>
-
-    <bean id="generateWalkPlannerGraphTask" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphTask" />
-    <bean id="generateTripPlannerGraphTask" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphTaskImpl" />
-    <bean id="generateStopTransfersTripPlannerGraphTask"
-        class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTransfersTripPlannerGraphTaskImpl" />
-
-    <bean id="modifications" class="org.onebusaway.transit_data_federation.model.modifications.Modifications" />
 
 </beans>

@@ -1,22 +1,20 @@
-package org.onebusaway.transit_data_federation.impl.offline;
+package org.onebusaway.transit_data_federation.bundle.tasks;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.services.GtfsRelationalDao;
-import org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl;
-import org.onebusaway.transit_data_federation.services.RunnableWithOutputPath;
-import org.onebusaway.transit_data_federation.services.StopSearchService;
+import java.io.IOException;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryParser.ParseException;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.Stop;
+import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl;
+import org.onebusaway.transit_data_federation.services.StopSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Generate the underlying Lucene search index for stop searches that will power
@@ -27,7 +25,7 @@ import java.io.IOException;
  * @see StopSearchService
  */
 @Component
-public class GenerateStopSearchIndexTask implements RunnableWithOutputPath {
+public class GenerateStopSearchIndexTask implements Runnable {
 
   public static final String FIELD_AGENCY_ID = "agencyId";
 
@@ -39,15 +37,16 @@ public class GenerateStopSearchIndexTask implements RunnableWithOutputPath {
 
   private GtfsRelationalDao _dao;
 
-  private File _path;
-
-  public void setOutputPath(File path) {
-    _path = path;
-  }
+  private FederatedTransitDataBundle _bundle;
 
   @Autowired
   public void setGtfsDao(GtfsRelationalDao dao) {
     _dao = dao;
+  }
+
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
   }
 
   public void run() {
@@ -59,8 +58,8 @@ public class GenerateStopSearchIndexTask implements RunnableWithOutputPath {
   }
 
   private void buildIndex() throws IOException, ParseException {
-    IndexWriter writer = new IndexWriter(_path, new StandardAnalyzer(), true,
-        IndexWriter.MaxFieldLength.LIMITED);
+    IndexWriter writer = new IndexWriter(_bundle.getStopSearchIndexPath(),
+        new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.LIMITED);
     for (Stop stop : _dao.getAllStops()) {
       Document document = getStopAsDocument(stop);
       writer.addDocument(document);

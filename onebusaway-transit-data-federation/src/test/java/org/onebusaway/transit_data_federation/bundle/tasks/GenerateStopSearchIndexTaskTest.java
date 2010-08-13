@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.offline;
+package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,30 +16,32 @@ import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 
 public class GenerateStopSearchIndexTaskTest {
-  
+
   private static final double MIN_SCORE = 1.0;
 
   private GtfsRelationalDao _gtfsDao;
 
   private GenerateStopSearchIndexTask _task;
 
-  private File _path;
+  private FederatedTransitDataBundle _bundle;
 
   @Before
   public void setup() throws IOException {
 
     _task = new GenerateStopSearchIndexTask();
 
-    _path = File.createTempFile(GenerateStopSearchIndexTask.class.getName(),
-        ".tmp");
-    _path.delete();
-    _path.mkdirs();
+    File path = File.createTempFile(
+        GenerateStopSearchIndexTask.class.getName(), ".tmp");
+    path.delete();
+    path.mkdirs();
 
-    _task.setOutputPath(_path);
+    _bundle = new FederatedTransitDataBundle(path);
+    _task.setBundle(_bundle);
 
     _gtfsDao = Mockito.mock(GtfsRelationalDao.class);
     _task.setGtfsDao(_gtfsDao);
@@ -47,7 +49,7 @@ public class GenerateStopSearchIndexTaskTest {
 
   @After
   public void teardown() {
-    deleteFile(_path);
+    deleteFile(_bundle.getPath());
   }
 
   @Test
@@ -72,9 +74,9 @@ public class GenerateStopSearchIndexTaskTest {
         Arrays.asList(stopA, stopB, stopC));
 
     _task.run();
-    
+
     StopSearchServiceImpl searchService = new StopSearchServiceImpl();
-    searchService.setIndexPath(_path);
+    searchService.setIndexPath(_bundle.getStopSearchIndexPath());
     searchService.initialize();
     SearchResult<AgencyAndId> ids = searchService.searchForStopsByCode("111",
         10, MIN_SCORE);
@@ -84,10 +86,10 @@ public class GenerateStopSearchIndexTaskTest {
     ids = searchService.searchForStopsByCode("222", 10, MIN_SCORE);
     assertEquals(1, ids.size());
     assertTrue(ids.getResults().contains(new AgencyAndId("1", "222")));
-    
+
     ids = searchService.searchForStopsByCode("333", 10, MIN_SCORE);
     assertEquals(0, ids.size());
-    
+
     ids = searchService.searchForStopsByCode("444", 10, MIN_SCORE);
     assertEquals(1, ids.size());
     assertTrue(ids.getResults().contains(new AgencyAndId("1", "333")));

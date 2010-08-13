@@ -2,7 +2,7 @@ package org.onebusaway.transit_data_federation.services.offline;
 
 import java.io.Serializable;
 
-import org.onebusaway.transit_data_federation.impl.offline.EntityReplacementStrategyFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyFactory;
 
 /**
  * Generic interface to support swapping out one entity with another. Use

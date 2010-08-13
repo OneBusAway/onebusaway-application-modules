@@ -1,19 +1,15 @@
 package org.onebusaway.transit_data_federation.bundle;
 
-import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreator.Stages;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Command line tool for federated transit data bundle creator. Allows
@@ -93,30 +89,19 @@ public class FederatedTransitDataBundleCreatorMain {
 
     if (commandLine.hasOption(ARG_SKIP_TO)) {
       String value = commandLine.getOptionValue(ARG_SKIP_TO);
-      Stages stage = FederatedTransitDataBundleCreator.Stages.valueOf(value);
-      Stages[] stages = FederatedTransitDataBundleCreator.Stages.values();
-      for (Stages s : stages) {
-        if (s.equals(stage))
-          break;
-        creator.setStageToSkip(s);
-      }
+      creator.setSkipToTask(value);
     }
 
     if (commandLine.hasOption(ARG_ONLY)) {
       String[] values = commandLine.getOptionValues(ARG_ONLY);
-      Set<Stages> stages = new HashSet<Stages>();
       for (String value : values)
-        stages.add(Stages.valueOf(value));
-      for (Stages stage : Stages.values()) {
-        if (!stages.contains(stage))
-          creator.setStageToSkip(stage);
-      }
+        creator.addTaskToOnlyRun(value);
     }
 
     if (commandLine.hasOption(ARG_SKIP)) {
       String[] values = commandLine.getOptionValues(ARG_SKIP);
       for (String value : values)
-        creator.setStageToSkip(Stages.valueOf(value));
+        creator.addTaskToSkip(value);
     }
   }
 }

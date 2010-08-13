@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.offline;
+package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.io.BufferedReader;
 import java.io.File;

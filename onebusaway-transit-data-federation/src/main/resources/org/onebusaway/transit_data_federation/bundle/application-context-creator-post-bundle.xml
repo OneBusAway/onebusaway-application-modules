@@ -15,16 +15,17 @@
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-    <bean id="bundleCreatorMoreHibernateProperties" class="org.onebusaway.container.spring.PropertiesBeanPostProcessor">
-        <property name="target" value="hibernateProperties" />
-        <property name="properties">
-            <props>
-                <prop key="hibernate.hbm2ddl.auto">update</prop>
-                <prop key="hibernate.cache.use_second_level_cache">false</prop>
-            </props>
-        </property>
+    <import resource="classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-common.xml" />
+
+    <alias name="dataSource" alias="mutableDataSource" />
+
+    <!-- Task Definitions -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="pre_cache" />
+        <property name="task" ref="preCacheTask" />
     </bean>
-    
-    <alias name="dataSource" alias="mutableDataSource"/>
+
+    <bean id="preCacheTask" class="org.onebusaway.transit_data_federation.bundle.tasks.PreCacheTask" />
 
 </beans>

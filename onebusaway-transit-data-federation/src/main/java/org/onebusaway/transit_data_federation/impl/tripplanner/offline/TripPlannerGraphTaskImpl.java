@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +22,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.blocks.BlockIdBlockOfTripsSourceImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.blocks.BlockOfTripsSource;
@@ -31,7 +31,6 @@ import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.offline.TripPlannerGraphTask;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
@@ -42,7 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.washington.cs.rse.collections.CollectionsLibrary;
 import edu.washington.cs.rse.collections.FactoryMap;
 
-public class TripPlannerGraphTaskImpl implements TripPlannerGraphTask {
+public class TripPlannerGraphTaskImpl implements Runnable {
 
   private static Logger _log = LoggerFactory.getLogger(TripPlannerGraphImpl.class);
 
@@ -55,10 +54,11 @@ public class TripPlannerGraphTaskImpl implements TripPlannerGraphTask {
   @Autowired
   private SessionFactory _sessionFactory;
 
-  private File _outputPath;
-
-  public void setOutputPath(File path) {
-    _outputPath = path;
+  private FederatedTransitDataBundle _bundle;
+  
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
   }
 
   private Map<Object, Object> _uniques = new HashMap<Object, Object>();
@@ -79,7 +79,7 @@ public class TripPlannerGraphTaskImpl implements TripPlannerGraphTask {
     sortStopTimeIndices(graph);
 
     try {
-      ObjectSerializationLibrary.writeObject(_outputPath, graph);
+      ObjectSerializationLibrary.writeObject(_bundle.getTripPlannerGraphPath(), graph);
     } catch (Exception ex) {
       throw new IllegalStateException("error writing graph to file", ex);
     }
@@ -120,7 +120,7 @@ public class TripPlannerGraphTaskImpl implements TripPlannerGraphTask {
 
     Collection<Route> routes = _gtfsDao.getAllRoutes();
     int routeIndex = 0;
-    
+
     for (Route route : routes) {
 
       System.out.println("routes: " + (routeIndex++) + "/" + routes.size());
@@ -441,8 +441,9 @@ public class TripPlannerGraphTaskImpl implements TripPlannerGraphTask {
         if (prev != null) {
           Stop s1 = prev.getStop();
           Stop s2 = stopTime.getStop();
-          if( s1 == null || s2 == null)
-            throw new IllegalStateException("no stops for stopTimes: st1=" + prev.getId() + " st2=" + stopTime.getId());
+          if (s1 == null || s2 == null)
+            throw new IllegalStateException("no stops for stopTimes: st1="
+                + prev.getId() + " st2=" + stopTime.getId());
           shapeDistanceTraveled += DistanceLibrary.distance(s1, s2);
         }
 

@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.walkplanner.offline;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
-import org.onebusaway.transit_data_federation.services.RunnableWithOutputPath;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.opentripplanner.graph_builder.model.osm.OSMNode;
@@ -25,21 +24,22 @@ import edu.washington.cs.rse.collections.combinations.Combinations;
 import edu.washington.cs.rse.collections.tuple.Pair;
 import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
-public class WalkPlannerGraphTask implements RunnableWithOutputPath {
+public class WalkPlannerGraphTask implements Runnable {
 
   private OpenStreetMapProvider _provider;
 
-  private File _outputPath;
-
   private boolean _createEmptyGraph = false;
+
+  private FederatedTransitDataBundle _bundle;
 
   @Autowired
   public void setOpenStreetMapProvider(OpenStreetMapProvider provider) {
     _provider = provider;
   }
 
-  public void setOutputPath(File path) {
-    _outputPath = path;
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
   }
 
   public void setCreateEmptyGraph(boolean createEmptyGraph) {
@@ -58,7 +58,8 @@ public class WalkPlannerGraphTask implements RunnableWithOutputPath {
         populateGraph(handler);
 
       WalkPlannerGraph graph = handler.getGraph();
-      ObjectSerializationLibrary.writeObject(_outputPath, graph);
+      ObjectSerializationLibrary.writeObject(_bundle.getWalkPlannerGraphPath(),
+          graph);
     } catch (Exception ex) {
       throw new IllegalStateException("error constructing WalkPlannerGraph", ex);
     }

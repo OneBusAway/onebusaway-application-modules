@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,25 +13,24 @@ import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
-import org.onebusaway.transit_data_federation.services.tripplanner.offline.StopTransfersTripPlannerGraphTask;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import edu.washington.cs.rse.collections.FactoryMap;
 import edu.washington.cs.rse.collections.stats.Min;
 import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
 
-public class StopTransfersTripPlannerGraphTaskImpl implements
-    StopTransfersTripPlannerGraphTask {
+public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
   private TripPlannerConstants _constants = new TripPlannerConstants();
 
@@ -40,45 +38,41 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
   private Map<Pair<AgencyAndId>, Double> _cachedStopDistance = new HashMap<Pair<AgencyAndId>, Double>();
 
+  private FederatedTransitDataBundle _bundle;
+
   private TripPlannerGraphImpl _graph;
 
-  private File _outputPath;
-
-  public void setWalkPlannerGraph(WalkPlannerGraph graph) {
-    _cachedStopTransferWalkPlanner.setWalkPlannerGraph(graph);
-  }
-
-  public void setTripPlannerGraph(TripPlannerGraph graph) {
-    _graph = (TripPlannerGraphImpl) graph;
-  }
-
-  public void setOutputPath(File path) {
-    _outputPath = path;
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
   }
 
   @Transactional
   public void run() {
 
-    System.out.println("======== StopTransfersTripPlannerGraphFactory =>");
-    
-
-    _graph.initialize();
-    
-    StopSequenceData data = new StopSequenceData();
-
-    for (TripEntryImpl trip : _graph.getTrips())
-      generateStatsForTrip(trip, data);
-
-    System.out.println("stopSequences=" + data.size());
-
-    processStopTransfers(data);
-
-    System.out.println("stop walk cache: "
-        + _cachedStopTransferWalkPlanner.getCacheHits() + " / "
-        + _cachedStopTransferWalkPlanner.getTotalHits());
-
     try {
-      ObjectSerializationLibrary.writeObject(_outputPath, _graph);
+
+      WalkPlannerGraph walkPlannerGraph = ObjectSerializationLibrary.readObject(_bundle.getWalkPlannerGraphPath());
+      _cachedStopTransferWalkPlanner.setWalkPlannerGraph(walkPlannerGraph);
+
+      _graph = ObjectSerializationLibrary.readObject(_bundle.getTripPlannerGraphPath());
+      _graph.initialize();
+
+      StopSequenceData data = new StopSequenceData();
+
+      for (TripEntryImpl trip : _graph.getTrips())
+        generateStatsForTrip(trip, data);
+
+      System.out.println("stopSequences=" + data.size());
+
+      processStopTransfers(data);
+
+      System.out.println("stop walk cache: "
+          + _cachedStopTransferWalkPlanner.getCacheHits() + " / "
+          + _cachedStopTransferWalkPlanner.getTotalHits());
+
+      ObjectSerializationLibrary.writeObject(_bundle.getTripPlannerGraphPath(),
+          _graph);
     } catch (Exception ex) {
       throw new IllegalStateException("error writing graph to file", ex);
     }
@@ -348,8 +342,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
       for (StopEntry transferFromEntry : potentialTransferStartPointsByEndPoint.get(transferToEntry)) {
 
-        Pair<StopEntry> pair = Tuples.pair(transferFromEntry,
-            transferToEntry);
+        Pair<StopEntry> pair = Tuples.pair(transferFromEntry, transferToEntry);
 
         int index = key.getIndexOfStop(transferFromEntry);
 
@@ -389,8 +382,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
     Double distance = _cachedStopDistance.get(pair);
     if (distance == null) {
-      distance = DistanceLibrary.distance(
-          stopA.getStopLocation(),
+      distance = DistanceLibrary.distance(stopA.getStopLocation(),
           stopB.getStopLocation());
       _cachedStopDistance.put(pair, distance);
     }
@@ -412,12 +404,12 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
       try {
 
         WalkPlan walkPlan = _cachedStopTransferWalkPlanner.getWalkPlanForStopToStop(transfer.getStops());
-        
-        if( walkPlan.getDistance() > _constants.getMaxTransferDistance())
+
+        if (walkPlan.getDistance() > _constants.getMaxTransferDistance())
           continue;
-        
+
         transfer.setWalkingDistance(walkPlan.getDistance());
-        
+
         if (transfer.getTime() < minT) {
           minTransfer = transfer;
           minT = transfer.getTime();
@@ -441,8 +433,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements
 
     private double _walkingDistance;
 
-    public Transfer(Pair<StopEntry> pair, double busTime,
-        double walkingDistance) {
+    public Transfer(Pair<StopEntry> pair, double busTime, double walkingDistance) {
       _stops = pair;
       _busTime = busTime;
       _walkingDistance = walkingDistance;
