@@ -1,6 +1,10 @@
 package org.onebusaway.container.spring;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -19,12 +23,17 @@ public class PropertiesBeanPostProcessor implements BeanPostProcessor, Ordered {
 
   private int _order;
 
-  private String _target;
+  private Set<String> _targets = new HashSet<String>();
 
   private Properties _properties;
 
   public void setTarget(String target) {
-    _target = target;
+    setTargets(Arrays.asList(target));
+  }
+
+  public void setTargets(List<String> targets) {
+    _targets.clear();
+    _targets.addAll(targets);
   }
 
   public void setProperties(Properties properties) {
@@ -55,7 +64,7 @@ public class PropertiesBeanPostProcessor implements BeanPostProcessor, Ordered {
   public Object postProcessAfterInitialization(Object obj, String beanName)
       throws BeansException {
 
-    if (_properties != null && beanName.equals(_target)) {
+    if (_properties != null && _targets.contains(beanName)) {
       if (obj instanceof Properties) {
         Properties properties = (Properties) obj;
         properties.putAll(_properties);
