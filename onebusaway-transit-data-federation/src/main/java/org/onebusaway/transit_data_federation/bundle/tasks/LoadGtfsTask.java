@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks;
 import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.impl.HibernateGtfsRelationalDaoImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
 public class LoadGtfsTask implements Runnable {
@@ -24,7 +25,8 @@ public class LoadGtfsTask implements Runnable {
   @Override
   public void run() {
     try {
-      HibernateGtfsRelationalDaoImpl store = new HibernateGtfsRelationalDaoImpl();
+      AutowireCapableBeanFactory factory = _applicationContext.getAutowireCapableBeanFactory();
+      HibernateGtfsRelationalDaoImpl store = factory.createBean(HibernateGtfsRelationalDaoImpl.class);
       store.setSessionFactory(_sessionFactory);
       GtfsReadingSupport.readGtfsIntoStore(_applicationContext, store);
     } catch (Throwable ex) {
