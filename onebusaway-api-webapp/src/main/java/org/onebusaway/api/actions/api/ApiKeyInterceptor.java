@@ -1,12 +1,7 @@
 package org.onebusaway.api.actions.api;
 
 import org.onebusaway.api.model.ResponseBean;
-import org.onebusaway.users.model.User;
-import org.onebusaway.users.model.UserIndex;
-import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.ApiKeyPermissionService;
-import org.onebusaway.users.services.UserIndexTypes;
-import org.onebusaway.users.services.UserService;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
@@ -28,9 +23,6 @@ import java.util.Map;
 public class ApiKeyInterceptor extends AbstractInterceptor {
 
   private static final long serialVersionUID = 1L;
-
-  @Autowired
-  private UserService _userService;
 
   @Autowired
   private ApiKeyPermissionService _keyService;
@@ -58,17 +50,8 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
     Map<String, Object> parameters = context.getParameters();
     String[] keys = (String[]) parameters.get("key");
 
-    UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, keys[0]);
-    UserIndex userIndex = _userService.getUserIndexForId(key);
-    
-    if (userIndex == null) {
-      return unauthorized(invocation, "invalid api key");
-    }
-
-    User user = userIndex.getUser();
-
-    boolean allowed = _keyService.getPermission(user, "api");
-    _keyService.usedKey(user, "api");
+    boolean allowed = _keyService.getPermission(keys[0], "api");
+    _keyService.usedKey(keys[0], "api");
     if (!allowed) {
       //this user is not authorized to use the API, at least for now
       return unauthorized(invocation, "permission denied");
