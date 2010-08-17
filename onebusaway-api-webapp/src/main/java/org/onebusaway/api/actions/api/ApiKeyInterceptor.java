@@ -51,7 +51,6 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
     String[] keys = (String[]) parameters.get("key");
 
     boolean allowed = _keyService.getPermission(keys[0], "api");
-    _keyService.usedKey(keys[0], "api");
     if (!allowed) {
       //this user is not authorized to use the API, at least for now
       return unauthorized(invocation, "permission denied");

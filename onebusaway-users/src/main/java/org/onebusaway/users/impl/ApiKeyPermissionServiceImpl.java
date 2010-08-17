@@ -1,10 +1,6 @@
 package org.onebusaway.users.impl;
 
-import org.onebusaway.users.model.User;
-import org.onebusaway.users.model.UserIndex;
-import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.ApiKeyPermissionService;
-import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +11,7 @@ import java.util.HashMap;
 @Component
 public class ApiKeyPermissionServiceImpl implements ApiKeyPermissionService {
 
-  private HashMap<User, Long> _lastVisitForUser;
+  private HashMap<String, Long> _lastVisitForUser;
   private UserService _userService;
 
   @Autowired
@@ -24,52 +20,29 @@ public class ApiKeyPermissionServiceImpl implements ApiKeyPermissionService {
   }
 
   public ApiKeyPermissionServiceImpl() {
-    _lastVisitForUser = new HashMap<User, Long>();
+    _lastVisitForUser = new HashMap<String, Long>();
 
   }
 
   @Override
   public boolean getPermission(String key, String service) {
-    User user = getUserForKey(key);
 
-    if (user == null) {
-      return false;
-    }
-
-    Long minRequestInterval = _userService.getAdditionalPropertyForUser(user,
-        "minRequestInterval");
+    Long minRequestInterval = _userService.getMinRequestIntervalForKey(key);
     if (minRequestInterval == null) {
       return false;
     }
-    Long lastVisit = _lastVisitForUser.get(user);
-    if (lastVisit == null) {
-      return true;
-    }
-    long now = System.currentTimeMillis();
-    return now - lastVisit >= minRequestInterval;
-  }
-
-  @Override
-  public void usedKey(String key, String service) {
-    User user = getUserForKey(key);
     
-    Long minRequestInterval = _userService.getAdditionalPropertyForUser(user,
-        "minRequestInterval");
-    if (minRequestInterval == null) {
-      return;
-    }
     long now = System.currentTimeMillis();
-    _lastVisitForUser.put(user, now);
-  }
-
-  public User getUserForKey(String key) {
-    UserIndexKey indexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
-    UserIndex userIndex = _userService.getUserIndexForId(indexKey);
-
-    if (userIndex == null) {
-      return null;
+    Long lastVisit = _lastVisitForUser.get(key);
+    
+    boolean ok = false;
+    
+    if (lastVisit == null || lastVisit + minRequestInterval <= now) {
+      ok = true;
     }
-
-    return userIndex.getUser();
+    
+    _lastVisitForUser.put(key, now);
+    return ok;
   }
+  
 }

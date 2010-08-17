@@ -259,4 +259,11 @@ public interface UserService {
 
   public int getNumberOfUsersForRole(UserRole role);
 
+  /**
+   * @param key an API key
+   * @return the minimum interval between requests in milliseconds for the key,
+   *         or null for a key with no permission to access the API 
+   */
+  public Long getMinRequestIntervalForKey(String key);
+  
 }

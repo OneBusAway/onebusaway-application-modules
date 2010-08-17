@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.client.model.UserIndexBean;
 import org.onebusaway.users.model.User;
@@ -398,5 +399,20 @@ public class UserServiceImpl implements UserService {
   @Override
   public int getNumberOfUsersForRole(UserRole role) {
     return _userDao.getNumberOfUsersWithRole(role);
+  }
+
+  @Cacheable
+  @Override
+  public Long getMinRequestIntervalForKey(String key) {
+    UserIndexKey indexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
+    UserIndex userIndex = getUserIndexForId(indexKey);
+
+    if (userIndex == null) {
+      return null;
+    }
+
+    User user = userIndex.getUser();
+
+    return getAdditionalPropertyForUser(user, "minRequestInterval");
   }
 }
