@@ -3,7 +3,6 @@ package org.onebusaway.webapp.actions;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 import org.onebusaway.users.services.UserService;
-import org.onebusaway.webapp.actions.setup.SetupAction;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
@@ -32,9 +31,12 @@ public class IsSetupInterceptor extends AbstractInterceptor {
   public String intercept(ActionInvocation invocation) throws Exception {
 
     Object action = invocation.getAction();
-    Class<? extends Object> actionType = action.getClass();
+    String namespace = invocation.getProxy().getNamespace();
+    String actionName = invocation.getProxy().getActionName();
     
-    if (actionType == SetupAction.class || actionType.isAssignableFrom(ResourcesAction.class)) {
+    Class<? extends Object> actionType = action.getClass();
+    if ((namespace.equals("/setup") && actionName.equals("setup"))
+        || actionType.isAssignableFrom(ResourcesAction.class)) {
       return invocation.invoke();
     }
 
@@ -44,7 +46,6 @@ public class IsSetupInterceptor extends AbstractInterceptor {
     
     if (nUsers == 0) {
       /* not set up and not trying to; redirect to setup page */
-
       return "NotSetup";
     }
     
