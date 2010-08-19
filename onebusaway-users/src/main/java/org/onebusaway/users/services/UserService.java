@@ -6,7 +6,6 @@ import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
-import org.onebusaway.users.model.UserRole;
 
 /**
  * Service methods for performing operations on user accounts.
@@ -40,6 +39,11 @@ public interface UserService {
    * @return the user with the specifed id, or null if not found
    */
   public User getUserForId(int userId);
+
+  /**
+   * @return the number of users with the admin role set
+   */
+  public int getNumberOfAdmins();
 
   /****
    * {@link UserIndex} Methods
@@ -257,13 +261,10 @@ public interface UserService {
   public void setAdditionalPropertyForUser(User user, String propertyName,
       Object propertyValue);
 
-  public int getNumberOfUsersForRole(UserRole role);
-
   /**
    * @param key an API key
    * @return the minimum interval between requests in milliseconds for the key,
-   *         or null for a key with no permission to access the API 
+   *         or null for a key with no permission to access the API
    */
   public Long getMinRequestIntervalForKey(String key);
-  
 }

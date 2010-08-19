@@ -25,7 +25,7 @@
 <p>Welcome.  Your installation of OneBusAway doesn't appear to have been set up yet. Let's get started.</p>
 
 <span class="label">Create an admin user</span>
-<s:form method="post" action="setup!submit">
+<s:form method="post" action="index!submit">
   <s:textfield name="userName" value="%{userName}" label="UserName"/>
   <s:password name="password" value="%{password}" label="Password"/>
   <s:password name="password2" value="%{password2}" label="Confirm password"/>

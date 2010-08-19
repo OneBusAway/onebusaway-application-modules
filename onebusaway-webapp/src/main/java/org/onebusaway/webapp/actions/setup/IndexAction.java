@@ -1,5 +1,7 @@
 package org.onebusaway.webapp.actions.setup;
 
+import org.onebusaway.presentation.impl.users.SetupAction;
+import org.onebusaway.presentation.services.InitialSetupService;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
@@ -16,15 +18,18 @@ import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.providers.encoding.PasswordEncoder;
 
+@SetupAction
 @Results( {@Result(type = "redirectAction", name = "redirect", params = {
-    "actionName", "/admin/index"})})
-public class SetupAction extends ActionSupport {
+    "namespace", "/admin", "actionName", "index"})})
+public class IndexAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
   private PasswordEncoder _passwordEncoder;
 
   private UserService _userService;
+
+  private InitialSetupService _initialSetupService;
 
   private String _userName;
 
@@ -40,6 +45,11 @@ public class SetupAction extends ActionSupport {
   @Autowired
   public void setUserService(UserService userService) {
     _userService = userService;
+  }
+
+  @Autowired
+  public void setInitialSetupService(InitialSetupService initialSetupService) {
+    _initialSetupService = initialSetupService;
   }
 
   public void setUserName(String userName) {
@@ -87,11 +97,14 @@ public class SetupAction extends ActionSupport {
         credentials, false);
 
     if (userIndex == null)
-      return null;
-    
+      return ERROR;
+
     User user = userIndex.getUser();
-    
+
     _userService.enableAdminRoleForUser(user, false);
+
+    // This will flush any internal cache on the initial setup check
+    _initialSetupService.isInitialSetupRequired(true);
 
     return "redirect";
   }

@@ -1,5 +1,8 @@
 package org.onebusaway.webapp.actions;
 
+import org.onebusaway.presentation.impl.users.SetupAction;
+
+@SetupAction
 public class ResourcesAction extends
     org.onebusaway.presentation.impl.resources.ResourcesAction {
 

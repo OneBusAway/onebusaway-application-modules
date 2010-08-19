@@ -82,6 +82,12 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public int getNumberOfAdmins() {
+    UserRole admin = _authoritiesService.getAdministratorRole();
+    return _userDao.getNumberOfUsersWithRole(admin);
+  }
+
+  @Override
   public User getUserForId(int userId) {
     return _userDao.getUserForId(userId);
   }
@@ -394,11 +400,6 @@ public class UserServiceImpl implements UserService {
       roles.remove(anon);
 
     targetUser.setRoles(roles);
-  }
-
-  @Override
-  public int getNumberOfUsersForRole(UserRole role) {
-    return _userDao.getNumberOfUsersWithRole(role);
   }
 
   @Cacheable
