@@ -77,6 +77,8 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
       bookmarkBean.setRouteFilter(getRouteFilterAsBean(bookmark.getRouteFilter()));
       bean.addBookmark(bookmarkBean);
     }
+    
+    bean.setMinApiRequestInterval(properties.getMinApiRequestInterval());
 
     return bean;
   }
@@ -197,25 +199,18 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   public void setLastSelectedStopIds(User user, List<String> stopIds) {
     _lastSelectedStopService.setLastSelectedStopsForUser(user.getId(), stopIds);
   }
+  
+
+  @Override
+  public void authorizeApi(User user, long minApiRequestInterval) {
+    UserPropertiesV2 properties = getProperties(user);
+    properties.setMinApiRequestInterval(minApiRequestInterval);
+    _userDao.saveOrUpdateUser(user);
+  }
 
   @Override
   public void mergeProperties(User sourceUser, User targetUser) {
     mergeProperties(getProperties(sourceUser), getProperties(targetUser));
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> T getAdditionalPropertyForUser(User user, String propertyName) {
-    UserPropertiesV2 properties = getProperties(user);
-    return (T) properties.getAdditionalProperties().get(propertyName);
-  }
-
-  @Override
-  public void setAdditionalPropertyForUser(User user, String propertyName,
-      Object propertyValue) {
-    UserPropertiesV2 properties = getProperties(user);
-    properties.getAdditionalProperties().put(propertyName, propertyValue);
-    _userDao.saveOrUpdateUser(user);
   }
 
   /****
@@ -258,10 +253,4 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   private RouteFilterBean getRouteFilterAsBean(RouteFilter routeFilter) {
     return new RouteFilterBean(routeFilter.getRouteIds());
   }
-
-  @Override
-  public void authorizeApi(User user, long minRequestInteval) {
-      setAdditionalPropertyForUser(user, "minRequestInterval", minRequestInteval); 
-  }
-
 }

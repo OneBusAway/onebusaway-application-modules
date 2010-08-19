@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.client.model.UserIndexBean;
 import org.onebusaway.users.model.User;
@@ -371,20 +372,6 @@ public class UserServiceImpl implements UserService {
     return _userPropertiesMigration.getUserPropertiesBulkMigrationStatus();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> T getAdditionalPropertyForUser(User user, String propertyName) {
-    return (T) _userPropertiesService.getAdditionalPropertyForUser(user,
-        propertyName);
-  }
-
-  @Override
-  public void setAdditionalPropertyForUser(User user, String propertyName,
-      Object propertyValue) {
-    _userPropertiesService.setAdditionalPropertyForUser(user, propertyName,
-        propertyValue);
-  }
-
   /****
    * Private Methods
    ****/
@@ -404,7 +391,9 @@ public class UserServiceImpl implements UserService {
 
   @Cacheable
   @Override
-  public Long getMinRequestIntervalForKey(String key) {
+  public Long getMinRequestIntervalForKey(String key,
+      @CacheableArgument(cacheRefreshIndicator = true) boolean forceRefresh) {
+    
     UserIndexKey indexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
     UserIndex userIndex = getUserIndexForId(indexKey);
 
@@ -413,7 +402,7 @@ public class UserServiceImpl implements UserService {
     }
 
     User user = userIndex.getUser();
-
-    return getAdditionalPropertyForUser(user, "minRequestInterval");
+    UserBean bean = getUserAsBean(user);
+    return bean.getMinApiRequestInterval();
   }
 }

@@ -24,6 +24,8 @@ public class UserBean implements Serializable {
 
   private List<BookmarkBean> bookmarks = new ArrayList<BookmarkBean>();
   
+  private Long minApiRequestInterval = null;
+  
   private boolean anonymous = true;
 
   private boolean admin = false;
@@ -96,6 +98,14 @@ public class UserBean implements Serializable {
 
   public void addBookmark(BookmarkBean bookmark) {
     bookmarks.add(bookmark);
+  }
+
+  public Long getMinApiRequestInterval() {
+    return minApiRequestInterval;
+  }
+
+  public void setMinApiRequestInterval(Long minApiRequestInterval) {
+    this.minApiRequestInterval = minApiRequestInterval;
   }
 
   public boolean isAnonymous() {

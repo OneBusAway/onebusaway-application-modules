@@ -237,34 +237,10 @@ public interface UserService {
   public void clearPhoneNumberRegistration(UserIndexKey userIndexKey);
 
   /**
-   * EXPERIMENTAL: Get an additional property for the specified user. Allows for
-   * flexible extension of a user with temporary data.
-   * 
-   * NOTE: I'm not sure I really want to support this in the long run.
-   * 
-   * @param user
-   * @param propertyName
-   * @return the property value
-   */
-  public <T> T getAdditionalPropertyForUser(User user, String propertyName);
-
-  /**
-   * EXPERIMENTAL: Set an additional property for the specified user. Allows for
-   * flexible extension of a user with temporary data.
-   * 
-   * NOTE: I'm not sure I really want to support this in the long run.
-   * 
-   * @param user
-   * @param propertyName
-   * @param propertyValue
-   */
-  public void setAdditionalPropertyForUser(User user, String propertyName,
-      Object propertyValue);
-
-  /**
    * @param key an API key
+   * @param forceRefresh guarantees that supplied value has not been cached
    * @return the minimum interval between requests in milliseconds for the key,
    *         or null for a key with no permission to access the API
    */
-  public Long getMinRequestIntervalForKey(String key);
+  public Long getMinRequestIntervalForKey(String key, boolean forceRefresh);
 }

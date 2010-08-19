@@ -45,14 +45,10 @@ public interface UserPropertiesService {
 
   public void mergeProperties(User sourceUser, User targetUser);
   
-  public <T> T getAdditionalPropertyForUser(User user, String propertyName);
-  
-  public void setAdditionalPropertyForUser(User user, String propertyName, Object propertyValue);
-  
   /**
    * Authorize this user to use the api 
    * @param User the user
-   * @param minRequestInteval the minimum time between requests in milliseconds
+   * @param minApiRequestInteval the minimum time between requests in milliseconds
    */
-  public void authorizeApi(User user, long minRequestInteval);
+  public void authorizeApi(User user, long minApiRequestInteval);
 }

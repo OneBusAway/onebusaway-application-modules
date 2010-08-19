@@ -2,21 +2,22 @@ package org.onebusaway.users.model.properties;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.onebusaway.users.model.UserProperties;
 
 /**
  * DO NO RENAME OR MOVE THIS CLASS. Serialized instances of this class will be
- * around forever.
+ * around forever. See notes in {@link UserProperties} for more info.
  * 
  * @author bdferris
  * @see UserProperties
  */
 public class UserPropertiesV2 implements Serializable, UserProperties {
 
+  /**
+   * Don't EVER change this. See notes in {@link UserProperties}.
+   */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -32,8 +33,8 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
   private double defaultLocationLon = Double.NaN;
 
   private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
-  
-  private Map<String,Object> additionalProperties = new HashMap<String, Object>();
+
+  private Long minApiRequestInterval = null;
 
   public UserPropertiesV2() {
 
@@ -95,14 +96,23 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
     this.bookmarks = bookmarks;
   }
 
-  public Map<String, Object> getAdditionalProperties() {
-    if( additionalProperties == null)
-      additionalProperties = new HashMap<String, Object>();
-    return additionalProperties;
+  /**
+   * API request throttling information
+   * 
+   * @return the minimum interval time (in ms) between successive API requests
+   *         for this account.
+   */
+  public Long getMinApiRequestInterval() {
+    return minApiRequestInterval;
   }
 
-  public void setAdditionalProperties(Map<String, Object> additionalProperties) {
-    this.additionalProperties = additionalProperties;
+  /**
+   * API request throttling information
+   * 
+   * @param minApiRequestInterval minimum time interval (in ms)
+   */
+  public void setMinApiRequestInterval(Long minApiRequestInterval) {
+    this.minApiRequestInterval = minApiRequestInterval;
   }
 
   public void clear() {
@@ -110,6 +120,6 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
     this.defaultLocationLat = Double.NaN;
     this.defaultLocationLon = Double.NaN;
     this.defaultLocationName = null;
-    this.additionalProperties = new HashMap<String, Object>();
+    this.minApiRequestInterval = null;
   }
 }
