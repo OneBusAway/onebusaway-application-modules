@@ -1,22 +1,23 @@
 package org.onebusaway.webapp.actions.setup;
 
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
-import org.apache.struts2.interceptor.validation.SkipValidation;
-
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.providers.encoding.PasswordEncoder;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
-@Results( {@Result(type = "redirectAction", name = "index")})
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import org.apache.struts2.interceptor.validation.SkipValidation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.providers.encoding.PasswordEncoder;
+
+@Results( {@Result(type = "redirectAction", name = "redirect", params = {
+    "actionName", "/admin/index"})})
 public class SetupAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -92,6 +93,6 @@ public class SetupAction extends ActionSupport {
     
     _userService.enableAdminRoleForUser(user, false);
 
-    return "admin.index";
+    return "redirect";
   }
 }
