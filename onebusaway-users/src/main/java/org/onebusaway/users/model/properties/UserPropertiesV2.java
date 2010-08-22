@@ -46,6 +46,7 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
     this.defaultLocationLat = o.defaultLocationLat;
     this.defaultLocationLon = o.defaultLocationLon;
     this.defaultLocationName = o.defaultLocationName;
+    this.minApiRequestInterval = o.minApiRequestInterval;
   }
 
   public boolean isRememberPreferencesEnabled() {

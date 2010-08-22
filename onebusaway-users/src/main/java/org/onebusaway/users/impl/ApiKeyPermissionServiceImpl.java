@@ -27,7 +27,7 @@ public class ApiKeyPermissionServiceImpl implements ApiKeyPermissionService {
   @Override
   public boolean getPermission(String key, String service) {
 
-    Long minRequestInterval = _userService.getMinRequestIntervalForKey(key,false);
+    Long minRequestInterval = _userService.getMinApiRequestIntervalForKey(key,false);
     if (minRequestInterval == null) {
       return false;
     }

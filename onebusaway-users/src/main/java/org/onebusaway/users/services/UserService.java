@@ -242,5 +242,5 @@ public interface UserService {
    * @return the minimum interval between requests in milliseconds for the key,
    *         or null for a key with no permission to access the API
    */
-  public Long getMinRequestIntervalForKey(String key, boolean forceRefresh);
+  public Long getMinApiRequestIntervalForKey(String key, boolean forceRefresh);
 }

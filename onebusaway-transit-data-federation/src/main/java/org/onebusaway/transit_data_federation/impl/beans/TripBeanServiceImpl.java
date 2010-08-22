@@ -3,7 +3,6 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.RouteBean.Builder;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
@@ -51,10 +50,6 @@ public class TripBeanServiceImpl implements TripBeanService {
 
     TripNarrative tripNarrative = _narrativeService.getTripForId(tripId);
 
-    if (tripNarrative.getRouteShortName() != null
-        && !tripNarrative.getRouteShortName().equals(routeBean.getShortName()))
-      routeBean = updateRouteBean(routeBean, tripNarrative);
-
     TripBean tripBean = new TripBean();
 
     tripBean.setId(ApplicationBeanLibrary.getId(tripId));
@@ -62,7 +57,7 @@ public class TripBeanServiceImpl implements TripBeanService {
     tripBean.setTripShortName(tripNarrative.getTripShortName());
     tripBean.setTripHeadsign(tripNarrative.getTripHeadsign());
     tripBean.setRoute(routeBean);
-
+    tripBean.setRouteShortName(tripNarrative.getRouteShortName());
     tripBean.setServiceId(ApplicationBeanLibrary.getId(tripEntry.getServiceId()));
 
     AgencyAndId shapeId = tripNarrative.getShapeId();
@@ -74,12 +69,5 @@ public class TripBeanServiceImpl implements TripBeanService {
     tripBean.setBlockId(tripNarrative.getBlockId());
     
     return tripBean;
-  }
-
-  private RouteBean updateRouteBean(RouteBean routeBean,
-      TripNarrative tripNarrative) {
-    Builder builder = RouteBean.builder(routeBean);
-    builder.setShortName(tripNarrative.getRouteShortName());
-    return builder.create();
   }
 }

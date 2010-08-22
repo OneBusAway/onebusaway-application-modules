@@ -391,7 +391,7 @@ public class UserServiceImpl implements UserService {
 
   @Cacheable
   @Override
-  public Long getMinRequestIntervalForKey(String key,
+  public Long getMinApiRequestIntervalForKey(String key,
       @CacheableArgument(cacheRefreshIndicator = true) boolean forceRefresh) {
     
     UserIndexKey indexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);

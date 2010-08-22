@@ -11,6 +11,8 @@ public final class TripBean implements Serializable {
   private String id;
 
   private RouteBean route;
+  
+  private String routeShortName;
 
   private String tripShortName;
 
@@ -31,6 +33,7 @@ public final class TripBean implements Serializable {
   public TripBean(TripBean trip) {
     this.id = trip.id;
     this.route = trip.route;
+    this.routeShortName = trip.routeShortName;
     this.tripShortName = trip.tripShortName;
     this.tripHeadsign = trip.tripHeadsign;
     this.serviceId = trip.serviceId;
@@ -52,6 +55,14 @@ public final class TripBean implements Serializable {
 
   public void setRoute(RouteBean route) {
     this.route = route;
+  }
+  
+  public String getRouteShortName() {
+    return routeShortName;
+  }
+
+  public void setRouteShortName(String routeShortName) {
+    this.routeShortName = routeShortName;
   }
 
   public String getTripShortName() {

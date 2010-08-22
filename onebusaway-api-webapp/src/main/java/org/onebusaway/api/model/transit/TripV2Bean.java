@@ -9,6 +9,8 @@ public final class TripV2Bean implements Serializable, HasId {
   private String id;
 
   private String routeId;
+  
+  private String routeShortName;
 
   private String tripShortName;
 
@@ -36,6 +38,14 @@ public final class TripV2Bean implements Serializable, HasId {
 
   public void setRouteId(String routeId) {
     this.routeId = routeId;
+  }
+
+  public String getRouteShortName() {
+    return routeShortName;
+  }
+
+  public void setRouteShortName(String routeShortName) {
+    this.routeShortName = routeShortName;
   }
 
   public String getTripShortName() {

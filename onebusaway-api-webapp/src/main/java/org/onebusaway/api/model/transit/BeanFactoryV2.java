@@ -193,6 +193,7 @@ public class BeanFactoryV2 {
     bean.setRouteId(trip.getRoute().getId());
     addToReferences(trip.getRoute());
 
+    bean.setRouteShortName(trip.getRouteShortName());
     bean.setTripHeadsign(trip.getTripHeadsign());
     bean.setTripShortName(trip.getTripShortName());
 

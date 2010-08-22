@@ -26,9 +26,9 @@
 
 <ul>
     <li><s:a namespace="/" action="logout">Logout</s:a></li>
-	<li><a href="user-properties-migration.action">User Properties Migration</a></li>
-	<li><span class="label">API Key Generator:</span><form action="api-key-generator.action"><label for="value">Minimum request interval in milliseconds</label><input type="text" name="interval"/><input type="submit" value="Submit"/></form></li>
-    <li><a href="create-login.action">Create a New Login</a></li>
+	<li><s:a href="user-properties-migration">User Properties Migration</s:a></li>
+    <li><s:a action="api-keys">API Key Management</s:a></li>
+    <li><s:a href="create-login">Create a New Login</s:a></li>
 </ul>
 
 
