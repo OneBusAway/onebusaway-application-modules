@@ -46,6 +46,10 @@
                 <param name="namespace">/setup</param>
                 <param name="actionName">index</param>
             </result>
+            <result name="AlreadySetup" type="redirectAction">
+                <param name="namespace">/</param>
+                <param name="actionName">index</param>
+            </result>
         </global-results>
 
         <global-exception-mappings>

@@ -18,7 +18,7 @@ import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.providers.encoding.PasswordEncoder;
 
-@SetupAction
+@SetupAction(onlyAllowIfNotSetup=true)
 @Results( {@Result(type = "redirectAction", name = "redirect", params = {
     "namespace", "/admin", "actionName", "index"})})
 public class IndexAction extends ActionSupport {

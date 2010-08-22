@@ -27,11 +27,16 @@ public class IsSetupInterceptor extends AbstractInterceptor {
 
     Class<? extends Object> actionType = action.getClass();
     SetupAction annotation = actionType.getAnnotation(SetupAction.class);
-    
-    if( annotation != null)
-      return invocation.invoke();
 
-    if (_initialSetupService.isInitialSetupRequired(false)) {
+    boolean needsSetup = _initialSetupService.isInitialSetupRequired(false);
+
+    if (annotation != null) {
+      if (annotation.onlyAllowIfNotSetup() && !needsSetup)
+        return "AlreadySetup";
+      return invocation.invoke();
+    }
+
+    if (needsSetup) {
       /* not set up and not trying to; redirect to setup page */
       return "NotSetup";
     }
