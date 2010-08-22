@@ -20,7 +20,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private static final long serialVersionUID = 2L;
-  
+
   private TripBean trip;
 
   private String stopId;
@@ -33,12 +33,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private long scheduledDepartureTime;
 
+  private long serviceDate;
+
   private String status;
 
   public TripBean getTrip() {
     return trip;
   }
-  
+
   public void setTrip(TripBean trip) {
     this.trip = trip;
   }
@@ -81,6 +83,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setScheduledDepartureTime(long scheduledDepartureTime) {
     this.scheduledDepartureTime = scheduledDepartureTime;
+  }
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
   }
 
   public String getStatus() {

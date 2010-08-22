@@ -40,6 +40,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   private long predictedDepartureTime;
 
   private long scheduledDepartureTime;
+  
+  private long serviceDate;
 
   private String status;
 
@@ -121,6 +123,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   public void setScheduledDepartureTime(long scheduledDepartureTime) {
     this.scheduledDepartureTime = scheduledDepartureTime;
+  }
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
   }
 
   public String getStatus() {

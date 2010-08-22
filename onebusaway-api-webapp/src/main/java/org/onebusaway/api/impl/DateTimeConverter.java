@@ -36,8 +36,14 @@ public class DateTimeConverter extends StrutsTypeConverter {
 
     if (values != null && values.length > 0 && values[0] != null
         && values[0].length() > 0) {
+      
+      String value = values[0];
+
+      if (value.matches("^(\\d+)$"))
+        return new Date(Long.parseLong(value));
+
       try {
-        return _format.parse(values[0]);
+        return _format.parse(value);
       } catch (ParseException e) {
         e.printStackTrace();
         throw new TypeConversionException(e);

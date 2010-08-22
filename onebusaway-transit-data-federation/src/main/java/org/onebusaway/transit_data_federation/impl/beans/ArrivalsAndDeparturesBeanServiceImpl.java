@@ -107,6 +107,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     pab.setScheduledArrivalTime(sti.getArrivalTime());
     pab.setScheduledDepartureTime(sti.getDepartureTime());
+    
+    pab.setServiceDate(sti.getServiceDate());
 
     if (sti.hasPredictedArrivalOffset())
       pab.setPredictedArrivalTime(sti.getArrivalTime()

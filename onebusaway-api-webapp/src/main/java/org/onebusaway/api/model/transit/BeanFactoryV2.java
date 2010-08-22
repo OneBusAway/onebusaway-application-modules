@@ -412,6 +412,7 @@ public class BeanFactoryV2 {
     bean.setScheduledDepartureTime(ad.getScheduledDepartureTime());
     bean.setStopId(ad.getStopId());
     bean.setStatus(ad.getStatus());
+    bean.setServiceDate(ad.getServiceDate());
     bean.setTripId(ad.getTrip().getId());
 
     return bean;
