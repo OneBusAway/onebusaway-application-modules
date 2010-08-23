@@ -46,17 +46,25 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
         return invocation.invoke();
     }
 
-    ActionContext context = invocation.getInvocationContext();
-    Map<String, Object> parameters = context.getParameters();
-    String[] keys = (String[]) parameters.get("key");
-
-    boolean allowed = _keyService.getPermission(keys[0], "api");
+    boolean allowed = isAllowed(invocation);
+    
     if (!allowed) {
       //this user is not authorized to use the API, at least for now
       return unauthorized(invocation, "permission denied");
     }
         
     return invocation.invoke();
+  }
+
+  private boolean isAllowed(ActionInvocation invocation) {
+    ActionContext context = invocation.getInvocationContext();
+    Map<String, Object> parameters = context.getParameters();
+    String[] keys = (String[]) parameters.get("key");
+    
+    if( keys == null || keys.length == 0)
+      return false;
+
+    return _keyService.getPermission(keys[0], "api");
   }
 
   private String unauthorized(ActionInvocation invocation, String reason) throws IOException {

@@ -9,6 +9,8 @@ import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
+
 public class ReportProblemWithTripController extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -22,8 +24,13 @@ public class ReportProblemWithTripController extends ApiActionSupport {
     super(2);
   }
 
+  @RequiredStringValidator(message="requiredField.tripId")
   public void setTripId(String tripId) {
     _model.setTripId(tripId);
+  }
+  
+  public String getTripId() {
+    return _model.getTripId();
   }
 
   public void setServiceDate(long serviceDate) {
@@ -61,6 +68,10 @@ public class ReportProblemWithTripController extends ApiActionSupport {
   public void setUserLocationAccuracy(double userLocationAccuracy) {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
+  
+  public DefaultHttpHeaders create() throws IOException, ServiceException {
+    return index();    
+  }
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
@@ -71,6 +82,6 @@ public class ReportProblemWithTripController extends ApiActionSupport {
     
     _service.reportProblemWithTrip(_model);
 
-    return setOkResponse(null);
+    return setOkResponse(new Object());
   }
 }
