@@ -62,9 +62,10 @@ class UserReportingServiceImpl implements UserReportingService {
     record.setUserComment(problem.getUserComment());
     record.setUserLat(problem.getUserLat());
     record.setUserLon(problem.getUserLon());
+    record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
     record.setUserOnVehicle(problem.isUserOnVehicle());
     record.setUserVehicleNumber(problem.getUserVehicleNumber());
-
+    
     TripInstanceProxy tripInstance = new TripInstanceProxy(trip,
         problem.getServiceDate());
 

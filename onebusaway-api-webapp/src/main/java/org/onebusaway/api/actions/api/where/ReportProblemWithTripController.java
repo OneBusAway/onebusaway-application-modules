@@ -57,6 +57,10 @@ public class ReportProblemWithTripController extends ApiActionSupport {
   public void setUserLon(double lon) {
     _model.setUserLon(lon);
   }
+  
+  public void setUserLocationAccuracy(double userLocationAccuracy) {
+    _model.setUserLocationAccuracy(userLocationAccuracy);
+  }
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 

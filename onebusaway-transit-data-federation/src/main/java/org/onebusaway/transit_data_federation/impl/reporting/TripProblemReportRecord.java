@@ -51,6 +51,8 @@ public class TripProblemReportRecord implements Serializable {
 
   private double userLon;
 
+  private double userLocationAccuracy;
+
   private double vehicleLat;
 
   private double vehicleLon;
@@ -153,6 +155,14 @@ public class TripProblemReportRecord implements Serializable {
 
   public void setUserLon(double userLon) {
     this.userLon = userLon;
+  }
+
+  public double getUserLocationAccuracy() {
+    return userLocationAccuracy;
+  }
+
+  public void setUserLocationAccuracy(double userLocationAccuracy) {
+    this.userLocationAccuracy = userLocationAccuracy;
   }
 
   public double getVehicleLat() {
