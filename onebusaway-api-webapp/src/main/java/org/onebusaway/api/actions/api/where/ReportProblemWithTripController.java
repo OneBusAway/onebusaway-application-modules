@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.ReportProblemWithTripBean;
+import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,7 +16,7 @@ public class ReportProblemWithTripController extends ApiActionSupport {
   @Autowired
   private TransitDataService _service;
 
-  private ReportProblemWithTripBean _model = new ReportProblemWithTripBean();
+  private TripProblemReportBean _model = new TripProblemReportBean();
 
   public ReportProblemWithTripController() {
     super(2);

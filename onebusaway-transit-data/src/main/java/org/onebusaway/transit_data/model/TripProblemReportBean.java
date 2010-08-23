@@ -2,9 +2,11 @@ package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
 
-public class ReportProblemWithTripBean implements Serializable {
+public class TripProblemReportBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
+  
+  private long id;
 
   private long time;
 
@@ -27,6 +29,24 @@ public class ReportProblemWithTripBean implements Serializable {
   private double userLon;
 
   private double userLocationAccuracy;
+  
+  private double vehicleLat;
+
+  private double vehicleLon;
+
+  private boolean predicted = false;
+
+  private double positionDeviation;
+
+  private int scheduleDeviation;
+  
+  public long getId() {
+    return id;
+  }
+
+  public void setId(long id) {
+    this.id = id;
+  }
 
   public long getTime() {
     return time;
@@ -115,4 +135,44 @@ public class ReportProblemWithTripBean implements Serializable {
   public void setUserLocationAccuracy(double userLocationAccuracy) {
     this.userLocationAccuracy = userLocationAccuracy;
   }
+
+  public double getVehicleLat() {
+    return vehicleLat;
+  }
+
+  public void setVehicleLat(double vehicleLat) {
+    this.vehicleLat = vehicleLat;
+  }
+
+  public double getVehicleLon() {
+    return vehicleLon;
+  }
+
+  public void setVehicleLon(double vehicleLon) {
+    this.vehicleLon = vehicleLon;
+  }
+
+  public boolean isPredicted() {
+    return predicted;
+  }
+
+  public void setPredicted(boolean predicted) {
+    this.predicted = predicted;
+  }
+
+  public double getPositionDeviation() {
+    return positionDeviation;
+  }
+
+  public void setPositionDeviation(double positionDeviation) {
+    this.positionDeviation = positionDeviation;
+  }
+
+  public int getScheduleDeviation() {
+    return scheduleDeviation;
+  }
+
+  public void setScheduleDeviation(int scheduleDeviation) {
+    this.scheduleDeviation = scheduleDeviation;
+  }  
 }

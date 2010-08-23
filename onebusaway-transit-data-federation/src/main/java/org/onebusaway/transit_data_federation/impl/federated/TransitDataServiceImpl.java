@@ -18,7 +18,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.ReportProblemWithTripBean;
+import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
@@ -332,8 +332,25 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public void reportProblemWithTrip(ReportProblemWithTripBean problem) {
+  public void reportProblemWithTrip(TripProblemReportBean problem) {
     _userReportingService.reportProblemWithTrip(problem);
+  }
+
+  @Override
+  public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
+      String tripId) {
+    return _userReportingService.getAllTripProblemReportsForTripId(convertAgencyAndId(tripId));
+  }
+
+  @Override
+  public TripProblemReportBean getTripProblemReportForTripIdAndId(
+      String tripId, long id) {
+    return _userReportingService.getTripProblemReportForId(id);
+  }
+
+  @Override
+  public void deleteTripProblemReportForTripIdAndId(String tripId, long id) {
+    _userReportingService.deleteTripProblemReportForId(id);
   }
 
   /****
@@ -350,4 +367,5 @@ class TransitDataServiceImpl implements TransitDataService {
       converted.add(convertAgencyAndId(id));
     return converted;
   }
+
 }

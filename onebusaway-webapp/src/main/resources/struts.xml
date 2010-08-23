@@ -26,7 +26,9 @@
             <interceptor name="is-setup" class="org.onebusaway.presentation.impl.users.IsSetupInterceptor" />
             <interceptor name="current-user" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />
             <interceptor-stack name="onebusaway-webapp-stack">
-                <interceptor-ref name="defaultStack" />
+                <interceptor-ref name="defaultStack">
+                    <param name="modelDriven.refreshModelBeforeResult">true</param>
+                </interceptor-ref>
                 <interceptor-ref name="is-setup" />
                 <interceptor-ref name="current-user" />
             </interceptor-stack>

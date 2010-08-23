@@ -72,6 +72,7 @@
         <property name="sourceList">
             <list>
                 <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/TripPositionRecordDaoImpl.hibernate.xml</value>
+                <value>classpath:org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml</value>
             </list>
         </property>
     </bean>

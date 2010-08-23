@@ -1,8 +1,11 @@
 package org.onebusaway.transit_data_federation.impl.reporting;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.ReportProblemWithTripBean;
+import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
@@ -39,7 +42,7 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   @Override
-  public void reportProblemWithTrip(ReportProblemWithTripBean problem) {
+  public void reportProblemWithTrip(TripProblemReportBean problem) {
 
     AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(problem.getTripId());
 
@@ -65,7 +68,7 @@ class UserReportingServiceImpl implements UserReportingService {
     record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
     record.setUserOnVehicle(problem.isUserOnVehicle());
     record.setUserVehicleNumber(problem.getUserVehicleNumber());
-    
+
     TripInstanceProxy tripInstance = new TripInstanceProxy(trip,
         problem.getServiceDate());
 
@@ -85,4 +88,55 @@ class UserReportingServiceImpl implements UserReportingService {
 
     _userReportingDao.saveOrUpdate(record);
   }
+
+  @Override
+  public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
+      AgencyAndId tripId) {
+    List<TripProblemReportRecord> records = _userReportingDao.getAllTripProblemReportsForTripId(tripId);
+    List<TripProblemReportBean> beans = new ArrayList<TripProblemReportBean>(records.size());
+    for(TripProblemReportRecord record : records)
+      beans.add(getRecordAsBean(record));
+    return beans;
+  }
+
+  @Override
+  public TripProblemReportBean getTripProblemReportForId(long id) {
+    TripProblemReportRecord record = _userReportingDao.getTripProblemRecordForId(id);
+    return getRecordAsBean(record);
+  }
+
+  @Override
+  public void deleteTripProblemReportForId(long id) {
+    TripProblemReportRecord record = _userReportingDao.getTripProblemRecordForId(id);
+    if( record != null)
+      _userReportingDao.delete(record);
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private TripProblemReportBean getRecordAsBean(TripProblemReportRecord record) {
+    TripProblemReportBean bean = new TripProblemReportBean();
+    bean.setData(record.getData());
+    bean.setId(record.getId());
+    bean.setServiceDate(record.getServiceDate());
+    bean.setStopId(AgencyAndIdLibrary.convertToString(record.getStopId()));
+    bean.setTime(record.getTime());
+    bean.setTripId(AgencyAndIdLibrary.convertToString(record.getTripId()));
+    bean.setUserComment(record.getUserComment());
+    bean.setUserLat(record.getUserLat());
+    bean.setUserLon(record.getUserLon());
+    bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
+    bean.setUserOnVehicle(record.isUserOnVehicle());
+    bean.setUserVehicleNumber(record.getUserVehicleNumber());
+
+    bean.setPredicted(record.isPredicted());
+    bean.setPositionDeviation(record.getPositionDeviation());
+    bean.setScheduleDeviation(record.getScheduleDeviation());
+    bean.setVehicleLat(record.getVehicleLat());
+    bean.setVehicleLon(record.getVehicleLon());
+    return bean;
+  }
+
 }

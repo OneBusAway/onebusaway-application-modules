@@ -18,7 +18,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.ReportProblemWithTripBean;
+import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
@@ -269,11 +269,26 @@ public interface TransitDataService extends FederatedService {
       OneBusAwayConstraintsBean constraints,
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException;
+  
+  /****
+   * These methods are going to pile up.  How do we handle this gracefully in the future?
+   ****/
 
   /**
    * Report a problem with a particular trip.
-   * @param problem the problem summary bean 
+   * 
+   * @param problem the problem summary bean
    */
-  @FederatedByEntityIdMethod(propertyExpression="tripId")
-  public void reportProblemWithTrip(ReportProblemWithTripBean problem);
+  @FederatedByEntityIdMethod(propertyExpression = "tripId")
+  public void reportProblemWithTrip(TripProblemReportBean problem);
+
+  @FederatedByEntityIdMethod()
+  public List<TripProblemReportBean> getAllTripProblemReportsForTripId(String tripId);
+  
+  
+  @FederatedByEntityIdMethod()
+  public TripProblemReportBean getTripProblemReportForTripIdAndId(String tripId, long id);
+  
+  @FederatedByEntityIdMethod()
+  public void deleteTripProblemReportForTripIdAndId(String tripId, long id);
 }
