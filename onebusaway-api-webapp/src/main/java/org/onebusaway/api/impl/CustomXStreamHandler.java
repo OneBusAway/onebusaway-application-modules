@@ -1,6 +1,5 @@
 package org.onebusaway.api.impl;
 
-import org.apache.struts2.rest.handler.XStreamHandler;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.TimeBean;
 import org.onebusaway.api.model.transit.AgencyV2Bean;
@@ -25,7 +24,12 @@ import org.onebusaway.api.model.transit.TripV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.siri.model.ErrorMessage;
+import org.onebusaway.siri.model.ServiceRequestContext;
+import org.onebusaway.siri.model.Siri;
 import org.onebusaway.siri.model.VehicleLocation;
+import org.onebusaway.siri.model.VehicleMonitoringDetailLevel;
+import org.onebusaway.siri.model.VehicleMonitoringRequest;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -35,6 +39,8 @@ import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
 
 import com.thoughtworks.xstream.XStream;
+
+import org.apache.struts2.rest.handler.XStreamHandler;
 
 public class CustomXStreamHandler extends XStreamHandler {
 
@@ -80,6 +86,11 @@ public class CustomXStreamHandler extends XStreamHandler {
 
     xstream.alias("VehicleLocation",VehicleLocation.class);
     
+    xstream.processAnnotations(VehicleMonitoringRequest.class);
+    xstream.processAnnotations(VehicleMonitoringDetailLevel.class);
+    xstream.processAnnotations(ServiceRequestContext.class);
+    xstream.processAnnotations(Siri.class);
+    xstream.processAnnotations(ErrorMessage.class);
     return xstream;
   }
 

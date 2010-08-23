@@ -1,7 +1,9 @@
 package org.onebusaway.api.actions.siri;
 
+import org.onebusaway.siri.model.ErrorMessage;
 import org.onebusaway.siri.model.MonitoredVehicleJourney;
 import org.onebusaway.siri.model.ServiceDelivery;
+import org.onebusaway.siri.model.Siri;
 import org.onebusaway.siri.model.VehicleActivity;
 import org.onebusaway.siri.model.VehicleLocation;
 import org.onebusaway.siri.model.VehicleMonitoringDelivery;
@@ -27,14 +29,12 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * For a given route, returns the vehicle ID, route, destination, last location
- * and time of last observation of each bus serving the route, as well as
- * remaining stops for each of the buses. distance / number of stops away data,
- * if available
+ * For a given vehicle, returns the location
  */
-public class VehicleMonitoringController implements ModelDriven<ServiceDelivery>, ServletRequestAware {
+public class VehicleMonitoringController implements ModelDriven<Object>,
+    ServletRequestAware {
 
-  private ServiceDelivery _response;
+  private Object _response;
   private HttpServletRequest _request;
   
   @Autowired  
@@ -49,9 +49,18 @@ public class VehicleMonitoringController implements ModelDriven<ServiceDelivery>
     
     /* find the vehicle */
     String vehicleId = _request.getParameter("vehicleId");
+    if (vehicleId == null) {
+      throw new IllegalArgumentException("Expected parameter vehicleId");
+    }
     String agencyId = _request.getParameter("agencyId");
+    if (agencyId == null) {
+      throw new IllegalArgumentException("Expected parameter agencyIdag");
+    }
     
     AgencyBean agency = _transitDataService.getAgency(agencyId);
+    if (agency == null) {
+      throw new IllegalArgumentException("No such agency: " + agencyId);
+    }
     TimeZone timeZone = TimeZone.getTimeZone(agency.getTimezone());
     Calendar now = Calendar.getInstance(timeZone);
     
@@ -66,16 +75,23 @@ public class VehicleMonitoringController implements ModelDriven<ServiceDelivery>
 
     TripDetailsBean trip = _transitDataService.getTripDetailsForVehicleAndTime(query);
     
-    if (trip == null)
-      return null;
+    if (trip == null) {
+      /*
+       * SIRI doesn't really specify what to do here, as far as I can tell. So
+       * we'll return our own type of error,
+       */
+      _response = new ErrorMessage("No known trip for this vehicle");
+      return new DefaultHttpHeaders();
+    }
+
+    Siri siri = new Siri();
+    siri.ServiceDelivery = new ServiceDelivery();
+    siri.ServiceDelivery.ResponseTimestamp = now;
     
-    _response = new ServiceDelivery();
-    _response.ResponseTimestamp = now;
-    
-    _response.ProducerRef = _request.getServerName();
-    _response.VehicleMonitoringDelivery = new VehicleMonitoringDelivery();
-    _response.VehicleMonitoringDelivery.ResponseTimestamp = _response.ResponseTimestamp;
-    _response.VehicleMonitoringDelivery.SubscriberRef = _request.getRemoteAddr();
+    siri.ServiceDelivery.ProducerRef = _request.getServerName();
+    siri.ServiceDelivery.VehicleMonitoringDelivery = new VehicleMonitoringDelivery();
+    siri.ServiceDelivery.VehicleMonitoringDelivery.ResponseTimestamp = siri.ServiceDelivery.ResponseTimestamp;
+    siri.ServiceDelivery.VehicleMonitoringDelivery.SubscriberRef = _request.getRemoteAddr();
 
     VehicleActivity activity = new VehicleActivity();
 
@@ -93,15 +109,16 @@ public class VehicleMonitoringController implements ModelDriven<ServiceDelivery>
     location.Longitude = status.getPosition().getLon();
     
     activity.MonitoredVehicleJourney.VehicleLocation = location;
-    _response.VehicleMonitoringDelivery.deliveries = new ArrayList<VehicleActivity>();
-    _response.VehicleMonitoringDelivery.deliveries.add(activity);
+    siri.ServiceDelivery.VehicleMonitoringDelivery.deliveries = new ArrayList<VehicleActivity>();
+    siri.ServiceDelivery.VehicleMonitoringDelivery.deliveries.add(activity);
     
+    _response = siri;
     return new DefaultHttpHeaders();
   }
 
   
   @Override
-  public ServiceDelivery getModel() {
+  public Object getModel() {
     return _response;
   }
 
