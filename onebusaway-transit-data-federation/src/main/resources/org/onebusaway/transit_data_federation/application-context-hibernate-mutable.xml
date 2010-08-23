@@ -59,6 +59,7 @@
         <property name="sourceList">
             <list>
                 <value>org.onebusaway.transit_data_federation.impl.realtime.TripPositionRecord</value>
+                <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
             </list>
         </property>
     </bean>

@@ -18,6 +18,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.ReportProblemWithTripBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
@@ -268,4 +269,11 @@ public interface TransitDataService extends FederatedService {
       OneBusAwayConstraintsBean constraints,
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException;
+
+  /**
+   * Report a problem with a particular trip.
+   * @param problem the problem summary bean 
+   */
+  @FederatedByEntityIdMethod(propertyExpression="tripId")
+  public void reportProblemWithTrip(ReportProblemWithTripBean problem);
 }

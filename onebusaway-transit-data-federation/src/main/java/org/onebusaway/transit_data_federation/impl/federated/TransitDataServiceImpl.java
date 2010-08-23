@@ -18,6 +18,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.ReportProblemWithTripBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
@@ -59,6 +60,7 @@ import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanServ
 import org.onebusaway.transit_data_federation.services.beans.TripStatusBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
 import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
+import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -106,6 +108,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private ShapeBeanService _shapeBeanService;
+
+  @Autowired
+  private UserReportingService _userReportingService;
 
   /****
    * {@link TransitDataService} Interface
@@ -250,7 +255,7 @@ class TransitDataServiceImpl implements TransitDataService {
     TripStatusBean status = null;
 
     boolean missing = false;
-    
+
     TripDetailsInclusionBean inclusion = query.getInclusion();
 
     if (inclusion.isIncludeTripBean()) {
@@ -285,9 +290,11 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public TripDetailsBean getTripDetailsForVehicleAndTime(TripForVehicleQueryBean query) {
+  public TripDetailsBean getTripDetailsForVehicleAndTime(
+      TripForVehicleQueryBean query) {
     AgencyAndId id = convertAgencyAndId(query.getVehicleId());
-    return _tripStatusBeanService.getTripStatusForVehicleAndTime(id, query.getTime().getTime(),query.getInclusion());
+    return _tripStatusBeanService.getTripStatusForVehicleAndTime(id,
+        query.getTime().getTime(), query.getInclusion());
   }
 
   @Override
@@ -322,6 +329,11 @@ class TransitDataServiceImpl implements TransitDataService {
       List<LocalSearchResult> localResults) throws ServiceException {
     return _oneBusAwayService.getLocalPaths(constraints, minTravelTimeToStops,
         localResults);
+  }
+
+  @Override
+  public void reportProblemWithTrip(ReportProblemWithTripBean problem) {
+    _userReportingService.reportProblemWithTrip(problem);
   }
 
   /****
