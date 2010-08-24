@@ -46,7 +46,7 @@ public class DefaultOperationHandler implements OperationHandler {
 
     public void onSuccess(UserBean user, boolean askForDefaultSearchLocation) {
 
-      if (!user.hasDefaultLocation() || user.getDefaultLocationName() == null) {
+      if (user == null || !user.hasDefaultLocation() || user.getDefaultLocationName() == null) {
 
         if (user.isRememberPreferencesEnabled() && askForDefaultSearchLocation) {
 

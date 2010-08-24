@@ -23,6 +23,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -184,7 +185,7 @@ public class StopFinderWidget extends Composite {
     String url = _stopFinder.getCurrentViewAsUrl();
     _currentLinkAnchor.setHref(url);
   }
-  
+
   protected StopInfoWidgetHandler getStopInfoWidgetHandler() {
     return new StopInfoWidgetHandlerImpl();
   }
@@ -203,23 +204,18 @@ public class StopFinderWidget extends Composite {
   private class StopInfoWidgetHandlerImpl implements StopInfoWidgetHandler {
 
     @Override
-    public void handleRealTimeLinkClicked() {
-      // TODO Auto-generated method stub
-
+    public void handleRealTimeLinkClicked(StopBean stop) {
+      Location.assign("stop.action?id=" + stop.getId());
     }
 
     @Override
     public void handleRouteClicked(RouteBean route) {
-      // TODO Auto-generated method stub
-
+      _stopFinder.queryRoute(route.getId());
     }
 
     @Override
-    public void handleScheduleLinkClicked() {
-      // TODO Auto-generated method stub
-
+    public void handleScheduleLinkClicked(StopBean stop) {
+      Location.assign("schedule.action?id=" + stop.getId());
     }
-
   }
-
 }

@@ -9,6 +9,7 @@ import java.util.Set;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.webapp.gwt.stop_and_route_selection.AbstractStopAndRouteSelectionWidget;
+import org.onebusaway.webapp.gwt.where_library.view.StopFinderWidget;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -73,6 +74,11 @@ public class RefineViewWidget extends AbstractStopAndRouteSelectionWidget {
   /****
    *
    ****/
+  
+  @Override
+  protected void prepareStopFinderWidget(StopFinderWidget widget) {
+    widget.addStyleName(style.StopFinderDialog());
+  }
   
   private void initialStopsAndRoutes() {
     Map<String, List<String>> map = Location.getParameterMap();

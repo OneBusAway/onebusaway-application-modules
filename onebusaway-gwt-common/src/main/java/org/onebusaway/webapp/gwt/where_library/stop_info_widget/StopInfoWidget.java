@@ -72,19 +72,19 @@ public class StopInfoWidget extends Composite {
     _stopDescription.setInnerText(description);
   }
 
-  protected void handleLinksForStopInfoWindow(StopBean bean) {
+  protected void handleLinksForStopInfoWindow(final StopBean bean) {
 
     _realtimeLink.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent arg0) {
-        _handler.handleRealTimeLinkClicked();
+        _handler.handleRealTimeLinkClicked(bean);
       }
     });
     
     _scheduleLink.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent arg0) {
-        _handler.handleScheduleLinkClicked();
+        _handler.handleScheduleLinkClicked(bean);
       }
     });
   }

@@ -28,7 +28,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
@@ -40,6 +39,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ModalLayoutPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class AbstractStopAndRouteSelectionWidget extends Composite {
 
@@ -48,9 +48,6 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
   private StopRemovedHandler _stopRemovedHandler = new StopRemovedHandler();
 
   private RouteHandler _routeHandler = new RouteHandler();
-
-  @UiField
-  public MyStyle style;
 
   @UiField
   public Anchor _addStopAnchor;
@@ -97,7 +94,7 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
     stopFinder.setWidget(widget);
     widget.setStopFinder(stopFinder);
 
-    widget.addStyleName(style.StopFinderDialog());
+    prepareStopFinderWidget(widget);
 
     _dialog.add(widget);
     _dialog.setWidgetLeftRight(widget, 5, Unit.PCT, 5, Unit.PCT);
@@ -132,6 +129,10 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
         stopFinder.onContextChanged(c);
       }
     });
+  }
+
+  protected void prepareStopFinderWidget(StopFinderWidget widget) {
+    
   }
 
   /****
@@ -194,8 +195,11 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
       setTitleWidget(new StopSelectionTitleWidget(_dialog));
       hideLinksPanel();
     }
-    
-    
+
+    @Override
+    protected Widget getStopInfoWindowWidget(StopBean stop) {
+      return new StopInfoWindowWidgetExtension(getStopInfoWidgetHandler(), stop);
+    }
   }
 
   private class StopInfoWindowWidgetExtension extends StopInfoWidget {
@@ -215,6 +219,7 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
           _dialog.hide();
         }
       });
+      getStopLinksPanel().clear();
       getStopLinksPanel().add(anchor);
     }
   }
@@ -228,10 +233,6 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
       panel.add(html);
       context.getTransitMapManager().showStopsInCurrentView();
     }
-  }
-
-  public interface MyStyle extends CssResource {
-    String StopFinderDialog();
   }
 
   private class StopRemovedHandler implements StopWidget.RemoveClickedHandler {
