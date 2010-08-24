@@ -28,6 +28,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Command;
@@ -49,6 +50,9 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
 
   private RouteHandler _routeHandler = new RouteHandler();
 
+  @UiField
+  public MyStyle style;
+  
   @UiField
   public Anchor _addStopAnchor;
 
@@ -94,7 +98,7 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
     stopFinder.setWidget(widget);
     widget.setStopFinder(stopFinder);
 
-    prepareStopFinderWidget(widget);
+    widget.addStyleName(style.StopFinderDialog());
 
     _dialog.add(widget);
     _dialog.setWidgetLeftRight(widget, 5, Unit.PCT, 5, Unit.PCT);
@@ -129,10 +133,6 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
         stopFinder.onContextChanged(c);
       }
     });
-  }
-
-  protected void prepareStopFinderWidget(StopFinderWidget widget) {
-    
   }
 
   /****
@@ -233,6 +233,10 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
       panel.add(html);
       context.getTransitMapManager().showStopsInCurrentView();
     }
+  }
+  
+  public interface MyStyle extends CssResource {
+    String StopFinderDialog();
   }
 
   private class StopRemovedHandler implements StopWidget.RemoveClickedHandler {
