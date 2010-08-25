@@ -69,6 +69,39 @@
 
     <build>
         <finalName>onebusaway-gwt-common</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>1.3-SNAPSHOT</version>
+                <configuration>
+                    <modules>
+                        <!-- 
+                        <module>org.onebusaway.webapp.gwt.AgenciesMap</module>
+                        <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
+                        <module>org.onebusaway.webapp.gwt.MobileApplication</module>
+                        <module>org.onebusaway.webapp.gwt.NotificationWidgetApplication</module>
+                        <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
+                        <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
+                        <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
+                        <module>org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication</module>
+                        -->
+                    </modules>
+                    <gwtVersion>${gwt-version}</gwtVersion>
+                    <webappDirectory>${project.build.directory}/gwt</webappDirectory>
+                    <hostedWebapp>${project.build.directory}/gwt</hostedWebapp>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
 </project>

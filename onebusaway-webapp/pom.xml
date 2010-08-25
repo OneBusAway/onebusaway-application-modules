@@ -34,11 +34,6 @@
             <artifactId>onebusaway-presentation</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-gwt-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.onebusaway</groupId>
@@ -184,6 +179,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
+                <version>1.3-SNAPSHOT</version>
                 <configuration>
                     <modules>
                         <module>org.onebusaway.webapp.gwt.AgenciesMap</module>
