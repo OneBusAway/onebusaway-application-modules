@@ -140,22 +140,12 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
     ProjectedPoint pointOnEdge = StreetGraphLibrary.computeClosestPointOnEdge(
         edge, point);
 
-    double edgeLength = edge.getDistance();
-
-    // If the point on the edge is beyond the endpoints of the edge
-    if (pointFrom.distance(pointOnEdge) > edgeLength
-        || pointTo.distance(pointOnEdge) > edgeLength) {
-
-      double distanceToNodeFrom = point.distance(pointFrom);
-      double distanceToNodeTo = point.distance(pointTo);
-
-      if (distanceToNodeFrom < distanceToNodeTo)
-        return new NearNodeWalkState(nodeFrom, point, forward);
-      else
-        return new NearNodeWalkState(nodeTo, point, forward);
-    }
-
-    return new NearEdgeWalkState(edge, point, pointOnEdge, forward);
+    if (pointFrom.equals(pointOnEdge))
+      return new NearNodeWalkState(nodeFrom, point, forward);
+    else if (pointTo.equals(pointOnEdge))
+      return new NearNodeWalkState(nodeTo, point, forward);
+    else
+      return new NearEdgeWalkState(edge, point, pointOnEdge, forward);
   }
 
   private void exportStateToPath(WalkState state, LinkedList<WalkNode> path) {
