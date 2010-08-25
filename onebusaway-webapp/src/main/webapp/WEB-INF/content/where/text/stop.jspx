@@ -68,7 +68,7 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
                 <td class="arrivalsRouteEntry"><s:url var="url" includeParams="get">
                     <s:param name="route" value="#route.id" />
                 </s:url><s:a href="%{url}">
-                	<oba:routeName value="#route" />
+                	<oba:routeName value="trip" />
                 </s:a></td>
 
                 <jsp:element name="td">

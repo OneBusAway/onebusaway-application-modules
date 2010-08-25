@@ -18,6 +18,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
@@ -52,6 +53,7 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
     return _id;
   }
 
+  @TypeConversion(converter = "org.onebusaway.api.impl.DateTimeConverter")
   public void setTime(Date time) {
     _time = time;
   }
@@ -115,7 +117,10 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
       v1.setPredictedArrivalTime(bean.getPredictedArrivalTime());
       v1.setPredictedDepartureTime(bean.getPredictedDepartureTime());
       v1.setRouteId(route.getId());
-      v1.setRouteShortName(route.getShortName());
+      if (trip.getRouteShortName() != null)
+        v1.setRouteShortName(trip.getRouteShortName());
+      else
+        v1.setRouteShortName(route.getShortName());
       v1.setScheduledArrivalTime(bean.getScheduledArrivalTime());
       v1.setScheduledDepartureTime(bean.getScheduledDepartureTime());
       v1.setStatus(bean.getStatus());

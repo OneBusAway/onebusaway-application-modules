@@ -44,7 +44,7 @@
                   <s:param name="route" value="#route.id" />
               </s:url>
               <s:a href="%{url}">
-            	<oba:routeName value="#route"/>
+            	<oba:routeName value="trip"/>
               </s:a>
             </jsp:element>
             <td>
