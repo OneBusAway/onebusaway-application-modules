@@ -1,7 +1,11 @@
 package org.onebusaway.transit_data_federation.impl.walkplanner;
 
-import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch;
 import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch.NoPathToGoalException;
@@ -20,19 +24,11 @@ import org.onebusaway.transit_data_federation.services.walkplanner.WalkEdgeEntry
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
-
-import edu.washington.cs.rse.collections.stats.Min;
-import edu.washington.cs.rse.geospatial.PointVector;
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import edu.washington.cs.rse.collections.stats.Min;
+import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 @Component
 public class WalkPlannerServiceImpl implements WalkPlannerService {
@@ -89,7 +85,11 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
   private WalkState getClosestWalkSegment(ProjectedPoint point, boolean forward)
       throws NoPathException {
 
-    Collection<WalkNodeEntry> nodes = getNodesNearLocation(point);
+    Collection<WalkNodeEntry> nodes = StreetGraphLibrary.getNodesNearLocation(
+        _graph, point.getLat(), point.getLon(),
+        _constants.getInitialMaxDistanceToWalkNode(),
+        _constants.getMaxDistanceToWalkNode());
+
     Set<WalkEdgeEntry> edges = getEdgesForNodes(nodes);
 
     if (edges.isEmpty())
@@ -102,23 +102,6 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
     }
 
     return min.getMinElement();
-  }
-
-  private Collection<WalkNodeEntry> getNodesNearLocation(ProjectedPoint point)
-      throws NoPathException {
-
-    double distance = _constants.getInitialMaxDistanceToWalkNode();
-
-    while (true) {
-      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(point.getLat(),
-          point.getLon(), distance);
-      Collection<WalkNodeEntry> nodes = _graph.getNodesByLocation(bounds);
-      if (!nodes.isEmpty())
-        return nodes;
-      distance *= 2;
-      if (distance > _constants.getMaxDistanceToWalkNode())
-        throw new NoPathException();
-    }
   }
 
   private Set<WalkEdgeEntry> getEdgesForNodes(Collection<WalkNodeEntry> nodes)
@@ -153,8 +136,9 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
 
     ProjectedPoint pointFrom = nodeFrom.getLocation();
     ProjectedPoint pointTo = nodeTo.getLocation();
-    ProjectedPoint pointOnEdge = projectPointOntoSegment(point, pointFrom,
-        pointTo);
+
+    ProjectedPoint pointOnEdge = StreetGraphLibrary.computeClosestPointOnEdge(
+        edge, point);
 
     double edgeLength = edge.getDistance();
 
@@ -172,34 +156,6 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
     }
 
     return new NearEdgeWalkState(edge, point, pointOnEdge, forward);
-  }
-
-  private ProjectedPoint projectPointOntoSegment(ProjectedPoint point,
-      ProjectedPoint segmentStart, ProjectedPoint segmentEnd) {
-    
-    segmentStart = ProjectedPointFactory.ensureSrid(segmentStart,
-        point.getSrid());
-    segmentEnd = ProjectedPointFactory.ensureSrid(segmentEnd, point.getSrid());
-    
-    if( segmentStart.getX() == segmentEnd.getX() && segmentStart.getY() == segmentEnd.getY())
-      return segmentStart;
-
-    PointVector v = new PointVector(point.getX() - segmentStart.getX(),
-        point.getY() - segmentStart.getY());
-    PointVector line = new PointVector(segmentEnd.getX() - segmentStart.getX(),
-        segmentEnd.getY() - segmentStart.getY());
-    PointVector proj = line.getProjection(v);
-    double x = segmentStart.getX() + proj.getX();
-    double y = segmentStart.getY() + proj.getY();
-    try {
-      return ProjectedPointFactory.reverse(x, y, point.getSrid());
-    } catch (Exception ex) {
-      System.out.println("point=" + point);
-      System.out.println("segmentStart=" + segmentStart);
-      System.out.println("segmentEnd=" + segmentEnd);
-      System.out.println("result=" + x + " " + y);
-      throw new IllegalStateException(ex);
-    }
   }
 
   private void exportStateToPath(WalkState state, LinkedList<WalkNode> path) {
