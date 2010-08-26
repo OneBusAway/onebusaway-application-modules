@@ -25,6 +25,7 @@ import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.siri.model.ErrorMessage;
+import org.onebusaway.siri.model.MonitoredStopVisit;
 import org.onebusaway.siri.model.ServiceRequestContext;
 import org.onebusaway.siri.model.Siri;
 import org.onebusaway.siri.model.VehicleLocation;
@@ -91,6 +92,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.processAnnotations(ServiceRequestContext.class);
     xstream.processAnnotations(Siri.class);
     xstream.processAnnotations(ErrorMessage.class);
+    xstream.processAnnotations(MonitoredStopVisit.class);
     return xstream;
   }
 
