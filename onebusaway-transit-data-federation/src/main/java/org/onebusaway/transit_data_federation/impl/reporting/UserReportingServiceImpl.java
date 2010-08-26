@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
@@ -39,6 +40,25 @@ class UserReportingServiceImpl implements UserReportingService {
   @Autowired
   public void setTripPositionService(TripPositionService tripPositionService) {
     _tripPositionService = tripPositionService;
+  }
+
+  @Override
+  public void reportProblemWithStop(StopProblemReportBean problem) {
+
+    StopProblemReportRecord record = new StopProblemReportRecord();
+
+    String stopId = problem.getStopId();
+    if (stopId != null)
+      record.setStopId(AgencyAndIdLibrary.convertFromString(stopId));
+
+    record.setTime(problem.getTime());
+    record.setData(problem.getData());
+    record.setUserComment(problem.getUserComment());
+    record.setUserLat(problem.getUserLat());
+    record.setUserLon(problem.getUserLon());
+    record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
+
+    _userReportingDao.saveOrUpdate(record);
   }
 
   @Override
@@ -93,8 +113,9 @@ class UserReportingServiceImpl implements UserReportingService {
   public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
       AgencyAndId tripId) {
     List<TripProblemReportRecord> records = _userReportingDao.getAllTripProblemReportsForTripId(tripId);
-    List<TripProblemReportBean> beans = new ArrayList<TripProblemReportBean>(records.size());
-    for(TripProblemReportRecord record : records)
+    List<TripProblemReportBean> beans = new ArrayList<TripProblemReportBean>(
+        records.size());
+    for (TripProblemReportRecord record : records)
       beans.add(getRecordAsBean(record));
     return beans;
   }
@@ -108,7 +129,7 @@ class UserReportingServiceImpl implements UserReportingService {
   @Override
   public void deleteTripProblemReportForId(long id) {
     TripProblemReportRecord record = _userReportingDao.getTripProblemRecordForId(id);
-    if( record != null)
+    if (record != null)
       _userReportingDao.delete(record);
   }
 

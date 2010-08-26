@@ -102,14 +102,14 @@ public class BeanFactoryV2 {
     List<RouteV2Bean> beans = new ArrayList<RouteV2Bean>();
     for (RouteBean route : result.getRoutes())
       beans.add(getRoute(route));
-    return list(beans, result.isLimitExceeded(),false);
+    return list(beans, result.isLimitExceeded(), false);
   }
 
   public ListWithReferencesBean<StopV2Bean> getResponse(StopsBean result) {
     List<StopV2Bean> beans = new ArrayList<StopV2Bean>();
     for (StopBean stop : result.getStops())
       beans.add(getStop(stop));
-    return list(beans, result.isLimitExceeded(),false);
+    return list(beans, result.isLimitExceeded(), false);
   }
 
   public ListWithReferencesBean<TripDetailsV2Bean> getTripDetailsResponse(
@@ -118,16 +118,17 @@ public class BeanFactoryV2 {
     List<TripDetailsV2Bean> beans = new ArrayList<TripDetailsV2Bean>();
     for (TripDetailsBean trip : trips.getList())
       beans.add(getTripDetails(trip));
-    return list(beans, trips.isLimitExceeded(),false);
+    return list(beans, trips.isLimitExceeded(), false);
   }
 
   public ListWithReferencesBean<String> getEntityIdsResponse(
       ListBean<String> ids) {
     return list(ids.getList(), ids.isLimitExceeded());
   }
-  
-  public <T> ListWithReferencesBean<T> getEmptyList(Class<T> type, boolean outOfRange) {
-    return list(new ArrayList<T>(),false,outOfRange);
+
+  public <T> ListWithReferencesBean<T> getEmptyList(Class<T> type,
+      boolean outOfRange) {
+    return list(new ArrayList<T>(), false, outOfRange);
   }
 
   /****
@@ -215,12 +216,12 @@ public class BeanFactoryV2 {
     bean.setVehicleId(tripStatus.getVehicleId());
 
     StopBean stop = tripStatus.getClosestStop();
-    if( stop != null) {
+    if (stop != null) {
       bean.setClosestStop(stop.getId());
       addToReferences(stop);
       bean.setClosestStopTimeOffset(tripStatus.getClosestStopTimeOffset());
     }
-    
+
     return bean;
   }
 
@@ -400,20 +401,28 @@ public class BeanFactoryV2 {
   public ArrivalAndDepartureV2Bean getArrivalAndDeparture(
       ArrivalAndDepartureBean ad) {
 
+    TripBean trip = ad.getTrip();
+    RouteBean route = trip.getRoute();
+
     ArrivalAndDepartureV2Bean bean = new ArrivalAndDepartureV2Bean();
 
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());
     bean.setPredictedDepartureTime(ad.getPredictedDepartureTime());
-    bean.setRouteId(ad.getTrip().getRoute().getId());
-    bean.setRouteShortName(ad.getTrip().getRoute().getShortName());
-    bean.setRouteLongName(ad.getTrip().getRoute().getLongName());
-    bean.setTripHeadsign(ad.getTrip().getTripHeadsign());
+    bean.setRouteId(route.getId());
+
+    if (trip.getRouteShortName() != null)
+      bean.setRouteShortName(trip.getRouteShortName());
+    else
+      bean.setRouteShortName(route.getShortName());
+    bean.setRouteLongName(route.getLongName());
+    
+    bean.setTripHeadsign(trip.getTripHeadsign());
     bean.setScheduledArrivalTime(ad.getScheduledArrivalTime());
     bean.setScheduledDepartureTime(ad.getScheduledDepartureTime());
     bean.setStopId(ad.getStopId());
     bean.setStatus(ad.getStatus());
     bean.setServiceDate(ad.getServiceDate());
-    bean.setTripId(ad.getTrip().getId());
+    bean.setTripId(trip.getId());
 
     return bean;
   }
@@ -477,9 +486,11 @@ public class BeanFactoryV2 {
   private <T> ListWithReferencesBean<T> list(List<T> list, boolean limitExceeded) {
     return new ListWithReferencesBean<T>(list, limitExceeded, _references);
   }
-  
-  private <T> ListWithReferencesBean<T> list(List<T> list, boolean limitExceeded, boolean outOfRange) {
-    return new ListWithRangeAndReferencesBean<T>(list, limitExceeded, outOfRange, _references);
+
+  private <T> ListWithReferencesBean<T> list(List<T> list,
+      boolean limitExceeded, boolean outOfRange) {
+    return new ListWithRangeAndReferencesBean<T>(list, limitExceeded,
+        outOfRange, _references);
   }
 
   private <T> List<T> filter(List<T> beans) {

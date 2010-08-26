@@ -18,6 +18,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
@@ -273,6 +274,14 @@ public interface TransitDataService extends FederatedService {
   /****
    * These methods are going to pile up.  How do we handle this gracefully in the future?
    ****/
+  
+  /**
+   * Report a problem with a particular stop.
+   * 
+   * @param problem the problem summary bean
+   */
+  @FederatedByEntityIdMethod(propertyExpression = "stopId")
+  public void reportProblemWithStop(StopProblemReportBean problem);
 
   /**
    * Report a problem with a particular trip.

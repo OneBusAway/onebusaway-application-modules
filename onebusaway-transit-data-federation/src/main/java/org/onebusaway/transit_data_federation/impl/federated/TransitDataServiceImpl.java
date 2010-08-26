@@ -18,6 +18,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
@@ -329,6 +330,11 @@ class TransitDataServiceImpl implements TransitDataService {
       List<LocalSearchResult> localResults) throws ServiceException {
     return _oneBusAwayService.getLocalPaths(constraints, minTravelTimeToStops,
         localResults);
+  }
+
+  @Override
+  public void reportProblemWithStop(StopProblemReportBean problem) {
+    _userReportingService.reportProblemWithStop(problem);
   }
 
   @Override
