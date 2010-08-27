@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 class UserDaoImpl implements UserDao {
@@ -68,6 +69,7 @@ class UserDaoImpl implements UserDao {
     return (User) _template.get(User.class, id);
   }
 
+  @Transactional
   @Override
   public void saveOrUpdateUser(User user) {
     _template.saveOrUpdate(user);
