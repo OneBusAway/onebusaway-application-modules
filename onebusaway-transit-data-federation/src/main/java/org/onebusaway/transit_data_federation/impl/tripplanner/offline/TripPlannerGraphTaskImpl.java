@@ -1,8 +1,10 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
+import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
@@ -21,6 +23,12 @@ import org.onebusaway.utility.ObjectSerializationLibrary;
 
 import edu.washington.cs.rse.collections.CollectionsLibrary;
 import edu.washington.cs.rse.collections.FactoryMap;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.classic.Session;
@@ -46,23 +54,82 @@ public class TripPlannerGraphTaskImpl implements Runnable {
 
   private static Logger _log = LoggerFactory.getLogger(TripPlannerGraphImpl.class);
 
-  @Autowired
   private ExtendedGtfsRelationalDao _gtfsDao;
 
-  @Autowired
   private TransitDataFederationDao _whereDao;
 
-  @Autowired
   private SessionFactory _sessionFactory;
 
   private FederatedTransitDataBundle _bundle;
-  
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
   }
 
+  @Autowired
+  public void setGtfsDao(ExtendedGtfsRelationalDao gtfsDao) {
+    _gtfsDao = gtfsDao;
+  }
+
+  @Autowired
+  public void setTransitDataFederationDao(TransitDataFederationDao whereDao) {
+    _whereDao = whereDao;
+  }
+
+  @Autowired
+  public void setSessionFactory(SessionFactory sessionFactory) {
+    this._sessionFactory = sessionFactory;
+
+  }
+
   private Map<Object, Object> _uniques = new HashMap<Object, Object>();
+
+  private Map<ShapeInterpolationKey, Double> _shapeInterpolations = new HashMap<ShapeInterpolationKey, Double>();
+
+  private GeometryFactory factory = new GeometryFactory();
+
+  class ShapeInterpolationKey {
+
+    private double lat;
+    private double lon;
+    private int stopSequence;
+    private AgencyAndId shapeId;
+    private int numStops;
+
+    public ShapeInterpolationKey(double lat, double lon, int stopSequence,
+        int numStops, AgencyAndId shapeId) {
+      this.lat = lat;
+      this.lon = lon;
+      this.stopSequence = stopSequence;
+      this.numStops = numStops;
+      this.shapeId = shapeId;
+    }
+
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      long temp;
+      temp = Double.doubleToLongBits(lat);
+      result = prime * result + (int) (temp ^ (temp >>> 32));
+      temp = Double.doubleToLongBits(lon);
+      result = prime * result + (int) (temp ^ (temp >>> 32));
+      result = prime * result + stopSequence;
+      result = prime * result + numStops;
+      result = result ^ shapeId.hashCode();
+      return result;
+    }
+
+    public boolean equals(Object o) {
+      if (o instanceof ShapeInterpolationKey) {
+        ShapeInterpolationKey other = (ShapeInterpolationKey) o;
+        return other.lat == lat && other.lon == lon
+            && other.stopSequence == stopSequence && other.numStops == numStops
+            && other.shapeId.equals(shapeId);
+      }
+      return false;
+    }
+  }
 
   @Transactional
   public void run() {
@@ -80,7 +147,8 @@ public class TripPlannerGraphTaskImpl implements Runnable {
     sortStopTimeIndices(graph);
 
     try {
-      ObjectSerializationLibrary.writeObject(_bundle.getTripPlannerGraphPath(), graph);
+      ObjectSerializationLibrary.writeObject(_bundle.getTripPlannerGraphPath(),
+          graph);
     } catch (Exception ex) {
       throw new IllegalStateException("error writing graph to file", ex);
     }
@@ -280,6 +348,7 @@ public class TripPlannerGraphTaskImpl implements Runnable {
         new ArrayList<StopTimeEntryImpl>());
 
     int sequence = 0;
+    double distance = 0;
 
     for (int x = 0; x < stopTimes.size(); x++) {
 
@@ -308,7 +377,15 @@ public class TripPlannerGraphTaskImpl implements Runnable {
       stopTimeEntry.setDropOffType(stopTime.getDropOffType());
       stopTimeEntry.setPickupType(stopTime.getPickupType());
       stopTimeEntry.setStop(stopEntry);
-      stopTimeEntry.setShapeDistTraveled(stopTime.getShapeDistTraveled());
+
+      /*
+       * never use the original shapeDistTraveled, because there is no guarantee
+       * that it is in meters.
+       */
+      distance = interpolateShapeDistTraveled(stopTime.getStop().getLat(),
+          stopTime.getStop().getLon(), stopTime.getStopSequence(),
+          stopTimes.size(), stopTime.getTrip().getShapeId(), distance);
+      stopTimeEntry.setShapeDistTraveled(distance);
 
       LocalizedServiceId serviceId = getLocalizedServiceIdForStopTime(stopTime);
       serviceId = unique(serviceId);
@@ -320,6 +397,63 @@ public class TripPlannerGraphTaskImpl implements Runnable {
     }
 
     return stopTimesByTripId;
+  }
+
+  private double interpolateShapeDistTraveled(double lat, double lon,
+      int stopSequence, int numStops, AgencyAndId shapeId, double after) {
+
+    ShapeInterpolationKey key = new ShapeInterpolationKey(lat, lon,
+        stopSequence, numStops, shapeId);
+
+    Double result = _shapeInterpolations.get(key);
+    if (result == null) {
+      List<ShapePoint> points = _gtfsDao.getShapePointsForShapeId(shapeId);
+
+      Coordinate stop = new Coordinate(lon, lat);
+           
+      ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>(points.size());
+      /* find remaining shape after previous stop */
+      double distanceBefore = 0;
+      ShapePoint p2 = null;
+      boolean found = false;
+      for (int i = 0; i < points.size() - 1; i++) {
+        ShapePoint p1 = points.get(i);
+        p2 = points.get(i + 1);
+        double thisDistance = SphericalGeometryLibrary.distance(p1.getLat(),
+            p1.getLon(), p2.getLat(), p2.getLon());
+
+        if (!found) {
+          if (distanceBefore + thisDistance >= after) {
+            found = true;
+          } else {
+            distanceBefore += thisDistance;
+          }
+        }
+        if (found) {
+          coordinates.add(new Coordinate(p1.getLon(), p1.getLat()));
+        }
+      }
+      coordinates.add(new Coordinate(p2.getLon(), p2.getLat()));
+
+      LineString shape = factory.createLineString(coordinates.toArray(new Coordinate[coordinates.size()]));
+      
+      LengthIndexedLine lengthIndexed = new LengthIndexedLine(shape);
+      
+      double indexOfStop = lengthIndexed.indexOf(stop);
+      
+      Geometry lineUpToStop = lengthIndexed.extractLine(0, indexOfStop);
+
+      result = distanceBefore;
+      Coordinate[] coordinateArray = lineUpToStop.getCoordinates();
+      for (int i = 0; i < coordinateArray.length - 1; ++i) {
+        result += SphericalGeometryLibrary.distance(coordinateArray[i].y,
+            coordinateArray[i].x, coordinateArray[i + 1].y,
+            coordinateArray[i + 1].x);
+      }
+
+      _shapeInterpolations.put(key, result);
+    }
+    return result;
   }
 
   private LocalizedServiceId getLocalizedServiceIdForStopTime(StopTime stopTime) {
@@ -666,4 +800,5 @@ public class TripPlannerGraphTaskImpl implements Runnable {
       return _stopsById.get(id);
     }
   }
+
 }
