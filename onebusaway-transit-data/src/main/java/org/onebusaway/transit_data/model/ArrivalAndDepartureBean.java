@@ -37,6 +37,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private String status;
 
+  private double shapeDistTraveled;
+
   public TripBean getTrip() {
     return trip;
   }
@@ -123,6 +125,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   public String toString() {
     return "route=" + trip.getRoute() + " scheduled=" + scheduledArrivalTime
         + " predicted=" + predictedArrivalTime;
+  }
+
+  public double getShapeDistTraveled() {
+    return shapeDistTraveled;
+  }
+
+  public void setShapeDistTraveled(double shapeDistTraveled) {
+    this.shapeDistTraveled = shapeDistTraveled;
   }
 
 }

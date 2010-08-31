@@ -8,12 +8,12 @@ import org.onebusaway.siri.model.Siri;
 import org.onebusaway.siri.model.StopMonitoringDelivery;
 import org.onebusaway.siri.model.VehicleLocation;
 import org.onebusaway.transit_data.model.AgencyBean;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
+import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
@@ -46,7 +46,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
   
   @Autowired  
   private TransitDataService _transitDataService;
-  
+
   /**
    * This is the default action for 
    * @return
@@ -72,8 +72,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
     String routeId = _request.getParameter("routeId");
     String directionId = _request.getParameter("directionId");
     
-    List<AgencyWithCoverageBean> agencies = _transitDataService.getAgenciesWithCoverage();
-
     // convert ids to agency_and_id
     stopId = agencyId + "_" + stopId;
 
@@ -142,15 +140,30 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
       MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef = new FramedVehicleJourneyRef();
 
-      MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongRoute();
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation = new VehicleLocation();
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getPosition().getLat();
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getPosition().getLon();
-      // todo
-      // MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall =
-      // specificTripDetails.getStatus().getDistanceAlongRoute() -
-      // stop.getDistanceAlongRoute();
-      // MonitoredStopVisit.MonitoredVehicleJourney.StopsFromCall = ;
+
+      MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongRoute();
+      MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall = status.getDistanceAlongRoute()
+          - adbean.getShapeDistTraveled();
+
+      int i = 0;
+      boolean started = false;
+      for (TripStopTimeBean stopTime : specificTripDetails.getSchedule().getStopTimes()) {
+        if (started) {
+          i++;
+        }
+        if (stopTime.getStop().equals(
+            specificTripDetails.getStatus().getClosestStop())) {
+          started = true;
+        }
+        if (stopTime.getStop().getId().equals(stopId)) {
+          break;
+        }
+      }
+
+      MonitoredStopVisit.MonitoredVehicleJourney.StopsFromCall = i;
 
       Date serviceDate = new Date(adbean.getServiceDate());
 
