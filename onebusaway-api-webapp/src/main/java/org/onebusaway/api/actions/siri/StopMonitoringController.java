@@ -1,5 +1,6 @@
 package org.onebusaway.api.actions.siri;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.siri.model.FramedVehicleJourneyRef;
 import org.onebusaway.siri.model.MonitoredStopVisit;
 import org.onebusaway.siri.model.MonitoredVehicleJourney;
@@ -43,17 +44,18 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
   private Object _response;
   private HttpServletRequest _request;
-  
-  @Autowired  
+
+  @Autowired
   private TransitDataService _transitDataService;
 
   /**
-   * This is the default action for 
+   * This is the default action for
+   * 
    * @return
    * @throws IOException
    */
   public DefaultHttpHeaders index() throws IOException {
-    
+
     /* find the stop */
     String stopId = _request.getParameter("stopId");
     if (stopId == null) {
@@ -71,7 +73,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
     String routeId = _request.getParameter("routeId");
     String directionId = _request.getParameter("directionId");
-    
+
     // convert ids to agency_and_id
     stopId = agencyId + "_" + stopId;
 
@@ -88,14 +90,13 @@ public class StopMonitoringController implements ModelDriven<Object>,
     timeTo.add(Calendar.MINUTE, 30);
 
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _transitDataService.getStopWithArrivalsAndDepartures(
-        stopId,
-        timeFrom.getTime(), timeTo.getTime());
-    
+        stopId, timeFrom.getTime(), timeTo.getTime());
+
     GregorianCalendar now = new GregorianCalendar();
     Siri siri = new Siri();
     siri.ServiceDelivery = new ServiceDelivery();
     siri.ServiceDelivery.ResponseTimestamp = now;
-    
+
     siri.ServiceDelivery.ProducerRef = _request.getServerName();
     siri.ServiceDelivery.deliveries = new ArrayList<StopMonitoringDelivery>();
 
@@ -109,11 +110,11 @@ public class StopMonitoringController implements ModelDriven<Object>,
       TripBean trip = adbean.getTrip();
       RouteBean route = trip.getRoute();
       if (routeId != null && !route.getId().equals(routeId)) {
-        //filtered out
+        // filtered out
         continue;
       }
       if (directionId != null && !trip.getDirectionId().equals(directionId)) {
-        //filtered out
+        // filtered out
         continue;
       }
 
@@ -126,12 +127,13 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
       StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(route.getId());
       List<StopBean> stops = stopsForRoute.getStops();
-      
+
       MonitoredStopVisit MonitoredStopVisit = new MonitoredStopVisit();
       delivery.visits.add(MonitoredStopVisit);
 
       MonitoredStopVisit.RecordedAtTime = new GregorianCalendar();
       TripStatusBean status = specificTripDetails.getStatus();
+
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getTime());
       MonitoredStopVisit.MonitoringRef = adbean.getStopId();
       MonitoredStopVisit.MonitoredVehicleJourney = new MonitoredVehicleJourney();
@@ -140,31 +142,33 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
       MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef = new FramedVehicleJourneyRef();
 
-      MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation = new VehicleLocation();
-      MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getPosition().getLat();
-      MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getPosition().getLon();
+      CoordinatePoint position = status.getPosition();
+      if (position != null) {
+        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation = new VehicleLocation();
+        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getPosition().getLat();
+        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getPosition().getLon();
 
-      MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongRoute();
-      MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall = status.getDistanceAlongRoute()
-          - adbean.getShapeDistTraveled();
+        MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongRoute();
+        MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall = status.getDistanceAlongRoute()
+            - adbean.getShapeDistTraveled();
 
-      int i = 0;
-      boolean started = false;
-      for (TripStopTimeBean stopTime : specificTripDetails.getSchedule().getStopTimes()) {
-        if (started) {
-          i++;
+        int i = 0;
+        boolean started = false;
+        for (TripStopTimeBean stopTime : specificTripDetails.getSchedule().getStopTimes()) {
+          if (started) {
+            i++;
+          }
+          if (stopTime.getStop().equals(
+              specificTripDetails.getStatus().getClosestStop())) {
+            started = true;
+          }
+          if (stopTime.getStop().getId().equals(stopId)) {
+            break;
+          }
         }
-        if (stopTime.getStop().equals(
-            specificTripDetails.getStatus().getClosestStop())) {
-          started = true;
-        }
-        if (stopTime.getStop().getId().equals(stopId)) {
-          break;
-        }
+
+        MonitoredStopVisit.MonitoredVehicleJourney.StopsFromCall = i;
       }
-
-      MonitoredStopVisit.MonitoredVehicleJourney.StopsFromCall = i;
-
       Date serviceDate = new Date(adbean.getServiceDate());
 
       MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef.DataFrameRef = String.format(
@@ -177,12 +181,10 @@ public class StopMonitoringController implements ModelDriven<Object>,
           stops.size() - 1).getId();
     }
 
-    
     _response = siri;
     return new DefaultHttpHeaders();
   }
 
-  
   @Override
   public Object getModel() {
     return _response;
@@ -193,11 +195,9 @@ public class StopMonitoringController implements ModelDriven<Object>,
     this._request = request;
   }
 
-
   public void setService(TransitDataService service) {
     this._transitDataService = service;
   }
-
 
   public TransitDataService getService() {
     return _transitDataService;
