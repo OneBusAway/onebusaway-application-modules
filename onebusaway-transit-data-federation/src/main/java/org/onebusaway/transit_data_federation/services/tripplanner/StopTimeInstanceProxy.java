@@ -22,6 +22,8 @@ public class StopTimeInstanceProxy {
 
   private int _predictedDepartureOffset = 0;
 
+  private double _shapeDistTraveled = -1;
+
   public StopTimeInstanceProxy(StopTimeEntry stopTime, Date serviceDate) {
     this(stopTime, serviceDate.getTime());
   }
@@ -115,6 +117,14 @@ public class StopTimeInstanceProxy {
    */
   public int getPredictedDepartureOffset() {
     return _predictedDepartureOffset;
+  }
+
+  public void setShapeDistTraveled(double _shapeDistTraveled) {
+    this._shapeDistTraveled = _shapeDistTraveled;
+  }
+
+  public double getShapeDistTraveled() {
+    return _shapeDistTraveled;
   }
 
   @Override

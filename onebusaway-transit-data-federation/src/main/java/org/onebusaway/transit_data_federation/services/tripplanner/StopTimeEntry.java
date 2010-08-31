@@ -23,4 +23,6 @@ public interface StopTimeEntry {
   public int getPickupType();
 
   public int getDropOffType();
+
+  public double getShapeDistTraveled();
 }

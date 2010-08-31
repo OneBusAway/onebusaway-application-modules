@@ -1,5 +1,39 @@
 package org.onebusaway.transit_data_federation.impl.realtime;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.impl.shapes.DistanceTraveledShapePointIndex;
+import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
+import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
+import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
+import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
+import org.onebusaway.transit_data_federation.services.ShapePointService;
+import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.realtime.StopRealtimeService;
+import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
+import org.onebusaway.transit_data_federation.services.realtime.TripPositionService;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
+
+import edu.washington.cs.rse.collections.FactoryMap;
+import edu.washington.cs.rse.collections.stats.Min;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,40 +47,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
-import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.VehicleLocationListener;
-import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.impl.shapes.DistanceTraveledShapePointIndex;
-import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
-import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
-import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
-import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.services.ShapePointService;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.realtime.StopRealtimeService;
-import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
-import org.onebusaway.transit_data_federation.services.realtime.TripPositionService;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedResource;
-import org.springframework.stereotype.Component;
-
-import edu.washington.cs.rse.collections.FactoryMap;
-import edu.washington.cs.rse.collections.stats.Min;
 
 /**
  * Implementation for {@link TripPositionService}. Keeps a recent cache of
@@ -456,8 +456,8 @@ public class TripPositionServiceImpl implements TripPositionService,
      */
 
     /**
-     * Effective scheduled time is the point that a transit vehicle is at on
-     * it's schedule, with schedule deviation taken into account. So if it's 100
+     * Effective scheduled time is the point that a transit vehicle is at on its
+     * schedule, with schedule deviation taken into account. So if it's 100
      * minutes into the current service date and the bus is running 10 minutes
      * late, it's actually at the 90 minute point in its scheduled operation.
      */
@@ -497,10 +497,6 @@ public class TripPositionServiceImpl implements TripPositionService,
     StopTimeEntry before = stopTimes.get(index - 1);
     StopTimeEntry after = stopTimes.get(index);
 
-    // Right now, StopTime shapeDistanceTraveled is not stored in the
-    // memory-resident StopTimeEntry
-    StopTimeNarrative beforeStopTime = _narrativeService.getStopTimeForEntry(before);
-    StopTimeNarrative afterStopTime = _narrativeService.getStopTimeForEntry(after);
     TripNarrative tripNarrative = _narrativeService.getTripForId(tripEntry.getId());
 
     AgencyAndId shapeId = tripNarrative.getShapeId();
@@ -523,14 +519,14 @@ public class TripPositionServiceImpl implements TripPositionService,
         / ((double) (toTime - fromTime));
 
     // Do we have enough information to use shape distance traveled?
-    if (shapeId != null && beforeStopTime.getShapeDistTraveled() >= 0
-        && afterStopTime.getShapeDistTraveled() >= 0) {
+    if (shapeId != null && before.getShapeDistTraveled() >= 0
+        && after.getShapeDistTraveled() >= 0) {
 
       ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(shapeId);
 
       if (!shapePoints.isEmpty()) {
         ShapePointIndex shapePointIndexMethod = getShapeDistanceTraveled(
-            beforeStopTime, afterStopTime, ratio);
+            before, after, ratio);
         CoordinatePoint location = shapePointIndexMethod.getPoint(shapePoints);
         position.setPosition(location);
         return position;
@@ -555,7 +551,7 @@ public class TripPositionServiceImpl implements TripPositionService,
   }
 
   private ShapePointIndex getShapeDistanceTraveled(
-      StopTimeNarrative beforeStopTime, StopTimeNarrative afterStopTime,
+      StopTimeEntry beforeStopTime, StopTimeEntry afterStopTime,
       double ratio) {
 
     double fromDistance = beforeStopTime.getShapeDistTraveled();

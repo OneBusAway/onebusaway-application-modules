@@ -20,13 +20,15 @@ public class MockEntryFactory {
   }
 
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
-      TripEntryImpl trip, int arrivalTime, int departureTime) {
+      TripEntryImpl trip, int arrivalTime, int departureTime,
+      double shapeDistTraveled) {
     StopTimeEntryImpl stopTime = new StopTimeEntryImpl();
     stopTime.setId(id);
     stopTime.setStop(stop);
     stopTime.setTrip(trip);
     stopTime.setArrivalTime(arrivalTime);
     stopTime.setDepartureTime(departureTime);
+    stopTime.setShapeDistTraveled(shapeDistTraveled);
     return stopTime;
   }
 

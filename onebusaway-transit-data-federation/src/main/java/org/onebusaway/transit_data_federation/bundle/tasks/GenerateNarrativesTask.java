@@ -1,13 +1,5 @@
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -30,14 +22,24 @@ import org.onebusaway.transit_data_federation.model.narrative.StopNarrative.Buil
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+
+import edu.washington.cs.rse.geospatial.DPoint;
+import edu.washington.cs.rse.geospatial.Geometry;
+
+import cern.colt.list.DoubleArrayList;
+import cern.jet.stat.Descriptive;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import cern.colt.list.DoubleArrayList;
-import cern.jet.stat.Descriptive;
-import edu.washington.cs.rse.geospatial.DPoint;
-import edu.washington.cs.rse.geospatial.Geometry;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Precomputes all the link narrative objects that will power
@@ -201,7 +203,6 @@ public class GenerateNarrativesTask implements Runnable {
     StopTimeNarrative.Builder builder = StopTimeNarrative.builder();
     builder.setRouteShortName(deduplicate(stopTime.getRouteShortName()));
     builder.setStopHeadsign(deduplicate(stopTime.getStopHeadsign()));
-    builder.setShapeDistTraveled(stopTime.getShapeDistTraveled());
     return deduplicate(builder.create());
   }
 

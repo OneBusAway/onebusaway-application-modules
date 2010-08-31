@@ -8,11 +8,6 @@ import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stop;
 import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stopTime;
 import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.trip;
 
-import java.util.Arrays;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.TransitDataFederationBaseTestSupport;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
@@ -27,6 +22,12 @@ import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.Arrays;
 
 public class TripPositionServiceImplTest {
 
@@ -62,7 +63,7 @@ public class TripPositionServiceImplTest {
 
     StopEntryImpl stop = stop("a", 47.5, -122.5);
     TripEntryImpl trip = trip("trip");
-    StopTimeEntry stopTime = stopTime(0, stop, trip, 30, 90);
+    StopTimeEntry stopTime = stopTime(0, stop, trip, 30, 90, -1);
     long serviceDate = t - 20 * 1000;
 
     VehicleLocationRecord vprA = new VehicleLocationRecord();
@@ -101,9 +102,9 @@ public class TripPositionServiceImplTest {
 
     TripEntryImpl trip = trip("trip");
 
-    StopTimeEntry stopTimeA = stopTime(0, stopA, trip, 30, 90);
-    StopTimeEntry stopTimeB = stopTime(1, stopB, trip, 120, 120);
-    StopTimeEntry stopTimeC = stopTime(2, stopC, trip, 180, 210);
+    StopTimeEntry stopTimeA = stopTime(0, stopA, trip, 30, 90, 0);
+    StopTimeEntry stopTimeB = stopTime(1, stopB, trip, 120, 120, 100);
+    StopTimeEntry stopTimeC = stopTime(2, stopC, trip, 180, 210, 200);
 
     trip.setStopTimes(Arrays.asList(stopTimeA, stopTimeB, stopTimeC));
 
@@ -111,20 +112,7 @@ public class TripPositionServiceImplTest {
         aid("shape")).create();
     Mockito.when(_narrativeService.getTripForId(trip.getId())).thenReturn(
         tripNarrative);
-
-    StopTimeNarrative stnA = StopTimeNarrative.builder().setShapeDistTraveled(0).create();
-    StopTimeNarrative stnB = StopTimeNarrative.builder().setShapeDistTraveled(
-        100).create();
-    StopTimeNarrative stnC = StopTimeNarrative.builder().setShapeDistTraveled(
-        200).create();
-
-    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeA)).thenReturn(
-        stnA);
-    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeB)).thenReturn(
-        stnB);
-    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeC)).thenReturn(
-        stnC);
-
+    
     double[] lats = {47.5, 47.56, 47.6, 47.54, 47.5};
     double[] lons = {-122.5, -122.45, -122.4, -122.35, -122.3};
     double[] distTraveled = {0, 50, 100, 150, 200};
@@ -234,9 +222,9 @@ public class TripPositionServiceImplTest {
 
     TripEntryImpl trip = trip("trip");
 
-    StopTimeEntry stopTimeA = stopTime(0, stopA, trip, 30, 90);
-    StopTimeEntry stopTimeB = stopTime(1, stopB, trip, 120, 120);
-    StopTimeEntry stopTimeC = stopTime(2, stopC, trip, 180, 210);
+    StopTimeEntry stopTimeA = stopTime(0, stopA, trip, 30, 90, -1);
+    StopTimeEntry stopTimeB = stopTime(1, stopB, trip, 120, 120, -1);
+    StopTimeEntry stopTimeC = stopTime(2, stopC, trip, 180, 210, -1);
 
     trip.setStopTimes(Arrays.asList(stopTimeA, stopTimeB, stopTimeC));
 

@@ -1,9 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -24,7 +20,6 @@ import org.onebusaway.transit_data_federation.impl.shapes.LastShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.LocationShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
@@ -48,13 +43,18 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlanSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import edu.washington.cs.rse.collections.combinations.Combinations;
 import edu.washington.cs.rse.collections.tuple.Pair;
 import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Component
 class TripPlanBeanServiceImpl implements TripPlanBeanService {
@@ -298,10 +298,9 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
   }
 
   private ShapePointIndex getStopTimeAsShapePointIndex(StopTimeEntry stopTime) {
-    StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
-    if (stopTimeNarrative.getShapeDistTraveled() >= 0)
+    if (stopTime.getShapeDistTraveled() >= 0)
       return new DistanceTraveledShapePointIndex(
-          stopTimeNarrative.getShapeDistTraveled());
+          stopTime.getShapeDistTraveled());
     StopEntry stop = stopTime.getStop();
     return new LocationShapePointIndex(stop.getStopLat(), stop.getStopLon());
   }

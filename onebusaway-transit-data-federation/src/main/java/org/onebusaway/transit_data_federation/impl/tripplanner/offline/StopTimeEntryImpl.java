@@ -21,6 +21,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   private int _sequence;
   private int _dropOffType;
   private int _pickupType;
+  private double _shapeDistTraveled;
 
   private StopEntryImpl _stop;
 
@@ -91,6 +92,15 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   }
 
   @Override
+  public double getShapeDistTraveled() {
+    return _shapeDistTraveled;
+  }
+
+  public void setShapeDistTraveled(double shapeDistTraveled) {
+    this._shapeDistTraveled = shapeDistTraveled;
+  }
+
+  @Override
   public boolean equals(Object obj) {
     if (obj == null || !(obj instanceof StopTimeEntryImpl))
       return false;
@@ -117,6 +127,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     out.writeInt(_sequence);
     out.writeInt(_dropOffType);
     out.writeInt(_pickupType);
+    out.writeDouble(_shapeDistTraveled);
 
     out.writeObject(_trip.getId());
     out.writeObject(_stop.getId());
@@ -131,6 +142,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     _sequence = in.readInt();
     _dropOffType = in.readInt();
     _pickupType = in.readInt();
+    _shapeDistTraveled = in.readDouble();
 
     AgencyAndId tripId = (AgencyAndId) in.readObject();
     AgencyAndId stopId = (AgencyAndId) in.readObject();
@@ -149,5 +161,4 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
           }
         });
   }
-
 }

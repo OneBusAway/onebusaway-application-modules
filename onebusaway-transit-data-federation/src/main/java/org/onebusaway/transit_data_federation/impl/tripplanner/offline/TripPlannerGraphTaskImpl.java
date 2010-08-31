@@ -1,20 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TimeZone;
-import java.util.TreeMap;
-
-import org.hibernate.SessionFactory;
-import org.hibernate.classic.Session;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -33,13 +18,29 @@ import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+
+import edu.washington.cs.rse.collections.CollectionsLibrary;
+import edu.washington.cs.rse.collections.FactoryMap;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.classic.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import edu.washington.cs.rse.collections.CollectionsLibrary;
-import edu.washington.cs.rse.collections.FactoryMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TimeZone;
+import java.util.TreeMap;
 
 public class TripPlannerGraphTaskImpl implements Runnable {
 
@@ -307,6 +308,7 @@ public class TripPlannerGraphTaskImpl implements Runnable {
       stopTimeEntry.setDropOffType(stopTime.getDropOffType());
       stopTimeEntry.setPickupType(stopTime.getPickupType());
       stopTimeEntry.setStop(stopEntry);
+      stopTimeEntry.setShapeDistTraveled(stopTime.getShapeDistTraveled());
 
       LocalizedServiceId serviceId = getLocalizedServiceIdForStopTime(stopTime);
       serviceId = unique(serviceId);
