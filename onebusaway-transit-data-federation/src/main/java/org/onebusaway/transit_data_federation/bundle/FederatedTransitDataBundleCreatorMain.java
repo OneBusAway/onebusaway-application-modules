@@ -29,7 +29,6 @@ public class FederatedTransitDataBundleCreatorMain {
 
   public static void main(String[] args) throws IOException,
       ClassNotFoundException {
-
     FederatedTransitDataBundleCreatorMain main = new FederatedTransitDataBundleCreatorMain();
     main.run(args);
   }

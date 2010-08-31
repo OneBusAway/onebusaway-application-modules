@@ -1,7 +1,31 @@
 package org.onebusaway.transit_data_federation.impl.realtime;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
+
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.gtfs.model.calendar.ServiceIdIntervals;
+import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.shapes.DistanceTraveledShapePointIndex;
@@ -19,34 +43,18 @@ import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
 import org.onebusaway.transit_data_federation.services.realtime.TripPositionService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
-
-import edu.washington.cs.rse.collections.FactoryMap;
-import edu.washington.cs.rse.collections.stats.Min;
-
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.Element;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import edu.washington.cs.rse.collections.FactoryMap;
+import edu.washington.cs.rse.collections.stats.Min;
+import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
 
 /**
  * Implementation for {@link TripPositionService}. Keeps a recent cache of
@@ -67,11 +75,15 @@ public class TripPositionServiceImpl implements TripPositionService,
    */
   private static final int TRIP_FOR_VEHICLE_SEARCH_WINDOW = 20 * 60 * 1000;
 
+  private static final long TIME_WINDOW = 30 * 60 * 1000;
+
   private Cache _tripPositionRecordCollectionCache;
 
   private TripPositionRecordDao _tripPositionRecordDao;
 
   private TransitGraphDao _transitGraphDao;
+
+  private CalendarService _calendarService;
 
   private NarrativeService _narrativeService;
 
@@ -144,6 +156,11 @@ public class TripPositionServiceImpl implements TripPositionService,
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setCalendarService(CalendarService calendarService) {
+    _calendarService = calendarService;
   }
 
   @Autowired
@@ -257,13 +274,13 @@ public class TripPositionServiceImpl implements TripPositionService,
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
     AgencyAndId tripId = record.getTripId();
     long timeOfRecord = record.getCurrentTime();
-      int scheduleDeviation = record.getScheduleDeviation();
+    int scheduleDeviation = record.getScheduleDeviation();
 
-    TripPositionRecord tripPositionRecord = new TripPositionRecord(
-        tripId, record.getServiceDate() , timeOfRecord,
-        scheduleDeviation, record.getVehicleId());
+    TripPositionRecord tripPositionRecord = new TripPositionRecord(tripId,
+        record.getServiceDate(), timeOfRecord, scheduleDeviation,
+        record.getVehicleId());
 
-      putTripPositionRecord(tripPositionRecord);
+    putTripPositionRecord(tripPositionRecord);
   }
 
   public void handleVehicleLocationRecords(List<VehicleLocationRecord> records) {
@@ -304,11 +321,11 @@ public class TripPositionServiceImpl implements TripPositionService,
           serviceDateAndId, targetTime);
 
       for (StopTimeInstanceProxy sti : entry.getValue()) {
-        
+
         // Only apply real-time data if there is data to apply
-        if( collection.isEmpty() )
+        if (collection.isEmpty())
           continue;
-        
+
         int scheduleDeviation = collection.getScheduleDeviationForTargetTime(targetTime);
         sti.setPredictedArrivalOffset(scheduleDeviation);
         sti.setPredictedDepartureOffset(scheduleDeviation);
@@ -320,6 +337,61 @@ public class TripPositionServiceImpl implements TripPositionService,
   /****
    * {@link TripPositionService} Interface
    ****/
+
+  @Override
+  public Map<TripInstanceProxy, TripPosition> getScheduledTripsForBounds(
+      CoordinateBounds bounds, long time) {
+
+    CoordinateRectangle r = new CoordinateRectangle(bounds.getMinLat(),
+        bounds.getMinLon(), bounds.getMaxLat(), bounds.getMaxLon());
+    List<StopEntry> stops = _transitGraphDao.getStopsByLocation(r);
+
+    ServiceIdIntervals intervals = new ServiceIdIntervals();
+    for (StopEntry stop : stops) {
+      StopTimeIndex index = stop.getStopTimes();
+      intervals.addIntervals(index.getServiceIdIntervals());
+    }
+
+    long timeFrom = time - TIME_WINDOW;
+    long timeTo = time + TIME_WINDOW;
+
+    Map<LocalizedServiceId, List<Date>> serviceIdsAndDates = _calendarService.getServiceDatesWithinRange(
+        intervals, new Date(timeFrom), new Date(timeTo));
+
+    Set<TripInstanceProxy> tripInstances = new HashSet<TripInstanceProxy>();
+
+    for (StopEntry stop : stops) {
+      StopTimeIndex index = stop.getStopTimes();
+      List<StopTimeInstanceProxy> stopTimeInstances = StopTimeSearchOperations.getStopTimeInstancesInRange(
+          index, timeFrom, timeTo, StopTimeOp.DEPARTURE, serviceIdsAndDates);
+      for (StopTimeInstanceProxy stopTimeInstance : stopTimeInstances) {
+        TripEntry trip = stopTimeInstance.getTrip();
+        long serviceDate = stopTimeInstance.getServiceDate();
+        tripInstances.add(new TripInstanceProxy(trip, serviceDate));
+      }
+    }
+
+    Map<TripInstanceProxy,TripPosition> tripsAndPositions = new HashMap<TripInstanceProxy, TripPosition>();
+    
+    for (TripInstanceProxy tripInstance : tripInstances) {
+
+      TripPosition tripPosition = getPositionForTripInstance(
+          tripInstance, time);
+
+      if (tripPosition == null)
+        continue;
+
+      CoordinatePoint location = tripPosition.getPosition();
+
+      if (location != null
+          && bounds.contains(location.getLat(), location.getLon())) {
+
+        tripsAndPositions.put(tripInstance, tripPosition);
+      }
+    }
+
+    return tripsAndPositions;
+  }
 
   @Override
   public TripPosition getPositionForTripInstance(
@@ -346,10 +418,10 @@ public class TripPositionServiceImpl implements TripPositionService,
 
     if (records.isEmpty())
       return null;
-    
+
     Min<TripPositionRecord> closest = new Min<TripPositionRecord>();
-    for( TripPositionRecord record : records) {
-      closest.add(Math.abs(record.getTime() - time),record);
+    for (TripPositionRecord record : records) {
+      closest.add(Math.abs(record.getTime() - time), record);
     }
 
     TripPositionRecord representative = closest.getMinElement();
@@ -449,7 +521,7 @@ public class TripPositionServiceImpl implements TripPositionService,
     position.setVehicleId(records.getVehicleId());
 
     position.setTime(records.getToTime());
-    
+
     /**
      * Let's interpolate the position of the transit vehicle.
      * 
@@ -586,13 +658,13 @@ public class TripPositionServiceImpl implements TripPositionService,
         && _persistTripPositionRecords) {
 
       _tripPositionRecordPersistentStoreAccessCount.incrementAndGet();
-      
+
       List<TripPositionRecord> predictions = _tripPositionRecordDao.getTripPositionRecordsForTripServiceDateAndTimeRange(
           serviceDateAndId.getId(), serviceDateAndId.getServiceDate(),
           fromTime, toTime);
-      
-      if( !predictions.isEmpty() )
-        return TripPositionRecordCollection.createFromRecords(predictions);      
+
+      if (!predictions.isEmpty())
+        return TripPositionRecordCollection.createFromRecords(predictions);
     }
 
     return new TripPositionRecordCollection(fromTime, toTime,

@@ -1,5 +1,8 @@
 package org.onebusaway.transit_data_federation.services.realtime;
 
+import java.util.Map;
+
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
 
@@ -11,6 +14,17 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceP
  * 
  */
 public interface TripPositionService {
+
+  /**
+   * Given a coordinate region and time, determine the set of trips that are
+   * scheduled to be active in that region at the specified time.
+   * 
+   * @param bounds
+   * @param time
+   * @return the set of trip instances along with their positions
+   */
+  public Map<TripInstanceProxy, TripPosition> getScheduledTripsForBounds(
+      CoordinateBounds bounds, long time);
 
   /**
    * Given a trip instance and a target time, determine the vehicle position at
