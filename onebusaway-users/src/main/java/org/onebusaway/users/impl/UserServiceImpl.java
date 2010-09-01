@@ -26,6 +26,7 @@ import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class UserServiceImpl implements UserService {
@@ -390,6 +391,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Cacheable
+  @Transactional
   @Override
   public Long getMinApiRequestIntervalForKey(String key,
       @CacheableArgument(cacheRefreshIndicator = true) boolean forceRefresh) {
