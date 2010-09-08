@@ -1,5 +1,12 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
@@ -28,15 +35,8 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGr
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class CombinedStateHandler {
-  
+
   private WalkPlansImpl _walkPlans;
 
   private TripPlannerConstants _constants;
@@ -106,7 +106,7 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     double d = _constants.getMaxTransferDistance();
-    CoordinateRectangle bounds = DistanceLibrary.bounds(state.getLocation(), d);
+    CoordinateBounds bounds = DistanceLibrary.bounds(state.getLocation(), d);
     List<StopEntry> stopEntries = _graph.getStopsByLocation(bounds);
 
     for (StopEntry stop : stopEntries) {
@@ -222,9 +222,8 @@ public class CombinedStateHandler {
     StopEntry stopEntry = state.getStop();
     StopTimeIndex stopTimeIndex = stopEntry.getStopTimes();
 
-    
-    StopTimeIndexResult result = StopTimeSearchOperations.getNextStopTimeDeparture(stopTimeIndex,
-        _indexContext, state.getCurrentTime(), null);
+    StopTimeIndexResult result = StopTimeSearchOperations.getNextStopTimeDeparture(
+        stopTimeIndex, _indexContext, state.getCurrentTime(), null);
     List<StopTimeInstanceProxy> departures = result.getStopTimeInstances();
 
     if (departures.isEmpty()) {
@@ -249,8 +248,8 @@ public class CombinedStateHandler {
     StopEntry stopEntry = state.getStop();
     StopTimeIndex stopTimeIndex = stopEntry.getStopTimes();
 
-    StopTimeIndexResult result = StopTimeSearchOperations.getPreviousStopTimeArrival(stopTimeIndex,
-        _indexContext, state.getCurrentTime(), null);
+    StopTimeIndexResult result = StopTimeSearchOperations.getPreviousStopTimeArrival(
+        stopTimeIndex, _indexContext, state.getCurrentTime(), null);
 
     List<StopTimeInstanceProxy> arrivals = result.getStopTimeInstances();
 
@@ -451,7 +450,8 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     double d = _constants.getMaxTransferDistance();
-    CoordinateRectangle bounds = DistanceLibrary.bounds(state.getLocation(), d);
+    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
+        state.getLocation(), d);
     List<StopEntry> stopEntries = _graph.getStopsByLocation(bounds);
 
     for (StopEntry stop : stopEntries) {

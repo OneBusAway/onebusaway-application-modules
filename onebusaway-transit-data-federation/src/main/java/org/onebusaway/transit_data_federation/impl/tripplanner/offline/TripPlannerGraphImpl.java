@@ -8,9 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.collections.adapter.IAdapter;
+import org.onebusaway.collections.adapter.IterableAdapter;
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.serialization.EntryCallback;
 import org.onebusaway.transit_data_federation.services.serialization.EntryIdAndCallback;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
@@ -19,15 +23,13 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-import edu.washington.cs.rse.collections.adapter.IAdapter;
-import edu.washington.cs.rse.collections.adapter.IterableAdapter;
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
-
 public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
 
   private static final long serialVersionUID = 1L;
 
   private static final TripEntryAdapter _tripEntryAdapter = new TripEntryAdapter();
+
+  private static final BlockEntryAdapter _blockEntryAdapter = new BlockEntryAdapter();
 
   private static final StopEntryAdapter _stopEntryAdapter = new StopEntryAdapter();
 
@@ -37,13 +39,17 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
 
   private List<TripEntryImpl> _trips = new ArrayList<TripEntryImpl>();
 
-  private transient STRtree _stopLocationTree = null;
+  private List<BlockEntryImpl> _blocks = new ArrayList<BlockEntryImpl>();
 
-  private transient Map<AgencyAndId, TripEntryImpl> _tripEntriesById = new HashMap<AgencyAndId, TripEntryImpl>();
+  private transient STRtree _stopLocationTree = null;
 
   private transient Map<AgencyAndId, StopEntryImpl> _stopEntriesById = new HashMap<AgencyAndId, StopEntryImpl>();
 
-  private transient Map<AgencyAndId, List<TripEntry>> _tripsByBlockId = new HashMap<AgencyAndId, List<TripEntry>>();
+  private transient Map<AgencyAndId, TripEntryImpl> _tripEntriesById = new HashMap<AgencyAndId, TripEntryImpl>();
+
+  private transient Map<AgencyAndId, BlockEntryImpl> _blockEntriesById = new HashMap<AgencyAndId, BlockEntryImpl>();
+
+  private transient Map<AgencyAndId, List<BlockEntry>> _blockEntriesByRouteCollectionId = new HashMap<AgencyAndId, List<BlockEntry>>();
 
   public TripPlannerGraphImpl() {
 
@@ -64,7 +70,7 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
       }
 
       _stopLocationTree.build();
-      
+
       System.out.println("  stops=" + _stops.size());
       System.out.println("  trips= " + _trips.size());
     }
@@ -75,26 +81,29 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
         _tripEntriesById.put(entry.getId(), entry);
     }
 
+    if (_blockEntriesById == null) {
+      _blockEntriesById = new HashMap<AgencyAndId, BlockEntryImpl>();
+      for (BlockEntryImpl entry : _blocks)
+        _blockEntriesById.put(entry.getId(), entry);
+    }
+
     if (_stopEntriesById == null) {
       _stopEntriesById = new HashMap<AgencyAndId, StopEntryImpl>();
       for (StopEntryImpl entry : _stops)
         _stopEntriesById.put(entry.getId(), entry);
     }
 
-    if (_tripsByBlockId == null) {
-      _tripsByBlockId = new HashMap<AgencyAndId, List<TripEntry>>();
-      for (TripEntryImpl entry : _trips) {
-        AgencyAndId blockId = entry.getBlockId();
-        if (blockId != null && _tripsByBlockId.get(blockId) == null) {
-          while (entry.getPrevTrip() != null)
-            entry = entry.getPrevTrip();
-          ArrayList<TripEntry> tripsForBlock = new ArrayList<TripEntry>();
-          while (entry != null) {
-            tripsForBlock.add(entry);
-            entry = entry.getNextTrip();
+    if (_blockEntriesByRouteCollectionId == null) {
+      _blockEntriesByRouteCollectionId = new HashMap<AgencyAndId, List<BlockEntry>>();
+      for (BlockEntry block : _blocks) {
+        for (TripEntry trip : block.getTrips()) {
+          AgencyAndId routeCollectionId = trip.getRouteCollectionId();
+          List<BlockEntry> blocks = _blockEntriesByRouteCollectionId.get(routeCollectionId);
+          if (blocks == null) {
+            blocks = new ArrayList<BlockEntry>();
+            _blockEntriesByRouteCollectionId.put(routeCollectionId, blocks);
           }
-          tripsForBlock.trimToSize();
-          _tripsByBlockId.put(blockId, tripsForBlock);
+          blocks.add(block);
         }
       }
     }
@@ -116,6 +125,10 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
     return _trips;
   }
 
+  public void putBlockEntry(BlockEntryImpl blockEntry) {
+    _blocks.add(blockEntry);
+  }
+
   /****
    * {@link TripPlannerGraph} Interface
    ****/
@@ -133,6 +146,12 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
   }
 
   @Override
+  public Iterable<BlockEntry> getAllBlocks() {
+    return new IterableAdapter<BlockEntryImpl, BlockEntry>(_blocks,
+        _blockEntryAdapter);
+  }
+
+  @Override
   public StopEntry getStopEntryForId(AgencyAndId id) {
     return _stopEntriesById.get(id);
   }
@@ -143,12 +162,26 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
   }
 
   @Override
-  public List<TripEntry> getTripsForBlockId(AgencyAndId blockId) {
-    return _tripsByBlockId.get(blockId);
+  public BlockEntry getBlockEntryForId(AgencyAndId blockId) {
+    return _blockEntriesById.get(blockId);
   }
 
   @Override
-  public List<StopEntry> getStopsByLocation(CoordinateRectangle bounds) {
+  public List<TripEntry> getTripsForBlockId(AgencyAndId blockId) {
+    BlockEntry block = getBlockEntryForId(blockId);
+    if (block == null)
+      return null;
+    return block.getTrips();
+  }
+
+  @Override
+  public List<BlockEntry> getBlocksForRouteCollectionId(
+      AgencyAndId routeCollectionId) {
+    return _blockEntriesByRouteCollectionId.get(routeCollectionId);
+  }
+
+  @Override
+  public List<StopEntry> getStopsByLocation(CoordinateBounds bounds) {
     Envelope r = new Envelope(bounds.getMinLon(), bounds.getMaxLon(),
         bounds.getMinLat(), bounds.getMaxLat());
     StopRTreeVisitor go = new StopRTreeVisitor();
@@ -271,6 +304,15 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
 
     @Override
     public TripEntry adapt(TripEntryImpl source) {
+      return source;
+    }
+  }
+
+  private static class BlockEntryAdapter implements
+      IAdapter<BlockEntryImpl, BlockEntry> {
+
+    @Override
+    public BlockEntry adapt(BlockEntryImpl source) {
       return source;
     }
   }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 
 public class SphericalGeometryLibraryTest {
 
@@ -66,5 +67,13 @@ public class SphericalGeometryLibraryTest {
     double d4 = SphericalGeometryLibrary.distance(bounds.getMaxLat(),
         bounds.getMaxLon(), bounds.getMaxLat(), bounds.getMinLon());
     assertEquals(800, d4, 0.1);
+  }
+
+  @Test
+  public void testGetCenterOfBounds() {
+    CoordinateBounds b = new CoordinateBounds(-1.0, -2.0, 4.0, 3.6);
+    CoordinatePoint p = SphericalGeometryLibrary.getCenterOfBounds(b);
+    assertEquals(1.5, p.getLat(), 0.0);
+    assertEquals(0.8, p.getLon(), 0.0);
   }
 }

@@ -106,27 +106,27 @@ public class StopTimeSearchOperations {
 
   /**
    * Return an index into the {@link StopTimeEntry} list such that if a new
-   * StopTimeEntry with the specified target time was inserted into the list,
-   * the list would remain in sorted order with respect to the
-   * {@link StopTimeOp}
+   * StopTimeEntry with the specified target value was inserted into the list at
+   * the specified index, the list would remain in sorted order with respect to
+   * the {@link StopTimeOp}
    * 
    * @param stopTimes a list of {@link StopTimeEntry} objects, sorted in the
    *          order appropriate to the {@link StopTimeOp}
-   * @param targetTime target time in seconds since midnight
-   * @param stopTimeOp the {@link StopTimeOp} determining whether arrival or
-   *          departure time is used
+   * @param targetValue target value (time, distance) to search for
+   * @param stopTimeOp the {@link StopTimeOp} determining whether arrival time,
+   *          departure time, or distance is used
    * @return
    */
   public static int searchForStopTime(List<StopTimeEntry> stopTimes,
-      int targetTime, StopTimeOp stopTimeOp) {
-    return search(stopTimes, targetTime, stopTimeOp, 0, stopTimes.size());
+      double targetValue, StopTimeOp stopTimeOp) {
+    return search(stopTimes, targetValue, stopTimeOp, 0, stopTimes.size());
   }
 
   /****
    * Private Methods
    ****/
 
-  private static int search(List<StopTimeEntry> stopTimes, int target,
+  private static int search(List<StopTimeEntry> stopTimes, double target,
       StopTimeOp stopTimeOp, int fromIndex, int toIndex) {
 
     if (fromIndex == toIndex)
@@ -134,11 +134,11 @@ public class StopTimeSearchOperations {
 
     int midIndex = (fromIndex + toIndex) / 2;
     StopTimeEntry stopTime = stopTimes.get(midIndex);
-    int t = stopTimeOp.getTime(stopTime);
+    double v = stopTimeOp.getValue(stopTime);
 
-    if (target < t) {
+    if (target < v) {
       return search(stopTimes, target, stopTimeOp, fromIndex, midIndex);
-    } else if (target > t) {
+    } else if (target > v) {
       return search(stopTimes, target, stopTimeOp, midIndex + 1, toIndex);
     } else {
       return midIndex;

@@ -97,4 +97,9 @@ public class TimepointPrediction implements Serializable {
   public void setTimeOfPrediction(int timeOfPrediction) {
     this.timeOfPrediction = timeOfPrediction;
   }
+  
+  @Override
+  public String toString() {
+    return tripId + " " + timepointScheduledTime + " " + scheduleDeviation; 
+  }
 }

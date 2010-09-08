@@ -15,6 +15,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.DateSupport;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
@@ -58,24 +59,30 @@ public class BlockCalendarServiceTest {
         DateSupport.getTimeZone());
     LocalizedServiceId lsidB = new LocalizedServiceId(serviceIdB,
         DateSupport.getTimeZone());
+    
 
     StopTimeEntryImpl stopTimeA = new StopTimeEntryImpl();
     stopTimeA.setArrivalTime(DateSupport.hourToSec(8.5));
     stopTimeA.setDepartureTime(DateSupport.hourToSec(8.5));
+    
+    StopTimeEntryImpl stopTimeB = new StopTimeEntryImpl();
+    stopTimeB.setArrivalTime(DateSupport.hourToSec(8.5));
+    stopTimeB.setDepartureTime(DateSupport.hourToSec(8.5));
+    
+    BlockEntryImpl block = new BlockEntryImpl();
+    block.setStopTimes(Arrays.asList((StopTimeEntry) stopTimeA,stopTimeB));
 
     TripEntryImpl tripA = new TripEntryImpl();
     tripA.setId(new AgencyAndId("agency", "tripA"));
     tripA.setServiceId(serviceIdA);
-    tripA.setStopTimes(Arrays.asList((StopTimeEntry) stopTimeA));
-
-    StopTimeEntryImpl stopTimeB = new StopTimeEntryImpl();
-    stopTimeB.setArrivalTime(DateSupport.hourToSec(8.5));
-    stopTimeB.setDepartureTime(DateSupport.hourToSec(8.5));
-
+    tripA.setStopTimeIndices(0, 1);
+    tripA.setBlock(block);
+    
     TripEntryImpl tripB = new TripEntryImpl();
     tripB.setId(new AgencyAndId("agency", "tripB"));
     tripB.setServiceId(serviceIdB);
-    tripB.setStopTimes(Arrays.asList((StopTimeEntry) stopTimeB));
+    tripB.setStopTimeIndices(1, 2);
+    tripB.setBlock(block);
 
     List<TripEntry> trips = Arrays.asList((TripEntry) tripA, tripB);
 

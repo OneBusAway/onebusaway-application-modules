@@ -21,10 +21,10 @@
 
     <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
 
-    <bean id="tripPositionRecordCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+    <bean id="blockLocationRecordCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName"
-            value="org.onebusaway.transit_data_federation.impl.realtime.TripPositionServiceImpl.tripPositionRecordCache" />
+            value="org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl.blockLocationRecordCache" />
         <property name="maxElementsInMemory" value="1400" />
         <property name="eternal" value="false" />
         <property name="timeToLive" value="0" />
@@ -33,9 +33,9 @@
         <property name="diskPersistent" value="false" />
     </bean>
 
-    <bean id="tripPositionServiceImpl" class="org.onebusaway.transit_data_federation.impl.realtime.TripPositionServiceImpl">
-        <property name="tripPositionRecordCache" ref="tripPositionRecordCache" />
-        <property name="persistTripPositionRecords" value="true" />
+    <bean id="blockLocationServiceImpl" class="org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl">
+        <property name="blockLocationRecordCache" ref="blockLocationRecordCache" />
+        <property name="persistBlockLocationRecords" value="true" />
     </bean>
 
     <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />

@@ -14,6 +14,8 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import org.onebusaway.collections.Counter;
+import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
@@ -41,9 +43,6 @@ import org.onebusaway.utility.text.NaturalStringOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import edu.washington.cs.rse.collections.FactoryMap;
-import edu.washington.cs.rse.collections.stats.Counter;
 
 @Component
 class StopScheduleBeanServiceImpl implements StopScheduleBeanService {

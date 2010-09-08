@@ -1,6 +1,12 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
@@ -12,16 +18,8 @@ import org.onebusaway.transit_data_federation.services.beans.TripPlanBeanService
 import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerService;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 @Component
 class TripPlannerBeanServiceImpl implements TripPlannerBeanService {

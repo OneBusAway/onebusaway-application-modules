@@ -148,9 +148,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getPosition().getLat();
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getPosition().getLon();
 
-        MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongRoute();
-        MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall = status.getDistanceAlongRoute()
-            - adbean.getShapeDistTraveled();
+        MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongTrip();
+        MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall = adbean.getDistanceFromStop();
 
         int i = 0;
         boolean started = false;

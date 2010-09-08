@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.collections.Min;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch;
 import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch.NoPathToGoalException;
@@ -26,9 +28,6 @@ import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGr
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import edu.washington.cs.rse.collections.stats.Min;
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 @Component
 public class WalkPlannerServiceImpl implements WalkPlannerService {

@@ -1,5 +1,14 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
+
+import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.transit_data_federation.impl.tripplanner.aggregation.NBestTripStrategy;
 import org.onebusaway.transit_data_federation.impl.tripplanner.comparison.BlockTripComparisonStrategy;
 import org.onebusaway.transit_data_federation.impl.tripplanner.comparison.TripComparisonStrategy;
@@ -20,22 +29,11 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripAggregati
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
-
-import edu.washington.cs.rse.collections.FactoryMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cern.colt.list.DoubleArrayList;
 import cern.jet.stat.Descriptive;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
 
 public abstract class AbstractTripSearchStrategy {
 

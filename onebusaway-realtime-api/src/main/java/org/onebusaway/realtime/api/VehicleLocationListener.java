@@ -10,6 +10,7 @@ import java.util.List;
  * @see VehicleLocationRecord
  */
 public interface VehicleLocationListener {
+  
   public void handleVehicleLocationRecord(VehicleLocationRecord record);
 
   public void handleVehicleLocationRecords(List<VehicleLocationRecord> records);

@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -44,10 +45,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInsta
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlanSource;
 
-import edu.washington.cs.rse.collections.combinations.Combinations;
-import edu.washington.cs.rse.collections.tuple.Pair;
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,19 +70,19 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
   public void setWalkPlanBeanService(WalkPlanBeanService walkPlanBeanService) {
     _walkPlanBeanService = walkPlanBeanService;
   }
-  
+
   @Autowired
   public void setShapePointService(ShapePointService shapePointService) {
     _shapePointService = shapePointService;
   }
-  
+
   @Autowired
   public void setStopBeanService(StopBeanService stopBeanService) {
     _stopBeanService = stopBeanService;
   }
-  
+
   @Autowired
-  public void setTripBeanService(TripBeanService tripBeanService){
+  public void setTripBeanService(TripBeanService tripBeanService) {
     _tripBeanService = tripBeanService;
   }
 
@@ -109,29 +106,32 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
     List<TripSegmentBean> segments = bean.getSegments();
     WalkPlanSource walkPlans = trip.getWalkPlans();
 
-    for (Pair<TripState> pair : Combinations.getSequentialPairs(trip.getStates())) {
+    TripState from = null;
 
-      TripState from = pair.getFirst();
-      TripState to = pair.getSecond();
+    for (TripState to : trip.getStates()) {
 
-      if (from instanceof StartState) {
-        handleStartState(segments, (StartState) from, to, walkPlans);
-      } else if (from instanceof VehicleDepartureState) {
-        handleVehicleDeparture(segments, (VehicleDepartureState) from, to);
-      } else if (from instanceof BlockTransferState) {
-        handleBlockTransfer(segments, (BlockTransferState) from, to);
-      } else if (from instanceof VehicleArrivalState) {
-        handleVehicleArrival(segments, (VehicleArrivalState) from, to);
-      } else if (from instanceof WalkFromStopState) {
-        handleWalkFromStop(segments, (WalkFromStopState) from, to, walkPlans);
+      if (from != null) {
+
+        if (from instanceof StartState) {
+          handleStartState(segments, (StartState) from, to, walkPlans);
+        } else if (from instanceof VehicleDepartureState) {
+          handleVehicleDeparture(segments, (VehicleDepartureState) from, to);
+        } else if (from instanceof BlockTransferState) {
+          handleBlockTransfer(segments, (BlockTransferState) from, to);
+        } else if (from instanceof VehicleArrivalState) {
+          handleVehicleArrival(segments, (VehicleArrivalState) from, to);
+        } else if (from instanceof WalkFromStopState) {
+          handleWalkFromStop(segments, (WalkFromStopState) from, to, walkPlans);
+        }
+
+        if (to instanceof EndState) {
+          EndState endState = (EndState) to;
+          CoordinatePoint point = endState.getLocation();
+          segments.add(new EndSegmentBean(to.getCurrentTime(), point.getLat(),
+              point.getLon()));
+        }
       }
-
-      if (to instanceof EndState) {
-        EndState endState = (EndState) to;
-        CoordinatePoint point = endState.getLocation();
-        segments.add(new EndSegmentBean(to.getCurrentTime(), point.getLat(),
-            point.getLon()));
-      }
+      from = to;
     }
     return bean;
   }

@@ -8,29 +8,60 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry
 
 import java.util.Comparator;
 
-public class StopTimeOp implements Comparator<StopTimeEntry> {
+public abstract class StopTimeOp implements Comparator<StopTimeEntry> {
 
-  public static final StopTimeOp ARRIVAL = new StopTimeOp(true);
+  public static final StopTimeOp ARRIVAL = new ByArrivalTime();
 
-  public static final StopTimeOp DEPARTURE = new StopTimeOp(false);
+  public static final StopTimeOp DEPARTURE = new ByDepartureTime();
 
-  private final boolean _useArrivalTime;
+  public static final StopTimeOp DISTANCE_ALONG_BLOCK = new ByDistanceAlongBlock();
 
-  private StopTimeOp(boolean useArrivalTime) {
-    _useArrivalTime = useArrivalTime;
-  }
+  public abstract double getValue(StopTimeEntry proxy);
 
-  public int getTime(StopTimeEntry proxy) {
-    return _useArrivalTime ? proxy.getArrivalTime() : proxy.getDepartureTime();
-  }
-
-  public long getTime(StopTimeInstanceProxy proxy) {
-    return _useArrivalTime ? proxy.getArrivalTime() : proxy.getDepartureTime();
-  }
+  public abstract double getValue(StopTimeInstanceProxy proxy);
 
   public int compare(StopTimeEntry o1, StopTimeEntry o2) {
-    int a = getTime(o1);
-    int b = getTime(o2);
+    double a = getValue(o1);
+    double b = getValue(o2);
     return a == b ? 0 : (a < b ? -1 : 1);
+  }
+
+  private static class ByArrivalTime extends StopTimeOp {
+
+    @Override
+    public double getValue(StopTimeEntry proxy) {
+      return proxy.getArrivalTime();
+    }
+
+    @Override
+    public double getValue(StopTimeInstanceProxy proxy) {
+      return proxy.getArrivalTime();
+    }
+  }
+
+  private static class ByDepartureTime extends StopTimeOp {
+
+    @Override
+    public double getValue(StopTimeEntry proxy) {
+      return proxy.getDepartureTime();
+    }
+
+    @Override
+    public double getValue(StopTimeInstanceProxy proxy) {
+      return proxy.getDepartureTime();
+    }
+  }
+
+  private static class ByDistanceAlongBlock extends StopTimeOp {
+
+    @Override
+    public double getValue(StopTimeEntry stopTime) {
+      return stopTime.getDistaceAlongBlock();
+    }
+
+    @Override
+    public double getValue(StopTimeInstanceProxy proxy) {
+      return getValue(proxy.getStopTime());
+    }
   }
 }

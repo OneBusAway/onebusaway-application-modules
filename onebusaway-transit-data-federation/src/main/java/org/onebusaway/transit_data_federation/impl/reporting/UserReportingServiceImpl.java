@@ -9,8 +9,8 @@ import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
-import org.onebusaway.transit_data_federation.services.realtime.TripPositionService;
+import org.onebusaway.transit_data_federation.services.realtime.TripLocation;
+import org.onebusaway.transit_data_federation.services.realtime.TripLocationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
@@ -25,7 +25,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
   private TransitGraphDao _graph;
 
-  private TripPositionService _tripPositionService;
+  private TripLocationService _tripPositionService;
 
   @Autowired
   public void setUserReportingDao(UserReportingDao userReportingDao) {
@@ -38,7 +38,7 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   @Autowired
-  public void setTripPositionService(TripPositionService tripPositionService) {
+  public void setTripPositionService(TripLocationService tripPositionService) {
     _tripPositionService = tripPositionService;
   }
 
@@ -92,13 +92,14 @@ class UserReportingServiceImpl implements UserReportingService {
     TripInstanceProxy tripInstance = new TripInstanceProxy(trip,
         problem.getServiceDate());
 
-    TripPosition tripPosition = _tripPositionService.getPositionForTripInstance(
+    TripLocation tripPosition = _tripPositionService.getPositionForTripInstance(
         tripInstance, problem.getTime());
 
     if (tripPosition != null) {
       record.setPredicted(tripPosition.isPredicted());
+      record.setDistanceAlongTrip(tripPosition.getDistanceAlongTrip());
       record.setScheduleDeviation(tripPosition.getScheduleDeviation());
-      CoordinatePoint p = tripPosition.getPosition();
+      CoordinatePoint p = tripPosition.getLocation();
       if (p != null) {
         record.setVehicleLat(p.getLat());
         record.setVehicleLon(p.getLon());
@@ -153,7 +154,7 @@ class UserReportingServiceImpl implements UserReportingService {
     bean.setUserVehicleNumber(record.getUserVehicleNumber());
 
     bean.setPredicted(record.isPredicted());
-    bean.setPositionDeviation(record.getPositionDeviation());
+    bean.setDistanceAlongTrip(record.getDistanceAlongTrip());
     bean.setScheduleDeviation(record.getScheduleDeviation());
     bean.setVehicleLat(record.getVehicleLat());
     bean.setVehicleLon(record.getVehicleLon());

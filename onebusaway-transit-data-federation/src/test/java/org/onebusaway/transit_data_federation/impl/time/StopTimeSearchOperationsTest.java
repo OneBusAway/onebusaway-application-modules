@@ -5,18 +5,6 @@ import static org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOpe
 import static org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations.getStopTimeInstancesInRange;
 import static org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations.searchForStopTime;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeIndexImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
-
-import edu.washington.cs.rse.text.DateLibrary;
-
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -27,6 +15,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
+import org.junit.Test;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeIndexImpl;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.utility.DateLibrary;
 
 public class StopTimeSearchOperationsTest {
 

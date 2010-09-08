@@ -14,6 +14,8 @@ public class StopTimeInstanceProxy {
 
   private StopTimeEntry _stopTime;
 
+  private boolean _predicted = false;
+
   private boolean _hasPredictedArrivalOffset = false;
 
   private boolean _hasPredictedDepartureOffset = false;
@@ -22,7 +24,7 @@ public class StopTimeInstanceProxy {
 
   private int _predictedDepartureOffset = 0;
 
-  private double _shapeDistTraveled = -1;
+  private double _distanceFromStop = Double.NaN;
 
   public StopTimeInstanceProxy(StopTimeEntry stopTime, Date serviceDate) {
     this(stopTime, serviceDate.getTime());
@@ -63,6 +65,14 @@ public class StopTimeInstanceProxy {
 
   public long getDepartureTime() {
     return _serviceDate + _stopTime.getDepartureTime() * 1000;
+  }
+
+  public boolean isPredicted() {
+    return _predicted;
+  }
+
+  public void setPredicted(boolean predicted) {
+    _predicted = predicted;
   }
 
   public boolean hasPredictedArrivalOffset() {
@@ -110,21 +120,26 @@ public class StopTimeInstanceProxy {
   }
 
   /**
-   * The predicted departure time offset is additive, which means a positive value
-   * indicates a vehicle is running late, while a negative value indicates a
-   * vehicle is running early.
+   * The predicted departure time offset is additive, which means a positive
+   * value indicates a vehicle is running late, while a negative value indicates
+   * a vehicle is running early.
+   * 
    * @return the predicted departure offset, in seconds
    */
   public int getPredictedDepartureOffset() {
     return _predictedDepartureOffset;
   }
-
-  public void setShapeDistTraveled(double _shapeDistTraveled) {
-    this._shapeDistTraveled = _shapeDistTraveled;
+  
+  public boolean hasDistanceFromStop() {
+    return ! Double.isNaN(_distanceFromStop);
   }
 
-  public double getShapeDistTraveled() {
-    return _shapeDistTraveled;
+  public double getDistanceFromStop() {
+    return _distanceFromStop;
+  }
+
+  public void setDistanceFromStop(double distanceFromStop) {
+    _distanceFromStop = distanceFromStop;
   }
 
   @Override

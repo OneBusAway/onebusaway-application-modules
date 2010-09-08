@@ -3,12 +3,12 @@ package org.onebusaway.transit_data_federation.services;
 import java.util.List;
 import java.util.Set;
 
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
 
 /**
  * Service interface that abstract operations on a transit graph, such as access
@@ -35,7 +35,18 @@ public interface TransitGraphDao {
    * @param bounds coordinate bounds query
    * @return a list of stop entries located within in the specified bounds
    */
-  public List<StopEntry> getStopsByLocation(CoordinateRectangle bounds);
+  public List<StopEntry> getStopsByLocation(CoordinateBounds bounds);
+
+  /**
+   * @return the list of all block entries in the transit graph
+   */
+  public Iterable<BlockEntry> getAllBlocks();
+
+  /**
+   * @param blockId a block id to query
+   * @return the block entry with the specified id, or null if not found
+   */
+  public BlockEntry getBlockEntryForId(AgencyAndId blockId);
 
   /**
    * @return the list of all trip entries in the transit graph
@@ -60,4 +71,6 @@ public interface TransitGraphDao {
    *         stop
    */
   public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId);
+  
+  public List<BlockEntry> getBlocksForRouteCollectionId(AgencyAndId routeCollectionId);
 }

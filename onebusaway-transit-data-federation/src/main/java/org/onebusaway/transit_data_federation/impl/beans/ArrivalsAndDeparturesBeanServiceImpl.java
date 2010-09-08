@@ -128,7 +128,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     tripBean = applyStopTimeNarrativeToTripBean(stopTimeNarrative, tripBean);
 
-    pab.setShapeDistTraveled(sti.getShapeDistTraveled());
+    pab.setPredicted(sti.isPredicted());
+    pab.setDistanceFromStop(sti.getDistanceFromStop());
 
     pab.setTrip(tripBean);
     pab.setStopId(ApplicationBeanLibrary.getId(stop.getId()));

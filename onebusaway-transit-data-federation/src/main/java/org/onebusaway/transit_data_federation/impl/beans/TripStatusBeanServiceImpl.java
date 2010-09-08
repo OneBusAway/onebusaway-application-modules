@@ -20,14 +20,20 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStatusBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
-import org.onebusaway.transit_data_federation.services.realtime.TripPosition;
-import org.onebusaway.transit_data_federation.services.realtime.TripPositionService;
+import org.onebusaway.transit_data_federation.services.realtime.ActiveCalendarService;
+import org.onebusaway.transit_data_federation.services.realtime.BlockInstance;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
+import org.onebusaway.transit_data_federation.services.realtime.TripLocation;
+import org.onebusaway.transit_data_federation.services.realtime.TripLocationService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
@@ -41,7 +47,11 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
 
   private CalendarService _calendarService;
 
-  private TripPositionService _tripPositionService;
+  private ActiveCalendarService _activeCalendarService;
+
+  private BlockLocationService _blockLocationService;
+
+  private TripLocationService _tripPositionService;
 
   private TripBeanService _tripBeanService;
 
@@ -60,7 +70,17 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
   }
 
   @Autowired
-  public void setTripPositionService(TripPositionService tripPositionService) {
+  public void setActive(ActiveCalendarService activeCalendarService) {
+    _activeCalendarService = activeCalendarService;
+  }
+
+  @Autowired
+  public void setBlockLocationService(BlockLocationService blockLocationService) {
+    _blockLocationService = blockLocationService;
+  }
+
+  @Autowired
+  public void setTripPositionService(TripLocationService tripPositionService) {
     _tripPositionService = tripPositionService;
   }
 
@@ -92,7 +112,7 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     TripInstanceProxy tripInstance = new TripInstanceProxy(tripEntry,
         serviceDate);
 
-    TripPosition tripPosition = _tripPositionService.getPositionForTripInstance(
+    TripLocation tripPosition = _tripPositionService.getPositionForTripInstance(
         tripInstance, time);
 
     return getTripPositionAsStatusBean(serviceDate, tripPosition);
@@ -102,17 +122,14 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
   public TripDetailsBean getTripStatusForVehicleAndTime(AgencyAndId vehicleId,
       long time, TripDetailsInclusionBean inclusion) {
 
-    TripPosition position = _tripPositionService.getPositionForVehicleAndTime(
+    TripLocation position = _tripPositionService.getPositionForVehicleAndTime(
         vehicleId, time);
 
     if (position == null)
       return null;
 
-    AgencyAndId tripId = position.getTripId();
-
-    TripEntry tripEntry = _graph.getTripEntryForId(tripId);
-    if (tripEntry == null)
-      return null;
+    TripEntry tripEntry = position.getTrip();
+    AgencyAndId tripId = tripEntry.getId();
 
     TripDetailsBean details = new TripDetailsBean();
     details.setTripId(AgencyAndIdLibrary.convertToString(tripId));
@@ -143,16 +160,16 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     CoordinateBounds bounds = query.getBounds();
     long time = query.getTime();
 
-    Map<TripInstanceProxy, TripPosition> tripsAndPositions = _tripPositionService.getScheduledTripsForBounds(
+    Map<TripInstanceProxy, TripLocation> tripsAndPositions = _tripPositionService.getScheduledTripsForBounds(
         bounds, time);
     TripDetailsInclusionBean inclusion = query.getInclusion();
 
     List<TripDetailsBean> results = new ArrayList<TripDetailsBean>();
 
-    for (Map.Entry<TripInstanceProxy, TripPosition> entry : tripsAndPositions.entrySet()) {
+    for (Map.Entry<TripInstanceProxy, TripLocation> entry : tripsAndPositions.entrySet()) {
 
       TripInstanceProxy tripInstance = entry.getKey();
-      TripPosition tripPosition = entry.getValue();
+      TripLocation tripPosition = entry.getValue();
 
       TripEntry trip = tripInstance.getTrip();
 
@@ -177,12 +194,61 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     return new ListBean<TripDetailsBean>(results, false);
   }
 
+  /**
+   * 
+   */
+  @Override
+  public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query) {
+
+    AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(query.getRouteId());
+
+    Date time = new Date(query.getTime());
+    TripDetailsInclusionBean inclusion = query.getInclusion();
+
+    // TODO : We could optimize this somewhat
+    List<BlockEntry> blocks = _graph.getBlocksForRouteCollectionId(routeId);
+    List<BlockInstance> instances = _activeCalendarService.getActiveBlocksInTimeRange(
+        blocks, time, time);
+
+    List<TripDetailsBean> results = new ArrayList<TripDetailsBean>();
+
+    for (BlockInstance instance : instances) {
+
+      BlockLocation position = _blockLocationService.getPositionForBlockInstance(
+          instance, time.getTime());
+
+      if (position == null)
+        continue;
+
+      TripEntry trip = position.getActiveTrip();
+      TripDetailsBean details = new TripDetailsBean();
+
+      details.setTripId(AgencyAndIdLibrary.convertToString(trip.getId()));
+
+      if (inclusion.isIncludeTripStatus()) {
+        TripStatusBean status = getBlockLocationAsStatusBean(
+            position.getServiceDate(), position);
+        details.setStatus(status);
+      }
+
+      if (inclusion.isIncludeTripBean())
+        details.setTrip(_tripBeanService.getTripForId(trip.getId()));
+
+      if (inclusion.isIncludeTripSchedule())
+        details.setSchedule(_tripStopTimesBeanService.getStopTimesForTrip(trip.getId()));
+
+      results.add(details);
+    }
+
+    return new ListBean<TripDetailsBean>(results, false);
+  }
+
   /****
    * Private Methods
    ****/
 
   private TripStatusBean getTripPositionAsStatusBean(long serviceDate,
-      TripPosition tripPosition) {
+      TripLocation tripPosition) {
 
     TripStatusBean bean = new TripStatusBean();
 
@@ -191,9 +257,9 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
 
     if (tripPosition != null) {
 
-      bean.setTime(tripPosition.getTime());
+      bean.setTime(tripPosition.getLastUpdateTime());
 
-      CoordinatePoint location = tripPosition.getPosition();
+      CoordinatePoint location = tripPosition.getLocation();
       bean.setPosition(location);
       bean.setScheduleDeviation(tripPosition.getScheduleDeviation());
       bean.setPredicted(tripPosition.isPredicted());
@@ -213,6 +279,38 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     return bean;
   }
 
+  private TripStatusBean getBlockLocationAsStatusBean(long serviceDate,
+      BlockLocation blockLocation) {
+
+    TripStatusBean bean = new TripStatusBean();
+
+    bean.setStatus("default");
+    bean.setServiceDate(serviceDate);
+
+    if (blockLocation != null) {
+
+      bean.setTime(blockLocation.getLastUpdateTime());
+
+      CoordinatePoint location = blockLocation.getLocation();
+      bean.setPosition(location);
+      bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
+      bean.setPredicted(blockLocation.isPredicted());
+      AgencyAndId vid = blockLocation.getVehicleId();
+      if (vid != null)
+        bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
+      StopTimeEntry stop = blockLocation.getClosestStop();
+      if (stop != null) {
+        StopBean stopBean = _stopBeanService.getStopForId(stop.getStop().getId());
+        bean.setClosestStop(stopBean);
+        bean.setClosestStopTimeOffset(blockLocation.getClosestStopTimeOffset());
+      }
+    } else {
+      bean.setPredicted(false);
+    }
+
+    return bean;
+  }
+
   private long getBestServiceDateForTrip(AgencyAndId tripId, long serviceDate) {
 
     TimeZone timeZone = _calendarService.getTimeZoneForAgencyId(tripId.getAgencyId());
@@ -223,5 +321,4 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     Date adjustedDate = d.getAsDate(timeZone);
     return adjustedDate.getTime();
   }
-
 }

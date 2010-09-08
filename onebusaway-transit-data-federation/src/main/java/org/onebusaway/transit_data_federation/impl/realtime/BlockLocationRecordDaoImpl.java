@@ -13,16 +13,17 @@ import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Implemenation class for {@link TripPositionRecordDao} that manages persisting
- * {@link TripPositionRecord} records to a Hibernate-managed data-store.
+ * Implementation class for {@link BlockLocationRecordDao} that manages
+ * persisting {@link BlockLocationRecord} records to a Hibernate-managed
+ * data-store.
  * 
  * @author bdferris
- * @see TripPositionRecordDao
- * @see TripPositionRecord
+ * @see BlockLocationRecordDao
+ * @see BlockLocationRecord
  */
 @Component
-@ManagedResource("org.onebusaway.transit_data_federation.impl.realtime:name=TripPositionRecordDaoImpl")
-public class TripPositionRecordDaoImpl implements TripPositionRecordDao {
+@ManagedResource("org.onebusaway.transit_data_federation.impl.realtime:name=BlockLocationRecordDaoImpl")
+public class BlockLocationRecordDaoImpl implements BlockLocationRecordDao {
 
   private HibernateTemplate _template;
 
@@ -46,40 +47,40 @@ public class TripPositionRecordDaoImpl implements TripPositionRecordDao {
   }
 
   /****
-   * {@link TripPositionRecordDao} Interface
+   * {@link BlockLocationRecordDao} Interface
    ****/
 
   @Override
-  public void saveTripPositionRecord(TripPositionRecord record) {
+  public void saveBlockLocationRecord(BlockLocationRecord record) {
     _template.save(record);
     _savedRecordCount.incrementAndGet();
   }
 
   @Override
-  public void saveTripPositionRecords(List<TripPositionRecord> records) {
+  public void saveBlockLocationRecords(List<BlockLocationRecord> records) {
     _template.saveOrUpdateAll(records);
     _savedRecordCount.addAndGet(records.size());
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<TripPositionRecord> getTripPositionRecordsForTripServiceDateAndTimeRange(
-      AgencyAndId tripId, long serviceDate, long fromTime, long toTime) {
-    String[] paramNames = {"tripId", "serviceDate", "fromTime", "toTime"};
-    Object[] paramValues = {tripId, serviceDate, fromTime, toTime};
+  public List<BlockLocationRecord> getBlockLocationRecordsForTripServiceDateAndTimeRange(
+      AgencyAndId blockId, long serviceDate, long fromTime, long toTime) {
+    String[] paramNames = {"blockId", "serviceDate", "fromTime", "toTime"};
+    Object[] paramValues = {blockId, serviceDate, fromTime, toTime};
     return _template.findByNamedQueryAndNamedParam(
-        "tripPositionRecordsForTripServiceDateAndTimeRange", paramNames,
+        "blockLocationRecordsForBlockServiceDateAndTimeRange", paramNames,
         paramValues);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<TripPositionRecord> getTripPositionRecordsForVehicleAndTimeRange(
+  public List<BlockLocationRecord> getBlockLocationRecordsForVehicleAndTimeRange(
       AgencyAndId vehicleId, long fromTime, long toTime) {
     String[] paramNames = {"vehicleId", "fromTime", "toTime"};
     Object[] paramValues = {vehicleId, fromTime, toTime};
     return _template.findByNamedQueryAndNamedParam(
-        "tripPositionRecordsForVehicleAndTimeRange", paramNames, paramValues);
+        "blockLocationRecordsForVehicleAndTimeRange", paramNames, paramValues);
   }
 
 }

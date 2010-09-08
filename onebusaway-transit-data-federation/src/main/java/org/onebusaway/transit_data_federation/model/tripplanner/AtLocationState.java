@@ -1,6 +1,6 @@
 package org.onebusaway.transit_data_federation.model.tripplanner;
 
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 
 public class AtLocationState extends TripState {
 

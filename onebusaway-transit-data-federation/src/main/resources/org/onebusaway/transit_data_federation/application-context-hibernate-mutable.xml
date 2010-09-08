@@ -58,7 +58,7 @@
     <bean id="hibernateAnnotatedClassesMutable" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list>
-                <value>org.onebusaway.transit_data_federation.impl.realtime.TripPositionRecord</value>
+                <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
                 <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
                 <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
             </list>
@@ -72,7 +72,7 @@
     <bean id="hibernateMappingLocationsMutable" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list>
-                <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/TripPositionRecordDaoImpl.hibernate.xml</value>
+                <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/BlockLocationRecordDaoImpl.hibernate.xml</value>
                 <value>classpath:org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml</value>
             </list>
         </property>

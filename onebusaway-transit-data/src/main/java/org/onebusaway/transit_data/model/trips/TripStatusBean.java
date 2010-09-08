@@ -8,27 +8,27 @@ import org.onebusaway.transit_data.model.StopBean;
 public final class TripStatusBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  
+
   private String status;
 
   private long serviceDate;
 
   private CoordinatePoint position;
-  
-  private double distanceAlongRoute;
 
-  private int scheduleDeviation;
+  private double distanceAlongTrip;
+
+  private double scheduleDeviation;
 
   private boolean predicted = false;
-  
+
   private String vehicleId;
-  
+
   private StopBean closestStop;
-  
+
   private int closestStopTimeOffset;
 
   private long time;
-  
+
   public String getStatus() {
     return status;
   }
@@ -53,11 +53,15 @@ public final class TripStatusBean implements Serializable {
     this.position = position;
   }
 
-  public int getScheduleDeviation() {
+  public boolean isScheduleDeviationSet() {
+    return !Double.isNaN(scheduleDeviation);
+  }
+
+  public double getScheduleDeviation() {
     return scheduleDeviation;
   }
 
-  public void setScheduleDeviation(int scheduleDeviation) {
+  public void setScheduleDeviation(double scheduleDeviation) {
     this.scheduleDeviation = scheduleDeviation;
   }
 
@@ -108,19 +112,28 @@ public final class TripStatusBean implements Serializable {
   }
 
   /**
-   * See description in {@link #getDistanceAlongRoute()}.
-   * @param distanceAlongRoute
+   * @return true if {@link #getDistanceAlongTrip()} has been set
    */
-  public void setDistanceAlongRoute(double distanceAlongRoute) {
-    this.distanceAlongRoute = distanceAlongRoute;
+  public boolean isDistanceAlongTripSet() {
+    return !Double.isNaN(distanceAlongTrip);
   }
 
   /**
-   * The vehicle's distance along the route.
+   * See description in {@link #getDistanceAlongTrip()}.
+   * 
+   * @param distanceAlongTrip
+   */
+  public void setDistanceAlongTrip(double distanceAlongTrip) {
+    this.distanceAlongTrip = distanceAlongTrip;
+  }
+
+  /**
+   * The vehicle's distance along the trip.
+   * 
    * @return distance, in meters
    */
-  public double getDistanceAlongRoute() {
-    return distanceAlongRoute;
+  public double getDistanceAlongTrip() {
+    return distanceAlongTrip;
   }
 
   public void setTime(long time) {

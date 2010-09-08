@@ -7,14 +7,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndexContext;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndexResult;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
-
-import edu.washington.cs.rse.collections.stats.Min;
 
 public class HintImpl {
 
@@ -49,20 +48,20 @@ public class HintImpl {
           continue;
 
         while (index > 0
-            && _op.getTime(stopTimes.get(index)) == _op.getTime(stopTimes.get(index - 1)))
+            && _op.getValue(stopTimes.get(index)) == _op.getValue(stopTimes.get(index - 1)))
           index--;
 
-        long previousTime = -1;
+        double previousTime = -1;
 
         while (0 <= index && index < stopTimes.size()) {
           StopTimeInstanceProxy sti = new StopTimeInstanceProxy(
               stopTimes.get(index), serviceDate);
-          long stiTime = _op.getTime(sti);
+          double stiTime = _op.getValue(sti);
           if (previousTime == -1)
             previousTime = stiTime;
           if (previousTime != stiTime)
             break;
-          long delta = stiTime - targetTime;
+          double delta = stiTime - targetTime;
           m.add(delta, sti);
           index++;
         }
@@ -97,20 +96,20 @@ public class HintImpl {
           continue;
 
         while (index < stopTimes.size()
-            && _op.getTime(stopTimes.get(index - 1)) == _op.getTime(stopTimes.get(index)))
+            && _op.getValue(stopTimes.get(index - 1)) == _op.getValue(stopTimes.get(index)))
           index++;
 
-        long previousTime = -1;
+        double previousTime = -1;
 
         while (0 < index && index <= stopTimes.size()) {
           StopTimeInstanceProxy sti = new StopTimeInstanceProxy(
               stopTimes.get(index - 1), serviceDate);
-          long stiTime = _op.getTime(sti);
+          double stiTime = _op.getValue(sti);
           if (previousTime == -1)
             previousTime = stiTime;
           if (stiTime != previousTime)
             break;
-          long delta = targetTime - stiTime;
+          double delta = targetTime - stiTime;
           m.add(delta, sti);
           index--;
         }
@@ -129,7 +128,7 @@ public class HintImpl {
     int index = (indexFrom + indexTo) / 2;
 
     StopTimeEntry stopTime = stopTimes.get(index);
-    long time = serviceDate.getTime() + _op.getTime(stopTime) * 1000;
+    long time = (long) (serviceDate.getTime() + _op.getValue(stopTime) * 1000);
 
     if (time == targetTime)
       return index;
@@ -149,7 +148,7 @@ public class HintImpl {
     int index = (indexFrom + indexTo + 1) / 2;
 
     StopTimeEntry stopTime = stopTimes.get(index - 1);
-    long time = serviceDate.getTime() + _op.getTime(stopTime) * 1000;
+    long time = (long) (serviceDate.getTime() + _op.getValue(stopTime) * 1000);
 
     if (time == targetTime)
       return index;

@@ -38,6 +38,8 @@ public class TripPlannerGraphTaskImplTest {
     ExtendedGtfsRelationalDao gtfsDao = Mockito.mock(ExtendedGtfsRelationalDao.class);
     task.setGtfsDao(gtfsDao);
     
+    task.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    
     //This is a trip that visits the same point twice, which makes a good test 
     
     double[] coords = {40.677665, -73.96886, //vanderbilt at prospect

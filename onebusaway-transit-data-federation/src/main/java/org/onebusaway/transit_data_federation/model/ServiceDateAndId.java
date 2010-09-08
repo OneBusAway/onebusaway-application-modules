@@ -65,4 +65,9 @@ public final class ServiceDateAndId implements Serializable {
       return false;
     return true;
   }
+  
+  @Override
+  public String toString() {
+    return id.toString() + " " + serviceDate;
+  }
 }

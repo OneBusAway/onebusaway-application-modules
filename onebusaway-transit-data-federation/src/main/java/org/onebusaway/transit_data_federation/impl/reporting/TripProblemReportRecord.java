@@ -26,7 +26,7 @@ public class TripProblemReportRecord implements Serializable {
   private long time;
 
   @Embedded
-  @AttributeOverrides( {
+  @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "tripId_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "tripId_id"))})
   private AgencyAndId tripId;
@@ -34,7 +34,7 @@ public class TripProblemReportRecord implements Serializable {
   private long serviceDate;
 
   @Embedded
-  @AttributeOverrides( {
+  @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "stopId_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "stopId_id"))})
   private AgencyAndId stopId;
@@ -59,12 +59,12 @@ public class TripProblemReportRecord implements Serializable {
 
   private boolean predicted = false;
 
-  private double positionDeviation;
+  private double distanceAlongTrip;
 
-  private int scheduleDeviation;
+  private double scheduleDeviation;
 
   @Embedded
-  @AttributeOverrides( {
+  @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "vehicleId_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "vehicleId_id"))})
   private AgencyAndId vehicleId;
@@ -189,19 +189,19 @@ public class TripProblemReportRecord implements Serializable {
     this.predicted = predicted;
   }
 
-  public double getPositionDeviation() {
-    return positionDeviation;
+  public double getDistanceAlongTrip() {
+    return distanceAlongTrip;
   }
 
-  public void setPositionDeviation(double positionDeviation) {
-    this.positionDeviation = positionDeviation;
+  public void setDistanceAlongTrip(double distanceAlongTrip) {
+    this.distanceAlongTrip = distanceAlongTrip;
   }
 
-  public int getScheduleDeviation() {
+  public double getScheduleDeviation() {
     return scheduleDeviation;
   }
 
-  public void setScheduleDeviation(int scheduleDeviation) {
+  public void setScheduleDeviation(double scheduleDeviation) {
     this.scheduleDeviation = scheduleDeviation;
   }
 

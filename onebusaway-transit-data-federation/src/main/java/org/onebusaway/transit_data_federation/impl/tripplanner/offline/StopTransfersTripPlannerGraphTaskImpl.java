@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.collections.Min;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
@@ -25,10 +28,6 @@ import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGr
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import edu.washington.cs.rse.collections.FactoryMap;
-import edu.washington.cs.rse.collections.stats.Min;
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
 
 public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
@@ -167,8 +166,8 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
     for (StopEntry stop : key.getStops()) {
 
-      CoordinateRectangle bounds = DistanceLibrary.bounds(
-          stop.getStopLocation(), _constants.getMaxTransferDistance());
+      CoordinateBounds bounds = DistanceLibrary.bounds(stop.getStopLocation(),
+          _constants.getMaxTransferDistance());
 
       List<StopEntry> nearbyStops = _graph.getStopsByLocation(bounds);
       for (StopEntry nearbyStop : nearbyStops) {
@@ -382,7 +381,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
     Double distance = _cachedStopDistance.get(pair);
     if (distance == null) {
-      distance = DistanceLibrary.distance(stopA.getStopLocation(),
+      distance = SphericalGeometryLibrary.distance(stopA.getStopLocation(),
           stopB.getStopLocation());
       _cachedStopDistance.put(pair, distance);
     }

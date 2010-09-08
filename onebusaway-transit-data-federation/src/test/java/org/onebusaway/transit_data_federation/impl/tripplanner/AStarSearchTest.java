@@ -1,19 +1,15 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
-import static org.junit.Assert.*;
-
-import org.onebusaway.transit_data_federation.impl.tripplanner.AStarProblem;
-import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch;
-import org.onebusaway.transit_data_federation.impl.tripplanner.WithDistance;
-import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch.NoPathToGoalException;
-
-import edu.washington.cs.rse.collections.FactoryMap;
-
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.Test;
+import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch.NoPathToGoalException;
 
 public class AStarSearchTest {
 

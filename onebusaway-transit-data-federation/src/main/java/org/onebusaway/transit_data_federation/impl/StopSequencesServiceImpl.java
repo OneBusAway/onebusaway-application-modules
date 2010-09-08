@@ -1,20 +1,18 @@
 package org.onebusaway.transit_data_federation.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.model.StopSequence;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
-
-import edu.washington.cs.rse.collections.FactoryMap;
-
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class StopSequencesServiceImpl implements StopSequencesService {

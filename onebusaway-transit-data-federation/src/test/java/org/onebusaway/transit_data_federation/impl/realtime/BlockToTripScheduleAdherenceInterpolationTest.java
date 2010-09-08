@@ -2,7 +2,7 @@ package org.onebusaway.transit_data_federation.impl.realtime;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +12,8 @@ import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.DateSupport;
-import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
+import org.onebusaway.transit_data_federation.impl.MockEntryFactory;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
@@ -37,16 +38,22 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
   @Test
   public void test() {
 
-    AgencyAndId blockId = new AgencyAndId("agency", "blockId");
+    BlockEntryImpl block = MockEntryFactory.block("blockId");
 
-    TripEntry tripA = getTripEntryWithStopTimeRange(6.5, 7.5);
-    TripEntry tripB = getTripEntryWithStopTimeRange(7.5, 8.5);
-    TripEntry tripC = getTripEntryWithStopTimeRange(9.0, 10.0);
+    TripEntryImpl tripA = MockEntryFactory.trip("tripA");
+    TripEntryImpl tripB = MockEntryFactory.trip("tripB");
+    TripEntryImpl tripC = MockEntryFactory.trip("tripC");
 
-    List<TripEntry> tripsForBlock = Arrays.asList(tripA, tripB, tripC);
+    List<StopTimeEntry> stopTimes = new ArrayList<StopTimeEntry>();
+    addStopTimeRange(stopTimes, tripA, 6.5, 7.5);
+    addStopTimeRange(stopTimes, tripB, 7.5, 8.5);
+    addStopTimeRange(stopTimes, tripC, 9.0, 10.0);
+    block.setStopTimes(stopTimes);
 
-    Mockito.when(_graphDao.getTripsForBlockId(blockId)).thenReturn(
-        tripsForBlock);
+    MockEntryFactory.linkBlockTrips(block, tripA, tripB, tripC);
+
+    Mockito.when(_graphDao.getTripsForBlockId(block.getId())).thenReturn(
+        block.getTrips());
 
     /****
      * 
@@ -56,9 +63,9 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     Date currentTime = DateSupport.date("2010-03-30 07:25");
 
     VehicleLocationRecord record = new VehicleLocationRecord();
-    record.setBlockId(blockId);
+    record.setBlockId(block.getId());
     record.setServiceDate(serviceDate.getTime());
-    record.setCurrentTime(currentTime.getTime());
+    record.setTimeOfRecord(currentTime.getTime());
     record.setScheduleDeviation(5 * 60);
 
     List<VehicleLocationRecord> records = _service.interpolate(record);
@@ -78,9 +85,9 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     currentTime = DateSupport.date("2010-03-30 08:45");
 
     record = new VehicleLocationRecord();
-    record.setBlockId(blockId);
+    record.setBlockId(block.getId());
     record.setServiceDate(serviceDate.getTime());
-    record.setCurrentTime(currentTime.getTime());
+    record.setTimeOfRecord(currentTime.getTime());
     record.setScheduleDeviation(20 * 60);
 
     records = _service.interpolate(record);
@@ -98,9 +105,9 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     currentTime = DateSupport.date("2010-03-30 08:45");
 
     record = new VehicleLocationRecord();
-    record.setBlockId(blockId);
+    record.setBlockId(block.getId());
     record.setServiceDate(serviceDate.getTime());
-    record.setCurrentTime(currentTime.getTime());
+    record.setTimeOfRecord(currentTime.getTime());
     record.setScheduleDeviation(0 * 60);
 
     records = _service.interpolate(record);
@@ -114,16 +121,23 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
   @Test
   public void test02() {
 
-    AgencyAndId blockId = new AgencyAndId("agency", "blockId");
+    BlockEntryImpl block = MockEntryFactory.block("blockId");
+    AgencyAndId blockId = block.getId();
+    
+    TripEntryImpl tripA = MockEntryFactory.trip("tripA");
+    TripEntryImpl tripB = MockEntryFactory.trip("tripB");
+    TripEntryImpl tripC = MockEntryFactory.trip("tripC");
 
-    TripEntry tripA = getTripEntryWithStopTimeRange(6.5, 7.5);
-    TripEntry tripB = getTripEntryWithStopTimeRange(7.5, 8.5);
-    TripEntry tripC = getTripEntryWithStopTimeRange(9.0, 10.0);
+    List<StopTimeEntry> stopTimes = new ArrayList<StopTimeEntry>();
+    addStopTimeRange(stopTimes, tripA, 6.5, 7.5);
+    addStopTimeRange(stopTimes, tripB, 7.5, 8.5);
+    addStopTimeRange(stopTimes, tripC, 9.0, 10.0);
+    block.setStopTimes(stopTimes);
 
-    List<TripEntry> tripsForBlock = Arrays.asList(tripA, tripB, tripC);
+    MockEntryFactory.linkBlockTrips(block, tripA, tripB, tripC);
 
-    Mockito.when(_graphDao.getTripsForBlockId(blockId)).thenReturn(
-        tripsForBlock);
+    Mockito.when(_graphDao.getTripsForBlockId(block.getId())).thenReturn(
+        block.getTrips());
 
     List<TripEntry> trips = _service.getTripsInTimeRangeForBlock(blockId,
         DateSupport.hourToSec(6), DateSupport.hourToSec(7));
@@ -165,20 +179,24 @@ public class BlockToTripScheduleAdherenceInterpolationTest {
     assertEquals(tripC, trips.get(1));
   }
 
-  private TripEntry getTripEntryWithStopTimeRange(double timeFrom, double timeTo) {
+  private void addStopTimeRange(List<StopTimeEntry> stopTimes,
+      TripEntryImpl trip, double timeFrom, double timeTo) {
 
     StopTimeEntryImpl stopTimeA = new StopTimeEntryImpl();
     int tFrom = DateSupport.hourToSec(timeFrom);
     stopTimeA.setArrivalTime(tFrom);
     stopTimeA.setDepartureTime(tFrom);
+    stopTimeA.setTrip(trip);
 
     StopTimeEntryImpl stopTimeB = new StopTimeEntryImpl();
     int tTo = DateSupport.hourToSec(timeTo);
     stopTimeB.setArrivalTime(tTo);
     stopTimeB.setDepartureTime(tTo);
+    stopTimeB.setTrip(trip);
 
-    TripEntryImpl trip = new TripEntryImpl();
-    trip.setStopTimes(Arrays.asList((StopTimeEntry) stopTimeA, stopTimeB));
-    return trip;
+    trip.setStopTimeIndices(stopTimes.size(), stopTimes.size() + 2);
+
+    stopTimes.add(stopTimeA);
+    stopTimes.add(stopTimeB);
   }
 }

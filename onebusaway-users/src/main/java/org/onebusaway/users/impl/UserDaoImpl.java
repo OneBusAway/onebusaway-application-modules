@@ -124,6 +124,7 @@ class UserDaoImpl implements UserDao {
         "userIndexKeyValuesForKeyType", "type", keyType);
   }
 
+  @Transactional
   @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return (UserIndex) _template.get(UserIndex.class, key);

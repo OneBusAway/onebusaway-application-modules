@@ -1,5 +1,15 @@
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.onebusaway.geospatial.model.XYPoint;
+import org.onebusaway.geospatial.services.GeometryLibrary;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -16,30 +26,18 @@ import org.onebusaway.transit_data_federation.model.ProjectedPoint;
 import org.onebusaway.transit_data_federation.model.modifications.Modifications;
 import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.StopNarrative.Builder;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.utility.ObjectSerializationLibrary;
-
-import edu.washington.cs.rse.geospatial.DPoint;
-import edu.washington.cs.rse.geospatial.Geometry;
-
-import cern.colt.list.DoubleArrayList;
-import cern.jet.stat.Descriptive;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import cern.colt.list.DoubleArrayList;
+import cern.jet.stat.Descriptive;
 
 /**
  * Precomputes all the link narrative objects that will power
@@ -246,7 +244,7 @@ public class GenerateNarrativesTask implements Runnable {
   private double getOrientationOfShapePointsNearStop(
       List<ProjectedPoint> shapePoints, ProjectedPoint stop) {
 
-    DPoint sp = new DPoint(stop.getX(), stop.getY());
+    XYPoint sp = new XYPoint(stop.getX(), stop.getY());
 
     ProjectedPoint prev = null;
 
@@ -258,16 +256,16 @@ public class GenerateNarrativesTask implements Runnable {
       if (prev != null) {
         if (!(prev.getLat() == point.getLat() && prev.getLon() == point.getLon())) {
 
-          DPoint ap = new DPoint(prev.getX(), prev.getY());
-          DPoint bp = new DPoint(point.getX(), point.getY());
-          DPoint seg = Geometry.projectPointToSegment(sp, ap, bp);
+          XYPoint ap = new XYPoint(prev.getX(), prev.getY());
+          XYPoint bp = new XYPoint(point.getX(), point.getY());
+          XYPoint seg = GeometryLibrary.projectPointToSegment(sp, ap, bp);
           double d = sp.getDistance(seg);
 
           if (d < minDistance) {
             minDistance = d;
 
-            minOrientation = Math.atan2(bp.getY() - ap.getY(), bp.getX()
-                - ap.getX());
+            minOrientation = Math.atan2(bp.getY() - ap.getY(),
+                bp.getX() - ap.getX());
           }
         }
       }

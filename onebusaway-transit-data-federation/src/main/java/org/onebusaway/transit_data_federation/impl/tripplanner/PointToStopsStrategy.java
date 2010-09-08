@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.impl.tripplanner.comparison.DurationTripComparisonStrategy;
 import org.onebusaway.transit_data_federation.impl.tripplanner.comparison.TripComparisonStrategy;
 import org.onebusaway.transit_data_federation.model.tripplanner.AtStopState;
@@ -11,8 +12,6 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripStateStats;
 import org.onebusaway.transit_data_federation.services.tripplanner.MinTravelTimeToStopsListener;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 public class PointToStopsStrategy extends AbstractTripSearchStrategy {
 

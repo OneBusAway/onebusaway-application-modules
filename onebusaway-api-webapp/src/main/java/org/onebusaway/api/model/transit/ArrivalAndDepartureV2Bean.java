@@ -25,6 +25,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private String tripId;
 
+  private long serviceDate;
+
   private String stopId;
 
   private String routeShortName;
@@ -40,10 +42,13 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   private long predictedDepartureTime;
 
   private long scheduledDepartureTime;
-  
-  private long serviceDate;
 
   private String status;
+
+  /**
+   * Allowed to be null if not set
+   */
+  private Double distanceFromStop;
 
   public String getRouteId() {
     return routeId;
@@ -75,6 +80,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   public void setTripId(String tripId) {
     this.tripId = tripId;
+  }
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
   }
 
   public String getTripHeadsign() {
@@ -125,20 +138,20 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
-  public long getServiceDate() {
-    return serviceDate;
-  }
-
-  public void setServiceDate(long serviceDate) {
-    this.serviceDate = serviceDate;
-  }
-
   public String getStatus() {
     return status;
   }
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  public Double getDistanceFromStop() {
+    return distanceFromStop;
+  }
+
+  public void setDistanceFromStop(Double distanceFromStop) {
+    this.distanceFromStop = distanceFromStop;
   }
 
   public boolean hasPredictedArrivalTime() {

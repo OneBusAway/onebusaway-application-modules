@@ -13,7 +13,7 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceP
  * @author bdferris
  * 
  */
-public interface TripPositionService {
+public interface TripLocationService {
 
   /**
    * Given a coordinate region and time, determine the set of trips that are
@@ -23,7 +23,7 @@ public interface TripPositionService {
    * @param time
    * @return the set of trip instances along with their positions
    */
-  public Map<TripInstanceProxy, TripPosition> getScheduledTripsForBounds(
+  public Map<TripInstanceProxy, TripLocation> getScheduledTripsForBounds(
       CoordinateBounds bounds, long time);
 
   /**
@@ -35,7 +35,7 @@ public interface TripPositionService {
    * @param targetTime the target time (Unix-time)
    * @return the trip position
    */
-  public TripPosition getPositionForTripInstance(
+  public TripLocation getPositionForTripInstance(
       TripInstanceProxy tripInstance, long targetTime);
 
   /**
@@ -44,6 +44,6 @@ public interface TripPositionService {
    * @return the trip position for the specified vehicle id and time, or null if
    *         not found
    */
-  public TripPosition getPositionForVehicleAndTime(AgencyAndId vehicleId,
+  public TripLocation getPositionForVehicleAndTime(AgencyAndId vehicleId,
       long time);
 }

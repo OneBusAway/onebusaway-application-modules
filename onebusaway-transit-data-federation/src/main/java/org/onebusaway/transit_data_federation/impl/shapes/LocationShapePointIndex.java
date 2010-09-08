@@ -3,10 +3,9 @@
  */
 package org.onebusaway.transit_data_federation.impl.shapes;
 
+import org.onebusaway.collections.Min;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-
-import edu.washington.cs.rse.collections.stats.Min;
 
 public class LocationShapePointIndex implements ShapePointIndex {
 

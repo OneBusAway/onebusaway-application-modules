@@ -1,13 +1,12 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 
 public class StopEntryImpl implements StopEntry, Serializable {
 

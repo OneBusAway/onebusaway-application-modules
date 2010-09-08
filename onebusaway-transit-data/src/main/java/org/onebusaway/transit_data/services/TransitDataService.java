@@ -40,6 +40,7 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 
 /**
  * The {@link TransitDataService} is the primary interface separating
@@ -142,6 +143,14 @@ public interface TransitDataService extends FederatedService {
   @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query);
+  
+  /**
+   * @param query determines the time and location of the query
+   * @return trips details for the trips matching the specified bounds query
+   */
+  @FederatedByEntityIdMethod(propertyExpression="routeId")
+  public ListBean<TripDetailsBean> getTripsForRoute(
+      TripsForRouteQueryBean query);
 
   /**
    * 

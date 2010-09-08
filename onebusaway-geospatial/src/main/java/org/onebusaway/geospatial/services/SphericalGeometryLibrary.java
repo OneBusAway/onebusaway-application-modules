@@ -8,6 +8,7 @@ import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 
 public class SphericalGeometryLibrary {
 
@@ -39,6 +40,10 @@ public class SphericalGeometryLibrary {
     return distance(lat1, lon1, lat2, lon2, RADIUS_OF_EARTH_IN_KM * 1000);
   }
 
+  public static final double distance(CoordinatePoint a, CoordinatePoint b) {
+    return distance(a.getLat(), a.getLon(), b.getLat(), b.getLon());
+  }
+
   public static final double distance(double lat1, double lon1, double lat2,
       double lon2, double radius) {
 
@@ -60,6 +65,11 @@ public class SphericalGeometryLibrary {
   public static final CoordinateBounds bounds(double lat, double lon,
       double distance) {
     return bounds(lat, lon, distance, RADIUS_OF_EARTH_IN_KM * 1000);
+  }
+
+  public static final CoordinateBounds bounds(CoordinatePoint point,
+      double distance) {
+    return bounds(point.getLat(), point.getLon(), distance);
   }
 
   public static CoordinateBounds bounds(CoordinateBounds b, double distance) {
@@ -96,7 +106,9 @@ public class SphericalGeometryLibrary {
    * @param lon
    * @param latOffset
    * @param lonOffset
-   * @return CoordinateBounds(lat-latOffser,lon-lonOffset,lat+latOffset,lon+lonOffset)
+   * @return 
+   *         CoordinateBounds(lat-latOffser,lon-lonOffset,lat+latOffset,lon+lonOffset
+   *         )
    */
   public static final CoordinateBounds boundsFromLatLonOffset(double lat,
       double lon, double latOffset, double lonOffset) {
@@ -106,10 +118,15 @@ public class SphericalGeometryLibrary {
     double lonTo = lon + lonOffset;
     return new CoordinateBounds(latFrom, lonFrom, latTo, lonTo);
   }
-  
+
   public static final CoordinateBounds boundsFromLatLonSpan(double lat,
       double lon, double latSpan, double lonSpan) {
-    return boundsFromLatLonOffset(lat,lon,latSpan/2,lonSpan/2);
+    return boundsFromLatLonOffset(lat, lon, latSpan / 2, lonSpan / 2);
+  }
+
+  public static CoordinatePoint getCenterOfBounds(CoordinateBounds b) {
+    return new CoordinatePoint((b.getMinLat() + b.getMaxLat()) / 2,
+        (b.getMinLon() + b.getMaxLon()) / 2);
   }
 
   private static final double p2(double a) {

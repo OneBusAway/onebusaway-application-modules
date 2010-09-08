@@ -88,6 +88,9 @@
     </bean>
 
     <bean id="tripGraphTask" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphTaskImpl" />
+    
+    <!-- This is needed by the trip graph task -->
+    <bean id="distanceAlongShapeLibrary" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.DistanceAlongShapeLibrary"/>
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="stop_transfers" />

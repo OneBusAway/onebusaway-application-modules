@@ -6,6 +6,7 @@ import java.util.TimeZone;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
@@ -18,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 @Component
 public class AgencyServiceImpl implements AgencyService {

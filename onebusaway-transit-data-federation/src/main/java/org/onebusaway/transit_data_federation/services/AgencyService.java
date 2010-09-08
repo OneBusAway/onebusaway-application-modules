@@ -1,12 +1,11 @@
 package org.onebusaway.transit_data_federation.services;
 
-import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.gtfs.model.Agency;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
 import java.util.Map;
 import java.util.TimeZone;
+
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.model.Agency;
 
 /**
  * Methods for querying {@link Agency} information.

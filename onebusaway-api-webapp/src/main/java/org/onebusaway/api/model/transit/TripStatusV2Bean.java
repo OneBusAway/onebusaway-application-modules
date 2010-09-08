@@ -14,12 +14,14 @@ public final class TripStatusV2Bean implements Serializable {
 
   private boolean predicted = false;
 
-  private int scheduleDeviation;
-  
+  private Double scheduleDeviation;
+
+  private Double distanceAlongTrip;
+
   private String vehicleId;
-  
+
   private String closestStop;
-  
+
   private int closestStopTimeOffset;
 
   public long getServiceDate() {
@@ -46,12 +48,20 @@ public final class TripStatusV2Bean implements Serializable {
     this.predicted = predicted;
   }
 
-  public int getScheduleDeviation() {
+  public Double getScheduleDeviation() {
     return scheduleDeviation;
   }
 
-  public void setScheduleDeviation(int scheduleDeviation) {
+  public void setScheduleDeviation(Double scheduleDeviation) {
     this.scheduleDeviation = scheduleDeviation;
+  }
+
+  public Double getDistanceAlongTrip() {
+    return distanceAlongTrip;
+  }
+
+  public void setDistanceAlongTrip(Double distanceAlongTrip) {
+    this.distanceAlongTrip = distanceAlongTrip;
   }
 
   public String getVehicleId() {

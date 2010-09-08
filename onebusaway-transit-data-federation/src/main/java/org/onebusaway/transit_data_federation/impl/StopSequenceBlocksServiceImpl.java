@@ -8,6 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.collections.Counter;
+import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.collections.Max;
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.Trip;
@@ -18,14 +23,9 @@ import org.onebusaway.transit_data_federation.model.StopSequenceCollectionKey;
 import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.utility.collections.TreeUnionFind;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import edu.washington.cs.rse.collections.FactoryMap;
-import edu.washington.cs.rse.collections.same.TreeUnionFind;
-import edu.washington.cs.rse.collections.stats.Counter;
-import edu.washington.cs.rse.collections.stats.Max;
-import edu.washington.cs.rse.collections.tuple.Pair;
 
 /**
  * Construct a set of {@link StopSequenceCollection} blocks for each route. A block
@@ -440,7 +440,7 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
     Stop prev = null;
     for (Stop stop : stopSequence.getStops()) {
       if (prev != null) {
-        Pair<Stop> pair = Pair.createPair(prev, stop);
+        Pair<Stop> pair = Tuples.pair(prev, stop);
         pairs.add(pair);
       }
       prev = stop;

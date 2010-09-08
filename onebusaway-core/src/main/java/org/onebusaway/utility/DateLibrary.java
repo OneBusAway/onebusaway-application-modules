@@ -16,6 +16,7 @@
 package org.onebusaway.utility;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -45,5 +46,19 @@ public class DateLibrary {
     String timeString = format.format(date);
     return timeString.substring(0, timeString.length() - 2) + ":"
         + timeString.substring(timeString.length() - 2);
+  }
+
+  public static Date getTimeAsDay(Date t) {
+    return getTimeAsDay(t.getTime());
+  }
+
+  public static Date getTimeAsDay(long t) {
+    Calendar cal = Calendar.getInstance();
+    cal.setTimeInMillis(t);
+    cal.set(Calendar.HOUR_OF_DAY, 0);
+    cal.set(Calendar.MINUTE, 0);
+    cal.set(Calendar.SECOND, 0);
+    cal.set(Calendar.MILLISECOND, 0);
+    return cal.getTime();
   }
 }

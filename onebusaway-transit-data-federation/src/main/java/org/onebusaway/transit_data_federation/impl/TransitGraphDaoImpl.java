@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.exceptions.InternalErrorServiceException;
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
@@ -15,8 +17,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
 
 @Component
 public class TransitGraphDaoImpl implements TransitGraphDao {
@@ -39,8 +39,18 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   }
 
   @Override
-  public List<StopEntry> getStopsByLocation(CoordinateRectangle bounds) {
+  public List<StopEntry> getStopsByLocation(CoordinateBounds bounds) {
     return _graph.getStopsByLocation(bounds);
+  }
+
+  @Override
+  public Iterable<BlockEntry> getAllBlocks() {
+    return _graph.getAllBlocks();
+  }
+
+  @Override
+  public BlockEntry getBlockEntryForId(AgencyAndId blockId) {
+    return _graph.getBlockEntryForId(blockId);
   }
 
   @Override
@@ -79,4 +89,9 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
     return routeCollectionIds;
   }
 
+  @Override
+  public List<BlockEntry> getBlocksForRouteCollectionId(
+      AgencyAndId routeCollectionId) {
+    return _graph.getBlocksForRouteCollectionId(routeCollectionId);
+  }
 }

@@ -51,9 +51,9 @@
         </dependency>
 
         <dependency>
-            <groupId>edu.washington.cs.rse</groupId>
-            <artifactId>geospatial</artifactId>
-            <version>1.0.5-SNAPSHOT</version>
+            <groupId>colt</groupId>
+            <artifactId>colt</artifactId>
+            <version>1.0.3</version>
         </dependency>
 
         <dependency>

@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
@@ -11,7 +12,7 @@ import java.util.List;
 
 public class TripEntryImpl implements TripEntry, Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 4L;
 
   private AgencyAndId _id;
 
@@ -19,85 +20,109 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   private AgencyAndId _routeCollectionId;
 
-  private AgencyAndId _blockId;
+  private BlockEntryImpl _block;
 
   private AgencyAndId _serviceId;
 
-  private List<StopTimeEntry> _stopTimes;
+  private int _stopTimeFromIndex;
+
+  private int _stopTimeToIndex;
+
+  private double _distanceAlongBlock;
 
   private TripEntryImpl _prevTrip;
 
   private TripEntryImpl _nextTrip;
 
-  public AgencyAndId getId() {
-    return _id;
-  }
-
   public void setId(AgencyAndId id) {
     _id = id;
-  }
-
-  public AgencyAndId getRouteId() {
-    return _routeId;
   }
 
   public void setRouteId(AgencyAndId routeId) {
     _routeId = routeId;
   }
 
-  public AgencyAndId getRouteCollectionId() {
-    return _routeCollectionId;
-  }
-
   public void setRouteCollectionId(AgencyAndId routeCollectionId) {
     _routeCollectionId = routeCollectionId;
   }
 
-  @Override
-  public AgencyAndId getBlockId() {
-    return _blockId;
-  }
-
-  public void setBlockId(AgencyAndId blockId) {
-    _blockId = blockId;
-  }
-
-  public AgencyAndId getServiceId() {
-    return _serviceId;
+  public void setBlock(BlockEntryImpl block) {
+    _block = block;
   }
 
   public void setServiceId(AgencyAndId serviceId) {
     _serviceId = serviceId;
   }
 
-  public List<StopTimeEntry> getStopTimes() {
-    return _stopTimes;
+  public void setStopTimeIndices(int fromIndex, int toIndex) {
+    _stopTimeFromIndex = fromIndex;
+    _stopTimeToIndex = toIndex;
   }
 
-  public void setStopTimes(List<StopTimeEntry> stopTimes) {
-    _stopTimes = stopTimes;
-  }
-
-  public TripEntryImpl getPrevTrip() {
-    return _prevTrip;
+  public void setDistanceAlongBlock(double distanceAlongBlock) {
+    _distanceAlongBlock = distanceAlongBlock;
   }
 
   public void setPrevTrip(TripEntryImpl prevTrip) {
     _prevTrip = prevTrip;
   }
 
-  public TripEntryImpl getNextTrip() {
-    return _nextTrip;
-  }
-
   public void setNextTrip(TripEntryImpl nextTrip) {
     _nextTrip = nextTrip;
   }
 
-  private void readObject(ObjectInputStream in) throws IOException,
-      ClassNotFoundException {
-    in.defaultReadObject();
-    TripPlannerGraphImpl.handleTripEntryRead(this);
+  /****
+   * {@link TripEntry} Interface
+   ****/
+
+  @Override
+  public AgencyAndId getId() {
+    return _id;
+  }
+
+  @Override
+  public AgencyAndId getRouteId() {
+    return _routeId;
+  }
+
+  @Override
+  public AgencyAndId getRouteCollectionId() {
+    return _routeCollectionId;
+  }
+
+  @Override
+  public BlockEntry getBlock() {
+    return _block;
+  }
+
+  @Override
+  public AgencyAndId getServiceId() {
+    return _serviceId;
+  }
+
+  @Override
+  public List<StopTimeEntry> getStopTimes() {
+    return _block.getStopTimes().subList(_stopTimeFromIndex, _stopTimeToIndex);
+  }
+
+  @Override
+  public int getBlockStopTimeSequenceOffset() {
+    return _stopTimeFromIndex;
+  }
+
+  @Override
+  public double getDistanceAlongBlock() {
+    return _distanceAlongBlock;
+  }
+
+  @Override
+  public TripEntryImpl getPrevTrip() {
+    return _prevTrip;
+  }
+
+  @Override
+  public TripEntryImpl getNextTrip() {
+    return _nextTrip;
   }
 
   @Override
@@ -105,4 +130,13 @@ public class TripEntryImpl implements TripEntry, Serializable {
     return "Trip(" + _id + ")";
   }
 
+  /****
+   * Serialization
+   ****/
+
+  private void readObject(ObjectInputStream in) throws IOException,
+      ClassNotFoundException {
+    in.defaultReadObject();
+    TripPlannerGraphImpl.handleTripEntryRead(this);
+  }
 }

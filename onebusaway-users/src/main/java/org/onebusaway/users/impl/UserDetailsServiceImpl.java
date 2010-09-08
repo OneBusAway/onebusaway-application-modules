@@ -14,6 +14,7 @@ import org.springframework.security.userdetails.UserDetails;
 import org.springframework.security.userdetails.UserDetailsService;
 import org.springframework.security.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class UserDetailsServiceImpl implements UserDetailsService,
@@ -45,6 +46,8 @@ public class UserDetailsServiceImpl implements UserDetailsService,
    * {@link UserDetailsService} Interface
    ****/
 
+  @Transactional
+  @Override
   public UserDetails loadUserByUsername(String username)
       throws UsernameNotFoundException, DataAccessException {
 
@@ -64,6 +67,7 @@ public class UserDetailsServiceImpl implements UserDetailsService,
    * {@link IndexedUserDetailsService} Interface
    ****/
 
+  @Transactional
   @Override
   public IndexedUserDetails getUserForIndexKey(UserIndexKey key)
       throws UsernameNotFoundException, DataAccessException {

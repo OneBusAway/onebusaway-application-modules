@@ -1,10 +1,9 @@
 package org.onebusaway.transit_data_federation.model;
 
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
 import java.io.Serializable;
+
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 
 /**
  * Simple point class that keeps both the global lat-lon representation and the

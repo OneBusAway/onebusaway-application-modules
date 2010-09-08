@@ -31,7 +31,7 @@ public class BlockToTripScheduleAdherenceInterpolation {
       VehicleLocationRecord record) {
 
     long serviceDate = record.getServiceDate();
-    long currentTime = record.getCurrentTime();
+    long currentTime = record.getTimeOfRecord();
     int serviceTime = (int) ((currentTime - serviceDate) / 1000);
 
     serviceTime -= record.getScheduleDeviation();

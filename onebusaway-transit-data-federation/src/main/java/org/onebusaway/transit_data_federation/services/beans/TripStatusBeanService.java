@@ -7,6 +7,7 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 
 /**
  * Service methods for querying the real-time status and position of a
@@ -46,4 +47,11 @@ public interface TripStatusBeanService {
    */
   public ListBean<TripDetailsBean> getActiveTripForBounds(
       TripsForBoundsQueryBean query);
+
+  /**
+   * 
+   * @param query
+   * @return the list of active trips matching the route query criteria
+   */
+  public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query);
 }

@@ -10,6 +10,9 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
@@ -29,9 +32,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
 
 public class CombinedStateHandlerTest {
 
@@ -97,7 +97,7 @@ public class CombinedStateHandlerTest {
     CoordinatePoint startPoint = new CoordinatePoint(47.5, -122.5);
     StartState state = new StartState(startTime, startPoint);
 
-    CoordinateRectangle bounds = DistanceLibrary.bounds(startPoint,
+    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(startPoint,
         _constants.getMaxTransferDistance());
 
     StopEntry stopEntry = mockStopEntry(new AgencyAndId("1", "stopIdA"),

@@ -37,31 +37,18 @@ public class VehicleLocationRecord implements Serializable {
 
   private AgencyAndId vehicleId;
 
-  private double currentLocationLat = Double.NaN;
-
-  private double currentLocationLon = Double.NaN;
-
-  private long currentTime;
-
-  /**
-   * 
-   */
-  private boolean scheduleDeviationSet = false;
+  private long timeOfRecord;
 
   /**
    * schedule deviation, in seconds, (+deviation is late, -deviation is early)
    */
-  private int scheduleDeviation;
+  private double scheduleDeviation = Double.NaN;
 
-  /**
-   * 
-   */
-  private boolean positionDeviationSet = false;
+  private double distanceAlongBlock = Double.NaN;
 
-  /**
-   * position deviation, in meters, (+deviation is late, -deviation is early)
-   */
-  private double positionDeviation;
+  private double currentLocationLat = Double.NaN;
+
+  private double currentLocationLon = Double.NaN;
 
   /**
    * 
@@ -87,10 +74,8 @@ public class VehicleLocationRecord implements Serializable {
     this.blockId = r.blockId;
     this.currentLocationLat = r.currentLocationLat;
     this.currentLocationLon = r.currentLocationLon;
-    this.currentTime = r.currentTime;
-    this.positionDeviationSet = r.positionDeviationSet;
-    this.positionDeviation = r.positionDeviation;
-    this.scheduleDeviationSet = r.scheduleDeviationSet;
+    this.timeOfRecord = r.timeOfRecord;
+    this.distanceAlongBlock = r.distanceAlongBlock;
     this.scheduleDeviation = r.scheduleDeviation;
     this.serviceDate = r.serviceDate;
     this.timepointId = r.timepointId;
@@ -132,6 +117,73 @@ public class VehicleLocationRecord implements Serializable {
     this.vehicleId = vehicleId;
   }
 
+  /**
+   * 
+   * @return time when the vehicle location record was made, in unix-time (ms)
+   */
+  public long getTimeOfRecord() {
+    return timeOfRecord;
+  }
+
+  /**
+   * 
+   * @param timeOfRecord time when the vehicle location record was made, in
+   *          unix-time (ms)
+   */
+  public void setTimeOfRecord(long timeOfRecord) {
+    this.timeOfRecord = timeOfRecord;
+  }
+
+  /**
+   * @return true if schedule deviation information has been provided
+   */
+  public boolean isScheduleDeviationSet() {
+    return !Double.isNaN(scheduleDeviation);
+  }
+
+  /**
+   * 
+   * @return schedule deviation, in seconds, (+deviation is late, -deviation is
+   *         early)
+   */
+  public double getScheduleDeviation() {
+    return scheduleDeviation;
+  }
+
+  /**
+   * 
+   * @param scheduleDeviation - in seconds (+deviation is late, -deviation is
+   *          early)
+   */
+  public void setScheduleDeviation(double scheduleDeviation) {
+    this.scheduleDeviation = scheduleDeviation;
+  }
+
+  public boolean isDistanceAlongBlockSet() {
+    return !Double.isNaN(distanceAlongBlock);
+  }
+
+  /**
+   * 
+   * @return the distance traveled along the block in meters, or NaN if not set
+   */
+  public double getDistanceAlongBlock() {
+    return distanceAlongBlock;
+  }
+
+  /**
+   * 
+   * @param distanceAlongBlock distance traveled along the block in meters, or
+   *          NaN if not set
+   */
+  public void setDistanceAlongBlock(double distanceAlongBlock) {
+    this.distanceAlongBlock = distanceAlongBlock;
+  }
+
+  public boolean isCurrentLocationSet() {
+    return !(Double.isNaN(currentLocationLat) || Double.isNaN(currentLocationLon));
+  }
+
   public double getCurrentLocationLat() {
     return currentLocationLat;
   }
@@ -146,74 +198,6 @@ public class VehicleLocationRecord implements Serializable {
 
   public void setCurrentLocationLon(double currentLocationLon) {
     this.currentLocationLon = currentLocationLon;
-  }
-
-  public long getCurrentTime() {
-    return currentTime;
-  }
-
-  public void setCurrentTime(long currentTime) {
-    this.currentTime = currentTime;
-  }
-
-  /**
-   * @return true if schedule deviation information has been provided
-   */
-  public boolean isScheduleDeviationSet() {
-    return scheduleDeviationSet;
-  }
-
-  public void setScheduleDeviationSet(boolean scheduleDeviationSet) {
-    this.scheduleDeviationSet = scheduleDeviationSet;
-  }
-
-  /**
-   * 
-   * @return schedule deviation, in seconds, (+deviation is late, -deviation is
-   *         early)
-   */
-  public int getScheduleDeviation() {
-    return scheduleDeviation;
-  }
-
-  /**
-   * 
-   * @param scheduleDeviation - in seconds (+deviation is late, -deviation is
-   *          early)
-   */
-  public void setScheduleDeviation(int scheduleDeviation) {
-    this.scheduleDeviationSet = true;
-    this.scheduleDeviation = scheduleDeviation;
-  }
-
-  /**
-   * @return true if position deviation information has been provided
-   */
-  public boolean isPositionDeviationSet() {
-    return positionDeviationSet;
-  }
-
-  public void setPositionDeviationSet(boolean positionDeviationSet) {
-    this.positionDeviationSet = positionDeviationSet;
-  }
-
-  /**
-   * @return position deviation, in meters, (+deviation is late, -deviation is
-   *         early)
-   */
-
-  public double getPositionDeviation() {
-    return positionDeviation;
-  }
-
-  /**
-   * 
-   * @param positionDeviation - in meters (+deviation is late, -deviation is
-   *          early)
-   */
-  public void setPositionDeviation(double positionDeviation) {
-    this.positionDeviationSet = true;
-    this.positionDeviation = positionDeviation;
   }
 
   public AgencyAndId getTimepointId() {

@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.impl.tripplanner;
 import java.util.Collection;
 import java.util.Map;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripContext;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlan;
@@ -15,8 +16,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerSe
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 @Component
 class TripPlannerServiceImpl implements TripPlannerService {

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.collections.Counter;
 import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.IdentityBean;
@@ -17,8 +18,6 @@ import org.onebusaway.gtfs.services.GenericMutableDao;
 import org.onebusaway.transit_data_federation.services.offline.EntityReplacementStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import edu.washington.cs.rse.collections.stats.Counter;
 
 /**
  * Supports reading from multiple {@link GtfsReader} instances sequentially with

@@ -23,6 +23,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private TripBean trip;
 
+  private long serviceDate;
+
   private String stopId;
 
   private long predictedArrivalTime;
@@ -33,11 +35,11 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private long scheduledDepartureTime;
 
-  private long serviceDate;
+  private boolean predicted = false;
 
   private String status;
 
-  private double shapeDistTraveled;
+  private double distanceFromStop = Double.NaN;
 
   public TripBean getTrip() {
     return trip;
@@ -45,6 +47,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setTrip(TripBean trip) {
     this.trip = trip;
+  }
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
   }
 
   public String getStopId() {
@@ -87,12 +97,12 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
-  public long getServiceDate() {
-    return serviceDate;
+  public boolean isPredicted() {
+    return predicted;
   }
 
-  public void setServiceDate(long serviceDate) {
-    this.serviceDate = serviceDate;
+  public void setPredicted(boolean predicted) {
+    this.predicted = predicted;
   }
 
   public String getStatus() {
@@ -101,6 +111,18 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  public boolean isDistanceFromStopSet() {
+    return ! Double.isNaN(distanceFromStop);
+  }
+  
+  public double getDistanceFromStop() {
+    return distanceFromStop;
+  }
+
+  public void setDistanceFromStop(double distanceFromStop) {
+    this.distanceFromStop = distanceFromStop;
   }
 
   public boolean hasPredictedArrivalTime() {
@@ -126,13 +148,4 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     return "route=" + trip.getRoute() + " scheduled=" + scheduledArrivalTime
         + " predicted=" + predictedArrivalTime;
   }
-
-  public double getShapeDistTraveled() {
-    return shapeDistTraveled;
-  }
-
-  public void setShapeDistTraveled(double shapeDistTraveled) {
-    this.shapeDistTraveled = shapeDistTraveled;
-  }
-
 }

@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.collections.combinations.Combinations;
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
@@ -19,10 +22,6 @@ import org.opentripplanner.graph_builder.model.osm.OSMWay;
 import org.opentripplanner.graph_builder.services.osm.OpenStreetMapContentHandler;
 import org.opentripplanner.graph_builder.services.osm.OpenStreetMapProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import edu.washington.cs.rse.collections.combinations.Combinations;
-import edu.washington.cs.rse.collections.tuple.Pair;
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 public class WalkPlannerGraphTask implements Runnable {
 
@@ -147,6 +146,7 @@ public class WalkPlannerGraphTask implements Runnable {
           || value.equals("motorway_link"))
         return;
 
+      
       for (Pair<Integer> pair : Combinations.getSequentialPairs(way.getNodeRefs()))
         _edges.add(pair);
     }

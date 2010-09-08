@@ -1,6 +1,25 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TimeZone;
+import java.util.TreeMap;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.classic.Session;
+import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.collections.MappingLibrary;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -15,40 +34,19 @@ import org.onebusaway.transit_data_federation.impl.tripplanner.offline.blocks.Bl
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.blocks.BlockOfTripsSource;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.blocks.TripIdBlockOfTripsSourceImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
+import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
 import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 
-import edu.washington.cs.rse.collections.CollectionsLibrary;
-import edu.washington.cs.rse.collections.FactoryMap;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.linearref.LengthIndexedLine;
-
-import org.hibernate.SessionFactory;
-import org.hibernate.classic.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TimeZone;
-import java.util.TreeMap;
 
 public class TripPlannerGraphTaskImpl implements Runnable {
 
@@ -59,6 +57,8 @@ public class TripPlannerGraphTaskImpl implements Runnable {
   private TransitDataFederationDao _whereDao;
 
   private SessionFactory _sessionFactory;
+
+  private DistanceAlongShapeLibrary _distanceAlongShapeLibrary;
 
   private FederatedTransitDataBundle _bundle;
 
@@ -80,56 +80,14 @@ public class TripPlannerGraphTaskImpl implements Runnable {
   @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
     this._sessionFactory = sessionFactory;
+  }
 
+  @Autowired
+  public void setDistanceAlongShapeLibrary(DistanceAlongShapeLibrary distanceAlongShapeLibrary) {
+    _distanceAlongShapeLibrary = distanceAlongShapeLibrary;
   }
 
   private Map<Object, Object> _uniques = new HashMap<Object, Object>();
-
-  private Map<ShapeInterpolationKey, Double> _shapeInterpolations = new HashMap<ShapeInterpolationKey, Double>();
-
-  private GeometryFactory factory = new GeometryFactory();
-
-  class ShapeInterpolationKey {
-
-    private double lat;
-    private double lon;
-    private int stopSequence;
-    private AgencyAndId shapeId;
-    private int numStops;
-
-    public ShapeInterpolationKey(double lat, double lon, int stopSequence,
-        int numStops, AgencyAndId shapeId) {
-      this.lat = lat;
-      this.lon = lon;
-      this.stopSequence = stopSequence;
-      this.numStops = numStops;
-      this.shapeId = shapeId;
-    }
-
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      long temp;
-      temp = Double.doubleToLongBits(lat);
-      result = prime * result + (int) (temp ^ (temp >>> 32));
-      temp = Double.doubleToLongBits(lon);
-      result = prime * result + (int) (temp ^ (temp >>> 32));
-      result = prime * result + stopSequence;
-      result = prime * result + numStops;
-      result = result ^ shapeId.hashCode();
-      return result;
-    }
-
-    public boolean equals(Object o) {
-      if (o instanceof ShapeInterpolationKey) {
-        ShapeInterpolationKey other = (ShapeInterpolationKey) o;
-        return other.lat == lat && other.lon == lon
-            && other.stopSequence == stopSequence && other.numStops == numStops
-            && other.shapeId.equals(shapeId);
-      }
-      return false;
-    }
-  }
 
   @Transactional
   public void run() {
@@ -237,7 +195,7 @@ public class TripPlannerGraphTaskImpl implements Runnable {
 
       checkBlockTrips(trips);
 
-      Map<Trip, List<StopTime>> stopTimesByTrip = CollectionsLibrary.mapToValueList(
+      Map<Trip, List<StopTime>> stopTimesByTrip = MappingLibrary.mapToValueList(
           stopTimes, "trip", Trip.class);
 
       List<Trip> tripsWithStopTimes = new ArrayList<Trip>();
@@ -266,63 +224,86 @@ public class TripPlannerGraphTaskImpl implements Runnable {
       Map<AgencyAndId, List<StopTimeEntryImpl>> stopTimesByTripId = getStopTimesByTripId(
           lookup, graph, stopTimes, arrivalTimes, departureTimes);
 
-      processTrips(lookup, graph, trips, stopTimesByTripId);
-
-      Trip prevTrip = null;
-      TripEntryImpl prevEntry = null;
-      StopTimeEntryImpl prevStopTime = null;
-
-      TripEntryImpl firstTrip = null;
-
-      for (Trip trip : trips) {
-
-        TripEntryImpl tripEntry = lookup.getTrip(trip.getId());
-        if (firstTrip == null)
-          firstTrip = tripEntry;
-
-        // Set PreviousTrip and NextTrip for the trips in the block
-        if (prevTrip != null) {
-
-          if (!prevEntry.getBlockId().equals(tripEntry.getBlockId()))
-            throw new IllegalStateException(
-                "expected trips to have same block id: prevTrip: id="
-                    + prevEntry.getId() + " blockId=" + prevEntry.getBlockId()
-                    + " nextTrip: id=" + tripEntry.getId() + " blockId="
-                    + tripEntry.getBlockId());
-
-          prevEntry.setNextTrip(tripEntry);
-          tripEntry.setPrevTrip(prevEntry);
-        }
-
-        // Set the next and previous stops information
-        for (StopTimeEntryImpl stopTime : stopTimesByTripId.get(trip.getId())) {
-
-          if (prevStopTime != null) {
-
-            int duration = stopTime.getArrivalTime()
-                - prevStopTime.getDepartureTime();
-
-            if (duration < 0) {
-              throw new IllegalStateException();
-            }
-
-            StopEntryImpl fromStopEntry = prevStopTime.getStop();
-            StopEntryImpl toStopEntry = stopTime.getStop();
-
-            fromStopEntry.addNextStopWithMinTravelTime(toStopEntry, duration);
-            toStopEntry.addPreviousStopWithMinTravelTime(fromStopEntry,
-                duration);
-          }
-          prevStopTime = stopTime;
-        }
-
-        prevTrip = trip;
-        prevEntry = tripEntry;
-      }
+      processBlockTrips(graph, trips, stopTimesByTripId);
 
       // Why?
       Session session = _sessionFactory.getCurrentSession();
       session.clear();
+    }
+  }
+
+  private double getTripDistance(Trip trip, List<StopTimeEntryImpl> stopTimes) {
+
+    // Scenarios
+    AgencyAndId shapeId = trip.getShapeId();
+    ShapePoints shapePoints = null;
+    if (shapeId != null) {
+      ShapePointsFactory factory = new ShapePointsFactory();
+      List<ShapePoint> rawPoints = _gtfsDao.getShapePointsForShapeId(shapeId);
+      Collections.sort(rawPoints);
+      for (ShapePoint rawPoint : rawPoints)
+        factory.addPoint(rawPoint.getLat(), rawPoint.getLon());
+      shapePoints = factory.create();
+      if (shapePoints.isEmpty())
+        shapePoints = null;
+    }
+
+    ensureStopTimesHaveShapeDistanceTraveledSet(stopTimes, shapePoints);
+
+    StopTimeEntryImpl lastStopTime = stopTimes.get(stopTimes.size() - 1);
+
+    if (shapePoints != null) {
+      double[] distances = shapePoints.getDistTraveled();
+      double distance = distances[shapePoints.getSize() - 1];
+      return Math.max(lastStopTime.getShapeDistTraveled(), distance);
+    }
+
+    return lastStopTime.getShapeDistTraveled();
+  }
+
+  /**
+   * We have to make sure shape distance traveled is set, even if we don't have
+   * shape information
+   * 
+   * @param stopTimes
+   * @param shapePoints potentially null
+   */
+  private void ensureStopTimesHaveShapeDistanceTraveledSet(
+      List<StopTimeEntryImpl> stopTimes, ShapePoints shapePoints) {
+
+    // We have to make sure
+    boolean missingDistanceInfo = false;
+
+    for (StopTimeEntryImpl stopTime : stopTimes) {
+      if (!stopTime.isShapeDistTraveledSet())
+        missingDistanceInfo = true;
+    }
+
+    if (missingDistanceInfo) {
+
+      // Do we have shape information?
+      if (shapePoints != null) {
+
+        double[] distances = _distanceAlongShapeLibrary.getDistancesAlongShape(
+            shapePoints, stopTimes);
+        for (int i = 0; i < distances.length; i++)
+          stopTimes.get(i).setShapeDistTraveled(distances[i]);
+
+      } else {
+
+        // Make do without
+        double d = 0;
+        StopTimeEntryImpl prev = null;
+        for (StopTimeEntryImpl stopTime : stopTimes) {
+          stopTime.setShapeDistTraveled(d);
+          if (prev != null) {
+            CoordinatePoint from = prev.getStop().getStopLocation();
+            CoordinatePoint to = stopTime.getStop().getStopLocation();
+            d += SphericalGeometryLibrary.distance(from, to);
+          }
+          prev = stopTime;
+        }
+      }
     }
   }
 
@@ -348,7 +329,6 @@ public class TripPlannerGraphTaskImpl implements Runnable {
         new ArrayList<StopTimeEntryImpl>());
 
     int sequence = 0;
-    double distance = 0;
 
     for (int x = 0; x < stopTimes.size(); x++) {
 
@@ -378,15 +358,6 @@ public class TripPlannerGraphTaskImpl implements Runnable {
       stopTimeEntry.setPickupType(stopTime.getPickupType());
       stopTimeEntry.setStop(stopEntry);
 
-      /*
-       * never use the original shapeDistTraveled, because there is no guarantee
-       * that it is in meters.
-       */
-      distance = interpolateShapeDistTraveled(stopTime.getStop().getLat(),
-          stopTime.getStop().getLon(), stopTime.getStopSequence(),
-          stopTimes.size(), stopTime.getTrip().getShapeId(), distance);
-      stopTimeEntry.setShapeDistTraveled(distance);
-
       LocalizedServiceId serviceId = getLocalizedServiceIdForStopTime(stopTime);
       serviceId = unique(serviceId);
       index.addStopTime(stopTimeEntry, serviceId);
@@ -397,63 +368,6 @@ public class TripPlannerGraphTaskImpl implements Runnable {
     }
 
     return stopTimesByTripId;
-  }
-
-  private double interpolateShapeDistTraveled(double lat, double lon,
-      int stopSequence, int numStops, AgencyAndId shapeId, double after) {
-
-    ShapeInterpolationKey key = new ShapeInterpolationKey(lat, lon,
-        stopSequence, numStops, shapeId);
-
-    Double result = _shapeInterpolations.get(key);
-    if (result == null) {
-      List<ShapePoint> points = _gtfsDao.getShapePointsForShapeId(shapeId);
-
-      Coordinate stop = new Coordinate(lon, lat);
-           
-      ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>(points.size());
-      /* find remaining shape after previous stop */
-      double distanceBefore = 0;
-      ShapePoint p2 = null;
-      boolean found = false;
-      for (int i = 0; i < points.size() - 1; i++) {
-        ShapePoint p1 = points.get(i);
-        p2 = points.get(i + 1);
-        double thisDistance = SphericalGeometryLibrary.distance(p1.getLat(),
-            p1.getLon(), p2.getLat(), p2.getLon());
-
-        if (!found) {
-          if (distanceBefore + thisDistance >= after) {
-            found = true;
-          } else {
-            distanceBefore += thisDistance;
-          }
-        }
-        if (found) {
-          coordinates.add(new Coordinate(p1.getLon(), p1.getLat()));
-        }
-      }
-      coordinates.add(new Coordinate(p2.getLon(), p2.getLat()));
-
-      LineString shape = factory.createLineString(coordinates.toArray(new Coordinate[coordinates.size()]));
-      
-      LengthIndexedLine lengthIndexed = new LengthIndexedLine(shape);
-      
-      double indexOfStop = lengthIndexed.indexOf(stop);
-      
-      Geometry lineUpToStop = lengthIndexed.extractLine(0, indexOfStop);
-
-      result = distanceBefore;
-      Coordinate[] coordinateArray = lineUpToStop.getCoordinates();
-      for (int i = 0; i < coordinateArray.length - 1; ++i) {
-        result += SphericalGeometryLibrary.distance(coordinateArray[i].y,
-            coordinateArray[i].x, coordinateArray[i + 1].y,
-            coordinateArray[i + 1].x);
-      }
-
-      _shapeInterpolations.put(key, result);
-    }
-    return result;
   }
 
   private LocalizedServiceId getLocalizedServiceIdForStopTime(StopTime stopTime) {
@@ -652,12 +566,22 @@ public class TripPlannerGraphTaskImpl implements Runnable {
    * 
    * @param graph
    */
-  private void processTrips(DataLookup lookup, TripPlannerGraphImpl graph,
+  private BlockEntryImpl processBlockTrips(TripPlannerGraphImpl graph,
       List<Trip> trips,
       Map<AgencyAndId, List<StopTimeEntryImpl>> stopTimesByTripId) {
 
-    Set<AgencyAndId> blockIds = new HashSet<AgencyAndId>();
-    Set<AgencyAndId> simulatedBlockIds = new HashSet<AgencyAndId>();
+    AgencyAndId blockId = null;
+    AgencyAndId simulatedBlockId = null;
+
+    BlockEntryImpl blockEntry = new BlockEntryImpl();
+    ArrayList<TripEntry> tripEntries = new ArrayList<TripEntry>();
+    ArrayList<StopTimeEntry> stopTimeEntries = new ArrayList<StopTimeEntry>();
+
+    TripEntryImpl prevTripEntry = null;
+    StopTimeEntryImpl prevStopTimeEntry = null;
+
+    double distanceAlongBlock = 0;
+    int accumulatedSlackTime = 0;
 
     for (Trip trip : trips) {
 
@@ -670,31 +594,81 @@ public class TripPlannerGraphTaskImpl implements Runnable {
       tripEntry.setRouteId(unique(trip.getRoute().getId()));
       tripEntry.setRouteCollectionId(unique(routeCollection.getId()));
 
-      AgencyAndId blockId = trip.getId();
+      AgencyAndId tripBlockId = null;
       if (trip.getBlockId() != null) {
-        blockId = new AgencyAndId(trip.getId().getAgencyId(), trip.getBlockId());
-        blockIds.add(blockId);
+        tripBlockId = new AgencyAndId(trip.getId().getAgencyId(),
+            trip.getBlockId());
       } else {
-        simulatedBlockIds.add(blockId);
+        if (simulatedBlockId == null)
+          simulatedBlockId = trip.getId();
+        tripBlockId = simulatedBlockId;
       }
 
-      tripEntry.setBlockId(unique(blockId));
+      if (blockId == null)
+        blockId = tripBlockId;
+      else if (!blockId.equals(tripBlockId))
+        throw new IllegalStateException("block id mismatch: expected="
+            + blockId + " actual=" + tripBlockId + " trip" + trip.getId());
+
+      tripEntry.setBlock(blockEntry);
       tripEntry.setServiceId(unique(trip.getServiceId()));
-      tripEntry.setStopTimes(new ArrayList<StopTimeEntry>(stopTimesForTrip));
 
-      lookup.putTrip(trip.getId(), tripEntry);
+      int fromIndex = stopTimeEntries.size();
+      stopTimeEntries.addAll(stopTimesForTrip);
+      int toIndex = stopTimeEntries.size();
+      tripEntry.setStopTimeIndices(fromIndex, toIndex);
+
       graph.putTripEntry(tripEntry);
+      tripEntries.add(tripEntry);
 
-      for (StopTimeEntryImpl stopTime : stopTimesForTrip)
+      for (StopTimeEntryImpl stopTime : stopTimesForTrip) {
         stopTime.setTrip(tripEntry);
+
+        stopTime.setAccumulatedSlackTime(accumulatedSlackTime);
+        accumulatedSlackTime += stopTime.getDepartureTime()
+            - stopTime.getArrivalTime();
+
+        if (prevStopTimeEntry != null) {
+
+          int duration = stopTime.getArrivalTime()
+              - prevStopTimeEntry.getDepartureTime();
+
+          if (duration < 0) {
+            throw new IllegalStateException();
+          }
+
+          StopEntryImpl fromStopEntry = prevStopTimeEntry.getStop();
+          StopEntryImpl toStopEntry = stopTime.getStop();
+
+          fromStopEntry.addNextStopWithMinTravelTime(toStopEntry, duration);
+          toStopEntry.addPreviousStopWithMinTravelTime(fromStopEntry, duration);
+        }
+        prevStopTimeEntry = stopTime;
+      }
+
+      if (prevTripEntry != null) {
+        prevTripEntry.setNextTrip(tripEntry);
+        tripEntry.setPrevTrip(prevTripEntry);
+      }
+
+      // Set distance along block information
+      tripEntry.setDistanceAlongBlock(distanceAlongBlock);
+      double tripDistance = getTripDistance(trip, stopTimesForTrip);
+      distanceAlongBlock += tripDistance;
+
+      prevTripEntry = tripEntry;
     }
 
-    blockIds.retainAll(simulatedBlockIds);
+    tripEntries.trimToSize();
+    stopTimeEntries.trimToSize();
 
-    if (!blockIds.isEmpty()) {
-      _log.warn("blockId and simulated blockId overlap: " + blockIds);
-      throw new IllegalStateException("blockId and simulated blockId overlap");
-    }
+    blockEntry.setId(blockId);
+    blockEntry.setTrips(tripEntries);
+    blockEntry.setStopTimes(stopTimeEntries);
+
+    graph.putBlockEntry(blockEntry);
+
+    return blockEntry;
   }
 
   @SuppressWarnings("unchecked")
@@ -780,17 +754,7 @@ public class TripPlannerGraphTaskImpl implements Runnable {
 
   private class DataLookup {
 
-    Map<AgencyAndId, TripEntryImpl> _tripsById = new HashMap<AgencyAndId, TripEntryImpl>();
-
     Map<AgencyAndId, StopEntryImpl> _stopsById = new HashMap<AgencyAndId, StopEntryImpl>();
-
-    public void putTrip(AgencyAndId tripId, TripEntryImpl entry) {
-      _tripsById.put(tripId, entry);
-    }
-
-    public TripEntryImpl getTrip(AgencyAndId tripId) {
-      return _tripsById.get(tripId);
-    }
 
     public void putStop(StopEntryImpl stop) {
       _stopsById.put(stop.getId(), stop);

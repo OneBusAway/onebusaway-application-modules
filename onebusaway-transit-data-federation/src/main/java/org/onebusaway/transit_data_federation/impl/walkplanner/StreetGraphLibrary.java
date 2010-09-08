@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.PointVector;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
@@ -12,8 +13,6 @@ import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import edu.washington.cs.rse.geospatial.PointVector;
 
 public class StreetGraphLibrary {
 

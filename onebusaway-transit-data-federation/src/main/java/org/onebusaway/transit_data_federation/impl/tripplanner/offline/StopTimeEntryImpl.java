@@ -13,7 +13,7 @@ import java.io.Serializable;
 @CacheableKey(keyFactory = StopEntryImplKeyFactoryImpl.class)
 public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private int _stopTimeId;
   private int _arrivalTime;
@@ -21,74 +21,104 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   private int _sequence;
   private int _dropOffType;
   private int _pickupType;
-  private double _shapeDistTraveled;
+  private double _shapeDistTraveled = Double.NaN;
+  private int _accumulatedSlackTime = 0;
 
   private StopEntryImpl _stop;
 
   private TripEntryImpl _trip;
 
-  public int getId() {
-    return _stopTimeId;
-  }
-
   public void setId(int id) {
     _stopTimeId = id;
-  }
-
-  public int getArrivalTime() {
-    return _arrivalTime;
   }
 
   public void setArrivalTime(int arrivalTime) {
     _arrivalTime = arrivalTime;
   }
 
-  public int getDepartureTime() {
-    return _departureTime;
-  }
-
   public void setDepartureTime(int departureTime) {
     _departureTime = departureTime;
-  }
-
-  public int getSequence() {
-    return _sequence;
   }
 
   public void setSequence(int sequence) {
     _sequence = sequence;
   }
 
-  public int getDropOffType() {
-    return _dropOffType;
-  }
-
   public void setDropOffType(int dropOffType) {
     _dropOffType = dropOffType;
-  }
-
-  public int getPickupType() {
-    return _pickupType;
   }
 
   public void setPickupType(int pickupType) {
     _pickupType = pickupType;
   }
 
-  public StopEntryImpl getStop() {
-    return _stop;
-  }
-
   public void setStop(StopEntryImpl stop) {
     _stop = stop;
   }
 
-  public TripEntryImpl getTrip() {
-    return _trip;
-  }
-
   public void setTrip(TripEntryImpl trip) {
     _trip = trip;
+  }
+
+  public boolean isShapeDistTraveledSet() {
+    return !Double.isNaN(_shapeDistTraveled);
+  }
+
+  public void setShapeDistTraveled(double shapeDistTraveled) {
+    _shapeDistTraveled = shapeDistTraveled;
+  }
+
+  public void setAccumulatedSlackTime(int accumulatedSlackTime) {
+    _accumulatedSlackTime = accumulatedSlackTime;
+  }
+
+  /****
+   * {@link StopTimeEntry} Interface
+   ****/
+
+  @Override
+  public int getId() {
+    return _stopTimeId;
+  }
+
+  @Override
+  public int getArrivalTime() {
+    return _arrivalTime;
+  }
+
+  @Override
+  public int getDepartureTime() {
+    return _departureTime;
+  }
+
+  @Override
+  public int getSequence() {
+    return _sequence;
+  }
+
+  @Override
+  public int getBlockSequence() {
+    return _trip.getBlockStopTimeSequenceOffset() + _sequence;
+  }
+
+  @Override
+  public int getDropOffType() {
+    return _dropOffType;
+  }
+
+  @Override
+  public int getPickupType() {
+    return _pickupType;
+  }
+
+  @Override
+  public StopEntryImpl getStop() {
+    return _stop;
+  }
+
+  @Override
+  public TripEntryImpl getTrip() {
+    return _trip;
   }
 
   @Override
@@ -96,8 +126,19 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     return _shapeDistTraveled;
   }
 
-  public void setShapeDistTraveled(double shapeDistTraveled) {
-    this._shapeDistTraveled = shapeDistTraveled;
+  @Override
+  public double getDistaceAlongBlock() {
+    return _trip.getDistanceAlongBlock() + _shapeDistTraveled;
+  }
+
+  @Override
+  public double getSlackTime() {
+    return _departureTime - _arrivalTime;
+  }
+
+  @Override
+  public double getAccumulatedSlackTime() {
+    return _accumulatedSlackTime;
   }
 
   @Override
@@ -128,6 +169,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     out.writeInt(_dropOffType);
     out.writeInt(_pickupType);
     out.writeDouble(_shapeDistTraveled);
+    out.writeInt(_accumulatedSlackTime);
 
     out.writeObject(_trip.getId());
     out.writeObject(_stop.getId());
@@ -143,6 +185,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     _dropOffType = in.readInt();
     _pickupType = in.readInt();
     _shapeDistTraveled = in.readDouble();
+    _accumulatedSlackTime = in.readInt();
 
     AgencyAndId tripId = (AgencyAndId) in.readObject();
     AgencyAndId stopId = (AgencyAndId) in.readObject();
@@ -161,4 +204,5 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
           }
         });
   }
+
 }

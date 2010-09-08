@@ -1,5 +1,14 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.tripplanner.comparison.MinPathToEndStateImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.comparison.PerceivedTravelTimeScoringStrategy;
 import org.onebusaway.transit_data_federation.impl.tripplanner.comparison.TripStateScoringStrategy;
@@ -14,15 +23,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class PointToPointStrategy extends AbstractTripSearchStrategy {
 
   private TripStatsScoringStrategy _scoringStrategy;
@@ -35,7 +35,8 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
 
   private int _ends;
 
-  public PointToPointStrategy(TripContext context, CoordinatePoint pointFrom, CoordinatePoint pointTo) {
+  public PointToPointStrategy(TripContext context, CoordinatePoint pointFrom,
+      CoordinatePoint pointTo) {
     super(context);
 
     _startTime = _constraints.getMinDepartureTime();
@@ -56,7 +57,8 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
    * Private Methods
    ****************************************************************************/
 
-  private void computeEndpointWalkPlans(CoordinatePoint pointFrom, CoordinatePoint pointTo) {
+  private void computeEndpointWalkPlans(CoordinatePoint pointFrom,
+      CoordinatePoint pointTo) {
 
     double maxDistance = _constants.getMaxTransferDistance();
 
@@ -65,7 +67,7 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
 
     WalkPlan walkFromStart = null;
 
-    if (DistanceLibrary.distance(pointFrom, pointTo) <= maxDistance) {
+    if (SphericalGeometryLibrary.distance(pointFrom, pointTo) <= maxDistance) {
       try {
         WalkPlan walkPlan = _walkPlanner.getWalkPlan(pointFrom, pointTo);
         if (walkPlan.getDistance() <= maxDistance) {
@@ -76,7 +78,8 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
     }
 
     TripPlannerGraph graph = _context.getGraph();
-    CoordinateRectangle bounds = DistanceLibrary.bounds(pointTo, maxDistance);
+    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(pointTo,
+        maxDistance);
     List<StopEntry> stopEntries = graph.getStopsByLocation(bounds);
 
     Map<StopEntry, WalkPlan> walksFromStops = new HashMap<StopEntry, WalkPlan>();
@@ -85,7 +88,8 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
     for (StopEntry stop : stopEntries) {
 
       try {
-        WalkPlan plan = _walkPlanner.getWalkPlan(stop.getStopLocation(), pointTo);
+        WalkPlan plan = _walkPlanner.getWalkPlan(stop.getStopLocation(),
+            pointTo);
         walksFromStops.put(stop, plan);
         double walkDistance = plan.getDistance();
         initialWalkDistances.put(stop, walkDistance);
@@ -99,7 +103,8 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
 
     _transitions.setEndPointWalkPlans(pointTo, walkFromStart, walksFromStops);
     _scoringStrategy = new PerceivedTravelTimeScoringStrategy(_constants);
-    _estimationStrategy = new MinPathToEndStateImpl(_scoringStrategy, initialWalkDistances, _constants.getWalkingVelocity(),
+    _estimationStrategy = new MinPathToEndStateImpl(_scoringStrategy,
+        initialWalkDistances, _constants.getWalkingVelocity(),
         _constants.getMinTransferTime());
   }
 
@@ -123,7 +128,8 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
   }
 
   @Override
-  protected double scoreForSearch(TripStateStats toStats) throws NoPathException {
+  protected double scoreForSearch(TripStateStats toStats)
+      throws NoPathException {
 
     double currentScore = scoreForComparison(toStats);
     double remainingEstimate = _estimationStrategy.getMinScoreForTripState(toStats.getState());

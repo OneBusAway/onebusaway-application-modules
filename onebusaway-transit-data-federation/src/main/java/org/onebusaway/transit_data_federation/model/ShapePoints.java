@@ -64,6 +64,10 @@ public class ShapePoints implements Serializable {
   public void setDistTraveled(double[] distTraveled) {
     this.distTraveled = distTraveled;
   }
+  
+  public double getDistTraveledForIndex(int index) {
+    return distTraveled[index];
+  }
 
   public void ensureDistTraveled() {
 

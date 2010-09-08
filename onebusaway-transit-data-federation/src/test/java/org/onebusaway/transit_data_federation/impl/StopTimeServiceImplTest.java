@@ -31,8 +31,7 @@ import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
-
-import edu.washington.cs.rse.text.DateLibrary;
+import org.onebusaway.utility.DateLibrary;
 
 public class StopTimeServiceImplTest {
 

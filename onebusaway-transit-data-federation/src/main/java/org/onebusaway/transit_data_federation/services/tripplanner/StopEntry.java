@@ -1,9 +1,8 @@
 package org.onebusaway.transit_data_federation.services.tripplanner;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.tripplanner.StopEntriesWithValues;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 public interface StopEntry {
   

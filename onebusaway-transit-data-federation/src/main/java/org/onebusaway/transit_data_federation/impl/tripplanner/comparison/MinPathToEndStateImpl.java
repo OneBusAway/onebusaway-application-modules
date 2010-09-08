@@ -1,5 +1,13 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.comparison;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
+
+import org.onebusaway.collections.Min;
 import org.onebusaway.transit_data_federation.model.tripplanner.AtStopState;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
@@ -13,15 +21,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
-
-import edu.washington.cs.rse.collections.stats.Min;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
 
 public class MinPathToEndStateImpl implements TripStateScoringStrategy {
 
