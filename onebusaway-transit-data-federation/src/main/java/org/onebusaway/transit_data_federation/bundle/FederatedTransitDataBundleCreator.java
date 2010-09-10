@@ -14,6 +14,7 @@ import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataB
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.TaskDefinition;
 import org.onebusaway.transit_data_federation.impl.DirectedGraph;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
@@ -51,6 +52,8 @@ public class FederatedTransitDataBundleCreator {
 
   private List<File> _contextPaths = new ArrayList<File>();
 
+  private Map<String, BeanDefinition> _contextBeans = new HashMap<String, BeanDefinition>();
+
   private List<File> _preBundleContextPaths = new ArrayList<File>();
 
   private List<File> _postBundleContextPaths = new ArrayList<File>();
@@ -81,6 +84,10 @@ public class FederatedTransitDataBundleCreator {
 
   public void setContextPaths(List<File> paths) {
     _contextPaths = paths;
+  }
+
+  public void setContextBeans(Map<String, BeanDefinition> contextBeans) {
+    _contextBeans = contextBeans;
   }
 
   /**
@@ -144,18 +151,21 @@ public class FederatedTransitDataBundleCreator {
     System.setProperty("bundlePath", _outputPath.getAbsolutePath());
 
     List<String> preBundlePaths = getPrimaryApplicatonContextPaths();
-    runTasks(preBundlePaths, true, true, _skipTasks, _onlyTasks);
+    Map<String, BeanDefinition> preBundleBeans = getPrimaryBeanDefintions();
+    
+    runTasks(preBundlePaths, preBundleBeans, true, true, _skipTasks, _onlyTasks);
 
     List<String> postBundlePaths = getPostBundleApplicatonContextPaths();
-    runTasks(postBundlePaths, false, true, _postBundleSkipTasks,
+    Map<String, BeanDefinition> postBundleBeans = getPostBundleBeanDefintions();
+    runTasks(postBundlePaths, postBundleBeans, false, true, _postBundleSkipTasks,
         _postBundleOnlyTasks);
   }
 
   private void runTasks(List<String> applicationContextPaths,
-      boolean checkDatabase, boolean clearCacheFiles, Set<String> skipTasks,
+      Map<String, BeanDefinition> beans, boolean checkDatabase, boolean clearCacheFiles, Set<String> skipTasks,
       Set<String> onlyTasks) throws UnknownTaskException {
 
-    ConfigurableApplicationContext context = ContainerLibrary.createContext(applicationContextPaths);
+    ConfigurableApplicationContext context = ContainerLibrary.createContext(applicationContextPaths,beans);
 
     Map<String, TaskDefinition> taskDefinitionsByTaskName = new HashMap<String, TaskDefinition>();
     List<String> taskNames = getTaskList(context, taskDefinitionsByTaskName,
@@ -211,6 +221,12 @@ public class FederatedTransitDataBundleCreator {
     return paths;
   }
 
+  private Map<String, BeanDefinition> getPrimaryBeanDefintions() {
+    Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
+    beans.putAll(_contextBeans);
+    return beans;
+  }
+
   private List<String> getPostBundleApplicatonContextPaths() {
 
     List<String> paths = new ArrayList<String>();
@@ -224,6 +240,12 @@ public class FederatedTransitDataBundleCreator {
       paths.add("file:" + contextPath);
 
     return paths;
+  }
+
+  private Map<String, BeanDefinition> getPostBundleBeanDefintions() {
+    Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
+    beans.putAll(_contextBeans);
+    return beans;
   }
 
   private void clearExistingCacheFiles(FederatedTransitDataBundle bundle) {
