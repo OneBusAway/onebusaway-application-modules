@@ -312,6 +312,10 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
       CoordinatePoint location = blockLocation.getLocation();
       bean.setPosition(location);
       bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
+      
+      TripEntry activeTrip = blockLocation.getActiveTrip();
+      bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock() - activeTrip.getDistanceAlongBlock());
+      
       bean.setPredicted(blockLocation.isPredicted());
       AgencyAndId vid = blockLocation.getVehicleId();
       if (vid != null)
