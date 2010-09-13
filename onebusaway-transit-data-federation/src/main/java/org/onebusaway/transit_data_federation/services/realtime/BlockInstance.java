@@ -21,13 +21,16 @@ public class BlockInstance {
 
   private final Set<LocalizedServiceId> _serviceIds;
 
+  private final boolean _allServiceIdsActive;
+
   public BlockInstance(BlockEntry block, long serviceDate,
-      Set<LocalizedServiceId> serviceIds) {
+      Set<LocalizedServiceId> serviceIds, boolean allServiceIdsActive) {
     if (block == null || serviceIds == null)
       throw new IllegalArgumentException();
     _block = block;
     _serviceDate = serviceDate;
     _serviceIds = serviceIds;
+    _allServiceIdsActive = allServiceIdsActive;
   }
 
   public BlockEntry getBlock() {
@@ -48,10 +51,15 @@ public class BlockInstance {
     return _serviceIds;
   }
 
+  public boolean isAllServiceIdsActive() {
+    return _allServiceIdsActive;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + (_allServiceIdsActive ? 1231 : 1237);
     result = prime * result + ((_block == null) ? 0 : _block.hashCode());
     result = prime * result + (int) (_serviceDate ^ (_serviceDate >>> 32));
     result = prime * result
@@ -65,14 +73,22 @@ public class BlockInstance {
       return true;
     if (obj == null)
       return false;
-    if (!(obj instanceof BlockInstance))
+    if (getClass() != obj.getClass())
       return false;
     BlockInstance other = (BlockInstance) obj;
+    if (_allServiceIdsActive != other._allServiceIdsActive)
+      return false;
+    if (_block == null) {
+      if (other._block != null)
+        return false;
+    } else if (!_block.equals(other._block))
+      return false;
     if (_serviceDate != other._serviceDate)
       return false;
-    if (!_block.equals(other._block))
-      return false;
-    if (!_serviceIds.equals(other._serviceIds))
+    if (_serviceIds == null) {
+      if (other._serviceIds != null)
+        return false;
+    } else if (!_serviceIds.equals(other._serviceIds))
       return false;
     return true;
   }

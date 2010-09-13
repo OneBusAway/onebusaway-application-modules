@@ -28,4 +28,9 @@ public class TripIdBlockOfTripsSourceImpl implements BlockOfTripsSource {
     Trip trip = gtfsDao.getTripForId(_tripId);
     return gtfsDao.getStopTimesForTrip(trip);
   }
+  
+  @Override
+  public String toString() {
+    return "TripIdBlockOfTripsSourceImpl(tripId=" + _tripId + ")";
+  }
 }

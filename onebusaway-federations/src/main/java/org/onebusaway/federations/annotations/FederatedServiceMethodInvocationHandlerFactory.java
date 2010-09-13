@@ -25,8 +25,8 @@ public class FederatedServiceMethodInvocationHandlerFactory {
 
     FederatedByAgencyIdMethod byAgency = method.getAnnotation(FederatedByAgencyIdMethod.class);
     if (byAgency != null)
-      return new FederatedByAgencyIdMethodInvocationHandlerImpl(
-          byAgency.argument());
+      return new FederatedByAgencyIdMethodInvocationHandlerImpl(method,
+          byAgency.argument(),byAgency.propertyExpression());
 
     FederatedByEntityIdMethod ann0 = method.getAnnotation(FederatedByEntityIdMethod.class);
     if (ann0 != null)

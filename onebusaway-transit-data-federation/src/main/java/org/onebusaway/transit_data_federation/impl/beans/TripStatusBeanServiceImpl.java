@@ -19,6 +19,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -33,7 +34,6 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.TripLocation;
 import org.onebusaway.transit_data_federation.services.realtime.TripLocationService;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
@@ -201,14 +201,36 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
   public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query) {
 
     AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(query.getRouteId());
-
     Date time = new Date(query.getTime());
     TripDetailsInclusionBean inclusion = query.getInclusion();
 
-    // TODO : We could optimize this somewhat
-    List<BlockEntry> blocks = _graph.getBlocksForRouteCollectionId(routeId);
-    List<BlockInstance> instances = _activeCalendarService.getActiveBlocksInTimeRange(
-        blocks, time, time);
+    List<BlockInstance> instances = _activeCalendarService.getActiveBlocksForRouteInTimeRange(
+        routeId, time, time);
+
+    return getBlockInstancesAsBeans(instances, inclusion, time);
+  }
+
+  @Override
+  public ListBean<TripDetailsBean> getTripsForAgency(
+      TripsForAgencyQueryBean query) {
+    
+    String agencyId = query.getAgencyId();
+    Date time = new Date(query.getTime());
+    TripDetailsInclusionBean inclusion = query.getInclusion();
+    
+    List<BlockInstance> instances = _activeCalendarService.getActiveBlocksForAgencyInTimeRange(
+        agencyId, time, time);
+
+    return getBlockInstancesAsBeans(instances, inclusion, time);
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private ListBean<TripDetailsBean> getBlockInstancesAsBeans(
+      List<BlockInstance> instances, TripDetailsInclusionBean inclusion,
+      Date time) {
 
     List<TripDetailsBean> results = new ArrayList<TripDetailsBean>();
 
@@ -242,10 +264,6 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
 
     return new ListBean<TripDetailsBean>(results, false);
   }
-
-  /****
-   * Private Methods
-   ****/
 
   private TripStatusBean getTripPositionAsStatusBean(long serviceDate,
       TripLocation tripPosition) {
@@ -321,4 +339,5 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
     Date adjustedDate = d.getAsDate(timeZone);
     return adjustedDate.getTime();
   }
+
 }

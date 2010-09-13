@@ -51,6 +51,14 @@ public class FederatedTransitDataBundle {
     return new File(_path, "NarrativeProvider.obj");
   }
 
+  public File getBlockIndicesByAgencyPath() {
+    return new File(_path, "BlockIndicesByAgency.obj");
+  }
+  
+  public File getBlockIndicesByRoutePath() {
+    return new File(_path, "BlockIndicesByRoute.obj");
+  }
+  
   public File getCachePath() {
     return new File(_path, "cache");
   }

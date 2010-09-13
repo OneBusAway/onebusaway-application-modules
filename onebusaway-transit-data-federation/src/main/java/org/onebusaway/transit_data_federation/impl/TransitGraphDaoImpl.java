@@ -88,10 +88,4 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
     return routeCollectionIds;
   }
-
-  @Override
-  public List<BlockEntry> getBlocksForRouteCollectionId(
-      AgencyAndId routeCollectionId) {
-    return _graph.getBlocksForRouteCollectionId(routeCollectionId);
-  }
 }

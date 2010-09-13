@@ -11,6 +11,7 @@ import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeE
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeIndexImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
 public class MockEntryFactory {
@@ -22,7 +23,7 @@ public class MockEntryFactory {
   public static StopEntryImpl stop(String id, double lat, double lon) {
     return new StopEntryImpl(aid(id), lat, lon, new StopTimeIndexImpl());
   }
-  
+
   public static BlockEntryImpl block(String id) {
     BlockEntryImpl block = new BlockEntryImpl();
     block.setId(aid(id));
@@ -34,26 +35,53 @@ public class MockEntryFactory {
     trip.setId(aid(id));
     return trip;
   }
+  
+  public static TripEntryImpl trip(String id, String serviceId) {
+    TripEntryImpl trip = new TripEntryImpl();
+    trip.setId(aid(id));
+    trip.setServiceId(aid(serviceId));
+    return trip;
+  }
 
   public static TripEntryImpl trip(String id, double distanceAlongBlock) {
     TripEntryImpl trip = trip(id);
     trip.setDistanceAlongBlock(distanceAlongBlock);
     return trip;
   }
-  
-  public static void linkBlockTrips(BlockEntryImpl block, TripEntryImpl...trips) {
+
+  public static void linkBlockTrips(BlockEntryImpl block,
+      TripEntryImpl... trips) {
     List<TripEntry> tripEntries = new ArrayList<TripEntry>();
-    for( int i=0; i<trips.length; i++) {
+    for (int i = 0; i < trips.length; i++) {
       TripEntryImpl trip = trips[i];
       trip.setBlock(block);
       tripEntries.add(trip);
-      if( i>0) {
-        TripEntryImpl prev = trips[i-1];
+      if (i > 0) {
+        TripEntryImpl prev = trips[i - 1];
         prev.setNextTrip(trip);
         trip.setPrevTrip(prev);
       }
     }
     block.setTrips(tripEntries);
+  }
+
+  public static void addStopTime(TripEntryImpl trip, StopTimeEntryImpl stopTime) {
+    
+    BlockEntryImpl block = trip.getBlock();
+    List<StopTimeEntry> stopTimes = block.getStopTimes();
+    
+    if(stopTimes == null) {
+      stopTimes = new ArrayList<StopTimeEntry>();
+      block.setStopTimes(stopTimes);
+    }
+    
+    stopTimes.add(stopTime);
+    int toIndex = stopTimes.size();
+    int fromIndex = toIndex - 1;
+    while (fromIndex > 0 && stopTimes.get(fromIndex - 1).getTrip().equals(trip))
+      fromIndex--;
+    trip.setStopTimeIndices(fromIndex, toIndex);
+    stopTime.setTrip(trip);
   }
 
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,

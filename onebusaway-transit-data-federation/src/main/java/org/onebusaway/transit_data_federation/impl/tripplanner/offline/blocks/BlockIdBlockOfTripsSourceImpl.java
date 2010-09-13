@@ -22,4 +22,9 @@ public class BlockIdBlockOfTripsSourceImpl implements BlockOfTripsSource {
   public List<StopTime> getStopTimes(ExtendedGtfsRelationalDao gtfsDao) {
     return gtfsDao.getStopTimesForBlockId(_blockId);
   }
+  
+  @Override
+  public String toString() {
+    return "BlockIdBlockOfTripsSourceImpl(blockId=" + _blockId + ")";
+  }
 }

@@ -44,6 +44,7 @@ import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -294,6 +295,12 @@ class TransitDataServiceImpl implements TransitDataService {
   @Override
   public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query) {
     return _tripStatusBeanService.getTripsForRoute(query);
+  }
+
+  @Override
+  public ListBean<TripDetailsBean> getTripsForAgency(
+      TripsForAgencyQueryBean query) {
+    return _tripStatusBeanService.getTripsForAgency(query);
   }
 
   @Override

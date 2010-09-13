@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.aid;
 import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.block;
 import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.linkBlockTrips;
+import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stop;
 import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stopTime;
 import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.time;
 import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.trip;
@@ -21,8 +22,11 @@ import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.DateSupport;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.realtime.BlockInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
@@ -62,7 +66,9 @@ public class ActiveCalendarServiceImplTest {
     _calendarData.putDatesForLocalizedServiceId(lsidB,
         Arrays.asList(serviceDateB, serviceDateC));
     _calendarData.putTimeZoneForAgencyId("1", tz);
-
+    
+    StopEntryImpl stopA = stop("stopA",0.0,0.0);
+    StopEntryImpl stopB = stop("stopB",0.0,0.0);
 
     BlockEntryImpl blockA = block("blockA");
     TripEntryImpl tripA = trip("tripA");
@@ -72,18 +78,18 @@ public class ActiveCalendarServiceImplTest {
 
     linkBlockTrips(blockA, tripA, tripB);
 
-    StopTimeEntry stA = stopTime(0, null, tripA, time(9, 00), time(9, 00), 0);
-    StopTimeEntry stB = stopTime(1, null, tripA, time(9, 30), time(9, 30), 100);
-    StopTimeEntry stC = stopTime(2, null, tripB, time(10, 00), time(10, 00),
+    StopTimeEntry stA = stopTime(0, stopA, tripA, time(9, 00), time(9, 00), 0);
+    StopTimeEntry stB = stopTime(1, stopB, tripA, time(9, 30), time(9, 30), 100);
+    StopTimeEntry stC = stopTime(2, stopB, tripB, time(10, 00), time(10, 00),
         200);
-    StopTimeEntry stD = stopTime(3, null, tripB, time(10, 30), time(10, 30),
+    StopTimeEntry stD = stopTime(3, stopA, tripB, time(10, 30), time(10, 30),
         300);
 
     blockA.setStopTimes(Arrays.asList(stA, stB, stC, stD));
     tripA.setStopTimeIndices(0, 2);
     tripB.setStopTimeIndices(2, 4);
 
-    BlockEntryImpl blockB = block("blockA");
+    BlockEntryImpl blockB = block("blockB");
     TripEntryImpl tripC = trip("tripC");
     TripEntryImpl tripD = trip("tripD");
     TripEntryImpl tripE = trip("tripE");
@@ -94,25 +100,28 @@ public class ActiveCalendarServiceImplTest {
 
     linkBlockTrips(blockB, tripC, tripD, tripE);
 
-    StopTimeEntry stE = stopTime(4, null, tripC, time(10, 00), time(10, 00), 0);
-    StopTimeEntry stF = stopTime(5, null, tripC, time(10, 30), time(10, 30), 0);
-    StopTimeEntry stG = stopTime(6, null, tripD, time(11, 00), time(11, 00), 0);
-    StopTimeEntry stH = stopTime(7, null, tripD, time(11, 30), time(11, 30), 0);
-    StopTimeEntry stI = stopTime(8, null, tripE, time(12, 00), time(12, 00), 0);
-    StopTimeEntry stJ = stopTime(9, null, tripE, time(12, 30), time(12, 30), 0);
+    StopTimeEntry stE = stopTime(4, stopA, tripC, time(10, 00), time(10, 00), 0);
+    StopTimeEntry stF = stopTime(5, stopB, tripC, time(10, 30), time(10, 30), 0);
+    StopTimeEntry stG = stopTime(6, stopB, tripD, time(11, 00), time(11, 00), 0);
+    StopTimeEntry stH = stopTime(7, stopA, tripD, time(11, 30), time(11, 30), 0);
+    StopTimeEntry stI = stopTime(8, stopA, tripE, time(12, 00), time(12, 00), 0);
+    StopTimeEntry stJ = stopTime(9, stopB, tripE, time(12, 30), time(12, 30), 0);
 
     blockB.setStopTimes(Arrays.asList(stE, stF, stG, stH, stI, stJ));
     tripC.setStopTimeIndices(0, 2);
     tripD.setStopTimeIndices(2, 4);
     tripE.setStopTimeIndices(4, 6);
 
+    BlockIndicesFactory factory = new BlockIndicesFactory();
+    factory.setCalendarService(_calendarService);
+    List<BlockIndex> blocks = factory.createIndices(Arrays.asList(
+        (BlockEntry) blockA, blockB));
+
     /****
      * 
      ****/
 
     Date time = DateSupport.date("2010-09-07 09:15");
-
-    List<BlockEntry> blocks = Arrays.asList((BlockEntry) blockA, blockB);
 
     List<BlockInstance> instances = _service.getActiveBlocksInTimeRange(blocks,
         time, time);
@@ -142,7 +151,7 @@ public class ActiveCalendarServiceImplTest {
     serviceIds = instance.getServiceIds();
     assertEquals(1, serviceIds.size());
     assertTrue(serviceIds.contains(lsidA));
-    
+
     /****
      * 
      ****/
@@ -159,7 +168,7 @@ public class ActiveCalendarServiceImplTest {
     serviceIds = instance.getServiceIds();
     assertEquals(1, serviceIds.size());
     assertTrue(serviceIds.contains(lsidA));
-    
+
     /****
      * 
      ****/
@@ -194,7 +203,7 @@ public class ActiveCalendarServiceImplTest {
     assertEquals(2, serviceIds.size());
     assertTrue(serviceIds.contains(lsidA));
     assertTrue(serviceIds.contains(lsidB));
-    
+
     /****
      * 
      ****/
@@ -212,7 +221,7 @@ public class ActiveCalendarServiceImplTest {
     assertEquals(2, serviceIds.size());
     assertTrue(serviceIds.contains(lsidA));
     assertTrue(serviceIds.contains(lsidB));
-    
+
     instance = instances.get(1);
     assertEquals(blockB, instance.getBlock());
     assertEquals(serviceDateB.getTime(), instance.getServiceDate());
@@ -220,7 +229,7 @@ public class ActiveCalendarServiceImplTest {
     assertEquals(2, serviceIds.size());
     assertTrue(serviceIds.contains(lsidA));
     assertTrue(serviceIds.contains(lsidB));
-    
+
     /****
      * 
      ****/
@@ -238,7 +247,7 @@ public class ActiveCalendarServiceImplTest {
     assertEquals(2, serviceIds.size());
     assertTrue(serviceIds.contains(lsidA));
     assertTrue(serviceIds.contains(lsidB));
-    
+
     /****
      * 
      ****/
@@ -266,7 +275,7 @@ public class ActiveCalendarServiceImplTest {
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
     assertEquals(0, instances.size());
-    
+
     /****
      * 
      ****/
@@ -276,14 +285,14 @@ public class ActiveCalendarServiceImplTest {
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
     assertEquals(1, instances.size());
-    
+
     instance = instances.get(0);
     assertEquals(blockA, instance.getBlock());
     assertEquals(serviceDateC.getTime(), instance.getServiceDate());
     serviceIds = instance.getServiceIds();
     assertEquals(1, serviceIds.size());
     assertTrue(serviceIds.contains(lsidB));
-    
+
     /****
      * 
      ****/
@@ -293,7 +302,7 @@ public class ActiveCalendarServiceImplTest {
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
     assertEquals(1, instances.size());
-    
+
     instance = instances.get(0);
     assertEquals(blockB, instance.getBlock());
     assertEquals(serviceDateC.getTime(), instance.getServiceDate());

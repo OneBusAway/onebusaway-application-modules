@@ -49,8 +49,6 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
 
   private transient Map<AgencyAndId, BlockEntryImpl> _blockEntriesById = new HashMap<AgencyAndId, BlockEntryImpl>();
 
-  private transient Map<AgencyAndId, List<BlockEntry>> _blockEntriesByRouteCollectionId = new HashMap<AgencyAndId, List<BlockEntry>>();
-
   public TripPlannerGraphImpl() {
 
   }
@@ -91,21 +89,6 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
       _stopEntriesById = new HashMap<AgencyAndId, StopEntryImpl>();
       for (StopEntryImpl entry : _stops)
         _stopEntriesById.put(entry.getId(), entry);
-    }
-
-    if (_blockEntriesByRouteCollectionId == null) {
-      _blockEntriesByRouteCollectionId = new HashMap<AgencyAndId, List<BlockEntry>>();
-      for (BlockEntry block : _blocks) {
-        for (TripEntry trip : block.getTrips()) {
-          AgencyAndId routeCollectionId = trip.getRouteCollectionId();
-          List<BlockEntry> blocks = _blockEntriesByRouteCollectionId.get(routeCollectionId);
-          if (blocks == null) {
-            blocks = new ArrayList<BlockEntry>();
-            _blockEntriesByRouteCollectionId.put(routeCollectionId, blocks);
-          }
-          blocks.add(block);
-        }
-      }
     }
   }
 
@@ -172,12 +155,6 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
     if (block == null)
       return null;
     return block.getTrips();
-  }
-
-  @Override
-  public List<BlockEntry> getBlocksForRouteCollectionId(
-      AgencyAndId routeCollectionId) {
-    return _blockEntriesByRouteCollectionId.get(routeCollectionId);
   }
 
   @Override

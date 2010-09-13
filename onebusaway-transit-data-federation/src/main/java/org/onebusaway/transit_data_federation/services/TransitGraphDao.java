@@ -71,6 +71,4 @@ public interface TransitGraphDao {
    *         stop
    */
   public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId);
-  
-  public List<BlockEntry> getBlocksForRouteCollectionId(AgencyAndId routeCollectionId);
 }

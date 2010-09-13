@@ -22,6 +22,4 @@ public interface TripPlannerGraph {
   public StopEntry getStopEntryForId(AgencyAndId id);
   
   public List<TripEntry> getTripsForBlockId(AgencyAndId blockId);
-  
-  public List<BlockEntry> getBlocksForRouteCollectionId(AgencyAndId routeCollectionId);
 }

@@ -192,6 +192,16 @@ public class TripPlannerGraphTaskImpl implements Runnable {
 
       List<Trip> trips = source.getTrips(_gtfsDao);
       List<StopTime> stopTimes = source.getStopTimes(_gtfsDao);
+      
+      if( trips.isEmpty() ) {
+        _log.warn("no trips for source=" + source);
+        continue;
+      }
+      
+      if( stopTimes.isEmpty() ) {
+        _log.warn("no stop times for source=" + source);
+        continue;
+      }
 
       checkBlockTrips(trips);
 
@@ -661,6 +671,11 @@ public class TripPlannerGraphTaskImpl implements Runnable {
 
     tripEntries.trimToSize();
     stopTimeEntries.trimToSize();
+    
+    if( blockId == null)
+      throw new IllegalStateException();
+    if( stopTimeEntries.isEmpty())
+      throw new IllegalStateException();
 
     blockEntry.setId(blockId);
     blockEntry.setTrips(tripEntries);

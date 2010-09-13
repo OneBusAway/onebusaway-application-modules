@@ -18,17 +18,17 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.StopProblemReportBean;
-import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
@@ -39,6 +39,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
+import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 
@@ -143,14 +144,20 @@ public interface TransitDataService extends FederatedService {
   @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query);
+
+  /**
+   * @param query determines the time and location of the query
+   * @return trips details for the trips matching the specified bounds query
+   */
+  @FederatedByEntityIdMethod(propertyExpression = "routeId")
+  public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query);
   
   /**
    * @param query determines the time and location of the query
    * @return trips details for the trips matching the specified bounds query
    */
-  @FederatedByEntityIdMethod(propertyExpression="routeId")
-  public ListBean<TripDetailsBean> getTripsForRoute(
-      TripsForRouteQueryBean query);
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<TripDetailsBean> getTripsForAgency(TripsForAgencyQueryBean query);
 
   /**
    * 
@@ -279,11 +286,12 @@ public interface TransitDataService extends FederatedService {
       OneBusAwayConstraintsBean constraints,
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException;
-  
+
   /****
-   * These methods are going to pile up.  How do we handle this gracefully in the future?
+   * These methods are going to pile up. How do we handle this gracefully in the
+   * future?
    ****/
-  
+
   /**
    * Report a problem with a particular stop.
    * 
@@ -301,12 +309,13 @@ public interface TransitDataService extends FederatedService {
   public void reportProblemWithTrip(TripProblemReportBean problem);
 
   @FederatedByEntityIdMethod()
-  public List<TripProblemReportBean> getAllTripProblemReportsForTripId(String tripId);
-  
-  
+  public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
+      String tripId);
+
   @FederatedByEntityIdMethod()
-  public TripProblemReportBean getTripProblemReportForTripIdAndId(String tripId, long id);
-  
+  public TripProblemReportBean getTripProblemReportForTripIdAndId(
+      String tripId, long id);
+
   @FederatedByEntityIdMethod()
   public void deleteTripProblemReportForTripIdAndId(String tripId, long id);
 }

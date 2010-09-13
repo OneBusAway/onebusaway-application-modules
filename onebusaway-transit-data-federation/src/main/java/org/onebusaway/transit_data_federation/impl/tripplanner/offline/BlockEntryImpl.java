@@ -48,4 +48,9 @@ public class BlockEntryImpl implements BlockEntry, Serializable {
   public List<StopTimeEntry> getStopTimes() {
     return _stopTimes;
   }
+  
+  @Override
+  public String toString() {
+    return _id.toString();
+  }
 }

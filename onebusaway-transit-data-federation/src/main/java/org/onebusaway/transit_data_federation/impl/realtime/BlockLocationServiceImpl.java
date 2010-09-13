@@ -669,7 +669,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     
     // TODO : Proper setting of service ids?
     BlockInstance blockInstance = new BlockInstance(trip.getBlock(),
-        tripInstance.getServiceDate(), new HashSet<LocalizedServiceId>());
+        tripInstance.getServiceDate(), new HashSet<LocalizedServiceId>(),true);
     
     BlockLocation blockLocation = getBlockLocation(blockInstance, records,
         targetTime);
