@@ -26,7 +26,7 @@ public interface BlockLocationRecordDao {
    * @return the set of block position records with the specified trip id,
    *         service date, and time range
    */
-  public List<BlockLocationRecord> getBlockLocationRecordsForTripServiceDateAndTimeRange(
+  public List<BlockLocationRecord> getBlockLocationRecordsForBlockServiceDateAndTimeRange(
       AgencyAndId blockId, long serviceDate, long fromTime, long toTime);
 
   /**

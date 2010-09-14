@@ -64,7 +64,7 @@ public class BlockLocationRecordDaoImpl implements BlockLocationRecordDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<BlockLocationRecord> getBlockLocationRecordsForTripServiceDateAndTimeRange(
+  public List<BlockLocationRecord> getBlockLocationRecordsForBlockServiceDateAndTimeRange(
       AgencyAndId blockId, long serviceDate, long fromTime, long toTime) {
     String[] paramNames = {"blockId", "serviceDate", "fromTime", "toTime"};
     Object[] paramValues = {blockId, serviceDate, fromTime, toTime};

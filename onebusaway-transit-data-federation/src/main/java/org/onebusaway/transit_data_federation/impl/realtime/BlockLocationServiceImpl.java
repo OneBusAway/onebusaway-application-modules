@@ -750,7 +750,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
       _blockLocationRecordPersistentStoreAccessCount.incrementAndGet();
 
-      List<BlockLocationRecord> predictions = _blockLocationRecordDao.getBlockLocationRecordsForTripServiceDateAndTimeRange(
+      List<BlockLocationRecord> predictions = _blockLocationRecordDao.getBlockLocationRecordsForBlockServiceDateAndTimeRange(
           serviceDateAndBlockId.getId(),
           serviceDateAndBlockId.getServiceDate(), fromTime, toTime);
 
