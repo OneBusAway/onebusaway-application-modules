@@ -121,8 +121,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
       /* gather data about trip, route, and stops */
       TripDetailsQueryBean query = new TripDetailsQueryBean();
       query.setTripId(trip.getId());
-      query.setServiceDate(new Date(adbean.getServiceDate()));
-      query.setTime(now.getTime());
+      query.setServiceDate(adbean.getServiceDate());
+      query.setTime(now.getTime().getTime());
       TripDetailsBean specificTripDetails = _transitDataService.getSpecificTripDetails(query);
 
       StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(route.getId());
@@ -134,7 +134,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.RecordedAtTime = new GregorianCalendar();
       TripStatusBean status = specificTripDetails.getStatus();
 
-      MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getTime());
+      MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
       MonitoredStopVisit.MonitoringRef = adbean.getStopId();
       MonitoredStopVisit.MonitoredVehicleJourney = new MonitoredVehicleJourney();
       MonitoredStopVisit.MonitoredVehicleJourney.LineRef = route.getId();
@@ -142,11 +142,11 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
       MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef = new FramedVehicleJourneyRef();
 
-      CoordinatePoint position = status.getPosition();
+      CoordinatePoint position = status.getLocation();
       if (position != null) {
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation = new VehicleLocation();
-        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getPosition().getLat();
-        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getPosition().getLon();
+        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getLocation().getLat();
+        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getLocation().getLon();
 
         MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongTrip();
         MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall = adbean.getDistanceFromStop();

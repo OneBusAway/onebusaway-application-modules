@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 
 /**
  * Service methods for accessing/interpolating the position of a transit vehicle

@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.realtime;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -23,17 +23,18 @@ import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.DateSupport;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockCalendarServiceImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
-import org.onebusaway.transit_data_federation.services.realtime.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 
-public class ActiveCalendarServiceImplTest {
+public class BlockCalendarServiceImplTest {
 
-  private ActiveCalendarServiceImpl _service;
+  private BlockCalendarServiceImpl _service;
 
   private CalendarServiceImpl _calendarService;
 
@@ -41,7 +42,7 @@ public class ActiveCalendarServiceImplTest {
 
   @Before
   public void before() {
-    _service = new ActiveCalendarServiceImpl();
+    _service = new BlockCalendarServiceImpl();
 
     _calendarService = new CalendarServiceImpl();
     _service.setCalendarService(_calendarService);

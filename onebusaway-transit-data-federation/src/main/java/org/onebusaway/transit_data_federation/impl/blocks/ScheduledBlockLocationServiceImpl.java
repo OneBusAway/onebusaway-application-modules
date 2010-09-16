@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.realtime;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduledBlockLocationService;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScheduledBlockLocationServiceImpl implements
+class ScheduledBlockLocationServiceImpl implements
     ScheduledBlockLocationService {
 
   private ShapePointService _shapePointService;
@@ -34,7 +34,7 @@ public class ScheduledBlockLocationServiceImpl implements
    ****/
 
   @Override
-  public ScheduledBlockLocation getScheduledBlockPositionFromDistanceAlongBlock(
+  public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
       List<StopTimeEntry> stopTimes, double distanceAlongBlock) {
 
     StopTimeOp stopTimeOp = StopTimeOp.DISTANCE_ALONG_BLOCK;
@@ -70,7 +70,7 @@ public class ScheduledBlockLocationServiceImpl implements
   }
 
   @Override
-  public ScheduledBlockLocation getScheduledBlockPositionFromScheduledTime(
+  public ScheduledBlockLocation getScheduledBlockLocationFromScheduledTime(
       List<StopTimeEntry> stopTimes, int scheduleTime) {
 
     StopTimeOp stopTimeOp = StopTimeOp.DEPARTURE;

@@ -4,7 +4,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.beans.TripStatusBeanService;
+import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class ClosestStopForVehicleController {
 
   @Autowired
-  private TripStatusBeanService _service;
+  private TripDetailsBeanService _service;
 
   @RequestMapping()
   public ModelAndView index(@RequestParam() String vehicleId,

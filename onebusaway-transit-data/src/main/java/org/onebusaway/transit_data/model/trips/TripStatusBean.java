@@ -9,35 +9,42 @@ public final class TripStatusBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private String status;
+  /****
+   * These are fields that we can supply from schedule data
+   ****/
 
   private long serviceDate;
 
-  private CoordinatePoint position;
-
-  private double distanceAlongTrip = Double.NaN;
-  
   private double scheduledDistanceAlongTrip = Double.NaN;
 
-  private double scheduleDeviation;
+  private double totalDistanceAlongTrip = Double.NaN;
 
-  private boolean predicted = false;
+  /****
+   * These are fields that we can supply from schedule data, but also update
+   * from real-time data when available
+   ****/
 
-  private String vehicleId;
+  private String status;
+
+  private CoordinatePoint location;
 
   private StopBean closestStop;
 
   private int closestStopTimeOffset;
 
-  private long time;
+  /****
+   * These are fields that we can supply only from real-time data
+   ****/
 
-  public String getStatus() {
-    return status;
-  }
+  private boolean predicted = false;
 
-  public void setStatus(String status) {
-    this.status = status;
-  }
+  private long lastUpdateTime;
+
+  private double scheduleDeviation;
+
+  private double distanceAlongTrip = Double.NaN;
+
+  private String vehicleId;
 
   public long getServiceDate() {
     return serviceDate;
@@ -47,40 +54,41 @@ public final class TripStatusBean implements Serializable {
     this.serviceDate = serviceDate;
   }
 
-  public CoordinatePoint getPosition() {
-    return position;
+  /**
+   * The vehicle's scheduled distance along the trip.
+   * 
+   * @return distance, in meters
+   */
+  public double getScheduledDistanceAlongTrip() {
+    return scheduledDistanceAlongTrip;
   }
 
-  public void setPosition(CoordinatePoint position) {
-    this.position = position;
+  public void setScheduledDistanceAlongTrip(double scheduledDistanceAlongTrip) {
+    this.scheduledDistanceAlongTrip = scheduledDistanceAlongTrip;
   }
 
-  public boolean isScheduleDeviationSet() {
-    return !Double.isNaN(scheduleDeviation);
+  public double getTotalDistanceAlongTrip() {
+    return totalDistanceAlongTrip;
   }
 
-  public double getScheduleDeviation() {
-    return scheduleDeviation;
+  public void setTotalDistanceAlongTrip(double totalDistanceAlongTrip) {
+    this.totalDistanceAlongTrip = totalDistanceAlongTrip;
   }
 
-  public void setScheduleDeviation(double scheduleDeviation) {
-    this.scheduleDeviation = scheduleDeviation;
+  public String getStatus() {
+    return status;
   }
 
-  public boolean isPredicted() {
-    return predicted;
+  public void setStatus(String status) {
+    this.status = status;
   }
 
-  public void setPredicted(boolean predicted) {
-    this.predicted = predicted;
+  public CoordinatePoint getLocation() {
+    return location;
   }
 
-  public String getVehicleId() {
-    return vehicleId;
-  }
-
-  public void setVehicleId(String vehicleId) {
-    this.vehicleId = vehicleId;
+  public void setLocation(CoordinatePoint location) {
+    this.location = location;
   }
 
   public StopBean getClosestStop() {
@@ -113,6 +121,37 @@ public final class TripStatusBean implements Serializable {
     this.closestStopTimeOffset = closestStopTimeOffset;
   }
 
+  public boolean isPredicted() {
+    return predicted;
+  }
+
+  public void setPredicted(boolean predicted) {
+    this.predicted = predicted;
+  }
+
+  public void setLastUpdateTime(long time) {
+    this.lastUpdateTime = time;
+  }
+
+  /**
+   * @return the time we last heard from the bus (Unix-time)
+   */
+  public long getLastUpdateTime() {
+    return lastUpdateTime;
+  }
+
+  public boolean isScheduleDeviationSet() {
+    return !Double.isNaN(scheduleDeviation);
+  }
+
+  public double getScheduleDeviation() {
+    return scheduleDeviation;
+  }
+
+  public void setScheduleDeviation(double scheduleDeviation) {
+    this.scheduleDeviation = scheduleDeviation;
+  }
+
   /**
    * @return true if {@link #getDistanceAlongTrip()} has been set
    */
@@ -137,28 +176,12 @@ public final class TripStatusBean implements Serializable {
   public double getDistanceAlongTrip() {
     return distanceAlongTrip;
   }
-  
-  /**
-   * The vehicle's scheduled distance along the trip.
-   * 
-   * @return distance, in meters
-   */
-  public double getScheduledDistanceAlongTrip() {
-    return scheduledDistanceAlongTrip;
+
+  public String getVehicleId() {
+    return vehicleId;
   }
 
-  public void setScheduledDistanceAlongTrip(double scheduledDistanceAlongTrip) {
-    this.scheduledDistanceAlongTrip = scheduledDistanceAlongTrip;
-  }
-
-  public void setTime(long time) {
-    this.time = time;
-  }
-
-  /**
-   * @return the time we last heard from the bus (Unix-time)
-   */
-  public long getTime() {
-    return time;
+  public void setVehicleId(String vehicleId) {
+    this.vehicleId = vehicleId;
   }
 }

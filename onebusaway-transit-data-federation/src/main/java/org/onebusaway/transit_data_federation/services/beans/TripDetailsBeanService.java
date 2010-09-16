@@ -5,7 +5,6 @@ import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
-import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
@@ -15,10 +14,9 @@ import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
  * particular trip.
  * 
  * @author bdferris
- * @see TripStatusBean
  * @see TripDetailsBean
  */
-public interface TripStatusBeanService {
+public interface TripDetailsBeanService {
 
   /**
    * @param tripId see {@link Trip#getId()}
@@ -27,8 +25,8 @@ public interface TripStatusBeanService {
    * @return the status info for a particular trip operating on the specified
    *         service date and time
    */
-  public TripStatusBean getTripStatusForTripId(AgencyAndId tripId,
-      long serviceDate, long time);
+  public TripDetailsBean getTripStatusForTripId(AgencyAndId tripId,
+      long serviceDate, long time, TripDetailsInclusionBean inclusion);
 
   /**
    * 

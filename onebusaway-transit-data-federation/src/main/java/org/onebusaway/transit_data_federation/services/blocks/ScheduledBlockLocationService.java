@@ -1,9 +1,16 @@
-package org.onebusaway.transit_data_federation.services.realtime;
+package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 
+/**
+ * Methods for retrieving the scheduled location of a vehicle traveling along a
+ * block of trips.
+ * 
+ * @author bdferris
+ * @see ScheduledBlockLocation
+ */
 public interface ScheduledBlockLocationService {
 
   /**
@@ -12,7 +19,7 @@ public interface ScheduledBlockLocationService {
    * @param scheduleTime
    * @return the schedule block position, or null if not in service
    */
-  public ScheduledBlockLocation getScheduledBlockPositionFromScheduledTime(
+  public ScheduledBlockLocation getScheduledBlockLocationFromScheduledTime(
       List<StopTimeEntry> stopTimes, int scheduleTime);
 
   /**
@@ -21,6 +28,6 @@ public interface ScheduledBlockLocationService {
    * @param distanceAlongBlock in meters
    * @return the schedule block position, or null if not in service
    */
-  public ScheduledBlockLocation getScheduledBlockPositionFromDistanceAlongBlock(
+  public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
       List<StopTimeEntry> stopTimes, double distanceAlongBlock);
 }

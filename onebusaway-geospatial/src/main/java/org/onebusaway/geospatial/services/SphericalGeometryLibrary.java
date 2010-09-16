@@ -62,11 +62,6 @@ public class SphericalGeometryLibrary {
     return radius * atan2(y, x);
   }
 
-  public static final CoordinateBounds bounds(double lat, double lon,
-      double distance) {
-    return bounds(lat, lon, distance, RADIUS_OF_EARTH_IN_KM * 1000);
-  }
-
   public static final CoordinateBounds bounds(CoordinatePoint point,
       double distance) {
     return bounds(point.getLat(), point.getLon(), distance);
@@ -80,16 +75,23 @@ public class SphericalGeometryLibrary {
   }
 
   public static final CoordinateBounds bounds(double lat, double lon,
-      double distance, double radius) {
+      double distance) {
+    return bounds(lat, lon, distance, distance);
+  }
+
+  public static final CoordinateBounds bounds(double lat, double lon,
+      double latDistance, double lonDistance) {
+
+    double radiusOfEarth = RADIUS_OF_EARTH_IN_KM * 1000;
 
     double latRadians = toRadians(lat);
     double lonRadians = toRadians(lon);
 
-    double latRadius = radius;
-    double lonRadius = Math.cos(latRadians) * radius;
+    double latRadius = radiusOfEarth;
+    double lonRadius = Math.cos(latRadians) * radiusOfEarth;
 
-    double latOffset = distance / latRadius;
-    double lonOffset = distance / lonRadius;
+    double latOffset = latDistance / latRadius;
+    double lonOffset = lonDistance / lonRadius;
 
     double latFrom = toDegrees(latRadians - latOffset);
     double latTo = toDegrees(latRadians + latOffset);

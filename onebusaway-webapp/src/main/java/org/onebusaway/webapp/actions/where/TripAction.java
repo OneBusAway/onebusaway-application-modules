@@ -88,8 +88,8 @@ public class TripAction extends ActionSupport {
 
     TripDetailsQueryBean query = new TripDetailsQueryBean();
     query.setTripId(_id);
-    query.setServiceDate(_serviceDate);
-    query.setTime(_time);
+    query.setServiceDate(_serviceDate.getTime());
+    query.setTime(_time.getTime());
     _tripDetails = _service.getSpecificTripDetails(query);
 
     if (_tripDetails == null)

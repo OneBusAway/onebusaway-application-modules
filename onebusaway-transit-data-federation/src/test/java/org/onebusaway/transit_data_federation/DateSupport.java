@@ -29,6 +29,10 @@ public class DateSupport {
     }
   }
 
+  public static long time(String source) {
+    return date(source).getTime();
+  }
+
   public static String format(Date dateA) {
     return _format.format(dateA);
   }

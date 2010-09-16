@@ -32,12 +32,12 @@ import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
 import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.ActiveCalendarService;
-import org.onebusaway.transit_data_federation.services.realtime.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.StopRealtimeService;
 import org.onebusaway.transit_data_federation.services.realtime.TripLocation;
 import org.onebusaway.transit_data_federation.services.realtime.TripLocationService;
@@ -47,7 +47,7 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -84,7 +84,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   private ScheduledBlockLocationService _scheduledBlockLocationService;
 
-  private ActiveCalendarService _activeCalendarService;
+  private BlockCalendarService _activeCalendarService;
 
   /**
    * By default, we keep around 20 minutes of cache entries
@@ -162,7 +162,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   @Autowired
   public void setActiveCalendarService(
-      ActiveCalendarService activeCalendarService) {
+      BlockCalendarService activeCalendarService) {
     _activeCalendarService = activeCalendarService;
   }
 
@@ -321,7 +321,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           BlockEntry blockEntry = tripEntry.getBlock();
 
           int scheduleTime = (int) ((targetTime - sti.getServiceDate()) / 1000);
-          ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockPositionFromScheduledTime(
+          ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
               blockEntry.getStopTimes(), scheduleTime);
 
           if (location != null) {
@@ -463,7 +463,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    ****/
 
   @Override
-  public Map<TripInstanceProxy, TripLocation> getScheduledTripsForBounds(
+  public Map<TripInstance, TripLocation> getScheduledTripsForBounds(
       CoordinateBounds bounds, long time) {
 
     List<StopEntry> stops = _transitGraphDao.getStopsByLocation(bounds);
@@ -480,7 +480,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     Map<LocalizedServiceId, List<Date>> serviceIdsAndDates = _calendarService.getServiceDatesWithinRange(
         intervals, new Date(timeFrom), new Date(timeTo));
 
-    Set<TripInstanceProxy> tripInstances = new HashSet<TripInstanceProxy>();
+    Set<TripInstance> tripInstances = new HashSet<TripInstance>();
 
     for (StopEntry stop : stops) {
       StopTimeIndex index = stop.getStopTimes();
@@ -489,13 +489,13 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       for (StopTimeInstanceProxy stopTimeInstance : stopTimeInstances) {
         TripEntry trip = stopTimeInstance.getTrip();
         long serviceDate = stopTimeInstance.getServiceDate();
-        tripInstances.add(new TripInstanceProxy(trip, serviceDate));
+        tripInstances.add(new TripInstance(trip, serviceDate));
       }
     }
 
-    Map<TripInstanceProxy, TripLocation> tripsAndPositions = new HashMap<TripInstanceProxy, TripLocation>();
+    Map<TripInstance, TripLocation> tripsAndPositions = new HashMap<TripInstance, TripLocation>();
 
-    for (TripInstanceProxy tripInstance : tripInstances) {
+    for (TripInstance tripInstance : tripInstances) {
 
       TripLocation tripPosition = getPositionForTripInstance(tripInstance, time);
 
@@ -516,7 +516,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   @Override
   public TripLocation getPositionForTripInstance(
-      TripInstanceProxy tripInstance, long targetTime) {
+      TripInstance tripInstance, long targetTime) {
 
     TripEntry trip = tripInstance.getTrip();
     BlockEntry block = trip.getBlock();
@@ -550,7 +550,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     BlockLocationRecord representative = closest.getMinElement();
 
     TripEntry tripEntry = _transitGraphDao.getTripEntryForId(representative.getTripId());
-    TripInstanceProxy tripInstance = new TripInstanceProxy(tripEntry,
+    TripInstance tripInstance = new TripInstance(tripEntry,
         representative.getServiceDate());
 
     BlockLocationRecordCollection collection = BlockLocationRecordCollection.createFromRecords(records);
@@ -593,8 +593,19 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     if (record.isScheduleDeviationSet())
       builder.setScheduleDeviation(record.getScheduleDeviation());
 
-    if (record.isDistanceAlongBlockSet())
+    if (record.isDistanceAlongBlockSet()) {
       builder.setDistanceAlongBlock(record.getDistanceAlongBlock());
+
+      if (!record.isScheduleDeviationSet()) {
+        BlockEntry block = _transitGraphDao.getBlockEntryForId(blockId);
+        List<StopTimeEntry> stopTimes = block.getStopTimes();
+        double distanceAlongBlock = record.getDistanceAlongBlock();
+        ScheduledBlockLocation scheduledBlockLocation = _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
+            stopTimes, distanceAlongBlock);
+        int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
+        builder.setScheduleDeviation(deviation);
+      }
+    }
 
     if (record.isCurrentLocationSet()) {
       builder.setLocationLat(record.getCurrentLocationLat());
@@ -656,7 +667,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     BlockLocation location = new BlockLocation();
 
-    location.setServiceDate(serviceDate);
+    location.setBlockInstance(blockInstance);
 
     boolean predicted = !records.isEmpty();
     if (predicted) {
@@ -699,7 +710,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     return location;
   }
 
-  private TripLocation getTripLocation(TripInstanceProxy tripInstance,
+  private TripLocation getTripLocation(TripInstance tripInstance,
       BlockLocationRecordCollection records, long targetTime) {
 
     TripEntry trip = tripInstance.getTrip();
@@ -749,16 +760,16 @@ public class BlockLocationServiceImpl implements BlockLocationService,
        */
       int effectiveScheduledTime = (int) (scheduledTime - blockLocation.getScheduleDeviation());
 
-      return _scheduledBlockLocationService.getScheduledBlockPositionFromScheduledTime(
+      return _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
           blockEntry.getStopTimes(), effectiveScheduledTime);
     }
 
     if (blockLocation.hasDistanceAlongBlock()) {
-      return _scheduledBlockLocationService.getScheduledBlockPositionFromDistanceAlongBlock(
+      return _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
           blockEntry.getStopTimes(), blockLocation.getDistanceAlongBlock());
     }
 
-    return _scheduledBlockLocationService.getScheduledBlockPositionFromScheduledTime(
+    return _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
         blockEntry.getStopTimes(), scheduledTime);
   }
 

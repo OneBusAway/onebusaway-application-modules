@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
@@ -16,9 +17,9 @@ public class BlockLocation {
    * These are fields that we can supply from schedule data
    ****/
 
-  private TripEntry activeTrip;
+  private BlockInstance blockInstance;
 
-  private long serviceDate;
+  private TripEntry activeTrip;
 
   private boolean inService;
 
@@ -51,6 +52,14 @@ public class BlockLocation {
 
   private AgencyAndId vehicleId;
 
+  public BlockInstance getBlockInstance() {
+    return blockInstance;
+  }
+
+  public void setBlockInstance(BlockInstance instance) {
+    this.blockInstance = instance;
+  }
+
   /**
    * @return the active trip for the block
    */
@@ -60,14 +69,6 @@ public class BlockLocation {
 
   public void setActiveTrip(TripEntry activeTrip) {
     this.activeTrip = activeTrip;
-  }
-
-  public long getServiceDate() {
-    return serviceDate;
-  }
-
-  public void setServiceDate(long serviceDate) {
-    this.serviceDate = serviceDate;
   }
 
   /**

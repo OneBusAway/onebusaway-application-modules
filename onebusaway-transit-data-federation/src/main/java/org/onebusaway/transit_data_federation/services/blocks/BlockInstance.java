@@ -1,17 +1,23 @@
-package org.onebusaway.transit_data_federation.services.realtime;
+package org.onebusaway.transit_data_federation.services.blocks;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 
 /**
  * A block instance is the combination of a {@link BlockEntry} and a service
  * date for which that block is active. The "service date" is the
  * "midnight time" from which the {@link StopTimeEntry} entries are relative.
+ * Blocks are slightly more complicated than {@link TripInstance}, because a
+ * block can be composed of trips with different service ids, not all which are
+ * necessarily active on a given service date.
  * 
  * @author bdferris
- * @see TripEntry
+ * @see BlockEntry
+ * @see LocalizedServiceId
  */
 public class BlockInstance {
 
@@ -31,6 +37,10 @@ public class BlockInstance {
     _serviceDate = serviceDate;
     _serviceIds = serviceIds;
     _allServiceIdsActive = allServiceIdsActive;
+  }
+
+  public BlockInstance(BlockEntry block, long serviceDate) {
+    this(block, serviceDate, new HashSet<LocalizedServiceId>(), false);
   }
 
   public BlockEntry getBlock() {

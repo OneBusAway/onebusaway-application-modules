@@ -124,6 +124,14 @@ public class TripEntryImpl implements TripEntry, Serializable {
   public double getDistanceAlongBlock() {
     return _distanceAlongBlock;
   }
+  
+  @Override
+  public double getTotalTripDistance() {
+    if( _nextTrip != null)
+      return _nextTrip.getDistanceAlongBlock() - _distanceAlongBlock;
+    else
+      return _block.getTotalBlockDistance() - _distanceAlongBlock;
+  }
 
   @Override
   public TripEntryImpl getPrevTrip() {

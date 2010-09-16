@@ -27,12 +27,12 @@ import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntry
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduledBlockLocationService;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.TripLocation;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 import org.onebusaway.utility.DateLibrary;
 
 public class BlockLocationServiceImplTest {
@@ -212,7 +212,7 @@ public class BlockLocationServiceImplTest {
 
     double epsilon = 0.001;
 
-    TripInstanceProxy tripInstance = new TripInstanceProxy(tripA, serviceDate);
+    TripInstance tripInstance = new TripInstance(tripA, serviceDate);
     TripLocation position = _service.getPositionForTripInstance(tripInstance,
         t(serviceDate, 0, 0));
 
@@ -237,7 +237,7 @@ public class BlockLocationServiceImplTest {
     p.setLocation(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
 
     Mockito.when(
-        _blockLocationService.getScheduledBlockPositionFromScheduledTime(
+        _blockLocationService.getScheduledBlockLocationFromScheduledTime(
             block.getStopTimes(), 1800)).thenReturn(p);
 
     position = _service.getPositionForTripInstance(tripInstance,

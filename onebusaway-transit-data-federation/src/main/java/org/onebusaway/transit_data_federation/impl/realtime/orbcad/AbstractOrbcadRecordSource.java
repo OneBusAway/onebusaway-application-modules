@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +21,10 @@ import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.impl.calendar.BlockCalendarService;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -212,19 +212,19 @@ public abstract class AbstractOrbcadRecordSource implements
     }
   }
 
-  private Date getServiceDateForRecord(OrbcadRecord record, AgencyAndId blockId) {
+  private BlockInstance getBlockInstanceForRecord(OrbcadRecord record, AgencyAndId blockId) {
 
     long recordTime = record.getTime() * 1000;
-    Date from = new Date(recordTime - 30 * 60 * 1000);
-    Date to = new Date(recordTime + 30 * 60 * 1000);
+    long timeFrom = recordTime - 30 * 60 * 1000;
+    long timeTo = recordTime + 30 * 60 * 1000;
 
-    List<Date> serviceDates = _blockCalendarService.getServiceDatesWithinRangeForBlockId(
-        blockId, from, to);
-
-    if (serviceDates.size() != 1)
+    List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(blockId, timeFrom, timeTo);
+    
+    // TODO : We currently assume we don't have overlapping blocks.
+    if( instances.size() != 1)
       return null;
 
-    return serviceDates.get(0);
+    return instances.get(0);
   }
 
   private AgencyAndId getBlockIdForRecord(OrbcadRecord record) {
@@ -306,8 +306,8 @@ public abstract class AbstractOrbcadRecordSource implements
         return;
       }
 
-      Date serviceDate = getServiceDateForRecord(record, blockId);
-      if (serviceDate == null) {
+      BlockInstance blockInstance = getBlockInstanceForRecord(record, blockId);
+      if (blockInstance == null) {
         _recordsWithoutServiceDate++;
         return;
       }
@@ -316,7 +316,7 @@ public abstract class AbstractOrbcadRecordSource implements
 
       message.setBlockId(blockId);
 
-      message.setServiceDate(serviceDate.getTime());
+      message.setServiceDate(blockInstance.getServiceDate());
       message.setTimeOfRecord(record.getTime() * 1000);
       // In Orbcad, +scheduleDeviation means the bus is early and -schedule
       // deviation means bus is late, which is opposite the
@@ -330,7 +330,7 @@ public abstract class AbstractOrbcadRecordSource implements
         message.setCurrentLocationLat(record.getLat());
         message.setCurrentLocationLon(record.getLon());
       }
-      
+
       List<VehicleLocationRecord> messages = _interpolation.interpolate(message);
 
       _records.addAll(messages);

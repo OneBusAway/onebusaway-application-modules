@@ -14,7 +14,7 @@ import org.onebusaway.transit_data_federation.services.realtime.TripLocationServ
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -89,7 +89,7 @@ class UserReportingServiceImpl implements UserReportingService {
     record.setUserOnVehicle(problem.isUserOnVehicle());
     record.setUserVehicleNumber(problem.getUserVehicleNumber());
 
-    TripInstanceProxy tripInstance = new TripInstanceProxy(trip,
+    TripInstance tripInstance = new TripInstance(trip,
         problem.getServiceDate());
 
     TripLocation tripPosition = _tripPositionService.getPositionForTripInstance(

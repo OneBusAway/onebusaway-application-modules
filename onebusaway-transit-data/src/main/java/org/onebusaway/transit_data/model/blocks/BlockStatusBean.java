@@ -16,7 +16,9 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 public final class BlockStatusBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
-
+  
+  private BlockBean block;
+  
   /****
    * These are fields that we can supply from schedule data
    ****/
@@ -60,6 +62,14 @@ public final class BlockStatusBean implements Serializable {
   private double distanceAlongBlock = Double.NaN;
 
   private String vehicleId;
+
+  public BlockBean getBlock() {
+    return block;
+  }
+
+  public void setBlock(BlockBean block) {
+    this.block = block;
+  }
 
   public long getServiceDate() {
     return serviceDate;

@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.realtime;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,17 +16,17 @@ import org.onebusaway.gtfs.model.calendar.ServiceIdIntervals;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
-import org.onebusaway.transit_data_federation.services.realtime.ActiveCalendarService;
-import org.onebusaway.transit_data_federation.services.realtime.BlockInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-class ActiveCalendarServiceImpl implements ActiveCalendarService {
+class BlockCalendarServiceImpl implements BlockCalendarService {
 
   private CalendarService _calendarService;
 
@@ -50,7 +50,7 @@ class ActiveCalendarServiceImpl implements ActiveCalendarService {
   }
 
   /****
-   * {@link ActiveCalendarService} Interface
+   * {@link BlockCalendarService} Interface
    ****/
 
   @Override

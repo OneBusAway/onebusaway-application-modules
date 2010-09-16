@@ -98,15 +98,15 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     TripStatusBean status = trip.getStatus();
     
     Calendar time = Calendar.getInstance();
-    time.setTime(new Date(status.getTime()));
+    time.setTime(new Date(status.getLastUpdateTime()));
     
     activity.RecordedAtTime = time;
     activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
     activity.MonitoredVehicleJourney.BlockRef = trip.getTrip().getBlockId();
     activity.MonitoredVehicleJourney.CourseOfJourneyRef = trip.getTripId();
     VehicleLocation location = new VehicleLocation();
-    location.Latitude = status.getPosition().getLat();
-    location.Longitude = status.getPosition().getLon();
+    location.Latitude = status.getLocation().getLat();
+    location.Longitude = status.getLocation().getLon();
     
     activity.MonitoredVehicleJourney.VehicleLocation = location;
     siri.ServiceDelivery.VehicleMonitoringDelivery.deliveries = new ArrayList<VehicleActivity>();

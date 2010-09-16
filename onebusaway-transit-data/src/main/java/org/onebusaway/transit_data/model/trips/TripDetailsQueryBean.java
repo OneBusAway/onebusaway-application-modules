@@ -12,9 +12,9 @@ public final class TripDetailsQueryBean implements Serializable {
 
   private String tripId;
   
-  private Date serviceDate;
+  private long serviceDate;
   
-  private Date time;
+  private long time;
   
   private TripDetailsInclusionBean inclusion = new TripDetailsInclusionBean();
   
@@ -26,19 +26,19 @@ public final class TripDetailsQueryBean implements Serializable {
     this.tripId = tripId;
   }
 
-  public Date getServiceDate() {
+  public long getServiceDate() {
     return serviceDate;
   }
 
-  public void setServiceDate(Date serviceDate) {
+  public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
   }
 
-  public Date getTime() {
+  public long getTime() {
     return time;
   }
 
-  public void setTime(Date time) {
+  public void setTime(long time) {
     this.time = time;
   }
 

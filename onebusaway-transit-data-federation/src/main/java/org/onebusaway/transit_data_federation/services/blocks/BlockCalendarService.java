@@ -1,11 +1,18 @@
-package org.onebusaway.transit_data_federation.services.realtime;
+package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 
-public interface ActiveCalendarService {
+/**
+ * Methods for determining which {@link BlockInstance} instances are active for
+ * given time ranges and other criteria.
+ * 
+ * @author bdferris
+ * @see BlockInstance
+ * @see BlockIndex
+ */
+public interface BlockCalendarService {
 
   public BlockInstance getActiveBlock(AgencyAndId blockId, long serviceDate,
       long time);

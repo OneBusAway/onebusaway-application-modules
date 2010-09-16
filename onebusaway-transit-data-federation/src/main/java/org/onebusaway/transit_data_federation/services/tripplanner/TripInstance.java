@@ -8,13 +8,13 @@ package org.onebusaway.transit_data_federation.services.tripplanner;
  * @author bdferris
  * @see TripEntry
  */
-public class TripInstanceProxy {
+public class TripInstance {
 
   private final TripEntry _trip;
 
   private final long _serviceDate;
 
-  public TripInstanceProxy(TripEntry trip, long serviceDate) {
+  public TripInstance(TripEntry trip, long serviceDate) {
     if (trip == null)
       throw new IllegalArgumentException();
     _trip = trip;
@@ -50,9 +50,9 @@ public class TripInstanceProxy {
       return true;
     if (obj == null)
       return false;
-    if (!(obj instanceof TripInstanceProxy))
+    if (!(obj instanceof TripInstance))
       return false;
-    TripInstanceProxy other = (TripInstanceProxy) obj;
+    TripInstance other = (TripInstance) obj;
     if (_serviceDate != other._serviceDate)
       return false;
     if (!_trip.equals(other._trip))

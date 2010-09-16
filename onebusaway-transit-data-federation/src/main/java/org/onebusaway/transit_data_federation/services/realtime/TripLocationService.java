@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 
 /**
  * Service methods for accessing/interpolating the position of a transit vehicle
@@ -23,7 +23,7 @@ public interface TripLocationService {
    * @param time
    * @return the set of trip instances along with their positions
    */
-  public Map<TripInstanceProxy, TripLocation> getScheduledTripsForBounds(
+  public Map<TripInstance, TripLocation> getScheduledTripsForBounds(
       CoordinateBounds bounds, long time);
 
   /**
@@ -36,7 +36,7 @@ public interface TripLocationService {
    * @return the trip position
    */
   public TripLocation getPositionForTripInstance(
-      TripInstanceProxy tripInstance, long targetTime);
+      TripInstance tripInstance, long targetTime);
 
   /**
    * @param vehicleId the target vehicle id

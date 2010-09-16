@@ -68,6 +68,30 @@ public class SphericalGeometryLibraryTest {
         bounds.getMaxLon(), bounds.getMaxLat(), bounds.getMinLon());
     assertEquals(800, d4, 0.1);
   }
+  
+  @Test
+  public void testBoundsLatAndLon() {
+
+    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
+        47.97527158291236, -122.3527193069458, 400, 200);
+
+    double d1 = SphericalGeometryLibrary.distance(bounds.getMaxLat(),
+        bounds.getMaxLon(), bounds.getMinLat(), bounds.getMaxLon());
+    assertEquals(800, d1, 0.01);
+
+    double d2 = SphericalGeometryLibrary.distance(bounds.getMaxLat(),
+        bounds.getMinLon(), bounds.getMinLat(), bounds.getMinLon());
+    assertEquals(800, d2, 0.01);
+
+    double d3 = SphericalGeometryLibrary.distance(bounds.getMinLat(),
+        bounds.getMaxLon(), bounds.getMinLat(), bounds.getMinLon());
+    assertEquals(400, d3, 0.1);
+
+    double d4 = SphericalGeometryLibrary.distance(bounds.getMaxLat(),
+        bounds.getMaxLon(), bounds.getMaxLat(), bounds.getMinLon());
+    assertEquals(400, d4, 0.1);
+  }
+
 
   @Test
   public void testGetCenterOfBounds() {

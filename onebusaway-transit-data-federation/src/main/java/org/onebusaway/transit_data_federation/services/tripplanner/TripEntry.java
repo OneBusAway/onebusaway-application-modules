@@ -30,6 +30,11 @@ public interface TripEntry {
   public int getBlockStopTimeSequenceOffset();
 
   public double getDistanceAlongBlock();
+  
+  /**
+   * @return distance, in meters
+   */
+  public double getTotalTripDistance();
 
   public TripEntry getPrevTrip();
 

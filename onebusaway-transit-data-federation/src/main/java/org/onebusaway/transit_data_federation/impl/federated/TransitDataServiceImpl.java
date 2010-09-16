@@ -18,20 +18,19 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.StopProblemReportBean;
-import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
+import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.StopRouteScheduleBean;
 import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
@@ -43,7 +42,6 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
-import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
@@ -59,9 +57,8 @@ import org.onebusaway.transit_data_federation.services.beans.StopScheduleBeanSer
 import org.onebusaway.transit_data_federation.services.beans.StopWithArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
+import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripStatusBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
 import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,10 +95,7 @@ class TransitDataServiceImpl implements TransitDataService {
   private TripBeanService _tripBeanService;
 
   @Autowired
-  private TripStopTimesBeanService _tripStopTimesBeanService;
-
-  @Autowired
-  private TripStatusBeanService _tripStatusBeanService;
+  private TripDetailsBeanService _tripDetailsBeanService;
 
   @Autowired
   private TripPlannerBeanService _tripPlannerBeanService;
@@ -247,67 +241,37 @@ class TransitDataServiceImpl implements TransitDataService {
   public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query)
       throws ServiceException {
 
-    String tripId = query.getTripId();
-    Date serviceDate = query.getServiceDate();
-    Date time = query.getTime();
-
-    AgencyAndId id = convertAgencyAndId(tripId);
-
-    TripBean trip = null;
-    TripStopTimesBean stopTimes = null;
-    TripStatusBean status = null;
-
-    boolean missing = false;
-
+    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
+    long serviceDate = query.getServiceDate();
+    long time = query.getTime();
     TripDetailsInclusionBean inclusion = query.getInclusion();
 
-    if (inclusion.isIncludeTripBean()) {
-      trip = _tripBeanService.getTripForId(id);
-      if (trip == null)
-        missing = true;
-    }
-
-    if (inclusion.isIncludeTripSchedule()) {
-      stopTimes = _tripStopTimesBeanService.getStopTimesForTrip(id);
-      if (stopTimes == null)
-        missing = true;
-    }
-
-    if (inclusion.isIncludeTripStatus()) {
-      status = _tripStatusBeanService.getTripStatusForTripId(id,
-          serviceDate.getTime(), time.getTime());
-      if (status == null)
-        missing = true;
-    }
-
-    if (missing)
-      return null;
-
-    return new TripDetailsBean(tripId, trip, stopTimes, status);
+    return _tripDetailsBeanService.getTripStatusForTripId(tripId, serviceDate,
+        time, inclusion);
   }
 
   @Override
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
-    return _tripStatusBeanService.getActiveTripForBounds(query);
+    return _tripDetailsBeanService.getActiveTripForBounds(query);
   }
 
   @Override
   public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query) {
-    return _tripStatusBeanService.getTripsForRoute(query);
+    return _tripDetailsBeanService.getTripsForRoute(query);
   }
 
   @Override
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query) {
-    return _tripStatusBeanService.getTripsForAgency(query);
+    return _tripDetailsBeanService.getTripsForAgency(query);
   }
 
   @Override
   public TripDetailsBean getTripDetailsForVehicleAndTime(
       TripForVehicleQueryBean query) {
     AgencyAndId id = convertAgencyAndId(query.getVehicleId());
-    return _tripStatusBeanService.getTripStatusForVehicleAndTime(id,
+    return _tripDetailsBeanService.getTripStatusForVehicleAndTime(id,
         query.getTime().getTime(), query.getInclusion());
   }
 

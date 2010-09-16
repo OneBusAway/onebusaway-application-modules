@@ -1,21 +1,20 @@
-package org.onebusaway.transit_data_federation.services.beans;
+package org.onebusaway.transit_data_federation.services.blocks;
+
+import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.blocks.BlockDetailsBean;
-import org.onebusaway.transit_data.model.blocks.BlockStatusBean;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 
 /**
  * Service methods for querying the real-time status and position of a
  * particular block of trips.
  * 
  * @author bdferris
- * @see StatusBean
- * @see BlockDetailsBean
+ * @see BlockLocation
  */
-public interface BlockStatusBeanService {
+public interface BlockStatusService {
 
   /**
    * @param blockId see {@link Trip#getBlockId()}
@@ -25,8 +24,7 @@ public interface BlockStatusBeanService {
    * @return the status info for a particular block operating on the specified
    *         service date and time
    */
-  public BlockStatusBean getBlock(AgencyAndId blockId, long serviceDate,
-      long time);
+  public BlockLocation getBlock(AgencyAndId blockId, long serviceDate, long time);
 
   /**
    * 
@@ -36,27 +34,26 @@ public interface BlockStatusBeanService {
    * @return trip details for the trip operated by the specified vehicle at the
    *         specified time, or null if not found
    */
-  public BlockStatusBean getBlockForVehicle(AgencyAndId vehicleId, long time);
+  public BlockLocation getBlockForVehicle(AgencyAndId vehicleId, long time);
 
   /**
    * 
    * @param query
    * @return the list of active blocks matching agency query criteria
    */
-  public ListBean<BlockStatusBean> getBlocksForAgency(String agencyId, long time);
+  public List<BlockLocation> getBlocksForAgency(String agencyId, long time);
 
   /**
    * 
    * @param query
    * @return the list of active blocks matching the route query criteria
    */
-  public ListBean<BlockStatusBean> getBlocksForRoute(AgencyAndId routeId,
-      long time);
+  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time);
 
   /**
    * @param query
    * @return the list of active blocks matching the query criteria
    */
-  public ListBean<BlockStatusBean> getBlocksForBounds(CoordinateBounds bounds,
+  public List<BlockLocation> getBlocksForBounds(CoordinateBounds bounds,
       long time);
 }

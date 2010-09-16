@@ -10,7 +10,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -24,8 +23,9 @@ import org.onebusaway.container.model.Listeners;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.impl.calendar.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.slf4j.Logger;
@@ -222,18 +222,18 @@ public class TimepointPredictionServiceImpl implements
       return;
 
     long t = System.currentTimeMillis();
-    Date from = new Date(t - 30 * 60 * 1000);
-    Date to = new Date(t + 30 * 60 * 1000);
+    long timeFrom = t - 30 * 60 * 1000;
+    long timeTo = t + 30 * 60 * 1000;
 
     List<VehicleLocationRecord> records = new ArrayList<VehicleLocationRecord>();
 
     for (List<TimepointPrediction> recordsForBlock : predictionsByBlockId.values()) {
       VehicleLocationRecord record = getBestScheduleAdherenceRecord(recordsForBlock);
-      List<Date> dates = _blockCalendarService.getServiceDatesWithinRangeForBlockId(
-          record.getBlockId(), from, to);
-      if (dates.size() != 1)
+      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(record.getBlockId(), timeFrom, timeTo);
+      // TODO : We currently assume that a block won't overlap with itself
+      if (instances.size() != 1)
         continue;
-      record.setServiceDate(dates.get(0).getTime());
+      record.setServiceDate(instances.get(0).getServiceDate());
       records.add(record);
     }
 

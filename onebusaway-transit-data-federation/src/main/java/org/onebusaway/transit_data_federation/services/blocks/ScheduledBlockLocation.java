@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.services.realtime;
+package org.onebusaway.transit_data_federation.services.blocks;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
@@ -75,5 +75,20 @@ public class ScheduledBlockLocation {
 
   public void setClosestStopTimeOffset(int closestStopTimeOffset) {
     this.closestStopTimeOffset = closestStopTimeOffset;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder();
+    b.append("ScheduledBlockLocation(");
+    b.append("activeTripe=");
+    if( activeTrip != null)
+      b.append(activeTrip.getId());
+    else
+      b.append("null");
+    b.append(" scheduledTime=").append(scheduledTime);
+    b.append(" distanceAlongBlock=").append(distanceAlongBlock);
+    b.append(")");
+    return b.toString();
   }
 }
