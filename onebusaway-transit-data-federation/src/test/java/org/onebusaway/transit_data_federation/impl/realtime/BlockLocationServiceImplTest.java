@@ -212,11 +212,6 @@ public class BlockLocationServiceImplTest {
 
     double epsilon = 0.001;
 
-    /*
-     * Mockito.when(_blockLocationService.getScheduledBlockPosition(tripA,
-     * 0)).thenReturn( null);
-     */
-
     TripInstanceProxy tripInstance = new TripInstanceProxy(tripA, serviceDate);
     TripLocation position = _service.getPositionForTripInstance(tripInstance,
         t(serviceDate, 0, 0));
@@ -257,8 +252,8 @@ public class BlockLocationServiceImplTest {
     assertFalse(position.hasScheduleDeviation());
     assertTrue(Double.isNaN(position.getScheduleDeviation()));
 
-    assertTrue(position.hasDistanceAlongTrip());
-    assertEquals(0.0, position.getDistanceAlongTrip(), 0.0);
+    assertFalse(position.hasDistanceAlongTrip());
+    assertTrue(Double.isNaN(position.getDistanceAlongTrip()));
 
     assertEquals(serviceDate, position.getServiceDate());
     assertEquals(0, position.getLastUpdateTime());
