@@ -40,7 +40,6 @@ public class StopSequenceCollectionKey implements Serializable {
   public StopSequenceCollectionKey(Route route, String id) {
     this.route = route;
     this.id = id;
-    this.id = id;
   }
 
   public Route getRoute() {

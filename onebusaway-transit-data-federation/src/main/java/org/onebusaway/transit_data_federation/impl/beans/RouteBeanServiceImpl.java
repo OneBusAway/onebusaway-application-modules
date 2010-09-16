@@ -213,8 +213,8 @@ class RouteBeanServiceImpl implements RouteBeanService {
       List<EncodedPolylineBean> polylines = _shapeBeanService.getMergedPolylinesForShapeIds(shapeIds);
 
       StopGroupBean group = new StopGroupBean();
+      group.setId(block.getPublicId());
       group.setName(name);
-
       group.setStopIds(groupStopIds);
       group.setPolylines(polylines);
       directionGroups.add(group);

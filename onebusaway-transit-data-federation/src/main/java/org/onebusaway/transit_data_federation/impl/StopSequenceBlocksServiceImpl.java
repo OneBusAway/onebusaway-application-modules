@@ -292,6 +292,7 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
 
       StopSequenceCollectionKey key = new StopSequenceCollectionKey(null, direction);
       block.setId(key);
+      block.setPublicId(direction);
       block.setDescription(name);
       block.setStopSequences(patterns);
       block.setStartLat(segment.fromLat);
