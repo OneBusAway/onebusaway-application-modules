@@ -9,9 +9,7 @@ import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
-import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
@@ -24,14 +22,7 @@ import org.springframework.stereotype.Component;
 public class ScheduledBlockLocationServiceImpl implements
     ScheduledBlockLocationService {
 
-  private NarrativeService _narrativeService;
-
   private ShapePointService _shapePointService;
-
-  @Autowired
-  public void setNarrativeService(NarrativeService narrativeService) {
-    _narrativeService = narrativeService;
-  }
 
   @Autowired
   public void setShapePointService(ShapePointService shapePointService) {
@@ -110,9 +101,10 @@ public class ScheduledBlockLocationServiceImpl implements
         CoordinatePoint location = new CoordinatePoint(stop.getStopLat(),
             stop.getStopLon());
         ScheduledBlockLocation result = new ScheduledBlockLocation();
-        result.setPosition(location);
+        result.setLocation(location);
         result.setClosestStop(stopTime);
         result.setClosestStopTimeOffset(0);
+        result.setScheduledTime(scheduleTime);
         result.setDistanceAlongBlock(stopTime.getDistaceAlongBlock());
         result.setActiveTrip(stopTime.getTrip());
         return result;
@@ -128,7 +120,8 @@ public class ScheduledBlockLocationServiceImpl implements
     StopTimeEntry after = stopTimes.get(stopTimeIndex);
 
     ScheduledBlockLocation result = new ScheduledBlockLocation();
-
+    result.setScheduledTime(scheduleTime);
+    
     int fromTime = before.getDepartureTime();
     int toTime = after.getArrivalTime();
 
@@ -165,9 +158,8 @@ public class ScheduledBlockLocationServiceImpl implements
     }
 
     TripEntry activeTrip = result.getActiveTrip();
-    TripNarrative tripNarrative = _narrativeService.getTripForId(activeTrip.getId());
 
-    AgencyAndId shapeId = tripNarrative.getShapeId();
+    AgencyAndId shapeId = activeTrip.getShapeId();
 
     // Do we have enough information to use shape distance traveled?
     if (shapeId != null) {
@@ -180,7 +172,7 @@ public class ScheduledBlockLocationServiceImpl implements
         ShapePointIndex shapePointIndexMethod = new DistanceTraveledShapePointIndex(
             distance);
         CoordinatePoint location = shapePointIndexMethod.getPoint(shapePoints);
-        result.setPosition(location);
+        result.setLocation(location);
         return result;
       }
     }
@@ -195,7 +187,7 @@ public class ScheduledBlockLocationServiceImpl implements
     double lon = (lonTo - lonFrom) * ratio + lonFrom;
 
     CoordinatePoint location = new CoordinatePoint(lat, lon);
-    result.setPosition(location);
+    result.setLocation(location);
 
     return result;
   }

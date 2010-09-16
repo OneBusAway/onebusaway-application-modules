@@ -60,13 +60,13 @@ public class TripBeanServiceImpl implements TripBeanService {
     tripBean.setRouteShortName(tripNarrative.getRouteShortName());
     tripBean.setServiceId(ApplicationBeanLibrary.getId(tripEntry.getServiceId()));
 
-    AgencyAndId shapeId = tripNarrative.getShapeId();
+    AgencyAndId shapeId = tripEntry.getShapeId();
     if (shapeId != null && shapeId.hasValues())
       tripBean.setShapeId(ApplicationBeanLibrary.getId(shapeId));
 
     tripBean.setDirectionId(tripNarrative.getDirectionId());
-
-    tripBean.setBlockId(tripNarrative.getBlockId());
+    
+    tripBean.setBlockId(ApplicationBeanLibrary.getId(tripEntry.getBlock().getId()));
     
     return tripBean;
   }

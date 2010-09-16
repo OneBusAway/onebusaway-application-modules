@@ -622,6 +622,7 @@ public class TripPlannerGraphTaskImpl implements Runnable {
 
       tripEntry.setBlock(blockEntry);
       tripEntry.setServiceId(unique(trip.getServiceId()));
+      tripEntry.setShapeId(unique(trip.getShapeId()));
 
       int fromIndex = stopTimeEntries.size();
       stopTimeEntries.addAll(stopTimesForTrip);
@@ -680,7 +681,8 @@ public class TripPlannerGraphTaskImpl implements Runnable {
     blockEntry.setId(blockId);
     blockEntry.setTrips(tripEntries);
     blockEntry.setStopTimes(stopTimeEntries);
-
+    blockEntry.setTotalBlockDistance(distanceAlongBlock);
+    
     graph.putBlockEntry(blockEntry);
 
     return blockEntry;
@@ -688,6 +690,16 @@ public class TripPlannerGraphTaskImpl implements Runnable {
 
   @SuppressWarnings("unchecked")
   private <T> T unique(T value) {
+    
+    if( value == null)
+      return null;
+    
+    if( value instanceof AgencyAndId) {
+      AgencyAndId id = (AgencyAndId) value;
+      if( ! id.hasValues())
+        return null;
+    }
+    
     T already = (T) _uniques.get(value);
     if (already == null) {
       _uniques.put(value, value);

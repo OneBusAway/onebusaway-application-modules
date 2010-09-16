@@ -1,5 +1,7 @@
 package org.onebusaway.transit_data_federation.services.realtime;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+
 /**
  * Service methods for accessing/interpolating the position of a transit vehicle
  * give a trip instance and target time.
@@ -20,4 +22,7 @@ public interface BlockLocationService {
    */
   public BlockLocation getPositionForBlockInstance(BlockInstance blockInstance,
       long targetTime);
+
+  public BlockLocation getLocationForVehicleAndTime(AgencyAndId vehicleId,
+      long targetime);
 }

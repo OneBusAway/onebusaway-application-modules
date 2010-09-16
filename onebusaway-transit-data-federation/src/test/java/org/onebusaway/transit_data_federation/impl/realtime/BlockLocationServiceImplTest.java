@@ -239,7 +239,7 @@ public class BlockLocationServiceImplTest {
     p.setClosestStop(stopTimeA);
     p.setClosestStopTimeOffset(0);
     p.setDistanceAlongBlock(0);
-    p.setPosition(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
+    p.setLocation(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
 
     Mockito.when(
         _blockLocationService.getScheduledBlockPositionFromScheduledTime(

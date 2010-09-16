@@ -121,7 +121,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    Date time = DateSupport.date("2010-09-07 09:15");
+    long time = timeFromString("2010-09-07 09:15");
 
     List<BlockInstance> instances = _service.getActiveBlocksInTimeRange(blocks,
         time, time);
@@ -139,7 +139,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-07 010:15");
+    time = timeFromString("2010-09-07 010:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -156,7 +156,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-07 011:15");
+    time = timeFromString("2010-09-07 011:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -173,7 +173,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-07 012:15");
+    time = timeFromString("2010-09-07 012:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -190,7 +190,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-08 09:15");
+    time = timeFromString("2010-09-08 09:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -208,7 +208,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-08 10:15");
+    time = timeFromString("2010-09-08 10:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -234,7 +234,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-08 11:15");
+    time = timeFromString("2010-09-08 11:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -252,7 +252,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-08 12:15");
+    time = timeFromString("2010-09-08 12:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -270,7 +270,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-09 09:15");
+    time = timeFromString("2010-09-09 09:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -280,7 +280,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-09 10:15");
+    time = timeFromString("2010-09-09 10:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -297,7 +297,7 @@ public class ActiveCalendarServiceImplTest {
      * 
      ****/
 
-    time = DateSupport.date("2010-09-09 11:15");
+    time = timeFromString("2010-09-09 11:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
 
@@ -309,5 +309,9 @@ public class ActiveCalendarServiceImplTest {
     serviceIds = instance.getServiceIds();
     assertEquals(1, serviceIds.size());
     assertTrue(serviceIds.contains(lsidB));
+  }
+  
+  private static long timeFromString(String source) {
+    return DateSupport.date(source).getTime();
   }
 }

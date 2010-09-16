@@ -5,6 +5,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,10 @@ class ShapePointServiceImpl implements ShapePointService {
   public ShapePoints getShapePointsForShapeId(AgencyAndId shapeId) {
 
     List<ShapePoint> shapePoints = _gtfsDao.getShapePointsForShapeId(shapeId);
-    
-    if( shapePoints.isEmpty() )
+
+    if (shapePoints.isEmpty())
       return null;
-    
+
     int n = shapePoints.size();
 
     double[] lat = new double[n];
@@ -50,5 +51,16 @@ class ShapePointServiceImpl implements ShapePointService {
     result.setLons(lon);
     result.setDistTraveled(distTraveled);
     return result;
+  }
+
+  @Cacheable
+  @Override
+  public ShapePoints getShapePointsForShapeIds(List<AgencyAndId> shapeIds) {
+    ShapePointsFactory factory = new ShapePointsFactory();
+    for (AgencyAndId shapeId : shapeIds) {
+      ShapePoints shapePoints = getShapePointsForShapeId(shapeId);
+      factory.addPoints(shapePoints);
+    }
+    return factory.create();
   }
 }

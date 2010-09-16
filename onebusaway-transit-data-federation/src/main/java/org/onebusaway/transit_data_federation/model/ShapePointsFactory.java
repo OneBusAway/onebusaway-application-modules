@@ -19,13 +19,17 @@ public class ShapePointsFactory {
   public void addPoint(double lat, double lon) {
     CoordinatePoint point = new CoordinatePoint(lat, lon);
     /*
-    if( ! _points.isEmpty() ) {
-      CoordinatePoint prev = _points.get(_points.size()-1);
-      if( prev.equals(point))
-        return;
-    }
-    */
+     * if( ! _points.isEmpty() ) { CoordinatePoint prev =
+     * _points.get(_points.size()-1); if( prev.equals(point)) return; }
+     */
     _points.add(point);
+  }
+
+  public void addPoints(ShapePoints shapePoints) {
+    double[] lats = shapePoints.getLats();
+    double[] lons = shapePoints.getLons();
+    for (int i = 0; i < lats.length; i++)
+      addPoint(lats[i], lons[i]);
   }
 
   public ShapePoints create() {
@@ -46,4 +50,5 @@ public class ShapePointsFactory {
     shapePoints.ensureDistTraveled();
     return shapePoints;
   }
+
 }

@@ -8,7 +8,9 @@ public class ScheduledBlockLocation {
 
   private TripEntry activeTrip;
 
-  private CoordinatePoint position;
+  private int scheduledTime;
+
+  private CoordinatePoint location;
 
   private double distanceAlongBlock;
 
@@ -24,12 +26,23 @@ public class ScheduledBlockLocation {
     this.activeTrip = activeTrip;
   }
 
-  public CoordinatePoint getPosition() {
-    return position;
+  /**
+   * @return the scheduled time of the current trip in seconds
+   */
+  public int getScheduledTime() {
+    return scheduledTime;
   }
 
-  public void setPosition(CoordinatePoint position) {
-    this.position = position;
+  public void setScheduledTime(int scheduledTime) {
+    this.scheduledTime = scheduledTime;
+  }
+
+  public CoordinatePoint getLocation() {
+    return location;
+  }
+
+  public void setLocation(CoordinatePoint location) {
+    this.location = location;
   }
 
   public double getDistanceAlongBlock() {
@@ -48,6 +61,14 @@ public class ScheduledBlockLocation {
     this.closestStop = closestStop;
   }
 
+  /**
+   * The time offset, in seconds, from the closest stop to the current position
+   * of the transit vehicle among the stop times of the current block. If the
+   * number is positive, the stop is coming up. If negative, the stop has
+   * already been passed.
+   * 
+   * @return time, in seconds
+   */
   public int getClosestStopTimeOffset() {
     return closestStopTimeOffset;
   }

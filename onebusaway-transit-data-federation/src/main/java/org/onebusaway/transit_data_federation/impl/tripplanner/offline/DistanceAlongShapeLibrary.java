@@ -5,11 +5,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.collections.Min;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
-import org.onebusaway.geospatial.services.GeometryLibrary;
 import org.onebusaway.geospatial.services.UTMLibrary;
 import org.onebusaway.geospatial.services.UTMProjection;
+import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
+import org.onebusaway.transit_data_federation.impl.shapes.ShapePointsLibrary;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +18,10 @@ public class DistanceAlongShapeLibrary {
 
   private static Logger _log = LoggerFactory.getLogger(DistanceAlongShapeLibrary.class);
 
-  private double _localMinimumThreshold = 20.0;
+  private ShapePointsLibrary _shapePointsLibrary = new ShapePointsLibrary();
 
   public void setLocalMinimumThreshold(double localMinimumThreshold) {
-    _localMinimumThreshold = localMinimumThreshold;
+    _shapePointsLibrary.setLocalMinimumThreshold(localMinimumThreshold);
   }
 
   public double[] getDistancesAlongShape(ShapePoints shapePoints,
@@ -32,8 +32,8 @@ public class DistanceAlongShapeLibrary {
     UTMProjection projection = UTMLibrary.getProjectionForPoint(
         shapePoints.getLats()[0], shapePoints.getLons()[0]);
 
-    List<XYPoint> projectedShapePoints = getProjectedShapePoints(shapePoints,
-        projection);
+    List<XYPoint> projectedShapePoints = _shapePointsLibrary.getProjectedShapePoints(
+        shapePoints, projection);
 
     List<List<PointAndIndex>> possibleAssignments = computePotentialAssignments(
         projection, projectedShapePoints, shapePoints.getDistTraveled(),
@@ -49,20 +49,6 @@ public class DistanceAlongShapeLibrary {
     return distances;
   }
 
-  private List<XYPoint> getProjectedShapePoints(ShapePoints shapePoints,
-      UTMProjection projection) {
-    List<XYPoint> projectedShapePoints = new ArrayList<XYPoint>();
-
-    double[] lats = shapePoints.getLats();
-    double[] lons = shapePoints.getLons();
-    int n = lats.length;
-
-    for (int i = 0; i < n; i++)
-      projectedShapePoints.add(projection.forward(new CoordinatePoint(lats[i],
-          lons[i])));
-    return projectedShapePoints;
-  }
-
   private List<List<PointAndIndex>> computePotentialAssignments(
       UTMProjection projection, List<XYPoint> projectedShapePoints,
       double[] shapePointDistance, List<StopTimeEntryImpl> stopTimes) {
@@ -74,41 +60,12 @@ public class DistanceAlongShapeLibrary {
       StopEntryImpl stop = stopTime.getStop();
       XYPoint stopPoint = projection.forward(stop.getStopLocation());
 
-      Min<PointAndIndex> min = new Min<PointAndIndex>();
-      Min<PointAndIndex> localMin = new Min<PointAndIndex>();
-      List<PointAndIndex> localMins = new ArrayList<PointAndIndex>();
+      List<PointAndIndex> assignments = _shapePointsLibrary.computePotentialAssignments(
+          projectedShapePoints, shapePointDistance, stopPoint, 0, projectedShapePoints.size());
 
-      for (int i = 0; i < projectedShapePoints.size() - 1; i++) {
-        XYPoint from = projectedShapePoints.get(i);
-        XYPoint to = projectedShapePoints.get(i + 1);
+      Collections.sort(assignments);
 
-        XYPoint location = GeometryLibrary.projectPointToSegment(stopPoint,
-            from, to);
-        double d = location.getDistance(stopPoint);
-        double distanceAlongShape = shapePointDistance[i]
-            + location.getDistance(from);
-        PointAndIndex pindex = new PointAndIndex(location, i,
-            distanceAlongShape);
-        min.add(d, pindex);
-
-        if (d <= _localMinimumThreshold)
-          localMin.add(d, pindex);
-
-        if (d > _localMinimumThreshold && !localMin.isEmpty()) {
-          localMins.add(localMin.getMinElement());
-          localMin = new Min<PointAndIndex>();
-        }
-      }
-
-      if (!localMin.isEmpty())
-        localMins.add(localMin.getMinElement());
-
-      if (localMins.isEmpty())
-        localMins.add(min.getMinElement());
-
-      Collections.sort(localMins);
-
-      possibleAssignments.add(localMins);
+      possibleAssignments.add(assignments);
     }
     return possibleAssignments;
   }
@@ -118,7 +75,7 @@ public class DistanceAlongShapeLibrary {
       List<List<PointAndIndex>> possibleAssignments, UTMProjection projection,
       List<XYPoint> projectedShapePoints) {
 
-    List<PointAndIndex> bestAssignment = new ArrayList<DistanceAlongShapeLibrary.PointAndIndex>();
+    List<PointAndIndex> bestAssignment = new ArrayList<PointAndIndex>();
 
     double lastDistanceAlongShape = -1;
 
@@ -235,25 +192,5 @@ public class DistanceAlongShapeLibrary {
     _log.error("best assignment:\n" + b.toString());
 
     throw new IllegalStateException();
-  }
-
-  private static class PointAndIndex implements Comparable<PointAndIndex> {
-
-    public XYPoint point;
-    public int index;
-    public double distanceAlongShape;
-
-    public PointAndIndex(XYPoint point, int index, double distanceAlongShape) {
-      this.point = point;
-      this.index = index;
-      this.distanceAlongShape = distanceAlongShape;
-    }
-
-    @Override
-    public int compareTo(PointAndIndex o) {
-      if (distanceAlongShape == o.distanceAlongShape)
-        return 0;
-      return distanceAlongShape < o.distanceAlongShape ? -1 : 1;
-    }
   }
 }

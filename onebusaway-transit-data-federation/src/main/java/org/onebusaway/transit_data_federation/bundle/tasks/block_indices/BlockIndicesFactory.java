@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -89,19 +90,22 @@ public class BlockIndicesFactory {
       List<List<BlockEntry>> groupedBlocks = ensureGroups(blocksWithSameSequence);
 
       for (List<BlockEntry> group : groupedBlocks) {
-
-        ServiceIdIntervals serviceIdIntervals = getBlocksAsServiceIdIntervals(group);
-
-        Map<LocalizedServiceId, ServiceIntervalBlock> intervalsByServiceId = getBlocksAsBlockIntervals(
-            group, serviceIdIntervals);
-        BlockIndex index = new BlockIndex(group, serviceIdIntervals,
-            intervalsByServiceId);
+        BlockIndex index = createIndexForGroupOfBlocks(group);
         allIndices.add(index);
       }
     }
 
     return allIndices;
   }
+
+  public BlockIndex createIndex(BlockEntry block) {
+    List<BlockEntry> blocks = Arrays.asList(block);
+    return createIndexForGroupOfBlocks(blocks);
+  }
+
+  /****
+   * Private Methods
+   ****/
 
   private BlockSequenceKey getBlockAsKey(BlockEntry block) {
     List<TripSequenceKey> keys = new ArrayList<TripSequenceKey>();
@@ -166,6 +170,16 @@ public class BlockIndicesFactory {
     }
 
     return null;
+  }
+
+  private BlockIndex createIndexForGroupOfBlocks(List<BlockEntry> blocks) {
+    ServiceIdIntervals serviceIdIntervals = getBlocksAsServiceIdIntervals(blocks);
+
+    Map<LocalizedServiceId, ServiceIntervalBlock> intervalsByServiceId = getBlocksAsBlockIntervals(
+        blocks, serviceIdIntervals);
+    BlockIndex index = new BlockIndex(blocks, serviceIdIntervals,
+        intervalsByServiceId);
+    return index;
   }
 
   private ServiceIdIntervals getBlocksAsServiceIdIntervals(

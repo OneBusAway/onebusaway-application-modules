@@ -1,5 +1,9 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.geospatial.services.PolylineEncoder;
@@ -21,7 +25,6 @@ import org.onebusaway.transit_data_federation.impl.shapes.LastShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.LocationShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StartState;
@@ -38,20 +41,14 @@ import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripPlanBeanService;
 import org.onebusaway.transit_data_federation.services.beans.WalkPlanBeanService;
-import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlanSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 @Component
 class TripPlanBeanServiceImpl implements TripPlanBeanService {
@@ -63,8 +60,6 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
   private StopBeanService _stopBeanService;
 
   private TripBeanService _tripBeanService;
-
-  private NarrativeService _narrativeService;
 
   @Autowired
   public void setWalkPlanBeanService(WalkPlanBeanService walkPlanBeanService) {
@@ -84,11 +79,6 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
   @Autowired
   public void setTripBeanService(TripBeanService tripBeanService) {
     _tripBeanService = tripBeanService;
-  }
-
-  @Autowired
-  public void setNarrativeService(NarrativeService service) {
-    _narrativeService = service;
   }
 
   @Transactional
@@ -160,8 +150,6 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
     StopTimeInstanceProxy stiFrom = from.getStopTimeInstance();
     TripEntry tripEntry = stiFrom.getTrip();
 
-    TripNarrative tripNarrative = _narrativeService.getTripForId(tripEntry.getId());
-
     StopBean stopBean = _stopBeanService.getStopForId(stopFromProxy.getId());
     TripBean tripBean = _tripBeanService.getTripForId(tripEntry.getId());
 
@@ -188,7 +176,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
       ShapePointIndex toIndex = getStopTimeAsShapePointIndex(stiTo.getStopTime());
 
       EncodedPolylineBean path = getShapePointsAsEncodedPolyline(
-          tripNarrative.getShapeId(), fromIndex, toIndex);
+          tripEntry.getShapeId(), fromIndex, toIndex);
       if (path != null)
         segments.add(new RideSegmentBean(from.getCurrentTime(), path));
 
@@ -197,7 +185,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
       ShapePointIndex fromIndex = getStopTimeAsShapePointIndex(stiFrom.getStopTime());
       ShapePointIndex toIndex = new LastShapePointIndex();
       EncodedPolylineBean path = getShapePointsAsEncodedPolyline(
-          tripNarrative.getShapeId(), fromIndex, toIndex);
+          tripEntry.getShapeId(), fromIndex, toIndex);
       if (path != null)
         segments.add(new RideSegmentBean(from.getCurrentTime(), path));
 
@@ -213,7 +201,6 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
     segments.add(bean);
 
     TripEntry nextTrip = from.getNextTrip();
-    TripNarrative nextTripNarrative = _narrativeService.getTripForId(nextTrip.getId());
 
     if (to instanceof VehicleArrivalState) {
 
@@ -224,7 +211,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
       ShapePointIndex indexTo = getStopTimeAsShapePointIndex(stiTo.getStopTime());
 
       EncodedPolylineBean path = getShapePointsAsEncodedPolyline(
-          nextTripNarrative.getShapeId(), indexFrom, indexTo);
+          nextTrip.getShapeId(), indexFrom, indexTo);
       if (path != null)
         segments.add(new RideSegmentBean(from.getCurrentTime(), path));
 
@@ -234,7 +221,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
       ShapePointIndex indexTo = new LastShapePointIndex();
 
       EncodedPolylineBean path = getShapePointsAsEncodedPolyline(
-          nextTripNarrative.getShapeId(), indexFrom, indexTo);
+          nextTrip.getShapeId(), indexFrom, indexTo);
       if (path != null)
         segments.add(new RideSegmentBean(from.getCurrentTime(), path));
 

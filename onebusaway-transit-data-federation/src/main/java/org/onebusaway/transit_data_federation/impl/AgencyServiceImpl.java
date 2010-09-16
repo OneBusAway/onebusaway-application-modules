@@ -1,7 +1,11 @@
 package org.onebusaway.transit_data_federation.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.onebusaway.container.cache.Cacheable;
@@ -37,6 +41,21 @@ public class AgencyServiceImpl implements AgencyService {
     if (agency == null)
       return null;
     return TimeZone.getTimeZone(agency.getTimezone());
+  }
+
+  @Cacheable
+  @Override
+  public List<String> getAllAgencyIds() {
+
+    Set<String> agencyIds = new HashSet<String>();
+
+    for (TripEntry trip : _graph.getAllTrips()) {
+      AgencyAndId id = trip.getId();
+      String agencyId = id.getAgencyId();
+      agencyIds.add(agencyId);
+    }
+
+    return new ArrayList<String>(agencyIds);
   }
 
   @Cacheable
@@ -124,4 +143,5 @@ public class AgencyServiceImpl implements AgencyService {
     public double lons = 0;
     public double count = 0;
   }
+
 }

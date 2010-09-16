@@ -23,6 +23,8 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   private AgencyAndId _serviceId;
 
+  private AgencyAndId _shapeId;
+
   private int _stopTimeFromIndex;
 
   private int _stopTimeToIndex;
@@ -51,6 +53,10 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   public void setServiceId(AgencyAndId serviceId) {
     _serviceId = serviceId;
+  }
+  
+  public void setShapeId(AgencyAndId shapeId) {
+    _shapeId = shapeId;
   }
 
   public void setStopTimeIndices(int fromIndex, int toIndex) {
@@ -97,6 +103,11 @@ public class TripEntryImpl implements TripEntry, Serializable {
   @Override
   public AgencyAndId getServiceId() {
     return _serviceId;
+  }
+
+  @Override
+  public AgencyAndId getShapeId() {
+    return _shapeId;
   }
 
   @Override

@@ -32,6 +32,7 @@ import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
 import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.realtime.ActiveCalendarService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
@@ -82,6 +83,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   private CalendarService _calendarService;
 
   private ScheduledBlockLocationService _scheduledBlockLocationService;
+
+  private ActiveCalendarService _activeCalendarService;
 
   /**
    * By default, we keep around 20 minutes of cache entries
@@ -155,6 +158,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   public void setScheduledBlockLocationService(
       ScheduledBlockLocationService scheduleBlockLocationService) {
     _scheduledBlockLocationService = scheduleBlockLocationService;
+  }
+
+  @Autowired
+  public void setActiveCalendarService(
+      ActiveCalendarService activeCalendarService) {
+    _activeCalendarService = activeCalendarService;
   }
 
   /**
@@ -420,6 +429,35 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     return getBlockLocation(blockInstance, records, targetTime);
   }
 
+  @Override
+  public BlockLocation getLocationForVehicleAndTime(AgencyAndId vehicleId,
+      long targetTime) {
+
+    long fromTime = targetTime - BLOCK_RECORD_FOR_VEHICLE_SEARCH_WINDOW;
+    long toTime = targetTime + BLOCK_RECORD_FOR_VEHICLE_SEARCH_WINDOW;
+
+    List<BlockLocationRecord> records = _blockLocationRecordDao.getBlockLocationRecordsForVehicleAndTimeRange(
+        vehicleId, fromTime, toTime);
+
+    if (records.isEmpty())
+      return null;
+
+    Min<BlockLocationRecord> closest = new Min<BlockLocationRecord>();
+    for (BlockLocationRecord record : records) {
+      closest.add(Math.abs(record.getTime() - targetTime), record);
+    }
+
+    BlockLocationRecord representative = closest.getMinElement();
+    AgencyAndId blockId = representative.getBlockId();
+    long serviceDate = representative.getServiceDate();
+
+    BlockInstance blockInstance = _activeCalendarService.getActiveBlock(
+        blockId, serviceDate, targetTime);
+    BlockLocationRecordCollection collection = BlockLocationRecordCollection.createFromRecords(records);
+
+    return getBlockLocation(blockInstance, collection, targetTime);
+  }
+
   /****
    * {@link TripLocationService} Interface
    ****/
@@ -653,9 +691,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     location.setInService(true);
     location.setActiveTrip(scheduledLocation.getActiveTrip());
-    location.setLocation(scheduledLocation.getPosition());
-    if (!location.hasDistanceAlongBlock())
-      location.setDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
+    location.setLocation(scheduledLocation.getLocation());
+    location.setScheduledDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
     location.setClosestStop(scheduledLocation.getClosestStop());
     location.setClosestStopTimeOffset(scheduledLocation.getClosestStopTimeOffset());
 
@@ -666,11 +703,11 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       BlockLocationRecordCollection records, long targetTime) {
 
     TripEntry trip = tripInstance.getTrip();
-    
+
     // TODO : Proper setting of service ids?
     BlockInstance blockInstance = new BlockInstance(trip.getBlock(),
-        tripInstance.getServiceDate(), new HashSet<LocalizedServiceId>(),true);
-    
+        tripInstance.getServiceDate(), new HashSet<LocalizedServiceId>(), true);
+
     BlockLocation blockLocation = getBlockLocation(blockInstance, records,
         targetTime);
 

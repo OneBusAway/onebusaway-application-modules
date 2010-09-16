@@ -15,7 +15,9 @@ public final class TripStatusBean implements Serializable {
 
   private CoordinatePoint position;
 
-  private double distanceAlongTrip;
+  private double distanceAlongTrip = Double.NaN;
+  
+  private double scheduledDistanceAlongTrip = Double.NaN;
 
   private double scheduleDeviation;
 
@@ -134,6 +136,19 @@ public final class TripStatusBean implements Serializable {
    */
   public double getDistanceAlongTrip() {
     return distanceAlongTrip;
+  }
+  
+  /**
+   * The vehicle's scheduled distance along the trip.
+   * 
+   * @return distance, in meters
+   */
+  public double getScheduledDistanceAlongTrip() {
+    return scheduledDistanceAlongTrip;
+  }
+
+  public void setScheduledDistanceAlongTrip(double scheduledDistanceAlongTrip) {
+    this.scheduledDistanceAlongTrip = scheduledDistanceAlongTrip;
   }
 
   public void setTime(long time) {

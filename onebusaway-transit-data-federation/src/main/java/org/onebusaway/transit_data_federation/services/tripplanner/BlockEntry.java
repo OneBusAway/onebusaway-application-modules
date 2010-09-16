@@ -9,6 +9,11 @@ public interface BlockEntry {
   public AgencyAndId getId();
 
   public List<TripEntry> getTrips();
-  
+
   public List<StopTimeEntry> getStopTimes();
+
+  /**
+   * @return distance, in meters
+   */
+  public double getTotalBlockDistance();
 }

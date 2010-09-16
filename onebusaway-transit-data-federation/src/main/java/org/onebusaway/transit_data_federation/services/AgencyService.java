@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.services;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -14,6 +15,8 @@ import org.onebusaway.gtfs.model.Agency;
  * 
  */
 public interface AgencyService {
+  
+  public List<String> getAllAgencyIds();
 
   /**
    * See {@link Agency#getTimezone()}.

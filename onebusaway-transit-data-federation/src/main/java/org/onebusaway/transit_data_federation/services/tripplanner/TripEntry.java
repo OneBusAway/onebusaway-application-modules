@@ -15,6 +15,8 @@ public interface TripEntry {
   public BlockEntry getBlock();
 
   public AgencyAndId getServiceId();
+  
+  public AgencyAndId getShapeId();
 
   public List<StopTimeEntry> getStopTimes();
 

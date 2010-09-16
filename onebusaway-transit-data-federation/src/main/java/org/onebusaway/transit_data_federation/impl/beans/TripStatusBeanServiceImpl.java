@@ -24,6 +24,7 @@ import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.beans.BlockStatusBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStatusBeanService;
@@ -40,6 +41,11 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripInstanceP
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * TODO: Refactor to use {@link BlockStatusBeanService}
+ * 
+ * @author bdferris
+ */
 @Component
 public class TripStatusBeanServiceImpl implements TripStatusBeanService {
 
@@ -201,7 +207,7 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
   public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query) {
 
     AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(query.getRouteId());
-    Date time = new Date(query.getTime());
+    long time = query.getTime();
     TripDetailsInclusionBean inclusion = query.getInclusion();
 
     List<BlockInstance> instances = _activeCalendarService.getActiveBlocksForRouteInTimeRange(
@@ -213,11 +219,11 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
   @Override
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query) {
-    
+
     String agencyId = query.getAgencyId();
-    Date time = new Date(query.getTime());
+    long time = query.getTime();
     TripDetailsInclusionBean inclusion = query.getInclusion();
-    
+
     List<BlockInstance> instances = _activeCalendarService.getActiveBlocksForAgencyInTimeRange(
         agencyId, time, time);
 
@@ -230,14 +236,14 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
 
   private ListBean<TripDetailsBean> getBlockInstancesAsBeans(
       List<BlockInstance> instances, TripDetailsInclusionBean inclusion,
-      Date time) {
+      long time) {
 
     List<TripDetailsBean> results = new ArrayList<TripDetailsBean>();
 
     for (BlockInstance instance : instances) {
 
       BlockLocation position = _blockLocationService.getPositionForBlockInstance(
-          instance, time.getTime());
+          instance, time);
 
       if (position == null)
         continue;
@@ -312,10 +318,11 @@ public class TripStatusBeanServiceImpl implements TripStatusBeanService {
       CoordinatePoint location = blockLocation.getLocation();
       bean.setPosition(location);
       bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
-      
+
       TripEntry activeTrip = blockLocation.getActiveTrip();
-      bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock() - activeTrip.getDistanceAlongBlock());
-      
+      bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock()
+          - activeTrip.getDistanceAlongBlock());
+
       bean.setPredicted(blockLocation.isPredicted());
       AgencyAndId vid = blockLocation.getVehicleId();
       if (vid != null)

@@ -64,7 +64,7 @@ public class GenerateNarrativesTask implements Runnable {
 
   @Autowired
   private Modifications _modifications;
-
+  
   private Map<Object, Object> _deduplication = new HashMap<Object, Object>();
 
   @Override
@@ -213,10 +213,8 @@ public class GenerateNarrativesTask implements Runnable {
     }
 
     TripNarrative.Builder builder = TripNarrative.builder();
-    builder.setBlockId(deduplicate(trip.getBlockId()));
     builder.setDirectionId(deduplicate(trip.getDirectionId()));
     builder.setRouteShortName(deduplicate(trip.getRouteShortName()));
-    builder.setShapeId(deduplicate(trip.getShapeId()));
     builder.setTripHeadsign(deduplicate(headsign));
     builder.setTripShortName(deduplicate(trip.getTripShortName()));
     return builder.create();

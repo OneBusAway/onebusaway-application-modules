@@ -10,13 +10,15 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
 public class BlockEntryImpl implements BlockEntry, Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private AgencyAndId _id;
 
   private List<TripEntry> _trips;
 
   private List<StopTimeEntry> _stopTimes;
+
+  private double _totalBlockDistance = 0;
 
   public void setId(AgencyAndId id) {
     _id = id;
@@ -28,6 +30,10 @@ public class BlockEntryImpl implements BlockEntry, Serializable {
 
   public void setStopTimes(List<StopTimeEntry> stopTimes) {
     _stopTimes = stopTimes;
+  }
+
+  public void setTotalBlockDistance(double totalBlockDistance) {
+    _totalBlockDistance = totalBlockDistance;
   }
 
   /****
@@ -48,7 +54,12 @@ public class BlockEntryImpl implements BlockEntry, Serializable {
   public List<StopTimeEntry> getStopTimes() {
     return _stopTimes;
   }
-  
+
+  @Override
+  public double getTotalBlockDistance() {
+    return _totalBlockDistance;
+  }
+
   @Override
   public String toString() {
     return _id.toString();

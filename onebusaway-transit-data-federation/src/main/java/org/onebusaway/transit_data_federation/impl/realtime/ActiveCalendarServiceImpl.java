@@ -9,10 +9,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceIdIntervals;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
+import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
@@ -29,6 +32,8 @@ class ActiveCalendarServiceImpl implements ActiveCalendarService {
 
   private BlockIndexService _blockIndexService;
 
+  private TransitGraphDao _transitGraphDao;
+
   @Autowired
   public void setCalendarService(CalendarService calendarService) {
     _calendarService = calendarService;
@@ -39,23 +44,74 @@ class ActiveCalendarServiceImpl implements ActiveCalendarService {
     _blockIndexService = blockIndexService;
   }
 
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  /****
+   * {@link ActiveCalendarService} Interface
+   ****/
+
+  @Override
+  public BlockInstance getActiveBlock(AgencyAndId blockId, long serviceDate,
+      long time) {
+
+    List<BlockInstance> blockInstances = getActiveBlocks(blockId, time, time);
+    
+    if (blockInstances.isEmpty())
+      return null;
+    else if (blockInstances.size() == 1)
+      return blockInstances.get(0);
+
+    Min<BlockInstance> m = new Min<BlockInstance>();
+
+    for (BlockInstance blockInstance : blockInstances) {
+      long someServiceDate = blockInstance.getServiceDate();
+      double delta = Math.abs(someServiceDate - serviceDate);
+      m.add(delta, blockInstance);
+    }
+
+    return m.getMinElement();
+  }
+  
+  @Override
+  public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
+      long timeFrom, long timeTo) {
+    
+    BlockEntry block = _transitGraphDao.getBlockEntryForId(blockId);
+
+    if (block == null)
+      return null;
+
+    BlockIndicesFactory factory = new BlockIndicesFactory();
+    factory.setCalendarService(_calendarService);
+    BlockIndex index = factory.createIndex(block);
+
+    List<BlockInstance> blockInstances = new ArrayList<BlockInstance>();
+
+    getActiveBlocksInTimeRange(index, timeFrom, timeTo, blockInstances);
+
+    return blockInstances;
+  }
+
   @Override
   public List<BlockInstance> getActiveBlocksForAgencyInTimeRange(
-      String agencyId, Date timeFrom, Date timeTo) {
+      String agencyId, long timeFrom, long timeTo) {
     List<BlockIndex> indices = _blockIndexService.getBlockIndicesForAgencyId(agencyId);
     return getActiveBlocksInTimeRange(indices, timeFrom, timeTo);
   }
 
   @Override
   public List<BlockInstance> getActiveBlocksForRouteInTimeRange(
-      AgencyAndId routeId, Date timeFrom, Date timeTo) {
+      AgencyAndId routeId, long timeFrom, long timeTo) {
     List<BlockIndex> indices = _blockIndexService.getBlockIndicesForRouteCollectionId(routeId);
     return getActiveBlocksInTimeRange(indices, timeFrom, timeTo);
   }
 
   @Override
   public List<BlockInstance> getActiveBlocksInTimeRange(
-      List<BlockIndex> indices, Date timeFrom, Date timeTo) {
+      List<BlockIndex> indices, long timeFrom, long timeTo) {
     List<BlockInstance> instances = new ArrayList<BlockInstance>();
     for (BlockIndex index : indices)
       getActiveBlocksInTimeRange(index, timeFrom, timeTo, instances);
@@ -66,15 +122,18 @@ class ActiveCalendarServiceImpl implements ActiveCalendarService {
    * Internal Methods
    *****/
 
-  private void getActiveBlocksInTimeRange(BlockIndex index, Date timeFrom,
-      Date timeTo, List<BlockInstance> results) {
+  private void getActiveBlocksInTimeRange(BlockIndex index, long timeFrom,
+      long timeTo, List<BlockInstance> results) {
 
+    Date dateFrom = new Date(timeFrom);
+    Date dateTo = new Date(timeTo);
+    
     ServiceIdIntervals serviceIdIntervals = index.getServiceIdIntervals();
     Set<LocalizedServiceId> serviceIds = serviceIdIntervals.getServiceIds();
     if (serviceIds.size() == 1)
-      handleBlockIndexWithSingleServiceId(index, timeFrom, timeTo, results);
+      handleBlockIndexWithSingleServiceId(index, dateFrom, dateTo, results);
     else
-      handleBlockIndexWithMultipleServiceIds(index, timeFrom, timeTo, results);
+      handleBlockIndexWithMultipleServiceIds(index, dateFrom, dateTo, results);
   }
 
   private List<BlockInstance> handleBlockIndexWithSingleServiceId(
