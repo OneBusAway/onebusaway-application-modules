@@ -2,11 +2,11 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.aid;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stop;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stopTime;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.time;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.trip;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.aid;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stop;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stopTime;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.time;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.trip;
 
 import java.util.Arrays;
 import java.util.List;

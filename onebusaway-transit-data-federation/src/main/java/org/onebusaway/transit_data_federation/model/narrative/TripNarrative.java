@@ -1,10 +1,9 @@
 package org.onebusaway.transit_data_federation.model.narrative;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
+import java.io.Serializable;
+
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-
-import java.io.Serializable;
 
 /**
  * Trip narrative information. Includes information about the trip short name,

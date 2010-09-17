@@ -2,13 +2,13 @@ package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.aid;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.addStopTime;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.block;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.linkBlockTrips;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stop;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stopTime;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.trip;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.addStopTime;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.aid;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.block;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.linkBlockTrips;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stop;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stopTime;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.trip;
 
 import java.util.ArrayList;
 import java.util.Arrays;

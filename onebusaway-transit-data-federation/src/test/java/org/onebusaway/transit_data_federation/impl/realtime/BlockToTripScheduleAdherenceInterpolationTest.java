@@ -11,14 +11,14 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.DateSupport;
-import org.onebusaway.transit_data_federation.impl.MockEntryFactory;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.testing.DateSupport;
+import org.onebusaway.transit_data_federation.testing.MockEntryFactory;
 
 public class BlockToTripScheduleAdherenceInterpolationTest {
 

@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import org.onebusaway.transit_data_federation.impl.MockEntryFactory;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
+import org.onebusaway.transit_data_federation.testing.MockEntryFactory;
 
 public class DistanceAlongShapeLibraryTest {
 

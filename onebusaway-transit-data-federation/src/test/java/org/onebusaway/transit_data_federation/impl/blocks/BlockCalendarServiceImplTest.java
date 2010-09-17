@@ -2,13 +2,13 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.aid;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.block;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.linkBlockTrips;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stop;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.stopTime;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.time;
-import static org.onebusaway.transit_data_federation.impl.MockEntryFactory.trip;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.aid;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.block;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.linkBlockTrips;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stop;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stopTime;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.time;
+import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.trip;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.transit_data_federation.DateSupport;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockCalendarServiceImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
@@ -31,6 +30,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.testing.DateSupport;
 
 public class BlockCalendarServiceImplTest {
 

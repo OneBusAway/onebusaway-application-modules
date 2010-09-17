@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation;
+package org.onebusaway.transit_data_federation.testing;
 
 import java.text.DateFormat;
 import java.text.ParseException;
