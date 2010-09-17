@@ -40,4 +40,8 @@ public class DateSupport {
   public static final int hourToSec(double hour) {
     return (int) (hour * 60 * 60);
   }
+
+  public static final int hourAndMinutesToSec(int hour, int minutes) {
+    return ((hour * 60) + minutes) * 60;
+  }
 }
