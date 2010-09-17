@@ -55,7 +55,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
    * @throws IOException
    */
   public DefaultHttpHeaders index() throws IOException {
-
     /* find the stop */
     String stopId = _request.getParameter("stopId");
     if (stopId == null) {
@@ -91,6 +90,10 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _transitDataService.getStopWithArrivalsAndDepartures(
         stopId, timeFrom.getTime(), timeTo.getTime());
+
+    if (stopWithArrivalsAndDepartures.getStop() == null) {
+      throw new IllegalArgumentException("Bogus stop parameter");
+    }
 
     GregorianCalendar now = new GregorianCalendar();
     Siri siri = new Siri();
@@ -129,10 +132,14 @@ public class StopMonitoringController implements ModelDriven<Object>,
       List<StopBean> stops = stopsForRoute.getStops();
 
       MonitoredStopVisit MonitoredStopVisit = new MonitoredStopVisit();
-      delivery.visits.add(MonitoredStopVisit);
 
       MonitoredStopVisit.RecordedAtTime = new GregorianCalendar();
       TripStatusBean status = specificTripDetails.getStatus();
+      if (status == null) {
+        //this trip has no status.  Let's skip it.
+        continue;
+      }
+      StopBean closestStop = status.getClosestStop();
 
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
       MonitoredStopVisit.MonitoringRef = adbean.getStopId();
@@ -143,31 +150,35 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef = new FramedVehicleJourneyRef();
 
       CoordinatePoint position = status.getLocation();
-      if (position != null) {
+      if (position == null) {
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation = new VehicleLocation();
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getLocation().getLat();
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getLocation().getLon();
 
         MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongTrip();
         MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall = adbean.getDistanceFromStop();
-
-        int i = 0;
-        boolean started = false;
-        for (TripStopTimeBean stopTime : specificTripDetails.getSchedule().getStopTimes()) {
-          if (started) {
-            i++;
-          }
-          if (stopTime.getStop().equals(
-              specificTripDetails.getStatus().getClosestStop())) {
-            started = true;
-          }
-          if (stopTime.getStop().getId().equals(stopId)) {
-            break;
-          }
-        }
-
-        MonitoredStopVisit.MonitoredVehicleJourney.StopsFromCall = i;
       }
+
+      int i = 0;
+      boolean started = false;
+      List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
+      for (TripStopTimeBean stopTime : stopTimes) {
+        if (started) {
+          i++;
+        }
+        if (stopTime.getStop().equals(closestStop)) {
+          started = true;
+        }
+        if (stopTime.getStop().getId().equals(stopId)) {
+          break;
+        }
+      }
+      if (started == false) {
+        /* remove trips which have already passed this stop */
+        continue;
+      }
+      MonitoredStopVisit.MonitoredVehicleJourney.StopsFromCall = i;
+
       Date serviceDate = new Date(adbean.getServiceDate());
 
       MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef.DataFrameRef = String.format(
@@ -178,6 +189,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.MonitoredVehicleJourney.OriginRef = stops.get(0).getId();
       MonitoredStopVisit.MonitoredVehicleJourney.DestinationRef = stops.get(
           stops.size() - 1).getId();
+
+      delivery.visits.add(MonitoredStopVisit);
     }
 
     _response = siri;
