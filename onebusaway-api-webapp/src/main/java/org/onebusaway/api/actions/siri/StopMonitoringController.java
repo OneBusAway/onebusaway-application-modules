@@ -1,6 +1,7 @@
 package org.onebusaway.api.actions.siri;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.siri.model.DistanceExtensions;
 import org.onebusaway.siri.model.FramedVehicleJourneyRef;
 import org.onebusaway.siri.model.MonitoredStopVisit;
 import org.onebusaway.siri.model.MonitoredVehicleJourney;
@@ -148,15 +149,15 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.MonitoredVehicleJourney.DirectionRef = trip.getDirectionId();
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
       MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef = new FramedVehicleJourneyRef();
+      MonitoredStopVisit.MonitoredVehicleJourney.Extensions = new DistanceExtensions();
 
       CoordinatePoint position = status.getLocation();
-      if (position == null) {
+      if (position != null) {
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation = new VehicleLocation();
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getLocation().getLat();
         MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getLocation().getLon();
-
-        MonitoredStopVisit.MonitoredVehicleJourney.DistanceAlongRoute = status.getDistanceAlongTrip();
-        MonitoredStopVisit.MonitoredVehicleJourney.DistanceFromCall = adbean.getDistanceFromStop();
+        MonitoredStopVisit.MonitoredVehicleJourney.Extensions.DistanceAlongRoute = status.getDistanceAlongTrip();
+        MonitoredStopVisit.MonitoredVehicleJourney.Extensions.DistanceFromCall = adbean.getDistanceFromStop();
       }
 
       int i = 0;
@@ -177,7 +178,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
         /* remove trips which have already passed this stop */
         continue;
       }
-      MonitoredStopVisit.MonitoredVehicleJourney.StopsFromCall = i;
+      MonitoredStopVisit.MonitoredVehicleJourney.Extensions.StopsFromCall = i;
 
       Date serviceDate = new Date(adbean.getServiceDate());
 
