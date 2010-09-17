@@ -247,7 +247,8 @@ public class BeanFactoryV2 {
       stiBean.setArrivalTime(sti.getArrivalTime());
       stiBean.setDepartureTime(sti.getDepartureTime());
       stiBean.setStopHeadsign(sti.getStopHeadsign());
-
+      stiBean.setDistanceAlongTrip(sti.getDistanceAlongTrip());
+      
       stiBean.setStopId(sti.getStop().getId());
       addToReferences(sti.getStop());
 

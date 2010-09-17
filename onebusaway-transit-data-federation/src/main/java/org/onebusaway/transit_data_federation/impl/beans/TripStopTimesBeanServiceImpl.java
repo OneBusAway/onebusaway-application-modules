@@ -74,7 +74,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       StopEntry stopEntry = stopTime.getStop();
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId());
       stBean.setStop(stopBean);
-
+      stBean.setDistanceAlongTrip(stopTime.getDistaceAlongBlock() - trip.getDistanceAlongBlock());
       bean.addStopTime(stBean);
     }
 
