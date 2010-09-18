@@ -35,15 +35,19 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private String tripHeadsign;
 
-  private long predictedArrivalTime;
-
   private long scheduledArrivalTime;
-
-  private long predictedDepartureTime;
 
   private long scheduledDepartureTime;
 
   private String status;
+
+  private boolean predicted = false;
+
+  private Long lastUpdateTime;
+
+  private long predictedArrivalTime;
+
+  private long predictedDepartureTime;
 
   /**
    * Allowed to be null if not set
@@ -106,28 +110,12 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.stopId = stopId;
   }
 
-  public long getPredictedArrivalTime() {
-    return predictedArrivalTime;
-  }
-
-  public void setPredictedArrivalTime(long predictedArrivalTime) {
-    this.predictedArrivalTime = predictedArrivalTime;
-  }
-
   public long getScheduledArrivalTime() {
     return scheduledArrivalTime;
   }
 
   public void setScheduledArrivalTime(long scheduledArrivalTime) {
     this.scheduledArrivalTime = scheduledArrivalTime;
-  }
-
-  public long getPredictedDepartureTime() {
-    return predictedDepartureTime;
-  }
-
-  public void setPredictedDepartureTime(long predictedDepartureTime) {
-    this.predictedDepartureTime = predictedDepartureTime;
   }
 
   public long getScheduledDepartureTime() {
@@ -145,6 +133,22 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   public void setStatus(String status) {
     this.status = status;
   }
+  
+  public boolean isPredicted() {
+    return predicted;
+  }
+
+  public void setPredicted(boolean predicted) {
+    this.predicted = predicted;
+  }
+
+  public Long getLastUpdateTime() {
+    return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(Long lastUpdateTime) {
+    this.lastUpdateTime = lastUpdateTime;
+  }
 
   public Double getDistanceFromStop() {
     return distanceFromStop;
@@ -156,6 +160,22 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   public boolean hasPredictedArrivalTime() {
     return this.predictedArrivalTime > 0;
+  }
+
+  public long getPredictedArrivalTime() {
+    return predictedArrivalTime;
+  }
+
+  public void setPredictedArrivalTime(long predictedArrivalTime) {
+    this.predictedArrivalTime = predictedArrivalTime;
+  }
+
+  public long getPredictedDepartureTime() {
+    return predictedDepartureTime;
+  }
+
+  public void setPredictedDepartureTime(long predictedDepartureTime) {
+    this.predictedDepartureTime = predictedDepartureTime;
   }
 
   public boolean hasPredictedDepartureTime() {
@@ -177,5 +197,4 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     return "route=" + routeShortName + " scheduled=" + scheduledArrivalTime
         + " predicted=" + predictedArrivalTime;
   }
-
 }

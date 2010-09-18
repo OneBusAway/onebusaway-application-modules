@@ -439,6 +439,9 @@ public class BeanFactoryV2 {
 
     if (ad.isDistanceFromStopSet())
       bean.setDistanceFromStop(ad.getDistanceFromStop());
+    
+    bean.setPredicted(ad.isPredicted());
+    bean.setLastUpdateTime(ad.getLastUpdateTime());
 
     return bean;
   }

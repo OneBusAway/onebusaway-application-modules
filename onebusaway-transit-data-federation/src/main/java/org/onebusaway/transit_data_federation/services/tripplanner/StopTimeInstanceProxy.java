@@ -16,6 +16,8 @@ public class StopTimeInstanceProxy {
 
   private boolean _predicted = false;
 
+  private long lastUpdateTime;
+
   private boolean _hasPredictedArrivalOffset = false;
 
   private boolean _hasPredictedDepartureOffset = false;
@@ -75,6 +77,14 @@ public class StopTimeInstanceProxy {
     _predicted = predicted;
   }
 
+  public long getLastUpdateTime() {
+    return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(long lastUpdateTime) {
+    this.lastUpdateTime = lastUpdateTime;
+  }
+
   public boolean hasPredictedArrivalOffset() {
     return _hasPredictedArrivalOffset;
   }
@@ -129,9 +139,9 @@ public class StopTimeInstanceProxy {
   public int getPredictedDepartureOffset() {
     return _predictedDepartureOffset;
   }
-  
+
   public boolean hasDistanceFromStop() {
-    return ! Double.isNaN(_distanceFromStop);
+    return !Double.isNaN(_distanceFromStop);
   }
 
   public double getDistanceFromStop() {

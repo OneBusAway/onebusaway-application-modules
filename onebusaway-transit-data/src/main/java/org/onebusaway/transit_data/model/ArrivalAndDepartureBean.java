@@ -37,6 +37,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private boolean predicted = false;
 
+  private Long lastUpdateTime;
+
   private String status;
 
   private double distanceFromStop = Double.NaN;
@@ -105,6 +107,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.predicted = predicted;
   }
 
+  public Long getLastUpdateTime() {
+    return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(Long lastUpdateTime) {
+    this.lastUpdateTime = lastUpdateTime;
+  }
+
   public String getStatus() {
     return status;
   }
@@ -114,9 +124,9 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   }
 
   public boolean isDistanceFromStopSet() {
-    return ! Double.isNaN(distanceFromStop);
+    return !Double.isNaN(distanceFromStop);
   }
-  
+
   public double getDistanceFromStop() {
     return distanceFromStop;
   }

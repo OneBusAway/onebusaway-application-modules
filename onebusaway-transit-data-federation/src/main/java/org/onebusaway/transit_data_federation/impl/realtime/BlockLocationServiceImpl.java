@@ -283,8 +283,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       BlockLocationRecordCollection collection = getBlockLocationRecordCollectionForBlock(
           serviceDateAndBlockId, targetTime);
 
+      boolean predicted = false;
+
       // Only apply real-time data if there is data to apply
       if (collection.hasScheduleDeviations()) {
+
+        predicted = true;
 
         int scheduleDeviation = collection.getScheduleDeviationForTargetTime(targetTime);
 
@@ -308,15 +312,20 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         }
       }
 
-      for (StopTimeInstanceProxy sti : entry.getValue()) {
-        if (collection.hasDistancesAlongBlock()) {
+      if (collection.hasDistancesAlongBlock()) {
 
-          double distanceAlongBlock = collection.getDistanceAlongBlockForTargetTime(targetTime);
+        predicted = true;
+        double distanceAlongBlock = collection.getDistanceAlongBlockForTargetTime(targetTime);
+
+        for (StopTimeInstanceProxy sti : entry.getValue()) {
           double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
               - distanceAlongBlock;
           sti.setDistanceFromStop(distanceFromStop);
-        } else {
+        }
 
+      } else {
+
+        for (StopTimeInstanceProxy sti : entry.getValue()) {
           TripEntry tripEntry = sti.getTrip();
           BlockEntry blockEntry = tripEntry.getBlock();
 
@@ -330,6 +339,15 @@ public class BlockLocationServiceImpl implements BlockLocationService,
                 - distanceAlongBlock;
             sti.setDistanceFromStop(distanceFromStop);
           }
+        }
+      }
+
+      // Set prediction status and last update time as applicable
+      if (predicted && !collection.isEmpty()) {
+        long lastUpdateTime = collection.getLastUpdateTime(targetTime);
+        for (StopTimeInstanceProxy sti : entry.getValue()) {
+          sti.setLastUpdateTime(lastUpdateTime);
+          sti.setPredicted(true);
         }
       }
     }
@@ -515,8 +533,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   @Override
-  public TripLocation getPositionForTripInstance(
-      TripInstance tripInstance, long targetTime) {
+  public TripLocation getPositionForTripInstance(TripInstance tripInstance,
+      long targetTime) {
 
     TripEntry trip = tripInstance.getTrip();
     BlockEntry block = trip.getBlock();
@@ -672,7 +690,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     boolean predicted = !records.isEmpty();
     if (predicted) {
       location.setPredicted(true);
-      location.setLastUpdateTime(records.getToTime());
+      long lastUpdateTime = records.getLastUpdateTime(targetTime);
+      location.setLastUpdateTime(lastUpdateTime);
     }
 
     if (records.hasScheduleDeviations()) {

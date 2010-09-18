@@ -135,6 +135,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setStopId(ApplicationBeanLibrary.getId(stop.getId()));
 
     pab.setStatus("default");
+    
+    pab.setPredicted(sti.isPredicted());
+    
+    if( sti.getLastUpdateTime() > 0)
+      pab.setLastUpdateTime(sti.getLastUpdateTime());
 
     return pab;
   }

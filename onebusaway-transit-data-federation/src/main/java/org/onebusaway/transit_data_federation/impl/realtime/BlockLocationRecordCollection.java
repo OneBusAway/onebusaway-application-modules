@@ -180,6 +180,16 @@ public final class BlockLocationRecordCollection implements Serializable {
 
     return headMap.get(headMap.lastKey());
   }
+  
+  public long getLastUpdateTime(long targetTime) {
+    if( ! scheduleDeviationsByTime.isEmpty() )
+      return getLastUpdateTime(targetTime, scheduleDeviationsByTime);
+    if( ! distancesAlongBlock.isEmpty() )
+      return getLastUpdateTime(targetTime, distancesAlongBlock);
+    if( ! locations.isEmpty() )
+      return getLastUpdateTime(targetTime, locations);
+    return 0;
+  }
 
   public AgencyAndId getVehicleId() {
     return vehicleId;
@@ -265,6 +275,15 @@ public final class BlockLocationRecordCollection implements Serializable {
     }
 
     return scheduleDeviationsByScheduleTime;
+  }
+  
+  private <V> long getLastUpdateTime(long targetTime, SortedMap<Long,V> map) {
+    if( map.isEmpty() )
+      return 0;
+    SortedMap<Long, V> headMap = map.headMap(targetTime+1);
+    if( headMap.isEmpty() )
+      return map.firstKey();
+    return headMap.lastKey();    
   }
 
   /****
