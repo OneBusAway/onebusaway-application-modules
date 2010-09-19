@@ -140,7 +140,7 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   }
 
   public boolean hasPredictedDepartureTime() {
-    return this.predictedArrivalTime > 0;
+    return this.predictedDepartureTime > 0;
   }
 
   public long computeBestArrivalTime() {
