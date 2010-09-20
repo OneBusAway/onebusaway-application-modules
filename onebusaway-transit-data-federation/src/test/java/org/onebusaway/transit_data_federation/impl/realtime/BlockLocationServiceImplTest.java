@@ -21,18 +21,17 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.TransitDataFederationBaseTestSupport;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
-import org.onebusaway.transit_data_federation.services.realtime.TripLocation;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 import org.onebusaway.utility.DateLibrary;
 
 public class BlockLocationServiceImplTest {
@@ -54,7 +53,7 @@ public class BlockLocationServiceImplTest {
     _blockLocationService = Mockito.mock(ScheduledBlockLocationService.class);
     _service.setScheduledBlockLocationService(_blockLocationService);
 
-    _service.setBlockLocationRecordCache(TransitDataFederationBaseTestSupport.createCache());
+    _service.setBlockLocationRecordCache(new BlockLocationRecordCacheImpl());
   }
 
   @Test
@@ -99,12 +98,14 @@ public class BlockLocationServiceImplTest {
     vprA.setScheduleDeviation(120);
     vprA.setTimeOfRecord(t(serviceDate, 9, 0));
     vprA.setServiceDate(serviceDate);
+    vprA.setVehicleId(aid("vehicleA"));
 
     VehicleLocationRecord vprB = new VehicleLocationRecord();
     vprB.setTripId(trip.getId());
     vprB.setScheduleDeviation(130);
     vprB.setTimeOfRecord(t(serviceDate, 9, 8));
     vprB.setServiceDate(serviceDate);
+    vprB.setVehicleId(aid("vehicleA"));
 
     _service.handleVehicleLocationRecords(Arrays.asList(vprA, vprB));
 
@@ -146,7 +147,8 @@ public class BlockLocationServiceImplTest {
     vpr.setScheduleDeviation(240);
     vpr.setTimeOfRecord(t(serviceDate, 9, 10.5));
     vpr.setServiceDate(serviceDate);
-
+    vpr.setVehicleId(aid("vehicleA"));
+    
     _service.handleVehicleLocationRecords(Arrays.asList(vpr));
 
     _service.applyRealtimeData(stis, t(serviceDate, 9, 11));
@@ -165,6 +167,7 @@ public class BlockLocationServiceImplTest {
     vpr.setScheduleDeviation(90);
     vpr.setTimeOfRecord(t(serviceDate, 9, 12));
     vpr.setServiceDate(serviceDate);
+    vpr.setVehicleId(aid("vehicleA"));
 
     _service.handleVehicleLocationRecords(Arrays.asList(vpr));
 
@@ -212,22 +215,22 @@ public class BlockLocationServiceImplTest {
 
     double epsilon = 0.001;
 
-    TripInstance tripInstance = new TripInstance(tripA, serviceDate);
-    TripLocation position = _service.getPositionForTripInstance(tripInstance,
-        t(serviceDate, 0, 0));
+    BlockInstance blockInstance = new BlockInstance(block, serviceDate);
+    BlockLocation location = _service.getLocationForBlockInstance(
+        blockInstance, t(serviceDate, 0, 0));
 
-    assertFalse(position.isInService());
-    assertNull(position.getClosestStop());
-    assertEquals(0, position.getClosestStopTimeOffset());
-    assertFalse(position.hasScheduleDeviation());
-    assertTrue(Double.isNaN(position.getScheduleDeviation()));
-    assertFalse(position.hasDistanceAlongTrip());
-    assertTrue(Double.isNaN(position.getDistanceAlongTrip()));
-    assertNull(position.getLocation());
-    assertEquals(serviceDate, position.getServiceDate());
-    assertEquals(0, position.getLastUpdateTime());
-    assertEquals(tripA, position.getTrip());
-    assertNull(position.getVehicleId());
+    assertFalse(location.isInService());
+    assertNull(location.getClosestStop());
+    assertEquals(0, location.getClosestStopTimeOffset());
+    assertFalse(location.hasScheduleDeviation());
+    assertTrue(Double.isNaN(location.getScheduleDeviation()));
+    assertFalse(location.hasDistanceAlongBlock());
+    assertTrue(Double.isNaN(location.getDistanceAlongBlock()));
+    assertNull(location.getLocation());
+    assertEquals(blockInstance, location.getBlockInstance());
+    assertEquals(0, location.getLastUpdateTime());
+    assertNull(location.getActiveTrip());
+    assertNull(location.getVehicleId());
 
     ScheduledBlockLocation p = new ScheduledBlockLocation();
     p.setActiveTrip(tripA);
@@ -240,30 +243,30 @@ public class BlockLocationServiceImplTest {
         _blockLocationService.getScheduledBlockLocationFromScheduledTime(
             block.getStopTimes(), 1800)).thenReturn(p);
 
-    position = _service.getPositionForTripInstance(tripInstance,
+    location = _service.getLocationForBlockInstance(blockInstance,
         t(serviceDate, 0, 30));
 
-    assertTrue(position.isInService());
-    assertEquals(stopTimeA, position.getClosestStop());
-    assertEquals(0, position.getClosestStopTimeOffset());
+    assertTrue(location.isInService());
+    assertEquals(stopTimeA, location.getClosestStop());
+    assertEquals(0, location.getClosestStopTimeOffset());
 
-    assertEquals(stopA.getStopLocation(), position.getLocation());
+    assertEquals(stopA.getStopLocation(), location.getLocation());
 
-    assertFalse(position.hasScheduleDeviation());
-    assertTrue(Double.isNaN(position.getScheduleDeviation()));
+    assertFalse(location.hasScheduleDeviation());
+    assertTrue(Double.isNaN(location.getScheduleDeviation()));
 
-    assertFalse(position.hasDistanceAlongTrip());
-    assertTrue(Double.isNaN(position.getDistanceAlongTrip()));
+    assertFalse(location.hasDistanceAlongBlock());
+    assertTrue(Double.isNaN(location.getDistanceAlongBlock()));
 
-    assertEquals(serviceDate, position.getServiceDate());
-    assertEquals(0, position.getLastUpdateTime());
-    assertEquals(tripA, position.getTrip());
-    assertNull(position.getVehicleId());
+    assertEquals(blockInstance, location.getBlockInstance());
+    assertEquals(0, location.getLastUpdateTime());
+    assertEquals(tripA, location.getActiveTrip());
+    assertNull(location.getVehicleId());
 
-    assertEquals(47.5, position.getLocation().getLat(), epsilon);
-    assertEquals(-122.5, position.getLocation().getLon(), epsilon);
-    assertEquals(stopTimeA, position.getClosestStop());
-    assertEquals(0, position.getClosestStopTimeOffset());
+    assertEquals(47.5, location.getLocation().getLat(), epsilon);
+    assertEquals(-122.5, location.getLocation().getLon(), epsilon);
+    assertEquals(stopTimeA, location.getClosestStop());
+    assertEquals(0, location.getClosestStopTimeOffset());
   }
 
   private long t(long serviceDate, int hours, double minutes) {

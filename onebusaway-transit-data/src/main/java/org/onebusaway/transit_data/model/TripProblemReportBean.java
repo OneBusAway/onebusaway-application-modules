@@ -14,6 +14,8 @@ public class TripProblemReportBean implements Serializable {
 
   private long serviceDate;
 
+  private String vehicleId;
+
   private String stopId;
 
   private String data;
@@ -36,7 +38,7 @@ public class TripProblemReportBean implements Serializable {
 
   private boolean predicted = false;
 
-  private double distanceAlongTrip = Double.NaN;
+  private double distanceAlongBlock = Double.NaN;
 
   private double scheduleDeviation = Double.NaN;
 
@@ -70,6 +72,14 @@ public class TripProblemReportBean implements Serializable {
 
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
+  }
+
+  public String getVehicleId() {
+    return vehicleId;
+  }
+
+  public void setVehicleId(String vehicleId) {
+    this.vehicleId = vehicleId;
   }
 
   public String getStopId() {
@@ -160,12 +170,12 @@ public class TripProblemReportBean implements Serializable {
     this.predicted = predicted;
   }
 
-  public double getDistanceAlongTrip() {
-    return distanceAlongTrip;
+  public double getDistanceAlongBlock() {
+    return distanceAlongBlock;
   }
 
-  public void setDistanceAlongTrip(double distanceAlongTrip) {
-    this.distanceAlongTrip = distanceAlongTrip;
+  public void setDistanceAlongBlock(double distanceAlongBlock) {
+    this.distanceAlongBlock = distanceAlongBlock;
   }
 
   public double getScheduleDeviation() {

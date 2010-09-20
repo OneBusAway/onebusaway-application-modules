@@ -27,16 +27,28 @@ public class TripProblemReportRecord implements Serializable {
 
   @Embedded
   @AttributeOverrides({
-      @AttributeOverride(name = "agencyId", column = @Column(name = "tripId_agencyId", length = 50)),
-      @AttributeOverride(name = "id", column = @Column(name = "tripId_id"))})
+      @AttributeOverride(name = "agencyId", column = @Column(name = "block_agencyId", length = 50)),
+      @AttributeOverride(name = "id", column = @Column(name = "block_id"))})
+  private AgencyAndId blockId;
+
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name = "agencyId", column = @Column(name = "trip_agencyId", length = 50)),
+      @AttributeOverride(name = "id", column = @Column(name = "trip_id"))})
   private AgencyAndId tripId;
 
   private long serviceDate;
 
   @Embedded
   @AttributeOverrides({
-      @AttributeOverride(name = "agencyId", column = @Column(name = "stopId_agencyId", length = 50)),
-      @AttributeOverride(name = "id", column = @Column(name = "stopId_id"))})
+      @AttributeOverride(name = "agencyId", column = @Column(name = "vehicle_agencyId", length = 50)),
+      @AttributeOverride(name = "id", column = @Column(name = "vehicle_id"))})
+  private AgencyAndId vehicleId;
+
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name = "agencyId", column = @Column(name = "stop_agencyId", length = 50)),
+      @AttributeOverride(name = "id", column = @Column(name = "stop_id"))})
   private AgencyAndId stopId;
 
   private String data;
@@ -59,15 +71,15 @@ public class TripProblemReportRecord implements Serializable {
 
   private boolean predicted = false;
 
-  private double distanceAlongTrip;
+  private double distanceAlongBlock;
 
   private double scheduleDeviation;
 
   @Embedded
   @AttributeOverrides({
-      @AttributeOverride(name = "agencyId", column = @Column(name = "vehicleId_agencyId", length = 50)),
-      @AttributeOverride(name = "id", column = @Column(name = "vehicleId_id"))})
-  private AgencyAndId vehicleId;
+      @AttributeOverride(name = "agencyId", column = @Column(name = "matchedVehicle_agencyId", length = 50)),
+      @AttributeOverride(name = "id", column = @Column(name = "matchedVehicle_id"))})
+  private AgencyAndId matchedVehicleId;
 
   public long getId() {
     return id;
@@ -85,6 +97,14 @@ public class TripProblemReportRecord implements Serializable {
     this.time = time;
   }
 
+  public AgencyAndId getBlockId() {
+    return blockId;
+  }
+
+  public void setBlockId(AgencyAndId blockId) {
+    this.blockId = blockId;
+  }
+
   public AgencyAndId getTripId() {
     return tripId;
   }
@@ -99,6 +119,14 @@ public class TripProblemReportRecord implements Serializable {
 
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
+  }
+
+  public AgencyAndId getVehicleId() {
+    return vehicleId;
+  }
+
+  public void setVehicleId(AgencyAndId vehicleId) {
+    this.vehicleId = vehicleId;
   }
 
   public AgencyAndId getStopId() {
@@ -189,12 +217,12 @@ public class TripProblemReportRecord implements Serializable {
     this.predicted = predicted;
   }
 
-  public double getDistanceAlongTrip() {
-    return distanceAlongTrip;
+  public double getDistanceAlongBlock() {
+    return distanceAlongBlock;
   }
 
-  public void setDistanceAlongTrip(double distanceAlongTrip) {
-    this.distanceAlongTrip = distanceAlongTrip;
+  public void setDistanceAlongBlock(double distanceAlongBlock) {
+    this.distanceAlongBlock = distanceAlongBlock;
   }
 
   public double getScheduleDeviation() {
@@ -205,11 +233,11 @@ public class TripProblemReportRecord implements Serializable {
     this.scheduleDeviation = scheduleDeviation;
   }
 
-  public AgencyAndId getVehicleId() {
-    return vehicleId;
+  public AgencyAndId getMatchedVehicleId() {
+    return matchedVehicleId;
   }
 
-  public void setVehicleId(AgencyAndId vehicleId) {
-    this.vehicleId = vehicleId;
+  public void setMatchedVehicleId(AgencyAndId matchedVehicleId) {
+    this.matchedVehicleId = matchedVehicleId;
   }
 }

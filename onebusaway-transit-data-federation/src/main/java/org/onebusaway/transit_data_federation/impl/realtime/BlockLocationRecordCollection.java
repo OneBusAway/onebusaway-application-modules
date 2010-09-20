@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
 
@@ -20,6 +21,10 @@ import org.onebusaway.utility.InterpolationLibrary;
 public final class BlockLocationRecordCollection implements Serializable {
 
   private static final long serialVersionUID = 1L;
+
+  private ServiceDateAndId blockInstance;
+
+  private AgencyAndId vehicleId;
 
   private final long fromTime;
 
@@ -48,8 +53,6 @@ public final class BlockLocationRecordCollection implements Serializable {
    * location.
    */
   private final SortedMap<Long, CoordinatePoint> locations;
-
-  private AgencyAndId vehicleId;
 
   public BlockLocationRecordCollection(long fromTime, long toTime,
       SortedMap<Long, Double> scheduleDeviationsByTime,
@@ -89,6 +92,7 @@ public final class BlockLocationRecordCollection implements Serializable {
     SortedMap<Integer, Double> scheduleDeviationsByScheduleTime = new TreeMap<Integer, Double>();
     SortedMap<Long, Double> distancesAlongBlock = new TreeMap<Long, Double>();
     SortedMap<Long, CoordinatePoint> locations = new TreeMap<Long, CoordinatePoint>();
+    ServiceDateAndId blockInstance = null;
     AgencyAndId vehicleId = null;
 
     for (BlockLocationRecord record : records) {
@@ -106,15 +110,24 @@ public final class BlockLocationRecordCollection implements Serializable {
       if (record.hasLocation())
         locations.put(record.getTime(), record.getLocation());
 
-      if (record.getVehicleId() != null)
-        vehicleId = record.getVehicleId();
+      blockInstance = checkBlockInstance(blockInstance, record);
+      vehicleId = checkVehicleId(vehicleId, record);
     }
 
     BlockLocationRecordCollection collection = new BlockLocationRecordCollection(
         fromTime, toTime, scheduleDeviationsByTime,
         scheduleDeviationsByScheduleTime, distancesAlongBlock, locations);
+    collection.blockInstance = blockInstance;
     collection.vehicleId = vehicleId;
     return collection;
+  }
+
+  public ServiceDateAndId getBlockInstance() {
+    return blockInstance;
+  }
+
+  public AgencyAndId getVehicleId() {
+    return vehicleId;
   }
 
   public long getFromTime() {
@@ -180,23 +193,23 @@ public final class BlockLocationRecordCollection implements Serializable {
 
     return headMap.get(headMap.lastKey());
   }
-  
+
   public long getLastUpdateTime(long targetTime) {
-    if( ! scheduleDeviationsByTime.isEmpty() )
+    if (!scheduleDeviationsByTime.isEmpty())
       return getLastUpdateTime(targetTime, scheduleDeviationsByTime);
-    if( ! distancesAlongBlock.isEmpty() )
+    if (!distancesAlongBlock.isEmpty())
       return getLastUpdateTime(targetTime, distancesAlongBlock);
-    if( ! locations.isEmpty() )
+    if (!locations.isEmpty())
       return getLastUpdateTime(targetTime, locations);
     return 0;
   }
 
-  public AgencyAndId getVehicleId() {
-    return vehicleId;
-  }
-
   public BlockLocationRecordCollection addRecord(BlockLocationRecord record,
       long windowSize) {
+
+    AgencyAndId vehicleId = checkVehicleId(this.vehicleId, record);
+    ServiceDateAndId blockInstance = checkBlockInstance(this.blockInstance,
+        record);
 
     long time = record.getTime();
 
@@ -232,10 +245,8 @@ public final class BlockLocationRecordCollection implements Serializable {
         updatedScheduleDeviationsByScheduleTime, updatedDistancesAlongBlock,
         updatedLocations);
 
-    if (record.getVehicleId() != null)
-      collection.vehicleId = record.getVehicleId();
-    else
-      collection.vehicleId = this.vehicleId;
+    collection.blockInstance = blockInstance;
+    collection.vehicleId = vehicleId;
 
     return collection;
   }
@@ -276,14 +287,14 @@ public final class BlockLocationRecordCollection implements Serializable {
 
     return scheduleDeviationsByScheduleTime;
   }
-  
-  private <V> long getLastUpdateTime(long targetTime, SortedMap<Long,V> map) {
-    if( map.isEmpty() )
+
+  private <V> long getLastUpdateTime(long targetTime, SortedMap<Long, V> map) {
+    if (map.isEmpty())
       return 0;
-    SortedMap<Long, V> headMap = map.headMap(targetTime+1);
-    if( headMap.isEmpty() )
+    SortedMap<Long, V> headMap = map.headMap(targetTime + 1);
+    if (headMap.isEmpty())
       return map.firstKey();
-    return headMap.lastKey();    
+    return headMap.lastKey();
   }
 
   /****
@@ -351,6 +362,29 @@ public final class BlockLocationRecordCollection implements Serializable {
     }
 
     return updatedLocations;
+  }
+
+  private static ServiceDateAndId checkBlockInstance(ServiceDateAndId existing,
+      BlockLocationRecord record) {
+    ServiceDateAndId instance = new ServiceDateAndId(record.getServiceDate(),
+        record.getBlockId());
+    if (existing == null)
+      return instance;
+    else if (!existing.equals(instance)) {
+      throw new IllegalArgumentException("blockInstance mismatch: expected="
+          + existing + " actual=" + instance);
+    }
+    return instance;
+  }
+
+  private static AgencyAndId checkVehicleId(AgencyAndId existing,
+      BlockLocationRecord record) {
+    if (existing == null)
+      return record.getVehicleId();
+    else if (!existing.equals(record.getVehicleId()))
+      throw new IllegalArgumentException("vehicleId mismatch: expected="
+          + existing + " actual=" + record.getVehicleId());
+    return existing;
   }
 
 }

@@ -125,6 +125,6 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   private BlockLocation getLocation(BlockInstance instance, long time) {
     if (instance == null)
       return null;
-    return _blockLocationService.getPositionForBlockInstance(instance, time);
+    return _blockLocationService.getLocationForBlockInstance(instance, time);
   }
 }

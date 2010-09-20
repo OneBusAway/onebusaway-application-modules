@@ -9,12 +9,13 @@ import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.TripLocation;
-import org.onebusaway.transit_data_federation.services.realtime.TripLocationService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
   private TransitGraphDao _graph;
 
-  private TripLocationService _tripPositionService;
+  private BlockLocationService _blockLocationService;
 
   @Autowired
   public void setUserReportingDao(UserReportingDao userReportingDao) {
@@ -38,8 +39,8 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   @Autowired
-  public void setTripPositionService(TripLocationService tripPositionService) {
-    _tripPositionService = tripPositionService;
+  public void setBlockLocationService(BlockLocationService blockLocationService) {
+    _blockLocationService = blockLocationService;
   }
 
   @Override
@@ -71,9 +72,15 @@ class UserReportingServiceImpl implements UserReportingService {
     if (trip == null)
       return;
 
+    BlockEntry block = trip.getBlock();
+
     TripProblemReportRecord record = new TripProblemReportRecord();
     record.setData(problem.getData());
     record.setServiceDate(problem.getServiceDate());
+
+    String vehicleId = problem.getVehicleId();
+    if (vehicleId != null)
+      record.setVehicleId(AgencyAndIdLibrary.convertFromString(vehicleId));
 
     String stopId = problem.getStopId();
     if (stopId != null)
@@ -89,22 +96,24 @@ class UserReportingServiceImpl implements UserReportingService {
     record.setUserOnVehicle(problem.isUserOnVehicle());
     record.setUserVehicleNumber(problem.getUserVehicleNumber());
 
-    TripInstance tripInstance = new TripInstance(trip,
+    BlockInstance blockInstance = new BlockInstance(block,
         problem.getServiceDate());
 
-    TripLocation tripPosition = _tripPositionService.getPositionForTripInstance(
-        tripInstance, problem.getTime());
+    List<BlockLocation> blockLocations = _blockLocationService.getLocationsForBlockInstance(
+        blockInstance, problem.getTime());
 
-    if (tripPosition != null) {
-      record.setPredicted(tripPosition.isPredicted());
-      record.setDistanceAlongTrip(tripPosition.getDistanceAlongTrip());
-      record.setScheduleDeviation(tripPosition.getScheduleDeviation());
-      CoordinatePoint p = tripPosition.getLocation();
+    BlockLocation blockLocation = getBestLocation(blockLocations, problem);
+
+    if (blockLocation != null) {
+      record.setPredicted(blockLocation.isPredicted());
+      record.setDistanceAlongBlock(blockLocation.getDistanceAlongBlock());
+      record.setScheduleDeviation(blockLocation.getScheduleDeviation());
+      CoordinatePoint p = blockLocation.getLocation();
       if (p != null) {
         record.setVehicleLat(p.getLat());
         record.setVehicleLon(p.getLon());
       }
-      record.setVehicleId(tripPosition.getVehicleId());
+      record.setMatchedVehicleId(blockLocation.getVehicleId());
     }
 
     _userReportingDao.saveOrUpdate(record);
@@ -138,6 +147,27 @@ class UserReportingServiceImpl implements UserReportingService {
    * Private Methods
    ****/
 
+  private BlockLocation getBestLocation(List<BlockLocation> blockLocations,
+      TripProblemReportBean problem) {
+
+    if (blockLocations.isEmpty())
+      return null;
+    else if (blockLocations.size() == 1)
+      return blockLocations.get(0);
+
+    String vid = problem.getVehicleId();
+    if (vid != null && vid.length() > 0) {
+      AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(vid);
+      for (BlockLocation location : blockLocations) {
+        if (vehicleId.equals(location.getVehicleId()))
+          return location;
+      }
+    }
+
+    // Try something else?
+    return blockLocations.get(0);
+  }
+
   private TripProblemReportBean getRecordAsBean(TripProblemReportRecord record) {
     TripProblemReportBean bean = new TripProblemReportBean();
     bean.setData(record.getData());
@@ -154,7 +184,7 @@ class UserReportingServiceImpl implements UserReportingService {
     bean.setUserVehicleNumber(record.getUserVehicleNumber());
 
     bean.setPredicted(record.isPredicted());
-    bean.setDistanceAlongTrip(record.getDistanceAlongTrip());
+    bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
     bean.setScheduleDeviation(record.getScheduleDeviation());
     bean.setVehicleLat(record.getVehicleLat());
     bean.setVehicleLon(record.getVehicleLon());

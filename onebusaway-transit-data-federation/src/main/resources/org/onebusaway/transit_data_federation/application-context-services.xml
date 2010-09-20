@@ -21,20 +21,7 @@
 
     <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
 
-    <bean id="blockLocationRecordCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
-        <property name="cacheManager" ref="cacheManager" />
-        <property name="cacheName"
-            value="org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl.blockLocationRecordCache" />
-        <property name="maxElementsInMemory" value="1400" />
-        <property name="eternal" value="false" />
-        <property name="timeToLive" value="0" />
-        <property name="timeToIdle" value="480" />
-        <property name="overflowToDisk" value="true" />
-        <property name="diskPersistent" value="false" />
-    </bean>
-
     <bean id="blockLocationServiceImpl" class="org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl">
-        <property name="blockLocationRecordCache" ref="blockLocationRecordCache" />
         <property name="persistBlockLocationRecords" value="true" />
     </bean>
 
