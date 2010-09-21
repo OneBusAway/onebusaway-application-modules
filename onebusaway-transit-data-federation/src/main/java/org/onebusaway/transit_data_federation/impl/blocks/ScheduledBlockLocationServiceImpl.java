@@ -37,6 +37,9 @@ class ScheduledBlockLocationServiceImpl implements
   public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
       List<StopTimeEntry> stopTimes, double distanceAlongBlock) {
 
+    if (distanceAlongBlock < 0)
+      return null;
+
     StopTimeOp stopTimeOp = StopTimeOp.DISTANCE_ALONG_BLOCK;
 
     int stopTimeIndex = StopTimeSearchOperations.searchForStopTime(stopTimes,
@@ -48,12 +51,32 @@ class ScheduledBlockLocationServiceImpl implements
 
     // Are we before out first stop-time?
     if (stopTimeIndex == 0) {
-      StopTimeEntry stopTime = stopTimes.get(0);
-      if (stopTime.getDistaceAlongBlock() == distanceAlongBlock)
+      StopTimeEntry first = stopTimes.get(0);
+      if (first.getDistaceAlongBlock() == distanceAlongBlock)
         return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(
-            stopTimes, stopTime.getArrivalTime(), stopTimeIndex);
-      else
+            stopTimes, first.getArrivalTime(), stopTimeIndex);
+
+      // If we only have one stop time, we can't interpolate the schedule time
+      if (stopTimes.size() == 1)
         return null;
+
+      StopTimeEntry next = stopTimes.get(1);
+      double r = (distanceAlongBlock - first.getDistaceAlongBlock())
+          / (next.getDistaceAlongBlock() - first.getDistaceAlongBlock());
+      int scheduledTime = (int) (r
+          * (next.getArrivalTime() - first.getDepartureTime()) + first.getArrivalTime());
+
+      TripEntry activeTrip = first.getTrip();
+
+      ScheduledBlockLocation location = new ScheduledBlockLocation();
+      location.setActiveTrip(activeTrip);
+      location.setClosestStop(first);
+      location.setClosestStopTimeOffset(first.getArrivalTime() - scheduledTime);
+      location.setDistanceAlongBlock(distanceAlongBlock);
+      location.setScheduledTime(scheduledTime);
+      location.setLocation(getLocationAlongShape(activeTrip, distanceAlongBlock));
+      return location;
+
     }
 
     StopTimeEntry before = stopTimes.get(stopTimeIndex - 1);
@@ -121,7 +144,7 @@ class ScheduledBlockLocationServiceImpl implements
 
     ScheduledBlockLocation result = new ScheduledBlockLocation();
     result.setScheduledTime(scheduleTime);
-    
+
     int fromTime = before.getDepartureTime();
     int toTime = after.getArrivalTime();
 
@@ -159,22 +182,11 @@ class ScheduledBlockLocationServiceImpl implements
 
     TripEntry activeTrip = result.getActiveTrip();
 
-    AgencyAndId shapeId = activeTrip.getShapeId();
-
-    // Do we have enough information to use shape distance traveled?
-    if (shapeId != null) {
-
-      ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(shapeId);
-
-      if (shapePoints != null && !shapePoints.isEmpty()) {
-        double distance = distanceAlongBlock
-            - activeTrip.getDistanceAlongBlock();
-        ShapePointIndex shapePointIndexMethod = new DistanceTraveledShapePointIndex(
-            distance);
-        CoordinatePoint location = shapePointIndexMethod.getPoint(shapePoints);
-        result.setLocation(location);
-        return result;
-      }
+    CoordinatePoint location = getLocationAlongShape(activeTrip,
+        distanceAlongBlock);
+    if (location != null) {
+      result.setLocation(location);
+      return result;
     }
 
     StopEntry beforeStop = before.getStop();
@@ -186,10 +198,28 @@ class ScheduledBlockLocationServiceImpl implements
     double lat = (latTo - latFrom) * ratio + latFrom;
     double lon = (lonTo - lonFrom) * ratio + lonFrom;
 
-    CoordinatePoint location = new CoordinatePoint(lat, lon);
+    location = new CoordinatePoint(lat, lon);
     result.setLocation(location);
 
     return result;
   }
 
+  private CoordinatePoint getLocationAlongShape(TripEntry activeTrip,
+      double distanceAlongBlock) {
+
+    AgencyAndId shapeId = activeTrip.getShapeId();
+
+    if (shapeId == null)
+      return null;
+
+    ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(shapeId);
+
+    if (shapePoints == null || shapePoints.isEmpty())
+      return null;
+
+    double distance = distanceAlongBlock - activeTrip.getDistanceAlongBlock();
+    ShapePointIndex shapePointIndexMethod = new DistanceTraveledShapePointIndex(
+        distance);
+    return shapePointIndexMethod.getPoint(shapePoints);
+  }
 }
