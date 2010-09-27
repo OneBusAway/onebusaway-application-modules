@@ -102,10 +102,10 @@ public class StopMonitoringController implements ModelDriven<Object>,
     siri.ServiceDelivery.ResponseTimestamp = now;
 
     siri.ServiceDelivery.ProducerRef = _request.getServerName();
-    siri.ServiceDelivery.deliveries = new ArrayList<StopMonitoringDelivery>();
+    siri.ServiceDelivery.stopMonitoringDeliveries = new ArrayList<StopMonitoringDelivery>();
 
     StopMonitoringDelivery delivery = new StopMonitoringDelivery();
-    siri.ServiceDelivery.deliveries.add(delivery);
+    siri.ServiceDelivery.stopMonitoringDeliveries.add(delivery);
 
     delivery.ResponseTimestamp = now;
     delivery.visits = new ArrayList<MonitoredStopVisit>();
