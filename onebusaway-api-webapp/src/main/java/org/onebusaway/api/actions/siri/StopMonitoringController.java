@@ -5,6 +5,7 @@ import org.onebusaway.siri.model.DistanceExtensions;
 import org.onebusaway.siri.model.FramedVehicleJourneyRef;
 import org.onebusaway.siri.model.MonitoredStopVisit;
 import org.onebusaway.siri.model.MonitoredVehicleJourney;
+import org.onebusaway.siri.model.OnwardCall;
 import org.onebusaway.siri.model.ServiceDelivery;
 import org.onebusaway.siri.model.Siri;
 import org.onebusaway.siri.model.StopMonitoringDelivery;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,13 +59,13 @@ public class StopMonitoringController implements ModelDriven<Object>,
    */
   public DefaultHttpHeaders index() throws IOException {
     /* find the stop */
-    String stopId = _request.getParameter("stopId");
+    String stopId = _request.getParameter("MonitoringRef");
     if (stopId == null) {
-      throw new IllegalArgumentException("Expected parameter stopId");
+      throw new IllegalArgumentException("Expected parameter MonitoringRef");
     }
-    String agencyId = _request.getParameter("agencyId");
+    String agencyId = _request.getParameter("OperatorRef");
     if (agencyId == null) {
-      throw new IllegalArgumentException("Expected parameter agencyId");
+      throw new IllegalArgumentException("Expected parameter OperatorRef");
     }
 
     AgencyBean agency = _transitDataService.getAgency(agencyId);
@@ -71,8 +73,14 @@ public class StopMonitoringController implements ModelDriven<Object>,
       throw new IllegalArgumentException("No such agency: " + agencyId);
     }
 
-    String routeId = _request.getParameter("routeId");
-    String directionId = _request.getParameter("directionId");
+    String routeId = _request.getParameter("LineRef");
+    String directionId = _request.getParameter("DirectionRef");
+
+    String detailLevel = _request.getParameter("StopMonitoringDetailLevel");
+    boolean includeOnwardCalls = false;
+    if (detailLevel != null) {
+      includeOnwardCalls = detailLevel.equals("calls");
+    }
 
     // convert ids to agency_and_id
     stopId = agencyId + "_" + stopId;
@@ -145,7 +153,10 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
       MonitoredStopVisit.MonitoringRef = adbean.getStopId();
       MonitoredStopVisit.MonitoredVehicleJourney = new MonitoredVehicleJourney();
-      MonitoredStopVisit.MonitoredVehicleJourney.LineRef = route.getId();
+
+      String routeIdNoAgency = getIdWithoutAgency(route.getId());
+
+      MonitoredStopVisit.MonitoredVehicleJourney.LineRef = routeIdNoAgency;
       MonitoredStopVisit.MonitoredVehicleJourney.DirectionRef = trip.getDirectionId();
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
       MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef = new FramedVehicleJourneyRef();
@@ -165,17 +176,59 @@ public class StopMonitoringController implements ModelDriven<Object>,
       }
 
       int i = 0;
+      int stopsFromCall = -1;
       boolean started = false;
+
       List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
+      long serviceDayStart = 0;
+      HashMap<String, Integer> visitNumberForStop = new HashMap<String, Integer>();
+      /*
+       * go through every stop in the trip to (a) find out how far many stops
+       * away the bus is from this stop and (b) populate, if necessary,
+       * onwardCalls
+       */
+      boolean afterStop = false;
       for (TripStopTimeBean stopTime : stopTimes) {
+        StopBean stop = stopTime.getStop();
+        int visitNumber = getVisitNumber(visitNumberForStop, stop);
+
         if (started) {
           i++;
         }
         if (stopTime.getStop().equals(closestStop)) {
           started = true;
         }
+
+        if (afterStop && includeOnwardCalls) {
+          OnwardCall onwardCall = new OnwardCall();
+          onwardCall.StopPointRef = getIdWithoutAgency(stop.getId());
+          onwardCall.StopPointName = stop.getName();
+          onwardCall.VisitNumber = visitNumber;
+          Calendar arrivalTime = new GregorianCalendar();
+          long millis = serviceDayStart + stopTime.getArrivalTime() * 1000;
+          arrivalTime.setTimeInMillis(millis);
+          onwardCall.AimedArrivalTime = arrivalTime;
+
+          Calendar departureTime = new GregorianCalendar();
+          millis = serviceDayStart + stopTime.getDepartureTime() * 1000;
+          departureTime.setTimeInMillis(millis);
+          onwardCall.AimedDepartureTime = departureTime;
+
+          MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls.add(onwardCall);
+        }
         if (stopTime.getStop().getId().equals(stopId)) {
-          break;
+          if (stopsFromCall == -1) {
+            stopsFromCall = i;
+            if (includeOnwardCalls) {
+              MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = new ArrayList<OnwardCall>();
+              long scheduledArrivalTimeAtStop = adbean.getScheduledArrivalTime();
+              int arrivalTimeSeconds = stopTime.getArrivalTime();
+              serviceDayStart = scheduledArrivalTimeAtStop - arrivalTimeSeconds * 1000;
+              afterStop = true;
+            } else {
+              break;
+            }
+          }
         }
       }
       if (started == false) {
@@ -192,14 +245,32 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.MonitoredVehicleJourney.PublishedLineName = trip.getTripHeadsign();
 
       MonitoredStopVisit.MonitoredVehicleJourney.OriginRef = stops.get(0).getId();
-      MonitoredStopVisit.MonitoredVehicleJourney.DestinationRef = stops.get(
-          stops.size() - 1).getId();
+      StopBean lastStop = stops.get(stops.size() - 1);
+      MonitoredStopVisit.MonitoredVehicleJourney.DestinationRef = lastStop.getId();
 
       delivery.visits.add(MonitoredStopVisit);
     }
 
     _response = siri;
     return new DefaultHttpHeaders();
+  }
+
+  private int getVisitNumber(HashMap<String, Integer> visitNumberForStop,
+      StopBean stop) {
+    int visitNumber;
+    if (visitNumberForStop.containsKey(stop.getId())) {
+      visitNumber = visitNumberForStop.get(stop.getId()) + 1;
+    } else {
+      visitNumber = 1;
+    }
+    visitNumberForStop.put(stop.getId(), visitNumber);
+    return visitNumber;
+  }
+
+  private String getIdWithoutAgency(String id) {
+    int startIndex = id.indexOf('_') + 1;
+    id = id.substring(startIndex);
+    return id;
   }
 
   @Override
