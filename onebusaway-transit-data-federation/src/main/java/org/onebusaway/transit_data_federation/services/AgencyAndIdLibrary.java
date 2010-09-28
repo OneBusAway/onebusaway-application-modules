@@ -42,11 +42,4 @@ public class AgencyAndIdLibrary {
   public static String convertToString(AgencyAndId aid) {
     return aid.getAgencyId() + ID_SEPARATOR + aid.getId();
   }
-  
-  public String getIdWithoutAgency(String id) {
-    int startIndex = id.indexOf('_') + 1;
-    id = id.substring(startIndex);
-    return id;
-  }
-
 }
