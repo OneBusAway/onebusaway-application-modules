@@ -24,7 +24,7 @@
         <property name="target" value="hibernateMappingLocations" />
         <property name="values">
             <list>
-                <value>classpath:org/onebusaway/gtfs/model/GtfsMapping.hibernate.xml</value>
+                <value>file:/home/novalis/onebusaway/src/onebusaway-gtfs-modules/onebusaway-gtfs-hibernate/src/main/resources/org/onebusaway/gtfs/model/GtfsMapping.hibernate.xml</value>
                 <value>classpath:org/onebusaway/gtfs/impl/HibernateGtfsRelationalDaoImpl.hibernate.xml</value>
             </list>
         </property>
@@ -38,7 +38,4 @@
             </map>
         </property>
     </bean>
-
-
-
 </beans>
