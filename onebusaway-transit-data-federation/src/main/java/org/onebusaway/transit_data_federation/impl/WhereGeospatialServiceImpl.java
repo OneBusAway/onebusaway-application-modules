@@ -43,7 +43,9 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
         if (!_initialized) {
 
           Collection<Stop> stops = _dao.getAllStops();
-
+          if (stops.size() == 0) {
+            throw new IllegalStateException("No stops in database.");
+          }
           _tree = new STRtree(stops.size());
 
           for (Stop stop : stops) {
