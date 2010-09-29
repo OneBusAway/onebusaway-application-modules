@@ -121,6 +121,10 @@ public final class TripStatusBean implements Serializable {
     this.closestStopTimeOffset = closestStopTimeOffset;
   }
 
+  /**
+   * @return true if there is an real-time data for this trip, whether
+   *         prediction or location
+   */
   public boolean isPredicted() {
     return predicted;
   }
