@@ -148,9 +148,13 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     Siri siri = new Siri();
     siri.ServiceDelivery = new ServiceDelivery();
     siri.ServiceDelivery.ResponseTimestamp = now;
-    
+
     siri.ServiceDelivery.VehicleMonitoringDelivery = new VehicleMonitoringDelivery();
     siri.ServiceDelivery.VehicleMonitoringDelivery.ResponseTimestamp = siri.ServiceDelivery.ResponseTimestamp;
+    
+    siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil = (Calendar) now.clone();
+    siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil.add(Calendar.MINUTE, 1);
+    
     siri.ServiceDelivery.VehicleMonitoringDelivery.SubscriberRef = _request.getRemoteAddr();
     
     siri.ServiceDelivery.VehicleMonitoringDelivery.deliveries = activities;
