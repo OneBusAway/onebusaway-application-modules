@@ -1,7 +1,19 @@
+/*
+ * Copyright 2010, OpenPlans Licensed under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.onebusaway.api.actions.siri;
 
 import org.onebusaway.siri.model.ErrorMessage;
-import org.onebusaway.siri.model.MonitoredVehicleJourney;
 import org.onebusaway.siri.model.ServiceDelivery;
 import org.onebusaway.siri.model.Siri;
 import org.onebusaway.siri.model.VehicleActivity;
@@ -154,9 +166,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     
     siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil = (Calendar) now.clone();
     siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil.add(Calendar.MINUTE, 1);
-    
-    siri.ServiceDelivery.VehicleMonitoringDelivery.SubscriberRef = _request.getRemoteAddr();
-    
+
     siri.ServiceDelivery.VehicleMonitoringDelivery.deliveries = activities;
     return siri;
   }
@@ -170,10 +180,10 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     time.setTime(new Date(status.getLastUpdateTime()));
     
     activity.RecordedAtTime = time;
-    activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
-    activity.MonitoredVehicleJourney.BlockRef = SiriUtils.getIdWithoutAgency(trip.getTrip().getBlockId());
-    activity.MonitoredVehicleJourney.CourseOfJourneyRef = SiriUtils.getIdWithoutAgency(trip.getTripId());
-    activity.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
+    activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(trip);
+    /* FIXME: get this from api */
+    activity.MonitoredVehicleJourney.ProgressRate = "normalProgress";
+
     VehicleLocation location = new VehicleLocation();
     location.Latitude = status.getLocation().getLat();
     location.Longitude = status.getLocation().getLon();
@@ -184,8 +194,13 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       List<TripStopTimeBean> stopTimes = trip.getSchedule().getStopTimes();
       StopBean currentStopTime = status.getClosestStop();
       
-      long serviceDate = status.getServiceDate();
-      activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(stopTimes, serviceDate, currentStopTime);
+      long serviceDateMillis = status.getServiceDate();
+      double distance = status.getDistanceAlongTrip();
+      if (Double.isNaN(distance)) {
+        distance = status.getScheduledDistanceAlongTrip();
+      }
+      activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
+          stopTimes, serviceDateMillis, distance, currentStopTime);
     }
     
     return activity;
@@ -210,7 +225,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
 
     if (trip == null) {
       /*
-       * This vehicle isn't on a trip, so
+       * This vehicle isn't on a trip, so:
        */
       _response = new ErrorMessage("No known trip for this vehicle");
       return new DefaultHttpHeaders();

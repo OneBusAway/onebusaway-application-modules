@@ -1,11 +1,23 @@
+/*
+ * Copyright 2010, OpenPlans Licensed under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package org.onebusaway.api.actions.siri;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.siri.model.DistanceExtensions;
-import org.onebusaway.siri.model.FramedVehicleJourneyRef;
 import org.onebusaway.siri.model.MonitoredCall;
 import org.onebusaway.siri.model.MonitoredStopVisit;
-import org.onebusaway.siri.model.MonitoredVehicleJourney;
 import org.onebusaway.siri.model.OnwardCall;
 import org.onebusaway.siri.model.ServiceDelivery;
 import org.onebusaway.siri.model.Siri;
@@ -16,7 +28,6 @@ import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
@@ -33,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -122,6 +132,11 @@ public class StopMonitoringController implements ModelDriven<Object>,
     delivery.visits = new ArrayList<MonitoredStopVisit>();
 
     for (ArrivalAndDepartureBean adbean : stopWithArrivalsAndDepartures.getArrivalsAndDepartures()) {
+      double distanceFromStop = adbean.getDistanceFromStop();
+      if (distanceFromStop < 0) {
+        /* passed this stop */
+        continue;
+      }
       TripBean trip = adbean.getTrip();
       RouteBean route = trip.getRoute();
       if (routeId != null && !route.getId().equals(routeId)) {
@@ -140,8 +155,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
       query.setTime(now.getTime().getTime());
       TripDetailsBean specificTripDetails = _transitDataService.getSpecificTripDetails(query);
 
-      StopsForRouteBean stopsForRoute = _transitDataService.getStopsForRoute(route.getId());
-      List<StopBean> stops = stopsForRoute.getStops();
 
       MonitoredStopVisit MonitoredStopVisit = new MonitoredStopVisit();
 
@@ -158,18 +171,12 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
 
       MonitoredStopVisit.MonitoringRef = SiriUtils.getIdWithoutAgency(adbean.getStopId());
-      MonitoredStopVisit.MonitoredVehicleJourney = new MonitoredVehicleJourney();
+      MonitoredStopVisit.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(specificTripDetails);
 
-      String routeIdNoAgency = SiriUtils.getIdWithoutAgency(route.getId());
-
-      MonitoredStopVisit.MonitoredVehicleJourney.LineRef = routeIdNoAgency;
-      MonitoredStopVisit.MonitoredVehicleJourney.DirectionRef = trip.getDirectionId();
-      MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
-      MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef = new FramedVehicleJourneyRef();
       MonitoredCall monitoredCall = new MonitoredCall();
       MonitoredStopVisit.MonitoredVehicleJourney.MonitoredCall = monitoredCall;
       monitoredCall.Extensions = new DistanceExtensions();
-      monitoredCall.StopPointRef = stopId;
+      monitoredCall.StopPointRef = SiriUtils.getIdWithoutAgency(stopId);
 
       CoordinatePoint position = status.getLocation();
       if (position != null) {
@@ -181,7 +188,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
           distance = status.getScheduledDistanceAlongTrip();
         }
         monitoredCall.Extensions.DistanceAlongRoute = distance;
-        monitoredCall.Extensions.DistanceFromCall = adbean.getDistanceFromStop();
+        monitoredCall.Extensions.DistanceFromCall = distanceFromStop;
       }
 
       /* FIXME: get this from api */
@@ -214,11 +221,14 @@ public class StopMonitoringController implements ModelDriven<Object>,
           distance = status.getScheduledDistanceAlongTrip();
         }
         if (stopTime.getDistanceAlongTrip() >= distance) {
+
+          monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip() - distance < 10;
+
           if (stopsFromCall == -1) {
             stopsFromCall = i;
             monitoredCall.VisitNumber = visitNumber;
             if (includeOnwardCalls) {
-              List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(stopTimes, status.getServiceDate(), stop);
+              List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(stopTimes, status.getServiceDate(), distance, stop);
               MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = onwardCalls;
               break;
             }
@@ -230,18 +240,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
         continue;
       }
       monitoredCall.Extensions.StopsFromCall = i;
-
-      Date serviceDate = new Date(adbean.getServiceDate());
-
-      MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef.DataFrameRef = String.format(
-          "%1$tY-%1$tm-%1$td", serviceDate);
-      MonitoredStopVisit.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef = trip.getId();
-      MonitoredStopVisit.MonitoredVehicleJourney.PublishedLineName = trip.getTripHeadsign();
-
-      MonitoredStopVisit.MonitoredVehicleJourney.OriginRef = SiriUtils.getIdWithoutAgency(stops.get(
-          0).getId());
-      StopBean lastStop = stops.get(stops.size() - 1);
-      MonitoredStopVisit.MonitoredVehicleJourney.DestinationRef = SiriUtils.getIdWithoutAgency(lastStop.getId());
 
       delivery.visits.add(MonitoredStopVisit);
     }
