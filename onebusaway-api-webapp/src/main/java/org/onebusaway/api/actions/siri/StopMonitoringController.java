@@ -164,8 +164,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
         continue;
       }
 
-      StopBean closestStop = status.getClosestStop();
-
       MonitoredStopVisit.RecordedAtTime = new GregorianCalendar();
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
@@ -195,7 +193,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = "normalProgress";
 
       int i = 0;
-      int stopsFromCall = -1;
       boolean started = false;
 
       List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
@@ -212,34 +209,35 @@ public class StopMonitoringController implements ModelDriven<Object>,
         if (started) {
           i++;
         }
-        if (stopTime.getStop().equals(closestStop)) {
-          started = true;
-        }
 
         double distance = status.getDistanceAlongTrip();
         if (Double.isNaN(distance)) {
           distance = status.getScheduledDistanceAlongTrip();
         }
         if (stopTime.getDistanceAlongTrip() >= distance) {
-
+          /* this stop time is further along the route than the vehicle is
+           * so we will now start counting stops until we hit the requested stop
+           */
+          started = true;
+        }
+        if (started && stopTime.getStop().getId().equals(stopId)) {
+          /* we have hit the requested stop */
           monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip() - distance < 10;
+        
+          monitoredCall.Extensions.StopsFromCall = i;
 
-          if (stopsFromCall == -1) {
-            stopsFromCall = i;
-            monitoredCall.VisitNumber = visitNumber;
-            if (includeOnwardCalls) {
-              List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(stopTimes, status.getServiceDate(), distance, stop);
-              MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = onwardCalls;
-              break;
-            }
+          monitoredCall.VisitNumber = visitNumber;
+          if (includeOnwardCalls) {
+            List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(stopTimes, status.getServiceDate(), distance, stop);
+            MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = onwardCalls;
           }
         }
       }
+
       if (started == false) {
         /* remove trips which have already passed this stop */
         continue;
       }
-      monitoredCall.Extensions.StopsFromCall = i;
 
       delivery.visits.add(MonitoredStopVisit);
     }

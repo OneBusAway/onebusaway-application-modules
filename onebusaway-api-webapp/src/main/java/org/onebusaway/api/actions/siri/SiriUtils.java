@@ -40,50 +40,53 @@ public class SiriUtils {
 
   public static List<OnwardCall> getOnwardCalls(
       List<TripStopTimeBean> stopTimes, long serviceDate,
- double distance,
-      StopBean currentStopTime) {
+      double distance, StopBean currentStop) {
 
     ArrayList<OnwardCall> onwardCalls = new ArrayList<OnwardCall>();
 
     HashMap<String, Integer> visitNumberForStop = new HashMap<String, Integer>();
+    boolean afterStart = false;
     boolean afterStop = false;
-
     int i = 0;
     for (TripStopTimeBean stopTime : stopTimes) {
 
       StopBean stop = stopTime.getStop();
       int visitNumber = getVisitNumber(visitNumberForStop, stop);
-      if (afterStop) {
+      if (afterStart) {
         i += 1;
-        OnwardCall onwardCall = new OnwardCall();
-        onwardCall.StopPointRef = SiriUtils.getIdWithoutAgency(stop.getId());
-        onwardCall.StopPointName = stop.getName();
-        onwardCall.VisitNumber = visitNumber;
-        onwardCall.Extensions = new DistanceExtensions();
+        if (afterStop) {
+          OnwardCall onwardCall = new OnwardCall();
+          onwardCall.StopPointRef = SiriUtils.getIdWithoutAgency(stop.getId());
+          onwardCall.StopPointName = stop.getName();
+          onwardCall.VisitNumber = visitNumber;
+          onwardCall.Extensions = new DistanceExtensions();
+          
+          onwardCall.Extensions.DistanceFromCall = stopTime.getDistanceAlongTrip()
+              - distance;
+          onwardCall.Extensions.StopsFromCall = i;
 
-        onwardCall.Extensions.DistanceFromCall = stopTime.getDistanceAlongTrip()
-            - distance;
-        onwardCall.Extensions.StopsFromCall = i;
-
-        /*
-         * This is not really that useful without being more certain about what
-         * trip we're on, so it's commented out 
-         * Calendar arrivalTime = new GregorianCalendar(); 
-         * long millis = serviceDate + stopTime.getArrivalTime() * 1000;
-         * arrivalTime.setTimeInMillis(millis); 
-         * onwardCall.AimedArrivalTime = arrivalTime;
-         * 
-         * Calendar departureTime = new GregorianCalendar(); 
-         * millis = serviceDate + stopTime.getDepartureTime() * 1000;
-         * departureTime.setTimeInMillis(millis); 
-         * onwardCall.AimedDepartureTime = departureTime;
-         */
+          /*
+           * This is not really that useful without being more certain about what
+           * trip we're on, so it's commented out 
+           * Calendar arrivalTime = new GregorianCalendar(); 
+           * long millis = serviceDate + stopTime.getArrivalTime() * 1000;
+           * arrivalTime.setTimeInMillis(millis); 
+           * onwardCall.AimedArrivalTime = arrivalTime;
+           * 
+           * Calendar departureTime = new GregorianCalendar(); 
+           * millis = serviceDate + stopTime.getDepartureTime() * 1000;
+           * departureTime.setTimeInMillis(millis); 
+           * onwardCall.AimedDepartureTime = departureTime;
+           */
         
-        onwardCalls.add(onwardCall);
-
+           onwardCalls.add(onwardCall);
+          }
+          if (stop == currentStop) {
+            afterStop = true;
+          }
       }
       if (stopTime.getDistanceAlongTrip() >= distance) {
-        afterStop = true;
+        afterStart = true;
       }
     }
     if (onwardCalls.size() == 0) {
