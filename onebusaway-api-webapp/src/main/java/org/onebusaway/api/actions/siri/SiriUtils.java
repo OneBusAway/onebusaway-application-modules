@@ -15,6 +15,7 @@
 package org.onebusaway.api.actions.siri;
 
 import org.onebusaway.siri.model.DistanceExtensions;
+import org.onebusaway.siri.model.Distances;
 import org.onebusaway.siri.model.FramedVehicleJourneyRef;
 import org.onebusaway.siri.model.MonitoredVehicleJourney;
 import org.onebusaway.siri.model.OnwardCall;
@@ -60,9 +61,10 @@ public class SiriUtils {
           onwardCall.VisitNumber = visitNumber;
           onwardCall.Extensions = new DistanceExtensions();
           
-          onwardCall.Extensions.DistanceFromCall = stopTime.getDistanceAlongTrip()
+          onwardCall.Extensions.Distances = new Distances();
+          onwardCall.Extensions.Distances.DistanceFromCall = stopTime.getDistanceAlongTrip()
               - distance;
-          onwardCall.Extensions.StopsFromCall = i;
+          onwardCall.Extensions.Distances.StopsFromCall = i;
 
           /*
            * This is not really that useful without being more certain about what

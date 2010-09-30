@@ -47,7 +47,8 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * For a given vehicle, returns the location
+ * For a given vehicle or set of vehicles, returns the location. Can select
+ * vehicles by id, trip, or route.
  */
 public class VehicleMonitoringController implements ModelDriven<Object>,
     ServletRequestAware {
@@ -58,9 +59,10 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
   @Autowired  
   private TransitDataService _transitDataService;
   private TimeZone defaultTimeZone = TimeZone.getTimeZone("America/New York");
-  
+
   /**
-   * This is the default action for 
+   * This is the default action
+   * 
    * @return
    * @throws IOException
    */
@@ -86,8 +88,20 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
 
     String vehicleId = _request.getParameter("VehicleRef");
 
+    // single trip, by vehicle
     if (vehicleId != null) {
-      return singleVehicleTrip(agencyId, vehicleId, timeZone, onwardCalls);
+      TripDetailsBean trip = getTripForVehicle(agencyId, vehicleId, timeZone);
+
+      if (trip == null) {
+        /*
+         * FIXME: This vehicle isn't on a trip. In the future, we'll correctly
+         * return a just-location trip.
+         */
+        _response = new ErrorMessage("No known trip for this vehicle");
+        return new DefaultHttpHeaders();
+      }
+
+      return singleVehicleTrip(timeZone, onwardCalls, trip);
     }
 
     Calendar now = Calendar.getInstance(timeZone);
@@ -106,7 +120,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       TripDetailsBean tripDetails = _transitDataService.getSpecificTripDetails(query);
       if (directionId != null
           && tripDetails.getTrip().getDirectionId().equals(directionId)) {
-        return singleVehicleTrip(agencyId, tripDetails, timeZone, onwardCalls);
+        return singleVehicleTrip(timeZone, onwardCalls, tripDetails);
       } else {
 
         Siri siri = generateSiriResponse(now, new ArrayList<VehicleActivity>());
@@ -138,22 +152,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     return new DefaultHttpHeaders();
   }
 
-  private DefaultHttpHeaders singleVehicleTrip(String agencyId,
-      TripDetailsBean trip, TimeZone timeZone, boolean onwardCalls) {
-
-    Calendar now = Calendar.getInstance(timeZone);
-
-    VehicleActivity activity = createActivity(trip, onwardCalls);
-
-    ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
-    activities.add(activity);
-    Siri siri = generateSiriResponse(now, activities);
-
-    _response = siri;
-    return new DefaultHttpHeaders();
-
-  }
-
+  /** Generate a siri response for a set of VehicleActivities */
   private Siri generateSiriResponse(Calendar now,
       ArrayList<VehicleActivity> activities) {
     Siri siri = new Siri();
@@ -170,6 +169,9 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     return siri;
   }
 
+  /**
+   * Create a VehicleActivity for a given vehicle's trip.
+   */
   private VehicleActivity createActivity(TripDetailsBean trip,
       boolean onwardCalls) {
     VehicleActivity activity = new VehicleActivity();
@@ -180,6 +182,8 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     
     activity.RecordedAtTime = time;
     activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(trip);
+    activity.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
+
     /* FIXME: get this from api */
     activity.MonitoredVehicleJourney.ProgressRate = "normalProgress";
 
@@ -204,9 +208,23 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     return activity;
   }
 
-  private DefaultHttpHeaders singleVehicleTrip(String agencyId,
-      String vehicleId, TimeZone timeZone, boolean onwardCalls) {
+  /** Generate a response for a single vehicle */
+  private DefaultHttpHeaders singleVehicleTrip(TimeZone timeZone,
+      boolean onwardCalls, TripDetailsBean trip) {
+    Calendar now = Calendar.getInstance(timeZone);
 
+    VehicleActivity activity = createActivity(trip, onwardCalls);
+
+    ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
+    activities.add(activity);
+    Siri siri = generateSiriResponse(now, activities);
+
+    _response = siri;
+    return new DefaultHttpHeaders();
+  }
+
+  private TripDetailsBean getTripForVehicle(String agencyId, String vehicleId,
+      TimeZone timeZone) {
     Calendar now = Calendar.getInstance(timeZone);
 
     /* find the vehicle's trip */
@@ -220,16 +238,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     inclusion.setIncludeTripStatus(true);
 
     TripDetailsBean trip = _transitDataService.getTripDetailsForVehicleAndTime(query);
-
-    if (trip == null) {
-      /*
-       * This vehicle isn't on a trip, so:
-       */
-      _response = new ErrorMessage("No known trip for this vehicle");
-      return new DefaultHttpHeaders();
-    }
-
-    return singleVehicleTrip(agencyId, trip, timeZone, onwardCalls);
+    return trip;
   }
 
 

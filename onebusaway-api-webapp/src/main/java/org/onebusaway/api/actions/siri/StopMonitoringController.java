@@ -16,6 +16,7 @@ package org.onebusaway.api.actions.siri;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.siri.model.DistanceExtensions;
+import org.onebusaway.siri.model.Distances;
 import org.onebusaway.siri.model.MonitoredCall;
 import org.onebusaway.siri.model.MonitoredStopVisit;
 import org.onebusaway.siri.model.OnwardCall;
@@ -51,7 +52,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * For a given stop, return the vehicles.
+ * For a given stop, return the vehicles that are going to stop there soon.
+ * Optionally, return the next stops for those vehicles.
  */
 public class StopMonitoringController implements ModelDriven<Object>,
     ServletRequestAware {
@@ -168,8 +170,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
 
-      MonitoredStopVisit.MonitoringRef = SiriUtils.getIdWithoutAgency(adbean.getStopId());
       MonitoredStopVisit.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(specificTripDetails);
+      MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
 
       MonitoredCall monitoredCall = new MonitoredCall();
       MonitoredStopVisit.MonitoredVehicleJourney.MonitoredCall = monitoredCall;
@@ -185,8 +187,9 @@ public class StopMonitoringController implements ModelDriven<Object>,
         if (Double.isNaN(distance)) {
           distance = status.getScheduledDistanceAlongTrip();
         }
-        monitoredCall.Extensions.DistanceAlongRoute = distance;
-        monitoredCall.Extensions.DistanceFromCall = distanceFromStop;
+        monitoredCall.Extensions.Distances = new Distances();
+        monitoredCall.Extensions.Distances.DistanceAlongRoute = distance;
+        monitoredCall.Extensions.Distances.DistanceFromCall = distanceFromStop;
       }
 
       /* FIXME: get this from api */
@@ -223,8 +226,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
         if (started && stopTime.getStop().getId().equals(stopId)) {
           /* we have hit the requested stop */
           monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip() - distance < 10;
-        
-          monitoredCall.Extensions.StopsFromCall = i;
+          monitoredCall.Extensions.Distances = new Distances();
+          monitoredCall.Extensions.Distances.StopsFromCall = i;
 
           monitoredCall.VisitNumber = visitNumber;
           if (includeOnwardCalls) {
