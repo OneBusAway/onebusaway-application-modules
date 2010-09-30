@@ -46,10 +46,9 @@ public class SiriUtils {
 
     HashMap<String, Integer> visitNumberForStop = new HashMap<String, Integer>();
     boolean afterStart = false;
-    boolean afterStop = false;
+    boolean afterStop = currentStop == null;
     int i = 0;
     for (TripStopTimeBean stopTime : stopTimes) {
-
       StopBean stop = stopTime.getStop();
       int visitNumber = getVisitNumber(visitNumberForStop, stop);
       if (afterStart) {

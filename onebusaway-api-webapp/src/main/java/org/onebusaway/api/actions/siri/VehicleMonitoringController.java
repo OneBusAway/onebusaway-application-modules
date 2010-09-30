@@ -21,7 +21,6 @@ import org.onebusaway.siri.model.VehicleLocation;
 import org.onebusaway.siri.model.VehicleMonitoringDelivery;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
@@ -192,7 +191,6 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     
     if (onwardCalls) {
       List<TripStopTimeBean> stopTimes = trip.getSchedule().getStopTimes();
-      StopBean currentStopTime = status.getClosestStop();
       
       long serviceDateMillis = status.getServiceDate();
       double distance = status.getDistanceAlongTrip();
@@ -200,7 +198,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         distance = status.getScheduledDistanceAlongTrip();
       }
       activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-          stopTimes, serviceDateMillis, distance, currentStopTime);
+          stopTimes, serviceDateMillis, distance, null);
     }
     
     return activity;
