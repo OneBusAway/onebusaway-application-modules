@@ -225,7 +225,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
           monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip() - distance < 10;
           monitoredCall.Extensions.Distances = new Distances();
           monitoredCall.Extensions.Distances.StopsFromCall = i;
-          monitoredCall.Extensions.Distances.StopDistanceAlongRoute = stopTime.getDistanceAlongTrip();;
+          monitoredCall.Extensions.Distances.CallDistanceAlongRoute = stopTime.getDistanceAlongTrip();;
           monitoredCall.Extensions.Distances.DistanceFromCall = distanceFromStop;
 
           monitoredCall.VisitNumber = visitNumber;

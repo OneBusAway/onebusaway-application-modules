@@ -64,7 +64,7 @@ public class SiriUtils {
           onwardCall.Extensions.Distances = new Distances();
           onwardCall.Extensions.Distances.DistanceFromCall = stopTime.getDistanceAlongTrip()
               - distance;
-          onwardCall.Extensions.Distances.StopDistanceAlongRoute = stopTime.getDistanceAlongTrip();
+          onwardCall.Extensions.Distances.CallDistanceAlongRoute = stopTime.getDistanceAlongTrip();
           onwardCall.Extensions.Distances.StopsFromCall = i;
 
           /*
