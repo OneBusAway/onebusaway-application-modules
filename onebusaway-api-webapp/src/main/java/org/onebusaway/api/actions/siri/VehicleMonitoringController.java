@@ -182,6 +182,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     
     activity.RecordedAtTime = time;
     activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(trip);
+    /* fixme: make sure this works when we have real vehicles */
     activity.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
 
     /* FIXME: get this from api */

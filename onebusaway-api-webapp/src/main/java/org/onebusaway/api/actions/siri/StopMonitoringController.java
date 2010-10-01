@@ -187,9 +187,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
         if (Double.isNaN(distance)) {
           distance = status.getScheduledDistanceAlongTrip();
         }
-        monitoredCall.Extensions.Distances = new Distances();
-        monitoredCall.Extensions.Distances.DistanceAlongRoute = distance;
-        monitoredCall.Extensions.Distances.DistanceFromCall = distanceFromStop;
       }
 
       /* FIXME: get this from api */
@@ -228,6 +225,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
           monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip() - distance < 10;
           monitoredCall.Extensions.Distances = new Distances();
           monitoredCall.Extensions.Distances.StopsFromCall = i;
+          monitoredCall.Extensions.Distances.StopDistanceAlongRoute = stopTime.getDistanceAlongTrip();;
+          monitoredCall.Extensions.Distances.DistanceFromCall = distanceFromStop;
 
           monitoredCall.VisitNumber = visitNumber;
           if (includeOnwardCalls) {
