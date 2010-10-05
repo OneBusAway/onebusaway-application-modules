@@ -25,6 +25,7 @@ import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndexServiceImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
@@ -67,6 +68,7 @@ public class StopTimeServiceImplTest {
     _service = new StopTimeServiceImpl();
     _service.setTransitGraphDao(graph);
     _service.setCalendarService(_calendarService);
+    _service.setBlockStopTimeIndexService(new BlockStopTimeIndexServiceImpl());
   }
 
   @Test

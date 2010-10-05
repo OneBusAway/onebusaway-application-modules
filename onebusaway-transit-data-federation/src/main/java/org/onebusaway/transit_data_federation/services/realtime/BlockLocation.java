@@ -36,6 +36,10 @@ public class BlockLocation {
 
   private int closestStopTimeOffset;
 
+  private BlockStopTimeEntry nextStop;
+
+  private int nextStopTimeOffset;
+
   /****
    * These are fields that we can supply only from real-time data
    ****/
@@ -146,6 +150,39 @@ public class BlockLocation {
    */
   public void setClosestStopTimeOffset(int closestStopTimeOffset) {
     this.closestStopTimeOffset = closestStopTimeOffset;
+  }
+
+  /**
+   * The next upcoming stop to the current position of the transit vehicle among
+   * the stop times of the current trip.
+   * 
+   * @return the next stop time entry
+   */
+  public BlockStopTimeEntry getNextStop() {
+    return nextStop;
+  }
+
+  public void setNextStop(BlockStopTimeEntry nextStop) {
+    this.nextStop = nextStop;
+  }
+
+  /**
+   * The time offset, in seconds, from the next stop to the current position of
+   * the transit vehicle.
+   * 
+   * @return time, in seconds
+   */
+  public int getNextStopTimeOffset() {
+    return nextStopTimeOffset;
+  }
+
+  /**
+   * See {@link #getNextStopTimeOffset()}
+   * 
+   * @param nextStopTimeOffset
+   */
+  public void setNextStopTimeOffset(int nextStopTimeOffset) {
+    this.nextStopTimeOffset = nextStopTimeOffset;
   }
 
   /**

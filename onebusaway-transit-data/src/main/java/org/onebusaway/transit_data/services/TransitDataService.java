@@ -191,7 +191,7 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdMethod
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, Date timeFrom, Date timeTo) throws ServiceException;
+      String stopId, Date targetTime, int minutesBefore, int minutesAfter) throws ServiceException;
 
   /**
    * @param stopIds
@@ -205,7 +205,7 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdsMethod
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, Date timeFrom, Date timeTo)
+      Collection<String> stopIds, Date targetTime, int minutesBefore, int minutesAfter)
       throws ServiceException;
 
   /**

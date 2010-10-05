@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.cache.CacheableArgument;
+import org.onebusaway.exceptions.InternalErrorServiceException;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -10,6 +11,14 @@ import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
+import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndexService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,11 +39,28 @@ class RouteServiceImpl implements RouteService {
   @Autowired
   private TransitDataFederationDao _whereDao;
 
+  private TransitGraphDao _transitGraphDao;
+
+  private BlockStopTimeIndexService _blockStopTimeIndexService;
+
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setBlockStopTimeIndexService(
+      BlockStopTimeIndexService blockStopTimeIndexService) {
+    _blockStopTimeIndexService = blockStopTimeIndexService;
+  }
+
   @Cacheable
   @Transactional
   public Collection<AgencyAndId> getStopsForRouteCollection(AgencyAndId id) {
+    
     Set<AgencyAndId> stopIds = new HashSet<AgencyAndId>();
     RouteCollection routeCollection = _whereDao.getRouteCollectionForId(id);
+    
     for (Route route : routeCollection.getRoutes()) {
       List<Trip> trips = _gtfsDao.getTripsForRoute(route);
       for (Trip trip : trips) {
@@ -43,14 +69,41 @@ class RouteServiceImpl implements RouteService {
           stopIds.add(stopTime.getStop().getId());
       }
     }
+    
     return new ArrayList<AgencyAndId>(stopIds);
   }
 
   @Cacheable
-  public AgencyAndId getRouteCollectionIdForRoute(@CacheableArgument(keyProperty="id") Route route) {
+  @Override
+  public AgencyAndId getRouteCollectionIdForRoute(
+      @CacheableArgument(keyProperty = "id") Route route) {
     RouteCollection routeCollection = _whereDao.getRouteCollectionForRoute(route);
     if (routeCollection == null)
       return null;
     return routeCollection.getId();
+  }
+
+  @Override
+  public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId) {
+
+    StopEntry stopEntry = _transitGraphDao.getStopEntryForId(stopId);
+    if (stopEntry == null)
+      throw new InternalErrorServiceException("no such stop: id=" + stopId);
+
+    Set<AgencyAndId> routeCollectionIds = new HashSet<AgencyAndId>();
+
+    List<BlockStopTimeIndex> indices = _blockStopTimeIndexService.getStopTimeIndicesForStop(stopEntry);
+
+    for (BlockStopTimeIndex blockStopTimeIndex : indices) {
+      BlockIndex blockIndex = blockStopTimeIndex.getBlockIndex();
+      for (BlockConfigurationEntry blockConfig : blockIndex.getBlocks()) {
+        for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
+          TripEntry trip = blockTrip.getTrip();
+          routeCollectionIds.add(trip.getRouteCollectionId());
+        }
+      }
+    }
+
+    return routeCollectionIds;
   }
 }

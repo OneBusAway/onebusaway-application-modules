@@ -98,8 +98,8 @@
     <bean id="tripEntriesFactory" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntriesFactory" />
     <bean id="serviceIdOverlapCache" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdOverlapCache" />
     <bean id="uniqueServiceImpl" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.UniqueServiceImpl" />
-    
-    <bean id="tripPlannerGraphRefresh" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphRefresh"/>
+
+    <bean id="tripPlannerGraphRefresh" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphRefresh" />
 
     <!-- The initial calendar task produces the data necessary to power the CalendarService, but subsequent tasks need access 
         to the data, so we provide a lazy-factory-init instance of the service -->
@@ -133,11 +133,15 @@
 
     <bean id="stopTransfersTask"
         class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTransfersTripPlannerGraphTaskImpl"
-        lazy-init="true" />
-    <bean id="blockStopTimeIndicesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockStopTimeIndicesTask"
-        lazy-init="true" />
+        lazy-init="true">
+        <property name="blockStopTimeIndicesRefreshTask">
+            <bean class="org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndexServiceImpl"
+                lazy-init="true" />
+        </property>
+    </bean>
+
     <bean id="blockIndexServiceImpl" class="org.onebusaway.transit_data_federation.impl.blocks.BlockIndexServiceImpl"
-        lazy-init="true"/>
+        lazy-init="true" />
 
     <bean id="modifications" class="org.onebusaway.transit_data_federation.model.modifications.Modifications" />
 

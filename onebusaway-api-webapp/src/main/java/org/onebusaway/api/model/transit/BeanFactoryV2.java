@@ -215,11 +215,18 @@ public class BeanFactoryV2 {
 
     bean.setPosition(tripStatus.getLocation());
 
-    StopBean stop = tripStatus.getClosestStop();
-    if (stop != null) {
-      bean.setClosestStop(stop.getId());
-      addToReferences(stop);
+    StopBean closestStop = tripStatus.getClosestStop();
+    if (closestStop != null) {
+      bean.setClosestStop(closestStop.getId());
+      addToReferences(closestStop);
       bean.setClosestStopTimeOffset(tripStatus.getClosestStopTimeOffset());
+    }
+    
+    StopBean nextStop = tripStatus.getNextStop();
+    if (nextStop != null) {
+      bean.setNextStop(nextStop.getId());
+      addToReferences(nextStop);
+      bean.setNextStopTimeOffset(tripStatus.getNextStopTimeOffset());
     }
 
     bean.setPredicted(tripStatus.isPredicted());
@@ -418,7 +425,7 @@ public class BeanFactoryV2 {
 
     bean.setTripId(trip.getId());
     bean.setServiceDate(ad.getServiceDate());
-
+    bean.setVehicleId(ad.getVehicleId());
     bean.setStopId(ad.getStopId());
     bean.setRouteId(route.getId());
 

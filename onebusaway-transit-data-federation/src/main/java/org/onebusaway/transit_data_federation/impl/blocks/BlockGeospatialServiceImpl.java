@@ -11,6 +11,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialSer
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndexService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,8 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
 
   private BlockCalendarService _blockCalendarService;
 
+  private BlockStopTimeIndexService _blockStopTimeIndexService;
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -30,6 +33,12 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
   @Autowired
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
+  }
+
+  @Autowired
+  public void setBlockStopTimeIndexService(
+      BlockStopTimeIndexService blockStopTimeIndexService) {
+    _blockStopTimeIndexService = blockStopTimeIndexService;
   }
 
   @Override
@@ -42,7 +51,7 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
 
     for (StopEntry stop : stops) {
 
-      List<BlockStopTimeIndex> stopTimeIndices = stop.getStopTimeIndices();
+      List<BlockStopTimeIndex> stopTimeIndices = _blockStopTimeIndexService.getStopTimeIndicesForStop(stop);
       for (BlockStopTimeIndex stopTimeIndex : stopTimeIndices)
         blockIndices.add(stopTimeIndex.getBlockIndex());
     }

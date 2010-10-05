@@ -29,12 +29,16 @@ public final class TripStatusV2Bean implements Serializable {
 
   private int closestStopTimeOffset;
 
+  private String nextStop;
+
+  private int nextStopTimeOffset;
+
   /****
    * These are fields that we can supply only from real-time data
    ****/
 
   private boolean predicted = false;
-  
+
   private Long lastUpdateTime;
 
   private Integer scheduleDeviation;
@@ -89,6 +93,22 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setClosestStopTimeOffset(int closestStopTimeOffset) {
     this.closestStopTimeOffset = closestStopTimeOffset;
+  }
+
+  public String getNextStop() {
+    return nextStop;
+  }
+
+  public void setNextStop(String nextStop) {
+    this.nextStop = nextStop;
+  }
+
+  public int getNextStopTimeOffset() {
+    return nextStopTimeOffset;
+  }
+
+  public void setNextStopTimeOffset(int nextStopTimeOffset) {
+    this.nextStopTimeOffset = nextStopTimeOffset;
   }
 
   public boolean isPredicted() {

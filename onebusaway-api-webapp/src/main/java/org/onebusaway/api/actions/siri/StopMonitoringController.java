@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -105,13 +106,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
       directionId = agencyId + "_" + directionId;
     }
 
-    Calendar timeFrom = new GregorianCalendar();
-    timeFrom.add(Calendar.MINUTE, -30);
-    Calendar timeTo = new GregorianCalendar();
-    timeTo.add(Calendar.MINUTE, 30);
-
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _transitDataService.getStopWithArrivalsAndDepartures(
-        stopId, timeFrom.getTime(), timeTo.getTime());
+        stopId, new Date(), 30, 30);
 
     if (stopWithArrivalsAndDepartures.getStop() == null) {
       throw new IllegalArgumentException("Bogus stop parameter");

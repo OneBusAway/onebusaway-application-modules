@@ -1,7 +1,6 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -74,17 +73,8 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
     if (_time == null)
       _time = new Date();
 
-    Calendar c = Calendar.getInstance();
-    c.setTime(_time);
-    c.add(Calendar.MINUTE, -_minutesBefore);
-    Date timeFrom = c.getTime();
-
-    c.setTime(_time);
-    c.add(Calendar.MINUTE, _minutesAfter);
-    Date timeTo = c.getTime();
-
     StopWithArrivalsAndDeparturesBean result = _service.getStopWithArrivalsAndDepartures(
-        _id, timeFrom, timeTo);
+        _id, _time, _minutesBefore,_minutesAfter);
 
     if (result == null)
       return setResourceNotFoundResponse();

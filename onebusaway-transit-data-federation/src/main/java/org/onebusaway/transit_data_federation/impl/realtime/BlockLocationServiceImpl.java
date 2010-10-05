@@ -20,8 +20,6 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeDepartureTimeValueAdapter;
-import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -30,13 +28,9 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationRecordCache;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
-import org.onebusaway.transit_data_federation.services.realtime.StopRealtimeService;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
@@ -54,7 +48,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime:name=BlockLocationServiceImpl")
 public class BlockLocationServiceImpl implements BlockLocationService,
-    StopRealtimeService, VehicleLocationListener {
+    VehicleLocationListener {
 
   private BlockLocationRecordCache _cache;
 
@@ -107,18 +101,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * through to the database
    */
   private AtomicInteger _blockLocationRecordPersistentStoreAccessCount = new AtomicInteger();
-
-  /**
-   * A count of the number of stop times queried for real-time arrival
-   * information
-   */
-  private AtomicInteger _stopTimesTotal = new AtomicInteger();
-
-  /**
-   * A count of the number of stop times queried for real-time arrival
-   * information that actually had data
-   */
-  private AtomicInteger _stopTimesWithPredictions = new AtomicInteger();
 
   private boolean _scheduleDeviationComputationEnabled = false;
 
@@ -193,16 +175,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     return _blockLocationRecordPersistentStoreAccessCount.get();
   }
 
-  @ManagedAttribute
-  public int getStopTimesTotal() {
-    return _stopTimesTotal.intValue();
-  }
-
-  @ManagedAttribute
-  public int getStopTimesWithPredictions() {
-    return _stopTimesWithPredictions.intValue();
-  }
-
   /****
    * Setup and Teardown
    ****/
@@ -227,7 +199,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
     T2<BlockInstance, BlockLocationRecord> tuple = getVehicleLocationRecordAsBlockLocationRecord(record);
-    if( tuple != null)
+    if (tuple != null)
       putBlockLocationRecord(tuple.getFirst(), tuple.getSecond());
   }
 
@@ -240,182 +212,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   @Override
   public void resetVehicleLocation(AgencyAndId vehicleId) {
     _cache.clearRecordsForVehicleId(vehicleId);
-  }
-
-  /****
-   * {@link StopRealtimeService} Interface
-   ****/
-
-  public void applyRealtimeData(List<StopTimeInstanceProxy> stopTimes,
-      long targetTime) {
-
-    _stopTimesTotal.addAndGet(stopTimes.size());
-
-    Map<BlockInstance, List<StopTimeInstanceProxy>> stisByBlockId = getStopTimeInstancesByBlockInstance(stopTimes);
-
-    for (Map.Entry<BlockInstance, List<StopTimeInstanceProxy>> entry : stisByBlockId.entrySet()) {
-
-      BlockInstance blockInstance = entry.getKey();
-      List<BlockLocationRecordCollection> collections = getBlockLocationRecordCollectionForBlock(
-          blockInstance, targetTime);
-
-      if (collections.isEmpty())
-        continue;
-
-      BlockLocationRecordCollection collection = collections.get(0);
-
-      boolean predicted = false;
-
-      // Only apply real-time data if there is data to apply
-      if (collection.hasScheduleDeviations()) {
-
-        predicted = true;
-
-        int scheduleDeviation = collection.getScheduleDeviationForTargetTime(targetTime);
-
-        long serviceDate = blockInstance.getServiceDate();
-        int effectiveScheduleTime = (int) (((targetTime - serviceDate) / 1000) - scheduleDeviation);
-
-        BlockStopTimeEntry nextStopTime = getNextStopTime(blockInstance,
-            collection, effectiveScheduleTime);
-
-        for (StopTimeInstanceProxy sti : entry.getValue()) {
-
-          BlockStopTimeEntry stopTime = sti.getStopTime();
-
-          int arrivalDeviation = calculateArrivalDeviation(collection,
-              nextStopTime, stopTime, effectiveScheduleTime, scheduleDeviation);
-          int departureDeviation = calculateDepartureDeviation(collection,
-              nextStopTime, stopTime, effectiveScheduleTime, scheduleDeviation);
-
-          sti.setPredictedArrivalOffset(arrivalDeviation);
-          sti.setPredictedDepartureOffset(departureDeviation);
-          _stopTimesWithPredictions.incrementAndGet();
-        }
-      }
-
-      if (collection.hasDistancesAlongBlock()) {
-
-        predicted = true;
-        double distanceAlongBlock = collection.getDistanceAlongBlockForTargetTime(targetTime);
-
-        for (StopTimeInstanceProxy sti : entry.getValue()) {
-          double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
-              - distanceAlongBlock;
-          sti.setDistanceFromStop(distanceFromStop);
-        }
-
-      } else {
-
-        for (StopTimeInstanceProxy sti : entry.getValue()) {
-          BlockTripEntry tripEntry = sti.getTrip();
-          BlockConfigurationEntry blockConfiguration = tripEntry.getBlockConfiguration();
-
-          int scheduleTime = (int) ((targetTime - sti.getServiceDate()) / 1000);
-          ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
-              blockConfiguration.getStopTimes(), scheduleTime);
-
-          if (location != null) {
-            double distanceAlongBlock = location.getDistanceAlongBlock();
-            double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
-                - distanceAlongBlock;
-            sti.setDistanceFromStop(distanceFromStop);
-          }
-        }
-      }
-
-      // Set prediction status and last update time as applicable
-      if (predicted && !collection.isEmpty()) {
-        long lastUpdateTime = collection.getLastUpdateTime(targetTime);
-        for (StopTimeInstanceProxy sti : entry.getValue()) {
-          sti.setLastUpdateTime(lastUpdateTime);
-          sti.setPredicted(true);
-        }
-      }
-    }
-  }
-
-  private BlockStopTimeEntry getNextStopTime(BlockInstance blockInstance,
-      BlockLocationRecordCollection collection, int effectiveScheduleTime) {
-
-    BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-
-    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
-    int index = GenericBinarySearch.search(stopTimes, effectiveScheduleTime,
-        BlockStopTimeDepartureTimeValueAdapter.INSTANCE);
-    if (0 <= index && index < stopTimes.size())
-      return stopTimes.get(index);
-    return null;
-  }
-
-  private int calculateArrivalDeviation(
-      BlockLocationRecordCollection collection,
-      BlockStopTimeEntry nextBlockStopTime,
-      BlockStopTimeEntry targetBlockStopTime, int effectiveScheduleTime,
-      int scheduleDeviation) {
-
-    StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
-    StopTimeEntry targetStopTime = targetBlockStopTime.getStopTime();
-
-    if (targetStopTime.getArrivalTime() < effectiveScheduleTime)
-      return collection.getScheduleDeviationForScheduleTime(targetStopTime.getArrivalTime());
-
-    // TargetStopTime
-    if (nextStopTime == null
-        || nextBlockStopTime.getBlockSequence() > targetBlockStopTime.getBlockSequence()) {
-      return scheduleDeviation;
-    }
-
-    double slack = targetBlockStopTime.getAccumulatedSlackTime()
-        - nextStopTime.getAccumulatedSlackTime();
-
-    if (nextStopTime.getArrivalTime() <= effectiveScheduleTime
-        && effectiveScheduleTime <= nextStopTime.getDepartureTime()) {
-      slack -= (effectiveScheduleTime - nextStopTime.getArrivalTime());
-    }
-
-    slack = Math.max(slack, 0);
-
-    if (slack > 0 && scheduleDeviation > 0)
-      scheduleDeviation -= Math.min(scheduleDeviation, slack);
-
-    return scheduleDeviation;
-  }
-
-  private int calculateDepartureDeviation(
-      BlockLocationRecordCollection collection,
-      BlockStopTimeEntry nextBlockStopTime,
-      BlockStopTimeEntry targetBlockStopTime, int effectiveScheduleTime,
-      int scheduleDeviation) {
-
-    StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
-    StopTimeEntry targetStopTime = targetBlockStopTime.getStopTime();
-
-    if (targetStopTime.getDepartureTime() < effectiveScheduleTime)
-      return collection.getScheduleDeviationForScheduleTime(targetStopTime.getDepartureTime());
-
-    // TargetStopTime
-    if (nextStopTime == null
-        || nextBlockStopTime.getBlockSequence() > targetBlockStopTime.getBlockSequence()) {
-      return scheduleDeviation;
-    }
-
-    double slack = targetStopTime.getAccumulatedSlackTime()
-        - nextStopTime.getAccumulatedSlackTime();
-
-    slack += targetStopTime.getSlackTime();
-
-    if (nextStopTime.getArrivalTime() <= effectiveScheduleTime
-        && effectiveScheduleTime <= nextStopTime.getDepartureTime()) {
-      slack -= (effectiveScheduleTime - nextStopTime.getArrivalTime());
-    }
-
-    slack = Math.max(slack, 0);
-
-    if (slack > 0 && scheduleDeviation > 0)
-      scheduleDeviation -= Math.min(scheduleDeviation, slack);
-
-    return scheduleDeviation;
   }
 
   /****
@@ -502,8 +298,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     BlockInstance blockInstance = getBestBlockForRecord(blockId,
         record.getServiceDate(), record.getTimeOfRecord());
-    
-    if( blockInstance == null)
+
+    if (blockInstance == null)
       return null;
 
     BlockLocationRecord.Builder builder = BlockLocationRecord.builder();
@@ -562,25 +358,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     }
 
     return m.getMinElement();
-  }
-
-  private Map<BlockInstance, List<StopTimeInstanceProxy>> getStopTimeInstancesByBlockInstance(
-      List<StopTimeInstanceProxy> stopTimes) {
-
-    Map<BlockInstance, List<StopTimeInstanceProxy>> r = new FactoryMap<BlockInstance, List<StopTimeInstanceProxy>>(
-        new ArrayList<StopTimeInstanceProxy>());
-
-    for (StopTimeInstanceProxy stopTime : stopTimes) {
-      BlockStopTimeEntry blockStopTime = stopTime.getStopTime();
-      BlockTripEntry blockTrip = blockStopTime.getTrip();
-      BlockConfigurationEntry blockConfiguration = blockTrip.getBlockConfiguration();
-      long serviceDate = stopTime.getServiceDate();
-      BlockInstance blockInstance = new BlockInstance(blockConfiguration,
-          serviceDate);
-      r.get(blockInstance).add(stopTime);
-    }
-
-    return r;
   }
 
   /**

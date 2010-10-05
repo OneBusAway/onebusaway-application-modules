@@ -25,6 +25,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private long serviceDate;
 
+  private String vehicleId;
+
   private String stopId;
 
   private long predictedArrivalTime;
@@ -43,6 +45,12 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private double distanceFromStop = Double.NaN;
 
+  private int numberOfStopsAway;
+
+  private String routeShortName;
+
+  private String tripHeadsign;
+
   public TripBean getTrip() {
     return trip;
   }
@@ -57,6 +65,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
+  }
+
+  public String getVehicleId() {
+    return vehicleId;
+  }
+
+  public void setVehicleId(String vehicleId) {
+    this.vehicleId = vehicleId;
   }
 
   public String getStopId() {
@@ -135,6 +151,30 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.distanceFromStop = distanceFromStop;
   }
 
+  public int getNumberOfStopsAway() {
+    return numberOfStopsAway;
+  }
+
+  public void setNumberOfStopsAway(int numberOfStopsAway) {
+    this.numberOfStopsAway = numberOfStopsAway;
+  }
+
+  public String getRouteShortName() {
+    return routeShortName;
+  }
+
+  public void setRouteShortName(String routeShortName) {
+    this.routeShortName = routeShortName;
+  }
+
+  public String getTripHeadsign() {
+    return tripHeadsign;
+  }
+
+  public void setTripHeadsign(String tripHeadsign) {
+    this.tripHeadsign = tripHeadsign;
+  }
+
   public boolean hasPredictedArrivalTime() {
     return this.predictedArrivalTime > 0;
   }
@@ -158,4 +198,5 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     return "route=" + trip.getRoute() + " scheduled=" + scheduledArrivalTime
         + " predicted=" + predictedArrivalTime;
   }
+
 }

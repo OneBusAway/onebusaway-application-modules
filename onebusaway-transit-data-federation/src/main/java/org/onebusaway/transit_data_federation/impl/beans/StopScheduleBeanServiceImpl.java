@@ -34,6 +34,7 @@ import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopScheduleBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndexService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
@@ -64,6 +65,8 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
   private NarrativeService _narrativeService;
 
+  private BlockStopTimeIndexService _blockStopTimeIndexService;
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -89,6 +92,12 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     _narrativeService = narrativeService;
   }
 
+  @Autowired
+  public void setBlockStopTimeIndexService(
+      BlockStopTimeIndexService blockStopTimeIndexService) {
+    _blockStopTimeIndexService = blockStopTimeIndexService;
+  }
+
   @Cacheable
   public StopCalendarDaysBean getCalendarForStop(AgencyAndId stopId) {
 
@@ -96,7 +105,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
     Set<ServiceIdActivation> serviceIds = new HashSet<ServiceIdActivation>();
-    for (BlockStopTimeIndex blockStopTimeIndex : stopEntry.getStopTimeIndices())
+    for (BlockStopTimeIndex blockStopTimeIndex : _blockStopTimeIndexService.getStopTimeIndicesForStop(stopEntry))
       serviceIds.add(blockStopTimeIndex.getServiceIds());
 
     SortedMap<ServiceDate, Set<ServiceIdActivation>> serviceIdsByDate = getServiceIdsByDate(serviceIds);
@@ -135,7 +144,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     Map<AgencyAndId, List<StopTimeInstanceProxy>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstanceProxy>>(
         new ArrayList<StopTimeInstanceProxy>());
 
-    for (BlockStopTimeIndex index : stopEntry.getStopTimeIndices()) {
+    for (BlockStopTimeIndex index : _blockStopTimeIndexService.getStopTimeIndicesForStop(stopEntry)) {
 
       ServiceIdActivation serviceIds = index.getServiceIds();
 

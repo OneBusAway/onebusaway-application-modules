@@ -73,6 +73,8 @@ class ScheduledBlockLocationServiceImpl implements
       location.setActiveTrip(activeTrip);
       location.setClosestStop(blockFirst);
       location.setClosestStopTimeOffset(first.getArrivalTime() - scheduledTime);
+      location.setNextStop(blockFirst);
+      location.setNextStopTimeOffset(first.getArrivalTime() - scheduledTime);
       location.setDistanceAlongBlock(distanceAlongBlock);
       location.setScheduledTime(scheduledTime);
       // In this case, distance along block and distance along trip are the same
@@ -132,6 +134,8 @@ class ScheduledBlockLocationServiceImpl implements
         result.setLocation(location);
         result.setClosestStop(blockStopTime);
         result.setClosestStopTimeOffset(0);
+        result.setNextStop(blockStopTime);
+        result.setNextStopTimeOffset(0);
         result.setScheduledTime(scheduleTime);
         result.setDistanceAlongBlock(blockStopTime.getDistaceAlongBlock());
         result.setActiveTrip(blockStopTime.getTrip());
@@ -166,6 +170,9 @@ class ScheduledBlockLocationServiceImpl implements
       result.setClosestStop(blockAfter);
       result.setClosestStopTimeOffset(toTimeOffset);
     }
+    
+    result.setNextStop(blockAfter);
+    result.setNextStopTimeOffset(toTimeOffset);
 
     double ratio = (scheduleTime - fromTime) / ((double) (toTime - fromTime));
 

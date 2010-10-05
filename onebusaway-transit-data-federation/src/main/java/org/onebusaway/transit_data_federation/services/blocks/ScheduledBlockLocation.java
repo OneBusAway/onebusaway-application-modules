@@ -18,6 +18,10 @@ public class ScheduledBlockLocation {
 
   private int closestStopTimeOffset;
 
+  private BlockStopTimeEntry nextStop;
+
+  private int nextStopTimeOffset;
+
   public BlockTripEntry getActiveTrip() {
     return activeTrip;
   }
@@ -77,12 +81,28 @@ public class ScheduledBlockLocation {
     this.closestStopTimeOffset = closestStopTimeOffset;
   }
 
+  public BlockStopTimeEntry getNextStop() {
+    return nextStop;
+  }
+
+  public void setNextStop(BlockStopTimeEntry nextStop) {
+    this.nextStop = nextStop;
+  }
+
+  public int getNextStopTimeOffset() {
+    return nextStopTimeOffset;
+  }
+
+  public void setNextStopTimeOffset(int nextStopTimeOffset) {
+    this.nextStopTimeOffset = nextStopTimeOffset;
+  }
+
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("ScheduledBlockLocation(");
     b.append("activeTripe=");
-    if( activeTrip != null)
+    if (activeTrip != null)
       b.append(activeTrip.getTrip().getId());
     else
       b.append("null");

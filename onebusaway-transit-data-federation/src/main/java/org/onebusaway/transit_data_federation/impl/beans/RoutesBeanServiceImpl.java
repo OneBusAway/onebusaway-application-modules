@@ -25,6 +25,7 @@ import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
+import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
@@ -46,6 +47,9 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   private static Logger _log = LoggerFactory.getLogger(RoutesBeanServiceImpl.class);
 
   private static final double MIN_SEARCH_SCORE = 1.0;
+  
+  @Autowired
+  private RouteService _routeService;
 
   @Autowired
   private RouteCollectionSearchService _searchService;
@@ -71,7 +75,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   public void setup() {
     
     for (StopEntry stop : _graphDao.getAllStops()) {
-      Set<AgencyAndId> routeIds = _graphDao.getRouteCollectionIdsForStop(stop.getId());
+      Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
       for (AgencyAndId routeId : routeIds) {
         STRtree tree = _stopTreesByRouteId.get(routeId);
         if (tree == null) {

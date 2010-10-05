@@ -1,7 +1,6 @@
 package org.onebusaway.presentation.impl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -122,17 +121,8 @@ public class ArrivalsAndDeparturesModel {
 
   public void process() {
 
-    Calendar c = Calendar.getInstance();
-    c.setTime(_time);
-    c.add(Calendar.MINUTE, -_minutesBefore);
-    Date timeFrom = c.getTime();
-
-    c.setTime(_time);
-    c.add(Calendar.MINUTE, _minutesAfter);
-    Date timeTo = c.getTime();
-
     _result = _transitDataService.getStopsWithArrivalsAndDepartures(_stopIds,
-        timeFrom, timeTo);
+        _time, _minutesBefore, _minutesAfter);
 
     checkForEmptyResult();
     filterResults();

@@ -32,6 +32,10 @@ public final class TripStatusBean implements Serializable {
 
   private int closestStopTimeOffset;
 
+  private StopBean nextStop;
+
+  private int nextStopTimeOffset;
+
   /****
    * These are fields that we can supply only from real-time data
    ****/
@@ -119,6 +123,28 @@ public final class TripStatusBean implements Serializable {
    */
   public void setClosestStopTimeOffset(int closestStopTimeOffset) {
     this.closestStopTimeOffset = closestStopTimeOffset;
+  }
+
+  public StopBean getNextStop() {
+    return nextStop;
+  }
+
+  public void setNextStop(StopBean nextStop) {
+    this.nextStop = nextStop;
+  }
+
+  /**
+   * The time offset, in seconds, from the next stop to the current position of
+   * the transit vehicle according to the schedule.
+   * 
+   * @return time, in seconds
+   */
+  public int getNextStopTimeOffset() {
+    return nextStopTimeOffset;
+  }
+
+  public void setNextStopTimeOffset(int nextStopTimeOffset) {
+    this.nextStopTimeOffset = nextStopTimeOffset;
   }
 
   /**

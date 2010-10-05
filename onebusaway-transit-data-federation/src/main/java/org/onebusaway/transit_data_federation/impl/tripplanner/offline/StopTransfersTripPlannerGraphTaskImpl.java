@@ -44,7 +44,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
   private TripPlannerGraphImpl _graph;
 
-  private Runnable _blockStopTimeIndicesTask;
+  private Runnable _blockStopTimeIndicesRefreshTask;
 
   private TripPlannerGraphRefresh _refresh;
 
@@ -58,9 +58,8 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
     _graph = graph;
   }
 
-  @Autowired
-  public void setBlockStopTimeIndicesTask(Runnable blockStopTimeIndicesTask) {
-    _blockStopTimeIndicesTask = blockStopTimeIndicesTask;
+  public void setBlockStopTimeIndicesRefreshTask(Runnable blockStopTimeIndicesRefreshTask) {
+    _blockStopTimeIndicesRefreshTask = blockStopTimeIndicesRefreshTask;
   }
   
   @Autowired
@@ -80,7 +79,7 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
       _refresh.refresh();
 
       // Make sure the block stop time indices have been wired up
-      _blockStopTimeIndicesTask.run();
+      _blockStopTimeIndicesRefreshTask.run();
 
       StopSequenceData data = new StopSequenceData();
 

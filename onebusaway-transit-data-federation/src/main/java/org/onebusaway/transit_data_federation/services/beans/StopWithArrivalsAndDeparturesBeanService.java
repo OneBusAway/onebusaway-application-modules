@@ -31,7 +31,7 @@ public interface StopWithArrivalsAndDeparturesBeanService {
    *         found
    */
   public StopWithArrivalsAndDeparturesBean getArrivalsAndDeparturesByStopId(
-      AgencyAndId stopId, Date timeFrom, Date timeTo);
+      AgencyAndId stopId, Date time, int minutesBefore, int minutesAfter);
 
   /**
    * Retrieve information about stops along with the arrival and departure
@@ -45,6 +45,6 @@ public interface StopWithArrivalsAndDeparturesBeanService {
    *           be found
    */
   public StopsWithArrivalsAndDeparturesBean getArrivalsAndDeparturesForStopIds(
-      Set<AgencyAndId> stopIds, Date timeFrom, Date timeTo)
+      Set<AgencyAndId> stopIds, Date time, int minutesBefore, int minutesAfter)
       throws NoSuchStopServiceException;
 }

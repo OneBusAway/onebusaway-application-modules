@@ -201,19 +201,19 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, Date timeFrom, Date timeTo) throws ServiceException {
+      String stopId, Date time, int minutesBefore, int minutesAfter) throws ServiceException {
     AgencyAndId id = convertAgencyAndId(stopId);
     return _stopWithArrivalsAndDepaturesBeanService.getArrivalsAndDeparturesByStopId(
-        id, timeFrom, timeTo);
+        id, time, minutesBefore, minutesAfter);
   }
 
   @Override
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, Date timeFrom, Date timeTo)
+      Collection<String> stopIds, Date time, int minutesBefore, int minutesAfter)
       throws ServiceException {
     Set<AgencyAndId> ids = convertAgencyAndIds(stopIds);
     return _stopWithArrivalsAndDepaturesBeanService.getArrivalsAndDeparturesForStopIds(
-        ids, timeFrom, timeTo);
+        ids, time, minutesBefore, minutesAfter);
   }
 
   @Override

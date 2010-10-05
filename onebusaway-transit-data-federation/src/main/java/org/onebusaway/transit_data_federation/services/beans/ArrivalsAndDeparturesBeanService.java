@@ -24,5 +24,5 @@ public interface ArrivalsAndDeparturesBeanService {
    *         the specified time range
    */
   public List<ArrivalAndDepartureBean> getArrivalsAndDeparturesByStopId(
-      AgencyAndId stopId, Date timeFrom, Date timeTo);
+      AgencyAndId stopId, Date time, int minutesBefore, int minutesAfter);
 }

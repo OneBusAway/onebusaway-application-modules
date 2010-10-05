@@ -40,7 +40,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   private AgencyService _agencyService;
 
   public StopWithArrivalsAndDeparturesBean getArrivalsAndDeparturesByStopId(
-      AgencyAndId id, Date timeFrom, Date timeTo) {
+      AgencyAndId id, Date time, int minutesBefore, int minutesAfter) {
 
     StopBean stop = _stopBeanService.getStopForId(id);
 
@@ -48,7 +48,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       return null;
 
     List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
-        id, timeFrom, timeTo);
+        id, time, minutesBefore, minutesAfter);
 
     List<AgencyAndId> nearbyStopIds = _nearbyStopsBeanService.getNearbyStops(
         stop, 100);
@@ -61,7 +61,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   }
 
   public StopsWithArrivalsAndDeparturesBean getArrivalsAndDeparturesForStopIds(
-      Set<AgencyAndId> ids, Date timeFrom, Date timeTo)
+      Set<AgencyAndId> ids, Date time, int minutesBefore, int minutesAfter)
       throws NoSuchStopServiceException {
 
     List<StopBean> stops = new ArrayList<StopBean>();
@@ -81,7 +81,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       stops.add(stopBean);
 
       List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
-          id, timeFrom, timeTo);
+          id, time, minutesBefore, minutesAfter);
       allArrivalsAndDepartures.addAll(arrivalsAndDepartures);
 
       List<AgencyAndId> nearbyStopIds = _nearbyStopsBeanService.getNearbyStops(

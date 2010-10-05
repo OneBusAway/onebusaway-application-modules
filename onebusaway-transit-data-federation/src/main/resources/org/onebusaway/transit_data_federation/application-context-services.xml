@@ -69,8 +69,4 @@
         <property name="objectType" value="org.onebusaway.transit_data_federation.impl.narrative.NarrativeProviderImpl" />
         <property name="path" ref="narrativeProviderPath" />
     </bean>
-
-    <!-- We need to make sure the block stop time indices are wired up on startup -->
-    <bean class="org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockStopTimeIndicesTask"
-        init-method="run" />
 </beans>

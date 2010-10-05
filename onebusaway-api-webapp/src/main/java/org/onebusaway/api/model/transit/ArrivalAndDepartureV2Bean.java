@@ -27,6 +27,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private long serviceDate;
 
+  private String vehicleId;
+
   private String stopId;
 
   private String routeShortName;
@@ -94,6 +96,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.serviceDate = serviceDate;
   }
 
+  public String getVehicleId() {
+    return vehicleId;
+  }
+
+  public void setVehicleId(String vehicleId) {
+    this.vehicleId = vehicleId;
+  }
+
   public String getTripHeadsign() {
     return tripHeadsign;
   }
@@ -133,7 +143,7 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   public void setStatus(String status) {
     this.status = status;
   }
-  
+
   public boolean isPredicted() {
     return predicted;
   }

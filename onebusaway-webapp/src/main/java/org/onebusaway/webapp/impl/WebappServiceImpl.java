@@ -1,6 +1,5 @@
 package org.onebusaway.webapp.impl;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -59,7 +58,7 @@ class WebappServiceImpl implements WebappService {
   @Override
   public UserBean getCurrentUser() {
     UserBean user = _currentUserService.getCurrentUser();
-    if( user == null)
+    if (user == null)
       user = _currentUserService.getAnonymousUser();
     return user;
   }
@@ -125,19 +124,10 @@ class WebappServiceImpl implements WebappService {
   public StopWithArrivalsAndDeparturesBean getArrivalsByStopId(String stopId)
       throws ServiceException {
 
-    Calendar c = Calendar.getInstance();
     Date now = new Date();
 
-    c.setTime(now);
-    c.add(Calendar.MINUTE, -5);
-    Date timeFrom = c.getTime();
-
-    c.setTime(now);
-    c.add(Calendar.MINUTE, 35);
-    Date timeTo = c.getTime();
-
-    return _transitDataService.getStopWithArrivalsAndDepartures(stopId,
-        timeFrom, timeTo);
+    return _transitDataService.getStopWithArrivalsAndDepartures(stopId, now, 5,
+        35);
   }
 
   @Override

@@ -44,6 +44,12 @@ public class StopEntryImpl implements StopEntry, Serializable {
     _stopTimeIndices.add(stopTimeIndex);
   }
 
+  public List<BlockStopTimeIndex> getStopTimeIndices() {
+    if (_stopTimeIndices == null)
+      return Collections.emptyList();
+    return _stopTimeIndices;
+  }
+
   public void addTransfer(StopEntry stop, double distance) {
     _transfers.setValue(stop, (int) distance);
   }
@@ -78,13 +84,6 @@ public class StopEntryImpl implements StopEntry, Serializable {
   @Override
   public CoordinatePoint getStopLocation() {
     return new CoordinatePoint(_lat, _lon);
-  }
-
-  @Override
-  public List<BlockStopTimeIndex> getStopTimeIndices() {
-    if (_stopTimeIndices == null)
-      return Collections.emptyList();
-    return _stopTimeIndices;
   }
 
   @Override

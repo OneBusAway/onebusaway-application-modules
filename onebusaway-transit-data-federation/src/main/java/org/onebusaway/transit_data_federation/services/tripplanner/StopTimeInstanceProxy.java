@@ -3,6 +3,8 @@ package org.onebusaway.transit_data_federation.services.tripplanner;
 import java.text.DateFormat;
 import java.util.Date;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+
 public class StopTimeInstanceProxy {
 
   private static final DateFormat DAY_FORMAT = DateFormat.getDateInstance(DateFormat.SHORT);
@@ -11,9 +13,12 @@ public class StopTimeInstanceProxy {
       DateFormat.SHORT, DateFormat.SHORT);
 
   private long _serviceDate;
+  
+  private AgencyAndId _vehicleId;
 
   private BlockStopTimeEntry _stopTime;
 
+  /*
   private boolean _predicted = false;
 
   private long lastUpdateTime;
@@ -27,6 +32,9 @@ public class StopTimeInstanceProxy {
   private int _predictedDepartureOffset = 0;
 
   private double _distanceFromStop = Double.NaN;
+  
+  private int _numberOfStopsAway;
+  */
 
   public StopTimeInstanceProxy(BlockStopTimeEntry stopTime, Date serviceDate) {
     this(stopTime, serviceDate.getTime());
@@ -64,7 +72,16 @@ public class StopTimeInstanceProxy {
   public long getDepartureTime() {
     return _serviceDate + _stopTime.getStopTime().getDepartureTime() * 1000;
   }
+  
+  public AgencyAndId getVehicleId() {
+    return _vehicleId;
+  }
+  
+  public void setVehicleId(AgencyAndId vehicleId) {
+    _vehicleId = vehicleId;
+  }
 
+  /*
   public boolean isPredicted() {
     return _predicted;
   }
@@ -84,6 +101,7 @@ public class StopTimeInstanceProxy {
   public boolean hasPredictedArrivalOffset() {
     return _hasPredictedArrivalOffset;
   }
+  */
 
   /**
    * Set the predicted arrival offset, in seconds. The predicted arrival time
@@ -92,10 +110,12 @@ public class StopTimeInstanceProxy {
    * 
    * @param offset in seconds
    */
+  /*
   public void setPredictedArrivalOffset(int offset) {
     _hasPredictedArrivalOffset = true;
     _predictedArrivalOffset = offset;
   }
+  */
 
   /**
    * The predicted arrival time offset is additive, which means a positive value
@@ -104,6 +124,7 @@ public class StopTimeInstanceProxy {
    * 
    * @return the predicted arrival offset, in seconds
    */
+  /*
   public int getPredictedArrivalOffset() {
     return _predictedArrivalOffset;
   }
@@ -111,6 +132,7 @@ public class StopTimeInstanceProxy {
   public boolean hasPredictedDepartureOffset() {
     return _hasPredictedDepartureOffset;
   }
+  */
 
   /**
    * Set the predicted departure offset, in seconds. The predicted departure
@@ -120,10 +142,12 @@ public class StopTimeInstanceProxy {
    * 
    * @param offset in seconds
    */
+  /*
   public void setPredictedDepartureOffset(int offset) {
     _hasPredictedDepartureOffset = true;
     _predictedDepartureOffset = offset;
   }
+  */
 
   /**
    * The predicted departure time offset is additive, which means a positive
@@ -132,6 +156,7 @@ public class StopTimeInstanceProxy {
    * 
    * @return the predicted departure offset, in seconds
    */
+  /*
   public int getPredictedDepartureOffset() {
     return _predictedDepartureOffset;
   }
@@ -147,6 +172,15 @@ public class StopTimeInstanceProxy {
   public void setDistanceFromStop(double distanceFromStop) {
     _distanceFromStop = distanceFromStop;
   }
+  
+  public int getNumberOfStopsAway() {
+    return _numberOfStopsAway;
+  }
+  
+  public void setNumberOfStopsAway(int numberOfStopsAway) {
+    _numberOfStopsAway = numberOfStopsAway;
+  }
+  */
 
   @Override
   public boolean equals(Object obj) {

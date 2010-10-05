@@ -1,29 +1,48 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.List;
 
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
+import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndexService;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class BlockStopTimeIndicesTask implements Runnable {
+@Component
+public class BlockStopTimeIndexServiceImpl implements
+    BlockStopTimeIndexService, Runnable {
+
+  private TransitGraphDao _graphDao;
 
   private BlockIndexService _blockIndexService;
+
+  @Autowired
+  public void setGraphDao(TransitGraphDao graphDao) {
+    _graphDao = graphDao;
+  }
 
   @Autowired
   public void setBlockIndicesService(BlockIndexService blockIndexService) {
     _blockIndexService = blockIndexService;
   }
 
-  public void run() {
+  public void setup() {
 
     List<BlockIndex> blockIndices = _blockIndexService.getBlockIndices();
+
+    // Clear any existing indices
+    for (StopEntry stop : _graphDao.getAllStops()) {
+      StopEntryImpl stopImpl = (StopEntryImpl) stop;
+      stopImpl.getStopTimeIndices().clear();
+    }
 
     for (BlockIndex blockIndex : blockIndices) {
 
@@ -54,6 +73,28 @@ public class BlockStopTimeIndicesTask implements Runnable {
     }
   }
 
+  /****
+   * {@link Runnable} Interface
+   ****/
+
+  @Override
+  public void run() {
+    setup();
+  }
+
+  /****
+   * {@link BlockStopTimeIndexService} Interface
+   ****/
+
+  @Override
+  public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {
+    return ((StopEntryImpl) stopEntry).getStopTimeIndices();
+  }
+
+  /****
+   * Private Methods
+   ****/
+
   private ServiceInterval getStopTimesAsServiceInterval(
       BlockStopTimeEntry firstStopTime, BlockStopTimeEntry lastStopTime) {
 
@@ -63,4 +104,5 @@ public class BlockStopTimeIndicesTask implements Runnable {
     return new ServiceInterval(st0.getArrivalTime(), st0.getDepartureTime(),
         st1.getArrivalTime(), st1.getDepartureTime());
   }
+
 }

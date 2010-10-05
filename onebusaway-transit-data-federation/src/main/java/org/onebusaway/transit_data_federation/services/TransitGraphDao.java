@@ -1,11 +1,9 @@
 package org.onebusaway.transit_data_federation.services;
 
 import java.util.List;
-import java.util.Set;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
@@ -58,11 +56,4 @@ public interface TransitGraphDao {
    * @return the trip entry with the specified id, or null if not found
    */
   public TripEntry getTripEntryForId(AgencyAndId id);
-
-  /**
-   * @param stopId a stop id to query
-   * @return the set of all {@link RouteCollection} ids serving the specified
-   *         stop
-   */
-  public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId);
 }
