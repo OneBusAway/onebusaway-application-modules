@@ -444,8 +444,8 @@ public class BeanFactoryV2 {
 
     bean.setStatus(ad.getStatus());
 
-    if (ad.isDistanceFromStopSet())
-      bean.setDistanceFromStop(ad.getDistanceFromStop());
+    bean.setDistanceFromStop(ad.getDistanceFromStop());
+    bean.setNumberOfStopsAway(ad.getNumberOfStopsAway());
     
     bean.setPredicted(ad.isPredicted());
     bean.setLastUpdateTime(ad.getLastUpdateTime());

@@ -51,10 +51,9 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private long predictedDepartureTime;
 
-  /**
-   * Allowed to be null if not set
-   */
-  private Double distanceFromStop;
+  private double distanceFromStop;
+
+  private int numberOfStopsAway;
 
   public String getRouteId() {
     return routeId;
@@ -160,12 +159,20 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.lastUpdateTime = lastUpdateTime;
   }
 
-  public Double getDistanceFromStop() {
+  public double getDistanceFromStop() {
     return distanceFromStop;
   }
 
-  public void setDistanceFromStop(Double distanceFromStop) {
+  public void setDistanceFromStop(double distanceFromStop) {
     this.distanceFromStop = distanceFromStop;
+  }
+
+  public int getNumberOfStopsAway() {
+    return numberOfStopsAway;
+  }
+
+  public void setNumberOfStopsAway(int numberOfStopsAway) {
+    this.numberOfStopsAway = numberOfStopsAway;
   }
 
   public boolean hasPredictedArrivalTime() {
