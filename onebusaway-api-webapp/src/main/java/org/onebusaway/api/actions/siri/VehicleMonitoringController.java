@@ -90,8 +90,10 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
 
     // single trip, by vehicle
     if (vehicleId != null) {
+      System.out.println("agency: " + agencyId);
+      System.out.println("vehicle: " + vehicleId);
       TripDetailsBean trip = getTripForVehicle(agencyId, vehicleId, timeZone);
-
+      System.out.println("trip: " + trip);
       if (trip == null) {
         /*
          * FIXME: This vehicle isn't on a trip. In the future, we'll correctly
@@ -108,26 +110,32 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
 
     String directionId = _request.getParameter("DirectionRef");
 
-    // single trip, by trip (FIXME: there might be more than one!)
+    // by trip (may be more than one trip)
     String tripId = _request.getParameter("VehicleJourneyRef");
     if (tripId != null) {
-      TripBean trip = _transitDataService.getTrip(agencyId + "_" + tripId);
-      if (trip == null) {
+      TripBean tripBean = _transitDataService.getTrip(agencyId + "_" + tripId);
+      if (tripBean == null) {
         throw new IllegalArgumentException("No such trip: " + tripId);
       }
       TripDetailsQueryBean query = new TripDetailsQueryBean();
       query.setTripId(tripId);
-      TripDetailsBean tripDetails = _transitDataService.getSingleTripDetails(query);
-      if (directionId != null
-          && tripDetails.getTrip().getDirectionId().equals(directionId)) {
-        return singleVehicleTrip(timeZone, onwardCalls, tripDetails);
-      } else {
-
-        Siri siri = generateSiriResponse(now, new ArrayList<VehicleActivity>());
-
-        _response = siri;
-        return new DefaultHttpHeaders();
+      ListBean<TripDetailsBean> trips = _transitDataService.getTripDetails(query);
+      ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
+      for (TripDetailsBean trip : trips.getList()) {
+        if (directionId != null
+            && trip.getTrip().getDirectionId().equals(directionId)) {
+          VehicleActivity activity = createActivity(trip, onwardCalls);
+          activities.add(activity);
+        }
       }
+      _response = generateSiriResponse(now, activities);
+
+    } else {
+
+      Siri siri = generateSiriResponse(now, new ArrayList<VehicleActivity>());
+
+      _response = siri;
+      return new DefaultHttpHeaders();
     }
 
     String routeId = _request.getParameter("LineRef");
