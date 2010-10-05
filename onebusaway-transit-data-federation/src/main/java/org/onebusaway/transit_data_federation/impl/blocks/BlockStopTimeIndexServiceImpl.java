@@ -2,6 +2,8 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
@@ -34,6 +36,7 @@ public class BlockStopTimeIndexServiceImpl implements
     _blockIndexService = blockIndexService;
   }
 
+  @PostConstruct
   public void setup() {
 
     List<BlockIndex> blockIndices = _blockIndexService.getBlockIndices();

@@ -104,6 +104,6 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
 
   @Override
   public String toString() {
-    return "BlockTrip(trip=" + trip + ")";
+    return "trip=" + trip.getId();
   }
 }

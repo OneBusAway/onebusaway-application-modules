@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
@@ -8,9 +9,10 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -19,7 +21,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
@@ -31,6 +32,8 @@ import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
@@ -43,6 +46,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private ArrivalsAndDeparturesBeanServiceImpl _service;
   private BlockLocationService _blockLocationService;
   private NarrativeService _narrativeService;
+  private ScheduledBlockLocationService _scheduledBlockLocationService;
   private StopTimeService _stopTimeService;
   private TripBeanService _tripBeanService;
 
@@ -57,6 +61,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     _narrativeService = Mockito.mock(NarrativeService.class);
     _service.setNarrativeService(_narrativeService);
 
+    _scheduledBlockLocationService = Mockito.mock(ScheduledBlockLocationService.class);
+    _service.setScheduledBlockLocationService(_scheduledBlockLocationService);
+
     _stopTimeService = Mockito.mock(StopTimeService.class);
     _service.setStopTimeService(_stopTimeService);
 
@@ -67,102 +74,172 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   @Test
   public void test() {
 
-    AgencyAndId stopId = aid("stop");
-    long t = dateAsLong("2010-10-05 16:18");
+    long t = dateAsLong("2010-10-05 16:30");
     long serviceDate = dateAsLong("2010-10-05 00:00");
     int minutesBefore = 5;
     int minutesAfter = 30;
 
-    Date stopTimeFrom = new Date(
-        t
-            - (ArrivalsAndDeparturesBeanServiceImpl.MINUTES_BEFORE_BUFFER + minutesBefore)
-            * 60 * 1000);
-    Date stopTimeTo = new Date(
-        t
-            + (ArrivalsAndDeparturesBeanServiceImpl.MINUTES_AFTER_BUFFER + minutesAfter)
-            * 60 * 1000);
-
     StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
     StopEntryImpl stopB = stop("stopB", 47.0, -122.0);
 
-    BlockEntryImpl blockA = block("block");
-    TripEntryImpl tripA = trip("trip", "sA", 3000);
+    /****
+     * Block A
+     ****/
 
-    stopTime(0, stopA, tripA, time(16, 30), 1000);
-    StopTimeEntryImpl stopTimeB = stopTime(0, stopB, tripA, time(16, 40), 2000);
+    BlockEntryImpl blockA = block("blockA");
+    TripEntryImpl tripA = trip("tripA", "sA", 3000);
 
-    BlockConfigurationEntry blockConfig = blockConfiguration(blockA,
+    stopTime(0, stopA, tripA, time(16, 30), time(16, 35), 1000);
+    StopTimeEntryImpl stopTimeAB = stopTime(1, stopB, tripA, time(16, 40),
+        time(16, 45), 2000);
+
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
         serviceIds(lsids("sA"), lsids()), tripA);
-    BlockStopTimeEntry bstA = blockConfig.getStopTimes().get(0);
-    BlockStopTimeEntry bstB = blockConfig.getStopTimes().get(1);
+    BlockStopTimeEntry bstAA = blockConfigA.getStopTimes().get(0);
+    BlockStopTimeEntry bstAB = blockConfigA.getStopTimes().get(1);
+
+    /****
+     * Block B
+     ****/
+
+    BlockEntryImpl blockB = block("blockB");
+    TripEntryImpl tripB = trip("tripB", "sA", 3000);
+
+    stopTime(2, stopA, tripB, time(16, 40), time(16, 45), 1000);
+    StopTimeEntryImpl stopTimeBB = stopTime(3, stopB, tripB, time(16, 50),
+        time(16, 55), 2000);
+
+    BlockConfigurationEntry blockConfigB = blockConfiguration(blockB,
+        serviceIds(lsids("sA"), lsids()), tripB);
+    BlockStopTimeEntry bstBA = blockConfigB.getStopTimes().get(0);
+    BlockStopTimeEntry bstBB = blockConfigB.getStopTimes().get(1);
 
     /****
      * 
      ****/
 
-    StopTimeInstanceProxy sti = new StopTimeInstanceProxy(bstB, serviceDate);
+    int expandedMinutesBefore = ArrivalsAndDeparturesBeanServiceImpl.MINUTES_BEFORE_BUFFER
+        + minutesBefore;
+    int expandedMinutesAfter = ArrivalsAndDeparturesBeanServiceImpl.MINUTES_AFTER_BUFFER
+        + minutesAfter;
+
+    Date stopTimeFrom = new Date(t - expandedMinutesBefore * 60 * 1000);
+    Date stopTimeTo = new Date(t + expandedMinutesAfter * 60 * 1000);
+
+    StopTimeInstanceProxy sti1 = new StopTimeInstanceProxy(bstAB, serviceDate);
+    StopTimeInstanceProxy sti2 = new StopTimeInstanceProxy(bstBB, serviceDate);
+
     Mockito.when(
-        _stopTimeService.getStopTimeInstancesInTimeRange(stopId, stopTimeFrom,
-            stopTimeTo)).thenReturn(Arrays.asList(sti));
+        _stopTimeService.getStopTimeInstancesInTimeRange(stopB.getId(),
+            stopTimeFrom, stopTimeTo)).thenReturn(Arrays.asList(sti1, sti2));
 
     /****
      * 
      ****/
 
-    BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, serviceDate);
     long lastUpdateTime = dateAsLong("2010-10-05 16:15");
 
     BlockLocation blockLocation = new BlockLocation();
-    blockLocation.setActiveTrip(bstA.getTrip());
-    blockLocation.setBlockInstance(blockInstance);
-    blockLocation.setClosestStop(bstA);
+    blockLocation.setActiveTrip(bstAA.getTrip());
+    blockLocation.setBlockInstance(blockInstanceA);
+    blockLocation.setClosestStop(bstAA);
     blockLocation.setDistanceAlongBlock(500);
     blockLocation.setInService(true);
     blockLocation.setLastUpdateTime(lastUpdateTime);
-    blockLocation.setNextStop(bstA);
+    blockLocation.setNextStop(bstAA);
     blockLocation.setPredicted(true);
     blockLocation.setScheduledDistanceAlongBlock(600);
-    blockLocation.setScheduleDeviation(60);
+    blockLocation.setScheduleDeviation(10 * 60);
     blockLocation.setVehicleId(aid("vehicle"));
 
     Mockito.when(
-        _blockLocationService.getLocationsForBlockInstance(blockInstance, t)).thenReturn(
+        _blockLocationService.getLocationsForBlockInstance(blockInstanceA, t)).thenReturn(
         Arrays.asList(blockLocation));
 
     /****
      * 
      ****/
 
+    ScheduledBlockLocation sbl = new ScheduledBlockLocation();
+    sbl.setActiveTrip(bstAB.getTrip());
+    sbl.setClosestStop(bstBA);
+    sbl.setDistanceAlongBlock(400);
+    sbl.setNextStop(bstBA);
+    sbl.setScheduledTime(time(16, 30));
+
+    Mockito.when(
+        _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
+            blockConfigB.getStopTimes(), time(16, 30))).thenReturn(sbl);
+
+    /****
+     * 
+     ****/
+
     Builder stopTimeNarrative = StopTimeNarrative.builder();
-    stopTimeNarrative.setStopHeadsign("Downtowm");
-    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeB)).thenReturn(
+    stopTimeNarrative.setStopHeadsign("Downtown");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeAB)).thenReturn(
+        stopTimeNarrative.create());
+
+    stopTimeNarrative = StopTimeNarrative.builder();
+    stopTimeNarrative.setRouteShortName("XX");
+    Mockito.when(_narrativeService.getStopTimeForEntry(stopTimeBB)).thenReturn(
         stopTimeNarrative.create());
 
     /****
      * 
      ****/
 
-    TripBean tripBean = new TripBean();
-    Mockito.when(_tripBeanService.getTripForId(aid("trip"))).thenReturn(
-        tripBean);
+    TripBean tripABean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripA"))).thenReturn(
+        tripABean);
+
+    TripBean tripBBean = new TripBean();
+    Mockito.when(_tripBeanService.getTripForId(aid("tripB"))).thenReturn(
+        tripBBean);
 
     /****
      * 
      ****/
 
     List<ArrivalAndDepartureBean> arrivalsAndDepartures = _service.getArrivalsAndDeparturesByStopId(
-        stopId, new Date(t), minutesBefore, minutesAfter);
+        stopB.getId(), new Date(t), minutesBefore, minutesAfter);
 
-    assertEquals(1, arrivalsAndDepartures.size());
+    assertEquals(2, arrivalsAndDepartures.size());
 
     ArrivalAndDepartureBean bean = arrivalsAndDepartures.get(0);
     assertEquals(1500, bean.getDistanceFromStop(), 0.0);
     assertEquals(lastUpdateTime, bean.getLastUpdateTime().longValue());
     assertEquals(1, bean.getNumberOfStopsAway());
+    assertEquals(dateAsLong("2010-10-05 16:45"), bean.getPredictedArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:45"),
+        bean.getPredictedDepartureTime());
+    assertNull(bean.getRouteShortName());
+    assertEquals(dateAsLong("2010-10-05 16:40"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:45"),
+        bean.getScheduledDepartureTime());
     assertEquals(serviceDate, bean.getServiceDate());
     assertEquals("default", bean.getStatus());
     assertEquals("1_stopB", bean.getStopId());
-    assertSame(tripBean, bean.getTrip());
+    assertSame(tripABean, bean.getTrip());
+    assertEquals("Downtown", bean.getTripHeadsign());
     assertEquals("1_vehicle", bean.getVehicleId());
+
+    bean = arrivalsAndDepartures.get(1);
+    assertEquals(1600, bean.getDistanceFromStop(), 0.0);
+    assertNull(bean.getLastUpdateTime());
+    assertEquals(1, bean.getNumberOfStopsAway());
+    assertEquals(0L, bean.getPredictedArrivalTime());
+    assertEquals(0L, bean.getPredictedDepartureTime());
+    assertEquals("XX", bean.getRouteShortName());
+    assertEquals(dateAsLong("2010-10-05 16:50"), bean.getScheduledArrivalTime());
+    assertEquals(dateAsLong("2010-10-05 16:55"),
+        bean.getScheduledDepartureTime());
+    assertEquals(serviceDate, bean.getServiceDate());
+    assertEquals("default", bean.getStatus());
+    assertEquals("1_stopB", bean.getStopId());
+    assertSame(tripBBean, bean.getTrip());
+    assertNull(bean.getTripHeadsign());
+    assertNull(bean.getVehicleId());
   }
 }
