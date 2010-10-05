@@ -7,7 +7,7 @@ import java.util.TreeMap;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
 
@@ -22,7 +22,7 @@ public final class BlockLocationRecordCollection implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private ServiceDateAndId blockInstance;
+  private BlockInstance blockInstance;
 
   private AgencyAndId vehicleId;
 
@@ -80,7 +80,7 @@ public final class BlockLocationRecordCollection implements Serializable {
    * @param records
    * @return a collection instance from the specified records
    */
-  public static BlockLocationRecordCollection createFromRecords(
+  public static BlockLocationRecordCollection createFromRecords(BlockInstance blockInstance,
       List<BlockLocationRecord> records) {
 
     if (records.isEmpty())
@@ -92,7 +92,7 @@ public final class BlockLocationRecordCollection implements Serializable {
     SortedMap<Integer, Double> scheduleDeviationsByScheduleTime = new TreeMap<Integer, Double>();
     SortedMap<Long, Double> distancesAlongBlock = new TreeMap<Long, Double>();
     SortedMap<Long, CoordinatePoint> locations = new TreeMap<Long, CoordinatePoint>();
-    ServiceDateAndId blockInstance = null;
+    
     AgencyAndId vehicleId = null;
 
     for (BlockLocationRecord record : records) {
@@ -110,7 +110,6 @@ public final class BlockLocationRecordCollection implements Serializable {
       if (record.hasLocation())
         locations.put(record.getTime(), record.getLocation());
 
-      blockInstance = checkBlockInstance(blockInstance, record);
       vehicleId = checkVehicleId(vehicleId, record);
     }
 
@@ -122,7 +121,7 @@ public final class BlockLocationRecordCollection implements Serializable {
     return collection;
   }
 
-  public ServiceDateAndId getBlockInstance() {
+  public BlockInstance getBlockInstance() {
     return blockInstance;
   }
 
@@ -204,12 +203,11 @@ public final class BlockLocationRecordCollection implements Serializable {
     return 0;
   }
 
-  public BlockLocationRecordCollection addRecord(BlockLocationRecord record,
-      long windowSize) {
+  public BlockLocationRecordCollection addRecord(BlockInstance blockInstance,
+      BlockLocationRecord record, long windowSize) {
 
     AgencyAndId vehicleId = checkVehicleId(this.vehicleId, record);
-    ServiceDateAndId blockInstance = checkBlockInstance(this.blockInstance,
-        record);
+    blockInstance = checkBlockInstance(this.blockInstance, blockInstance);
 
     long time = record.getTime();
 
@@ -364,17 +362,15 @@ public final class BlockLocationRecordCollection implements Serializable {
     return updatedLocations;
   }
 
-  private static ServiceDateAndId checkBlockInstance(ServiceDateAndId existing,
-      BlockLocationRecord record) {
-    ServiceDateAndId instance = new ServiceDateAndId(record.getServiceDate(),
-        record.getBlockId());
+  private static BlockInstance checkBlockInstance(BlockInstance existing,
+      BlockInstance blockInstance) {
     if (existing == null)
-      return instance;
-    else if (!existing.equals(instance)) {
+      return blockInstance;
+    else if (!existing.equals(blockInstance)) {
       throw new IllegalArgumentException("blockInstance mismatch: expected="
-          + existing + " actual=" + instance);
+          + existing + " actual=" + blockInstance);
     }
-    return instance;
+    return blockInstance;
   }
 
   private static AgencyAndId checkVehicleId(AgencyAndId existing,

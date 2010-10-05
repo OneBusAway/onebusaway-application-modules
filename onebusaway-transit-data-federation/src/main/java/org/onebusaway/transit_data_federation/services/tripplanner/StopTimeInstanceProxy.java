@@ -12,7 +12,7 @@ public class StopTimeInstanceProxy {
 
   private long _serviceDate;
 
-  private StopTimeEntry _stopTime;
+  private BlockStopTimeEntry _stopTime;
 
   private boolean _predicted = false;
 
@@ -28,33 +28,29 @@ public class StopTimeInstanceProxy {
 
   private double _distanceFromStop = Double.NaN;
 
-  public StopTimeInstanceProxy(StopTimeEntry stopTime, Date serviceDate) {
+  public StopTimeInstanceProxy(BlockStopTimeEntry stopTime, Date serviceDate) {
     this(stopTime, serviceDate.getTime());
   }
 
-  public StopTimeInstanceProxy(StopTimeEntry stopTime, long serviceDate) {
+  public StopTimeInstanceProxy(BlockStopTimeEntry stopTime, long serviceDate) {
     _stopTime = stopTime;
     _serviceDate = serviceDate;
   }
 
-  public StopTimeEntry getStopTime() {
+  public BlockStopTimeEntry getStopTime() {
     return _stopTime;
   }
 
-  public TripEntry getTrip() {
+  public BlockTripEntry getTrip() {
     return _stopTime.getTrip();
   }
 
   public int getSequence() {
-    return _stopTime.getSequence();
-  }
-
-  public StopEntry getStopEntry() {
-    return _stopTime.getStop();
+    return _stopTime.getBlockSequence();
   }
 
   public StopEntry getStop() {
-    return _stopTime.getStop();
+    return _stopTime.getStopTime().getStop();
   }
 
   public long getServiceDate() {
@@ -62,11 +58,11 @@ public class StopTimeInstanceProxy {
   }
 
   public long getArrivalTime() {
-    return _serviceDate + _stopTime.getArrivalTime() * 1000;
+    return _serviceDate + _stopTime.getStopTime().getArrivalTime() * 1000;
   }
 
   public long getDepartureTime() {
-    return _serviceDate + _stopTime.getDepartureTime() * 1000;
+    return _serviceDate + _stopTime.getStopTime().getDepartureTime() * 1000;
   }
 
   public boolean isPredicted() {

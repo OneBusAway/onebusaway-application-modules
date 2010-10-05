@@ -1,12 +1,12 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 
 public class ScheduledBlockLocation {
 
-  private TripEntry activeTrip;
+  private BlockTripEntry activeTrip;
 
   private int scheduledTime;
 
@@ -14,15 +14,15 @@ public class ScheduledBlockLocation {
 
   private double distanceAlongBlock;
 
-  private StopTimeEntry closestStop;
+  private BlockStopTimeEntry closestStop;
 
   private int closestStopTimeOffset;
 
-  public TripEntry getActiveTrip() {
+  public BlockTripEntry getActiveTrip() {
     return activeTrip;
   }
 
-  public void setActiveTrip(TripEntry activeTrip) {
+  public void setActiveTrip(BlockTripEntry activeTrip) {
     this.activeTrip = activeTrip;
   }
 
@@ -53,11 +53,11 @@ public class ScheduledBlockLocation {
     this.distanceAlongBlock = distanceAlongBlock;
   }
 
-  public StopTimeEntry getClosestStop() {
+  public BlockStopTimeEntry getClosestStop() {
     return closestStop;
   }
 
-  public void setClosestStop(StopTimeEntry closestStop) {
+  public void setClosestStop(BlockStopTimeEntry closestStop) {
     this.closestStop = closestStop;
   }
 
@@ -83,7 +83,7 @@ public class ScheduledBlockLocation {
     b.append("ScheduledBlockLocation(");
     b.append("activeTripe=");
     if( activeTrip != null)
-      b.append(activeTrip.getId());
+      b.append(activeTrip.getTrip().getId());
     else
       b.append("null");
     b.append(" scheduledTime=").append(scheduledTime);

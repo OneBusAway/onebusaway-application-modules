@@ -6,12 +6,16 @@ import java.util.List;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
+import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
+import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.BlockBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,15 +49,44 @@ public class BlockBeanServiceImpl implements BlockBeanService {
 
     bean.setId(AgencyAndIdLibrary.convertToString(blockEntry.getId()));
 
-    List<TripBean> trips = new ArrayList<TripBean>();
-    for (TripEntry tripEntry : blockEntry.getTrips()) {
-      TripBean tripBean = _tripBeanService.getTripForId(tripEntry.getId());
-      if (tripBean == null)
-        throw new IllegalStateException("unknown trip: " + tripEntry.getId());
-      trips.add(tripBean);
+    List<BlockConfigurationBean> configBeans = new ArrayList<BlockConfigurationBean>();
+    for (BlockConfigurationEntry blockConfiguration : blockEntry.getConfigurations()) {
+      BlockConfigurationBean configBean = getBlockConfigurationAsBean(blockConfiguration);
+      configBeans.add(configBean);
     }
-    bean.setTrips(trips);
+    bean.setConfigurations(configBeans);
 
     return bean;
   }
+
+  @Override
+  public BlockTripBean getBlockTripAsBean(BlockTripEntry blockTrip) {
+
+    TripEntry trip = blockTrip.getTrip();
+    TripBean tripBean = _tripBeanService.getTripForId(trip.getId());
+    if (tripBean == null)
+      throw new IllegalStateException("unknown trip: " + trip.getId());
+
+    BlockTripBean bean = new BlockTripBean();
+    bean.setTrip(tripBean);
+    bean.setAccumulatedSlackTime(blockTrip.getAccumulatedSlackTime());
+    bean.setDistanceAlongBlock(blockTrip.getDistanceAlongBlock());
+    return bean;
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private BlockConfigurationBean getBlockConfigurationAsBean(
+      BlockConfigurationEntry blockConfiguration) {
+
+    BlockConfigurationBean bean = new BlockConfigurationBean();
+    List<BlockTripBean> tripBeans = new ArrayList<BlockTripBean>();
+    for (BlockTripEntry blockTrip : blockConfiguration.getTrips())
+      tripBeans.add(getBlockTripAsBean(blockTrip));
+    bean.setTrips(tripBeans);
+    return bean;
+  }
+
 }

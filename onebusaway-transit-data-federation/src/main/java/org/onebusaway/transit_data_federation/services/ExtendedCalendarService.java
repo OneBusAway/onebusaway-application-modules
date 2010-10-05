@@ -1,0 +1,21 @@
+package org.onebusaway.transit_data_federation.services;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.Set;
+
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.model.calendar.ServiceInterval;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
+
+public interface ExtendedCalendarService {
+
+  public Set<ServiceDate> getServiceDatesForServiceIds(
+      ServiceIdActivation serviceIds);
+
+  public Set<Date> getDatesForServiceIds(ServiceIdActivation serviceIds);
+
+  public Collection<Date> getServiceDatesWithinRange(
+      ServiceIdActivation serviceIds, ServiceInterval interval, Date from,
+      Date to);
+}

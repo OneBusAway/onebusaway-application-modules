@@ -2,7 +2,6 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -93,7 +92,7 @@ public class BlockStatusServiceImpl implements BlockStatusService {
     long timeFrom = time - TIME_BEFORE_WINDOW;
     long timeTo = time + TIME_AFTER_WINDOW;
 
-    Set<BlockInstance> instances = _blockGeospatialService.getActiveScheduledBlocksPassingThroughBounds(
+    List<BlockInstance> instances = _blockGeospatialService.getActiveScheduledBlocksPassingThroughBounds(
         bounds, timeFrom, timeTo);
 
     List<BlockLocation> locations = getAsLocations(instances, time);

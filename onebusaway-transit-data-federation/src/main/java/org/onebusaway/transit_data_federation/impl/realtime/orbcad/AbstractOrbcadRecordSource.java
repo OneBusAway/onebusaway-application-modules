@@ -21,11 +21,10 @@ import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,8 +75,6 @@ public abstract class AbstractOrbcadRecordSource implements
 
   private transient int _recordsValid = 0;
 
-  private BlockToTripScheduleAdherenceInterpolation _interpolation;
-
   public void setRefreshInterval(int refreshIntervalInSeconds) {
     _refreshInterval = refreshIntervalInSeconds;
   }
@@ -112,12 +109,6 @@ public abstract class AbstractOrbcadRecordSource implements
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraph) {
     _transitGraph = transitGraph;
-  }
-
-  @Autowired
-  public void setBlockToTripScheduleAdherenceInterpolation(
-      BlockToTripScheduleAdherenceInterpolation interpolation) {
-    _interpolation = interpolation;
   }
 
   /****
@@ -212,16 +203,18 @@ public abstract class AbstractOrbcadRecordSource implements
     }
   }
 
-  private BlockInstance getBlockInstanceForRecord(OrbcadRecord record, AgencyAndId blockId) {
+  private BlockInstance getBlockInstanceForRecord(OrbcadRecord record,
+      AgencyAndId blockId) {
 
     long recordTime = record.getTime() * 1000;
     long timeFrom = recordTime - 30 * 60 * 1000;
     long timeTo = recordTime + 30 * 60 * 1000;
 
-    List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(blockId, timeFrom, timeTo);
-    
+    List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+        blockId, timeFrom, timeTo);
+
     // TODO : We currently assume we don't have overlapping blocks.
-    if( instances.size() != 1)
+    if (instances.size() != 1)
       return null;
 
     return instances.get(0);
@@ -235,8 +228,8 @@ public abstract class AbstractOrbcadRecordSource implements
 
     for (String agencyId : _agencyIds) {
       AgencyAndId aid = new AgencyAndId(agencyId, blockId);
-      List<TripEntry> trips = _transitGraph.getTripsForBlockId(aid);
-      if (trips == null || trips.isEmpty())
+      BlockEntry block = _transitGraph.getBlockEntryForId(aid);
+      if (block == null)
         continue;
       return aid;
     }
@@ -331,9 +324,7 @@ public abstract class AbstractOrbcadRecordSource implements
         message.setCurrentLocationLon(record.getLon());
       }
 
-      List<VehicleLocationRecord> messages = _interpolation.interpolate(message);
-
-      _records.addAll(messages);
+      _records.add(message);
       _recordsValid++;
     }
   }

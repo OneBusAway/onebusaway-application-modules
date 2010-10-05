@@ -13,7 +13,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
-import org.onebusaway.transit_data_federation.testing.MockEntryFactory;
+import org.onebusaway.transit_data_federation.testing.UnitTestingSupport;
 
 public class DistanceAlongShapeLibraryTest {
 
@@ -67,7 +67,7 @@ public class DistanceAlongShapeLibraryTest {
 
     int index = 0;
 
-    TripEntryImpl trip = MockEntryFactory.trip("trip");
+    TripEntryImpl trip = UnitTestingSupport.trip("trip");
     List<StopTimeEntryImpl> stopTimes = new ArrayList<StopTimeEntryImpl>();
 
     while ((line = reader.readLine()) != null) {
@@ -78,11 +78,11 @@ public class DistanceAlongShapeLibraryTest {
 
       StopEntryImpl stop = stops.get(stopId);
       if (stop == null) {
-        stop = MockEntryFactory.stop(stopId, lat, lon);
+        stop = UnitTestingSupport.stop(stopId, lat, lon);
         stops.put(stopId, stop);
       }
 
-      StopTimeEntryImpl stopTime = MockEntryFactory.stopTime(index, stop, trip,
+      StopTimeEntryImpl stopTime = UnitTestingSupport.stopTime(index, stop, trip,
           index, index, Double.NaN);
       stopTimes.add(stopTime);
     }

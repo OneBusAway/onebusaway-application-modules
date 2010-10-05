@@ -7,12 +7,13 @@ import java.util.Set;
 import org.onebusaway.exceptions.InternalErrorServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,10 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   public void setTripPlannerGraph(TripPlannerGraph graph) {
     _graph = graph;
   }
+
+  /****
+   * {@link TransitGraphDao} Interface
+   ****/
 
   @Override
   public Iterable<StopEntry> getAllStops() {
@@ -63,26 +68,21 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
     return _graph.getTripEntryForId(id);
   }
 
-  @Override
-  public List<TripEntry> getTripsForBlockId(AgencyAndId blockId) {
-    return _graph.getTripsForBlockId(blockId);
-  }
-
   public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId) {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
     if (stopEntry == null)
       throw new InternalErrorServiceException("no such stop: id=" + stopId);
 
-    StopTimeIndex index = stopEntry.getStopTimes();
-
     Set<AgencyAndId> routeCollectionIds = new HashSet<AgencyAndId>();
 
-    for (LocalizedServiceId serviceId : index.getServiceIds()) {
-      List<StopTimeEntry> stopTimes = index.getStopTimesForServiceIdSortedByArrival(serviceId);
-      for (StopTimeEntry stopTime : stopTimes) {
-        TripEntry trip = stopTime.getTrip();
-        routeCollectionIds.add(trip.getRouteCollectionId());
+    for (BlockStopTimeIndex blockStopTimeIndex : stopEntry.getStopTimeIndices()) {
+      BlockIndex blockIndex = blockStopTimeIndex.getBlockIndex();
+      for (BlockConfigurationEntry blockConfig : blockIndex.getBlocks()) {
+        for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
+          TripEntry trip = blockTrip.getTrip();
+          routeCollectionIds.add(trip.getRouteCollectionId());
+        }
       }
     }
 

@@ -1,42 +1,85 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
-import java.util.Map;
 
-import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.gtfs.model.calendar.ServiceIdIntervals;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 
+/**
+ * A BlockIndex is a collection of {@link BlockConfigurationEntry} elements that
+ * have the following properties in common:
+ * 
+ * 1) Each {@link BlockConfigurationEntry} refers to the same stop sequence
+ * pattern and underlying shape of travel.
+ * 
+ * 2) Each {@link BlockConfigurationEntry} has the same set of service ids (see
+ * {@link BlockConfigurationEntry#getServiceIds()}
+ * 
+ * 3) The list of {@link BlockConfigurationEntry} elements is sorted by arrival
+ * time and no block ever overtakes another block.
+ * 
+ * 4) The {@link ServiceIntervalBlock} additionally captures the min and max
+ * arrival and departure times for each block in the list, in the same sorted
+ * order as the block list.
+ * 
+ * These assumptions allow us to do efficient searches for blocks that are
+ * active at a particular time.
+ * 
+ * @author bdferris
+ * @see BlockCalendarService
+ */
 public class BlockIndex {
 
-  private final List<BlockEntry> _blocks;
+  private final List<BlockConfigurationEntry> _blocks;
 
-  private final ServiceIdIntervals _serviceIdIntervals;
+  private final ServiceIntervalBlock _serviceIntervalBlock;
 
-  private final Map<LocalizedServiceId, ServiceIntervalBlock> _intervalsByServiceId;
+  /**
+   * See the requirements in the class documentation.
+   * 
+   * @param blocks
+   * @param serviceIdIntervals
+   * @param serviceIntervalBlock
+   */
+  public BlockIndex(List<BlockConfigurationEntry> blocks,
+      ServiceIntervalBlock serviceIntervalBlock) {
 
-  public BlockIndex(List<BlockEntry> blocks,
-      ServiceIdIntervals serviceIdIntervals,
-      Map<LocalizedServiceId, ServiceIntervalBlock> intervalsByServiceId) {
+    if (blocks == null)
+      throw new IllegalArgumentException("blocks is null");
+    if (blocks.isEmpty())
+      throw new IllegalArgumentException("blocks is empty");
+    checkBlocksHaveSameServiceids(blocks);
+
     _blocks = blocks;
-    _serviceIdIntervals = serviceIdIntervals;
-    _intervalsByServiceId = intervalsByServiceId;
+    _serviceIntervalBlock = serviceIntervalBlock;
   }
 
-  public ServiceIdIntervals getServiceIdIntervals() {
-    return _serviceIdIntervals;
-  }
-  
-  public Map<LocalizedServiceId, ServiceIntervalBlock> getIntervalsByServiceId() {
-    return _intervalsByServiceId;
-  }
-
-  public List<BlockEntry> getBlocks() {
+  public List<BlockConfigurationEntry> getBlocks() {
     return _blocks;
   }
 
-  public ServiceIntervalBlock getIntervalForServiceId(
-      LocalizedServiceId serviceId) {
-    return _intervalsByServiceId.get(serviceId);
+  public ServiceIdActivation getServiceIds() {
+    return _blocks.get(0).getServiceIds();
+  }
+
+  public ServiceIntervalBlock getServiceIntervalBlock() {
+    return _serviceIntervalBlock;
+  }
+
+  @Override
+  public String toString() {
+    return "BlockIndex [blocks=" + _blocks + ", serviceIntervalBlock="
+        + _serviceIntervalBlock + "]";
+  }
+
+  private static void checkBlocksHaveSameServiceids(
+      List<BlockConfigurationEntry> blocks) {
+    ServiceIdActivation expected = blocks.get(0).getServiceIds();
+    for (int i = 1; i < blocks.size(); i++) {
+      ServiceIdActivation actual = blocks.get(i).getServiceIds();
+      if (!expected.equals(actual))
+        throw new IllegalArgumentException("serviceIds mismatch: expected="
+            + expected + " actual=" + actual);
+    }
   }
 }

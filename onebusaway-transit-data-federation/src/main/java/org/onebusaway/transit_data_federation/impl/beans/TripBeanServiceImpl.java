@@ -9,6 +9,7 @@ import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -58,7 +59,7 @@ public class TripBeanServiceImpl implements TripBeanService {
     tripBean.setTripHeadsign(tripNarrative.getTripHeadsign());
     tripBean.setRoute(routeBean);
     tripBean.setRouteShortName(tripNarrative.getRouteShortName());
-    tripBean.setServiceId(ApplicationBeanLibrary.getId(tripEntry.getServiceId()));
+    tripBean.setServiceId(ApplicationBeanLibrary.getId(tripEntry.getServiceId().getId()));
 
     AgencyAndId shapeId = tripEntry.getShapeId();
     if (shapeId != null && shapeId.hasValues())
@@ -66,7 +67,8 @@ public class TripBeanServiceImpl implements TripBeanService {
 
     tripBean.setDirectionId(tripNarrative.getDirectionId());
     
-    tripBean.setBlockId(ApplicationBeanLibrary.getId(tripEntry.getBlock().getId()));
+    BlockEntry block = tripEntry.getBlock();
+    tripBean.setBlockId(ApplicationBeanLibrary.getId(block.getId()));
     
     return tripBean;
   }

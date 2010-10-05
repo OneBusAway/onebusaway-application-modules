@@ -51,8 +51,18 @@ public class GenericMutableDaoWrapper implements GenericMutableDao {
   }
 
   @Override
+  public void updateEntity(Object entity) {
+    _source.updateEntity(entity);
+  }
+
+  @Override
   public void saveEntity(Object entity) {
     _source.saveEntity(entity);
+  }
+
+  @Override
+  public void saveOrUpdateEntity(Object entity) {
+    _source.saveOrUpdateEntity(entity);
   }
 
   @Override

@@ -3,8 +3,8 @@ package org.onebusaway.transit_data_federation.services.realtime;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 
 /**
  * Vehicle position information for a particular block.
@@ -19,7 +19,7 @@ public class BlockLocation {
 
   private BlockInstance blockInstance;
 
-  private TripEntry activeTrip;
+  private BlockTripEntry activeTrip;
 
   private boolean inService;
 
@@ -32,7 +32,7 @@ public class BlockLocation {
 
   private CoordinatePoint location;
 
-  private StopTimeEntry closestStop;
+  private BlockStopTimeEntry closestStop;
 
   private int closestStopTimeOffset;
 
@@ -63,11 +63,11 @@ public class BlockLocation {
   /**
    * @return the active trip for the block
    */
-  public TripEntry getActiveTrip() {
+  public BlockTripEntry getActiveTrip() {
     return activeTrip;
   }
 
-  public void setActiveTrip(TripEntry activeTrip) {
+  public void setActiveTrip(BlockTripEntry activeTrip) {
     this.activeTrip = activeTrip;
   }
 
@@ -118,11 +118,11 @@ public class BlockLocation {
    * 
    * @return the closest stop time entry
    */
-  public StopTimeEntry getClosestStop() {
+  public BlockStopTimeEntry getClosestStop() {
     return closestStop;
   }
 
-  public void setClosestStop(StopTimeEntry closestStop) {
+  public void setClosestStop(BlockStopTimeEntry closestStop) {
     this.closestStop = closestStop;
   }
 

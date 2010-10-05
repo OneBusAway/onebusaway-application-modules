@@ -11,6 +11,7 @@ import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDepartur
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.StopRealtimeService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
@@ -45,11 +46,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   @Autowired
   private TripBeanService _tripBeanService;
-  
+
   private AtomicInteger _stopTimesTotal = new AtomicInteger();
-  
+
   private AtomicInteger _stopTimesWithPredictions = new AtomicInteger();
-  
+
   @ManagedAttribute()
   public int getStopTimesTotal() {
     return _stopTimesTotal.intValue();
@@ -64,19 +65,20 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       AgencyAndId id, Date timeFrom, Date timeTo) {
 
     Calendar c = Calendar.getInstance();
-    
+
     // We add a buffer before and after to catch late and early buses
     c.setTime(timeFrom);
     c.add(Calendar.MINUTE, -30);
     Date from = c.getTime();
-    
+
     c.setTime(timeTo);
     c.add(Calendar.MINUTE, 10);
     Date to = c.getTime();
 
     List<StopTimeInstanceProxy> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
         id, from, to);
-    _stopTimePredictionService.applyRealtimeData(stis, System.currentTimeMillis());
+    _stopTimePredictionService.applyRealtimeData(stis,
+        System.currentTimeMillis());
 
     List<ArrivalAndDepartureBean> beans = new ArrayList<ArrivalAndDepartureBean>();
     for (StopTimeInstanceProxy sti : stis)
@@ -91,7 +93,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       if (isArrivalAndDepartureBeanInRange(bean, fromReduced, toReduced)) {
         filtered.add(bean);
         _stopTimesTotal.incrementAndGet();
-        if( bean.hasPredictedArrivalTime() )
+        if (bean.hasPredictedArrivalTime())
           _stopTimesWithPredictions.incrementAndGet();
       }
     }
@@ -108,7 +110,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     pab.setScheduledArrivalTime(sti.getArrivalTime());
     pab.setScheduledDepartureTime(sti.getDepartureTime());
-    
+
     pab.setServiceDate(sti.getServiceDate());
 
     if (sti.hasPredictedArrivalOffset())
@@ -119,9 +121,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setPredictedDepartureTime(sti.getDepartureTime()
           + sti.getPredictedDepartureOffset() * 1000);
 
-    StopTimeEntry stopTime = sti.getStopTime();
-    StopEntry stop = sti.getStop();
-    TripEntry trip = sti.getTrip();
+    BlockStopTimeEntry blockStopTime = sti.getStopTime();
+    StopTimeEntry stopTime = blockStopTime.getStopTime();
+    StopEntry stop = stopTime.getStop();
+    TripEntry trip = stopTime.getTrip();
 
     TripBean tripBean = _tripBeanService.getTripForId(trip.getId());
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
@@ -135,10 +138,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setStopId(ApplicationBeanLibrary.getId(stop.getId()));
 
     pab.setStatus("default");
-    
+
     pab.setPredicted(sti.isPredicted());
-    
-    if( sti.getLastUpdateTime() > 0)
+
+    if (sti.getLastUpdateTime() > 0)
       pab.setLastUpdateTime(sti.getLastUpdateTime());
 
     return pab;
@@ -148,13 +151,13 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       StopTimeNarrative stopTimeNarrative, TripBean tripBean) {
 
     tripBean = new TripBean(tripBean);
-    
+
     String stopHeadsign = stopTimeNarrative.getStopHeadsign();
     if (stopHeadsign != null && stopHeadsign.length() > 0)
       tripBean.setTripHeadsign(stopHeadsign);
-    
+
     String routeShortName = stopTimeNarrative.getRouteShortName();
-    if( routeShortName != null && routeShortName.length() > 0) {
+    if (routeShortName != null && routeShortName.length() > 0) {
       RouteBean routeBean = tripBean.getRoute();
       Builder builder = RouteBean.builder(routeBean);
       builder.setShortName(routeShortName);

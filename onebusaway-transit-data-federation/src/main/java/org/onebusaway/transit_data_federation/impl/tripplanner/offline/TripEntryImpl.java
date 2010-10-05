@@ -6,12 +6,13 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
 public class TripEntryImpl implements TripEntry, Serializable {
 
-  private static final long serialVersionUID = 4L;
+  private static final long serialVersionUID = 5L;
 
   private AgencyAndId _id;
 
@@ -21,19 +22,13 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   private BlockEntryImpl _block;
 
-  private AgencyAndId _serviceId;
+  private LocalizedServiceId _serviceId;
 
   private AgencyAndId _shapeId;
 
-  private int _stopTimeFromIndex;
+  private List<StopTimeEntry> _stopTimes;
 
-  private int _stopTimeToIndex;
-
-  private double _distanceAlongBlock;
-
-  private TripEntryImpl _prevTrip;
-
-  private TripEntryImpl _nextTrip;
+  private double _totalTripDistance;
 
   public void setId(AgencyAndId id) {
     _id = id;
@@ -51,29 +46,20 @@ public class TripEntryImpl implements TripEntry, Serializable {
     _block = block;
   }
 
-  public void setServiceId(AgencyAndId serviceId) {
+  public void setServiceId(LocalizedServiceId serviceId) {
     _serviceId = serviceId;
   }
-  
+
   public void setShapeId(AgencyAndId shapeId) {
     _shapeId = shapeId;
   }
 
-  public void setStopTimeIndices(int fromIndex, int toIndex) {
-    _stopTimeFromIndex = fromIndex;
-    _stopTimeToIndex = toIndex;
+  public void setStopTimes(List<StopTimeEntry> stopTimes) {
+    _stopTimes = stopTimes;
   }
 
-  public void setDistanceAlongBlock(double distanceAlongBlock) {
-    _distanceAlongBlock = distanceAlongBlock;
-  }
-
-  public void setPrevTrip(TripEntryImpl prevTrip) {
-    _prevTrip = prevTrip;
-  }
-
-  public void setNextTrip(TripEntryImpl nextTrip) {
-    _nextTrip = nextTrip;
+  public void setTotalTripDistance(double totalTripDistance) {
+    _totalTripDistance = totalTripDistance;
   }
 
   /****
@@ -101,7 +87,7 @@ public class TripEntryImpl implements TripEntry, Serializable {
   }
 
   @Override
-  public AgencyAndId getServiceId() {
+  public LocalizedServiceId getServiceId() {
     return _serviceId;
   }
 
@@ -112,35 +98,12 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   @Override
   public List<StopTimeEntry> getStopTimes() {
-    return _block.getStopTimes().subList(_stopTimeFromIndex, _stopTimeToIndex);
+    return _stopTimes;
   }
 
-  @Override
-  public int getBlockStopTimeSequenceOffset() {
-    return _stopTimeFromIndex;
-  }
-
-  @Override
-  public double getDistanceAlongBlock() {
-    return _distanceAlongBlock;
-  }
-  
   @Override
   public double getTotalTripDistance() {
-    if( _nextTrip != null)
-      return _nextTrip.getDistanceAlongBlock() - _distanceAlongBlock;
-    else
-      return _block.getTotalBlockDistance() - _distanceAlongBlock;
-  }
-
-  @Override
-  public TripEntryImpl getPrevTrip() {
-    return _prevTrip;
-  }
-
-  @Override
-  public TripEntryImpl getNextTrip() {
-    return _nextTrip;
+    return _totalTripDistance;
   }
 
   @Override

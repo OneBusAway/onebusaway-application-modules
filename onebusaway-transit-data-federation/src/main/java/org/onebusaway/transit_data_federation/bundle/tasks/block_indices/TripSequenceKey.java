@@ -3,14 +3,15 @@ package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 
 class TripSequenceKey {
 
-  private final AgencyAndId _serviceId;
+  private final LocalizedServiceId _serviceId;
 
   private final List<AgencyAndId> _stopIds;
 
-  public TripSequenceKey(AgencyAndId serviceId, List<AgencyAndId> stopIds) {
+  public TripSequenceKey(LocalizedServiceId serviceId, List<AgencyAndId> stopIds) {
     _serviceId = serviceId;
     _stopIds = stopIds;
   }

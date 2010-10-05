@@ -5,15 +5,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,31 +33,21 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
   }
 
   @Override
-  public Set<BlockInstance> getActiveScheduledBlocksPassingThroughBounds(
+  public List<BlockInstance> getActiveScheduledBlocksPassingThroughBounds(
       CoordinateBounds bounds, long timeFrom, long timeTo) {
 
     List<StopEntry> stops = _transitGraphDao.getStopsByLocation(bounds);
 
-    Set<AgencyAndId> routeIds = new HashSet<AgencyAndId>();
+    Set<BlockIndex> blockIndices = new HashSet<BlockIndex>();
 
     for (StopEntry stop : stops) {
-      StopTimeIndex stopTimeIndex = stop.getStopTimes();
-      for (LocalizedServiceId serviceId : stopTimeIndex.getServiceIds()) {
-        List<StopTimeEntry> stopTimes = stopTimeIndex.getStopTimesForServiceIdSortedByArrival(serviceId);
-        for (StopTimeEntry stopTime : stopTimes) {
-          routeIds.add(stopTime.getTrip().getRouteCollectionId());
-        }
-      }
+
+      List<BlockStopTimeIndex> stopTimeIndices = stop.getStopTimeIndices();
+      for (BlockStopTimeIndex stopTimeIndex : stopTimeIndices)
+        blockIndices.add(stopTimeIndex.getBlockIndex());
     }
 
-    Set<BlockInstance> allBlockInstances = new HashSet<BlockInstance>();
-
-    for (AgencyAndId routeId : routeIds) {
-      List<BlockInstance> blockInstances = _blockCalendarService.getActiveBlocksForRouteInTimeRange(
-          routeId, timeFrom, timeTo);
-      allBlockInstances.addAll(blockInstances);
-    }
-
-    return allBlockInstances;
+    return _blockCalendarService.getActiveBlocksInTimeRange(blockIndices,
+        timeFrom, timeTo);
   }
 }

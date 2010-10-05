@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripContext;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstraints;
+import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.tripplanner.MinTravelTimeToStopsListener;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
@@ -20,18 +20,13 @@ import org.springframework.stereotype.Component;
 @Component
 class TripPlannerServiceImpl implements TripPlannerService {
 
-  private CalendarService _calendarService;
-
   private WalkPlannerService _walkPlanner;
 
   private TripPlannerConstants _constants;
 
   private TripPlannerGraph _graph;
 
-  @Autowired
-  public void setCalendarService(CalendarService calendarService) {
-    _calendarService = calendarService;
-  }
+  private StopTimeService _stopTimeService;
 
   @Autowired
   public void setWalkPlannerService(WalkPlannerService walkPlannerService) {
@@ -46,6 +41,11 @@ class TripPlannerServiceImpl implements TripPlannerService {
   @Autowired
   public void setTripPlannerGraph(TripPlannerGraph graph) {
     _graph = graph;
+  }
+
+  @Autowired
+  public void setStopTimeService(StopTimeService stopTimeService) {
+    _stopTimeService = stopTimeService;
   }
 
   public Map<StopEntry, Long> getMinTravelTimeToStopsFrom(CoordinatePoint from,
@@ -83,7 +83,7 @@ class TripPlannerServiceImpl implements TripPlannerService {
     context.setConstants(_constants);
     context.setGraph(_graph);
     context.setWalkPlannerService(_walkPlanner);
-    context.setCalendarService(_calendarService);
+    context.setStopTimeService(_stopTimeService);
     context.setConstraints(constraints);
 
     return context;

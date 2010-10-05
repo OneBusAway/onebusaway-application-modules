@@ -1,23 +1,24 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.onebusaway.collections.FactoryMap;
-import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.gtfs.model.calendar.ServiceIdIntervals;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
-import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockFirstTimeComparator;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.slf4j.Logger;
@@ -29,13 +30,7 @@ public class BlockIndicesFactory {
 
   private static final BlockFirstTimeComparator _blockComparator = new BlockFirstTimeComparator();
 
-  private CalendarService _calendarService;
-
   private boolean _verbose = false;
-
-  public void setCalendarService(CalendarService calendarService) {
-    _calendarService = calendarService;
-  }
 
   public void setVerbose(boolean verbose) {
     _verbose = verbose;
@@ -48,12 +43,19 @@ public class BlockIndicesFactory {
 
     for (BlockIndex index : indices) {
 
-      List<AgencyAndId> blockIds = MappingLibrary.map(index.getBlocks(), "id");
-      ServiceIdIntervals serviceIdIntervals = index.getServiceIdIntervals();
-      Map<LocalizedServiceId, ServiceIntervalBlock> intervalsByServiceId = index.getIntervalsByServiceId();
+      List<BlockConfigurationIndex> configurationIndices = new ArrayList<BlockConfigurationIndex>();
 
-      BlockIndexData data = new BlockIndexData(blockIds, serviceIdIntervals,
-          intervalsByServiceId);
+      for (BlockConfigurationEntry entry : index.getBlocks()) {
+        BlockEntry block = entry.getBlock();
+        int configurationIndex = block.getConfigurations().indexOf(entry);
+        configurationIndices.add(new BlockConfigurationIndex(block.getId(),
+            configurationIndex));
+      }
+
+      ServiceIntervalBlock serviceIntervalBlock = index.getServiceIntervalBlock();
+
+      BlockIndexData data = new BlockIndexData(configurationIndices,
+          serviceIntervalBlock);
       allData.add(data);
     }
 
@@ -64,15 +66,17 @@ public class BlockIndicesFactory {
 
     List<BlockIndex> allIndices = new ArrayList<BlockIndex>();
 
-    Map<BlockSequenceKey, List<BlockEntry>> blocksByKey = new FactoryMap<BlockSequenceKey, List<BlockEntry>>(
-        new ArrayList<BlockEntry>());
+    Map<BlockSequenceKey, List<BlockConfigurationEntry>> blocksByKey = new FactoryMap<BlockSequenceKey, List<BlockConfigurationEntry>>(
+        new ArrayList<BlockConfigurationEntry>());
 
     if (_verbose)
       _log.info("grouping blocks by sequence key");
 
     for (BlockEntry block : blocks) {
-      BlockSequenceKey key = getBlockAsKey(block);
-      blocksByKey.get(key).add(block);
+      for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
+        BlockSequenceKey key = getBlockConfigurationAsKey(blockConfiguration);
+        blocksByKey.get(key).add(blockConfiguration);
+      }
     }
 
     if (_verbose)
@@ -80,16 +84,16 @@ public class BlockIndicesFactory {
 
     int count = 0;
 
-    for (List<BlockEntry> blocksWithSameSequence : blocksByKey.values()) {
+    for (List<BlockConfigurationEntry> blocksWithSameSequence : blocksByKey.values()) {
 
       if (_verbose && count % 100 == 0)
         _log.info("groups processed: " + count + "/" + blocksByKey.size());
 
       count++;
 
-      List<List<BlockEntry>> groupedBlocks = ensureGroups(blocksWithSameSequence);
+      List<List<BlockConfigurationEntry>> groupedBlocks = ensureGroups(blocksWithSameSequence);
 
-      for (List<BlockEntry> group : groupedBlocks) {
+      for (List<BlockConfigurationEntry> group : groupedBlocks) {
         BlockIndex index = createIndexForGroupOfBlocks(group);
         allIndices.add(index);
       }
@@ -98,19 +102,21 @@ public class BlockIndicesFactory {
     return allIndices;
   }
 
-  public BlockIndex createIndex(BlockEntry block) {
-    List<BlockEntry> blocks = Arrays.asList(block);
-    return createIndexForGroupOfBlocks(blocks);
+  public BlockIndex createIndexForGroupOfBlocks(
+      List<BlockConfigurationEntry> blocks) {
+    ServiceIntervalBlock serviceIntervalBlock = getBlocksAsBlockInterval(blocks);
+    return new BlockIndex(blocks, serviceIntervalBlock);
   }
 
   /****
    * Private Methods
    ****/
 
-  private BlockSequenceKey getBlockAsKey(BlockEntry block) {
+  private BlockSequenceKey getBlockConfigurationAsKey(
+      BlockConfigurationEntry block) {
     List<TripSequenceKey> keys = new ArrayList<TripSequenceKey>();
-    for (TripEntry trip : block.getTrips()) {
-      TripSequenceKey key = getTripAsKey(trip);
+    for (BlockTripEntry blockTrip : block.getTrips()) {
+      TripSequenceKey key = getTripAsKey(blockTrip.getTrip());
       keys.add(key);
     }
     return new BlockSequenceKey(keys);
@@ -123,16 +129,17 @@ public class BlockIndicesFactory {
     return new TripSequenceKey(trip.getServiceId(), stopIds);
   }
 
-  private List<List<BlockEntry>> ensureGroups(List<BlockEntry> blocks) {
+  private List<List<BlockConfigurationEntry>> ensureGroups(
+      List<BlockConfigurationEntry> blocks) {
 
     Collections.sort(blocks, _blockComparator);
 
-    List<List<BlockEntry>> lists = new ArrayList<List<BlockEntry>>();
+    List<List<BlockConfigurationEntry>> lists = new ArrayList<List<BlockConfigurationEntry>>();
 
-    for (BlockEntry block : blocks) {
-      List<BlockEntry> list = getBestList(lists, block);
+    for (BlockConfigurationEntry block : blocks) {
+      List<BlockConfigurationEntry> list = getBestList(lists, block);
       if (list == null) {
-        list = new ArrayList<BlockEntry>();
+        list = new ArrayList<BlockConfigurationEntry>();
         lists.add(list);
       }
       list.add(block);
@@ -141,24 +148,24 @@ public class BlockIndicesFactory {
     return lists;
   }
 
-  private List<BlockEntry> getBestList(List<List<BlockEntry>> lists,
-      BlockEntry block) {
+  private List<BlockConfigurationEntry> getBestList(
+      List<List<BlockConfigurationEntry>> lists, BlockConfigurationEntry block) {
 
-    for (List<BlockEntry> list : lists) {
+    for (List<BlockConfigurationEntry> list : lists) {
 
       if (list.isEmpty())
         return list;
 
-      BlockEntry prev = list.get(list.size() - 1);
+      BlockConfigurationEntry prev = list.get(list.size() - 1);
 
-      List<StopTimeEntry> stopTimesA = prev.getStopTimes();
-      List<StopTimeEntry> stopTimesB = block.getStopTimes();
+      List<BlockStopTimeEntry> stopTimesA = prev.getStopTimes();
+      List<BlockStopTimeEntry> stopTimesB = block.getStopTimes();
 
       boolean allGood = true;
 
       for (int i = 0; i < stopTimesA.size(); i++) {
-        StopTimeEntry stopTimeA = stopTimesA.get(i);
-        StopTimeEntry stopTimeB = stopTimesB.get(i);
+        StopTimeEntry stopTimeA = stopTimesA.get(i).getStopTime();
+        StopTimeEntry stopTimeB = stopTimesB.get(i).getStopTime();
         if (!(stopTimeA.getArrivalTime() <= stopTimeB.getArrivalTime() && stopTimeA.getDepartureTime() <= stopTimeB.getDepartureTime())) {
           allGood = false;
           break;
@@ -172,83 +179,48 @@ public class BlockIndicesFactory {
     return null;
   }
 
-  private BlockIndex createIndexForGroupOfBlocks(List<BlockEntry> blocks) {
-    ServiceIdIntervals serviceIdIntervals = getBlocksAsServiceIdIntervals(blocks);
+  private ServiceIntervalBlock getBlocksAsBlockInterval(
+      List<BlockConfigurationEntry> blocks) {
 
-    Map<LocalizedServiceId, ServiceIntervalBlock> intervalsByServiceId = getBlocksAsBlockIntervals(
-        blocks, serviceIdIntervals);
-    BlockIndex index = new BlockIndex(blocks, serviceIdIntervals,
-        intervalsByServiceId);
-    return index;
-  }
-
-  private ServiceIdIntervals getBlocksAsServiceIdIntervals(
-      List<BlockEntry> group) {
-    ServiceIdIntervals serviceIdIntervals = new ServiceIdIntervals();
-
-    for (BlockEntry block : group) {
-      for (TripEntry trip : block.getTrips()) {
-
-        AgencyAndId tripId = trip.getId();
-        AgencyAndId serviceId = trip.getServiceId();
-        LocalizedServiceId lsid = _calendarService.getLocalizedServiceIdForAgencyAndServiceId(
-            tripId.getAgencyId(), serviceId);
-
-        List<StopTimeEntry> stopTimes = trip.getStopTimes();
-        StopTimeEntry first = stopTimes.get(0);
-        StopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
-        serviceIdIntervals.addStopTime(lsid, first.getArrivalTime(),
-            first.getDepartureTime());
-        serviceIdIntervals.addStopTime(lsid, last.getArrivalTime(),
-            last.getDepartureTime());
-      }
-    }
-    return serviceIdIntervals;
-  }
-
-  private Map<LocalizedServiceId, ServiceIntervalBlock> getBlocksAsBlockIntervals(
-      List<BlockEntry> blocks, ServiceIdIntervals serviceIdIntervals) {
+    BlockConfigurationEntry firstBlock = blocks.get(0);
+    ServiceIdActivation serviceIdActivation = firstBlock.getServiceIds();
+    Set<LocalizedServiceId> serviceIds = new HashSet<LocalizedServiceId>(
+        serviceIdActivation.getActiveServiceIds());
 
     int n = blocks.size();
 
-    Map<LocalizedServiceId, ServiceIntervalBlock> intervalsByServiceId = new HashMap<LocalizedServiceId, ServiceIntervalBlock>();
+    int[] minArrivals = new int[n];
+    int[] minDepartures = new int[n];
+    int[] maxArrivals = new int[n];
+    int[] maxDepartures = new int[n];
 
-    for (LocalizedServiceId serviceId : serviceIdIntervals.getServiceIds()) {
+    int index = 0;
 
-      int[] minArrivals = new int[n];
-      int[] minDepartures = new int[n];
-      int[] maxArrivals = new int[n];
-      int[] maxDepartures = new int[n];
+    for (BlockConfigurationEntry block : blocks) {
 
-      int index = 0;
+      ServiceInterval interval = null;
 
-      for (BlockEntry block : blocks) {
-
-        ServiceInterval interval = null;
-
-        for (TripEntry trip : block.getTrips()) {
-          if (!serviceId.getId().equals(trip.getServiceId()))
-            continue;
-          List<StopTimeEntry> stopTimes = trip.getStopTimes();
-          StopTimeEntry first = stopTimes.get(0);
-          StopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
-          interval = extend(interval, first);
-          interval = extend(interval, last);
-        }
-
-        minArrivals[index] = interval.getMinArrival();
-        minDepartures[index] = interval.getMinDeparture();
-        maxArrivals[index] = interval.getMaxArrival();
-        maxDepartures[index] = interval.getMaxDeparture();
-
-        index++;
+      for (BlockTripEntry blockTrip : block.getTrips()) {
+        TripEntry trip = blockTrip.getTrip();
+        if (!serviceIds.contains(trip.getServiceId()))
+          continue;
+        List<StopTimeEntry> stopTimes = trip.getStopTimes();
+        StopTimeEntry first = stopTimes.get(0);
+        StopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
+        interval = extend(interval, first);
+        interval = extend(interval, last);
       }
 
-      ServiceIntervalBlock intervals = new ServiceIntervalBlock(minArrivals,
-          minDepartures, maxArrivals, maxDepartures);
-      intervalsByServiceId.put(serviceId, intervals);
+      minArrivals[index] = interval.getMinArrival();
+      minDepartures[index] = interval.getMinDeparture();
+      maxArrivals[index] = interval.getMaxArrival();
+      maxDepartures[index] = interval.getMaxDeparture();
+
+      index++;
     }
-    return intervalsByServiceId;
+
+    return new ServiceIntervalBlock(minArrivals, minDepartures, maxArrivals,
+        maxDepartures);
   }
 
   private ServiceInterval extend(ServiceInterval interval,

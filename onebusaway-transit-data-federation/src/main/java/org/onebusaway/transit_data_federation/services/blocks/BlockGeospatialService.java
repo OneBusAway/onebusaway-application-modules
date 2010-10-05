@@ -1,6 +1,6 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
-import java.util.Set;
+import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 
@@ -18,6 +18,6 @@ public interface BlockGeospatialService {
    * @return the list of SCHEDULED block instances in the given region along
    *         with their scheduled locations
    */
-  public Set<BlockInstance> getActiveScheduledBlocksPassingThroughBounds(
+  public List<BlockInstance> getActiveScheduledBlocksPassingThroughBounds(
       CoordinateBounds bounds, long timeFrom, long timeTo);
 }

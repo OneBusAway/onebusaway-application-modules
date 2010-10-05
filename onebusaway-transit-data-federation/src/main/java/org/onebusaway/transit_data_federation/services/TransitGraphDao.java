@@ -60,12 +60,6 @@ public interface TransitGraphDao {
   public TripEntry getTripEntryForId(AgencyAndId id);
 
   /**
-   * @param blockId a trip sequence block id to query
-   * @return the list of all trip entries with the specified block id
-   */
-  public List<TripEntry> getTripsForBlockId(AgencyAndId blockId);
-
-  /**
    * @param stopId a stop id to query
    * @return the set of all {@link RouteCollection} ids serving the specified
    *         stop

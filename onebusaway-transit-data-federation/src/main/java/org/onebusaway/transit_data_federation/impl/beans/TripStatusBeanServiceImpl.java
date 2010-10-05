@@ -24,6 +24,8 @@ import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanSe
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,10 +143,10 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     if (blockLocation == null)
       return null;
 
-    TripEntry tripEntry = blockLocation.getActiveTrip();
+    BlockTripEntry tripEntry = blockLocation.getActiveTrip();
 
-    return getTripEntryAndBlockLocationAsTripDetails(tripEntry, blockLocation,
-        inclusion);
+    return getTripEntryAndBlockLocationAsTripDetails(tripEntry.getTrip(),
+        blockLocation, inclusion);
   }
 
   private TripDetailsBean getTripEntryAndBlockLocationAsTripDetails(
@@ -164,7 +166,10 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     }
 
     if (inclusion.isIncludeTripSchedule()) {
-      stopTimes = _tripStopTimesBeanService.getStopTimesForTrip(tripEntry.getId());
+      if (blockLocation != null)
+        stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockLocation.getActiveTrip());
+      else
+        stopTimes = _tripStopTimesBeanService.getStopTimesForTrip(tripEntry);
       if (stopTimes == null)
         missing = true;
     }
@@ -201,16 +206,19 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       bean.setLocation(location);
       bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
 
-      TripEntry activeTrip = blockLocation.getActiveTrip();
+      BlockTripEntry activeBlockTrip = blockLocation.getActiveTrip();
+      TripEntry activeTrip = activeBlockTrip.getTrip();
+
       bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
-          - activeTrip.getDistanceAlongBlock());
+          - activeBlockTrip.getDistanceAlongBlock());
       bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock()
-          - activeTrip.getDistanceAlongBlock());
+          - activeBlockTrip.getDistanceAlongBlock());
       bean.setTotalDistanceAlongTrip(activeTrip.getTotalTripDistance());
 
-      StopTimeEntry stop = blockLocation.getClosestStop();
+      BlockStopTimeEntry stop = blockLocation.getClosestStop();
       if (stop != null) {
-        StopBean stopBean = _stopBeanService.getStopForId(stop.getStop().getId());
+        StopTimeEntry stopTime = stop.getStopTime();
+        StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
         bean.setClosestStop(stopBean);
         bean.setClosestStopTimeOffset(blockLocation.getClosestStopTimeOffset());
       }

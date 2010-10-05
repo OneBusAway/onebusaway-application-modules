@@ -13,7 +13,7 @@ import java.io.Serializable;
 @CacheableKey(keyFactory = StopEntryImplKeyFactoryImpl.class)
 public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 3L;
 
   private int _stopTimeId;
   private int _arrivalTime;
@@ -97,11 +97,6 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   }
 
   @Override
-  public int getBlockSequence() {
-    return _trip.getBlockStopTimeSequenceOffset() + _sequence;
-  }
-
-  @Override
   public int getDropOffType() {
     return _dropOffType;
   }
@@ -127,17 +122,12 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   }
 
   @Override
-  public double getDistaceAlongBlock() {
-    return _trip.getDistanceAlongBlock() + _shapeDistTraveled;
-  }
-
-  @Override
-  public double getSlackTime() {
+  public int getSlackTime() {
     return _departureTime - _arrivalTime;
   }
 
   @Override
-  public double getAccumulatedSlackTime() {
+  public int getAccumulatedSlackTime() {
     return _accumulatedSlackTime;
   }
 

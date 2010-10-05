@@ -3,15 +3,13 @@ package org.onebusaway.transit_data.model.blocks;
 import java.io.Serializable;
 import java.util.List;
 
-import org.onebusaway.transit_data.model.trips.TripBean;
-
-public class BlockBean implements Serializable {
+public final class BlockBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
   private String id;
 
-  private List<TripBean> trips;
+  private List<BlockConfigurationBean> configurations;
 
   public String getId() {
     return id;
@@ -21,11 +19,11 @@ public class BlockBean implements Serializable {
     this.id = id;
   }
 
-  public List<TripBean> getTrips() {
-    return trips;
+  public List<BlockConfigurationBean> getConfigurations() {
+    return configurations;
   }
 
-  public void setTrips(List<TripBean> trips) {
-    this.trips = trips;
+  public void setConfigurations(List<BlockConfigurationBean> configurations) {
+    this.configurations = configurations;
   }
 }

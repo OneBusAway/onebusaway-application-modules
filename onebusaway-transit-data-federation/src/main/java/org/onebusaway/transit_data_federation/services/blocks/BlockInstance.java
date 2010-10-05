@@ -1,10 +1,9 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 
 /**
@@ -21,59 +20,37 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
  */
 public class BlockInstance {
 
-  private final BlockEntry _block;
+  private final BlockConfigurationEntry _block;
 
   private final long _serviceDate;
 
-  private final Set<LocalizedServiceId> _serviceIds;
-
-  private final boolean _allServiceIdsActive;
-
-  public BlockInstance(BlockEntry block, long serviceDate,
-      Set<LocalizedServiceId> serviceIds, boolean allServiceIdsActive) {
-    if (block == null || serviceIds == null)
+  public BlockInstance(BlockConfigurationEntry block, long serviceDate) {
+    if (block == null)
       throw new IllegalArgumentException();
     _block = block;
     _serviceDate = serviceDate;
-    _serviceIds = serviceIds;
-    _allServiceIdsActive = allServiceIdsActive;
   }
 
-  public BlockInstance(BlockEntry block, long serviceDate) {
-    this(block, serviceDate, new HashSet<LocalizedServiceId>(), false);
-  }
-
-  public BlockEntry getBlock() {
+  public BlockConfigurationEntry getBlock() {
     return _block;
   }
 
   /**
-   * The service date that the trip instance is operating. This is the
+   * The service date that the block instance is operating. This is the
    * "midnight" time relative to the stop times for the trip.
    * 
-   * @return the service date on which the trip is operating (Unix-time)
+   * @return the service date on which the block is operating (Unix-time)
    */
   public long getServiceDate() {
     return _serviceDate;
-  }
-
-  public Set<LocalizedServiceId> getServiceIds() {
-    return _serviceIds;
-  }
-
-  public boolean isAllServiceIdsActive() {
-    return _allServiceIdsActive;
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + (_allServiceIdsActive ? 1231 : 1237);
-    result = prime * result + ((_block == null) ? 0 : _block.hashCode());
+    result = prime * result + _block.hashCode();
     result = prime * result + (int) (_serviceDate ^ (_serviceDate >>> 32));
-    result = prime * result
-        + ((_serviceIds == null) ? 0 : _serviceIds.hashCode());
     return result;
   }
 
@@ -86,19 +63,9 @@ public class BlockInstance {
     if (getClass() != obj.getClass())
       return false;
     BlockInstance other = (BlockInstance) obj;
-    if (_allServiceIdsActive != other._allServiceIdsActive)
-      return false;
-    if (_block == null) {
-      if (other._block != null)
-        return false;
-    } else if (!_block.equals(other._block))
+    if (!_block.equals(other._block))
       return false;
     if (_serviceDate != other._serviceDate)
-      return false;
-    if (_serviceIds == null) {
-      if (other._serviceIds != null)
-        return false;
-    } else if (!_serviceIds.equals(other._serviceIds))
       return false;
     return true;
   }

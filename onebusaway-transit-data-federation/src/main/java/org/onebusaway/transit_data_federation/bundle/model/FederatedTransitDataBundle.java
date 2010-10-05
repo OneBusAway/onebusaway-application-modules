@@ -31,6 +31,10 @@ public class FederatedTransitDataBundle {
     return _path;
   }
 
+  public File getCalendarServiceDataPath() {
+    return new File(_path, "CalendarServiceData.obj");
+  }
+
   public File getRouteSearchIndexPath() {
     return new File(_path, "RouteSearchIndex");
   }
@@ -51,14 +55,10 @@ public class FederatedTransitDataBundle {
     return new File(_path, "NarrativeProvider.obj");
   }
 
-  public File getBlockIndicesByAgencyPath() {
-    return new File(_path, "BlockIndicesByAgency.obj");
+  public File getBlockIndicesPath() {
+    return new File(_path, "BlockIndices.obj");
   }
-  
-  public File getBlockIndicesByRoutePath() {
-    return new File(_path, "BlockIndicesByRoute.obj");
-  }
-  
+
   public File getCachePath() {
     return new File(_path, "cache");
   }

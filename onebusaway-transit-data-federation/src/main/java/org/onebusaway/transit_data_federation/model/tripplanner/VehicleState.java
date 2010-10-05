@@ -7,7 +7,7 @@ public abstract class VehicleState extends AtStopState {
   private final StopTimeInstanceProxy _sti;
 
   public VehicleState(StopTimeInstanceProxy sti, boolean arrival) {
-    super(arrival ? sti.getArrivalTime() : sti.getDepartureTime(), sti.getStopTime().getStop());
+    super(arrival ? sti.getArrivalTime() : sti.getDepartureTime(), sti.getStopTime().getStopTime().getStop());
     _sti = sti;
   }
 

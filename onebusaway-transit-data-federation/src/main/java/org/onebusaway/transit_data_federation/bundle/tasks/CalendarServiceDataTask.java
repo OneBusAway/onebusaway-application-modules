@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceDataFactoryImpl;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
-import org.onebusaway.gtfs.model.GtfsServiceBundle;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,7 +28,7 @@ public class CalendarServiceDataTask implements Runnable {
 
   private GtfsRelationalDao _dao;
 
-  private GtfsServiceBundle _bundle;
+  private FederatedTransitDataBundle _bundle;
 
   @Autowired
   public void setGtfsDao(GtfsRelationalDao dao) {
@@ -36,7 +36,7 @@ public class CalendarServiceDataTask implements Runnable {
   }
 
   @Autowired
-  public void setBundle(GtfsServiceBundle bundle) {
+  public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
   }
 

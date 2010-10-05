@@ -152,20 +152,22 @@ public class FederatedTransitDataBundleCreator {
 
     List<String> preBundlePaths = getPrimaryApplicatonContextPaths();
     Map<String, BeanDefinition> preBundleBeans = getPrimaryBeanDefintions();
-    
+
     runTasks(preBundlePaths, preBundleBeans, true, true, _skipTasks, _onlyTasks);
 
     List<String> postBundlePaths = getPostBundleApplicatonContextPaths();
     Map<String, BeanDefinition> postBundleBeans = getPostBundleBeanDefintions();
-    runTasks(postBundlePaths, postBundleBeans, false, true, _postBundleSkipTasks,
-        _postBundleOnlyTasks);
+    runTasks(postBundlePaths, postBundleBeans, false, true,
+        _postBundleSkipTasks, _postBundleOnlyTasks);
   }
 
   private void runTasks(List<String> applicationContextPaths,
-      Map<String, BeanDefinition> beans, boolean checkDatabase, boolean clearCacheFiles, Set<String> skipTasks,
-      Set<String> onlyTasks) throws UnknownTaskException {
+      Map<String, BeanDefinition> beans, boolean checkDatabase,
+      boolean clearCacheFiles, Set<String> skipTasks, Set<String> onlyTasks)
+      throws UnknownTaskException {
 
-    ConfigurableApplicationContext context = ContainerLibrary.createContext(applicationContextPaths,beans);
+    ConfigurableApplicationContext context = ContainerLibrary.createContext(
+        applicationContextPaths, beans);
 
     Map<String, TaskDefinition> taskDefinitionsByTaskName = new HashMap<String, TaskDefinition>();
     List<String> taskNames = getTaskList(context, taskDefinitionsByTaskName,
@@ -183,6 +185,10 @@ public class FederatedTransitDataBundleCreator {
       System.out.println("== " + taskName + " =====>");
       TaskDefinition def = taskDefinitionsByTaskName.get(taskName);
       Runnable task = def.getTask();
+      if (task == null) {
+        String taskBeanName = def.getTaskBeanName();
+        task = context.getBean(taskBeanName, Runnable.class);
+      }
       if (task == null)
         throw new IllegalStateException("unknown task bean with name: "
             + taskName);
@@ -232,7 +238,6 @@ public class FederatedTransitDataBundleCreator {
     List<String> paths = new ArrayList<String>();
 
     paths.add("classpath:org/onebusaway/transit_data_federation/application-context-services.xml");
-    paths.add(PRE_BUNDLE_RESOURCE);
     paths.add(POST_BUNDLE_RESOURCE);
     for (File contextPath : _contextPaths)
       paths.add("file:" + contextPath);

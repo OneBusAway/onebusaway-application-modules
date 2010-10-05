@@ -1,40 +1,35 @@
 package org.onebusaway.transit_data_federation.impl.realtime;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 
 class BlockLocationRecordKey {
-  private final AgencyAndId blockId;
-  private final long serviceDate;
+  private final BlockInstance blockInstance;
   private final AgencyAndId vehicleId;
 
-  public BlockLocationRecordKey(AgencyAndId blockId, long serviceDate, AgencyAndId vehicleId) {
-    if (blockId == null)
-      throw new IllegalArgumentException("blockId is null");
+  public BlockLocationRecordKey(BlockInstance blockInstance,
+      AgencyAndId vehicleId) {
+    if (blockInstance == null)
+      throw new IllegalArgumentException("blockInstance is null");
     if (vehicleId == null)
       throw new IllegalArgumentException("vehicleId is null");
-    this.blockId = blockId;
-    this.serviceDate = serviceDate;
+    this.blockInstance = blockInstance;
     this.vehicleId = vehicleId;
+  }
+
+  public BlockInstance getBlockInstance() {
+    return blockInstance;
   }
 
   public AgencyAndId getVehicleId() {
     return vehicleId;
   }
 
-  public AgencyAndId getBlockId() {
-    return blockId;
-  }
-
-  public long getServiceDate() {
-    return serviceDate;
-  }
-
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + blockId.hashCode();
-    result = prime * result + (int) (serviceDate ^ (serviceDate >>> 32));
+    result = prime * result + blockInstance.hashCode();
     result = prime * result + vehicleId.hashCode();
     return result;
   }
@@ -48,9 +43,7 @@ class BlockLocationRecordKey {
     if (getClass() != obj.getClass())
       return false;
     BlockLocationRecordKey other = (BlockLocationRecordKey) obj;
-    if (!blockId.equals(other.blockId))
-      return false;
-    if (serviceDate != other.serviceDate)
+    if (!blockInstance.equals(other.blockInstance))
       return false;
     if (!vehicleId.equals(other.vehicleId))
       return false;

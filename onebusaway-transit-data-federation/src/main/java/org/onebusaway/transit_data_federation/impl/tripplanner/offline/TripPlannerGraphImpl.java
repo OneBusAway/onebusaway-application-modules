@@ -73,23 +73,23 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
       System.out.println("  trips= " + _trips.size());
     }
 
-    if (_tripEntriesById == null) {
-      _tripEntriesById = new HashMap<AgencyAndId, TripEntryImpl>();
-      for (TripEntryImpl entry : _trips)
-        _tripEntriesById.put(entry.getId(), entry);
+    if (_tripEntriesById == null || _tripEntriesById.size() < _trips.size()) {
+      refreshTripMapping();
     }
 
-    if (_blockEntriesById == null) {
-      _blockEntriesById = new HashMap<AgencyAndId, BlockEntryImpl>();
-      for (BlockEntryImpl entry : _blocks)
-        _blockEntriesById.put(entry.getId(), entry);
+    if (_blockEntriesById == null || _blockEntriesById.size() < _blocks.size()) {
+      refreshBlockMapping();
     }
 
-    if (_stopEntriesById == null) {
-      _stopEntriesById = new HashMap<AgencyAndId, StopEntryImpl>();
-      for (StopEntryImpl entry : _stops)
-        _stopEntriesById.put(entry.getId(), entry);
-    }
+    if (_stopEntriesById == null || _stopEntriesById.size() < _stops.size())
+      refreshStopMapping();
+  }
+
+  public void initializeFromExistinGraph(TripPlannerGraphImpl graph) {
+    _stops.addAll(graph._stops);
+    _trips.addAll(graph._trips);
+    _blocks.addAll(graph._blocks);
+    initialize();
   }
 
   public void putStopEntry(StopEntryImpl stopEntry) {
@@ -110,6 +110,24 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
 
   public void putBlockEntry(BlockEntryImpl blockEntry) {
     _blocks.add(blockEntry);
+  }
+
+  public void refreshTripMapping() {
+    _tripEntriesById = new HashMap<AgencyAndId, TripEntryImpl>();
+    for (TripEntryImpl entry : _trips)
+      _tripEntriesById.put(entry.getId(), entry);
+  }
+
+  public void refreshBlockMapping() {
+    _blockEntriesById = new HashMap<AgencyAndId, BlockEntryImpl>();
+    for (BlockEntryImpl entry : _blocks)
+      _blockEntriesById.put(entry.getId(), entry);
+  }
+
+  public void refreshStopMapping() {
+    _stopEntriesById = new HashMap<AgencyAndId, StopEntryImpl>();
+    for (StopEntryImpl entry : _stops)
+      _stopEntriesById.put(entry.getId(), entry);
   }
 
   /****
@@ -135,26 +153,18 @@ public class TripPlannerGraphImpl implements Serializable, TripPlannerGraph {
   }
 
   @Override
-  public StopEntry getStopEntryForId(AgencyAndId id) {
+  public StopEntryImpl getStopEntryForId(AgencyAndId id) {
     return _stopEntriesById.get(id);
   }
 
   @Override
-  public TripEntry getTripEntryForId(AgencyAndId id) {
+  public TripEntryImpl getTripEntryForId(AgencyAndId id) {
     return _tripEntriesById.get(id);
   }
 
   @Override
   public BlockEntry getBlockEntryForId(AgencyAndId blockId) {
     return _blockEntriesById.get(blockId);
-  }
-
-  @Override
-  public List<TripEntry> getTripsForBlockId(AgencyAndId blockId) {
-    BlockEntry block = getBlockEntryForId(blockId);
-    if (block == null)
-      return null;
-    return block.getTrips();
   }
 
   @Override

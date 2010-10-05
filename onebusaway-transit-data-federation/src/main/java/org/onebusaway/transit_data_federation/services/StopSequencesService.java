@@ -1,11 +1,11 @@
 package org.onebusaway.transit_data_federation.services;
 
 import java.util.List;
-import java.util.Map;
 
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.model.StopSequence;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 
 /**
  * Service methods for generating {@link StopSequence} objects from a collection
@@ -25,10 +25,9 @@ public interface StopSequencesService {
    * stop sequence, but not always. Here we find all unique sequences for the
    * set of trips.
    * 
-   * @param stopTimesByTrip set of trips along with the stop times for each trip
+   * @param trips set of trips
    * @return the set of unique stop sequences visited by the trips
    */
-  public List<StopSequence> getStopSequencesForTrips(
-      Map<Trip, List<StopTime>> stopTimesByTrip);
+  public List<StopSequence> getStopSequencesForTrips(List<BlockTripEntry> trips);
 
 }

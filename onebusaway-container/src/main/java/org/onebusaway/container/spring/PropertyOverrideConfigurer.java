@@ -26,11 +26,19 @@ public class PropertyOverrideConfigurer extends
 
   private static final Pattern _pattern = Pattern.compile("\\$\\{([^}]+)\\}");
 
+  private boolean ignoreInvalidBeans = false;
+
+  public void setIgnoreInvalidBeans(boolean ignoreInvalidBeans) {
+    this.ignoreInvalidBeans = ignoreInvalidBeans;
+  }
+
   @Override
   protected void applyPropertyValue(ConfigurableListableBeanFactory factory,
       String beanName, String property, String value) {
     if (value != null)
       value = resolveValue(value);
+    if (!factory.containsBeanDefinition(beanName) && ignoreInvalidBeans)
+      return;
     super.applyPropertyValue(factory, beanName, property, value);
   }
 

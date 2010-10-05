@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.trips.TripBean;
 
 /**
  * Status of a particular block instance, including real-time location
@@ -16,15 +15,15 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 public final class BlockStatusBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  
+
   private BlockBean block;
-  
+
   /****
    * These are fields that we can supply from schedule data
    ****/
 
   private long serviceDate;
-  
+
   private double scheduledDistanceAlongBlock = Double.NaN;
 
   private double totalDistanceAlongBlock = Double.NaN;
@@ -35,12 +34,12 @@ public final class BlockStatusBean implements Serializable {
    ****/
 
   private boolean inService = false;
-  
+
   private String status;
 
   private CoordinatePoint location;
 
-  private TripBean activeTrip;
+  private BlockTripBean activeTrip;
 
   private StopBean closestStop;
 
@@ -124,11 +123,11 @@ public final class BlockStatusBean implements Serializable {
     this.location = location;
   }
 
-  public TripBean getActiveTrip() {
+  public BlockTripBean getActiveTrip() {
     return activeTrip;
   }
 
-  public void setActiveTrip(TripBean activeTrip) {
+  public void setActiveTrip(BlockTripBean activeTrip) {
     this.activeTrip = activeTrip;
   }
 

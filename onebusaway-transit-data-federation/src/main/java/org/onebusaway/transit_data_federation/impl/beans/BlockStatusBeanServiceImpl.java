@@ -9,35 +9,27 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.blocks.BlockStatusBean;
-import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data_federation.services.beans.BlockBeanService;
 import org.onebusaway.transit_data_federation.services.beans.BlockStatusBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
 
-  private TripBeanService _tripBeanService;
-
   private StopBeanService _stopBeanService;
 
   private BlockStatusService _blockStatusService;
 
   private BlockBeanService _blockBeanService;
-
-  @Autowired
-  public void setTripBeanService(TripBeanService tripBeanService) {
-    _tripBeanService = tripBeanService;
-  }
 
   @Autowired
   public void setStopBeanService(StopBeanService stopBeanService) {
@@ -48,9 +40,9 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
   public void setBlockStatusService(BlockStatusService blockStatusService) {
     _blockStatusService = blockStatusService;
   }
-  
+
   @Autowired
-  public void setBlockBeanService(BlockBeanService blockBeanService){
+  public void setBlockBeanService(BlockBeanService blockBeanService) {
     _blockBeanService = blockBeanService;
   }
 
@@ -109,12 +101,12 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
       return null;
 
     BlockInstance instance = blockLocation.getBlockInstance();
-    BlockEntry block = instance.getBlock();
+    BlockConfigurationEntry block = instance.getBlock();
     long serviceDate = instance.getServiceDate();
 
     BlockStatusBean bean = new BlockStatusBean();
-    
-    bean.setBlock(_blockBeanService.getBlockForId(block.getId()));
+
+    bean.setBlock(_blockBeanService.getBlockForId(block.getBlock().getId()));
 
     bean.setStatus("default");
     bean.setServiceDate(serviceDate);
@@ -127,15 +119,15 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
 
     bean.setScheduledDistanceAlongBlock(blockLocation.getScheduledDistanceAlongBlock());
 
-    TripEntry activeTrip = blockLocation.getActiveTrip();
+    BlockTripEntry activeTrip = blockLocation.getActiveTrip();
     if (activeTrip != null) {
-      TripBean activeTripBean = _tripBeanService.getTripForId(activeTrip.getId());
+      BlockTripBean activeTripBean = _blockBeanService.getBlockTripAsBean(activeTrip);
       bean.setActiveTrip(activeTripBean);
     }
 
-    StopTimeEntry stop = blockLocation.getClosestStop();
+    BlockStopTimeEntry stop = blockLocation.getClosestStop();
     if (stop != null) {
-      StopBean stopBean = _stopBeanService.getStopForId(stop.getStop().getId());
+      StopBean stopBean = _stopBeanService.getStopForId(stop.getStopTime().getStop().getId());
       bean.setClosestStop(stopBean);
       bean.setClosestStopTimeOffset(blockLocation.getClosestStopTimeOffset());
     }

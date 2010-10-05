@@ -1,13 +1,14 @@
 package org.onebusaway.transit_data_federation.services;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 
 import java.util.Date;
 import java.util.List;
 
 /**
- * Service methods for determing the set of active stop times at a particular
+ * Service methods for determining the set of active stop times at a particular
  * stop and time.
  * 
  * @author bdferris
@@ -26,4 +27,13 @@ public interface StopTimeService {
    */
   public List<StopTimeInstanceProxy> getStopTimeInstancesInTimeRange(
       AgencyAndId stopId, Date from, Date to);
+
+  public List<StopTimeInstanceProxy> getStopTimeInstancesInRange(Date from,
+      Date to, StopEntry stopEntry);
+
+  public List<StopTimeInstanceProxy> getNextStopTimeDeparture(
+      StopEntry stopEntry, long currentTime);
+
+  public List<StopTimeInstanceProxy> getPreviousStopTimeArrival(
+      StopEntry stopEntry, long targetTime);
 }

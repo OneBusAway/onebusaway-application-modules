@@ -10,6 +10,8 @@ public class TaskDefinition {
 
   private Runnable task;
 
+  private String taskBeanName;
+
   public String getTaskName() {
     return taskName;
   }
@@ -40,5 +42,13 @@ public class TaskDefinition {
 
   public void setTask(Runnable task) {
     this.task = task;
+  }
+
+  public String getTaskBeanName() {
+    return taskBeanName;
+  }
+
+  public void setTaskBeanName(String taskBeanName) {
+    this.taskBeanName = taskBeanName;
   }
 }

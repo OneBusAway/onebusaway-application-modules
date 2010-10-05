@@ -26,7 +26,7 @@ public class FederatedTransitDataBundleCreatorMain {
   private static final String ARG_ONLY = "only";
 
   private static final String ARG_SKIP = "skip";
-  
+
   private static final String ARG_ONLY_IF_DNE = "onlyIfDoesNotExist";
 
   public static void main(String[] args) throws IOException,
@@ -36,6 +36,11 @@ public class FederatedTransitDataBundleCreatorMain {
   }
 
   public void run(String[] args) {
+
+    for (String path : System.getProperty("java.class.path").split(
+        File.pathSeparator))
+      System.out.println(path);
+
     try {
       Parser parser = new GnuParser();
 
@@ -56,14 +61,16 @@ public class FederatedTransitDataBundleCreatorMain {
       for (int i = 0; i < remainingArgs.length - 1; i++)
         contextPaths.add(new File(remainingArgs[i]));
       creator.setContextPaths(contextPaths);
-      
+
+      // if( commandLine.has)
+
       File outputPath = new File(remainingArgs[remainingArgs.length - 1]);
-      
-      if( commandLine.hasOption(ARG_ONLY_IF_DNE) && outputPath.exists() ) {
+
+      if (commandLine.hasOption(ARG_ONLY_IF_DNE) && outputPath.exists()) {
         System.err.println("Bundle path already exists.  Exiting...");
         System.exit(0);
       }
-      
+
       creator.setOutputPath(outputPath);
 
       setStagesToSkip(commandLine, creator);
@@ -87,7 +94,7 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_SKIP_TO, true, "");
     options.addOption(ARG_ONLY, true, "");
     options.addOption(ARG_SKIP, true, "");
-    options.addOption(ARG_ONLY_IF_DNE,false,"");
+    options.addOption(ARG_ONLY_IF_DNE, false, "");
   }
 
   protected void printUsage() {

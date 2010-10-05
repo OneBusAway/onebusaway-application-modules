@@ -2,14 +2,22 @@ package org.onebusaway.transit_data_federation.impl.realtime;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.aid;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.List;
 
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord.Builder;
-import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 
 public class BlockLocationRecordCacheImplTest {
 
@@ -17,50 +25,53 @@ public class BlockLocationRecordCacheImplTest {
   public void testSimpleOperations() {
     long serviceDate = System.currentTimeMillis();
 
+    BlockEntryImpl block = block("blockA");
+    TripEntryImpl trip = trip("tripA", "serviceId");
+    stopTime(0, null, trip, time(9, 00), 0);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block, trip);
+    BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
+
     BlockLocationRecordCacheImpl cache = new BlockLocationRecordCacheImpl();
     cache.setBlockLocationRecordCacheWindowSize(20);
 
-    List<BlockLocationRecordCollection> records = cache.getRecordsForBlockInstance(new ServiceDateAndId(
-        serviceDate, aid("blockA")));
+    List<BlockLocationRecordCollection> records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(0, records.size());
 
     records = cache.getRecordsForVehicleId(aid("vehicleA"));
     assertEquals(0, records.size());
 
-    cache.addRecord(record(20, "blockA", serviceDate, "vehicleA", 10.0));
+    cache.addRecord(blockInstance,
+        record(20, "blockA", serviceDate, "vehicleA", 10.0));
 
-    records = cache.getRecordsForBlockInstance(new ServiceDateAndId(
-        serviceDate, aid("blockA")));
+    records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(1, records.size());
     BlockLocationRecordCollection collection = records.get(0);
     assertEquals(20, collection.getFromTime());
     assertEquals(20, collection.getToTime());
-    assertEquals(new ServiceDateAndId(serviceDate, aid("blockA")),
-        collection.getBlockInstance());
+    assertEquals(blockInstance, collection.getBlockInstance());
     assertEquals(aid("vehicleA"), collection.getVehicleId());
 
     records = cache.getRecordsForVehicleId(aid("vehicleA"));
     assertEquals(1, records.size());
 
-    cache.addRecord(record(30, "blockA", serviceDate, "vehicleA", 20.0));
+    cache.addRecord(blockInstance,
+        record(30, "blockA", serviceDate, "vehicleA", 20.0));
 
-    records = cache.getRecordsForBlockInstance(new ServiceDateAndId(
-        serviceDate, aid("blockA")));
+    records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(1, records.size());
     collection = records.get(0);
     assertEquals(20, collection.getFromTime());
     assertEquals(30, collection.getToTime());
-    assertEquals(new ServiceDateAndId(serviceDate, aid("blockA")),
-        collection.getBlockInstance());
+    assertEquals(blockInstance, collection.getBlockInstance());
     assertEquals(aid("vehicleA"), collection.getVehicleId());
 
     records = cache.getRecordsForVehicleId(aid("vehicleA"));
     assertEquals(1, records.size());
 
-    cache.addRecord(record(40, "blockA", serviceDate, "vehicleB", 5.0));
+    cache.addRecord(blockInstance,
+        record(40, "blockA", serviceDate, "vehicleB", 5.0));
 
-    records = cache.getRecordsForBlockInstance(new ServiceDateAndId(
-        serviceDate, aid("blockA")));
+    records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(2, records.size());
 
     records = cache.getRecordsForVehicleId(aid("vehicleA"));
@@ -68,8 +79,7 @@ public class BlockLocationRecordCacheImplTest {
     collection = records.get(0);
     assertEquals(20, collection.getFromTime());
     assertEquals(30, collection.getToTime());
-    assertEquals(new ServiceDateAndId(serviceDate, aid("blockA")),
-        collection.getBlockInstance());
+    assertEquals(blockInstance, collection.getBlockInstance());
     assertEquals(aid("vehicleA"), collection.getVehicleId());
 
     records = cache.getRecordsForVehicleId(aid("vehicleB"));
@@ -77,14 +87,12 @@ public class BlockLocationRecordCacheImplTest {
     collection = records.get(0);
     assertEquals(40, collection.getFromTime());
     assertEquals(40, collection.getToTime());
-    assertEquals(new ServiceDateAndId(serviceDate, aid("blockA")),
-        collection.getBlockInstance());
+    assertEquals(blockInstance, collection.getBlockInstance());
     assertEquals(aid("vehicleB"), collection.getVehicleId());
 
     cache.clearRecordsForVehicleId(aid("vehicleA"));
 
-    records = cache.getRecordsForBlockInstance(new ServiceDateAndId(
-        serviceDate, aid("blockA")));
+    records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(1, records.size());
 
     records = cache.getRecordsForVehicleId(aid("vehicleA"));
@@ -99,13 +107,29 @@ public class BlockLocationRecordCacheImplTest {
 
     long serviceDate = System.currentTimeMillis();
 
+    BlockEntryImpl blockA = block("blockA");
+    TripEntryImpl tripA = trip("tripA", "serviceId");
+    stopTime(0, null, tripA, time(9, 00), 0);
+    BlockConfigurationEntry blockConfigA = linkBlockTrips(blockA, tripA);
+    BlockInstance instanceA = new BlockInstance(blockConfigA, serviceDate);
+
+    BlockEntryImpl blockB = block("blockB");
+    TripEntryImpl tripB = trip("tripB", "serviceId");
+    stopTime(0, null, tripB, time(9, 00), 0);
+    BlockConfigurationEntry blockConfigB = linkBlockTrips(blockB, tripB);
+    BlockInstance instanceB = new BlockInstance(blockConfigB, serviceDate);
+
     BlockLocationRecordCacheImpl cache = new BlockLocationRecordCacheImpl();
     cache.setBlockLocationRecordCacheWindowSize(20);
 
-    cache.addRecord(record(20, "blockA", serviceDate, "vehicleA", 10.0));
-    cache.addRecord(record(30, "blockB", serviceDate, "vehicleB", 20.0));
-    cache.addRecord(record(40, "blockA", serviceDate, "vehicleC", 20.0));
-    cache.addRecord(record(50, "blockB", serviceDate, "vehicleD", 20.0));
+    cache.addRecord(instanceA,
+        record(20, "blockA", serviceDate, "vehicleA", 10.0));
+    cache.addRecord(instanceB,
+        record(30, "blockB", serviceDate, "vehicleB", 20.0));
+    cache.addRecord(instanceA,
+        record(40, "blockA", serviceDate, "vehicleC", 20.0));
+    cache.addRecord(instanceB,
+        record(50, "blockB", serviceDate, "vehicleD", 20.0));
 
     cache.clearStaleRecords(35);
 
@@ -121,12 +145,10 @@ public class BlockLocationRecordCacheImplTest {
     records = cache.getRecordsForVehicleId(aid("vehicleD"));
     assertEquals(1, records.size());
 
-    records = cache.getRecordsForBlockInstance(new ServiceDateAndId(
-        serviceDate, aid("blockA")));
+    records = cache.getRecordsForBlockInstance(instanceA);
     assertEquals(1, records.size());
 
-    records = cache.getRecordsForBlockInstance(new ServiceDateAndId(
-        serviceDate, aid("blockB")));
+    records = cache.getRecordsForBlockInstance(instanceB);
     assertEquals(1, records.size());
   }
 
@@ -141,9 +163,11 @@ public class BlockLocationRecordCacheImplTest {
 
     for (int i = 0; i < 20; i++) {
 
-      AgencyAndId blockId = new AgencyAndId("1", Integer.toString(i));
-      ServiceDateAndId blockInstance = new ServiceDateAndId(serviceDate,
-          blockId);
+      BlockEntryImpl block = block(Integer.toString(i));
+      TripEntryImpl trip = trip(Integer.toString(i), "serviceId");
+      stopTime(0, null, trip, time(9, 00), 0);
+      BlockConfigurationEntry blockConfig = linkBlockTrips(block, trip);
+      BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
 
       for (int j = 0; j < 5; j++) {
 
@@ -169,13 +193,13 @@ public class BlockLocationRecordCacheImplTest {
 
   private static class RecordSource implements Runnable {
 
-    private ServiceDateAndId _blockInstance;
+    private BlockInstance _blockInstance;
 
     private AgencyAndId _vehicleId;
 
     private BlockLocationRecordCacheImpl _cache;
 
-    public RecordSource(ServiceDateAndId blockInstance, AgencyAndId vehicleId,
+    public RecordSource(BlockInstance blockInstance, AgencyAndId vehicleId,
         BlockLocationRecordCacheImpl cache) {
       _blockInstance = blockInstance;
       _vehicleId = vehicleId;
@@ -191,13 +215,13 @@ public class BlockLocationRecordCacheImplTest {
           _cache.clearRecordsForVehicleId(_vehicleId);
 
         Builder b = BlockLocationRecord.builder();
-        b.setBlockId(_blockInstance.getId());
+        b.setBlockId(_blockInstance.getBlock().getBlock().getId());
         b.setServiceDate(_blockInstance.getServiceDate());
         b.setVehicleId(_vehicleId);
         b.setDistanceAlongBlock(i * 100);
         b.setTime(i * 1000);
 
-        _cache.addRecord(b.create());
+        _cache.addRecord(_blockInstance, b.create());
 
         List<BlockLocationRecordCollection> records = _cache.getRecordsForBlockInstance(_blockInstance);
         BlockLocationRecordCollection collection = getCollectionForVehicleId(records);

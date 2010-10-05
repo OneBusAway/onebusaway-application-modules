@@ -9,6 +9,7 @@ import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
@@ -28,6 +29,8 @@ class UserReportingServiceImpl implements UserReportingService {
 
   private BlockLocationService _blockLocationService;
 
+  private BlockCalendarService _blockCalendarService;
+
   @Autowired
   public void setUserReportingDao(UserReportingDao userReportingDao) {
     _userReportingDao = userReportingDao;
@@ -41,6 +44,11 @@ class UserReportingServiceImpl implements UserReportingService {
   @Autowired
   public void setBlockLocationService(BlockLocationService blockLocationService) {
     _blockLocationService = blockLocationService;
+  }
+
+  @Autowired
+  public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
+    _blockCalendarService = blockCalendarService;
   }
 
   @Override
@@ -96,24 +104,27 @@ class UserReportingServiceImpl implements UserReportingService {
     record.setUserOnVehicle(problem.isUserOnVehicle());
     record.setUserVehicleNumber(problem.getUserVehicleNumber());
 
-    BlockInstance blockInstance = new BlockInstance(block,
-        problem.getServiceDate());
+    BlockInstance blockInstance = _blockCalendarService.getBlockInstance(
+        block.getId(), problem.getServiceDate());
 
-    List<BlockLocation> blockLocations = _blockLocationService.getLocationsForBlockInstance(
-        blockInstance, problem.getTime());
+    if (blockInstance != null) {
 
-    BlockLocation blockLocation = getBestLocation(blockLocations, problem);
+      List<BlockLocation> blockLocations = _blockLocationService.getLocationsForBlockInstance(
+          blockInstance, problem.getTime());
 
-    if (blockLocation != null) {
-      record.setPredicted(blockLocation.isPredicted());
-      record.setDistanceAlongBlock(blockLocation.getDistanceAlongBlock());
-      record.setScheduleDeviation(blockLocation.getScheduleDeviation());
-      CoordinatePoint p = blockLocation.getLocation();
-      if (p != null) {
-        record.setVehicleLat(p.getLat());
-        record.setVehicleLon(p.getLon());
+      BlockLocation blockLocation = getBestLocation(blockLocations, problem);
+
+      if (blockLocation != null) {
+        record.setPredicted(blockLocation.isPredicted());
+        record.setDistanceAlongBlock(blockLocation.getDistanceAlongBlock());
+        record.setScheduleDeviation(blockLocation.getScheduleDeviation());
+        CoordinatePoint p = blockLocation.getLocation();
+        if (p != null) {
+          record.setVehicleLat(p.getLat());
+          record.setVehicleLon(p.getLon());
+        }
+        record.setMatchedVehicleId(blockLocation.getVehicleId());
       }
-      record.setMatchedVehicleId(blockLocation.getVehicleId());
     }
 
     _userReportingDao.saveOrUpdate(record);

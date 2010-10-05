@@ -16,7 +16,7 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.GraphEntryFactory;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StartState;
@@ -35,15 +35,11 @@ import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerSe
 
 public class CombinedStateHandlerTest {
 
-  private GraphEntryFactory _factory = new GraphEntryFactory();
-
   private TripContext _context;
 
   private TripPlannerConstants _constants;
 
   private TripPlannerConstraints _constraints;
-
-  private CalendarService _calendarService;
 
   private TripPlannerGraph _graph;
 
@@ -61,9 +57,6 @@ public class CombinedStateHandlerTest {
 
     _constraints = new TripPlannerConstraints();
     _context.setConstraints(_constraints);
-
-    _calendarService = Mockito.mock(CalendarService.class);
-    _context.setCalendarService(_calendarService);
 
     _graph = Mockito.mock(TripPlannerGraph.class);
     _context.setGraph(_graph);
@@ -267,7 +260,14 @@ public class CombinedStateHandlerTest {
 
   private StopEntry mockStopEntry(AgencyAndId stopId, double lat, double lon,
       StopEntry... transfers) {
-    return _factory.createStopEntry(stopId, lat, lon, transfers);
+    StopEntryImpl stop = new StopEntryImpl(stopId, lat, lon);
+    for (StopEntry transfer : transfers) {
+      CoordinatePoint transferStopLocation = transfer.getStopLocation();
+      double distance = SphericalGeometryLibrary.distance(transferStopLocation,
+          stop.getStopLocation());
+      stop.addTransfer(transfer, distance);
+    }
+    return stop;
   }
 
   @SuppressWarnings("unchecked")

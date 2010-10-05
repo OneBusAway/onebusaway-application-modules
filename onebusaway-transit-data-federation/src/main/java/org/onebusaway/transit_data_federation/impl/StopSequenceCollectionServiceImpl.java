@@ -13,50 +13,45 @@ import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Max;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.model.StopSequence;
 import org.onebusaway.transit_data_federation.model.StopSequenceCollection;
 import org.onebusaway.transit_data_federation.model.StopSequenceCollectionKey;
+import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.utility.collections.TreeUnionFind;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Construct a set of {@link StopSequenceCollection} blocks for each route. A block
- * contains a set of {@link StopSequence} sequences that are headed in the same
- * direction for a particular route, along with a general description of the
- * destinations for those stop sequences and general start and stop locations
- * for the sequences.
+ * Construct a set of {@link StopSequenceCollection} collection for each route.
+ * A collection contains a set of {@link StopSequence} sequences that are headed
+ * in the same direction for a particular route, along with a general
+ * description of the destinations for those stop sequences and general start
+ * and stop locations for the sequences.
  * 
  * @author bdferris
  */
 @Component
-public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionService {
+public class StopSequenceCollectionServiceImpl implements
+    StopSequenceCollectionService {
 
   private static final double SERVICE_PATTERN_TRIP_COUNT_RATIO_MIN = 0.2;
 
   private static final double STOP_SEQUENCE_MIN_COMMON_RATIO = 0.3;
 
-  private TransitGraphDao _graph;
+  private NarrativeService _narrativeService;
 
   @Autowired
-  public void setTransitGraphDao(TransitGraphDao graph) {
-    _graph = graph;
+  public void setNarrativeService(NarrativeService narrativeService) {
+    _narrativeService = narrativeService;
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @seeorg.onebusaway.transit_data_federation.impl.StopSequenceBlocksService#
-   * getStopSequencesAsBlocks(java.util.List)
-   */
-  public List<StopSequenceCollection> getStopSequencesAsBlocks(
+  public List<StopSequenceCollection> getStopSequencesAsCollections(
       List<StopSequence> sequences) {
 
     pruneEmptyStopSequences(sequences);
@@ -67,7 +62,7 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
     Map<StopSequence, PatternStats> sequenceStats = getStatsForStopSequences(sequences);
     Map<String, List<StopSequence>> sequenceGroups = getGroupsForStopSequences(sequences);
 
-    return constructBlocks(sequenceStats, sequenceGroups);
+    return constructCollections(sequenceStats, sequenceGroups);
   }
 
   /**
@@ -118,18 +113,20 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
 
     Segment segment = new Segment();
 
-    List<Stop> stops = pattern.getStops();
-    Stop prev = null;
+    List<StopEntry> stops = pattern.getStops();
+    StopEntry prev = null;
 
-    for (Stop stop : stops) {
+    for (StopEntry stop : stops) {
       if (prev == null) {
-        segment.fromLat = stop.getLat();
-        segment.fromLon = stop.getLon();
+        segment.fromLat = stop.getStopLat();
+        segment.fromLon = stop.getStopLon();
       } else {
-        segment.distance += DistanceLibrary.distance(prev, stop);
+        segment.distance += SphericalGeometryLibrary.distance(
+            prev.getStopLat(), prev.getStopLon(), stop.getStopLat(),
+            stop.getStopLon());
       }
-      segment.toLat = stop.getLat();
-      segment.toLon = stop.getLon();
+      segment.toLat = stop.getStopLat();
+      segment.toLon = stop.getStopLon();
       prev = stop;
     }
 
@@ -221,20 +218,20 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
    * 
    * @param route
    * @param sequenceStats
-   * @param sequencesByStopSequenceBlockId
+   * @param sequencesByGroupId
    * @return
    */
-  private List<StopSequenceCollection> constructBlocks(
+  private List<StopSequenceCollection> constructCollections(
       Map<StopSequence, PatternStats> sequenceStats,
-      Map<String, List<StopSequence>> sequencesByStopSequenceBlockId) {
+      Map<String, List<StopSequence>> sequencesByGroupId) {
 
-    computeContinuations(sequenceStats, sequencesByStopSequenceBlockId);
+    computeContinuations(sequenceStats, sequencesByGroupId);
 
     Set<String> allNames = new HashSet<String>();
     Map<String, String> directionToName = new HashMap<String, String>();
     Map<String, Segment> segments = new HashMap<String, Segment>();
 
-    for (Map.Entry<String, List<StopSequence>> entry : sequencesByStopSequenceBlockId.entrySet()) {
+    for (Map.Entry<String, List<StopSequence>> entry : sequencesByGroupId.entrySet()) {
 
       String direction = entry.getKey();
       List<StopSequence> sequences = entry.getValue();
@@ -245,8 +242,11 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
 
       for (StopSequence sequence : sequences) {
         maxTripCount.add(sequence.getTripCount(), sequence);
-        for (Trip trip : sequence.getTrips()) {
-          String headsign = trip.getTripHeadsign();
+
+        for (BlockTripEntry blockTrip : sequence.getTrips()) {
+          TripEntry trip = blockTrip.getTrip();
+          TripNarrative tripNarrative = _narrativeService.getTripForId(trip.getId());
+          String headsign = tripNarrative.getTripHeadsign();
           if (headsign != null && headsign.length() > 0)
             names.increment(headsign);
         }
@@ -280,7 +280,7 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
 
       String direction = entry.getKey();
       String name = entry.getValue();
-      List<StopSequence> patterns = sequencesByStopSequenceBlockId.get(direction);
+      List<StopSequence> patterns = sequencesByGroupId.get(direction);
 
       Segment segment = segments.get(direction);
 
@@ -290,7 +290,8 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
       if (segment.fromLat == 0.0)
         throw new IllegalStateException("what?");
 
-      StopSequenceCollectionKey key = new StopSequenceCollectionKey(null, direction);
+      StopSequenceCollectionKey key = new StopSequenceCollectionKey(null,
+          direction);
       block.setId(key);
       block.setPublicId(direction);
       block.setDescription(name);
@@ -314,72 +315,61 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
    * the second StopSequence, as defined by a block id.
    * 
    * @param sequenceStats
-   * @param sequencesByStopSequenceBlockId
+   * @param sequencesByGroupId
    */
   private void computeContinuations(
       Map<StopSequence, PatternStats> sequenceStats,
-      Map<String, List<StopSequence>> sequencesByStopSequenceBlockId) {
+      Map<String, List<StopSequence>> sequencesByGroupId) {
 
-    Set<Trip> trips = new HashSet<Trip>();
-    Map<AgencyAndId, StopSequence> stopSequencesByTripId = new HashMap<AgencyAndId, StopSequence>();
+    Map<BlockTripEntry, StopSequence> stopSequencesByTrip = new HashMap<BlockTripEntry, StopSequence>();
 
-    Map<StopSequence, String> stopSequenceBlockIds = new HashMap<StopSequence, String>();
-    for (Map.Entry<String, List<StopSequence>> entry : sequencesByStopSequenceBlockId.entrySet()) {
+    Map<StopSequence, String> stopSequenceGroupIds = new HashMap<StopSequence, String>();
+    for (Map.Entry<String, List<StopSequence>> entry : sequencesByGroupId.entrySet()) {
       String id = entry.getKey();
       for (StopSequence sequence : entry.getValue())
-        stopSequenceBlockIds.put(sequence, id);
+        stopSequenceGroupIds.put(sequence, id);
     }
 
     for (StopSequence sequence : sequenceStats.keySet()) {
-      for (Trip trip : sequence.getTrips()) {
-        if (trip.getBlockId() != null) {
-          if (trips.add(trip)) {
-            stopSequencesByTripId.put(trip.getId(), sequence);
-          }
+
+      String groupId = stopSequenceGroupIds.get(sequence);
+
+      for (BlockTripEntry trip : sequence.getTrips()) {
+
+        BlockTripEntry prevTrip = trip.getPreviousTrip();
+
+        if (prevTrip == null)
+          continue;
+
+        StopSequence prevSequence = stopSequencesByTrip.get(prevTrip);
+
+        // No continuations if incoming is not part of the sequence collection
+        if (prevSequence == null)
+          continue;
+
+        // No continuation if it's the same stop sequence
+        if (prevSequence.equals(sequence))
+          continue;
+
+        // No contination if the the block group ids don't match
+        String prevGroupId = stopSequenceGroupIds.get(prevSequence);
+        if (!groupId.equals(prevGroupId))
+          continue;
+
+        StopEntry prevStop = prevSequence.getStops().get(
+            prevSequence.getStops().size() - 1);
+        StopEntry nextStop = sequence.getStops().get(0);
+        double d = SphericalGeometryLibrary.distance(prevStop.getStopLat(),
+            prevStop.getStopLon(), nextStop.getStopLat(), nextStop.getStopLon());
+        if (d < 5280 / 4) {
+          /*
+           * System.out.println("distance=" + d + " from=" + prevStop.getId() +
+           * " to=" + nextStop.getId() + " ssFrom=" + prevSequence.getId() +
+           * " ssTo=" + stopSequence.getId());
+           */
+          PatternStats stats = sequenceStats.get(prevSequence);
+          stats.continuations.add(sequence);
         }
-      }
-    }
-
-    for (AgencyAndId tripId : stopSequencesByTripId.keySet()) {
-
-      TripEntry tripEntry = _graph.getTripEntryForId(tripId);
-      TripEntry prevTrip = tripEntry.getPrevTrip();
-
-      // No continuations if no incoming trip
-      if (prevTrip == null)
-        continue;
-
-      StopSequence prevSequence = stopSequencesByTripId.get(prevTrip.getId());
-
-      // No continuations if incoming is not part of the sequence collection
-      if (prevSequence == null)
-        continue;
-
-      String prevGroupId = stopSequenceBlockIds.get(prevSequence);
-
-      StopSequence stopSequence = stopSequencesByTripId.get(tripId);
-      String groupId = stopSequenceBlockIds.get(stopSequence);
-
-      // No continuation if it's the same stop sequence
-      if (prevSequence.equals(stopSequence))
-        continue;
-
-      // No contination if the the block group ids don't match
-      if (!groupId.equals(prevGroupId))
-        continue;
-
-      Stop prevStop = prevSequence.getStops().get(
-          prevSequence.getStops().size() - 1);
-      Stop nextStop = stopSequence.getStops().get(0);
-      double d = DistanceLibrary.distance(prevStop, nextStop);
-      if (d < 5280 / 4) {
-        /*
-         * System.out.println("distance=" + d + " from=" + prevStop.getId() +
-         * " to=" + nextStop.getId() + " ssFrom=" + prevSequence.getId() +
-         * " ssTo=" + stopSequence.getId());
-         */
-        PatternStats stats = sequenceStats.get(prevSequence);
-        stats.continuations.add(stopSequence);
       }
     }
   }
@@ -423,10 +413,10 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
   }
 
   private double getMaxCommonStopSequenceRatio(StopSequence a, StopSequence b) {
-    Set<Pair<Stop>> pairsA = getStopSequenceAsStopPairSet(a);
-    Set<Pair<Stop>> pairsB = getStopSequenceAsStopPairSet(b);
+    Set<Pair<StopEntry>> pairsA = getStopSequenceAsStopPairSet(a);
+    Set<Pair<StopEntry>> pairsB = getStopSequenceAsStopPairSet(b);
     int common = 0;
-    for (Pair<Stop> pairA : pairsA) {
+    for (Pair<StopEntry> pairA : pairsA) {
       if (pairsB.contains(pairA))
         common++;
     }
@@ -436,12 +426,13 @@ public class StopSequenceBlocksServiceImpl implements StopSequenceCollectionServ
     return Math.max(ratioA, ratioB);
   }
 
-  private Set<Pair<Stop>> getStopSequenceAsStopPairSet(StopSequence stopSequence) {
-    Set<Pair<Stop>> pairs = new HashSet<Pair<Stop>>();
-    Stop prev = null;
-    for (Stop stop : stopSequence.getStops()) {
+  private Set<Pair<StopEntry>> getStopSequenceAsStopPairSet(
+      StopSequence stopSequence) {
+    Set<Pair<StopEntry>> pairs = new HashSet<Pair<StopEntry>>();
+    StopEntry prev = null;
+    for (StopEntry stop : stopSequence.getStops()) {
       if (prev != null) {
-        Pair<Stop> pair = Tuples.pair(prev, stop);
+        Pair<StopEntry> pair = Tuples.pair(prev, stop);
         pairs.add(pair);
       }
       prev = stop;

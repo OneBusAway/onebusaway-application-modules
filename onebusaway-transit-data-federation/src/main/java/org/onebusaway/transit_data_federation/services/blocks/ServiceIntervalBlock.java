@@ -2,6 +2,8 @@ package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.io.Serializable;
 
+import org.onebusaway.gtfs.model.calendar.ServiceInterval;
+
 /**
  * Specifies an immutable interval of min and max arrival and departure times.
  * 
@@ -66,6 +68,11 @@ public final class ServiceIntervalBlock implements Serializable, Comparable<Serv
    */
   public int[] getMaxDepartures() {
     return maxDepartures;
+  }
+  
+  public ServiceInterval getRange() {
+    int n = maxArrivals.length-1;
+    return new ServiceInterval(minArrivals[0], minDepartures[0], maxArrivals[n], maxDepartures[n]);
   }
 
   @Override

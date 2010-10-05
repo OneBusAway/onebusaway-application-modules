@@ -1,36 +1,32 @@
 package org.onebusaway.transit_data_federation.impl.blocks;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.aid;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.block;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.linkBlockTrips;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stop;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stopTime;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.time;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.trip;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockIndices;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.findBlockConfig;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
-import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
-import org.onebusaway.transit_data_federation.impl.blocks.BlockCalendarServiceImpl;
+import org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.testing.DateSupport;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.testing.UnitTestingSupport;
 
 public class BlockCalendarServiceImplTest {
 
@@ -40,83 +36,78 @@ public class BlockCalendarServiceImplTest {
 
   private CalendarServiceData _calendarData;
 
+  private ExtendedCalendarServiceImpl _extendedCalendarService;
+
   @Before
   public void before() {
     _service = new BlockCalendarServiceImpl();
 
-    _calendarService = new CalendarServiceImpl();
-    _service.setCalendarService(_calendarService);
-
     _calendarData = new CalendarServiceData();
+
+    _calendarService = new CalendarServiceImpl();
     _calendarService.setData(_calendarData);
+
+    _extendedCalendarService = new ExtendedCalendarServiceImpl();
+    _extendedCalendarService.setCalendarService(_calendarService);
+
+    _service.setCalendarService(_extendedCalendarService);
   }
 
   @Test
   public void testGetActiveBlocksInTimeRange() {
 
-    TimeZone tz = TimeZone.getTimeZone("America/Los_Angeles");
-    LocalizedServiceId lsidA = new LocalizedServiceId(aid("sidA"), tz);
-    LocalizedServiceId lsidB = new LocalizedServiceId(aid("sidB"), tz);
+    Date serviceDateA = UnitTestingSupport.date("2010-09-07 00:00");
+    Date serviceDateB = UnitTestingSupport.date("2010-09-08 00:00");
+    Date serviceDateC = UnitTestingSupport.date("2010-09-09 00:00");
 
-    Date serviceDateA = DateSupport.date("2010-09-07 00:00");
-    Date serviceDateB = DateSupport.date("2010-09-08 00:00");
-    Date serviceDateC = DateSupport.date("2010-09-09 00:00");
+    UnitTestingSupport.addDates(_calendarData, "sidA", serviceDateA,
+        serviceDateB);
+    UnitTestingSupport.addDates(_calendarData, "sidB", serviceDateB,
+        serviceDateC);
 
-    _calendarData.putDatesForLocalizedServiceId(lsidA,
-        Arrays.asList(serviceDateA, serviceDateB));
-    _calendarData.putDatesForLocalizedServiceId(lsidB,
-        Arrays.asList(serviceDateB, serviceDateC));
-    _calendarData.putTimeZoneForAgencyId("1", tz);
-    
-    StopEntryImpl stopA = stop("stopA",0.0,0.0);
-    StopEntryImpl stopB = stop("stopB",0.0,0.0);
+    StopEntryImpl stopA = stop("stopA", 0.0, 0.0);
+    StopEntryImpl stopB = stop("stopB", 0.0, 0.0);
 
     BlockEntryImpl blockA = block("blockA");
-    TripEntryImpl tripA = trip("tripA");
-    TripEntryImpl tripB = trip("tripB");
-    tripA.setServiceId(aid("sidA"));
-    tripB.setServiceId(aid("sidB"));
+    TripEntryImpl tripA = trip("tripA", "sidA");
+    TripEntryImpl tripB = trip("tripB", "sidB");
 
-    linkBlockTrips(blockA, tripA, tripB);
+    stopTime(0, stopA, tripA, time(9, 00), time(9, 00), 0);
+    stopTime(1, stopB, tripA, time(9, 30), time(9, 30), 100);
+    stopTime(2, stopB, tripB, time(10, 00), time(10, 00), 200);
+    stopTime(3, stopA, tripB, time(10, 30), time(10, 30), 300);
 
-    StopTimeEntry stA = stopTime(0, stopA, tripA, time(9, 00), time(9, 00), 0);
-    StopTimeEntry stB = stopTime(1, stopB, tripA, time(9, 30), time(9, 30), 100);
-    StopTimeEntry stC = stopTime(2, stopB, tripB, time(10, 00), time(10, 00),
-        200);
-    StopTimeEntry stD = stopTime(3, stopA, tripB, time(10, 30), time(10, 30),
-        300);
+    linkBlockTrips(_calendarService, blockA, tripA, tripB);
 
-    blockA.setStopTimes(Arrays.asList(stA, stB, stC, stD));
-    tripA.setStopTimeIndices(0, 2);
-    tripB.setStopTimeIndices(2, 4);
+    BlockConfigurationEntry bcA_A_B = findBlockConfig(blockA,
+        serviceIds(lsids("sidA"), lsids("sidB")));
+    BlockConfigurationEntry bcA_B_A = findBlockConfig(blockA,
+        serviceIds(lsids("sidB"), lsids("sidA")));
+    BlockConfigurationEntry bcA_AB = findBlockConfig(blockA,
+        serviceIds(lsids("sidA", "sidB"), lsids()));
 
     BlockEntryImpl blockB = block("blockB");
-    TripEntryImpl tripC = trip("tripC");
-    TripEntryImpl tripD = trip("tripD");
-    TripEntryImpl tripE = trip("tripE");
+    TripEntryImpl tripC = trip("tripC", "sidA");
+    TripEntryImpl tripD = trip("tripD", "sidB");
+    TripEntryImpl tripE = trip("tripE", "sidA");
 
-    tripC.setServiceId(aid("sidA"));
-    tripD.setServiceId(aid("sidB"));
-    tripE.setServiceId(aid("sidA"));
+    stopTime(4, stopA, tripC, time(10, 00), time(10, 00), 0);
+    stopTime(5, stopB, tripC, time(10, 30), time(10, 30), 0);
+    stopTime(6, stopB, tripD, time(11, 00), time(11, 00), 0);
+    stopTime(7, stopA, tripD, time(11, 30), time(11, 30), 0);
+    stopTime(8, stopA, tripE, time(12, 00), time(12, 00), 0);
+    stopTime(9, stopB, tripE, time(12, 30), time(12, 30), 0);
 
-    linkBlockTrips(blockB, tripC, tripD, tripE);
+    linkBlockTrips(_calendarService, blockB, tripC, tripD, tripE);
 
-    StopTimeEntry stE = stopTime(4, stopA, tripC, time(10, 00), time(10, 00), 0);
-    StopTimeEntry stF = stopTime(5, stopB, tripC, time(10, 30), time(10, 30), 0);
-    StopTimeEntry stG = stopTime(6, stopB, tripD, time(11, 00), time(11, 00), 0);
-    StopTimeEntry stH = stopTime(7, stopA, tripD, time(11, 30), time(11, 30), 0);
-    StopTimeEntry stI = stopTime(8, stopA, tripE, time(12, 00), time(12, 00), 0);
-    StopTimeEntry stJ = stopTime(9, stopB, tripE, time(12, 30), time(12, 30), 0);
+    BlockConfigurationEntry bcB_A_B = findBlockConfig(blockB,
+        serviceIds(lsids("sidA"), lsids("sidB")));
+    BlockConfigurationEntry bcB_B_A = findBlockConfig(blockB,
+        serviceIds(lsids("sidB"), lsids("sidA")));
+    BlockConfigurationEntry bcB_AB = findBlockConfig(blockB,
+        serviceIds(lsids("sidA", "sidB"), lsids()));
 
-    blockB.setStopTimes(Arrays.asList(stE, stF, stG, stH, stI, stJ));
-    tripC.setStopTimeIndices(0, 2);
-    tripD.setStopTimeIndices(2, 4);
-    tripE.setStopTimeIndices(4, 6);
-
-    BlockIndicesFactory factory = new BlockIndicesFactory();
-    factory.setCalendarService(_calendarService);
-    List<BlockIndex> blocks = factory.createIndices(Arrays.asList(
-        (BlockEntry) blockA, blockB));
+    List<BlockIndex> blocks = blockIndices(blockA, blockB);
 
     /****
      * 
@@ -130,11 +121,8 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     BlockInstance instance = instances.get(0);
-    assertEquals(blockA, instance.getBlock());
+    assertEquals(bcA_A_B, instance.getBlock());
     assertEquals(serviceDateA.getTime(), instance.getServiceDate());
-    Set<LocalizedServiceId> serviceIds = instance.getServiceIds();
-    assertEquals(1, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
 
     /****
      * 
@@ -147,11 +135,8 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockB, instance.getBlock());
+    assertEquals(bcB_A_B, instance.getBlock());
     assertEquals(serviceDateA.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(1, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
 
     /****
      * 
@@ -164,11 +149,8 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockB, instance.getBlock());
+    assertEquals(bcB_A_B, instance.getBlock());
     assertEquals(serviceDateA.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(1, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
 
     /****
      * 
@@ -181,11 +163,8 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockB, instance.getBlock());
+    assertEquals(bcB_A_B, instance.getBlock());
     assertEquals(serviceDateA.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(1, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
 
     /****
      * 
@@ -198,12 +177,8 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockA, instance.getBlock());
+    assertEquals(bcA_AB, instance.getBlock());
     assertEquals(serviceDateB.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(2, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
-    assertTrue(serviceIds.contains(lsidB));
 
     /****
      * 
@@ -216,20 +191,12 @@ public class BlockCalendarServiceImplTest {
     assertEquals(2, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockA, instance.getBlock());
+    assertEquals(bcA_AB, instance.getBlock());
     assertEquals(serviceDateB.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(2, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
-    assertTrue(serviceIds.contains(lsidB));
 
     instance = instances.get(1);
-    assertEquals(blockB, instance.getBlock());
+    assertEquals(bcB_AB, instance.getBlock());
     assertEquals(serviceDateB.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(2, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
-    assertTrue(serviceIds.contains(lsidB));
 
     /****
      * 
@@ -242,12 +209,8 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockB, instance.getBlock());
+    assertEquals(bcB_AB, instance.getBlock());
     assertEquals(serviceDateB.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(2, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
-    assertTrue(serviceIds.contains(lsidB));
 
     /****
      * 
@@ -260,12 +223,8 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockB, instance.getBlock());
+    assertEquals(bcB_AB, instance.getBlock());
     assertEquals(serviceDateB.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(2, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidA));
-    assertTrue(serviceIds.contains(lsidB));
 
     /****
      * 
@@ -288,11 +247,8 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockA, instance.getBlock());
+    assertEquals(bcA_B_A, instance.getBlock());
     assertEquals(serviceDateC.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(1, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidB));
 
     /****
      * 
@@ -305,14 +261,11 @@ public class BlockCalendarServiceImplTest {
     assertEquals(1, instances.size());
 
     instance = instances.get(0);
-    assertEquals(blockB, instance.getBlock());
+    assertEquals(bcB_B_A, instance.getBlock());
     assertEquals(serviceDateC.getTime(), instance.getServiceDate());
-    serviceIds = instance.getServiceIds();
-    assertEquals(1, serviceIds.size());
-    assertTrue(serviceIds.contains(lsidB));
   }
-  
+
   private static long timeFromString(String source) {
-    return DateSupport.date(source).getTime();
+    return UnitTestingSupport.date(source).getTime();
   }
 }

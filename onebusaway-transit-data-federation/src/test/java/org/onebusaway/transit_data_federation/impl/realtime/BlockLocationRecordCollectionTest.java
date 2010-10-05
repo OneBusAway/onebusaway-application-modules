@@ -2,17 +2,33 @@ package org.onebusaway.transit_data_federation.impl.realtime;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.junit.Test;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 
 public class BlockLocationRecordCollectionTest {
 
   @Test
   public void test01() {
+
+    BlockEntryImpl block = block("blockA");
+    TripEntryImpl trip = trip("tripA", "serviceId");
+    stopTime(0, null, trip, time(9, 00), 0);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block, trip);
+    BlockInstance blockInstance = new BlockInstance(blockConfig,
+        System.currentTimeMillis());
 
     SortedMap<Long, Double> m = new TreeMap<Long, Double>();
     m.put(t(4, 10), 10.0);
@@ -84,7 +100,8 @@ public class BlockLocationRecordCollectionTest {
     assertEquals(p3, entry.getLastLocationForTargetTime(t(16, 40)));
 
     CoordinatePoint p4 = new CoordinatePoint(47.15, -122.15);
-    entry = entry.addRecord(record(t(10, 0), 20, 220, p4), t(5, 0));
+    entry = entry.addRecord(blockInstance, record(t(10, 0), 20, 220, p4),
+        t(5, 0));
 
     assertEquals(t(6, 40), entry.getFromTime());
     assertEquals(t(11, 40), entry.getToTime());
@@ -118,7 +135,8 @@ public class BlockLocationRecordCollectionTest {
     assertEquals(p4, entry.getLastLocationForTargetTime(t(10, 50)));
 
     CoordinatePoint p5 = new CoordinatePoint(47.4, -122.4);
-    entry = entry.addRecord(record(t(16, 40), 14, 500, p5), t(6, 40));
+    entry = entry.addRecord(blockInstance, record(t(16, 40), 14, 500, p5),
+        t(6, 40));
 
     assertEquals(t(10, 00), entry.getFromTime());
     assertEquals(t(16, 40), entry.getToTime());

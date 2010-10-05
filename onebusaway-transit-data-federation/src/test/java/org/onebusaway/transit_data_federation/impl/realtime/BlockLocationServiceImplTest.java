@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.aid;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.block;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.linkBlockTrips;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stop;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.stopTime;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.time;
-import static org.onebusaway.transit_data_federation.testing.MockEntryFactory.trip;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -23,14 +23,15 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.utility.DateLibrary;
 
@@ -41,6 +42,8 @@ public class BlockLocationServiceImplTest {
   private TransitGraphDao _transitGraphDao;
 
   private ScheduledBlockLocationService _blockLocationService;
+
+  private BlockCalendarService _blockCalendarService;
 
   @Before
   public void setup() {
@@ -54,6 +57,9 @@ public class BlockLocationServiceImplTest {
     _service.setScheduledBlockLocationService(_blockLocationService);
 
     _service.setBlockLocationRecordCache(new BlockLocationRecordCacheImpl());
+
+    _blockCalendarService = Mockito.mock(BlockCalendarService.class);
+    _service.setBlockCalendarService(_blockCalendarService);
   }
 
   @Test
@@ -64,26 +70,17 @@ public class BlockLocationServiceImplTest {
     StopEntryImpl stopC = stop("c", 47.7, -122.7);
     StopEntryImpl stopD = stop("d", 47.8, -122.8);
 
-    TripEntryImpl trip = trip("trip");
     BlockEntryImpl block = block("block");
 
-    linkBlockTrips(block, trip);
+    TripEntryImpl trip = trip("trip", "serviceId");
 
-    StopTimeEntryImpl stopTimeA = stopTime(0, stopA, trip, time(9, 10),
-        time(9, 11), -1);
-    StopTimeEntryImpl stopTimeB = stopTime(1, stopB, trip, time(9, 20),
-        time(9, 22), -1);
-    StopTimeEntryImpl stopTimeC = stopTime(2, stopC, trip, time(9, 30),
-        time(9, 30), -1);
-    StopTimeEntryImpl stopTimeD = stopTime(3, stopD, trip, time(9, 40),
-        time(9, 45), -1);
-    stopTimeB.setAccumulatedSlackTime(60);
-    stopTimeC.setAccumulatedSlackTime(180);
-    stopTimeD.setAccumulatedSlackTime(180);
+    stopTime(0, stopA, trip, time(9, 10), time(9, 11), -1);
+    stopTime(1, stopB, trip, time(9, 20), time(9, 22), -1);
+    stopTime(2, stopC, trip, time(9, 30), time(9, 30), -1);
+    stopTime(3, stopD, trip, time(9, 40), time(9, 45), -1);
 
-    block.setStopTimes(Arrays.asList((StopTimeEntry) stopTimeA, stopTimeB,
-        stopTimeC, stopTimeD));
-    trip.setStopTimeIndices(0, 4);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block, trip);
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
 
     Mockito.when(_transitGraphDao.getTripEntryForId(aid("trip"))).thenReturn(
         trip);
@@ -92,6 +89,12 @@ public class BlockLocationServiceImplTest {
 
     Date date = DateLibrary.getTimeAsDay(new Date());
     long serviceDate = date.getTime();
+
+    List<BlockInstance> instances = Arrays.asList(new BlockInstance(
+        blockConfig, serviceDate));
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(block.getId()),
+            Mockito.anyLong(), Mockito.anyLong())).thenReturn(instances);
 
     VehicleLocationRecord vprA = new VehicleLocationRecord();
     vprA.setTripId(trip.getId());
@@ -109,13 +112,13 @@ public class BlockLocationServiceImplTest {
 
     _service.handleVehicleLocationRecords(Arrays.asList(vprA, vprB));
 
-    StopTimeInstanceProxy stiA = new StopTimeInstanceProxy(stopTimeA,
+    StopTimeInstanceProxy stiA = new StopTimeInstanceProxy(stopTimes.get(0),
         serviceDate);
-    StopTimeInstanceProxy stiB = new StopTimeInstanceProxy(stopTimeB,
+    StopTimeInstanceProxy stiB = new StopTimeInstanceProxy(stopTimes.get(1),
         serviceDate);
-    StopTimeInstanceProxy stiC = new StopTimeInstanceProxy(stopTimeC,
+    StopTimeInstanceProxy stiC = new StopTimeInstanceProxy(stopTimes.get(2),
         serviceDate);
-    StopTimeInstanceProxy stiD = new StopTimeInstanceProxy(stopTimeD,
+    StopTimeInstanceProxy stiD = new StopTimeInstanceProxy(stopTimes.get(3),
         serviceDate);
 
     List<StopTimeInstanceProxy> stis = Arrays.asList(stiA, stiB, stiC, stiD);
@@ -148,7 +151,7 @@ public class BlockLocationServiceImplTest {
     vpr.setTimeOfRecord(t(serviceDate, 9, 10.5));
     vpr.setServiceDate(serviceDate);
     vpr.setVehicleId(aid("vehicleA"));
-    
+
     _service.handleVehicleLocationRecords(Arrays.asList(vpr));
 
     _service.applyRealtimeData(stis, t(serviceDate, 9, 11));
@@ -192,30 +195,24 @@ public class BlockLocationServiceImplTest {
 
     BlockEntryImpl block = block("block");
 
-    TripEntryImpl tripA = trip("tripA");
-    TripEntryImpl tripB = trip("tripB");
+    TripEntryImpl tripA = trip("tripA", "serviceId");
+    TripEntryImpl tripB = trip("tripB", "serviceId");
 
-    linkBlockTrips(block, tripA, tripB);
+    stopTime(0, stopA, tripA, 30, 90, 0);
+    stopTime(1, stopB, tripA, 120, 120, 100);
+    stopTime(2, stopC, tripA, 180, 210, 200);
 
-    StopTimeEntry stopTimeA = stopTime(0, stopA, tripA, 30, 90, 0);
-    StopTimeEntry stopTimeB = stopTime(1, stopB, tripA, 120, 120, 100);
-    StopTimeEntry stopTimeC = stopTime(2, stopC, tripA, 180, 210, 200);
+    stopTime(3, stopC, tripB, 240, 240, 300);
+    stopTime(4, stopB, tripB, 270, 270, 400);
+    stopTime(5, stopA, tripB, 300, 300, 500);
 
-    StopTimeEntry stopTimeD = stopTime(3, stopC, tripB, 240, 240, 300);
-    StopTimeEntry stopTimeE = stopTime(4, stopB, tripB, 270, 270, 400);
-    StopTimeEntry stopTimeF = stopTime(5, stopA, tripB, 300, 300, 500);
-
-    block.setStopTimes(Arrays.asList(stopTimeA, stopTimeB, stopTimeC,
-        stopTimeD, stopTimeE, stopTimeF));
-
-    tripA.setStopTimeIndices(0, 3);
-    tripB.setStopTimeIndices(3, 6);
+    BlockConfigurationEntry blockConfig = linkBlockTrips(block, tripA, tripB);
 
     long serviceDate = 1000 * 1000;
 
     double epsilon = 0.001;
 
-    BlockInstance blockInstance = new BlockInstance(block, serviceDate);
+    BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
     BlockLocation location = _service.getLocationForBlockInstance(
         blockInstance, t(serviceDate, 0, 0));
 
@@ -233,21 +230,21 @@ public class BlockLocationServiceImplTest {
     assertNull(location.getVehicleId());
 
     ScheduledBlockLocation p = new ScheduledBlockLocation();
-    p.setActiveTrip(tripA);
-    p.setClosestStop(stopTimeA);
+    p.setActiveTrip(blockConfig.getTrips().get(0));
+    p.setClosestStop(blockConfig.getStopTimes().get(0));
     p.setClosestStopTimeOffset(0);
     p.setDistanceAlongBlock(0);
     p.setLocation(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
 
     Mockito.when(
         _blockLocationService.getScheduledBlockLocationFromScheduledTime(
-            block.getStopTimes(), 1800)).thenReturn(p);
+            blockConfig.getStopTimes(), 1800)).thenReturn(p);
 
     location = _service.getLocationForBlockInstance(blockInstance,
         t(serviceDate, 0, 30));
 
     assertTrue(location.isInService());
-    assertEquals(stopTimeA, location.getClosestStop());
+    assertEquals(blockConfig.getStopTimes().get(0), location.getClosestStop());
     assertEquals(0, location.getClosestStopTimeOffset());
 
     assertEquals(stopA.getStopLocation(), location.getLocation());
@@ -260,12 +257,12 @@ public class BlockLocationServiceImplTest {
 
     assertEquals(blockInstance, location.getBlockInstance());
     assertEquals(0, location.getLastUpdateTime());
-    assertEquals(tripA, location.getActiveTrip());
+    assertEquals(blockConfig.getTrips().get(0), location.getActiveTrip());
     assertNull(location.getVehicleId());
 
     assertEquals(47.5, location.getLocation().getLat(), epsilon);
     assertEquals(-122.5, location.getLocation().getLon(), epsilon);
-    assertEquals(stopTimeA, location.getClosestStop());
+    assertEquals(blockConfig.getStopTimes().get(0), location.getClosestStop());
     assertEquals(0, location.getClosestStopTimeOffset());
   }
 

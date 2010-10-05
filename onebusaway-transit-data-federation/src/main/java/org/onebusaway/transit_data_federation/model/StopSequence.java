@@ -5,9 +5,9 @@ import java.util.List;
 import org.onebusaway.container.model.IdentityBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 
 /**
  * A stop sequence is a unique sequence of stops visited by a transit trip. So
@@ -25,9 +25,9 @@ public class StopSequence extends IdentityBean<Integer> {
 
   private Route route;
 
-  private List<Stop> stops;
+  private List<StopEntry> stops;
 
-  private List<Trip> trips;
+  private List<BlockTripEntry> trips;
 
   private int tripCount;
 
@@ -51,19 +51,19 @@ public class StopSequence extends IdentityBean<Integer> {
     this.route = route;
   }
 
-  public List<Stop> getStops() {
+  public List<StopEntry> getStops() {
     return this.stops;
   }
 
-  public void setStops(List<Stop> stops) {
+  public void setStops(List<StopEntry> stops) {
     this.stops = stops;
   }
 
-  public List<Trip> getTrips() {
+  public List<BlockTripEntry> getTrips() {
     return this.trips;
   }
 
-  public void setTrips(List<Trip> trips) {
+  public void setTrips(List<BlockTripEntry> trips) {
     this.trips = trips;
   }
 

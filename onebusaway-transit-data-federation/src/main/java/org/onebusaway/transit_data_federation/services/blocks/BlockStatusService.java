@@ -25,6 +25,16 @@ public interface BlockStatusService {
    *         service date and time
    */
   public BlockLocation getBlock(AgencyAndId blockId, long serviceDate, long time);
+  
+  /**
+   * @param blockId see {@link Trip#getBlockId()}
+   * @param serviceDate the service date the block is operating under
+   *          (Unix-time)
+   * @param time the time of operation to query
+   * @return the status info for blocks operating on the specified
+   *         service date and time
+   */
+  //public BlockLocation getBlocks(AgencyAndId blockId, long serviceDate, long time);
 
   /**
    * 

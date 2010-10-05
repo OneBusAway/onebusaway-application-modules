@@ -20,6 +20,9 @@ import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataB
 import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
@@ -41,9 +44,28 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
   private TripPlannerGraphImpl _graph;
 
+  private Runnable _blockStopTimeIndicesTask;
+
+  private TripPlannerGraphRefresh _refresh;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
+  }
+
+  @Autowired
+  public void setGraph(TripPlannerGraphImpl graph) {
+    _graph = graph;
+  }
+
+  @Autowired
+  public void setBlockStopTimeIndicesTask(Runnable blockStopTimeIndicesTask) {
+    _blockStopTimeIndicesTask = blockStopTimeIndicesTask;
+  }
+  
+  @Autowired
+  public void setRefresh(TripPlannerGraphRefresh refresh) {
+    _refresh = refresh;
   }
 
   @Transactional
@@ -54,8 +76,11 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
       WalkPlannerGraph walkPlannerGraph = ObjectSerializationLibrary.readObject(_bundle.getWalkPlannerGraphPath());
       _cachedStopTransferWalkPlanner.setWalkPlannerGraph(walkPlannerGraph);
 
-      _graph = ObjectSerializationLibrary.readObject(_bundle.getTripPlannerGraphPath());
-      _graph.initialize();
+      // Make sure graph is initialized
+      _refresh.refresh();
+
+      // Make sure the block stop time indices have been wired up
+      _blockStopTimeIndicesTask.run();
 
       StopSequenceData data = new StopSequenceData();
 
@@ -243,15 +268,15 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
     for (StopEntryImpl stopEntry : potentialTransferStartPointsByEndPoint.keySet()) {
 
       // Consider all the stop times at that stop
-      StopTimeIndexImpl index = stopEntry.getStopTimes();
-      List<StopTimeEntry> stopTimes = index.getAllStopTimes();
 
       Set<StopSequenceKey> outboundSequences = new HashSet<StopSequenceKey>();
 
-      for (StopTimeEntry stopTime : stopTimes) {
-        TripEntry trip = stopTime.getTrip();
-        StopSequenceKey outboundSequence = data.getSequenceForTrip(trip);
-        outboundSequences.add(outboundSequence);
+      for (BlockStopTimeIndex index : stopEntry.getStopTimeIndices()) {
+        for (BlockStopTimeEntry blockStopTime : index.getStopTimes()) {
+          BlockTripEntry blockTrip = blockStopTime.getTrip();
+          StopSequenceKey outboundSequence = data.getSequenceForTrip(blockTrip.getTrip());
+          outboundSequences.add(outboundSequence);
+        }
       }
 
       for (StopSequenceKey outboundSequence : outboundSequences) {

@@ -16,7 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.model.ServiceDateAndId;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationRecordCache;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,7 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
 
   private ConcurrentMap<AgencyAndId, List<BlockLocationRecordKey>> _keysByVehicleId = new ConcurrentHashMap<AgencyAndId, List<BlockLocationRecordKey>>();
 
-  private ConcurrentMap<ServiceDateAndId, List<BlockLocationRecordKey>> _keysByBlockInstance = new ConcurrentHashMap<ServiceDateAndId, List<BlockLocationRecordKey>>();
+  private ConcurrentMap<BlockInstance, List<BlockLocationRecordKey>> _keysByBlockInstance = new ConcurrentHashMap<BlockInstance, List<BlockLocationRecordKey>>();
 
   /**
    * By default, we keep around 20 minutes of cache entries
@@ -90,24 +90,24 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
 
   @Override
   public List<BlockLocationRecordCollection> getRecordsForBlockInstance(
-      ServiceDateAndId blockInstance) {
+      BlockInstance blockInstance) {
 
     return getRecordsFromMap(_keysByBlockInstance, blockInstance);
   }
 
   @Override
-  public void addRecord(BlockLocationRecord record) {
+  public void addRecord(BlockInstance blockInstance, BlockLocationRecord record) {
 
     AgencyAndId vehicleId = record.getVehicleId();
-    ServiceDateAndId blockInstance = new ServiceDateAndId(
-        record.getServiceDate(), record.getBlockId());
 
-    BlockLocationRecordKey key = new BlockLocationRecordKey(record.getBlockId(), record.getServiceDate(), vehicleId);
+    BlockLocationRecordKey key = new BlockLocationRecordKey(blockInstance,
+        vehicleId);
 
     BlockLocationRecordCollection records = _recordsByKey.get(key);
 
     if (records == null) {
-      BlockLocationRecordCollection newRecords = BlockLocationRecordCollection.createFromRecords(Arrays.asList(record));
+      BlockLocationRecordCollection newRecords = BlockLocationRecordCollection.createFromRecords(
+          blockInstance, Arrays.asList(record));
       records = _recordsByKey.putIfAbsent(key, newRecords);
 
       // If this was a new record, add its key to the various indices
@@ -118,7 +118,7 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
     }
 
     if (records != null) {
-      records = records.addRecord(record,
+      records = records.addRecord(blockInstance, record,
           _blockLocationRecordCacheWindowSize * 1000);
       _recordsByKey.put(key, records);
     }
@@ -130,7 +130,8 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
     List<BlockLocationRecordKey> keysForVehicleId = _keysByVehicleId.remove(vehicleId);
 
     if (keysForVehicleId != null) {
-      List<BlockLocationRecordKey> keys = new ArrayList<BlockLocationRecordKey>(keysForVehicleId);
+      List<BlockLocationRecordKey> keys = new ArrayList<BlockLocationRecordKey>(
+          keysForVehicleId);
       for (BlockLocationRecordKey key : keys)
         removeRecordsForKey(key, true);
     }
@@ -170,7 +171,8 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
     return allRecords;
   }
 
-  private <K> void addKeyToMap(ConcurrentMap<K, List<BlockLocationRecordKey>> map, K subKey,
+  private <K> void addKeyToMap(
+      ConcurrentMap<K, List<BlockLocationRecordKey>> map, K subKey,
       BlockLocationRecordKey key) {
 
     while (true) {
@@ -184,12 +186,14 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
           return;
       }
 
-      List<BlockLocationRecordKey> origCopy = new ArrayList<BlockLocationRecordKey>(keys);
+      List<BlockLocationRecordKey> origCopy = new ArrayList<BlockLocationRecordKey>(
+          keys);
 
       if (origCopy.contains(key))
         return;
 
-      List<BlockLocationRecordKey> extendedCopy = new ArrayList<BlockLocationRecordKey>(origCopy);
+      List<BlockLocationRecordKey> extendedCopy = new ArrayList<BlockLocationRecordKey>(
+          origCopy);
       extendedCopy.add(key);
 
       if (map.replace(subKey, origCopy, extendedCopy))
@@ -197,20 +201,19 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
     }
   }
 
-  private void removeRecordsForKey(BlockLocationRecordKey key, boolean removeRecords) {
+  private void removeRecordsForKey(BlockLocationRecordKey key,
+      boolean removeRecords) {
 
     if (removeRecords)
       _recordsByKey.remove(key);
 
-    ServiceDateAndId blockInstance = new ServiceDateAndId(key.getServiceDate(),
-        key.getBlockId());
-
-    removeKeyFromMap(_keysByBlockInstance, key, blockInstance);
+    removeKeyFromMap(_keysByBlockInstance, key, key.getBlockInstance());
     removeKeyFromMap(_keysByVehicleId, key, key.getVehicleId());
   }
 
-  private <K> void removeKeyFromMap(ConcurrentMap<K, List<BlockLocationRecordKey>> map, BlockLocationRecordKey key,
-      K subKey) {
+  private <K> void removeKeyFromMap(
+      ConcurrentMap<K, List<BlockLocationRecordKey>> map,
+      BlockLocationRecordKey key, K subKey) {
 
     while (true) {
 
@@ -219,12 +222,14 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
       if (keys == null)
         return;
 
-      List<BlockLocationRecordKey> origCopy = new ArrayList<BlockLocationRecordKey>(keys);
+      List<BlockLocationRecordKey> origCopy = new ArrayList<BlockLocationRecordKey>(
+          keys);
 
       if (!origCopy.contains(key))
         return;
 
-      List<BlockLocationRecordKey> reducedCopy = new ArrayList<BlockLocationRecordKey>(origCopy);
+      List<BlockLocationRecordKey> reducedCopy = new ArrayList<BlockLocationRecordKey>(
+          origCopy);
       reducedCopy.remove(key);
 
       if (reducedCopy.isEmpty()) {

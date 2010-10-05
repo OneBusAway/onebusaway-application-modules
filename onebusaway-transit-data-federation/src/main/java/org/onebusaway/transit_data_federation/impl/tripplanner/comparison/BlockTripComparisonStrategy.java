@@ -66,7 +66,7 @@ public class BlockTripComparisonStrategy implements TripComparisonStrategy {
       if (state instanceof VehicleDepartureState) {
         VehicleDepartureState vds = (VehicleDepartureState) state;
         StopTimeInstanceProxy sti = vds.getStopTimeInstance();
-        AgencyAndId tripId = sti.getTrip().getId();
+        AgencyAndId tripId = sti.getTrip().getTrip().getId();
         tripIds.add(tripId);
       }
       stats = stats.getParent();

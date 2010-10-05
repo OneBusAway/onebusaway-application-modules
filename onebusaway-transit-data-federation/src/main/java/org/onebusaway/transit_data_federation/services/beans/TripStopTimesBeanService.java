@@ -1,10 +1,11 @@
 package org.onebusaway.transit_data_federation.services.beans;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
 /**
  * Service methods for accessing the list of stop times for a specified trip.
@@ -19,9 +20,10 @@ public interface TripStopTimesBeanService {
 
   /**
    * 
-   * @param tripId see {@link Trip#getId()}
+   * @param tripId
    * @return the list of stop times for the specified trip
    */
-  public TripStopTimesBean getStopTimesForTrip(AgencyAndId tripId);
+  public TripStopTimesBean getStopTimesForTrip(TripEntry trip);
 
+  public TripStopTimesBean getStopTimesForBlockTrip(BlockTripEntry tripEntry);
 }

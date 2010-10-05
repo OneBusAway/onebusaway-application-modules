@@ -18,25 +18,26 @@ import org.onebusaway.collections.Counter;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopCalendarDayBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopRouteDirectionScheduleBean;
 import org.onebusaway.transit_data.model.StopRouteScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopScheduleBeanService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.utility.text.NaturalStringOrder;
@@ -57,7 +58,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
   private TransitGraphDao _graph;
 
-  private CalendarService _calendarService;
+  private ExtendedCalendarService _calendarService;
 
   private RouteBeanService _routeBeanService;
 
@@ -74,7 +75,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
   }
 
   @Autowired
-  public void setCalendarService(CalendarService calendarService) {
+  public void setCalendarService(ExtendedCalendarService calendarService) {
     _calendarService = calendarService;
   }
 
@@ -94,24 +95,24 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     TimeZone timeZone = _agencyService.getTimeZoneForAgencyId(stopId.getAgencyId());
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
-    StopTimeIndex index = stopEntry.getStopTimes();
+    Set<ServiceIdActivation> serviceIds = new HashSet<ServiceIdActivation>();
+    for (BlockStopTimeIndex blockStopTimeIndex : stopEntry.getStopTimeIndices())
+      serviceIds.add(blockStopTimeIndex.getServiceIds());
 
-    Set<LocalizedServiceId> serviceIds = index.getServiceIds();
+    SortedMap<ServiceDate, Set<ServiceIdActivation>> serviceIdsByDate = getServiceIdsByDate(serviceIds);
 
-    SortedMap<ServiceDate, Set<AgencyAndId>> serviceIdsByDate = getServiceIdsByDate(serviceIds);
-
-    Counter<Set<AgencyAndId>> counts = new Counter<Set<AgencyAndId>>();
-    for (Set<AgencyAndId> ids : serviceIdsByDate.values())
+    Counter<Set<ServiceIdActivation>> counts = new Counter<Set<ServiceIdActivation>>();
+    for (Set<ServiceIdActivation> ids : serviceIdsByDate.values())
       counts.increment(ids);
 
     int total = counts.size();
-    Map<Set<AgencyAndId>, Integer> idsToGroup = new HashMap<Set<AgencyAndId>, Integer>();
-    for (Set<AgencyAndId> ids : counts.getSortedKeys())
+    Map<Set<ServiceIdActivation>, Integer> idsToGroup = new HashMap<Set<ServiceIdActivation>, Integer>();
+    for (Set<ServiceIdActivation> ids : counts.getSortedKeys())
       idsToGroup.put(ids, total--);
 
     List<StopCalendarDayBean> beans = new ArrayList<StopCalendarDayBean>(
         serviceIdsByDate.size());
-    for (Map.Entry<ServiceDate, Set<AgencyAndId>> entry : serviceIdsByDate.entrySet()) {
+    for (Map.Entry<ServiceDate, Set<ServiceIdActivation>> entry : serviceIdsByDate.entrySet()) {
       StopCalendarDayBean bean = new StopCalendarDayBean();
       ServiceDate serviceDate = entry.getKey();
       Date date = serviceDate.getAsDate(timeZone);
@@ -130,27 +131,24 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
       AgencyAndId stopId, ServiceDate date) {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
-    StopTimeIndex index = stopEntry.getStopTimes();
 
     Map<AgencyAndId, List<StopTimeInstanceProxy>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstanceProxy>>(
         new ArrayList<StopTimeInstanceProxy>());
 
-    Set<AgencyAndId> serviceIds = _calendarService.getServiceIdsOnDate(date);
-    Set<LocalizedServiceId> localizedServiceIds = new HashSet<LocalizedServiceId>();
-    for (LocalizedServiceId serviceId : index.getServiceIds()) {
-      if (serviceIds.contains(serviceId.getId()))
-        localizedServiceIds.add(serviceId);
-    }
+    for (BlockStopTimeIndex index : stopEntry.getStopTimeIndices()) {
 
-    for (LocalizedServiceId serviceId : localizedServiceIds) {
+      ServiceIdActivation serviceIds = index.getServiceIds();
 
-      Date serviceDate = date.getAsDate(serviceId.getTimeZone());
+      Set<ServiceDate> serviceDates = _calendarService.getServiceDatesForServiceIds(serviceIds);
+      if (!serviceDates.contains(date))
+        continue;
 
-      List<StopTimeEntry> stopTimes = index.getStopTimesForServiceIdSortedByDeparture(serviceId);
+      Date serviceDate = date.getAsDate(serviceIds.getTimeZone());
 
-      for (StopTimeEntry stopTime : stopTimes) {
+      for (BlockStopTimeEntry stopTime : index.getStopTimes()) {
 
-        TripEntry trip = stopTime.getTrip();
+        BlockTripEntry blockTrip = stopTime.getTrip();
+        TripEntry trip = blockTrip.getTrip();
         AgencyAndId routeCollectionId = trip.getRouteCollectionId();
 
         StopTimeInstanceProxy sti = new StopTimeInstanceProxy(stopTime,
@@ -178,10 +176,11 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
       for (StopTimeInstanceProxy sti : stopTimesForRoute) {
 
-        TripEntry trip = sti.getTrip();
+        BlockTripEntry blockTrip = sti.getTrip();
+        TripEntry trip = blockTrip.getTrip();
 
         AgencyAndId tripId = trip.getId();
-        AgencyAndId serviceId = trip.getServiceId();
+        AgencyAndId serviceId = trip.getServiceId().getId();
 
         StopTimeInstanceBean stiBean = new StopTimeInstanceBean();
         stiBean.setTripId(AgencyAndIdLibrary.convertToString(tripId));
@@ -224,18 +223,17 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
    * Private Methods
    ****/
 
-  private SortedMap<ServiceDate, Set<AgencyAndId>> getServiceIdsByDate(
-      Set<LocalizedServiceId> serviceIds) {
+  private SortedMap<ServiceDate, Set<ServiceIdActivation>> getServiceIdsByDate(
+      Set<ServiceIdActivation> allServiceIds) {
 
-    SortedMap<ServiceDate, Set<AgencyAndId>> serviceIdsByDate = new TreeMap<ServiceDate, Set<AgencyAndId>>();
+    SortedMap<ServiceDate, Set<ServiceIdActivation>> serviceIdsByDate = new TreeMap<ServiceDate, Set<ServiceIdActivation>>();
     serviceIdsByDate = FactoryMap.createSorted(serviceIdsByDate,
-        new HashSet<AgencyAndId>());
+        new HashSet<ServiceIdActivation>());
 
-    for (LocalizedServiceId serviceId : serviceIds) {
-      AgencyAndId id = serviceId.getId();
-      Set<ServiceDate> dates = _calendarService.getServiceDatesForServiceId(id);
+    for (ServiceIdActivation serviceIds : allServiceIds) {
+      Set<ServiceDate> dates = _calendarService.getServiceDatesForServiceIds(serviceIds);
       for (ServiceDate date : dates) {
-        serviceIdsByDate.get(date).add(id);
+        serviceIdsByDate.get(date).add(serviceIds);
       }
     }
     return serviceIdsByDate;

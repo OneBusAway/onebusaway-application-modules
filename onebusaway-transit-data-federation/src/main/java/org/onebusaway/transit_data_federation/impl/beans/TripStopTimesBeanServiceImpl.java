@@ -2,17 +2,16 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.TimeZone;
 
-import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.services.AgencyService;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
+import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
@@ -22,19 +21,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
-  private TransitGraphDao _graph;
-
   private TripBeanService _tripBeanService;
 
   private StopBeanService _stopBeanService;
 
   private AgencyService _agencyService;
 
-  @Autowired
-  public void setTransitGraph(TransitGraphDao graph) {
-    _graph = graph;
-  }
-  
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -51,16 +43,12 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
   }
 
   @Override
-  @Cacheable
-  public TripStopTimesBean getStopTimesForTrip(AgencyAndId tripId) {
+  public TripStopTimesBean getStopTimesForTrip(TripEntry trip) {
 
-    TripEntry trip = _graph.getTripEntryForId(tripId);
-
-    if (trip == null)
-      return null;
+    AgencyAndId tripId = trip.getId();
 
     TripStopTimesBean bean = new TripStopTimesBean();
-    
+
     TimeZone tz = _agencyService.getTimeZoneForAgencyId(tripId.getAgencyId());
     bean.setTimeZone(tz.getID());
 
@@ -74,20 +62,31 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       StopEntry stopEntry = stopTime.getStop();
       StopBean stopBean = _stopBeanService.getStopForId(stopEntry.getId());
       stBean.setStop(stopBean);
-      stBean.setDistanceAlongTrip(stopTime.getDistaceAlongBlock() - trip.getDistanceAlongBlock());
+      stBean.setDistanceAlongTrip(stopTime.getShapeDistTraveled());
       bean.addStopTime(stBean);
     }
 
-    if (trip.getPrevTrip() != null) {
-      TripBean previousTrip = _tripBeanService.getTripForId(trip.getPrevTrip().getId());
+    return bean;
+  }
+
+  @Override
+  public TripStopTimesBean getStopTimesForBlockTrip(BlockTripEntry blockTrip) {
+
+    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip());
+
+    if (blockTrip.getPreviousTrip() != null) {
+      BlockTripEntry previous = blockTrip.getPreviousTrip();
+      TripBean previousTrip = _tripBeanService.getTripForId(previous.getTrip().getId());
       bean.setPreviousTrip(previousTrip);
     }
 
-    if (trip.getNextTrip() != null) {
-      TripBean nextTrip = _tripBeanService.getTripForId(trip.getNextTrip().getId());
+    if (blockTrip.getNextTrip() != null) {
+      BlockTripEntry next = blockTrip.getNextTrip();
+      TripBean nextTrip = _tripBeanService.getTripForId(next.getTrip().getId());
       bean.setNextTrip(nextTrip);
     }
 
     return bean;
   }
+
 }

@@ -71,17 +71,8 @@ public class CacheableMethodKeyFactoryManager {
   }
 
   public CacheableMethodKeyFactory getCacheableMethodKeyFactoryForJoinPoint(
-      ProceedingJoinPoint pjp) {
-    List<Method> methods = getMatchingMethodsForJoinPoint(pjp);
-    if (methods.size() == 1) {
-      return getCacheableMethodKeyFactoryForMethod(methods.get(0));
-    } else if (methods.size() == 0) {
-      throw new IllegalArgumentException("method not found: pjp="
-          + pjp.getSignature());
-    } else {
-      throw new IllegalArgumentException("multiple methods found: pjp="
-          + pjp.getSignature());
-    }
+      ProceedingJoinPoint pjp, Method method) {
+    return getCacheableMethodKeyFactoryForMethod(method);
   }
 
   public CacheableMethodKeyFactory getCacheableMethodKeyFactoryForMethod(
@@ -133,6 +124,19 @@ public class CacheableMethodKeyFactoryManager {
     }
 
     return new DefaultCacheableKeyFactory(keyFactories);
+  }
+
+  public Method getMatchingMethodForJoinPoint(ProceedingJoinPoint pjp) {
+    List<Method> methods = getMatchingMethodsForJoinPoint(pjp);
+    if (methods.size() == 1) {
+      return methods.get(0);
+    } else if (methods.size() == 0) {
+      throw new IllegalArgumentException("method not found: pjp="
+          + pjp.getSignature());
+    } else {
+      throw new IllegalArgumentException("multiple methods found: pjp="
+          + pjp.getSignature());
+    }
   }
 
   public List<Method> getMatchingMethodsForJoinPoint(ProceedingJoinPoint pjp) {

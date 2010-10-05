@@ -92,8 +92,8 @@ public class DistanceAlongShapeLibrary {
       PointAndIndex second = possibleAssignments.get(1).get(0);
       if (first.distanceAlongShape > second.distanceAlongShape) {
         StopTimeEntryImpl firstStopTime = stopTimes.get(0);
-        _log.warn("snapping first stop of trip="
-            + firstStopTime.getTrip().getId() + " to start of shape");
+        _log.warn("snapping first stop time id="
+            + firstStopTime.getId() + " to start of shape");
         possibleAssignments.get(0).add(
             new PointAndIndex(projectedShapePoints.get(0), 0, 0.0));
       }
@@ -123,8 +123,8 @@ public class DistanceAlongShapeLibrary {
         if (i == possibleAssignments.size() - 1) {
 
           StopTimeEntryImpl lastStopTime = stopTimes.get(i);
-          _log.warn("snapping last stop of trip="
-              + lastStopTime.getTrip().getId() + " to end of shape");
+          _log.warn("snapping last stop time id="
+              + lastStopTime.getId() + " to end of shape");
           int lastShapePointIndex = projectedShapePoints.size() - 1;
           XYPoint lastShapePoint = projectedShapePoints.get(lastShapePointIndex);
           XYPoint stopLocation = projection.forward(lastStopTime.getStop().getStopLocation());

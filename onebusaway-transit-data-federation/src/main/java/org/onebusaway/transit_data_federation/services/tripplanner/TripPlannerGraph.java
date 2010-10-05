@@ -20,6 +20,4 @@ public interface TripPlannerGraph {
   public TripEntry getTripEntryForId(AgencyAndId id);
   
   public StopEntry getStopEntryForId(AgencyAndId id);
-  
-  public List<TripEntry> getTripsForBlockId(AgencyAndId blockId);
 }
