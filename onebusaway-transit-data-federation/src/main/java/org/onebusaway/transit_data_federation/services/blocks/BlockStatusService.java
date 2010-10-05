@@ -34,7 +34,7 @@ public interface BlockStatusService {
    * @return the status info for blocks operating on the specified
    *         service date and time
    */
-  //public BlockLocation getBlocks(AgencyAndId blockId, long serviceDate, long time);
+  public List<BlockLocation> getBlocks(AgencyAndId blockId, long serviceDate, long time);
 
   /**
    * 

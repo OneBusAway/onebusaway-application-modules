@@ -90,7 +90,7 @@ public class TripAction extends ActionSupport {
     query.setTripId(_id);
     query.setServiceDate(_serviceDate.getTime());
     query.setTime(_time.getTime());
-    _tripDetails = _service.getSpecificTripDetails(query);
+    _tripDetails = _service.getSingleTripDetails(query);
 
     if (_tripDetails == null)
       throw new NoSuchTripServiceException(_id);

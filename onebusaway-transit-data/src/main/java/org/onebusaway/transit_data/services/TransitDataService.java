@@ -134,7 +134,18 @@ public interface TransitDataService extends FederatedService {
    * @throws ServiceException
    */
   @FederatedByEntityIdMethod(propertyExpression = "tripId")
-  public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query)
+  public TripDetailsBean getSingleTripDetails(TripDetailsQueryBean query)
+      throws ServiceException;
+
+  /**
+   * @param query details about which trips to query, and what to include in the
+   *          response
+   * @return trip details for trips matching the specified query, or empty if
+   *         not found
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod(propertyExpression = "tripId")
+  public ListBean<TripDetailsBean> getTripDetails(TripDetailsQueryBean query)
       throws ServiceException;
 
   /**
@@ -151,13 +162,14 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdMethod(propertyExpression = "routeId")
   public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query);
-  
+
   /**
    * @param query determines the time and location of the query
    * @return trips details for the trips matching the specified bounds query
    */
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
-  public ListBean<TripDetailsBean> getTripsForAgency(TripsForAgencyQueryBean query);
+  public ListBean<TripDetailsBean> getTripsForAgency(
+      TripsForAgencyQueryBean query);
 
   /**
    * 

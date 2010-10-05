@@ -11,6 +11,7 @@ import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
@@ -75,23 +76,43 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
    ****/
 
   @Override
-  public TripDetailsBean getTripStatusForTripId(AgencyAndId tripId,
-      long serviceDate, long time, TripDetailsInclusionBean inclusion) {
+  public TripDetailsBean getTripForId(TripDetailsQueryBean query) {
+
+    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
+    long serviceDate = query.getServiceDate();
+    long time = query.getTime();
 
     TripEntry tripEntry = _transitGraphDao.getTripEntryForId(tripId);
     if (tripEntry == null)
       return null;
 
-    BlockLocation blockLocation = _blockStatusService.getBlock(
+    BlockLocation location = _blockStatusService.getBlock(
         tripEntry.getBlock().getId(), serviceDate, time);
 
-    return getTripEntryAndBlockLocationAsTripDetails(tripEntry, blockLocation,
-        inclusion);
+    return getTripEntryAndBlockLocationAsTripDetails(tripEntry, location,
+        query.getInclusion());
   }
 
   @Override
-  public TripDetailsBean getTripStatusForVehicleAndTime(AgencyAndId vehicleId,
-      long time, TripDetailsInclusionBean inclusion) {
+  public ListBean<TripDetailsBean> getTripsForId(TripDetailsQueryBean query) {
+
+    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
+    long serviceDate = query.getServiceDate();
+    long time = query.getTime();
+
+    TripEntry tripEntry = _transitGraphDao.getTripEntryForId(tripId);
+    if (tripEntry == null)
+      return new ListBean<TripDetailsBean>();
+
+    List<BlockLocation> locations = _blockStatusService.getBlocks(
+        tripEntry.getBlock().getId(), serviceDate, time);
+
+    return getBlockLocationsAsTripDetails(locations, query.getInclusion());
+  }
+
+  @Override
+  public TripDetailsBean getTripForVehicle(AgencyAndId vehicleId, long time,
+      TripDetailsInclusionBean inclusion) {
 
     BlockLocation blockLocation = _blockStatusService.getBlockForVehicle(
         vehicleId, time);
@@ -99,7 +120,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   }
 
   @Override
-  public ListBean<TripDetailsBean> getActiveTripForBounds(
+  public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
     List<BlockLocation> locations = _blockStatusService.getBlocksForBounds(
         query.getBounds(), query.getTime());

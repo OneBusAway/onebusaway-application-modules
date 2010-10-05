@@ -155,7 +155,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
       query.setTripId(trip.getId());
       query.setServiceDate(adbean.getServiceDate());
       query.setTime(now.getTime().getTime());
-      TripDetailsBean specificTripDetails = _transitDataService.getSpecificTripDetails(query);
+      TripDetailsBean specificTripDetails = _transitDataService.getSingleTripDetails(query);
 
 
       MonitoredStopVisit MonitoredStopVisit = new MonitoredStopVisit();

@@ -1,6 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
@@ -27,6 +29,8 @@ public class BlockStatusServiceImpl implements BlockStatusService {
    * Catch early blocks up to 10 minutes
    */
   private static final long TIME_AFTER_WINDOW = 10 * 60 * 1000;
+
+  private static final BlockLocationVehicleIdComparator _vehicleIdComparator = new BlockLocationVehicleIdComparator();
 
   private BlockCalendarService _blockCalendarService;
 
@@ -57,9 +61,34 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   @Override
   public BlockLocation getBlock(AgencyAndId blockId, long serviceDate, long time) {
 
-    BlockInstance blockInstance = _blockCalendarService.getActiveBlock(blockId,
-        serviceDate, time);
-    return getLocation(blockInstance, time);
+    List<BlockLocation> locations = getBlocks(blockId, serviceDate, time);
+
+    if (locations.isEmpty())
+      return null;
+    else if (locations.size() == 1)
+      return locations.get(0);
+
+    Collections.sort(locations, _vehicleIdComparator);
+
+    return locations.get(0);
+  }
+
+  @Override
+  public List<BlockLocation> getBlocks(AgencyAndId blockId, long serviceDate,
+      long time) {
+
+    List<BlockInstance> blockInstances = _blockCalendarService.getActiveBlocks(
+        blockId, time, time);
+
+    List<BlockLocation> locations = new ArrayList<BlockLocation>();
+    for (BlockInstance blockInstance : blockInstances) {
+      long blockServiceDate = blockInstance.getServiceDate();
+      // How should we handle this check?
+      if (blockServiceDate != serviceDate)
+        continue;
+      computeLocations(blockInstance, time, locations);
+    }
+    return locations;
   }
 
   @Override
@@ -113,17 +142,38 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   private List<BlockLocation> getAsLocations(Iterable<BlockInstance> instances,
       long time) {
     List<BlockLocation> locations = new ArrayList<BlockLocation>();
-    for (BlockInstance instance : instances) {
-      BlockLocation location = getLocation(instance, time);
-      if (location != null)
-        locations.add(location);
-    }
+    for (BlockInstance instance : instances)
+      computeLocations(instance, time, locations);
     return locations;
   }
 
-  private BlockLocation getLocation(BlockInstance instance, long time) {
+  private void computeLocations(BlockInstance instance, long time,
+      List<BlockLocation> results) {
     if (instance == null)
-      return null;
-    return _blockLocationService.getLocationForBlockInstance(instance, time);
+      return;
+    results.addAll(_blockLocationService.getLocationsForBlockInstance(instance,
+        time));
+  }
+
+  /**
+   * The block location with the first vehicle id should come first. If no
+   * vehicle id is set, push it to the back.
+   * 
+   * @author bdferris
+   * 
+   */
+  private static class BlockLocationVehicleIdComparator implements
+      Comparator<BlockLocation> {
+
+    @Override
+    public int compare(BlockLocation o1, BlockLocation o2) {
+      AgencyAndId v1 = o1.getVehicleId();
+      AgencyAndId v2 = o2.getVehicleId();
+      if (v1 == null)
+        return v2 == null ? 0 : 1;
+      if (v2 == null)
+        return -1;
+      return v1.compareTo(v2);
+    }
   }
 }

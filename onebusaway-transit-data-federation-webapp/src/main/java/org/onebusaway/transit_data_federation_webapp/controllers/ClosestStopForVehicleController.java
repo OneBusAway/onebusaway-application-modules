@@ -34,7 +34,7 @@ public class ClosestStopForVehicleController {
     inclusion.setIncludeTripSchedule(false);
     inclusion.setIncludeTripStatus(true);
     
-    TripDetailsBean details = _service.getTripStatusForVehicleAndTime(vid, time,inclusion);
+    TripDetailsBean details = _service.getTripForVehicle(vid, time,inclusion);
     
     if( "html".equals(format))
       return new ModelAndView("closest-stop-for-vehicle-html.jspx", "stopTime", details);

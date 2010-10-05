@@ -3,8 +3,6 @@ package org.onebusaway.transit_data_federation.services.blocks;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 
 /**
  * Methods for determining which {@link BlockInstance} instances are active for
@@ -22,17 +20,13 @@ public interface BlockCalendarService {
    * Returns the {@link BlockInstance} for the block active on the specified
    * service date. Note that this function assumes an EXACT service date match.
    * If you aren't quite sure what your service date is, try the
-   * {@link #getActiveBlock(AgencyAndId, long, long)} or
-   * {@link #getActiveBlocks(AgencyAndId, long, long)} methods.
+   * {@link #getActiveBlocks(AgencyAndId, long, long)} method.
    * 
    * @param blockId
    * @param serviceDate
    * @return the block instance, or null if not found
    */
   public BlockInstance getBlockInstance(AgencyAndId blockId, long serviceDate);
-
-  public BlockInstance getActiveBlock(AgencyAndId blockId, long serviceDate,
-      long time);
 
   public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
       long timeFrom, long timeTo);

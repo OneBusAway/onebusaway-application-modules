@@ -117,7 +117,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       }
       TripDetailsQueryBean query = new TripDetailsQueryBean();
       query.setTripId(tripId);
-      TripDetailsBean tripDetails = _transitDataService.getSpecificTripDetails(query);
+      TripDetailsBean tripDetails = _transitDataService.getSingleTripDetails(query);
       if (directionId != null
           && tripDetails.getTrip().getDirectionId().equals(directionId)) {
         return singleVehicleTrip(timeZone, onwardCalls, tripDetails);

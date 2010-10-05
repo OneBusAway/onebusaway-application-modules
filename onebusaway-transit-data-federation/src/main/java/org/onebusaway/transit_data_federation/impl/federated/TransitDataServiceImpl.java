@@ -39,7 +39,6 @@ import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
@@ -238,22 +237,21 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query)
+  public TripDetailsBean getSingleTripDetails(TripDetailsQueryBean query)
       throws ServiceException {
+    return _tripDetailsBeanService.getTripForId(query);
+  }
 
-    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
-    long serviceDate = query.getServiceDate();
-    long time = query.getTime();
-    TripDetailsInclusionBean inclusion = query.getInclusion();
-
-    return _tripDetailsBeanService.getTripStatusForTripId(tripId, serviceDate,
-        time, inclusion);
+  @Override
+  public ListBean<TripDetailsBean> getTripDetails(TripDetailsQueryBean query)
+      throws ServiceException {
+    return _tripDetailsBeanService.getTripsForId(query);
   }
 
   @Override
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
-    return _tripDetailsBeanService.getActiveTripForBounds(query);
+    return _tripDetailsBeanService.getTripsForBounds(query);
   }
 
   @Override
@@ -271,7 +269,7 @@ class TransitDataServiceImpl implements TransitDataService {
   public TripDetailsBean getTripDetailsForVehicleAndTime(
       TripForVehicleQueryBean query) {
     AgencyAndId id = convertAgencyAndId(query.getVehicleId());
-    return _tripDetailsBeanService.getTripStatusForVehicleAndTime(id,
+    return _tripDetailsBeanService.getTripForVehicle(id,
         query.getTime().getTime(), query.getInclusion());
   }
 

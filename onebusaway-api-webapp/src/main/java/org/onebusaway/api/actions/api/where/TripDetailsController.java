@@ -91,7 +91,7 @@ public class TripDetailsController extends ApiActionSupport {
     inclusion.setIncludeTripSchedule(_includeSchedule);
     inclusion.setIncludeTripStatus(_includeStatus);
 
-    TripDetailsBean trip = _service.getSpecificTripDetails(query);
+    TripDetailsBean trip = _service.getSingleTripDetails(query);
 
     if (trip == null)
       return setResourceNotFoundResponse();

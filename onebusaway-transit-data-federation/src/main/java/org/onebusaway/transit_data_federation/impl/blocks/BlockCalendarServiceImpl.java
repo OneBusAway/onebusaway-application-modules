@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.onebusaway.collections.Min;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
@@ -52,7 +51,7 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
    * {@link BlockCalendarService} Interface
    ****/
 
-  @Cacheable(isValueSerializable=false)
+  @Cacheable(isValueSerializable = false)
   @Override
   public BlockInstance getBlockInstance(AgencyAndId blockId, long serviceDate) {
 
@@ -79,28 +78,6 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     }
 
     return null;
-  }
-
-  @Override
-  public BlockInstance getActiveBlock(AgencyAndId blockId, long serviceDate,
-      long time) {
-
-    List<BlockInstance> blockInstances = getActiveBlocks(blockId, time, time);
-
-    if (blockInstances.isEmpty())
-      return null;
-    else if (blockInstances.size() == 1)
-      return blockInstances.get(0);
-
-    Min<BlockInstance> m = new Min<BlockInstance>();
-
-    for (BlockInstance blockInstance : blockInstances) {
-      long someServiceDate = blockInstance.getServiceDate();
-      double delta = Math.abs(someServiceDate - serviceDate);
-      m.add(delta, blockInstance);
-    }
-
-    return m.getMinElement();
   }
 
   @Override
