@@ -83,7 +83,8 @@ public class TripEntriesFactory {
               + tripsForRoute.size());
         tripIndex++;
         TripEntryImpl tripEntry = processTrip(graph, trip);
-        tripEntry.setRouteCollectionId(unique(routeCollection.getId()));
+        if( tripEntry != null)
+          tripEntry.setRouteCollectionId(unique(routeCollection.getId()));
       }
 
       // Clear the shape cache between routes, since there is less likelihood of
@@ -97,6 +98,11 @@ public class TripEntriesFactory {
   private TripEntryImpl processTrip(TripPlannerGraphImpl graph, Trip trip) {
 
     List<StopTime> stopTimes = _gtfsDao.getStopTimesForTrip(trip);
+    
+    // A trip without stop times is a trip we don't care about
+    if( stopTimes.isEmpty())
+      return null;
+      
     ShapePoints shapePoints = getShapePoints(trip);
 
     List<StopTimeEntryImpl> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
