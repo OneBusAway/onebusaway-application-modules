@@ -103,7 +103,7 @@ public class BlockLocationRecordCacheImplTest {
   }
 
   @Test
-  public void testClearCache() {
+  public void testClearCache() throws InterruptedException {
 
     long serviceDate = System.currentTimeMillis();
 
@@ -124,14 +124,24 @@ public class BlockLocationRecordCacheImplTest {
 
     cache.addRecord(instanceA,
         record(20, "blockA", serviceDate, "vehicleA", 10.0));
+    
+    Thread.sleep(100);
+    
     cache.addRecord(instanceB,
         record(30, "blockB", serviceDate, "vehicleB", 20.0));
+    
+    Thread.sleep(100);
+    
     cache.addRecord(instanceA,
         record(40, "blockA", serviceDate, "vehicleC", 20.0));
+    
+    Thread.sleep(100);
+    
     cache.addRecord(instanceB,
         record(50, "blockB", serviceDate, "vehicleD", 20.0));
-
-    cache.clearStaleRecords(35);
+    
+    
+    cache.clearStaleRecords(System.currentTimeMillis()-150);
 
     List<BlockLocationRecordCollection> records = cache.getRecordsForVehicleId(aid("vehicleA"));
     assertEquals(0, records.size());
