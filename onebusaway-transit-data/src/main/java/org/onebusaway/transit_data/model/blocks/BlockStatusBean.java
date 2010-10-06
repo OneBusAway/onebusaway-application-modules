@@ -224,4 +224,14 @@ public final class BlockStatusBean implements Serializable {
   public void setVehicleId(String vehicleId) {
     this.vehicleId = vehicleId;
   }
+  
+  /****
+   * 
+   ****/
+  
+  public double computeBestDistanceAlongBlock() {
+    if( isDistanceAlongBlockSet())
+      return getDistanceAlongBlock();
+    return getScheduledDistanceAlongBlock();
+  }
 }

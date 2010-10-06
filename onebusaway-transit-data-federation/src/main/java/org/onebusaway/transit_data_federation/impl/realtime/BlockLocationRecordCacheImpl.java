@@ -18,6 +18,8 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationRecordCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,6 +32,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
+
+  private static Logger _log = LoggerFactory.getLogger(BlockLocationRecordCacheImpl.class);
 
   private ConcurrentMap<BlockLocationRecordKey, BlockLocationRecordCollection> _recordsByKey = new ConcurrentHashMap<BlockLocationRecordKey, BlockLocationRecordCollection>();
 
@@ -143,7 +147,10 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
       Entry<BlockLocationRecordKey, BlockLocationRecordCollection> entry = it.next();
       BlockLocationRecordKey key = entry.getKey();
       BlockLocationRecordCollection value = entry.getValue();
-      if (value.getToTime() < time) {
+      if (value.getMeasuredLastUpdateTime() < time) {
+        if (_log.isDebugEnabled())
+          _log.debug("pruning block location record cache for vehicle="
+              + key.getVehicleId() + " block=" + key.getBlockInstance());
         it.remove();
         removeRecordsForKey(key, false);
       }

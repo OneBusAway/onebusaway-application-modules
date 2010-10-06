@@ -32,8 +32,6 @@ import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
@@ -46,7 +44,6 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private ArrivalsAndDeparturesBeanServiceImpl _service;
   private BlockLocationService _blockLocationService;
   private NarrativeService _narrativeService;
-  private ScheduledBlockLocationService _scheduledBlockLocationService;
   private StopTimeService _stopTimeService;
   private TripBeanService _tripBeanService;
 
@@ -60,9 +57,6 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     _narrativeService = Mockito.mock(NarrativeService.class);
     _service.setNarrativeService(_narrativeService);
-
-    _scheduledBlockLocationService = Mockito.mock(ScheduledBlockLocationService.class);
-    _service.setScheduledBlockLocationService(_scheduledBlockLocationService);
 
     _stopTimeService = Mockito.mock(StopTimeService.class);
     _service.setStopTimeService(_stopTimeService);
@@ -160,17 +154,22 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     /****
      * 
      ****/
+    
+    BlockInstance blockInstanceB = new BlockInstance(blockConfigB, serviceDate);
 
-    ScheduledBlockLocation sbl = new ScheduledBlockLocation();
-    sbl.setActiveTrip(bstAB.getTrip());
-    sbl.setClosestStop(bstBA);
-    sbl.setDistanceAlongBlock(400);
-    sbl.setNextStop(bstBA);
-    sbl.setScheduledTime(time(16, 30));
+    BlockLocation blockLocationB = new BlockLocation();
+    blockLocationB.setActiveTrip(bstBA.getTrip());
+    blockLocationB.setBlockInstance(blockInstanceA);
+    blockLocationB.setClosestStop(bstBA);
+    blockLocationB.setDistanceAlongBlock(400);
+    blockLocationB.setInService(true);
+    blockLocationB.setNextStop(bstAA);
+    blockLocationB.setPredicted(false);
+    blockLocationB.setScheduledDistanceAlongBlock(400);
 
     Mockito.when(
-        _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
-            blockConfigB.getStopTimes(), time(16, 30))).thenReturn(sbl);
+        _blockLocationService.getLocationsForBlockInstance(blockInstanceB, t)).thenReturn(
+        Arrays.asList(blockLocationB));
 
     /****
      * 

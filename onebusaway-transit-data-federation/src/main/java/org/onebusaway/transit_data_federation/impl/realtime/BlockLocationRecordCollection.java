@@ -31,6 +31,14 @@ public final class BlockLocationRecordCollection implements Serializable {
   private final long toTime;
 
   /**
+   * When we are running in simulator mode, we might be simulating a trip that
+   * occurred in the past, which makes pruning records based on the currnt time
+   * tricky. To deal with this, we record the measured time of the last updaate
+   * according to our local clock, as opposed to whatever the record indicated.
+   */
+  private final long measuredLastUpdateTime;
+
+  /**
    * Schedule deviations at particular points in time. Key = unix time ms and
    * Value = seconds.
    */
@@ -65,6 +73,7 @@ public final class BlockLocationRecordCollection implements Serializable {
     this.scheduleDeviationsByScheduleTime = scheduleDeviationsByScheduleTime;
     this.distancesAlongBlock = distancesAlongBlock;
     this.locations = locations;
+    this.measuredLastUpdateTime = System.currentTimeMillis();
   }
 
   public BlockLocationRecordCollection(long fromTime, long toTime) {
@@ -80,8 +89,8 @@ public final class BlockLocationRecordCollection implements Serializable {
    * @param records
    * @return a collection instance from the specified records
    */
-  public static BlockLocationRecordCollection createFromRecords(BlockInstance blockInstance,
-      List<BlockLocationRecord> records) {
+  public static BlockLocationRecordCollection createFromRecords(
+      BlockInstance blockInstance, List<BlockLocationRecord> records) {
 
     if (records.isEmpty())
       return null;
@@ -92,7 +101,7 @@ public final class BlockLocationRecordCollection implements Serializable {
     SortedMap<Integer, Double> scheduleDeviationsByScheduleTime = new TreeMap<Integer, Double>();
     SortedMap<Long, Double> distancesAlongBlock = new TreeMap<Long, Double>();
     SortedMap<Long, CoordinatePoint> locations = new TreeMap<Long, CoordinatePoint>();
-    
+
     AgencyAndId vehicleId = null;
 
     for (BlockLocationRecord record : records) {
@@ -137,6 +146,10 @@ public final class BlockLocationRecordCollection implements Serializable {
     return toTime;
   }
 
+  public long getMeasuredLastUpdateTime() {
+    return measuredLastUpdateTime;
+  }
+  
   public boolean hasScheduleDeviations() {
     return !scheduleDeviationsByTime.isEmpty();
   }

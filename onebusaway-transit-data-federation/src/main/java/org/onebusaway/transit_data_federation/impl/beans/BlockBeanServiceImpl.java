@@ -5,10 +5,12 @@ import java.util.List;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.BlockBeanService;
@@ -82,6 +84,18 @@ public class BlockBeanServiceImpl implements BlockBeanService {
       BlockConfigurationEntry blockConfiguration) {
 
     BlockConfigurationBean bean = new BlockConfigurationBean();
+    ServiceIdActivation serviceIds = blockConfiguration.getServiceIds();
+    
+    List<String> activeServiceIds = new ArrayList<String>();
+    for( LocalizedServiceId lsid : serviceIds.getActiveServiceIds() )
+      activeServiceIds.add(AgencyAndIdLibrary.convertToString(lsid.getId()));
+    bean.setActiveServiceIds(activeServiceIds);
+    
+    List<String> inactiveServiceIds = new ArrayList<String>();
+    for( LocalizedServiceId lsid : serviceIds.getInactiveServiceIds() )
+      inactiveServiceIds.add(AgencyAndIdLibrary.convertToString(lsid.getId()));
+    bean.setInactiveServiceIds(inactiveServiceIds);
+    
     List<BlockTripBean> tripBeans = new ArrayList<BlockTripBean>();
     for (BlockTripEntry blockTrip : blockConfiguration.getTrips())
       tripBeans.add(getBlockTripAsBean(blockTrip));

@@ -19,8 +19,6 @@ import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
@@ -63,8 +61,6 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   private BlockLocationService _blockLocationService;
 
-  private ScheduledBlockLocationService _scheduledBlockLocationService;
-
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
     _stopTimeService = stopTimeService;
@@ -83,12 +79,6 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   @Autowired
   public void setBlockLocationService(BlockLocationService blockLocationService) {
     _blockLocationService = blockLocationService;
-  }
-
-  @Autowired
-  public void setScheduledBlockLocationService(
-      ScheduledBlockLocationService scheduledBlockLocationService) {
-    _scheduledBlockLocationService = scheduledBlockLocationService;
   }
 
   private AtomicInteger _stopTimesTotal = new AtomicInteger();
@@ -136,20 +126,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
       for (StopTimeInstanceProxy sti : stisForBlock) {
 
-        if (locations == null || locations.isEmpty()) {
-
+        for (BlockLocation location : locations) {
           ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(sti);
-          applyScheduledBlockLocationToBean(sti, time.getTime(), bean);
+          applyBlockLocationToBean(sti, time.getTime(), bean, location);
           beans.add(bean);
-
-        } else {
-
-          for (BlockLocation location : locations) {
-            ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(sti);
-            applyRealtimeBlockLocationToBean(sti, time.getTime(), bean,
-                location);
-            beans.add(bean);
-          }
         }
       }
     }
@@ -229,81 +209,54 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     return pab;
   }
 
-  private void applyScheduledBlockLocationToBean(StopTimeInstanceProxy sti,
-      long time, ArrivalAndDepartureBean bean) {
+  private void applyBlockLocationToBean(StopTimeInstanceProxy sti,
+      long targetTime, ArrivalAndDepartureBean bean, BlockLocation blockLocation) {
 
-    BlockTripEntry trip = sti.getTrip();
     BlockStopTimeEntry destinationStopTime = sti.getStopTime();
 
-    BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
-    int effectiveScheduleTime = (int) ((time - sti.getServiceDate()) / 1000);
-    ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
-        blockConfig.getStopTimes(), effectiveScheduleTime);
+    if (blockLocation.hasScheduleDeviation()) {
 
-    if (location != null) {
+      int scheduleDeviation = (int) blockLocation.getScheduleDeviation();
+      int effectiveScheduleTime = (int) (((targetTime - sti.getServiceDate()) / 1000) - scheduleDeviation);
 
-      bean.setDistanceFromStop(destinationStopTime.getDistaceAlongBlock()
-          - location.getDistanceAlongBlock());
+      int arrivalDeviation = calculateArrivalDeviation(
+          blockLocation.getNextStop(), destinationStopTime,
+          effectiveScheduleTime, scheduleDeviation);
+      int departureDeviation = calculateDepartureDeviation(
+          blockLocation.getNextStop(), destinationStopTime,
+          effectiveScheduleTime, scheduleDeviation);
 
-      if (location.getNextStop() != null) {
-        BlockStopTimeEntry nextStopTime = location.getNextStop();
-        bean.setNumberOfStopsAway(destinationStopTime.getBlockSequence()
-            - nextStopTime.getBlockSequence());
-      }
+      bean.setPredictedArrivalTime(sti.getArrivalTime() + arrivalDeviation
+          * 1000);
+
+      bean.setPredictedDepartureTime(sti.getDepartureTime()
+          + departureDeviation * 1000);
     }
-  }
 
-  private void applyRealtimeBlockLocationToBean(StopTimeInstanceProxy sti,
-      long targetTime, ArrivalAndDepartureBean bean, BlockLocation blockLocation) {
-    /****
-     * Real-Time Info
-     ****/
+    bean.setPredicted(blockLocation.isPredicted());
 
-    if (blockLocation != null) {
-
-      BlockStopTimeEntry destinationStopTime = sti.getStopTime();
-
-      if (blockLocation.hasScheduleDeviation()) {
-
-        int scheduleDeviation = (int) blockLocation.getScheduleDeviation();
-        int effectiveScheduleTime = (int) (((targetTime - sti.getServiceDate()) / 1000) - scheduleDeviation);
-
-        int arrivalDeviation = calculateArrivalDeviation(
-            blockLocation.getNextStop(), destinationStopTime,
-            effectiveScheduleTime, scheduleDeviation);
-        int departureDeviation = calculateDepartureDeviation(
-            blockLocation.getNextStop(), destinationStopTime,
-            effectiveScheduleTime, scheduleDeviation);
-
-        bean.setPredictedArrivalTime(sti.getArrivalTime() + arrivalDeviation
-            * 1000);
-
-        bean.setPredictedDepartureTime(sti.getDepartureTime()
-            + departureDeviation * 1000);
-      }
-
-      bean.setPredicted(blockLocation.isPredicted());
-
-      // Distance from stop
-      if (blockLocation.hasDistanceAlongBlock()) {
-        double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
-            - blockLocation.getDistanceAlongBlock();
-        bean.setDistanceFromStop(distanceFromStop);
-      }
-
-      // Number of stops away
-      if (blockLocation.getNextStop() != null) {
-        BlockStopTimeEntry nextStopTime = blockLocation.getNextStop();
-        bean.setNumberOfStopsAway(destinationStopTime.getBlockSequence()
-            - nextStopTime.getBlockSequence());
-      }
-
-      if (blockLocation.getLastUpdateTime() > 0)
-        bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
-
-      if (blockLocation.getVehicleId() != null)
-        bean.setVehicleId(AgencyAndIdLibrary.convertToString(blockLocation.getVehicleId()));
+    // Distance from stop
+    if (blockLocation.hasDistanceAlongBlock()) {
+      double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
+          - blockLocation.getDistanceAlongBlock();
+      bean.setDistanceFromStop(distanceFromStop);
     }
+    else {
+      bean.setDistanceFromStop(blockLocation.getScheduledDistanceAlongBlock());
+    }
+
+    // Number of stops away
+    if (blockLocation.getNextStop() != null) {
+      BlockStopTimeEntry nextStopTime = blockLocation.getNextStop();
+      bean.setNumberOfStopsAway(destinationStopTime.getBlockSequence()
+          - nextStopTime.getBlockSequence());
+    }
+
+    if (blockLocation.getLastUpdateTime() > 0)
+      bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
+
+    if (blockLocation.getVehicleId() != null)
+      bean.setVehicleId(AgencyAndIdLibrary.convertToString(blockLocation.getVehicleId()));
   }
 
   private boolean isArrivalAndDepartureBeanInRange(
