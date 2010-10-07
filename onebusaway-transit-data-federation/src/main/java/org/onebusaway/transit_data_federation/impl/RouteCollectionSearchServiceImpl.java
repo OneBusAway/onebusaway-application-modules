@@ -74,13 +74,13 @@ public class RouteCollectionSearchServiceImpl implements
     for (ScoreDoc sd : top.scoreDocs) {
       Document document = _searcher.doc(sd.doc);
       
-      // Result must have a minimum score to qualify
-      if( sd.score < minScoreToKeep)
-        continue;
-      
       String agencyId = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_AGENCY_ID);
       String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
       AgencyAndId id = new AgencyAndId(agencyId, routeShortName);
+      
+      // Result must have a minimum score to qualify
+      if( sd.score < minScoreToKeep && ! routeShortName.equals(value))
+        continue;
       
       // Keep the best score for a particular id
       Float score = topScores.get(id);

@@ -240,7 +240,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (BlockLocationRecordCollection collection : records) {
       BlockLocation location = getBlockLocation(blockInstance, collection,
           targetTime);
-      if (location != null)
+      if (location != null && location.isInService())
         locations.add(location);
     }
 
