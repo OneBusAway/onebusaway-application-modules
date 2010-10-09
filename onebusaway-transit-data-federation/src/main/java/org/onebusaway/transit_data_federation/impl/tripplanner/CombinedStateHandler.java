@@ -27,7 +27,7 @@ import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
@@ -218,7 +218,7 @@ public class CombinedStateHandler {
 
     StopEntry stopEntry = state.getStop();
 
-    List<StopTimeInstanceProxy> departures = _stopTimeService.getNextStopTimeDeparture(
+    List<StopTimeInstance> departures = _stopTimeService.getNextStopTimeDeparture(
         stopEntry, state.getCurrentTime());
 
     if (departures.isEmpty()) {
@@ -227,7 +227,7 @@ public class CombinedStateHandler {
     }
 
     long nextTime = -1;
-    for (StopTimeInstanceProxy sti : departures) {
+    for (StopTimeInstance sti : departures) {
       VehicleDepartureState next = new VehicleDepartureState(sti);
       if (nextTime == -1 || next.getCurrentTime() > nextTime)
         nextTime = next.getCurrentTime();
@@ -242,7 +242,7 @@ public class CombinedStateHandler {
 
     StopEntry stopEntry = state.getStop();
 
-    List<StopTimeInstanceProxy> arrivals = _stopTimeService.getPreviousStopTimeArrival(
+    List<StopTimeInstance> arrivals = _stopTimeService.getPreviousStopTimeArrival(
         stopEntry, state.getCurrentTime());
 
     if (arrivals.isEmpty()) {
@@ -251,7 +251,7 @@ public class CombinedStateHandler {
     }
 
     long prevTime = -1;
-    for (StopTimeInstanceProxy sti : arrivals) {
+    for (StopTimeInstance sti : arrivals) {
       VehicleArrivalState prev = new VehicleArrivalState(sti);
       if (prevTime == -1 || prev.getCurrentTime() < prevTime)
         prevTime = prev.getCurrentTime();
@@ -268,7 +268,7 @@ public class CombinedStateHandler {
   public void getVehicleDepartureOrContinuationForwardTransitions(
       VehicleState state, Set<TripState> transitions) {
 
-    StopTimeInstanceProxy sti = state.getStopTimeInstance();
+    StopTimeInstance sti = state.getStopTimeInstance();
 
     BlockTripEntry blockTrip = sti.getTrip();
     List<BlockStopTimeEntry> stopTimes = blockTrip.getStopTimes();
@@ -291,7 +291,7 @@ public class CombinedStateHandler {
     } else {
       BlockStopTimeEntry nextStopTime = stopTimes.get(nextIndex);
 
-      StopTimeInstanceProxy nextSti = new StopTimeInstanceProxy(nextStopTime,
+      StopTimeInstance nextSti = new StopTimeInstance(nextStopTime,
           sti.getServiceDate());
 
       // We can continue on
@@ -314,7 +314,7 @@ public class CombinedStateHandler {
     }
   }
 
-  private boolean hasReasonToGetOffAtThisStop(StopTimeInstanceProxy nextSti) {
+  private boolean hasReasonToGetOffAtThisStop(StopTimeInstance nextSti) {
 
     StopEntry stopEntry = nextSti.getStop();
 
@@ -350,7 +350,7 @@ public class CombinedStateHandler {
   public void getVehicleContinuationAndArrivalReverseTransitions(
       VehicleState state, Set<TripState> transitions) {
 
-    StopTimeInstanceProxy sti = state.getStopTimeInstance();
+    StopTimeInstance sti = state.getStopTimeInstance();
     BlockTripEntry blockTrip = sti.getTrip();
 
     List<BlockStopTimeEntry> stopTimes = blockTrip.getStopTimes();
@@ -368,7 +368,7 @@ public class CombinedStateHandler {
     } else {
       BlockStopTimeEntry prevStopTime = stopTimes.get(prevIndex);
 
-      StopTimeInstanceProxy nextSti = new StopTimeInstanceProxy(prevStopTime,
+      StopTimeInstance nextSti = new StopTimeInstance(prevStopTime,
           sti.getServiceDate());
 
       // We can either get on at the previous stop
@@ -382,7 +382,7 @@ public class CombinedStateHandler {
   public void getVehicleArrivalForwardTransitions(VehicleArrivalState state,
       Set<TripState> transitions) {
 
-    StopTimeInstanceProxy sti = state.getStopTimeInstance();
+    StopTimeInstance sti = state.getStopTimeInstance();
 
     // We can wait here
     transitions.add(new WaitingAtStopState(state.getCurrentTime()
@@ -403,7 +403,7 @@ public class CombinedStateHandler {
     BlockTripEntry entry = state.getNextTrip();
     List<BlockStopTimeEntry> stopTimes = entry.getStopTimes();
     BlockStopTimeEntry first = stopTimes.get(0);
-    StopTimeInstanceProxy sti = new StopTimeInstanceProxy(first,
+    StopTimeInstance sti = new StopTimeInstance(first,
         state.getServiceDate());
     transitions.add(new VehicleContinuationState(sti));
     transitions.add(new VehicleArrivalState(sti));
@@ -416,7 +416,7 @@ public class CombinedStateHandler {
     List<BlockStopTimeEntry> stopTimes = entry.getStopTimes();
 
     BlockStopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
-    StopTimeInstanceProxy sti = new StopTimeInstanceProxy(last,
+    StopTimeInstance sti = new StopTimeInstance(last,
         state.getServiceDate());
     transitions.add(new VehicleContinuationState(sti));
     transitions.add(new VehicleDepartureState(sti));

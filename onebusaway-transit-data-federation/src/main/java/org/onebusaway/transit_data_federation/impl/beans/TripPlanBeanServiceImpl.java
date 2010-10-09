@@ -44,7 +44,7 @@ import org.onebusaway.transit_data_federation.services.beans.WalkPlanBeanService
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlanSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,7 +148,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
       VehicleDepartureState from, TripState to) {
 
     StopEntry stopFromProxy = from.getStop();
-    StopTimeInstanceProxy stiFrom = from.getStopTimeInstance();
+    StopTimeInstance stiFrom = from.getStopTimeInstance();
     BlockTripEntry blockTripEntry = stiFrom.getTrip();
     TripEntry tripEntry = blockTripEntry.getTrip();
 
@@ -172,7 +172,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
     if (to instanceof VehicleArrivalState) {
 
       VehicleArrivalState vas = (VehicleArrivalState) to;
-      StopTimeInstanceProxy stiTo = vas.getStopTimeInstance();
+      StopTimeInstance stiTo = vas.getStopTimeInstance();
 
       ShapePointIndex fromIndex = getStopTimeAsShapePointIndex(stiFrom.getStopTime().getStopTime());
       ShapePointIndex toIndex = getStopTimeAsShapePointIndex(stiTo.getStopTime().getStopTime());
@@ -208,7 +208,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
     if (to instanceof VehicleArrivalState) {
 
       VehicleArrivalState vas = (VehicleArrivalState) to;
-      StopTimeInstanceProxy stiTo = vas.getStopTimeInstance();
+      StopTimeInstance stiTo = vas.getStopTimeInstance();
 
       ShapePointIndex indexFrom = new FirstShapePointIndex();
       ShapePointIndex indexTo = getStopTimeAsShapePointIndex(stiTo.getStopTime().getStopTime());
@@ -236,7 +236,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
   private void handleVehicleArrival(List<TripSegmentBean> segments,
       VehicleArrivalState from, TripState to) {
 
-    StopTimeInstanceProxy sti = from.getStopTimeInstance();
+    StopTimeInstance sti = from.getStopTimeInstance();
     StopBean stopBean = _stopBeanService.getStopForId(sti.getStop().getId());
     ArrivalSegmentBean arrival = new ArrivalSegmentBean(from.getCurrentTime(),
         stopBean);

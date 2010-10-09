@@ -32,7 +32,7 @@ import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 public class StopTimeServiceImplTest {
 
@@ -90,14 +90,14 @@ public class StopTimeServiceImplTest {
 
     addFirstStopToBlockIndex(bA, bB, bC, bD);
 
-    List<StopTimeInstanceProxy> results = _service.getStopTimeInstancesInTimeRange(
+    List<StopTimeInstance> results = _service.getStopTimeInstancesInTimeRange(
         _stopId, from, to);
 
     sort(results);
 
     assertEquals(2, results.size());
 
-    StopTimeInstanceProxy sti = results.get(0);
+    StopTimeInstance sti = results.get(0);
     assertEquals(day.getTime(), sti.getServiceDate());
     assertEquals(dateAsLong("2009-09-01 10:10"), sti.getArrivalTime());
     assertEquals(dateAsLong("2009-09-01 10:10"), sti.getDepartureTime());
@@ -154,14 +154,14 @@ public class StopTimeServiceImplTest {
 
     Date from = date("2009-09-01 10:10");
     Date to = date("2009-09-01 10:40");
-    List<StopTimeInstanceProxy> results = _service.getStopTimeInstancesInTimeRange(
+    List<StopTimeInstance> results = _service.getStopTimeInstancesInTimeRange(
         _stopId, from, to);
 
     sort(results);
 
     assertEquals(1, results.size());
 
-    StopTimeInstanceProxy sti = results.get(0);
+    StopTimeInstance sti = results.get(0);
     assertEquals(dayA.getTime(), sti.getServiceDate());
     assertEquals(date("2009-09-01 10:00").getTime(), sti.getArrivalTime());
     assertEquals(date("2009-09-01 10:30").getTime(), sti.getDepartureTime());
@@ -279,14 +279,14 @@ public class StopTimeServiceImplTest {
 
     Date from = date("2009-09-02 10:10");
     Date to = date("2009-09-02 10:40");
-    List<StopTimeInstanceProxy> results = _service.getStopTimeInstancesInTimeRange(
+    List<StopTimeInstance> results = _service.getStopTimeInstancesInTimeRange(
         _stopId, from, to);
 
     sort(results);
 
     assertEquals(1, results.size());
 
-    StopTimeInstanceProxy sti = results.get(0);
+    StopTimeInstance sti = results.get(0);
     assertEquals(dayA.getTime(), sti.getServiceDate());
     assertEquals(date("2009-09-02 10:00").getTime(), sti.getArrivalTime());
     assertEquals(date("2009-09-02 10:30").getTime(), sti.getDepartureTime());
@@ -393,13 +393,13 @@ public class StopTimeServiceImplTest {
     _stop.getStopTimeIndices().add(BlockStopTimeIndex.create(blockIndex, 0));
   }
 
-  private void sort(List<StopTimeInstanceProxy> stopTimes) {
+  private void sort(List<StopTimeInstance> stopTimes) {
     Collections.sort(stopTimes, new StopTimeInstanceComparator());
   }
 
   private static class StopTimeInstanceComparator implements
-      Comparator<StopTimeInstanceProxy> {
-    public int compare(StopTimeInstanceProxy o1, StopTimeInstanceProxy o2) {
+      Comparator<StopTimeInstance> {
+    public int compare(StopTimeInstance o1, StopTimeInstance o2) {
       return (int) (o1.getArrivalTime() - o2.getArrivalTime());
     }
   }

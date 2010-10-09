@@ -17,7 +17,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndexService;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ class StopTimeServiceImpl implements StopTimeService {
   }
 
   @Override
-  public List<StopTimeInstanceProxy> getStopTimeInstancesInTimeRange(
+  public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
       AgencyAndId stopId, Date from, Date to) {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
@@ -59,9 +59,9 @@ class StopTimeServiceImpl implements StopTimeService {
   }
 
   @Override
-  public List<StopTimeInstanceProxy> getStopTimeInstancesInRange(Date from,
+  public List<StopTimeInstance> getStopTimeInstancesInRange(Date from,
       Date to, StopEntry stopEntry) {
-    List<StopTimeInstanceProxy> stopTimeInstances = new ArrayList<StopTimeInstanceProxy>();
+    List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 
     for (BlockStopTimeIndex index : _blockStopTimeIndexService.getStopTimeIndicesForStop(stopEntry)) {
       Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
@@ -74,14 +74,14 @@ class StopTimeServiceImpl implements StopTimeService {
   }
 
   @Override
-  public List<StopTimeInstanceProxy> getPreviousStopTimeArrival(
+  public List<StopTimeInstance> getPreviousStopTimeArrival(
       StopEntry stopEntry, long targetTime) {
     _log.warn("todo: implement me");
     return Collections.emptyList();
   }
 
   @Override
-  public List<StopTimeInstanceProxy> getNextStopTimeDeparture(
+  public List<StopTimeInstance> getNextStopTimeDeparture(
       StopEntry stopEntry, long currentTime) {
     _log.warn("todo: implement me");
     return Collections.emptyList();
@@ -93,7 +93,7 @@ class StopTimeServiceImpl implements StopTimeService {
 
   private void getStopTimesForStopAndServiceIdsAndTimeRange(
       BlockStopTimeIndex index, Collection<Date> serviceDates, Date from,
-      Date to, List<StopTimeInstanceProxy> stopTimeInstances) {
+      Date to, List<StopTimeInstance> stopTimeInstances) {
 
     List<BlockStopTimeEntry> blockStopTimes = index.getStopTimes();
 
@@ -109,7 +109,7 @@ class StopTimeServiceImpl implements StopTimeService {
 
       for (int in = fromIndex; in < toIndex; in++) {
         BlockStopTimeEntry blockStopTime = blockStopTimes.get(in);
-        stopTimeInstances.add(new StopTimeInstanceProxy(blockStopTime,
+        stopTimeInstances.add(new StopTimeInstance(blockStopTime,
             serviceDate));
       }
     }

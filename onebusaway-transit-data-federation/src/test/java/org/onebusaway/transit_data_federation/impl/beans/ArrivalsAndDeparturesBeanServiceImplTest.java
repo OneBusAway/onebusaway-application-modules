@@ -37,7 +37,7 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 public class ArrivalsAndDeparturesBeanServiceImplTest {
 
@@ -120,8 +120,8 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     Date stopTimeFrom = new Date(t - expandedMinutesBefore * 60 * 1000);
     Date stopTimeTo = new Date(t + expandedMinutesAfter * 60 * 1000);
 
-    StopTimeInstanceProxy sti1 = new StopTimeInstanceProxy(bstAB, serviceDate);
-    StopTimeInstanceProxy sti2 = new StopTimeInstanceProxy(bstBB, serviceDate);
+    StopTimeInstance sti1 = new StopTimeInstance(bstAB, serviceDate);
+    StopTimeInstance sti2 = new StopTimeInstance(bstBB, serviceDate);
 
     Mockito.when(
         _stopTimeService.getStopTimeInstancesInTimeRange(stopB.getId(),

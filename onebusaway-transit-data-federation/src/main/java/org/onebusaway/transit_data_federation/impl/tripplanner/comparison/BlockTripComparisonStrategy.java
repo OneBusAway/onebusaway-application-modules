@@ -9,7 +9,7 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripState;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripStateStats;
 import org.onebusaway.transit_data_federation.model.tripplanner.VehicleDepartureState;
 import org.onebusaway.transit_data_federation.services.tripplanner.ETripComparison;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -65,7 +65,7 @@ public class BlockTripComparisonStrategy implements TripComparisonStrategy {
 
       if (state instanceof VehicleDepartureState) {
         VehicleDepartureState vds = (VehicleDepartureState) state;
-        StopTimeInstanceProxy sti = vds.getStopTimeInstance();
+        StopTimeInstance sti = vds.getStopTimeInstance();
         AgencyAndId tripId = sti.getTrip().getTrip().getId();
         tripIds.add(tripId);
       }

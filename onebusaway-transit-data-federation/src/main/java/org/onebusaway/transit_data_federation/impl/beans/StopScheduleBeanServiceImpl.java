@@ -39,7 +39,7 @@ import org.onebusaway.transit_data_federation.services.narrative.NarrativeServic
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.utility.text.NaturalStringOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,8 +141,8 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
 
-    Map<AgencyAndId, List<StopTimeInstanceProxy>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstanceProxy>>(
-        new ArrayList<StopTimeInstanceProxy>());
+    Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
+        new ArrayList<StopTimeInstance>());
 
     for (BlockStopTimeIndex index : _blockStopTimeIndexService.getStopTimeIndicesForStop(stopEntry)) {
 
@@ -160,7 +160,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         TripEntry trip = blockTrip.getTrip();
         AgencyAndId routeCollectionId = trip.getRouteCollectionId();
 
-        StopTimeInstanceProxy sti = new StopTimeInstanceProxy(stopTime,
+        StopTimeInstance sti = new StopTimeInstance(stopTime,
             serviceDate);
 
         stopTimesByRouteCollectionId.get(routeCollectionId).add(sti);
@@ -169,10 +169,10 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     List<StopRouteScheduleBean> beans = new ArrayList<StopRouteScheduleBean>();
 
-    for (Map.Entry<AgencyAndId, List<StopTimeInstanceProxy>> entry : stopTimesByRouteCollectionId.entrySet()) {
+    for (Map.Entry<AgencyAndId, List<StopTimeInstance>> entry : stopTimesByRouteCollectionId.entrySet()) {
 
       AgencyAndId routeCollectionId = entry.getKey();
-      List<StopTimeInstanceProxy> stopTimesForRoute = entry.getValue();
+      List<StopTimeInstance> stopTimesForRoute = entry.getValue();
 
       StopRouteScheduleBean routeScheduleBean = new StopRouteScheduleBean();
       beans.add(routeScheduleBean);
@@ -183,7 +183,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
       Map<String, StopTimeByDirectionEntry> stopTimesByDirection = new FactoryMap<String, StopTimeByDirectionEntry>(
           new StopTimeByDirectionEntry());
 
-      for (StopTimeInstanceProxy sti : stopTimesForRoute) {
+      for (StopTimeInstance sti : stopTimesForRoute) {
 
         BlockTripEntry blockTrip = sti.getTrip();
         TripEntry trip = blockTrip.getTrip();

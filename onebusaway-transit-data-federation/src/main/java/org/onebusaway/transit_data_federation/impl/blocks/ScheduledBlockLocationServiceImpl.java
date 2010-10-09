@@ -42,46 +42,32 @@ class ScheduledBlockLocationServiceImpl implements
       return null;
 
     int stopTimeIndex = GenericBinarySearch.search(stopTimes,
-        distanceAlongBlock, BlockStopTimeDistanceAlongBlockValueAdapter.INSTANCE);
+        distanceAlongBlock,
+        BlockStopTimeDistanceAlongBlockValueAdapter.INSTANCE);
 
     // Are we out beyond our last stop-time?
-    if (stopTimeIndex == stopTimes.size())
-      return null;
-
-    // Are we before out first stop-time?
-    if (stopTimeIndex == 0) {
-      BlockStopTimeEntry blockFirst = stopTimes.get(0);
-      StopTimeEntry first = blockFirst.getStopTime();
-      if (blockFirst.getDistaceAlongBlock() == distanceAlongBlock)
-        return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(
-            stopTimes, first.getArrivalTime(), stopTimeIndex);
+    if (stopTimeIndex == stopTimes.size()) {
 
       // If we only have one stop time, we can't interpolate the schedule time
       if (stopTimes.size() == 1)
         return null;
 
-      BlockStopTimeEntry blockNext = stopTimes.get(1);
-      StopTimeEntry next = blockNext.getStopTime();
-      double r = (distanceAlongBlock - blockFirst.getDistaceAlongBlock())
-          / (blockNext.getDistaceAlongBlock() - blockFirst.getDistaceAlongBlock());
-      int scheduledTime = (int) (r
-          * (next.getArrivalTime() - first.getDepartureTime()) + first.getArrivalTime());
+      BlockStopTimeEntry blockFrom = stopTimes.get(stopTimes.size() - 2);
+      BlockStopTimeEntry blockTo = stopTimes.get(stopTimes.size() - 1);
+      return interpolateLocation(blockFrom, blockTo, distanceAlongBlock);
+    }
 
-      BlockTripEntry activeTrip = blockFirst.getTrip();
+    // Are we before out first stop-time?
+    if (stopTimeIndex == 0) {
 
-      ScheduledBlockLocation location = new ScheduledBlockLocation();
-      location.setActiveTrip(activeTrip);
-      location.setClosestStop(blockFirst);
-      location.setClosestStopTimeOffset(first.getArrivalTime() - scheduledTime);
-      location.setNextStop(blockFirst);
-      location.setNextStopTimeOffset(first.getArrivalTime() - scheduledTime);
-      location.setDistanceAlongBlock(distanceAlongBlock);
-      location.setScheduledTime(scheduledTime);
-      // In this case, distance along block and distance along trip are the same
-      // because we are still in the first trip of the block
-      location.setLocation(getLocationAlongShape(activeTrip, distanceAlongBlock));
-      return location;
+      // If we only have one stop time, we can't interpolate the schedule time
+      if (stopTimes.size() == 1)
+        return null;
 
+      BlockStopTimeEntry blockFrom = stopTimes.get(0);
+      BlockStopTimeEntry blockTo = stopTimes.get(1);
+
+      return interpolateLocation(blockFrom, blockTo, distanceAlongBlock);
     }
 
     BlockStopTimeEntry blockBefore = stopTimes.get(stopTimeIndex - 1);
@@ -170,7 +156,7 @@ class ScheduledBlockLocationServiceImpl implements
       result.setClosestStop(blockAfter);
       result.setClosestStopTimeOffset(toTimeOffset);
     }
-    
+
     result.setNextStop(blockAfter);
     result.setNextStopTimeOffset(toTimeOffset);
 
@@ -216,6 +202,46 @@ class ScheduledBlockLocationServiceImpl implements
     result.setLocation(location);
 
     return result;
+  }
+
+  private ScheduledBlockLocation interpolateLocation(
+      BlockStopTimeEntry blockFrom, BlockStopTimeEntry blockTo,
+      double distanceAlongBlock) {
+
+    StopTimeEntry from = blockFrom.getStopTime();
+    StopTimeEntry to = blockTo.getStopTime();
+
+    double r = (distanceAlongBlock - blockFrom.getDistaceAlongBlock())
+        / (blockTo.getDistaceAlongBlock() - blockFrom.getDistaceAlongBlock());
+    int scheduledTime = (int) (r
+        * (to.getArrivalTime() - from.getDepartureTime()) + from.getArrivalTime());
+
+    BlockTripEntry activeTrip = distanceAlongBlock < blockTo.getDistaceAlongBlock()
+        ? blockFrom.getTrip() : blockTo.getTrip();
+
+    BlockStopTimeEntry closestStop = r < 0.5 ? blockFrom : blockTo;
+
+    BlockStopTimeEntry nextStop = null;
+    if (r <= 0)
+      nextStop = blockFrom;
+    else if (r <= 1.0)
+      nextStop = blockTo;
+
+    ScheduledBlockLocation location = new ScheduledBlockLocation();
+    location.setActiveTrip(activeTrip);
+    location.setClosestStop(closestStop);
+    location.setClosestStopTimeOffset(closestStop.getStopTime().getArrivalTime()
+        - scheduledTime);
+    location.setNextStop(nextStop);
+    if (nextStop != null)
+      location.setNextStopTimeOffset(nextStop.getStopTime().getArrivalTime()
+          - scheduledTime);
+    location.setDistanceAlongBlock(distanceAlongBlock);
+    location.setScheduledTime(scheduledTime);
+    // In this case, distance along block and distance along trip are the same
+    // because we are still in the first trip of the block
+    location.setLocation(getLocationAlongShape(activeTrip, distanceAlongBlock));
+    return location;
   }
 
   private CoordinatePoint getLocationAlongShape(BlockTripEntry activeBlockTrip,

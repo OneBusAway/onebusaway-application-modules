@@ -1,16 +1,16 @@
 package org.onebusaway.transit_data_federation.model.tripplanner;
 
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 public class VehicleArrivalState extends VehicleState {
 
-  public VehicleArrivalState(StopTimeInstanceProxy sti) {
+  public VehicleArrivalState(StopTimeInstance sti) {
     super(sti,true);
   }
 
   @Override
   public String toString() {
-    StopTimeInstanceProxy sti = getStopTimeInstance();
+    StopTimeInstance sti = getStopTimeInstance();
     return "arrival(ts=" + getCurrentTimeString() + " stop="
         + sti.getStop().getId() + ")";
   }

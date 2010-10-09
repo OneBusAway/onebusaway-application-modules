@@ -29,6 +29,7 @@ import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
+import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
@@ -171,6 +172,10 @@ public interface TransitDataService extends FederatedService {
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query);
 
+  @FederatedByAgencyIdMethod
+  public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
+      long time);
+
   /**
    * 
    * @param query determines the vehicle and time of the trip query
@@ -191,7 +196,8 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdMethod
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, Date targetTime, int minutesBefore, int minutesAfter) throws ServiceException;
+      String stopId, Date targetTime, int minutesBefore, int minutesAfter)
+      throws ServiceException;
 
   /**
    * @param stopIds
@@ -205,8 +211,8 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdsMethod
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, Date targetTime, int minutesBefore, int minutesAfter)
-      throws ServiceException;
+      Collection<String> stopIds, Date targetTime, int minutesBefore,
+      int minutesAfter) throws ServiceException;
 
   /**
    * @param stopId

@@ -75,7 +75,7 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
   @Override
   public String toString() {
-    return "BlockConfiguration [serviceIds=" + serviceIds + " trips=" + trips
+    return "BlockConfiguration [block=" + block.getId() + " serviceIds=" + serviceIds + " trips=" + trips
         + "]";
   }
 

@@ -18,11 +18,11 @@ import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
@@ -48,7 +48,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime:name=BlockLocationServiceImpl")
 public class BlockLocationServiceImpl implements BlockLocationService,
-    VehicleLocationListener {
+    BlockVehicleLocationListener {
 
   private BlockLocationRecordCache _cache;
 
@@ -193,7 +193,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   /****
-   * {@link VehicleLocationListener} Interface
+   * {@link BlockVehicleLocationListener} Interface
    ****/
 
   @Override
@@ -201,12 +201,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     T2<BlockInstance, BlockLocationRecord> tuple = getVehicleLocationRecordAsBlockLocationRecord(record);
     if (tuple != null)
       putBlockLocationRecord(tuple.getFirst(), tuple.getSecond());
-  }
-
-  @Override
-  public void handleVehicleLocationRecords(List<VehicleLocationRecord> records) {
-    for (VehicleLocationRecord record : records)
-      handleVehicleLocationRecord(record);
   }
 
   @Override

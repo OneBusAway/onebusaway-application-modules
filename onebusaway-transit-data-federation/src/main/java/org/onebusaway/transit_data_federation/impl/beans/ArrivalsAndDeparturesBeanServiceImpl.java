@@ -27,7 +27,7 @@ import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTime
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
@@ -109,22 +109,22 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     c.add(Calendar.MINUTE, MINUTES_AFTER_BUFFER + minutesAfter);
     Date to = c.getTime();
 
-    List<StopTimeInstanceProxy> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
+    List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
         id, from, to);
 
-    Map<BlockInstance, List<StopTimeInstanceProxy>> stisByBlockId = getStopTimeInstancesByBlockInstance(stis);
+    Map<BlockInstance, List<StopTimeInstance>> stisByBlockId = getStopTimeInstancesByBlockInstance(stis);
 
     List<ArrivalAndDepartureBean> beans = new ArrayList<ArrivalAndDepartureBean>();
 
-    for (Map.Entry<BlockInstance, List<StopTimeInstanceProxy>> entry : stisByBlockId.entrySet()) {
+    for (Map.Entry<BlockInstance, List<StopTimeInstance>> entry : stisByBlockId.entrySet()) {
 
       BlockInstance blockInstance = entry.getKey();
       List<BlockLocation> locations = _blockLocationService.getLocationsForBlockInstance(
           blockInstance, time.getTime());
 
-      List<StopTimeInstanceProxy> stisForBlock = entry.getValue();
+      List<StopTimeInstance> stisForBlock = entry.getValue();
 
-      for (StopTimeInstanceProxy sti : stisForBlock) {
+      for (StopTimeInstance sti : stisForBlock) {
 
         for (BlockLocation location : locations) {
           ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(sti);
@@ -157,13 +157,13 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
    * Private Methods
    ****/
 
-  private Map<BlockInstance, List<StopTimeInstanceProxy>> getStopTimeInstancesByBlockInstance(
-      List<StopTimeInstanceProxy> stopTimes) {
+  private Map<BlockInstance, List<StopTimeInstance>> getStopTimeInstancesByBlockInstance(
+      List<StopTimeInstance> stopTimes) {
 
-    Map<BlockInstance, List<StopTimeInstanceProxy>> r = new FactoryMap<BlockInstance, List<StopTimeInstanceProxy>>(
-        new ArrayList<StopTimeInstanceProxy>());
+    Map<BlockInstance, List<StopTimeInstance>> r = new FactoryMap<BlockInstance, List<StopTimeInstance>>(
+        new ArrayList<StopTimeInstance>());
 
-    for (StopTimeInstanceProxy stopTime : stopTimes) {
+    for (StopTimeInstance stopTime : stopTimes) {
       BlockStopTimeEntry blockStopTime = stopTime.getStopTime();
       BlockTripEntry blockTrip = blockStopTime.getTrip();
       BlockConfigurationEntry blockConfiguration = blockTrip.getBlockConfiguration();
@@ -177,7 +177,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   }
 
   private ArrivalAndDepartureBean getStopTimeInstanceAsBean(
-      StopTimeInstanceProxy sti) {
+      StopTimeInstance sti) {
 
     ArrivalAndDepartureBean pab = new ArrivalAndDepartureBean();
 
@@ -209,7 +209,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     return pab;
   }
 
-  private void applyBlockLocationToBean(StopTimeInstanceProxy sti,
+  private void applyBlockLocationToBean(StopTimeInstance sti,
       long targetTime, ArrivalAndDepartureBean bean, BlockLocation blockLocation) {
 
     BlockStopTimeEntry destinationStopTime = sti.getStopTime();

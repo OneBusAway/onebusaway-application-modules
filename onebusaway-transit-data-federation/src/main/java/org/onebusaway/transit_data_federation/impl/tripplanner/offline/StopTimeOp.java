@@ -4,7 +4,7 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch.ValueAdapter;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 
 import java.util.Comparator;
@@ -17,7 +17,7 @@ public abstract class StopTimeOp implements Comparator<StopTimeEntry>, ValueAdap
 
   public abstract double getValue(StopTimeEntry proxy);
 
-  public abstract double getValue(StopTimeInstanceProxy proxy);
+  public abstract double getValue(StopTimeInstance proxy);
 
   public int compare(StopTimeEntry o1, StopTimeEntry o2) {
     double a = getValue(o1);
@@ -33,7 +33,7 @@ public abstract class StopTimeOp implements Comparator<StopTimeEntry>, ValueAdap
     }
 
     @Override
-    public double getValue(StopTimeInstanceProxy proxy) {
+    public double getValue(StopTimeInstance proxy) {
       return proxy.getArrivalTime();
     }
   }
@@ -46,7 +46,7 @@ public abstract class StopTimeOp implements Comparator<StopTimeEntry>, ValueAdap
     }
 
     @Override
-    public double getValue(StopTimeInstanceProxy proxy) {
+    public double getValue(StopTimeInstance proxy) {
       return proxy.getDepartureTime();
     }
   }
