@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.realtime;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -8,13 +9,15 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-class VehicleStatusServieImpl implements VehicleLocationListener {
+class VehicleStatusServieImpl implements VehicleLocationListener,
+    VehicleStatusService {
 
   private ConcurrentHashMap<AgencyAndId, VehicleLocationRecord> _vehicleRecordsById = new ConcurrentHashMap<AgencyAndId, VehicleLocationRecord>();
 
@@ -28,9 +31,14 @@ class VehicleStatusServieImpl implements VehicleLocationListener {
   }
 
   @Autowired
-  public void setBlockVehicleLocationService(BlockVehicleLocationListener service) {
+  public void setBlockVehicleLocationService(
+      BlockVehicleLocationListener service) {
     _blockVehicleLocationService = service;
   }
+
+  /****
+   * {@link VehicleLocationListener} Interface
+   ****/
 
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
@@ -69,4 +77,12 @@ class VehicleStatusServieImpl implements VehicleLocationListener {
     _blockVehicleLocationService.resetVehicleLocation(vehicleId);
   }
 
+  /****
+   * {@link VehicleStatusService} Interface
+   ****/
+
+  @Override
+  public List<VehicleLocationRecord> getAllVehicleLocationRecords() {
+    return new ArrayList<VehicleLocationRecord>(_vehicleRecordsById.values());
+  }
 }
