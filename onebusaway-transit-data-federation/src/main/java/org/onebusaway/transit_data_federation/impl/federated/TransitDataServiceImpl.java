@@ -272,6 +272,12 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public VehicleStatusBean getVehicleForAgency(String vehicleId, long time) {
+    AgencyAndId vid = AgencyAndIdLibrary.convertFromString(vehicleId);
+    return _vehicleStatusBeanService.getVehicleForId(vid, time);
+  }
+
+  @Override
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time) {
     return _vehicleStatusBeanService.getAllVehiclesForAgency(agencyId, time);

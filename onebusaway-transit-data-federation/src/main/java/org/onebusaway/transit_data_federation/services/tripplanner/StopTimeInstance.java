@@ -79,7 +79,7 @@ public class StopTimeInstance {
 
   @Override
   public String toString() {
-    return "StopTimeInstanceProxy(trip=" + getTrip() + " service="
+    return "StopTimeInstance(stop=" + _stopTime.getStopTime().getStop().getId() + " trip=" + getTrip() + " service="
         + DAY_FORMAT.format(_serviceDate) + " arrival="
         + TIME_FORMAT.format(getArrivalTime()) + " departure="
         + TIME_FORMAT.format(getDepartureTime()) + ")";

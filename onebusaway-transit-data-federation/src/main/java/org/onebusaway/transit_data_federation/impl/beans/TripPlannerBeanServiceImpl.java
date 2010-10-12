@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,9 @@ import org.onebusaway.transit_data_federation.services.beans.TripPlanBeanService
 import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerService;
+import org.opentripplanner.routing.core.TraverseOptions;
+import org.opentripplanner.routing.services.PathService;
+import org.opentripplanner.routing.spt.GraphPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +33,8 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
   private TripPlanBeanService _beanFactory;
 
   private TripPlannerConstants _constants;
+
+  private PathService _pathService;
 
   @Autowired
   public void setTripPlannerService(TripPlannerService service) {
@@ -45,9 +51,23 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
     _constants = constants;
   }
 
+  //@Autowired
+  public void setPathService(PathService pathService) {
+    _pathService = pathService;
+  }
+
   public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
       double latTo, double lonTo, TripPlannerConstraintsBean constraints)
       throws ServiceException {
+
+    if (_pathService != null) {
+      String fromPlace = latFrom + "," + lonFrom;
+      String toPlace = latTo + "," + lonTo;
+      TraverseOptions options = new TraverseOptions();
+      List<GraphPath> plans = _pathService.plan(fromPlace, toPlace,
+          new Date(constraints.getMinDepartureTime()), options, 1);
+      return null;
+    }
 
     TripPlannerConstraints c = new TripPlannerConstraints();
 
@@ -84,7 +104,8 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
   }
 
   public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(double lat,
-      double lon, OneBusAwayConstraintsBean constraints) throws ServiceException {
+      double lon, OneBusAwayConstraintsBean constraints)
+      throws ServiceException {
 
     final CoordinatePoint p = new CoordinatePoint(lat, lon);
 

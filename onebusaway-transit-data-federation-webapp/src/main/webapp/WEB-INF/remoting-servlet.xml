@@ -37,7 +37,7 @@
     </bean>
 
     <bean name="/vehicle-location-listener" class="org.springframework.remoting.caucho.HessianServiceExporter">
-        <property name="service" ref="blockLocationServiceImpl" />
+        <property name="service" ref="vehicleStatusServiceImpl" />
         <property name="serviceInterface" value="org.onebusaway.realtime.api.VehicleLocationListener" />
     </bean>
 

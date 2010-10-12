@@ -30,10 +30,4 @@ public interface StopTimeService {
 
   public List<StopTimeInstance> getStopTimeInstancesInRange(Date from,
       Date to, StopEntry stopEntry);
-
-  public List<StopTimeInstance> getNextStopTimeDeparture(
-      StopEntry stopEntry, long currentTime);
-
-  public List<StopTimeInstance> getPreviousStopTimeArrival(
-      StopEntry stopEntry, long targetTime);
 }

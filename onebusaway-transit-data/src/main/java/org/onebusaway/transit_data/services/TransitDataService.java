@@ -171,6 +171,9 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query);
+  
+  @FederatedByEntityIdMethod
+  public VehicleStatusBean getVehicleForAgency(String vehicleId, long time);
 
   @FederatedByAgencyIdMethod
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,

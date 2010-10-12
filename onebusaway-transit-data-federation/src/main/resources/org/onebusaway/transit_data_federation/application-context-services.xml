@@ -43,14 +43,14 @@
         </property>
     </bean>
 
-
     <bean id="walkPlannerGraph" class="org.onebusaway.container.spring.SerializedFactoryBean">
         <property name="objectType" value="org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph" />
-        <property name="path" ref="walkPlannerGraphPath" />
+        <property name="path" ref="walkPlannerGraphPath"  />
     </bean>
 
     <!-- Don't bother loading the walk graph... we're not using it and it takes up a lot of memory -->
-    <!-- <bean id="walkPlannerGraph" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl"/> -->
+    <!-- <bean id="walkPlannerGraph" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl" 
+        /> -->
 
     <bean id="tripPlannerGraph" class="org.onebusaway.container.spring.SerializedFactoryBean">
         <property name="objectType" value="org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph" />
@@ -69,4 +69,5 @@
         <property name="objectType" value="org.onebusaway.transit_data_federation.impl.narrative.NarrativeProviderImpl" />
         <property name="path" ref="narrativeProviderPath" />
     </bean>
+
 </beans>

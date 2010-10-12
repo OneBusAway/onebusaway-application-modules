@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -218,8 +219,8 @@ public class CombinedStateHandler {
 
     StopEntry stopEntry = state.getStop();
 
-    List<StopTimeInstance> departures = _stopTimeService.getNextStopTimeDeparture(
-        stopEntry, state.getCurrentTime());
+    //_stopTimeService.getNextStopTimeDeparture(stopEntry, state.getCurrentTime());
+    List<StopTimeInstance> departures = Collections.emptyList();
 
     if (departures.isEmpty()) {
       System.err.println("unlikely");
@@ -242,8 +243,8 @@ public class CombinedStateHandler {
 
     StopEntry stopEntry = state.getStop();
 
-    List<StopTimeInstance> arrivals = _stopTimeService.getPreviousStopTimeArrival(
-        stopEntry, state.getCurrentTime());
+    //_stopTimeService.getPreviousStopTimeArrival(stopEntry, state.getCurrentTime());
+    List<StopTimeInstance> arrivals = Collections.emptyList(); 
 
     if (arrivals.isEmpty()) {
       System.err.println("unlikely");

@@ -35,6 +35,13 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
     _tripDetailsBeanService = tripDetailsBeanService;
   }
 
+  public VehicleStatusBean getVehicleForId(AgencyAndId vehicleId, long time) {
+    VehicleLocationRecord record = _vehicleStatusService.getVehicleLocationRecordForId(vehicleId);
+    if (record == null)
+      return null;
+    return getRecordAsBean(record, time);
+  }
+
   @Override
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time) {
