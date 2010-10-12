@@ -161,6 +161,10 @@ public class StopMonitoringController implements ModelDriven<Object>,
         // this trip has no status. Let's skip it.
         continue;
       }
+      if (status.isPredicted() == false) {
+        /* only show trips with realtime info */
+        continue;
+      }
 
       MonitoredStopVisit.RecordedAtTime = new GregorianCalendar();
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());

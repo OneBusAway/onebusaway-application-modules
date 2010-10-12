@@ -14,6 +14,7 @@
 package org.onebusaway.api.actions.siri;
 
 import org.onebusaway.siri.model.ErrorMessage;
+import org.onebusaway.siri.model.MonitoredVehicleJourney;
 import org.onebusaway.siri.model.ServiceDelivery;
 import org.onebusaway.siri.model.Siri;
 import org.onebusaway.siri.model.VehicleActivity;
@@ -22,6 +23,7 @@ import org.onebusaway.siri.model.VehicleMonitoringDelivery;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
+import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -123,18 +125,17 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
       for (TripDetailsBean trip : trips.getList()) {
         if (directionId != null
-            && trip.getTrip().getDirectionId().equals(directionId)) {
-          VehicleActivity activity = createActivity(trip, onwardCalls);
-          activities.add(activity);
+            && !trip.getTrip().getDirectionId().equals(directionId)) {
+          continue;
         }
+        if (trip.getStatus().isPredicted() == false) {
+          /* only show trips with realtime info */
+          continue;
+        }
+        VehicleActivity activity = createActivity(trip, onwardCalls);
+        activities.add(activity);
       }
       _response = generateSiriResponse(now, activities);
-
-    } else {
-
-      Siri siri = generateSiriResponse(now, new ArrayList<VehicleActivity>());
-
-      _response = siri;
       return new DefaultHttpHeaders();
     }
 
@@ -147,17 +148,62 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       ListBean<TripDetailsBean> trips = _transitDataService.getTripsForRoute(query);
       ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
       for (TripDetailsBean trip : trips.getList()) {
+        if (directionId != null
+            && !trip.getTrip().getDirectionId().equals(directionId)) {
+          continue;
+        }
+        if (trip.getStatus().isPredicted() == false) {
+          /* only show trips with realtime info */
+          continue;
+        }
         VehicleActivity activity = createActivity(trip, onwardCalls);
         activities.add(activity);
       }
       _response = generateSiriResponse(now, activities);
-
       return new DefaultHttpHeaders();
     }
 
-    /* FIXME: need api call for all vehicles */
-
+    /* All vehicles */
+    ListBean<VehicleStatusBean> vehicles = _transitDataService.getAllVehiclesForAgency(
+        agencyId, now.getTimeInMillis());
+    ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
+    for (VehicleStatusBean v : vehicles.getList()) {
+      activities.add(createActivity(v));
+    }
+    _response = generateSiriResponse(now, activities);
     return new DefaultHttpHeaders();
+  }
+
+  private VehicleActivity createActivity(VehicleStatusBean vehicleStatus) {
+    VehicleActivity activity = new VehicleActivity();
+
+    Calendar time = Calendar.getInstance();
+    time.setTime(new Date(vehicleStatus.getLastUpdateTime()));
+
+    activity.RecordedAtTime = time;
+    TripBean tripBean = vehicleStatus.getTrip();
+    if (tripBean != null) {
+      TripDetailsQueryBean query = new TripDetailsQueryBean();
+      query.setTime(time.getTimeInMillis());
+      query.setTripId(tripBean.getId());
+      query.setVehicleId(vehicleStatus.getVehicleId());
+      TripDetailsBean tripDetails = _transitDataService.getSingleTripDetails(query);
+      activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(tripDetails);
+    } else {
+      activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
+    }
+    activity.MonitoredVehicleJourney.Monitored = true;
+
+    activity.MonitoredVehicleJourney.VehicleRef = vehicleStatus.getVehicleId();
+
+    activity.MonitoredVehicleJourney.ProgressRate = vehicleStatus.getStatus();
+
+    VehicleLocation location = new VehicleLocation();
+    location.Latitude = vehicleStatus.getLocation().getLat();
+    location.Longitude = vehicleStatus.getLocation().getLon();
+
+    activity.MonitoredVehicleJourney.VehicleLocation = location;
+    return activity;
   }
 
   /** Generate a siri response for a set of VehicleActivities */
@@ -190,6 +236,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     
     activity.RecordedAtTime = time;
     activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(trip);
+    activity.MonitoredVehicleJourney.Monitored = true;
     /* fixme: make sure this works when we have real vehicles */
     activity.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
 
