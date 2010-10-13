@@ -261,6 +261,11 @@ public class ScheduledBlockLocationServiceImplTest {
     position = _service.getScheduledBlockLocationFromDistanceAlongBlock(
         _stopTimes, 1500);
 
-    assertNull(position);
+    assertEquals(_tripB, position.getActiveTrip());
+    assertEquals(_stopTimeC, position.getClosestStop());
+    assertEquals(-225, position.getClosestStopTimeOffset());
+    assertEquals(1500, position.getDistanceAlongBlock(), 0.0);
+    assertEquals(47.663667674849385, position.getLocation().getLat(), 1e-6);
+    assertEquals(-122.37355470657349, position.getLocation().getLon(), 1e-6);
   }
 }
