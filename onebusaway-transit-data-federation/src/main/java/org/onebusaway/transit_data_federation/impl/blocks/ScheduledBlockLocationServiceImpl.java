@@ -214,7 +214,10 @@ class ScheduledBlockLocationServiceImpl implements
     double r = (distanceAlongBlock - blockFrom.getDistaceAlongBlock())
         / (blockTo.getDistaceAlongBlock() - blockFrom.getDistaceAlongBlock());
     int scheduledTime = (int) (r
-        * (to.getArrivalTime() - from.getDepartureTime()) + from.getArrivalTime());
+        * (to.getArrivalTime() - from.getDepartureTime()) + from.getDepartureTime());
+    
+    if( r > 1 )
+      scheduledTime += to.getSlackTime();
 
     BlockTripEntry activeTrip = distanceAlongBlock < blockTo.getDistaceAlongBlock()
         ? blockFrom.getTrip() : blockTo.getTrip();
