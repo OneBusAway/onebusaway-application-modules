@@ -124,7 +124,7 @@ public final class BlockLocationRecordCollection implements Serializable {
   public double getScheduleDeviationForTargetTime(long targetTime) {
 
     if (records.isEmpty())
-      return 0;
+      return Double.NaN;
 
     SortedMap<Long, Double> m = AdapterLibrary.adaptSortedMap(records,
         _scheduleDeviationAdapter);
