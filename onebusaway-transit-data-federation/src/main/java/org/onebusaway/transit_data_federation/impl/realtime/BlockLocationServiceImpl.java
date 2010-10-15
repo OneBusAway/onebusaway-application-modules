@@ -188,8 +188,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   @PreDestroy
   public void stop() {
-    if (_persistBlockLocationRecords)
-      _executor.shutdownNow();
+    _executor.shutdownNow();
   }
 
   /****
@@ -391,7 +390,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     CoordinatePoint point = records.getLastLocationForTargetTime(targetTime);
     location.setLastKnownLocation(point);
-    
+
     String status = records.getStatusForTargetTime(targetTime);
     location.setStatus(status);
 

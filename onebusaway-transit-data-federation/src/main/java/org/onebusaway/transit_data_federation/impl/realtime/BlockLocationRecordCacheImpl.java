@@ -48,6 +48,8 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
 
   private int _cacheEvictionFrequency = 1;
 
+  private ScheduledExecutorService _executor;
+
   private ScheduledFuture<?> _evictionHandler;
 
   /**
@@ -70,15 +72,18 @@ class BlockLocationRecordCacheImpl implements BlockLocationRecordCache {
 
   @PostConstruct
   public void start() {
-    ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-    _evictionHandler = executor.scheduleAtFixedRate(new CacheEvictionHandler(),
-        _cacheEvictionFrequency, _cacheEvictionFrequency, TimeUnit.MINUTES);
+    _executor = Executors.newScheduledThreadPool(1);
+    _evictionHandler = _executor.scheduleAtFixedRate(
+        new CacheEvictionHandler(), _cacheEvictionFrequency,
+        _cacheEvictionFrequency, TimeUnit.MINUTES);
   }
 
   @PreDestroy
   public void stop() {
     if (_evictionHandler != null)
       _evictionHandler.cancel(true);
+    if (_executor != null)
+      _executor.shutdownNow();
   }
 
   /****
