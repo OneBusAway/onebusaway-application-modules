@@ -130,7 +130,7 @@
         lazy-init="true" />
 
     <!-- OTP Graph Builder -->
-
+    <!-- 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="otp_graph" />
         <property name="afterTaskName" value="block_indices" />
@@ -144,7 +144,7 @@
         <property name="graphBundle" ref="otpGraphBundle" />
         <property name="graphBuilders">
             <list>
-                <!-- <ref bean="osmBuilder" /> -->
+                <ref bean="osmBuilder" />
             </list>
         </property>
         <property name="alwaysRebuild" value="true" />
@@ -155,6 +155,7 @@
     <bean id="osmBuilder" class="org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl">
         <property name="provider" ref="osmProvider" />
     </bean>
+    -->
 
     <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
         <property name="regionsSource">
