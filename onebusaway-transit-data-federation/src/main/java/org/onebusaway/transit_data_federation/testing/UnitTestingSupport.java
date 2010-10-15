@@ -14,6 +14,7 @@ import java.util.TreeSet;
 
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -27,6 +28,7 @@ import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockStop
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockTripEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdOverlapCache;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ShapePointsTemporaryService;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
@@ -76,7 +78,7 @@ public class UnitTestingSupport {
   public static String format(Date dateA) {
     return UnitTestingSupport._format.format(dateA);
   }
-  
+
   public static Date getTimeAsDay(Date t) {
     return getTimeAsDay(t.getTime());
   }
@@ -161,6 +163,7 @@ public class UnitTestingSupport {
         new ArrayList<LocalizedServiceId>(serviceIds),
         new ArrayList<LocalizedServiceId>()));
     builder.setTrips(tripEntries);
+    builder.setTripGapDistances(new double[tripEntries.size()]);
     BlockConfigurationEntry configuration = builder.create();
 
     List<BlockConfigurationEntry> configurations = block.getConfigurations();
@@ -181,7 +184,8 @@ public class UnitTestingSupport {
 
     BlockConfigurationEntriesFactory factory = new BlockConfigurationEntriesFactory();
     factory.setServiceIdOverlapCache(cache);
-
+    factory.setShapePointsService(new ShapePointsTemporaryService());
+    
     List<TripEntryImpl> tripsInBlock = new ArrayList<TripEntryImpl>();
     for (TripEntryImpl trip : trips)
       tripsInBlock.add(trip);
@@ -261,6 +265,7 @@ public class UnitTestingSupport {
     builder.setBlock(block);
     builder.setServiceIds(serviceIds);
     builder.setTrips(Arrays.asList(trips));
+    builder.setTripGapDistances(new double[trips.length]);
     return builder.create();
   }
 
@@ -334,6 +339,17 @@ public class UnitTestingSupport {
     return shapePoints;
   }
 
+  public static ShapePoint shapePoint(String id, int sequence, double lat,
+      double lon) {
+    ShapePoint point = new ShapePoint();
+    point.setId(sequence);
+    point.setSequence(sequence);
+    point.setLat(lat);
+    point.setLon(lon);
+    point.setShapeId(aid(id));
+    return point;
+  }
+
   public static void addServiceDates(CalendarServiceData data, String sid,
       ServiceDate... serviceDates) {
     AgencyAndId serviceId = aid(sid);
@@ -371,4 +387,5 @@ public class UnitTestingSupport {
 
     data.putServiceDatesForServiceId(serviceId, serviceDates);
   }
+
 }

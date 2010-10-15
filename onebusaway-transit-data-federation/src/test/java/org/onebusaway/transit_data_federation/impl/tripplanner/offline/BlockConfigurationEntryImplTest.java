@@ -26,8 +26,7 @@ public class BlockConfigurationEntryImplTest {
   @Test
   public void test() {
 
-    
-    ServiceIdActivation serviceIds = serviceIds(lsids("sA"),lsids("sB"));
+    ServiceIdActivation serviceIds = serviceIds(lsids("sA"), lsids("sB"));
 
     StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
     StopEntryImpl stopB = stop("stopB", 47.1, -122.0);
@@ -59,12 +58,17 @@ public class BlockConfigurationEntryImplTest {
     builder.setBlock(block);
     builder.setTrips(trips);
     builder.setServiceIds(serviceIds);
+    builder.setTripGapDistances(new double[] {10.0, 20.0, 0.0});
     BlockConfigurationEntry entry = builder.create();
 
     assertSame(block, entry.getBlock());
     assertSame(serviceIds, entry.getServiceIds());
-    
-    assertEquals(4500.0, entry.getTotalBlockDistance(), 0.0);
+
+    assertEquals(4530.0, entry.getTotalBlockDistance(), 0.0);
+
+    /****
+     * Trips
+     ****/
 
     List<BlockTripEntry> blockTrips = entry.getTrips();
     assertEquals(3, blockTrips.size());
@@ -79,16 +83,20 @@ public class BlockConfigurationEntryImplTest {
     blockTrip = blockTrips.get(1);
     assertEquals(2, blockTrip.getAccumulatedStopTimeIndex());
     assertEquals(15 * 60, blockTrip.getAccumulatedSlackTime());
-    assertEquals(1000.0, blockTrip.getDistanceAlongBlock(), 0.0);
+    assertEquals(1010.0, blockTrip.getDistanceAlongBlock(), 0.0);
     assertSame(blockTrips.get(2), blockTrip.getNextTrip());
     assertSame(blockTrips.get(0), blockTrip.getPreviousTrip());
 
     blockTrip = blockTrips.get(2);
     assertEquals(4, blockTrip.getAccumulatedStopTimeIndex());
     assertEquals(27 * 60, blockTrip.getAccumulatedSlackTime());
-    assertEquals(3000.0, blockTrip.getDistanceAlongBlock(), 0.0);
+    assertEquals(3030.0, blockTrip.getDistanceAlongBlock(), 0.0);
     assertNull(blockTrip.getNextTrip());
     assertSame(blockTrips.get(1), blockTrip.getPreviousTrip());
+
+    /****
+     * Stop Times
+     ****/
 
     List<BlockStopTimeEntry> stopTimes = entry.getStopTimes();
     assertEquals(6, stopTimes.size());
@@ -110,28 +118,28 @@ public class BlockConfigurationEntryImplTest {
     bst = stopTimes.get(2);
     assertEquals(15 * 60, bst.getAccumulatedSlackTime());
     assertEquals(2, bst.getBlockSequence());
-    assertEquals(1400, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(1410, bst.getDistaceAlongBlock(), 0.0);
     assertSame(st3, bst.getStopTime());
     assertSame(blockTrips.get(1), bst.getTrip());
 
     bst = stopTimes.get(3);
     assertEquals(20 * 60, bst.getAccumulatedSlackTime());
     assertEquals(3, bst.getBlockSequence());
-    assertEquals(2600, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(2610, bst.getDistaceAlongBlock(), 0.0);
     assertSame(st4, bst.getStopTime());
     assertSame(blockTrips.get(1), bst.getTrip());
 
     bst = stopTimes.get(4);
     assertEquals(27 * 60, bst.getAccumulatedSlackTime());
     assertEquals(4, bst.getBlockSequence());
-    assertEquals(3300, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(3330, bst.getDistaceAlongBlock(), 0.0);
     assertSame(st5, bst.getStopTime());
     assertSame(blockTrips.get(2), bst.getTrip());
 
     bst = stopTimes.get(5);
     assertEquals(32 * 60, bst.getAccumulatedSlackTime());
     assertEquals(5, bst.getBlockSequence());
-    assertEquals(4200, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(4230, bst.getDistaceAlongBlock(), 0.0);
     assertSame(st6, bst.getStopTime());
     assertSame(blockTrips.get(2), bst.getTrip());
   }

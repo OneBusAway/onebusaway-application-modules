@@ -14,8 +14,7 @@ public class WalkEdgeEntryImpl implements WalkEdgeEntry {
 
   private double _distance;
 
-  public WalkEdgeEntryImpl(WalkNodeEntry from, WalkNodeEntry to,
-      double distance) {
+  public WalkEdgeEntryImpl(WalkNodeEntry from, WalkNodeEntry to, double distance) {
     _from = from;
     _to = to;
     _distance = distance;
@@ -35,7 +34,7 @@ public class WalkEdgeEntryImpl implements WalkEdgeEntry {
 
   @Override
   public boolean equals(Object obj) {
-    if( obj == null || !(obj instanceof WalkEdgeEntryImpl))
+    if (obj == null || !(obj instanceof WalkEdgeEntryImpl))
       return false;
     WalkEdgeEntryImpl edge = (WalkEdgeEntryImpl) obj;
     return _from.equals(edge._from) && _to.equals(edge._to);
@@ -44,5 +43,10 @@ public class WalkEdgeEntryImpl implements WalkEdgeEntry {
   @Override
   public int hashCode() {
     return _from.hashCode() + 31 * _to.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return "Edge(from=" + _from + " to=" + _to + ")";
   }
 }

@@ -51,8 +51,12 @@ public class TripPlannerGraphTaskImplTest {
     ServiceIdOverlapCache serviceIdOverlapCache = new ServiceIdOverlapCache();
     serviceIdOverlapCache.setCalendarService(calendarService);
 
+    ShapePointsTemporaryService shapePointsService = new ShapePointsTemporaryService();
+    shapePointsService.setGtfsDao(gtfsDao);
+    
     BlockConfigurationEntriesFactory blockConfigurationEntriesFactory = new BlockConfigurationEntriesFactory();
     blockConfigurationEntriesFactory.setServiceIdOverlapCache(serviceIdOverlapCache);
+    blockConfigurationEntriesFactory.setShapePointsService(shapePointsService);
 
     BlockEntriesFactory blockEntriesFactory = new BlockEntriesFactory();
     blockEntriesFactory.setGtfsDao(gtfsDao);
@@ -67,6 +71,7 @@ public class TripPlannerGraphTaskImplTest {
     TripEntriesFactory tripEntriesFactory = new TripEntriesFactory();
     tripEntriesFactory.setGtfsDao(gtfsDao);
     tripEntriesFactory.setStopTimeEntriesFactory(stopTimeEntriesFactory);
+    tripEntriesFactory.setShapePointsService(shapePointsService);
     tripEntriesFactory.setUniqueService(uniqueService);
     tripEntriesFactory.setWhereDao(whereDao);
 

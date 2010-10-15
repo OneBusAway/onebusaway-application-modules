@@ -35,16 +35,20 @@ public class DistanceAlongShapeLibrary {
     List<XYPoint> projectedShapePoints = _shapePointsLibrary.getProjectedShapePoints(
         shapePoints, projection);
 
+    double[] shapePointsDistTraveled = shapePoints.getDistTraveled();
+    
     List<List<PointAndIndex>> possibleAssignments = computePotentialAssignments(
-        projection, projectedShapePoints, shapePoints.getDistTraveled(),
+        projection, projectedShapePoints, shapePointsDistTraveled,
         stopTimes);
+    
+    double maxDistanceTraveled = shapePointsDistTraveled[shapePointsDistTraveled.length - 1];
 
     List<PointAndIndex> bestAssignment = computeBestAssignment(shapePoints,
         stopTimes, possibleAssignments, projection, projectedShapePoints);
 
     for (int i = 0; i < distances.length; i++) {
       PointAndIndex pindex = bestAssignment.get(i);
-      distances[i] = pindex.distanceAlongShape;
+      distances[i] = Math.min(pindex.distanceAlongShape,maxDistanceTraveled);
     }
     return distances;
   }

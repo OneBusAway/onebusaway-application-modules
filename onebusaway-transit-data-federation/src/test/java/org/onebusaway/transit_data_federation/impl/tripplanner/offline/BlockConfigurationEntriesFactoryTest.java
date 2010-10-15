@@ -16,12 +16,16 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
 public class BlockConfigurationEntriesFactoryTest {
 
@@ -29,6 +33,7 @@ public class BlockConfigurationEntriesFactoryTest {
 
   private BlockConfigurationEntriesFactory _factory;
 
+  @SuppressWarnings("unchecked")
   @Before
   public void before() {
 
@@ -53,11 +58,28 @@ public class BlockConfigurationEntriesFactoryTest {
     serviceIdOverlapCache.setCalendarService(_calendarService);
 
     /****
+     * ShapePointsService
+     ****/
+
+    ShapePointsTemporaryService shapePointsService = Mockito.mock(ShapePointsTemporaryService.class);
+
+    Mockito.when(
+        shapePointsService.computeGapDistancesBetweenTrips((List<TripEntry>) Mockito.any())).thenAnswer(
+        new Answer<double[]>() {
+          @Override
+          public double[] answer(InvocationOnMock invocation) throws Throwable {
+            List<TripEntry> trips = (List<TripEntry>) invocation.getArguments()[0];
+            return new double[trips.size()];
+          }
+        });
+
+    /****
      * Factory
      ****/
 
     _factory = new BlockConfigurationEntriesFactory();
     _factory.setServiceIdOverlapCache(serviceIdOverlapCache);
+    _factory.setShapePointsService(shapePointsService);
   }
 
   @Test

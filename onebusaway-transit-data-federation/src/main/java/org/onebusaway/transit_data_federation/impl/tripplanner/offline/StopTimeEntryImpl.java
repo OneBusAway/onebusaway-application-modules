@@ -146,7 +146,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
   @Override
   public String toString() {
-    return "StopTimeEntryImpl(trip=" + _trip + " arrival=" + _arrivalTime
+    return "StopTimeEntryImpl(stop=" + _stop.getId() + " trip=" + _trip + " arrival=" + _arrivalTime
         + " departure=" + _departureTime + ")";
   }
 

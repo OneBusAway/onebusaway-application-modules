@@ -2,23 +2,17 @@ package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
 import org.onebusaway.gtfs.model.Agency;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.offline.UniqueService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
@@ -38,7 +32,7 @@ public class TripEntriesFactory {
 
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
 
-  private Map<AgencyAndId, ShapePoints> _shapePointsCache = new HashMap<AgencyAndId, ShapePoints>();
+  private ShapePointsTemporaryService _shapePointsService;
 
   @Autowired
   public void setUniqueService(UniqueService uniqueService) {
@@ -48,6 +42,11 @@ public class TripEntriesFactory {
   @Autowired
   public void setWhereDao(TransitDataFederationDao whereDao) {
     _whereDao = whereDao;
+  }
+  
+  @Autowired
+  public void setShapePointsService(ShapePointsTemporaryService shapePointsService) {
+    _shapePointsService = shapePointsService;
   }
 
   @Autowired
@@ -89,7 +88,7 @@ public class TripEntriesFactory {
 
       // Clear the shape cache between routes, since there is less likelihood of
       // overlap
-      _shapePointsCache.clear();
+      _shapePointsService.clearCache();
     }
 
     graph.refreshTripMapping();
@@ -103,7 +102,10 @@ public class TripEntriesFactory {
     if( stopTimes.isEmpty())
       return null;
       
-    ShapePoints shapePoints = getShapePoints(trip);
+    ShapePoints shapePoints = null;
+    
+    if( trip.getShapeId() != null)
+      shapePoints = _shapePointsService.getShapePoints(trip.getShapeId());
 
     List<StopTimeEntryImpl> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
         graph, stopTimes, shapePoints);
@@ -139,31 +141,6 @@ public class TripEntriesFactory {
     for (StopTimeEntryImpl stopTime : stopTimesForTrip)
       stopTimes.add(stopTime);
     return stopTimes;
-  }
-
-  private ShapePoints getShapePoints(Trip trip) {
-
-    // Scenarios
-    AgencyAndId shapeId = trip.getShapeId();
-
-    if (shapeId == null)
-      return null;
-
-    if (_shapePointsCache.containsKey(shapeId))
-      return _shapePointsCache.get(shapeId);
-
-    ShapePointsFactory factory = new ShapePointsFactory();
-    List<ShapePoint> rawPoints = _gtfsDao.getShapePointsForShapeId(shapeId);
-    rawPoints = new ArrayList<ShapePoint>(rawPoints);
-    Collections.sort(rawPoints);
-    for (ShapePoint rawPoint : rawPoints)
-      factory.addPoint(rawPoint.getLat(), rawPoint.getLon());
-    ShapePoints shapePoints = factory.create();
-    if (shapePoints.isEmpty())
-      shapePoints = null;
-    _shapePointsCache.put(shapeId, shapePoints);
-
-    return shapePoints;
   }
 
   private double getTripDistance(List<StopTimeEntryImpl> stopTimes,

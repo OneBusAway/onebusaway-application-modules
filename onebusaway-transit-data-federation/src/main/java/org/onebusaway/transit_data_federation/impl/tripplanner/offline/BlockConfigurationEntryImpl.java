@@ -75,8 +75,8 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
   @Override
   public String toString() {
-    return "BlockConfiguration [block=" + block.getId() + " serviceIds=" + serviceIds + " trips=" + trips
-        + "]";
+    return "BlockConfiguration [block=" + block.getId() + " serviceIds="
+        + serviceIds + " trips=" + trips + "]";
   }
 
   public static class Builder {
@@ -86,6 +86,8 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
     private ServiceIdActivation serviceIds;
 
     private List<TripEntry> trips;
+
+    private double[] tripGapDistances;
 
     private Builder() {
 
@@ -103,14 +105,20 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
       this.trips = trips;
     }
 
+    public void setTripGapDistances(double[] tripGapDistances) {
+      this.tripGapDistances = tripGapDistances;
+    }
+
     public BlockConfigurationEntry create() {
       return new BlockConfigurationEntryImpl(this);
     }
 
     private double computeTotalBlockDistance() {
       double distance = 0;
-      for (TripEntry trip : trips)
-        distance += trip.getTotalTripDistance();
+      for (int i = 0; i < trips.size(); i++) {
+        TripEntry trip = trips.get(i);
+        distance += trip.getTotalTripDistance() + tripGapDistances[i];
+      }
       return distance;
     }
 
@@ -169,7 +177,8 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
         accumulatedStopTimeIndex += stopTimes.size();
         for (StopTimeEntry stopTime : stopTimes)
           accumulatedSlackTime += stopTime.getSlackTime();
-        distanceAlongBlock += tripEntry.getTotalTripDistance();
+        distanceAlongBlock += tripEntry.getTotalTripDistance()
+            + tripGapDistances[i];
 
         prev = blockTripEntry;
       }
@@ -178,6 +187,7 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
       return blockTrips;
     }
+
   }
 
   private class BlockStopTimeList extends AbstractList<BlockStopTimeEntry>

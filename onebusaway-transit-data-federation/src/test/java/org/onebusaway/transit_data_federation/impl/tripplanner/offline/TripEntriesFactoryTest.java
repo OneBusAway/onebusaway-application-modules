@@ -3,6 +3,8 @@ package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsid;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.shapePoint;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
@@ -14,7 +16,6 @@ import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
@@ -29,6 +30,9 @@ public class TripEntriesFactoryTest {
 
     TripPlannerGraphImpl graph = new TripPlannerGraphImpl();
     GtfsRelationalDaoImpl gtfsDao = new GtfsRelationalDaoImpl();
+
+    ShapePointsTemporaryService shapePointsService = new ShapePointsTemporaryService();
+    shapePointsService.setGtfsDao(gtfsDao);
 
     Agency agency = new Agency();
     agency.setId("1");
@@ -77,15 +81,16 @@ public class TripEntriesFactoryTest {
     stB.setTrip(trip);
     gtfsDao.saveEntity(stB);
 
-    gtfsDao.saveEntity(shapePoint(shapeId, 0, 47.673840100841396,
+    gtfsDao.saveEntity(shapePoint("shapeId", 1, 47.673840100841396,
         -122.38756621771239));
-    gtfsDao.saveEntity(shapePoint(shapeId, 1, 47.668667271970484,
+    gtfsDao.saveEntity(shapePoint("shapeId", 2, 47.668667271970484,
         -122.38756621771239));
-    gtfsDao.saveEntity(shapePoint(shapeId, 2, 47.66868172192725,
+    gtfsDao.saveEntity(shapePoint("shapeId", 3, 47.66868172192725,
         -122.3661729186096));
 
     TripEntriesFactory factory = new TripEntriesFactory();
     factory.setGtfsDao(gtfsDao);
+    factory.setShapePointsService(shapePointsService);
     factory.setUniqueService(new UniqueServiceImpl());
 
     RouteCollection rc = new RouteCollection();
@@ -107,7 +112,7 @@ public class TripEntriesFactoryTest {
     assertEquals(route.getId(), entry.getRouteId());
     assertEquals(lsid("serviceId"), entry.getServiceId());
     assertEquals(trip.getShapeId(), entry.getShapeId());
-    assertEquals(1601.9, entry.getTotalTripDistance(), 0.1);
+    assertEquals(2177.1, entry.getTotalTripDistance(), 0.1);
 
     List<StopTimeEntry> stopTimes = entry.getStopTimes();
     assertEquals(2, stopTimes.size());
@@ -115,16 +120,5 @@ public class TripEntriesFactoryTest {
     for (StopTimeEntry stopTime : stopTimes) {
       assertSame(entry, stopTime.getTrip());
     }
-  }
-
-  private ShapePoint shapePoint(AgencyAndId shapeId, int sequence, double lat,
-      double lon) {
-    ShapePoint point = new ShapePoint();
-    point.setId(sequence);
-    point.setSequence(sequence);
-    point.setLat(lat);
-    point.setLon(lon);
-    point.setShapeId(shapeId);
-    return point;
   }
 }

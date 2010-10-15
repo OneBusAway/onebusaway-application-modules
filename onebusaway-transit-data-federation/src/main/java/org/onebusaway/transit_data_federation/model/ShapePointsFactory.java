@@ -18,10 +18,6 @@ public class ShapePointsFactory {
 
   public void addPoint(double lat, double lon) {
     CoordinatePoint point = new CoordinatePoint(lat, lon);
-    /*
-     * if( ! _points.isEmpty() ) { CoordinatePoint prev =
-     * _points.get(_points.size()-1); if( prev.equals(point)) return; }
-     */
     _points.add(point);
   }
 

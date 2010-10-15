@@ -22,10 +22,18 @@ public class BlockConfigurationEntriesFactory {
 
   private ServiceIdOverlapCache _serviceIdOverlapCache;
 
+  private ShapePointsTemporaryService _shapePointsService;
+
   @Autowired
   public void setServiceIdOverlapCache(
       ServiceIdOverlapCache serviceIdOverlapCache) {
     _serviceIdOverlapCache = serviceIdOverlapCache;
+  }
+
+  @Autowired
+  public void setShapePointsService(
+      ShapePointsTemporaryService shapePointsService) {
+    _shapePointsService = shapePointsService;
   }
 
   public void processBlockConfigurations(BlockEntryImpl block,
@@ -66,10 +74,13 @@ public class BlockConfigurationEntriesFactory {
       Collections.sort(trips, _blockTripComparator);
       trips.trimToSize();
 
+      double[] tripGapDistances = _shapePointsService.computeGapDistancesBetweenTrips(trips);
+
       BlockConfigurationEntryImpl.Builder builder = BlockConfigurationEntryImpl.builder();
       builder.setBlock(block);
       builder.setServiceIds(serviceIds);
       builder.setTrips(trips);
+      builder.setTripGapDistances(tripGapDistances);
 
       configurations.add(builder.create());
     }
