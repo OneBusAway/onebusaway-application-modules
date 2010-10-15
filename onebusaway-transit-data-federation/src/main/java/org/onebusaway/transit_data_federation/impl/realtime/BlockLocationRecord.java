@@ -61,6 +61,8 @@ public class BlockLocationRecord {
 
   private final double locationLon;
 
+  private final String status;
+
   @Embedded
   @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "vehicle_agencyId", length = 50)),
@@ -80,6 +82,7 @@ public class BlockLocationRecord {
     distanceAlongBlock = Double.NaN;
     locationLat = Double.NaN;
     locationLon = Double.NaN;
+    status = null;
     vehicleId = null;
   }
 
@@ -92,6 +95,7 @@ public class BlockLocationRecord {
     this.distanceAlongBlock = builder.distanceAlongBlock;
     this.locationLat = builder.locationLat;
     this.locationLon = builder.locationLon;
+    this.status = builder.status;
     this.vehicleId = builder.vehicleId;
   }
 
@@ -166,7 +170,13 @@ public class BlockLocationRecord {
   }
 
   public CoordinatePoint getLocation() {
+    if (!hasLocation())
+      return null;
     return new CoordinatePoint(locationLat, locationLon);
+  }
+
+  public String getStatus() {
+    return status;
   }
 
   /**
@@ -203,6 +213,8 @@ public class BlockLocationRecord {
     private double locationLat = Double.NaN;
 
     private double locationLon = Double.NaN;
+
+    private String status;
 
     private AgencyAndId vehicleId;
 
@@ -248,12 +260,17 @@ public class BlockLocationRecord {
       }
     }
 
-    public BlockLocationRecord create() {
-      return new BlockLocationRecord(this);
+    public void setStatus(String status) {
+      this.status = status;
     }
 
     public void setVehicleId(AgencyAndId vehicleId) {
       this.vehicleId = vehicleId;
     }
+
+    public BlockLocationRecord create() {
+      return new BlockLocationRecord(this);
+    }
+
   }
 }

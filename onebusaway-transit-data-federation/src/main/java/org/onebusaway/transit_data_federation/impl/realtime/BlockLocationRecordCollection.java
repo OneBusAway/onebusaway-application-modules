@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.onebusaway.collections.adapter.AdapterLibrary;
+import org.onebusaway.collections.adapter.IAdapter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -21,6 +23,10 @@ import org.onebusaway.utility.InterpolationLibrary;
 public final class BlockLocationRecordCollection implements Serializable {
 
   private static final long serialVersionUID = 1L;
+
+  private static final ScheduleDeviationAdapter _scheduleDeviationAdapter = new ScheduleDeviationAdapter();
+
+  private static final DistanceAlongBlockAdapter _distanceAlongBlockAdapter = new DistanceAlongBlockAdapter();
 
   private BlockInstance blockInstance;
 
@@ -39,47 +45,21 @@ public final class BlockLocationRecordCollection implements Serializable {
   private final long measuredLastUpdateTime;
 
   /**
-   * Schedule deviations at particular points in time. Key = unix time ms and
-   * Value = seconds.
+   * Vehicle location records at particular points in time. Key = unix time ms
    */
-  private final SortedMap<Long, Double> scheduleDeviationsByTime;
-
-  /**
-   * Schedule deviations at particular points in the schedule. Key = schedule
-   * time (secs) and Value = seconds.
-   */
-  private final SortedMap<Integer, Double> scheduleDeviationsByScheduleTime;
-
-  /**
-   * Distance along block at particular points in time. Key = unix time ms and
-   * Value = meters.
-   */
-  private final SortedMap<Long, Double> distancesAlongBlock;
-
-  /**
-   * Locations at particular points in time. Key = unix time ms and Value =
-   * location.
-   */
-  private final SortedMap<Long, CoordinatePoint> locations;
+  private final SortedMap<Long, BlockLocationRecord> records;
 
   public BlockLocationRecordCollection(long fromTime, long toTime,
-      SortedMap<Long, Double> scheduleDeviationsByTime,
-      SortedMap<Integer, Double> scheduleDeviationsByScheduleTime,
-      SortedMap<Long, Double> distancesAlongBlock,
-      SortedMap<Long, CoordinatePoint> locations) {
+      SortedMap<Long, BlockLocationRecord> records) {
     this.fromTime = fromTime;
     this.toTime = toTime;
-    this.scheduleDeviationsByTime = scheduleDeviationsByTime;
-    this.scheduleDeviationsByScheduleTime = scheduleDeviationsByScheduleTime;
-    this.distancesAlongBlock = distancesAlongBlock;
-    this.locations = locations;
+    this.records = records;
     this.measuredLastUpdateTime = System.currentTimeMillis();
   }
 
   public BlockLocationRecordCollection(long fromTime, long toTime) {
-    this(fromTime, toTime, new TreeMap<Long, Double>(),
-        new TreeMap<Integer, Double>(), new TreeMap<Long, Double>(),
-        new TreeMap<Long, CoordinatePoint>());
+    this(fromTime, toTime, new TreeMap<Long, BlockLocationRecord>());
+
   }
 
   /**
@@ -97,10 +77,7 @@ public final class BlockLocationRecordCollection implements Serializable {
 
     long fromTime = Long.MAX_VALUE;
     long toTime = Long.MIN_VALUE;
-    SortedMap<Long, Double> scheduleDeviationsByTime = new TreeMap<Long, Double>();
-    SortedMap<Integer, Double> scheduleDeviationsByScheduleTime = new TreeMap<Integer, Double>();
-    SortedMap<Long, Double> distancesAlongBlock = new TreeMap<Long, Double>();
-    SortedMap<Long, CoordinatePoint> locations = new TreeMap<Long, CoordinatePoint>();
+    SortedMap<Long, BlockLocationRecord> map = new TreeMap<Long, BlockLocationRecord>();
 
     AgencyAndId vehicleId = null;
 
@@ -108,23 +85,13 @@ public final class BlockLocationRecordCollection implements Serializable {
       fromTime = Math.min(fromTime, record.getTime());
       toTime = Math.max(toTime, record.getTime());
 
-      if (record.hasScheduleDeviation())
-        scheduleDeviationsByTime.put(record.getTime(),
-            record.getScheduleDeviation());
-
-      if (record.hasDistanceAlongBlock())
-        distancesAlongBlock.put(record.getTime(),
-            record.getDistanceAlongBlock());
-
-      if (record.hasLocation())
-        locations.put(record.getTime(), record.getLocation());
+      map.put(record.getTime(), record);
 
       vehicleId = checkVehicleId(vehicleId, record);
     }
 
     BlockLocationRecordCollection collection = new BlockLocationRecordCollection(
-        fromTime, toTime, scheduleDeviationsByTime,
-        scheduleDeviationsByScheduleTime, distancesAlongBlock, locations);
+        fromTime, toTime, map);
     collection.blockInstance = blockInstance;
     collection.vehicleId = vehicleId;
     return collection;
@@ -149,71 +116,58 @@ public final class BlockLocationRecordCollection implements Serializable {
   public long getMeasuredLastUpdateTime() {
     return measuredLastUpdateTime;
   }
-  
-  public boolean hasScheduleDeviations() {
-    return !scheduleDeviationsByTime.isEmpty();
-  }
-
-  public boolean hasDistancesAlongBlock() {
-    return !distancesAlongBlock.isEmpty();
-  }
-
-  public boolean hasLocations() {
-    return !locations.isEmpty();
-  }
 
   public boolean isEmpty() {
-    return scheduleDeviationsByTime.isEmpty() && distancesAlongBlock.isEmpty()
-        && locations.isEmpty();
+    return records.isEmpty();
   }
 
-  public int getScheduleDeviationForTargetTime(long targetTime) {
+  public double getScheduleDeviationForTargetTime(long targetTime) {
 
-    if (scheduleDeviationsByTime.isEmpty())
+    if (records.isEmpty())
       return 0;
 
-    return (int) Math.round(InterpolationLibrary.interpolate(
-        scheduleDeviationsByTime, targetTime, EOutOfRangeStrategy.LAST_VALUE));
-  }
+    SortedMap<Long, Double> m = AdapterLibrary.adaptSortedMap(records,
+        _scheduleDeviationAdapter);
 
-  public int getScheduleDeviationForScheduleTime(int scheduleTime) {
-    if (scheduleDeviationsByScheduleTime.isEmpty())
-      return 0;
-
-    return (int) Math.round(InterpolationLibrary.interpolate(
-        scheduleDeviationsByScheduleTime, scheduleTime,
+    return Math.round(InterpolationLibrary.interpolate(m, targetTime,
         EOutOfRangeStrategy.LAST_VALUE));
   }
 
   public double getDistanceAlongBlockForTargetTime(long targetTime) {
 
-    if (distancesAlongBlock.isEmpty())
+    if (records.isEmpty())
       return Double.NaN;
 
-    return InterpolationLibrary.interpolate(distancesAlongBlock, targetTime,
+    SortedMap<Long, Double> m = AdapterLibrary.adaptSortedMap(records,
+        _distanceAlongBlockAdapter);
+
+    return InterpolationLibrary.interpolate(m, targetTime,
         EOutOfRangeStrategy.INTERPOLATE);
   }
 
   public CoordinatePoint getLastLocationForTargetTime(long targetTime) {
 
-    if (locations.isEmpty())
+    BlockLocationRecord record = previousRecord(targetTime);
+    if (record == null)
       return null;
+    return record.getLocation();
+  }
 
-    SortedMap<Long, CoordinatePoint> headMap = locations.headMap(targetTime + 1);
-    if (headMap.isEmpty())
+  public String getStatusForTargetTime(long targetTime) {
+
+    BlockLocationRecord record = previousRecord(targetTime);
+    if (record == null)
       return null;
-
-    return headMap.get(headMap.lastKey());
+    return record.getStatus();
   }
 
   public long getLastUpdateTime(long targetTime) {
-    if (!scheduleDeviationsByTime.isEmpty())
-      return getLastUpdateTime(targetTime, scheduleDeviationsByTime);
-    if (!distancesAlongBlock.isEmpty())
-      return getLastUpdateTime(targetTime, distancesAlongBlock);
-    if (!locations.isEmpty())
-      return getLastUpdateTime(targetTime, locations);
-    return 0;
+    if (records.isEmpty())
+      return 0;
+    SortedMap<Long, BlockLocationRecord> headMap = records.headMap(targetTime + 1);
+    if (headMap.isEmpty())
+      return records.firstKey();
+    return headMap.lastKey();
   }
 
   public BlockLocationRecordCollection addRecord(BlockInstance blockInstance,
@@ -228,10 +182,9 @@ public final class BlockLocationRecordCollection implements Serializable {
     long updatedToTime = Math.max(toTime, time);
     long updatedWindowSize = updatedToTime - updatedFromTime;
 
-    SortedMap<Long, Double> updatedScheduleDeviationsByTime = getUpdatedScheduleDeviationsByTime(record);
-    SortedMap<Integer, Double> updatedScheduleDeviationsByScheduleTime = getUpdatedScheduleDeviationsByScheduleTime(record);
-    SortedMap<Long, Double> updatedDistancesAlongBlock = getUpdatedDistancesAlongBlock(record);
-    SortedMap<Long, CoordinatePoint> updatedLocations = getUpdatedLocations(record);
+    SortedMap<Long, BlockLocationRecord> updatedRecords = new TreeMap<Long, BlockLocationRecord>(
+        this.records);
+    updatedRecords.put(record.getTime(), record);
 
     if (updatedWindowSize > windowSize) {
 
@@ -239,28 +192,21 @@ public final class BlockLocationRecordCollection implements Serializable {
       updatedFromTime = (long) (time - (time - updatedFromTime) * ratio);
       updatedToTime = (long) (time + (updatedToTime - time) * ratio);
 
-      updatedScheduleDeviationsByTime = submap(updatedFromTime, updatedToTime,
-          updatedScheduleDeviationsByTime);
-      updatedDistancesAlongBlock = submap(updatedFromTime, updatedToTime,
-          updatedDistancesAlongBlock);
-      updatedLocations = submap(updatedFromTime, updatedToTime,
-          updatedLocations);
-
-      updatedScheduleDeviationsByScheduleTime = submap(
-          updatedScheduleDeviationsByScheduleTime, updatedFromTime,
-          updatedToTime, record.getServiceDate());
+      updatedRecords = submap(updatedFromTime, updatedToTime, updatedRecords);
     }
 
     BlockLocationRecordCollection collection = new BlockLocationRecordCollection(
-        updatedFromTime, updatedToTime, updatedScheduleDeviationsByTime,
-        updatedScheduleDeviationsByScheduleTime, updatedDistancesAlongBlock,
-        updatedLocations);
+        updatedFromTime, updatedToTime, updatedRecords);
 
     collection.blockInstance = blockInstance;
     collection.vehicleId = vehicleId;
 
     return collection;
   }
+
+  /****
+   * Private Methods
+   ****/
 
   private <T> SortedMap<Long, T> submap(long updatedFromTime,
       long updatedToTime, SortedMap<Long, T> map) {
@@ -269,110 +215,16 @@ public final class BlockLocationRecordCollection implements Serializable {
     return new TreeMap<Long, T>(map);
   }
 
-  private SortedMap<Integer, Double> submap(
-      SortedMap<Integer, Double> scheduleDeviationsByScheduleTime,
-      long updatedFromTime, long updatedToTime, long serviceDate) {
+  private BlockLocationRecord previousRecord(long targetTime) {
 
-    scheduleDeviationsByScheduleTime = new TreeMap<Integer, Double>(
-        scheduleDeviationsByScheduleTime);
+    if (records.isEmpty())
+      return null;
 
-    while (!scheduleDeviationsByScheduleTime.isEmpty()) {
-      Integer key = scheduleDeviationsByScheduleTime.firstKey();
-      Double deviation = scheduleDeviationsByScheduleTime.get(key);
-      long time = (long) (serviceDate + (key + deviation) * 1000);
-      if (time < updatedFromTime)
-        scheduleDeviationsByScheduleTime.remove(key);
-      else
-        break;
-    }
-
-    while (!scheduleDeviationsByScheduleTime.isEmpty()) {
-      Integer key = scheduleDeviationsByScheduleTime.lastKey();
-      Double deviation = scheduleDeviationsByScheduleTime.get(key);
-      long time = (long) (serviceDate + (key + deviation) * 1000);
-      if (updatedToTime < time)
-        scheduleDeviationsByScheduleTime.remove(key);
-      else
-        break;
-    }
-
-    return scheduleDeviationsByScheduleTime;
-  }
-
-  private <V> long getLastUpdateTime(long targetTime, SortedMap<Long, V> map) {
-    if (map.isEmpty())
-      return 0;
-    SortedMap<Long, V> headMap = map.headMap(targetTime + 1);
+    SortedMap<Long, BlockLocationRecord> headMap = records.headMap(targetTime + 1);
     if (headMap.isEmpty())
-      return map.firstKey();
-    return headMap.lastKey();
-  }
+      return null;
 
-  /****
-   * Private Methods
-   ****/
-
-  private SortedMap<Long, Double> getUpdatedScheduleDeviationsByTime(
-      BlockLocationRecord record) {
-
-    SortedMap<Long, Double> updatedScheduleDeviations = this.scheduleDeviationsByTime;
-
-    if (record.hasScheduleDeviation()) {
-      updatedScheduleDeviations = new TreeMap<Long, Double>(
-          updatedScheduleDeviations);
-      updatedScheduleDeviations.put(record.getTime(),
-          record.getScheduleDeviation());
-    }
-
-    return updatedScheduleDeviations;
-  }
-
-  private SortedMap<Integer, Double> getUpdatedScheduleDeviationsByScheduleTime(
-      BlockLocationRecord record) {
-
-    SortedMap<Integer, Double> updatedScheduleDeviations = this.scheduleDeviationsByScheduleTime;
-
-    if (record.hasScheduleDeviation()) {
-      double scheduleDeviation = record.getScheduleDeviation();
-      int effectiveScheduleTime = (int) ((record.getTime() - record.getServiceDate()) / 1000 - scheduleDeviation);
-      updatedScheduleDeviations = new TreeMap<Integer, Double>(
-          updatedScheduleDeviations);
-      // We clear the tail map so that if a new record comes in that increases
-      // the schedule deviation to effective move us backwards, we clear out any
-      // previous records in that interval
-      updatedScheduleDeviations.tailMap(effectiveScheduleTime).clear();
-      updatedScheduleDeviations.put(effectiveScheduleTime, scheduleDeviation);
-    }
-
-    return updatedScheduleDeviations;
-  }
-
-  private SortedMap<Long, Double> getUpdatedDistancesAlongBlock(
-      BlockLocationRecord record) {
-
-    SortedMap<Long, Double> updatedDistancesAlongBlock = this.distancesAlongBlock;
-
-    if (record.hasDistanceAlongBlock()) {
-      updatedDistancesAlongBlock = new TreeMap<Long, Double>(
-          updatedDistancesAlongBlock);
-      updatedDistancesAlongBlock.put(record.getTime(),
-          record.getDistanceAlongBlock());
-    }
-
-    return updatedDistancesAlongBlock;
-  }
-
-  private SortedMap<Long, CoordinatePoint> getUpdatedLocations(
-      BlockLocationRecord record) {
-
-    SortedMap<Long, CoordinatePoint> updatedLocations = this.locations;
-
-    if (record.hasLocation()) {
-      updatedLocations = new TreeMap<Long, CoordinatePoint>(updatedLocations);
-      updatedLocations.put(record.getTime(), record.getLocation());
-    }
-
-    return updatedLocations;
+    return headMap.get(headMap.lastKey());
   }
 
   private static BlockInstance checkBlockInstance(BlockInstance existing,
@@ -394,6 +246,28 @@ public final class BlockLocationRecordCollection implements Serializable {
       throw new IllegalArgumentException("vehicleId mismatch: expected="
           + existing + " actual=" + record.getVehicleId());
     return existing;
+  }
+
+  /****
+   * Static Classes
+   ****/
+
+  private static class ScheduleDeviationAdapter implements
+      IAdapter<BlockLocationRecord, Double> {
+
+    @Override
+    public Double adapt(BlockLocationRecord source) {
+      return source.getScheduleDeviation();
+    }
+  }
+
+  private static class DistanceAlongBlockAdapter implements
+      IAdapter<BlockLocationRecord, Double> {
+
+    @Override
+    public Double adapt(BlockLocationRecord source) {
+      return source.getDistanceAlongBlock();
+    }
   }
 
 }

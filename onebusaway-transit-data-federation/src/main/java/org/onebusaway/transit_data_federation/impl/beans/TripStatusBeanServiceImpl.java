@@ -251,6 +251,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         bean.setNextStop(stopBean);
         bean.setNextStopTimeOffset(blockLocation.getNextStopTimeOffset());
       }
+      
+      bean.setStatus(blockLocation.getStatus());
 
       bean.setPredicted(blockLocation.isPredicted());
 

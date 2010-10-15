@@ -40,6 +40,8 @@ public class BlockLocation {
 
   private int nextStopTimeOffset;
 
+  private String status;
+
   /****
    * These are fields that we can supply only from real-time data
    ****/
@@ -183,6 +185,14 @@ public class BlockLocation {
    */
   public void setNextStopTimeOffset(int nextStopTimeOffset) {
     this.nextStopTimeOffset = nextStopTimeOffset;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
   }
 
   /**

@@ -325,6 +325,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       builder.setLocationLon(record.getCurrentLocationLon());
     }
 
+    builder.setStatus(record.getStatus());
     builder.setVehicleId(record.getVehicleId());
 
     return Tuples.tuple(blockInstance, builder.create());
@@ -382,20 +383,17 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       location.setLastUpdateTime(lastUpdateTime);
     }
 
-    if (records.hasScheduleDeviations()) {
-      int scheduleDeviation = records.getScheduleDeviationForTargetTime(targetTime);
-      location.setScheduleDeviation(scheduleDeviation);
-    }
+    double scheduleDeviation = records.getScheduleDeviationForTargetTime(targetTime);
+    location.setScheduleDeviation(scheduleDeviation);
 
-    if (records.hasDistancesAlongBlock()) {
-      double distanceAlongBlock = records.getDistanceAlongBlockForTargetTime(targetTime);
-      location.setDistanceAlongBlock(distanceAlongBlock);
-    }
+    double distanceAlongBlock = records.getDistanceAlongBlockForTargetTime(targetTime);
+    location.setDistanceAlongBlock(distanceAlongBlock);
 
-    if (records.hasLocations()) {
-      CoordinatePoint point = records.getLastLocationForTargetTime(targetTime);
-      location.setLastKnownLocation(point);
-    }
+    CoordinatePoint point = records.getLastLocationForTargetTime(targetTime);
+    location.setLastKnownLocation(point);
+    
+    String status = records.getStatusForTargetTime(targetTime);
+    location.setStatus(status);
 
     location.setVehicleId(records.getVehicleId());
 
@@ -471,8 +469,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     if (!collections.isEmpty()) {
       List<BlockLocationRecordCollection> inRange = new ArrayList<BlockLocationRecordCollection>();
+      long offset = _predictionCacheMaxOffset * 1000;
       for (BlockLocationRecordCollection entry : collections) {
-        long offset = _predictionCacheMaxOffset * 1000;
         if (entry.getFromTime() - offset <= targetTime
             && targetTime <= entry.getToTime() + offset)
           inRange.add(entry);

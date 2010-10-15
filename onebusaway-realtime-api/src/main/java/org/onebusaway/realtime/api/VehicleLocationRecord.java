@@ -66,6 +66,8 @@ public class VehicleLocationRecord implements Serializable {
    */
   private int timepointPredictedTime;
 
+  private String status;
+
   public VehicleLocationRecord() {
 
   }
@@ -238,5 +240,13 @@ public class VehicleLocationRecord implements Serializable {
    */
   public void setTimepointPredictedTime(int timepointPredictedTime) {
     this.timepointPredictedTime = timepointPredictedTime;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
   }
 }
