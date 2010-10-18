@@ -9,6 +9,7 @@ import static java.lang.Math.toRadians;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.model.XYPoint;
 
 public class SphericalGeometryLibrary {
 
@@ -131,8 +132,33 @@ public class SphericalGeometryLibrary {
         (b.getMinLon() + b.getMaxLon()) / 2);
   }
 
+  /**
+   * Note that this is an approximate method at best that will perform
+   * increasingly worse as the distance between the points increases.
+   * 
+   * @param point
+   * @param segmentStart
+   * @param segmentEnd
+   * @return
+   */
+  public static CoordinatePoint projectPointToSegmentAppropximate(CoordinatePoint point,
+      CoordinatePoint segmentStart, CoordinatePoint segmentEnd) {
+
+    XYPoint pPoint = new XYPoint(point.getLon(), point.getLat());
+    XYPoint pSegmentStart = new XYPoint(segmentStart.getLon(),
+        segmentStart.getLat());
+    XYPoint pSegmentEnd = new XYPoint(segmentEnd.getLon(), segmentEnd.getLat());
+
+    XYPoint pResult = GeometryLibrary.projectPointToSegment(pPoint,
+        pSegmentStart, pSegmentEnd);
+    return new CoordinatePoint(pResult.getY(), pResult.getX());
+  }
+
+  /****
+   * Private Methods
+   ****/
+
   private static final double p2(double a) {
     return a * a;
   }
-
 }
