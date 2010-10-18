@@ -13,27 +13,24 @@
  */
 package org.onebusaway.api.actions.siri;
 
-import org.onebusaway.siri.model.ErrorMessage;
 import org.onebusaway.siri.model.MonitoredVehicleJourney;
 import org.onebusaway.siri.model.ServiceDelivery;
 import org.onebusaway.siri.model.Siri;
 import org.onebusaway.siri.model.VehicleActivity;
 import org.onebusaway.siri.model.VehicleLocation;
 import org.onebusaway.siri.model.VehicleMonitoringDelivery;
-import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
-import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.rest.DefaultHttpHeaders;
@@ -43,9 +40,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -60,10 +56,17 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
   
   @Autowired  
   private TransitDataService _transitDataService;
-  private TimeZone defaultTimeZone = TimeZone.getTimeZone("America/New York");
+
+  private Date _time;
+
+  @TypeConversion(converter = "org.onebusaway.api.actions.siri.Iso8601DateTimeConverter")
+  public void setTime(Date time) {
+    _time = time;
+  }
 
   /**
-   * This is the default action
+   * This is the default action, corresponding to a SIRI
+   * VehicleMonitoringRequest
    * 
    * @return
    * @throws IOException
@@ -71,16 +74,9 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
   public DefaultHttpHeaders index() throws IOException {
     
     String agencyId = _request.getParameter("OperatorRef");
-    TimeZone timeZone;
-    if (agencyId == null) {
-      timeZone = defaultTimeZone;
-    } else {
-      AgencyBean agency = _transitDataService.getAgency(agencyId);
-      if (agency == null) {
-        throw new IllegalArgumentException("No such agency: " + agencyId);
-      }
-      timeZone = TimeZone.getTimeZone(agency.getTimezone());
-    }
+
+    if (_time == null)
+      _time = new Date();
 
     String detailLevel = _request.getParameter("VehicleMonitoringDetailLevel");
     boolean onwardCalls = false;
@@ -89,26 +85,18 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     }
 
     String vehicleId = _request.getParameter("VehicleRef");
-
+    String vehicleIdWithAgency = agencyId + "_" + vehicleId;
+      
     // single trip, by vehicle
     if (vehicleId != null) {
-      System.out.println("agency: " + agencyId);
-      System.out.println("vehicle: " + vehicleId);
-      TripDetailsBean trip = getTripForVehicle(agencyId, vehicleId, timeZone);
-      System.out.println("trip: " + trip);
-      if (trip == null) {
-        /*
-         * FIXME: This vehicle isn't on a trip. In the future, we'll correctly
-         * return a just-location trip.
-         */
-        _response = new ErrorMessage("No known trip for this vehicle");
-        return new DefaultHttpHeaders();
+      VehicleStatusBean vehicle = _transitDataService.getVehicleForAgency(
+          vehicleIdWithAgency, _time.getTime());
+      ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
+      if (vehicle != null) {
+        activities.add(createActivity(vehicle));
       }
-
-      return singleVehicleTrip(timeZone, onwardCalls, trip);
+      _response = generateSiriResponse(_time, activities);
     }
-
-    Calendar now = Calendar.getInstance(timeZone);
 
     String directionId = _request.getParameter("DirectionRef");
 
@@ -135,7 +123,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         VehicleActivity activity = createActivity(trip, onwardCalls);
         activities.add(activity);
       }
-      _response = generateSiriResponse(now, activities);
+      _response = generateSiriResponse(_time, activities);
       return new DefaultHttpHeaders();
     }
 
@@ -144,7 +132,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     if (routeId != null) {
       TripsForRouteQueryBean query = new TripsForRouteQueryBean();
       query.setRouteId(agencyId + "_" + routeId);
-      query.setTime(now.getTimeInMillis());
+      query.setTime(_time.getTime());
       ListBean<TripDetailsBean> trips = _transitDataService.getTripsForRoute(query);
       ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
       for (TripDetailsBean trip : trips.getList()) {
@@ -159,18 +147,18 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         VehicleActivity activity = createActivity(trip, onwardCalls);
         activities.add(activity);
       }
-      _response = generateSiriResponse(now, activities);
+      _response = generateSiriResponse(_time, activities);
       return new DefaultHttpHeaders();
     }
 
     /* All vehicles */
     ListBean<VehicleStatusBean> vehicles = _transitDataService.getAllVehiclesForAgency(
-        agencyId, now.getTimeInMillis());
+        agencyId, _time.getTime());
     ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
     for (VehicleStatusBean v : vehicles.getList()) {
       activities.add(createActivity(v));
     }
-    _response = generateSiriResponse(now, activities);
+    _response = generateSiriResponse(_time, activities);
     return new DefaultHttpHeaders();
   }
 
@@ -207,16 +195,18 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
   }
 
   /** Generate a siri response for a set of VehicleActivities */
-  private Siri generateSiriResponse(Calendar now,
+  private Siri generateSiriResponse(Date time,
       ArrayList<VehicleActivity> activities) {
     Siri siri = new Siri();
     siri.ServiceDelivery = new ServiceDelivery();
-    siri.ServiceDelivery.ResponseTimestamp = now;
+    GregorianCalendar calendar = new GregorianCalendar();
+    calendar.setTime(time);
+    siri.ServiceDelivery.ResponseTimestamp = calendar;
 
     siri.ServiceDelivery.VehicleMonitoringDelivery = new VehicleMonitoringDelivery();
     siri.ServiceDelivery.VehicleMonitoringDelivery.ResponseTimestamp = siri.ServiceDelivery.ResponseTimestamp;
     
-    siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil = (Calendar) now.clone();
+    siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil = (Calendar) calendar.clone();
     siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil.add(Calendar.MINUTE, 1);
 
     siri.ServiceDelivery.VehicleMonitoringDelivery.deliveries = activities;
@@ -237,11 +227,9 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     activity.RecordedAtTime = time;
     activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(trip);
     activity.MonitoredVehicleJourney.Monitored = true;
-    /* fixme: make sure this works when we have real vehicles */
     activity.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
 
-    /* FIXME: get this from api */
-    activity.MonitoredVehicleJourney.ProgressRate = "normalProgress";
+    activity.MonitoredVehicleJourney.ProgressRate = status.getStatus();
 
     VehicleLocation location = new VehicleLocation();
     location.Latitude = status.getLocation().getLat();
@@ -263,40 +251,6 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     
     return activity;
   }
-
-  /** Generate a response for a single vehicle */
-  private DefaultHttpHeaders singleVehicleTrip(TimeZone timeZone,
-      boolean onwardCalls, TripDetailsBean trip) {
-    Calendar now = Calendar.getInstance(timeZone);
-
-    VehicleActivity activity = createActivity(trip, onwardCalls);
-
-    ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
-    activities.add(activity);
-    Siri siri = generateSiriResponse(now, activities);
-
-    _response = siri;
-    return new DefaultHttpHeaders();
-  }
-
-  private TripDetailsBean getTripForVehicle(String agencyId, String vehicleId,
-      TimeZone timeZone) {
-    Calendar now = Calendar.getInstance(timeZone);
-
-    /* find the vehicle's trip */
-    TripForVehicleQueryBean query = new TripForVehicleQueryBean();
-    query.setVehicleId(agencyId + "_" + vehicleId);
-    query.setTime(now.getTime());
-
-    TripDetailsInclusionBean inclusion = query.getInclusion();
-    inclusion.setIncludeTripBean(true);
-    inclusion.setIncludeTripSchedule(true);
-    inclusion.setIncludeTripStatus(true);
-
-    TripDetailsBean trip = _transitDataService.getTripDetailsForVehicleAndTime(query);
-    return trip;
-  }
-
 
   @Override
   public Object getModel() {

@@ -201,8 +201,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
         }
       }
 
-      /* FIXME: get this from api */
-      MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = "normalProgress";
+      MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = status.getStatus();
 
       int i = 0;
       boolean started = false;
