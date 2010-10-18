@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
@@ -142,10 +143,9 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         query.getAgencyId(), query.getTime());
     return getBlockLocationsAsTripDetails(locations, query.getInclusion());
   }
-  
+
   @Override
-  public TripStatusBean getBlockLocationAsStatusBean(
-      BlockLocation blockLocation) {
+  public TripStatusBean getBlockLocationAsStatusBean(BlockLocation blockLocation) {
 
     TripStatusBean bean = new TripStatusBean();
     bean.setStatus("default");
@@ -179,21 +179,22 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         bean.setClosestStop(stopBean);
         bean.setClosestStopTimeOffset(blockLocation.getClosestStopTimeOffset());
       }
-      
+
       BlockStopTimeEntry nextStop = blockLocation.getNextStop();
-      if ( nextStop != null) {
+      if (nextStop != null) {
         StopTimeEntry stopTime = nextStop.getStopTime();
         StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
         bean.setNextStop(stopBean);
         bean.setNextStopTimeOffset(blockLocation.getNextStopTimeOffset());
       }
-      
-      String phase = null;
-      if( blockLocation.getPhase() != null) 
-        phase = blockLocation.getPhase().toString().toLowerCase();
-      
-      bean.setPhase(phase);
-      bean.setStatus(blockLocation.getStatus());
+
+      EVehiclePhase phase = blockLocation.getPhase();
+      if (phase != null)
+        bean.setPhase(phase.toString().toLowerCase());
+
+      String status = blockLocation.getStatus();
+      if (status != null)
+        bean.setStatus(status);
 
       bean.setPredicted(blockLocation.isPredicted());
 
@@ -207,7 +208,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     return bean;
   }
-
 
   /****
    * Private Methods
