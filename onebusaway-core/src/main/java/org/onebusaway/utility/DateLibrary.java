@@ -15,6 +15,7 @@
  */
 package org.onebusaway.utility;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,6 +47,41 @@ public class DateLibrary {
     String timeString = format.format(date);
     return timeString.substring(0, timeString.length() - 2) + ":"
         + timeString.substring(timeString.length() - 2);
+  }
+
+  /**
+   * 
+   * @param value an ISO 8601 string representation fo a Date
+   * @return a parsed Date object
+   * @throws ParseException if there is an error parsing the string
+   */
+  public static Date getIso8601StringAsTime(String value) throws ParseException {
+    return getIso8601StringAsTime(value, TimeZone.getDefault());
+  }
+
+  /**
+   * 
+   * @param value an ISO 8601 string representation fo a Date
+   * @param timeZone the target timezone for the ISO 8601 representation
+   * @return a parsed Date object
+   * @throws ParseException if there is an error parsing the string
+   */
+  public static Date getIso8601StringAsTime(String value, TimeZone timeZone)
+      throws ParseException {
+
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    format.setTimeZone(timeZone);
+
+    int n = value.length();
+
+    if (n > 6) {
+      char c1 = value.charAt(n - 6);
+      char c2 = value.charAt(n - 3);
+      if ((c1 == '-' || c1 == '+') && c2 == ':')
+        value = value.substring(0, n - 3) + value.substring(n - 2);
+    }
+
+    return format.parse(value);
   }
 
   public static Date getTimeAsDay(Date t) {

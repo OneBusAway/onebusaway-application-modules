@@ -37,6 +37,7 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 
 import com.opensymphony.xwork2.ModelDriven;
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.rest.DefaultHttpHeaders;
@@ -64,6 +65,13 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
   @Autowired
   private TransitDataService _transitDataService;
+
+  private Date _time;
+
+  @TypeConversion(converter = "org.onebusaway.api.actions.siri.Iso8601DateTimeConverter")
+  public void setTime(Date time) {
+    _time = time;
+  }
 
   /**
    * This is the default action for
@@ -96,6 +104,9 @@ public class StopMonitoringController implements ModelDriven<Object>,
       includeOnwardCalls = detailLevel.equals("calls");
     }
 
+    if (_time == null)
+      _time = new Date();
+
     // convert ids to agency_and_id
     stopId = agencyId + "_" + stopId;
 
@@ -107,13 +118,15 @@ public class StopMonitoringController implements ModelDriven<Object>,
     }
 
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _transitDataService.getStopWithArrivalsAndDepartures(
-        stopId, new Date(), 30, 30);
+        stopId, _time, 30, 30);
 
-    if (stopWithArrivalsAndDepartures.getStop() == null) {
+    if (stopWithArrivalsAndDepartures == null) {
       throw new IllegalArgumentException("Bogus stop parameter");
     }
 
     GregorianCalendar now = new GregorianCalendar();
+    now.setTime(_time);
+
     Siri siri = new Siri();
     siri.ServiceDelivery = new ServiceDelivery();
     siri.ServiceDelivery.ResponseTimestamp = now;
@@ -152,7 +165,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
       query.setServiceDate(adbean.getServiceDate());
       query.setTime(now.getTime().getTime());
       TripDetailsBean specificTripDetails = _transitDataService.getSingleTripDetails(query);
-
 
       MonitoredStopVisit MonitoredStopVisit = new MonitoredStopVisit();
 
@@ -215,14 +227,16 @@ public class StopMonitoringController implements ModelDriven<Object>,
           distance = status.getScheduledDistanceAlongTrip();
         }
         if (stopTime.getDistanceAlongTrip() >= distance) {
-          /* this stop time is further along the route than the vehicle is
-           * so we will now start counting stops until we hit the requested stop
+          /*
+           * this stop time is further along the route than the vehicle is so we
+           * will now start counting stops until we hit the requested stop
            */
           started = true;
         }
         if (started && stopTime.getStop().getId().equals(stopId)) {
           /* we have hit the requested stop */
-          monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip() - distance < 10;
+          monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip()
+              - distance < 10;
           monitoredCall.Extensions.Distances = new Distances();
           monitoredCall.Extensions.Distances.StopsFromCall = i;
           monitoredCall.Extensions.Distances.CallDistanceAlongRoute = stopTime.getDistanceAlongTrip();;
@@ -230,7 +244,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
           monitoredCall.VisitNumber = visitNumber;
           if (includeOnwardCalls) {
-            List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(stopTimes, status.getServiceDate(), distance, stop);
+            List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(stopTimes,
+                status.getServiceDate(), distance, stop);
             MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = onwardCalls;
           }
         }
