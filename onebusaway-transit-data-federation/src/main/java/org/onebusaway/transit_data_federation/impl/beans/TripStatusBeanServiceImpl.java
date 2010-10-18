@@ -142,6 +142,72 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         query.getAgencyId(), query.getTime());
     return getBlockLocationsAsTripDetails(locations, query.getInclusion());
   }
+  
+  @Override
+  public TripStatusBean getBlockLocationAsStatusBean(
+      BlockLocation blockLocation) {
+
+    TripStatusBean bean = new TripStatusBean();
+    bean.setStatus("default");
+
+    if (blockLocation != null) {
+
+      BlockInstance blockInstance = blockLocation.getBlockInstance();
+      long serviceDate = blockInstance.getServiceDate();
+
+      bean.setServiceDate(serviceDate);
+
+      bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
+
+      CoordinatePoint location = blockLocation.getLocation();
+      bean.setLocation(location);
+      bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
+
+      BlockTripEntry activeBlockTrip = blockLocation.getActiveTrip();
+      TripEntry activeTrip = activeBlockTrip.getTrip();
+
+      bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
+          - activeBlockTrip.getDistanceAlongBlock());
+      bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock()
+          - activeBlockTrip.getDistanceAlongBlock());
+      bean.setTotalDistanceAlongTrip(activeTrip.getTotalTripDistance());
+
+      BlockStopTimeEntry closestStop = blockLocation.getClosestStop();
+      if (closestStop != null) {
+        StopTimeEntry stopTime = closestStop.getStopTime();
+        StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
+        bean.setClosestStop(stopBean);
+        bean.setClosestStopTimeOffset(blockLocation.getClosestStopTimeOffset());
+      }
+      
+      BlockStopTimeEntry nextStop = blockLocation.getNextStop();
+      if ( nextStop != null) {
+        StopTimeEntry stopTime = nextStop.getStopTime();
+        StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
+        bean.setNextStop(stopBean);
+        bean.setNextStopTimeOffset(blockLocation.getNextStopTimeOffset());
+      }
+      
+      String phase = null;
+      if( blockLocation.getPhase() != null) 
+        phase = blockLocation.getPhase().toString().toLowerCase();
+      
+      bean.setPhase(phase);
+      bean.setStatus(blockLocation.getStatus());
+
+      bean.setPredicted(blockLocation.isPredicted());
+
+      AgencyAndId vid = blockLocation.getVehicleId();
+      if (vid != null)
+        bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
+
+    } else {
+      bean.setPredicted(false);
+    }
+
+    return bean;
+  }
+
 
   /****
    * Private Methods
@@ -208,62 +274,4 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     return new TripDetailsBean(tripId, trip, stopTimes, status);
   }
 
-  private TripStatusBean getBlockLocationAsStatusBean(
-      BlockLocation blockLocation) {
-
-    TripStatusBean bean = new TripStatusBean();
-    bean.setStatus("default");
-
-    if (blockLocation != null) {
-
-      BlockInstance blockInstance = blockLocation.getBlockInstance();
-      long serviceDate = blockInstance.getServiceDate();
-
-      bean.setServiceDate(serviceDate);
-
-      bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
-
-      CoordinatePoint location = blockLocation.getLocation();
-      bean.setLocation(location);
-      bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
-
-      BlockTripEntry activeBlockTrip = blockLocation.getActiveTrip();
-      TripEntry activeTrip = activeBlockTrip.getTrip();
-
-      bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
-          - activeBlockTrip.getDistanceAlongBlock());
-      bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock()
-          - activeBlockTrip.getDistanceAlongBlock());
-      bean.setTotalDistanceAlongTrip(activeTrip.getTotalTripDistance());
-
-      BlockStopTimeEntry closestStop = blockLocation.getClosestStop();
-      if (closestStop != null) {
-        StopTimeEntry stopTime = closestStop.getStopTime();
-        StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
-        bean.setClosestStop(stopBean);
-        bean.setClosestStopTimeOffset(blockLocation.getClosestStopTimeOffset());
-      }
-      
-      BlockStopTimeEntry nextStop = blockLocation.getNextStop();
-      if ( nextStop != null) {
-        StopTimeEntry stopTime = nextStop.getStopTime();
-        StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
-        bean.setNextStop(stopBean);
-        bean.setNextStopTimeOffset(blockLocation.getNextStopTimeOffset());
-      }
-      
-      bean.setStatus(blockLocation.getStatus());
-
-      bean.setPredicted(blockLocation.isPredicted());
-
-      AgencyAndId vid = blockLocation.getVehicleId();
-      if (vid != null)
-        bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
-
-    } else {
-      bean.setPredicted(false);
-    }
-
-    return bean;
-  }
 }

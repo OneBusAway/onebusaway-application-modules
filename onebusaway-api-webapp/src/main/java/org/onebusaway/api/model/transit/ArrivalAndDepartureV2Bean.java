@@ -55,6 +55,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private int numberOfStopsAway;
 
+  private TripStatusV2Bean tripStatus;
+
   public String getRouteId() {
     return routeId;
   }
@@ -173,6 +175,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   public void setNumberOfStopsAway(int numberOfStopsAway) {
     this.numberOfStopsAway = numberOfStopsAway;
+  }
+
+  public TripStatusV2Bean getTripStatus() {
+    return tripStatus;
+  }
+
+  public void setTripStatus(TripStatusV2Bean tripStatus) {
+    this.tripStatus = tripStatus;
   }
 
   public boolean hasPredictedArrivalTime() {

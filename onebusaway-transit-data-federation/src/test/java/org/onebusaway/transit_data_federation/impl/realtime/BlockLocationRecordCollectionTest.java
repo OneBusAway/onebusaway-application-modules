@@ -13,6 +13,7 @@ import java.util.TreeMap;
 
 import org.junit.Test;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord.Builder;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
@@ -37,9 +38,12 @@ public class BlockLocationRecordCollectionTest {
     CoordinatePoint p2 = new CoordinatePoint(47.1, -122.1);
     CoordinatePoint p3 = new CoordinatePoint(47.2, -122.2);
 
-    addRecord(records, record(t(4, 10), 10.0, 100.0, p1, "ok"));
-    addRecord(records, record(t(8, 20), 18.0, 200.0, p2, "not ok"));
-    addRecord(records, record(t(12, 30), 15.0, 300.0, p3, "ok"));
+    EVehiclePhase inProgress = EVehiclePhase.IN_PROGRESS;
+    EVehiclePhase layover = EVehiclePhase.LAYOVER_DURING;
+
+    addRecord(records, record(t(4, 10), 10.0, 100.0, p1, inProgress, "ok"));
+    addRecord(records, record(t(8, 20), 18.0, 200.0, p2, layover, "not ok"));
+    addRecord(records, record(t(12, 30), 15.0, 300.0, p3, inProgress, "ok"));
 
     BlockLocationRecordCollection entry = new BlockLocationRecordCollection(t(
         3, 20), t(13, 20), records);
@@ -78,6 +82,17 @@ public class BlockLocationRecordCollectionTest {
     assertEquals(p3, entry.getLastLocationForTargetTime(t(12, 30)));
     assertEquals(p3, entry.getLastLocationForTargetTime(t(16, 40)));
 
+    assertNull(entry.getPhaseForTargetTime(t(3, 20)));
+    assertNull(entry.getPhaseForTargetTime(t(4, 9)));
+    assertEquals(inProgress, entry.getPhaseForTargetTime(t(4, 10)));
+    assertEquals(inProgress, entry.getPhaseForTargetTime(t(5, 12)));
+    assertEquals(inProgress, entry.getPhaseForTargetTime(t(8, 19)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(8, 20)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(10, 0)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(12, 29)));
+    assertEquals(inProgress, entry.getPhaseForTargetTime(t(12, 30)));
+    assertEquals(inProgress, entry.getPhaseForTargetTime(t(16, 40)));
+
     assertNull(entry.getStatusForTargetTime(t(3, 20)));
     assertNull(entry.getStatusForTargetTime(t(4, 9)));
     assertEquals("ok", entry.getStatusForTargetTime(t(4, 10)));
@@ -91,7 +106,7 @@ public class BlockLocationRecordCollectionTest {
 
     CoordinatePoint p4 = new CoordinatePoint(47.15, -122.15);
     entry = entry.addRecord(blockInstance,
-        record(t(10, 0), 20, 220, p4, "not ok"), t(5, 0));
+        record(t(10, 0), 20, 220, p4, layover, "not ok"), t(5, 0));
 
     assertEquals(t(6, 40), entry.getFromTime());
     assertEquals(t(11, 40), entry.getToTime());
@@ -116,6 +131,12 @@ public class BlockLocationRecordCollectionTest {
     assertEquals(p4, entry.getLastLocationForTargetTime(t(10, 00)));
     assertEquals(p4, entry.getLastLocationForTargetTime(t(10, 50)));
 
+    assertNull(entry.getPhaseForTargetTime(t(6, 40)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(8, 20)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(9, 10)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(10, 00)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(10, 50)));
+
     assertNull(entry.getStatusForTargetTime(t(6, 40)));
     assertEquals("not ok", entry.getStatusForTargetTime(t(8, 20)));
     assertEquals("not ok", entry.getStatusForTargetTime(t(9, 10)));
@@ -124,7 +145,7 @@ public class BlockLocationRecordCollectionTest {
 
     CoordinatePoint p5 = new CoordinatePoint(47.4, -122.4);
     entry = entry.addRecord(blockInstance,
-        record(t(16, 40), 14, 500, p5, "ok"), t(6, 40));
+        record(t(16, 40), 14, 500, p5, inProgress, "ok"), t(6, 40));
 
     assertEquals(t(10, 00), entry.getFromTime());
     assertEquals(t(16, 40), entry.getToTime());
@@ -144,6 +165,12 @@ public class BlockLocationRecordCollectionTest {
     assertEquals(p5, entry.getLastLocationForTargetTime(t(16, 40)));
     assertEquals(p5, entry.getLastLocationForTargetTime(t(20, 00)));
 
+    assertNull(entry.getPhaseForTargetTime(t(6, 40)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(10, 00)));
+    assertEquals(layover, entry.getPhaseForTargetTime(t(13, 20)));
+    assertEquals(inProgress, entry.getPhaseForTargetTime(t(16, 40)));
+    assertEquals(inProgress, entry.getPhaseForTargetTime(t(20, 00)));
+
     assertNull(entry.getStatusForTargetTime(t(6, 40)));
     assertEquals("not ok", entry.getStatusForTargetTime(t(10, 00)));
     assertEquals("not ok", entry.getStatusForTargetTime(t(13, 20)));
@@ -152,12 +179,14 @@ public class BlockLocationRecordCollectionTest {
   }
 
   private BlockLocationRecord record(long time, double scheduleDeviation,
-      double distanceAlongBlock, CoordinatePoint location, String status) {
+      double distanceAlongBlock, CoordinatePoint location, EVehiclePhase phase,
+      String status) {
     Builder builder = BlockLocationRecord.builder();
     builder.setTime(time);
     builder.setScheduleDeviation(scheduleDeviation);
     builder.setDistanceAlongBlock(distanceAlongBlock);
     builder.setLocation(location);
+    builder.setPhase(phase);
     builder.setStatus(status);
     return builder.create();
   }

@@ -239,8 +239,9 @@ public class BeanFactoryV2 {
       bean.setNextStopTimeOffset(tripStatus.getNextStopTimeOffset());
     }
 
+    bean.setPhase(tripStatus.getPhase());
     bean.setStatus(tripStatus.getStatus());
-    
+
     bean.setPredicted(tripStatus.isPredicted());
     if (tripStatus.getLastUpdateTime() > 0)
       bean.setLastUpdateTime(tripStatus.getLastUpdateTime());
@@ -318,6 +319,7 @@ public class BeanFactoryV2 {
 
     bean.setLastUpdateTime(vehicleStatus.getLastUpdateTime());
     bean.setLocation(vehicleStatus.getLocation());
+    bean.setPhase(vehicleStatus.getPhase());
     bean.setStatus(vehicleStatus.getStatus());
     bean.setVehicleId(vehicleStatus.getVehicleId());
 
@@ -480,6 +482,10 @@ public class BeanFactoryV2 {
 
     bean.setDistanceFromStop(ad.getDistanceFromStop());
     bean.setNumberOfStopsAway(ad.getNumberOfStopsAway());
+
+    TripStatusBean tripStatus = ad.getTripStatus();
+    if (tripStatus != null)
+      bean.setTripStatus(getTripStatus(tripStatus));
 
     bean.setPredicted(ad.isPredicted());
     bean.setLastUpdateTime(ad.getLastUpdateTime());

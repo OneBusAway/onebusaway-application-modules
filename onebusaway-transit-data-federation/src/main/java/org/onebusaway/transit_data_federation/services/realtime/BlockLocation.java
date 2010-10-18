@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
@@ -39,6 +40,8 @@ public class BlockLocation {
   private BlockStopTimeEntry nextStop;
 
   private int nextStopTimeOffset;
+
+  private EVehiclePhase phase;
 
   private String status;
 
@@ -185,6 +188,14 @@ public class BlockLocation {
    */
   public void setNextStopTimeOffset(int nextStopTimeOffset) {
     this.nextStopTimeOffset = nextStopTimeOffset;
+  }
+
+  public EVehiclePhase getPhase() {
+    return phase;
+  }
+
+  public void setPhase(EVehiclePhase phase) {
+    this.phase = phase;
   }
 
   public String getStatus() {

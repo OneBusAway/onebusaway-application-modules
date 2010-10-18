@@ -9,6 +9,7 @@ import org.onebusaway.collections.adapter.AdapterLibrary;
 import org.onebusaway.collections.adapter.IAdapter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
@@ -151,6 +152,13 @@ public final class BlockLocationRecordCollection implements Serializable {
     if (record == null)
       return null;
     return record.getLocation();
+  }
+  
+  public EVehiclePhase getPhaseForTargetTime(long targetTime){
+    BlockLocationRecord record = previousRecord(targetTime);
+    if (record == null)
+      return null;
+    return record.getPhase();
   }
 
   public String getStatusForTargetTime(long targetTime) {

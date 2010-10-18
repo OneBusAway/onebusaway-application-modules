@@ -5,9 +5,11 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 
 /**
  * Service methods for querying the real-time status and position of a
@@ -70,4 +72,12 @@ public interface TripDetailsBeanService {
    */
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query);
+
+  /**
+   * Convert a {@link BlockLocation} object into a trip status bean
+   * @param blockLocation
+   * @return a trip status bean representation of a block location object
+   */
+  public TripStatusBean getBlockLocationAsStatusBean(BlockLocation blockLocation);
+
 }

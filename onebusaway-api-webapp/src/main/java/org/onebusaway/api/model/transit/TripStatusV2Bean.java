@@ -33,6 +33,8 @@ public final class TripStatusV2Bean implements Serializable {
 
   private int nextStopTimeOffset;
 
+  private String phase;
+
   private String status;
 
   /****
@@ -111,6 +113,14 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setNextStopTimeOffset(int nextStopTimeOffset) {
     this.nextStopTimeOffset = nextStopTimeOffset;
+  }
+
+  public String getPhase() {
+    return phase;
+  }
+
+  public void setPhase(String phase) {
+    this.phase = phase;
   }
 
   public String getStatus() {

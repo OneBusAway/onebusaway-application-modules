@@ -18,6 +18,7 @@ import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
@@ -324,6 +325,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       builder.setLocationLon(record.getCurrentLocationLon());
     }
 
+    builder.setPhase(record.getPhase());
     builder.setStatus(record.getStatus());
     builder.setVehicleId(record.getVehicleId());
 
@@ -391,6 +393,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     CoordinatePoint point = records.getLastLocationForTargetTime(targetTime);
     location.setLastKnownLocation(point);
 
+    EVehiclePhase phase = records.getPhaseForTargetTime(targetTime);
+    location.setPhase(phase);
+    
     String status = records.getStatusForTargetTime(targetTime);
     location.setStatus(status);
 

@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
@@ -31,6 +32,7 @@ import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
+import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
@@ -46,6 +48,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private NarrativeService _narrativeService;
   private StopTimeService _stopTimeService;
   private TripBeanService _tripBeanService;
+  private TripDetailsBeanService _tripDetailsBeanService;
 
   @Before
   public void setup() {
@@ -63,6 +66,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     _tripBeanService = Mockito.mock(TripBeanService.class);
     _service.setTripBeanService(_tripBeanService);
+
+    _tripDetailsBeanService = Mockito.mock(TripDetailsBeanService.class);
+    _service.setTripDetailsBeanService(_tripDetailsBeanService);
   }
 
   @Test
@@ -154,7 +160,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     /****
      * 
      ****/
-    
+
     BlockInstance blockInstanceB = new BlockInstance(blockConfigB, serviceDate);
 
     BlockLocation blockLocationB = new BlockLocation();
@@ -201,6 +207,21 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
      * 
      ****/
 
+    TripStatusBean tripStatusBeanA = new TripStatusBean();
+    TripStatusBean tripStatusBeanB = new TripStatusBean();
+
+    Mockito.when(
+        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocation)).thenReturn(
+        tripStatusBeanA);
+
+    Mockito.when(
+        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationB)).thenReturn(
+        tripStatusBeanB);
+
+    /****
+     * 
+     ****/
+
     List<ArrivalAndDepartureBean> arrivalsAndDepartures = _service.getArrivalsAndDeparturesByStopId(
         stopB.getId(), new Date(t), minutesBefore, minutesAfter);
 
@@ -221,6 +242,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     assertEquals("default", bean.getStatus());
     assertEquals("1_stopB", bean.getStopId());
     assertSame(tripABean, bean.getTrip());
+    assertSame(tripStatusBeanA, bean.getTripStatus());
     assertEquals("Downtown", bean.getTripHeadsign());
     assertEquals("1_vehicle", bean.getVehicleId());
 
@@ -238,6 +260,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     assertEquals("default", bean.getStatus());
     assertEquals("1_stopB", bean.getStopId());
     assertSame(tripBBean, bean.getTrip());
+    assertSame(tripStatusBeanB, bean.getTripStatus());
     assertNull(bean.getTripHeadsign());
     assertNull(bean.getVehicleId());
   }

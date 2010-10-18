@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
@@ -67,6 +68,12 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
 
     VehicleStatusBean bean = new VehicleStatusBean();
     bean.setLastUpdateTime(record.getTimeOfRecord());
+
+    EVehiclePhase phase = record.getPhase();
+    if (phase != null)
+      bean.setPhase(phase.toString().toLowerCase());
+
+    bean.setStatus(record.getStatus());
 
     if (record.isCurrentLocationSet())
       bean.setLocation(new CoordinatePoint(record.getCurrentLocationLat(),

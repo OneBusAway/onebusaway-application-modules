@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data.model;
 
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
 public class ArrivalAndDepartureBean extends ApplicationBean {
 
@@ -50,6 +51,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   private String routeShortName;
 
   private String tripHeadsign;
+
+  private TripStatusBean tripStatus;
 
   public TripBean getTrip() {
     return trip;
@@ -173,6 +176,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setTripHeadsign(String tripHeadsign) {
     this.tripHeadsign = tripHeadsign;
+  }
+
+  public TripStatusBean getTripStatus() {
+    return tripStatus;
+  }
+
+  public void setTripStatus(TripStatusBean tripStatus) {
+    this.tripStatus = tripStatus;
   }
 
   public boolean hasPredictedArrivalTime() {

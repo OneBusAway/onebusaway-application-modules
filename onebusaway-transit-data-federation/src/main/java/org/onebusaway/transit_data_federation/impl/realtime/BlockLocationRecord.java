@@ -14,6 +14,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 
 /**
  * A block location record is a database-serializable record that captures the
@@ -60,6 +61,8 @@ public class BlockLocationRecord {
   private final double locationLat;
 
   private final double locationLon;
+  
+  private final EVehiclePhase phase;
 
   private final String status;
 
@@ -82,6 +85,7 @@ public class BlockLocationRecord {
     distanceAlongBlock = Double.NaN;
     locationLat = Double.NaN;
     locationLon = Double.NaN;
+    phase = null;
     status = null;
     vehicleId = null;
   }
@@ -95,6 +99,7 @@ public class BlockLocationRecord {
     this.distanceAlongBlock = builder.distanceAlongBlock;
     this.locationLat = builder.locationLat;
     this.locationLon = builder.locationLon;
+    this.phase = builder.phase;
     this.status = builder.status;
     this.vehicleId = builder.vehicleId;
   }
@@ -174,6 +179,10 @@ public class BlockLocationRecord {
       return null;
     return new CoordinatePoint(locationLat, locationLon);
   }
+  
+  public EVehiclePhase getPhase() {
+    return phase;
+  }
 
   public String getStatus() {
     return status;
@@ -213,6 +222,8 @@ public class BlockLocationRecord {
     private double locationLat = Double.NaN;
 
     private double locationLon = Double.NaN;
+    
+    private EVehiclePhase phase;
 
     private String status;
 
@@ -258,6 +269,10 @@ public class BlockLocationRecord {
         this.locationLat = location.getLat();
         this.locationLon = location.getLon();
       }
+    }
+    
+    public void setPhase(EVehiclePhase phase) {
+      this.phase = phase;
     }
 
     public void setStatus(String status) {

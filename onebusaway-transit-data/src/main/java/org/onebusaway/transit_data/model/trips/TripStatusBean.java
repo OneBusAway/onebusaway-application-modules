@@ -24,6 +24,8 @@ public final class TripStatusBean implements Serializable {
    * from real-time data when available
    ****/
 
+  private String phase;
+
   private String status;
 
   private CoordinatePoint location;
@@ -77,6 +79,14 @@ public final class TripStatusBean implements Serializable {
 
   public void setTotalDistanceAlongTrip(double totalDistanceAlongTrip) {
     this.totalDistanceAlongTrip = totalDistanceAlongTrip;
+  }
+
+  public String getPhase() {
+    return phase;
+  }
+
+  public void setPhase(String phase) {
+    this.phase = phase;
   }
 
   public String getStatus() {

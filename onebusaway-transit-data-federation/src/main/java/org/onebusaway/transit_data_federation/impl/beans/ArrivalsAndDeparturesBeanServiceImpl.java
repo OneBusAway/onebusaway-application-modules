@@ -13,11 +13,13 @@ import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
+import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
@@ -61,6 +63,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   private BlockLocationService _blockLocationService;
 
+  private TripDetailsBeanService _tripDetailsBeanService;
+
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
     _stopTimeService = stopTimeService;
@@ -79,6 +83,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   @Autowired
   public void setBlockLocationService(BlockLocationService blockLocationService) {
     _blockLocationService = blockLocationService;
+  }
+
+  @Autowired
+  public void setTripDetailsBeanService(
+      TripDetailsBeanService tripDetailsBeanService) {
+    _tripDetailsBeanService = tripDetailsBeanService;
   }
 
   private AtomicInteger _stopTimesTotal = new AtomicInteger();
@@ -176,8 +186,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     return r;
   }
 
-  private ArrivalAndDepartureBean getStopTimeInstanceAsBean(
-      StopTimeInstance sti) {
+  private ArrivalAndDepartureBean getStopTimeInstanceAsBean(StopTimeInstance sti) {
 
     ArrivalAndDepartureBean pab = new ArrivalAndDepartureBean();
 
@@ -209,8 +218,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     return pab;
   }
 
-  private void applyBlockLocationToBean(StopTimeInstance sti,
-      long targetTime, ArrivalAndDepartureBean bean, BlockLocation blockLocation) {
+  private void applyBlockLocationToBean(StopTimeInstance sti, long targetTime,
+      ArrivalAndDepartureBean bean, BlockLocation blockLocation) {
 
     BlockStopTimeEntry destinationStopTime = sti.getStopTime();
 
@@ -240,8 +249,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
           - blockLocation.getDistanceAlongBlock();
       bean.setDistanceFromStop(distanceFromStop);
-    }
-    else {
+    } else {
       bean.setDistanceFromStop(blockLocation.getScheduledDistanceAlongBlock());
     }
 
@@ -257,6 +265,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     if (blockLocation.getVehicleId() != null)
       bean.setVehicleId(AgencyAndIdLibrary.convertToString(blockLocation.getVehicleId()));
+
+    TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocation);
+    bean.setTripStatus(tripStatusBean);
   }
 
   private boolean isArrivalAndDepartureBeanInRange(

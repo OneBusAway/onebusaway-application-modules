@@ -10,6 +10,8 @@ public final class VehicleStatusV2Bean implements Serializable {
 
   private String vehicleId;
 
+  private String phase;
+
   private String status;
 
   private long lastUpdateTime;
@@ -26,6 +28,14 @@ public final class VehicleStatusV2Bean implements Serializable {
 
   public void setVehicleId(String vehicleId) {
     this.vehicleId = vehicleId;
+  }
+
+  public String getPhase() {
+    return phase;
+  }
+
+  public void setPhase(String phase) {
+    this.phase = phase;
   }
 
   public String getStatus() {
