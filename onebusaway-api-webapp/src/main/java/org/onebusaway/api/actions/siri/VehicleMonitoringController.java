@@ -175,6 +175,8 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       query.setTime(time.getTimeInMillis());
       query.setTripId(tripBean.getId());
       query.setVehicleId(vehicleStatus.getVehicleId());
+      query.getInclusion().setIncludeTripStatus(true);
+      query.setServiceDate(vehicleStatus.getTripStatus().getServiceDate());
       TripDetailsBean tripDetails = _transitDataService.getSingleTripDetails(query);
       activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(tripDetails);
     } else {
