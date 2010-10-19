@@ -85,6 +85,7 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
         record.getVehicleId(), time, new TripDetailsInclusionBean(true, false,
             true));
     if (details != null && details.getStatus() != null) {
+      bean.setTrip(details.getTrip());
       bean.setTripStatus(details.getStatus());
     }
 
