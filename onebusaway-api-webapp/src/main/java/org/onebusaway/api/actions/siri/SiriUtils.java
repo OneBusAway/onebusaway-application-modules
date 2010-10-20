@@ -138,4 +138,17 @@ public class SiriUtils {
 
     return monitoredVehicleJourney;
   }
+
+  public static String getProgressRateForStatus(String status) {
+    if (status == null) {
+      return "normalProgress";
+    }
+    if (status.equals("IN_PROGRESS")) {
+      return "normalProgress";
+    }
+    if (status.equals("STALLED")) {
+      return "noProgress";
+    }
+    return null; /* something unknown */
+  }
 }

@@ -201,7 +201,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
         }
       }
 
-      MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = status.getStatus();
+      MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(status.getStatus());
 
       int i = 0;
       boolean started = false;
