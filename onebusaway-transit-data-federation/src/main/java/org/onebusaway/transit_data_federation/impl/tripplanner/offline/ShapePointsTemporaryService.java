@@ -15,9 +15,13 @@ import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ShapePointsTemporaryService {
+
+  private static Logger _log = LoggerFactory.getLogger(ShapePointsTemporaryService.class);
 
   private GtfsRelationalDao _gtfsDao;
 
@@ -32,6 +36,11 @@ public class ShapePointsTemporaryService {
     _gtfsDao = gtfsDao;
   }
 
+  /**
+   * @param shapeId
+   * @return the set of shape points for the specified shape id, or null if none
+   *         available
+   */
   public ShapePoints getShapePoints(AgencyAndId shapeId) {
 
     if (_shapePointsCache.containsKey(shapeId))
@@ -43,22 +52,39 @@ public class ShapePointsTemporaryService {
     Collections.sort(rawPoints);
     for (ShapePoint rawPoint : rawPoints)
       factory.addPoint(rawPoint.getLat(), rawPoint.getLon());
+
     ShapePoints shapePoints = factory.create();
-    if (shapePoints.isEmpty())
+
+    if (shapePoints.isEmpty()) {
+      _log.warn("no shape points defined for shapeId=" + shapeId);
       shapePoints = null;
+    }
+
     _shapePointsCache.put(shapeId, shapePoints);
 
-    ensurePoint(_firstPointByShapeId, shapeId, shapePoints, 0);
-    ensurePoint(_lastPointByShapeId, shapeId, shapePoints,
-        shapePoints.getSize() - 1);
+    if (shapePoints != null) {
+      ensurePoint(_firstPointByShapeId, shapeId, shapePoints, 0);
+      ensurePoint(_lastPointByShapeId, shapeId, shapePoints,
+          shapePoints.getSize() - 1);
+    }
 
     return shapePoints;
   }
 
+  /**
+   * 
+   * @param shapeId
+   * @return the first point of the specified shape, or null if not available
+   */
   public ShapePoint getFirstPointForShapeId(AgencyAndId shapeId) {
     return _firstPointByShapeId.get(shapeId);
   }
 
+  /**
+   * 
+   * @param shapeId
+   * @return the last point of the specified shape, or null if not available
+   */
   public ShapePoint getLastPointForShapeId(AgencyAndId shapeId) {
     return _lastPointByShapeId.get(shapeId);
   }
@@ -92,13 +118,14 @@ public class ShapePointsTemporaryService {
 
     if (shapeId != null) {
       ShapePoint lastShapePoint = getLastPointForShapeId(shapeId);
-      return new CoordinatePoint(lastShapePoint.getLat(),
-          lastShapePoint.getLon());
-    } else {
-      List<StopTimeEntry> stopTimes = trip.getStopTimes();
-      StopTimeEntry lastStopTime = stopTimes.get(stopTimes.size() - 1);
-      return lastStopTime.getStop().getStopLocation();
+      if (lastShapePoint != null)
+        return new CoordinatePoint(lastShapePoint.getLat(),
+            lastShapePoint.getLon());
     }
+
+    List<StopTimeEntry> stopTimes = trip.getStopTimes();
+    StopTimeEntry lastStopTime = stopTimes.get(stopTimes.size() - 1);
+    return lastStopTime.getStop().getStopLocation();
   }
 
   private CoordinatePoint getStartOfShape(TripEntry trip) {
@@ -107,13 +134,14 @@ public class ShapePointsTemporaryService {
 
     if (shapeId != null) {
       ShapePoint firstShapePoint = getFirstPointForShapeId(shapeId);
-      return new CoordinatePoint(firstShapePoint.getLat(),
-          firstShapePoint.getLon());
-    } else {
-      List<StopTimeEntry> stopTimes = trip.getStopTimes();
-      StopTimeEntry firstStopTime = stopTimes.get(0);
-      return firstStopTime.getStop().getStopLocation();
+      if (firstShapePoint != null)
+        return new CoordinatePoint(firstShapePoint.getLat(),
+            firstShapePoint.getLon());
     }
+
+    List<StopTimeEntry> stopTimes = trip.getStopTimes();
+    StopTimeEntry firstStopTime = stopTimes.get(0);
+    return firstStopTime.getStop().getStopLocation();
   }
 
   private void ensurePoint(Map<AgencyAndId, ShapePoint> pointsByShapeId,
