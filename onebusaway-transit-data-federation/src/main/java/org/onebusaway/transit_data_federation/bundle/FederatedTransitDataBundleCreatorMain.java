@@ -3,13 +3,20 @@ package org.onebusaway.transit_data_federation.bundle;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
+import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
+import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
 /**
  * Command line tool for federated transit data bundle creator. Allows
@@ -57,12 +64,27 @@ public class FederatedTransitDataBundleCreatorMain {
       }
 
       FederatedTransitDataBundleCreator creator = new FederatedTransitDataBundleCreator();
-      List<File> contextPaths = new ArrayList<File>();
-      for (int i = 0; i < remainingArgs.length - 1; i++)
-        contextPaths.add(new File(remainingArgs[i]));
-      creator.setContextPaths(contextPaths);
 
-      // if( commandLine.has)
+      File firstPath = new File(remainingArgs[0]);
+
+      if (remainingArgs.length == 2 && firstPath.isDirectory()) {
+        
+        GtfsBundle gtfsBundle = new GtfsBundle();
+        gtfsBundle.setPath(firstPath);
+
+        BeanDefinitionBuilder gtfsBundles = BeanDefinitionBuilder.genericBeanDefinition(GtfsBundles.class);
+        gtfsBundles.addPropertyValue("bundles", Arrays.asList(gtfsBundle));
+
+        Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
+        beans.put("gtfs-bundles", gtfsBundles.getBeanDefinition());
+        creator.setContextBeans(beans);
+
+      } else {
+        List<File> contextPaths = new ArrayList<File>();
+        for (int i = 0; i < remainingArgs.length - 1; i++)
+          contextPaths.add(new File(remainingArgs[i]));
+        creator.setContextPaths(contextPaths);
+      }
 
       File outputPath = new File(remainingArgs[remainingArgs.length - 1]);
 
