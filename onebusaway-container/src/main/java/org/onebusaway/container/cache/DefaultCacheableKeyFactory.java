@@ -45,6 +45,11 @@ public class DefaultCacheableKeyFactory implements CacheableMethodKeyFactory,
     Object[] args = point.getArgs();
     if (args.length != _keyFactories.length)
       throw new IllegalArgumentException();
+
+    // Short circuit for single argument keys
+    if (args.length == 1)
+      return _keyFactories[0].createKey(args[0]);
+
     KeyImpl keys = new KeyImpl(args.length);
     boolean refreshCache = false;
     for (int i = 0; i < args.length; i++) {
