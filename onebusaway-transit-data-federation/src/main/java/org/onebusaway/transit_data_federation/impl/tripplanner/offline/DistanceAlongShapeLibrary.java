@@ -36,11 +36,10 @@ public class DistanceAlongShapeLibrary {
         shapePoints, projection);
 
     double[] shapePointsDistTraveled = shapePoints.getDistTraveled();
-    
+
     List<List<PointAndIndex>> possibleAssignments = computePotentialAssignments(
-        projection, projectedShapePoints, shapePointsDistTraveled,
-        stopTimes);
-    
+        projection, projectedShapePoints, shapePointsDistTraveled, stopTimes);
+
     double maxDistanceTraveled = shapePointsDistTraveled[shapePointsDistTraveled.length - 1];
 
     List<PointAndIndex> bestAssignment = computeBestAssignment(shapePoints,
@@ -48,7 +47,7 @@ public class DistanceAlongShapeLibrary {
 
     for (int i = 0; i < distances.length; i++) {
       PointAndIndex pindex = bestAssignment.get(i);
-      distances[i] = Math.min(pindex.distanceAlongShape,maxDistanceTraveled);
+      distances[i] = Math.min(pindex.distanceAlongShape, maxDistanceTraveled);
     }
     return distances;
   }
@@ -65,7 +64,8 @@ public class DistanceAlongShapeLibrary {
       XYPoint stopPoint = projection.forward(stop.getStopLocation());
 
       List<PointAndIndex> assignments = _shapePointsLibrary.computePotentialAssignments(
-          projectedShapePoints, shapePointDistance, stopPoint, 0, projectedShapePoints.size());
+          projectedShapePoints, shapePointDistance, stopPoint, 0,
+          projectedShapePoints.size());
 
       Collections.sort(assignments);
 
@@ -96,8 +96,8 @@ public class DistanceAlongShapeLibrary {
       PointAndIndex second = possibleAssignments.get(1).get(0);
       if (first.distanceAlongShape > second.distanceAlongShape) {
         StopTimeEntryImpl firstStopTime = stopTimes.get(0);
-        _log.warn("snapping first stop time id="
-            + firstStopTime.getId() + " to start of shape");
+        _log.warn("snapping first stop time id=" + firstStopTime.getId()
+            + " to start of shape");
         possibleAssignments.get(0).add(
             new PointAndIndex(projectedShapePoints.get(0), 0, 0.0));
       }
@@ -127,8 +127,8 @@ public class DistanceAlongShapeLibrary {
         if (i == possibleAssignments.size() - 1) {
 
           StopTimeEntryImpl lastStopTime = stopTimes.get(i);
-          _log.warn("snapping last stop time id="
-              + lastStopTime.getId() + " to end of shape");
+          _log.warn("snapping last stop time id=" + lastStopTime.getId()
+              + " to end of shape");
           int lastShapePointIndex = projectedShapePoints.size() - 1;
           XYPoint lastShapePoint = projectedShapePoints.get(lastShapePointIndex);
           XYPoint stopLocation = projection.forward(lastStopTime.getStop().getStopLocation());
@@ -161,6 +161,7 @@ public class DistanceAlongShapeLibrary {
     _log.error("error constructing distances along shape for trip="
         + first.getTrip().getId() + " firstStopTime=" + first.getId()
         + " lastStopTime=" + last.getId());
+
     StringBuilder b = new StringBuilder();
     int index = 0;
     for (List<PointAndIndex> possible : possibleAssignments) {

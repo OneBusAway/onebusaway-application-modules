@@ -31,7 +31,7 @@ public class StopTimeEntriesFactory {
   }
 
   public List<StopTimeEntryImpl> processStopTimes(TripPlannerGraphImpl graph,
-      List<StopTime> stopTimes, ShapePoints shapePoints) {
+      List<StopTime> stopTimes, TripEntryImpl tripEntry, ShapePoints shapePoints) {
 
     // In case the list is unmodifiable
     stopTimes = new ArrayList<StopTime>(stopTimes);
@@ -40,6 +40,9 @@ public class StopTimeEntriesFactory {
 
     List<StopTimeEntryImpl> stopTimeEntries = createInitialStopTimeEntries(
         graph, stopTimes);
+
+    for (StopTimeEntryImpl stopTime : stopTimeEntries)
+      stopTime.setTrip(tripEntry);
 
     ensureStopTimesHaveShapeDistanceTraveledSet(stopTimeEntries, shapePoints);
     ensureStopTimesHaveTimesSet(stopTimes, stopTimeEntries);

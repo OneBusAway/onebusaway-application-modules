@@ -43,9 +43,10 @@ public class TripEntriesFactory {
   public void setWhereDao(TransitDataFederationDao whereDao) {
     _whereDao = whereDao;
   }
-  
+
   @Autowired
-  public void setShapePointsService(ShapePointsTemporaryService shapePointsService) {
+  public void setShapePointsService(
+      ShapePointsTemporaryService shapePointsService) {
     _shapePointsService = shapePointsService;
   }
 
@@ -82,7 +83,7 @@ public class TripEntriesFactory {
               + tripsForRoute.size());
         tripIndex++;
         TripEntryImpl tripEntry = processTrip(graph, trip);
-        if( tripEntry != null)
+        if (tripEntry != null)
           tripEntry.setRouteCollectionId(unique(routeCollection.getId()));
       }
 
@@ -97,24 +98,19 @@ public class TripEntriesFactory {
   private TripEntryImpl processTrip(TripPlannerGraphImpl graph, Trip trip) {
 
     List<StopTime> stopTimes = _gtfsDao.getStopTimesForTrip(trip);
-    
-    // A trip without stop times is a trip we don't care about
-    if( stopTimes.isEmpty())
-      return null;
-      
-    ShapePoints shapePoints = null;
-    
-    if( trip.getShapeId() != null)
-      shapePoints = _shapePointsService.getShapePoints(trip.getShapeId());
 
-    List<StopTimeEntryImpl> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
-        graph, stopTimes, shapePoints);
+    // A trip without stop times is a trip we don't care about
+    if (stopTimes.isEmpty())
+      return null;
+
+    ShapePoints shapePoints = null;
+
+    if (trip.getShapeId() != null)
+      shapePoints = _shapePointsService.getShapePoints(trip.getShapeId());
 
     Agency agency = trip.getRoute().getAgency();
     TimeZone tz = TimeZone.getTimeZone(agency.getTimezone());
     LocalizedServiceId lsid = new LocalizedServiceId(trip.getServiceId(), tz);
-
-    double tripDistance = getTripDistance(stopTimesForTrip, shapePoints);
 
     TripEntryImpl tripEntry = new TripEntryImpl();
 
@@ -122,14 +118,17 @@ public class TripEntriesFactory {
     tripEntry.setRouteId(unique(trip.getRoute().getId()));
 
     tripEntry.setServiceId(unique(lsid));
-    tripEntry.setTotalTripDistance(tripDistance);
 
-    // Only set the shape id for a trip if there are actually shape points to back it up
-    if( ! (shapePoints == null || shapePoints.isEmpty() ) )
+    // Only set the shape id for a trip if there are actually shape points to
+    // back it up
+    if (!(shapePoints == null || shapePoints.isEmpty()))
       tripEntry.setShapeId(unique(trip.getShapeId()));
 
-    for (StopTimeEntryImpl stopTime : stopTimesForTrip)
-      stopTime.setTrip(tripEntry);
+    List<StopTimeEntryImpl> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
+        graph, stopTimes, tripEntry, shapePoints);
+    
+    double tripDistance = getTripDistance(stopTimesForTrip, shapePoints);
+    tripEntry.setTotalTripDistance(tripDistance);
 
     tripEntry.setStopTimes(cast(stopTimesForTrip));
 
