@@ -23,9 +23,11 @@
     <package name="onebusaway-webapp-default" extends="struts-default">
 
         <interceptors>
+            <interceptor name="cache-control" class="org.onebusaway.presentation.services.cachecontrol.CacheControlInterceptor" />
             <interceptor name="is-setup" class="org.onebusaway.presentation.impl.users.IsSetupInterceptor" />
             <interceptor name="current-user" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />
             <interceptor-stack name="onebusaway-webapp-stack">
+                <interceptor-ref name="cache-control"/>
                 <interceptor-ref name="defaultStack">
                     <param name="modelDriven.refreshModelBeforeResult">true</param>
                 </interceptor-ref>
