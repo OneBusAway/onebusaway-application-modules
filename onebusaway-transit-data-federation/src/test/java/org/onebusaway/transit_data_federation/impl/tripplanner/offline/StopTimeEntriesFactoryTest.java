@@ -1,13 +1,15 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 import static org.junit.Assert.assertEquals;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Stop;
@@ -17,12 +19,6 @@ import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
 
 public class StopTimeEntriesFactoryTest {
-
-  @Test
-  public void pre() {
-    System.out.println(SphericalGeometryLibrary.distance(47.673840100841396,
-        -122.38756621771239, 47.672207391799056, -122.387855896286));
-  }
 
   @Test
   public void test() {
@@ -53,6 +49,8 @@ public class StopTimeEntriesFactoryTest {
     Trip trip = new Trip();
     trip.setRoute(route);
     trip.setServiceId(aid("serviceId"));
+
+    TripEntryImpl tripEntry = trip("trip");
 
     StopTime stA = new StopTime();
     stA.setId(100);
@@ -88,7 +86,7 @@ public class StopTimeEntriesFactoryTest {
     ShapePoints shapePoints = shapePointsFactory.create();
 
     List<StopTimeEntryImpl> entries = factory.processStopTimes(graph,
-        stopTimes, shapePoints);
+        stopTimes, tripEntry, shapePoints);
 
     assertEquals(stopTimes.size(), entries.size());
 
