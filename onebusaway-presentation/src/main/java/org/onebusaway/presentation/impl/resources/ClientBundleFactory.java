@@ -52,6 +52,8 @@ public class ClientBundleFactory {
   private Map<String, LocalResource> _urlToResource = new HashMap<String, LocalResource>();
 
   private String _prefix;
+  
+  private String _pattern;
 
   private File _tempDir;
 
@@ -63,6 +65,10 @@ public class ClientBundleFactory {
 
   public void setPrefix(String prefix) {
     _prefix = prefix;
+  }
+  
+  public void setPattern(String pattern) {
+    _pattern = pattern;
   }
 
   public void setServletContext(ServletContext servletContext) {
@@ -184,10 +190,6 @@ public class ClientBundleFactory {
         continue;
       }
 
-      if (localURL == null)
-        throw new IllegalStateException("could not find resource: "
-            + resourceName + " for " + bundleType.getName() + "#" + methodName);
-
       if (CssResource.class.isAssignableFrom(returnType)) {
 
         CssResourceImpl resourceImpl = new CssResourceImpl(_context, bundle,
@@ -241,13 +243,8 @@ public class ClientBundleFactory {
 
     StringBuilder b = new StringBuilder();
 
-    /*
-     * if (_prefix != null && _prefix.length() > 0) b.append(_prefix);
-     */
-
-    b.append('/');
     b.append(bundleName);
-    b.append('/');
+    b.append('-');
     if (resourceName.startsWith("get"))
       resourceName = resourceName.substring(3);
     b.append(resourceName);
@@ -351,6 +348,9 @@ public class ClientBundleFactory {
         _urlToResource.remove(existingUrl);
       _resourceToUrl.put(resource, url);
       _urlToResource.put(url, resource);
+      
+      if( _pattern != null)
+        url = _pattern.replaceAll("\\{\\}", url);
 
       if (_prefix != null)
         url = _prefix + url;
