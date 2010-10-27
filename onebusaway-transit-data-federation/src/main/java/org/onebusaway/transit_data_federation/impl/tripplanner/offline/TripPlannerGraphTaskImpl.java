@@ -45,11 +45,15 @@ public class TripPlannerGraphTaskImpl implements Runnable {
   @Transactional
   public void run() {
 
-    System.out.println("======== TripPlannerGraphFactory =>");
-
     _stopEntriesFactory.processStops(_graph);
     _tripEntriesFactory.processTrips(_graph);
     _blockEntriesFactory.processBlocks(_graph);
+
+    /**
+     * Make sure the graph is initialized as result of the graph building
+     * process, as it will be used by subsequent tasks
+     */
+    _graph.initialize();
 
     try {
       ObjectSerializationLibrary.writeObject(_bundle.getTripPlannerGraphPath(),
