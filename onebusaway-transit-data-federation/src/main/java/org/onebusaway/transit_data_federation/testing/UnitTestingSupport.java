@@ -20,6 +20,7 @@ import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferList;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockConfigurationEntriesFactory;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockConfigurationEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockConfigurationEntryImpl.Builder;
@@ -38,6 +39,7 @@ import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigur
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
 public class UnitTestingSupport {
@@ -114,6 +116,21 @@ public class UnitTestingSupport {
     return new StopEntryImpl(aid(id), lat, lon);
   }
 
+  public static void addTransfer(StopEntryImpl from, StopEntryImpl to) {
+
+    double distance = SphericalGeometryLibrary.distance(from.getStopLocation(),
+        to.getStopLocation());
+    StopTransfer transfer = new StopTransfer(to, 0, distance);
+    
+    List<StopTransfer> transfers = new ArrayList<StopTransfer>();
+    StopTransferList existing = from.getTransfers();
+    if (existing != null)
+      transfers.addAll(existing);
+    transfers.add(transfer);
+    existing = new StopTransferList(transfers);
+    from.setTransfers(existing);
+  }
+
   public static BlockEntryImpl block(String id) {
     BlockEntryImpl block = new BlockEntryImpl();
     block.setId(aid(id));
@@ -185,7 +202,7 @@ public class UnitTestingSupport {
     BlockConfigurationEntriesFactory factory = new BlockConfigurationEntriesFactory();
     factory.setServiceIdOverlapCache(cache);
     factory.setShapePointsService(new ShapePointsTemporaryService());
-    
+
     List<TripEntryImpl> tripsInBlock = new ArrayList<TripEntryImpl>();
     for (TripEntryImpl trip : trips)
       tripsInBlock.add(trip);
