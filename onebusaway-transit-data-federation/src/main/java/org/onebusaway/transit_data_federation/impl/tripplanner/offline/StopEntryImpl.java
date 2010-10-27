@@ -24,6 +24,8 @@ public class StopEntryImpl implements StopEntry, Serializable {
   private final double _lon;
 
   private transient List<BlockStopTimeIndex> _stopTimeIndices = new ArrayList<BlockStopTimeIndex>();
+  
+  private transient StopTransferList _transfers = null;
 
   private StopIdsWithValuesImpl _prevStopsWithMinTravelTime = new StopIdsWithValuesImpl();
 
@@ -50,12 +52,11 @@ public class StopEntryImpl implements StopEntry, Serializable {
   }
 
   public StopTransferList getTransfers() {
-    return null;
-    //return _transfers;
+    return _transfers;
   }
 
   public void setTransfers(StopTransferList transfers) {
-    //_transfers = transfers;
+    _transfers = transfers;
   }
 
   public void addPreviousStopWithMinTravelTime(StopEntry stop, int travelTime) {

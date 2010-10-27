@@ -10,10 +10,8 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
-import org.onebusaway.transit_data_federation.model.tripplanner.EmptyStopEntriesWithValues;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StartState;
-import org.onebusaway.transit_data_federation.model.tripplanner.StopEntriesWithValues;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripContext;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripState;
@@ -30,6 +28,8 @@ import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTime
 import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
@@ -51,6 +51,8 @@ public class CombinedStateHandler {
   private Map<StopEntry, WalkPlan> _walkFromStopsToEndpointPlans;
 
   private StopTimeService _stopTimeService;
+  
+  private StopTransferService _stopTransferService;
 
   public CombinedStateHandler(TripContext context) {
     _walkPlans = context.getWalkPlans();
@@ -58,6 +60,7 @@ public class CombinedStateHandler {
     _graph = context.getGraph();
     _walkPlanner = context.getWalkPlannerService();
     _stopTimeService = context.getStopTimeService();
+    _stopTransferService = context.getStopTransferService();
   }
 
   public void setEndPointWalkPlans(CoordinatePoint endPoint,
@@ -142,16 +145,16 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry entry = state.getStop();
+    
     //StopEntriesWithValues transferMap = entry.getTransfers();
-    StopEntriesWithValues transferMap = new EmptyStopEntriesWithValues();
+    List<StopTransfer> transfers = _stopTransferService.getTransfersForStop(entry);
 
-    for (int i = 0; i < transferMap.size(); i++) {
-
-      StopEntry nearbyEntry = transferMap.getStopEntry(i);
+    for( StopTransfer transfer : transfers) {
+      StopEntry nearbyEntry = transfer.getStop();
       if (nearbyEntry.equals(entry))
         continue;
 
-      int transferDistance = transferMap.getValue(i);
+      double transferDistance = transfer.getDistance();
       double walkingTime = transferDistance / _constants.getWalkingVelocity();
       long t = (long) (state.getCurrentTime() + walkingTime);
 
@@ -194,16 +197,15 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry stopEntry = state.getStop();
-    //StopEntriesWithValues transferMap = stopEntry.getTransfers();
-    StopEntriesWithValues transferMap = new EmptyStopEntriesWithValues();
+    List<StopTransfer> transfers = _stopTransferService.getTransfersForStop(stopEntry);
 
-    for (int i = 0; i < transferMap.size(); i++) {
+    for( StopTransfer transfer : transfers) {
 
-      StopEntry nearbyEntry = transferMap.getStopEntry(i);
+      StopEntry nearbyEntry = transfer.getStop();
       if (nearbyEntry.equals(stopEntry))
         continue;
 
-      int transferDistance = transferMap.getValue(i);
+      double transferDistance = transfer.getDistance();
       double walkingTime = transferDistance / _constants.getWalkingVelocity();
       long t = (long) (state.getCurrentTime() - walkingTime);
 

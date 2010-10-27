@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.model.tripplanner;
 
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 
@@ -18,6 +19,8 @@ public class TripContext {
   private WalkPlansImpl _walkPlans = new WalkPlansImpl();
 
   private StopTimeService _stopTimeService;
+
+  private StopTransferService _stopTransferService;
 
   public void setGraph(TripPlannerGraph graph) {
     _graph = graph;
@@ -61,5 +64,13 @@ public class TripContext {
 
   public StopTimeService getStopTimeService() {
     return _stopTimeService;
+  }
+
+  public void setStopTransferService(StopTransferService stopTransferService) {
+    _stopTransferService = stopTransferService;
+  }
+
+  public StopTransferService getStopTransferService() {
+    return _stopTransferService;
   }
 }

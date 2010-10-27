@@ -1,6 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
 import static org.junit.Assert.assertEquals;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addTransfer;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,7 +15,6 @@ import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
@@ -28,6 +29,7 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WalkNode;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
@@ -43,6 +45,8 @@ public class CombinedStateHandlerTest {
   private TripPlannerGraph _graph;
 
   private WalkPlannerService _walkPlannerService;
+  
+  private StopTransferService _stopTransferService;
 
   private CombinedStateHandler _handler;
 
@@ -62,6 +66,9 @@ public class CombinedStateHandlerTest {
 
     _walkPlannerService = Mockito.mock(WalkPlannerService.class);
     _context.setWalkPlannerService(_walkPlannerService);
+    
+    _stopTransferService = new StopTransferServiceImpl();
+    _context.setStopTransferService(_stopTransferService);
 
     _handler = new CombinedStateHandler(_context);
     _results = new HashSet<TripState>();
@@ -92,8 +99,7 @@ public class CombinedStateHandlerTest {
     CoordinateBounds bounds = SphericalGeometryLibrary.bounds(startPoint,
         _constants.getMaxTransferDistance());
 
-    StopEntry stopEntry = mockStopEntry(new AgencyAndId("1", "stopIdA"),
-        47.501, -122.501);
+    StopEntry stopEntry = stop("stopIdA", 47.501, -122.501);
     CoordinatePoint stopLocation = stopEntry.getStopLocation();
     Mockito.when(_graph.getStopsByLocation(bounds)).thenReturn(
         Arrays.asList(stopEntry));
@@ -140,11 +146,9 @@ public class CombinedStateHandlerTest {
   public void testGetWalkFromStopForwardTransitions() {
 
     // Setup
-
-    StopEntry stopEntryB = mockStopEntry(new AgencyAndId("1", "stopIdB"),
-        47.501, -122.501);
-    StopEntry stopEntryA = mockStopEntry(new AgencyAndId("1", "stopIdA"), 47.5,
-        -122.5, stopEntryB);
+    StopEntryImpl stopEntryA = stop("stopIdA", 47.5, -122.5);
+    StopEntryImpl stopEntryB = stop("stopIdB", 47.501, -122.501);
+    addTransfer(stopEntryA, stopEntryB);
 
     CoordinatePoint stopLocationA = stopEntryA.getStopLocation();
     CoordinatePoint stopLocationB = stopEntryB.getStopLocation();
@@ -178,7 +182,7 @@ public class CombinedStateHandlerTest {
     int d = (int) walkToStopPlan.getDistance();
     double walkingTime = d / _constants.getWalkingVelocity();
     long walkToStopTime = (long) (startTime + walkingTime);
-    assertEquals(walkToStopTime, walkToStopState.getCurrentTime(), 100);
+    assertEquals(walkToStopTime, walkToStopState.getCurrentTime(), 200);
 
     EndState endState = getResultOfType(EndState.class);
     assertEquals(endPoint, endState.getLocation());
@@ -255,18 +259,6 @@ public class CombinedStateHandlerTest {
 
   private WalkNode walkNode(CoordinatePoint p) {
     return new WalkNode(ProjectedPointFactory.forward(p));
-  }
-
-  private StopEntry mockStopEntry(AgencyAndId stopId, double lat, double lon,
-      StopEntry... transfers) {
-    StopEntryImpl stop = new StopEntryImpl(stopId, lat, lon);
-    for (StopEntry transfer : transfers) {
-      CoordinatePoint transferStopLocation = transfer.getStopLocation();
-      double distance = SphericalGeometryLibrary.distance(transferStopLocation,
-          stop.getStopLocation());
-      //stop.addTransfer(transfer, distance);
-    }
-    return stop;
   }
 
   @SuppressWarnings("unchecked")
