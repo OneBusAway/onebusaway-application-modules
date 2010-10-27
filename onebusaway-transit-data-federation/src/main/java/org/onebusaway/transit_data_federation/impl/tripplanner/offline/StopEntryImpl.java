@@ -9,12 +9,13 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferList;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 
 public class StopEntryImpl implements StopEntry, Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private final AgencyAndId _id;
 
@@ -23,8 +24,6 @@ public class StopEntryImpl implements StopEntry, Serializable {
   private final double _lon;
 
   private transient List<BlockStopTimeIndex> _stopTimeIndices = new ArrayList<BlockStopTimeIndex>();
-
-  private StopIdsWithValuesImpl _transfers = new StopIdsWithValuesImpl();
 
   private StopIdsWithValuesImpl _prevStopsWithMinTravelTime = new StopIdsWithValuesImpl();
 
@@ -50,8 +49,13 @@ public class StopEntryImpl implements StopEntry, Serializable {
     return _stopTimeIndices;
   }
 
-  public void addTransfer(StopEntry stop, double distance) {
-    _transfers.setValue(stop, (int) distance);
+  public StopTransferList getTransfers() {
+    return null;
+    //return _transfers;
+  }
+
+  public void setTransfers(StopTransferList transfers) {
+    //_transfers = transfers;
   }
 
   public void addPreviousStopWithMinTravelTime(StopEntry stop, int travelTime) {
@@ -84,11 +88,6 @@ public class StopEntryImpl implements StopEntry, Serializable {
   @Override
   public CoordinatePoint getStopLocation() {
     return new CoordinatePoint(_lat, _lon);
-  }
-
-  @Override
-  public StopIdsWithValuesImpl getTransfers() {
-    return _transfers;
   }
 
   @Override

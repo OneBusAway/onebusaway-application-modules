@@ -71,16 +71,18 @@
         <property name="afterTaskName" value="narratives" />
         <property name="task" ref="walkGraphTask" />
     </bean>
-    
+
     <bean id="walkGraphTask" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphTask" />
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="trip_graph" />
         <property name="afterTaskName" value="narratives" />
         <property name="task" ref="tripGraphTask" />
+        <property name="taskWhenSkipped" ref="tripGraphRefreshTask" />
     </bean>
 
     <bean id="tripGraphTask" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphTaskImpl" />
+    <bean id="tripGraphRefreshTask" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphRefreshTask" />
 
     <bean id="tripPlannerGraphImpl" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphImpl" />
     <bean id="transitGraphDaoImpl" class="org.onebusaway.transit_data_federation.impl.TransitGraphDaoImpl" />
@@ -93,10 +95,8 @@
     <bean id="stopTimeEntriesFactory" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntriesFactory" />
     <bean id="tripEntriesFactory" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntriesFactory" />
     <bean id="serviceIdOverlapCache" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdOverlapCache" />
-    <bean id="shapePointsTemporaryService" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.ShapePointsTemporaryService"/>
+    <bean id="shapePointsTemporaryService" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.ShapePointsTemporaryService" />
     <bean id="uniqueServiceImpl" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.UniqueServiceImpl" />
-
-    <bean id="tripPlannerGraphRefresh" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphRefresh" />
 
     <!-- The initial calendar task produces the data necessary to power the CalendarService, but subsequent tasks need access 
         to the data, so we provide a lazy-factory-init instance of the service -->
@@ -114,48 +114,33 @@
         <property name="taskName" value="block_indices" />
         <property name="afterTaskName" value="trip_graph" />
         <property name="task" ref="blockIndicesTask" />
+        <property name="taskWhenSkippedBeanName">
+            <idref bean="blockStopTimeIndicesRefreshTask" />
+        </property>
     </bean>
 
     <bean id="blockIndicesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesTask" />
 
+    <bean id="blockStopTimeIndicesRefreshTask" class="org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndexServiceImpl"
+        lazy-init="true" />
+
     <!-- -->
 
-    <!-- <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition"> <property name="taskName" value="stop_transfers" 
-        /> <property name="afterTaskName" value="block_indices" /> <property name="taskBeanName"> <idref bean="stopTransfersTask" 
-        /> </property> </bean> <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTransfersTripPlannerGraphTaskImpl" 
-        lazy-init="true"> <property name="blockStopTimeIndicesRefreshTask"> <bean class="org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndexServiceImpl" 
-        lazy-init="true" /> </property> </bean> -->
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="stop_transfers" />
+        <property name="afterTaskName" value="block_indices" />
+        <property name="taskBeanName">
+            <idref bean="stopTransfersTask" />
+        </property>
+    </bean>
+
+    <bean id="stopTransfersTask"
+        class="org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTransfersTripPlannerGraphTaskImpl"
+        lazy-init="true">
+    </bean>
 
     <bean id="blockIndexServiceImpl" class="org.onebusaway.transit_data_federation.impl.blocks.BlockIndexServiceImpl"
         lazy-init="true" />
-
-    <!-- OTP Graph Builder -->
-    <!-- 
-    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="otp_graph" />
-        <property name="afterTaskName" value="block_indices" />
-        <property name="taskBeanName">
-            <idref bean="otpGraphBuidlerTask" />
-        </property>
-    </bean>
-
-    <bean id="otpGraphBuidlerTask" class="org.opentripplanner.graph_builder.GraphBuilderTask">
-        <property name="graph" ref="otpGraph" />
-        <property name="graphBundle" ref="otpGraphBundle" />
-        <property name="graphBuilders">
-            <list>
-                <ref bean="osmBuilder" />
-            </list>
-        </property>
-        <property name="alwaysRebuild" value="true" />
-    </bean>
-
-    <bean id="otpGraph" class="org.opentripplanner.routing.core.Graph" />
-
-    <bean id="osmBuilder" class="org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl">
-        <property name="provider" ref="osmProvider" />
-    </bean>
-    -->
 
     <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
         <property name="regionsSource">

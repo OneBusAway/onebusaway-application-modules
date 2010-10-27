@@ -41,6 +41,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private long scheduledDepartureTime;
 
+  private int headway;
+
   private String status;
 
   private boolean predicted = false;
@@ -135,6 +137,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   public void setScheduledDepartureTime(long scheduledDepartureTime) {
     this.scheduledDepartureTime = scheduledDepartureTime;
+  }
+
+  public int getHeadway() {
+    return headway;
+  }
+
+  public void setHeadway(int headway) {
+    this.headway = headway;
   }
 
   public String getStatus() {

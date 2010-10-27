@@ -38,6 +38,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private long scheduledDepartureTime;
 
+  private int headway;
+
   private boolean predicted = false;
 
   private Long lastUpdateTime;
@@ -116,6 +118,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setScheduledDepartureTime(long scheduledDepartureTime) {
     this.scheduledDepartureTime = scheduledDepartureTime;
+  }
+
+  public int getHeadway() {
+    return headway;
+  }
+
+  public void setHeadway(int headway) {
+    this.headway = headway;
   }
 
   public boolean isPredicted() {

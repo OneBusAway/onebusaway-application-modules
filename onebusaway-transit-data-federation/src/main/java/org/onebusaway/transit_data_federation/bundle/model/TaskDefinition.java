@@ -12,6 +12,10 @@ public class TaskDefinition {
 
   private String taskBeanName;
 
+  private Runnable taskWhenSkipped;
+
+  private String taskWhenSkippedBeanName;
+
   public String getTaskName() {
     return taskName;
   }
@@ -50,5 +54,21 @@ public class TaskDefinition {
 
   public void setTaskBeanName(String taskBeanName) {
     this.taskBeanName = taskBeanName;
+  }
+
+  public Runnable getTaskWhenSkipped() {
+    return taskWhenSkipped;
+  }
+
+  public void setTaskWhenSkipped(Runnable taskWhenSkipped) {
+    this.taskWhenSkipped = taskWhenSkipped;
+  }
+
+  public String getTaskWhenSkippedBeanName() {
+    return taskWhenSkippedBeanName;
+  }
+
+  public void setTaskWhenSkippedBeanName(String taskWhenSkippedBeanName) {
+    this.taskWhenSkippedBeanName = taskWhenSkippedBeanName;
   }
 }

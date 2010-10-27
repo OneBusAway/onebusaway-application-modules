@@ -195,10 +195,6 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     pab.setServiceDate(sti.getServiceDate());
 
-    AgencyAndId vehicleId = sti.getVehicleId();
-    if (vehicleId != null)
-      pab.setVehicleId(AgencyAndIdLibrary.convertToString(vehicleId));
-
     BlockStopTimeEntry blockStopTime = sti.getStopTime();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
     StopEntry stop = stopTime.getStop();

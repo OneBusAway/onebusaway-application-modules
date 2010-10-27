@@ -478,6 +478,8 @@ public class BeanFactoryV2 {
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());
     bean.setPredictedDepartureTime(ad.getPredictedDepartureTime());
 
+    bean.setHeadway(ad.getHeadway());
+    
     bean.setStatus(ad.getStatus());
 
     bean.setDistanceFromStop(ad.getDistanceFromStop());

@@ -231,6 +231,11 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       return null;
 
     BlockTripEntry tripEntry = blockLocation.getActiveTrip();
+    
+    if( tripEntry == null) {
+      System.err.println("no trip?");
+      return null;
+    }
 
     return getTripEntryAndBlockLocationAsTripDetails(tripEntry.getTrip(),
         blockLocation, inclusion);

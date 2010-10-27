@@ -4,7 +4,7 @@ import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataB
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class TripPlannerGraphRefresh {
+public class TripPlannerGraphRefreshTask implements Runnable {
 
   private TripPlannerGraphImpl _graph;
 
@@ -20,7 +20,8 @@ public class TripPlannerGraphRefresh {
     _bundle = bundle;
   }
 
-  public void refresh() {
+  @Override
+  public void run() {
     try {
       if (_graph.getAllStops().iterator().hasNext()) {
         _graph.initialize();

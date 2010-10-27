@@ -10,6 +10,7 @@ import java.util.Set;
 import org.onebusaway.collections.Min;
 import org.onebusaway.transit_data_federation.model.tripplanner.AtStopState;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
+import org.onebusaway.transit_data_federation.model.tripplanner.EmptyStopEntriesWithValues;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StopEntriesWithValues;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripState;
@@ -130,7 +131,8 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
     if (stats != null)
       return stats;
 
-    StopEntriesWithValues transfers = stopEntry.getTransfers();
+    // StopEntriesWithValues transfers = stopEntry.getTransfers();
+    StopEntriesWithValues transfers = new EmptyStopEntriesWithValues();
 
     Min<TripStats> m = new Min<TripStats>();
 
@@ -203,7 +205,8 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
       // We can only transfer between stops if we're currently on a vehicle
       // Stop to Stop to Stop transfers are not allowed
 
-      StopEntriesWithValues transfers = currentStop.getTransfers();
+      // StopEntriesWithValues transfers = currentStop.getTransfers();
+      StopEntriesWithValues transfers = new EmptyStopEntriesWithValues();
 
       for (int i = 0; i < transfers.size(); i++) {
 

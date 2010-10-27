@@ -10,6 +10,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
+import org.onebusaway.transit_data_federation.model.tripplanner.EmptyStopEntriesWithValues;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StartState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StopEntriesWithValues;
@@ -141,7 +142,8 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry entry = state.getStop();
-    StopEntriesWithValues transferMap = entry.getTransfers();
+    //StopEntriesWithValues transferMap = entry.getTransfers();
+    StopEntriesWithValues transferMap = new EmptyStopEntriesWithValues();
 
     for (int i = 0; i < transferMap.size(); i++) {
 
@@ -192,7 +194,8 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry stopEntry = state.getStop();
-    StopEntriesWithValues transferMap = stopEntry.getTransfers();
+    //StopEntriesWithValues transferMap = stopEntry.getTransfers();
+    StopEntriesWithValues transferMap = new EmptyStopEntriesWithValues();
 
     for (int i = 0; i < transferMap.size(); i++) {
 
@@ -326,8 +329,10 @@ public class CombinedStateHandler {
     if (stopEntry.getNextStopsWithMinTimes().size() > 1)
       return true;
 
+    /*
     if (!stopEntry.getTransfers().isEmpty())
       return true;
+    */
 
     return false;
   }

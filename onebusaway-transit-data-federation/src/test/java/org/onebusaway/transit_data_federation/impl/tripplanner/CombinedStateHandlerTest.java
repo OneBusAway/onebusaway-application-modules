@@ -264,7 +264,7 @@ public class CombinedStateHandlerTest {
       CoordinatePoint transferStopLocation = transfer.getStopLocation();
       double distance = SphericalGeometryLibrary.distance(transferStopLocation,
           stop.getStopLocation());
-      stop.addTransfer(transfer, distance);
+      //stop.addTransfer(transfer, distance);
     }
     return stop;
   }

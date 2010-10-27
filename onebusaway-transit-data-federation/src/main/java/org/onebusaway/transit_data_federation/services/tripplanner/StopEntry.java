@@ -14,8 +14,6 @@ public interface StopEntry {
 
   public CoordinatePoint getStopLocation();
 
-  public StopEntriesWithValues getTransfers();
-
   public StopEntriesWithValues getPreviousStopsWithMinTimes();
 
   public StopEntriesWithValues getNextStopsWithMinTimes();

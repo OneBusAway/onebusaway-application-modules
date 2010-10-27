@@ -3,8 +3,6 @@ package org.onebusaway.transit_data_federation.services.tripplanner;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-
 public class StopTimeInstance {
 
   private static final DateFormat DAY_FORMAT = DateFormat.getDateInstance(DateFormat.SHORT);
@@ -15,8 +13,6 @@ public class StopTimeInstance {
   private final BlockStopTimeEntry _stopTime;
 
   private final long _serviceDate;
-
-  private AgencyAndId _vehicleId;
 
   public StopTimeInstance(BlockStopTimeEntry stopTime, Date serviceDate) {
     this(stopTime, serviceDate.getTime());
@@ -53,14 +49,6 @@ public class StopTimeInstance {
 
   public long getDepartureTime() {
     return _serviceDate + _stopTime.getStopTime().getDepartureTime() * 1000;
-  }
-
-  public AgencyAndId getVehicleId() {
-    return _vehicleId;
-  }
-
-  public void setVehicleId(AgencyAndId vehicleId) {
-    _vehicleId = vehicleId;
   }
 
   @Override

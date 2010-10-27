@@ -44,10 +44,6 @@ public class FederatedTransitDataBundleCreatorMain {
 
   public void run(String[] args) {
 
-    for (String path : System.getProperty("java.class.path").split(
-        File.pathSeparator))
-      System.out.println(path);
-
     try {
       Parser parser = new GnuParser();
 
@@ -68,7 +64,7 @@ public class FederatedTransitDataBundleCreatorMain {
       File firstPath = new File(remainingArgs[0]);
 
       if (remainingArgs.length == 2 && firstPath.isDirectory()) {
-        
+
         GtfsBundle gtfsBundle = new GtfsBundle();
         gtfsBundle.setPath(firstPath);
 

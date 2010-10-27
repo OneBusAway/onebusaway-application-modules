@@ -58,6 +58,10 @@ public class FederatedTransitDataBundle {
   public File getBlockIndicesPath() {
     return new File(_path, "BlockIndices.obj");
   }
+  
+  public File getStopTransfersPath() {
+    return new File(_path, "StopTransfers.obj");
+  }
 
   public File getCachePath() {
     return new File(_path, "cache");

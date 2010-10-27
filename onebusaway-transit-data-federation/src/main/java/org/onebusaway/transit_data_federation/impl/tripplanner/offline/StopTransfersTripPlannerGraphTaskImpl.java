@@ -18,6 +18,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferData;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
@@ -44,10 +45,6 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
   private TripPlannerGraphImpl _graph;
 
-  private Runnable _blockStopTimeIndicesRefreshTask;
-
-  private TripPlannerGraphRefresh _refresh;
-
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -58,15 +55,6 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
     _graph = graph;
   }
 
-  public void setBlockStopTimeIndicesRefreshTask(Runnable blockStopTimeIndicesRefreshTask) {
-    _blockStopTimeIndicesRefreshTask = blockStopTimeIndicesRefreshTask;
-  }
-  
-  @Autowired
-  public void setRefresh(TripPlannerGraphRefresh refresh) {
-    _refresh = refresh;
-  }
-
   @Transactional
   public void run() {
 
@@ -75,12 +63,6 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
       WalkPlannerGraph walkPlannerGraph = ObjectSerializationLibrary.readObject(_bundle.getWalkPlannerGraphPath());
       _cachedStopTransferWalkPlanner.setWalkPlannerGraph(walkPlannerGraph);
 
-      // Make sure graph is initialized
-      _refresh.refresh();
-
-      // Make sure the block stop time indices have been wired up
-      _blockStopTimeIndicesRefreshTask.run();
-
       StopSequenceData data = new StopSequenceData();
 
       for (TripEntryImpl trip : _graph.getTrips())
@@ -88,14 +70,14 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
       System.out.println("stopSequences=" + data.size());
 
-      processStopTransfers(data);
+      Map<AgencyAndId, List<StopTransferData>> stopTransfers = processStopTransfers(data);
 
       System.out.println("stop walk cache: "
           + _cachedStopTransferWalkPlanner.getCacheHits() + " / "
           + _cachedStopTransferWalkPlanner.getTotalHits());
 
-      ObjectSerializationLibrary.writeObject(_bundle.getTripPlannerGraphPath(),
-          _graph);
+      ObjectSerializationLibrary.writeObject(_bundle.getStopTransfersPath(),
+          stopTransfers);
     } catch (Exception ex) {
       throw new IllegalStateException("error writing graph to file", ex);
     }
@@ -127,8 +109,10 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
    * keeping only the best. See getBestTransfers for more info.
    * 
    * @param tripsByBlockId
+   * @return
    */
-  private void processStopTransfers(StopSequenceData data) {
+  private Map<AgencyAndId, List<StopTransferData>> processStopTransfers(
+      StopSequenceData data) {
 
     Map<Pair<StopEntry>, Transfer> activeTransfers = new HashMap<Pair<StopEntry>, Transfer>();
 
@@ -150,8 +134,8 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
 
     }
 
-    CoordinateBounds bounds = new CoordinateBounds(47.652437773749696,
-        -122.31671333312988, 47.67492405709021, -122.27989196777344);
+    Map<AgencyAndId, List<StopTransferData>> stopTransfersBySourceStop = new FactoryMap<AgencyAndId, List<StopTransferData>>(
+        new ArrayList<StopTransferData>());
 
     // Store all the transfers
     for (Map.Entry<Pair<StopEntry>, Transfer> entry : activeTransfers.entrySet()) {
@@ -161,13 +145,12 @@ public class StopTransfersTripPlannerGraphTaskImpl implements Runnable {
       StopEntryImpl fromStop = (StopEntryImpl) transfer.getFirst();
       StopEntryImpl toStop = (StopEntryImpl) transfer.getSecond();
 
-      fromStop.addTransfer(toStop, distance);
-
-      if (bounds.contains(fromStop.getStopLat(), fromStop.getStopLon())
-          || bounds.contains(toStop.getStopLat(), toStop.getStopLon()))
-        System.out.println(fromStop.getStopLat() + " " + fromStop.getStopLon()
-            + " " + toStop.getStopLat() + " " + toStop.getStopLon());
+      StopTransferData stopTransfer = new StopTransferData(toStop.getId(), 0,
+          distance);
+      stopTransfersBySourceStop.get(fromStop.getId()).add(stopTransfer);
     }
+
+    return stopTransfersBySourceStop;
   }
 
   /**
