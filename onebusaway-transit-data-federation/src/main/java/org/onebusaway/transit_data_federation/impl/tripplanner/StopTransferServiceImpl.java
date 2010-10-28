@@ -8,11 +8,13 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.utility.ObjectSerializationLibrary;
@@ -22,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-class StopTransferServiceImpl implements StopTransferService {
+public class StopTransferServiceImpl implements StopTransferService {
 
   private static Logger _log = LoggerFactory.getLogger(StopTransferServiceImpl.class);
 
@@ -44,40 +46,48 @@ class StopTransferServiceImpl implements StopTransferService {
   }
 
   @PostConstruct
+  @Refreshable(dependsOn = RefreshableResources.STOP_TRANSFER_DATA)
   public void setup() throws IOException, ClassNotFoundException {
 
     File path = _bundle.getStopTransfersPath();
 
-    Map<AgencyAndId, List<StopTransferData>> stopTransferDataByStopId = ObjectSerializationLibrary.readObject(path);
+    if (path.exists()) {
 
-    for (Map.Entry<AgencyAndId, List<StopTransferData>> entry : stopTransferDataByStopId.entrySet()) {
+      Map<AgencyAndId, List<StopTransferData>> stopTransferDataByStopId = ObjectSerializationLibrary.readObject(path);
 
-      AgencyAndId stopId = entry.getKey();
-      List<StopTransferData> transferData = entry.getValue();
+      for (Map.Entry<AgencyAndId, List<StopTransferData>> entry : stopTransferDataByStopId.entrySet()) {
 
-      StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
+        AgencyAndId stopId = entry.getKey();
+        List<StopTransferData> transferData = entry.getValue();
 
-      if (stop == null) {
-        _log.warn("unknown stop: " + stopId);
-        continue;
-      }
+        StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
 
-      List<StopTransfer> transfers = new ArrayList<StopTransfer>();
-
-      for (StopTransferData data : transferData) {
-        AgencyAndId targetStopId = data.getStopId();
-        StopEntry targetStop = _transitGraphDao.getStopEntryForId(targetStopId);
-        if (targetStop == null) {
-          _log.warn("unkown stop: " + targetStopId);
+        if (stop == null) {
+          _log.warn("unknown stop: " + stopId);
           continue;
         }
-        StopTransfer transfer = new StopTransfer(targetStop,
-            data.getMinTransferTime(), data.getDistance());
-        transfers.add(transfer);
-      }
 
-      StopEntryImpl stopEntry = (StopEntryImpl) stop;
-      stopEntry.setTransfers(new StopTransferList(transfers));
+        List<StopTransfer> transfers = new ArrayList<StopTransfer>();
+
+        for (StopTransferData data : transferData) {
+          AgencyAndId targetStopId = data.getStopId();
+          StopEntry targetStop = _transitGraphDao.getStopEntryForId(targetStopId);
+          if (targetStop == null) {
+            _log.warn("unkown stop: " + targetStopId);
+            continue;
+          }
+          StopTransfer transfer = new StopTransfer(targetStop,
+              data.getMinTransferTime(), data.getDistance());
+
+          System.out.println(stop.getStopLat() + " " + stop.getStopLon() + " "
+              + targetStop.getStopLat() + " " + targetStop.getStopLon());
+
+          transfers.add(transfer);
+        }
+
+        StopEntryImpl stopEntry = (StopEntryImpl) stop;
+        stopEntry.setTransfers(new StopTransferList(transfers));
+      }
     }
   }
 

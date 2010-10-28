@@ -1,7 +1,7 @@
 package org.onebusaway.transit_data_federation.services;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 import java.util.Date;

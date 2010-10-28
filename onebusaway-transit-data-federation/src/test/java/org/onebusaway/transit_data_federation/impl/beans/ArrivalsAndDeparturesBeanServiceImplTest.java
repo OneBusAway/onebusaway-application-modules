@@ -24,10 +24,10 @@ import org.mockito.Mockito;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
@@ -37,8 +37,8 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 public class ArrivalsAndDeparturesBeanServiceImplTest {

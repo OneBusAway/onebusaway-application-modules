@@ -12,7 +12,7 @@ import org.onebusaway.transit_data_federation.model.ProjectedPoint;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkNode;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.services.beans.WalkPlanBeanService;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.springframework.stereotype.Component;
 
 @Component

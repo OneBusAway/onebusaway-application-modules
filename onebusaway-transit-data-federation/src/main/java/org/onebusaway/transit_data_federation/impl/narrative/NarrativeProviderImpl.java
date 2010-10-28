@@ -11,8 +11,8 @@ import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public final class NarrativeProviderImpl implements Serializable {
 

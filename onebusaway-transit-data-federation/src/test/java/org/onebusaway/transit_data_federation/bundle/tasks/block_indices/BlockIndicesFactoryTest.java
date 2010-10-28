@@ -17,14 +17,14 @@ import java.util.List;
 
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
 public class BlockIndicesFactoryTest {
   @Test

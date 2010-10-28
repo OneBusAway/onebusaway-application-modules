@@ -13,6 +13,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
@@ -30,6 +31,8 @@ public class GenerateStopSearchIndexTaskTest {
 
   private FederatedTransitDataBundle _bundle;
 
+  private RefreshService _refreshService;
+
   @Before
   public void setup() throws IOException {
 
@@ -45,6 +48,9 @@ public class GenerateStopSearchIndexTaskTest {
 
     _gtfsDao = Mockito.mock(GtfsRelationalDao.class);
     _task.setGtfsDao(_gtfsDao);
+    
+    _refreshService = Mockito.mock(RefreshService.class);
+    _task.setRefreshService(_refreshService);
   }
 
   @After
@@ -76,7 +82,7 @@ public class GenerateStopSearchIndexTaskTest {
     _task.run();
 
     StopSearchServiceImpl searchService = new StopSearchServiceImpl();
-    searchService.setIndexPath(_bundle.getStopSearchIndexPath());
+    searchService.setBundle(_bundle);
     searchService.initialize();
     SearchResult<AgencyAndId> ids = searchService.searchForStopsByCode("111",
         10, MIN_SCORE);

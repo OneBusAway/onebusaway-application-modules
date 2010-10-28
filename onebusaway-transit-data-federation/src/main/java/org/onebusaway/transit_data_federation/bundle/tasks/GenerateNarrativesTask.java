@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.geospatial.model.XYPoint;
 import org.onebusaway.geospatial.services.GeometryLibrary;
 import org.onebusaway.gtfs.model.Agency;
@@ -19,7 +20,9 @@ import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.bundle.services.UniqueService;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.narrative.NarrativeProviderImpl;
 import org.onebusaway.transit_data_federation.impl.narrative.NarrativeServiceImpl;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
@@ -64,8 +67,20 @@ public class GenerateNarrativesTask implements Runnable {
 
   @Autowired
   private Modifications _modifications;
-  
-  private Map<Object, Object> _deduplication = new HashMap<Object, Object>();
+
+  private UniqueService _uniqueService;
+
+  private RefreshService _refreshService;
+
+  @Autowired
+  public void setUniqueService(UniqueService uniqueService) {
+    _uniqueService = uniqueService;
+  }
+
+  @Autowired
+  public void setRefreshService(RefreshService refreshService) {
+    _refreshService = refreshService;
+  }
 
   @Override
   public void run() {
@@ -79,6 +94,7 @@ public class GenerateNarrativesTask implements Runnable {
     try {
       ObjectSerializationLibrary.writeObject(
           _bundle.getNarrativeProviderPath(), provider);
+      _refreshService.refresh(RefreshableResources.NARRATIVE_DATA);
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
@@ -176,7 +192,6 @@ public class GenerateNarrativesTask implements Runnable {
 
       if (tripIndex % 200 == 0) {
         _log.info("trips=" + tripIndex + " of " + trips.size());
-        _log.info(_deduplication.size() + " / " + total);
       }
 
       tripIndex++;
@@ -193,8 +208,6 @@ public class GenerateNarrativesTask implements Runnable {
         total++;
       }
     }
-
-    _log.info(_deduplication.size() + " / " + total);
   }
 
   private StopTimeNarrative getStopTimeNarrative(StopTime stopTime) {
@@ -303,12 +316,7 @@ public class GenerateNarrativesTask implements Runnable {
     }
   }
 
-  @SuppressWarnings("unchecked")
   private <T> T deduplicate(T object) {
-    if (object == null)
-      return object;
-    if (!_deduplication.containsKey(object))
-      _deduplication.put(object, object);
-    return (T) _deduplication.get(object);
+    return _uniqueService.unique(object);
   }
 }

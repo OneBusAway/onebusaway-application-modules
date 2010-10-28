@@ -9,9 +9,11 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryParser.ParseException;
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.RouteCollectionSearchServiceImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
@@ -50,6 +52,8 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
 
   private FederatedTransitDataBundle _bundle;
 
+  private RefreshService _refreshService;
+
   @Autowired
   public void setWhereDao(TransitDataFederationDao dao) {
     _whereDao = dao;
@@ -58,6 +62,11 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
+  }
+  
+  @Autowired
+  public void setRefresService(RefreshService refreshService) {
+    _refreshService = refreshService;
   }
 
   @Transactional
@@ -79,6 +88,8 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
     }
     writer.optimize();
     writer.close();
+    
+    _refreshService.refresh(RefreshableResources.ROUTE_COLLECTION_SEARCH_DATA);
   }
 
   private List<Document> getRouteCollectionAsDocuments(

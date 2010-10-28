@@ -9,7 +9,7 @@ import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GenericMutableDao;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
-import org.onebusaway.transit_data_federation.services.offline.EntityReplacementStrategy;
+import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
 import org.springframework.context.ApplicationContext;
 
 /**

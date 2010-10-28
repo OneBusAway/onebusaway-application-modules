@@ -15,7 +15,7 @@ import org.onebusaway.gtfs.model.IdentityBean;
 import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GenericMutableDao;
-import org.onebusaway.transit_data_federation.services.offline.EntityReplacementStrategy;
+import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

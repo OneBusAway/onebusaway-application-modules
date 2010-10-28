@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
 public class BlockIndexData implements Serializable {
 

@@ -18,9 +18,9 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripStats;
 import org.onebusaway.transit_data_federation.model.tripplanner.VehicleArrivalState;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkFromStopState;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 
 public class MinPathToEndStateImpl implements TripStateScoringStrategy {

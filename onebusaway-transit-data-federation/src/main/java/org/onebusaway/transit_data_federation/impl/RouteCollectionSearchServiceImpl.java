@@ -22,10 +22,13 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TopDocCollector;
 import org.apache.lucene.search.TopDocs;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionSearchIndexTask;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -38,29 +41,43 @@ public class RouteCollectionSearchServiceImpl implements
       GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_SHORT_NAME,
       GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_LONG_NAME};
 
-  private File _indexPath;
+  private FederatedTransitDataBundle _bundle;
 
   private Searcher _searcher;
 
-  public void setIndexPath(File indexPath) {
-    _indexPath = indexPath;
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
   }
 
   @PostConstruct
+  @Refreshable(dependsOn = RefreshableResources.ROUTE_COLLECTION_SEARCH_DATA)
   public void initialize() throws IOException {
-    IndexReader reader = IndexReader.open(_indexPath);
-    _searcher = new IndexSearcher(reader);
+
+    File path = _bundle.getRouteSearchIndexPath();
+
+    if (path.exists()) {
+      IndexReader reader = IndexReader.open(path);
+      _searcher = new IndexSearcher(reader);
+    } else {
+      _searcher = null;
+    }
   }
 
   public SearchResult<AgencyAndId> searchForRoutesByShortName(String value,
-      int maxResultCount, double minScoreToKeep) throws IOException, ParseException {
-    
+      int maxResultCount, double minScoreToKeep) throws IOException,
+      ParseException {
+
     return search(new MultiFieldQueryParser(NAME_FIELDS, _analyzer), value,
         maxResultCount, minScoreToKeep);
   }
 
   private SearchResult<AgencyAndId> search(QueryParser parser, String value,
-      int maxResultCount, double minScoreToKeep) throws IOException, ParseException {
+      int maxResultCount, double minScoreToKeep) throws IOException,
+      ParseException {
+
+    if (_searcher == null)
+      return new SearchResult<AgencyAndId>();
 
     TopDocCollector collector = new TopDocCollector(maxResultCount);
 
@@ -68,20 +85,20 @@ public class RouteCollectionSearchServiceImpl implements
     _searcher.search(query, collector);
 
     TopDocs top = collector.topDocs();
-    
+
     Map<AgencyAndId, Float> topScores = new HashMap<AgencyAndId, Float>();
 
     for (ScoreDoc sd : top.scoreDocs) {
       Document document = _searcher.doc(sd.doc);
-      
+
       String agencyId = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_AGENCY_ID);
       String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
       AgencyAndId id = new AgencyAndId(agencyId, routeShortName);
-      
+
       // Result must have a minimum score to qualify
-      if( sd.score < minScoreToKeep && ! routeShortName.equals(value))
+      if (sd.score < minScoreToKeep && !routeShortName.equals(value))
         continue;
-      
+
       // Keep the best score for a particular id
       Float score = topScores.get(id);
       if (score == null || score < sd.score)

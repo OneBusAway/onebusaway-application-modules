@@ -37,37 +37,26 @@ import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
  * 
  * The build process is configured using Spring and additional context config
  * paths can be specified to add to the Spring container (see
- * {@link #setPreBundleContextPaths(List)}). The core config is kept in the
- * resource:
+ * {@link #setContextPaths(List)}). The core config is kept in the resource:
  * 
- * {@value #PRE_BUNDLE_RESOURCE}
+ * {@value #BUNDLE_RESOURCE}
  * 
  * @author bdferris
  * @see FederatedTransitDataBundleCreatorMain
  */
 public class FederatedTransitDataBundleCreator {
 
-  private static final String PRE_BUNDLE_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-pre-bundle.xml";
-
-  private static final String POST_BUNDLE_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-creator-post-bundle.xml";
+  private static final String BUNDLE_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-bundle-creator.xml";
 
   private List<File> _contextPaths = new ArrayList<File>();
 
   private Map<String, BeanDefinition> _contextBeans = new HashMap<String, BeanDefinition>();
-
-  private List<File> _preBundleContextPaths = new ArrayList<File>();
-
-  private List<File> _postBundleContextPaths = new ArrayList<File>();
 
   private File _outputPath;
 
   private Set<String> _skipTasks = new HashSet<String>();
 
   private Set<String> _onlyTasks = new HashSet<String>();
-
-  private Set<String> _postBundleSkipTasks = new HashSet<String>();
-
-  private Set<String> _postBundleOnlyTasks = new HashSet<String>();
 
   private String _skipToTask;
 
@@ -82,35 +71,12 @@ public class FederatedTransitDataBundleCreator {
    * 
    * @param contextPaths additional Spring context paths to add to the container
    */
-
   public void setContextPaths(List<File> paths) {
     _contextPaths = paths;
   }
 
   public void setContextBeans(Map<String, BeanDefinition> contextBeans) {
     _contextBeans = contextBeans;
-  }
-
-  /**
-   * Additional pre-bundle-construction context paths that will be added when
-   * constructing the Spring container that controls the build process. See
-   * {@link ContainerLibrary#createContext(Iterable)}.
-   * 
-   * @param contextPaths additional Spring context paths to add to the container
-   */
-  public void setPreBundleContextPaths(List<File> contextPaths) {
-    _preBundleContextPaths = contextPaths;
-  }
-
-  /**
-   * Additional post-bundle-construction context paths that will be added when
-   * constructing the Spring container that controls the build process. See
-   * {@link ContainerLibrary#createContext(Iterable)}.
-   * 
-   * @param contextPaths additional Spring context paths to add to the container
-   */
-  public void setPostBundleContextPaths(List<File> contextPaths) {
-    _postBundleContextPaths = contextPaths;
   }
 
   /**
@@ -151,15 +117,11 @@ public class FederatedTransitDataBundleCreator {
      */
     System.setProperty("bundlePath", _outputPath.getAbsolutePath());
 
-    List<String> preBundlePaths = getPrimaryApplicatonContextPaths();
-    Map<String, BeanDefinition> preBundleBeans = getPrimaryBeanDefintions();
+    List<String> contextPaths = getPrimaryApplicatonContextPaths();
+    Map<String, BeanDefinition> contextBeans = getPrimaryBeanDefintions();
 
-    runTasks(preBundlePaths, preBundleBeans, true, true, _skipTasks, _onlyTasks);
+    runTasks(contextPaths, contextBeans, true, true, _skipTasks, _onlyTasks);
 
-    List<String> postBundlePaths = getPostBundleApplicatonContextPaths();
-    Map<String, BeanDefinition> postBundleBeans = getPostBundleBeanDefintions();
-    runTasks(postBundlePaths, postBundleBeans, false, true,
-        _postBundleSkipTasks, _postBundleOnlyTasks);
   }
 
   private void runTasks(List<String> applicationContextPaths,
@@ -219,7 +181,9 @@ public class FederatedTransitDataBundleCreator {
 
   private void createOrUpdateDatabaseSchemaAsNeeded(
       ConfigurableApplicationContext context, Set<String> taskNames) {
-    LocalSessionFactoryBean factory = context.getBean(LocalSessionFactoryBean.class);
+
+    LocalSessionFactoryBean factory = context.getBean("&sessionFactory",
+        LocalSessionFactoryBean.class);
 
     if (taskNames.contains("gtfs")) {
       factory.dropDatabaseSchema();
@@ -235,35 +199,13 @@ public class FederatedTransitDataBundleCreator {
 
   private List<String> getPrimaryApplicatonContextPaths() {
     List<String> paths = new ArrayList<String>();
-    paths.add(PRE_BUNDLE_RESOURCE);
+    paths.add(BUNDLE_RESOURCE);
     for (File contextPath : _contextPaths)
-      paths.add("file:" + contextPath);
-    for (File contextPath : _preBundleContextPaths)
       paths.add("file:" + contextPath);
     return paths;
   }
 
   private Map<String, BeanDefinition> getPrimaryBeanDefintions() {
-    Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
-    beans.putAll(_contextBeans);
-    return beans;
-  }
-
-  private List<String> getPostBundleApplicatonContextPaths() {
-
-    List<String> paths = new ArrayList<String>();
-
-    paths.add("classpath:org/onebusaway/transit_data_federation/application-context-services.xml");
-    paths.add(POST_BUNDLE_RESOURCE);
-    for (File contextPath : _contextPaths)
-      paths.add("file:" + contextPath);
-    for (File contextPath : _postBundleContextPaths)
-      paths.add("file:" + contextPath);
-
-    return paths;
-  }
-
-  private Map<String, BeanDefinition> getPostBundleBeanDefintions() {
     Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
     beans.putAll(_contextBeans);
     return beans;

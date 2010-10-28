@@ -18,56 +18,12 @@
 
     <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
 
+    <bean id="refreshServiceImpl" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
+
     <bean id="blockLocationServiceImpl" class="org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl">
         <property name="persistBlockLocationRecords" value="true" />
     </bean>
 
     <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
-
-    <bean id="routeSearchIndexPath" factory-bean="bundle" factory-method="getRouteSearchIndexPath" />
-    <bean id="stopSearchIndexPath" factory-bean="bundle" factory-method="getStopSearchIndexPath" />
-    <bean id="walkPlannerGraphPath" factory-bean="bundle" factory-method="getWalkPlannerGraphPath" />
-    <bean id="tripPlannerGraphPath" factory-bean="bundle" factory-method="getTripPlannerGraphPath" />
-    <bean id="narrativeProviderPath" factory-bean="bundle" factory-method="getNarrativeProviderPath" />
-
-    <bean id="calendarServiceDataFactory" class="org.onebusaway.gtfs.impl.SerializedCalendarServiceDataFactoryImpl"
-        primary="true">
-        <property name="path">
-            <bean factory-bean="bundle" factory-method="getCalendarServiceDataPath" />
-        </property>
-    </bean>
-
-    <bean id="calendarServiceImpl" class="org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl">
-        <property name="data">
-            <bean factory-bean="calendarServiceDataFactory" factory-method="createData" />
-        </property>
-    </bean>
-
-    <bean id="walkPlannerGraph" class="org.onebusaway.container.spring.SerializedFactoryBean">
-        <property name="objectType" value="org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph" />
-        <property name="path" ref="walkPlannerGraphPath"  />
-    </bean>
-
-    <!-- Don't bother loading the walk graph... we're not using it and it takes up a lot of memory -->
-    <!-- <bean id="walkPlannerGraph" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl" 
-        /> -->
-
-    <bean id="tripPlannerGraph" class="org.onebusaway.container.spring.SerializedFactoryBean">
-        <property name="objectType" value="org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph" />
-        <property name="path" ref="tripPlannerGraphPath" />
-    </bean>
-
-    <bean id="routeCollectionSearchServiceImpl" class="org.onebusaway.transit_data_federation.impl.RouteCollectionSearchServiceImpl">
-        <property name="indexPath" ref="routeSearchIndexPath" />
-    </bean>
-
-    <bean id="stopSearchServiceImpl" class="org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl">
-        <property name="indexPath" ref="stopSearchIndexPath" />
-    </bean>
-
-    <bean id="narrativeProviderImpl" class="org.onebusaway.container.spring.SerializedFactoryBean">
-        <property name="objectType" value="org.onebusaway.transit_data_federation.impl.narrative.NarrativeProviderImpl" />
-        <property name="path" ref="narrativeProviderPath" />
-    </bean>
 
 </beans>

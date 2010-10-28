@@ -18,7 +18,6 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
@@ -26,10 +25,11 @@ import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanSe
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -2,13 +2,13 @@ package org.onebusaway.transit_data_federation.model.tripplanner;
 
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 
 public class TripContext {
 
-  private TripPlannerGraph _graph;
+  private TransitGraphDao _transitGraphDao;
 
   private TripPlannerConstants _constants = new TripPlannerConstants();
 
@@ -22,12 +22,12 @@ public class TripContext {
 
   private StopTransferService _stopTransferService;
 
-  public void setGraph(TripPlannerGraph graph) {
-    _graph = graph;
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
   }
 
-  public TripPlannerGraph getGraph() {
-    return _graph;
+  public TransitGraphDao getTransitGraphDao() {
+    return _transitGraphDao;
   }
 
   public TripPlannerConstants getConstants() {

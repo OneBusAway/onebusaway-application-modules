@@ -47,8 +47,8 @@ public class FederatedTransitDataBundle {
     return new File(_path, "WalkPlannerGraph.obj");
   }
 
-  public File getTripPlannerGraphPath() {
-    return new File(_path, "TripPlannerGraph.obj");
+  public File getTransitGraphPath() {
+    return new File(_path, "TransitGraph.obj");
   }
 
   public File getNarrativeProviderPath() {
@@ -58,7 +58,7 @@ public class FederatedTransitDataBundle {
   public File getBlockIndicesPath() {
     return new File(_path, "BlockIndices.obj");
   }
-  
+
   public File getStopTransfersPath() {
     return new File(_path, "StopTransfers.obj");
   }

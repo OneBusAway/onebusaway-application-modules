@@ -5,7 +5,7 @@ import java.util.List;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.model.StopSequence;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 /**
  * Service methods for generating {@link StopSequence} objects from a collection

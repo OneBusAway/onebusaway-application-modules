@@ -25,22 +25,22 @@ import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopRouteDirectionScheduleBean;
 import org.onebusaway.transit_data.model.StopRouteScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopScheduleBeanService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
-import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndexService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.onebusaway.utility.text.NaturalStringOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,7 +65,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
   private NarrativeService _narrativeService;
 
-  private BlockStopTimeIndexService _blockStopTimeIndexService;
+  private BlockIndexService _blockIndexService;
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -93,9 +93,9 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
   }
 
   @Autowired
-  public void setBlockStopTimeIndexService(
-      BlockStopTimeIndexService blockStopTimeIndexService) {
-    _blockStopTimeIndexService = blockStopTimeIndexService;
+  public void setBlockIndexService(
+      BlockIndexService blockIndexService) {
+    _blockIndexService = blockIndexService;
   }
 
   @Cacheable
@@ -105,7 +105,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
     Set<ServiceIdActivation> serviceIds = new HashSet<ServiceIdActivation>();
-    for (BlockStopTimeIndex blockStopTimeIndex : _blockStopTimeIndexService.getStopTimeIndicesForStop(stopEntry))
+    for (BlockStopTimeIndex blockStopTimeIndex : _blockIndexService.getStopTimeIndicesForStop(stopEntry))
       serviceIds.add(blockStopTimeIndex.getServiceIds());
 
     SortedMap<ServiceDate, Set<ServiceIdActivation>> serviceIdsByDate = getServiceIdsByDate(serviceIds);
@@ -144,7 +144,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
         new ArrayList<StopTimeInstance>());
 
-    for (BlockStopTimeIndex index : _blockStopTimeIndexService.getStopTimeIndicesForStop(stopEntry)) {
+    for (BlockStopTimeIndex index : _blockIndexService.getStopTimeIndicesForStop(stopEntry)) {
 
       ServiceIdActivation serviceIds = index.getServiceIds();
 

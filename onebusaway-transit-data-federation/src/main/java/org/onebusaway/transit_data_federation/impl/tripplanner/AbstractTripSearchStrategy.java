@@ -26,7 +26,6 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WaitingAtStopSta
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
 import org.onebusaway.transit_data_federation.services.tripplanner.ETripComparison;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripAggregationStrategy;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 import org.slf4j.Logger;
@@ -73,8 +72,6 @@ public abstract class AbstractTripSearchStrategy {
 
   protected TripContext _context;
 
-  protected TripPlannerGraph _graph;
-
   protected TripPlannerConstraints _constraints;
 
   protected TripPlannerConstants _constants;
@@ -94,7 +91,6 @@ public abstract class AbstractTripSearchStrategy {
   public AbstractTripSearchStrategy(TripContext context) {
 
     _context = context;
-    _graph = context.getGraph();
     _constraints = context.getConstraints();
     _constants = context.getConstants();
     _walkPlanner = context.getWalkPlannerService();

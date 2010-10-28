@@ -1,5 +1,8 @@
 package org.onebusaway.transit_data_federation.services.tripplanner;
 
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+
 /**
  * A trip instance is the combination of a {@link TripEntry} and a service date
  * for which that trip is active. The "service date" is the "midnight time" from

@@ -14,16 +14,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
 public class BlockLocationServiceImplTest {
 

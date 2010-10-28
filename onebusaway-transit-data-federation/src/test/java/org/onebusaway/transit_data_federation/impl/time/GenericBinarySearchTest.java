@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopTimeOp;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
 public class GenericBinarySearchTest {
 

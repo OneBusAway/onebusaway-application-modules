@@ -24,13 +24,13 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WalkFromStopStat
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 
@@ -40,7 +40,7 @@ public class CombinedStateHandler {
 
   private TripPlannerConstants _constants;
 
-  private TripPlannerGraph _graph;
+  private TransitGraphDao _transitGraphDao;
 
   private WalkPlannerService _walkPlanner;
 
@@ -51,13 +51,13 @@ public class CombinedStateHandler {
   private Map<StopEntry, WalkPlan> _walkFromStopsToEndpointPlans;
 
   private StopTimeService _stopTimeService;
-  
+
   private StopTransferService _stopTransferService;
 
   public CombinedStateHandler(TripContext context) {
     _walkPlans = context.getWalkPlans();
     _constants = context.getConstants();
-    _graph = context.getGraph();
+    _transitGraphDao = context.getTransitGraphDao();
     _walkPlanner = context.getWalkPlannerService();
     _stopTimeService = context.getStopTimeService();
     _stopTransferService = context.getStopTransferService();
@@ -109,7 +109,7 @@ public class CombinedStateHandler {
 
     double d = _constants.getMaxTransferDistance();
     CoordinateBounds bounds = DistanceLibrary.bounds(state.getLocation(), d);
-    List<StopEntry> stopEntries = _graph.getStopsByLocation(bounds);
+    List<StopEntry> stopEntries = _transitGraphDao.getStopsByLocation(bounds);
 
     for (StopEntry stop : stopEntries) {
 
@@ -145,11 +145,11 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry entry = state.getStop();
-    
-    //StopEntriesWithValues transferMap = entry.getTransfers();
+
+    // StopEntriesWithValues transferMap = entry.getTransfers();
     List<StopTransfer> transfers = _stopTransferService.getTransfersForStop(entry);
 
-    for( StopTransfer transfer : transfers) {
+    for (StopTransfer transfer : transfers) {
       StopEntry nearbyEntry = transfer.getStop();
       if (nearbyEntry.equals(entry))
         continue;
@@ -199,7 +199,7 @@ public class CombinedStateHandler {
     StopEntry stopEntry = state.getStop();
     List<StopTransfer> transfers = _stopTransferService.getTransfersForStop(stopEntry);
 
-    for( StopTransfer transfer : transfers) {
+    for (StopTransfer transfer : transfers) {
 
       StopEntry nearbyEntry = transfer.getStop();
       if (nearbyEntry.equals(stopEntry))
@@ -224,7 +224,8 @@ public class CombinedStateHandler {
 
     StopEntry stopEntry = state.getStop();
 
-    //_stopTimeService.getNextStopTimeDeparture(stopEntry, state.getCurrentTime());
+    // _stopTimeService.getNextStopTimeDeparture(stopEntry,
+    // state.getCurrentTime());
     List<StopTimeInstance> departures = Collections.emptyList();
 
     if (departures.isEmpty()) {
@@ -248,8 +249,9 @@ public class CombinedStateHandler {
 
     StopEntry stopEntry = state.getStop();
 
-    //_stopTimeService.getPreviousStopTimeArrival(stopEntry, state.getCurrentTime());
-    List<StopTimeInstance> arrivals = Collections.emptyList(); 
+    // _stopTimeService.getPreviousStopTimeArrival(stopEntry,
+    // state.getCurrentTime());
+    List<StopTimeInstance> arrivals = Collections.emptyList();
 
     if (arrivals.isEmpty()) {
       System.err.println("unlikely");
@@ -332,9 +334,8 @@ public class CombinedStateHandler {
       return true;
 
     /*
-    if (!stopEntry.getTransfers().isEmpty())
-      return true;
-    */
+     * if (!stopEntry.getTransfers().isEmpty()) return true;
+     */
 
     return false;
   }
@@ -411,8 +412,7 @@ public class CombinedStateHandler {
     BlockTripEntry entry = state.getNextTrip();
     List<BlockStopTimeEntry> stopTimes = entry.getStopTimes();
     BlockStopTimeEntry first = stopTimes.get(0);
-    StopTimeInstance sti = new StopTimeInstance(first,
-        state.getServiceDate());
+    StopTimeInstance sti = new StopTimeInstance(first, state.getServiceDate());
     transitions.add(new VehicleContinuationState(sti));
     transitions.add(new VehicleArrivalState(sti));
   }
@@ -424,8 +424,7 @@ public class CombinedStateHandler {
     List<BlockStopTimeEntry> stopTimes = entry.getStopTimes();
 
     BlockStopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
-    StopTimeInstance sti = new StopTimeInstance(last,
-        state.getServiceDate());
+    StopTimeInstance sti = new StopTimeInstance(last, state.getServiceDate());
     transitions.add(new VehicleContinuationState(sti));
     transitions.add(new VehicleDepartureState(sti));
   }
@@ -440,7 +439,7 @@ public class CombinedStateHandler {
     double d = _constants.getMaxTransferDistance();
     CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
         state.getLocation(), d);
-    List<StopEntry> stopEntries = _graph.getStopsByLocation(bounds);
+    List<StopEntry> stopEntries = _transitGraphDao.getStopsByLocation(bounds);
 
     for (StopEntry stop : stopEntries) {
 

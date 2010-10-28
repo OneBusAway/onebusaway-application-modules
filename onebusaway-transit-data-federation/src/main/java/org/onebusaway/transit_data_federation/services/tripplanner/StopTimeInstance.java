@@ -3,6 +3,10 @@ package org.onebusaway.transit_data_federation.services.tripplanner;
 import java.text.DateFormat;
 import java.util.Date;
 
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+
 public class StopTimeInstance {
 
   private static final DateFormat DAY_FORMAT = DateFormat.getDateInstance(DateFormat.SHORT);

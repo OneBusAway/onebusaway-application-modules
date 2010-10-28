@@ -1,5 +1,7 @@
 package org.onebusaway.transit_data_federation.services.tripplanner;
 
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+
 public final class StopTransfer {
 
   private final StopEntry stop;

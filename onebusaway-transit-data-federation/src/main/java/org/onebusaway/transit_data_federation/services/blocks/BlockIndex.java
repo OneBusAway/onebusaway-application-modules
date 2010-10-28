@@ -2,8 +2,8 @@ package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
 /**
  * A BlockIndex is a collection of {@link BlockConfigurationEntry} elements that

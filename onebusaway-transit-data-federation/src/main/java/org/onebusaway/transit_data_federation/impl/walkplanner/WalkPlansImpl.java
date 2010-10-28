@@ -8,7 +8,7 @@ import org.onebusaway.transit_data_federation.model.tripplanner.AtLocationState;
 import org.onebusaway.transit_data_federation.model.tripplanner.AtStopState;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripState;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlanSource;
 
 public class WalkPlansImpl implements WalkPlanSource {

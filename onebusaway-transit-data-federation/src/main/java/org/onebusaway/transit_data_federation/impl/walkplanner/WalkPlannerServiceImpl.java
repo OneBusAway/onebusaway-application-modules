@@ -1,17 +1,25 @@
 package org.onebusaway.transit_data_federation.impl.walkplanner;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.onebusaway.collections.Min;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch;
 import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch.NoPathToGoalException;
 import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkEdgeEntryImpl;
+import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl;
 import org.onebusaway.transit_data_federation.impl.walkplanner.states.AtNodeWalkState;
 import org.onebusaway.transit_data_federation.impl.walkplanner.states.NearEdgeWalkState;
 import org.onebusaway.transit_data_federation.impl.walkplanner.states.NearNodeWalkState;
@@ -26,25 +34,47 @@ import org.onebusaway.transit_data_federation.services.walkplanner.WalkEdgeEntry
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
+import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class WalkPlannerServiceImpl implements WalkPlannerService {
 
+  private FederatedTransitDataBundle _bundle;
+
   private TripPlannerConstants _constants;
 
   private WalkPlannerGraph _graph;
+
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
+  }
 
   @Autowired
   public void setTripPlannerConstants(TripPlannerConstants constants) {
     _constants = constants;
   }
 
-  @Autowired
   public void setWalkPlannerGraph(WalkPlannerGraph graph) {
     _graph = graph;
   }
+
+  @PostConstruct
+  @Refreshable(dependsOn = RefreshableResources.WALK_PLANNER_GRAPH)
+  public void setup() throws IOException, ClassNotFoundException {
+    File path = _bundle.getWalkPlannerGraphPath();
+    if (path.exists()) {
+      _graph = ObjectSerializationLibrary.readObject(path);
+    } else {
+      _graph = new WalkPlannerGraphImpl();
+    }
+  }
+
+  /****
+   * {@link WalkPlannerService} Service
+   ****/
 
   public WalkPlan getWalkPlan(CoordinatePoint latLonFrom,
       CoordinatePoint latLonTo) throws NoPathException {

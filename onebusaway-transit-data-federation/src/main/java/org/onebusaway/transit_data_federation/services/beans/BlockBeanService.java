@@ -4,7 +4,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 /**
  * Service methods to lookup a {@link BlockBean} representation of a block: a

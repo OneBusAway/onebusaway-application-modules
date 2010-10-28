@@ -14,14 +14,14 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 public class ScheduledBlockLocationServiceImplTest {
 

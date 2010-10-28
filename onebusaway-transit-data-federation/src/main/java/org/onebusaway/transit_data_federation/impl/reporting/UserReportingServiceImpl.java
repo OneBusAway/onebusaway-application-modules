@@ -8,15 +8,15 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

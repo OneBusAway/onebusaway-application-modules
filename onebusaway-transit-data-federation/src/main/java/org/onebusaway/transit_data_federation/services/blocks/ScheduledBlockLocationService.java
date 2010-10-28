@@ -2,7 +2,7 @@ package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 
 /**
  * Methods for retrieving the scheduled location of a vehicle traveling along a

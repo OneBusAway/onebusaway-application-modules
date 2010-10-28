@@ -4,8 +4,8 @@ import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 /**
  * Service methods for accessing the list of stop times for a specified trip.

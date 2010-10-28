@@ -4,10 +4,10 @@ import java.util.AbstractList;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
 public class BlockStopTimeIndex {
 

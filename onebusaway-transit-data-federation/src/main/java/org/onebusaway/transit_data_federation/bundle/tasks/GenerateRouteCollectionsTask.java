@@ -7,10 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.collections.Counter;
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationMutableDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,8 @@ public class GenerateRouteCollectionsTask implements Runnable {
 
   private TransitDataFederationMutableDao _transitDataFederationMutableDao;
 
+  private RefreshService _refreshService;
+
   @Autowired
   public void setGtfsDao(GtfsRelationalDao gtfsDao) {
     _gtfsDao = gtfsDao;
@@ -45,6 +49,11 @@ public class GenerateRouteCollectionsTask implements Runnable {
   public void setTransitDataFederationMutableDao(
       TransitDataFederationMutableDao transitDataFederationMutableDao) {
     _transitDataFederationMutableDao = transitDataFederationMutableDao;
+  }
+
+  @Autowired
+  public void setRefreshService(RefreshService refreshService) {
+    _refreshService = refreshService;
   }
 
   @Transactional
@@ -84,6 +93,8 @@ public class GenerateRouteCollectionsTask implements Runnable {
     }
 
     // _whereMutableDao.flush();
+
+    _refreshService.refresh(RefreshableResources.ROUTE_COLLECTIONS_DATA);
   }
 
   private String getRouteCollectionIdForRoute(Route route) {

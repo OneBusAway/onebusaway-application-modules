@@ -10,9 +10,11 @@ import java.util.Set;
 
 import org.onebusaway.collections.combinations.Combinations;
 import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
@@ -31,6 +33,8 @@ public class WalkPlannerGraphTask implements Runnable {
 
   private FederatedTransitDataBundle _bundle;
 
+  private RefreshService _refreshService;
+
   @Autowired
   public void setOpenStreetMapProvider(OpenStreetMapProvider provider) {
     _provider = provider;
@@ -39,6 +43,11 @@ public class WalkPlannerGraphTask implements Runnable {
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
+  }
+
+  @Autowired
+  public void setRefreshService(RefreshService refreshService) {
+    _refreshService = refreshService;
   }
 
   public void setCreateEmptyGraph(boolean createEmptyGraph) {
@@ -59,6 +68,7 @@ public class WalkPlannerGraphTask implements Runnable {
       WalkPlannerGraph graph = handler.getGraph();
       ObjectSerializationLibrary.writeObject(_bundle.getWalkPlannerGraphPath(),
           graph);
+      _refreshService.refresh(RefreshableResources.WALK_PLANNER_GRAPH);
     } catch (Exception ex) {
       throw new IllegalStateException("error constructing WalkPlannerGraph", ex);
     }
@@ -146,7 +156,6 @@ public class WalkPlannerGraphTask implements Runnable {
           || value.equals("motorway_link"))
         return;
 
-      
       for (Pair<Integer> pair : Combinations.getSequentialPairs(way.getNodeRefs()))
         _edges.add(pair);
     }

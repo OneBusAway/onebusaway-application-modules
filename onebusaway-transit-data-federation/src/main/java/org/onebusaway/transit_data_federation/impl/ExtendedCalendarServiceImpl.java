@@ -12,8 +12,8 @@ import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
+import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -9,10 +9,12 @@ import java.util.List;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationMutableDao;
 
@@ -40,6 +42,9 @@ public class GenerateRouteCollectionsTaskTest {
     Mockito.when(gtfsDao.getTripsForRoute(routeB)).thenReturn(trips(routeB, 10));
     Mockito.when(gtfsDao.getTripsForRoute(routeC)).thenReturn(trips(routeC, 6));
 
+    RefreshService refreshService = Mockito.mock(RefreshService.class);
+    task.setRefreshService(refreshService);
+
     task.run();
 
     ArgumentCaptor<RouteCollection> captor = ArgumentCaptor.forClass(RouteCollection.class);
@@ -64,6 +69,9 @@ public class GenerateRouteCollectionsTaskTest {
     assertEquals(new AgencyAndId("agency", "B"), rcB.getId());
     assertEquals("B", rcB.getShortName());
     assertEquals("Route B Local", rcB.getLongName());
+
+    Mockito.verify(refreshService).refresh(
+        RefreshableResources.ROUTE_COLLECTIONS_DATA);
   }
 
   private Route route(String id, String shortName, String longName) {

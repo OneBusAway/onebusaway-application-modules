@@ -19,8 +19,8 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripContext;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripStateStats;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 
 public class PointToPointStrategy extends AbstractTripSearchStrategy {
@@ -77,10 +77,10 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
       }
     }
 
-    TripPlannerGraph graph = _context.getGraph();
+    TransitGraphDao graphDao = _context.getTransitGraphDao();
     CoordinateBounds bounds = SphericalGeometryLibrary.bounds(pointTo,
         maxDistance);
-    List<StopEntry> stopEntries = graph.getStopsByLocation(bounds);
+    List<StopEntry> stopEntries = graphDao.getStopsByLocation(bounds);
 
     Map<StopEntry, WalkPlan> walksFromStops = new HashMap<StopEntry, WalkPlan>();
     Map<StopEntry, Double> initialWalkDistances = new HashMap<StopEntry, Double>();

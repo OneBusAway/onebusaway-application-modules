@@ -2,6 +2,9 @@ package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.util.List;
 
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -32,6 +35,13 @@ public class PreCacheTask implements Runnable {
 
   private TransitDataService _service;
 
+  private CacheManager _cacheManager;
+
+  @Autowired
+  public void setCacheManager(CacheManager cacheManager) {
+    _cacheManager = cacheManager;
+  }
+
   @Autowired
   public void setTransitDataService(TransitDataService service) {
     _service = service;
@@ -39,6 +49,12 @@ public class PreCacheTask implements Runnable {
 
   @Override
   public void run() {
+
+    // Clear all existing cache elements
+    for (String cacheName : _cacheManager.getCacheNames()) {
+      Cache cache = _cacheManager.getCache(cacheName);
+      cache.removeAll();
+    }
 
     try {
       List<AgencyWithCoverageBean> agenciesWithCoverage = _service.getAgenciesWithCoverage();

@@ -7,10 +7,12 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryParser.ParseException;
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl;
 import org.onebusaway.transit_data_federation.services.StopSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,8 @@ public class GenerateStopSearchIndexTask implements Runnable {
 
   private FederatedTransitDataBundle _bundle;
 
+  private RefreshService _refreshService;
+
   @Autowired
   public void setGtfsDao(GtfsRelationalDao dao) {
     _dao = dao;
@@ -47,6 +51,11 @@ public class GenerateStopSearchIndexTask implements Runnable {
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
+  }
+
+  @Autowired
+  public void setRefreshService(RefreshService refreshService) {
+    _refreshService = refreshService;
   }
 
   public void run() {
@@ -66,6 +75,7 @@ public class GenerateStopSearchIndexTask implements Runnable {
     }
     writer.optimize();
     writer.close();
+    _refreshService.refresh(RefreshableResources.STOP_SEARCH_DATA);
   }
 
   private Document getStopAsDocument(Stop stop) {

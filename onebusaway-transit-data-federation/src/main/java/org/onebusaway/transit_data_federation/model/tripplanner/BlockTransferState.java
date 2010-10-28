@@ -1,6 +1,6 @@
 package org.onebusaway.transit_data_federation.model.tripplanner;
 
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 public class BlockTransferState extends TripState {
 

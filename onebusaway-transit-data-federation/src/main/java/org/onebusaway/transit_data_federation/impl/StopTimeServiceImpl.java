@@ -11,11 +11,11 @@ import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeDeparture
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
-import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndexService;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ class StopTimeServiceImpl implements StopTimeService {
 
   private ExtendedCalendarService _calendarService;
 
-  private BlockStopTimeIndexService _blockStopTimeIndexService;
+  private BlockIndexService _blockIndexService;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao graph) {
@@ -40,9 +40,8 @@ class StopTimeServiceImpl implements StopTimeService {
   }
 
   @Autowired
-  public void setBlockStopTimeIndexService(
-      BlockStopTimeIndexService blockStopTimeIndexService) {
-    _blockStopTimeIndexService = blockStopTimeIndexService;
+  public void setBlockIndexService(BlockIndexService blockIndexService) {
+    _blockIndexService = blockIndexService;
   }
 
   @Override
@@ -58,7 +57,7 @@ class StopTimeServiceImpl implements StopTimeService {
       StopEntry stopEntry) {
     List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 
-    for (BlockStopTimeIndex index : _blockStopTimeIndexService.getStopTimeIndicesForStop(stopEntry)) {
+    for (BlockStopTimeIndex index : _blockIndexService.getStopTimeIndicesForStop(stopEntry)) {
       Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
           index.getServiceIds(), index.getServiceInterval(), from, to);
       getStopTimesForStopAndServiceIdsAndTimeRange(index, serviceDates, from,

@@ -9,9 +9,9 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstraints;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.MinTravelTimeToStopsListener;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerService;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ class TripPlannerServiceImpl implements TripPlannerService {
 
   private TripPlannerConstants _constants;
 
-  private TripPlannerGraph _graph;
+  private TransitGraphDao _transitGraphDao;
 
   private StopTimeService _stopTimeService;
 
@@ -39,8 +39,8 @@ class TripPlannerServiceImpl implements TripPlannerService {
   }
 
   @Autowired
-  public void setTripPlannerGraph(TripPlannerGraph graph) {
-    _graph = graph;
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
   }
 
   @Autowired
@@ -81,7 +81,7 @@ class TripPlannerServiceImpl implements TripPlannerService {
     TripContext context = new TripContext();
 
     context.setConstants(_constants);
-    context.setGraph(_graph);
+    context.setTransitGraphDao(_transitGraphDao);
     context.setWalkPlannerService(_walkPlanner);
     context.setStopTimeService(_stopTimeService);
     context.setConstraints(constraints);

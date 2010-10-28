@@ -14,10 +14,10 @@ import java.util.List;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord.Builder;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 
 public class BlockLocationRecordCacheImplTest {
 

@@ -4,8 +4,8 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch.ValueAdapter;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 
 import java.util.Comparator;
 

@@ -1,8 +1,8 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 public class ScheduledBlockLocation {
 

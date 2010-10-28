@@ -2,8 +2,8 @@ package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 /**
  * Vehicle location information for a particular trip.

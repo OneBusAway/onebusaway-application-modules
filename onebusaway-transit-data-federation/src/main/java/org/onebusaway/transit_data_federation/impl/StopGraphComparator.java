@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class StopGraphComparator implements Comparator<StopEntry> {
 

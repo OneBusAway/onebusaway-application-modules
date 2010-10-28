@@ -2,7 +2,7 @@ package org.onebusaway.transit_data_federation.model.tripplanner;
 
 import java.util.NoSuchElementException;
 
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public final class EmptyStopEntriesWithValues implements StopEntriesWithValues {
 

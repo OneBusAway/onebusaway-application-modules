@@ -6,8 +6,8 @@ import org.onebusaway.container.model.IdentityBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 /**
  * A stop sequence is a unique sequence of stops visited by a transit trip. So

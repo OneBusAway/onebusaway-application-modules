@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.onebusaway.transit_data_federation.services.offline.EntityReplacementStrategy;
+import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
 
 /**
  * {@link EntityReplacementStrategy} implementation that is used to map entity

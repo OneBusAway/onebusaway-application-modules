@@ -16,7 +16,7 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StartState;
@@ -28,9 +28,9 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WalkFromStopStat
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkNode;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 
@@ -42,7 +42,7 @@ public class CombinedStateHandlerTest {
 
   private TripPlannerConstraints _constraints;
 
-  private TripPlannerGraph _graph;
+  private TransitGraphDao _transitGraphDao;
 
   private WalkPlannerService _walkPlannerService;
   
@@ -61,8 +61,8 @@ public class CombinedStateHandlerTest {
     _constraints = new TripPlannerConstraints();
     _context.setConstraints(_constraints);
 
-    _graph = Mockito.mock(TripPlannerGraph.class);
-    _context.setGraph(_graph);
+    _transitGraphDao = Mockito.mock(TransitGraphDao.class);
+    _context.setTransitGraphDao(_transitGraphDao);
 
     _walkPlannerService = Mockito.mock(WalkPlannerService.class);
     _context.setWalkPlannerService(_walkPlannerService);
@@ -101,7 +101,7 @@ public class CombinedStateHandlerTest {
 
     StopEntry stopEntry = stop("stopIdA", 47.501, -122.501);
     CoordinatePoint stopLocation = stopEntry.getStopLocation();
-    Mockito.when(_graph.getStopsByLocation(bounds)).thenReturn(
+    Mockito.when(_transitGraphDao.getStopsByLocation(bounds)).thenReturn(
         Arrays.asList(stopEntry));
 
     WalkPlan walkToStopPlan = new WalkPlan(Arrays.asList(walkNode(startPoint),

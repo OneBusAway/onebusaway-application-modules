@@ -3,7 +3,7 @@
  */
 package org.onebusaway.transit_data_federation.services.serialization;
 
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl;
 
 /**
@@ -19,7 +19,7 @@ import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlann
  * @param <K> the id type
  * @param <T> the callback result type
  * 
- * @see TripPlannerGraphImpl
+ * @see TransitGraphImpl
  * @see WalkPlannerGraphImpl
  */
 public class EntryIdAndCallback<K, T> {

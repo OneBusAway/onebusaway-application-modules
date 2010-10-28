@@ -2,16 +2,19 @@ package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 
 import java.util.List;
 
+import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripPlannerGraphImpl;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class BlockIndicesTask implements Runnable {
 
   private FederatedTransitDataBundle _bundle;
-  private TripPlannerGraphImpl _graph;
+  private TransitGraphDao _transitGraphDao;
+  private RefreshService _refreshService;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
@@ -19,8 +22,13 @@ public class BlockIndicesTask implements Runnable {
   }
 
   @Autowired
-  public void setGraph(TripPlannerGraphImpl graph) {
-    _graph = graph;
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setRefreshService(RefreshService refreshService) {
+    _refreshService = refreshService;
   }
 
   @Override
@@ -31,12 +39,15 @@ public class BlockIndicesTask implements Runnable {
       BlockIndicesFactory factory = new BlockIndicesFactory();
       factory.setVerbose(true);
 
-      Iterable<BlockEntry> blocks = _graph.getAllBlocks();
+      Iterable<BlockEntry> blocks = _transitGraphDao.getAllBlocks();
 
       List<BlockIndexData> data = factory.createData(blocks);
 
       ObjectSerializationLibrary.writeObject(_bundle.getBlockIndicesPath(),
           data);
+
+      _refreshService.refresh(RefreshableResources.BLOCK_INDEX_DATA);
+
     } catch (Exception ex) {
       throw new IllegalStateException(ex);
     }

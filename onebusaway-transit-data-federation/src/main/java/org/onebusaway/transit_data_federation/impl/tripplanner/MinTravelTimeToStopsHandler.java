@@ -1,7 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.MinTravelTimeToStopsListener;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 
 import java.util.HashMap;
 import java.util.Map;

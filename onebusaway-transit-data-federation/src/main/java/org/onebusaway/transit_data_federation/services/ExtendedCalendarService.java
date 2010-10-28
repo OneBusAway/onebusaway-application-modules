@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
 public interface ExtendedCalendarService {
 

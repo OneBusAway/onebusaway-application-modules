@@ -1,9 +1,9 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 
 /**

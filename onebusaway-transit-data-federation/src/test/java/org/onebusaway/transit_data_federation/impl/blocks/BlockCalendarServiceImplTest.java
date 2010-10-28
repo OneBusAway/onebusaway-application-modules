@@ -20,12 +20,12 @@ import org.junit.Test;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.BlockEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.offline.TripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.testing.UnitTestingSupport;
 
 public class BlockCalendarServiceImplTest {

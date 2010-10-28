@@ -3,7 +3,7 @@ package org.onebusaway.transit_data_federation.impl.tripplanner;
 import java.util.AbstractList;
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 
 /**

@@ -9,8 +9,8 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripContext;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstraints;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripState;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripStateStats;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.MinTravelTimeToStopsListener;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 
 public class PointToStopsStrategy extends AbstractTripSearchStrategy {

@@ -7,11 +7,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
-import org.onebusaway.transit_data_federation.services.tripplanner.BlockEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

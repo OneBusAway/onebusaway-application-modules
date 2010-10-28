@@ -17,7 +17,7 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConst
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstraints;
 import org.onebusaway.transit_data_federation.services.beans.TripPlanBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanService;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerService;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.services.PathService;
