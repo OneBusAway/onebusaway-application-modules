@@ -128,11 +128,9 @@ public class AgencyServiceImpl implements AgencyService {
     for (Agency agency : _dao.getAllAgencies()) {
 
       CoordinateBounds bounds = boundsByAgencyId.get(agency.getId());
-
-      if (bounds == null || bounds.isEmpty()) {
-        _log.warn("Agency has no service: " + agency);
-        boundsByAgencyId.remove(agency.getId());
-      }
+      
+      if( bounds == null)
+        boundsByAgencyId.put(agency.getId(),new CoordinateBounds());
     }
 
     return boundsByAgencyId;

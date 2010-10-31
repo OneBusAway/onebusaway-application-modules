@@ -18,6 +18,8 @@ public interface BlockConfigurationEntry {
   public List<BlockTripEntry> getTrips();
 
   public List<BlockStopTimeEntry> getStopTimes();
+  
+  public List<FrequencyEntry> getFrequencies();
 
   /**
    * @return distance, in meters

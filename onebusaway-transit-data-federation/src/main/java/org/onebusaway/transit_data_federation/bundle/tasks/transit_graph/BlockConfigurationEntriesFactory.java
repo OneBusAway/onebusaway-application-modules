@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -45,6 +47,50 @@ public class BlockConfigurationEntriesFactory {
   public void processBlockConfigurations(BlockEntryImpl block,
       List<TripEntryImpl> tripsInBlock) {
 
+    processFrequencyBlockConfigurations(block, tripsInBlock, null);
+  }
+
+  public void processFrequencyBlockConfigurations(BlockEntryImpl block,
+      List<TripEntryImpl> tripsInBlock,
+      Map<AgencyAndId, List<FrequencyEntry>> frequenciesAlongBlock) {
+
+    Map<LocalizedServiceId, List<TripEntryImpl>> tripsByServiceId = getTripsByServiceId(
+        block, tripsInBlock);
+
+    List<ServiceIdActivation> combinations = _serviceIdOverlapCache.getOverlappingServiceIdCombinations(tripsByServiceId.keySet());
+
+    ArrayList<BlockConfigurationEntry> configurations = new ArrayList<BlockConfigurationEntry>();
+
+    for (ServiceIdActivation serviceIds : combinations) {
+
+      BlockConfigurationEntryImpl.Builder builder = processTripsForServiceIdConfiguration(
+          block, tripsByServiceId, serviceIds);
+
+      List<TripEntry> trips = builder.getTrips();
+
+      if (frequenciesAlongBlock != null) {
+        List<FrequencyEntry> frequencies = computeBlockFrequencies(block,
+            trips, frequenciesAlongBlock);
+        builder.setFrequencies(frequencies);
+      }
+
+      configurations.add(builder.create());
+    }
+
+    Collections.sort(configurations, _blockConfigurationComparator);
+    configurations.trimToSize();
+
+    block.setConfigurations(configurations);
+
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private Map<LocalizedServiceId, List<TripEntryImpl>> getTripsByServiceId(
+      BlockEntryImpl block, List<TripEntryImpl> tripsInBlock) {
+
     Map<LocalizedServiceId, List<TripEntryImpl>> tripsByServiceId = new FactoryMap<LocalizedServiceId, List<TripEntryImpl>>(
         new ArrayList<TripEntryImpl>());
 
@@ -66,35 +112,55 @@ public class BlockConfigurationEntriesFactory {
       tripsByServiceId.get(serviceId).add(trip);
     }
 
-    List<ServiceIdActivation> combinations = _serviceIdOverlapCache.getOverlappingServiceIdCombinations(tripsByServiceId.keySet());
+    return tripsByServiceId;
+  }
 
-    ArrayList<BlockConfigurationEntry> configurations = new ArrayList<BlockConfigurationEntry>();
+  private BlockConfigurationEntryImpl.Builder processTripsForServiceIdConfiguration(
+      BlockEntryImpl block,
+      Map<LocalizedServiceId, List<TripEntryImpl>> tripsByServiceId,
+      ServiceIdActivation serviceIds) {
 
-    for (ServiceIdActivation serviceIds : combinations) {
+    ArrayList<TripEntry> trips = new ArrayList<TripEntry>();
 
-      ArrayList<TripEntry> trips = new ArrayList<TripEntry>();
-      for (LocalizedServiceId serviceId : serviceIds.getActiveServiceIds()) {
-        trips.addAll(tripsByServiceId.get(serviceId));
-      }
-
-      Collections.sort(trips, _blockTripComparator);
-      trips.trimToSize();
-
-      double[] tripGapDistances = _shapePointsService.computeGapDistancesBetweenTrips(trips);
-
-      BlockConfigurationEntryImpl.Builder builder = BlockConfigurationEntryImpl.builder();
-      builder.setBlock(block);
-      builder.setServiceIds(serviceIds);
-      builder.setTrips(trips);
-      builder.setTripGapDistances(tripGapDistances);
-
-      configurations.add(builder.create());
+    for (LocalizedServiceId serviceId : serviceIds.getActiveServiceIds()) {
+      trips.addAll(tripsByServiceId.get(serviceId));
     }
 
-    Collections.sort(configurations, _blockConfigurationComparator);
-    configurations.trimToSize();
+    Collections.sort(trips, _blockTripComparator);
+    trips.trimToSize();
 
-    block.setConfigurations(configurations);
+    double[] tripGapDistances = _shapePointsService.computeGapDistancesBetweenTrips(trips);
+
+    BlockConfigurationEntryImpl.Builder builder = BlockConfigurationEntryImpl.builder();
+    builder.setBlock(block);
+    builder.setServiceIds(serviceIds);
+    builder.setTrips(trips);
+    builder.setTripGapDistances(tripGapDistances);
+    return builder;
+  }
+
+  private List<FrequencyEntry> computeBlockFrequencies(BlockEntryImpl block,
+      List<TripEntry> trips,
+      Map<AgencyAndId, List<FrequencyEntry>> frequenciesAlongBlock) {
+
+    List<FrequencyEntry> frequencies = null;
+
+    for (TripEntry trip : trips) {
+
+      List<FrequencyEntry> potentialFrequencies = frequenciesAlongBlock.get(trip.getId());
+
+      if (frequencies == null) {
+        frequencies = potentialFrequencies;
+      } else {
+        if (!frequencies.equals(potentialFrequencies)) {
+          throw new IllegalStateException(
+              "frequency-based trips in same block don't have same frequencies: blockId="
+                  + block.getId());
+        }
+      }
+    }
+
+    return frequencies;
   }
 
   private static class BlockTripComparator implements Comparator<TripEntry> {

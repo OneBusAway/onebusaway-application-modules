@@ -3,10 +3,11 @@ package org.onebusaway.transit_data_federation.services.blocks;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
 /**
- * A BlockIndex is a collection of {@link BlockConfigurationEntry} elements that
+ * A FrequencyBlockIndex is a collection of {@link BlockConfigurationEntry} elements that
  * have the following properties in common:
  * 
  * 1) Each {@link BlockConfigurationEntry} refers to the same stop sequence
@@ -28,11 +29,13 @@ import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdAc
  * @author bdferris
  * @see BlockCalendarService
  */
-public class BlockIndex implements HasBlocks {
+public class FrequencyBlockIndex implements HasBlocks {
 
   private final List<BlockConfigurationEntry> _blocks;
+  
+  private final List<FrequencyEntry> _frequencies;
 
-  private final ServiceIntervalBlock _serviceIntervalBlock;
+  private final FrequencyServiceIntervalBlock _serviceIntervalBlock;
 
   /**
    * See the requirements in the class documentation.
@@ -41,34 +44,44 @@ public class BlockIndex implements HasBlocks {
    * @param serviceIdIntervals
    * @param serviceIntervalBlock
    */
-  public BlockIndex(List<BlockConfigurationEntry> blocks,
-      ServiceIntervalBlock serviceIntervalBlock) {
+  public FrequencyBlockIndex(List<BlockConfigurationEntry> blocks, List<FrequencyEntry> frequencies,
+      FrequencyServiceIntervalBlock serviceIntervalBlock) {
 
     if (blocks == null)
       throw new IllegalArgumentException("blocks is null");
     if (blocks.isEmpty())
       throw new IllegalArgumentException("blocks is empty");
+    if( frequencies == null)
+      throw new IllegalArgumentException("frequencies is null");
+    if( frequencies.isEmpty() )
+      throw new IllegalArgumentException("frequencies is empty");
+    
     checkBlocksHaveSameServiceids(blocks);
 
     _blocks = blocks;
+    _frequencies = frequencies;
     _serviceIntervalBlock = serviceIntervalBlock;
   }
 
   public List<BlockConfigurationEntry> getBlocks() {
     return _blocks;
   }
+  
+  public List<FrequencyEntry> getFrequencies() {
+    return _frequencies;
+  }
 
   public ServiceIdActivation getServiceIds() {
     return _blocks.get(0).getServiceIds();
   }
 
-  public ServiceIntervalBlock getServiceIntervalBlock() {
+  public FrequencyServiceIntervalBlock getServiceIntervalBlock() {
     return _serviceIntervalBlock;
   }
 
   @Override
   public String toString() {
-    return "BlockIndex [blocks=" + _blocks + ", serviceIntervalBlock="
+    return "FrequencyBlockIndex [blocks=" + _blocks + ", serviceIntervalBlock="
         + _serviceIntervalBlock + "]";
   }
 

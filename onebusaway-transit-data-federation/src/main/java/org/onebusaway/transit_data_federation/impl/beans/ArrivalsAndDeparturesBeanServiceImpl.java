@@ -27,6 +27,7 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocationSer
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -126,6 +127,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     List<ArrivalAndDepartureBean> beans = new ArrayList<ArrivalAndDepartureBean>();
 
+    long fromReduced = time.getTime() - minutesBefore * 60 * 1000;
+    long toReduced = time.getTime() + minutesAfter * 60 * 1000;
+
     for (Map.Entry<BlockInstance, List<StopTimeInstance>> entry : stisByBlockId.entrySet()) {
 
       BlockInstance blockInstance = entry.getKey();
@@ -137,30 +141,24 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       for (StopTimeInstance sti : stisForBlock) {
 
         for (BlockLocation location : locations) {
-          ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(sti);
+          ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
           applyBlockLocationToBean(sti, time.getTime(), bean, location);
-          beans.add(bean);
+          if (isArrivalAndDepartureBeanInRange(bean, fromReduced, toReduced)) {
+            beans.add(bean);
+          }
+        }
+
+        if (sti.getFrequency() != null && locations.isEmpty()) {
+          ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
+          if (isFrequencyBasedArrivalInRange(sti, fromReduced, toReduced))
+            beans.add(bean);
         }
       }
     }
 
-    List<ArrivalAndDepartureBean> filtered = new ArrayList<ArrivalAndDepartureBean>();
+    Collections.sort(beans, new ArrivalAndDepartureComparator());
 
-    long fromReduced = time.getTime() - minutesBefore * 60 * 1000;
-    long toReduced = time.getTime() + minutesAfter * 60 * 1000;
-
-    for (ArrivalAndDepartureBean bean : beans) {
-      if (isArrivalAndDepartureBeanInRange(bean, fromReduced, toReduced)) {
-        filtered.add(bean);
-        _stopTimesTotal.incrementAndGet();
-        if (bean.hasPredictedArrivalTime())
-          _stopTimesWithPredictions.incrementAndGet();
-      }
-    }
-
-    Collections.sort(filtered, new ArrivalAndDepartureComparator());
-
-    return filtered;
+    return beans;
   }
 
   /****
@@ -186,12 +184,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     return r;
   }
 
-  private ArrivalAndDepartureBean getStopTimeInstanceAsBean(StopTimeInstance sti) {
+  private ArrivalAndDepartureBean getStopTimeInstanceAsBean(Date time,
+      StopTimeInstance sti) {
 
     ArrivalAndDepartureBean pab = new ArrivalAndDepartureBean();
-
-    pab.setScheduledArrivalTime(sti.getArrivalTime());
-    pab.setScheduledDepartureTime(sti.getDepartureTime());
 
     pab.setServiceDate(sti.getServiceDate());
 
@@ -210,6 +206,19 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setStopId(ApplicationBeanLibrary.getId(stop.getId()));
 
     pab.setStatus("default");
+
+    FrequencyEntry frequency = sti.getFrequency();
+
+    if (frequency == null) {
+      pab.setScheduledArrivalTime(sti.getArrivalTime());
+      pab.setScheduledDepartureTime(sti.getDepartureTime());
+      pab.setHeadway(0);
+    } else {
+      long t = time.getTime() + frequency.getHeadwaySecs() * 1000;
+      pab.setScheduledArrivalTime(t);
+      pab.setScheduledDepartureTime(t);
+      pab.setHeadway(frequency.getHeadwaySecs());
+    }
 
     return pab;
   }
@@ -283,6 +292,14 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         && bean.getPredictedDepartureTime() <= timeTo)
       return true;
     return false;
+  }
+
+  private boolean isFrequencyBasedArrivalInRange(StopTimeInstance sti,
+      long fromReduced, long toReduced) {
+    FrequencyEntry freq = sti.getFrequency();
+    long startTime = sti.getServiceDate() + freq.getStartTime() * 1000;
+    long endTime = sti.getServiceDate() + freq.getEndTime() * 1000;
+    return fromReduced <= endTime && startTime <= toReduced;
   }
 
   private int calculateArrivalDeviation(BlockStopTimeEntry nextBlockStopTime,

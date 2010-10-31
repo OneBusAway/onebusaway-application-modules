@@ -3,9 +3,9 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import org.onebusaway.transit_data.model.StopBean;
-
 import java.util.Comparator;
+
+import org.onebusaway.transit_data.model.StopBean;
 
 public class StopBeanIdComparator implements Comparator<StopBean> {
 

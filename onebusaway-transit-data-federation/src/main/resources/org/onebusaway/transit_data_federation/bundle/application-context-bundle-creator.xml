@@ -26,7 +26,7 @@
         <property name="target" value="hibernateProperties" />
         <property name="properties">
             <props>
-                <prop key="hibernate.hbm2ddl.auto"></prop>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
                 <prop key="hibernate.cache.use_second_level_cache">false</prop>
             </props>
         </property>
@@ -39,11 +39,19 @@
     <context:component-scan base-package="org.onebusaway.transit_data_federation.bundle.tasks" />
 
     <!-- Task Definitions -->
+    
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="start" />
+        <property name="task" ref="startTask" />
+    </bean>
+
+    <bean id="startTask" class="org.onebusaway.transit_data_federation.bundle.tasks.NullTask" />
 
     <!-- Load GTFS -->
 
     <bean id="task_gtfs" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="gtfs" />
+        <property name="afterTaskName" value="start" />
         <property name="task" ref="loadGtfsTask" />
     </bean>
 
@@ -120,7 +128,7 @@
     <!-- Trip Graph -->
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="trip_graph" />
+        <property name="taskName" value="transit_graph" />
         <property name="afterTaskName" value="narratives" />
         <property name="task" ref="tripGraphTask" />
     </bean>
@@ -129,7 +137,7 @@
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="block_indices" />
-        <property name="afterTaskName" value="trip_graph" />
+        <property name="afterTaskName" value="transit_graph" />
         <property name="task" ref="blockIndicesTask" />
     </bean>
 

@@ -27,6 +27,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurat
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockStopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockTripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
@@ -37,6 +38,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -121,7 +123,7 @@ public class UnitTestingSupport {
     double distance = SphericalGeometryLibrary.distance(from.getStopLocation(),
         to.getStopLocation());
     StopTransfer transfer = new StopTransfer(to, 0, distance);
-    
+
     List<StopTransfer> transfers = new ArrayList<StopTransfer>();
     StopTransferList existing = from.getTransfers();
     if (existing != null)
@@ -162,8 +164,18 @@ public class UnitTestingSupport {
     return trip;
   }
 
+  public static FrequencyEntry frequency(int startTime, int endTime,
+      int headwaySecs) {
+    return new FrequencyEntryImpl(startTime, endTime, headwaySecs);
+  }
+
   public static BlockConfigurationEntry linkBlockTrips(BlockEntryImpl block,
       TripEntryImpl... trips) {
+    return linkBlockTrips(block, null, trips);
+  }
+
+  public static BlockConfigurationEntry linkBlockTrips(BlockEntryImpl block,
+      List<FrequencyEntry> frequencies, TripEntryImpl... trips) {
 
     List<TripEntry> tripEntries = new ArrayList<TripEntry>();
     Set<LocalizedServiceId> serviceIds = new TreeSet<LocalizedServiceId>();
@@ -180,7 +192,9 @@ public class UnitTestingSupport {
         new ArrayList<LocalizedServiceId>(serviceIds),
         new ArrayList<LocalizedServiceId>()));
     builder.setTrips(tripEntries);
+    builder.setFrequencies(frequencies);
     builder.setTripGapDistances(new double[tripEntries.size()]);
+
     BlockConfigurationEntry configuration = builder.create();
 
     List<BlockConfigurationEntry> configurations = block.getConfigurations();

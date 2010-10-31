@@ -71,4 +71,11 @@ public class TaskDefinition {
   public void setTaskWhenSkippedBeanName(String taskWhenSkippedBeanName) {
     this.taskWhenSkippedBeanName = taskWhenSkippedBeanName;
   }
+
+  @Override
+  public String toString() {
+    return "TaskDef(taskName=" + taskName + " beforeTaskName=" + beforeTaskName
+        + " afterTaskName=" + afterTaskName + " task=" + task
+        + " taskBeanName=" + taskBeanName + ")";
+  }
 }

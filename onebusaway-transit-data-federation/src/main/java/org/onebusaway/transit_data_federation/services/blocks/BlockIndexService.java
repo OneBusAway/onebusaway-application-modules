@@ -14,4 +14,16 @@ public interface BlockIndexService {
   public List<BlockIndex> getBlockIndicesForRouteCollectionId(AgencyAndId routeCollectionId);
   
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry);
+  
+  /****
+   * Frequency Indicies
+   ****/
+  
+  public List<FrequencyBlockIndex> getFrequencyBlockIndices();
+  
+  public List<FrequencyBlockIndex> getFrequencyBlockIndicesForAgencyId(String agencyId);
+  
+  public List<FrequencyBlockIndex> getFrequencyBlockIndicesForRouteCollectionId(AgencyAndId routeCollectionId);
+  
+  public List<FrequencyBlockStopTimeIndex> getFrequencyStopTimeIndicesForStop(StopEntry stopEntry);
 }

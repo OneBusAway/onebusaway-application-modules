@@ -11,6 +11,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferList;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class StopEntryImpl implements StopEntry, Serializable {
@@ -23,8 +24,10 @@ public class StopEntryImpl implements StopEntry, Serializable {
 
   private final double _lon;
 
-  private transient List<BlockStopTimeIndex> _stopTimeIndices = new ArrayList<BlockStopTimeIndex>();
-  
+  private transient List<BlockStopTimeIndex> _stopTimeIndices = null;
+
+  private transient List<FrequencyBlockStopTimeIndex> _frequencyStopTimeIndices = null;
+
   private transient StopTransferList _transfers = null;
 
   private StopIdsWithValuesImpl _prevStopsWithMinTravelTime = new StopIdsWithValuesImpl();
@@ -49,6 +52,19 @@ public class StopEntryImpl implements StopEntry, Serializable {
     if (_stopTimeIndices == null)
       return Collections.emptyList();
     return _stopTimeIndices;
+  }
+
+  public void addFrequencyStopTimeIndex(
+      FrequencyBlockStopTimeIndex stopTimeIndex) {
+    if (_frequencyStopTimeIndices == null)
+      _frequencyStopTimeIndices = new ArrayList<FrequencyBlockStopTimeIndex>();
+    _frequencyStopTimeIndices.add(stopTimeIndex);
+  }
+
+  public List<FrequencyBlockStopTimeIndex> getFrequencyStopTimeIndices() {
+    if (_frequencyStopTimeIndices == null)
+      return Collections.emptyList();
+    return _frequencyStopTimeIndices;
   }
 
   public StopTransferList getTransfers() {

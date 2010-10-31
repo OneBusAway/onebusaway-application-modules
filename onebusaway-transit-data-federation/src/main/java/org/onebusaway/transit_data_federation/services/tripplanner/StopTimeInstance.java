@@ -5,6 +5,7 @@ import java.util.Date;
 
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class StopTimeInstance {
@@ -18,17 +19,33 @@ public class StopTimeInstance {
 
   private final long _serviceDate;
 
+  private final FrequencyEntry _frequency;
+
   public StopTimeInstance(BlockStopTimeEntry stopTime, Date serviceDate) {
     this(stopTime, serviceDate.getTime());
   }
 
   public StopTimeInstance(BlockStopTimeEntry stopTime, long serviceDate) {
+    this(stopTime, serviceDate, null);
+  }
+
+  public StopTimeInstance(BlockStopTimeEntry stopTime, long serviceDate,
+      FrequencyEntry frequency) {
     _stopTime = stopTime;
     _serviceDate = serviceDate;
+    _frequency = frequency;
   }
 
   public BlockStopTimeEntry getStopTime() {
     return _stopTime;
+  }
+
+  public long getServiceDate() {
+    return _serviceDate;
+  }
+
+  public FrequencyEntry getFrequency() {
+    return _frequency;
   }
 
   public BlockTripEntry getTrip() {
@@ -41,10 +58,6 @@ public class StopTimeInstance {
 
   public StopEntry getStop() {
     return _stopTime.getStopTime().getStop();
-  }
-
-  public long getServiceDate() {
-    return _serviceDate;
   }
 
   public long getArrivalTime() {
@@ -71,9 +84,9 @@ public class StopTimeInstance {
 
   @Override
   public String toString() {
-    return "StopTimeInstance(stop=" + _stopTime.getStopTime().getStop().getId() + " trip=" + getTrip() + " service="
-        + DAY_FORMAT.format(_serviceDate) + " arrival="
-        + TIME_FORMAT.format(getArrivalTime()) + " departure="
+    return "StopTimeInstance(stop=" + _stopTime.getStopTime().getStop().getId()
+        + " trip=" + getTrip() + " service=" + DAY_FORMAT.format(_serviceDate)
+        + " arrival=" + TIME_FORMAT.format(getArrivalTime()) + " departure="
         + TIME_FORMAT.format(getDepartureTime()) + ")";
   }
 }

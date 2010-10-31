@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.services.blocks;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 
@@ -24,11 +25,19 @@ public class BlockInstance {
 
   private final long _serviceDate;
 
+  private final FrequencyEntry _frequency;
+
   public BlockInstance(BlockConfigurationEntry block, long serviceDate) {
+    this(block,serviceDate,null);
+  }
+
+  public BlockInstance(BlockConfigurationEntry block, long serviceDate,
+      FrequencyEntry frequency) {
     if (block == null)
       throw new IllegalArgumentException();
     _block = block;
     _serviceDate = serviceDate;
+    _frequency = frequency;
   }
 
   public BlockConfigurationEntry getBlock() {
@@ -50,6 +59,8 @@ public class BlockInstance {
     final int prime = 31;
     int result = 1;
     result = prime * result + _block.hashCode();
+    result = prime * result
+        + ((_frequency == null) ? 0 : _frequency.hashCode());
     result = prime * result + (int) (_serviceDate ^ (_serviceDate >>> 32));
     return result;
   }
@@ -65,6 +76,11 @@ public class BlockInstance {
     BlockInstance other = (BlockInstance) obj;
     if (!_block.equals(other._block))
       return false;
+    if (_frequency == null) {
+      if (other._frequency != null)
+        return false;
+    } else if (!_frequency.equals(other._frequency))
+      return false;
     if (_serviceDate != other._serviceDate)
       return false;
     return true;
@@ -72,7 +88,7 @@ public class BlockInstance {
 
   @Override
   public String toString() {
-    return _block.toString() + " " + _serviceDate;
+    return _block.toString() + " " + _serviceDate + " " + _frequency;
   }
 
 }

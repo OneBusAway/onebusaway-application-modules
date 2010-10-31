@@ -57,6 +57,7 @@
                 <s:a href="%{tripUrl}"><s:property value="trip.tripHeadsign" /></s:a>
             </div>
             <div class="arrivalsTimePanel">
+              <s:if test="headway == 0">            
               <span class="arrivalsTimeEntry">
                 <oba:date value="arrivalsAndDeparturesPresentation.getBestTime(top)" format="hh:mm" />
               </span> - <jsp:element name="span">
@@ -65,6 +66,12 @@
                 </jsp:attribute>
                 <s:property value="arrivalsAndDeparturesPresentation.getStatusLabel(top)" />
               </jsp:element>
+              </s:if>
+              <s:else>
+                <jsp:text>Service every </jsp:text>
+                <s:property value="headway/60"/>
+                <jsp:text> mins</jsp:text>
+              </s:else>
             </div>
             </div>
             </td>

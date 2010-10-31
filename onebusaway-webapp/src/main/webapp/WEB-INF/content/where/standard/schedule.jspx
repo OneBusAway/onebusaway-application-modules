@@ -139,6 +139,16 @@ bound</div>
                     </s:iterator>
                 </tr>
             </table>
+            
+            <table>
+                <s:iterator value="frequencies">
+                <tr>
+                <td><oba:date format="hh:mm" value="startTime"/></td>
+                <td><oba:date format="hh:mm" value="endTime"/></td>
+                <td><jsp:text>Every </jsp:text><s:property value="headwaySecs / 60"/><jsp:text> mins</jsp:text></td>
+                </tr>
+                </s:iterator>
+            </table>
 
             </div>
             </s:iterator>

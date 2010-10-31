@@ -38,5 +38,5 @@ public interface BlockCalendarService {
       AgencyAndId routeId, long timeFrom, long timeTo);
 
   public List<BlockInstance> getActiveBlocksInTimeRange(
-      Iterable<BlockIndex> indices, long timeFrom, long timeTo);
+      Iterable<BlockIndex> indices, Iterable<FrequencyBlockIndex> frequencyIndices, long timeFrom, long timeTo);
 }

@@ -55,13 +55,13 @@ public class ScheduleAction extends ActionSupport {
   public StopScheduleBean getResult() {
     return _result;
   }
-  
+
   public TimeZone getTimeZone() {
     return _timeZone;
   }
 
   @Override
-  @Actions( {@Action(value = "/where/standard/schedule")})
+  @Actions({@Action(value = "/where/standard/schedule")})
   public String execute() throws Exception {
 
     if (_date == null)
@@ -103,6 +103,13 @@ public class ScheduleAction extends ActionSupport {
     return rows;
   }
 
+  /****
+   * 
+   * @param stopTimes
+   * @param format
+   * @return
+   ****/
+
   public List<T2<String, List<StopTimeInstanceBean>>> getStopTimesByFormatKey(
       List<StopTimeInstanceBean> stopTimes, String format) {
     return getTimesByFormatKey(stopTimes, format, _stopTimeAdapter);
@@ -120,10 +127,14 @@ public class ScheduleAction extends ActionSupport {
         _stopCalendarDayAdapter);
   }
 
+  /****
+   * 
+   ****/
+
   public Date getShiftedDate(Date date) {
     return getShiftedDateStatic(date);
   }
-  
+
   public String getFormattedDate(String format, Date date) {
     SimpleDateFormat df = new SimpleDateFormat(format);
     df.setTimeZone(_timeZone);
@@ -133,7 +144,7 @@ public class ScheduleAction extends ActionSupport {
   /****
    * Private Methods
    ****/
-  
+
   private static interface IAdapter<FROM, TO> {
     public TO adapt(FROM source);
   }
@@ -166,7 +177,7 @@ public class ScheduleAction extends ActionSupport {
 
     SimpleDateFormat df = new SimpleDateFormat(format);
     df.setTimeZone(_timeZone);
-    
+
     List<T2<String, List<T>>> tuples = new ArrayList<T2<String, List<T>>>();
     T2<String, List<T>> tuple = null;
 

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.container.ContainerLibrary;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
@@ -18,7 +17,6 @@ import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
 
 /**
  * The primary method for building a new federated transit data bundle, which is
@@ -59,10 +57,6 @@ public class FederatedTransitDataBundleCreator {
   private Set<String> _onlyTasks = new HashSet<String>();
 
   private String _skipToTask;
-
-  private boolean _skipApplied = false;
-
-  private Set<String> _visitedTasks = new HashSet<String>();
 
   /**
    * Additional context paths that will be added when constructing the Spring
@@ -120,29 +114,22 @@ public class FederatedTransitDataBundleCreator {
     List<String> contextPaths = getPrimaryApplicatonContextPaths();
     Map<String, BeanDefinition> contextBeans = getPrimaryBeanDefintions();
 
-    runTasks(contextPaths, contextBeans, true, true, _skipTasks, _onlyTasks);
-
-  }
-
-  private void runTasks(List<String> applicationContextPaths,
-      Map<String, BeanDefinition> beans, boolean checkDatabase,
-      boolean clearCacheFiles, Set<String> skipTasks, Set<String> onlyTasks)
-      throws UnknownTaskException {
+    boolean resetDatabase = isDatabaseResetNeeded();
+    if (resetDatabase) {
+      System.setProperty("hibernate.hbm2ddl.auto", "create");
+    } else {
+      System.setProperty("hibernate.hbm2ddl.auto", "update");
+    }
 
     ConfigurableApplicationContext context = ContainerLibrary.createContext(
-        applicationContextPaths, beans);
+        contextPaths, contextBeans);
 
     List<TaskDefinition> taskDefinitions = getTaskList(context);
-    Set<String> taskNames = getReducedTaskList(taskDefinitions, skipTasks,
-        onlyTasks);
+    Set<String> taskNames = getReducedTaskList(taskDefinitions);
 
-    if (checkDatabase)
-      createOrUpdateDatabaseSchemaAsNeeded(context, taskNames);
-
-    if (clearCacheFiles) {
-      FederatedTransitDataBundle bundle = context.getBean(FederatedTransitDataBundle.class);
-      clearExistingCacheFiles(bundle);
-    }
+    // Clear cache files
+    FederatedTransitDataBundle bundle = context.getBean(FederatedTransitDataBundle.class);
+    clearExistingCacheFiles(bundle);
 
     for (TaskDefinition def : taskDefinitions) {
       String taskName = def.getTaskName();
@@ -179,18 +166,14 @@ public class FederatedTransitDataBundleCreator {
     return task;
   }
 
-  private void createOrUpdateDatabaseSchemaAsNeeded(
-      ConfigurableApplicationContext context, Set<String> taskNames) {
-
-    LocalSessionFactoryBean factory = context.getBean("&sessionFactory",
-        LocalSessionFactoryBean.class);
-
-    if (taskNames.contains("gtfs")) {
-      factory.dropDatabaseSchema();
-      factory.createDatabaseSchema();
-    } else {
-      factory.updateDatabaseSchema();
-    }
+  private boolean isDatabaseResetNeeded() {
+    if ("start".equals(_skipToTask))
+      return true;
+    if (_onlyTasks.contains("start"))
+      return true;
+    if (_skipTasks.contains("start"))
+      return false;
+    return true;
   }
 
   /****
@@ -232,69 +215,95 @@ public class FederatedTransitDataBundleCreator {
       throws UnknownTaskException {
 
     Map<String, TaskDefinition> taskDefinitions = context.getBeansOfType(TaskDefinition.class);
-    Map<String, TaskDefinition> taskDefinitionsByTaskName = new HashMap<String, TaskDefinition>();
+    Map<String, TaskDefinition> taskDefinitionsByTaskName = getTaskDefinitionsByName(taskDefinitions);
 
     DirectedGraph<String> graph = new DirectedGraph<String>();
 
     for (TaskDefinition taskDefinition : taskDefinitions.values()) {
+
       String taskName = taskDefinition.getTaskName();
 
-      if (!_visitedTasks.add(taskName))
-        continue;
-
-      taskDefinitionsByTaskName.put(taskName, taskDefinition);
       graph.addNode(taskName);
 
       String before = taskDefinition.getBeforeTaskName();
-      if (before != null)
+      if (before != null) {
+        if (!taskDefinitionsByTaskName.containsKey(before))
+          throw new UnknownTaskException(before);
         graph.addEdge(taskName, before);
+      }
 
       String after = taskDefinition.getAfterTaskName();
-      if (after != null)
+      if (after != null) {
+        if (!taskDefinitionsByTaskName.containsKey(after))
+          throw new UnknownTaskException(after);
         graph.addEdge(after, taskName);
+      }
     }
 
     List<String> taskNames = graph.getTopologicalSort(null);
 
     List<TaskDefinition> taskDefinitionsInOrder = new ArrayList<TaskDefinition>();
-    for (String taskName : taskNames)
-      taskDefinitionsInOrder.add(taskDefinitionsByTaskName.get(taskName));
+    for (String taskName : taskNames) {
+      TaskDefinition task = taskDefinitionsByTaskName.get(taskName);
+      taskDefinitionsInOrder.add(task);
+    }
     return taskDefinitionsInOrder;
   }
 
-  private Set<String> getReducedTaskList(List<TaskDefinition> taskDefinitions,
-      Set<String> skipTasks, Set<String> onlyTasks) throws UnknownTaskException {
+  private Map<String, TaskDefinition> getTaskDefinitionsByName(
+      Map<String, TaskDefinition> taskDefinitions) {
+    Map<String, TaskDefinition> taskDefinitionsByTaskName = new HashMap<String, TaskDefinition>();
+
+    for (TaskDefinition taskDefinition : taskDefinitions.values()) {
+
+      String taskName = taskDefinition.getTaskName();
+
+      if (taskName == null || taskName.trim().length() == 0) {
+        throw new IllegalStateException(
+            "no taskName property defined for task definition: "
+                + taskDefinition);
+      }
+
+      taskDefinitionsByTaskName.put(taskName, taskDefinition);
+
+    }
+    return taskDefinitionsByTaskName;
+  }
+
+  private Set<String> getReducedTaskList(List<TaskDefinition> taskDefinitions)
+      throws UnknownTaskException {
 
     // Check task names first
-    List<String> tasks = MappingLibrary.map(taskDefinitions, "taskName");
+    List<String> tasks = new ArrayList<String>();
 
-    for (String task : onlyTasks) {
+    for (TaskDefinition taskDef : taskDefinitions) {
+      String taskName = taskDef.getTaskName();
+      tasks.add(taskName);
+    }
+
+    for (String task : _onlyTasks) {
       if (!tasks.contains(task))
         throw new UnknownTaskException(task);
     }
 
-    for (String task : skipTasks) {
+    for (String task : _skipTasks) {
       if (!tasks.contains(task))
         throw new UnknownTaskException(task);
     }
 
     if (_skipToTask != null) {
       int index = tasks.indexOf(_skipToTask);
-      if (index == -1) {
-        if (!_skipApplied)
-          tasks.clear();
-      } else {
-        for (int i = 0; i < index; i++)
-          tasks.remove(0);
-        _skipApplied = true;
-      }
+      if (index == -1)
+        throw new UnknownTaskException(_skipToTask);
 
+      for (int i = 0; i < index; i++)
+        tasks.remove(0);
     }
 
-    if (!onlyTasks.isEmpty())
-      tasks.retainAll(onlyTasks);
+    if (!_onlyTasks.isEmpty())
+      tasks.retainAll(_onlyTasks);
 
-    tasks.removeAll(skipTasks);
+    tasks.removeAll(_skipTasks);
 
     return new HashSet<String>(tasks);
   }

@@ -9,6 +9,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfig
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -24,6 +25,8 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
   private final List<BlockTripEntry> trips;
 
+  private final List<FrequencyEntry> frequencies;
+
   private final double totalBlockDistance;
 
   private final BlockStopTimeList blockStopTimes = new BlockStopTimeList();
@@ -36,6 +39,7 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
     this.block = builder.block;
     this.serviceIds = builder.serviceIds;
     this.trips = builder.computeBlockTrips(this);
+    this.frequencies = builder.frequencies;
     this.totalBlockDistance = builder.computeTotalBlockDistance();
     this.tripIndices = builder.computeTripIndices();
     this.accumulatedStopTimeIndices = builder.computeAccumulatedStopTimeIndices();
@@ -65,6 +69,11 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
   }
 
   @Override
+  public List<FrequencyEntry> getFrequencies() {
+    return frequencies;
+  }
+
+  @Override
   public List<BlockStopTimeEntry> getStopTimes() {
     return blockStopTimes;
   }
@@ -88,6 +97,8 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
     private List<TripEntry> trips;
 
+    private List<FrequencyEntry> frequencies;
+
     private double[] tripGapDistances;
 
     private Builder() {
@@ -102,8 +113,20 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
       this.serviceIds = serviceIds;
     }
 
+    public List<TripEntry> getTrips() {
+      return trips;
+    }
+
     public void setTrips(List<TripEntry> trips) {
       this.trips = trips;
+    }
+
+    public List<FrequencyEntry> getFrequencies() {
+      return frequencies;
+    }
+
+    public void setFrequencies(List<FrequencyEntry> frequencies) {
+      this.frequencies = frequencies;
     }
 
     public void setTripGapDistances(double[] tripGapDistances) {
@@ -216,5 +239,4 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
       return new BlockStopTimeEntryImpl(stopTime, index, blockTrip);
     }
   }
-
 }

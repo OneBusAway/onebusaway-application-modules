@@ -8,12 +8,16 @@ import java.util.List;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeArrivalTimeValueAdapter;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeDepartureTimeValueAdapter;
+import org.onebusaway.transit_data_federation.impl.blocks.FrequencyEndTimeIndexAdapter;
+import org.onebusaway.transit_data_federation.impl.blocks.FrequencyStartTimeIndexAdapter;
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
@@ -55,12 +59,20 @@ class StopTimeServiceImpl implements StopTimeService {
   @Override
   public List<StopTimeInstance> getStopTimeInstancesInRange(Date from, Date to,
       StopEntry stopEntry) {
+
     List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 
     for (BlockStopTimeIndex index : _blockIndexService.getStopTimeIndicesForStop(stopEntry)) {
       Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
           index.getServiceIds(), index.getServiceInterval(), from, to);
       getStopTimesForStopAndServiceIdsAndTimeRange(index, serviceDates, from,
+          to, stopTimeInstances);
+    }
+
+    for (FrequencyBlockStopTimeIndex index : _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry)) {
+      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
+          index.getServiceIds(), index.getServiceInterval(), from, to);
+      getFrequenciesForStopAndServiceIdsAndTimeRange(index, serviceDates, from,
           to, stopTimeInstances);
     }
 
@@ -93,6 +105,29 @@ class StopTimeServiceImpl implements StopTimeService {
       }
     }
 
+  }
+
+  private void getFrequenciesForStopAndServiceIdsAndTimeRange(
+      FrequencyBlockStopTimeIndex index, Collection<Date> serviceDates,
+      Date from, Date to, List<StopTimeInstance> stopTimeInstances) {
+
+    for (Date serviceDate : serviceDates) {
+
+      int relativeFrom = time(serviceDate, from);
+      int relativeTo = time(serviceDate, to);
+
+      int fromIndex = GenericBinarySearch.search(index, index.size(),
+          relativeFrom, FrequencyEndTimeIndexAdapter.INSTANCE);
+      int toIndex = GenericBinarySearch.search(index, index.size(), relativeTo,
+          FrequencyStartTimeIndexAdapter.INSTANCE);
+
+      List<FrequencyBlockStopTimeEntry> frequencyStopTimes = index.getFrequencyStopTimes();
+      for (int in = fromIndex; in < toIndex; in++) {
+        FrequencyBlockStopTimeEntry entry = frequencyStopTimes.get(in);
+        stopTimeInstances.add(new StopTimeInstance(entry.getStopTime(),
+            serviceDate.getTime(), entry.getFrequency()));
+      }
+    }
   }
 
   private int time(Date serviceDate, Date targetDate) {

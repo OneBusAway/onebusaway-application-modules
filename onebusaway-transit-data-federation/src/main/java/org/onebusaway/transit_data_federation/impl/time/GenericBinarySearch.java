@@ -29,8 +29,30 @@ public class GenericBinarySearch {
     return search(elements, targetValue, valueAdapter, 0, elements.size());
   }
 
+  /**
+   * Return an index into the element list such that if a new element with the
+   * specified target value was inserted into the list at the specified index,
+   * the list would remain in sorted order with respect to the
+   * {@link ValueAdapter}
+   * 
+   * @param elements a list of objects, sorted in the order appropriate to the
+   *          {@link ValueAdapter}
+   * @param targetValue target value to search for
+   * @param valueAdapter adapter to convert the input element type into a double
+   *          value
+   * @return
+   */
+  public static <T> int search(T elements, int size, double targetValue,
+      IndexAdapter<T> valueAdapter) {
+    return search(elements, targetValue, valueAdapter, 0, size);
+  }
+
   public interface ValueAdapter<T> {
     public double getValue(T value);
+  }
+
+  public interface IndexAdapter<T> {
+    public double getValue(T source, int index);
   }
 
   /****
@@ -51,6 +73,24 @@ public class GenericBinarySearch {
       return search(elements, target, comparator, fromIndex, midIndex);
     } else if (target > v) {
       return search(elements, target, comparator, midIndex + 1, toIndex);
+    } else {
+      return midIndex;
+    }
+  }
+
+  private static <T> int search(T elements, double target,
+      IndexAdapter<T> adapter, int fromIndex, int toIndex) {
+
+    if (fromIndex == toIndex)
+      return fromIndex;
+
+    int midIndex = (fromIndex + toIndex) / 2;
+    double v = adapter.getValue(elements, midIndex);
+
+    if (target < v) {
+      return search(elements, target, adapter, fromIndex, midIndex);
+    } else if (target > v) {
+      return search(elements, target, adapter, midIndex + 1, toIndex);
     } else {
       return midIndex;
     }

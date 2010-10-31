@@ -9,7 +9,7 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,12 +21,17 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
+import org.onebusaway.transit_data_federation.services.blocks.HasBlocks;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
 public class BlockIndicesFactoryTest {
+
   @Test
   public void test() {
 
@@ -222,9 +227,182 @@ public class BlockIndicesFactoryTest {
         intervalBlock.getMaxDepartures()));
   }
 
-  private List<BlockIndex> grep(List<BlockIndex> datas, AgencyAndId blockId) {
-    List<BlockIndex> matches = new ArrayList<BlockIndex>();
-    for (BlockIndex data : datas) {
+  @Test
+  public void testFrequencies() {
+
+    BlockIndicesFactory factory = new BlockIndicesFactory();
+
+    StopEntryImpl stopA = stop("a", 47.0, -122.0);
+    StopEntryImpl stopB = stop("b", 47.1, -122.1);
+
+    /****
+     * Block A
+     ****/
+
+    BlockEntryImpl blockA = block("a");
+
+    TripEntryImpl tripA = trip("a", "s1");
+
+    addStopTime(tripA, stopTime(0, stopA, tripA, 0, 10, 0));
+    addStopTime(tripA, stopTime(0, stopB, tripA, 20, 20, 0));
+
+    FrequencyEntry freqA1 = frequency(time(6, 00), time(9, 00), 10);
+    FrequencyEntry freqA2 = frequency(time(15, 00), time(18, 00), 10);
+    List<FrequencyEntry> freqsA = Arrays.asList(freqA1, freqA2);
+
+    BlockConfigurationEntry bcA = linkBlockTrips(blockA, freqsA, tripA);
+
+    /****
+     * Block B
+     ****/
+
+    BlockEntryImpl blockB = block("b");
+
+    TripEntryImpl tripB = trip("b", "s1");
+
+    addStopTime(tripB, stopTime(0, stopA, tripB, 20, 30, 0));
+    addStopTime(tripB, stopTime(0, stopB, tripB, 50, 50, 0));
+
+    FrequencyEntry freqB1 = frequency(time(9, 00), time(15, 00), 20);
+    FrequencyEntry freqB2 = frequency(time(18, 00), time(21, 00), 20);
+    List<FrequencyEntry> freqsB = Arrays.asList(freqB1, freqB2);
+
+    BlockConfigurationEntry bcB = linkBlockTrips(blockB, freqsB, tripB);
+
+    List<FrequencyBlockIndex> allIndices = factory.createFrequencyIndices(Arrays.asList(
+        (BlockEntry) blockB, blockA));
+
+    assertEquals(1, allIndices.size());
+
+    List<FrequencyBlockIndex> indices = grep(allIndices, aid("a"));
+    assertEquals(1, indices.size());
+
+    FrequencyBlockIndex index = indices.get(0);
+
+    List<BlockConfigurationEntry> configs = index.getBlocks();
+    assertEquals(4, configs.size());
+    assertEquals(bcA, configs.get(0));
+    assertEquals(bcB, configs.get(1));
+    assertEquals(bcA, configs.get(2));
+    assertEquals(bcB, configs.get(3));
+
+    List<FrequencyEntry> freqs = index.getFrequencies();
+    assertEquals(Arrays.asList(freqA1, freqB1, freqA2, freqB2), freqs);
+
+    ServiceIdActivation serviceIds = index.getServiceIds();
+    assertEquals(1, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+
+    FrequencyServiceIntervalBlock intervalBlock = index.getServiceIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {
+        time(6, 0), time(9, 0), time(15, 0), time(18, 0)},
+        intervalBlock.getStartTimes()));
+    assertTrue(Arrays.equals(new int[] {
+        time(9, 0), time(15, 0), time(18, 0), time(21, 0)},
+        intervalBlock.getEndTimes()));
+  }
+
+  @Test
+  public void testOverlappingFrequencies() {
+
+    BlockIndicesFactory factory = new BlockIndicesFactory();
+
+    StopEntryImpl stopA = stop("a", 47.0, -122.0);
+    StopEntryImpl stopB = stop("b", 47.1, -122.1);
+
+    /****
+     * Block A
+     ****/
+
+    BlockEntryImpl blockA = block("a");
+
+    TripEntryImpl tripA = trip("a", "s1");
+
+    addStopTime(tripA, stopTime(0, stopA, tripA, 0, 10, 0));
+    addStopTime(tripA, stopTime(0, stopB, tripA, 20, 20, 0));
+
+    FrequencyEntry freqA1 = frequency(time(6, 00), time(9, 00), 10);
+    FrequencyEntry freqA2 = frequency(time(15, 00), time(18, 00), 10);
+    List<FrequencyEntry> freqsA = Arrays.asList(freqA1, freqA2);
+
+    BlockConfigurationEntry bcA = linkBlockTrips(blockA, freqsA, tripA);
+
+    /****
+     * Block B
+     ****/
+
+    BlockEntryImpl blockB = block("b");
+
+    TripEntryImpl tripB = trip("b", "s1");
+
+    addStopTime(tripB, stopTime(0, stopA, tripB, 20, 30, 0));
+    addStopTime(tripB, stopTime(0, stopB, tripB, 50, 50, 0));
+
+    FrequencyEntry freqB1 = frequency(time(8, 00), time(14, 00), 20);
+    FrequencyEntry freqB2 = frequency(time(17, 00), time(20, 00), 20);
+    List<FrequencyEntry> freqsB = Arrays.asList(freqB1, freqB2);
+
+    BlockConfigurationEntry bcB = linkBlockTrips(blockB, freqsB, tripB);
+
+    List<FrequencyBlockIndex> allIndices = factory.createFrequencyIndices(Arrays.asList(
+        (BlockEntry) blockB, blockA));
+
+    assertEquals(2, allIndices.size());
+
+    List<FrequencyBlockIndex> indices = grep(allIndices, aid("a"));
+    assertEquals(1, indices.size());
+
+    FrequencyBlockIndex index = indices.get(0);
+
+    List<BlockConfigurationEntry> configs = index.getBlocks();
+    assertEquals(2, configs.size());
+    assertEquals(bcA, configs.get(0));
+    assertEquals(bcA, configs.get(1));
+
+    List<FrequencyEntry> freqs = index.getFrequencies();
+    assertEquals(Arrays.asList(freqA1, freqA2), freqs);
+
+    ServiceIdActivation serviceIds = index.getServiceIds();
+    assertEquals(1, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+
+    FrequencyServiceIntervalBlock intervalBlock = index.getServiceIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {time(6, 0), time(15, 0)},
+        intervalBlock.getStartTimes()));
+    assertTrue(Arrays.equals(new int[] {time(9, 0), time(18, 0)},
+        intervalBlock.getEndTimes()));
+    
+    /****
+     * 
+     ****/
+    
+    indices = grep(allIndices, aid("b"));
+    assertEquals(1, indices.size());
+
+    index = indices.get(0);
+
+    configs = index.getBlocks();
+    assertEquals(2, configs.size());
+    assertEquals(bcB, configs.get(0));
+    assertEquals(bcB, configs.get(1));
+
+    freqs = index.getFrequencies();
+    assertEquals(Arrays.asList(freqB1, freqB2), freqs);
+
+    serviceIds = index.getServiceIds();
+    assertEquals(1, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+
+    intervalBlock = index.getServiceIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {time(8, 0), time(17, 0)},
+        intervalBlock.getStartTimes()));
+    assertTrue(Arrays.equals(new int[] {time(14, 0), time(20, 0)},
+        intervalBlock.getEndTimes()));
+  }
+
+  private <T extends HasBlocks> List<T> grep(List<T> datas, AgencyAndId blockId) {
+    List<T> matches = new ArrayList<T>();
+    for (T data : datas) {
       for (BlockConfigurationEntry config : data.getBlocks()) {
         if (config.getBlock().getId().equals(blockId)) {
           matches.add(data);

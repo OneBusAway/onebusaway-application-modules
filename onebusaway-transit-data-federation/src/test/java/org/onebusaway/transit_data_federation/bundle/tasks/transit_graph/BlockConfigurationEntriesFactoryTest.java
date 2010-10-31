@@ -3,16 +3,19 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addServiceDates;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
@@ -32,6 +36,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public class BlockConfigurationEntriesFactoryTest {
@@ -144,6 +149,7 @@ public class BlockConfigurationEntriesFactoryTest {
     assertSame(block, entry.getBlock());
     assertEquals(serviceIds(lsids("sA", "sB"), lsids()), entry.getServiceIds());
     assertEquals(1200.0, entry.getTotalBlockDistance(), 0.0);
+    assertNull(entry.getFrequencies());
 
     List<BlockTripEntry> trips = entry.getTrips();
     assertEquals(4, trips.size());
@@ -247,6 +253,7 @@ public class BlockConfigurationEntriesFactoryTest {
     assertSame(block, entry.getBlock());
     assertEquals(serviceIds(lsids("sA"), lsids("sB")), entry.getServiceIds());
     assertEquals(600.0, entry.getTotalBlockDistance(), 0.0);
+    assertNull(entry.getFrequencies());
 
     trips = entry.getTrips();
     assertEquals(2, trips.size());
@@ -306,6 +313,7 @@ public class BlockConfigurationEntriesFactoryTest {
     assertSame(block, entry.getBlock());
     assertEquals(serviceIds(lsids("sB"), lsids("sA")), entry.getServiceIds());
     assertEquals(600.0, entry.getTotalBlockDistance(), 0.0);
+    assertNull(entry.getFrequencies());
 
     trips = entry.getTrips();
     assertEquals(2, trips.size());
@@ -356,5 +364,116 @@ public class BlockConfigurationEntriesFactoryTest {
     assertEquals(500.0, bst.getDistaceAlongBlock(), 0.0);
     assertSame(st7, bst.getStopTime());
     assertSame(trips.get(1), bst.getTrip());
+  }
+
+  @Test
+  public void testSingleTripWithFrequencies() {
+
+    StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
+    StopEntryImpl stopB = stop("stopB", 47.1, -122.1);
+
+    TripEntryImpl tripA = trip("tripA", "sA", 300.0);
+    stopTime(0, stopA, tripA, time(9, 00), time(9, 05), 100.0);
+    stopTime(1, stopB, tripA, time(9, 30), time(9, 35), 200.0);
+
+    BlockEntryImpl block = new BlockEntryImpl();
+    List<TripEntryImpl> tripsInBlock = Arrays.asList(tripA);
+
+    Map<AgencyAndId, List<FrequencyEntry>> frequnciesByTripId = new HashMap<AgencyAndId, List<FrequencyEntry>>();
+    FrequencyEntry freqA = frequency(time(8, 00), time(10, 00), 10 * 60);
+    FrequencyEntry freqB = frequency(time(10, 00), time(12, 00), 10 * 60);
+    List<FrequencyEntry> expectedFrequencies = Arrays.asList(freqA, freqB);
+    frequnciesByTripId.put(tripA.getId(), expectedFrequencies);
+
+    /****
+     * Actual Test
+     ****/
+
+    _factory.processFrequencyBlockConfigurations(block, tripsInBlock,
+        frequnciesByTripId);
+
+    List<BlockConfigurationEntry> configurations = block.getConfigurations();
+    assertEquals(1, configurations.size());
+
+    BlockConfigurationEntry entry = configurations.get(0);
+    List<FrequencyEntry> frequencies = entry.getFrequencies();
+    assertEquals(expectedFrequencies, frequencies);
+  }
+
+  @Test
+  public void testTripsWithFrequencies() {
+
+    StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
+    StopEntryImpl stopB = stop("stopB", 47.1, -122.1);
+
+    TripEntryImpl tripA = trip("tripA", "sA", 300.0);
+    stopTime(0, stopA, tripA, time(9, 00), time(9, 05), 100.0);
+    stopTime(1, stopB, tripA, time(9, 30), time(9, 35), 200.0);
+
+    TripEntryImpl tripB = trip("tripB", "sA", 300.0);
+    stopTime(2, stopB, tripB, time(10, 00), time(10, 05), 100.0);
+    stopTime(3, stopA, tripB, time(10, 30), time(10, 35), 200.0);
+
+    BlockEntryImpl block = new BlockEntryImpl();
+    List<TripEntryImpl> tripsInBlock = Arrays.asList(tripA, tripB);
+
+    Map<AgencyAndId, List<FrequencyEntry>> frequnciesByTripId = new HashMap<AgencyAndId, List<FrequencyEntry>>();
+    FrequencyEntry freqA = frequency(time(8, 00), time(10, 00), 10 * 60);
+    FrequencyEntry freqB = frequency(time(10, 00), time(12, 00), 10 * 60);
+    List<FrequencyEntry> expectedFrequencies = Arrays.asList(freqA, freqB);
+
+    frequnciesByTripId.put(tripA.getId(), expectedFrequencies);
+    frequnciesByTripId.put(tripB.getId(), expectedFrequencies);
+
+    /****
+     * Actual Test
+     ****/
+
+    _factory.processFrequencyBlockConfigurations(block, tripsInBlock,
+        frequnciesByTripId);
+
+    List<BlockConfigurationEntry> configurations = block.getConfigurations();
+    assertEquals(1, configurations.size());
+
+    BlockConfigurationEntry entry = configurations.get(0);
+    List<FrequencyEntry> frequencies = entry.getFrequencies();
+    assertEquals(expectedFrequencies, frequencies);
+  }
+
+  @Test
+  public void testTripsWithMismatchedFrequencies() {
+
+    StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
+    StopEntryImpl stopB = stop("stopB", 47.1, -122.1);
+
+    TripEntryImpl tripA = trip("tripA", "sA", 300.0);
+    stopTime(0, stopA, tripA, time(9, 00), time(9, 05), 100.0);
+    stopTime(1, stopB, tripA, time(9, 30), time(9, 35), 200.0);
+
+    TripEntryImpl tripB = trip("tripB", "sA", 300.0);
+    stopTime(2, stopB, tripB, time(10, 00), time(10, 05), 100.0);
+    stopTime(3, stopA, tripB, time(10, 30), time(10, 35), 200.0);
+
+    BlockEntryImpl block = new BlockEntryImpl();
+    List<TripEntryImpl> tripsInBlock = Arrays.asList(tripA, tripB);
+
+    Map<AgencyAndId, List<FrequencyEntry>> frequnciesByTripId = new HashMap<AgencyAndId, List<FrequencyEntry>>();
+    FrequencyEntry freqA = frequency(time(8, 00), time(10, 00), 10 * 60);
+    FrequencyEntry freqB = frequency(time(10, 00), time(12, 00), 10 * 60);
+
+    frequnciesByTripId.put(tripA.getId(), Arrays.asList(freqA, freqB));
+    frequnciesByTripId.put(tripB.getId(), Arrays.asList(freqA));
+
+    /****
+     * Actual Test
+     ****/
+
+    try {
+      _factory.processFrequencyBlockConfigurations(block, tripsInBlock,
+          frequnciesByTripId);
+      fail();
+    } catch (IllegalStateException ex) {
+
+    }
   }
 }

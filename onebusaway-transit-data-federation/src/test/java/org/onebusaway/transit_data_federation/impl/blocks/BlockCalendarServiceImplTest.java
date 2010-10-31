@@ -12,6 +12,7 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +26,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.testing.UnitTestingSupport;
 
@@ -108,6 +110,8 @@ public class BlockCalendarServiceImplTest {
         serviceIds(lsids("sidA", "sidB"), lsids()));
 
     List<BlockIndex> blocks = blockIndices(blockA, blockB);
+    
+    List<FrequencyBlockIndex> frequencyIndices = Collections.emptyList();
 
     /****
      * 
@@ -116,7 +120,7 @@ public class BlockCalendarServiceImplTest {
     long time = timeFromString("2010-09-07 09:15");
 
     List<BlockInstance> instances = _service.getActiveBlocksInTimeRange(blocks,
-        time, time);
+        frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -130,7 +134,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-07 010:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -144,7 +148,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-07 011:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -158,7 +162,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-07 012:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -172,7 +176,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-08 09:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -186,7 +190,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-08 10:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(2, instances.size());
 
@@ -204,7 +208,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-08 11:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -218,7 +222,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-08 12:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -232,7 +236,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-09 09:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(0, instances.size());
 
@@ -242,7 +246,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-09 10:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -256,7 +260,7 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-09 11:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 

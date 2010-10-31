@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.blocks;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +12,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +58,9 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
         blockIndices.add(stopTimeIndex.getBlockIndex());
     }
 
+    List<FrequencyBlockIndex> frequencyIndices = Collections.emptyList();
+
     return _blockCalendarService.getActiveBlocksInTimeRange(blockIndices,
-        timeFrom, timeTo);
+        frequencyIndices, timeFrom, timeTo);
   }
 }

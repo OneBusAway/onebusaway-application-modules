@@ -25,6 +25,7 @@ import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopRouteDirectionScheduleBean;
 import org.onebusaway.transit_data.model.StopRouteScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
@@ -33,9 +34,11 @@ import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopScheduleBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -50,6 +53,8 @@ import org.springframework.transaction.annotation.Transactional;
 class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
   private static StopTimeBeanComparator _stopTimeComparator = new StopTimeBeanComparator();
+
+  private static FrequencyBeanComparator _frequencyComparator = new FrequencyBeanComparator();
 
   private static DirectionComparator _directionComparator = new DirectionComparator();
 
@@ -93,8 +98,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
   }
 
   @Autowired
-  public void setBlockIndexService(
-      BlockIndexService blockIndexService) {
+  public void setBlockIndexService(BlockIndexService blockIndexService) {
     _blockIndexService = blockIndexService;
   }
 
@@ -105,8 +109,12 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
     Set<ServiceIdActivation> serviceIds = new HashSet<ServiceIdActivation>();
-    for (BlockStopTimeIndex blockStopTimeIndex : _blockIndexService.getStopTimeIndicesForStop(stopEntry))
-      serviceIds.add(blockStopTimeIndex.getServiceIds());
+
+    for (BlockStopTimeIndex index : _blockIndexService.getStopTimeIndicesForStop(stopEntry))
+      serviceIds.add(index.getServiceIds());
+
+    for (FrequencyBlockStopTimeIndex index : _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry))
+      serviceIds.add(index.getServiceIds());
 
     SortedMap<ServiceDate, Set<ServiceIdActivation>> serviceIdsByDate = getServiceIdsByDate(serviceIds);
 
@@ -141,47 +149,30 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
 
-    Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
-        new ArrayList<StopTimeInstance>());
+    Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId = getStopTimeInstancesByRouteCollectionId(
+        stopEntry, date);
 
-    for (BlockStopTimeIndex index : _blockIndexService.getStopTimeIndicesForStop(stopEntry)) {
+    Map<AgencyAndId, List<StopTimeInstance>> frequenciesByRouteCollectionId = getFrequencyInstancesByRouteCollectionId(
+        stopEntry, date);
 
-      ServiceIdActivation serviceIds = index.getServiceIds();
-
-      Set<ServiceDate> serviceDates = _calendarService.getServiceDatesForServiceIds(serviceIds);
-      if (!serviceDates.contains(date))
-        continue;
-
-      Date serviceDate = date.getAsDate(serviceIds.getTimeZone());
-
-      for (BlockStopTimeEntry stopTime : index.getStopTimes()) {
-
-        BlockTripEntry blockTrip = stopTime.getTrip();
-        TripEntry trip = blockTrip.getTrip();
-        AgencyAndId routeCollectionId = trip.getRouteCollectionId();
-
-        StopTimeInstance sti = new StopTimeInstance(stopTime,
-            serviceDate);
-
-        stopTimesByRouteCollectionId.get(routeCollectionId).add(sti);
-      }
-    }
+    Set<AgencyAndId> routeIds = new HashSet<AgencyAndId>();
+    routeIds.addAll(stopTimesByRouteCollectionId.keySet());
+    routeIds.addAll(frequenciesByRouteCollectionId.keySet());
 
     List<StopRouteScheduleBean> beans = new ArrayList<StopRouteScheduleBean>();
 
-    for (Map.Entry<AgencyAndId, List<StopTimeInstance>> entry : stopTimesByRouteCollectionId.entrySet()) {
-
-      AgencyAndId routeCollectionId = entry.getKey();
-      List<StopTimeInstance> stopTimesForRoute = entry.getValue();
+    for (AgencyAndId routeId : routeIds) {
 
       StopRouteScheduleBean routeScheduleBean = new StopRouteScheduleBean();
       beans.add(routeScheduleBean);
 
-      RouteBean route = _routeBeanService.getRouteForId(routeCollectionId);
+      RouteBean route = _routeBeanService.getRouteForId(routeId);
       routeScheduleBean.setRoute(route);
 
       Map<String, StopTimeByDirectionEntry> stopTimesByDirection = new FactoryMap<String, StopTimeByDirectionEntry>(
           new StopTimeByDirectionEntry());
+
+      List<StopTimeInstance> stopTimesForRoute = stopTimesByRouteCollectionId.get(routeId);
 
       for (StopTimeInstance sti : stopTimesForRoute) {
 
@@ -191,13 +182,13 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         AgencyAndId tripId = trip.getId();
         AgencyAndId serviceId = trip.getServiceId().getId();
 
+        TripNarrative narrative = _narrativeService.getTripForId(tripId);
+
         StopTimeInstanceBean stiBean = new StopTimeInstanceBean();
         stiBean.setTripId(AgencyAndIdLibrary.convertToString(tripId));
         stiBean.setArrivalTime(sti.getArrivalTime());
         stiBean.setDepartureTime(sti.getDepartureTime());
         stiBean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
-
-        TripNarrative narrative = _narrativeService.getTripForId(tripId);
 
         String directionId = narrative.getDirectionId();
         if (directionId == null)
@@ -207,15 +198,51 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         stopTimesForDirection.addEntry(stiBean, narrative.getTripHeadsign());
       }
 
+      List<StopTimeInstance> frequenciesForRoute = frequenciesByRouteCollectionId.get(routeId);
+
+      for (StopTimeInstance sti : frequenciesForRoute) {
+
+        BlockStopTimeEntry blockStopTime = sti.getStopTime();
+        BlockTripEntry blockTrip = blockStopTime.getTrip();
+        TripEntry trip = blockTrip.getTrip();
+
+        AgencyAndId tripId = trip.getId();
+        AgencyAndId serviceId = trip.getServiceId().getId();
+
+        TripNarrative narrative = _narrativeService.getTripForId(tripId);
+
+        FrequencyInstanceBean bean = new FrequencyInstanceBean();
+        bean.setTripId(AgencyAndIdLibrary.convertToString(tripId));
+        bean.setStartTime(sti.getServiceDate()
+            + sti.getFrequency().getStartTime() * 1000);
+        bean.setEndTime(sti.getServiceDate() + sti.getFrequency().getEndTime()
+            * 1000);
+        bean.setHeadwaySecs(sti.getFrequency().getHeadwaySecs());
+        bean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
+
+        String directionId = narrative.getDirectionId();
+        if (directionId == null)
+          directionId = "0";
+
+        StopTimeByDirectionEntry stopTimesForDirection = stopTimesByDirection.get(directionId);
+        stopTimesForDirection.addEntry(bean, narrative.getTripHeadsign());
+      }
+
       for (StopTimeByDirectionEntry stopTimesForDirection : stopTimesByDirection.values()) {
 
         StopRouteDirectionScheduleBean directionBean = new StopRouteDirectionScheduleBean();
+
         directionBean.getStopTimes().addAll(
             stopTimesForDirection.getStopTimes());
+
+        directionBean.getFrequencies().addAll(
+            stopTimesForDirection.getFrequencies());
+
         String headsign = stopTimesForDirection.getBestHeadsign();
         directionBean.setTripHeadsign(headsign);
 
         Collections.sort(directionBean.getStopTimes(), _stopTimeComparator);
+        Collections.sort(directionBean.getFrequencies(), _frequencyComparator);
 
         routeScheduleBean.getDirections().add(directionBean);
       }
@@ -258,6 +285,82 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     }
   }
 
+  private static class FrequencyBeanComparator implements
+      Comparator<FrequencyInstanceBean> {
+
+    public int compare(FrequencyInstanceBean o1, FrequencyInstanceBean o2) {
+
+      long t1 = o1.getStartTime();
+      long t2 = o2.getStartTime();
+      return new Long(t1).compareTo(new Long(t2));
+    }
+  }
+
+  private Map<AgencyAndId, List<StopTimeInstance>> getStopTimeInstancesByRouteCollectionId(
+      StopEntry stopEntry, ServiceDate date) {
+
+    Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
+        new ArrayList<StopTimeInstance>());
+
+    for (BlockStopTimeIndex index : _blockIndexService.getStopTimeIndicesForStop(stopEntry)) {
+
+      ServiceIdActivation serviceIds = index.getServiceIds();
+
+      Set<ServiceDate> serviceDates = _calendarService.getServiceDatesForServiceIds(serviceIds);
+      if (!serviceDates.contains(date))
+        continue;
+
+      Date serviceDate = date.getAsDate(serviceIds.getTimeZone());
+
+      for (BlockStopTimeEntry stopTime : index.getStopTimes()) {
+
+        BlockTripEntry blockTrip = stopTime.getTrip();
+        TripEntry trip = blockTrip.getTrip();
+        AgencyAndId routeCollectionId = trip.getRouteCollectionId();
+
+        StopTimeInstance sti = new StopTimeInstance(stopTime, serviceDate);
+
+        stopTimesByRouteCollectionId.get(routeCollectionId).add(sti);
+      }
+    }
+
+    return stopTimesByRouteCollectionId;
+  }
+
+  private Map<AgencyAndId, List<StopTimeInstance>> getFrequencyInstancesByRouteCollectionId(
+      StopEntry stopEntry, ServiceDate date) {
+
+    Map<AgencyAndId, List<StopTimeInstance>> frequenciesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
+        new ArrayList<StopTimeInstance>());
+
+    for (FrequencyBlockStopTimeIndex index : _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry)) {
+
+      ServiceIdActivation serviceIds = index.getServiceIds();
+
+      Set<ServiceDate> serviceDates = _calendarService.getServiceDatesForServiceIds(serviceIds);
+      if (!serviceDates.contains(date))
+        continue;
+
+      Date serviceDate = date.getAsDate(serviceIds.getTimeZone());
+
+      for (FrequencyBlockStopTimeEntry entry : index.getFrequencyStopTimes()) {
+
+        BlockStopTimeEntry stopTime = entry.getStopTime();
+
+        BlockTripEntry blockTrip = stopTime.getTrip();
+        TripEntry trip = blockTrip.getTrip();
+        AgencyAndId routeCollectionId = trip.getRouteCollectionId();
+
+        StopTimeInstance sti = new StopTimeInstance(stopTime,
+            serviceDate.getTime(), entry.getFrequency());
+
+        frequenciesByRouteCollectionId.get(routeCollectionId).add(sti);
+      }
+    }
+
+    return frequenciesByRouteCollectionId;
+  }
+
   private static class StopRouteScheduleBeanComparator implements
       Comparator<StopRouteScheduleBean> {
 
@@ -292,15 +395,32 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     private List<StopTimeInstanceBean> _stopTimes = new ArrayList<StopTimeInstanceBean>();
 
+    private List<FrequencyInstanceBean> _frequencies = new ArrayList<FrequencyInstanceBean>();
+
     private Counter<String> _headsigns = new Counter<String>();
 
     public Collection<? extends StopTimeInstanceBean> getStopTimes() {
       return _stopTimes;
     }
 
+    public Collection<FrequencyInstanceBean> getFrequencies() {
+      return _frequencies;
+    }
+
     public void addEntry(StopTimeInstanceBean sti, String headsign) {
       _stopTimes.add(sti);
       _headsigns.increment(headsign);
+    }
+
+    public void addEntry(FrequencyInstanceBean fi, String headsign) {
+      _frequencies.add(fi);
+
+      // We weight the frequency-based headsign count by the estimated number of
+      // trips in the interval
+      int rangeInSeconds = (int) ((fi.getEndTime() - fi.getStartTime()) / 1000);
+      int count = rangeInSeconds / fi.getHeadwaySecs();
+
+      _headsigns.increment(headsign, count);
     }
 
     public String getBestHeadsign() {

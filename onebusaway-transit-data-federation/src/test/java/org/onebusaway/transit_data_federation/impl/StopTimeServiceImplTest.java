@@ -390,7 +390,7 @@ public class StopTimeServiceImplTest {
     BlockIndicesFactory factory = new BlockIndicesFactory();
     BlockIndex blockIndex = factory.createIndexForGroupOfBlocks(blockConfigs);
 
-    _stop.getStopTimeIndices().add(BlockStopTimeIndex.create(blockIndex, 0));
+    _stop.addStopTimeIndex(BlockStopTimeIndex.create(blockIndex, 0));
   }
 
   private void sort(List<StopTimeInstance> stopTimes) {
