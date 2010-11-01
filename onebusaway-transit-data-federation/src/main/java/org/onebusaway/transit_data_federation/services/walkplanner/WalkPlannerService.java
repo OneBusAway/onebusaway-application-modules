@@ -5,6 +5,8 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlannerConstraints;
 
 public interface WalkPlannerService {
+  
+  public WalkPlannerGraph getWalkPlannerGraph();
 
   public WalkPlan getWalkPlan(CoordinatePoint latLonFrom, CoordinatePoint latLonTo) throws NoPathException;
 

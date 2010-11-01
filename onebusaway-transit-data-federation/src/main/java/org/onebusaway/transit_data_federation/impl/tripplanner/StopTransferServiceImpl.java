@@ -79,8 +79,10 @@ public class StopTransferServiceImpl implements StopTransferService {
           StopTransfer transfer = new StopTransfer(targetStop,
               data.getMinTransferTime(), data.getDistance());
 
+          /*
           System.out.println(stop.getStopLat() + " " + stop.getStopLon() + " "
               + targetStop.getStopLat() + " " + targetStop.getStopLon());
+          */
 
           transfers.add(transfer);
         }

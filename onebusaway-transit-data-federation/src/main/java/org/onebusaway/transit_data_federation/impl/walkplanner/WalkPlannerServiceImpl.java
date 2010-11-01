@@ -76,6 +76,11 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
    * {@link WalkPlannerService} Service
    ****/
 
+  @Override
+  public WalkPlannerGraph getWalkPlannerGraph() {
+    return _graph;
+  }
+
   public WalkPlan getWalkPlan(CoordinatePoint latLonFrom,
       CoordinatePoint latLonTo) throws NoPathException {
     return getWalkPlan(latLonFrom, latLonTo, new WalkPlannerConstraints());
