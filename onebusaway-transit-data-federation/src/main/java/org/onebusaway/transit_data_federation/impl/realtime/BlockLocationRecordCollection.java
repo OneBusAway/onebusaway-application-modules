@@ -153,8 +153,15 @@ public final class BlockLocationRecordCollection implements Serializable {
       return null;
     return record.getLocation();
   }
-  
-  public EVehiclePhase getPhaseForTargetTime(long targetTime){
+
+  public double getLastOrientationForTargetTime(long targetTime) {
+    BlockLocationRecord record = previousRecord(targetTime);
+    if (record == null)
+      return Double.NaN;
+    return record.getOrientation();
+  }
+
+  public EVehiclePhase getPhaseForTargetTime(long targetTime) {
     BlockLocationRecord record = previousRecord(targetTime);
     if (record == null)
       return null;

@@ -224,6 +224,8 @@ public class BeanFactoryV2 {
     bean.setTotalDistanceAlongTrip(tripStatus.getTotalDistanceAlongTrip());
 
     bean.setPosition(tripStatus.getLocation());
+    if (tripStatus.isOrientationSet())
+      bean.setOrientation(tripStatus.getOrientation());
 
     StopBean closestStop = tripStatus.getClosestStop();
     if (closestStop != null) {
@@ -243,8 +245,15 @@ public class BeanFactoryV2 {
     bean.setStatus(tripStatus.getStatus());
 
     bean.setPredicted(tripStatus.isPredicted());
+
     if (tripStatus.getLastUpdateTime() > 0)
       bean.setLastUpdateTime(tripStatus.getLastUpdateTime());
+
+    bean.setLastKnownLocation(tripStatus.getLastKnownLocation());
+
+    if (tripStatus.isLastKnownOrientationSet())
+      bean.setLastKnownOrientation(tripStatus.getLastKnownOrientation());
+
     if (tripStatus.isScheduleDeviationSet())
       bean.setScheduleDeviation((int) tripStatus.getScheduleDeviation());
     if (tripStatus.isDistanceAlongTripSet())
@@ -479,7 +488,7 @@ public class BeanFactoryV2 {
     bean.setPredictedDepartureTime(ad.getPredictedDepartureTime());
 
     bean.setHeadway(ad.getHeadway());
-    
+
     bean.setStatus(ad.getStatus());
 
     bean.setDistanceFromStop(ad.getDistanceFromStop());

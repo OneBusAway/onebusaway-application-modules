@@ -94,6 +94,40 @@ public class SphericalGeometryLibraryTest {
   }
 
   @Test
+  public void testGetOrientation() {
+    double lat0 = 47.6538286680302;
+    double lon0 = -122.30780805044554;
+
+    double orientation = SphericalGeometryLibrary.getOrientation(lat0, lon0,
+        47.65385757615516, -122.30632747106932);
+    assertEquals(1.1, orientation, 0.1);
+
+    orientation = SphericalGeometryLibrary.getOrientation(lat0, lon0,
+        47.65415388351328, -122.3063596575775);
+    assertEquals(12.6, orientation, 0.1);
+
+    orientation = SphericalGeometryLibrary.getOrientation(lat0, lon0,
+        47.65441405444146, -122.30704630308531);
+    assertEquals(37.5, orientation, 0.1);
+
+    orientation = SphericalGeometryLibrary.getOrientation(lat0, lon0,
+        47.65435623879166, -122.30780805044554);
+    assertEquals(90.0, orientation, 0.1);
+
+    orientation = SphericalGeometryLibrary.getOrientation(lat0, lon0,
+        47.65405270558003, -122.30883265428923);
+    assertEquals(167.6, orientation, 0.1);
+
+    orientation = SphericalGeometryLibrary.getOrientation(lat0, lon0,
+        47.653510677599435, -122.30930472307585);
+    assertEquals(192.0, orientation, 0.1);
+    
+    orientation = SphericalGeometryLibrary.getOrientation(lat0, lon0,
+        47.65312041396976, -122.30780805044554);
+    assertEquals(270.0, orientation, 0.1);
+  }
+
+  @Test
   public void testProjectPointToSegmentApproximate() {
 
     CoordinatePoint p = new CoordinatePoint(40.737284, -73.955430);

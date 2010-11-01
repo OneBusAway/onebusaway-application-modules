@@ -30,6 +30,8 @@ public final class TripStatusBean implements Serializable {
 
   private CoordinatePoint location;
 
+  private double orientation = Double.NaN;
+
   private StopBean closestStop;
 
   private int closestStopTimeOffset;
@@ -45,6 +47,10 @@ public final class TripStatusBean implements Serializable {
   private boolean predicted = false;
 
   private long lastUpdateTime;
+
+  private CoordinatePoint lastKnownLocation;
+
+  private double lastKnownOrientation = Double.NaN;
 
   private double scheduleDeviation;
 
@@ -103,6 +109,18 @@ public final class TripStatusBean implements Serializable {
 
   public void setLocation(CoordinatePoint location) {
     this.location = location;
+  }
+  
+  public boolean isOrientationSet() {
+    return ! Double.isNaN(orientation);
+  }
+
+  public double getOrientation() {
+    return orientation;
+  }
+
+  public void setOrientation(double orientation) {
+    this.orientation = orientation;
   }
 
   public StopBean getClosestStop() {
@@ -178,6 +196,26 @@ public final class TripStatusBean implements Serializable {
    */
   public long getLastUpdateTime() {
     return lastUpdateTime;
+  }
+
+  public CoordinatePoint getLastKnownLocation() {
+    return lastKnownLocation;
+  }
+
+  public void setLastKnownLocation(CoordinatePoint lastKnownLocation) {
+    this.lastKnownLocation = lastKnownLocation;
+  }
+  
+  public boolean isLastKnownOrientationSet() {
+    return ! Double.isNaN(lastKnownOrientation);
+  }
+
+  public double getLastKnownOrientation() {
+    return lastKnownOrientation;
+  }
+
+  public void setLastKnownOrientation(double lastKnownOrientation) {
+    this.lastKnownOrientation = lastKnownOrientation;
   }
 
   public boolean isScheduleDeviationSet() {

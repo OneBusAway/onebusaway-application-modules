@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.realtime;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
@@ -41,9 +42,11 @@ public class BlockLocationRecordCollectionTest {
     EVehiclePhase inProgress = EVehiclePhase.IN_PROGRESS;
     EVehiclePhase layover = EVehiclePhase.LAYOVER_DURING;
 
-    addRecord(records, record(t(4, 10), 10.0, 100.0, p1, inProgress, "ok"));
-    addRecord(records, record(t(8, 20), 18.0, 200.0, p2, layover, "not ok"));
-    addRecord(records, record(t(12, 30), 15.0, 300.0, p3, inProgress, "ok"));
+    addRecord(records, record(t(4, 10), 10.0, 100.0, p1, 0.0, inProgress, "ok"));
+    addRecord(records,
+        record(t(8, 20), 18.0, 200.0, p2, 90.0, layover, "not ok"));
+    addRecord(records,
+        record(t(12, 30), 15.0, 300.0, p3, 45.0, inProgress, "ok"));
 
     BlockLocationRecordCollection entry = new BlockLocationRecordCollection(t(
         3, 20), t(13, 20), records);
@@ -82,6 +85,17 @@ public class BlockLocationRecordCollectionTest {
     assertEquals(p3, entry.getLastLocationForTargetTime(t(12, 30)));
     assertEquals(p3, entry.getLastLocationForTargetTime(t(16, 40)));
 
+    assertTrue(Double.isNaN(entry.getLastOrientationForTargetTime(t(3, 20))));
+    assertTrue(Double.isNaN(entry.getLastOrientationForTargetTime(t(4, 9))));
+    assertEquals(0.0, entry.getLastOrientationForTargetTime(t(4, 10)), 0.0);
+    assertEquals(0.0, entry.getLastOrientationForTargetTime(t(5, 12)), 0.0);
+    assertEquals(0.0, entry.getLastOrientationForTargetTime(t(8, 19)), 0.0);
+    assertEquals(90.0, entry.getLastOrientationForTargetTime(t(8, 20)), 0.0);
+    assertEquals(90.0, entry.getLastOrientationForTargetTime(t(10, 0)), 0.0);
+    assertEquals(90.0, entry.getLastOrientationForTargetTime(t(12, 29)), 0.0);
+    assertEquals(45.0, entry.getLastOrientationForTargetTime(t(12, 30)), 0.0);
+    assertEquals(45.0, entry.getLastOrientationForTargetTime(t(16, 40)), 0.0);
+
     assertNull(entry.getPhaseForTargetTime(t(3, 20)));
     assertNull(entry.getPhaseForTargetTime(t(4, 9)));
     assertEquals(inProgress, entry.getPhaseForTargetTime(t(4, 10)));
@@ -106,7 +120,7 @@ public class BlockLocationRecordCollectionTest {
 
     CoordinatePoint p4 = new CoordinatePoint(47.15, -122.15);
     entry = entry.addRecord(blockInstance,
-        record(t(10, 0), 20, 220, p4, layover, "not ok"), t(5, 0));
+        record(t(10, 0), 20, 220, p4, 270.0, layover, "not ok"), t(5, 0));
 
     assertEquals(t(6, 40), entry.getFromTime());
     assertEquals(t(11, 40), entry.getToTime());
@@ -131,6 +145,12 @@ public class BlockLocationRecordCollectionTest {
     assertEquals(p4, entry.getLastLocationForTargetTime(t(10, 00)));
     assertEquals(p4, entry.getLastLocationForTargetTime(t(10, 50)));
 
+    assertTrue(Double.isNaN(entry.getLastOrientationForTargetTime(t(6, 40))));
+    assertEquals(90.0, entry.getLastOrientationForTargetTime(t(8, 20)), 0.0);
+    assertEquals(90.0, entry.getLastOrientationForTargetTime(t(9, 10)), 0.0);
+    assertEquals(270.0, entry.getLastOrientationForTargetTime(t(10, 00)), 0.0);
+    assertEquals(270.0, entry.getLastOrientationForTargetTime(t(10, 50)), 0.0);
+
     assertNull(entry.getPhaseForTargetTime(t(6, 40)));
     assertEquals(layover, entry.getPhaseForTargetTime(t(8, 20)));
     assertEquals(layover, entry.getPhaseForTargetTime(t(9, 10)));
@@ -145,7 +165,7 @@ public class BlockLocationRecordCollectionTest {
 
     CoordinatePoint p5 = new CoordinatePoint(47.4, -122.4);
     entry = entry.addRecord(blockInstance,
-        record(t(16, 40), 14, 500, p5, inProgress, "ok"), t(6, 40));
+        record(t(16, 40), 14, 500, p5, 180.0, inProgress, "ok"), t(6, 40));
 
     assertEquals(t(10, 00), entry.getFromTime());
     assertEquals(t(16, 40), entry.getToTime());
@@ -165,6 +185,12 @@ public class BlockLocationRecordCollectionTest {
     assertEquals(p5, entry.getLastLocationForTargetTime(t(16, 40)));
     assertEquals(p5, entry.getLastLocationForTargetTime(t(20, 00)));
 
+    assertTrue(Double.isNaN(entry.getLastOrientationForTargetTime(t(6, 40))));
+    assertEquals(270.0, entry.getLastOrientationForTargetTime(t(10, 00)), 0.0);
+    assertEquals(270.0, entry.getLastOrientationForTargetTime(t(13, 20)), 0.0);
+    assertEquals(180.0, entry.getLastOrientationForTargetTime(t(16, 40)), 0.0);
+    assertEquals(180.0, entry.getLastOrientationForTargetTime(t(20, 00)), 0.0);
+
     assertNull(entry.getPhaseForTargetTime(t(6, 40)));
     assertEquals(layover, entry.getPhaseForTargetTime(t(10, 00)));
     assertEquals(layover, entry.getPhaseForTargetTime(t(13, 20)));
@@ -179,13 +205,14 @@ public class BlockLocationRecordCollectionTest {
   }
 
   private BlockLocationRecord record(long time, double scheduleDeviation,
-      double distanceAlongBlock, CoordinatePoint location, EVehiclePhase phase,
-      String status) {
+      double distanceAlongBlock, CoordinatePoint location, double orientation,
+      EVehiclePhase phase, String status) {
     Builder builder = BlockLocationRecord.builder();
     builder.setTime(time);
     builder.setScheduleDeviation(scheduleDeviation);
     builder.setDistanceAlongBlock(distanceAlongBlock);
     builder.setLocation(location);
+    builder.setOrientation(orientation);
     builder.setPhase(phase);
     builder.setStatus(status);
     return builder.create();

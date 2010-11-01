@@ -3,8 +3,10 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.shapes.DistanceTraveledShapePointIndex;
+import org.onebusaway.transit_data_federation.impl.shapes.PointAndOrientation;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
@@ -114,10 +116,21 @@ class ScheduledBlockLocationServiceImpl implements
           && scheduleTime <= stopTime.getDepartureTime()) {
 
         StopEntry stop = stopTime.getStop();
-        CoordinatePoint location = new CoordinatePoint(stop.getStopLat(),
-            stop.getStopLon());
+
         ScheduledBlockLocation result = new ScheduledBlockLocation();
-        result.setLocation(location);
+
+        PointAndOrientation po = getLocationAlongShape(blockStopTime.getTrip(),
+            blockStopTime.getDistaceAlongBlock());
+        if (po != null) {
+          result.setLocation(po.getPoint());
+          result.setOrientation(po.getOrientation());
+        } else {
+          CoordinatePoint location = new CoordinatePoint(stop.getStopLat(),
+              stop.getStopLon());
+          result.setLocation(location);
+          result.setOrientation(0);
+        }
+
         result.setClosestStop(blockStopTime);
         result.setClosestStopTimeOffset(0);
         result.setNextStop(blockStopTime);
@@ -182,10 +195,12 @@ class ScheduledBlockLocationServiceImpl implements
 
     BlockTripEntry activeTrip = result.getActiveTrip();
 
-    CoordinatePoint location = getLocationAlongShape(activeTrip,
+    PointAndOrientation po = getLocationAlongShape(activeTrip,
         distanceAlongBlock);
-    if (location != null) {
-      result.setLocation(location);
+
+    if (po != null) {
+      result.setLocation(po.getPoint());
+      result.setOrientation(po.getOrientation());
       return result;
     }
 
@@ -198,8 +213,12 @@ class ScheduledBlockLocationServiceImpl implements
     double lat = (latTo - latFrom) * ratio + latFrom;
     double lon = (lonTo - lonFrom) * ratio + lonFrom;
 
-    location = new CoordinatePoint(lat, lon);
+    CoordinatePoint location = new CoordinatePoint(lat, lon);
     result.setLocation(location);
+
+    double orientation = SphericalGeometryLibrary.getOrientation(latFrom,
+        lonFrom, latTo, lonTo);
+    result.setOrientation(orientation);
 
     return result;
   }
@@ -215,8 +234,8 @@ class ScheduledBlockLocationServiceImpl implements
         / (blockTo.getDistaceAlongBlock() - blockFrom.getDistaceAlongBlock());
     int scheduledTime = (int) (r
         * (to.getArrivalTime() - from.getDepartureTime()) + from.getDepartureTime());
-    
-    if( r > 1 )
+
+    if (r > 1)
       scheduledTime += to.getSlackTime();
 
     BlockTripEntry activeTrip = distanceAlongBlock < blockTo.getDistaceAlongBlock()
@@ -243,12 +262,19 @@ class ScheduledBlockLocationServiceImpl implements
     location.setScheduledTime(scheduledTime);
     // In this case, distance along block and distance along trip are the same
     // because we are still in the first trip of the block
-    location.setLocation(getLocationAlongShape(activeTrip, distanceAlongBlock));
+
+    PointAndOrientation po = getLocationAlongShape(activeTrip,
+        distanceAlongBlock);
+    if (po != null) {
+      location.setLocation(po.getPoint());
+      location.setOrientation(po.getOrientation());
+    }
+
     return location;
   }
 
-  private CoordinatePoint getLocationAlongShape(BlockTripEntry activeBlockTrip,
-      double distanceAlongBlock) {
+  private PointAndOrientation getLocationAlongShape(
+      BlockTripEntry activeBlockTrip, double distanceAlongBlock) {
 
     TripEntry activeTrip = activeBlockTrip.getTrip();
     AgencyAndId shapeId = activeTrip.getShapeId();
@@ -266,6 +292,6 @@ class ScheduledBlockLocationServiceImpl implements
 
     ShapePointIndex shapePointIndexMethod = new DistanceTraveledShapePointIndex(
         distanceAlongTrip);
-    return shapePointIndexMethod.getPoint(shapePoints);
+    return shapePointIndexMethod.getPointAndOrientation(shapePoints);
   }
 }

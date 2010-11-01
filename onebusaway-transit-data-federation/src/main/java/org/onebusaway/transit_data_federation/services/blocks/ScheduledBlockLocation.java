@@ -11,6 +11,8 @@ public class ScheduledBlockLocation {
   private int scheduledTime;
 
   private CoordinatePoint location;
+  
+  private double orientation = Double.NaN;
 
   private double distanceAlongBlock;
 
@@ -47,6 +49,14 @@ public class ScheduledBlockLocation {
 
   public void setLocation(CoordinatePoint location) {
     this.location = location;
+  }
+
+  public double getOrientation() {
+    return orientation;
+  }
+
+  public void setOrientation(double orientation) {
+    this.orientation = orientation;
   }
 
   public double getDistanceAlongBlock() {

@@ -3,7 +3,6 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.transit_data.model.ListBean;
@@ -159,8 +158,16 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
       bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
 
-      CoordinatePoint location = blockLocation.getLocation();
-      bean.setLocation(location);
+      bean.setLastKnownLocation(blockLocation.getLastKnownLocation());
+      bean.setLastKnownOrientation(blockLocation.getLastKnownOrientation());
+
+      bean.setLocation(blockLocation.getLocation());
+      bean.setOrientation(blockLocation.getOrientation());
+
+      bean.setLastKnownLocation(blockLocation.getLastKnownLocation());
+      if (blockLocation.isLastKnownOrientationSet())
+        bean.setLastKnownOrientation(blockLocation.getLastKnownOrientation());
+
       bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
 
       BlockTripEntry activeBlockTrip = blockLocation.getActiveTrip();
@@ -231,8 +238,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       return null;
 
     BlockTripEntry tripEntry = blockLocation.getActiveTrip();
-    
-    if( tripEntry == null) {
+
+    if (tripEntry == null) {
       System.err.println("no trip?");
       return null;
     }

@@ -324,6 +324,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       builder.setLocationLat(record.getCurrentLocationLat());
       builder.setLocationLon(record.getCurrentLocationLon());
     }
+    
+    builder.setOrientation(record.getCurrentOrientation());
 
     builder.setPhase(record.getPhase());
     builder.setStatus(record.getStatus());
@@ -393,9 +395,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     CoordinatePoint point = records.getLastLocationForTargetTime(targetTime);
     location.setLastKnownLocation(point);
 
+    double orientation = records.getLastOrientationForTargetTime(targetTime);
+    location.setLastKnownOrientation(orientation);
+
     EVehiclePhase phase = records.getPhaseForTargetTime(targetTime);
     location.setPhase(phase);
-    
+
     String status = records.getStatusForTargetTime(targetTime);
     location.setStatus(status);
 
@@ -412,6 +417,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     location.setInService(true);
     location.setActiveTrip(scheduledLocation.getActiveTrip());
     location.setLocation(scheduledLocation.getLocation());
+    location.setOrientation(scheduledLocation.getOrientation());
     location.setScheduledDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
     location.setClosestStop(scheduledLocation.getClosestStop());
     location.setClosestStopTimeOffset(scheduledLocation.getClosestStopTimeOffset());

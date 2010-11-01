@@ -33,6 +33,8 @@ public class BlockLocation {
 
   private CoordinatePoint location;
 
+  private double orientation = Double.NaN;
+
   private BlockStopTimeEntry closestStop;
 
   private int closestStopTimeOffset;
@@ -54,6 +56,8 @@ public class BlockLocation {
   private long lastUpdateTime;
 
   private CoordinatePoint lastKnownLocation;
+
+  private double lastKnownOrientation = Double.NaN;
 
   private double scheduleDeviation = Double.NaN;
 
@@ -119,6 +123,14 @@ public class BlockLocation {
 
   public void setLocation(CoordinatePoint location) {
     this.location = location;
+  }
+  
+  public double getOrientation() {
+    return orientation;
+  }
+
+  public void setOrientation(double orientation) {
+    this.orientation = orientation;
   }
 
   /**
@@ -237,6 +249,21 @@ public class BlockLocation {
 
   public void setLastKnownLocation(CoordinatePoint lastKnownLocation) {
     this.lastKnownLocation = lastKnownLocation;
+  }
+  
+  public boolean isLastKnownOrientationSet() {
+    return ! Double.isNaN(lastKnownOrientation);
+  }
+
+  /**
+   * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
+   */
+  public double getLastKnownOrientation() {
+    return lastKnownOrientation;
+  }
+
+  public void setLastKnownOrientation(double lastKnownOrientation) {
+    this.lastKnownOrientation = lastKnownOrientation;
   }
 
   /**

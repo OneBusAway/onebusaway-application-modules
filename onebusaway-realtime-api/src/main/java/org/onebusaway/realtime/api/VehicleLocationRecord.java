@@ -51,6 +51,11 @@ public class VehicleLocationRecord implements Serializable {
   private double currentLocationLon = Double.NaN;
 
   /**
+   * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
+   */
+  private double currentOrientation = Double.NaN;
+
+  /**
    * 
    */
 
@@ -78,6 +83,7 @@ public class VehicleLocationRecord implements Serializable {
     this.blockId = r.blockId;
     this.currentLocationLat = r.currentLocationLat;
     this.currentLocationLon = r.currentLocationLon;
+    this.currentOrientation = r.currentOrientation;
     this.timeOfRecord = r.timeOfRecord;
     this.distanceAlongBlock = r.distanceAlongBlock;
     this.scheduleDeviation = r.scheduleDeviation;
@@ -202,6 +208,18 @@ public class VehicleLocationRecord implements Serializable {
 
   public void setCurrentLocationLon(double currentLocationLon) {
     this.currentLocationLon = currentLocationLon;
+  }
+
+  public boolean isCurrentOrientationSet() {
+    return !Double.isNaN(currentOrientation);
+  }
+
+  public double getCurrentOrientation() {
+    return currentOrientation;
+  }
+
+  public void setCurrentOrientation(double currentOrientation) {
+    this.currentOrientation = currentOrientation;
   }
 
   public AgencyAndId getTimepointId() {

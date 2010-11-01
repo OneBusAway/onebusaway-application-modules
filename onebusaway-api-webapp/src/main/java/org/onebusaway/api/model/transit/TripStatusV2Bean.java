@@ -25,6 +25,8 @@ public final class TripStatusV2Bean implements Serializable {
 
   private CoordinatePoint position;
 
+  private Double orientation;
+
   private String closestStop;
 
   private int closestStopTimeOffset;
@@ -44,6 +46,10 @@ public final class TripStatusV2Bean implements Serializable {
   private boolean predicted = false;
 
   private Long lastUpdateTime;
+
+  private CoordinatePoint lastKnownLocation;
+
+  private Double lastKnownOrientation;
 
   private Integer scheduleDeviation;
 
@@ -81,6 +87,14 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setPosition(CoordinatePoint position) {
     this.position = position;
+  }
+
+  public Double getOrientation() {
+    return orientation;
+  }
+
+  public void setOrientation(Double orientation) {
+    this.orientation = orientation;
   }
 
   public String getClosestStop() {
@@ -145,6 +159,22 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setLastUpdateTime(Long lastUpdateTime) {
     this.lastUpdateTime = lastUpdateTime;
+  }
+
+  public CoordinatePoint getLastKnownLocation() {
+    return lastKnownLocation;
+  }
+
+  public void setLastKnownLocation(CoordinatePoint lastKnownLocation) {
+    this.lastKnownLocation = lastKnownLocation;
+  }
+
+  public Double getLastKnownOrientation() {
+    return lastKnownOrientation;
+  }
+
+  public void setLastKnownOrientation(Double lastKnownOrientation) {
+    this.lastKnownOrientation = lastKnownOrientation;
   }
 
   public Integer getScheduleDeviation() {

@@ -61,7 +61,9 @@ public class BlockLocationRecord {
   private final double locationLat;
 
   private final double locationLon;
-  
+
+  private final double orientation;
+
   private final EVehiclePhase phase;
 
   private final String status;
@@ -85,6 +87,7 @@ public class BlockLocationRecord {
     distanceAlongBlock = Double.NaN;
     locationLat = Double.NaN;
     locationLon = Double.NaN;
+    orientation = Double.NaN;
     phase = null;
     status = null;
     vehicleId = null;
@@ -99,6 +102,7 @@ public class BlockLocationRecord {
     this.distanceAlongBlock = builder.distanceAlongBlock;
     this.locationLat = builder.locationLat;
     this.locationLon = builder.locationLon;
+    this.orientation = builder.orientation;
     this.phase = builder.phase;
     this.status = builder.status;
     this.vehicleId = builder.vehicleId;
@@ -179,7 +183,14 @@ public class BlockLocationRecord {
       return null;
     return new CoordinatePoint(locationLat, locationLon);
   }
-  
+
+  /**
+   * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
+   */
+  public double getOrientation() {
+    return orientation;
+  }
+
   public EVehiclePhase getPhase() {
     return phase;
   }
@@ -222,7 +233,9 @@ public class BlockLocationRecord {
     private double locationLat = Double.NaN;
 
     private double locationLon = Double.NaN;
-    
+
+    private double orientation = Double.NaN;
+
     private EVehiclePhase phase;
 
     private String status;
@@ -270,7 +283,11 @@ public class BlockLocationRecord {
         this.locationLon = location.getLon();
       }
     }
-    
+
+    public void setOrientation(double orientation) {
+      this.orientation = orientation;
+    }
+
     public void setPhase(EVehiclePhase phase) {
       this.phase = phase;
     }
