@@ -87,6 +87,8 @@ public class RouteCollectionSearchServiceImpl implements
     TopDocs top = collector.topDocs();
 
     Map<AgencyAndId, Float> topScores = new HashMap<AgencyAndId, Float>();
+    
+    String lowerCaseQueryValue = value.toLowerCase();
 
     for (ScoreDoc sd : top.scoreDocs) {
       Document document = _searcher.doc(sd.doc);
@@ -94,9 +96,11 @@ public class RouteCollectionSearchServiceImpl implements
       String agencyId = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_AGENCY_ID);
       String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
       AgencyAndId id = new AgencyAndId(agencyId, routeShortName);
-
+      
+      String lowerCaseRouteShortName = routeShortName.toLowerCase();
+      
       // Result must have a minimum score to qualify
-      if (sd.score < minScoreToKeep && !routeShortName.equals(value))
+      if (sd.score < minScoreToKeep && !lowerCaseRouteShortName.equals(lowerCaseQueryValue))
         continue;
 
       // Keep the best score for a particular id

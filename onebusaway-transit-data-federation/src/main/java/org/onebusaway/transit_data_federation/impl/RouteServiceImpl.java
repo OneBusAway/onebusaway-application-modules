@@ -20,6 +20,8 @@ import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -94,6 +96,18 @@ class RouteServiceImpl implements RouteService {
 
     for (BlockStopTimeIndex blockStopTimeIndex : indices) {
       BlockIndex blockIndex = blockStopTimeIndex.getBlockIndex();
+      for (BlockConfigurationEntry blockConfig : blockIndex.getBlocks()) {
+        for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
+          TripEntry trip = blockTrip.getTrip();
+          routeCollectionIds.add(trip.getRouteCollectionId());
+        }
+      }
+    }
+    
+    List<FrequencyBlockStopTimeIndex> frequencyIndices = _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry);
+    
+    for (FrequencyBlockStopTimeIndex blockStopTimeIndex : frequencyIndices) {
+      FrequencyBlockIndex blockIndex = blockStopTimeIndex.getBlockIndex();
       for (BlockConfigurationEntry blockConfig : blockIndex.getBlocks()) {
         for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
           TripEntry trip = blockTrip.getTrip();
