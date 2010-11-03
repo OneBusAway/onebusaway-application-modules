@@ -307,10 +307,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         && _scheduleDeviationComputationEnabled) {
 
       BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-      List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
       double distanceAlongBlock = record.getDistanceAlongBlock();
       ScheduledBlockLocation scheduledBlockLocation = _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
-          stopTimes, distanceAlongBlock);
+          blockConfig, distanceAlongBlock);
       int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
       record.setScheduleDeviation(deviation);
     }
@@ -417,7 +416,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       return location;
     }
 
-    location.setInService(true);
+    location.setInService(scheduledLocation.isInService());
     location.setActiveTrip(scheduledLocation.getActiveTrip());
     location.setLocation(scheduledLocation.getLocation());
     location.setOrientation(scheduledLocation.getOrientation());
@@ -451,16 +450,16 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       int effectiveScheduledTime = (int) (scheduledTime - blockLocation.getScheduleDeviation());
 
       return _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
-          blockConfig.getStopTimes(), effectiveScheduledTime);
+          blockConfig, effectiveScheduledTime);
     }
 
     if (blockLocation.hasDistanceAlongBlock()) {
       return _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
-          blockConfig.getStopTimes(), blockLocation.getDistanceAlongBlock());
+          blockConfig, blockLocation.getDistanceAlongBlock());
     }
 
     return _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
-        blockConfig.getStopTimes(), scheduledTime);
+        blockConfig, scheduledTime);
   }
 
   private List<VehicleLocationCacheRecord> getBlockLocationRecordCollectionForBlock(

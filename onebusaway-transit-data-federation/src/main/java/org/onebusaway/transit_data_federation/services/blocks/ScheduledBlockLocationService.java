@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 
 /**
@@ -14,13 +15,18 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 public interface ScheduledBlockLocationService {
 
   /**
+   * If you request a schedule time that is less than the first arrival time of
+   * the block, we will still return a {@link ScheduledBlockLocation}. If the
+   * distance along the block of the first stop is greater than zero, we attempt
+   * to interpolate where the bus currently is along the block based on the
+   * relative velocity between the first two stops in the block.
    * 
    * @param stopTimes
    * @param scheduleTime
-   * @return the schedule block position, or null if not in service
+   * @return the schedule block position
    */
   public ScheduledBlockLocation getScheduledBlockLocationFromScheduledTime(
-      List<BlockStopTimeEntry> stopTimes, int scheduleTime);
+      BlockConfigurationEntry blockConfig, int scheduleTime);
 
   /**
    * 
@@ -29,5 +35,5 @@ public interface ScheduledBlockLocationService {
    * @return the schedule block position, or null if not in service
    */
   public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
-      List<BlockStopTimeEntry> stopTimes, double distanceAlongBlock);
+      BlockConfigurationEntry blockConfig, double distanceAlongBlock);
 }

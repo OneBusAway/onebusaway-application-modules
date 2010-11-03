@@ -1,7 +1,9 @@
 package org.onebusaway.transit_data_federation.impl.blocks;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
@@ -38,8 +40,6 @@ public class ScheduledBlockLocationServiceImplTest {
   private BlockStopTimeEntry _stopTimeB;
 
   private BlockStopTimeEntry _stopTimeC;
-
-  private List<BlockStopTimeEntry> _stopTimes;
 
   private StopEntryImpl _stopA;
 
@@ -91,7 +91,6 @@ public class ScheduledBlockLocationServiceImplTest {
     stopTime(3, _stopC, tripB, time(10, 20), time(10, 20), 200);
 
     _blockConfig = linkBlockTrips("blockA", tripA, tripB);
-    _stopTimes = _blockConfig.getStopTimes();
 
     List<BlockTripEntry> trips = _blockConfig.getTrips();
     _tripA = trips.get(0);
@@ -104,22 +103,61 @@ public class ScheduledBlockLocationServiceImplTest {
   }
 
   @Test
-  public void test00() {
+  public void test00a() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(9, 55));
-    assertNull(position);
+        _blockConfig, time(9, 55));
+
+    assertEquals(_tripA, position.getActiveTrip());
+    assertEquals(_stopTimeA, position.getClosestStop());
+    assertEquals(300, position.getClosestStopTimeOffset());
+    assertEquals(0.0, position.getDistanceAlongBlock(), 0.0);
+    assertEquals(47.670170374084805, position.getLocation().getLat(), 1e-6);
+    assertEquals(-122.3875880241394, position.getLocation().getLon(), 1e-6);
+    assertEquals(270.8, position.getOrientation(), 0.1);
+    assertEquals(time(9, 55), position.getScheduledTime());
+    assertFalse(position.isInService());
 
     position = _service.getScheduledBlockLocationFromDistanceAlongBlock(
-        _stopTimes, -100);
+        _blockConfig, -100);
     assertNull(position);
+  }
+
+  @Test
+  public void test00b() {
+
+    ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
+        _blockConfig, time(9, 59));
+
+    assertEquals(_tripA, position.getActiveTrip());
+    assertEquals(_stopTimeA, position.getClosestStop());
+    assertEquals(60, position.getClosestStopTimeOffset());
+    assertEquals(140.0, position.getDistanceAlongBlock(), 0.0);
+    assertEquals(47.668911387520204, position.getLocation().getLat(), 1e-6);
+    assertEquals(-122.38756951346872, position.getLocation().getLon(), 1e-6);
+    assertEquals(270.8, position.getOrientation(), 0.1);
+    assertEquals(time(9, 59), position.getScheduledTime());
+    assertTrue(position.isInService());
+
+    position = _service.getScheduledBlockLocationFromDistanceAlongBlock(
+        _blockConfig, 140.0);
+
+    assertEquals(_tripA, position.getActiveTrip());
+    assertEquals(_stopTimeA, position.getClosestStop());
+    assertEquals(60, position.getClosestStopTimeOffset());
+    assertEquals(140.0, position.getDistanceAlongBlock(), 0.0);
+    assertEquals(47.668911387520204, position.getLocation().getLat(), 1e-6);
+    assertEquals(-122.38756951346872, position.getLocation().getLon(), 1e-6);
+    assertEquals(270.8, position.getOrientation(), 0.1);
+    assertEquals(time(9, 59), position.getScheduledTime());
+    assertTrue(position.isInService());
   }
 
   @Test
   public void test01() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(10, 00));
+        _blockConfig, time(10, 00));
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
@@ -127,11 +165,12 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(200.0, position.getDistanceAlongBlock(), 0.0);
     assertEquals(_stopA.getStopLat(), position.getLocation().getLat(), 1e-6);
     assertEquals(_stopA.getStopLon(), position.getLocation().getLon(), 1e-6);
-    assertEquals(356.6,position.getOrientation(),0.1);
+    assertEquals(356.6, position.getOrientation(), 0.1);
     assertEquals(time(10, 00), position.getScheduledTime());
+    assertTrue(position.isInService());
 
     position = _service.getScheduledBlockLocationFromDistanceAlongBlock(
-        _stopTimes, 200.0);
+        _blockConfig, 200.0);
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
@@ -139,15 +178,16 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(200.0, position.getDistanceAlongBlock(), 0.0);
     assertEquals(_stopA.getStopLat(), position.getLocation().getLat(), 1e-6);
     assertEquals(_stopA.getStopLon(), position.getLocation().getLon(), 1e-6);
-    assertEquals(356.6,position.getOrientation(),0.1);
+    assertEquals(356.6, position.getOrientation(), 0.1);
     assertEquals(time(10, 00), position.getScheduledTime());
+    assertTrue(position.isInService());
   }
 
   @Test
   public void test02() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(10, 02));
+        _blockConfig, time(10, 02));
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
@@ -155,11 +195,12 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(320.0, position.getDistanceAlongBlock(), 0.0);
     assertEquals(47.668651, position.getLocation().getLat(), 1e-6);
     assertEquals(-122.385467, position.getLocation().getLon(), 1e-6);
-    assertEquals(2.4,position.getOrientation(),0.1);
+    assertEquals(2.4, position.getOrientation(), 0.1);
     assertEquals(time(10, 02), position.getScheduledTime());
+    assertTrue(position.isInService());
 
     position = _service.getScheduledBlockLocationFromDistanceAlongBlock(
-        _stopTimes, 320.0);
+        _blockConfig, 320.0);
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
@@ -167,15 +208,16 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(320.0, position.getDistanceAlongBlock(), 0.0);
     assertEquals(47.668651, position.getLocation().getLat(), 1e-6);
     assertEquals(-122.385467, position.getLocation().getLon(), 1e-6);
-    assertEquals(2.4,position.getOrientation(),0.1);
+    assertEquals(2.4, position.getOrientation(), 0.1);
     assertEquals(time(10, 02), position.getScheduledTime());
+    assertTrue(position.isInService());
   }
 
   @Test
   public void test03() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(10, 8));
+        _blockConfig, time(10, 8));
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeB, position.getClosestStop());
@@ -183,11 +225,12 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(680, position.getDistanceAlongBlock(), 0.0);
     assertEquals(47.6666929645559, position.getLocation().getLat(), 1e-6);
     assertEquals(-122.38214275139767, position.getLocation().getLon(), 1e-6);
-    assertEquals(318.3,position.getOrientation(),0.1);
+    assertEquals(318.3, position.getOrientation(), 0.1);
     assertEquals(time(10, 8), position.getScheduledTime());
+    assertTrue(position.isInService());
 
     position = _service.getScheduledBlockLocationFromDistanceAlongBlock(
-        _stopTimes, 680);
+        _blockConfig, 680);
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeB, position.getClosestStop());
@@ -195,15 +238,16 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(680, position.getDistanceAlongBlock(), 0.0);
     assertEquals(47.6666929645559, position.getLocation().getLat(), 1e-6);
     assertEquals(-122.38214275139767, position.getLocation().getLon(), 1e-6);
-    assertEquals(318.3  ,position.getOrientation(),0.1);
+    assertEquals(318.3, position.getOrientation(), 0.1);
     assertEquals(time(10, 8), position.getScheduledTime());
+    assertTrue(position.isInService());
   }
 
   @Test
   public void test04() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(10, 12));
+        _blockConfig, time(10, 12));
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeB, position.getClosestStop());
@@ -211,15 +255,16 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(800, position.getDistanceAlongBlock(), 0.0);
     assertEquals(_stopB.getStopLat(), position.getLocation().getLat(), 1e-6);
     assertEquals(_stopB.getStopLon(), position.getLocation().getLon(), 1e-6);
-    assertEquals(318.3,position.getOrientation(),0.1);
+    assertEquals(318.3, position.getOrientation(), 0.1);
     assertEquals(time(10, 12), position.getScheduledTime());
+    assertTrue(position.isInService());
   }
 
   @Test
   public void test05() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(10, 17));
+        _blockConfig, time(10, 17));
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeB, position.getClosestStop());
@@ -227,14 +272,15 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(960, position.getDistanceAlongBlock(), 0.0);
     assertEquals(47.66471023595962, position.getLocation().getLat(), 1e-6);
     assertEquals(-122.37984571150027, position.getLocation().getLon(), 1e-6);
-    assertEquals(328.5,position.getOrientation(),0.1);
+    assertEquals(328.5, position.getOrientation(), 0.1);
+    assertTrue(position.isInService());
   }
 
   @Test
   public void test06() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(10, 18));
+        _blockConfig, time(10, 18));
 
     assertEquals(_tripB, position.getActiveTrip());
     assertEquals(_stopTimeC, position.getClosestStop());
@@ -242,14 +288,14 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(1040, position.getDistanceAlongBlock(), 0.0);
     assertEquals(47.6642256894362, position.getLocation().getLat(), 1e-6);
     assertEquals(-122.3790560454492, position.getLocation().getLon(), 1e-6);
-    assertEquals(328.5,position.getOrientation(),0.1);
+    assertEquals(328.5, position.getOrientation(), 0.1);
   }
 
   @Test
   public void test07() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(10, 20));
+        _blockConfig, time(10, 20));
 
     assertEquals(_tripB, position.getActiveTrip());
     assertEquals(_stopTimeC, position.getClosestStop());
@@ -257,19 +303,20 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(1200, position.getDistanceAlongBlock(), 0.0);
     assertEquals(_stopC.getStopLat(), position.getLocation().getLat(), 1e-6);
     assertEquals(_stopC.getStopLon(), position.getLocation().getLon(), 1e-6);
-    assertEquals(0.0,position.getOrientation(),0.1);
+    assertEquals(0.0, position.getOrientation(), 0.1);
+    assertTrue(position.isInService());
   }
 
   @Test
   public void test08() {
 
     ScheduledBlockLocation position = _service.getScheduledBlockLocationFromScheduledTime(
-        _stopTimes, time(10, 25));
+        _blockConfig, time(10, 25));
 
     assertNull(position);
 
     position = _service.getScheduledBlockLocationFromDistanceAlongBlock(
-        _stopTimes, 1500);
+        _blockConfig, 1500);
 
     assertEquals(_tripB, position.getActiveTrip());
     assertEquals(_stopTimeC, position.getClosestStop());
@@ -277,6 +324,16 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(1500, position.getDistanceAlongBlock(), 0.0);
     assertEquals(47.663667674849385, position.getLocation().getLat(), 1e-6);
     assertEquals(-122.37355470657349, position.getLocation().getLon(), 1e-6);
-    assertEquals(0.0,position.getOrientation(),0.1);
+    assertEquals(0.0, position.getOrientation(), 0.1);
+    assertFalse(position.isInService());
+  }
+
+  @Test
+  public void test09() {
+
+    ScheduledBlockLocation position = _service.getScheduledBlockLocationFromDistanceAlongBlock(
+        _blockConfig, 2500);
+
+    assertNull(position);
   }
 }

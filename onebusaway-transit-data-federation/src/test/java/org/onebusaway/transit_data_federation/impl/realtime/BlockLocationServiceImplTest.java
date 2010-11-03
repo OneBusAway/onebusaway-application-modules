@@ -109,7 +109,7 @@ public class BlockLocationServiceImplTest {
 
     Mockito.when(
         _blockLocationService.getScheduledBlockLocationFromScheduledTime(
-            blockConfig.getStopTimes(), 1800)).thenReturn(p);
+            blockConfig, 1800)).thenReturn(p);
 
     location = _service.getLocationForBlockInstance(blockInstance,
         t(serviceDate, 0, 30));

@@ -13,11 +13,13 @@ import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.utility.InterpolationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,24 +40,27 @@ class ScheduledBlockLocationServiceImpl implements
 
   @Override
   public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
-      List<BlockStopTimeEntry> stopTimes, double distanceAlongBlock) {
+      BlockConfigurationEntry blockConfig, double distanceAlongBlock) {
 
-    if (distanceAlongBlock < 0)
+    if (distanceAlongBlock < 0.0
+        || distanceAlongBlock > blockConfig.getTotalBlockDistance())
       return null;
 
-    int stopTimeIndex = GenericBinarySearch.search(stopTimes,
-        distanceAlongBlock,
-        BlockStopTimeDistanceAlongBlockValueAdapter.INSTANCE);
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+    int n = stopTimes.size();
+
+    int stopTimeIndex = GenericBinarySearch.search(blockConfig, n,
+        distanceAlongBlock, BlockConfigDistanceAlongBlockIndexAdapter.INSTANCE);
 
     // Are we out beyond our last stop-time?
-    if (stopTimeIndex == stopTimes.size()) {
+    if (stopTimeIndex == n) {
 
       // If we only have one stop time, we can't interpolate the schedule time
-      if (stopTimes.size() == 1)
+      if (n == 1)
         return null;
 
-      BlockStopTimeEntry blockFrom = stopTimes.get(stopTimes.size() - 2);
-      BlockStopTimeEntry blockTo = stopTimes.get(stopTimes.size() - 1);
+      BlockStopTimeEntry blockFrom = stopTimes.get(n - 2);
+      BlockStopTimeEntry blockTo = stopTimes.get(n - 1);
       return interpolateLocation(blockFrom, blockTo, distanceAlongBlock);
     }
 
@@ -63,7 +68,7 @@ class ScheduledBlockLocationServiceImpl implements
     if (stopTimeIndex == 0) {
 
       // If we only have one stop time, we can't interpolate the schedule time
-      if (stopTimes.size() == 1)
+      if (n == 1)
         return null;
 
       BlockStopTimeEntry blockFrom = stopTimes.get(0);
@@ -90,10 +95,12 @@ class ScheduledBlockLocationServiceImpl implements
 
   @Override
   public ScheduledBlockLocation getScheduledBlockLocationFromScheduledTime(
-      List<BlockStopTimeEntry> stopTimes, int scheduleTime) {
+      BlockConfigurationEntry blockConfig, int scheduleTime) {
 
-    int index = GenericBinarySearch.search(stopTimes, scheduleTime,
-        BlockStopTimeDepartureTimeValueAdapter.INSTANCE);
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+    int n = stopTimes.size();
+    int index = GenericBinarySearch.search(blockConfig, n, scheduleTime,
+        BlockConfigDepartureTimeIndexAdapter.INSTANCE);
 
     return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(stopTimes,
         scheduleTime, index);
@@ -138,6 +145,7 @@ class ScheduledBlockLocationServiceImpl implements
         result.setScheduledTime(scheduleTime);
         result.setDistanceAlongBlock(blockStopTime.getDistaceAlongBlock());
         result.setActiveTrip(blockStopTime.getTrip());
+        result.setInService(true);
         return result;
       }
     }
@@ -145,23 +153,44 @@ class ScheduledBlockLocationServiceImpl implements
     if (stopTimeIndex == 0) {
 
       BlockStopTimeEntry blockStopTime = stopTimes.get(stopTimeIndex);
+      StopTimeEntry stopTime = blockStopTime.getStopTime();
+
+      double distanceAlongBlock = Double.NaN;
+      boolean inService = false;
+
+      if (stopTimes.size() > 1) {
+        BlockStopTimeEntry secondBlockStopTime = stopTimes.get(1);
+        StopTimeEntry secondStopTime = secondBlockStopTime.getStopTime();
+        distanceAlongBlock = InterpolationLibrary.interpolatePair(
+            stopTime.getDepartureTime(), blockStopTime.getDistaceAlongBlock(),
+            secondStopTime.getArrivalTime(),
+            secondBlockStopTime.getDistaceAlongBlock(), scheduleTime);
+        if (distanceAlongBlock >= 0)
+          inService = true;
+        else
+          distanceAlongBlock = 0.0;
+      }
+
+      PointAndOrientation po = null;
+
+      if (!Double.isNaN(distanceAlongBlock))
+        po = getLocationAlongShape(blockStopTime.getTrip(), distanceAlongBlock);
 
       ScheduledBlockLocation result = new ScheduledBlockLocation();
 
-      PointAndOrientation po = getLocationAlongShape(blockStopTime.getTrip(), 0.0);
-      
       if (po != null) {
         result.setLocation(po.getPoint());
         result.setOrientation(po.getOrientation());
       }
 
       result.setClosestStop(blockStopTime);
-      result.setClosestStopTimeOffset(0);
+      result.setClosestStopTimeOffset(stopTime.getArrivalTime() - scheduleTime);
       result.setNextStop(blockStopTime);
-      result.setNextStopTimeOffset(0);
+      result.setNextStopTimeOffset(stopTime.getArrivalTime() - scheduleTime);
       result.setScheduledTime(scheduleTime);
-      result.setDistanceAlongBlock(blockStopTime.getDistaceAlongBlock());
+      result.setDistanceAlongBlock(distanceAlongBlock);
       result.setActiveTrip(blockStopTime.getTrip());
+      result.setInService(inService);
       return result;
     }
 
@@ -178,6 +207,7 @@ class ScheduledBlockLocationServiceImpl implements
 
     ScheduledBlockLocation result = new ScheduledBlockLocation();
     result.setScheduledTime(scheduleTime);
+    result.setInService(true);
 
     int fromTime = before.getDepartureTime();
     int toTime = after.getArrivalTime();
@@ -250,6 +280,9 @@ class ScheduledBlockLocationServiceImpl implements
       BlockStopTimeEntry blockFrom, BlockStopTimeEntry blockTo,
       double distanceAlongBlock) {
 
+    if (distanceAlongBlock < 0.0)
+      return null;
+
     StopTimeEntry from = blockFrom.getStopTime();
     StopTimeEntry to = blockTo.getStopTime();
 
@@ -281,6 +314,7 @@ class ScheduledBlockLocationServiceImpl implements
     if (nextStop != null)
       location.setNextStopTimeOffset(nextStop.getStopTime().getArrivalTime()
           - scheduledTime);
+    location.setInService(nextStop != null);
     location.setDistanceAlongBlock(distanceAlongBlock);
     location.setScheduledTime(scheduledTime);
     // In this case, distance along block and distance along trip are the same

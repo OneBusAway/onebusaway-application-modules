@@ -280,10 +280,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
       List<BlockConfigurationEntry> blocks = blockIndex.getBlocks();
 
       BlockConfigurationEntry firstBlock = blocks.get(0);
-      BlockConfigurationEntry lastBlock = blocks.get(blocks.size() - 1);
 
       List<BlockStopTimeEntry> firstStopTimes = firstBlock.getStopTimes();
-      List<BlockStopTimeEntry> lastStopTimes = lastBlock.getStopTimes();
 
       List<FrequencyEntry> frequencies = blockIndex.getFrequencies();
       FrequencyEntry firstFrequency = frequencies.get(0);
@@ -294,7 +292,6 @@ public class BlockIndexServiceImpl implements BlockIndexService {
       for (int i = 0; i < n; i++) {
 
         BlockStopTimeEntry firstStopTime = firstStopTimes.get(i);
-        BlockStopTimeEntry lastStopTime = lastStopTimes.get(i);
 
         ServiceInterval serviceInterval = new ServiceInterval(
             firstFrequency.getStartTime(), lastFrequency.getEndTime());

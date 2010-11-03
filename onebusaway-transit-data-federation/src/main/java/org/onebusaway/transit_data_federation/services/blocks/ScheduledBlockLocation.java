@@ -11,10 +11,10 @@ public class ScheduledBlockLocation {
   private int scheduledTime;
 
   private CoordinatePoint location;
-  
+
   private double orientation = Double.NaN;
 
-  private double distanceAlongBlock;
+  private double distanceAlongBlock = Double.NaN;
 
   private BlockStopTimeEntry closestStop;
 
@@ -23,6 +23,8 @@ public class ScheduledBlockLocation {
   private BlockStopTimeEntry nextStop;
 
   private int nextStopTimeOffset;
+
+  private boolean inService;
 
   public BlockTripEntry getActiveTrip() {
     return activeTrip;
@@ -105,6 +107,14 @@ public class ScheduledBlockLocation {
 
   public void setNextStopTimeOffset(int nextStopTimeOffset) {
     this.nextStopTimeOffset = nextStopTimeOffset;
+  }
+
+  public boolean isInService() {
+    return inService;
+  }
+
+  public void setInService(boolean inService) {
+    this.inService = inService;
   }
 
   @Override
