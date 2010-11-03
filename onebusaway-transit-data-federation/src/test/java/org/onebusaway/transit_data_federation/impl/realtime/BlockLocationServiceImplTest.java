@@ -106,7 +106,8 @@ public class BlockLocationServiceImplTest {
     p.setClosestStopTimeOffset(0);
     p.setDistanceAlongBlock(0);
     p.setLocation(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
-
+    p.setInService(true);
+    
     Mockito.when(
         _blockLocationService.getScheduledBlockLocationFromScheduledTime(
             blockConfig, 1800)).thenReturn(p);
