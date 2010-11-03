@@ -1,11 +1,11 @@
 package org.onebusaway.transit_data_federation.services.beans;
 
+import java.util.List;
+
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-
-import java.util.Date;
-import java.util.List;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 
 /**
  * Service for querying arrivals and departures at a particular stop in a given
@@ -24,5 +24,5 @@ public interface ArrivalsAndDeparturesBeanService {
    *         the specified time range
    */
   public List<ArrivalAndDepartureBean> getArrivalsAndDeparturesByStopId(
-      AgencyAndId stopId, Date time, int minutesBefore, int minutesAfter);
+      AgencyAndId stopId, ArrivalsAndDeparturesQueryBean query);
 }

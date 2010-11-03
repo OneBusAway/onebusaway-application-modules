@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
@@ -222,8 +223,15 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
      * 
      ****/
 
+    ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+    query.setTime(t);
+    query.setMinutesBefore(minutesBefore);
+    query.setMinutesAfter(minutesAfter);
+    query.setFrequencyMinutesBefore(minutesBefore);
+    query.setFrequencyMinutesAfter(minutesAfter);
+
     List<ArrivalAndDepartureBean> arrivalsAndDepartures = _service.getArrivalsAndDeparturesByStopId(
-        stopB.getId(), new Date(t), minutesBefore, minutesAfter);
+        stopB.getId(), query);
 
     assertEquals(2, arrivalsAndDepartures.size());
 

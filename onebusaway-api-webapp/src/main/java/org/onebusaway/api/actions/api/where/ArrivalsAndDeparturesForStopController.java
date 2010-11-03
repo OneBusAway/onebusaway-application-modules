@@ -11,6 +11,7 @@ import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -32,12 +33,8 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
   private TransitDataService _service;
 
   private String _id;
-
-  private Date _time;
-
-  private int _minutesBefore = 5;
-
-  private int _minutesAfter = 35;
+  
+  private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
   public ArrivalsAndDeparturesForStopController() {
     super(V1);
@@ -54,27 +51,36 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
 
   @TypeConversion(converter = "org.onebusaway.api.impl.DateTimeConverter")
   public void setTime(Date time) {
-    _time = time;
+    _query.setTime(time.getTime());
   }
 
   public void setMinutesBefore(int minutesBefore) {
-    _minutesBefore = minutesBefore;
+    _query.setMinutesBefore(minutesBefore);
   }
 
   public void setMinutesAfter(int minutesAfter) {
-    _minutesAfter = minutesAfter;
+    _query.setMinutesAfter(minutesAfter);
   }
+  
+  public void setFrequencyMinutesBefore(int frequncyMinutesBefore) {
+    _query.setFrequencyMinutesBefore(frequncyMinutesBefore);
+  }
+
+  public void setFrequencyMinutesAfter(int frequencyMinutesAfter) {
+    _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
+  }
+
 
   public DefaultHttpHeaders show() throws ServiceException {
 
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    if (_time == null)
-      _time = new Date();
+    if( _query.getTime() == 0)
+      _query.setTime(System.currentTimeMillis());
 
     StopWithArrivalsAndDeparturesBean result = _service.getStopWithArrivalsAndDepartures(
-        _id, _time, _minutesBefore,_minutesAfter);
+        _id, _query);
 
     if (result == null)
       return setResourceNotFoundResponse();

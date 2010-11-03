@@ -17,6 +17,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
@@ -206,20 +207,20 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, Date time, int minutesBefore, int minutesAfter)
+      String stopId, ArrivalsAndDeparturesQueryBean query)
       throws ServiceException {
     AgencyAndId id = convertAgencyAndId(stopId);
     return _stopWithArrivalsAndDepaturesBeanService.getArrivalsAndDeparturesByStopId(
-        id, time, minutesBefore, minutesAfter);
+        id, query);
   }
 
   @Override
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, Date time, int minutesBefore, int minutesAfter)
+      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query)
       throws ServiceException {
     Set<AgencyAndId> ids = convertAgencyAndIds(stopIds);
     return _stopWithArrivalsAndDepaturesBeanService.getArrivalsAndDeparturesForStopIds(
-        ids, time, minutesBefore, minutesAfter);
+        ids, query);
   }
 
   @Override

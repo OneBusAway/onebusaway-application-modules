@@ -17,6 +17,7 @@ import org.onebusaway.federations.annotations.FederatedByLocationMethod;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
@@ -171,7 +172,7 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query);
-  
+
   @FederatedByEntityIdMethod
   public VehicleStatusBean getVehicleForAgency(String vehicleId, long time);
 
@@ -199,7 +200,7 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdMethod
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, Date targetTime, int minutesBefore, int minutesAfter)
+      String stopId, ArrivalsAndDeparturesQueryBean query)
       throws ServiceException;
 
   /**
@@ -214,8 +215,8 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdsMethod
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, Date targetTime, int minutesBefore,
-      int minutesAfter) throws ServiceException;
+      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query)
+      throws ServiceException;
 
   /**
    * @param stopId

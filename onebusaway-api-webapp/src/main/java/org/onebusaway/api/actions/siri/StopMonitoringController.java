@@ -26,6 +26,7 @@ import org.onebusaway.siri.model.StopMonitoringDelivery;
 import org.onebusaway.siri.model.VehicleLocation;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
@@ -117,8 +118,14 @@ public class StopMonitoringController implements ModelDriven<Object>,
       directionId = agencyId + "_" + directionId;
     }
 
+    ArrivalsAndDeparturesQueryBean arrivalsQuery = new ArrivalsAndDeparturesQueryBean();
+    arrivalsQuery.setTime(_time.getTime());
+    arrivalsQuery.setMinutesBefore(30);
+    arrivalsQuery.setMinutesAfter(30);
+    arrivalsQuery.setFrequencyMinutesBefore(30);
+    arrivalsQuery.setFrequencyMinutesAfter(30);
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _transitDataService.getStopWithArrivalsAndDepartures(
-        stopId, _time, 30, 30);
+        stopId, arrivalsQuery);
 
     if (stopWithArrivalsAndDepartures == null) {
       throw new IllegalArgumentException("Bogus stop parameter");

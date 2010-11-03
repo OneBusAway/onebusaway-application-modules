@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
@@ -111,52 +112,66 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   }
 
   public List<ArrivalAndDepartureBean> getArrivalsAndDeparturesByStopId(
-      AgencyAndId id, Date time, int minutesBefore, int minutesAfter) {
+      AgencyAndId id, ArrivalsAndDeparturesQueryBean query) {
 
-    Calendar c = Calendar.getInstance();
+    long time = query.getTime();
+
+    int minutesBefore = Math.max(query.getMinutesBefore(),
+        query.getFrequencyMinutesBefore());
+    int minutesAfter = Math.max(query.getMinutesAfter(),
+        query.getFrequencyMinutesAfter());
 
     // We add a buffer before and after to catch late and early buses
-    c.setTime(time);
-    c.add(Calendar.MINUTE, -MINUTES_BEFORE_BUFFER - minutesBefore);
-    Date from = c.getTime();
+    Calendar c = Calendar.getInstance();
 
-    c.setTime(time);
+    c.setTimeInMillis(time);
+    c.add(Calendar.MINUTE, -MINUTES_BEFORE_BUFFER - minutesBefore);
+    Date fromTimeBuffered = c.getTime();
+
+    c.setTimeInMillis(time);
     c.add(Calendar.MINUTE, MINUTES_AFTER_BUFFER + minutesAfter);
-    Date to = c.getTime();
+    Date toTimeBuffered = c.getTime();
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        id, from, to);
+        id, fromTimeBuffered, toTimeBuffered);
 
     Map<BlockInstance, List<StopTimeInstance>> stisByBlockId = getStopTimeInstancesByBlockInstance(stis);
 
     List<ArrivalAndDepartureBean> beans = new ArrayList<ArrivalAndDepartureBean>();
 
-    long fromReduced = time.getTime() - minutesBefore * 60 * 1000;
-    long toReduced = time.getTime() + minutesAfter * 60 * 1000;
+    long fromTime = time - query.getMinutesBefore() * 60 * 1000;
+    long toTime = time + query.getMinutesAfter() * 60 * 1000;
+
+    long frequencyFromTime = time - query.getFrequencyMinutesBefore() * 60
+        * 1000;
+    long frequencyToTime = time + query.getFrequencyMinutesAfter() * 60 * 1000;
 
     for (Map.Entry<BlockInstance, List<StopTimeInstance>> entry : stisByBlockId.entrySet()) {
 
       BlockInstance blockInstance = entry.getKey();
       List<BlockLocation> locations = _blockLocationService.getLocationsForBlockInstance(
-          blockInstance, time.getTime());
+          blockInstance, time);
 
       List<StopTimeInstance> stisForBlock = entry.getValue();
 
       for (StopTimeInstance sti : stisForBlock) {
-        System.out.println(fromReduced + " " + toReduced);
+
+        long from = sti.getFrequency() != null ? frequencyFromTime : fromTime;
+        long to = sti.getFrequency() != null ? frequencyToTime : toTime;
+
         for (BlockLocation location : locations) {
+
           ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
-          applyBlockLocationToBean(sti, time.getTime(), bean, location);
-          
-          System.out.println("  " + bean.getPredictedArrivalTime() + " " + bean.getVehicleId());
-          if (isArrivalAndDepartureBeanInRange(bean, fromReduced, toReduced)) {
+          applyBlockLocationToBean(sti, time, bean, location);
+
+          if (isArrivalAndDepartureBeanInRange(bean, from, to)) {
             beans.add(bean);
           }
         }
 
         if (sti.getFrequency() != null && locations.isEmpty()) {
           ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
-          if (isFrequencyBasedArrivalInRange(sti, fromReduced, toReduced))
+          if (isFrequencyBasedArrivalInRange(sti, fromTime, toTime))
             beans.add(bean);
         }
       }
@@ -183,14 +198,14 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       BlockConfigurationEntry blockConfiguration = blockTrip.getBlockConfiguration();
       long serviceDate = stopTime.getServiceDate();
       BlockInstance blockInstance = new BlockInstance(blockConfiguration,
-          serviceDate,stopTime.getFrequency());
+          serviceDate, stopTime.getFrequency());
       r.get(blockInstance).add(stopTime);
     }
 
     return r;
   }
 
-  private ArrivalAndDepartureBean getStopTimeInstanceAsBean(Date time,
+  private ArrivalAndDepartureBean getStopTimeInstanceAsBean(long time,
       StopTimeInstance sti) {
 
     ArrivalAndDepartureBean pab = new ArrivalAndDepartureBean();
@@ -220,7 +235,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setScheduledDepartureTime(sti.getDepartureTime());
       pab.setFrequency(null);
     } else {
-      long t = time.getTime() + frequency.getHeadwaySecs() * 1000;
+      long t = time + frequency.getHeadwaySecs() * 1000;
       pab.setScheduledArrivalTime(t);
       pab.setScheduledDepartureTime(t);
 
@@ -351,7 +366,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
 
     // TargetStopTime
-    
+
     if (nextStopTime == null
         || nextBlockStopTime.getBlockSequence() > targetBlockStopTime.getBlockSequence()) {
       return scheduleDeviation;

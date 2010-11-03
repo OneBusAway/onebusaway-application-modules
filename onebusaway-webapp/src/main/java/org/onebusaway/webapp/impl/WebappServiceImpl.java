@@ -7,6 +7,7 @@ import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesAndStopsBean;
@@ -124,10 +125,8 @@ class WebappServiceImpl implements WebappService {
   public StopWithArrivalsAndDeparturesBean getArrivalsByStopId(String stopId)
       throws ServiceException {
 
-    Date now = new Date();
-
-    return _transitDataService.getStopWithArrivalsAndDepartures(stopId, now, 5,
-        35);
+    return _transitDataService.getStopWithArrivalsAndDepartures(stopId,
+        new ArrivalsAndDeparturesQueryBean());
   }
 
   @Override

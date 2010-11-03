@@ -142,6 +142,29 @@ class ScheduledBlockLocationServiceImpl implements
       }
     }
 
+    if (stopTimeIndex == 0) {
+
+      BlockStopTimeEntry blockStopTime = stopTimes.get(stopTimeIndex);
+
+      ScheduledBlockLocation result = new ScheduledBlockLocation();
+
+      PointAndOrientation po = getLocationAlongShape(blockStopTime.getTrip(), 0.0);
+      
+      if (po != null) {
+        result.setLocation(po.getPoint());
+        result.setOrientation(po.getOrientation());
+      }
+
+      result.setClosestStop(blockStopTime);
+      result.setClosestStopTimeOffset(0);
+      result.setNextStop(blockStopTime);
+      result.setNextStopTimeOffset(0);
+      result.setScheduledTime(scheduleTime);
+      result.setDistanceAlongBlock(blockStopTime.getDistaceAlongBlock());
+      result.setActiveTrip(blockStopTime.getTrip());
+      return result;
+    }
+
     if (stopTimeIndex == 0 || stopTimeIndex == stopTimes.size()) {
       // Out of bounds for these stop times
       return null;

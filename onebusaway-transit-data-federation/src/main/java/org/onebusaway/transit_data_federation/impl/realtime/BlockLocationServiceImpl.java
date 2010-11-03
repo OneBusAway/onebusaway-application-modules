@@ -242,7 +242,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (VehicleLocationCacheRecord cacheRecord : records) {
       BlockLocation location = getBlockLocation(blockInstance,
           cacheRecord.getRecord(), targetTime);
-      if (location != null && location.isInService() )
+      if (location != null
+          && (location.getNextStop() != null || location.isInService()))
         locations.add(location);
     }
 
@@ -382,28 +383,28 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
       List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
       if (timepointPredictions != null && !timepointPredictions.isEmpty()) {
-        
-        SortedMap<Integer, Double> scheduleDeviations = new TreeMap<Integer,Double>();
-        
+
+        SortedMap<Integer, Double> scheduleDeviations = new TreeMap<Integer, Double>();
+
         BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-        
-        for( TimepointPredictionRecord tpr : timepointPredictions ) {
+
+        for (TimepointPredictionRecord tpr : timepointPredictions) {
           AgencyAndId stopId = tpr.getTimepointId();
           long predictedTime = tpr.getTimepointPredictedTime();
-          if( stopId == null || predictedTime == 0)
+          if (stopId == null || predictedTime == 0)
             continue;
-          
-          for( BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes() ) {
+
+          for (BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes()) {
             StopTimeEntry stopTime = blockStopTime.getStopTime();
             StopEntry stop = stopTime.getStop();
-            if( stopId.equals(stop.getId())) {
+            if (stopId.equals(stop.getId())) {
               int arrivalTime = stopTime.getArrivalTime();
               int deviation = (int) ((tpr.getTimepointPredictedTime() - blockInstance.getServiceDate()) / 1000 - arrivalTime);
               scheduleDeviations.put(arrivalTime, (double) deviation);
             }
           }
         }
-        
+
         location.setScheduleDeviations(scheduleDeviations);
       }
     }

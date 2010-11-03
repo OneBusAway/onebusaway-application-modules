@@ -14,6 +14,7 @@ import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -44,11 +45,7 @@ public class ArrivalsAndDeparturesModel {
 
   private TimeZone _timeZone;
 
-  private Date _time = new Date();
-
-  private int _minutesBefore = 5;
-
-  private int _minutesAfter = 35;
+  private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
   private StopsWithArrivalsAndDeparturesBean _result;
 
@@ -104,15 +101,23 @@ public class ArrivalsAndDeparturesModel {
   }
 
   public void setTargetTime(Date time) {
-    _time = time;
+    _query.setTime(time.getTime());
   }
 
   public void setMinutesBefore(int minutesBefore) {
-    _minutesBefore = minutesBefore;
+    _query.setMinutesBefore(minutesBefore);
   }
 
   public void setMinutesAfter(int minutesAfter) {
-    _minutesAfter = minutesAfter;
+    _query.setMinutesAfter(minutesAfter);
+  }
+
+  public void setFrequencyMinutesBefore(int frequencyMinutesBefore) {
+    _query.setFrequencyMinutesBefore(frequencyMinutesBefore);
+  }
+
+  public void setFrequencyMinutesAfter(int frequencyMinutesAfter) {
+    _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
   }
 
   public boolean isMissingData() {
@@ -122,7 +127,7 @@ public class ArrivalsAndDeparturesModel {
   public void process() {
 
     _result = _transitDataService.getStopsWithArrivalsAndDepartures(_stopIds,
-        _time, _minutesBefore, _minutesAfter);
+        _query);
 
     checkForEmptyResult();
     filterResults();

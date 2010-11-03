@@ -1,7 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,6 +10,7 @@ import org.onebusaway.collections.Counter;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
@@ -40,7 +40,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   private AgencyService _agencyService;
 
   public StopWithArrivalsAndDeparturesBean getArrivalsAndDeparturesByStopId(
-      AgencyAndId id, Date time, int minutesBefore, int minutesAfter) {
+      AgencyAndId id, ArrivalsAndDeparturesQueryBean query) {
 
     StopBean stop = _stopBeanService.getStopForId(id);
 
@@ -48,7 +48,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       return null;
 
     List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
-        id, time, minutesBefore, minutesAfter);
+        id, query);
 
     List<AgencyAndId> nearbyStopIds = _nearbyStopsBeanService.getNearbyStops(
         stop, 100);
@@ -61,7 +61,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
   }
 
   public StopsWithArrivalsAndDeparturesBean getArrivalsAndDeparturesForStopIds(
-      Set<AgencyAndId> ids, Date time, int minutesBefore, int minutesAfter)
+      Set<AgencyAndId> ids, ArrivalsAndDeparturesQueryBean query)
       throws NoSuchStopServiceException {
 
     List<StopBean> stops = new ArrayList<StopBean>();
@@ -81,7 +81,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       stops.add(stopBean);
 
       List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
-          id, time, minutesBefore, minutesAfter);
+          id, query);
       allArrivalsAndDepartures.addAll(arrivalsAndDepartures);
 
       List<AgencyAndId> nearbyStopIds = _nearbyStopsBeanService.getNearbyStops(
