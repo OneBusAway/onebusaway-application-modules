@@ -46,7 +46,7 @@ public class BlockLocationServiceImplTest {
     _blockLocationService = Mockito.mock(ScheduledBlockLocationService.class);
     _service.setScheduledBlockLocationService(_blockLocationService);
 
-    _service.setBlockLocationRecordCache(new BlockLocationRecordCacheImpl());
+    _service.setVehicleLocationRecordCache(new VehicleLocationRecordCacheImpl());
 
     _blockCalendarService = Mockito.mock(BlockCalendarService.class);
     _service.setBlockCalendarService(_blockCalendarService);
@@ -54,7 +54,6 @@ public class BlockLocationServiceImplTest {
 
   @Test
   public void testApplyRealtimeData() {
-
 
   }
 
@@ -91,7 +90,7 @@ public class BlockLocationServiceImplTest {
     assertFalse(location.isInService());
     assertNull(location.getClosestStop());
     assertEquals(0, location.getClosestStopTimeOffset());
-    assertFalse(location.hasScheduleDeviation());
+    assertFalse(location.isScheduleDeviationSet());
     assertTrue(Double.isNaN(location.getScheduleDeviation()));
     assertFalse(location.hasDistanceAlongBlock());
     assertTrue(Double.isNaN(location.getDistanceAlongBlock()));
@@ -121,7 +120,7 @@ public class BlockLocationServiceImplTest {
 
     assertEquals(stopA.getStopLocation(), location.getLocation());
 
-    assertFalse(location.hasScheduleDeviation());
+    assertFalse(location.isScheduleDeviationSet());
     assertTrue(Double.isNaN(location.getScheduleDeviation()));
 
     assertFalse(location.hasDistanceAlongBlock());

@@ -25,4 +25,10 @@ public interface BlockConfigurationEntry {
    * @return distance, in meters
    */
   public double getTotalBlockDistance();
+  
+  public int getArrivalTimeForIndex(int index);
+  
+  public int getDepartureTimeForIndex(int index);
+
+  public double getDistanceAlongBlockForIndex(int blockSequence);
 }

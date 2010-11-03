@@ -21,6 +21,7 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.container.model.HasListeners;
 import org.onebusaway.container.model.Listeners;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
@@ -229,7 +230,8 @@ public class TimepointPredictionServiceImpl implements
 
     for (List<TimepointPrediction> recordsForBlock : predictionsByBlockId.values()) {
       VehicleLocationRecord record = getBestScheduleAdherenceRecord(recordsForBlock);
-      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(record.getBlockId(), timeFrom, timeTo);
+      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+          record.getBlockId(), timeFrom, timeTo);
       // TODO : We currently assume that a block won't overlap with itself
       if (instances.size() != 1)
         continue;
@@ -250,9 +252,11 @@ public class TimepointPredictionServiceImpl implements
     r.setBlockId(best.getBlockId());
     r.setTimeOfRecord(System.currentTimeMillis());
     r.setScheduleDeviation(best.getScheduleDeviation());
-    r.setTimepointId(best.getTimepointId());
-    r.setTimepointPredictedTime(best.getTimepointPredictedTime());
-    r.setTimepointScheduledTime(best.getTimepointScheduledTime());
+    TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+    tpr.setTimepointId(best.getTimepointId());
+    tpr.setTimepointPredictedTime(best.getTimepointPredictedTime());
+    tpr.setTimepointScheduledTime(best.getTimepointScheduledTime());
+    r.setTimepointPredictions(Arrays.asList(tpr));
     r.setTripId(best.getTripId());
     r.setVehicleId(best.getVehicleId());
     return r;

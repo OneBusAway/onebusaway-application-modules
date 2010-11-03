@@ -41,7 +41,7 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private long scheduledDepartureTime;
 
-  private int headway;
+  private FrequencyV2Bean frequency;
 
   private String status;
 
@@ -139,12 +139,12 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
-  public int getHeadway() {
-    return headway;
+  public FrequencyV2Bean getFrequency() {
+    return frequency;
   }
 
-  public void setHeadway(int headway) {
-    this.headway = headway;
+  public void setFrequency(FrequencyV2Bean frequency) {
+    this.frequency = frequency;
   }
 
   public String getStatus() {

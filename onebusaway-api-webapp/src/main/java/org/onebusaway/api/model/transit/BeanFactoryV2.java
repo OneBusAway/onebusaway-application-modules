@@ -26,6 +26,7 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
@@ -487,7 +488,8 @@ public class BeanFactoryV2 {
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());
     bean.setPredictedDepartureTime(ad.getPredictedDepartureTime());
 
-    bean.setHeadway(ad.getHeadway());
+    if( ad.getFrequency() != null)
+      bean.setFrequency(getFrequency(ad.getFrequency()));
 
     bean.setStatus(ad.getStatus());
 
@@ -501,6 +503,14 @@ public class BeanFactoryV2 {
     bean.setPredicted(ad.isPredicted());
     bean.setLastUpdateTime(ad.getLastUpdateTime());
 
+    return bean;
+  }
+
+  public FrequencyV2Bean getFrequency(FrequencyBean frequency) {
+    FrequencyV2Bean bean = new FrequencyV2Bean();
+    bean.setStartTime(frequency.getStartTime());
+    bean.setEndTime(frequency.getEndTime());
+    bean.setHeadway(frequency.getHeadway());
     return bean;
   }
 

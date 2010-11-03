@@ -94,8 +94,9 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
       return null;
 
     BlockIndicesFactory factory = new BlockIndicesFactory();
-    List<BlockIndex> indices = factory.createIndices(Arrays.asList(block));
-    List<FrequencyBlockIndex> frequencyIndices = Collections.emptyList();
+    List<BlockEntry> list = Arrays.asList(block);
+    List<BlockIndex> indices = factory.createIndices(list);
+    List<FrequencyBlockIndex> frequencyIndices = factory.createFrequencyIndices(list);
     return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
         timeTo);
   }

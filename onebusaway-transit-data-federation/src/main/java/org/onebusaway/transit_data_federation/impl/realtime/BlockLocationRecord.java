@@ -64,6 +64,16 @@ public class BlockLocationRecord {
 
   private final double orientation;
 
+  @Embedded
+  @AttributeOverrides({
+      @AttributeOverride(name = "agencyId", column = @Column(name = "timepoint_agencyId", length = 50)),
+      @AttributeOverride(name = "id", column = @Column(name = "timepoint_id"))})
+  private final AgencyAndId timepointId;
+
+  private final long timepointScheduledTime;
+
+  private final long timepointPredictedTime;
+
   private final EVehiclePhase phase;
 
   private final String status;
@@ -88,6 +98,9 @@ public class BlockLocationRecord {
     locationLat = Double.NaN;
     locationLon = Double.NaN;
     orientation = Double.NaN;
+    timepointId = null;
+    timepointScheduledTime = 0;
+    timepointPredictedTime = 0;
     phase = null;
     status = null;
     vehicleId = null;
@@ -103,6 +116,9 @@ public class BlockLocationRecord {
     this.locationLat = builder.locationLat;
     this.locationLon = builder.locationLon;
     this.orientation = builder.orientation;
+    this.timepointId = builder.timepointId;
+    this.timepointScheduledTime = builder.timepointScheduledTime;
+    this.timepointPredictedTime = builder.timepointPredictedTime;
     this.phase = builder.phase;
     this.status = builder.status;
     this.vehicleId = builder.vehicleId;
@@ -191,6 +207,18 @@ public class BlockLocationRecord {
     return orientation;
   }
 
+  public AgencyAndId getTimepointId() {
+    return timepointId;
+  }
+
+  public long getTimepointScheduledTime() {
+    return timepointScheduledTime;
+  }
+
+  public long getTimepointPredictedTime() {
+    return timepointPredictedTime;
+  }
+
   public EVehiclePhase getPhase() {
     return phase;
   }
@@ -235,6 +263,12 @@ public class BlockLocationRecord {
     private double locationLon = Double.NaN;
 
     private double orientation = Double.NaN;
+
+    private AgencyAndId timepointId;
+
+    private long timepointScheduledTime;
+
+    private long timepointPredictedTime;
 
     private EVehiclePhase phase;
 
@@ -286,6 +320,18 @@ public class BlockLocationRecord {
 
     public void setOrientation(double orientation) {
       this.orientation = orientation;
+    }
+
+    public void setTimepointId(AgencyAndId timepointId) {
+      this.timepointId = timepointId;
+    }
+
+    public void setTimepointScheduledTime(long timepointScheduledTime) {
+      this.timepointScheduledTime = timepointScheduledTime;
+    }
+
+    public void setTimepointPredictedTime(long timepointPredictedTime) {
+      this.timepointPredictedTime = timepointPredictedTime;
     }
 
     public void setPhase(EVehiclePhase phase) {

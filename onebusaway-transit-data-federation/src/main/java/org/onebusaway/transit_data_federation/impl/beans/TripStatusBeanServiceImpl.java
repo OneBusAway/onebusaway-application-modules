@@ -171,13 +171,15 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
 
       BlockTripEntry activeBlockTrip = blockLocation.getActiveTrip();
-      TripEntry activeTrip = activeBlockTrip.getTrip();
 
-      bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
-          - activeBlockTrip.getDistanceAlongBlock());
-      bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock()
-          - activeBlockTrip.getDistanceAlongBlock());
-      bean.setTotalDistanceAlongTrip(activeTrip.getTotalTripDistance());
+      if (activeBlockTrip != null) {
+        bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
+            - activeBlockTrip.getDistanceAlongBlock());
+        bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock()
+            - activeBlockTrip.getDistanceAlongBlock());
+        TripEntry activeTrip = activeBlockTrip.getTrip();
+        bean.setTotalDistanceAlongTrip(activeTrip.getTotalTripDistance());
+      }
 
       BlockStopTimeEntry closestStop = blockLocation.getClosestStop();
       if (closestStop != null) {

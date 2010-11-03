@@ -6,8 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeArrivalTimeValueAdapter;
-import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeDepartureTimeValueAdapter;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeArrivalTimeIndexAdapter;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeDepartureTimeIndexAdapter;
 import org.onebusaway.transit_data_federation.impl.blocks.FrequencyEndTimeIndexAdapter;
 import org.onebusaway.transit_data_federation.impl.blocks.FrequencyStartTimeIndexAdapter;
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
@@ -94,10 +94,10 @@ class StopTimeServiceImpl implements StopTimeService {
       int relativeFrom = time(serviceDate, from);
       int relativeTo = time(serviceDate, to);
 
-      int fromIndex = GenericBinarySearch.search(blockStopTimes, relativeFrom,
-          BlockStopTimeDepartureTimeValueAdapter.INSTANCE);
-      int toIndex = GenericBinarySearch.search(blockStopTimes, relativeTo,
-          BlockStopTimeArrivalTimeValueAdapter.INSTANCE);
+      int fromIndex = GenericBinarySearch.search(index, blockStopTimes.size(),
+          relativeFrom, BlockStopTimeDepartureTimeIndexAdapter.INSTANCE);
+      int toIndex = GenericBinarySearch.search(index, blockStopTimes.size(),
+          relativeTo, BlockStopTimeArrivalTimeIndexAdapter.INSTANCE);
 
       for (int in = fromIndex; in < toIndex; in++) {
         BlockStopTimeEntry blockStopTime = blockStopTimes.get(in);

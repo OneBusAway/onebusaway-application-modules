@@ -7,11 +7,13 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
@@ -32,6 +34,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.utility.EOutOfRangeStrategy;
+import org.onebusaway.utility.InterpolationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -139,10 +143,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       List<StopTimeInstance> stisForBlock = entry.getValue();
 
       for (StopTimeInstance sti : stisForBlock) {
-
+        System.out.println(fromReduced + " " + toReduced);
         for (BlockLocation location : locations) {
           ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
           applyBlockLocationToBean(sti, time.getTime(), bean, location);
+          
+          System.out.println("  " + bean.getPredictedArrivalTime() + " " + bean.getVehicleId());
           if (isArrivalAndDepartureBeanInRange(bean, fromReduced, toReduced)) {
             beans.add(bean);
           }
@@ -177,7 +183,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       BlockConfigurationEntry blockConfiguration = blockTrip.getBlockConfiguration();
       long serviceDate = stopTime.getServiceDate();
       BlockInstance blockInstance = new BlockInstance(blockConfiguration,
-          serviceDate);
+          serviceDate,stopTime.getFrequency());
       r.get(blockInstance).add(stopTime);
     }
 
@@ -212,12 +218,17 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (frequency == null) {
       pab.setScheduledArrivalTime(sti.getArrivalTime());
       pab.setScheduledDepartureTime(sti.getDepartureTime());
-      pab.setHeadway(0);
+      pab.setFrequency(null);
     } else {
       long t = time.getTime() + frequency.getHeadwaySecs() * 1000;
       pab.setScheduledArrivalTime(t);
       pab.setScheduledDepartureTime(t);
-      pab.setHeadway(frequency.getHeadwaySecs());
+
+      FrequencyBean fb = new FrequencyBean();
+      fb.setStartTime(sti.getServiceDate() + frequency.getStartTime() * 1000);
+      fb.setEndTime(sti.getServiceDate() + frequency.getEndTime() * 1000);
+      fb.setHeadway(frequency.getHeadwaySecs());
+      pab.setFrequency(fb);
     }
 
     return pab;
@@ -228,23 +239,17 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     BlockStopTimeEntry destinationStopTime = sti.getStopTime();
 
-    if (blockLocation.hasScheduleDeviation()) {
+    if (blockLocation.isScheduleDeviationSet()
+        || blockLocation.areScheduleDeviationsSet()) {
 
-      int scheduleDeviation = (int) blockLocation.getScheduleDeviation();
-      int effectiveScheduleTime = (int) (((targetTime - sti.getServiceDate()) / 1000) - scheduleDeviation);
+      int scheduleDeviation = getBestScheduleDeviation(sti, blockLocation);
+      setPredictedTimesFromScheduleDeviation(sti, targetTime, bean,
+          blockLocation, destinationStopTime, scheduleDeviation);
 
-      int arrivalDeviation = calculateArrivalDeviation(
-          blockLocation.getNextStop(), destinationStopTime,
-          effectiveScheduleTime, scheduleDeviation);
-      int departureDeviation = calculateDepartureDeviation(
-          blockLocation.getNextStop(), destinationStopTime,
-          effectiveScheduleTime, scheduleDeviation);
-
-      bean.setPredictedArrivalTime(sti.getArrivalTime() + arrivalDeviation
-          * 1000);
-
-      bean.setPredictedDepartureTime(sti.getDepartureTime()
-          + departureDeviation * 1000);
+      if (sti.getFrequency() != null) {
+        bean.setScheduledArrivalTime(bean.getPredictedArrivalTime());
+        bean.setScheduledDepartureTime(bean.getPredictedDepartureTime());
+      }
     }
 
     bean.setPredicted(blockLocation.isPredicted());
@@ -273,6 +278,43 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocation);
     bean.setTripStatus(tripStatusBean);
+  }
+
+  private int getBestScheduleDeviation(StopTimeInstance sti,
+      BlockLocation blockLocation) {
+
+    SortedMap<Integer, Double> scheduleDeviations = blockLocation.getScheduleDeviations();
+
+    if (scheduleDeviations != null && !scheduleDeviations.isEmpty()) {
+      return (int) InterpolationLibrary.interpolate(scheduleDeviations,
+          sti.getStopTime().getStopTime().getArrivalTime(),
+          EOutOfRangeStrategy.LAST_VALUE);
+    } else if (blockLocation.isScheduleDeviationSet()) {
+      return (int) blockLocation.getScheduleDeviation();
+    } else {
+      return 0;
+    }
+  }
+
+  private void setPredictedTimesFromScheduleDeviation(StopTimeInstance sti,
+      long targetTime, ArrivalAndDepartureBean bean,
+      BlockLocation blockLocation, BlockStopTimeEntry destinationStopTime,
+      int scheduleDeviation) {
+
+    int effectiveScheduleTime = (int) (((targetTime - sti.getServiceDate()) / 1000) - scheduleDeviation);
+
+    int arrivalDeviation = calculateArrivalDeviation(
+        blockLocation.getNextStop(), destinationStopTime,
+        effectiveScheduleTime, scheduleDeviation);
+
+    int departureDeviation = calculateDepartureDeviation(
+        blockLocation.getNextStop(), destinationStopTime,
+        effectiveScheduleTime, scheduleDeviation);
+
+    bean.setPredictedArrivalTime(sti.getArrivalTime() + arrivalDeviation * 1000);
+
+    bean.setPredictedDepartureTime(sti.getDepartureTime() + departureDeviation
+        * 1000);
   }
 
   private boolean isArrivalAndDepartureBeanInRange(
@@ -309,6 +351,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
 
     // TargetStopTime
+    
     if (nextStopTime == null
         || nextBlockStopTime.getBlockSequence() > targetBlockStopTime.getBlockSequence()) {
       return scheduleDeviation;

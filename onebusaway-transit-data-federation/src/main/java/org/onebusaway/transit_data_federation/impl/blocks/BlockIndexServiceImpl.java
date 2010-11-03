@@ -29,6 +29,7 @@ import org.onebusaway.transit_data_federation.services.blocks.HasBlocks;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -284,6 +285,10 @@ public class BlockIndexServiceImpl implements BlockIndexService {
       List<BlockStopTimeEntry> firstStopTimes = firstBlock.getStopTimes();
       List<BlockStopTimeEntry> lastStopTimes = lastBlock.getStopTimes();
 
+      List<FrequencyEntry> frequencies = blockIndex.getFrequencies();
+      FrequencyEntry firstFrequency = frequencies.get(0);
+      FrequencyEntry lastFrequency = frequencies.get(frequencies.size() - 1);
+
       int n = firstStopTimes.size();
 
       for (int i = 0; i < n; i++) {
@@ -291,8 +296,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
         BlockStopTimeEntry firstStopTime = firstStopTimes.get(i);
         BlockStopTimeEntry lastStopTime = lastStopTimes.get(i);
 
-        ServiceInterval serviceInterval = getStopTimesAsServiceInterval(
-            firstStopTime, lastStopTime);
+        ServiceInterval serviceInterval = new ServiceInterval(
+            firstFrequency.getStartTime(), lastFrequency.getEndTime());
 
         FrequencyBlockStopTimeIndex blockStopTimeIndex = new FrequencyBlockStopTimeIndex(
             blockIndex, i, serviceInterval);

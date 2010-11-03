@@ -1,5 +1,7 @@
 package org.onebusaway.transit_data_federation.services.realtime;
 
+import java.util.SortedMap;
+
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
@@ -60,6 +62,8 @@ public class BlockLocation {
   private double lastKnownOrientation = Double.NaN;
 
   private double scheduleDeviation = Double.NaN;
+
+  private SortedMap<Integer, Double> scheduleDeviations = null;
 
   private double distanceAlongBlock = Double.NaN;
 
@@ -124,7 +128,7 @@ public class BlockLocation {
   public void setLocation(CoordinatePoint location) {
     this.location = location;
   }
-  
+
   public double getOrientation() {
     return orientation;
   }
@@ -250,9 +254,9 @@ public class BlockLocation {
   public void setLastKnownLocation(CoordinatePoint lastKnownLocation) {
     this.lastKnownLocation = lastKnownLocation;
   }
-  
+
   public boolean isLastKnownOrientationSet() {
-    return ! Double.isNaN(lastKnownOrientation);
+    return !Double.isNaN(lastKnownOrientation);
   }
 
   /**
@@ -269,7 +273,7 @@ public class BlockLocation {
   /**
    * @return true if we have schedule deviation data
    */
-  public boolean hasScheduleDeviation() {
+  public boolean isScheduleDeviationSet() {
     return !Double.isNaN(scheduleDeviation);
   }
 
@@ -291,6 +295,19 @@ public class BlockLocation {
    */
   public void setScheduleDeviation(double scheduleDeviation) {
     this.scheduleDeviation = scheduleDeviation;
+  }
+
+  public boolean areScheduleDeviationsSet() {
+    return scheduleDeviations != null && !scheduleDeviations.isEmpty();
+  }
+
+  public SortedMap<Integer, Double> getScheduleDeviations() {
+    return scheduleDeviations;
+  }
+
+  public void setScheduleDeviations(
+      SortedMap<Integer, Double> scheduleDeviations) {
+    this.scheduleDeviations = scheduleDeviations;
   }
 
   public boolean hasDistanceAlongBlock() {

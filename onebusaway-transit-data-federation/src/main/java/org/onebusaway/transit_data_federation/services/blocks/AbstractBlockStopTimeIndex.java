@@ -13,7 +13,7 @@ abstract class AbstractBlockStopTimeIndex<T extends HasBlocks> {
 
   protected final T _blockIndex;
 
-  private final int _blockSequence;
+  protected final int _blockSequence;
 
   private final ServiceInterval _serviceInterval;
 

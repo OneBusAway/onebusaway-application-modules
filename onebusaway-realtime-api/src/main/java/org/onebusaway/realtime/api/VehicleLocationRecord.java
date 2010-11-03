@@ -1,6 +1,8 @@
 package org.onebusaway.realtime.api;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 
@@ -55,21 +57,7 @@ public class VehicleLocationRecord implements Serializable {
    */
   private double currentOrientation = Double.NaN;
 
-  /**
-   * 
-   */
-
-  private AgencyAndId timepointId;
-
-  /**
-   * In seconds since the start of the service date
-   */
-  private int timepointScheduledTime;
-
-  /**
-   * In seconds since the start of the service date
-   */
-  private int timepointPredictedTime;
+  private List<TimepointPredictionRecord> timepointPredictions;
 
   private EVehiclePhase phase;
 
@@ -88,11 +76,17 @@ public class VehicleLocationRecord implements Serializable {
     this.distanceAlongBlock = r.distanceAlongBlock;
     this.scheduleDeviation = r.scheduleDeviation;
     this.serviceDate = r.serviceDate;
-    this.timepointId = r.timepointId;
-    this.timepointPredictedTime = r.timepointPredictedTime;
-    this.timepointScheduledTime = r.timepointScheduledTime;
     this.tripId = r.tripId;
     this.vehicleId = r.vehicleId;
+
+    List<TimepointPredictionRecord> timepointPredictions = r.getTimepointPredictions();
+    if (timepointPredictions != null) {
+      List<TimepointPredictionRecord> dup = new ArrayList<TimepointPredictionRecord>(
+          timepointPredictions.size());
+      for (TimepointPredictionRecord tpr : timepointPredictions)
+        dup.add(new TimepointPredictionRecord(tpr));
+      this.timepointPredictions = dup;
+    }
   }
 
   public long getServiceDate() {
@@ -222,44 +216,13 @@ public class VehicleLocationRecord implements Serializable {
     this.currentOrientation = currentOrientation;
   }
 
-  public AgencyAndId getTimepointId() {
-    return timepointId;
+  public List<TimepointPredictionRecord> getTimepointPredictions() {
+    return timepointPredictions;
   }
 
-  public void setTimepointId(AgencyAndId timepointId) {
-    this.timepointId = timepointId;
-  }
-
-  /**
-   * 
-   * @return seconds since the start of the service date
-   */
-  public int getTimepointScheduledTime() {
-    return timepointScheduledTime;
-  }
-
-  /**
-   * 
-   * @param timepointScheduledTime - seconds since the start of the service date
-   */
-  public void setTimepointScheduledTime(int timepointScheduledTime) {
-    this.timepointScheduledTime = timepointScheduledTime;
-  }
-
-  /**
-   * 
-   * @return seconds since the start of the service date
-   */
-  public int getTimepointPredictedTime() {
-    return timepointPredictedTime;
-  }
-
-  /**
-   * 
-   * @param timepointPredictedTime - seconds since the start of the service date
-   */
-  public void setTimepointPredictedTime(int timepointPredictedTime) {
-    this.timepointPredictedTime = timepointPredictedTime;
+  public void setTimepointPredictions(
+      List<TimepointPredictionRecord> timepointPredictions) {
+    this.timepointPredictions = timepointPredictions;
   }
 
   public EVehiclePhase getPhase() {

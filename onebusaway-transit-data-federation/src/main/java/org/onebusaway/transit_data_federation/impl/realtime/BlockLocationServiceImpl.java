@@ -2,8 +2,11 @@ package org.onebusaway.transit_data_federation.impl.realtime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,11 +17,9 @@ import javax.annotation.PreDestroy;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
-import org.onebusaway.collections.tuple.T2;
-import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -26,11 +27,14 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocati
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.realtime.BlockLocationRecordCache;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheRecord;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationRecordCache;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +55,7 @@ import org.springframework.stereotype.Component;
 public class BlockLocationServiceImpl implements BlockLocationService,
     BlockVehicleLocationListener {
 
-  private BlockLocationRecordCache _cache;
+  private VehicleLocationRecordCache _cache;
 
   private BlockLocationRecordDao _blockLocationRecordDao;
 
@@ -106,7 +110,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   private boolean _scheduleDeviationComputationEnabled = false;
 
   @Autowired
-  public void setBlockLocationRecordCache(BlockLocationRecordCache cache) {
+  public void setVehicleLocationRecordCache(VehicleLocationRecordCache cache) {
     _cache = cache;
   }
 
@@ -198,9 +202,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
-    T2<BlockInstance, BlockLocationRecord> tuple = getVehicleLocationRecordAsBlockLocationRecord(record);
-    if (tuple != null)
-      putBlockLocationRecord(tuple.getFirst(), tuple.getSecond());
+    BlockInstance instance = getVehicleLocationRecordAsBlockInstance(record);
+    if (instance != null)
+      putBlockLocationRecord(instance, record);
   }
 
   @Override
@@ -216,25 +220,29 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   public BlockLocation getLocationForBlockInstance(BlockInstance blockInstance,
       long targetTime) {
 
-    List<BlockLocationRecordCollection> records = getBlockLocationRecordCollectionForBlock(
+    List<VehicleLocationCacheRecord> records = getBlockLocationRecordCollectionForBlock(
         blockInstance, targetTime);
 
+    VehicleLocationRecord record = null;
+    if (!records.isEmpty())
+      record = records.get(0).getRecord();
+
     // TODO : find a better way to pick?
-    return getBlockLocation(blockInstance, records.get(0), targetTime);
+    return getBlockLocation(blockInstance, record, targetTime);
   }
 
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
       BlockInstance blockInstance, long targetTime) {
 
-    List<BlockLocationRecordCollection> records = getBlockLocationRecordCollectionForBlock(
+    List<VehicleLocationCacheRecord> records = getBlockLocationRecordCollectionForBlock(
         blockInstance, targetTime);
 
     List<BlockLocation> locations = new ArrayList<BlockLocation>();
-    for (BlockLocationRecordCollection collection : records) {
-      BlockLocation location = getBlockLocation(blockInstance, collection,
-          targetTime);
-      if (location != null && location.isInService())
+    for (VehicleLocationCacheRecord cacheRecord : records) {
+      BlockLocation location = getBlockLocation(blockInstance,
+          cacheRecord.getRecord(), targetTime);
+      if (location != null && location.isInService() )
         locations.add(location);
     }
 
@@ -245,17 +253,15 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   public BlockLocation getLocationForVehicleAndTime(AgencyAndId vehicleId,
       long targetTime) {
 
-    List<BlockLocationRecordCollection> collections = getBlockLocationRecordCollectionForVehicle(
+    List<VehicleLocationCacheRecord> cacheRecords = getBlockLocationRecordCollectionForVehicle(
         vehicleId, targetTime);
 
     // TODO : We might take a bit more care in picking the collection if
     // multiple collections are returned
-    for (BlockLocationRecordCollection collection : collections) {
-      if (collection.isEmpty())
-        continue;
-      BlockInstance blockInstance = collection.getBlockInstance();
-      BlockLocation location = getBlockLocation(blockInstance, collection,
-          targetTime);
+    for (VehicleLocationCacheRecord cacheRecord : cacheRecords) {
+      BlockInstance blockInstance = cacheRecord.getBlockInstance();
+      BlockLocation location = getBlockLocation(blockInstance,
+          cacheRecord.getRecord(), targetTime);
       if (location != null)
         return location;
     }
@@ -267,7 +273,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * Private Methods
    ****/
 
-  private T2<BlockInstance, BlockLocationRecord> getVehicleLocationRecordAsBlockLocationRecord(
+  private BlockInstance getVehicleLocationRecordAsBlockInstance(
       VehicleLocationRecord record) {
 
     AgencyAndId blockId = record.getBlockId();
@@ -296,42 +302,19 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     if (blockInstance == null)
       return null;
 
-    BlockLocationRecord.Builder builder = BlockLocationRecord.builder();
-    builder.setBlockId(blockId);
-    builder.setTime(record.getTimeOfRecord());
-    builder.setServiceDate(record.getServiceDate());
+    if (!record.isScheduleDeviationSet()
+        && _scheduleDeviationComputationEnabled) {
 
-    if (record.isScheduleDeviationSet())
-      builder.setScheduleDeviation(record.getScheduleDeviation());
-
-    if (record.isDistanceAlongBlockSet()) {
-      builder.setDistanceAlongBlock(record.getDistanceAlongBlock());
-
-      if (!record.isScheduleDeviationSet()
-          && _scheduleDeviationComputationEnabled) {
-
-        BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-        List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
-        double distanceAlongBlock = record.getDistanceAlongBlock();
-        ScheduledBlockLocation scheduledBlockLocation = _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
-            stopTimes, distanceAlongBlock);
-        int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
-        builder.setScheduleDeviation(deviation);
-      }
+      BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+      List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+      double distanceAlongBlock = record.getDistanceAlongBlock();
+      ScheduledBlockLocation scheduledBlockLocation = _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
+          stopTimes, distanceAlongBlock);
+      int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
+      record.setScheduleDeviation(deviation);
     }
 
-    if (record.isCurrentLocationSet()) {
-      builder.setLocationLat(record.getCurrentLocationLat());
-      builder.setLocationLon(record.getCurrentLocationLon());
-    }
-    
-    builder.setOrientation(record.getCurrentOrientation());
-
-    builder.setPhase(record.getPhase());
-    builder.setStatus(record.getStatus());
-    builder.setVehicleId(record.getVehicleId());
-
-    return Tuples.tuple(blockInstance, builder.create());
+    return blockInstance;
   }
 
   private BlockInstance getBestBlockForRecord(AgencyAndId blockId,
@@ -363,48 +346,67 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * a back-end data-store if necessary
    */
   private void putBlockLocationRecord(BlockInstance blockInstance,
-      BlockLocationRecord record) {
+      VehicleLocationRecord record) {
 
     // Cache the result
     _cache.addRecord(blockInstance, record);
 
-    if (_persistBlockLocationRecords)
-      addPredictionToPersistenceQueue(record);
+    if (_persistBlockLocationRecords) {
+      List<BlockLocationRecord> blockLocationRecords = getVehicleLocationRecordAsBlockLocationRecord(record);
+      addPredictionToPersistenceQueue(blockLocationRecords);
+    }
   }
 
   private BlockLocation getBlockLocation(BlockInstance blockInstance,
-      BlockLocationRecordCollection records, long targetTime) {
+      VehicleLocationRecord record, long targetTime) {
 
     BlockLocation location = new BlockLocation();
 
     location.setBlockInstance(blockInstance);
 
-    boolean predicted = !records.isEmpty();
-    if (predicted) {
+    if (record != null) {
+
       location.setPredicted(true);
-      long lastUpdateTime = records.getLastUpdateTime(targetTime);
-      location.setLastUpdateTime(lastUpdateTime);
+      location.setLastUpdateTime(record.getTimeOfRecord());
+      location.setScheduleDeviation(record.getScheduleDeviation());
+      location.setDistanceAlongBlock(record.getDistanceAlongBlock());
+      if (record.isCurrentLocationSet()) {
+        CoordinatePoint p = new CoordinatePoint(record.getCurrentLocationLat(),
+            record.getCurrentLocationLon());
+        location.setLastKnownLocation(p);
+      }
+      location.setOrientation(record.getCurrentOrientation());
+      location.setPhase(record.getPhase());
+      location.setStatus(record.getStatus());
+      location.setVehicleId(record.getVehicleId());
+
+      List<TimepointPredictionRecord> timepointPredictions = record.getTimepointPredictions();
+      if (timepointPredictions != null && !timepointPredictions.isEmpty()) {
+        
+        SortedMap<Integer, Double> scheduleDeviations = new TreeMap<Integer,Double>();
+        
+        BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+        
+        for( TimepointPredictionRecord tpr : timepointPredictions ) {
+          AgencyAndId stopId = tpr.getTimepointId();
+          long predictedTime = tpr.getTimepointPredictedTime();
+          if( stopId == null || predictedTime == 0)
+            continue;
+          
+          for( BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes() ) {
+            StopTimeEntry stopTime = blockStopTime.getStopTime();
+            StopEntry stop = stopTime.getStop();
+            if( stopId.equals(stop.getId())) {
+              int arrivalTime = stopTime.getArrivalTime();
+              int deviation = (int) ((tpr.getTimepointPredictedTime() - blockInstance.getServiceDate()) / 1000 - arrivalTime);
+              scheduleDeviations.put(arrivalTime, (double) deviation);
+            }
+          }
+        }
+        
+        location.setScheduleDeviations(scheduleDeviations);
+      }
     }
-
-    double scheduleDeviation = records.getScheduleDeviationForTargetTime(targetTime);
-    location.setScheduleDeviation(scheduleDeviation);
-
-    double distanceAlongBlock = records.getDistanceAlongBlockForTargetTime(targetTime);
-    location.setDistanceAlongBlock(distanceAlongBlock);
-
-    CoordinatePoint point = records.getLastLocationForTargetTime(targetTime);
-    location.setLastKnownLocation(point);
-
-    double orientation = records.getLastOrientationForTargetTime(targetTime);
-    location.setLastKnownOrientation(orientation);
-
-    EVehiclePhase phase = records.getPhaseForTargetTime(targetTime);
-    location.setPhase(phase);
-
-    String status = records.getStatusForTargetTime(targetTime);
-    location.setStatus(status);
-
-    location.setVehicleId(records.getVehicleId());
 
     ScheduledBlockLocation scheduledLocation = getScheduledBlockLocation(
         location, targetTime);
@@ -436,7 +438,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     int scheduledTime = (int) ((targetTime - serviceDate) / 1000);
 
-    if (blockLocation.hasScheduleDeviation()) {
+    if (blockLocation.isScheduleDeviationSet()) {
 
       /**
        * Effective scheduled time is the point that a transit vehicle is at on
@@ -460,29 +462,30 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         blockConfig.getStopTimes(), scheduledTime);
   }
 
-  private List<BlockLocationRecordCollection> getBlockLocationRecordCollectionForBlock(
+  private List<VehicleLocationCacheRecord> getBlockLocationRecordCollectionForBlock(
       BlockInstance blockInstance, long targetTime) {
     return getBlockLocationRecordCollections(new BlockInstanceStrategy(
         blockInstance), targetTime);
   }
 
-  private List<BlockLocationRecordCollection> getBlockLocationRecordCollectionForVehicle(
+  private List<VehicleLocationCacheRecord> getBlockLocationRecordCollectionForVehicle(
       AgencyAndId vehicleId, long targetTime) {
     return getBlockLocationRecordCollections(new VehicleIdRecordStrategy(
         vehicleId), targetTime);
   }
 
-  private List<BlockLocationRecordCollection> getBlockLocationRecordCollections(
+  private List<VehicleLocationCacheRecord> getBlockLocationRecordCollections(
       RecordStrategy strategy, long targetTime) {
 
-    List<BlockLocationRecordCollection> collections = strategy.getRecordsFromCache();
+    List<VehicleLocationCacheRecord> records = strategy.getRecordsFromCache();
 
-    if (!collections.isEmpty()) {
-      List<BlockLocationRecordCollection> inRange = new ArrayList<BlockLocationRecordCollection>();
+    if (!records.isEmpty()) {
+      List<VehicleLocationCacheRecord> inRange = new ArrayList<VehicleLocationCacheRecord>();
       long offset = _predictionCacheMaxOffset * 1000;
-      for (BlockLocationRecordCollection entry : collections) {
-        if (entry.getFromTime() - offset <= targetTime
-            && targetTime <= entry.getToTime() + offset)
+      for (VehicleLocationCacheRecord entry : records) {
+        VehicleLocationRecord record = entry.getRecord();
+        if (record.getTimeOfRecord() - offset <= targetTime
+            && targetTime <= record.getTimeOfRecord() + offset)
           inRange.add(entry);
       }
       if (!inRange.isEmpty())
@@ -507,20 +510,83 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
         Map<BlockLocationRecordKey, List<BlockLocationRecord>> recordsByKey = groupRecord(predictions);
 
-        List<BlockLocationRecordCollection> allCollections = new ArrayList<BlockLocationRecordCollection>();
+        List<VehicleLocationCacheRecord> allCollections = new ArrayList<VehicleLocationCacheRecord>();
         for (Map.Entry<BlockLocationRecordKey, List<BlockLocationRecord>> entry : recordsByKey.entrySet()) {
           BlockLocationRecordKey key = entry.getKey();
-          List<BlockLocationRecord> records = entry.getValue();
-          BlockLocationRecordCollection collection = BlockLocationRecordCollection.createFromRecords(
-              key.getBlockInstance(), records);
-          allCollections.add(collection);
+          List<BlockLocationRecord> blockLocationRecords = entry.getValue();
+          List<VehicleLocationCacheRecord> someRecords = getBlockLocationRecordsAsVehicleLocationRecords(
+              key.getBlockInstance(), blockLocationRecords);
+          allCollections.addAll(someRecords);
         }
 
         return allCollections;
       }
     }
 
-    return Arrays.asList(new BlockLocationRecordCollection(fromTime, toTime));
+    return Collections.emptyList();
+  }
+
+  private List<BlockLocationRecord> getVehicleLocationRecordAsBlockLocationRecord(
+      VehicleLocationRecord record) {
+
+    BlockLocationRecord.Builder builder = BlockLocationRecord.builder();
+    builder.setBlockId(record.getBlockId());
+    builder.setTime(record.getTimeOfRecord());
+    builder.setServiceDate(record.getServiceDate());
+
+    builder.setScheduleDeviation(record.getScheduleDeviation());
+    builder.setDistanceAlongBlock(record.getDistanceAlongBlock());
+
+    if (record.isCurrentLocationSet()) {
+      builder.setLocationLat(record.getCurrentLocationLat());
+      builder.setLocationLon(record.getCurrentLocationLon());
+    }
+
+    builder.setOrientation(record.getCurrentOrientation());
+
+    builder.setPhase(record.getPhase());
+    builder.setStatus(record.getStatus());
+    builder.setVehicleId(record.getVehicleId());
+
+    List<TimepointPredictionRecord> predictions = record.getTimepointPredictions();
+    if (predictions == null || predictions.isEmpty())
+      return Arrays.asList(builder.create());
+
+    List<BlockLocationRecord> results = new ArrayList<BlockLocationRecord>();
+    for (TimepointPredictionRecord tpr : predictions) {
+      builder.setTimepointId(tpr.getTimepointId());
+      builder.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
+      builder.setTimepointPredictedTime(tpr.getTimepointPredictedTime());
+      results.add(builder.create());
+    }
+    return results;
+  }
+
+  private List<VehicleLocationCacheRecord> getBlockLocationRecordsAsVehicleLocationRecords(
+      BlockInstance blockInstance, List<BlockLocationRecord> records) {
+
+    List<VehicleLocationCacheRecord> results = new ArrayList<VehicleLocationCacheRecord>();
+
+    for (BlockLocationRecord record : records) {
+      VehicleLocationRecord vlr = new VehicleLocationRecord();
+      vlr.setBlockId(blockInstance.getBlock().getBlock().getId());
+      vlr.setCurrentLocationLat(record.getLocationLat());
+      vlr.setCurrentLocationLon(record.getLocationLon());
+      vlr.setCurrentOrientation(record.getOrientation());
+      vlr.setDistanceAlongBlock(record.getDistanceAlongBlock());
+      vlr.setPhase(record.getPhase());
+      vlr.setScheduleDeviation(record.getScheduleDeviation());
+      vlr.setServiceDate(record.getServiceDate());
+      vlr.setStatus(record.getStatus());
+      vlr.setTimeOfRecord(record.getTime());
+      vlr.setVehicleId(record.getVehicleId());
+
+      VehicleLocationCacheRecord cacheRecord = new VehicleLocationCacheRecord(
+          blockInstance, vlr);
+      results.add(cacheRecord);
+    }
+
+    return results;
   }
 
   private Map<BlockLocationRecordKey, List<BlockLocationRecord>> groupRecord(
@@ -544,9 +610,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     return recordsByKey;
   }
 
-  private void addPredictionToPersistenceQueue(BlockLocationRecord prediction) {
+  private void addPredictionToPersistenceQueue(List<BlockLocationRecord> records) {
     synchronized (_recordPersistenceQueue) {
-      _recordPersistenceQueue.add(prediction);
+      _recordPersistenceQueue.addAll(records);
     }
   }
 
@@ -579,7 +645,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   private interface RecordStrategy {
 
-    public List<BlockLocationRecordCollection> getRecordsFromCache();
+    public List<VehicleLocationCacheRecord> getRecordsFromCache();
 
     public List<BlockLocationRecord> getRecordsFromDao(long fromTime,
         long toTime);
@@ -594,7 +660,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     }
 
     @Override
-    public List<BlockLocationRecordCollection> getRecordsFromCache() {
+    public List<VehicleLocationCacheRecord> getRecordsFromCache() {
       return _cache.getRecordsForBlockInstance(_blockInstance);
     }
 
@@ -616,8 +682,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       _vehicleId = vehicleId;
     }
 
-    public List<BlockLocationRecordCollection> getRecordsFromCache() {
-      return _cache.getRecordsForVehicleId(_vehicleId);
+    public List<VehicleLocationCacheRecord> getRecordsFromCache() {
+      return Arrays.asList(_cache.getRecordForVehicleId(_vehicleId));
     }
 
     public List<BlockLocationRecord> getRecordsFromDao(long fromTime,

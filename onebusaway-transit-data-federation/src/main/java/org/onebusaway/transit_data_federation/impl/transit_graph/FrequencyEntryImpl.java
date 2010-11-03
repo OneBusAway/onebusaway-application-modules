@@ -35,7 +35,7 @@ public class FrequencyEntryImpl implements FrequencyEntry, Serializable {
 
   @Override
   public String toString() {
-    return "startTime=" + startTime + " endTime=" + endTime + " headwaySecs"
+    return "startTime=" + startTime + " endTime=" + endTime + " headwaySecs="
         + headwaySecs;
   }
 

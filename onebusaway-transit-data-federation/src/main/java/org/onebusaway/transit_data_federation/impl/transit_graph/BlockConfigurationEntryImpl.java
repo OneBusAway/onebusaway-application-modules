@@ -84,6 +84,33 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
   }
 
   @Override
+  public int getArrivalTimeForIndex(int index) {
+    StopTimeEntry stopTime = getStopTimeForIndex(index);
+    return stopTime.getArrivalTime();
+  }
+
+  @Override
+  public int getDepartureTimeForIndex(int index) {
+    StopTimeEntry stopTime = getStopTimeForIndex(index);
+    return stopTime.getDepartureTime();
+  }
+
+  @Override
+  public double getDistanceAlongBlockForIndex(int index) {
+
+    int tripIndex = tripIndices[index];
+
+    BlockTripEntry blockTrip = trips.get(tripIndex);
+    TripEntry trip = blockTrip.getTrip();
+
+    List<StopTimeEntry> stopTimes = trip.getStopTimes();
+    int stopTimeIndex = index - accumulatedStopTimeIndices[tripIndex];
+    StopTimeEntry stopTime = stopTimes.get(stopTimeIndex);
+
+    return blockTrip.getDistanceAlongBlock() + stopTime.getShapeDistTraveled();
+  }
+
+  @Override
   public String toString() {
     return "BlockConfiguration [block=" + block.getId() + " serviceIds="
         + serviceIds + " trips=" + trips + "]";
@@ -214,6 +241,22 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
   }
 
+  /*****
+   * Private Methods
+   ****/
+
+  private StopTimeEntry getStopTimeForIndex(int index) {
+    int tripIndex = tripIndices[index];
+
+    BlockTripEntry blockTrip = trips.get(tripIndex);
+    TripEntry trip = blockTrip.getTrip();
+
+    List<StopTimeEntry> stopTimes = trip.getStopTimes();
+    int stopTimeIndex = index - accumulatedStopTimeIndices[tripIndex];
+    StopTimeEntry stopTime = stopTimes.get(stopTimeIndex);
+    return stopTime;
+  }
+
   private class BlockStopTimeList extends AbstractList<BlockStopTimeEntry>
       implements Serializable {
 
@@ -239,4 +282,5 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
       return new BlockStopTimeEntryImpl(stopTime, index, blockTrip);
     }
   }
+
 }

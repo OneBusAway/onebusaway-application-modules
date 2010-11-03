@@ -14,15 +14,6 @@ public class FrequencyBlockStopTimeIndex extends
 
   private final FrequencyBlockStopTimeList _frequencyStopTimes = new FrequencyBlockStopTimeList();
 
-  public static FrequencyBlockStopTimeIndex create(
-      FrequencyBlockIndex blockIndex, int blockSequence) {
-
-    ServiceInterval serviceInterval = computeServiceInterval(blockIndex,
-        blockSequence);
-    return new FrequencyBlockStopTimeIndex(blockIndex, blockSequence,
-        serviceInterval);
-  }
-
   public FrequencyBlockStopTimeIndex(FrequencyBlockIndex blockIndex,
       int blockSequence, ServiceInterval serviceInterval) {
     super(blockIndex, blockSequence, serviceInterval);
@@ -56,6 +47,5 @@ public class FrequencyBlockStopTimeIndex extends
     }
 
   }
-
 
 }

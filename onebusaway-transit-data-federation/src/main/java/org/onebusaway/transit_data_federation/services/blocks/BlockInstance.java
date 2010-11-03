@@ -53,6 +53,10 @@ public class BlockInstance {
   public long getServiceDate() {
     return _serviceDate;
   }
+  
+  public FrequencyEntry getFrequency() {
+    return _frequency;
+  }
 
   @Override
   public int hashCode() {

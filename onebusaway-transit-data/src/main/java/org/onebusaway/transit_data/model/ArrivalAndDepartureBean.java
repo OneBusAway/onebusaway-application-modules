@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data.model;
 
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
@@ -38,7 +39,7 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private long scheduledDepartureTime;
 
-  private int headway;
+  private FrequencyBean frequency;
 
   private boolean predicted = false;
 
@@ -120,12 +121,12 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
-  public int getHeadway() {
-    return headway;
+  public FrequencyBean getFrequency() {
+    return frequency;
   }
 
-  public void setHeadway(int headway) {
-    this.headway = headway;
+  public void setFrequency(FrequencyBean frequency) {
+    this.frequency = frequency;
   }
 
   public boolean isPredicted() {
