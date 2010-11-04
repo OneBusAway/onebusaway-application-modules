@@ -152,7 +152,7 @@ public class ArrivalsAndDeparturesPresentaion {
 
     boolean isNow = isNow(pab);
     long t = getBestTime(pab);
-    int minutes = (int) Math.floor((t - now) / (1000.0 * 60.0));
+    int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
     return isNow ? "NOW" : Integer.toString(minutes);
   }
 

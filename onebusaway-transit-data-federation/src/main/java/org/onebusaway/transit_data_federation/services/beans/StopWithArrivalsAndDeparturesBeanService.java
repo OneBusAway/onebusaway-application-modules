@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.services.beans;
 
-import java.util.Date;
 import java.util.Set;
 
 import org.onebusaway.exceptions.NoSuchStopServiceException;
