@@ -251,6 +251,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   @Override
+  public BlockLocation getScheduledLocationForBlockInstance(
+      BlockInstance blockInstance, long targetTime) {
+    return getBlockLocation(blockInstance, null, targetTime);
+  }
+
+  @Override
   public BlockLocation getLocationForVehicleAndTime(AgencyAndId vehicleId,
       long targetTime) {
 
@@ -692,5 +698,4 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           _vehicleId, fromTime, toTime);
     }
   }
-
 }

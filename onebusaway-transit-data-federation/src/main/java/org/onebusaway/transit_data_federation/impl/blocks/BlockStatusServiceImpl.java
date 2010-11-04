@@ -149,10 +149,25 @@ public class BlockStatusServiceImpl implements BlockStatusService {
 
   private void computeLocations(BlockInstance instance, long time,
       List<BlockLocation> results) {
+
     if (instance == null)
       return;
-    results.addAll(_blockLocationService.getLocationsForBlockInstance(instance,
-        time));
+
+    // Try real-time trips first
+    List<BlockLocation> locations = _blockLocationService.getLocationsForBlockInstance(
+        instance, time);
+
+    if (!locations.isEmpty()) {
+      results.addAll(locations);
+    } else {
+
+      // If no real-time trips are available, use scheduled trips
+      BlockLocation location = _blockLocationService.getScheduledLocationForBlockInstance(
+          instance, time);
+
+      if (location != null)
+        results.add(location);
+    }
   }
 
   /**

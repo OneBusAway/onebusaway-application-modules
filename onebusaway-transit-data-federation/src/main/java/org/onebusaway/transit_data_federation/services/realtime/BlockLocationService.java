@@ -16,27 +16,36 @@ public interface BlockLocationService {
 
   /**
    * Given a block instance and a target time, determine the vehicle position at
-   * that time. Use real-time data when available, but otherwise provide
-   * schedule position data. If multiple vehicles are currently active for a
-   * block, we just return the first instance.
+   * that time, using real-time data when available. If multiple vehicles are
+   * currently active for a block, we just return the first instance.
    * 
    * @param blockInstance the block instance to query
    * @param targetTime the target time (Unix-time)
-   * @return the block location
+   * @return the block location, or null if no real-time data is available
    */
   public BlockLocation getLocationForBlockInstance(BlockInstance blockInstance,
       long targetTime);
 
   /**
    * Given a block instance and a target time, determine the vehicle locations
-   * at that time. Use real-time data when available, but otherwise provide
-   * schedule location data.
+   * at that time using real-time data when available.
    * 
    * @param blockInstance the trip instance to query
    * @param targetTime the target time (Unix-time)
-   * @return the block locations
+   * @return the block locations, or empty if no real-time data is available
    */
   public List<BlockLocation> getLocationsForBlockInstance(
+      BlockInstance blockInstance, long targetTime);
+
+  /**
+   * Determines the scheduled vehicle location of a given block instance at the
+   * specified time.
+   * 
+   * @param blockInstance
+   * @param targetTime
+   * @return the scheduled location of a particular block instance
+   */
+  public BlockLocation getScheduledLocationForBlockInstance(
       BlockInstance blockInstance, long targetTime);
 
   public BlockLocation getLocationForVehicleAndTime(AgencyAndId vehicleId,
