@@ -16,6 +16,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private ConcurrentMap<Long, AbstractSituationBean> _situations = new ConcurrentHashMap<Long, AbstractSituationBean>();
 
+  @Override
   public void updateServiceAlerts(SituationExchangeDeliveryBean alerts) {
 
     List<AbstractSituationBean> situations = alerts.getSituations();

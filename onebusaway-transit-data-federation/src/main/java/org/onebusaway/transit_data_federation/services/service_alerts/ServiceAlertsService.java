@@ -4,5 +4,8 @@ import org.onebusaway.transit_data.model.service_alerts.SituationExchangeDeliver
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 
 public interface ServiceAlertsService {
+
+  public void updateServiceAlerts(SituationExchangeDeliveryBean alerts);
+
   public SituationExchangeDeliveryBean getServiceAlerts(SituationQueryBean query);
 }

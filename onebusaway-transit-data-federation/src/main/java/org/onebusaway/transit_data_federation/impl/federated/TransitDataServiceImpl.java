@@ -333,6 +333,12 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public void updateServiceAlerts(String agencyId,
+      SituationExchangeDeliveryBean alerts) {
+    _serviceAlertsService.updateServiceAlerts(alerts);
+  }
+
+  @Override
   public SituationExchangeDeliveryBean getServiceAlerts(SituationQueryBean query) {
     return _serviceAlertsService.getServiceAlerts(query);
   }

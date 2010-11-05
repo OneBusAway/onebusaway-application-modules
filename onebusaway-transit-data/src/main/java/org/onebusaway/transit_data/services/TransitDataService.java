@@ -315,6 +315,9 @@ public interface TransitDataService extends FederatedService {
    * 
    ****/
 
+  @FederatedByAgencyIdMethod
+  public void updateServiceAlerts(String agencyId, SituationExchangeDeliveryBean alerts);
+  
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public SituationExchangeDeliveryBean getServiceAlerts(SituationQueryBean query);
 
