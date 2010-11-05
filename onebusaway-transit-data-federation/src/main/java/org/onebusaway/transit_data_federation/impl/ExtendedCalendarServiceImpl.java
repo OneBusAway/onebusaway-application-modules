@@ -88,7 +88,7 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     return serviceDates;
   }
 
-  //@Cacheable
+  // @Cacheable
   @Override
   public Collection<Date> getServiceDatesWithinRange(
       ServiceIdActivation serviceIds, ServiceInterval interval, Date from,

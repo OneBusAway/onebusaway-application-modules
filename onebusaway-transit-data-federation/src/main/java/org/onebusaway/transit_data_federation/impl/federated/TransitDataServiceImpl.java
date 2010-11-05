@@ -37,6 +37,8 @@ import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationExchangeDeliveryBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -63,6 +65,7 @@ import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanServ
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
 import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -107,6 +110,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private ShapeBeanService _shapeBeanService;
+
+  @Autowired
+  private ServiceAlertsService _serviceAlertsService;
 
   @Autowired
   private UserReportingService _userReportingService;
@@ -324,6 +330,11 @@ class TransitDataServiceImpl implements TransitDataService {
       List<LocalSearchResult> localResults) throws ServiceException {
     return _oneBusAwayService.getLocalPaths(constraints, minTravelTimeToStops,
         localResults);
+  }
+
+  @Override
+  public SituationExchangeDeliveryBean getServiceAlerts(SituationQueryBean query) {
+    return _serviceAlertsService.getServiceAlerts(query);
   }
 
   @Override

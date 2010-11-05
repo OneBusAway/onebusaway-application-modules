@@ -10,7 +10,6 @@ import java.util.Set;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
@@ -87,15 +86,9 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
   public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
       long timeFrom, long timeTo) {
 
-    BlockEntry block = _transitGraphDao.getBlockEntryForId(blockId);
-
-    if (block == null)
-      return null;
-
-    BlockIndicesFactory factory = new BlockIndicesFactory();
-    List<BlockEntry> list = Arrays.asList(block);
-    List<BlockIndex> indices = factory.createIndices(list);
-    List<FrequencyBlockIndex> frequencyIndices = factory.createFrequencyIndices(list);
+    List<BlockIndex> indices = _blockIndexService.getBlockIndicesForBlock(blockId);
+    List<FrequencyBlockIndex> frequencyIndices = _blockIndexService.getFrequencyBlockIndicesForBlock(blockId);
+    
     return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
         timeTo);
   }

@@ -3,7 +3,9 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexData;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.FrequencyBlockIndexData;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -27,6 +30,7 @@ import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockInde
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.HasBlocks;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -54,9 +58,13 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
   private Map<AgencyAndId, List<BlockIndex>> _blockIndicesByRouteId;
 
+  private Map<AgencyAndId, List<BlockIndex>> _blockIndicesByBlockId;
+
   private List<FrequencyBlockIndex> _frequencyBlockIndices;
 
   private Map<String, List<FrequencyBlockIndex>> _frequencyBlockIndicesByAgencyId;
+
+  private Map<AgencyAndId, List<FrequencyBlockIndex>> _frequencyBlockIndicesByBlockId;
 
   private Map<AgencyAndId, List<FrequencyBlockIndex>> _frequencyBlockIndicesByRouteId;
 
@@ -95,6 +103,11 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   }
 
   @Override
+  public List<BlockIndex> getBlockIndicesForBlock(AgencyAndId blockId) {
+    return list(_blockIndicesByBlockId.get(blockId));
+  }
+
+  @Override
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {
     return ((StopEntryImpl) stopEntry).getStopTimeIndices();
   }
@@ -114,6 +127,12 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   public List<FrequencyBlockIndex> getFrequencyBlockIndicesForRouteCollectionId(
       AgencyAndId routeCollectionId) {
     return list(_frequencyBlockIndicesByRouteId.get(routeCollectionId));
+  }
+
+  @Override
+  public List<FrequencyBlockIndex> getFrequencyBlockIndicesForBlock(
+      AgencyAndId blockId) {
+    return list(_frequencyBlockIndicesByBlockId.get(blockId));
   }
 
   @Override
@@ -162,6 +181,28 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
       clearExistingStopTimeIndices();
     }
+
+    _log.info("calculating block indices by blockId...");
+    long t1 = System.currentTimeMillis();
+
+    _blockIndicesByBlockId = new HashMap<AgencyAndId, List<BlockIndex>>();
+    _frequencyBlockIndicesByBlockId = new HashMap<AgencyAndId, List<FrequencyBlockIndex>>();
+
+    for (BlockEntry block : _graphDao.getAllBlocks()) {
+      BlockIndicesFactory factory = new BlockIndicesFactory();
+      List<BlockEntry> list = Arrays.asList(block);
+      List<BlockIndex> indices = factory.createIndices(list);
+      List<FrequencyBlockIndex> frequencyIndices = factory.createFrequencyIndices(list);
+
+      if (!indices.isEmpty())
+        _blockIndicesByBlockId.put(block.getId(), indices);
+      if (!frequencyIndices.isEmpty())
+        _frequencyBlockIndicesByBlockId.put(block.getId(), frequencyIndices);
+    }
+
+    long t2 = System.currentTimeMillis();
+    _log.info("completed calculating block indices by blockId: t=" + (t2 - t1));
+
   }
 
   private void loadFrequencyBlockIndices() throws IOException,
@@ -238,6 +279,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
     for (BlockIndex blockIndex : _blockIndices) {
 
       List<BlockConfigurationEntry> blocks = blockIndex.getBlocks();
+      
+      System.out.println("blocks=" + blocks.size());
 
       BlockConfigurationEntry firstBlock = blocks.get(0);
       BlockConfigurationEntry lastBlock = blocks.get(blocks.size() - 1);
@@ -323,5 +366,4 @@ public class BlockIndexServiceImpl implements BlockIndexService {
     return new ServiceInterval(st0.getArrivalTime(), st0.getDepartureTime(),
         st1.getArrivalTime(), st1.getDepartureTime());
   }
-
 }
