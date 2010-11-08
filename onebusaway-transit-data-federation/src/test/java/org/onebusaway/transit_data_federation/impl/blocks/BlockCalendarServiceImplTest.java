@@ -193,14 +193,16 @@ public class BlockCalendarServiceImplTest {
     time = timeFromString("2010-09-08 10:15");
 
     instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
-
+    
+    Collections.sort(instances, new BlockInstanceComparator());
+    
     assertEquals(2, instances.size());
 
-    instance = instances.get(1);
+    instance = instances.get(0);
     assertEquals(bcA_AB, instance.getBlock());
     assertEquals(serviceDateB.getTime(), instance.getServiceDate());
 
-    instance = instances.get(0);
+    instance = instances.get(1);
     assertEquals(bcB_AB, instance.getBlock());
     assertEquals(serviceDateB.getTime(), instance.getServiceDate());
 
