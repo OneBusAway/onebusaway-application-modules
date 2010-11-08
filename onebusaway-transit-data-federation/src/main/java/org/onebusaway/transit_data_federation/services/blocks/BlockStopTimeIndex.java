@@ -1,36 +1,36 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
-public class BlockStopTimeIndex extends AbstractBlockStopTimeIndex<BlockIndex> {
+public class BlockStopTimeIndex extends AbstractBlockStopTimeIndex<BlockTripIndex> {
 
-  public static BlockStopTimeIndex create(BlockIndex blockIndex,
+  public static BlockStopTimeIndex create(BlockTripIndex blockTripIndex,
       int blockSequence) {
 
-    ServiceInterval serviceInterval = computeServiceInterval(blockIndex,
+    ServiceInterval serviceInterval = computeServiceInterval(blockTripIndex,
         blockSequence);
 
-    return new BlockStopTimeIndex(blockIndex, blockSequence, serviceInterval);
+    return new BlockStopTimeIndex(blockTripIndex, blockSequence, serviceInterval);
   }
 
   public int getArrivalTimeForIndex(int index) {
-    BlockConfigurationEntry block = _blockIndex.getBlocks().get(index);
-    return block.getArrivalTimeForIndex(_blockSequence);
+    BlockTripEntry trip = _blockTripIndex.getTrips().get(index);
+    return trip.getArrivalTimeForIndex(_stopIndex);
   }
 
   public int getDepartureTimeForIndex(int index) {
-    BlockConfigurationEntry block = _blockIndex.getBlocks().get(index);
-    return block.getDepartureTimeForIndex(_blockSequence);
+    BlockTripEntry trip = _blockTripIndex.getTrips().get(index);
+    return trip.getDepartureTimeForIndex(_stopIndex);
   }
   
   public double getDistanceAlongBlockForIndex(int index) {
-    BlockConfigurationEntry block = _blockIndex.getBlocks().get(index);
-    return block.getDistanceAlongBlockForIndex(_blockSequence);
+    BlockTripEntry trip = _blockTripIndex.getTrips().get(index);
+    return trip.getDistanceAlongBlockForIndex(_stopIndex);
   }
 
-  public BlockStopTimeIndex(BlockIndex blockIndex, int blockSequence,
+  public BlockStopTimeIndex(BlockTripIndex blockIndex, int stopIndex,
       ServiceInterval serviceInterval) {
-    super(blockIndex, blockSequence, serviceInterval);
+    super(blockIndex, stopIndex, serviceInterval);
   }
 }

@@ -2,13 +2,13 @@ package org.onebusaway.transit_data.model.service_alerts;
 
 import java.io.Serializable;
 
-public abstract class AbstractSituationBean implements Serializable {
+public class SituationBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private long creationTime;
+  private String id;
 
-  private long situationId;
+  private long creationTime;
 
   private String miscellaneousReason;
 
@@ -32,20 +32,20 @@ public abstract class AbstractSituationBean implements Serializable {
 
   private SituationAffectsBean affects;
 
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
   public long getCreationTime() {
     return creationTime;
   }
 
   public void setCreationTime(long creationTime) {
     this.creationTime = creationTime;
-  }
-
-  public long getSituationId() {
-    return situationId;
-  }
-
-  public void setSituationId(long situationId) {
-    this.situationId = situationId;
   }
 
   public String getMiscellaneousReason() {

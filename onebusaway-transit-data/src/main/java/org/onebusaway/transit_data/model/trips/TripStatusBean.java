@@ -1,9 +1,11 @@
 package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 
 public final class TripStatusBean implements Serializable {
 
@@ -57,6 +59,8 @@ public final class TripStatusBean implements Serializable {
   private double distanceAlongTrip = Double.NaN;
 
   private String vehicleId;
+  
+  private List<SituationBean> situations;
 
   public long getServiceDate() {
     return serviceDate;
@@ -261,5 +265,13 @@ public final class TripStatusBean implements Serializable {
 
   public void setVehicleId(String vehicleId) {
     this.vehicleId = vehicleId;
+  }
+
+  public List<SituationBean> getSituations() {
+    return situations;
+  }
+
+  public void setSituations(List<SituationBean> situations) {
+    this.situations = situations;
   }
 }

@@ -24,6 +24,7 @@ import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockCo
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ShapePointsTemporaryService;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl.Builder;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockStopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockTripEntryImpl;
@@ -31,10 +32,9 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyEntryI
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl.Builder;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferList;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -238,12 +238,12 @@ public class UnitTestingSupport {
     return null;
   }
 
-  public static List<BlockIndex> blockIndices(BlockEntryImpl... blocks) {
+  public static List<BlockTripIndex> blockTripIndices(BlockEntryImpl... blocks) {
     List<BlockEntry> list = new ArrayList<BlockEntry>();
     for (BlockEntryImpl block : blocks)
       list.add(block);
     BlockIndicesFactory factory = new BlockIndicesFactory();
-    return factory.createIndices(list);
+    return factory.createTripIndices(list);
   }
 
   public static StopTimeEntryImpl addStopTime(TripEntryImpl trip,

@@ -4,38 +4,38 @@ import java.util.AbstractList;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
-abstract class AbstractBlockStopTimeIndex<T extends HasBlocks> {
+abstract class AbstractBlockStopTimeIndex<T extends HasBlockTrips> {
 
-  protected final T _blockIndex;
+  protected final T _blockTripIndex;
 
-  protected final int _blockSequence;
+  protected final int _stopIndex;
 
   private final ServiceInterval _serviceInterval;
 
   private final BlockStopTimeList _stopTimes = new BlockStopTimeList();
 
-  public AbstractBlockStopTimeIndex(T blockIndex, int blockSequence,
+  public AbstractBlockStopTimeIndex(T blockTripIndex, int stopIndex,
       ServiceInterval serviceInterval) {
-    if (blockIndex == null)
-      throw new IllegalArgumentException("blockIndex is null");
+    if (blockTripIndex == null)
+      throw new IllegalArgumentException("blockTripIndex is null");
     if (serviceInterval == null)
       throw new IllegalArgumentException("serviceInterval is null");
-    _blockIndex = blockIndex;
-    _blockSequence = blockSequence;
+    _blockTripIndex = blockTripIndex;
+    _stopIndex = stopIndex;
     _serviceInterval = serviceInterval;
   }
 
   public T getBlockIndex() {
-    return _blockIndex;
+    return _blockTripIndex;
   }
 
   public ServiceIdActivation getServiceIds() {
-    return _blockIndex.getServiceIds();
+    return _blockTripIndex.getServiceIds();
   }
 
   public ServiceInterval getServiceInterval() {
@@ -55,21 +55,22 @@ abstract class AbstractBlockStopTimeIndex<T extends HasBlocks> {
    * Private Methods
    ****/
 
-  protected static ServiceInterval computeServiceInterval(HasBlocks blockIndex,
+  protected static ServiceInterval computeServiceInterval(HasBlockTrips blockIndex,
       int blockSequence) {
 
     ServiceInterval serviceInterval = null;
 
-    List<BlockConfigurationEntry> blocks = blockIndex.getBlocks();
+    List<BlockTripEntry> trips = blockIndex.getTrips();
 
-    for (BlockConfigurationEntry block : blocks) {
+    for (BlockTripEntry trip : trips) {
 
-      BlockStopTimeEntry blockStopTime = block.getStopTimes().get(blockSequence);
+      BlockStopTimeEntry blockStopTime = trip.getStopTimes().get(blockSequence);
       StopTimeEntry stopTime = blockStopTime.getStopTime();
 
       serviceInterval = ServiceInterval.extend(serviceInterval,
           stopTime.getArrivalTime(), stopTime.getDepartureTime());
     }
+    
     return serviceInterval;
   }
 
@@ -77,13 +78,13 @@ abstract class AbstractBlockStopTimeIndex<T extends HasBlocks> {
 
     @Override
     public int size() {
-      return _blockIndex.getBlocks().size();
+      return _blockTripIndex.getTrips().size();
     }
 
     @Override
     public BlockStopTimeEntry get(int index) {
-      BlockConfigurationEntry block = _blockIndex.getBlocks().get(index);
-      return block.getStopTimes().get(_blockSequence);
+      BlockTripEntry trip = _blockTripIndex.getTrips().get(index);
+      return trip.getStopTimes().get(_stopIndex);
     }
 
   }

@@ -2,18 +2,15 @@ package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.FrequencyComparator;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
-import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -21,9 +18,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +26,7 @@ public class BlockIndicesFactory {
 
   private static Logger _log = LoggerFactory.getLogger(BlockIndicesFactory.class);
 
-  private static final BlockFirstTimeComparator _blockComparator = new BlockFirstTimeComparator();
+  private static final BlockTripFirstTimeComparator _blockTripComparator = new BlockTripFirstTimeComparator();
 
   private static final FrequencyComparator _frequencyComparator = new FrequencyComparator();
 
@@ -41,25 +36,27 @@ public class BlockIndicesFactory {
     _verbose = verbose;
   }
 
-  public List<BlockIndexData> createData(Iterable<BlockEntry> blocks) {
+  /****
+   * 
+   ****/
 
-    List<BlockIndex> indices = createIndices(blocks);
-    List<BlockIndexData> allData = new ArrayList<BlockIndexData>();
+  public List<BlockTripIndexData> createTripData(Iterable<BlockEntry> blocks) {
 
-    for (BlockIndex index : indices) {
+    List<BlockTripIndex> indices = createTripIndices(blocks);
+    List<BlockTripIndexData> allData = new ArrayList<BlockTripIndexData>();
 
-      List<BlockConfigurationIndex> configurationIndices = new ArrayList<BlockConfigurationIndex>();
+    for (BlockTripIndex index : indices) {
 
-      for (BlockConfigurationEntry entry : index.getBlocks()) {
-        BlockEntry block = entry.getBlock();
-        int configurationIndex = block.getConfigurations().indexOf(entry);
-        configurationIndices.add(new BlockConfigurationIndex(block.getId(),
-            configurationIndex));
+      List<BlockTripReference> references = new ArrayList<BlockTripReference>();
+
+      for (BlockTripEntry trip : index.getTrips()) {
+        BlockTripReference ref = ReferencesLibrary.getTripAsReference(trip);
+        references.add(ref);
       }
 
       ServiceIntervalBlock serviceIntervalBlock = index.getServiceIntervalBlock();
 
-      BlockIndexData data = new BlockIndexData(configurationIndices,
+      BlockTripIndexData data = new BlockTripIndexData(references,
           serviceIntervalBlock);
       allData.add(data);
     }
@@ -67,42 +64,46 @@ public class BlockIndicesFactory {
     return allData;
   }
 
-  public List<FrequencyBlockIndexData> createFrequencyData(
+  public List<FrequencyBlockTripIndexData> createFrequencyTripData(
       Iterable<BlockEntry> blocks) {
 
-    List<FrequencyBlockIndex> indices = createFrequencyIndices(blocks);
-    List<FrequencyBlockIndexData> allData = new ArrayList<FrequencyBlockIndexData>();
+    List<FrequencyBlockTripIndex> indices = createFrequencyTripIndices(blocks);
+    List<FrequencyBlockTripIndexData> allData = new ArrayList<FrequencyBlockTripIndexData>();
 
-    for (FrequencyBlockIndex index : indices) {
+    for (FrequencyBlockTripIndex index : indices) {
 
-      List<BlockConfigurationIndex> configurationIndices = new ArrayList<BlockConfigurationIndex>();
+      List<BlockTripReference> tripReferences = new ArrayList<BlockTripReference>();
 
-      for (BlockConfigurationEntry entry : index.getBlocks()) {
-        BlockEntry block = entry.getBlock();
-        int configurationIndex = block.getConfigurations().indexOf(entry);
-        configurationIndices.add(new BlockConfigurationIndex(block.getId(),
-            configurationIndex));
+      for (BlockTripEntry entry : index.getTrips()) {
+        BlockTripReference reference = ReferencesLibrary.getTripAsReference(entry);
+        tripReferences.add(reference);
       }
 
       FrequencyServiceIntervalBlock serviceIntervalBlock = index.getServiceIntervalBlock();
 
-      FrequencyBlockIndexData data = new FrequencyBlockIndexData(
-          configurationIndices, index.getFrequencies(), serviceIntervalBlock);
+      FrequencyBlockTripIndexData data = new FrequencyBlockTripIndexData(
+          tripReferences, index.getFrequencies(), serviceIntervalBlock);
       allData.add(data);
     }
 
     return allData;
   }
 
-  public List<BlockIndex> createIndices(Iterable<BlockEntry> blocks) {
+  /****
+   * 
+   ****/
 
-    List<BlockIndex> allIndices = new ArrayList<BlockIndex>();
+  public List<BlockTripIndex> createTripIndices(Iterable<BlockEntry> blocks) {
 
-    Map<BlockSequenceKey, List<BlockConfigurationEntry>> blocksByKey = new FactoryMap<BlockSequenceKey, List<BlockConfigurationEntry>>(
-        new ArrayList<BlockConfigurationEntry>());
+    List<BlockTripIndex> allIndices = new ArrayList<BlockTripIndex>();
+
+    Map<BlockTripSequenceKey, List<BlockTripEntry>> blockTripsByKey = new FactoryMap<BlockTripSequenceKey, List<BlockTripEntry>>(
+        new ArrayList<BlockTripEntry>());
 
     if (_verbose)
-      _log.info("grouping blocks by sequence key");
+      _log.info("grouping block trips by sequence key");
+
+    int tripCount = 0;
 
     for (BlockEntry block : blocks) {
 
@@ -110,27 +111,32 @@ public class BlockIndicesFactory {
         continue;
 
       for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
-        BlockSequenceKey key = getBlockConfigurationAsKey(blockConfiguration);
-        blocksByKey.get(key).add(blockConfiguration);
+        for (BlockTripEntry blockTrip : blockConfiguration.getTrips()) {
+          BlockTripSequenceKey key = getBlockTripAsKey(blockTrip);
+          blockTripsByKey.get(key).add(blockTrip);
+          tripCount++;
+        }
+
       }
     }
 
     if (_verbose)
-      _log.info("groups found: " + blocksByKey.size());
+      _log.info("groups found: " + blockTripsByKey.size() + " out of trips: "
+          + tripCount);
 
     int count = 0;
 
-    for (List<BlockConfigurationEntry> blocksWithSameSequence : blocksByKey.values()) {
+    for (List<BlockTripEntry> tripsWithSameSequence : blockTripsByKey.values()) {
 
       if (_verbose && count % 100 == 0)
-        _log.info("groups processed: " + count + "/" + blocksByKey.size());
+        _log.info("groups processed: " + count + "/" + blockTripsByKey.size());
 
       count++;
 
-      List<List<BlockConfigurationEntry>> groupedBlocks = ensureGroups(blocksWithSameSequence);
+      List<List<BlockTripEntry>> groupedBlocks = ensureTripGroups(tripsWithSameSequence);
 
-      for (List<BlockConfigurationEntry> group : groupedBlocks) {
-        BlockIndex index = createIndexForGroupOfBlocks(group);
+      for (List<BlockTripEntry> group : groupedBlocks) {
+        BlockTripIndex index = createIndexForGroupOfBlockTrips(group);
         allIndices.add(index);
       }
     }
@@ -138,16 +144,18 @@ public class BlockIndicesFactory {
     return allIndices;
   }
 
-  public List<FrequencyBlockIndex> createFrequencyIndices(
+  public List<FrequencyBlockTripIndex> createFrequencyTripIndices(
       Iterable<BlockEntry> blocks) {
 
-    List<FrequencyBlockIndex> allIndices = new ArrayList<FrequencyBlockIndex>();
+    List<FrequencyBlockTripIndex> allIndices = new ArrayList<FrequencyBlockTripIndex>();
 
-    Map<BlockSequenceKey, List<BlockConfigurationEntry>> blocksByKey = new FactoryMap<BlockSequenceKey, List<BlockConfigurationEntry>>(
-        new ArrayList<BlockConfigurationEntry>());
+    Map<BlockTripSequenceKey, List<BlockTripEntry>> blockTripsByKey = new FactoryMap<BlockTripSequenceKey, List<BlockTripEntry>>(
+        new ArrayList<BlockTripEntry>());
 
     if (_verbose)
       _log.info("grouping blocks by sequence key");
+
+    int tripCount = 0;
 
     for (BlockEntry block : blocks) {
 
@@ -155,28 +163,32 @@ public class BlockIndicesFactory {
         continue;
 
       for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
-        BlockSequenceKey key = getBlockConfigurationAsKey(blockConfiguration);
-        blocksByKey.get(key).add(blockConfiguration);
+        for (BlockTripEntry blockTrip : blockConfiguration.getTrips()) {
+          BlockTripSequenceKey key = getBlockTripAsKey(blockTrip);
+          blockTripsByKey.get(key).add(blockTrip);
+          tripCount++;
+        }
       }
     }
 
     if (_verbose)
-      _log.info("frequency groups found: " + blocksByKey.size());
+      _log.info("frequency groups found: " + blockTripsByKey.size()
+          + " out of trips: " + tripCount);
 
     int count = 0;
 
-    for (List<BlockConfigurationEntry> blocksWithSameSequence : blocksByKey.values()) {
+    for (List<BlockTripEntry> tripsWithSameSequence : blockTripsByKey.values()) {
 
       if (_verbose && count % 100 == 0)
         _log.info("frequency groups processed: " + count + "/"
-            + blocksByKey.size());
+            + blockTripsByKey.size());
 
       count++;
 
-      List<FrequencyGroup> groupedBlocks = ensureFrequencyGroups(blocksWithSameSequence);
+      List<FrequencyTripGroup> groupedTrips = ensureFrequencyTripGroups(tripsWithSameSequence);
 
-      for (FrequencyGroup group : groupedBlocks) {
-        FrequencyBlockIndex index = createFrequencyIndexForGroup(group);
+      for (FrequencyTripGroup group : groupedTrips) {
+        FrequencyBlockTripIndex index = createFrequencyIndexForGroupOfBlockTrips(group);
         allIndices.add(index);
       }
     }
@@ -184,16 +196,21 @@ public class BlockIndicesFactory {
     return allIndices;
   }
 
-  public BlockIndex createIndexForGroupOfBlocks(
-      List<BlockConfigurationEntry> blocks) {
-    ServiceIntervalBlock serviceIntervalBlock = getBlocksAsBlockInterval(blocks);
-    return new BlockIndex(blocks, serviceIntervalBlock);
+  /****
+   * 
+   ****/
+
+  public BlockTripIndex createIndexForGroupOfBlockTrips(
+      List<BlockTripEntry> blocks) {
+    ServiceIntervalBlock serviceIntervalBlock = getBlockTripsAsBlockInterval(blocks);
+    return new BlockTripIndex(blocks, serviceIntervalBlock);
   }
 
-  public FrequencyBlockIndex createFrequencyIndexForGroup(FrequencyGroup group) {
-    FrequencyServiceIntervalBlock serviceIntervalBlock = getBlocksAsFrequencyBlockInterval(group);
+  public FrequencyBlockTripIndex createFrequencyIndexForGroupOfBlockTrips(
+      FrequencyTripGroup group) {
+    FrequencyServiceIntervalBlock serviceIntervalBlock = getBlockTripssAsFrequencyBlockInterval(group);
     group.trimToSize();
-    return new FrequencyBlockIndex(group.getBlockConfigs(),
+    return new FrequencyBlockTripIndex(group.getTrips(),
         group.getFrequencies(), serviceIntervalBlock);
   }
 
@@ -205,34 +222,25 @@ public class BlockIndicesFactory {
     return blockEntry.getConfigurations().get(0).getFrequencies() != null;
   }
 
-  private BlockSequenceKey getBlockConfigurationAsKey(
-      BlockConfigurationEntry block) {
-    List<TripSequenceKey> keys = new ArrayList<TripSequenceKey>();
-    for (BlockTripEntry blockTrip : block.getTrips()) {
-      TripSequenceKey key = getTripAsKey(blockTrip.getTrip());
-      keys.add(key);
-    }
-    return new BlockSequenceKey(keys);
-  }
-
-  private TripSequenceKey getTripAsKey(TripEntry trip) {
+  private BlockTripSequenceKey getBlockTripAsKey(BlockTripEntry blockTrip) {
     List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
-    for (StopTimeEntry stopTime : trip.getStopTimes())
+    for (StopTimeEntry stopTime : blockTrip.getTrip().getStopTimes())
       stopIds.add(stopTime.getStop().getId());
-    return new TripSequenceKey(trip.getServiceId(), stopIds);
+    return new BlockTripSequenceKey(
+        blockTrip.getBlockConfiguration().getServiceIds(), stopIds);
   }
 
-  private List<List<BlockConfigurationEntry>> ensureGroups(
-      List<BlockConfigurationEntry> blocks) {
+  private List<List<BlockTripEntry>> ensureTripGroups(
+      List<BlockTripEntry> blockTrips) {
 
-    Collections.sort(blocks, _blockComparator);
+    Collections.sort(blockTrips, _blockTripComparator);
 
-    List<List<BlockConfigurationEntry>> lists = new ArrayList<List<BlockConfigurationEntry>>();
+    List<List<BlockTripEntry>> lists = new ArrayList<List<BlockTripEntry>>();
 
-    for (BlockConfigurationEntry block : blocks) {
-      List<BlockConfigurationEntry> list = getBestList(lists, block);
+    for (BlockTripEntry block : blockTrips) {
+      List<BlockTripEntry> list = getBestTripList(lists, block);
       if (list == null) {
-        list = new ArrayList<BlockConfigurationEntry>();
+        list = new ArrayList<BlockTripEntry>();
         lists.add(list);
       }
       list.add(block);
@@ -241,29 +249,21 @@ public class BlockIndicesFactory {
     return lists;
   }
 
-  private List<BlockConfigurationEntry> getBestList(
-      List<List<BlockConfigurationEntry>> lists, BlockConfigurationEntry block) {
+  private List<BlockTripEntry> getBestTripList(
+      List<List<BlockTripEntry>> lists, BlockTripEntry trip) {
 
-    for (List<BlockConfigurationEntry> list : lists) {
+    for (List<BlockTripEntry> list : lists) {
 
       if (list.isEmpty())
         return list;
 
-      BlockConfigurationEntry prev = list.get(list.size() - 1);
+      BlockTripEntry prev = list.get(list.size() - 1);
 
       List<BlockStopTimeEntry> stopTimesA = prev.getStopTimes();
-      List<BlockStopTimeEntry> stopTimesB = block.getStopTimes();
+      List<BlockStopTimeEntry> stopTimesB = trip.getStopTimes();
 
-      boolean allGood = true;
-
-      for (int i = 0; i < stopTimesA.size(); i++) {
-        StopTimeEntry stopTimeA = stopTimesA.get(i).getStopTime();
-        StopTimeEntry stopTimeB = stopTimesB.get(i).getStopTime();
-        if (!(stopTimeA.getArrivalTime() <= stopTimeB.getArrivalTime() && stopTimeA.getDepartureTime() <= stopTimeB.getDepartureTime())) {
-          allGood = false;
-          break;
-        }
-      }
+      boolean allGood = areStopTimesAlwaysIncreasingOrEqual(stopTimesA,
+          stopTimesB);
 
       if (allGood)
         return list;
@@ -272,36 +272,52 @@ public class BlockIndicesFactory {
     return null;
   }
 
-  private List<FrequencyGroup> ensureFrequencyGroups(
-      List<BlockConfigurationEntry> blocksWithSameSequence) {
+  private boolean areStopTimesAlwaysIncreasingOrEqual(
+      List<BlockStopTimeEntry> stopTimesA, List<BlockStopTimeEntry> stopTimesB) {
+    boolean allGood = true;
 
-    List<BlockConfigWithFrequency> bcwfs = new ArrayList<BlockIndicesFactory.BlockConfigWithFrequency>();
+    for (int i = 0; i < stopTimesA.size(); i++) {
+      StopTimeEntry stopTimeA = stopTimesA.get(i).getStopTime();
+      StopTimeEntry stopTimeB = stopTimesB.get(i).getStopTime();
+      if (!(stopTimeA.getArrivalTime() <= stopTimeB.getArrivalTime() && stopTimeA.getDepartureTime() <= stopTimeB.getDepartureTime())) {
+        allGood = false;
+        break;
+      }
+    }
+    return allGood;
+  }
 
-    for (BlockConfigurationEntry blockConfig : blocksWithSameSequence) {
+  private List<FrequencyTripGroup> ensureFrequencyTripGroups(
+      List<BlockTripEntry> tripsWithSameSequence) {
+
+    List<BlockTripWithFrequency> btwfs = new ArrayList<BlockTripWithFrequency>();
+
+    for (BlockTripEntry trip : tripsWithSameSequence) {
+      BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
       for (FrequencyEntry frequency : blockConfig.getFrequencies())
-        bcwfs.add(new BlockConfigWithFrequency(blockConfig, frequency));
+        btwfs.add(new BlockTripWithFrequency(trip, frequency));
     }
 
-    Collections.sort(bcwfs);
+    Collections.sort(btwfs);
 
-    List<FrequencyGroup> lists = new ArrayList<FrequencyGroup>();
+    List<FrequencyTripGroup> lists = new ArrayList<FrequencyTripGroup>();
 
-    for (BlockConfigWithFrequency bcwf : bcwfs) {
-      FrequencyGroup group = getBestFrequencyGroup(lists, bcwf);
+    for (BlockTripWithFrequency btwf : btwfs) {
+      FrequencyTripGroup group = getBestFrequencyTripGroup(lists, btwf);
       if (group == null) {
-        group = new FrequencyGroup();
+        group = new FrequencyTripGroup();
         lists.add(group);
       }
-      group.addEntry(bcwf);
+      group.addEntry(btwf);
     }
 
     return lists;
   }
 
-  private FrequencyGroup getBestFrequencyGroup(List<FrequencyGroup> groups,
-      BlockConfigWithFrequency bcwf) {
+  private FrequencyTripGroup getBestFrequencyTripGroup(
+      List<FrequencyTripGroup> groups, BlockTripWithFrequency bcwf) {
 
-    for (FrequencyGroup group : groups) {
+    for (FrequencyTripGroup group : groups) {
 
       if (group.isEmpty())
         return group;
@@ -318,15 +334,14 @@ public class BlockIndicesFactory {
     return null;
   }
 
-  private ServiceIntervalBlock getBlocksAsBlockInterval(
-      List<BlockConfigurationEntry> blocks) {
+  /****
+   * 
+   ****/
 
-    BlockConfigurationEntry firstBlock = blocks.get(0);
-    ServiceIdActivation serviceIdActivation = firstBlock.getServiceIds();
-    Set<LocalizedServiceId> serviceIds = new HashSet<LocalizedServiceId>(
-        serviceIdActivation.getActiveServiceIds());
+  private ServiceIntervalBlock getBlockTripsAsBlockInterval(
+      List<BlockTripEntry> trips) {
 
-    int n = blocks.size();
+    int n = trips.size();
 
     int[] minArrivals = new int[n];
     int[] minDepartures = new int[n];
@@ -335,20 +350,15 @@ public class BlockIndicesFactory {
 
     int index = 0;
 
-    for (BlockConfigurationEntry block : blocks) {
+    for (BlockTripEntry trip : trips) {
 
       ServiceInterval interval = null;
 
-      for (BlockTripEntry blockTrip : block.getTrips()) {
-        TripEntry trip = blockTrip.getTrip();
-        if (!serviceIds.contains(trip.getServiceId()))
-          continue;
-        List<StopTimeEntry> stopTimes = trip.getStopTimes();
-        StopTimeEntry first = stopTimes.get(0);
-        StopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
-        interval = extend(interval, first);
-        interval = extend(interval, last);
-      }
+      List<BlockStopTimeEntry> stopTimes = trip.getStopTimes();
+      StopTimeEntry first = stopTimes.get(0).getStopTime();
+      StopTimeEntry last = stopTimes.get(stopTimes.size() - 1).getStopTime();
+      interval = extend(interval, first);
+      interval = extend(interval, last);
 
       minArrivals[index] = interval.getMinArrival();
       minDepartures[index] = interval.getMinDeparture();
@@ -362,39 +372,20 @@ public class BlockIndicesFactory {
         maxDepartures);
   }
 
-  private FrequencyServiceIntervalBlock getBlocksAsFrequencyBlockInterval(
-      FrequencyGroup group) {
+  private FrequencyServiceIntervalBlock getBlockTripssAsFrequencyBlockInterval(
+      FrequencyTripGroup group) {
 
-    List<BlockConfigurationEntry> blockConfigs = group.getBlockConfigs();
+    List<BlockTripEntry> trips = group.getTrips();
     List<FrequencyEntry> frequencies = group.getFrequencies();
 
-    BlockConfigurationEntry firstBlock = blockConfigs.get(0);
-    ServiceIdActivation serviceIdActivation = firstBlock.getServiceIds();
-    Set<LocalizedServiceId> serviceIds = new HashSet<LocalizedServiceId>(
-        serviceIdActivation.getActiveServiceIds());
-
-    int n = blockConfigs.size();
+    int n = trips.size();
 
     int[] startTimes = new int[n];
     int[] endTimes = new int[n];
 
     for (int index = 0; index < n; index++) {
 
-      BlockConfigurationEntry block = blockConfigs.get(index);
       FrequencyEntry freq = frequencies.get(index);
-
-      ServiceInterval interval = null;
-
-      for (BlockTripEntry blockTrip : block.getTrips()) {
-        TripEntry trip = blockTrip.getTrip();
-        if (!serviceIds.contains(trip.getServiceId()))
-          continue;
-        List<StopTimeEntry> stopTimes = trip.getStopTimes();
-        StopTimeEntry first = stopTimes.get(0);
-        StopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
-        interval = extend(interval, first);
-        interval = extend(interval, last);
-      }
 
       startTimes[index] = freq.getStartTime();
       endTimes[index] = freq.getEndTime();
@@ -412,16 +403,15 @@ public class BlockIndicesFactory {
         stopTime.getDepartureTime());
   }
 
-  private static class BlockConfigWithFrequency implements
-      Comparable<BlockConfigWithFrequency> {
+  private static class BlockTripWithFrequency implements
+      Comparable<BlockTripWithFrequency> {
 
-    private BlockConfigurationEntry _blockConfig;
+    private BlockTripEntry _trip;
 
     private FrequencyEntry _frequency;
 
-    public BlockConfigWithFrequency(BlockConfigurationEntry blockConfig,
-        FrequencyEntry frequency) {
-      _blockConfig = blockConfig;
+    public BlockTripWithFrequency(BlockTripEntry trip, FrequencyEntry frequency) {
+      _trip = trip;
       _frequency = frequency;
     }
 
@@ -430,28 +420,28 @@ public class BlockIndicesFactory {
     }
 
     @Override
-    public int compareTo(BlockConfigWithFrequency obj) {
+    public int compareTo(BlockTripWithFrequency obj) {
       return _frequencyComparator.compare(_frequency, obj._frequency);
     }
   }
 
-  private static class FrequencyGroup {
+  private static class FrequencyTripGroup {
 
-    private ArrayList<BlockConfigurationEntry> _blockConfigs = new ArrayList<BlockConfigurationEntry>();
+    private ArrayList<BlockTripEntry> _trips = new ArrayList<BlockTripEntry>();
 
     private ArrayList<FrequencyEntry> _frequencies = new ArrayList<FrequencyEntry>();
 
-    public void addEntry(BlockConfigWithFrequency bcwf) {
-      _blockConfigs.add(bcwf._blockConfig);
+    public void addEntry(BlockTripWithFrequency bcwf) {
+      _trips.add(bcwf._trip);
       _frequencies.add(bcwf._frequency);
     }
 
     public boolean isEmpty() {
-      return _blockConfigs.isEmpty();
+      return _trips.isEmpty();
     }
 
-    public List<BlockConfigurationEntry> getBlockConfigs() {
-      return _blockConfigs;
+    public List<BlockTripEntry> getTrips() {
+      return _trips;
     }
 
     public List<FrequencyEntry> getFrequencies() {
@@ -459,7 +449,7 @@ public class BlockIndicesFactory {
     }
 
     public void trimToSize() {
-      _blockConfigs.trimToSize();
+      _trips.trimToSize();
       _frequencies.trimToSize();
     }
   }

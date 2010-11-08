@@ -37,6 +37,7 @@ import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationExchangeDeliveryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
@@ -333,13 +334,29 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public SituationBean createServiceAlert(String agencyId,
+      SituationBean situation) {
+    return _serviceAlertsService.createServiceAlert(agencyId, situation);
+  }
+
+  @Override
+  public void updateServiceAlert(SituationBean situation) {
+    _serviceAlertsService.updateServiceAlert(situation);
+  }
+
+  @Override
+  public SituationBean getServiceAlertForId(String situationId) {
+    return _serviceAlertsService.getServiceAlertForId(situationId);
+  }
+
+  @Override
   public void updateServiceAlerts(String agencyId,
       SituationExchangeDeliveryBean alerts) {
     _serviceAlertsService.updateServiceAlerts(alerts);
   }
 
   @Override
-  public SituationExchangeDeliveryBean getServiceAlerts(SituationQueryBean query) {
+  public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query) {
     return _serviceAlertsService.getServiceAlerts(query);
   }
 

@@ -7,14 +7,14 @@ public final class SituationAffectsBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private List<SituationAffectedRouteBean> routesAndDirections;
+  private List<SituationAffectedVehicleJourneyBean> vehicleJourneys;
 
-  public List<SituationAffectedRouteBean> getRoutesAndDirections() {
-    return routesAndDirections;
+  public List<SituationAffectedVehicleJourneyBean> getVehicleJourneys() {
+    return vehicleJourneys;
   }
 
-  public void setRoutesAndDirections(
-      List<SituationAffectedRouteBean> routesAndDirections) {
-    this.routesAndDirections = routesAndDirections;
+  public void setVehicleJourneys(
+      List<SituationAffectedVehicleJourneyBean> vehicleJourneys) {
+    this.vehicleJourneys = vehicleJourneys;
   }
 }

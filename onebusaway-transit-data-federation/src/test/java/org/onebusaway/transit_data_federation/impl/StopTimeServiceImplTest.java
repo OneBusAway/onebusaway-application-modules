@@ -28,9 +28,10 @@ import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIn
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
@@ -381,14 +382,14 @@ public class StopTimeServiceImplTest {
 
   private void addFirstStopToBlockIndex(BlockConfigurationEntry... blocks) {
 
-    List<BlockConfigurationEntry> blockConfigs = new ArrayList<BlockConfigurationEntry>();
+    List<BlockTripEntry> trips = new ArrayList<BlockTripEntry>();
 
     for (BlockConfigurationEntry blockConfig : blocks) {
-      blockConfigs.add(blockConfig);
+      trips.add(blockConfig.getTrips().get(0));
     }
 
     BlockIndicesFactory factory = new BlockIndicesFactory();
-    BlockIndex blockIndex = factory.createIndexForGroupOfBlocks(blockConfigs);
+    BlockTripIndex blockIndex = factory.createIndexForGroupOfBlockTrips(trips);
 
     _stop.addStopTimeIndex(BlockStopTimeIndex.create(blockIndex, 0));
   }

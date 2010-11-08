@@ -1,6 +1,8 @@
 package org.onebusaway.transit_data_federation.services.transit_graph;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -27,6 +29,10 @@ public class ServiceIdActivation implements Serializable,
   private final List<LocalizedServiceId> activeServiceIds;
 
   private final List<LocalizedServiceId> inactiveServiceIds;
+
+  public ServiceIdActivation(LocalizedServiceId serviceId) {
+    this(Arrays.asList(serviceId), empty());
+  }
 
   public ServiceIdActivation(List<LocalizedServiceId> activeServiceIds,
       List<LocalizedServiceId> inactiveServiceIds) {
@@ -100,5 +106,9 @@ public class ServiceIdActivation implements Serializable,
   @Override
   public String toString() {
     return "active=" + activeServiceIds + " inactive=" + inactiveServiceIds;
+  }
+
+  private static final List<LocalizedServiceId> empty() {
+    return Collections.emptyList();
   }
 }

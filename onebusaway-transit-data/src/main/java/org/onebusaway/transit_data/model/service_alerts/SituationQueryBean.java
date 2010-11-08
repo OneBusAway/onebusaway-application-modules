@@ -1,9 +1,13 @@
 package org.onebusaway.transit_data.model.service_alerts;
 
+import java.io.Serializable;
+
 import org.onebusaway.transit_data.model.QueryBean;
 
 @QueryBean
-public class SituationQueryBean {
+public class SituationQueryBean implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   private String agencyId;
 

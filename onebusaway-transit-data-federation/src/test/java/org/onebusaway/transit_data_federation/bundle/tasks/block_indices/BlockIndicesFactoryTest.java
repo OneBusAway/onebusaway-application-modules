@@ -5,11 +5,13 @@ import static org.junit.Assert.assertTrue;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addStopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.frequency;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,15 +22,16 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
-import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
-import org.onebusaway.transit_data_federation.services.blocks.HasBlocks;
+import org.onebusaway.transit_data_federation.services.blocks.HasBlockTrips;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public class BlockIndicesFactoryTest {
 
@@ -47,7 +50,7 @@ public class BlockIndicesFactoryTest {
 
     BlockEntryImpl blockA = block("a");
 
-    TripEntryImpl tripA1 = trip("a1", "s1");
+    TripEntryImpl tripA1 = trip("a1", "s1"); // 1
     TripEntryImpl tripA2 = trip("a2", "s1");
     TripEntryImpl tripA3 = trip("a3", "s1");
 
@@ -58,10 +61,10 @@ public class BlockIndicesFactoryTest {
     addStopTime(tripA3, stopTime(0, stopA, tripA3, 50, 50, 0));
     addStopTime(tripA3, stopTime(0, stopB, tripA3, 60, 70, 0));
 
-    BlockConfigurationEntry bcA = linkBlockTrips(blockA, tripA1, tripA2, tripA3);
+    linkBlockTrips(blockA, tripA1, tripA2, tripA3);
 
     /****
-     * Block B
+     * Block B - Same trip/stop sequence as A
      ****/
 
     BlockEntryImpl blockB = block("b");
@@ -77,7 +80,7 @@ public class BlockIndicesFactoryTest {
     addStopTime(tripB3, stopTime(0, stopA, tripB3, 80, 80, 0));
     addStopTime(tripB3, stopTime(0, stopB, tripB3, 90, 100, 0));
 
-    BlockConfigurationEntry bcB = linkBlockTrips(blockB, tripB1, tripB2, tripB3);
+    linkBlockTrips(blockB, tripB1, tripB2, tripB3);
 
     /****
      * Block C - Same stop sequence, but runs a little bit faster
@@ -96,7 +99,7 @@ public class BlockIndicesFactoryTest {
     addStopTime(tripC3, stopTime(0, stopA, tripC3, 85, 85, 0));
     addStopTime(tripC3, stopTime(0, stopB, tripC3, 90, 95, 0));
 
-    BlockConfigurationEntry bcC = linkBlockTrips(blockC, tripC1, tripC2, tripC3);
+    linkBlockTrips(blockC, tripC1, tripC2, tripC3);
 
     /****
      * Block D - Same stop sequence, but with different service id
@@ -115,7 +118,7 @@ public class BlockIndicesFactoryTest {
     addStopTime(tripD3, stopTime(0, stopA, tripD3, 100, 100, 0));
     addStopTime(tripD3, stopTime(0, stopB, tripD3, 110, 120, 0));
 
-    BlockConfigurationEntry bcD = linkBlockTrips(blockD, tripD1, tripD2, tripD3);
+    linkBlockTrips(blockD, tripD1, tripD2, tripD3);
 
     /****
      * Block E - One less stop
@@ -133,7 +136,7 @@ public class BlockIndicesFactoryTest {
     addStopTime(tripE2, stopTime(0, stopA, tripE2, 100, 100, 0));
     addStopTime(tripE3, stopTime(0, stopA, tripE3, 110, 110, 0));
 
-    BlockConfigurationEntry bcE = linkBlockTrips(blockE, tripE1, tripE2, tripE3);
+    linkBlockTrips(blockE, tripE1, tripE2, tripE3);
 
     /****
      * Block F - Another to group with E, but earlier
@@ -143,7 +146,7 @@ public class BlockIndicesFactoryTest {
 
     TripEntryImpl tripF1 = trip("f1", "s1");
     TripEntryImpl tripF2 = trip("f2", "s1");
-    TripEntryImpl tripF3 = trip("ef3", "s1");
+    TripEntryImpl tripF3 = trip("f3", "s1");
 
     addStopTime(tripF1, stopTime(0, stopA, tripF1, 40, 50, 0));
     addStopTime(tripF1, stopTime(0, stopB, tripF1, 70, 70, 0));
@@ -151,80 +154,143 @@ public class BlockIndicesFactoryTest {
     addStopTime(tripF2, stopTime(0, stopA, tripF2, 90, 90, 0));
     addStopTime(tripF3, stopTime(0, stopA, tripF3, 100, 100, 0));
 
-    BlockConfigurationEntry bcF = linkBlockTrips(blockF, tripF1, tripF2, tripF3);
+    linkBlockTrips(blockF, tripF1, tripF2, tripF3);
 
-    List<BlockIndex> allIndices = factory.createIndices(Arrays.asList(
+    List<BlockTripIndex> allIndices = factory.createTripIndices(Arrays.asList(
         (BlockEntry) blockF, blockE, blockD, blockC, blockB, blockA));
 
-    assertEquals(4, allIndices.size());
+    assertEquals(6, allIndices.size());
 
-    List<BlockIndex> indices = grep(allIndices, aid("a"));
+    List<BlockTripIndex> indices = grep(allIndices, aid("a1"));
     assertEquals(1, indices.size());
-    BlockIndex index = indices.get(0);
-    List<BlockConfigurationEntry> configs = index.getBlocks();
-    assertEquals(2, configs.size());
-    assertEquals(bcA, configs.get(0));
-    assertEquals(bcB, configs.get(1));
+    BlockTripIndex index = indices.get(0);
+    List<TripEntry> trips = trips(index.getTrips());
+    assertEquals(5, trips.size());
+    assertEquals(tripA1, trips.get(0));
+    assertEquals(tripB1, trips.get(1));
+    assertEquals(tripF1, trips.get(2));
+    assertEquals(tripE1, trips.get(3));
+    assertEquals(tripB3, trips.get(4));
     ServiceIdActivation serviceIds = index.getServiceIds();
     assertEquals(1, serviceIds.getActiveServiceIds().size());
     assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
     ServiceIntervalBlock intervalBlock = index.getServiceIntervalBlock();
-    assertTrue(Arrays.equals(new int[] {0, 20}, intervalBlock.getMinArrivals()));
-    assertTrue(Arrays.equals(new int[] {10, 30},
+    assertTrue(Arrays.equals(new int[] {0, 20, 40, 50, 80},
+        intervalBlock.getMinArrivals()));
+    assertTrue(Arrays.equals(new int[] {10, 30, 50, 60, 80},
         intervalBlock.getMinDepartures()));
-    assertTrue(Arrays.equals(new int[] {60, 90}, intervalBlock.getMaxArrivals()));
-    assertTrue(Arrays.equals(new int[] {70, 100},
+    assertTrue(Arrays.equals(new int[] {20, 50, 70, 80, 90},
+        intervalBlock.getMaxArrivals()));
+    assertTrue(Arrays.equals(new int[] {20, 50, 70, 80, 100},
         intervalBlock.getMaxDepartures()));
 
-    indices = grep(allIndices, aid("c"));
+    indices = grep(allIndices, aid("a2"));
     assertEquals(1, indices.size());
     index = indices.get(0);
-    configs = index.getBlocks();
-    assertEquals(1, configs.size());
-    assertEquals(bcC, configs.get(0));
+    trips = trips(index.getTrips());
+    assertEquals(5, trips.size());
+    assertEquals(tripA2, trips.get(0));
+    assertEquals(tripB2, trips.get(1));
+    assertEquals(tripC2, trips.get(2));
+    assertEquals(tripF2, trips.get(3));
+    assertEquals(tripE2, trips.get(4));
     serviceIds = index.getServiceIds();
     assertEquals(1, serviceIds.getActiveServiceIds().size());
     assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
     intervalBlock = index.getServiceIntervalBlock();
-    assertTrue(Arrays.equals(new int[] {40}, intervalBlock.getMinArrivals()));
-    assertTrue(Arrays.equals(new int[] {50}, intervalBlock.getMinDepartures()));
-    assertTrue(Arrays.equals(new int[] {90}, intervalBlock.getMaxArrivals()));
-    assertTrue(Arrays.equals(new int[] {95}, intervalBlock.getMaxDepartures()));
+    assertTrue(Arrays.equals(new int[] {30, 60, 70, 80, 90},
+        intervalBlock.getMinArrivals()));
+    assertTrue(Arrays.equals(new int[] {30, 60, 70, 80, 90},
+        intervalBlock.getMinDepartures()));
+    assertTrue(Arrays.equals(new int[] {40, 70, 80, 90, 100},
+        intervalBlock.getMaxArrivals()));
+    assertTrue(Arrays.equals(new int[] {40, 70, 80, 90, 100},
+        intervalBlock.getMaxDepartures()));
 
-    indices = grep(allIndices, aid("d"));
+    indices = grep(allIndices, aid("c1"));
     assertEquals(1, indices.size());
     index = indices.get(0);
-    configs = index.getBlocks();
-    assertEquals(1, configs.size());
-    assertEquals(bcD, configs.get(0));
+    trips = trips(index.getTrips());
+    assertEquals(3, trips.size());
+    assertEquals(tripC1, trips.get(0));
+    assertEquals(tripA3, trips.get(1));
+    assertEquals(tripC3, trips.get(2));
+    serviceIds = index.getServiceIds();
+    assertEquals(1, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+    intervalBlock = index.getServiceIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {40, 50, 85},
+        intervalBlock.getMinArrivals()));
+    assertTrue(Arrays.equals(new int[] {50, 50, 85},
+        intervalBlock.getMinDepartures()));
+    assertTrue(Arrays.equals(new int[] {60, 60, 90},
+        intervalBlock.getMaxArrivals()));
+    assertTrue(Arrays.equals(new int[] {60, 70, 95},
+        intervalBlock.getMaxDepartures()));
+
+    indices = grep(allIndices, aid("d1"));
+    assertEquals(1, indices.size());
+    index = indices.get(0);
+    trips = trips(index.getTrips());
+    assertEquals(2, trips.size());
+    assertEquals(tripD1, trips.get(0));
+    assertEquals(tripD3, trips.get(1));
     serviceIds = index.getServiceIds();
     assertEquals(2, serviceIds.getActiveServiceIds().size());
     assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
     assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s2")));
     intervalBlock = index.getServiceIntervalBlock();
-    assertTrue(Arrays.equals(new int[] {40}, intervalBlock.getMinArrivals()));
-    assertTrue(Arrays.equals(new int[] {50}, intervalBlock.getMinDepartures()));
-    assertTrue(Arrays.equals(new int[] {110}, intervalBlock.getMaxArrivals()));
-    assertTrue(Arrays.equals(new int[] {120}, intervalBlock.getMaxDepartures()));
+    assertTrue(Arrays.equals(new int[] {40, 100},
+        intervalBlock.getMinArrivals()));
+    assertTrue(Arrays.equals(new int[] {50, 100},
+        intervalBlock.getMinDepartures()));
+    assertTrue(Arrays.equals(new int[] {70, 110},
+        intervalBlock.getMaxArrivals()));
+    assertTrue(Arrays.equals(new int[] {70, 120},
+        intervalBlock.getMaxDepartures()));
 
-    indices = grep(allIndices, aid("e"));
+    indices = grep(allIndices, aid("d2"));
     assertEquals(1, indices.size());
     index = indices.get(0);
-    configs = index.getBlocks();
-    assertEquals(2, configs.size());
-    assertEquals(bcF, configs.get(0));
-    assertEquals(bcE, configs.get(1));
+    trips = trips(index.getTrips());
+    assertEquals(1, trips.size());
+    assertEquals(tripD2, trips.get(0));
+    serviceIds = index.getServiceIds();
+    assertEquals(2, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s2")));
+    intervalBlock = index.getServiceIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {80}, intervalBlock.getMinArrivals()));
+    assertTrue(Arrays.equals(new int[] {80}, intervalBlock.getMinDepartures()));
+    assertTrue(Arrays.equals(new int[] {90}, intervalBlock.getMaxArrivals()));
+    assertTrue(Arrays.equals(new int[] {90}, intervalBlock.getMaxDepartures()));
+
+    indices = grep(allIndices, aid("e3"));
+    assertEquals(1, indices.size());
+    index = indices.get(0);
+    trips = trips(index.getTrips());
+    assertEquals(2, trips.size());
+    assertEquals(tripF3, trips.get(0));
+    assertEquals(tripE3, trips.get(1));
     serviceIds = index.getServiceIds();
     assertEquals(1, serviceIds.getActiveServiceIds().size());
     assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
     intervalBlock = index.getServiceIntervalBlock();
-    assertTrue(Arrays.equals(new int[] {40, 50}, intervalBlock.getMinArrivals()));
-    assertTrue(Arrays.equals(new int[] {50, 60},
+    assertTrue(Arrays.equals(new int[] {100, 110},
+        intervalBlock.getMinArrivals()));
+    assertTrue(Arrays.equals(new int[] {100, 110},
         intervalBlock.getMinDepartures()));
     assertTrue(Arrays.equals(new int[] {100, 110},
         intervalBlock.getMaxArrivals()));
     assertTrue(Arrays.equals(new int[] {100, 110},
         intervalBlock.getMaxDepartures()));
+  }
+
+  private List<TripEntry> trips(List<BlockTripEntry> trips) {
+    List<TripEntry> tes = new ArrayList<TripEntry>();
+    for (BlockTripEntry blockTrip : trips)
+      tes.add(blockTrip.getTrip());
+    return tes;
   }
 
   @Test
@@ -250,7 +316,7 @@ public class BlockIndicesFactoryTest {
     FrequencyEntry freqA2 = frequency(time(15, 00), time(18, 00), 10);
     List<FrequencyEntry> freqsA = Arrays.asList(freqA1, freqA2);
 
-    BlockConfigurationEntry bcA = linkBlockTrips(blockA, freqsA, tripA);
+    linkBlockTrips(blockA, freqsA, tripA);
 
     /****
      * Block B
@@ -267,24 +333,24 @@ public class BlockIndicesFactoryTest {
     FrequencyEntry freqB2 = frequency(time(18, 00), time(21, 00), 20);
     List<FrequencyEntry> freqsB = Arrays.asList(freqB1, freqB2);
 
-    BlockConfigurationEntry bcB = linkBlockTrips(blockB, freqsB, tripB);
+    linkBlockTrips(blockB, freqsB, tripB);
 
-    List<FrequencyBlockIndex> allIndices = factory.createFrequencyIndices(Arrays.asList(
+    List<FrequencyBlockTripIndex> allIndices = factory.createFrequencyTripIndices(Arrays.asList(
         (BlockEntry) blockB, blockA));
 
     assertEquals(1, allIndices.size());
 
-    List<FrequencyBlockIndex> indices = grep(allIndices, aid("a"));
+    List<FrequencyBlockTripIndex> indices = grep(allIndices, aid("a"));
     assertEquals(1, indices.size());
 
-    FrequencyBlockIndex index = indices.get(0);
+    FrequencyBlockTripIndex index = indices.get(0);
 
-    List<BlockConfigurationEntry> configs = index.getBlocks();
-    assertEquals(4, configs.size());
-    assertEquals(bcA, configs.get(0));
-    assertEquals(bcB, configs.get(1));
-    assertEquals(bcA, configs.get(2));
-    assertEquals(bcB, configs.get(3));
+    List<TripEntry> trips = trips(index.getTrips());
+    assertEquals(4, trips.size());
+    assertEquals(tripA, trips.get(0));
+    assertEquals(tripB, trips.get(1));
+    assertEquals(tripA, trips.get(2));
+    assertEquals(tripB, trips.get(3));
 
     List<FrequencyEntry> freqs = index.getFrequencies();
     assertEquals(Arrays.asList(freqA1, freqB1, freqA2, freqB2), freqs);
@@ -325,7 +391,7 @@ public class BlockIndicesFactoryTest {
     FrequencyEntry freqA2 = frequency(time(15, 00), time(18, 00), 10);
     List<FrequencyEntry> freqsA = Arrays.asList(freqA1, freqA2);
 
-    BlockConfigurationEntry bcA = linkBlockTrips(blockA, freqsA, tripA);
+    linkBlockTrips(blockA, freqsA, tripA);
 
     /****
      * Block B
@@ -342,22 +408,22 @@ public class BlockIndicesFactoryTest {
     FrequencyEntry freqB2 = frequency(time(17, 00), time(20, 00), 20);
     List<FrequencyEntry> freqsB = Arrays.asList(freqB1, freqB2);
 
-    BlockConfigurationEntry bcB = linkBlockTrips(blockB, freqsB, tripB);
+    linkBlockTrips(blockB, freqsB, tripB);
 
-    List<FrequencyBlockIndex> allIndices = factory.createFrequencyIndices(Arrays.asList(
+    List<FrequencyBlockTripIndex> allIndices = factory.createFrequencyTripIndices(Arrays.asList(
         (BlockEntry) blockB, blockA));
 
     assertEquals(2, allIndices.size());
 
-    List<FrequencyBlockIndex> indices = grep(allIndices, aid("a"));
+    List<FrequencyBlockTripIndex> indices = grep(allIndices, aid("a"));
     assertEquals(1, indices.size());
 
-    FrequencyBlockIndex index = indices.get(0);
+    FrequencyBlockTripIndex index = indices.get(0);
 
-    List<BlockConfigurationEntry> configs = index.getBlocks();
-    assertEquals(2, configs.size());
-    assertEquals(bcA, configs.get(0));
-    assertEquals(bcA, configs.get(1));
+    List<TripEntry> trips = trips(index.getTrips());
+    assertEquals(2, trips.size());
+    assertEquals(tripA, trips.get(0));
+    assertEquals(tripA, trips.get(1));
 
     List<FrequencyEntry> freqs = index.getFrequencies();
     assertEquals(Arrays.asList(freqA1, freqA2), freqs);
@@ -371,20 +437,20 @@ public class BlockIndicesFactoryTest {
         intervalBlock.getStartTimes()));
     assertTrue(Arrays.equals(new int[] {time(9, 0), time(18, 0)},
         intervalBlock.getEndTimes()));
-    
+
     /****
      * 
      ****/
-    
+
     indices = grep(allIndices, aid("b"));
     assertEquals(1, indices.size());
 
     index = indices.get(0);
 
-    configs = index.getBlocks();
-    assertEquals(2, configs.size());
-    assertEquals(bcB, configs.get(0));
-    assertEquals(bcB, configs.get(1));
+    trips = trips(index.getTrips());
+    assertEquals(2, trips.size());
+    assertEquals(tripB, trips.get(0));
+    assertEquals(tripB, trips.get(1));
 
     freqs = index.getFrequencies();
     assertEquals(Arrays.asList(freqB1, freqB2), freqs);
@@ -400,11 +466,14 @@ public class BlockIndicesFactoryTest {
         intervalBlock.getEndTimes()));
   }
 
-  private <T extends HasBlocks> List<T> grep(List<T> datas, AgencyAndId blockId) {
+  private <T extends HasBlockTrips> List<T> grep(List<T> datas,
+      AgencyAndId tripId) {
+
     List<T> matches = new ArrayList<T>();
+
     for (T data : datas) {
-      for (BlockConfigurationEntry config : data.getBlocks()) {
-        if (config.getBlock().getId().equals(blockId)) {
+      for (BlockTripEntry trip : data.getTrips()) {
+        if (trip.getTrip().getId().equals(tripId)) {
           matches.add(data);
           break;
         }

@@ -23,13 +23,14 @@
 <body>
 
 <p>
-<a namespace="/admin" href="index.action">Back to the Admin Panel</a>
+<s:a namespace="/admin" action="index">Back to the Admin Panel</s:a>
 </p>
 
 <h2>Operations</h2>
 
 <ul>
 	<li><s:a href="active-trips.action">Active Trips</s:a></li>
+    <li><s:a href="service-alerts.action">Service Alerts</s:a></li>
 </ul>
 
 

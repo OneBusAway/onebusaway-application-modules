@@ -169,10 +169,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
           }
         }
 
-        if (sti.getFrequency() != null && locations.isEmpty()) {
+        if (locations.isEmpty()) {
           ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
-          if (isFrequencyBasedArrivalInRange(sti, fromTime, toTime))
-            beans.add(bean);
+          if (sti.getFrequency() == null) {
+            if (isArrivalAndDepartureBeanInRange(bean, from, to))
+              beans.add(bean);
+          } else {
+            if (isFrequencyBasedArrivalInRange(sti, fromTime, toTime))
+              beans.add(bean);
+          }
         }
       }
     }

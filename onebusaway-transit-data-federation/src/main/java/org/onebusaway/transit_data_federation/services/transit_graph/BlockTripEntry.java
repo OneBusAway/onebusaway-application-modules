@@ -29,4 +29,14 @@ public interface BlockTripEntry {
   public BlockTripEntry getPreviousTrip();
 
   public BlockTripEntry getNextTrip();
+  
+  /****
+   * Stop Methods
+   ****/
+  
+  public int getArrivalTimeForIndex(int index);
+  
+  public int getDepartureTimeForIndex(int index);
+
+  public double getDistanceAlongBlockForIndex(int blockSequence);
 }

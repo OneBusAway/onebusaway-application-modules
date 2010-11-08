@@ -3,7 +3,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockIndices;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockTripIndices;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
@@ -42,8 +42,8 @@ import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 
 public class RouteBeanServiceImplTest {
@@ -186,9 +186,9 @@ public class RouteBeanServiceImplTest {
 
     linkBlockTrips(blockA, tripA, tripB);
 
-    List<BlockIndex> blockIndices = blockIndices(blockA);
+    List<BlockTripIndex> blockIndices = blockTripIndices(blockA);
     Mockito.when(
-        _blockIndexService.getBlockIndicesForRouteCollectionId(routeId)).thenReturn(
+        _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId)).thenReturn(
         blockIndices);
 
     StopBean stopBeanA = getStopBean(stopA);

@@ -8,6 +8,7 @@ import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -24,6 +25,7 @@ import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanSe
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
@@ -44,6 +46,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   private TripStopTimesBeanService _tripStopTimesBeanService;
 
   private StopBeanService _stopBeanService;
+
+  private ServiceAlertsService _serviceAlertBeanService;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -69,6 +73,12 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Autowired
   public void setStopBeanService(StopBeanService stopBeanService) {
     _stopBeanService = stopBeanService;
+  }
+
+  @Autowired
+  public void setServiceAlertBeanService(
+      ServiceAlertsService serviceAlertBeanService) {
+    _serviceAlertBeanService = serviceAlertBeanService;
   }
 
   /****
@@ -210,6 +220,15 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       AgencyAndId vid = blockLocation.getVehicleId();
       if (vid != null)
         bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
+
+      if (activeBlockTrip != null) {
+        TripEntry trip = activeBlockTrip.getTrip();
+        AgencyAndId lineId = trip.getRouteCollectionId();
+        String lineIdAsString = AgencyAndIdLibrary.convertToString(lineId);
+        List<SituationBean> situations = _serviceAlertBeanService.getSituationsForLineId(lineIdAsString);
+        if (!situations.isEmpty())
+          bean.setSituations(situations);
+      }
 
     } else {
       bean.setPredicted(false);

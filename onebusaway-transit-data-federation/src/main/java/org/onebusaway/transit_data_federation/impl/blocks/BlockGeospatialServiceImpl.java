@@ -8,11 +8,11 @@ import java.util.Set;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
-import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
 
     List<StopEntry> stops = _transitGraphDao.getStopsByLocation(bounds);
 
-    Set<BlockIndex> blockIndices = new HashSet<BlockIndex>();
+    Set<BlockTripIndex> blockIndices = new HashSet<BlockTripIndex>();
 
     for (StopEntry stop : stops) {
 
@@ -58,7 +58,7 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
         blockIndices.add(stopTimeIndex.getBlockIndex());
     }
 
-    List<FrequencyBlockIndex> frequencyIndices = Collections.emptyList();
+    List<FrequencyBlockTripIndex> frequencyIndices = Collections.emptyList();
 
     return _blockCalendarService.getActiveBlocksInTimeRange(blockIndices,
         frequencyIndices, timeFrom, timeTo);

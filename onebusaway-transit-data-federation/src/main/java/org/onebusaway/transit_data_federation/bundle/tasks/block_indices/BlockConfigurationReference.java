@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-public class BlockConfigurationIndex implements Serializable {
+public class BlockConfigurationReference implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -12,7 +12,7 @@ public class BlockConfigurationIndex implements Serializable {
 
   private final int configurationIndex;
 
-  public BlockConfigurationIndex(AgencyAndId blockId, int configurationIndex) {
+  public BlockConfigurationReference(AgencyAndId blockId, int configurationIndex) {
     if (blockId == null)
       throw new IllegalArgumentException();
     this.blockId = blockId;
@@ -44,7 +44,7 @@ public class BlockConfigurationIndex implements Serializable {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BlockConfigurationIndex other = (BlockConfigurationIndex) obj;
+    BlockConfigurationReference other = (BlockConfigurationReference) obj;
     if (!blockId.equals(other.blockId))
       return false;
     if (configurationIndex != other.configurationIndex)

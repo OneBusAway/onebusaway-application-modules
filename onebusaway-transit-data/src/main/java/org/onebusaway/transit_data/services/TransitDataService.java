@@ -35,6 +35,7 @@ import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationExchangeDeliveryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
@@ -311,15 +312,26 @@ public interface TransitDataService extends FederatedService {
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException;
 
-  /****
+  /**
+   * @return **
    * 
    ****/
 
   @FederatedByAgencyIdMethod
-  public void updateServiceAlerts(String agencyId, SituationExchangeDeliveryBean alerts);
-  
+  public SituationBean createServiceAlert(String agencyId, SituationBean situation);
+
+  @FederatedByEntityIdMethod(propertyExpression = "id")
+  public void updateServiceAlert(SituationBean situation);
+
+  @FederatedByAgencyIdMethod
+  public void updateServiceAlerts(String agencyId,
+      SituationExchangeDeliveryBean alerts);
+
+  @FederatedByEntityIdMethod
+  public SituationBean getServiceAlertForId(String situationId);
+
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
-  public SituationExchangeDeliveryBean getServiceAlerts(SituationQueryBean query);
+  public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query);
 
   /****
    * These methods are going to pile up. How do we handle this gracefully in the

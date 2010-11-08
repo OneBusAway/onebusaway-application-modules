@@ -103,6 +103,22 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
   }
 
   @Override
+  public int getArrivalTimeForIndex(int stopIndex) {
+    return trip.getStopTimes().get(stopIndex).getArrivalTime();
+  }
+
+  @Override
+  public int getDepartureTimeForIndex(int stopIndex) {
+    return trip.getStopTimes().get(stopIndex).getDepartureTime();
+  }
+
+  @Override
+  public double getDistanceAlongBlockForIndex(int stopIndex) {
+    return distanceAlongBlock
+        + trip.getStopTimes().get(stopIndex).getShapeDistTraveled();
+  }
+
+  @Override
   public String toString() {
     return trip.getId().toString();
   }

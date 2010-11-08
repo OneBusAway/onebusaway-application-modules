@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,14 +13,15 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,9 +88,9 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
   public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
       long timeFrom, long timeTo) {
 
-    List<BlockIndex> indices = _blockIndexService.getBlockIndicesForBlock(blockId);
-    List<FrequencyBlockIndex> frequencyIndices = _blockIndexService.getFrequencyBlockIndicesForBlock(blockId);
-    
+    List<BlockTripIndex> indices = _blockIndexService.getBlockTripIndicesForBlock(blockId);
+    List<FrequencyBlockTripIndex> frequencyIndices = _blockIndexService.getFrequencyBlockTripIndicesForBlock(blockId);
+
     return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
         timeTo);
   }
@@ -96,8 +98,8 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
   @Override
   public List<BlockInstance> getActiveBlocksForAgencyInTimeRange(
       String agencyId, long timeFrom, long timeTo) {
-    List<BlockIndex> indices = _blockIndexService.getBlockIndicesForAgencyId(agencyId);
-    List<FrequencyBlockIndex> frequencyIndices = _blockIndexService.getFrequencyBlockIndicesForAgencyId(agencyId);
+    List<BlockTripIndex> indices = _blockIndexService.getBlockTripIndicesForAgencyId(agencyId);
+    List<FrequencyBlockTripIndex> frequencyIndices = _blockIndexService.getFrequencyBlockTripIndicesForAgencyId(agencyId);
     return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
         timeTo);
   }
@@ -105,22 +107,27 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
   @Override
   public List<BlockInstance> getActiveBlocksForRouteInTimeRange(
       AgencyAndId routeId, long timeFrom, long timeTo) {
-    List<BlockIndex> indices = _blockIndexService.getBlockIndicesForRouteCollectionId(routeId);
-    List<FrequencyBlockIndex> frequencyIndices = _blockIndexService.getFrequencyBlockIndicesForRouteCollectionId(routeId);
+    List<BlockTripIndex> indices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId);
+    List<FrequencyBlockTripIndex> frequencyIndices = _blockIndexService.getFrequencyBlockTripIndicesForRouteCollectionId(routeId);
     return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
         timeTo);
   }
 
   @Override
   public List<BlockInstance> getActiveBlocksInTimeRange(
-      Iterable<BlockIndex> indices,
-      Iterable<FrequencyBlockIndex> frequencyIndices, long timeFrom, long timeTo) {
-    List<BlockInstance> instances = new ArrayList<BlockInstance>();
-    for (BlockIndex index : indices)
+      Iterable<BlockTripIndex> indices,
+      Iterable<FrequencyBlockTripIndex> frequencyIndices, long timeFrom,
+      long timeTo) {
+
+    Set<BlockInstance> instances = new HashSet<BlockInstance>();
+
+    for (BlockTripIndex index : indices)
       getActiveBlocksInTimeRange(index, timeFrom, timeTo, instances);
-    for (FrequencyBlockIndex index : frequencyIndices)
+
+    for (FrequencyBlockTripIndex index : frequencyIndices)
       getActiveFrequencyBlocksInTimeRange(index, timeFrom, timeTo, instances);
-    return instances;
+
+    return new ArrayList<BlockInstance>(instances);
   }
 
   /****
@@ -134,8 +141,12 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     return serviceDates.contains(serviceDate);
   }
 
-  private void getActiveBlocksInTimeRange(BlockIndex index, long timeFrom,
-      long timeTo, List<BlockInstance> results) {
+  /****
+   * 
+   ****/
+
+  private void getActiveBlocksInTimeRange(BlockTripIndex index, long timeFrom,
+      long timeTo, Collection<BlockInstance> results) {
 
     Date dateFrom = new Date(timeFrom);
     Date dateTo = new Date(timeTo);
@@ -143,10 +154,10 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     handleBlockIndex(index, dateFrom, dateTo, results);
   }
 
-  private List<BlockInstance> handleBlockIndex(BlockIndex index, Date timeFrom,
-      Date timeTo, List<BlockInstance> instances) {
+  private Collection<BlockInstance> handleBlockIndex(BlockTripIndex index,
+      Date timeFrom, Date timeTo, Collection<BlockInstance> instances) {
 
-    List<BlockConfigurationEntry> blocks = index.getBlocks();
+    List<BlockTripEntry> trips = index.getTrips();
 
     ServiceIntervalBlock serviceIntervalBlock = index.getServiceIntervalBlock();
     ServiceInterval serviceInterval = serviceIntervalBlock.getRange();
@@ -156,16 +167,16 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
 
     for (Date serviceDate : serviceDates) {
 
-      findBlocksInRange(serviceIntervalBlock, serviceDate, timeFrom, timeTo,
-          blocks, instances);
+      findBlockTripsInRange(serviceIntervalBlock, serviceDate, timeFrom,
+          timeTo, trips, instances);
     }
 
     return instances;
   }
 
-  private void findBlocksInRange(ServiceIntervalBlock intervals,
-      Date serviceDate, Date timeFrom, Date timeTo,
-      List<BlockConfigurationEntry> blocks, List<BlockInstance> instances) {
+  private void findBlockTripsInRange(ServiceIntervalBlock intervals,
+      Date serviceDate, Date timeFrom, Date timeTo, List<BlockTripEntry> trips,
+      Collection<BlockInstance> instances) {
 
     int scheduledTimeFrom = (int) ((timeFrom.getTime() - serviceDate.getTime()) / 1000);
     int scheduledTimeTo = (int) ((timeTo.getTime() - serviceDate.getTime()) / 1000);
@@ -176,7 +187,8 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
         scheduledTimeTo));
 
     for (int in = indexFrom; in < indexTo; in++) {
-      BlockConfigurationEntry block = blocks.get(in);
+      BlockTripEntry trip = trips.get(in);
+      BlockConfigurationEntry block = trip.getBlockConfiguration();
       BlockInstance instance = new BlockInstance(block, serviceDate.getTime());
       instances.add(instance);
     }
@@ -186,8 +198,9 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
    * Frequency Block Indices
    ****/
 
-  private void getActiveFrequencyBlocksInTimeRange(FrequencyBlockIndex index,
-      long timeFrom, long timeTo, List<BlockInstance> results) {
+  private void getActiveFrequencyBlocksInTimeRange(
+      FrequencyBlockTripIndex index, long timeFrom, long timeTo,
+      Collection<BlockInstance> results) {
 
     Date dateFrom = new Date(timeFrom);
     Date dateTo = new Date(timeTo);
@@ -195,11 +208,11 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     handleFrequencyBlockIndex(index, dateFrom, dateTo, results);
   }
 
-  private List<BlockInstance> handleFrequencyBlockIndex(
-      FrequencyBlockIndex index, Date timeFrom, Date timeTo,
-      List<BlockInstance> instances) {
+  private Collection<BlockInstance> handleFrequencyBlockIndex(
+      FrequencyBlockTripIndex index, Date timeFrom, Date timeTo,
+      Collection<BlockInstance> instances) {
 
-    List<BlockConfigurationEntry> blocks = index.getBlocks();
+    List<BlockTripEntry> trips = index.getTrips();
     List<FrequencyEntry> frequencies = index.getFrequencies();
 
     FrequencyServiceIntervalBlock serviceIntervalBlock = index.getServiceIntervalBlock();
@@ -210,17 +223,17 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
 
     for (Date serviceDate : serviceDates) {
 
-      findFrequencyBlocksInRange(serviceIntervalBlock, serviceDate, timeFrom,
-          timeTo, blocks, frequencies, instances);
+      findFrequencyBlockTripsInRange(serviceIntervalBlock, serviceDate,
+          timeFrom, timeTo, trips, frequencies, instances);
     }
 
     return instances;
   }
 
-  private void findFrequencyBlocksInRange(
+  private void findFrequencyBlockTripsInRange(
       FrequencyServiceIntervalBlock serviceIntervalBlock, Date serviceDate,
-      Date timeFrom, Date timeTo, List<BlockConfigurationEntry> blocks,
-      List<FrequencyEntry> frequencies, List<BlockInstance> instances) {
+      Date timeFrom, Date timeTo, List<BlockTripEntry> trips,
+      List<FrequencyEntry> frequencies, Collection<BlockInstance> instances) {
 
     int scheduledTimeFrom = (int) ((timeFrom.getTime() - serviceDate.getTime()) / 1000);
     int scheduledTimeTo = (int) ((timeTo.getTime() - serviceDate.getTime()) / 1000);
@@ -231,13 +244,18 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
         serviceIntervalBlock.getStartTimes(), scheduledTimeTo));
 
     for (int in = indexFrom; in < indexTo; in++) {
-      BlockConfigurationEntry block = blocks.get(in);
+      BlockTripEntry trip = trips.get(in);
+      BlockConfigurationEntry block = trip.getBlockConfiguration();
       FrequencyEntry frequency = frequencies.get(in);
       BlockInstance instance = new BlockInstance(block, serviceDate.getTime(),
           frequency);
       instances.add(instance);
     }
   }
+
+  /****
+   * 
+   ****/
 
   private int index(int index) {
     if (index < 0)

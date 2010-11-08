@@ -1,6 +1,7 @@
 package org.onebusaway.api.model.transit;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 
@@ -56,6 +57,8 @@ public final class TripStatusV2Bean implements Serializable {
   private Double distanceAlongTrip;
 
   private String vehicleId;
+  
+  private List<String> situationIds;
 
   public long getServiceDate() {
     return serviceDate;
@@ -199,5 +202,13 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setVehicleId(String vehicleId) {
     this.vehicleId = vehicleId;
+  }
+
+  public List<String> getSituationIds() {
+    return situationIds;
+  }
+
+  public void setSituationIds(List<String> situationIds) {
+    this.situationIds = situationIds;
   }
 }

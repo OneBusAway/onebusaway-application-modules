@@ -34,9 +34,8 @@ import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -188,21 +187,19 @@ class RouteBeanServiceImpl implements RouteBeanService {
     directionGrouping.setOrdered(true);
     result.addGrouping(directionGrouping);
 
-    List<BlockIndex> blockIndices = _blockIndexService.getBlockIndicesForRouteCollectionId(routeCollectionId);
+    List<BlockTripIndex> blockIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeCollectionId);
 
     List<BlockTripEntry> blockTrips = new ArrayList<BlockTripEntry>();
 
-    for (BlockIndex blockIndex : blockIndices) {
+    for (BlockTripIndex blockIndex : blockIndices) {
 
       // Do we really need to do all of them?
-      for (BlockConfigurationEntry blockConfig : blockIndex.getBlocks()) {
-        for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
-          TripEntry trip = blockTrip.getTrip();
-          AgencyAndId rcId = trip.getRouteCollectionId();
-          if (!rcId.equals(routeCollectionId))
-            continue;
-          blockTrips.add(blockTrip);
-        }
+      for (BlockTripEntry blockTrip : blockIndex.getTrips()) {
+        TripEntry trip = blockTrip.getTrip();
+        AgencyAndId rcId = trip.getRouteCollectionId();
+        if (!rcId.equals(routeCollectionId))
+          continue;
+        blockTrips.add(blockTrip);
       }
     }
 

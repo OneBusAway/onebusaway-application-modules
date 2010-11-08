@@ -10,21 +10,21 @@ import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBl
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 
 public class FrequencyBlockStopTimeIndex extends
-    AbstractBlockStopTimeIndex<FrequencyBlockIndex> {
+    AbstractBlockStopTimeIndex<FrequencyBlockTripIndex> {
 
   private final FrequencyBlockStopTimeList _frequencyStopTimes = new FrequencyBlockStopTimeList();
 
-  public FrequencyBlockStopTimeIndex(FrequencyBlockIndex blockIndex,
+  public FrequencyBlockStopTimeIndex(FrequencyBlockTripIndex blockTripIndex,
       int blockSequence, ServiceInterval serviceInterval) {
-    super(blockIndex, blockSequence, serviceInterval);
+    super(blockTripIndex, blockSequence, serviceInterval);
   }
 
   public double getStartTimeForIndex(int index) {
-    return _blockIndex.getFrequencies().get(index).getStartTime();
+    return _blockTripIndex.getFrequencies().get(index).getStartTime();
   }
 
   public double getEndTimeForIndex(int index) {
-    return _blockIndex.getFrequencies().get(index).getEndTime();
+    return _blockTripIndex.getFrequencies().get(index).getEndTime();
   }
 
   public List<FrequencyBlockStopTimeEntry> getFrequencyStopTimes() {
