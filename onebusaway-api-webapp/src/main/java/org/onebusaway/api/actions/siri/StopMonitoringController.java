@@ -189,7 +189,9 @@ public class StopMonitoringController implements ModelDriven<Object>,
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
       MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
 
-      MonitoredStopVisit.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(specificTripDetails);
+      MonitoredStopVisit.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(
+          specificTripDetails, new Date(status.getServiceDate()),
+          status.getVehicleId());
       MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
 
       MonitoredCall monitoredCall = new MonitoredCall();

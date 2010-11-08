@@ -24,8 +24,6 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
-import org.onebusaway.transit_data.model.trips.TripStatusBean;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -110,9 +108,8 @@ public class SiriUtils {
   }
 
   public static MonitoredVehicleJourney getMonitoredVehicleJourney(
-      TripDetailsBean trip) {
+      TripDetailsBean trip, Date serviceDate, String vehicleId) {
     TripBean tripBean = trip.getTrip();
-    TripStatusBean status = trip.getStatus();
 
     MonitoredVehicleJourney monitoredVehicleJourney = new MonitoredVehicleJourney();
 
@@ -123,9 +120,7 @@ public class SiriUtils {
     monitoredVehicleJourney.PublishedLineName = tripBean.getTripHeadsign();
 
     monitoredVehicleJourney.FramedVehicleJourneyRef = new FramedVehicleJourneyRef();
-    monitoredVehicleJourney.VehicleRef = status.getVehicleId();
-
-    Date serviceDate = new Date(status.getServiceDate());
+    monitoredVehicleJourney.VehicleRef = vehicleId;
 
     monitoredVehicleJourney.FramedVehicleJourneyRef.DataFrameRef = String.format(
         "%1$tY-%1$tm-%1$td", serviceDate);

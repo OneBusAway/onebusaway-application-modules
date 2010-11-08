@@ -85,10 +85,10 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     }
 
     String vehicleId = _request.getParameter("VehicleRef");
-    String vehicleIdWithAgency = agencyId + "_" + vehicleId;
-      
+
     // single trip, by vehicle
     if (vehicleId != null) {
+      String vehicleIdWithAgency = agencyId + "_" + vehicleId;
       VehicleStatusBean vehicle = _transitDataService.getVehicleForAgency(
           vehicleIdWithAgency, _time.getTime());
       ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
@@ -96,6 +96,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         activities.add(createActivity(vehicle));
       }
       _response = generateSiriResponse(_time, activities);
+      return new DefaultHttpHeaders();
     }
 
     String directionId = _request.getParameter("DirectionRef");
@@ -176,9 +177,12 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       query.setTripId(tripBean.getId());
       query.setVehicleId(vehicleStatus.getVehicleId());
       query.getInclusion().setIncludeTripStatus(true);
-      query.setServiceDate(vehicleStatus.getTripStatus().getServiceDate());
+      TripStatusBean tripStatus = vehicleStatus.getTripStatus();
+      query.setServiceDate(tripStatus.getServiceDate());
       TripDetailsBean tripDetails = _transitDataService.getSingleTripDetails(query);
-      activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(tripDetails);
+      activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(
+          tripDetails, new Date(tripStatus.getServiceDate()),
+          vehicleStatus.getVehicleId());
     } else {
       activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
     }
@@ -227,7 +231,9 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     time.setTime(new Date(status.getLastUpdateTime()));
     
     activity.RecordedAtTime = time;
-    activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(trip);
+
+    activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(
+        trip, new Date(status.getServiceDate()), status.getVehicleId());
     activity.MonitoredVehicleJourney.Monitored = true;
     activity.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
 
