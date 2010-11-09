@@ -3,6 +3,7 @@ package org.onebusaway.webapp.gwt.where_library.view;
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.webapp.gwt.where_library.WhereLibrary;
 import org.onebusaway.webapp.gwt.where_library.WhereMessages;
 import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryCssResource;
@@ -168,6 +169,10 @@ public class ArrivalsAndDeparturesPresentaion {
   public boolean isLongRouteName(RouteBean route) {
     String name = RoutePresenter.getNameForRoute(route);
     return RoutePresenter.isRouteNameLong(name);
+  }
+  
+  public boolean isShowFrequencyFrom(FrequencyBean frequency) { 
+    return frequency.getStartTime() > System.currentTimeMillis();
   }
 
   /****

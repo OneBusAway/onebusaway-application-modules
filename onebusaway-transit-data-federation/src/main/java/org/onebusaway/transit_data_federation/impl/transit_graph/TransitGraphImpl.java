@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
@@ -26,6 +29,8 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 public class TransitGraphImpl implements Serializable, TripPlannerGraph {
 
   private static final long serialVersionUID = 1L;
+
+  private static Logger _log = LoggerFactory.getLogger(TransitGraphImpl.class);
 
   private static final TripEntryAdapter _tripEntryAdapter = new TripEntryAdapter();
 
@@ -57,17 +62,24 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
     if (_stopLocationTree == null) {
       System.out.println("initializing trip planner graph...");
 
-      _stopLocationTree = new STRtree(_stops.size());
+      if (_stops.size() == 0) {
 
-      for (int i = 0; i < _stops.size(); i++) {
-        StopEntry stop = _stops.get(i);
-        double x = stop.getStopLon();
-        double y = stop.getStopLat();
-        Envelope r = new Envelope(x, x, y, y);
-        _stopLocationTree.insert(r, stop);
+        _log.warn("no stops found for graph");
+
+      } else {
+
+        _stopLocationTree = new STRtree(_stops.size());
+
+        for (int i = 0; i < _stops.size(); i++) {
+          StopEntry stop = _stops.get(i);
+          double x = stop.getStopLon();
+          double y = stop.getStopLat();
+          Envelope r = new Envelope(x, x, y, y);
+          _stopLocationTree.insert(r, stop);
+        }
+
+        _stopLocationTree.build();
       }
-
-      _stopLocationTree.build();
 
       System.out.println("  stops=" + _stops.size());
       System.out.println("  trips= " + _trips.size());
@@ -169,6 +181,8 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
 
   @Override
   public List<StopEntry> getStopsByLocation(CoordinateBounds bounds) {
+    if (_stopLocationTree == null)
+      return Collections.emptyList();
     Envelope r = new Envelope(bounds.getMinLon(), bounds.getMaxLon(),
         bounds.getMinLat(), bounds.getMaxLat());
     StopRTreeVisitor go = new StopRTreeVisitor();

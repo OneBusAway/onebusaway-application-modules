@@ -70,10 +70,15 @@
               <s:else>
                 <jsp:text>Every </jsp:text>
                 <s:property value="frequency.headway/60"/>
-                <jsp:text> mins from </jsp:text>
-                <oba:date format="hh:mmaa" value="frequency.startTime"/>
-                <jsp:text> to </jsp:text>
-                <oba:date format="hh:mmaa" value="frequency.endTime"/>
+                <jsp:text> mins</jsp:text>
+                <s:if test="arrivalsAndDeparturesPresentation.isShowFrequencyFrom(frequency)">
+                  <jsp:text> from </jsp:text>
+                  <oba:date format="hh:mmaa" value="frequency.startTime"/>
+                </s:if>
+                <s:else>
+                  <jsp:text> until </jsp:text>
+                  <oba:date format="hh:mmaa" value="frequency.endTime"/>
+                </s:else>
               </s:else>
             </div>
             </div>

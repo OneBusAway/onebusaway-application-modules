@@ -240,15 +240,21 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setScheduledDepartureTime(sti.getDepartureTime());
       pab.setFrequency(null);
     } else {
-      long t = time + frequency.getHeadwaySecs() * 1000;
-      pab.setScheduledArrivalTime(t);
-      pab.setScheduledDepartureTime(t);
 
       FrequencyBean fb = new FrequencyBean();
       fb.setStartTime(sti.getServiceDate() + frequency.getStartTime() * 1000);
       fb.setEndTime(sti.getServiceDate() + frequency.getEndTime() * 1000);
       fb.setHeadway(frequency.getHeadwaySecs());
       pab.setFrequency(fb);
+      
+      long t = time + frequency.getHeadwaySecs() * 1000;
+      
+      if( t < fb.getStartTime() )
+        t = fb.getStartTime();
+      if( t > fb.getEndTime() )
+        t = fb.getEndTime();
+      pab.setScheduledArrivalTime(t);
+      pab.setScheduledDepartureTime(t);
     }
 
     return pab;

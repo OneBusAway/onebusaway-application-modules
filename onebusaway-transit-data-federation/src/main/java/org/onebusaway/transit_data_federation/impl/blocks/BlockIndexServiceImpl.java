@@ -304,8 +304,12 @@ public class BlockIndexServiceImpl implements BlockIndexService {
       stops++;
     }
 
-    _log.info("stops=" + stops + " stop_indices=" + stopIndices
-        + " avg (stop_indices/stop)=" + (stopIndices / stops));
+    if (stops == 0) {
+      _log.info("no stop indices loaded");
+    } else {
+      _log.info("stops=" + stops + " stop_indices=" + stopIndices
+          + " avg (stop_indices/stop)=" + (stopIndices / stops));
+    }
 
   }
 
