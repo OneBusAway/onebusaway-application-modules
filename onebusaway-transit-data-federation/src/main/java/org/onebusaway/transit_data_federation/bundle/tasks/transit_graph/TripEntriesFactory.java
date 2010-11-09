@@ -121,7 +121,7 @@ public class TripEntriesFactory {
 
     tripEntry.setId(trip.getId());
     tripEntry.setRouteId(unique(trip.getRoute().getId()));
-
+    tripEntry.setDirectionId(unique(trip.getDirectionId()));
     tripEntry.setServiceId(unique(lsid));
 
     // Only set the shape id for a trip if there are actually shape points to

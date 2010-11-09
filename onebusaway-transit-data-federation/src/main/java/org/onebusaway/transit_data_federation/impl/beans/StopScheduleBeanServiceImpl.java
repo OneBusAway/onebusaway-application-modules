@@ -190,7 +190,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         stiBean.setDepartureTime(sti.getDepartureTime());
         stiBean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
 
-        String directionId = narrative.getDirectionId();
+        String directionId = trip.getDirectionId();
         if (directionId == null)
           directionId = "0";
 
@@ -220,7 +220,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         bean.setHeadwaySecs(sti.getFrequency().getHeadwaySecs());
         bean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
 
-        String directionId = narrative.getDirectionId();
+        String directionId = trip.getDirectionId();
         if (directionId == null)
           directionId = "0";
 

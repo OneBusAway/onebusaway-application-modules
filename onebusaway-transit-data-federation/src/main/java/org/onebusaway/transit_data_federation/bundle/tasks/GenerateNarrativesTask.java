@@ -226,7 +226,6 @@ public class GenerateNarrativesTask implements Runnable {
     }
 
     TripNarrative.Builder builder = TripNarrative.builder();
-    builder.setDirectionId(deduplicate(trip.getDirectionId()));
     builder.setRouteShortName(deduplicate(trip.getRouteShortName()));
     builder.setTripHeadsign(deduplicate(headsign));
     builder.setTripShortName(deduplicate(trip.getTripShortName()));

@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -21,9 +22,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
+  private static final String ID_SEPARATOR = "_|_";
+
   private ConcurrentMap<String, SituationBean> _situations = new ConcurrentHashMap<String, SituationBean>();
 
   private ConcurrentMap<String, Set<String>> _situationIdsByLineId = new ConcurrentHashMap<String, Set<String>>();
+
+  private ConcurrentMap<String, Set<String>> _situationIdsByLineAndDirectionId = new ConcurrentHashMap<String, Set<String>>();
 
   @Override
   public SituationBean createServiceAlert(String agencyId,
@@ -66,25 +71,25 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
   public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query) {
     List<SituationBean> situations = new ArrayList<SituationBean>(
         _situations.values());
-
     return new ListBean<SituationBean>(situations, false);
   }
 
   @Override
   public List<SituationBean> getSituationsForLineId(String lineId) {
 
-    List<SituationBean> situations = new ArrayList<SituationBean>();
+    List<String> situationIds = new ArrayList<String>();
+    getSituationsForLineId(lineId, situationIds);
+    return getSituationIdsAsBeans(situationIds);
+  }
 
-    Set<String> situationIds = _situationIdsByLineId.get(lineId);
-    if (situationIds != null) {
-      for (String situationId : situationIds) {
-        SituationBean situation = _situations.get(situationId);
-        if (situation != null)
-          situations.add(situation);
-      }
-    }
+  @Override
+  public List<SituationBean> getSituationsForLineId(String lineId,
+      String directionId) {
 
-    return situations;
+    Set<String> situationIds = new HashSet<String>();
+    getSituationsForLineId(lineId, situationIds);
+    getSituationsForLineAndDirectionId(lineId, directionId, situationIds);
+    return getSituationIdsAsBeans(situationIds);
   }
 
   /****
@@ -95,6 +100,15 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
     String id = situation.getId();
     SituationBean existingSituation = _situations.put(id, situation);
+
+    updateLineReferences(existingSituation, situation);
+    updateLineAndDirectionReferences(existingSituation, situation);
+  }
+
+  private void updateLineReferences(SituationBean existingSituation,
+      SituationBean situation) {
+
+    String id = situation.getId();
 
     Set<String> existingLineIds = Collections.emptySet();
     if (existingSituation != null)
@@ -117,16 +131,92 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     }
   }
 
+  private void updateLineAndDirectionReferences(
+      SituationBean existingSituation, SituationBean situation) {
+
+    String id = situation.getId();
+
+    Set<String> existingLineIds = Collections.emptySet();
+    if (existingSituation != null)
+      existingLineIds = getVehicleJourneysAsLineAndDirectionIds(existingSituation);
+
+    Set<String> newLineIds = getVehicleJourneysAsLineAndDirectionIds(situation);
+
+    for (String existingLineId : existingLineIds) {
+      if (newLineIds.contains(existingLineId))
+        continue;
+      ConcurrentCollectionsLibrary.removeFromMapValueSet(
+          _situationIdsByLineAndDirectionId, existingLineId, id);
+    }
+
+    for (String newLineId : newLineIds) {
+      if (existingLineIds.contains(newLineId))
+        continue;
+      ConcurrentCollectionsLibrary.addToMapValueSet(
+          _situationIdsByLineAndDirectionId, newLineId, id);
+    }
+  }
+
   private Set<String> getVehicleJourneysAsLineIds(SituationBean situation) {
     Set<String> lineIds = new HashSet<String>();
     SituationAffectsBean affects = situation.getAffects();
     if (affects != null) {
       List<SituationAffectedVehicleJourneyBean> journeys = affects.getVehicleJourneys();
       if (journeys != null) {
-        for (SituationAffectedVehicleJourneyBean journey : journeys)
+        for (SituationAffectedVehicleJourneyBean journey : journeys) {
           lineIds.add(journey.getLineId());
+        }
       }
     }
     return lineIds;
+  }
+
+  private Set<String> getVehicleJourneysAsLineAndDirectionIds(
+      SituationBean situation) {
+    Set<String> lineIds = new HashSet<String>();
+    SituationAffectsBean affects = situation.getAffects();
+    if (affects != null) {
+      List<SituationAffectedVehicleJourneyBean> journeys = affects.getVehicleJourneys();
+      if (journeys != null) {
+        for (SituationAffectedVehicleJourneyBean journey : journeys) {
+          if (journey.getDirection() == null)
+            continue;
+          lineIds.add(journey.getLineId() + ID_SEPARATOR
+              + journey.getDirection());
+        }
+      }
+    }
+    return lineIds;
+  }
+
+  private void getSituationsForLineId(String lineId,
+      Collection<String> situationIds) {
+    Set<String> ids = _situationIdsByLineId.get(lineId);
+    if (ids != null)
+      situationIds.addAll(ids);
+  }
+
+  private void getSituationsForLineAndDirectionId(String lineId,
+      String directionId, Collection<String> situationIds) {
+    String id = joinLineAndDirectionId(lineId, directionId);
+    Set<String> ids = _situationIdsByLineId.get(id);
+    if (ids != null)
+      situationIds.addAll(ids);
+  }
+
+  private List<SituationBean> getSituationIdsAsBeans(
+      Collection<String> situationIds) {
+    List<SituationBean> situations = new ArrayList<SituationBean>(
+        situationIds.size());
+    for (String situationId : situationIds) {
+      SituationBean situation = _situations.get(situationId);
+      if (situation != null)
+        situations.add(situation);
+    }
+    return situations;
+  }
+
+  private String joinLineAndDirectionId(String lineId, String directionId) {
+    return lineId + ID_SEPARATOR + directionId;
   }
 }

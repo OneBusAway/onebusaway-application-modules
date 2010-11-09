@@ -7,14 +7,11 @@ import java.util.Map;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.StopSequence;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
-import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -26,13 +23,6 @@ public class StopSequencesServiceImpl implements StopSequencesService {
   private static final String NO_DIRECTION_ID = StopSequencesServiceImpl.class.getName()
       + ".noDirectionId";
 
-  private NarrativeService _narrativeServie;
-
-  @Autowired
-  public void setNarrativeService(NarrativeService narrativeService) {
-    _narrativeServie = narrativeService;
-  }
-
   @Override
   public List<StopSequence> getStopSequencesForTrips(List<BlockTripEntry> trips) {
 
@@ -41,8 +31,7 @@ public class StopSequencesServiceImpl implements StopSequencesService {
 
     for (BlockTripEntry blockTrip : trips) {
       TripEntry trip = blockTrip.getTrip();
-      TripNarrative narrative = _narrativeServie.getTripForId(trip.getId());
-      String directionId = narrative.getDirectionId();
+      String directionId = trip.getDirectionId();
       if (directionId == null)
         directionId = NO_DIRECTION_ID;
       AgencyAndId shapeId = trip.getShapeId();

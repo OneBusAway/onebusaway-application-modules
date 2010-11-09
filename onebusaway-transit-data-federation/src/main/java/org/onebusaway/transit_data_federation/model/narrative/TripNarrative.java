@@ -23,8 +23,6 @@ public final class TripNarrative implements Serializable {
 
   private final String routeShortName;
 
-  private final String directionId;
-
   public static Builder builder() {
     return new Builder();
   }
@@ -33,7 +31,6 @@ public final class TripNarrative implements Serializable {
     this.tripShortName = builder.tripShortName;
     this.tripHeadsign = builder.tripHeadsign;
     this.routeShortName = builder.routeShortName;
-    this.directionId = builder.directionId;
   }
 
   public String getTripShortName() {
@@ -48,10 +45,6 @@ public final class TripNarrative implements Serializable {
     return routeShortName;
   }
 
-  public String getDirectionId() {
-    return directionId;
-  }
-
   public static class Builder {
 
     private String tripShortName;
@@ -59,8 +52,6 @@ public final class TripNarrative implements Serializable {
     private String tripHeadsign;
 
     private String routeShortName;
-
-    private String directionId;
 
     public TripNarrative create() {
       return new TripNarrative(this);
@@ -78,11 +69,6 @@ public final class TripNarrative implements Serializable {
 
     public Builder setRouteShortName(String routeShortName) {
       this.routeShortName = routeShortName;
-      return this;
-    }
-
-    public Builder setDirectionId(String directionId) {
-      this.directionId = directionId;
       return this;
     }
   }

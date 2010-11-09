@@ -99,7 +99,6 @@ public class RouteBeanServiceImplTest {
     _service.setStopSequencesBlocksService(_stopSequenceBlocksService);
 
     _narrativeService = Mockito.mock(NarrativeService.class);
-    _stopSequencesService.setNarrativeService(_narrativeService);
     _stopSequenceBlocksService.setNarrativeService(_narrativeService);
 
     _blockIndexService = Mockito.mock(BlockIndexService.class);
@@ -164,16 +163,16 @@ public class RouteBeanServiceImplTest {
     TripEntryImpl tripB = trip("tripB", "sidA");
 
     tripA.setRouteCollectionId(routeId);
+    tripA.setDirectionId("0");
     tripB.setRouteCollectionId(routeId);
-
+    tripB.setDirectionId("1");
+    
     Builder tnA = TripNarrative.builder();
-    tnA.setDirectionId("0");
     tnA.setTripHeadsign("Destination A");
     Mockito.when(_narrativeService.getTripForId(tripA.getId())).thenReturn(
         tnA.create());
 
     Builder tnB = TripNarrative.builder();
-    tnB.setDirectionId("1");
     tnB.setTripHeadsign("Destination B");
     Mockito.when(_narrativeService.getTripForId(tripB.getId())).thenReturn(
         tnB.create());

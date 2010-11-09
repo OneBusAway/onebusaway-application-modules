@@ -225,7 +225,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         TripEntry trip = activeBlockTrip.getTrip();
         AgencyAndId lineId = trip.getRouteCollectionId();
         String lineIdAsString = AgencyAndIdLibrary.convertToString(lineId);
-        List<SituationBean> situations = _serviceAlertBeanService.getSituationsForLineId(lineIdAsString);
+        List<SituationBean> situations = _serviceAlertBeanService.getSituationsForLineId(
+            lineIdAsString, trip.getDirectionId());
         if (!situations.isEmpty())
           bean.setSituations(situations);
       }

@@ -12,6 +12,8 @@ public interface TripEntry {
   public AgencyAndId getRouteId();
 
   public AgencyAndId getRouteCollectionId();
+  
+  public String getDirectionId();
 
   public BlockEntry getBlock();
 

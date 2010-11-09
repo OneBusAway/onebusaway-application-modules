@@ -65,7 +65,7 @@ public class TripBeanServiceImpl implements TripBeanService {
     if (shapeId != null && shapeId.hasValues())
       tripBean.setShapeId(ApplicationBeanLibrary.getId(shapeId));
 
-    tripBean.setDirectionId(tripNarrative.getDirectionId());
+    tripBean.setDirectionId(tripEntry.getDirectionId());
     
     BlockEntry block = tripEntry.getBlock();
     tripBean.setBlockId(ApplicationBeanLibrary.getId(block.getId()));

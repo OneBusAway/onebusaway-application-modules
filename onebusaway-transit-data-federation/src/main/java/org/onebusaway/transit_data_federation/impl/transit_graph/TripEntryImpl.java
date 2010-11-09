@@ -19,6 +19,8 @@ public class TripEntryImpl implements TripEntry, Serializable {
   private AgencyAndId _routeId;
 
   private AgencyAndId _routeCollectionId;
+  
+  private String _directionId;
 
   private BlockEntryImpl _block;
 
@@ -40,6 +42,10 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   public void setRouteCollectionId(AgencyAndId routeCollectionId) {
     _routeCollectionId = routeCollectionId;
+  }
+  
+  public void setDirectionId(String directionId) {
+    _directionId = directionId;
   }
 
   public void setBlock(BlockEntryImpl block) {
@@ -79,6 +85,11 @@ public class TripEntryImpl implements TripEntry, Serializable {
   @Override
   public AgencyAndId getRouteCollectionId() {
     return _routeCollectionId;
+  }
+  
+  @Override
+  public String getDirectionId() {
+    return _directionId;
   }
 
   @Override

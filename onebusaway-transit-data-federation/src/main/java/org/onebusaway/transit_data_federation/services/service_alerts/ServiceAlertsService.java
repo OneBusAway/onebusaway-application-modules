@@ -21,4 +21,6 @@ public interface ServiceAlertsService {
   public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query);
 
   public List<SituationBean> getSituationsForLineId(String lineId);
+  
+  public List<SituationBean> getSituationsForLineId(String lineId, String directionId);
 }
