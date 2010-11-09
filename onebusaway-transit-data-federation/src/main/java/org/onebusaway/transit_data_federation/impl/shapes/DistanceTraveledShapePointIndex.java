@@ -12,15 +12,37 @@ public class DistanceTraveledShapePointIndex extends AbstractShapePointIndex {
 
   private double _shapeDistanceTraveled;
 
+  private int _fromIndex = -1;
+
+  private int _toIndex = -1;
+
   public DistanceTraveledShapePointIndex(double shapeDistanceTraveled) {
     _shapeDistanceTraveled = shapeDistanceTraveled;
+  }
+
+  public DistanceTraveledShapePointIndex(double shapeDistanceTraveled,
+      int fromIndex, int toIndex) {
+    _shapeDistanceTraveled = shapeDistanceTraveled;
+    _fromIndex = fromIndex;
+    _toIndex = toIndex;
   }
 
   @Override
   public int getIndex(ShapePoints points) {
     points.ensureDistTraveled();
-    int index = Arrays.binarySearch(points.getDistTraveled(),
-        _shapeDistanceTraveled);
+
+    int index = 0;
+
+    /**
+     * Use index hints when available
+     */
+    if (_fromIndex < 0 || _toIndex < 0)
+      index = Arrays.binarySearch(points.getDistTraveled(),
+          _shapeDistanceTraveled);
+    else
+      index = Arrays.binarySearch(points.getDistTraveled(), _fromIndex,
+          _toIndex, _shapeDistanceTraveled);
+    
     if (index < 0)
       index = -(index + 1);
     return index;

@@ -170,8 +170,14 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         }
 
         if (locations.isEmpty()) {
+          
           ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
+          
           if (sti.getFrequency() == null) {
+            
+            BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(blockInstance, time);
+            applyBlockLocationToBean(sti, time, bean, scheduledLocation);
+            
             if (isArrivalAndDepartureBeanInRange(bean, from, to))
               beans.add(bean);
           } else {
@@ -286,7 +292,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
           - blockLocation.getDistanceAlongBlock();
       bean.setDistanceFromStop(distanceFromStop);
     } else {
-      bean.setDistanceFromStop(blockLocation.getScheduledDistanceAlongBlock());
+      double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
+      - blockLocation.getScheduledDistanceAlongBlock();
+      bean.setDistanceFromStop(distanceFromStop);
     }
 
     // Number of stops away

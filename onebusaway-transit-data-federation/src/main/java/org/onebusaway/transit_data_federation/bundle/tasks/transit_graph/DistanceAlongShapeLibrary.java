@@ -28,10 +28,10 @@ public class DistanceAlongShapeLibrary {
     _shapePointsLibrary.setLocalMinimumThreshold(localMinimumThreshold);
   }
 
-  public double[] getDistancesAlongShape(ShapePoints shapePoints,
+  public PointAndIndex[] getDistancesAlongShape(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes) {
 
-    double[] distances = new double[stopTimes.size()];
+    PointAndIndex[] stopTimePoints = new PointAndIndex[stopTimes.size()];
 
     UTMProjection projection = UTMLibrary.getProjectionForPoint(
         shapePoints.getLats()[0], shapePoints.getLons()[0]);
@@ -49,11 +49,16 @@ public class DistanceAlongShapeLibrary {
     List<PointAndIndex> bestAssignment = computeBestAssignment(shapePoints,
         stopTimes, possibleAssignments, projection, projectedShapePoints);
 
-    for (int i = 0; i < distances.length; i++) {
+    for (int i = 0; i < stopTimePoints.length; i++) {
       PointAndIndex pindex = bestAssignment.get(i);
-      distances[i] = Math.min(pindex.distanceAlongShape, maxDistanceTraveled);
+      if( pindex.distanceAlongShape > maxDistanceTraveled) {
+        int index = projectedShapePoints.size() - 1;
+        XYPoint point = projectedShapePoints.get(index);
+        pindex = new PointAndIndex(point, index, maxDistanceTraveled);
+      }
+      stopTimePoints[i] = pindex;
     }
-    return distances;
+    return stopTimePoints;
   }
 
   private List<List<PointAndIndex>> computePotentialAssignments(

@@ -271,6 +271,13 @@ public class UnitTestingSupport {
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
       TripEntryImpl trip, int arrivalTime, int departureTime,
       double shapeDistTraveled) {
+    return stopTime(id,stop,trip,arrivalTime,departureTime, shapeDistTraveled, -1);
+  }
+  
+  public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
+      TripEntryImpl trip, int arrivalTime, int departureTime,
+      double shapeDistTraveled, int shapeIndex) {
+    
     StopTimeEntryImpl stopTime = new StopTimeEntryImpl();
     stopTime.setId(id);
     stopTime.setStop(stop);
@@ -278,12 +285,14 @@ public class UnitTestingSupport {
     stopTime.setArrivalTime(arrivalTime);
     stopTime.setDepartureTime(departureTime);
     stopTime.setShapeDistTraveled(shapeDistTraveled);
+    stopTime.setShapePointIndex(shapeIndex);
 
     if (trip != null)
       addStopTime(trip, stopTime);
 
     return stopTime;
   }
+  
 
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
       TripEntryImpl trip, int time, double shapeDistTraveled) {

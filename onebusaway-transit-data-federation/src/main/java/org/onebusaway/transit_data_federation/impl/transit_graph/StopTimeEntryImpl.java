@@ -1,17 +1,12 @@
 package org.onebusaway.transit_data_federation.impl.transit_graph;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.serialization.EntryCallback;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
 public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
-  private static final long serialVersionUID = 3L;
+  private static final long serialVersionUID = 5L;
 
   private int _stopTimeId;
   private int _arrivalTime;
@@ -19,6 +14,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   private int _sequence;
   private int _dropOffType;
   private int _pickupType;
+  private int _shapePointIndex = -1;
   private double _shapeDistTraveled = Double.NaN;
   private int _accumulatedSlackTime = 0;
 
@@ -56,6 +52,10 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
   public void setTrip(TripEntryImpl trip) {
     _trip = trip;
+  }
+
+  public void setShapePointIndex(int shapePointIndex) {
+    _shapePointIndex = shapePointIndex;
   }
 
   public boolean isShapeDistTraveledSet() {
@@ -115,6 +115,11 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   }
 
   @Override
+  public int getShapePointIndex() {
+    return _shapePointIndex;
+  }
+
+  @Override
   public double getShapeDistTraveled() {
     return _shapeDistTraveled;
   }
@@ -147,50 +152,4 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     return "StopTimeEntryImpl(stop=" + _stop.getId() + " trip=" + _trip
         + " arrival=" + _arrivalTime + " departure=" + _departureTime + ")";
   }
-
-  private void writeObject(ObjectOutputStream out) throws IOException {
-
-    out.writeInt(_stopTimeId);
-    out.writeInt(_arrivalTime);
-    out.writeInt(_departureTime);
-    out.writeInt(_sequence);
-    out.writeInt(_dropOffType);
-    out.writeInt(_pickupType);
-    out.writeDouble(_shapeDistTraveled);
-    out.writeInt(_accumulatedSlackTime);
-
-    out.writeObject(_trip.getId());
-    out.writeObject(_stop.getId());
-  }
-
-  private void readObject(ObjectInputStream in) throws IOException,
-      ClassNotFoundException {
-
-    _stopTimeId = in.readInt();
-    _arrivalTime = in.readInt();
-    _departureTime = in.readInt();
-    _sequence = in.readInt();
-    _dropOffType = in.readInt();
-    _pickupType = in.readInt();
-    _shapeDistTraveled = in.readDouble();
-    _accumulatedSlackTime = in.readInt();
-
-    AgencyAndId tripId = (AgencyAndId) in.readObject();
-    AgencyAndId stopId = (AgencyAndId) in.readObject();
-
-    TransitGraphImpl.addTripEntryCallback(tripId,
-        new EntryCallback<TripEntryImpl>() {
-          public void handle(TripEntryImpl entry) {
-            _trip = entry;
-          }
-        });
-
-    TransitGraphImpl.addStopEntryCallback(stopId,
-        new EntryCallback<StopEntryImpl>() {
-          public void handle(StopEntryImpl entry) {
-            _stop = entry;
-          }
-        });
-  }
-
 }

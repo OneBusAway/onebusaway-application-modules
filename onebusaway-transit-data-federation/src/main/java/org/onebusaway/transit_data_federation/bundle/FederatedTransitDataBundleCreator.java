@@ -167,10 +167,10 @@ public class FederatedTransitDataBundleCreator {
   }
 
   private boolean isDatabaseResetNeeded() {
-    if( _skipToTask != null)
+    if (_skipToTask != null)
       return "start".equals(_skipToTask);
-    if (_onlyTasks.contains("start"))
-      return true;
+    if (!_onlyTasks.isEmpty())
+      return _onlyTasks.contains("start");
     if (_skipTasks.contains("start"))
       return false;
     return true;

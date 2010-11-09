@@ -24,6 +24,15 @@ public interface StopTimeEntry {
 
   public int getDropOffType();
 
+  /**
+   * The index into the list of shape points for this stop time's trip, for the
+   * shape point that comes right before this stops location along the shape. If
+   * no shape information is available, this index will be -1.
+   * 
+   * @return the index for the preceding shape point, or -1 if no shape info
+   */
+  public int getShapePointIndex();
+
   public double getShapeDistTraveled();
 
   /**

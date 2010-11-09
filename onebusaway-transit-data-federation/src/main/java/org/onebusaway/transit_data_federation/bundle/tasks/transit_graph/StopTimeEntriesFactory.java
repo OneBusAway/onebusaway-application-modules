@@ -12,6 +12,7 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
@@ -96,10 +97,14 @@ public class StopTimeEntriesFactory {
     // Do we have shape information?
     if (shapePoints != null) {
 
-      double[] distances = _distanceAlongShapeLibrary.getDistancesAlongShape(
+      PointAndIndex[] stopTimePoints = _distanceAlongShapeLibrary.getDistancesAlongShape(
           shapePoints, stopTimes);
-      for (int i = 0; i < distances.length; i++)
-        stopTimes.get(i).setShapeDistTraveled(distances[i]);
+      for (int i = 0; i < stopTimePoints.length; i++) {
+        PointAndIndex pindex = stopTimePoints[i];
+        StopTimeEntryImpl stopTime = stopTimes.get(i);
+        stopTime.setShapePointIndex(pindex.index);
+        stopTime.setShapeDistTraveled(pindex.distanceAlongShape);
+      }
 
     } else {
 

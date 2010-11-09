@@ -86,9 +86,9 @@ public class ScheduledBlockLocationServiceImplTest {
     _stopB = stop("stopB", 47.66583195331816, -122.38117664826683);
     _stopC = stop("stopC", 47.663667674849385, -122.37724035677341);
 
-    stopTime(1, _stopA, tripA, time(10, 00), time(10, 00), 200);
-    stopTime(2, _stopB, tripA, time(10, 10), time(10, 15), 800);
-    stopTime(3, _stopC, tripB, time(10, 20), time(10, 20), 200);
+    stopTime(1, _stopA, tripA, time(10, 00), time(10, 00), 200, 1);
+    stopTime(2, _stopB, tripA, time(10, 10), time(10, 15), 800, 3);
+    stopTime(3, _stopC, tripB, time(10, 20), time(10, 20), 200, 1);
 
     _blockConfig = linkBlockTrips("blockA", tripA, tripB);
 
