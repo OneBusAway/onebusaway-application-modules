@@ -13,6 +13,8 @@ public final class TripStatusV2Bean implements Serializable {
    * These are fields that we can supply from schedule data
    ****/
 
+  private String activeTripId;
+
   private long serviceDate;
 
   private Double scheduledDistanceAlongTrip;
@@ -57,8 +59,16 @@ public final class TripStatusV2Bean implements Serializable {
   private Double distanceAlongTrip;
 
   private String vehicleId;
-  
+
   private List<String> situationIds;
+
+  public String getActiveTripId() {
+    return activeTripId;
+  }
+
+  public void setActiveTripId(String activeTripId) {
+    this.activeTripId = activeTripId;
+  }
 
   public long getServiceDate() {
     return serviceDate;

@@ -18,8 +18,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.onebusaway.container.model.HasListeners;
-import org.onebusaway.container.model.Listeners;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
@@ -33,8 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class TimepointPredictionServiceImpl implements
-    HasListeners<VehicleLocationListener> {
+public class TimepointPredictionServiceImpl {
 
   private final Logger _log = LoggerFactory.getLogger(TimepointPredictionServiceImpl.class);
 
@@ -43,8 +40,6 @@ public class TimepointPredictionServiceImpl implements
   private static final int TIMEPOINT_PREDICTION_SERVER_PORT = 9002;
 
   private TimepointPredictionReceiver _receiver;
-
-  private Listeners<VehicleLocationListener> _listeners = new Listeners<VehicleLocationListener>();
 
   private String _serverName = TIMEPOINT_PREDICTION_SERVER_NAME;
 
@@ -63,6 +58,10 @@ public class TimepointPredictionServiceImpl implements
   private BlockCalendarService _blockCalendarService;
 
   private TransitGraphDao _transitGraph;
+
+  private VehicleLocationListener _vehicleLocationListener;
+
+  private boolean _includeTimepointPredictionRecords = false;
 
   public void setServerName(String name) {
     _serverName = name;
@@ -88,6 +87,11 @@ public class TimepointPredictionServiceImpl implements
     _agencyIds = agencyIds;
   }
 
+  public void setIncludeTimepointPredictionRecords(
+      boolean includeTimepointPredictionRecords) {
+    _includeTimepointPredictionRecords = includeTimepointPredictionRecords;
+  }
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraph) {
     _transitGraph = transitGraph;
@@ -98,14 +102,10 @@ public class TimepointPredictionServiceImpl implements
     _blockCalendarService = blockCalendarService;
   }
 
-  @Override
-  public void addListener(VehicleLocationListener listener) {
-    _listeners.addListener(listener);
-  }
-
-  @Override
-  public void removeListener(VehicleLocationListener listener) {
-    _listeners.removeListener(listener);
+  @Autowired
+  public void setVehicleLocationListener(
+      VehicleLocationListener vehicleLocationListener) {
+    _vehicleLocationListener = vehicleLocationListener;
   }
 
   @PostConstruct
@@ -239,8 +239,7 @@ public class TimepointPredictionServiceImpl implements
       records.add(record);
     }
 
-    for (VehicleLocationListener listener : _listeners)
-      listener.handleVehicleLocationRecords(records);
+    _vehicleLocationListener.handleVehicleLocationRecords(records);
   }
 
   private VehicleLocationRecord getBestScheduleAdherenceRecord(
@@ -252,11 +251,15 @@ public class TimepointPredictionServiceImpl implements
     r.setBlockId(best.getBlockId());
     r.setTimeOfRecord(System.currentTimeMillis());
     r.setScheduleDeviation(best.getScheduleDeviation());
-    TimepointPredictionRecord tpr = new TimepointPredictionRecord();
-    tpr.setTimepointId(best.getTimepointId());
-    tpr.setTimepointPredictedTime(best.getTimepointPredictedTime());
-    tpr.setTimepointScheduledTime(best.getTimepointScheduledTime());
-    r.setTimepointPredictions(Arrays.asList(tpr));
+
+    if (_includeTimepointPredictionRecords) {
+      TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+      tpr.setTimepointId(best.getTimepointId());
+      tpr.setTimepointPredictedTime(best.getTimepointPredictedTime());
+      tpr.setTimepointScheduledTime(best.getTimepointScheduledTime());
+      r.setTimepointPredictions(Arrays.asList(tpr));
+    }
+
     r.setTripId(best.getTripId());
     r.setVehicleId(best.getVehicleId());
     return r;

@@ -232,6 +232,12 @@ public class BeanFactoryV2 {
   public TripStatusV2Bean getTripStatus(TripStatusBean tripStatus) {
 
     TripStatusV2Bean bean = new TripStatusV2Bean();
+    
+    TripBean activeTrip = tripStatus.getActiveTrip();
+    if( activeTrip != null) {
+      bean.setActiveTripId(activeTrip.getId());
+      addToReferences(activeTrip);
+    }
 
     bean.setServiceDate(tripStatus.getServiceDate());
     bean.setScheduledDistanceAlongTrip(tripStatus.getScheduledDistanceAlongTrip());

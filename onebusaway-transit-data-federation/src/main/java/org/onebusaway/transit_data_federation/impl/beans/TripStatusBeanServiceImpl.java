@@ -189,6 +189,9 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
             - activeBlockTrip.getDistanceAlongBlock());
         TripEntry activeTrip = activeBlockTrip.getTrip();
         bean.setTotalDistanceAlongTrip(activeTrip.getTotalTripDistance());
+        
+        TripBean activeTripBean = _tripBeanService.getTripForId(activeTrip.getId());
+        bean.setActiveTrip(activeTripBean);
       }
 
       BlockStopTimeEntry closestStop = blockLocation.getClosestStop();

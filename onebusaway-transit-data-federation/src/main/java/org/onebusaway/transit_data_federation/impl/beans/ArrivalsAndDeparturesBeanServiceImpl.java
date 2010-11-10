@@ -170,16 +170,24 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         }
 
         if (locations.isEmpty()) {
-          
+
           ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
-          
+
           if (sti.getFrequency() == null) {
-            
-            BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(blockInstance, time);
-            applyBlockLocationToBean(sti, time, bean, scheduledLocation);
-            
-            if (isArrivalAndDepartureBeanInRange(bean, from, to))
+
+            /**
+             * We don't need to get the scheduled location of a vehicle unless
+             * its in our arrival window
+             */
+            if (isArrivalAndDepartureBeanInRange(bean, from, to)) {
+
+              BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
+                  blockInstance, time);
+              applyBlockLocationToBean(sti, time, bean, scheduledLocation);
+
               beans.add(bean);
+            }
+
           } else {
             if (isFrequencyBasedArrivalInRange(sti, fromTime, toTime))
               beans.add(bean);
@@ -252,12 +260,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       fb.setEndTime(sti.getServiceDate() + frequency.getEndTime() * 1000);
       fb.setHeadway(frequency.getHeadwaySecs());
       pab.setFrequency(fb);
-      
+
       long t = time + frequency.getHeadwaySecs() * 1000;
-      
-      if( t < fb.getStartTime() )
+
+      if (t < fb.getStartTime())
         t = fb.getStartTime();
-      if( t > fb.getEndTime() )
+      if (t > fb.getEndTime())
         t = fb.getEndTime();
       pab.setScheduledArrivalTime(t);
       pab.setScheduledDepartureTime(t);
@@ -293,7 +301,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       bean.setDistanceFromStop(distanceFromStop);
     } else {
       double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
-      - blockLocation.getScheduledDistanceAlongBlock();
+          - blockLocation.getScheduledDistanceAlongBlock();
       bean.setDistanceFromStop(distanceFromStop);
     }
 

@@ -15,6 +15,8 @@ public final class TripStatusBean implements Serializable {
    * These are fields that we can supply from schedule data
    ****/
 
+  private TripBean activeTrip;
+
   private long serviceDate;
 
   private double scheduledDistanceAlongTrip = Double.NaN;
@@ -59,8 +61,16 @@ public final class TripStatusBean implements Serializable {
   private double distanceAlongTrip = Double.NaN;
 
   private String vehicleId;
-  
+
   private List<SituationBean> situations;
+
+  public TripBean getActiveTrip() {
+    return activeTrip;
+  }
+
+  public void setActiveTrip(TripBean activeTrip) {
+    this.activeTrip = activeTrip;
+  }
 
   public long getServiceDate() {
     return serviceDate;
@@ -114,9 +124,9 @@ public final class TripStatusBean implements Serializable {
   public void setLocation(CoordinatePoint location) {
     this.location = location;
   }
-  
+
   public boolean isOrientationSet() {
-    return ! Double.isNaN(orientation);
+    return !Double.isNaN(orientation);
   }
 
   public double getOrientation() {
@@ -209,9 +219,9 @@ public final class TripStatusBean implements Serializable {
   public void setLastKnownLocation(CoordinatePoint lastKnownLocation) {
     this.lastKnownLocation = lastKnownLocation;
   }
-  
+
   public boolean isLastKnownOrientationSet() {
-    return ! Double.isNaN(lastKnownOrientation);
+    return !Double.isNaN(lastKnownOrientation);
   }
 
   public double getLastKnownOrientation() {

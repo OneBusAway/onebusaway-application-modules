@@ -41,7 +41,6 @@ class ShapePointServiceImpl implements ShapePointService {
     for (ShapePoint shapePoint : shapePoints) {
       lat[i] = shapePoint.getLat();
       lon[i] = shapePoint.getLon();
-      distTraveled[i] = shapePoint.getDistTraveled();
       i++;
     }
 
@@ -50,6 +49,9 @@ class ShapePointServiceImpl implements ShapePointService {
     result.setLats(lat);
     result.setLons(lon);
     result.setDistTraveled(distTraveled);
+    
+    result.ensureDistTraveled();
+    
     return result;
   }
 
