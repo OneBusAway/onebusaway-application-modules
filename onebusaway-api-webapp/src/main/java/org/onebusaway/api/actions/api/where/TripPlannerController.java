@@ -5,7 +5,6 @@ import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
-import org.onebusaway.api.model.transit.TripDetailsV2Bean;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -50,7 +49,7 @@ public class TripPlannerController extends ApiActionSupport {
     _lonTo = lonTo;
   }
 
-  @TypeConversion(converter = "org.onebusaway.api.impl.DateTimeConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTimeFrom(Date timeFrom) {
     _timeFrom = timeFrom;
   }

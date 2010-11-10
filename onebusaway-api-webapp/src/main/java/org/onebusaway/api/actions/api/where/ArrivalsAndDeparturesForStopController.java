@@ -49,7 +49,7 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
     return _id;
   }
 
-  @TypeConversion(converter = "org.onebusaway.api.impl.DateTimeConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _query.setTime(time.getTime());
   }

@@ -29,25 +29,27 @@
 <s:push value="result">
 
     <div class="tripPanelHeader">
-    <div class="tripPanelHeaderRoute">Route <s:property value="trip.route.shortName" /> - <s:property value="trip.tripHeadsign" /></div>
-    <div class="tripPanelHeaderTripId">Trip # <s:property value="trip.id" /></div>
+      <div class="tripPanelHeaderRoute">Route <s:property value="trip.route.shortName" /> - <s:property value="trip.tripHeadsign" /></div>
+      <div class="tripPanelHeaderTripId">Trip # <s:property value="trip.id" /></div>
     </div>
     
-
-    <div class="block tripPanelRealtimeInfo">
-    <div><span class="tripPanelLabel">Real-time status:</span> <s:if test="numberOfPredictions==0">
-        <span>No info available from the bus</span>
-    </s:if> <s:if test="numberOfPredictions > 0"><jsp:element name="span">
-                <jsp:attribute name="class">
-                    <s:property value="getGoalDeviationLabelStyle(top)" />
-                </jsp:attribute>
-                <s:property value="getGoalDeviationLabel(top)" />
-            </jsp:element></s:if></div>
+    <s:if test="status.vehicleId != null">
+      <s:url var="url" action="vehicle-status">
+        <s:param name="vehicleId" value="status.vehicleId"/>
+      </s:url>
+      
+      <p><span class="tripPanelLabel">Real-time status:</span> <s:a href="%{url}">More Info</s:a></p>
+    </s:if>
 
     <s:if test="schedule.previousTrip != null">
-        <div class="block">Incoming Route: <a href="trip.action?id=${schedule.previousTrip.id}"><oba:routeName
+        <s:url var="url" action="trip">
+            <s:param name="id" value="schedule.previousTrip.id"/>
+            <s:param name="serviceDate" value="serviceDate" />
+            <s:param name="vehicleId" value="status.vehicleId"/>
+        </s:url>
+        <div class="block">Incoming Route: <s:a href="%{url}"><oba:routeName
             value="schedule.previousTrip.route" /> - <s:property
-            value="schedule.previousTrip.tripHeadsign" /></a></div>
+            value="schedule.previousTrip.tripHeadsign" /></s:a></div>
     </s:if>
 
     <div class="block">
@@ -72,12 +74,15 @@
     </div>
 
     <s:if test="schedule.nextTrip != null">
-        <div class="block">Continues as Route: <a href="trip.action?id=${schedule.nextTrip.id}"><oba:routeName
+        <s:url var="url" action="trip">
+            <s:param name="id" value="schedule.nextTrip.id"/>
+            <s:param name="serviceDate" value="serviceDate" />
+            <s:param name="vehicleId" value="status.vehicleId"/>
+        </s:url>
+        <div class="block">Continues as Route: <s:a href="%{url}"><oba:routeName
             value="schedule.nextTrip.route" /> - <s:property
-            value="schedule.nextTrip.tripHeadsign" /></a></div>
+            value="schedule.nextTrip.tripHeadsign" /></s:a></div>
     </s:if>
-
-    </div>
 
 </s:push>
 </div>

@@ -43,7 +43,7 @@ public class ServiceAlertsAction extends ActionSupport {
     return _agencyId;
   }
 
-  @TypeConversion(converter = "org.onebusaway.webapp.actions.where.DateTimeConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
   public void setTime(Date time) {
     _time = time;
   }

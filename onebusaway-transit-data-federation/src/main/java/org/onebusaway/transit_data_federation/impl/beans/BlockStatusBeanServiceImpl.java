@@ -53,7 +53,7 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
   @Override
   public BlockStatusBean getBlock(AgencyAndId blockId, long serviceDate,
       long time) {
-    return bean(_blockStatusService.getBlock(blockId, serviceDate, time));
+    return bean(_blockStatusService.getBlock(blockId, serviceDate, null, time));
   }
 
   @Override

@@ -54,6 +54,7 @@
                 <param name="namespace">/</param>
                 <param name="actionName">index</param>
             </result>
+            <result name="input">/WEB-INF/content/input.jspx</result>
         </global-results>
 
         <global-exception-mappings>

@@ -125,6 +125,11 @@ bound</div>
                                         <tr>
                                             <td class="stopScheduleHoursKey"><s:property value="first" />:</td>
                                             <td class="stopScheduleHoursValues"><s:iterator value="second">
+                                                <s:url var="url" action="trip">
+                                                    <s:param name="id" value="trip.id"/>
+                                                    <s:param name="serviceDate" value="serviceDate" />
+                                                    <s:param name="stopId" value="stop.id"/>
+                                                </s:url>
                                                 <a class="stopScheduleMinutes"
                                                     href="trip.action?id=${tripId}&amp;stopId=${stop.id}"><oba:date
                                                     format="mm" value="departureTime" /></a>

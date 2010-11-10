@@ -10,6 +10,8 @@ public final class TripDetailsBean implements Serializable {
 
   private String tripId;
 
+  private long serviceDate;
+
   private TripBean trip;
 
   private TripStopTimesBean schedule;
@@ -20,15 +22,12 @@ public final class TripDetailsBean implements Serializable {
 
   }
 
-  public TripDetailsBean(String tripId, TripBean trip, TripStopTimesBean schedule) {
+  public TripDetailsBean(String tripId, long serviceDate,
+      TripBean trip, TripStopTimesBean schedule, TripStatusBean status) {
     this.tripId = tripId;
+    this.serviceDate = serviceDate;
     this.trip = trip;
     this.schedule = schedule;
-  }
-
-  public TripDetailsBean(String tripId, TripBean trip, TripStopTimesBean schedule,
-      TripStatusBean status) {
-    this(tripId, trip, schedule);
     this.status = status;
   }
 
@@ -38,6 +37,14 @@ public final class TripDetailsBean implements Serializable {
 
   public void setTripId(String tripId) {
     this.tripId = tripId;
+  }
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
   }
 
   public TripBean getTrip() {

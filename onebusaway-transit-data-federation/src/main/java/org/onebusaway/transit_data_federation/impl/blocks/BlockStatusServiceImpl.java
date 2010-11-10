@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -59,9 +60,11 @@ public class BlockStatusServiceImpl implements BlockStatusService {
    ****/
 
   @Override
-  public BlockLocation getBlock(AgencyAndId blockId, long serviceDate, long time) {
+  public BlockLocation getBlock(AgencyAndId blockId, long serviceDate,
+      AgencyAndId vehicleId, long time) {
 
-    List<BlockLocation> locations = getBlocks(blockId, serviceDate, time);
+    List<BlockLocation> locations = getBlocks(blockId, serviceDate, vehicleId,
+        time);
 
     if (locations.isEmpty())
       return null;
@@ -75,18 +78,14 @@ public class BlockStatusServiceImpl implements BlockStatusService {
 
   @Override
   public List<BlockLocation> getBlocks(AgencyAndId blockId, long serviceDate,
-      long time) {
+      AgencyAndId vehicleId, long time) {
 
-    List<BlockInstance> blockInstances = _blockCalendarService.getActiveBlocks(
-        blockId, time, time);
+    List<BlockInstance> blockInstances = getBlockInstances(blockId,
+        serviceDate, time);
 
     List<BlockLocation> locations = new ArrayList<BlockLocation>();
     for (BlockInstance blockInstance : blockInstances) {
-      long blockServiceDate = blockInstance.getServiceDate();
-      // How should we handle this check?
-      if (blockServiceDate != serviceDate)
-        continue;
-      computeLocations(blockInstance, time, locations);
+      computeLocations(blockInstance, vehicleId, time, locations);
     }
     return locations;
   }
@@ -139,16 +138,34 @@ public class BlockStatusServiceImpl implements BlockStatusService {
    * Private Methods
    ****/
 
+  private List<BlockInstance> getBlockInstances(AgencyAndId blockId,
+      long serviceDate, long time) {
+
+    if (serviceDate != 0) {
+      return Arrays.asList(_blockCalendarService.getBlockInstance(blockId,
+          serviceDate));
+    } else {
+      return _blockCalendarService.getActiveBlocks(blockId, time, time);
+    }
+  }
+
   private List<BlockLocation> getAsLocations(Iterable<BlockInstance> instances,
       long time) {
     List<BlockLocation> locations = new ArrayList<BlockLocation>();
     for (BlockInstance instance : instances)
-      computeLocations(instance, time, locations);
+      computeLocations(instance, null, time, locations);
     return locations;
   }
 
-  private void computeLocations(BlockInstance instance, long time,
-      List<BlockLocation> results) {
+  /**
+   * 
+   * @param instance
+   * @param vehicleId optional filter on location results. Can be null.
+   * @param time
+   * @param results
+   */
+  private void computeLocations(BlockInstance instance, AgencyAndId vehicleId,
+      long time, List<BlockLocation> results) {
 
     if (instance == null)
       return;
@@ -158,15 +175,26 @@ public class BlockStatusServiceImpl implements BlockStatusService {
         instance, time);
 
     if (!locations.isEmpty()) {
-      results.addAll(locations);
+
+      if (vehicleId == null) {
+        results.addAll(locations);
+      } else {
+        for (BlockLocation location : locations)
+          if (vehicleId.equals(location.getVehicleId()))
+            results.add(location);
+      }
+
     } else {
 
-      // If no real-time trips are available, use scheduled trips
-      BlockLocation location = _blockLocationService.getScheduledLocationForBlockInstance(
-          instance, time);
+      // If no real-time trips are available and no vehicle id was specified,
+      // use scheduled trips
+      if (vehicleId == null) {
+        BlockLocation location = _blockLocationService.getScheduledLocationForBlockInstance(
+            instance, time);
 
-      if (location != null)
-        results.add(location);
+        if (location != null)
+          results.add(location);
+      }
     }
   }
 

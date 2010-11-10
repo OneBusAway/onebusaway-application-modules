@@ -32,6 +32,7 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
 public class TripAction extends ActionSupport {
 
@@ -42,9 +43,9 @@ public class TripAction extends ActionSupport {
 
   private String _id;
 
-  private Date _serviceDate = new Date();
+  private Date _serviceDate;
 
-  private Date _time = new Date();
+  private Date _time;
 
   private TripDetailsBean _tripDetails;
 
@@ -52,16 +53,24 @@ public class TripAction extends ActionSupport {
 
   private long _actualServiceDate;
 
+  private String _vehicleId;
+
   public void setId(String id) {
     _id = id;
   }
 
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
   public void setServiceDate(Date serviceDate) {
     _serviceDate = serviceDate;
   }
 
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
   public void setTime(Date time) {
     _time = time;
+  }
+  
+  public void setVehicleId(String vehicleId) {
+    _vehicleId = vehicleId;
   }
 
   public void setStop(String stopId) {
@@ -85,11 +94,18 @@ public class TripAction extends ActionSupport {
 
     if (_id == null)
       return INPUT;
+    
+    if( _time == null)
+      _time = new Date();
 
     TripDetailsQueryBean query = new TripDetailsQueryBean();
     query.setTripId(_id);
-    query.setServiceDate(_serviceDate.getTime());
+    if( _serviceDate != null)
+      query.setServiceDate(_serviceDate.getTime());
+    query.setVehicleId(_vehicleId);
+    
     query.setTime(_time.getTime());
+    
     _tripDetails = _service.getSingleTripDetails(query);
 
     if (_tripDetails == null)

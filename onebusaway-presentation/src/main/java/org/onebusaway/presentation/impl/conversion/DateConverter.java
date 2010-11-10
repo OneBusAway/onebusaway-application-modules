@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.onebusaway.webapp.actions.where;
+package org.onebusaway.presentation.impl.conversion;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,25 +27,32 @@ import com.opensymphony.xwork2.conversion.TypeConversionException;
 /**
  * 
  */
-public class DateTimeConverter extends StrutsTypeConverter {
+public class DateConverter extends StrutsTypeConverter {
 
-  private static SimpleDateFormat _format = new SimpleDateFormat("yyyy-MM-dd_HH-mm");
+  private static SimpleDateFormat _format = new SimpleDateFormat("yyyy-MM-dd");
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   public Object convertFromString(Map context, String[] values, Class toClass) {
 
     if (values != null && values.length > 0 && values[0] != null
         && values[0].length() > 0) {
+
+      String value = values[0];
+
+      if (value.matches("^(\\d+)$"))
+        return new Date(Long.parseLong(value));
+
       try {
-        return _format.parse(values[0]);
+        return _format.parse(value);
       } catch (ParseException e) {
+        e.printStackTrace();
         throw new TypeConversionException(e);
       }
     }
     return null;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   public String convertToString(Map context, Object o) {
     if (o instanceof Date)
       return _format.format((Date) o);

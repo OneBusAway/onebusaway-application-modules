@@ -186,6 +186,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
         StopTimeInstanceBean stiBean = new StopTimeInstanceBean();
         stiBean.setTripId(AgencyAndIdLibrary.convertToString(tripId));
+        stiBean.setServiceDate(sti.getServiceDate());
         stiBean.setArrivalTime(sti.getArrivalTime());
         stiBean.setDepartureTime(sti.getDepartureTime());
         stiBean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));

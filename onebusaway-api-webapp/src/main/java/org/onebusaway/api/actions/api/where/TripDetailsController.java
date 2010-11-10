@@ -51,12 +51,12 @@ public class TripDetailsController extends ApiActionSupport {
     return _id;
   }
 
-  @TypeConversion(converter = "org.onebusaway.api.impl.DateConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
   public void setServiceDate(Date date) {
     _serviceDate = date;
   }
 
-  @TypeConversion(converter = "org.onebusaway.api.impl.DateTimeConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _time = time;
   }
