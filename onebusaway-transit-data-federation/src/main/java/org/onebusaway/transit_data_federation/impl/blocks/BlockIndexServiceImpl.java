@@ -268,8 +268,6 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
       List<BlockTripEntry> trips = blockTripIndex.getTrips();
 
-      System.out.println("trips=" + trips.size());
-
       BlockTripEntry firstTrip = trips.get(0);
       BlockTripEntry lastTrip = trips.get(trips.size() - 1);
 
