@@ -95,6 +95,10 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
     saveServiceAlerts();
   }
+  
+  public void removeServiceAlert(String situationId) {
+    
+  }
 
   @Override
   public SituationBean getServiceAlertForId(String situationId) {

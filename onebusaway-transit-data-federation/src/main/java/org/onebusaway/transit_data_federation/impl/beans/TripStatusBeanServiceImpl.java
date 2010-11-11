@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
@@ -89,20 +90,17 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Override
   public TripDetailsBean getTripForId(TripDetailsQueryBean query) {
 
-    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
-    long serviceDate = query.getServiceDate();
-    AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(query.getVehicleId());
-    long time = query.getTime();
+    ListBean<TripDetailsBean> listBean = getTripsForId(query);
+    List<TripDetailsBean> trips = listBean.getList();
 
-    TripEntry tripEntry = _transitGraphDao.getTripEntryForId(tripId);
-    if (tripEntry == null)
+    if (trips.isEmpty()) {
       return null;
-
-    BlockLocation location = _blockStatusService.getBlock(
-        tripEntry.getBlock().getId(), serviceDate, vehicleId, time);
-
-    return getTripEntryAndBlockLocationAsTripDetails(tripEntry, location,
-        query.getInclusion());
+    } else if (trips.size() == 1) {
+      return trips.get(0);
+    } else {
+      // Be smarter here?
+      return trips.get(0);
+    }
   }
 
   @Override
@@ -117,10 +115,35 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     if (tripEntry == null)
       return new ListBean<TripDetailsBean>();
 
-    List<BlockLocation> locations = _blockStatusService.getBlocks(
+    Map<BlockInstance, List<BlockLocation>> locationsByInstance = _blockStatusService.getBlocks(
         tripEntry.getBlock().getId(), serviceDate, vehicleId, time);
 
-    return getBlockLocationsAsTripDetails(locations, query.getInclusion());
+    List<TripDetailsBean> tripDetails = new ArrayList<TripDetailsBean>();
+
+    for (Map.Entry<BlockInstance, List<BlockLocation>> entry : locationsByInstance.entrySet()) {
+      BlockInstance blockInstance = entry.getKey();
+      List<BlockLocation> locations = entry.getValue();
+
+      /**
+       * If we have no locations for the specified block instance, it means the
+       * block is not currently active. But we can still attempt to construct a
+       * trip details
+       */
+      if (locations.isEmpty()) {
+        BlockTripEntry blockTripEntry = getTargetBlockTrip(tripEntry,
+            blockInstance);
+        TripDetailsBean details = getTripEntryAndBlockLocationAsTripDetails(
+            blockTripEntry, blockInstance, null, query.getInclusion());
+        tripDetails.add(details);
+      } else {
+        for (BlockLocation location : locations) {
+          TripDetailsBean details = getBlockLocationAsTripDetails(location,
+              query.getInclusion());
+          tripDetails.add(details);
+        }
+      }
+    }
+    return new ListBean<TripDetailsBean>(tripDetails, false);
   }
 
   @Override
@@ -272,20 +295,23 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       return null;
     }
 
-    return getTripEntryAndBlockLocationAsTripDetails(tripEntry.getTrip(),
-        blockLocation, inclusion);
+    return getTripEntryAndBlockLocationAsTripDetails(tripEntry,
+        blockLocation.getBlockInstance(), blockLocation, inclusion);
   }
 
   private TripDetailsBean getTripEntryAndBlockLocationAsTripDetails(
-      TripEntry tripEntry, BlockLocation blockLocation,
-      TripDetailsInclusionBean inclusion) {
+      BlockTripEntry blockTripEntry, BlockInstance blockInstance,
+      BlockLocation blockLocation, TripDetailsInclusionBean inclusion) {
 
     TripBean trip = null;
-    long serviceDate = 0;
+    long serviceDate = blockInstance.getServiceDate();
     TripStopTimesBean stopTimes = null;
     TripStatusBean status = null;
 
     boolean missing = false;
+    
+    TripEntry tripEntry = blockTripEntry.getTrip();
+    
 
     if (inclusion.isIncludeTripBean()) {
       trip = _tripBeanService.getTripForId(tripEntry.getId());
@@ -295,14 +321,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     if (inclusion.isIncludeTripSchedule()) {
 
-      if (blockLocation != null) {
-        BlockTripEntry blockTrip = getTargetBlockTrip(tripEntry, blockLocation);
-        if (blockTrip != null)
-          stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockTrip);
-      }
-
-      if (stopTimes == null)
-        stopTimes = _tripStopTimesBeanService.getStopTimesForTrip(tripEntry);
+      stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockTripEntry);
 
       if (stopTimes == null)
         missing = true;
@@ -314,11 +333,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         missing = true;
     }
 
-    if (blockLocation != null) {
-      BlockInstance instance = blockLocation.getBlockInstance();
-      serviceDate = instance.getServiceDate();
-    }
-
     if (missing)
       return null;
 
@@ -327,15 +341,14 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   }
 
   private BlockTripEntry getTargetBlockTrip(TripEntry targetTrip,
-      BlockLocation blockLocation) {
+      BlockInstance blockInstance) {
 
-    BlockInstance blockInstance = blockLocation.getBlockInstance();
     BlockConfigurationEntry blockConfig = blockInstance.getBlock();
     for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
       if (blockTrip.getTrip().equals(targetTrip))
         return blockTrip;
     }
-    return null;
+    throw new IllegalStateException("expected blockTrip for trip=" + targetTrip
+        + " and block=" + blockInstance);
   }
-
 }

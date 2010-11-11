@@ -2,9 +2,9 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -30,8 +30,6 @@ public class BlockStatusServiceImpl implements BlockStatusService {
    * Catch early blocks up to 10 minutes
    */
   private static final long TIME_AFTER_WINDOW = 10 * 60 * 1000;
-
-  private static final BlockLocationVehicleIdComparator _vehicleIdComparator = new BlockLocationVehicleIdComparator();
 
   private BlockCalendarService _blockCalendarService;
 
@@ -60,34 +58,21 @@ public class BlockStatusServiceImpl implements BlockStatusService {
    ****/
 
   @Override
-  public BlockLocation getBlock(AgencyAndId blockId, long serviceDate,
-      AgencyAndId vehicleId, long time) {
-
-    List<BlockLocation> locations = getBlocks(blockId, serviceDate, vehicleId,
-        time);
-
-    if (locations.isEmpty())
-      return null;
-    else if (locations.size() == 1)
-      return locations.get(0);
-
-    Collections.sort(locations, _vehicleIdComparator);
-
-    return locations.get(0);
-  }
-
-  @Override
-  public List<BlockLocation> getBlocks(AgencyAndId blockId, long serviceDate,
-      AgencyAndId vehicleId, long time) {
+  public Map<BlockInstance, List<BlockLocation>> getBlocks(AgencyAndId blockId,
+      long serviceDate, AgencyAndId vehicleId, long time) {
 
     List<BlockInstance> blockInstances = getBlockInstances(blockId,
         serviceDate, time);
 
-    List<BlockLocation> locations = new ArrayList<BlockLocation>();
+    Map<BlockInstance, List<BlockLocation>> results = new HashMap<BlockInstance, List<BlockLocation>>();
+
     for (BlockInstance blockInstance : blockInstances) {
+      List<BlockLocation> locations = new ArrayList<BlockLocation>();
       computeLocations(blockInstance, vehicleId, time, locations);
+      results.put(blockInstance, locations);
     }
-    return locations;
+
+    return results;
   }
 
   @Override
@@ -192,31 +177,9 @@ public class BlockStatusServiceImpl implements BlockStatusService {
         BlockLocation location = _blockLocationService.getScheduledLocationForBlockInstance(
             instance, time);
 
-        if (location != null)
+        if (location != null && location.isInService())
           results.add(location);
       }
-    }
-  }
-
-  /**
-   * The block location with the first vehicle id should come first. If no
-   * vehicle id is set, push it to the back.
-   * 
-   * @author bdferris
-   * 
-   */
-  private static class BlockLocationVehicleIdComparator implements
-      Comparator<BlockLocation> {
-
-    @Override
-    public int compare(BlockLocation o1, BlockLocation o2) {
-      AgencyAndId v1 = o1.getVehicleId();
-      AgencyAndId v2 = o2.getVehicleId();
-      if (v1 == null)
-        return v2 == null ? 0 : 1;
-      if (v2 == null)
-        return -1;
-      return v1.compareTo(v2);
     }
   }
 }

@@ -15,6 +15,8 @@ public interface ServiceAlertsService {
   public void updateServiceAlert(SituationBean situation);
 
   public void updateServiceAlerts(SituationExchangeDeliveryBean alerts);
+  
+  public void removeServiceAlert(String situationId);
 
   public SituationBean getServiceAlertForId(String situationId);
 

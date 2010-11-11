@@ -2,7 +2,6 @@ package org.onebusaway.transit_data_federation.services.beans;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.blocks.BlockDetailsBean;
 import org.onebusaway.transit_data.model.blocks.BlockStatusBean;
@@ -16,17 +15,6 @@ import org.onebusaway.transit_data.model.blocks.BlockStatusBean;
  * @see BlockDetailsBean
  */
 public interface BlockStatusBeanService {
-
-  /**
-   * @param blockId see {@link Trip#getBlockId()}
-   * @param serviceDate the service date the block is operating under
-   *          (Unix-time)
-   * @param time the time of operation to query
-   * @return the status info for a particular block operating on the specified
-   *         service date and time
-   */
-  public BlockStatusBean getBlock(AgencyAndId blockId, long serviceDate,
-      long time);
 
   /**
    * 
