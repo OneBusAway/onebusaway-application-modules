@@ -34,6 +34,11 @@ public class CalendarServiceDataTask implements Runnable {
 
   private RefreshService _refreshService;
 
+  /**
+   * By default, we only plan six months in advance
+   */
+  private int _excludeFutureServiceDatesInDays = 180;
+
   @Autowired
   public void setGtfsDao(GtfsRelationalDao dao) {
     _dao = dao;
@@ -48,11 +53,16 @@ public class CalendarServiceDataTask implements Runnable {
   public void setRefreshService(RefreshService refreshService) {
     _refreshService = refreshService;
   }
+  
+  public void setExcludeFutureServiceDatesInDays(int excludeFutureServiceDatesInDays) {
+    _excludeFutureServiceDatesInDays = excludeFutureServiceDatesInDays;
+  }
 
   public void run() {
 
     CalendarServiceDataFactoryImpl factory = new CalendarServiceDataFactoryImpl();
     factory.setGtfsDao(_dao);
+    factory.setExcludeFutureServiceDatesInDays(_excludeFutureServiceDatesInDays);
     CalendarServiceData data = factory.createData();
 
     try {
