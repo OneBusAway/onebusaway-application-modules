@@ -106,6 +106,11 @@ public class BlockIndicesFactory {
     int tripCount = 0;
 
     for (BlockEntry block : blocks) {
+      
+      if( block.getConfigurations().isEmpty() ) {
+        _log.warn("block has no configurations: " + block.getId());
+        continue;
+      }
 
       if (isFrequencyBased(block))
         continue;
@@ -159,6 +164,11 @@ public class BlockIndicesFactory {
 
     for (BlockEntry block : blocks) {
 
+      if( block.getConfigurations().isEmpty() ) {
+        _log.warn("block has no configurations: " + block.getId());
+        continue;
+      }
+      
       if (!isFrequencyBased(block))
         continue;
 

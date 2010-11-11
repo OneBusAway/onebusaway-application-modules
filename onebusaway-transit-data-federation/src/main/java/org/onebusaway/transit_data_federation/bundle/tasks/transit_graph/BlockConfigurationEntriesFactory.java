@@ -79,6 +79,9 @@ public class BlockConfigurationEntriesFactory {
 
     Collections.sort(configurations, _blockConfigurationComparator);
     configurations.trimToSize();
+    
+    if( configurations.isEmpty() )
+      System.out.println("no block configurations found for block: " + block.getId());
 
     block.setConfigurations(configurations);
 
