@@ -93,7 +93,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           vehicleIdWithAgency, _time.getTime());
       ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
       if (vehicle != null) {
-        activities.add(createActivity(vehicle));
+        activities.add(createActivity(vehicle, onwardCalls));
       }
       _response = generateSiriResponse(_time, activities);
       return new DefaultHttpHeaders();
@@ -157,13 +157,14 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         agencyId, _time.getTime());
     ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
     for (VehicleStatusBean v : vehicles.getList()) {
-      activities.add(createActivity(v));
+      activities.add(createActivity(v, onwardCalls));
     }
     _response = generateSiriResponse(_time, activities);
     return new DefaultHttpHeaders();
   }
 
-  private VehicleActivity createActivity(VehicleStatusBean vehicleStatus) {
+  private VehicleActivity createActivity(VehicleStatusBean vehicleStatus,
+      boolean onwardCalls) {
     VehicleActivity activity = new VehicleActivity();
 
     Calendar time = Calendar.getInstance();
@@ -183,6 +184,19 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(
           tripDetails, new Date(tripStatus.getServiceDate()),
           vehicleStatus.getVehicleId());
+
+      if (onwardCalls) {
+
+        List<TripStopTimeBean> stopTimes = tripDetails.getSchedule().getStopTimes();
+
+        long serviceDateMillis = tripStatus.getServiceDate();
+        double distance = tripStatus.getDistanceAlongTrip();
+        if (Double.isNaN(distance)) {
+          distance = tripStatus.getScheduledDistanceAlongTrip();
+        }
+        activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
+            stopTimes, serviceDateMillis, distance, null);
+      }
     } else {
       activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
     }
