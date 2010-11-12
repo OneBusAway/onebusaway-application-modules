@@ -7,6 +7,8 @@ public final class TripDetailsV2Bean implements Serializable {
   private static final long serialVersionUID = 1L;
 
   private String tripId;
+  
+  private long serviceDate;
 
   private TripStatusV2Bean status;
 
@@ -18,6 +20,14 @@ public final class TripDetailsV2Bean implements Serializable {
 
   public void setTripId(String tripId) {
     this.tripId = tripId;
+  }
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
   }
 
   public TripStatusV2Bean getStatus() {

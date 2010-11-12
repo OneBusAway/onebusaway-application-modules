@@ -11,6 +11,7 @@ import org.onebusaway.api.model.transit.ListWithRangeAndReferencesBean;
 import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.ReferencesBean;
 import org.onebusaway.api.model.transit.RouteV2Bean;
+import org.onebusaway.api.model.transit.ScheduleFrequencyInstanceV2Bean;
 import org.onebusaway.api.model.transit.ScheduleStopTimeInstanceV2Bean;
 import org.onebusaway.api.model.transit.StopCalendarDayV2Bean;
 import org.onebusaway.api.model.transit.StopRouteDirectionScheduleV2Bean;
@@ -80,6 +81,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("stopRouteDirectionSchedule",
         StopRouteDirectionScheduleV2Bean.class);
     xstream.alias("scheduleStopTime", ScheduleStopTimeInstanceV2Bean.class);
+    xstream.alias("scheduleFrequency", ScheduleFrequencyInstanceV2Bean.class);
     xstream.alias("stopCalendarDay", StopCalendarDayV2Bean.class);
     xstream.alias("stopWithArrivalsAndDepartures",
         StopWithArrivalsAndDeparturesV2Bean.class);

@@ -47,7 +47,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInsta
 import org.onebusaway.utility.text.NaturalStringOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 class StopScheduleBeanServiceImpl implements StopScheduleBeanService {

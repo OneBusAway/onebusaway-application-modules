@@ -28,9 +28,11 @@ public class TripDetailsController extends ApiActionSupport {
 
   private String _id;
 
-  private Date _serviceDate = new Date();
+  private Date _serviceDate;
 
   private Date _time = new Date();
+  
+  private String _vehicleId;
   
   private boolean _includeTrip = true;
 
@@ -61,6 +63,10 @@ public class TripDetailsController extends ApiActionSupport {
     _time = time;
   }
 
+  public void setVehicleId(String vehicleId) {
+    _vehicleId = vehicleId;
+  }
+  
   public void setIncludeTrip(boolean includeTrip) {
     _includeTrip = includeTrip;
   }
@@ -83,8 +89,10 @@ public class TripDetailsController extends ApiActionSupport {
     
     TripDetailsQueryBean query = new TripDetailsQueryBean();
     query.setTripId(_id);
-    query.setServiceDate(_serviceDate.getTime());
+    if( _serviceDate != null)
+      query.setServiceDate(_serviceDate.getTime());
     query.setTime(_time.getTime());
+    query.setVehicleId(_vehicleId);
     
     TripDetailsInclusionBean inclusion = query.getInclusion();
     inclusion.setIncludeTripBean(_includeTrip);

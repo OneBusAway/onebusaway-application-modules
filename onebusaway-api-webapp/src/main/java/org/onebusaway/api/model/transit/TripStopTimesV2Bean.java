@@ -16,6 +16,8 @@ public final class TripStopTimesV2Bean implements Serializable {
 
   private String nextTripId;
 
+  private FrequencyV2Bean frequency;
+
   public String getTimeZone() {
     return timeZone;
   }
@@ -46,5 +48,13 @@ public final class TripStopTimesV2Bean implements Serializable {
 
   public void setNextTripId(String nextTripId) {
     this.nextTripId = nextTripId;
+  }
+
+  public FrequencyV2Bean getFrequency() {
+    return frequency;
+  }
+
+  public void setFrequency(FrequencyV2Bean frequency) {
+    this.frequency = frequency;
   }
 }

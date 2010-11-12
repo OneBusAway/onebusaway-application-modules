@@ -17,7 +17,6 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopCalendarDayBean;
-import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopRouteDirectionScheduleBean;
@@ -31,6 +30,7 @@ import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
@@ -232,9 +232,9 @@ public class BeanFactoryV2 {
   public TripStatusV2Bean getTripStatus(TripStatusBean tripStatus) {
 
     TripStatusV2Bean bean = new TripStatusV2Bean();
-    
+
     TripBean activeTrip = tripStatus.getActiveTrip();
-    if( activeTrip != null) {
+    if (activeTrip != null) {
       bean.setActiveTripId(activeTrip.getId());
       addToReferences(activeTrip);
     }
@@ -328,6 +328,10 @@ public class BeanFactoryV2 {
       addToReferences(prevTrip);
     }
 
+    FrequencyBean freq = tripStopTimes.getFrequency();
+    if (freq != null)
+      bean.setFrequency(getFrequency(freq));
+
     return bean;
   }
 
@@ -336,6 +340,7 @@ public class BeanFactoryV2 {
     TripDetailsV2Bean bean = new TripDetailsV2Bean();
 
     bean.setTripId(tripDetails.getTripId());
+    bean.setServiceDate(tripDetails.getServiceDate());
 
     TripBean trip = tripDetails.getTrip();
     if (trip != null)
@@ -379,8 +384,11 @@ public class BeanFactoryV2 {
 
     StopScheduleV2Bean bean = new StopScheduleV2Bean();
 
-    StopV2Bean stop = getStop(stopSchedule.getStop());
-    bean.setStop(stop);
+    StopBean stop = stopSchedule.getStop();
+    if (stop != null) {
+      addToReferences(stop);
+      bean.setStopId(stop.getId());
+    }
 
     bean.setDate(stopSchedule.getDate().getTime());
 
@@ -392,6 +400,7 @@ public class BeanFactoryV2 {
     }
     bean.setStopRouteSchedules(stopRouteScheduleBeans);
 
+    /*
     StopCalendarDaysBean days = stopSchedule.getCalendarDays();
     bean.setTimeZone(days.getTimeZone());
 
@@ -401,6 +410,7 @@ public class BeanFactoryV2 {
       dayBeans.add(dayBean);
     }
     bean.setStopCalendarDays(dayBeans);
+    */
 
     return bean;
   }
@@ -426,7 +436,7 @@ public class BeanFactoryV2 {
     StopRouteDirectionScheduleV2Bean bean = new StopRouteDirectionScheduleV2Bean();
     bean.setTripHeadsign(direction.getTripHeadsign());
 
-    List<ScheduleStopTimeInstanceV2Bean> stopTimes = bean.getScheduleStopTimes();
+    List<ScheduleStopTimeInstanceV2Bean> stopTimes = new ArrayList<ScheduleStopTimeInstanceV2Bean>();
     for (StopTimeInstanceBean sti : direction.getStopTimes()) {
       ScheduleStopTimeInstanceV2Bean stiBean = new ScheduleStopTimeInstanceV2Bean();
       stiBean.setArrivalTime(sti.getArrivalTime());
@@ -436,6 +446,25 @@ public class BeanFactoryV2 {
       stiBean.setStopHeadsign(stiBean.getStopHeadsign());
       stopTimes.add(stiBean);
     }
+
+    if (!stopTimes.isEmpty())
+      bean.setScheduleStopTimes(stopTimes);
+
+    List<ScheduleFrequencyInstanceV2Bean> frequencies = new ArrayList<ScheduleFrequencyInstanceV2Bean>();
+    for (FrequencyInstanceBean freq : direction.getFrequencies()) {
+      ScheduleFrequencyInstanceV2Bean freqBean = new ScheduleFrequencyInstanceV2Bean();
+      freqBean.setServiceDate(freq.getServiceDate());
+      freqBean.setServiceId(freq.getServiceId());
+      freqBean.setTripId(freq.getTripId());
+      freqBean.setStartTime(freq.getStartTime());
+      freqBean.setEndTime(freq.getEndTime());
+      freqBean.setHeadway(freq.getHeadwaySecs());
+      freqBean.setStopHeadsign(freq.getStopHeadsign());
+      frequencies.add(freqBean);
+    }
+
+    if (!frequencies.isEmpty())
+      bean.setScheduleFrequencies(frequencies);
 
     return bean;
   }
@@ -610,7 +639,7 @@ public class BeanFactoryV2 {
   public NaturalLanguageStringV2Bean getString(NaturalLanguageStringBean nls) {
     if (nls == null)
       return null;
-    if( nls.getValue() == null || nls.getValue().isEmpty())
+    if (nls.getValue() == null || nls.getValue().isEmpty())
       return null;
     NaturalLanguageStringV2Bean bean = new NaturalLanguageStringV2Bean();
     bean.setLang(nls.getLang());
