@@ -6,12 +6,15 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -43,7 +46,41 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
   }
 
   @Override
-  public TripStopTimesBean getStopTimesForTrip(TripEntry trip) {
+  public TripStopTimesBean getStopTimesForBlockTrip(BlockInstance blockInstance, BlockTripEntry blockTrip) {
+
+    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip());
+
+    if (blockTrip.getPreviousTrip() != null) {
+      BlockTripEntry previous = blockTrip.getPreviousTrip();
+      TripBean previousTrip = _tripBeanService.getTripForId(previous.getTrip().getId());
+      bean.setPreviousTrip(previousTrip);
+    }
+
+    if (blockTrip.getNextTrip() != null) {
+      BlockTripEntry next = blockTrip.getNextTrip();
+      TripBean nextTrip = _tripBeanService.getTripForId(next.getTrip().getId());
+      bean.setNextTrip(nextTrip);
+    }
+    
+    FrequencyEntry frequency = blockInstance.getFrequency();
+    
+    if( frequency != null) {
+      long serviceDate = blockInstance.getServiceDate();
+      FrequencyBean fb = new FrequencyBean();
+      fb.setStartTime(serviceDate + frequency.getStartTime() * 1000);
+      fb.setEndTime(serviceDate + frequency.getEndTime() * 1000);
+      fb.setHeadway(frequency.getHeadwaySecs());
+      bean.setFrequency(fb);
+    }
+
+    return bean;
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private TripStopTimesBean getStopTimesForTrip(TripEntry trip) {
 
     AgencyAndId tripId = trip.getId();
 
@@ -68,25 +105,4 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
 
     return bean;
   }
-
-  @Override
-  public TripStopTimesBean getStopTimesForBlockTrip(BlockTripEntry blockTrip) {
-
-    TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip());
-
-    if (blockTrip.getPreviousTrip() != null) {
-      BlockTripEntry previous = blockTrip.getPreviousTrip();
-      TripBean previousTrip = _tripBeanService.getTripForId(previous.getTrip().getId());
-      bean.setPreviousTrip(previousTrip);
-    }
-
-    if (blockTrip.getNextTrip() != null) {
-      BlockTripEntry next = blockTrip.getNextTrip();
-      TripBean nextTrip = _tripBeanService.getTripForId(next.getTrip().getId());
-      bean.setNextTrip(nextTrip);
-    }
-
-    return bean;
-  }
-
 }

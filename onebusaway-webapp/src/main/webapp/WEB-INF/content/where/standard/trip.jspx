@@ -40,6 +40,7 @@
       
       <p><span class="tripPanelLabel">Real-time status:</span> <s:a href="%{url}">More Info</s:a></p>
     </s:if>
+    
 
     <s:if test="schedule.previousTrip != null">
         <s:url var="url" action="trip">
@@ -52,6 +53,39 @@
             value="schedule.previousTrip.tripHeadsign" /></s:a></div>
     </s:if>
 
+    <s:if test="schedule.frequency != null">
+      <s:set var="freq" value="schedule.frequency"/>
+      <div class="block">
+      <p>Service every <span class="frequency"><s:property value="#freq.headway / 60"/></span> mins from <oba:date format="hh:mm aa" value="#freq.startTime"/> to <oba:date format="hh:mm aa" value="#freq.endTime"/></p>
+      </div>
+      
+      <div class="block">
+        
+        <s:set var="firstStopTime" value="schedule.stopTimes[0]"/>
+        
+        <oba:group value="schedule.stopTimes" var="groups">
+          <s:property value="departureTime / 300" />
+        </oba:group>
+
+        <table>
+        <s:iterator value="#groups">
+            <s:iterator status="groupStatus">
+                <tr>
+                    <td class="TripPage-TimeColumn"><s:if test="#groupStatus.first">
+                        <span class="TripPage-ArrivalTime">
+                          <s:property value="(top.arrivalTime - #firstStopTime.departureTime) / 60"/> mins
+                        </span>
+                    </s:if></td>
+                    <td class="TripPage-StopColumn"><a href="stop.action?id=${stop.id}"><s:property value="stop.name" /></a></td>
+                </tr>
+            </s:iterator>
+        </s:iterator>
+        </table>
+      
+      </div>
+    </s:if>
+    <s:else>
+    
     <div class="block">
     
     <oba:group value="schedule.stopTimes" var="groups">
@@ -72,6 +106,7 @@
         </s:iterator>
     </table>
     </div>
+    </s:else>
 
     <s:if test="schedule.nextTrip != null">
         <s:url var="url" action="trip">

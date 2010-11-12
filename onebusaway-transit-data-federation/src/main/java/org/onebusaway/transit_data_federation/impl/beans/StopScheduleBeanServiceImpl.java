@@ -142,7 +142,6 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     return new StopCalendarDaysBean(timeZone.getID(), beans);
   }
 
-  @Transactional
   @Cacheable
   public List<StopRouteScheduleBean> getScheduledArrivalsForStopAndDate(
       AgencyAndId stopId, ServiceDate date) {
@@ -214,6 +213,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
         FrequencyInstanceBean bean = new FrequencyInstanceBean();
         bean.setTripId(AgencyAndIdLibrary.convertToString(tripId));
+        bean.setServiceDate(sti.getServiceDate());
         bean.setStartTime(sti.getServiceDate()
             + sti.getFrequency().getStartTime() * 1000);
         bean.setEndTime(sti.getServiceDate() + sti.getFrequency().getEndTime()

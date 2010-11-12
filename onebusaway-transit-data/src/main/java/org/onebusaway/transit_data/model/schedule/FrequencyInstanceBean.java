@@ -6,6 +6,8 @@ public final class FrequencyInstanceBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private long serviceDate;
+
   private long startTime;
 
   private long endTime;
@@ -17,6 +19,14 @@ public final class FrequencyInstanceBean implements Serializable {
   private String tripId;
 
   private String stopHeadsign;
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
+  }
 
   public long getStartTime() {
     return startTime;

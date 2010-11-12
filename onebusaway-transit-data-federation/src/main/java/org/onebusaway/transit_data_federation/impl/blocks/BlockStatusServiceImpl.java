@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -127,8 +130,19 @@ public class BlockStatusServiceImpl implements BlockStatusService {
       long serviceDate, long time) {
 
     if (serviceDate != 0) {
-      return Arrays.asList(_blockCalendarService.getBlockInstance(blockId,
-          serviceDate));
+      BlockInstance blockInstance = _blockCalendarService.getBlockInstance(
+          blockId, serviceDate);
+      if (blockInstance == null)
+        return Collections.emptyList();
+      BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+      if (blockConfig.getFrequencies() == null)
+        return Arrays.asList(blockInstance);
+
+      List<BlockInstance> instances = new ArrayList<BlockInstance>();
+      for (FrequencyEntry frequency : blockConfig.getFrequencies())
+        instances.add(new BlockInstance(blockConfig,
+            blockInstance.getServiceDate(), frequency));
+      return instances;
     } else {
       return _blockCalendarService.getActiveBlocks(blockId, time, time);
     }

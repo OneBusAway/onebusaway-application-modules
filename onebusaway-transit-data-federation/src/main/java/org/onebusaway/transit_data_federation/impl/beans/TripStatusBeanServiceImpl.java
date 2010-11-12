@@ -321,7 +321,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     if (inclusion.isIncludeTripSchedule()) {
 
-      stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockTripEntry);
+      stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockInstance, blockTripEntry);
 
       if (stopTimes == null)
         missing = true;

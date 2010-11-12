@@ -16,6 +16,7 @@ import org.onebusaway.transit_data.model.StopCalendarDayBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -125,6 +126,13 @@ public class ScheduleAction extends ActionSupport {
       List<StopCalendarDayBean> stopCalendarDays, String format, String value) {
     return getTimesByFormatKeyAndValue(stopCalendarDays, format, value,
         _stopCalendarDayAdapter);
+  }
+  
+  public String getFrequencyCellHeight(FrequencyInstanceBean bean) {
+    int hours = (int) Math.round((bean.getEndTime() - bean.getStartTime()) / (60.0 * 60 * 1000));
+    if( hours == 0)
+      hours = 1;
+    return hours+"em";
   }
 
   /****

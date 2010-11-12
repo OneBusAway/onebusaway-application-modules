@@ -102,60 +102,103 @@ bound</div>
         <s:url var="realtimeUrl" action="stop" includeParams="none">
             <s:param name="id" value="#stop.id" />
         </s:url>
-
+        
         <div class="stopScheduleDate">Schedule for <span><s:date format="EEEE, MMMM d, yyyy"
             name="result.date" /></span>. For real-time arrival info, <s:a href="%{realtimeUrl}">click here</s:a>.</div>
 
+        <div class="block">
+        <p>Jump to route:
+          <s:iterator value="result.routes" status="rowstatus">
+            <s:if test="! #rowstatus.first">
+              <jsp:text>, </jsp:text>
+            </s:if>
+            <span><s:a href="#route_%{route.id}"><oba:routeName value="route"/></s:a></span>  
+          </s:iterator>
+        </p>
+        </div>
+        
         <s:iterator value="result.routes">
         	<s:set var="route" value="route" />
-        	<s:iterator value="directions">
-            <div class="stopScheduleRouteEntry">
+            
+            
+        	<s:iterator value="directions" status="dirstatus">
+            
+            <jsp:element name="div">
+              <jsp:attribute name="class">stopScheduleRouteEntry</jsp:attribute>
+              <jsp:attribute name="id"><s:if test="#dirstatus.first">route_<s:property value="%{route.id}"/></s:if></jsp:attribute>
+            
             <div class="stopScheduleRouteHeader"><span class="stopScheduleRouteName"><oba:routeName value="#route"/></span> - <span class="stopScheduleRouteDescription"><s:property value="tripHeadsign" /></span></div>
 
-            <table class="stopScheduleRouteTable">
-                <tr>
-                    <s:iterator value="getStopTimesByFormatKey(stopTimes,'aa')">
-                        <td>
-                        <table>
-                            <tr>
-                                <td class="stopScheduleAmPmKey"><s:property value="first" /></td>
-                                <td class="stopScheduleAmPmValues">
-                                <table class="stopScheduleHoursTable">
-                                    <s:iterator value="getStopTimesByFormatKey(second,'h')">
-                                        <tr>
-                                            <td class="stopScheduleHoursKey"><s:property value="first" />:</td>
-                                            <td class="stopScheduleHoursValues"><s:iterator value="second">
-                                                <s:url var="url" action="trip">
-                                                    <s:param name="id" value="tripId"/>
-                                                    <s:param name="serviceDate" value="serviceDate" />
-                                                    <s:param name="stopId" value="stop.id"/>
-                                                </s:url>
-                                                <s:a cssClass="stopScheduleMinutes"
-                                                    href="%{url}"><oba:date
-                                                    format="mm" value="departureTime" /></s:a>
-                                            </s:iterator></td>
-                                        </tr>
-                                    </s:iterator>
-                                </table>
-                                </td>
-                            </tr>
-                        </table>
-                        </td>
-                    </s:iterator>
-                </tr>
-            </table>
-            
-            <table>
-                <s:iterator value="frequencies">
-                <tr>
-                <td><oba:date format="hh:mm" value="startTime"/></td>
-                <td><oba:date format="hh:mm" value="endTime"/></td>
-                <td><jsp:text>Every </jsp:text><s:property value="headwaySecs / 60"/><jsp:text> mins</jsp:text></td>
-                </tr>
+            <s:if test="! frequencies.empty">
+            <table class="stopScheduleTable stopScheduleFrequencyTable">
+                <thead>
+                  <tr>
+                    <td class="times">Times</td>
+                    <td class="frequency">Frequency</td>
+                    <td class="trip">Trip</td>
+                  </tr>
+                </thead>
+                <tbody>
+                <s:iterator value="frequencies" status="rowstatus">
+                  <jsp:element name="tr">                    
+                    <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
+                    <td class="startTime"><oba:date format="hh:mm aa" value="startTime"/><br/>...</td>
+                    <td><jsp:text>Every </jsp:text><span class="frequency"><s:property value="headwaySecs / 60"/></span><jsp:text> mins</jsp:text></td>
+                    <s:url var="url" action="trip">
+                      <s:param name="id" value="tripId"/>
+                      <s:param name="serviceDate" value="serviceDate"/>
+                    </s:url>
+                    <td><s:a href="%{url}">Details</s:a></td>
+                  </jsp:element>
                 </s:iterator>
+                </tbody>
             </table>
+            </s:if>
 
-            </div>
+            <s:if test="! stopTimes.empty">
+            <table class="stopScheduleTable stopScheduleNonFrequencyTable">
+              <thead>
+                <tr>
+                  <td class="am_pm_header"></td>
+                  <td class="hour_header">Hour:</td>
+                  <td class="minute_header">Minute</td>
+                </tr>
+              </thead>
+              <tbody>
+                <s:iterator value="getStopTimesByFormatKey(stopTimes,'aa')">
+                  <s:set var="AmPmLabel" value="first"/>
+                  <tr><td></td><td></td><td></td></tr>
+                  <s:iterator value="getStopTimesByFormatKey(second,'h')" status="rowstatus">
+                    <jsp:element name="tr">
+                      <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
+                      <td class="am_pm_label">
+                        <s:if test="#rowstatus.first">
+                          <s:property value="#AmPmLabel"/>
+                        </s:if>
+                      </td>
+                      <td class="stopScheduleHoursKey">
+                        <s:property value="first" />:
+                      </td>
+                      <td class="stopScheduleHoursValues">
+                        <s:iterator value="second" >
+                          <s:url var="url" action="trip">
+                            <s:param name="id" value="tripId"/>
+                            <s:param name="serviceDate" value="serviceDate" />
+                            <s:param name="stopId" value="stop.id"/>
+                          </s:url>
+                          <s:a cssClass="stopScheduleMinutes" href="%{url}">
+                            <oba:date format="mm" value="departureTime" />
+                          </s:a>
+                        </s:iterator>
+                      </td>
+                    </jsp:element>
+                  </s:iterator>
+                </s:iterator>
+              </tbody>
+            </table>
+            </s:if>
+
+            </jsp:element>
             </s:iterator>
         </s:iterator>
 
