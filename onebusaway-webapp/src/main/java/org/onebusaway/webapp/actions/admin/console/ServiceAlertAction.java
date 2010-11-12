@@ -27,8 +27,11 @@ import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.TextProvider;
 import com.opensymphony.xwork2.TextProviderFactory;
 
-@Results({@Result(type = "redirectAction", name = "submitSuccess", params = {
-    "actionName", "service-alert", "id", "${id}", "parse", "true"})})
+@Results({
+    @Result(type = "redirectAction", name = "submitSuccess", params = {
+        "actionName", "service-alert", "id", "${id}", "parse", "true"}),
+    @Result(type = "redirectAction", name = "deleteSuccess", params = {
+        "actionName", "service-alerts!agency", "agencyId", "${agencyId}", "parse", "true"})})
 public class ServiceAlertAction extends ActionSupport implements
     ModelDriven<SituationBean> {
 
@@ -103,6 +106,15 @@ public class ServiceAlertAction extends ActionSupport implements
       _transitDataService.updateServiceAlert(_model);
 
     return "submitSuccess";
+  }
+
+  public String delete() {
+
+    if (_model.getId() != null) {
+      _transitDataService.removeServiceAlert(_model.getId());
+    }
+
+    return "deleteSuccess";
   }
 
   /****

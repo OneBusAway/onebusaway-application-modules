@@ -95,9 +95,15 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
     saveServiceAlerts();
   }
-  
+
   public void removeServiceAlert(String situationId) {
-    
+
+    SituationBean existingSituation = _situations.remove(situationId);
+
+    if (existingSituation != null) {
+      updateLineReferences(existingSituation, null);
+      updateLineAndDirectionReferences(existingSituation, null);
+    }
   }
 
   @Override
@@ -146,33 +152,26 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
   private void updateLineReferences(SituationBean existingSituation,
       SituationBean situation) {
 
-    String id = situation.getId();
-
-    Set<String> existingLineIds = Collections.emptySet();
-    if (existingSituation != null)
-      existingLineIds = getVehicleJourneysAsLineIds(existingSituation);
-
+    Set<String> existingLineIds = getVehicleJourneysAsLineIds(existingSituation);
     Set<String> newLineIds = getVehicleJourneysAsLineIds(situation);
 
     for (String existingLineId : existingLineIds) {
       if (newLineIds.contains(existingLineId))
         continue;
       ConcurrentCollectionsLibrary.removeFromMapValueSet(_situationIdsByLineId,
-          existingLineId, id);
+          existingLineId, existingSituation.getId());
     }
 
     for (String newLineId : newLineIds) {
       if (existingLineIds.contains(newLineId))
         continue;
       ConcurrentCollectionsLibrary.addToMapValueSet(_situationIdsByLineId,
-          newLineId, id);
+          newLineId, situation.getId());
     }
   }
 
   private void updateLineAndDirectionReferences(
       SituationBean existingSituation, SituationBean situation) {
-
-    String id = situation.getId();
 
     Set<String> existingLineIds = Collections.emptySet();
     if (existingSituation != null)
@@ -184,18 +183,22 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
       if (newLineIds.contains(existingLineId))
         continue;
       ConcurrentCollectionsLibrary.removeFromMapValueSet(
-          _situationIdsByLineAndDirectionId, existingLineId, id);
+          _situationIdsByLineAndDirectionId, existingLineId, existingSituation.getId());
     }
 
     for (String newLineId : newLineIds) {
       if (existingLineIds.contains(newLineId))
         continue;
       ConcurrentCollectionsLibrary.addToMapValueSet(
-          _situationIdsByLineAndDirectionId, newLineId, id);
+          _situationIdsByLineAndDirectionId, newLineId, situation.getId());
     }
   }
 
   private Set<String> getVehicleJourneysAsLineIds(SituationBean situation) {
+
+    if (situation == null)
+      return Collections.emptySet();
+
     Set<String> lineIds = new HashSet<String>();
     SituationAffectsBean affects = situation.getAffects();
     if (affects != null) {
@@ -211,6 +214,10 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private Set<String> getVehicleJourneysAsLineAndDirectionIds(
       SituationBean situation) {
+
+    if (situation == null)
+      return Collections.emptySet();
+
     Set<String> lineIds = new HashSet<String>();
     SituationAffectsBean affects = situation.getAffects();
     if (affects != null) {

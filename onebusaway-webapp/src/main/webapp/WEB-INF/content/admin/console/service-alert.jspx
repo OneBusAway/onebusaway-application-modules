@@ -55,5 +55,13 @@
 </s:else>
 </s:form>
 
+<s:if test="id != null">
+<s:url var="url" action="service-alert!delete">
+    <s:param name="id" value="id"/>
+    <s:param name="agencyId" value="agencyId"/>
+</s:url>
+<p><s:a href="%{url}">Delete</s:a></p>
+</s:if>
+
 </body>
 </html>

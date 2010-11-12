@@ -350,6 +350,11 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public void removeServiceAlert(String situationId) {
+    _serviceAlertsService.removeServiceAlert(situationId);
+  }
+
+  @Override
   public void updateServiceAlerts(String agencyId,
       SituationExchangeDeliveryBean alerts) {
     _serviceAlertsService.updateServiceAlerts(alerts);
