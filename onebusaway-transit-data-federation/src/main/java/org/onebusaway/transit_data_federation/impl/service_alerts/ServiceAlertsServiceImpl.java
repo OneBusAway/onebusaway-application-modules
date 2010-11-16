@@ -20,6 +20,8 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
@@ -40,6 +42,10 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
   private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _situationIdsByLineId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
 
   private ConcurrentMap<LineAndDirectionRef, Set<AgencyAndId>> _situationIdsByLineAndDirectionId = new ConcurrentHashMap<LineAndDirectionRef, Set<AgencyAndId>>();
+
+  private ConcurrentMap<LineAndStopCallRef, Set<AgencyAndId>> _situationIdsByLineAndStopCall = new ConcurrentHashMap<LineAndStopCallRef, Set<AgencyAndId>>();
+
+  private ConcurrentMap<LineDirectionAndStopCallRef, Set<AgencyAndId>> _situationIdsByLineDirectionAndStopCall = new ConcurrentHashMap<LineDirectionAndStopCallRef, Set<AgencyAndId>>();
 
   private File _path;
 
@@ -116,7 +122,36 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId) {
 
+    BlockTripEntry blockTrip = blockStopTime.getTrip();
+    TripEntry trip = blockTrip.getTrip();
+    AgencyAndId lineId = trip.getRouteCollectionId();
+    String directionId = trip.getDirectionId();
+    StopTimeEntry stopTime = blockStopTime.getStopTime();
+    StopEntry stop = stopTime.getStop();
+    AgencyAndId stopId = stop.getId();
+
+    LineAndStopCallRef lineAndStopCallRef = new LineAndStopCallRef(lineId,
+        stopId);
+
     Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
+    getSituationIdsForKey(_situationIdsByLineId, lineId, situationIds);
+    getSituationIdsForKey(_situationIdsByLineAndStopCall, lineAndStopCallRef,
+        situationIds);
+
+    /**
+     * Remember that direction is optional
+     */
+    if (directionId != null) {
+      LineAndDirectionRef lineAndDirectionRef = new LineAndDirectionRef(lineId,
+          directionId);
+      LineDirectionAndStopCallRef lineDirectionAndStopCallRef = new LineDirectionAndStopCallRef(
+          lineId, directionId, stopId);
+
+      getSituationIdsForKey(_situationIdsByLineAndDirectionId,
+          lineAndDirectionRef, situationIds);
+      getSituationIdsForKey(_situationIdsByLineDirectionAndStopCall,
+          lineDirectionAndStopCallRef, situationIds);
+    }
     return getSituationIdsAsObjects(situationIds);
   }
 
@@ -163,6 +198,14 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     updateReferences(existingSituation, situation,
         _situationIdsByLineAndDirectionId,
         AffectsLineAndDirectionKeyFactory.INSTANCE);
+
+    updateReferences(existingSituation, situation,
+        _situationIdsByLineAndStopCall,
+        AffectsLineAndStopCallKeyFactory.INSTANCE);
+
+    updateReferences(existingSituation, situation,
+        _situationIdsByLineDirectionAndStopCall,
+        AffectsLineDirectionAndStopCallKeyFactory.INSTANCE);
   }
 
   private <T> void updateReferences(Situation existingSituation,

@@ -712,7 +712,7 @@ public class BeanFactoryV2 {
   }
 
   public void addToReferences(TripBean trip) {
-    if (!shouldAddReferenceWithId(_references.getStops(), trip.getId()))
+    if (!shouldAddReferenceWithId(_references.getTrips(), trip.getId()))
       return;
     TripV2Bean bean = getTrip(trip);
     _references.addTrip(bean);

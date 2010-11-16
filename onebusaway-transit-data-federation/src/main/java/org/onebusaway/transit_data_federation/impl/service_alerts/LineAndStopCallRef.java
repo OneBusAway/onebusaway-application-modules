@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-public class StopCallRef implements Serializable {
+public class LineAndStopCallRef implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -12,7 +12,7 @@ public class StopCallRef implements Serializable {
 
   private final AgencyAndId _stopId;
 
-  public StopCallRef(AgencyAndId lineId, AgencyAndId stopId) {
+  public LineAndStopCallRef(AgencyAndId lineId, AgencyAndId stopId) {
     _lineId = lineId;
     _stopId = stopId;
   }
@@ -34,7 +34,7 @@ public class StopCallRef implements Serializable {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    StopCallRef other = (StopCallRef) obj;
+    LineAndStopCallRef other = (LineAndStopCallRef) obj;
     if (_lineId == null) {
       if (other._lineId != null)
         return false;

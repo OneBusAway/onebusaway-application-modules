@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.services.service_alerts;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
@@ -34,6 +35,8 @@ public class Situation implements Serializable {
   private NaturalLanguageStringBean internal;
 
   private SituationAffects affects;
+
+  private List<SituationConsequence> consequences;
 
   public AgencyAndId getId() {
     return id;
@@ -139,4 +142,11 @@ public class Situation implements Serializable {
     this.affects = affects;
   }
 
+  public List<SituationConsequence> getConsequences() {
+    return consequences;
+  }
+
+  public void setConsequences(List<SituationConsequence> consequences) {
+    this.consequences = consequences;
+  }
 }
