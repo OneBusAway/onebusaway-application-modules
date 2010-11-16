@@ -1,6 +1,8 @@
 package org.onebusaway.transit_data_federation.bundle;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +37,8 @@ public class FederatedTransitDataBundleCreatorMain {
   private static final String ARG_SKIP = "skip";
 
   private static final String ARG_ONLY_IF_DNE = "onlyIfDoesNotExist";
+
+  private static final String ARG_ADDITIONAL_RESOURCES_DIRECTORY = "additionalResourcesDirectory";
 
   public static void main(String[] args) throws IOException,
       ClassNotFoundException {
@@ -94,6 +98,13 @@ public class FederatedTransitDataBundleCreatorMain {
       setStagesToSkip(commandLine, creator);
 
       try {
+
+        if (commandLine.hasOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY)) {
+          File additionalResourceDirectory = new File(
+              commandLine.getOptionValue(ARG_ADDITIONAL_RESOURCES_DIRECTORY));
+          copyFiles(additionalResourceDirectory, outputPath);
+        }
+
         creator.run();
       } catch (Exception ex) {
         ex.printStackTrace();
@@ -113,6 +124,7 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_ONLY, true, "");
     options.addOption(ARG_SKIP, true, "");
     options.addOption(ARG_ONLY_IF_DNE, false, "");
+    options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
   }
 
   protected void printUsage() {
@@ -137,6 +149,39 @@ public class FederatedTransitDataBundleCreatorMain {
       String[] values = commandLine.getOptionValues(ARG_SKIP);
       for (String value : values)
         creator.addTaskToSkip(value);
+    }
+  }
+
+  protected void copyFiles(File from, File to) throws IOException {
+
+    if (!from.exists())
+      return;
+
+    if (from.isDirectory()) {
+      to.mkdirs();
+      for (File fromChild : from.listFiles()) {
+        File toChild = new File(to, fromChild.getName());
+        copyFiles(fromChild, toChild);
+      }
+    } else {
+      FileInputStream in = null;
+      FileOutputStream out = null;
+
+      try {
+        in = new FileInputStream(from);
+        out = new FileOutputStream(to);
+
+        int byteCount = 0;
+        byte[] buffer = new byte[1024];
+        while ((byteCount = in.read(buffer)) >= 0)
+          out.write(buffer, 0, byteCount);
+      } finally {
+        if (in != null)
+          in.close();
+        if (out != null)
+          out.close();
+      }
+
     }
   }
 }
