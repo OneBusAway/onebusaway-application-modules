@@ -318,7 +318,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (blockLocation.getVehicleId() != null)
       bean.setVehicleId(AgencyAndIdLibrary.convertToString(blockLocation.getVehicleId()));
 
-    TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocation);
+    TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(
+        blockLocation, targetTime);
     bean.setTripStatus(tripStatusBean);
   }
 

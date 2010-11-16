@@ -130,6 +130,12 @@
             <artifactId>onebusaway-wiki-integration-xwiki-macros</artifactId>
             <version>${xwiki.integration.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.3.1</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -141,7 +147,6 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

@@ -1,17 +1,16 @@
 package org.onebusaway.webapp.actions.admin.console;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.TreeMap;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.json.JSONException;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
@@ -26,12 +25,14 @@ import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.TextProvider;
 import com.opensymphony.xwork2.TextProviderFactory;
+import com.thoughtworks.xstream.XStream;
 
 @Results({
     @Result(type = "redirectAction", name = "submitSuccess", params = {
         "actionName", "service-alert", "id", "${id}", "parse", "true"}),
     @Result(type = "redirectAction", name = "deleteSuccess", params = {
-        "actionName", "service-alerts!agency", "agencyId", "${agencyId}", "parse", "true"})})
+        "actionName", "service-alerts!agency", "agencyId", "${agencyId}",
+        "parse", "true"})})
 public class ServiceAlertAction extends ActionSupport implements
     ModelDriven<SituationBean> {
 
@@ -89,7 +90,7 @@ public class ServiceAlertAction extends ActionSupport implements
     return SUCCESS;
   }
 
-  public String submit() throws IOException {
+  public String submit() throws IOException, JSONException {
 
     _model.setEnvironmentReason(string(_model.getEnvironmentReason()));
     _model.setEquipmentReason(string(_model.getEquipmentReason()));
@@ -161,43 +162,34 @@ public class ServiceAlertAction extends ActionSupport implements
   }
 
   private String getSituationAffectsAsString() {
-    StringBuilder b = new StringBuilder();
+
     SituationAffectsBean affects = _model.getAffects();
+
     if (affects != null) {
-      List<SituationAffectedVehicleJourneyBean> journeys = affects.getVehicleJourneys();
-      if (journeys != null) {
-        for (SituationAffectedVehicleJourneyBean journey : journeys) {
-          b.append(journey.getLineId());
-          if (journey.getDirection() != null)
-            b.append(" ").append(journey.getDirection());
-          b.append("\n");
-        }
-      }
+      XStream xstream = createXStream();
+      return xstream.toXML(affects);
     }
-    return b.toString();
+
+    return null;
   }
 
   private SituationAffectsBean getStringAsSituationAffects(String value)
-      throws IOException {
+      throws IOException, JSONException {
 
-    BufferedReader reader = new BufferedReader(new StringReader(value));
-    String line = null;
+    if (value == null || value.trim().isEmpty())
+      return new SituationAffectsBean();
 
-    SituationAffectsBean affects = new SituationAffectsBean();
-    List<SituationAffectedVehicleJourneyBean> journeys = new ArrayList<SituationAffectedVehicleJourneyBean>();
+    XStream xstream = createXStream();
+    return (SituationAffectsBean) xstream.fromXML(value);
+  }
 
-    while ((line = reader.readLine()) != null) {
-      String[] tokens = line.split("\\s+");
-      SituationAffectedVehicleJourneyBean journey = new SituationAffectedVehicleJourneyBean();
-      journey.setLineId(tokens[0]);
-      if (tokens.length > 1)
-        journey.setDirection(tokens[1]);
-      journeys.add(journey);
-    }
-
-    if (!journeys.isEmpty())
-      affects.setVehicleJourneys(journeys);
-
-    return affects;
+  private XStream createXStream() {
+    XStream xstream = new XStream();
+    xstream.alias("affects", SituationAffectsBean.class);
+    xstream.alias("stop", SituationAffectedStopBean.class);
+    xstream.alias("vehicleJourney",
+        SituationAffectedVehicleJourneyBean.class);
+    xstream.alias("call", SituationAffectedCallBean.class);
+    return xstream;
   }
 }

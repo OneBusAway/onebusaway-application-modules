@@ -1,12 +1,15 @@
-package org.onebusaway.transit_data.model.service_alerts;
+package org.onebusaway.transit_data_federation.services.service_alerts;
 
 import java.io.Serializable;
 
-public class SituationBean implements Serializable {
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
+
+public class Situation implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private String id;
+  private AgencyAndId id;
 
   private long creationTime;
 
@@ -30,13 +33,13 @@ public class SituationBean implements Serializable {
 
   private NaturalLanguageStringBean internal;
 
-  private SituationAffectsBean affects;
+  private SituationAffects affects;
 
-  public String getId() {
+  public AgencyAndId getId() {
     return id;
   }
 
-  public void setId(String id) {
+  public void setId(AgencyAndId id) {
     this.id = id;
   }
 
@@ -128,11 +131,11 @@ public class SituationBean implements Serializable {
     this.internal = internal;
   }
 
-  public SituationAffectsBean getAffects() {
+  public SituationAffects getAffects() {
     return affects;
   }
 
-  public void setAffects(SituationAffectsBean affects) {
+  public void setAffects(SituationAffects affects) {
     this.affects = affects;
   }
 

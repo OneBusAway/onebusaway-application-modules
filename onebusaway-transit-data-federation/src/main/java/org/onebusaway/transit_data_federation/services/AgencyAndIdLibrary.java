@@ -23,7 +23,7 @@ public class AgencyAndIdLibrary {
    * @return an id object
    */
   public static AgencyAndId convertFromString(String value) {
-    if( value == null)
+    if( value == null || value.isEmpty())
       return null;
     int index = value.indexOf(ID_SEPARATOR);
     if (index == -1) {
@@ -42,6 +42,8 @@ public class AgencyAndIdLibrary {
    * @return a string representation of the form "agencyId_entityId"
    */
   public static String convertToString(AgencyAndId aid) {
+    if( aid == null)
+      return null;
     return aid.getAgencyId() + ID_SEPARATOR + aid.getId();
   }
 }

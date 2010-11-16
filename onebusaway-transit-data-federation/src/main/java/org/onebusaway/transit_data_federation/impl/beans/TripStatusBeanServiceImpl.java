@@ -19,6 +19,7 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
@@ -26,7 +27,6 @@ import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanSe
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -49,7 +49,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
   private StopBeanService _stopBeanService;
 
-  private ServiceAlertsService _serviceAlertBeanService;
+  private ServiceAlertsBeanService _serviceAlertBeanService;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -79,7 +79,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
   @Autowired
   public void setServiceAlertBeanService(
-      ServiceAlertsService serviceAlertBeanService) {
+      ServiceAlertsBeanService serviceAlertBeanService) {
     _serviceAlertBeanService = serviceAlertBeanService;
   }
 
@@ -133,12 +133,12 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         BlockTripEntry blockTripEntry = getTargetBlockTrip(tripEntry,
             blockInstance);
         TripDetailsBean details = getTripEntryAndBlockLocationAsTripDetails(
-            blockTripEntry, blockInstance, null, query.getInclusion());
+            blockTripEntry, blockInstance, null, query.getInclusion(), time);
         tripDetails.add(details);
       } else {
         for (BlockLocation location : locations) {
           TripDetailsBean details = getBlockLocationAsTripDetails(location,
-              query.getInclusion());
+              query.getInclusion(), time);
           tripDetails.add(details);
         }
       }
@@ -152,7 +152,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     BlockLocation blockLocation = _blockStatusService.getBlockForVehicle(
         vehicleId, time);
-    return getBlockLocationAsTripDetails(blockLocation, inclusion);
+    return getBlockLocationAsTripDetails(blockLocation, inclusion, time);
   }
 
   @Override
@@ -160,7 +160,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       TripsForBoundsQueryBean query) {
     List<BlockLocation> locations = _blockStatusService.getBlocksForBounds(
         query.getBounds(), query.getTime());
-    return getBlockLocationsAsTripDetails(locations, query.getInclusion());
+    return getBlockLocationsAsTripDetails(locations, query.getInclusion(),
+        query.getTime());
   }
 
   @Override
@@ -168,7 +169,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(query.getRouteId());
     List<BlockLocation> locations = _blockStatusService.getBlocksForRoute(
         routeId, query.getTime());
-    return getBlockLocationsAsTripDetails(locations, query.getInclusion());
+    return getBlockLocationsAsTripDetails(locations, query.getInclusion(),
+        query.getTime());
   }
 
   @Override
@@ -176,11 +178,13 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       TripsForAgencyQueryBean query) {
     List<BlockLocation> locations = _blockStatusService.getBlocksForAgency(
         query.getAgencyId(), query.getTime());
-    return getBlockLocationsAsTripDetails(locations, query.getInclusion());
+    return getBlockLocationsAsTripDetails(locations, query.getInclusion(),
+        query.getTime());
   }
 
   @Override
-  public TripStatusBean getBlockLocationAsStatusBean(BlockLocation blockLocation) {
+  public TripStatusBean getBlockLocationAsStatusBean(
+      BlockLocation blockLocation, long time) {
 
     TripStatusBean bean = new TripStatusBean();
     bean.setStatus("default");
@@ -251,11 +255,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
 
       if (activeBlockTrip != null) {
-        TripEntry trip = activeBlockTrip.getTrip();
-        AgencyAndId lineId = trip.getRouteCollectionId();
-        String lineIdAsString = AgencyAndIdLibrary.convertToString(lineId);
-        List<SituationBean> situations = _serviceAlertBeanService.getSituationsForLineId(
-            lineIdAsString, trip.getDirectionId());
+        List<SituationBean> situations = _serviceAlertBeanService.getSituationsForVehicleJourney(
+            time, blockInstance, activeBlockTrip, blockLocation.getVehicleId());
         if (!situations.isEmpty())
           bean.setSituations(situations);
       }
@@ -272,18 +273,19 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
    ****/
 
   private ListBean<TripDetailsBean> getBlockLocationsAsTripDetails(
-      List<BlockLocation> locations, TripDetailsInclusionBean inclusion) {
+      List<BlockLocation> locations, TripDetailsInclusionBean inclusion,
+      long time) {
     List<TripDetailsBean> tripDetails = new ArrayList<TripDetailsBean>();
     for (BlockLocation location : locations) {
       TripDetailsBean details = getBlockLocationAsTripDetails(location,
-          inclusion);
+          inclusion, time);
       tripDetails.add(details);
     }
     return new ListBean<TripDetailsBean>(tripDetails, false);
   }
 
   private TripDetailsBean getBlockLocationAsTripDetails(
-      BlockLocation blockLocation, TripDetailsInclusionBean inclusion) {
+      BlockLocation blockLocation, TripDetailsInclusionBean inclusion, long time) {
 
     if (blockLocation == null)
       return null;
@@ -296,12 +298,12 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     }
 
     return getTripEntryAndBlockLocationAsTripDetails(tripEntry,
-        blockLocation.getBlockInstance(), blockLocation, inclusion);
+        blockLocation.getBlockInstance(), blockLocation, inclusion, time);
   }
 
   private TripDetailsBean getTripEntryAndBlockLocationAsTripDetails(
       BlockTripEntry blockTripEntry, BlockInstance blockInstance,
-      BlockLocation blockLocation, TripDetailsInclusionBean inclusion) {
+      BlockLocation blockLocation, TripDetailsInclusionBean inclusion, long time) {
 
     TripBean trip = null;
     long serviceDate = blockInstance.getServiceDate();
@@ -309,9 +311,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     TripStatusBean status = null;
 
     boolean missing = false;
-    
+
     TripEntry tripEntry = blockTripEntry.getTrip();
-    
 
     if (inclusion.isIncludeTripBean()) {
       trip = _tripBeanService.getTripForId(tripEntry.getId());
@@ -321,14 +322,15 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     if (inclusion.isIncludeTripSchedule()) {
 
-      stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockInstance, blockTripEntry);
+      stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(
+          blockInstance, blockTripEntry);
 
       if (stopTimes == null)
         missing = true;
     }
 
     if (inclusion.isIncludeTripStatus() && blockLocation != null) {
-      status = getBlockLocationAsStatusBean(blockLocation);
+      status = getBlockLocationAsStatusBean(blockLocation, time);
       if (status == null)
         missing = true;
     }

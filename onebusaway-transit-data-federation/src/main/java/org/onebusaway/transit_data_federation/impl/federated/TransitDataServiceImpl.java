@@ -38,7 +38,6 @@ import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationExchangeDeliveryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
@@ -55,6 +54,7 @@ import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RoutesBeanService;
+import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopScheduleBeanService;
@@ -66,7 +66,6 @@ import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanServ
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
 import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -113,7 +112,7 @@ class TransitDataServiceImpl implements TransitDataService {
   private ShapeBeanService _shapeBeanService;
 
   @Autowired
-  private ServiceAlertsService _serviceAlertsService;
+  private ServiceAlertsBeanService _serviceAlertsBeanService;
 
   @Autowired
   private UserReportingService _userReportingService;
@@ -336,33 +335,36 @@ class TransitDataServiceImpl implements TransitDataService {
   @Override
   public SituationBean createServiceAlert(String agencyId,
       SituationBean situation) {
-    return _serviceAlertsService.createServiceAlert(agencyId, situation);
+    return _serviceAlertsBeanService.createServiceAlert(agencyId, situation);
   }
 
   @Override
   public void updateServiceAlert(SituationBean situation) {
-    _serviceAlertsService.updateServiceAlert(situation);
+    _serviceAlertsBeanService.updateServiceAlert(situation);
   }
 
   @Override
   public SituationBean getServiceAlertForId(String situationId) {
-    return _serviceAlertsService.getServiceAlertForId(situationId);
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(situationId);
+    return _serviceAlertsBeanService.getServiceAlertForId(id);
   }
 
   @Override
   public void removeServiceAlert(String situationId) {
-    _serviceAlertsService.removeServiceAlert(situationId);
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(situationId);
+    _serviceAlertsBeanService.removeServiceAlert(id);
   }
 
   @Override
-  public void updateServiceAlerts(String agencyId,
-      SituationExchangeDeliveryBean alerts) {
-    _serviceAlertsService.updateServiceAlerts(alerts);
+  public ListBean<SituationBean> getAllServiceAlertsForAgencyId(String agencyId) {
+    List<SituationBean> situations = _serviceAlertsBeanService.getAllSituationsForAgencyId(agencyId);
+    return new ListBean<SituationBean>(situations, false);
   }
 
   @Override
   public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query) {
-    return _serviceAlertsService.getServiceAlerts(query);
+    List<SituationBean> situations = _serviceAlertsBeanService.getAllSituationsForAgencyId(query.getAgencyId());
+    return new ListBean<SituationBean>(situations, false);
   }
 
   @Override
@@ -406,5 +408,4 @@ class TransitDataServiceImpl implements TransitDataService {
       converted.add(convertAgencyAndId(id));
     return converted;
   }
-
 }

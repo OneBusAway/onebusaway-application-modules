@@ -2,27 +2,30 @@ package org.onebusaway.transit_data_federation.services.service_alerts;
 
 import java.util.List;
 
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationExchangeDeliveryBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 public interface ServiceAlertsService {
 
-  public SituationBean createServiceAlert(String agencyId,
-      SituationBean situation);
+  public Situation createServiceAlert(String agencyId, Situation situation);
 
-  public void updateServiceAlert(SituationBean situation);
+  public void updateServiceAlert(Situation situation);
 
-  public void updateServiceAlerts(SituationExchangeDeliveryBean alerts);
-  
-  public void removeServiceAlert(String situationId);
+  public void removeServiceAlert(AgencyAndId situationId);
 
-  public SituationBean getServiceAlertForId(String situationId);
+  public Situation getServiceAlertForId(AgencyAndId situationId);
 
-  public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query);
+  public List<Situation> getAllSituationsForAgencyId(String agencyId);
 
-  public List<SituationBean> getSituationsForLineId(String lineId);
-  
-  public List<SituationBean> getSituationsForLineId(String lineId, String directionId);
+  public List<Situation> getSituationsForStopId(long time, AgencyAndId stopId);
+
+  public List<Situation> getSituationsForStopCall(long time,
+      BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
+      AgencyAndId vehicleId);
+
+  public List<Situation> getSituationsForVehicleJourney(long time,
+      BlockInstance blockInstance, BlockTripEntry blockTrip,
+      AgencyAndId vehicleId);
 }

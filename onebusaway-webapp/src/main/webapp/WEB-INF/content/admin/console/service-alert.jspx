@@ -44,7 +44,7 @@
 <s:textfield label="Detail" name="detail.value" value="%{detail.value}"/>
 <s:textfield label="Advice" name="advice.value" value="%{advice.value}"/>
 <s:textfield label="Internal" name="internal.value" value="%{internal.value}"/>
-<s:textfield label="Affects" name="affectsRaw" value="%{affectsRaw}" />
+<s:textarea label="Affects" name="affectsRaw" value="%{affectsRaw}" cols="80" rows="10"/>
 <s:hidden name="agencyId" value="%{agencyId}"/>
 <s:hidden name="id" value="%{id}"/>
 <s:if test="id != null">
@@ -62,6 +62,17 @@
 </s:url>
 <p><s:a href="%{url}">Delete</s:a></p>
 </s:if>
+
+<h2>Example Affects</h2>
+<pre>
+<affects>
+  <stops>
+    <affectedStop>
+      <stopId>1_10020</stopId>
+    </affectedStop>
+  </stops>
+</affects>
+</pre>
 
 </body>
 </html>

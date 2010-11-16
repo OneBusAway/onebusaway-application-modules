@@ -36,7 +36,6 @@ import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationExchangeDeliveryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
@@ -318,20 +317,20 @@ public interface TransitDataService extends FederatedService {
    ****/
 
   @FederatedByAgencyIdMethod
-  public SituationBean createServiceAlert(String agencyId, SituationBean situation);
+  public SituationBean createServiceAlert(String agencyId,
+      SituationBean situation);
 
   @FederatedByEntityIdMethod(propertyExpression = "id")
   public void updateServiceAlert(SituationBean situation);
 
-  @FederatedByAgencyIdMethod
-  public void updateServiceAlerts(String agencyId,
-      SituationExchangeDeliveryBean alerts);
-  
   @FederatedByEntityIdMethod
   public void removeServiceAlert(String situationId);
 
   @FederatedByEntityIdMethod
   public SituationBean getServiceAlertForId(String situationId);
+
+  @FederatedByAgencyIdMethod()
+  public ListBean<SituationBean> getAllServiceAlertsForAgencyId(String agencyId);
 
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query);

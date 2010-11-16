@@ -15,7 +15,10 @@
  */
 package org.onebusaway.transit_data.model;
 
+import java.util.List;
+
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
@@ -56,6 +59,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   private String tripHeadsign;
 
   private TripStatusBean tripStatus;
+
+  private List<SituationBean> situations;
 
   public TripBean getTrip() {
     return trip;
@@ -195,6 +200,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setTripStatus(TripStatusBean tripStatus) {
     this.tripStatus = tripStatus;
+  }
+
+  public List<SituationBean> getSituations() {
+    return situations;
+  }
+
+  public void setSituations(List<SituationBean> situations) {
+    this.situations = situations;
   }
 
   public boolean hasPredictedArrivalTime() {

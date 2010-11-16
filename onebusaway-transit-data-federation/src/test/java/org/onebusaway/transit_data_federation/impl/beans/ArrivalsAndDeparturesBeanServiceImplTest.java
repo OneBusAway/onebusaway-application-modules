@@ -212,11 +212,11 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     TripStatusBean tripStatusBeanB = new TripStatusBean();
 
     Mockito.when(
-        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocation)).thenReturn(
+        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocation, t)).thenReturn(
         tripStatusBeanA);
 
     Mockito.when(
-        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationB)).thenReturn(
+        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationB, t)).thenReturn(
         tripStatusBeanB);
 
     /****

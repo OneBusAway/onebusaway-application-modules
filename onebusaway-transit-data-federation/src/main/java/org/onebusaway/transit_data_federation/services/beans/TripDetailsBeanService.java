@@ -76,8 +76,9 @@ public interface TripDetailsBeanService {
   /**
    * Convert a {@link BlockLocation} object into a trip status bean
    * @param blockLocation
+   * @param time TODO
    * @return a trip status bean representation of a block location object
    */
-  public TripStatusBean getBlockLocationAsStatusBean(BlockLocation blockLocation);
+  public TripStatusBean getBlockLocationAsStatusBean(BlockLocation blockLocation, long time);
 
 }

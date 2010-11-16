@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.service_alerts.NaturalLanguageStringV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectsV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -32,6 +34,7 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
@@ -401,16 +404,15 @@ public class BeanFactoryV2 {
     bean.setStopRouteSchedules(stopRouteScheduleBeans);
 
     /*
-    StopCalendarDaysBean days = stopSchedule.getCalendarDays();
-    bean.setTimeZone(days.getTimeZone());
-
-    List<StopCalendarDayV2Bean> dayBeans = new ArrayList<StopCalendarDayV2Bean>();
-    for (StopCalendarDayBean day : days.getDays()) {
-      StopCalendarDayV2Bean dayBean = getStopCalendarDay(day);
-      dayBeans.add(dayBean);
-    }
-    bean.setStopCalendarDays(dayBeans);
-    */
+     * StopCalendarDaysBean days = stopSchedule.getCalendarDays();
+     * bean.setTimeZone(days.getTimeZone());
+     * 
+     * List<StopCalendarDayV2Bean> dayBeans = new
+     * ArrayList<StopCalendarDayV2Bean>(); for (StopCalendarDayBean day :
+     * days.getDays()) { StopCalendarDayV2Bean dayBean =
+     * getStopCalendarDay(day); dayBeans.add(dayBean); }
+     * bean.setStopCalendarDays(dayBeans);
+     */
 
     return bean;
   }
@@ -515,6 +517,16 @@ public class BeanFactoryV2 {
       addToReferences(nearbyStop);
     }
     bean.setNearbyStopIds(nearbyStopIds);
+    
+    List<SituationBean> situations = sad.getSituations();
+    if( ! CollectionsLibrary.isEmpty(situations) ) {
+      List<String> situationIds = new ArrayList<String>();
+      for( SituationBean situation : situations) {
+        addToReferences(situation);
+        situationIds.add(situation.getId());
+      }
+      bean.setSituationIds(situationIds);
+    }
 
     return bean;
   }
@@ -563,6 +575,16 @@ public class BeanFactoryV2 {
     bean.setPredicted(ad.isPredicted());
     bean.setLastUpdateTime(ad.getLastUpdateTime());
 
+    List<SituationBean> situations = ad.getSituations();
+    if (situations != null && !situations.isEmpty()) {
+      List<String> situationIds = new ArrayList<String>();
+      for (SituationBean situation : situations) {
+        situationIds.add(situation.getId());
+        addToReferences(situation);
+      }
+      bean.setSituationIds(situationIds);
+    }
+
     return bean;
   }
 
@@ -600,9 +622,19 @@ public class BeanFactoryV2 {
   public SituationAffectsV2Bean getSituationAffects(SituationAffectsBean affects) {
 
     SituationAffectsV2Bean bean = new SituationAffectsV2Bean();
+
+    List<SituationAffectedStopBean> stops = affects.getStops();
+
+    if (!CollectionsLibrary.isEmpty(stops)) {
+      List<SituationAffectedStopV2Bean> beans = new ArrayList<SituationAffectedStopV2Bean>();
+      for (SituationAffectedStopBean stop : stops)
+        beans.add(getSituationAffectedStop(stop));
+      bean.setStops(beans);
+    }
+
     List<SituationAffectedVehicleJourneyBean> journeys = affects.getVehicleJourneys();
 
-    if (journeys != null && !journeys.isEmpty()) {
+    if (!CollectionsLibrary.isEmpty(journeys)) {
       List<SituationAffectedVehicleJourneyV2Bean> beans = new ArrayList<SituationAffectedVehicleJourneyV2Bean>();
       for (SituationAffectedVehicleJourneyBean journey : journeys)
         beans.add(getSituationAffectedJourney(journey));
@@ -617,6 +649,13 @@ public class BeanFactoryV2 {
     SituationAffectedVehicleJourneyV2Bean bean = new SituationAffectedVehicleJourneyV2Bean();
     bean.setLineId(journey.getLineId());
     bean.setDirection(journey.getDirection());
+    return bean;
+  }
+
+  public SituationAffectedStopV2Bean getSituationAffectedStop(
+      SituationAffectedStopBean stop) {
+    SituationAffectedStopV2Bean bean = new SituationAffectedStopV2Bean();
+    bean.setStopId(stop.getStopId());
     return bean;
   }
 
