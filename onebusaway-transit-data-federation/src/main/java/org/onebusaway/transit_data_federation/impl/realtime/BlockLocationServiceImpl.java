@@ -689,7 +689,10 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     }
 
     public List<VehicleLocationCacheRecord> getRecordsFromCache() {
-      return Arrays.asList(_cache.getRecordForVehicleId(_vehicleId));
+      VehicleLocationCacheRecord recordForVehicleId = _cache.getRecordForVehicleId(_vehicleId);
+      if( recordForVehicleId == null)
+        return Collections.emptyList();
+      return Arrays.asList(recordForVehicleId);
     }
 
     public List<BlockLocationRecord> getRecordsFromDao(long fromTime,
