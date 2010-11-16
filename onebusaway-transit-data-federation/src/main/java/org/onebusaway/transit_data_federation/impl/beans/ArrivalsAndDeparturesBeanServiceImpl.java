@@ -15,12 +15,14 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
+import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -71,6 +73,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   private TripDetailsBeanService _tripDetailsBeanService;
 
+  private ServiceAlertsBeanService _serviceAlertsBeanService;
+
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
     _stopTimeService = stopTimeService;
@@ -95,6 +99,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   public void setTripDetailsBeanService(
       TripDetailsBeanService tripDetailsBeanService) {
     _tripDetailsBeanService = tripDetailsBeanService;
+  }
+
+  @Autowired
+  public void setServiceAlertsBeanService(
+      ServiceAlertsBeanService serviceAlertsBeanService) {
+    _serviceAlertsBeanService = serviceAlertsBeanService;
   }
 
   private AtomicInteger _stopTimesTotal = new AtomicInteger();
@@ -165,6 +175,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
           applyBlockLocationToBean(sti, time, bean, location);
 
           if (isArrivalAndDepartureBeanInRange(bean, from, to)) {
+            applySituationsToBean(time, blockInstance, sti,
+                location.getVehicleId(), bean);
+
             beans.add(bean);
           }
         }
@@ -184,13 +197,16 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
               BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
                   blockInstance, time);
               applyBlockLocationToBean(sti, time, bean, scheduledLocation);
+              applySituationsToBean(time, blockInstance, sti, null, bean);
 
               beans.add(bean);
             }
 
           } else {
-            if (isFrequencyBasedArrivalInRange(sti, fromTime, toTime))
+            if (isFrequencyBasedArrivalInRange(sti, fromTime, toTime)) {
+              applySituationsToBean(time, blockInstance, sti, null, bean);
               beans.add(bean);
+            }
           }
         }
       }
@@ -321,6 +337,16 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     TripStatusBean tripStatusBean = _tripDetailsBeanService.getBlockLocationAsStatusBean(
         blockLocation, targetTime);
     bean.setTripStatus(tripStatusBean);
+  }
+
+  private void applySituationsToBean(long time, BlockInstance blockInstance,
+      StopTimeInstance sti, AgencyAndId vehicleId, ArrivalAndDepartureBean bean) {
+
+    List<SituationBean> situations = _serviceAlertsBeanService.getSituationsForStopCall(
+        time, blockInstance, sti.getStopTime(), vehicleId);
+
+    if (!situations.isEmpty())
+      bean.setSituations(situations);
   }
 
   private int getBestScheduleDeviation(StopTimeInstance sti,

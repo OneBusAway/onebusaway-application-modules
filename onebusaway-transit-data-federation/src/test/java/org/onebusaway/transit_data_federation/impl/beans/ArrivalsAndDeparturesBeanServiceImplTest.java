@@ -32,6 +32,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -50,6 +51,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private StopTimeService _stopTimeService;
   private TripBeanService _tripBeanService;
   private TripDetailsBeanService _tripDetailsBeanService;
+  private ServiceAlertsBeanService _serviceAlertsBeanService;
 
   @Before
   public void setup() {
@@ -70,6 +72,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     _tripDetailsBeanService = Mockito.mock(TripDetailsBeanService.class);
     _service.setTripDetailsBeanService(_tripDetailsBeanService);
+    
+    _serviceAlertsBeanService = Mockito.mock(ServiceAlertsBeanService.class);
+    _service.setServiceAlertsBeanService(_serviceAlertsBeanService);
   }
 
   @Test
