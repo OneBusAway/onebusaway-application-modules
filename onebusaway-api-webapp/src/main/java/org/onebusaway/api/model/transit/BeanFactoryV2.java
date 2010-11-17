@@ -626,8 +626,10 @@ public class BeanFactoryV2 {
     bean.setMiscellaneousReason(situation.getMiscellaneousReason());
     bean.setUndefinedReason(situation.getUndefinedReason());
 
-    bean.setAdvice(getString(situation.getAdvice()));
+    bean.setSummary(getString(situation.getSummary()));
     bean.setDescription(getString(situation.getDescription()));
+    bean.setAdvice(getString(situation.getAdvice()));
+    
     bean.setDetail(getString(situation.getDetail()));
     bean.setInternal(getString(situation.getInternal()));
 

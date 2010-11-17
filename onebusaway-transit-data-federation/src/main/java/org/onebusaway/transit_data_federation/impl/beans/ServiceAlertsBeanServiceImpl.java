@@ -138,6 +138,7 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     bean.setDescription(situation.getDescription());
     bean.setAdvice(situation.getAdvice());
     bean.setDetail(situation.getDetail());
+    bean.setInternal(situation.getInternal());
 
     if( situation.getAffects() != null)
       bean.setAffects(getSituationAffectsAsBean(situation.getAffects()));
@@ -175,6 +176,7 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     situation.setDescription(bean.getDescription());
     situation.setAdvice(bean.getAdvice());
     situation.setDetail(bean.getDetail());
+    situation.setInternal(bean.getInternal());
 
     if( bean.getAffects() != null)
       situation.setAffects(getBeanAsSituationAffects(bean.getAffects()));
