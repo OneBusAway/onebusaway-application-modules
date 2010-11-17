@@ -71,7 +71,7 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
 
     EVehiclePhase phase = record.getPhase();
     if (phase != null)
-      bean.setPhase(phase.toString().toLowerCase());
+      bean.setPhase(phase.toLabel());
 
     bean.setStatus(record.getStatus());
 

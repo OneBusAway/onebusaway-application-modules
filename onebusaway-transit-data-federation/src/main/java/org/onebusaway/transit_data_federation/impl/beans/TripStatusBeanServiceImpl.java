@@ -242,7 +242,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
       EVehiclePhase phase = blockLocation.getPhase();
       if (phase != null)
-        bean.setPhase(phase.toString().toLowerCase());
+        bean.setPhase(phase.toLabel());
 
       String status = blockLocation.getStatus();
       if (status != null)

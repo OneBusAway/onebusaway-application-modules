@@ -39,6 +39,8 @@ public enum EVehiclePhase {
    */
   DEADHEAD_AFTER,
 
+  a,
+  
   /**
    * The vehicle is doing something unexpected
    */
@@ -64,5 +66,9 @@ public enum EVehiclePhase {
 
   public static boolean isActiveAfterBlock(EVehiclePhase phase) {
     return _activeAfterBlock.contains(phase);
+  }
+  
+  public String toLabel() {
+    return toString().toLowerCase();
   }
 }
