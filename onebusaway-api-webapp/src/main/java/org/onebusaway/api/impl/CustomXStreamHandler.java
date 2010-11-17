@@ -24,8 +24,10 @@ import org.onebusaway.api.model.transit.TripDetailsV2Bean;
 import org.onebusaway.api.model.transit.TripStopTimeV2Bean;
 import org.onebusaway.api.model.transit.TripV2Bean;
 import org.onebusaway.api.model.transit.VehicleStatusV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
@@ -44,6 +46,7 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -94,6 +97,9 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("situation", SituationV2Bean.class);
     xstream.alias("stop",SituationAffectedStopV2Bean.class);
     xstream.alias("vehicleJourney",SituationAffectedVehicleJourneyV2Bean.class);
+    xstream.alias("call",SituationAffectedCallV2Bean.class);
+    xstream.alias("consequence",SituationConsequenceV2Bean.class);
+    xstream.alias("conditionDetails",SituationConditionDetailsBean.class);
 
     xstream.alias("VehicleLocation",VehicleLocation.class);
     

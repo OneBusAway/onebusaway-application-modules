@@ -44,7 +44,7 @@
 <s:textfield label="Detail" name="detail.value" value="%{detail.value}"/>
 <s:textfield label="Advice" name="advice.value" value="%{advice.value}"/>
 <s:textfield label="Internal" name="internal.value" value="%{internal.value}"/>
-<s:textarea label="Affects" name="affectsRaw" value="%{affectsRaw}" cols="80" rows="10"/>
+<s:textarea label="Raw" name="raw" value="%{raw}" cols="80" rows="10"/>
 <s:hidden name="agencyId" value="%{agencyId}"/>
 <s:hidden name="id" value="%{id}"/>
 <s:if test="id != null">

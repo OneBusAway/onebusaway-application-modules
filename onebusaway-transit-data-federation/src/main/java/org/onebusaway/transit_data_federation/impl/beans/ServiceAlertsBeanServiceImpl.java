@@ -10,6 +10,8 @@ import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBea
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -19,6 +21,8 @@ import org.onebusaway.transit_data_federation.services.service_alerts.SituationA
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffects;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationConditionDetails;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationConsequence;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +139,17 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     bean.setAdvice(situation.getAdvice());
     bean.setDetail(situation.getDetail());
 
-    bean.setAffects(getSituationAffectsAsBean(situation.getAffects()));
+    if( situation.getAffects() != null)
+      bean.setAffects(getSituationAffectsAsBean(situation.getAffects()));
+
+    if (!CollectionsLibrary.isEmpty(situation.getConsequences())) {
+      List<SituationConsequenceBean> consequences = new ArrayList<SituationConsequenceBean>();
+      for (SituationConsequence consequence : situation.getConsequences()) {
+        SituationConsequenceBean consequenceBean = getConsequenceAsBean(consequence);
+        consequences.add(consequenceBean);
+      }
+      bean.setConsequences(consequences);
+    }
 
     return bean;
   }
@@ -162,7 +176,17 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     situation.setAdvice(bean.getAdvice());
     situation.setDetail(bean.getDetail());
 
-    situation.setAffects(getBeanAsSituationAffects(bean.getAffects()));
+    if( bean.getAffects() != null)
+      situation.setAffects(getBeanAsSituationAffects(bean.getAffects()));
+
+    if (!CollectionsLibrary.isEmpty(bean.getConsequences())) {
+      List<SituationConsequence> consequences = new ArrayList<SituationConsequence>();
+      for (SituationConsequenceBean consequenceBean : bean.getConsequences()) {
+        SituationConsequence consequence = getBeanAsConsequence(consequenceBean);
+        consequences.add(consequence);
+      }
+      situation.setConsequences(consequences);
+    }
 
     return situation;
   }
@@ -298,5 +322,79 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     SituationAffectedCall call = new SituationAffectedCall();
     call.setStopId(AgencyAndIdLibrary.convertFromString(bean.getStopId()));
     return call;
+  }
+
+  /****
+   * Consequence
+   ****/
+
+  private SituationConsequenceBean getConsequenceAsBean(
+      SituationConsequence consequence) {
+
+    SituationConsequenceBean bean = new SituationConsequenceBean();
+
+    bean.setCondition(consequence.getCondition());
+
+    SituationConditionDetails conditionDetails = consequence.getConditionDetails();
+    if (conditionDetails != null)
+      bean.setConditionDetails(getConditionDetailsAsBean(conditionDetails));
+
+    return bean;
+  }
+
+  private SituationConsequence getBeanAsConsequence(
+      SituationConsequenceBean consequenceBean) {
+
+    SituationConsequence consequence = new SituationConsequence();
+
+    consequence.setCondition(consequenceBean.getCondition());
+
+    SituationConditionDetailsBean conditionDetails = consequenceBean.getConditionDetails();
+    if (conditionDetails != null)
+      consequence.setConditionDetails(getBeanAsConditionDetails(conditionDetails));
+
+    return consequence;
+  }
+
+  /****
+   * Condition Details
+   ****/
+
+  public SituationConditionDetailsBean getConditionDetailsAsBean(
+      SituationConditionDetails details) {
+
+    SituationConditionDetailsBean bean = new SituationConditionDetailsBean();
+
+    bean.setDiversionPath(details.getDiversionPath());
+
+    List<AgencyAndId> diversionStops = details.getDiversionStops();
+
+    if (!CollectionsLibrary.isEmpty(diversionStops)) {
+
+      List<String> stopIds = new ArrayList<String>();
+      for (AgencyAndId stopId : diversionStops)
+        stopIds.add(AgencyAndIdLibrary.convertToString(stopId));
+      bean.setDiversionStopIds(stopIds);
+    }
+
+    return bean;
+  }
+
+  private SituationConditionDetails getBeanAsConditionDetails(
+      SituationConditionDetailsBean bean) {
+
+    SituationConditionDetails details = new SituationConditionDetails();
+
+    details.setDiversionPath(bean.getDiversionPath());
+
+    List<String> stopIds = bean.getDiversionStopIds();
+    if (!CollectionsLibrary.isEmpty(stopIds)) {
+      List<AgencyAndId> diversionStops = new ArrayList<AgencyAndId>();
+      for (String stopId : stopIds)
+        diversionStops.add(AgencyAndIdLibrary.convertFromString(stopId));
+      details.setDiversionStops(diversionStops);
+    }
+
+    return details;
   }
 }

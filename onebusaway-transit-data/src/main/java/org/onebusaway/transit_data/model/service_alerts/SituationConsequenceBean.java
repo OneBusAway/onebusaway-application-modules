@@ -1,14 +1,14 @@
-package org.onebusaway.transit_data_federation.services.service_alerts;
+package org.onebusaway.transit_data.model.service_alerts;
 
 import java.io.Serializable;
 
-public class SituationConsequence implements Serializable {
+public class SituationConsequenceBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
-
+  
   private String condition;
 
-  private SituationConditionDetails conditionDetails;
+  private SituationConditionDetailsBean conditionDetails;
 
   public String getCondition() {
     return condition;
@@ -18,11 +18,12 @@ public class SituationConsequence implements Serializable {
     this.condition = condition;
   }
 
-  public SituationConditionDetails getConditionDetails() {
+  public SituationConditionDetailsBean getConditionDetails() {
     return conditionDetails;
   }
 
-  public void setConditionDetails(SituationConditionDetails conditionDetails) {
+  public void setConditionDetails(SituationConditionDetailsBean conditionDetails) {
     this.conditionDetails = conditionDetails;
   }
+
 }

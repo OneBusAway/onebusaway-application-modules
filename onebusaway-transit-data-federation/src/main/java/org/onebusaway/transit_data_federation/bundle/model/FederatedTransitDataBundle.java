@@ -66,6 +66,10 @@ public class FederatedTransitDataBundle {
   public File getStopTransfersPath() {
     return new File(_path, "StopTransfers.obj");
   }
+  
+  public File getServiceAlertsPath() {
+    return new File(_path, "ServiceAlerts.xml");
+  }
 
   public File getCachePath() {
     return new File(_path, "cache");

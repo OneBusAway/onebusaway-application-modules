@@ -9,11 +9,14 @@ import java.util.TreeMap;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.json.JSONException;
+import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.webapp.actions.admin.console.reasons.EnvironmentReasons;
 import org.onebusaway.webapp.actions.admin.console.reasons.EquipmentReasons;
@@ -44,7 +47,7 @@ public class ServiceAlertAction extends ActionSupport implements
 
   private String _agencyId;
 
-  private String _affectsRaw;
+  private String _raw;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -64,12 +67,12 @@ public class ServiceAlertAction extends ActionSupport implements
     return _agencyId;
   }
 
-  public void setAffectsRaw(String affectsRaw) {
-    _affectsRaw = affectsRaw;
+  public void setRaw(String raw) {
+    _raw = raw;
   }
 
-  public String getAffectsRaw() {
-    return _affectsRaw;
+  public String getRaw() {
+    return _raw;
   }
 
   @Override
@@ -85,7 +88,7 @@ public class ServiceAlertAction extends ActionSupport implements
         _agencyId = id.substring(0, index);
     }
 
-    _affectsRaw = getSituationAffectsAsString();
+    _raw = getRawSituationAsString();
 
     return SUCCESS;
   }
@@ -98,8 +101,11 @@ public class ServiceAlertAction extends ActionSupport implements
     _model.setMiscellaneousReason(string(_model.getMiscellaneousReason()));
     _model.setUndefinedReason(string(_model.getUndefinedReason()));
 
-    if (_affectsRaw != null && !_affectsRaw.trim().isEmpty())
-      _model.setAffects(getStringAsSituationAffects(_affectsRaw));
+    if (_raw != null && !_raw.trim().isEmpty()) {
+      SituationBean rawSituation = getStringAsRawSituation(_raw);
+      _model.setAffects(rawSituation.getAffects());
+      _model.setConsequences(rawSituation.getConsequences());
+    }
 
     if (_model.getId() == null || _model.getId().trim().isEmpty())
       _model = _transitDataService.createServiceAlert(_agencyId, _model);
@@ -161,35 +167,35 @@ public class ServiceAlertAction extends ActionSupport implements
     return m;
   }
 
-  private String getSituationAffectsAsString() {
+  private String getRawSituationAsString() {
 
-    SituationAffectsBean affects = _model.getAffects();
-
-    if (affects != null) {
-      XStream xstream = createXStream();
-      return xstream.toXML(affects);
-    }
-
-    return null;
+    XStream xstream = createXStream();
+    return xstream.toXML(_model);
   }
 
-  private SituationAffectsBean getStringAsSituationAffects(String value)
+  private SituationBean getStringAsRawSituation(String value)
       throws IOException, JSONException {
 
     if (value == null || value.trim().isEmpty())
-      return new SituationAffectsBean();
+      return new SituationBean();
 
     XStream xstream = createXStream();
-    return (SituationAffectsBean) xstream.fromXML(value);
+    return (SituationBean) xstream.fromXML(value);
   }
 
   private XStream createXStream() {
+
     XStream xstream = new XStream();
+
+    xstream.alias("situation", SituationBean.class);
     xstream.alias("affects", SituationAffectsBean.class);
     xstream.alias("stop", SituationAffectedStopBean.class);
-    xstream.alias("vehicleJourney",
-        SituationAffectedVehicleJourneyBean.class);
+    xstream.alias("vehicleJourney", SituationAffectedVehicleJourneyBean.class);
     xstream.alias("call", SituationAffectedCallBean.class);
+    xstream.alias("consequence", SituationConsequenceBean.class);
+    xstream.alias("conditionDetails", SituationConditionDetailsBean.class);
+    xstream.alias("encodedPolyline", EncodedPolylineBean.class);
+
     return xstream;
   }
 }

@@ -1,6 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,19 +16,30 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.collections.ConcurrentCollectionsLibrary;
+import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffects;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationConditionDetails;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationConsequence;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationsContainer;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.thoughtworks.xstream.XStream;
 
 @Component
 public class ServiceAlertsServiceImpl implements ServiceAlertsService {
@@ -47,10 +60,11 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private ConcurrentMap<LineDirectionAndStopCallRef, Set<AgencyAndId>> _situationIdsByLineDirectionAndStopCall = new ConcurrentHashMap<LineDirectionAndStopCallRef, Set<AgencyAndId>>();
 
-  private File _path;
+  private FederatedTransitDataBundle _bundle;
 
-  public void setPath(File path) {
-    _path = path;
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
   }
 
   @PostConstruct
@@ -262,33 +276,67 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
    * Serialization
    ****/
 
-  private void loadServieAlerts() {
+  private synchronized void loadServieAlerts() {
 
-    if (_path == null || !_path.exists())
+    File path = _bundle.getServiceAlertsPath();
+
+    if (path == null || !path.exists())
       return;
 
     try {
 
-      List<Situation> situations = ObjectSerializationLibrary.readObject(_path);
+      XStream xstream = createXStream();
+      FileReader in = new FileReader(path);
+      SituationsContainer container = (SituationsContainer) xstream.fromXML(in);
+      in.close();
+      List<Situation> situations = container.getSituations();
       for (Situation situation : situations)
         updateReferences(situation);
 
     } catch (Exception ex) {
-      _log.error("error loading service alerts from path " + _path, ex);
+      _log.error("error loading service alerts from path " + path, ex);
     }
   }
 
-  private void saveServiceAlerts() {
-    if (_path == null)
+  private synchronized void saveServiceAlerts() {
+
+    File path = _bundle.getServiceAlertsPath();
+
+    if (path == null)
       return;
 
     try {
+
       List<Situation> situations = new ArrayList<Situation>(
           _situations.values());
-      ObjectSerializationLibrary.writeObject(_path, situations);
+      SituationsContainer container = new SituationsContainer();
+      container.setSituations(situations);
+
+      XStream xstream = createXStream();
+
+      FileWriter out = new FileWriter(path);
+      xstream.toXML(container, out);
+      out.close();
     } catch (Exception ex) {
-      _log.error("error saving service alerts to path " + _path, ex);
+      _log.error("error saving service alerts to path " + path, ex);
     }
   }
 
+  private XStream createXStream() {
+
+    XStream xstream = new XStream();
+    
+    xstream.alias("situationContainer", SituationsContainer.class);
+    xstream.alias("situation", Situation.class);
+    xstream.alias("affects", SituationAffects.class);
+    xstream.alias("stop", SituationAffectedStop.class);
+    xstream.alias("vehicleJourney", SituationAffectedVehicleJourney.class);
+    xstream.alias("call", SituationAffectedCall.class);
+    xstream.alias("consequence", SituationConsequence.class);
+    xstream.alias("conditionDetails", SituationConditionDetails.class);
+    xstream.alias("agencyAndId", AgencyAndId.class);
+    xstream.alias("encodedPolyline", EncodedPolylineBean.class);
+
+    return xstream;
+  }
 }

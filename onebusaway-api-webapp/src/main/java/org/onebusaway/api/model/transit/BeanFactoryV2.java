@@ -5,9 +5,12 @@ import java.util.List;
 
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.service_alerts.NaturalLanguageStringV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectsV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetailsV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -34,10 +37,13 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
@@ -517,11 +523,11 @@ public class BeanFactoryV2 {
       addToReferences(nearbyStop);
     }
     bean.setNearbyStopIds(nearbyStopIds);
-    
+
     List<SituationBean> situations = sad.getSituations();
-    if( ! CollectionsLibrary.isEmpty(situations) ) {
+    if (!CollectionsLibrary.isEmpty(situations)) {
       List<String> situationIds = new ArrayList<String>();
-      for( SituationBean situation : situations) {
+      for (SituationBean situation : situations) {
         addToReferences(situation);
         situationIds.add(situation.getId());
       }
@@ -605,6 +611,15 @@ public class BeanFactoryV2 {
 
     bean.setAffects(getSituationAffects(situation.getAffects()));
 
+    if (!CollectionsLibrary.isEmpty(situation.getConsequences())) {
+      List<SituationConsequenceV2Bean> beans = new ArrayList<SituationConsequenceV2Bean>();
+      for (SituationConsequenceBean consequence : situation.getConsequences()) {
+        SituationConsequenceV2Bean consequenceBean = getSituationConsequence(consequence);
+        beans.add(consequenceBean);
+      }
+      bean.setConsequences(beans);
+    }
+
     bean.setEnvironmentReason(situation.getEnvironmentReason());
     bean.setEquipmentReason(situation.getEquipmentReason());
     bean.setPersonnelReason(situation.getPersonnelReason());
@@ -649,6 +664,16 @@ public class BeanFactoryV2 {
     SituationAffectedVehicleJourneyV2Bean bean = new SituationAffectedVehicleJourneyV2Bean();
     bean.setLineId(journey.getLineId());
     bean.setDirection(journey.getDirection());
+    
+    if( ! CollectionsLibrary.isEmpty(journey.getCalls())) {
+      List<SituationAffectedCallV2Bean> calls = new ArrayList<SituationAffectedCallV2Bean>();
+      for( SituationAffectedCallBean call : journey.getCalls()) {
+        SituationAffectedCallV2Bean callBean = new SituationAffectedCallV2Bean();
+        callBean.setStopId(call.getStopId());
+        calls.add(callBean);
+      }
+      bean.setCalls(calls);
+    }
     return bean;
   }
 
@@ -656,6 +681,22 @@ public class BeanFactoryV2 {
       SituationAffectedStopBean stop) {
     SituationAffectedStopV2Bean bean = new SituationAffectedStopV2Bean();
     bean.setStopId(stop.getStopId());
+    return bean;
+  }
+
+  private SituationConsequenceV2Bean getSituationConsequence(
+      SituationConsequenceBean consequence) {
+
+    SituationConsequenceV2Bean bean = new SituationConsequenceV2Bean();
+    bean.setCondition(consequence.getCondition());
+
+    SituationConditionDetailsBean details = consequence.getConditionDetails();
+    if (details != null) {
+      SituationConditionDetailsV2Bean detailsBean = new SituationConditionDetailsV2Bean();
+      detailsBean.setDiversionPath(details.getDiversionPath());
+      detailsBean.setDiversionStopIds(details.getDiversionStopIds());
+      bean.setConditionDetails(detailsBean);
+    }
     return bean;
   }
 

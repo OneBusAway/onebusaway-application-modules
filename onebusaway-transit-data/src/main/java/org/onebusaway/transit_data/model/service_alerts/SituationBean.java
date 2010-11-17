@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data.model.service_alerts;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class SituationBean implements Serializable {
 
@@ -31,6 +32,8 @@ public class SituationBean implements Serializable {
   private NaturalLanguageStringBean internal;
 
   private SituationAffectsBean affects;
+
+  private List<SituationConsequenceBean> consequences;
 
   public String getId() {
     return id;
@@ -136,4 +139,11 @@ public class SituationBean implements Serializable {
     this.affects = affects;
   }
 
+  public List<SituationConsequenceBean> getConsequences() {
+    return consequences;
+  }
+
+  public void setConsequences(List<SituationConsequenceBean> consequences) {
+    this.consequences = consequences;
+  }
 }

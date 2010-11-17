@@ -1,6 +1,7 @@
 package org.onebusaway.api.model.transit.service_alerts;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.onebusaway.api.model.transit.HasId;
 
@@ -33,6 +34,8 @@ public class SituationV2Bean implements HasId, Serializable {
   private NaturalLanguageStringV2Bean internal;
 
   private SituationAffectsV2Bean affects;
+
+  private List<SituationConsequenceV2Bean> consequences;
 
   public String getId() {
     return id;
@@ -138,4 +141,11 @@ public class SituationV2Bean implements HasId, Serializable {
     this.affects = affects;
   }
 
+  public List<SituationConsequenceV2Bean> getConsequences() {
+    return consequences;
+  }
+
+  public void setConsequences(List<SituationConsequenceV2Bean> consequences) {
+    this.consequences = consequences;
+  }
 }
