@@ -64,7 +64,7 @@ public class TripAction extends ActionSupport {
     _serviceDate = serviceDate;
   }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _time = time;
   }

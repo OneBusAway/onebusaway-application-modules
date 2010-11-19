@@ -113,7 +113,7 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
   @Override
   public String toString() {
     return "BlockConfiguration [block=" + block.getId() + " serviceIds="
-        + serviceIds + " trips=" + trips + "]";
+        + serviceIds + "]";
   }
 
   public static class Builder {
