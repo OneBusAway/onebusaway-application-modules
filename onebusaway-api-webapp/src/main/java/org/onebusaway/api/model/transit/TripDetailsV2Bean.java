@@ -1,6 +1,7 @@
 package org.onebusaway.api.model.transit;
 
 import java.io.Serializable;
+import java.util.List;
 
 public final class TripDetailsV2Bean implements Serializable {
 
@@ -13,6 +14,8 @@ public final class TripDetailsV2Bean implements Serializable {
   private TripStatusV2Bean status;
 
   private TripStopTimesV2Bean schedule;
+  
+  private List<String> situationIds;
 
   public String getTripId() {
     return tripId;
@@ -44,5 +47,13 @@ public final class TripDetailsV2Bean implements Serializable {
 
   public void setSchedule(TripStopTimesV2Bean schedule) {
     this.schedule = schedule;
+  }
+
+  public List<String> getSituationIds() {
+    return situationIds;
+  }
+
+  public void setSituationIds(List<String> situationIds) {
+    this.situationIds = situationIds;
   }
 }

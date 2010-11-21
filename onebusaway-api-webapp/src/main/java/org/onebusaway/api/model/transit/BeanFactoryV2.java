@@ -351,6 +351,7 @@ public class BeanFactoryV2 {
     bean.setTripId(tripDetails.getTripId());
     bean.setServiceDate(tripDetails.getServiceDate());
 
+
     TripBean trip = tripDetails.getTrip();
     if (trip != null)
       addToReferences(trip);
@@ -362,6 +363,16 @@ public class BeanFactoryV2 {
     TripStatusBean status = tripDetails.getStatus();
     if (status != null)
       bean.setStatus(getTripStatus(status));
+    
+    List<SituationBean> situations = tripDetails.getSituations();
+    if (!CollectionsLibrary.isEmpty(situations)) {
+      List<String> situationIds = new ArrayList<String>();
+      for (SituationBean situation : situations) {
+        addToReferences(situation);
+        situationIds.add(situation.getId());
+      }
+      bean.setSituationIds(situationIds);
+    }
 
     return bean;
   }

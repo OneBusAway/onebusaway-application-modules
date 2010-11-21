@@ -1,8 +1,10 @@
 package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 
 public final class TripDetailsBean implements Serializable {
 
@@ -18,17 +20,20 @@ public final class TripDetailsBean implements Serializable {
 
   private TripStatusBean status;
 
+  private List<SituationBean> situations;
+
   public TripDetailsBean() {
 
   }
 
-  public TripDetailsBean(String tripId, long serviceDate,
-      TripBean trip, TripStopTimesBean schedule, TripStatusBean status) {
+  public TripDetailsBean(String tripId, long serviceDate, TripBean trip,
+      TripStopTimesBean schedule, TripStatusBean status, List<SituationBean> situations) {
     this.tripId = tripId;
     this.serviceDate = serviceDate;
     this.trip = trip;
     this.schedule = schedule;
     this.status = status;
+    this.situations = situations;
   }
 
   public String getTripId() {
@@ -69,5 +74,13 @@ public final class TripDetailsBean implements Serializable {
 
   public void setStatus(TripStatusBean status) {
     this.status = status;
+  }
+
+  public List<SituationBean> getSituations() {
+    return situations;
+  }
+
+  public void setSituations(List<SituationBean> situations) {
+    this.situations = situations;
   }
 }

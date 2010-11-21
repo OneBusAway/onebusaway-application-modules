@@ -121,8 +121,12 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     List<TripDetailsBean> tripDetails = new ArrayList<TripDetailsBean>();
 
     for (Map.Entry<BlockInstance, List<BlockLocation>> entry : locationsByInstance.entrySet()) {
+
       BlockInstance blockInstance = entry.getKey();
       List<BlockLocation> locations = entry.getValue();
+
+      BlockTripEntry targeBlockTripEntry = getTargetBlockTrip(tripEntry,
+          blockInstance);
 
       /**
        * If we have no locations for the specified block instance, it means the
@@ -130,15 +134,14 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
        * trip details
        */
       if (locations.isEmpty()) {
-        BlockTripEntry blockTripEntry = getTargetBlockTrip(tripEntry,
-            blockInstance);
         TripDetailsBean details = getTripEntryAndBlockLocationAsTripDetails(
-            blockTripEntry, blockInstance, null, query.getInclusion(), time);
+            targeBlockTripEntry, blockInstance, null, query.getInclusion(),
+            time);
         tripDetails.add(details);
       } else {
         for (BlockLocation location : locations) {
-          TripDetailsBean details = getBlockLocationAsTripDetails(location,
-              query.getInclusion(), time);
+          TripDetailsBean details = getBlockLocationAsTripDetails(
+              targeBlockTripEntry, location, query.getInclusion(), time);
           tripDetails.add(details);
         }
       }
@@ -152,7 +155,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     BlockLocation blockLocation = _blockStatusService.getBlockForVehicle(
         vehicleId, time);
-    return getBlockLocationAsTripDetails(blockLocation, inclusion, time);
+    return getBlockLocationAsTripDetails(blockLocation.getActiveTrip(),
+        blockLocation, inclusion, time);
   }
 
   @Override
@@ -279,27 +283,21 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       long time) {
     List<TripDetailsBean> tripDetails = new ArrayList<TripDetailsBean>();
     for (BlockLocation location : locations) {
-      TripDetailsBean details = getBlockLocationAsTripDetails(location,
-          inclusion, time);
+      TripDetailsBean details = getBlockLocationAsTripDetails(
+          location.getActiveTrip(), location, inclusion, time);
       tripDetails.add(details);
     }
     return new ListBean<TripDetailsBean>(tripDetails, false);
   }
 
   private TripDetailsBean getBlockLocationAsTripDetails(
-      BlockLocation blockLocation, TripDetailsInclusionBean inclusion, long time) {
+      BlockTripEntry targetBlockTrip, BlockLocation blockLocation,
+      TripDetailsInclusionBean inclusion, long time) {
 
-    if (blockLocation == null)
+    if (targetBlockTrip == null || blockLocation == null)
       return null;
 
-    BlockTripEntry tripEntry = blockLocation.getActiveTrip();
-
-    if (tripEntry == null) {
-      System.err.println("no trip?");
-      return null;
-    }
-
-    return getTripEntryAndBlockLocationAsTripDetails(tripEntry,
+    return getTripEntryAndBlockLocationAsTripDetails(targetBlockTrip,
         blockLocation.getBlockInstance(), blockLocation, inclusion, time);
   }
 
@@ -311,6 +309,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     long serviceDate = blockInstance.getServiceDate();
     TripStopTimesBean stopTimes = null;
     TripStatusBean status = null;
+    AgencyAndId vehicleId = null;
 
     boolean missing = false;
 
@@ -335,13 +334,19 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       status = getBlockLocationAsStatusBean(blockLocation, time);
       if (status == null)
         missing = true;
+      else
+        vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());
     }
+
+    List<SituationBean> situations = _serviceAlertBeanService.getSituationsForVehicleJourney(
+        time, blockInstance, blockTripEntry, vehicleId);
 
     if (missing)
       return null;
 
     String tripId = AgencyAndIdLibrary.convertToString(tripEntry.getId());
-    return new TripDetailsBean(tripId, serviceDate, trip, stopTimes, status);
+    return new TripDetailsBean(tripId, serviceDate, trip, stopTimes, status,
+        situations);
   }
 
   private BlockTripEntry getTargetBlockTrip(TripEntry targetTrip,

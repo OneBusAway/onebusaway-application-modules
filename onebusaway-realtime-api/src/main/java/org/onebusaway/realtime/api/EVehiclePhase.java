@@ -39,7 +39,10 @@ public enum EVehiclePhase {
    */
   DEADHEAD_AFTER,
 
-  a,
+  /**
+   * A pause after a vehicle has completed its block
+   */
+  LAYOVER_AFTER,
   
   /**
    * The vehicle is doing something unexpected
