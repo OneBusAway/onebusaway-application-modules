@@ -33,11 +33,11 @@ public class TripsForRouteController extends ApiActionSupport {
 
   private MaxCountSupport _maxCount = new MaxCountSupport();
 
-  private boolean _includeTrips = true;
+  private boolean _includeTrip = true;
   
   private boolean _includeStatus = false;
 
-  private boolean _includeSchedules = false;
+  private boolean _includeSchedule = false;
 
   public TripsForRouteController() {
     super(V2);
@@ -60,16 +60,16 @@ public class TripsForRouteController extends ApiActionSupport {
     _maxCount.setMaxCount(maxCount);
   }
 
-  public void setIncludeTrips(boolean includeTrips) {
-    _includeTrips = includeTrips;
+  public void setIncludeTrip(boolean includeTrip) {
+    _includeTrip = includeTrip;
   }
   
   public void setIncludeStatus(boolean includeStatus) {
     _includeStatus = includeStatus;
   }
 
-  public void setIncludeSchedules(boolean includeSchedules) {
-    _includeSchedules = includeSchedules;
+  public void setIncludeSchedule(boolean includeSchedule) {
+    _includeSchedule = includeSchedule;
   }
 
   public DefaultHttpHeaders show() throws IOException, ServiceException {
@@ -90,8 +90,8 @@ public class TripsForRouteController extends ApiActionSupport {
     query.setMaxCount(_maxCount.getMaxCount());
 
     TripDetailsInclusionBean inclusion = query.getInclusion();
-    inclusion.setIncludeTripBean(_includeTrips);
-    inclusion.setIncludeTripSchedule(_includeSchedules);
+    inclusion.setIncludeTripBean(_includeTrip);
+    inclusion.setIncludeTripSchedule(_includeSchedule);
     inclusion.setIncludeTripStatus(_includeStatus);
 
     BeanFactoryV2 factory = getBeanFactoryV2();
