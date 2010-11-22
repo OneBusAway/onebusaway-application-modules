@@ -15,6 +15,14 @@ public class ShapePointsLibrary {
 
   private double _localMinimumThreshold = 20.0;
 
+  public ShapePointsLibrary() {
+
+  }
+
+  public ShapePointsLibrary(double localMinimumThreshold) {
+    _localMinimumThreshold = localMinimumThreshold;
+  }
+
   /**
    * When searching for the closest point along a block's shape, there may be
    * multiple local minimums as a block potentially loops back on itself. This
@@ -67,8 +75,8 @@ public class ShapePointsLibrary {
         localMin = new Min<PointAndIndex>();
       }
     }
-    
-    if( min.isEmpty() )
+
+    if (min.isEmpty())
       return Collections.emptyList();
 
     if (!localMin.isEmpty())
