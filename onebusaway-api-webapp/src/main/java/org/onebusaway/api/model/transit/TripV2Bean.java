@@ -23,6 +23,8 @@ public final class TripV2Bean implements Serializable, HasId {
   private String timeZone;
   
   private String directionId;
+  
+  private String blockId;
 
   public String getId() {
     return id;
@@ -94,5 +96,13 @@ public final class TripV2Bean implements Serializable, HasId {
 
   public void setDirectionId(String directionId) {
     this.directionId = directionId;
+  }
+
+  public String getBlockId() {
+    return blockId;
+  }
+
+  public void setBlockId(String blockId) {
+    this.blockId = blockId;
   }
 }

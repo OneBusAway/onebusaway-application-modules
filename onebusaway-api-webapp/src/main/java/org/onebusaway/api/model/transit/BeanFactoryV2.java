@@ -234,6 +234,7 @@ public class BeanFactoryV2 {
     bean.setDirectionId(trip.getDirectionId());
     bean.setServiceId(trip.getServiceId());
     bean.setShapeId(trip.getShapeId());
+    bean.setBlockId(trip.getBlockId());
 
     return bean;
   }

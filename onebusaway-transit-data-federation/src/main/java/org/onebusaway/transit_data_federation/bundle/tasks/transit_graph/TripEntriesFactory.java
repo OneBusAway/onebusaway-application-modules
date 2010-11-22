@@ -17,6 +17,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImp
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class TripEntriesFactory {
 
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
 
-  private ShapePointsTemporaryService _shapePointsService;
+  private ShapePointService _shapePointsService;
 
   @Autowired
   public void setUniqueService(UniqueService uniqueService) {
@@ -50,8 +51,7 @@ public class TripEntriesFactory {
   }
 
   @Autowired
-  public void setShapePointsService(
-      ShapePointsTemporaryService shapePointsService) {
+  public void setShapePointService(ShapePointService shapePointsService) {
     _shapePointsService = shapePointsService;
   }
 
@@ -91,10 +91,6 @@ public class TripEntriesFactory {
         if (tripEntry != null)
           tripEntry.setRouteCollectionId(unique(routeCollection.getId()));
       }
-
-      // Clear the shape cache between routes, since there is less likelihood of
-      // overlap
-      _shapePointsService.clearCache();
     }
 
     graph.refreshTripMapping();
@@ -111,7 +107,7 @@ public class TripEntriesFactory {
     ShapePoints shapePoints = null;
 
     if (trip.getShapeId() != null)
-      shapePoints = _shapePointsService.getShapePoints(trip.getShapeId());
+      shapePoints = _shapePointsService.getShapePointsForShapeId(trip.getShapeId());
 
     Agency agency = trip.getRoute().getAgency();
     TimeZone tz = TimeZone.getTimeZone(agency.getTimezone());
@@ -131,7 +127,7 @@ public class TripEntriesFactory {
 
     List<StopTimeEntryImpl> stopTimesForTrip = _stopTimeEntriesFactory.processStopTimes(
         graph, stopTimes, tripEntry, shapePoints);
-    
+
     double tripDistance = getTripDistance(stopTimesForTrip, shapePoints);
     tripEntry.setTotalTripDistance(tripDistance);
 

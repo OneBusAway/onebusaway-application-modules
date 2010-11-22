@@ -25,16 +25,8 @@ import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.UniqueServiceImpl;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockEntriesFactory;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ShapePointsTemporaryService;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.StopEntriesFactory;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.StopTimeEntriesFactory;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.TransitGraphTask;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.TripEntriesFactory;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.ShapePointServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
@@ -64,12 +56,12 @@ public class TransitGraphTaskTest {
     ServiceIdOverlapCache serviceIdOverlapCache = new ServiceIdOverlapCache();
     serviceIdOverlapCache.setCalendarService(calendarService);
 
-    ShapePointsTemporaryService shapePointsService = new ShapePointsTemporaryService();
+    ShapePointServiceImpl shapePointsService = new ShapePointServiceImpl();
     shapePointsService.setGtfsDao(gtfsDao);
 
     BlockConfigurationEntriesFactory blockConfigurationEntriesFactory = new BlockConfigurationEntriesFactory();
     blockConfigurationEntriesFactory.setServiceIdOverlapCache(serviceIdOverlapCache);
-    blockConfigurationEntriesFactory.setShapePointsService(shapePointsService);
+    blockConfigurationEntriesFactory.setShapePointService(shapePointsService);
 
     BlockEntriesFactory blockEntriesFactory = new BlockEntriesFactory();
     blockEntriesFactory.setGtfsDao(gtfsDao);
@@ -84,7 +76,7 @@ public class TransitGraphTaskTest {
     TripEntriesFactory tripEntriesFactory = new TripEntriesFactory();
     tripEntriesFactory.setGtfsDao(gtfsDao);
     tripEntriesFactory.setStopTimeEntriesFactory(stopTimeEntriesFactory);
-    tripEntriesFactory.setShapePointsService(shapePointsService);
+    tripEntriesFactory.setShapePointService(shapePointsService);
     tripEntriesFactory.setUniqueService(uniqueService);
     tripEntriesFactory.setWhereDao(whereDao);
 

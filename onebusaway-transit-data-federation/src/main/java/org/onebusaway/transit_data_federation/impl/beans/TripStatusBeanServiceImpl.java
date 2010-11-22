@@ -155,6 +155,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     BlockLocation blockLocation = _blockStatusService.getBlockForVehicle(
         vehicleId, time);
+    if( blockLocation == null)
+      return null;
     return getBlockLocationAsTripDetails(blockLocation.getActiveTrip(),
         blockLocation, inclusion, time);
   }

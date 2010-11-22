@@ -22,7 +22,6 @@ import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ShapePointsTemporaryService;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl.Builder;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
@@ -215,7 +214,6 @@ public class UnitTestingSupport {
 
     BlockConfigurationEntriesFactory factory = new BlockConfigurationEntriesFactory();
     factory.setServiceIdOverlapCache(cache);
-    factory.setShapePointsService(new ShapePointsTemporaryService());
 
     List<TripEntryImpl> tripsInBlock = new ArrayList<TripEntryImpl>();
     for (TripEntryImpl trip : trips)
@@ -271,13 +269,14 @@ public class UnitTestingSupport {
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
       TripEntryImpl trip, int arrivalTime, int departureTime,
       double shapeDistTraveled) {
-    return stopTime(id,stop,trip,arrivalTime,departureTime, shapeDistTraveled, -1);
+    return stopTime(id, stop, trip, arrivalTime, departureTime,
+        shapeDistTraveled, -1);
   }
-  
+
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
       TripEntryImpl trip, int arrivalTime, int departureTime,
       double shapeDistTraveled, int shapeIndex) {
-    
+
     StopTimeEntryImpl stopTime = new StopTimeEntryImpl();
     stopTime.setId(id);
     stopTime.setStop(stop);
@@ -292,7 +291,6 @@ public class UnitTestingSupport {
 
     return stopTime;
   }
-  
 
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,
       TripEntryImpl trip, int time, double shapeDistTraveled) {

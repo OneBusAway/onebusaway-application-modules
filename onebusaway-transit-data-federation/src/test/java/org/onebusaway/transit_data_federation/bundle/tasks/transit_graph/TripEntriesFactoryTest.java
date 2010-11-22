@@ -20,6 +20,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.bundle.tasks.UniqueServiceImpl;
+import org.onebusaway.transit_data_federation.impl.ShapePointServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
@@ -34,8 +35,8 @@ public class TripEntriesFactoryTest {
     TransitGraphImpl graph = new TransitGraphImpl();
     GtfsRelationalDaoImpl gtfsDao = new GtfsRelationalDaoImpl();
 
-    ShapePointsTemporaryService shapePointsService = new ShapePointsTemporaryService();
-    shapePointsService.setGtfsDao(gtfsDao);
+    ShapePointServiceImpl shapePointService = new ShapePointServiceImpl();
+    shapePointService.setGtfsDao(gtfsDao);
 
     Agency agency = new Agency();
     agency.setId("1");
@@ -93,7 +94,7 @@ public class TripEntriesFactoryTest {
 
     TripEntriesFactory factory = new TripEntriesFactory();
     factory.setGtfsDao(gtfsDao);
-    factory.setShapePointsService(shapePointsService);
+    factory.setShapePointService(shapePointService);
     factory.setUniqueService(new UniqueServiceImpl());
 
     RouteCollection rc = new RouteCollection();

@@ -5,12 +5,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addServiceDates;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.frequency;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,24 +21,20 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ShapePointsTemporaryService;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
+import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public class BlockConfigurationEntriesFactoryTest {
 
@@ -45,7 +42,6 @@ public class BlockConfigurationEntriesFactoryTest {
 
   private BlockConfigurationEntriesFactory _factory;
 
-  @SuppressWarnings("unchecked")
   @Before
   public void before() {
 
@@ -73,17 +69,14 @@ public class BlockConfigurationEntriesFactoryTest {
      * ShapePointsService
      ****/
 
-    ShapePointsTemporaryService shapePointsService = Mockito.mock(ShapePointsTemporaryService.class);
+    ShapePointService shapePointService = Mockito.mock(ShapePointService.class);
+
+    ShapePointsFactory shapePointsFactory = new ShapePointsFactory();
+    shapePointsFactory.addPoint(0, 0);
 
     Mockito.when(
-        shapePointsService.computeGapDistancesBetweenTrips((List<TripEntry>) Mockito.any())).thenAnswer(
-        new Answer<double[]>() {
-          @Override
-          public double[] answer(InvocationOnMock invocation) throws Throwable {
-            List<TripEntry> trips = (List<TripEntry>) invocation.getArguments()[0];
-            return new double[trips.size()];
-          }
-        });
+        shapePointService.getShapePointsForShapeId((AgencyAndId) Mockito.any())).thenReturn(
+        shapePointsFactory.create());
 
     /****
      * Factory
@@ -91,7 +84,7 @@ public class BlockConfigurationEntriesFactoryTest {
 
     _factory = new BlockConfigurationEntriesFactory();
     _factory.setServiceIdOverlapCache(serviceIdOverlapCache);
-    _factory.setShapePointsService(shapePointsService);
+    _factory.setShapePointService(shapePointService);
   }
 
   @Test

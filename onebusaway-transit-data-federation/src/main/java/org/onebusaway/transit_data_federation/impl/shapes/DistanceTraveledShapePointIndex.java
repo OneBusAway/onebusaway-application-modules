@@ -42,7 +42,7 @@ public class DistanceTraveledShapePointIndex extends AbstractShapePointIndex {
     else
       index = Arrays.binarySearch(points.getDistTraveled(), _fromIndex,
           _toIndex, _shapeDistanceTraveled);
-    
+
     if (index < 0)
       index = -(index + 1);
     return index;
@@ -65,6 +65,9 @@ public class DistanceTraveledShapePointIndex extends AbstractShapePointIndex {
     if (index == 0)
       return new CoordinatePoint(lats[0], lons[0]);
     if (index == n)
+      return new CoordinatePoint(lats[n - 1], lons[n - 1]);
+
+    if (dist[index] == dist[index - 1])
       return new CoordinatePoint(lats[n - 1], lons[n - 1]);
 
     double ratio = (_shapeDistanceTraveled - dist[index - 1])
@@ -95,6 +98,12 @@ public class DistanceTraveledShapePointIndex extends AbstractShapePointIndex {
       return computePointAndOrientation(points, 0, 0, 1);
     if (index == n)
       return computePointAndOrientation(points, n - 1, n - 2, n - 1);
+
+    if (dist[index] == dist[index - 1]) {
+      double lat = lats[index];
+      double lon = lons[index];
+      return new PointAndOrientation(lat, lon, 0);
+    }
 
     double ratio = (_shapeDistanceTraveled - dist[index - 1])
         / (dist[index] - dist[index - 1]);

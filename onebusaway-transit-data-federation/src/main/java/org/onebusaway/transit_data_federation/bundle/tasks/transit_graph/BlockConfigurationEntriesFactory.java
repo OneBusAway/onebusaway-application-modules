@@ -8,11 +8,14 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
@@ -30,7 +33,7 @@ public class BlockConfigurationEntriesFactory {
 
   private ServiceIdOverlapCache _serviceIdOverlapCache;
 
-  private ShapePointsTemporaryService _shapePointsService;
+  private ShapePointService _shapePointService;
 
   @Autowired
   public void setServiceIdOverlapCache(
@@ -39,9 +42,8 @@ public class BlockConfigurationEntriesFactory {
   }
 
   @Autowired
-  public void setShapePointsService(
-      ShapePointsTemporaryService shapePointsService) {
-    _shapePointsService = shapePointsService;
+  public void setShapePointService(ShapePointService shapePointService) {
+    _shapePointService = shapePointService;
   }
 
   public void processBlockConfigurations(BlockEntryImpl block,
@@ -79,9 +81,10 @@ public class BlockConfigurationEntriesFactory {
 
     Collections.sort(configurations, _blockConfigurationComparator);
     configurations.trimToSize();
-    
-    if( configurations.isEmpty() )
-      System.out.println("no block configurations found for block: " + block.getId());
+
+    if (configurations.isEmpty())
+      System.out.println("no block configurations found for block: "
+          + block.getId());
 
     block.setConfigurations(configurations);
 
@@ -132,7 +135,7 @@ public class BlockConfigurationEntriesFactory {
     Collections.sort(trips, _blockTripComparator);
     trips.trimToSize();
 
-    double[] tripGapDistances = _shapePointsService.computeGapDistancesBetweenTrips(trips);
+    double[] tripGapDistances = computeGapDistancesBetweenTrips(trips);
 
     BlockConfigurationEntryImpl.Builder builder = BlockConfigurationEntryImpl.builder();
     builder.setBlock(block);
@@ -164,6 +167,39 @@ public class BlockConfigurationEntriesFactory {
     }
 
     return frequencies;
+  }
+
+  private double[] computeGapDistancesBetweenTrips(List<TripEntry> trips) {
+
+    double[] tripGapDistances = new double[trips.size()];
+
+    if (_shapePointService == null)
+      return tripGapDistances;
+
+    for (int index = 0; index < trips.size() - 1; index++) {
+
+      TripEntry tripA = trips.get(index);
+      TripEntry tripB = trips.get(index + 1);
+
+      double d = 0;
+
+      ShapePoints shapeFrom = _shapePointService.getShapePointsForShapeId(tripA.getShapeId());
+      ShapePoints shapeTo = _shapePointService.getShapePointsForShapeId(tripB.getShapeId());
+
+      if (shapeFrom != null && shapeTo != null && !shapeFrom.isEmpty()
+          && !shapeTo.isEmpty()) {
+        int n = shapeFrom.getSize();
+        double lat1 = shapeFrom.getLatForIndex(n - 1);
+        double lon1 = shapeFrom.getLonForIndex(n - 1);
+        double lat2 = shapeTo.getLatForIndex(0);
+        double lon2 = shapeTo.getLonForIndex(0);
+        d = SphericalGeometryLibrary.distance(lat1, lon1, lat2, lon2);
+      }
+
+      tripGapDistances[index] = d;
+    }
+
+    return tripGapDistances;
   }
 
   private static class BlockTripComparator implements Comparator<TripEntry> {

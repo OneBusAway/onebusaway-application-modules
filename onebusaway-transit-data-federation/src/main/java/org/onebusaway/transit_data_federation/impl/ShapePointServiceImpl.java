@@ -11,10 +11,11 @@ import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
-class ShapePointServiceImpl implements ShapePointService {
+public class ShapePointServiceImpl implements ShapePointService {
 
   private GtfsRelationalDao _gtfsDao;
 
@@ -27,6 +28,8 @@ class ShapePointServiceImpl implements ShapePointService {
   public ShapePoints getShapePointsForShapeId(AgencyAndId shapeId) {
 
     List<ShapePoint> shapePoints = _gtfsDao.getShapePointsForShapeId(shapeId);
+
+    shapePoints = deduplicateShapePoints(shapePoints);
 
     if (shapePoints.isEmpty())
       return null;
@@ -49,9 +52,9 @@ class ShapePointServiceImpl implements ShapePointService {
     result.setLats(lat);
     result.setLons(lon);
     result.setDistTraveled(distTraveled);
-    
+
     result.ensureDistTraveled();
-    
+
     return result;
   }
 
@@ -64,5 +67,25 @@ class ShapePointServiceImpl implements ShapePointService {
       factory.addPoints(shapePoints);
     }
     return factory.create();
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private List<ShapePoint> deduplicateShapePoints(List<ShapePoint> shapePoints) {
+
+    List<ShapePoint> deduplicated = new ArrayList<ShapePoint>();
+    ShapePoint prev = null;
+
+    for (ShapePoint shapePoint : shapePoints) {
+      if (prev == null
+          || !(prev.getLat() == shapePoint.getLat() && prev.getLon() == shapePoint.getLon())) {
+        deduplicated.add(shapePoint);
+      }
+      prev = shapePoint;
+    }
+
+    return deduplicated;
   }
 }
