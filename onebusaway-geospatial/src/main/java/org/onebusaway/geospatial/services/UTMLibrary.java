@@ -56,7 +56,7 @@ public class UTMLibrary {
     return LAT_ZONES.charAt(latZone);
   }
 
-  public static int getUTMIndexForLatitude(double lat) {
+  private static int getUTMIndexForLatitude(double lat) {
     if (lat < -80 || lat > 84)
       throw new IllegalArgumentException(
           "Coordinates not within UTM zone limits");

@@ -213,7 +213,7 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
   }
 
   protected void printUsage() {
-    System.err.println("usage: [-format osm|xml|encoded] data-sources.xml [data-sources.xml ...] output_directory");
+    System.err.println("usage: [-format osm|xml|encoded] data-sources.xml [data-sources.xml ...] output_path");
   }
 
   protected EFormat getFormat(CommandLine cli) {
@@ -259,7 +259,7 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
       Stop stop = (Stop) bean;
 
       if (_projection == null) {
-        int zone = UTMLibrary.getUTMIndexForLatitude(stop.getLat());
+        int zone = UTMLibrary.getUTMZoneForLongitude(stop.getLon());
         _projection = new UTMProjection(zone);
       }
 

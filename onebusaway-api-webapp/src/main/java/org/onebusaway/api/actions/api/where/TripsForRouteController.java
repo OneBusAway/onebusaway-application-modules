@@ -34,6 +34,8 @@ public class TripsForRouteController extends ApiActionSupport {
   private MaxCountSupport _maxCount = new MaxCountSupport();
 
   private boolean _includeTrips = true;
+  
+  private boolean _includeStatus = false;
 
   private boolean _includeSchedules = false;
 
@@ -61,6 +63,10 @@ public class TripsForRouteController extends ApiActionSupport {
   public void setIncludeTrips(boolean includeTrips) {
     _includeTrips = includeTrips;
   }
+  
+  public void setIncludeStatus(boolean includeStatus) {
+    _includeStatus = includeStatus;
+  }
 
   public void setIncludeSchedules(boolean includeSchedules) {
     _includeSchedules = includeSchedules;
@@ -86,7 +92,7 @@ public class TripsForRouteController extends ApiActionSupport {
     TripDetailsInclusionBean inclusion = query.getInclusion();
     inclusion.setIncludeTripBean(_includeTrips);
     inclusion.setIncludeTripSchedule(_includeSchedules);
-    inclusion.setIncludeTripStatus(true);
+    inclusion.setIncludeTripStatus(_includeStatus);
 
     BeanFactoryV2 factory = getBeanFactoryV2();
 

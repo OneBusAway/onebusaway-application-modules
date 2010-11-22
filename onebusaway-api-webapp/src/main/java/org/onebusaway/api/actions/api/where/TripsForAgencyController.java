@@ -93,8 +93,7 @@ public class TripsForAgencyController extends ApiActionSupport {
     inclusion.setIncludeTripBean(_includeTrips);
     inclusion.setIncludeTripStatus(_includeStatus);
     inclusion.setIncludeTripSchedule(_includeSchedules);
-    inclusion.setIncludeTripStatus(true);
-
+    
     BeanFactoryV2 factory = getBeanFactoryV2();
 
     try {
