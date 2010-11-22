@@ -1,10 +1,10 @@
 package org.onebusaway.transit_data_federation.impl.realtime;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.onebusaway.collections.ConcurrentCollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -37,11 +38,9 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
 
   private static Logger _log = LoggerFactory.getLogger(VehicleLocationRecordCacheImpl.class);
 
-  private ConcurrentMap<BlockLocationRecordKey, VehicleLocationCacheRecord> _recordsByKey = new ConcurrentHashMap<BlockLocationRecordKey, VehicleLocationCacheRecord>();
+  private ConcurrentMap<AgencyAndId, VehicleLocationCacheRecord> _recordsByVehicleId = new ConcurrentHashMap<AgencyAndId, VehicleLocationCacheRecord>();
 
-  private ConcurrentMap<AgencyAndId, BlockLocationRecordKey> _keyByVehicleId = new ConcurrentHashMap<AgencyAndId, BlockLocationRecordKey>();
-
-  private ConcurrentMap<BlockInstance, List<BlockLocationRecordKey>> _keysByBlockInstance = new ConcurrentHashMap<BlockInstance, List<BlockLocationRecordKey>>();
+  private ConcurrentMap<BlockInstance, Set<AgencyAndId>> _vehicleIdsByBlockInstance = new ConcurrentHashMap<BlockInstance, Set<AgencyAndId>>();
 
   /**
    * By default, we keep around 20 minutes of cache entries
@@ -94,15 +93,26 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
 
   @Override
   public VehicleLocationCacheRecord getRecordForVehicleId(AgencyAndId vehicleId) {
-
-    return getRecordFromMap(_keyByVehicleId, vehicleId);
+    return _recordsByVehicleId.get(vehicleId);
   }
 
   @Override
   public List<VehicleLocationCacheRecord> getRecordsForBlockInstance(
       BlockInstance blockInstance) {
 
-    return getRecordsFromMap(_keysByBlockInstance, blockInstance);
+    Set<AgencyAndId> vehicleIds = _vehicleIdsByBlockInstance.get(blockInstance);
+
+    List<VehicleLocationCacheRecord> records = new ArrayList<VehicleLocationCacheRecord>();
+    if (vehicleIds != null) {
+      for (AgencyAndId vehicleId : vehicleIds) {
+        VehicleLocationCacheRecord record = _recordsByVehicleId.get(vehicleId);
+
+        if (record != null && record.getBlockInstance().equals(blockInstance))
+          records.add(record);
+      }
+    }
+
+    return records;
   }
 
   @Override
@@ -111,40 +121,47 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
 
     AgencyAndId vehicleId = record.getVehicleId();
 
-    BlockLocationRecordKey key = new BlockLocationRecordKey(blockInstance,
-        vehicleId);
+    VehicleLocationCacheRecord cacheRecord = new VehicleLocationCacheRecord(
+        blockInstance, record);
+    VehicleLocationCacheRecord existing = _recordsByVehicleId.put(vehicleId,
+        cacheRecord);
 
-    VehicleLocationCacheRecord existingRecord = _recordsByKey.put(key,
-        new VehicleLocationCacheRecord(blockInstance, record));
-
-    if (existingRecord == null) {
-
-      addKeyToMap(_keysByBlockInstance, blockInstance, key);
-      _keyByVehicleId.put(key.getVehicleId(), key);
+    if (existing != null) {
+      BlockInstance existingBlockInstance = existing.getBlockInstance();
+      if (!blockInstance.equals(existingBlockInstance))
+        ConcurrentCollectionsLibrary.removeFromMapValueSet(
+            _vehicleIdsByBlockInstance, existingBlockInstance, vehicleId);
     }
+
+    // Ensure the block => vehicle mapping is set
+    ConcurrentCollectionsLibrary.addToMapValueSet(_vehicleIdsByBlockInstance,
+        blockInstance, vehicleId);
   }
 
   @Override
   public void clearRecordsForVehicleId(AgencyAndId vehicleId) {
 
-    BlockLocationRecordKey key = _keyByVehicleId.remove(vehicleId);
+    VehicleLocationCacheRecord record = _recordsByVehicleId.remove(vehicleId);
 
-    if (key != null)
-      removeRecordsForKey(key, true);
+    if (record != null) {
+      ConcurrentCollectionsLibrary.removeFromMapValueSet(
+          _vehicleIdsByBlockInstance, record.getBlockInstance(), vehicleId);
+    }
   }
 
   public void clearStaleRecords(long time) {
-    Iterator<Entry<BlockLocationRecordKey, VehicleLocationCacheRecord>> it = _recordsByKey.entrySet().iterator();
+    Iterator<Entry<AgencyAndId, VehicleLocationCacheRecord>> it = _recordsByVehicleId.entrySet().iterator();
     while (it.hasNext()) {
-      Entry<BlockLocationRecordKey, VehicleLocationCacheRecord> entry = it.next();
-      BlockLocationRecordKey key = entry.getKey();
+      Entry<AgencyAndId, VehicleLocationCacheRecord> entry = it.next();
+      AgencyAndId vehicleId = entry.getKey();
       VehicleLocationCacheRecord value = entry.getValue();
       if (value.getMeasuredLastUpdateTime() < time) {
         if (_log.isDebugEnabled())
           _log.debug("pruning block location record cache for vehicle="
-              + key.getVehicleId() + " block=" + key.getBlockInstance());
+              + vehicleId + " block=" + value.getBlockInstance());
         it.remove();
-        removeRecordsForKey(key, false);
+        ConcurrentCollectionsLibrary.removeFromMapValueSet(
+            _vehicleIdsByBlockInstance, value.getBlockInstance(), vehicleId);
       }
     }
   }
@@ -152,105 +169,6 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
   /****
    * Private Methods
    ****/
-
-  private <K> VehicleLocationCacheRecord getRecordFromMap(
-      ConcurrentMap<K, BlockLocationRecordKey> map, K subKey) {
-
-    BlockLocationRecordKey key = map.get(subKey);
-
-    if (key != null)
-      return _recordsByKey.get(key);
-
-    return null;
-  }
-
-  private <K> List<VehicleLocationCacheRecord> getRecordsFromMap(
-      ConcurrentMap<K, List<BlockLocationRecordKey>> map, K subKey) {
-
-    List<VehicleLocationCacheRecord> allRecords = new ArrayList<VehicleLocationCacheRecord>();
-    List<BlockLocationRecordKey> keys = map.get(subKey);
-
-    if (keys != null) {
-      for (BlockLocationRecordKey key : keys) {
-        VehicleLocationCacheRecord r = _recordsByKey.get(key);
-        if (r != null)
-          allRecords.add(r);
-      }
-    }
-
-    return allRecords;
-  }
-
-  private <K> void addKeyToMap(
-      ConcurrentMap<K, List<BlockLocationRecordKey>> map, K subKey,
-      BlockLocationRecordKey key) {
-
-    while (true) {
-
-      List<BlockLocationRecordKey> keys = map.get(subKey);
-
-      if (keys == null) {
-        List<BlockLocationRecordKey> newKeys = Arrays.asList(key);
-        keys = map.putIfAbsent(subKey, newKeys);
-        if (keys == null)
-          return;
-      }
-
-      List<BlockLocationRecordKey> origCopy = new ArrayList<BlockLocationRecordKey>(
-          keys);
-
-      if (origCopy.contains(key))
-        return;
-
-      List<BlockLocationRecordKey> extendedCopy = new ArrayList<BlockLocationRecordKey>(
-          origCopy);
-      extendedCopy.add(key);
-
-      if (map.replace(subKey, origCopy, extendedCopy))
-        return;
-    }
-  }
-
-  private void removeRecordsForKey(BlockLocationRecordKey key,
-      boolean removeRecords) {
-
-    if (removeRecords)
-      _recordsByKey.remove(key);
-
-    removeKeyFromMap(_keysByBlockInstance, key, key.getBlockInstance());
-    _keyByVehicleId.remove(key.getVehicleId(), key);
-  }
-
-  private <K> void removeKeyFromMap(
-      ConcurrentMap<K, List<BlockLocationRecordKey>> map,
-      BlockLocationRecordKey key, K subKey) {
-
-    while (true) {
-
-      List<BlockLocationRecordKey> keys = map.get(subKey);
-
-      if (keys == null)
-        return;
-
-      List<BlockLocationRecordKey> origCopy = new ArrayList<BlockLocationRecordKey>(
-          keys);
-
-      if (!origCopy.contains(key))
-        return;
-
-      List<BlockLocationRecordKey> reducedCopy = new ArrayList<BlockLocationRecordKey>(
-          origCopy);
-      reducedCopy.remove(key);
-
-      if (reducedCopy.isEmpty()) {
-        if (map.remove(subKey, origCopy))
-          return;
-      } else {
-        if (map.replace(subKey, origCopy, reducedCopy))
-          return;
-      }
-    }
-  }
 
   private class CacheEvictionHandler implements Runnable {
 
