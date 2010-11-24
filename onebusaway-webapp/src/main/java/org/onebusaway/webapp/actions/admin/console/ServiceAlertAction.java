@@ -18,10 +18,10 @@ import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.actions.admin.console.reasons.EnvironmentReasons;
-import org.onebusaway.webapp.actions.admin.console.reasons.EquipmentReasons;
-import org.onebusaway.webapp.actions.admin.console.reasons.MiscellaneousReasons;
-import org.onebusaway.webapp.actions.admin.console.reasons.PersonnelReasons;
+import org.onebusaway.webapp.actions.bundles.service_alerts.EnvironmentReasons;
+import org.onebusaway.webapp.actions.bundles.service_alerts.EquipmentReasons;
+import org.onebusaway.webapp.actions.bundles.service_alerts.MiscellaneousReasons;
+import org.onebusaway.webapp.actions.bundles.service_alerts.PersonnelReasons;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;

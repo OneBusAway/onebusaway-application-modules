@@ -13,6 +13,8 @@ public class Situation implements Serializable {
   private AgencyAndId id;
 
   private long creationTime;
+  
+  private TimeRange publicationWindow;
 
   private String miscellaneousReason;
 

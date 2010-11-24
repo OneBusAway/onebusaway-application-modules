@@ -1,8 +1,11 @@
 package org.onebusaway.users.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.users.client.model.BookmarkBean;
 import org.onebusaway.users.client.model.RouteFilterBean;
@@ -77,8 +80,13 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
       bookmarkBean.setRouteFilter(getRouteFilterAsBean(bookmark.getRouteFilter()));
       bean.addBookmark(bookmarkBean);
     }
-    
+
     bean.setMinApiRequestInterval(properties.getMinApiRequestInterval());
+    
+    Map<String, Long> readServiceAlerts = properties.getReadSituationIdsWithReadTime();
+    if( readServiceAlerts == null)
+      readServiceAlerts = Collections.emptyMap();
+    bean.setReadServiceAlerts(readServiceAlerts);
 
     return bean;
   }
@@ -199,13 +207,35 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   public void setLastSelectedStopIds(User user, List<String> stopIds) {
     _lastSelectedStopService.setLastSelectedStopsForUser(user.getId(), stopIds);
   }
-  
 
   @Override
   public void authorizeApi(User user, long minApiRequestInterval) {
     UserPropertiesV2 properties = getProperties(user);
     properties.setMinApiRequestInterval(minApiRequestInterval);
     _userDao.saveOrUpdateUser(user);
+  }
+
+  @Override
+  public void markServiceAlertAsRead(User user, String situationId, long time,
+      boolean isRead) {
+
+    UserPropertiesV2 properties = getProperties(user);
+    Map<String, Long> readSituationIdsWithReadTime = properties.getReadSituationIdsWithReadTime();
+
+    if (isRead) {
+
+      if (readSituationIdsWithReadTime == null) {
+        readSituationIdsWithReadTime = new HashMap<String, Long>();
+        properties.setReadSituationIdsWithReadTime(readSituationIdsWithReadTime);
+      }
+      readSituationIdsWithReadTime.put(situationId, time);
+      _userDao.saveOrUpdateUser(user);
+    } else {
+      if (readSituationIdsWithReadTime == null)
+        return;
+      if (readSituationIdsWithReadTime.remove(situationId) != null)
+        _userDao.saveOrUpdateUser(user);
+    }
   }
 
   @Override

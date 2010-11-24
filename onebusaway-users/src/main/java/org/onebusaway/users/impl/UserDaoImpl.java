@@ -52,10 +52,10 @@ class UserDaoImpl implements UserDao {
   @Override
   public List<Integer> getAllUserIdsInRange(final int firstResult,
       final int maxResults) {
-    return (List<Integer>) _template.execute(new HibernateCallback() {
+    return _template.execute(new HibernateCallback<List<Integer>>() {
       @Override
-      public Object doInHibernate(Session session) throws HibernateException,
-          SQLException {
+      public List<Integer> doInHibernate(Session session)
+          throws HibernateException, SQLException {
         Query query = session.createQuery("SELECT user.id FROM User user");
         query.setFirstResult(firstResult);
         query.setMaxResults(maxResults);

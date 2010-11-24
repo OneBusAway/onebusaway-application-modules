@@ -47,7 +47,7 @@ public class ArrivalsAndDeparturesModel {
 
   private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
-  private StopsWithArrivalsAndDeparturesBean _result;
+  protected StopsWithArrivalsAndDeparturesBean _result;
 
   private List<AgencyBean> _agencies;
 
@@ -55,6 +55,8 @@ public class ArrivalsAndDeparturesModel {
    * True if we filtered the results (ex. only include particular set of routes)
    */
   private boolean _filtered = false;
+
+  protected UserBean _user;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -161,7 +163,7 @@ public class ArrivalsAndDeparturesModel {
   public List<AgencyBean> getAgencies() {
     return _agencies;
   }
-
+  
   /****
    * Private Methods
    ****/
@@ -200,8 +202,8 @@ public class ArrivalsAndDeparturesModel {
     // Save the last selected stop id
     _currentUserService.setLastSelectedStopIds(_stopIds);
 
-    UserBean user = _currentUserService.getCurrentUser();
-    if (user == null || !user.hasDefaultLocation()) {
+    _user = _currentUserService.getCurrentUser();
+    if (_user == null || !_user.hasDefaultLocation()) {
       List<StopBean> stops = _result.getStops();
       StopBean stop = stops.get(0);
       _defaultSearchLocationService.setDefaultLocationForCurrentUser(

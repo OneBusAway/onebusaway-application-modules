@@ -227,4 +227,10 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
   public void authorizeApi(User user, long minRequestInteval) {
     throw new IllegalStateException("V1 user properties don't support api keys");
   }
+
+  @Override
+  public void markServiceAlertAsRead(User user, String situationId, long time,
+      boolean isRead) {
+    throw new UnsupportedOperationException();
+  }
 }

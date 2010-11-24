@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
@@ -17,6 +18,7 @@ import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanSe
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
@@ -140,7 +142,7 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     bean.setDetail(situation.getDetail());
     bean.setInternal(situation.getInternal());
 
-    if( situation.getAffects() != null)
+    if (situation.getAffects() != null)
       bean.setAffects(getSituationAffectsAsBean(situation.getAffects()));
 
     if (!CollectionsLibrary.isEmpty(situation.getConsequences())) {
@@ -178,7 +180,7 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     situation.setDetail(bean.getDetail());
     situation.setInternal(bean.getInternal());
 
-    if( bean.getAffects() != null)
+    if (bean.getAffects() != null)
       situation.setAffects(getBeanAsSituationAffects(bean.getAffects()));
 
     if (!CollectionsLibrary.isEmpty(bean.getConsequences())) {
@@ -201,6 +203,16 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
       SituationAffects affects) {
 
     SituationAffectsBean bean = new SituationAffectsBean();
+
+    List<SituationAffectedAgency> agencies = affects.getAgencies();
+    if (!CollectionsLibrary.isEmpty(agencies)) {
+      List<SituationAffectedAgencyBean> beans = new ArrayList<SituationAffectedAgencyBean>();
+      for (SituationAffectedAgency agency : agencies) {
+        SituationAffectedAgencyBean agencyBean = getAffectedAgencyAsBean(agency);
+        beans.add(agencyBean);
+      }
+      bean.setAgencies(beans);
+    }
 
     List<SituationAffectedStop> stops = affects.getStops();
     if (!CollectionsLibrary.isEmpty(stops)) {
@@ -228,6 +240,16 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
     SituationAffects affects = new SituationAffects();
 
+    List<SituationAffectedAgencyBean> agencyBeans = bean.getAgencies();
+    if (!CollectionsLibrary.isEmpty(agencyBeans)) {
+      List<SituationAffectedAgency> agencies = new ArrayList<SituationAffectedAgency>();
+      for (SituationAffectedAgencyBean agencyBean : agencyBeans) {
+        SituationAffectedAgency agency = getBeanAsAffectedAgency(agencyBean);
+        agencies.add(agency);
+      }
+      affects.setAgencies(agencies);
+    }
+
     List<SituationAffectedStopBean> stopBeans = bean.getStops();
     if (!CollectionsLibrary.isEmpty(stopBeans)) {
       List<SituationAffectedStop> stops = new ArrayList<SituationAffectedStop>();
@@ -248,6 +270,26 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
       affects.setVehicleJourneys(vehicleJourneys);
     }
     return affects;
+  }
+
+  /****
+   * Affected Agency
+   ****/
+
+  private SituationAffectedAgencyBean getAffectedAgencyAsBean(
+      SituationAffectedAgency agency) {
+
+    SituationAffectedAgencyBean bean = new SituationAffectedAgencyBean();
+    bean.setAgencyId(agency.getAgencyId());
+    return bean;
+  }
+
+  private SituationAffectedAgency getBeanAsAffectedAgency(
+      SituationAffectedAgencyBean agencyBean) {
+
+    SituationAffectedAgency agency = new SituationAffectedAgency();
+    agency.setAgencyId(agencyBean.getAgencyId());
+    return agency;
   }
 
   /****

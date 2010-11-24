@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -48,9 +49,11 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private ConcurrentMap<AgencyAndId, Situation> _situations = new ConcurrentHashMap<AgencyAndId, Situation>();
 
+  private ConcurrentMap<String, Set<AgencyAndId>> _situationIdsBySituationAgencyId = new ConcurrentHashMap<String, Set<AgencyAndId>>();
+
   private ConcurrentMap<String, Set<AgencyAndId>> _situationIdsByAgencyId = new ConcurrentHashMap<String, Set<AgencyAndId>>();
 
-  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _situationsByStopId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
+  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _situationIdsByStopId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
 
   private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _situationIdsByLineId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
 
@@ -99,18 +102,35 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   @Override
   public void updateServiceAlert(Situation situation) {
-    updateReferences(situation);
+    updateServiceAlerts(Arrays.asList(situation));
+    saveServiceAlerts();
+  }
+
+  @Override
+  public void updateServiceAlerts(List<Situation> situations) {
+    for (Situation situation : situations)
+      updateReferences(situation);
     saveServiceAlerts();
   }
 
   @Override
   public void removeServiceAlert(AgencyAndId situationId) {
+    removeServiceAlerts(Arrays.asList(situationId));
+  }
 
-    Situation existingSituation = _situations.remove(situationId);
+  @Override
+  public void removeServiceAlerts(List<AgencyAndId> situationIds) {
 
-    if (existingSituation != null) {
-      updateReferences(existingSituation, null);
+    for (AgencyAndId situationId : situationIds) {
+
+      Situation existingSituation = _situations.remove(situationId);
+
+      if (existingSituation != null) {
+        updateReferences(existingSituation, null);
+      }
     }
+
+    saveServiceAlerts();
   }
 
   @Override
@@ -120,14 +140,17 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   @Override
   public List<Situation> getAllSituationsForAgencyId(String agencyId) {
-    Set<AgencyAndId> situationIds = _situationIdsByAgencyId.get(agencyId);
+    Set<AgencyAndId> situationIds = _situationIdsBySituationAgencyId.get(agencyId);
     return getSituationIdsAsObjects(situationIds);
   }
 
   @Override
   public List<Situation> getSituationsForStopId(long time, AgencyAndId stopId) {
 
-    Set<AgencyAndId> situationIds = _situationsByStopId.get(stopId);
+    Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
+    getSituationIdsForKey(_situationIdsByAgencyId, stopId.getAgencyId(),
+        situationIds);
+    getSituationIdsForKey(_situationIdsByStopId, stopId, situationIds);
     return getSituationIdsAsObjects(situationIds);
   }
 
@@ -148,6 +171,8 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
         stopId);
 
     Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
+    getSituationIdsForKey(_situationIdsByAgencyId, lineId.getAgencyId(),
+        situationIds);
     getSituationIdsForKey(_situationIdsByLineId, lineId, situationIds);
     getSituationIdsForKey(_situationIdsByLineAndStopCall, lineAndStopCallRef,
         situationIds);
@@ -180,6 +205,8 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
         trip.getDirectionId());
 
     Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
+    getSituationIdsForKey(_situationIdsByAgencyId, lineId.getAgencyId(),
+        situationIds);
     getSituationIdsForKey(_situationIdsByLineId, lineId, situationIds);
     getSituationIdsForKey(_situationIdsByLineAndDirectionId,
         lineAndDirectionRef, situationIds);
@@ -200,10 +227,14 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private void updateReferences(Situation existingSituation, Situation situation) {
 
+    updateReferences(existingSituation, situation,
+        _situationIdsBySituationAgencyId,
+        AffectsSituationAgencyKeyFactory.INSTANCE);
+
     updateReferences(existingSituation, situation, _situationIdsByAgencyId,
         AffectsAgencyKeyFactory.INSTANCE);
 
-    updateReferences(existingSituation, situation, _situationsByStopId,
+    updateReferences(existingSituation, situation, _situationIdsByStopId,
         AffectsStopKeyFactory.INSTANCE);
 
     updateReferences(existingSituation, situation, _situationIdsByLineId,
@@ -325,7 +356,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
   private XStream createXStream() {
 
     XStream xstream = new XStream();
-    
+
     xstream.alias("situationContainer", SituationsContainer.class);
     xstream.alias("situation", Situation.class);
     xstream.alias("affects", SituationAffects.class);

@@ -235,6 +235,17 @@ public interface CurrentUserService {
   public void clearPhoneNumberRegistration();
 
   /**
+   * Mark the specified service alert as read or unread at the specified time
+   * for the current user.
+   * 
+   * @param situationId the service alert situation id
+   * @param time the time the service alert was read or marked unread
+   * @param isRead whether the service alert should be marked read or unread
+   */
+  public void markServiceAlertAsRead(String situationId, long time,
+      boolean isRead);
+
+  /**
    * Remove the {@link UserIndex} with the specified key from the user. See
    * {@link UserService#removeUserIndexForUser(User, UserIndexKey)}
    * 

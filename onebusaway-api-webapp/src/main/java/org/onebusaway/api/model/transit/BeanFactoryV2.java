@@ -12,6 +12,7 @@ import org.onebusaway.api.model.transit.service_alerts.SituationAffectsV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetailsV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
@@ -44,6 +45,7 @@ import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
@@ -352,7 +354,6 @@ public class BeanFactoryV2 {
     bean.setTripId(tripDetails.getTripId());
     bean.setServiceDate(tripDetails.getServiceDate());
 
-
     TripBean trip = tripDetails.getTrip();
     if (trip != null)
       addToReferences(trip);
@@ -364,7 +365,7 @@ public class BeanFactoryV2 {
     TripStatusBean status = tripDetails.getStatus();
     if (status != null)
       bean.setStatus(getTripStatus(status));
-    
+
     List<SituationBean> situations = tripDetails.getSituations();
     if (!CollectionsLibrary.isEmpty(situations)) {
       List<String> situationIds = new ArrayList<String>();
@@ -621,6 +622,9 @@ public class BeanFactoryV2 {
     bean.setId(situation.getId());
     bean.setCreationTime(situation.getCreationTime());
 
+    if (situation.getPublicationWindow() != null)
+      bean.setPublicationWindow(getTimeRange(situation.getPublicationWindow()));
+
     bean.setAffects(getSituationAffects(situation.getAffects()));
 
     if (!CollectionsLibrary.isEmpty(situation.getConsequences())) {
@@ -641,7 +645,7 @@ public class BeanFactoryV2 {
     bean.setSummary(getString(situation.getSummary()));
     bean.setDescription(getString(situation.getDescription()));
     bean.setAdvice(getString(situation.getAdvice()));
-    
+
     bean.setDetail(getString(situation.getDetail()));
     bean.setInternal(getString(situation.getInternal()));
 
@@ -678,10 +682,10 @@ public class BeanFactoryV2 {
     SituationAffectedVehicleJourneyV2Bean bean = new SituationAffectedVehicleJourneyV2Bean();
     bean.setLineId(journey.getLineId());
     bean.setDirection(journey.getDirection());
-    
-    if( ! CollectionsLibrary.isEmpty(journey.getCalls())) {
+
+    if (!CollectionsLibrary.isEmpty(journey.getCalls())) {
       List<SituationAffectedCallV2Bean> calls = new ArrayList<SituationAffectedCallV2Bean>();
-      for( SituationAffectedCallBean call : journey.getCalls()) {
+      for (SituationAffectedCallBean call : journey.getCalls()) {
         SituationAffectedCallV2Bean callBean = new SituationAffectedCallV2Bean();
         callBean.setStopId(call.getStopId());
         calls.add(callBean);
@@ -702,6 +706,10 @@ public class BeanFactoryV2 {
       SituationConsequenceBean consequence) {
 
     SituationConsequenceV2Bean bean = new SituationConsequenceV2Bean();
+
+    if (consequence.getPeriod() != null)
+      bean.setPeriod(getTimeRange(consequence.getPeriod()));
+
     bean.setCondition(consequence.getCondition());
 
     SituationConditionDetailsBean details = consequence.getConditionDetails();
@@ -738,6 +746,15 @@ public class BeanFactoryV2 {
     NaturalLanguageStringV2Bean bean = new NaturalLanguageStringV2Bean();
     bean.setLang(nls.getLang());
     bean.setValue(nls.getValue());
+    return bean;
+  }
+
+  public TimeRangeV2Bean getTimeRange(TimeRangeBean range) {
+    if (range == null)
+      return null;
+    TimeRangeV2Bean bean = new TimeRangeV2Bean();
+    bean.setFrom(range.getFrom());
+    bean.setTo(range.getTo());
     return bean;
   }
 

@@ -6,9 +6,19 @@ public class SituationConsequence implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private TimeRange period;
+
   private String condition;
 
   private SituationConditionDetails conditionDetails;
+
+  public TimeRange getPeriod() {
+    return period;
+  }
+
+  public void setPeriod(TimeRange period) {
+    this.period = period;
+  }
 
   public String getCondition() {
     return condition;

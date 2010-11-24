@@ -1,6 +1,7 @@
 package org.onebusaway.users.services;
 
 import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;

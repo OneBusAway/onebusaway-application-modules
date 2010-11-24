@@ -1,8 +1,10 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -75,7 +77,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     List<StopBean> stops = new ArrayList<StopBean>();
     List<ArrivalAndDepartureBean> allArrivalsAndDepartures = new ArrayList<ArrivalAndDepartureBean>();
     Set<AgencyAndId> allNearbyStopIds = new HashSet<AgencyAndId>();
-
+    Map<String, SituationBean> situationsById = new HashMap<String, SituationBean>();
     Counter<TimeZone> timeZones = new Counter<TimeZone>();
 
     for (AgencyAndId id : ids) {
@@ -98,6 +100,11 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
 
       TimeZone timeZone = _agencyService.getTimeZoneForAgencyId(id.getAgencyId());
       timeZones.increment(timeZone);
+
+      List<SituationBean> situations = _serviceAlertsBeanService.getSituationsForStopId(
+          query.getTime(), id);
+      for (SituationBean situation : situations)
+        situationsById.put(situation.getId(), situation);
     }
 
     allNearbyStopIds.removeAll(ids);
@@ -116,6 +123,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     result.setStops(stops);
     result.setArrivalsAndDepartures(allArrivalsAndDepartures);
     result.setNearbyStops(nearbyStops);
+    result.setSituations(new ArrayList<SituationBean>(situationsById.values()));
     result.setTimeZone(timeZone.getID());
     return result;
   }

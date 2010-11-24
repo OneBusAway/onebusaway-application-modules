@@ -7,9 +7,19 @@ public final class SituationAffectsBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private List<SituationAffectedAgencyBean> agencies;
+
   private List<SituationAffectedStopBean> stops;
 
   private List<SituationAffectedVehicleJourneyBean> vehicleJourneys;
+
+  public List<SituationAffectedAgencyBean> getAgencies() {
+    return agencies;
+  }
+
+  public void setAgencies(List<SituationAffectedAgencyBean> agencies) {
+    this.agencies = agencies;
+  }
 
   public List<SituationAffectedStopBean> getStops() {
     return stops;

@@ -12,8 +12,12 @@ public interface ServiceAlertsService {
   public Situation createServiceAlert(String agencyId, Situation situation);
 
   public void updateServiceAlert(Situation situation);
+  
+  public void updateServiceAlerts(List<Situation> situations);
 
   public void removeServiceAlert(AgencyAndId situationId);
+  
+  public void removeServiceAlerts(List<AgencyAndId> situationIds);
 
   public Situation getServiceAlertForId(AgencyAndId situationId);
 

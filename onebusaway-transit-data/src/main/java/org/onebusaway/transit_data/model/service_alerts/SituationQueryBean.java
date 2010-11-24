@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data.model.service_alerts;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.onebusaway.transit_data.model.QueryBean;
 
@@ -11,6 +12,8 @@ public class SituationQueryBean implements Serializable {
 
   private String agencyId;
 
+  private List<String> stopIds;
+
   private long time;
 
   public String getAgencyId() {
@@ -19,6 +22,14 @@ public class SituationQueryBean implements Serializable {
 
   public void setAgencyId(String agencyId) {
     this.agencyId = agencyId;
+  }
+
+  public List<String> getStopIds() {
+    return stopIds;
+  }
+
+  public void setStopIds(List<String> stopIds) {
+    this.stopIds = stopIds;
   }
 
   public long getTime() {

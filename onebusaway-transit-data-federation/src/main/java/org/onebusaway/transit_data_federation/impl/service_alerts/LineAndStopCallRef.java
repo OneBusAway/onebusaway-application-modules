@@ -18,6 +18,11 @@ public class LineAndStopCallRef implements Serializable {
   }
 
   @Override
+  public String toString() {
+    return "(lineId=" + _lineId + ", stopId=" + _stopId + ")";
+  }
+
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;

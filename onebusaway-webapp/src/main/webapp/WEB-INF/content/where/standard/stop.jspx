@@ -34,6 +34,8 @@
 <!-- The Arrivals Title Header -->
 <jsp:include page="arrivals-title-snippet.jspx"/>
 
+<jsp:include page="arrivals-alerts-header-snippet.jspx"/>
+
 <s:if test="filtered">
     <div class="arrivalsFilterPanel"><s:url var="removeFilterUrl" includeParams="get">
         <s:param name="route" value="%{'all'}" />
@@ -43,18 +45,7 @@
 <!-- The Arrivals and Departures Table -->
 <jsp:include page="arrivals-table-snippet.jspx"/>
 
-<!-- 
-<div class="arrivalsNearbyStops">
-<div>Nearby stops:</div>
-<s:iterator value="result.nearbyStops">
-    <s:url var="nearbyStopUrl" action="stop" includeParams="none">
-        <s:param name="id" value="id" />
-    </s:url>
-    <div><s:a href="%{nearbyStopUrl}">
-        <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if>
-    </s:a></div>
-</s:iterator></div>
--->
+<jsp:include page="arrivals-alerts-footer-snippet.jspx"/>
 
 <div id="nearbyStops" class="stop_links">
 <h4>Nearby stops:</h4>

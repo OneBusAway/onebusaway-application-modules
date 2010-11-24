@@ -13,6 +13,8 @@ public class SituationV2Bean implements HasId, Serializable {
 
   private long creationTime;
 
+  private TimeRangeV2Bean publicationWindow;
+
   private String miscellaneousReason;
 
   private String personnelReason;
@@ -51,6 +53,14 @@ public class SituationV2Bean implements HasId, Serializable {
 
   public void setCreationTime(long creationTime) {
     this.creationTime = creationTime;
+  }
+
+  public TimeRangeV2Bean getPublicationWindow() {
+    return publicationWindow;
+  }
+
+  public void setPublicationWindow(TimeRangeV2Bean publicationWindow) {
+    this.publicationWindow = publicationWindow;
   }
 
   public String getMiscellaneousReason() {

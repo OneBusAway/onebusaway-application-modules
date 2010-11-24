@@ -11,6 +11,8 @@ public class SituationBean implements Serializable {
 
   private long creationTime;
 
+  private TimeRangeBean publicationWindow;
+
   private String miscellaneousReason;
 
   private String personnelReason;
@@ -49,6 +51,14 @@ public class SituationBean implements Serializable {
 
   public void setCreationTime(long creationTime) {
     this.creationTime = creationTime;
+  }
+
+  public TimeRangeBean getPublicationWindow() {
+    return publicationWindow;
+  }
+
+  public void setPublicationWindow(TimeRangeBean publicationWindow) {
+    this.publicationWindow = publicationWindow;
   }
 
   public String getMiscellaneousReason() {
