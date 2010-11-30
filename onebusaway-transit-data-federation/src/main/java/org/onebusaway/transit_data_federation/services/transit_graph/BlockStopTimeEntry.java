@@ -12,7 +12,7 @@ public interface BlockStopTimeEntry {
    * 
    * @return distance, in meters, from the start of the block
    */
-  public double getDistaceAlongBlock();
+  public double getDistanceAlongBlock();
 
   /**
    * The amount of accumulated slack time from the start of the block to the

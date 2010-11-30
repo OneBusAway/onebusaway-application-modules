@@ -185,56 +185,56 @@ public class BlockConfigurationEntriesFactoryTest {
     BlockStopTimeEntry bst = stopTimes.get(0);
     assertEquals(0, bst.getAccumulatedSlackTime());
     assertEquals(0, bst.getBlockSequence());
-    assertEquals(100.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(100.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st0, bst.getStopTime());
     assertSame(trips.get(0), bst.getTrip());
 
     bst = stopTimes.get(1);
     assertEquals(5 * 60, bst.getAccumulatedSlackTime());
     assertEquals(1, bst.getBlockSequence());
-    assertEquals(200.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(200.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st1, bst.getStopTime());
     assertSame(trips.get(0), bst.getTrip());
 
     bst = stopTimes.get(2);
     assertEquals(10 * 60, bst.getAccumulatedSlackTime());
     assertEquals(2, bst.getBlockSequence());
-    assertEquals(400.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(400.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st2, bst.getStopTime());
     assertSame(trips.get(1), bst.getTrip());
 
     bst = stopTimes.get(3);
     assertEquals(15 * 60, bst.getAccumulatedSlackTime());
     assertEquals(3, bst.getBlockSequence());
-    assertEquals(500.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(500.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st3, bst.getStopTime());
     assertSame(trips.get(1), bst.getTrip());
 
     bst = stopTimes.get(4);
     assertEquals(20 * 60, bst.getAccumulatedSlackTime());
     assertEquals(4, bst.getBlockSequence());
-    assertEquals(700.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(700.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st4, bst.getStopTime());
     assertSame(trips.get(2), bst.getTrip());
 
     bst = stopTimes.get(5);
     assertEquals(25 * 60, bst.getAccumulatedSlackTime());
     assertEquals(5, bst.getBlockSequence());
-    assertEquals(800.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(800.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st5, bst.getStopTime());
     assertSame(trips.get(2), bst.getTrip());
 
     bst = stopTimes.get(6);
     assertEquals(30 * 60, bst.getAccumulatedSlackTime());
     assertEquals(6, bst.getBlockSequence());
-    assertEquals(1000.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(1000.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st6, bst.getStopTime());
     assertSame(trips.get(3), bst.getTrip());
 
     bst = stopTimes.get(7);
     assertEquals(35 * 60, bst.getAccumulatedSlackTime());
     assertEquals(7, bst.getBlockSequence());
-    assertEquals(1100.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(1100.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st7, bst.getStopTime());
     assertSame(trips.get(3), bst.getTrip());
 
@@ -273,28 +273,28 @@ public class BlockConfigurationEntriesFactoryTest {
     bst = stopTimes.get(0);
     assertEquals(0, bst.getAccumulatedSlackTime());
     assertEquals(0, bst.getBlockSequence());
-    assertEquals(100.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(100.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st0, bst.getStopTime());
     assertSame(trips.get(0), bst.getTrip());
 
     bst = stopTimes.get(1);
     assertEquals(5 * 60, bst.getAccumulatedSlackTime());
     assertEquals(1, bst.getBlockSequence());
-    assertEquals(200.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(200.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st1, bst.getStopTime());
     assertSame(trips.get(0), bst.getTrip());
 
     bst = stopTimes.get(2);
     assertEquals(10 * 60, bst.getAccumulatedSlackTime());
     assertEquals(2, bst.getBlockSequence());
-    assertEquals(400.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(400.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st2, bst.getStopTime());
     assertSame(trips.get(1), bst.getTrip());
 
     bst = stopTimes.get(3);
     assertEquals(15 * 60, bst.getAccumulatedSlackTime());
     assertEquals(3, bst.getBlockSequence());
-    assertEquals(500.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(500.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st3, bst.getStopTime());
     assertSame(trips.get(1), bst.getTrip());
 
@@ -333,28 +333,28 @@ public class BlockConfigurationEntriesFactoryTest {
     bst = stopTimes.get(0);
     assertEquals(0, bst.getAccumulatedSlackTime());
     assertEquals(0, bst.getBlockSequence());
-    assertEquals(100.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(100.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st4, bst.getStopTime());
     assertSame(trips.get(0), bst.getTrip());
 
     bst = stopTimes.get(1);
     assertEquals(5 * 60, bst.getAccumulatedSlackTime());
     assertEquals(1, bst.getBlockSequence());
-    assertEquals(200.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(200.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st5, bst.getStopTime());
     assertSame(trips.get(0), bst.getTrip());
 
     bst = stopTimes.get(2);
     assertEquals(10 * 60, bst.getAccumulatedSlackTime());
     assertEquals(2, bst.getBlockSequence());
-    assertEquals(400.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(400.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st6, bst.getStopTime());
     assertSame(trips.get(1), bst.getTrip());
 
     bst = stopTimes.get(3);
     assertEquals(15 * 60, bst.getAccumulatedSlackTime());
     assertEquals(3, bst.getBlockSequence());
-    assertEquals(500.0, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(500.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st7, bst.getStopTime());
     assertSame(trips.get(1), bst.getTrip());
   }

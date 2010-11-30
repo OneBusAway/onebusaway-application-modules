@@ -83,8 +83,8 @@ class ScheduledBlockLocationServiceImpl implements
     StopTimeEntry before = blockBefore.getStopTime();
     StopTimeEntry after = blockAfter.getStopTime();
 
-    double ratio = (distanceAlongBlock - blockBefore.getDistaceAlongBlock())
-        / (blockAfter.getDistaceAlongBlock() - blockBefore.getDistaceAlongBlock());
+    double ratio = (distanceAlongBlock - blockBefore.getDistanceAlongBlock())
+        / (blockAfter.getDistanceAlongBlock() - blockBefore.getDistanceAlongBlock());
 
     int scheduleTime = (int) (before.getDepartureTime() + (after.getArrivalTime() - before.getDepartureTime())
         * ratio);
@@ -162,7 +162,7 @@ class ScheduledBlockLocationServiceImpl implements
     int shapePointIndex = stopTime.getShapePointIndex();
 
     PointAndOrientation po = getLocationAlongShape(blockStopTime.getTrip(),
-        blockStopTime.getDistaceAlongBlock(), shapePointIndex,
+        blockStopTime.getDistanceAlongBlock(), shapePointIndex,
         shapePointIndex + 1);
     if (po != null) {
       result.setLocation(po.getPoint());
@@ -179,7 +179,7 @@ class ScheduledBlockLocationServiceImpl implements
     result.setNextStop(blockStopTime);
     result.setNextStopTimeOffset(0);
     result.setScheduledTime(scheduleTime);
-    result.setDistanceAlongBlock(blockStopTime.getDistaceAlongBlock());
+    result.setDistanceAlongBlock(blockStopTime.getDistanceAlongBlock());
     result.setActiveTrip(blockStopTime.getTrip());
     result.setInService(true);
     return result;
@@ -217,8 +217,8 @@ class ScheduledBlockLocationServiceImpl implements
 
     double ratio = (scheduleTime - fromTime) / ((double) (toTime - fromTime));
 
-    double fromDistance = blockBefore.getDistaceAlongBlock();
-    double toDistance = blockAfter.getDistaceAlongBlock();
+    double fromDistance = blockBefore.getDistanceAlongBlock();
+    double toDistance = blockAfter.getDistanceAlongBlock();
 
     double distanceAlongBlock = ratio * (toDistance - fromDistance)
         + fromDistance;
@@ -296,9 +296,9 @@ class ScheduledBlockLocationServiceImpl implements
       StopTimeEntry secondStopTime = secondBlockStopTime.getStopTime();
 
       distanceAlongBlock = InterpolationLibrary.interpolatePair(
-          stopTime.getDepartureTime(), blockStopTime.getDistaceAlongBlock(),
+          stopTime.getDepartureTime(), blockStopTime.getDistanceAlongBlock(),
           secondStopTime.getArrivalTime(),
-          secondBlockStopTime.getDistaceAlongBlock(), scheduleTime);
+          secondBlockStopTime.getDistanceAlongBlock(), scheduleTime);
 
       if (distanceAlongBlock >= 0)
         inService = true;
@@ -340,15 +340,15 @@ class ScheduledBlockLocationServiceImpl implements
     StopTimeEntry from = blockFrom.getStopTime();
     StopTimeEntry to = blockTo.getStopTime();
 
-    double r = (distanceAlongBlock - blockFrom.getDistaceAlongBlock())
-        / (blockTo.getDistaceAlongBlock() - blockFrom.getDistaceAlongBlock());
+    double r = (distanceAlongBlock - blockFrom.getDistanceAlongBlock())
+        / (blockTo.getDistanceAlongBlock() - blockFrom.getDistanceAlongBlock());
     int scheduledTime = (int) (r
         * (to.getArrivalTime() - from.getDepartureTime()) + from.getDepartureTime());
 
     if (r > 1)
       scheduledTime += to.getSlackTime();
 
-    BlockTripEntry activeTrip = distanceAlongBlock < blockTo.getDistaceAlongBlock()
+    BlockTripEntry activeTrip = distanceAlongBlock < blockTo.getDistanceAlongBlock()
         ? blockFrom.getTrip() : blockTo.getTrip();
 
     BlockStopTimeEntry closestStop = r < 0.5 ? blockFrom : blockTo;

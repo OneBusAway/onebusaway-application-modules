@@ -312,11 +312,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     // Distance from stop
     if (blockLocation.hasDistanceAlongBlock()) {
-      double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
+      double distanceFromStop = sti.getStopTime().getDistanceAlongBlock()
           - blockLocation.getDistanceAlongBlock();
       bean.setDistanceFromStop(distanceFromStop);
     } else {
-      double distanceFromStop = sti.getStopTime().getDistaceAlongBlock()
+      double distanceFromStop = sti.getStopTime().getDistanceAlongBlock()
           - blockLocation.getScheduledDistanceAlongBlock();
       bean.setDistanceFromStop(distanceFromStop);
     }

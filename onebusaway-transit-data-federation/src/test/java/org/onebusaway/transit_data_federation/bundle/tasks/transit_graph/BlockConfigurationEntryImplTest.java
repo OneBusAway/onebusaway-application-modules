@@ -110,42 +110,42 @@ public class BlockConfigurationEntryImplTest {
     BlockStopTimeEntry bst = stopTimes.get(0);
     assertEquals(0, bst.getAccumulatedSlackTime());
     assertEquals(0, bst.getBlockSequence());
-    assertEquals(200, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(200, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st1, bst.getStopTime());
     assertSame(blockTrips.get(0), bst.getTrip());
 
     bst = stopTimes.get(1);
     assertEquals(300, bst.getAccumulatedSlackTime());
     assertEquals(1, bst.getBlockSequence());
-    assertEquals(800, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(800, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st2, bst.getStopTime());
     assertSame(blockTrips.get(0), bst.getTrip());
 
     bst = stopTimes.get(2);
     assertEquals(15 * 60, bst.getAccumulatedSlackTime());
     assertEquals(2, bst.getBlockSequence());
-    assertEquals(1410, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(1410, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st3, bst.getStopTime());
     assertSame(blockTrips.get(1), bst.getTrip());
 
     bst = stopTimes.get(3);
     assertEquals(20 * 60, bst.getAccumulatedSlackTime());
     assertEquals(3, bst.getBlockSequence());
-    assertEquals(2610, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(2610, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st4, bst.getStopTime());
     assertSame(blockTrips.get(1), bst.getTrip());
 
     bst = stopTimes.get(4);
     assertEquals(27 * 60, bst.getAccumulatedSlackTime());
     assertEquals(4, bst.getBlockSequence());
-    assertEquals(3330, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(3330, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st5, bst.getStopTime());
     assertSame(blockTrips.get(2), bst.getTrip());
 
     bst = stopTimes.get(5);
     assertEquals(32 * 60, bst.getAccumulatedSlackTime());
     assertEquals(5, bst.getBlockSequence());
-    assertEquals(4230, bst.getDistaceAlongBlock(), 0.0);
+    assertEquals(4230, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st6, bst.getStopTime());
     assertSame(blockTrips.get(2), bst.getTrip());
   }

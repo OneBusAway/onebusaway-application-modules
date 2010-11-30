@@ -10,6 +10,6 @@ public class BlockStopTimeDistanceAlongBlockValueAdapter implements
 
   @Override
   public double getValue(BlockStopTimeEntry value) {
-    return value.getDistaceAlongBlock();
+    return value.getDistanceAlongBlock();
   }
 }

@@ -64,7 +64,7 @@ public final class TripStatusBean implements Serializable {
 
   private List<SituationBean> situations;
 
-  private double nextStopDistanceAlongTrip;
+  private double nextStopDistanceFromVehicle;
 
   public TripBean getActiveTrip() {
     return activeTrip;
@@ -287,11 +287,11 @@ public final class TripStatusBean implements Serializable {
     this.situations = situations;
   }
 
-  public double getNextStopDistanceAlongTrip() {
-    return nextStopDistanceAlongTrip;
+  public double getNextStopDistanceFromVehicle() {
+    return nextStopDistanceFromVehicle;
   }
 
-  public void setNextStopDistanceAlongTrip(double d) {
-    this.nextStopDistanceAlongTrip = d;
+  public void setNextStopDistanceFromVehicle(double d) {
+    this.nextStopDistanceFromVehicle = d;
   }
 }

@@ -41,7 +41,7 @@ public class BlockStopTimeEntryImpl implements BlockStopTimeEntry {
   }
 
   @Override
-  public double getDistaceAlongBlock() {
+  public double getDistanceAlongBlock() {
     return trip.getDistanceAlongBlock() + stopTime.getShapeDistTraveled();
   }
 
