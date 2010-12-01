@@ -53,6 +53,9 @@ public class ScheduledBlockLocation {
     this.location = location;
   }
 
+  /**
+   * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
+   */
   public double getOrientation() {
     return orientation;
   }

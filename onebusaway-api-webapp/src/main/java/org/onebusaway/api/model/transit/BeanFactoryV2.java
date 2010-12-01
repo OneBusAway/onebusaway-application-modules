@@ -101,6 +101,11 @@ public class BeanFactoryV2 {
     return entry(getStopWithArrivalAndDepartures(result));
   }
 
+  public EntryWithReferencesBean<ArrivalAndDepartureV2Bean> getResponse(
+      ArrivalAndDepartureBean result) {
+    return entry(getArrivalAndDeparture(result));
+  }
+
   public EntryWithReferencesBean<StopScheduleV2Bean> getResponse(
       StopScheduleBean stopSchedule) {
     return entry(getStopSchedule(stopSchedule));
@@ -562,6 +567,7 @@ public class BeanFactoryV2 {
     bean.setServiceDate(ad.getServiceDate());
     bean.setVehicleId(ad.getVehicleId());
     bean.setStopId(ad.getStopId());
+    bean.setStopSequence(ad.getStopSequence());
     bean.setRouteId(route.getId());
 
     if (trip.getRouteShortName() != null)

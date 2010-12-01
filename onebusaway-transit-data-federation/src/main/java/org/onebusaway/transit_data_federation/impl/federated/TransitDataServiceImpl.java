@@ -17,6 +17,8 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -52,6 +54,7 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
+import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RoutesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
@@ -89,6 +92,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private StopWithArrivalsAndDeparturesBeanService _stopWithArrivalsAndDepaturesBeanService;
+
+  @Autowired
+  private ArrivalsAndDeparturesBeanService _arrivalsAndDeparturesBeanService;
 
   @Autowired
   private StopsBeanService _stopsBeanService;
@@ -227,6 +233,21 @@ class TransitDataServiceImpl implements TransitDataService {
     Set<AgencyAndId> ids = convertAgencyAndIds(stopIds);
     return _stopWithArrivalsAndDepaturesBeanService.getArrivalsAndDeparturesForStopIds(
         ids, query);
+  }
+
+  @Override
+  public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
+      ArrivalAndDepartureForStopQueryBean query) throws ServiceException {
+
+    AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(query.getStopId());
+    int stopSequence = query.getStopSequence();
+    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
+    long serviceDate = query.getServiceDate();
+    AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(query.getVehicleId());
+    long time = query.getTime();
+
+    return _arrivalsAndDeparturesBeanService.getArrivalAndDepartureForStop(
+        stopId, stopSequence, tripId, serviceDate, vehicleId, time);
   }
 
   @Override

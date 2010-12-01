@@ -44,6 +44,8 @@ public final class TripStatusBean implements Serializable {
 
   private int nextStopTimeOffset;
 
+  private double nextStopDistanceFromVehicle;
+
   /****
    * These are fields that we can supply only from real-time data
    ****/
@@ -63,8 +65,6 @@ public final class TripStatusBean implements Serializable {
   private String vehicleId;
 
   private List<SituationBean> situations;
-
-  private double nextStopDistanceFromVehicle;
 
   public TripBean getActiveTrip() {
     return activeTrip;
@@ -131,6 +131,9 @@ public final class TripStatusBean implements Serializable {
     return !Double.isNaN(orientation);
   }
 
+  /**
+   * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
+   */
   public double getOrientation() {
     return orientation;
   }
@@ -189,6 +192,14 @@ public final class TripStatusBean implements Serializable {
 
   public void setNextStopTimeOffset(int nextStopTimeOffset) {
     this.nextStopTimeOffset = nextStopTimeOffset;
+  }
+
+  public double getNextStopDistanceFromVehicle() {
+    return nextStopDistanceFromVehicle;
+  }
+
+  public void setNextStopDistanceFromVehicle(double d) {
+    this.nextStopDistanceFromVehicle = d;
   }
 
   /**
@@ -285,13 +296,5 @@ public final class TripStatusBean implements Serializable {
 
   public void setSituations(List<SituationBean> situations) {
     this.situations = situations;
-  }
-
-  public double getNextStopDistanceFromVehicle() {
-    return nextStopDistanceFromVehicle;
-  }
-
-  public void setNextStopDistanceFromVehicle(double d) {
-    this.nextStopDistanceFromVehicle = d;
   }
 }

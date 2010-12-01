@@ -25,4 +25,19 @@ public interface ArrivalsAndDeparturesBeanService {
    */
   public List<ArrivalAndDepartureBean> getArrivalsAndDeparturesByStopId(
       AgencyAndId stopId, ArrivalsAndDeparturesQueryBean query);
+
+  /**
+   * Return arrival and departure information for a single trip instance
+   * arriving and departing a particular stop.
+   * 
+   * @param stopId the target stop id
+   * @param tripId the target tripId
+   * @param serviceDate the target service date
+   * @param vehicleId optionally specify a particular vehicle id, or null
+   * @param time the time to query
+   * @return the arrival and departure information, or null if not found
+   */
+  public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
+      AgencyAndId stopId, int stopSequence, AgencyAndId tripId, long serviceDate,
+      AgencyAndId vehicleId, long time);
 }

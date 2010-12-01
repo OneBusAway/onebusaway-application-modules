@@ -208,6 +208,9 @@ public class VehicleLocationRecord implements Serializable {
     return !Double.isNaN(currentOrientation);
   }
 
+  /**
+   * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
+   */
   public double getCurrentOrientation() {
     return currentOrientation;
   }

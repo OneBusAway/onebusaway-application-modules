@@ -1,6 +1,7 @@
 package org.onebusaway.api.impl;
 
 import org.apache.struts2.rest.handler.XStreamHandler;
+import org.onebusaway.api.actions.api.ValidationErrorBean;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.TimeBean;
 import org.onebusaway.api.model.transit.AgencyV2Bean;
@@ -57,6 +58,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     XStream xstream = super.createXStream();
     xstream.setMode(XStream.NO_REFERENCES);
     xstream.alias("response", ResponseBean.class);
+    xstream.alias("validationError", ValidationErrorBean.class);
     xstream.alias("time", TimeBean.class);
     xstream.alias("stop", StopBean.class);
     xstream.alias("route", RouteBean.class);

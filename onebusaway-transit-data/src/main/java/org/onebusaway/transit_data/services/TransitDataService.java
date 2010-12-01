@@ -17,6 +17,8 @@ import org.onebusaway.federations.annotations.FederatedByLocationMethod;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -219,6 +221,10 @@ public interface TransitDataService extends FederatedService {
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
       Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query)
       throws ServiceException;
+
+  @FederatedByEntityIdMethod(propertyExpression = "stopId")
+  public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
+      ArrivalAndDepartureForStopQueryBean query) throws ServiceException;
 
   /**
    * @param stopId

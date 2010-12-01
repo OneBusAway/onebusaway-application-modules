@@ -32,6 +32,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private String stopId;
 
+  private int stopSequence;
+
   private String routeShortName;
 
   private String routeLongName;
@@ -124,6 +126,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   public void setStopId(String stopId) {
     this.stopId = stopId;
+  }
+
+  public int getStopSequence() {
+    return stopSequence;
+  }
+
+  public void setStopSequence(int stopSequence) {
+    this.stopSequence = stopSequence;
   }
 
   public long getScheduledArrivalTime() {

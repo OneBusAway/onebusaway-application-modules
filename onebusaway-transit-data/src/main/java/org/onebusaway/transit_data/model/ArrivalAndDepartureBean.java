@@ -34,6 +34,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private String stopId;
 
+  private int stopSequence;
+
   private long predictedArrivalTime;
 
   private long scheduledArrivalTime;
@@ -92,6 +94,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setStopId(String stopId) {
     this.stopId = stopId;
+  }
+
+  public int getStopSequence() {
+    return stopSequence;
+  }
+
+  public void setStopSequence(int stopSequence) {
+    this.stopSequence = stopSequence;
   }
 
   public long getPredictedArrivalTime() {
