@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
-public class VehicleForIdController extends ApiActionSupport {
+public class VehicleController extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
 
@@ -27,7 +27,7 @@ public class VehicleForIdController extends ApiActionSupport {
 
   private long _time = 0;
 
-  public VehicleForIdController() {
+  public VehicleController() {
     super(V2);
   }
 
