@@ -4,7 +4,6 @@
     <tlib-version>1</tlib-version>
     <short-name>oba</short-name>
     <uri>/oba-tags</uri>
-    <!-- 
     <tag>
         <name>group</name>
         <tag-class>org.onebusaway.presentation.tags.GroupTag</tag-class>
@@ -107,5 +106,4 @@
         </attribute>
         <dynamic-attributes>false</dynamic-attributes>
     </tag>
-    -->
 </taglib>
