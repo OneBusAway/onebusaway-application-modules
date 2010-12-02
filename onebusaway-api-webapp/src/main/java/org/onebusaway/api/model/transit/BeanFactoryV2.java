@@ -155,6 +155,10 @@ public class BeanFactoryV2 {
       beans.add(getVehicleStatus(vehicle));
     return list(beans, vehicles.isLimitExceeded(), false);
   }
+  
+  public EntryWithReferencesBean<VehicleStatusV2Bean> getVehicleStatusResponse(VehicleStatusBean vehicleStatus) {
+    return entry(getVehicleStatus(vehicleStatus));
+  }
 
   public EntryWithReferencesBean<SituationV2Bean> getResponse(
       SituationBean situation) {

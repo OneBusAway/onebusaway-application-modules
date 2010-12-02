@@ -64,7 +64,7 @@ public class VehicleController extends ApiActionSupport {
       if (vehicle == null)
         return setResourceNotFoundResponse();
 
-      return setOkResponse(factory.getVehicleStatus(vehicle));
+      return setOkResponse(factory.getVehicleStatusResponse(vehicle));
 
     } catch (OutOfServiceAreaServiceException ex) {
       return setOkResponse(factory.getEmptyList(VehicleStatusV2Bean.class, true));
