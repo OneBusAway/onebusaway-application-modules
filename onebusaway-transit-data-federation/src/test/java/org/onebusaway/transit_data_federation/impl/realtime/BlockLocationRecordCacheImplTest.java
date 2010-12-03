@@ -228,7 +228,7 @@ public class BlockLocationRecordCacheImplTest {
         b.setBlockId(_blockInstance.getBlock().getBlock().getId());
         b.setServiceDate(_blockInstance.getServiceDate());
         b.setVehicleId(_vehicleId);
-        b.setDistanceAlongBlock(i * 100);
+        b.setDistanceAlongBlock((double)i * 100);
         b.setTime(i * 1000);
 
         _cache.addRecord(_blockInstance, b.create());
