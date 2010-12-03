@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 
  * @author bdferris
  * @see CacheableMethodKeyFactory
- * @see CacheableObjectKeyFactory 
+ * @see CacheableObjectKeyFactory
  */
 public final class CacheKeyInfo implements Serializable {
 
@@ -19,15 +19,30 @@ public final class CacheKeyInfo implements Serializable {
 
   private final boolean cacheRefreshIndicated;
 
+  /**
+   * 
+   * @param key the serializable cache key generated for the method call
+   * @param cacheRefreshIndicated true if the specified method call indicates
+   *          that the cache should be cleared, otherwise false
+   */
   public CacheKeyInfo(Serializable key, boolean cacheRefreshIndicated) {
     this.key = key;
     this.cacheRefreshIndicated = cacheRefreshIndicated;
   }
 
+  /**
+   * 
+   * @return the serializable cache key generated for the method call
+   */
   public Serializable getKey() {
     return key;
   }
 
+  /**
+   * 
+   * @return true if the specified method call indicates that the cache should
+   *         be cleared, otherwise false
+   */
   public boolean isCacheRefreshIndicated() {
     return cacheRefreshIndicated;
   }

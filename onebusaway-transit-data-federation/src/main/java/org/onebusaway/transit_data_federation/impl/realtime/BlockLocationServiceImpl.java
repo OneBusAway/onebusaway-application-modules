@@ -37,6 +37,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -54,6 +56,8 @@ import org.springframework.stereotype.Component;
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime:name=BlockLocationServiceImpl")
 public class BlockLocationServiceImpl implements BlockLocationService,
     BlockVehicleLocationListener {
+
+  private static Logger _log = LoggerFactory.getLogger(BlockLocationServiceImpl.class);
 
   private VehicleLocationRecordCache _cache;
 
@@ -540,15 +544,19 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     builder.setTime(record.getTimeOfRecord());
     builder.setServiceDate(record.getServiceDate());
 
-    builder.setScheduleDeviation(record.getScheduleDeviation());
-    builder.setDistanceAlongBlock(record.getDistanceAlongBlock());
+    if( record.isScheduleDeviationSet() )
+      builder.setScheduleDeviation(record.getScheduleDeviation());
+    
+    if( record.isDistanceAlongBlockSet())
+      builder.setDistanceAlongBlock(record.getDistanceAlongBlock());
 
     if (record.isCurrentLocationSet()) {
       builder.setLocationLat(record.getCurrentLocationLat());
       builder.setLocationLon(record.getCurrentLocationLon());
     }
 
-    builder.setOrientation(record.getCurrentOrientation());
+    if( record.isCurrentOrientationSet() )
+      builder.setOrientation(record.getCurrentOrientation());
 
     builder.setPhase(record.getPhase());
     builder.setStatus(record.getStatus());
@@ -636,16 +644,20 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     @Override
     public void run() {
 
-      List<BlockLocationRecord> queue = getPredictionPersistenceQueue();
+      try {
+        List<BlockLocationRecord> queue = getPredictionPersistenceQueue();
 
-      if (queue.isEmpty())
-        return;
+        if (queue.isEmpty())
+          return;
 
-      long t1 = System.currentTimeMillis();
-      _blockLocationRecordDao.saveBlockLocationRecords(queue);
-      long t2 = System.currentTimeMillis();
-      _lastInsertDuration = t2 - t1;
-      _lastInsertCount = queue.size();
+        long t1 = System.currentTimeMillis();
+        _blockLocationRecordDao.saveBlockLocationRecords(queue);
+        long t2 = System.currentTimeMillis();
+        _lastInsertDuration = t2 - t1;
+        _lastInsertCount = queue.size();
+      } catch (Throwable ex) {
+        _log.error("error writing block location records to dao", ex);
+      }
     }
   }
 
@@ -690,7 +702,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     public List<VehicleLocationCacheRecord> getRecordsFromCache() {
       VehicleLocationCacheRecord recordForVehicleId = _cache.getRecordForVehicleId(_vehicleId);
-      if( recordForVehicleId == null)
+      if (recordForVehicleId == null)
         return Collections.emptyList();
       return Arrays.asList(recordForVehicleId);
     }

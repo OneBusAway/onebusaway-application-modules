@@ -12,6 +12,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
@@ -54,15 +56,20 @@ public class BlockLocationRecord {
 
   private final long time;
 
-  private final double scheduleDeviation;
+  @Column(nullable = true)
+  private final Double scheduleDeviation;
 
-  private final double distanceAlongBlock;
+  @Column(nullable = true)
+  private final Double distanceAlongBlock;
 
-  private final double locationLat;
+  @Column(nullable = true)
+  private final Double locationLat;
 
-  private final double locationLon;
+  @Column(nullable = true)
+  private final Double locationLon;
 
-  private final double orientation;
+  @Column(nullable = true)
+  private final Double orientation;
 
   @Embedded
   @AttributeOverrides({
@@ -74,6 +81,14 @@ public class BlockLocationRecord {
 
   private final long timepointPredictedTime;
 
+  /**
+   * Custom Hibernate mapping so that the vehicle phase enum gets mapped to a
+   * string as opposed to an integer, allowing for safe expansion of the enum in
+   * the future and more legibility in the raw SQL. Additionally, the phase
+   * string can be a little shorter than the default length.
+   */
+  @Type(type = "org.onebusaway.container.hibernate.EnumUserType", parameters = {@Parameter(name = "enumClassName", value = "org.onebusaway.realtime.api.EVehiclePhase")})
+  @Column(length = 50)
   private final EVehiclePhase phase;
 
   private final String status;
@@ -93,11 +108,11 @@ public class BlockLocationRecord {
     tripId = null;
     serviceDate = 0;
     time = 0;
-    scheduleDeviation = Double.NaN;
-    distanceAlongBlock = Double.NaN;
-    locationLat = Double.NaN;
-    locationLon = Double.NaN;
-    orientation = Double.NaN;
+    scheduleDeviation = null;
+    distanceAlongBlock = null;
+    locationLat = null;
+    locationLon = null;
+    orientation = null;
     timepointId = null;
     timepointScheduledTime = 0;
     timepointPredictedTime = 0;
@@ -159,51 +174,55 @@ public class BlockLocationRecord {
     return time;
   }
 
-  public boolean hasScheduleDeviation() {
-    return !Double.isNaN(scheduleDeviation);
+  public boolean isScheduleDeviationSet() {
+    return scheduleDeviation != null;
   }
 
   /**
    * @return schedule deviation, in seconds, (+deviation is late, -deviation is
    *         early)
    */
-  public double getScheduleDeviation() {
+  public Double getScheduleDeviation() {
     return scheduleDeviation;
   }
 
-  public boolean hasDistanceAlongBlock() {
-    return !Double.isNaN(distanceAlongBlock);
+  public boolean isDistanceAlongBlockSet() {
+    return distanceAlongBlock != null;
   }
 
   /**
    * @return the distance traveled along the block
    */
-  public double getDistanceAlongBlock() {
+  public Double getDistanceAlongBlock() {
     return distanceAlongBlock;
   }
 
-  public boolean hasLocation() {
-    return !(Double.isNaN(locationLat) || Double.isNaN(locationLon));
+  public boolean isLocationSet() {
+    return locationLat != null && locationLon != null;
   }
 
-  public double getLocationLat() {
+  public Double getLocationLat() {
     return locationLat;
   }
 
-  public double getLocationLon() {
+  public Double getLocationLon() {
     return locationLon;
   }
 
   public CoordinatePoint getLocation() {
-    if (!hasLocation())
+    if (!isLocationSet())
       return null;
     return new CoordinatePoint(locationLat, locationLon);
+  }
+
+  public boolean isOrientationSet() {
+    return orientation != null;
   }
 
   /**
    * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
    */
-  public double getOrientation() {
+  public Double getOrientation() {
     return orientation;
   }
 
@@ -254,15 +273,15 @@ public class BlockLocationRecord {
 
     private long time;
 
-    private double scheduleDeviation = Double.NaN;
+    private Double scheduleDeviation = null;
 
-    private double distanceAlongBlock = Double.NaN;
+    private Double distanceAlongBlock = null;
 
-    private double locationLat = Double.NaN;
+    private Double locationLat = null;
 
-    private double locationLon = Double.NaN;
+    private Double locationLon = null;
 
-    private double orientation = Double.NaN;
+    private Double orientation = null;
 
     private AgencyAndId timepointId;
 
@@ -292,33 +311,33 @@ public class BlockLocationRecord {
       this.time = time;
     }
 
-    public void setScheduleDeviation(double scheduleDeviation) {
+    public void setScheduleDeviation(Double scheduleDeviation) {
       this.scheduleDeviation = scheduleDeviation;
     }
 
-    public void setDistanceAlongBlock(double distanceAlongBlock) {
+    public void setDistanceAlongBlock(Double distanceAlongBlock) {
       this.distanceAlongBlock = distanceAlongBlock;
     }
 
-    public void setLocationLat(double locationLat) {
+    public void setLocationLat(Double locationLat) {
       this.locationLat = locationLat;
     }
 
-    public void setLocationLon(double locationLon) {
+    public void setLocationLon(Double locationLon) {
       this.locationLon = locationLon;
     }
 
     public void setLocation(CoordinatePoint location) {
       if (location == null) {
-        this.locationLat = Double.NaN;
-        this.locationLon = Double.NaN;
+        this.locationLat = null;
+        this.locationLon = null;
       } else {
         this.locationLat = location.getLat();
         this.locationLon = location.getLon();
       }
     }
 
-    public void setOrientation(double orientation) {
+    public void setOrientation(Double orientation) {
       this.orientation = orientation;
     }
 

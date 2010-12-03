@@ -51,11 +51,16 @@ public class CacheableMethodKeyFactoryManager {
 
   private Map<Method, Integer> _cacheRefreshIndicatorArgumentIndexByMethod = new HashMap<Method, Integer>();
 
+  public void addCacheableObjectKeyFactory(Class<?> className,
+      CacheableObjectKeyFactory keyFactory) {
+    _keyFactories.put(className, keyFactory);
+  }
+
   public void setCacheKeyFactories(Map<Object, Object> keyFactories) {
     for (Map.Entry<Object, Object> entry : keyFactories.entrySet()) {
       Class<?> className = getObjectAsClass(entry.getKey());
       CacheableObjectKeyFactory keyFactory = getObjectAsObjectKeyFactory(entry.getValue());
-      _keyFactories.put(className, keyFactory);
+      addCacheableObjectKeyFactory(className, keyFactory);
     }
   }
 
