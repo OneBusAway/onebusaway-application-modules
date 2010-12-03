@@ -9,6 +9,7 @@ import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
@@ -30,6 +31,7 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -155,7 +157,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     BlockLocation blockLocation = _blockStatusService.getBlockForVehicle(
         vehicleId, time);
-    if( blockLocation == null)
+    if (blockLocation == null)
       return null;
     return getBlockLocationAsTripDetails(blockLocation.getActiveTrip(),
         blockLocation, inclusion, time);
@@ -201,6 +203,14 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       long serviceDate = blockInstance.getServiceDate();
 
       bean.setServiceDate(serviceDate);
+
+      FrequencyEntry frequency = blockInstance.getFrequency();
+
+      if (frequency != null) {
+        FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(
+            serviceDate, frequency);
+        bean.setFrequency(fb);
+      }
 
       bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
 
@@ -309,11 +319,16 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     TripBean trip = null;
     long serviceDate = blockInstance.getServiceDate();
+    FrequencyBean frequency = null;
     TripStopTimesBean stopTimes = null;
     TripStatusBean status = null;
     AgencyAndId vehicleId = null;
 
     boolean missing = false;
+
+    if (blockInstance.getFrequency() != null)
+      frequency = FrequencyBeanLibrary.getBeanForFrequency(serviceDate,
+          blockInstance.getFrequency());
 
     TripEntry tripEntry = blockTripEntry.getTrip();
 
@@ -347,8 +362,16 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       return null;
 
     String tripId = AgencyAndIdLibrary.convertToString(tripEntry.getId());
-    return new TripDetailsBean(tripId, serviceDate, trip, stopTimes, status,
-        situations);
+
+    TripDetailsBean bean = new TripDetailsBean();
+    bean.setTripId(tripId);
+    bean.setServiceDate(serviceDate);
+    bean.setFrequency(frequency);
+    bean.setTrip(trip);
+    bean.setSchedule(stopTimes);
+    bean.setStatus(status);
+    bean.setSituations(situations);
+    return bean;
   }
 
   private BlockTripEntry getTargetBlockTrip(TripEntry targetTrip,

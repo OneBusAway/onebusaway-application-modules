@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 
 public final class TripStatusBean implements Serializable {
@@ -18,6 +19,8 @@ public final class TripStatusBean implements Serializable {
   private TripBean activeTrip;
 
   private long serviceDate;
+  
+  private FrequencyBean frequency;
 
   private double scheduledDistanceAlongTrip = Double.NaN;
 
@@ -80,6 +83,14 @@ public final class TripStatusBean implements Serializable {
 
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
+  }
+
+  public FrequencyBean getFrequency() {
+    return frequency;
+  }
+
+  public void setFrequency(FrequencyBean frequency) {
+    this.frequency = frequency;
   }
 
   /**

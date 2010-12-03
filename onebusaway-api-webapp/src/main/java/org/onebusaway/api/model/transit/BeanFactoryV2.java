@@ -155,8 +155,9 @@ public class BeanFactoryV2 {
       beans.add(getVehicleStatus(vehicle));
     return list(beans, vehicles.isLimitExceeded(), false);
   }
-  
-  public EntryWithReferencesBean<VehicleStatusV2Bean> getVehicleStatusResponse(VehicleStatusBean vehicleStatus) {
+
+  public EntryWithReferencesBean<VehicleStatusV2Bean> getVehicleStatusResponse(
+      VehicleStatusBean vehicleStatus) {
     return entry(getVehicleStatus(vehicleStatus));
   }
 
@@ -261,6 +262,11 @@ public class BeanFactoryV2 {
     }
 
     bean.setServiceDate(tripStatus.getServiceDate());
+
+    FrequencyBean frequency = tripStatus.getFrequency();
+    if (frequency != null)
+      bean.setFrequency(getFrequency(frequency));
+
     bean.setScheduledDistanceAlongTrip(tripStatus.getScheduledDistanceAlongTrip());
     bean.setTotalDistanceAlongTrip(tripStatus.getTotalDistanceAlongTrip());
 
@@ -362,6 +368,9 @@ public class BeanFactoryV2 {
 
     bean.setTripId(tripDetails.getTripId());
     bean.setServiceDate(tripDetails.getServiceDate());
+
+    if (tripDetails.getFrequency() != null)
+      bean.setFrequency(getFrequency(tripDetails.getFrequency()));
 
     TripBean trip = tripDetails.getTrip();
     if (trip != null)

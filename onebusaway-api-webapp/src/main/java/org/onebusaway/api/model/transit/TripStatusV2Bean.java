@@ -17,6 +17,8 @@ public final class TripStatusV2Bean implements Serializable {
 
   private long serviceDate;
 
+  private FrequencyV2Bean frequency;
+
   private Double scheduledDistanceAlongTrip;
 
   private Double totalDistanceAlongTrip;
@@ -76,6 +78,14 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
+  }
+
+  public FrequencyV2Bean getFrequency() {
+    return frequency;
+  }
+
+  public void setFrequency(FrequencyV2Bean frequency) {
+    this.frequency = frequency;
   }
 
   public Double getScheduledDistanceAlongTrip() {

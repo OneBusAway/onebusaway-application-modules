@@ -66,10 +66,7 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
     
     if( frequency != null) {
       long serviceDate = blockInstance.getServiceDate();
-      FrequencyBean fb = new FrequencyBean();
-      fb.setStartTime(serviceDate + frequency.getStartTime() * 1000);
-      fb.setEndTime(serviceDate + frequency.getEndTime() * 1000);
-      fb.setHeadway(frequency.getHeadwaySecs());
+      FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(serviceDate, frequency);
       bean.setFrequency(fb);
     }
 
