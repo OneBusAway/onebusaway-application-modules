@@ -439,6 +439,7 @@ class ScheduledBlockLocationServiceImpl implements
      * We allow callers of this method to specify an arbitrarily high
      * shapePointIndexTo, knowing we'll bound it by the max number of points
      */
+    shapePointIndexFrom = Math.min(shapePointIndexFrom, shapePoints.getSize());
     shapePointIndexTo = Math.min(shapePointIndexTo, shapePoints.getSize());
 
     double distanceAlongTrip = distanceAlongBlock

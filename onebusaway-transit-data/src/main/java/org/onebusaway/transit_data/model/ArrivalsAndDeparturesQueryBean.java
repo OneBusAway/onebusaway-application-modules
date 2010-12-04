@@ -17,6 +17,18 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
 
   private int frequencyMinutesAfter = 30;
 
+  public ArrivalsAndDeparturesQueryBean() {
+
+  }
+
+  public ArrivalsAndDeparturesQueryBean(ArrivalsAndDeparturesQueryBean bean) {
+    this.time = bean.time;
+    this.minutesBefore = bean.minutesBefore;
+    this.minutesAfter = bean.minutesAfter;
+    this.frequencyMinutesBefore = bean.frequencyMinutesBefore;
+    this.frequencyMinutesAfter = bean.frequencyMinutesAfter;
+  }
+
   public long getTime() {
     return time;
   }
@@ -57,4 +69,37 @@ public final class ArrivalsAndDeparturesQueryBean implements Serializable {
     this.frequencyMinutesAfter = frequencyMinutesAfter;
   }
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + frequencyMinutesAfter;
+    result = prime * result + frequencyMinutesBefore;
+    result = prime * result + minutesAfter;
+    result = prime * result + minutesBefore;
+    result = prime * result + (int) (time ^ (time >>> 32));
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ArrivalsAndDeparturesQueryBean other = (ArrivalsAndDeparturesQueryBean) obj;
+    if (frequencyMinutesAfter != other.frequencyMinutesAfter)
+      return false;
+    if (frequencyMinutesBefore != other.frequencyMinutesBefore)
+      return false;
+    if (minutesAfter != other.minutesAfter)
+      return false;
+    if (minutesBefore != other.minutesBefore)
+      return false;
+    if (time != other.time)
+      return false;
+    return true;
+  }
 }
