@@ -143,7 +143,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
     Collections.sort(stopBeans, new StopBeanIdComparator());
 
     StopsBean result = new StopsBean();
-    result.setStopBeans(stopBeans);
+    result.setStops(stopBeans);
     result.setLimitExceeded(limitExceeded);
     return result;
   }

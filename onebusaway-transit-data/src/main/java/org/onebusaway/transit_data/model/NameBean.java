@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class NameBean extends ApplicationBean {
@@ -52,6 +53,10 @@ public class NameBean extends ApplicationBean {
   public String getName() {
     return names.get(0);
   }
+  
+  public void setName(String name) {
+    this.names = Arrays.asList(name);
+  }
 
   public String getName(int index) {
     return names.get(index);
@@ -59,6 +64,10 @@ public class NameBean extends ApplicationBean {
 
   public List<String> getNames() {
     return names;
+  }
+  
+  public void setNames(List<String> names) {
+    this.names = names;
   }
 
   /***************************************************************************
