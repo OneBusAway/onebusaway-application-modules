@@ -374,7 +374,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     bean.setPredicted(blockLocation.isPredicted());
 
     // Distance from stop
-    if (blockLocation.hasDistanceAlongBlock()) {
+    if (blockLocation.isDistanceAlongBlockSet()) {
       double distanceFromStop = sti.getStopTime().getDistanceAlongBlock()
           - blockLocation.getDistanceAlongBlock();
       bean.setDistanceFromStop(distanceFromStop);

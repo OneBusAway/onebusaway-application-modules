@@ -463,7 +463,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           blockConfig, effectiveScheduledTime);
     }
 
-    if (blockLocation.hasDistanceAlongBlock()) {
+    if (blockLocation.isDistanceAlongBlockSet()) {
       return _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
           blockConfig, blockLocation.getDistanceAlongBlock());
     }

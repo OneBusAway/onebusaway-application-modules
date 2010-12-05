@@ -1,17 +1,18 @@
 package org.onebusaway.transit_data_federation.impl.reporting;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
@@ -27,9 +28,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
   private TransitGraphDao _graph;
 
-  private BlockLocationService _blockLocationService;
-
-  private BlockCalendarService _blockCalendarService;
+  private BlockStatusService _blockStatusService;
 
   @Autowired
   public void setUserReportingDao(UserReportingDao userReportingDao) {
@@ -42,13 +41,8 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   @Autowired
-  public void setBlockLocationService(BlockLocationService blockLocationService) {
-    _blockLocationService = blockLocationService;
-  }
-
-  @Autowired
-  public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
-    _blockCalendarService = blockCalendarService;
+  public void setBlockStatusService(BlockStatusService blockStatusService) {
+    _blockStatusService = blockStatusService;
   }
 
   @Override
@@ -63,9 +57,13 @@ class UserReportingServiceImpl implements UserReportingService {
     record.setTime(problem.getTime());
     record.setData(problem.getData());
     record.setUserComment(problem.getUserComment());
-    record.setUserLat(problem.getUserLat());
-    record.setUserLon(problem.getUserLon());
-    record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
+
+    if (!Double.isNaN(problem.getUserLat()))
+      record.setUserLat(problem.getUserLat());
+    if (!Double.isNaN(problem.getUserLon()))
+      record.setUserLon(problem.getUserLon());
+    if (!Double.isNaN(problem.getUserLocationAccuracy()))
+      record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
 
     _userReportingDao.saveOrUpdate(record);
   }
@@ -96,28 +94,42 @@ class UserReportingServiceImpl implements UserReportingService {
 
     record.setTime(problem.getTime());
     record.setTripId(tripId);
+    record.setBlockId(block.getId());
 
     record.setUserComment(problem.getUserComment());
-    record.setUserLat(problem.getUserLat());
-    record.setUserLon(problem.getUserLon());
-    record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
+
+    if (!Double.isNaN(problem.getUserLat()))
+      record.setUserLat(problem.getUserLat());
+    if (!Double.isNaN(problem.getUserLon()))
+      record.setUserLon(problem.getUserLon());
+    if (!Double.isNaN(problem.getUserLocationAccuracy()))
+      record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
+
     record.setUserOnVehicle(problem.isUserOnVehicle());
     record.setUserVehicleNumber(problem.getUserVehicleNumber());
 
-    BlockInstance blockInstance = _blockCalendarService.getBlockInstance(
-        block.getId(), problem.getServiceDate());
+    Map<BlockInstance, List<BlockLocation>> locationsByInstance = _blockStatusService.getBlocks(
+        block.getId(), problem.getServiceDate(), record.getVehicleId(),
+        problem.getTime());
+
+    BlockInstance blockInstance = getBestBlockInstance(locationsByInstance.keySet());
 
     if (blockInstance != null) {
 
-      List<BlockLocation> blockLocations = _blockLocationService.getLocationsForBlockInstance(
-          blockInstance, problem.getTime());
+      List<BlockLocation> blockLocations = locationsByInstance.get(blockInstance);
 
       BlockLocation blockLocation = getBestLocation(blockLocations, problem);
 
       if (blockLocation != null) {
+
         record.setPredicted(blockLocation.isPredicted());
-        record.setDistanceAlongBlock(blockLocation.getDistanceAlongBlock());
-        record.setScheduleDeviation(blockLocation.getScheduleDeviation());
+
+        if (blockLocation.isDistanceAlongBlockSet())
+          record.setDistanceAlongBlock(blockLocation.getDistanceAlongBlock());
+
+        if (blockLocation.isScheduleDeviationSet())
+          record.setScheduleDeviation(blockLocation.getScheduleDeviation());
+
         CoordinatePoint p = blockLocation.getLocation();
         if (p != null) {
           record.setVehicleLat(p.getLat());
@@ -158,24 +170,23 @@ class UserReportingServiceImpl implements UserReportingService {
    * Private Methods
    ****/
 
+  private BlockInstance getBestBlockInstance(
+      Collection<BlockInstance> blockInstances) {
+
+    if (blockInstances.isEmpty())
+      return null;
+
+    // Could we do something better here?
+    return blockInstances.iterator().next();
+  }
+
   private BlockLocation getBestLocation(List<BlockLocation> blockLocations,
       TripProblemReportBean problem) {
 
     if (blockLocations.isEmpty())
       return null;
-    else if (blockLocations.size() == 1)
-      return blockLocations.get(0);
 
-    String vid = problem.getVehicleId();
-    if (vid != null && vid.length() > 0) {
-      AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(vid);
-      for (BlockLocation location : blockLocations) {
-        if (vehicleId.equals(location.getVehicleId()))
-          return location;
-      }
-    }
-
-    // Try something else?
+    // Could we do something better here?
     return blockLocations.get(0);
   }
 

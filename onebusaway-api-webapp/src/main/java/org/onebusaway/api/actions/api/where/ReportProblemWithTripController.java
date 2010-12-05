@@ -37,7 +37,7 @@ public class ReportProblemWithTripController extends ApiActionSupport {
     _model.setServiceDate(serviceDate);
   }
   
-  public void setVehileId(String vehicleId) {
+  public void setVehicleId(String vehicleId) {
     _model.setVehicleId(vehicleId);
   }
 

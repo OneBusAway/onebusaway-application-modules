@@ -34,12 +34,15 @@ public class StopProblemReportRecord implements Serializable {
   private String data;
 
   private String userComment;
+  
+  @Column(nullable = true)
+  private Double userLat;
 
-  private double userLat;
+  @Column(nullable = true)
+  private Double userLon;
 
-  private double userLon;
-
-  private double userLocationAccuracy;
+  @Column(nullable = true)
+  private Double userLocationAccuracy;
 
   public long getId() {
     return id;
@@ -81,27 +84,27 @@ public class StopProblemReportRecord implements Serializable {
     this.userComment = userComment;
   }
 
-  public double getUserLat() {
+  public Double getUserLat() {
     return userLat;
   }
 
-  public void setUserLat(double userLat) {
+  public void setUserLat(Double userLat) {
     this.userLat = userLat;
   }
 
-  public double getUserLon() {
+  public Double getUserLon() {
     return userLon;
   }
 
-  public void setUserLon(double userLon) {
+  public void setUserLon(Double userLon) {
     this.userLon = userLon;
   }
 
-  public double getUserLocationAccuracy() {
+  public Double getUserLocationAccuracy() {
     return userLocationAccuracy;
   }
 
-  public void setUserLocationAccuracy(double userLocationAccuracy) {
+  public void setUserLocationAccuracy(Double userLocationAccuracy) {
     this.userLocationAccuracy = userLocationAccuracy;
   }
 }

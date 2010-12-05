@@ -313,7 +313,7 @@ public class BlockLocation {
     this.scheduleDeviations = scheduleDeviations;
   }
 
-  public boolean hasDistanceAlongBlock() {
+  public boolean isDistanceAlongBlockSet() {
     return !Double.isNaN(distanceAlongBlock);
   }
 

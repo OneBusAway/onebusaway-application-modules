@@ -26,15 +26,15 @@ public class TripProblemReportBean implements Serializable {
 
   private String userVehicleNumber;
 
-  private double userLat;
+  private double userLat = Double.NaN;
 
-  private double userLon;
+  private double userLon = Double.NaN;
 
-  private double userLocationAccuracy;
+  private double userLocationAccuracy = Double.NaN;
 
-  private double vehicleLat;
+  private double vehicleLat = Double.NaN;
 
-  private double vehicleLon;
+  private double vehicleLon = Double.NaN;
 
   private boolean predicted = false;
 

@@ -92,7 +92,7 @@ public class BlockLocationServiceImplTest {
     assertEquals(0, location.getClosestStopTimeOffset());
     assertFalse(location.isScheduleDeviationSet());
     assertTrue(Double.isNaN(location.getScheduleDeviation()));
-    assertFalse(location.hasDistanceAlongBlock());
+    assertFalse(location.isDistanceAlongBlockSet());
     assertTrue(Double.isNaN(location.getDistanceAlongBlock()));
     assertNull(location.getLocation());
     assertEquals(blockInstance, location.getBlockInstance());
@@ -124,7 +124,7 @@ public class BlockLocationServiceImplTest {
     assertFalse(location.isScheduleDeviationSet());
     assertTrue(Double.isNaN(location.getScheduleDeviation()));
 
-    assertFalse(location.hasDistanceAlongBlock());
+    assertFalse(location.isDistanceAlongBlockSet());
     assertTrue(Double.isNaN(location.getDistanceAlongBlock()));
 
     assertEquals(blockInstance, location.getBlockInstance());
