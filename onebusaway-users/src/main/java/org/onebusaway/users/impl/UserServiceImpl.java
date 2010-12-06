@@ -25,6 +25,7 @@ import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.providers.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,8 @@ public class UserServiceImpl implements UserService {
   private UserPropertiesService _userPropertiesService;
 
   private UserIndexRegistrationService _userIndexRegistrationService;
+
+  private PasswordEncoder _passwordEncoder;
 
   @Autowired
   public void setUserDao(UserDao dao) {
@@ -62,6 +65,11 @@ public class UserServiceImpl implements UserService {
   public void setUserIndexRegistrationService(
       UserIndexRegistrationService userIndexRegistrationService) {
     _userIndexRegistrationService = userIndexRegistrationService;
+  }
+
+  @Autowired
+  public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+    _passwordEncoder = passwordEncoder;
   }
 
   /****
@@ -230,6 +238,15 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public UserIndex getOrCreateUserForUsernameAndPassword(String username,
+      String password) {
+
+    String credentials = _passwordEncoder.encodePassword(password, username);
+    UserIndexKey key = new UserIndexKey(UserIndexTypes.USERNAME, username);
+    return getOrCreateUserForIndexKey(key, credentials, false);
+  }
+
+  @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return _userDao.getUserIndexForId(key);
   }
@@ -395,7 +412,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public Long getMinApiRequestIntervalForKey(String key,
       @CacheableArgument(cacheRefreshIndicator = true) boolean forceRefresh) {
-    
+
     UserIndexKey indexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
     UserIndex userIndex = getUserIndexForId(indexKey);
 

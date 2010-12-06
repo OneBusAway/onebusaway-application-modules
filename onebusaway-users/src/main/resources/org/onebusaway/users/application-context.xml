@@ -124,6 +124,16 @@
             </bean>
         </property>
     </bean>
+    
+    <bean id="passwordEncoderV1" class="org.onebusaway.users.impl.authentication.VersionedPasswordEncoder">
+        <property name="versionId" value="v1" />
+        <property name="passwordEncoder">
+            <bean class="org.springframework.security.providers.encoding.ShaPasswordEncoder">
+                <constructor-arg value="256" />
+                <property name="encodeHashAsBase64" value="true" />
+            </bean>
+        </property>
+    </bean>
 
     <bean id="userLastAccessTimeServiceCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />

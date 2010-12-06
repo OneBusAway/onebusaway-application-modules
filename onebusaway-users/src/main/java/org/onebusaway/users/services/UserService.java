@@ -1,7 +1,6 @@
 package org.onebusaway.users.services;
 
 import java.util.List;
-import java.util.Map;
 
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.User;
@@ -75,6 +74,16 @@ public interface UserService {
    */
   public UserIndex getOrCreateUserForIndexKey(UserIndexKey key,
       String credentials, boolean isAnonymous);
+
+  /**
+   * @param username
+   * @param password
+   * @return an existing user index with the specified username if it already
+   *         exists, or a newly created user index (and underlying user) with
+   *         the specified username and password credentials
+   */
+  public UserIndex getOrCreateUserForUsernameAndPassword(String username,
+      String password);
 
   /**
    * Add a {@link UserIndex} with the specified id and credentials to an
