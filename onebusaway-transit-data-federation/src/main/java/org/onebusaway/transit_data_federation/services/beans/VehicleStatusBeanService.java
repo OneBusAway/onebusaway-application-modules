@@ -15,4 +15,8 @@ public interface VehicleStatusBeanService {
 
   public ListBean<VehicleLocationRecordBean> getVehicleLocations(
       VehicleLocationRecordQueryBean query);
+
+  public void submitVehicleLocation(VehicleLocationRecordBean record);
+
+  public void resetVehicleLocation(AgencyAndId vehicleId);
 }

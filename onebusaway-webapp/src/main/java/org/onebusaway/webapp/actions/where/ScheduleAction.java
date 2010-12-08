@@ -43,6 +43,8 @@ public class ScheduleAction extends ActionSupport {
   private StopScheduleBean _result;
 
   private TimeZone _timeZone;
+  
+  private boolean _showArrivals = false;
 
   public void setId(String id) {
     _id = id;
@@ -51,6 +53,14 @@ public class ScheduleAction extends ActionSupport {
   @TypeConversion(converter = "org.onebusaway.webapp.actions.where.ScheduleByStopDateConverter")
   public void setDate(Date date) {
     _date = date;
+  }
+  
+  public void setShowArrivals(boolean showArrivals) {
+    _showArrivals = showArrivals;
+  }
+  
+  public boolean isShowArrivals() {
+    return _showArrivals;
   }
 
   public StopScheduleBean getResult() {

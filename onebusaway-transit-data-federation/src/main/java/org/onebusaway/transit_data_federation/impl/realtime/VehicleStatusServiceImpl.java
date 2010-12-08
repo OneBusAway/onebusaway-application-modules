@@ -80,12 +80,12 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
   /****
    * {@link VehicleStatusService} Interface
    ****/
-  
+
   @Override
-  public VehicleLocationRecord getVehicleLocationRecordForId(AgencyAndId vehicleId) {
+  public VehicleLocationRecord getVehicleLocationRecordForId(
+      AgencyAndId vehicleId) {
     return _vehicleRecordsById.get(vehicleId);
   }
-
 
   @Override
   public List<VehicleLocationRecord> getAllVehicleLocationRecords() {

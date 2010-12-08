@@ -280,7 +280,7 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
         if (prevStopTime != null) {
           accumulatedTravelTime += stopTime.getArrivalTime()
               - prevStopTime.getDepartureTime();
-          accumulatedTravelDistance = stopTime.getShapeDistTraveled()
+          accumulatedTravelDistance += stopTime.getShapeDistTraveled()
               - prevStopTime.getShapeDistTraveled();
         }
         prevStopTime = stopTime;

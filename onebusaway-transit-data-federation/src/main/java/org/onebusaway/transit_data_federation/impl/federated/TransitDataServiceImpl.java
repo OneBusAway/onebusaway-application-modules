@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -373,6 +374,17 @@ class TransitDataServiceImpl implements TransitDataService {
   public ListBean<VehicleLocationRecordBean> getVehicleLocationRecords(
       VehicleLocationRecordQueryBean query) {
     return _vehicleStatusBeanService.getVehicleLocations(query);
+  }
+
+  @Override
+  public void submitVehicleLocation(VehicleLocationRecordBean record) {
+    _vehicleStatusBeanService.submitVehicleLocation(record);
+  }
+
+  @FederatedByEntityIdMethod
+  public void resetVehicleLocation(String vehicleId) {
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(vehicleId);
+    _vehicleStatusBeanService.resetVehicleLocation(id);
   }
 
   /****

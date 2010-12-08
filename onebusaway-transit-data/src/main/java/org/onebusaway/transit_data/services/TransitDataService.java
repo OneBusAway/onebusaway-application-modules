@@ -180,9 +180,13 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query);
-  
+
   @FederatedByEntityIdMethod
   public BlockBean getBlockForId(String blockId);
+
+  /****
+   * Vehicle Methods
+   *****/
 
   @FederatedByEntityIdMethod
   public VehicleStatusBean getVehicleForAgency(String vehicleId, long time);
@@ -199,6 +203,12 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAnyEntityIdMethod(properties = {"blockId", "tripId", "vehicleId"})
   public ListBean<VehicleLocationRecordBean> getVehicleLocationRecords(
       VehicleLocationRecordQueryBean query);
+
+  @FederatedByEntityIdMethod(propertyExpression = "vehicleId")
+  public void submitVehicleLocation(VehicleLocationRecordBean record);
+
+  @FederatedByEntityIdMethod
+  public void resetVehicleLocation(String vehicleId);
 
   /**
    * 

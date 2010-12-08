@@ -64,7 +64,7 @@
         <s:set var="firstStopTime" value="schedule.stopTimes[0]"/>
         
         <oba:group value="schedule.stopTimes" var="groups">
-          <s:property value="departureTime / 300" />
+          <s:property value="getdepartureTime / 300" />
         </oba:group>
 
         <table>
@@ -89,7 +89,7 @@
     <div class="block">
     
     <oba:group value="schedule.stopTimes" var="groups">
-        <s:property value="departureTime / 300" />
+        <s:property value="getStopTimeRaw(top) / 300" />
     </oba:group>
 
     <table>

@@ -10,5 +10,4 @@ public interface VehicleStatusService {
   public VehicleLocationRecord getVehicleLocationRecordForId(AgencyAndId vehicleId);
   
   public List<VehicleLocationRecord> getAllVehicleLocationRecords();
-
 }
