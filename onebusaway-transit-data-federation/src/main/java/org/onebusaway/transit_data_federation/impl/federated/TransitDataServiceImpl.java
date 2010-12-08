@@ -35,6 +35,7 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
@@ -57,6 +58,7 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
+import org.onebusaway.transit_data_federation.services.beans.BlockBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RoutesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
@@ -109,6 +111,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private TripDetailsBeanService _tripDetailsBeanService;
+
+  @Autowired
+  private BlockBeanService _blockBeanService;
 
   @Autowired
   private TripPlannerBeanService _tripPlannerBeanService;
@@ -299,6 +304,12 @@ class TransitDataServiceImpl implements TransitDataService {
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query) {
     return _tripDetailsBeanService.getTripsForAgency(query);
+  }
+
+  @Override
+  public BlockBean getBlockForId(String blockId) {
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(blockId);
+    return _blockBeanService.getBlockForId(id);
   }
 
   @Override

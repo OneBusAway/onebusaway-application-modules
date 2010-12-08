@@ -15,8 +15,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.onebusaway.container.model.HasListeners;
-import org.onebusaway.container.model.Listeners;
 import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
@@ -32,8 +30,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime.orbcad:name=OrbcadRecordFtpSource")
-public abstract class AbstractOrbcadRecordSource implements
-    HasListeners<VehicleLocationListener> {
+public abstract class AbstractOrbcadRecordSource {
 
   private static final int REFRESH_INTERVAL_IN_SECONDS = 30;
 
@@ -47,7 +44,7 @@ public abstract class AbstractOrbcadRecordSource implements
 
   private long _lastRefresh = 0;
 
-  private Listeners<VehicleLocationListener> _listeners = new Listeners<VehicleLocationListener>();
+  private VehicleLocationListener _vehicleLocationListener;
 
   private Map<String, String> _blockIdMapping = new HashMap<String, String>();
 
@@ -91,14 +88,10 @@ public abstract class AbstractOrbcadRecordSource implements
     _blockIdMappingFile = blockIdMappingFile;
   }
 
-  @Override
-  public void addListener(VehicleLocationListener listener) {
-    _listeners.addListener(listener);
-  }
-
-  @Override
-  public void removeListener(VehicleLocationListener listener) {
-    _listeners.removeListener(listener);
+  @Autowired
+  public void setVehicleLocationListener(
+      VehicleLocationListener vehicleLocationListener) {
+    _vehicleLocationListener = vehicleLocationListener;
   }
 
   @Autowired
@@ -254,13 +247,10 @@ public abstract class AbstractOrbcadRecordSource implements
 
         handleRefresh();
 
-        for (VehicleLocationListener listener : _listeners) {
-          try {
-            listener.handleVehicleLocationRecords(_records);
-          } catch (Throwable ex) {
-            _log.warn("error passing schedule adherence records to listener",
-                ex);
-          }
+        try {
+          _vehicleLocationListener.handleVehicleLocationRecords(_records);
+        } catch (Throwable ex) {
+          _log.warn("error passing schedule adherence records to listener", ex);
         }
 
         _records.clear();

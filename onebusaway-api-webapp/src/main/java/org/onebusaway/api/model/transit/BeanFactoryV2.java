@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.api.impl.MaxCountSupport;
+import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
+import org.onebusaway.api.model.transit.blocks.BlockTripV2Bean;
+import org.onebusaway.api.model.transit.blocks.BlockV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.NaturalLanguageStringV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
@@ -35,6 +38,9 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.model.blocks.BlockBean;
+import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
+import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
@@ -95,6 +101,10 @@ public class BeanFactoryV2 {
   public EntryWithReferencesBean<TripDetailsV2Bean> getResponse(
       TripDetailsBean tripDetails) {
     return entry(getTripDetails(tripDetails));
+  }
+
+  public EntryWithReferencesBean<BlockV2Bean> getBlockResponse(BlockBean block) {
+    return entry(getBlock(block));
   }
 
   public EntryWithReferencesBean<StopWithArrivalsAndDeparturesV2Bean> getResponse(
@@ -403,6 +413,40 @@ public class BeanFactoryV2 {
       }
       bean.setSituationIds(situationIds);
     }
+
+    return bean;
+  }
+
+  public BlockV2Bean getBlock(BlockBean block) {
+    BlockV2Bean bean = new BlockV2Bean();
+    bean.setId(block.getId());
+    List<BlockConfigurationV2Bean> blockConfigs = new ArrayList<BlockConfigurationV2Bean>();
+    for (BlockConfigurationBean blockConfig : block.getConfigurations())
+      blockConfigs.add(getBlockConfig(blockConfig));
+    bean.setConfigurations(blockConfigs);
+    return bean;
+  }
+
+  public BlockConfigurationV2Bean getBlockConfig(
+      BlockConfigurationBean blockConfig) {
+    BlockConfigurationV2Bean bean = new BlockConfigurationV2Bean();
+    bean.setActiveServiceIds(blockConfig.getActiveServiceIds());
+    bean.setInactiveServiceIds(blockConfig.getInactiveServiceIds());
+    List<BlockTripV2Bean> blockTrips = new ArrayList<BlockTripV2Bean>();
+    for (BlockTripBean blockTrip : blockConfig.getTrips())
+      blockTrips.add(getBlockTrip(blockTrip));
+    bean.setTrips(blockTrips);
+    return bean;
+  }
+
+  public BlockTripV2Bean getBlockTrip(BlockTripBean blockTrip) {
+
+    BlockTripV2Bean bean = new BlockTripV2Bean();
+    bean.setAccumulatedSlackTime(blockTrip.getAccumulatedSlackTime());
+    bean.setDistanceAlongBlock(blockTrip.getDistanceAlongBlock());
+
+    addToReferences(blockTrip.getTrip());
+    bean.setTripId(blockTrip.getTrip().getId());
 
     return bean;
   }
