@@ -28,8 +28,8 @@ public abstract class AbstractBlockVertex extends AbstractVertex {
       BlockStopTimeEntry bst1 = _instance.getStopTime();
       BlockStopTimeEntry bst2 = bsv._instance.getStopTime();
       if (bst1.getTrip().getBlockConfiguration() == bst2.getTrip().getBlockConfiguration())
-        return Math.abs(bst1.getDistaceAlongBlock()
-            - bst2.getDistaceAlongBlock());
+        return Math.abs(bst1.getDistanceAlongBlock()
+            - bst2.getDistanceAlongBlock());
     }
 
     return super.distance(v);

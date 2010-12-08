@@ -62,6 +62,6 @@ public class BlockHopEdge extends AbstractEdge {
 
   @Override
   public double getDistance() {
-    return _to.getDistaceAlongBlock() - _from.getDistaceAlongBlock();
+    return _to.getDistanceAlongBlock() - _from.getDistanceAlongBlock();
   }
 }
