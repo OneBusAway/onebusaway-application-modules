@@ -36,7 +36,7 @@ public class CustomCsvHandler implements ContentTypeHandler {
 
   @Override
   public String getContentType() {
-    return "text/csv";
+    return "text/plain";
   }
 
   @Override
