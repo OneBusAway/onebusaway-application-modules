@@ -41,6 +41,7 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
       CoordinatePoint latLonTo, WalkPlannerConstraints constraints)
       throws NoPathException {
 
+    /*
     String fromPlace = latLonFrom.getLat() + "," + latLonFrom.getLon();
     String toPlace = latLonTo.getLat() + "," + latLonTo.getLon();
     Date targetTime = new Date();
@@ -55,6 +56,8 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
     for (SPTEdge edge : path.edges) {
 
     }
+    */
+    
     // TODO Auto-generated method stub
     return null;
   }
