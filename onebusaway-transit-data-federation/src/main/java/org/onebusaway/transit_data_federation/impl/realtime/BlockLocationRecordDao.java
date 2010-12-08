@@ -38,4 +38,19 @@ public interface BlockLocationRecordDao {
    */
   public List<BlockLocationRecord> getBlockLocationRecordsForVehicleAndTimeRange(
       AgencyAndId vehicleId, long fromTime, long toTime);
+
+  /**
+   * The mega-query method.  Supply what you can.
+   * @param blockId
+   * @param tripId
+   * @param vehicleId
+   * @param serviceDate
+   * @param fromTime
+   * @param toTime
+   * @param recordLimit TODO
+   * @return
+   */
+  public List<BlockLocationRecord> getBlockLocationRecords(AgencyAndId blockId,
+      AgencyAndId tripId, AgencyAndId vehicleId, long serviceDate,
+      long fromTime, long toTime, int recordLimit);
 }

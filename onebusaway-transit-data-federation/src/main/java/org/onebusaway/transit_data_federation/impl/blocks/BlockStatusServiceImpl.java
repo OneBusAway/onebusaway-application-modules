@@ -144,7 +144,15 @@ public class BlockStatusServiceImpl implements BlockStatusService {
             blockInstance.getServiceDate(), frequency));
       return instances;
     } else {
-      return _blockCalendarService.getActiveBlocks(blockId, time, time);
+
+      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+          blockId, time, time);
+
+      if (instances.isEmpty()) {
+        instances = _blockCalendarService.getClosestActiveBlocks(blockId, time);
+      }
+
+      return instances;
     }
   }
 

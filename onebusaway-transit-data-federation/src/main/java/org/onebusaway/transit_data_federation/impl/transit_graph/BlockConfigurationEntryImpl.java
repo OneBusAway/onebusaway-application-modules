@@ -204,11 +204,36 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
       int accumulatedStopTimeIndex = 0;
       int accumulatedSlackTime = 0;
       double distanceAlongBlock = 0;
-      BlockTripEntryImpl prev = null;
+
+      BlockTripEntryImpl prevTrip = null;
+      StopTimeEntry prevTripStopTime = null;
+      double prevTripAvgVelocity = 0;
 
       for (int i = 0; i < trips.size(); i++) {
 
         TripEntry tripEntry = trips.get(i);
+        List<StopTimeEntry> stopTimes = tripEntry.getStopTimes();
+
+        /**
+         * See if there is any slack time in the schedule in the transition
+         * between the two trips. We take the distance between the last stop of
+         * the previous trip and the first stop of the next trip, along with the
+         * average travel velocity from the previous trip, and compute the
+         * estimated travel time. Any time that's left over is slack.
+         */
+        if (prevTripStopTime != null) {
+          StopTimeEntry nextStopTime = stopTimes.get(0);
+          int slackTime = nextStopTime.getArrivalTime()
+              - prevTripStopTime.getDepartureTime();
+          double distance = (distanceAlongBlock - (prevTrip.getDistanceAlongBlock() + prevTripStopTime.getShapeDistTraveled()))
+              + nextStopTime.getShapeDistTraveled();
+          if (prevTripAvgVelocity > 0) {
+            int timeToTravel = (int) (distance / prevTripAvgVelocity);
+            slackTime -= Math.min(timeToTravel, slackTime);
+          }
+
+          accumulatedSlackTime += slackTime;
+        }
 
         BlockTripEntryImpl blockTripEntry = new BlockTripEntryImpl();
         blockTripEntry.setTrip(tripEntry);
@@ -217,21 +242,26 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
         blockTripEntry.setAccumulatedSlackTime(accumulatedSlackTime);
         blockTripEntry.setDistanceAlongBlock(distanceAlongBlock);
 
-        if (prev != null) {
-          prev.setNextTrip(blockTripEntry);
-          blockTripEntry.setPreviousTrip(prev);
+        if (prevTrip != null) {
+          prevTrip.setNextTrip(blockTripEntry);
+          blockTripEntry.setPreviousTrip(prevTrip);
         }
 
         blockTrips.add(blockTripEntry);
 
-        List<StopTimeEntry> stopTimes = tripEntry.getStopTimes();
         accumulatedStopTimeIndex += stopTimes.size();
+
         for (StopTimeEntry stopTime : stopTimes)
           accumulatedSlackTime += stopTime.getSlackTime();
+
+        prevTripAvgVelocity = computeAverageTripTravelVelocity(stopTimes);
+
         distanceAlongBlock += tripEntry.getTotalTripDistance()
             + tripGapDistances[i];
 
-        prev = blockTripEntry;
+        prevTrip = blockTripEntry;
+        prevTripStopTime = stopTimes.get(stopTimes.size() - 1);
+
       }
 
       blockTrips.trimToSize();
@@ -239,6 +269,28 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
       return blockTrips;
     }
 
+    private double computeAverageTripTravelVelocity(
+        List<StopTimeEntry> stopTimes) {
+
+      int accumulatedTravelTime = 0;
+      double accumulatedTravelDistance = 0;
+      StopTimeEntry prevStopTime = null;
+
+      for (StopTimeEntry stopTime : stopTimes) {
+        if (prevStopTime != null) {
+          accumulatedTravelTime += stopTime.getArrivalTime()
+              - prevStopTime.getDepartureTime();
+          accumulatedTravelDistance = stopTime.getShapeDistTraveled()
+              - prevStopTime.getShapeDistTraveled();
+        }
+        prevStopTime = stopTime;
+      }
+
+      if (accumulatedTravelTime == 0)
+        return 0;
+
+      return accumulatedTravelDistance / accumulatedTravelTime;
+    }
   }
 
   /*****

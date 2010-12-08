@@ -23,9 +23,13 @@
 
     <bean name="myXml" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.api.impl.CustomXStreamHandler" />
     <bean name="myJson" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.api.impl.CustomJsonLibHandler" />
+    <bean name="myCsv" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.api.impl.CustomCsvHandler" />
     
     <constant name="struts.rest.handlerOverride.xml" value="myXml" />
     <constant name="struts.rest.handlerOverride.json" value="myJson" />
+    <constant name="struts.rest.handlerOverride.csv" value="myCsv" />
+    
+    <constant name="struts.action.extension" value="xhtml,,xml,json,csv" />
 
     <package name="rest-custom" extends="rest-default">
 

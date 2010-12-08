@@ -29,6 +29,11 @@
         </dependency>
         <dependency>
             <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-gtfs</artifactId>
+        </dependency>
+        <!-- We need this for CsvEntityReader, NOT for any of the gtfs classes (I wish it was separate) -->
+        <dependency>
+            <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-siri-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
@@ -39,7 +44,7 @@
             <artifactId>hessian</artifactId>
         </dependency>
 
-        <!--  Struts 2 -->
+        <!-- Struts 2 -->
         <dependency>
             <groupId>org.apache.struts</groupId>
             <artifactId>struts2-core</artifactId>

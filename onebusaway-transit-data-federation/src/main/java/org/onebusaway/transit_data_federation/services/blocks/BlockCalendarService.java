@@ -32,6 +32,9 @@ public interface BlockCalendarService {
   public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
       long timeFrom, long timeTo);
 
+  public List<BlockInstance> getClosestActiveBlocks(AgencyAndId blockId,
+      long time);
+
   public List<BlockInstance> getActiveBlocksForAgencyInTimeRange(
       String agencyId, long timeFrom, long timeTo);
 

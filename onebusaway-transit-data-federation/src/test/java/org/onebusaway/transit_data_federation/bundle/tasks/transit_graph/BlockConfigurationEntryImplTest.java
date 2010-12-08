@@ -95,7 +95,7 @@ public class BlockConfigurationEntryImplTest {
 
     blockTrip = blockTrips.get(2);
     assertEquals(4, blockTrip.getAccumulatedStopTimeIndex());
-    assertEquals(27 * 60, blockTrip.getAccumulatedSlackTime());
+    assertEquals(35 * 60, blockTrip.getAccumulatedSlackTime());
     assertEquals(3030.0, blockTrip.getDistanceAlongBlock(), 0.0);
     assertNull(blockTrip.getNextTrip());
     assertSame(blockTrips.get(1), blockTrip.getPreviousTrip());
@@ -136,14 +136,14 @@ public class BlockConfigurationEntryImplTest {
     assertSame(blockTrips.get(1), bst.getTrip());
 
     bst = stopTimes.get(4);
-    assertEquals(27 * 60, bst.getAccumulatedSlackTime());
+    assertEquals(35 * 60, bst.getAccumulatedSlackTime());
     assertEquals(4, bst.getBlockSequence());
     assertEquals(3330, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st5, bst.getStopTime());
     assertSame(blockTrips.get(2), bst.getTrip());
 
     bst = stopTimes.get(5);
-    assertEquals(32 * 60, bst.getAccumulatedSlackTime());
+    assertEquals(40 * 60, bst.getAccumulatedSlackTime());
     assertEquals(5, bst.getBlockSequence());
     assertEquals(4230, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st6, bst.getStopTime());

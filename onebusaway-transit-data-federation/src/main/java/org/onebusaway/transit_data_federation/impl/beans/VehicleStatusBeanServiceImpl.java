@@ -9,8 +9,12 @@ import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
+import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord;
+import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecordDao;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
@@ -25,6 +29,8 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
 
   private TripDetailsBeanService _tripDetailsBeanService;
 
+  private BlockLocationRecordDao _blockLocationRecordDao;
+
   @Autowired
   public void setVehicleStatusService(VehicleStatusService vehicleStatusService) {
     _vehicleStatusService = vehicleStatusService;
@@ -34,6 +40,12 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   public void setTripDetailsBeanService(
       TripDetailsBeanService tripDetailsBeanService) {
     _tripDetailsBeanService = tripDetailsBeanService;
+  }
+
+  @Autowired
+  public void setBlockLocationRecordDao(
+      BlockLocationRecordDao blockLocationRecordDao) {
+    _blockLocationRecordDao = blockLocationRecordDao;
   }
 
   public VehicleStatusBean getVehicleForId(AgencyAndId vehicleId, long time) {
@@ -63,6 +75,51 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
     return new ListBean<VehicleStatusBean>(beans, false);
   }
 
+  @Override
+  public ListBean<VehicleLocationRecordBean> getVehicleLocations(
+      VehicleLocationRecordQueryBean query) {
+
+    AgencyAndId blockId = AgencyAndIdLibrary.convertFromString(query.getBlockId());
+    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
+    AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(query.getVehicleId());
+
+    List<BlockLocationRecord> records = _blockLocationRecordDao.getBlockLocationRecords(
+        blockId, tripId, vehicleId, query.getServiceDate(),
+        query.getFromTime(), query.getToTime(), 1000);
+
+    List<VehicleLocationRecordBean> beans = new ArrayList<VehicleLocationRecordBean>(
+        records.size());
+
+    for (BlockLocationRecord record : records) {
+
+      VehicleLocationRecordBean bean = new VehicleLocationRecordBean();
+      bean.setBlockId(AgencyAndIdLibrary.convertToString(record.getBlockId()));
+      if (record.getPhase() != null)
+        bean.setPhase(record.getPhase().toLabel());
+      CoordinatePoint location = record.getLocation();
+      if (location != null)
+        bean.setCurrentLocation(location);
+      if (record.getOrientation() != null)
+        bean.setCurrentOrientation(record.getOrientation());
+      if (record.getDistanceAlongBlock() != null)
+        bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
+      if (record.getScheduleDeviation() != null)
+        bean.setScheduleDeviation(record.getScheduleDeviation());
+      bean.setStatus(record.getStatus());
+      bean.setServiceDate(record.getServiceDate());
+      bean.setTimeOfRecord(record.getTime());
+      bean.setTripId(AgencyAndIdLibrary.convertToString(record.getTripId()));
+      bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
+      beans.add(bean);
+    }
+
+    return new ListBean<VehicleLocationRecordBean>(beans, false);
+  }
+
+  /****
+   * 
+   ****/
+
   private VehicleStatusBean getRecordAsBean(VehicleLocationRecord record,
       long time) {
 
@@ -91,5 +148,4 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
 
     return bean;
   }
-
 }

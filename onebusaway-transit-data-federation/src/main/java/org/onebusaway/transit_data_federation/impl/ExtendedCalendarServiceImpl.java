@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -102,6 +103,15 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     }
 
     return serviceDates;
+  }
+
+  @Cacheable
+  public List<Date> getDatesForServiceIdsAsOrderedList(
+      ServiceIdActivation serviceIds) {
+    Set<Date> dates = getDatesForServiceIds(serviceIds);
+    List<Date> list = new ArrayList<Date>(dates);
+    Collections.sort(list);
+    return list;
   }
 
   @SuppressWarnings("unchecked")

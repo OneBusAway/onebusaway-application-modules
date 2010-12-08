@@ -3,11 +3,13 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.onebusaway.collections.Min;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
@@ -93,6 +95,38 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
 
     return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
         timeTo);
+  }
+
+  @Override
+  public List<BlockInstance> getClosestActiveBlocks(AgencyAndId blockId,
+      long time) {
+
+    Date timeAsDate = new Date(time);
+
+    Min<BlockInstance> m = new Min<BlockInstance>();
+
+    BlockEntry blockEntry = _transitGraphDao.getBlockEntryForId(blockId);
+    for (BlockConfigurationEntry blockConfig : blockEntry.getConfigurations()) {
+      List<Date> serviceDates = _calendarService.getDatesForServiceIdsAsOrderedList(blockConfig.getServiceIds());
+
+      int index = index(Collections.binarySearch(serviceDates, timeAsDate));
+
+      if (index > 0) {
+        BlockInstance instance = new BlockInstance(blockConfig,
+            serviceDates.get(index - 1).getTime());
+        long delta = getTimeToBlockInstance(instance, time);
+        m.add(delta, instance);
+      }
+
+      if (index < serviceDates.size()) {
+        BlockInstance instance = new BlockInstance(blockConfig,
+            serviceDates.get(index).getTime());
+        long delta = getTimeToBlockInstance(instance, time);
+        m.add(delta, instance);
+      }
+    }
+
+    return m.getMinElements();
   }
 
   @Override
@@ -251,6 +285,19 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
           frequency);
       instances.add(instance);
     }
+  }
+
+  /****
+   * 
+   ****/
+
+  private long getTimeToBlockInstance(BlockInstance instance, long time) {
+    long serviceDate = instance.getServiceDate();
+    BlockConfigurationEntry blockConfig = instance.getBlock();
+    int n = blockConfig.getStopTimes().size();
+    long from = serviceDate + blockConfig.getArrivalTimeForIndex(0) * 1000;
+    long to = serviceDate + blockConfig.getDepartureTimeForIndex(n - 1) * 1000;
+    return Math.abs((from + to) / 2 - time);
   }
 
   /****

@@ -39,6 +39,8 @@ import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
@@ -352,6 +354,19 @@ class TransitDataServiceImpl implements TransitDataService {
     return _oneBusAwayService.getLocalPaths(constraints, minTravelTimeToStops,
         localResults);
   }
+
+  /****
+   * 
+   ****/
+
+  public ListBean<VehicleLocationRecordBean> getVehicleLocationRecords(
+      VehicleLocationRecordQueryBean query) {
+    return _vehicleStatusBeanService.getVehicleLocations(query);
+  }
+
+  /****
+   * Service Alert Methods
+   ****/
 
   @Override
   public SituationBean createServiceAlert(String agencyId,

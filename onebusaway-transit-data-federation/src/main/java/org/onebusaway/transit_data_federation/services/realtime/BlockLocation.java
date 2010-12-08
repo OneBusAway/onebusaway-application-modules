@@ -339,4 +339,21 @@ public class BlockLocation {
     this.vehicleId = vehicleId;
   }
 
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder();
+    b.append("BlockLocation(");
+    if (phase != null)
+      b.append("phase=").append(phase).append(",");
+    if (status != null)
+      b.append("status=").append(status).append(",");
+    if (isScheduleDeviationSet())
+      b.append("scheduleDeviation=").append(scheduleDeviation).append(",");
+    if (isDistanceAlongBlockSet())
+      b.append("distanceAlongBlock=").append(distanceAlongBlock).append(",");
+    if (vehicleId != null)
+      b.append("vehicleId=").append(vehicleId).append(",");
+    b.append(")");
+    return b.toString();
+  }
 }

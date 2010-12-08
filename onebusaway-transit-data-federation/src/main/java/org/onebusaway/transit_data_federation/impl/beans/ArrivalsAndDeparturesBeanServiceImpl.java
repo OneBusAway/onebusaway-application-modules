@@ -489,8 +489,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       return scheduleDeviation;
     }
 
-    double slack = targetBlockStopTime.getAccumulatedSlackTime()
-        - nextStopTime.getAccumulatedSlackTime();
+    int a = targetBlockStopTime.getAccumulatedSlackTime();
+    int b = nextStopTime.getAccumulatedSlackTime();
+    double slack = a - b;
 
     if (nextStopTime.getArrivalTime() <= effectiveScheduleTime
         && effectiveScheduleTime <= nextStopTime.getDepartureTime()) {

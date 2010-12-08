@@ -239,6 +239,9 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         TripBean activeTripBean = _tripBeanService.getTripForId(activeTrip.getId());
         bean.setActiveTrip(activeTripBean);
       }
+      else {
+        System.out.println("what?");
+      }
 
       BlockStopTimeEntry closestStop = blockLocation.getClosestStop();
       if (closestStop != null) {

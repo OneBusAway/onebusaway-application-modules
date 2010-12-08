@@ -9,6 +9,7 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByAggregateMethod;
+import org.onebusaway.federations.annotations.FederatedByAnyEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByCoordinateBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
@@ -37,6 +38,8 @@ import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
@@ -186,6 +189,15 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * 
+   * @param query
+   * @return
+   */
+  @FederatedByAnyEntityIdMethod(properties = {"blockId", "tripId", "vehicleId"})
+  public ListBean<VehicleLocationRecordBean> getVehicleLocationRecords(
+      VehicleLocationRecordQueryBean query);
+
+  /**
+   * 
    * @param query determines the vehicle and time of the trip query
    * @return trip details for the trip matching the specified query, or null if
    *         not found
@@ -317,9 +329,12 @@ public interface TransitDataService extends FederatedService {
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException;
 
-  /**
-   * @return **
-   * 
+  /****
+   * Historical Data
+   ****/
+
+  /****
+   * Service Alert Methods
    ****/
 
   @FederatedByAgencyIdMethod

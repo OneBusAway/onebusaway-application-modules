@@ -541,6 +541,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     BlockLocationRecord.Builder builder = BlockLocationRecord.builder();
     builder.setBlockId(record.getBlockId());
+    builder.setTripId(record.getTripId());
     builder.setTime(record.getTimeOfRecord());
     builder.setServiceDate(record.getServiceDate());
 

@@ -35,6 +35,7 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
@@ -153,6 +154,15 @@ public class BeanFactoryV2 {
     List<VehicleStatusV2Bean> beans = new ArrayList<VehicleStatusV2Bean>();
     for (VehicleStatusBean vehicle : vehicles.getList())
       beans.add(getVehicleStatus(vehicle));
+    return list(beans, vehicles.isLimitExceeded(), false);
+  }
+
+  public ListWithReferencesBean<VehicleLocationRecordV2Bean> getVehicleLocationRecordResponse(
+      ListBean<VehicleLocationRecordBean> vehicles) {
+
+    List<VehicleLocationRecordV2Bean> beans = new ArrayList<VehicleLocationRecordV2Bean>();
+    for (VehicleLocationRecordBean vehicle : vehicles.getList())
+      beans.add(getVehicleLocationRecord(vehicle));
     return list(beans, vehicles.isLimitExceeded(), false);
   }
 
@@ -417,6 +427,28 @@ public class BeanFactoryV2 {
     if (tripStatus != null)
       bean.setTripStatus(getTripStatus(tripStatus));
 
+    return bean;
+  }
+
+  public VehicleLocationRecordV2Bean getVehicleLocationRecord(
+      VehicleLocationRecordBean record) {
+
+    VehicleLocationRecordV2Bean bean = new VehicleLocationRecordV2Bean();
+
+    bean.setBlockId(record.getBlockId());
+    bean.setCurrentLocation(record.getCurrentLocation());
+    if (record.isCurrentOrientationSet())
+      bean.setCurrentOrientation(record.getCurrentOrientation());
+    if (record.isDistanceAlongBlockSet())
+      bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
+    bean.setPhase(record.getPhase());
+    if (record.isScheduleDeviationSet())
+      bean.setScheduleDeviation(record.getScheduleDeviation());
+    bean.setServiceDate(record.getServiceDate());
+    bean.setStatus(record.getStatus());
+    bean.setTimeOfRecord(record.getTimeOfRecord());
+    bean.setTripId(record.getTripId());
+    bean.setVehicleId(record.getVehicleId());
     return bean;
   }
 

@@ -24,6 +24,7 @@ import org.onebusaway.api.model.transit.StopsForRouteV2Bean;
 import org.onebusaway.api.model.transit.TripDetailsV2Bean;
 import org.onebusaway.api.model.transit.TripStopTimeV2Bean;
 import org.onebusaway.api.model.transit.TripV2Bean;
+import org.onebusaway.api.model.transit.VehicleLocationRecordV2Bean;
 import org.onebusaway.api.model.transit.VehicleStatusV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
@@ -94,6 +95,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("arrivalAndDeparture", ArrivalAndDepartureV2Bean.class);
     xstream.alias("agencyWithCoverage", AgencyWithCoverageV2Bean.class);
     xstream.alias("stopsForRoute",StopsForRouteV2Bean.class);
+    xstream.alias("vehicleLocationRecord", VehicleLocationRecordV2Bean.class);
     xstream.alias("vehicleStatus", VehicleStatusV2Bean.class);
     
     xstream.alias("situation", SituationV2Bean.class);
