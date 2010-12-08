@@ -13,7 +13,7 @@ import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
 @Results({@Result(type = "redirectAction", name = "submitSuccess", params = {
-    "actionName", "vehicle-location-record",})})
+    "actionName", "vehicle-location-record"})})
 public class VehicleLocationRecordAction extends ActionSupport implements
     ModelDriven<VehicleLocationRecordBean> {
 
