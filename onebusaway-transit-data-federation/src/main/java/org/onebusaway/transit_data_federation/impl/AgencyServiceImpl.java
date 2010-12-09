@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.Agency;
@@ -39,7 +40,7 @@ public class AgencyServiceImpl implements AgencyService {
   public TimeZone getTimeZoneForAgencyId(String agencyId) {
     Agency agency = _dao.getAgencyForId(agencyId);
     if (agency == null)
-      return null;
+      throw new NoSuchAgencyServiceException(agencyId);
     return TimeZone.getTimeZone(agency.getTimezone());
   }
 
