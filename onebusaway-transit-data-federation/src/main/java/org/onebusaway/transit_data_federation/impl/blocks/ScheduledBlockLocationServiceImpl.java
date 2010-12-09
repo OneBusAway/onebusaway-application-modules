@@ -137,7 +137,7 @@ class ScheduledBlockLocationServiceImpl implements
      */
     if (stopTimeIndex == 0) {
       return getScheduledBlockLocationBeforeStartOfBlock(stopTimes,
-          scheduleTime, stopTimeIndex);
+          scheduleTime);
     }
 
     /**
@@ -278,9 +278,12 @@ class ScheduledBlockLocationServiceImpl implements
   }
 
   private ScheduledBlockLocation getScheduledBlockLocationBeforeStartOfBlock(
-      List<BlockStopTimeEntry> stopTimes, int scheduleTime, int stopTimeIndex) {
+      List<BlockStopTimeEntry> stopTimes, int scheduleTime) {
 
-    BlockStopTimeEntry blockStopTime = stopTimes.get(stopTimeIndex);
+    /**
+     * The first block stop time
+     */
+    BlockStopTimeEntry blockStopTime = stopTimes.get(0);
     StopTimeEntry stopTime = blockStopTime.getStopTime();
 
     double distanceAlongBlock = Double.NaN;

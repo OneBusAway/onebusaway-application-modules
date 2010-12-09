@@ -219,7 +219,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
               BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
                   blockInstance, time);
-              applyBlockLocationToBean(sti, time, bean, scheduledLocation);
+              if (scheduledLocation != null)
+                applyBlockLocationToBean(sti, time, bean, scheduledLocation);
               applySituationsToBean(time, blockInstance, sti, null, bean);
 
               beans.add(bean);
@@ -337,7 +338,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       pab.setFrequency(null);
     } else {
 
-      FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(sti.getServiceDate(), frequency);
+      FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(
+          sti.getServiceDate(), frequency);
       pab.setFrequency(fb);
 
       long t = time + frequency.getHeadwaySecs() * 1000;

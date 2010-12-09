@@ -26,6 +26,14 @@ public class ScheduledBlockLocation {
 
   private boolean inService;
 
+  /**
+   * Should never be null, even if the trip is not in service. In the case of
+   * out of service before the start of the block, the active trip will be the
+   * first trip of the block. For out of service at the end of the block, it
+   * will be the last trip of the block.
+   * 
+   * @return the currently active trip
+   */
   public BlockTripEntry getActiveTrip() {
     return activeTrip;
   }
@@ -112,6 +120,22 @@ public class ScheduledBlockLocation {
     this.nextStopTimeOffset = nextStopTimeOffset;
   }
 
+  /**
+   * A scheduled block location can exist but not be considered "in service" in
+   * the following cases:
+   * 
+   * 1) The scheduled block location is requested for a scheduled time that is
+   * before the official start time of the block. If the scheduled time is after
+   * the end time of the block, then the scheduled block location should not
+   * exist.
+   * 
+   * 2) The scheduled block location is requested for a distance along block
+   * that is beyond the last stop in the block, but not yet to the end of the
+   * block's shape.
+   * 
+   * @return true if the vehicle is considered "in service" at this scheduled
+   *         location
+   */
   public boolean isInService() {
     return inService;
   }

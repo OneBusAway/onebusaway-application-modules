@@ -246,8 +246,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (VehicleLocationCacheRecord cacheRecord : records) {
       BlockLocation location = getBlockLocation(blockInstance,
           cacheRecord.getRecord(), targetTime);
-      if (location != null
-          && (location.getNextStop() != null || location.isInService()))
+      if (location != null)
         locations.add(location);
     }
 
@@ -367,6 +366,13 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     }
   }
 
+  /**
+   * 
+   * @param blockInstance
+   * @param record
+   * @param targetTime
+   * @return null if the effective scheduled block location cannot be determined
+   */
   private BlockLocation getBlockLocation(BlockInstance blockInstance,
       VehicleLocationRecord record, long targetTime) {
 
@@ -421,10 +427,17 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     ScheduledBlockLocation scheduledLocation = getScheduledBlockLocation(
         location, targetTime);
 
-    if (scheduledLocation == null) {
-      location.setInService(false);
-      return location;
-    }
+    /**
+     * Will be null in the following cases:
+     * 
+     * 1) When the effective schedule time is beyond the last scheduled stop
+     * time for the block.
+     * 
+     * 2) When the effective distance along block is outside the range of the
+     * block's shape.
+     */
+    if (scheduledLocation == null)
+      return null;
 
     location.setInService(scheduledLocation.isInService());
     location.setActiveTrip(scheduledLocation.getActiveTrip());
@@ -545,10 +558,10 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     builder.setTime(record.getTimeOfRecord());
     builder.setServiceDate(record.getServiceDate());
 
-    if( record.isScheduleDeviationSet() )
+    if (record.isScheduleDeviationSet())
       builder.setScheduleDeviation(record.getScheduleDeviation());
-    
-    if( record.isDistanceAlongBlockSet())
+
+    if (record.isDistanceAlongBlockSet())
       builder.setDistanceAlongBlock(record.getDistanceAlongBlock());
 
     if (record.isCurrentLocationSet()) {
@@ -556,7 +569,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       builder.setLocationLon(record.getCurrentLocationLon());
     }
 
-    if( record.isCurrentOrientationSet() )
+    if (record.isCurrentOrientationSet())
       builder.setOrientation(record.getCurrentOrientation());
 
     builder.setPhase(record.getPhase());

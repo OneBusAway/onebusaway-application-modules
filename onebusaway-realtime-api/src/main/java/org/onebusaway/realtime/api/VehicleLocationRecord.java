@@ -243,4 +243,34 @@ public class VehicleLocationRecord implements Serializable {
   public void setStatus(String status) {
     this.status = status;
   }
+
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder();
+    b.append("VehicleLocationRecord:");
+    if (blockId != null)
+      b.append(" blockId=").append(blockId);
+    if (tripId != null)
+      b.append(" tripId").append(tripId);
+    if (serviceDate != 0)
+      b.append(" serviceDate=").append(serviceDate);
+    if (timeOfRecord != 0)
+      b.append(" time=").append(timeOfRecord);
+    if (vehicleId != null)
+      b.append(" vehicleId=").append(vehicleId);
+    if (isScheduleDeviationSet())
+      b.append(" scheduleDeviation=").append(scheduleDeviation);
+    if (isDistanceAlongBlockSet())
+      b.append(" distanceAlongBlock=").append(distanceAlongBlock);
+    if (isCurrentLocationSet())
+      b.append(" currentLocation=").append(currentLocationLat).append(" ").append(
+          currentLocationLon);
+    if (isCurrentOrientationSet())
+      b.append(" currentOrientation=").append(currentOrientation);
+    if (phase != null)
+      b.append(" phase=").append(phase);
+    if (status != null)
+      b.append(" status=").append(status);
+    return b.toString();
+  }
 }

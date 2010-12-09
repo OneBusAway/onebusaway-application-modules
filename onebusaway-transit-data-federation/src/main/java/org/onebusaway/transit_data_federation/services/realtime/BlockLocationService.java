@@ -21,7 +21,7 @@ public interface BlockLocationService {
    * 
    * @param blockInstance the block instance to query
    * @param targetTime the target time (Unix-time)
-   * @return the block location, or null if no real-time data is available
+   * @return the block location, or null if the block instance is not active at the specified time
    */
   public BlockLocation getLocationForBlockInstance(BlockInstance blockInstance,
       long targetTime);
@@ -32,7 +32,7 @@ public interface BlockLocationService {
    * 
    * @param blockInstance the trip instance to query
    * @param targetTime the target time (Unix-time)
-   * @return the block locations, or empty if no real-time data is available
+   * @return the block locations, or empty if no block locations are active at the specified time 
    */
   public List<BlockLocation> getLocationsForBlockInstance(
       BlockInstance blockInstance, long targetTime);
@@ -43,7 +43,7 @@ public interface BlockLocationService {
    * 
    * @param blockInstance
    * @param targetTime
-   * @return the scheduled location of a particular block instance
+   * @return the scheduled location of a particular block instance, or null if not active at the specified time
    */
   public BlockLocation getScheduledLocationForBlockInstance(
       BlockInstance blockInstance, long targetTime);

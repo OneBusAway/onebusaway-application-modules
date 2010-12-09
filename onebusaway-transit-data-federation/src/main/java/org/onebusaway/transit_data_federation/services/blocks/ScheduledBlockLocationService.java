@@ -18,6 +18,9 @@ public interface ScheduledBlockLocationService {
    * to interpolate where the bus currently is along the block based on the
    * relative velocity between the first two stops in the block.
    * 
+   * We return a null location when requesting a schedule time that is beyond
+   * the last scheduled stop time for the block.
+   * 
    * @param stopTimes
    * @param scheduleTime
    * @return the schedule block position
@@ -29,7 +32,8 @@ public interface ScheduledBlockLocationService {
    * 
    * @param stopTimes
    * @param distanceAlongBlock in meters
-   * @return the schedule block position, or null if not in service
+   * @return the schedule block position, or null if the distance is outside the
+   *         range of the block
    */
   public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
       BlockConfigurationEntry blockConfig, double distanceAlongBlock);
