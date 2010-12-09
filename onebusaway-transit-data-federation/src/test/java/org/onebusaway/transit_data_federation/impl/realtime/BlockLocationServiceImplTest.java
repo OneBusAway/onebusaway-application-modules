@@ -87,18 +87,7 @@ public class BlockLocationServiceImplTest {
     BlockLocation location = _service.getLocationForBlockInstance(
         blockInstance, t(serviceDate, 0, 0));
 
-    assertFalse(location.isInService());
-    assertNull(location.getClosestStop());
-    assertEquals(0, location.getClosestStopTimeOffset());
-    assertFalse(location.isScheduleDeviationSet());
-    assertTrue(Double.isNaN(location.getScheduleDeviation()));
-    assertFalse(location.isDistanceAlongBlockSet());
-    assertTrue(Double.isNaN(location.getDistanceAlongBlock()));
-    assertNull(location.getLocation());
-    assertEquals(blockInstance, location.getBlockInstance());
-    assertEquals(0, location.getLastUpdateTime());
-    assertNull(location.getActiveTrip());
-    assertNull(location.getVehicleId());
+    assertNull(location);
 
     ScheduledBlockLocation p = new ScheduledBlockLocation();
     p.setActiveTrip(blockConfig.getTrips().get(0));
