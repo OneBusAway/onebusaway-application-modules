@@ -129,6 +129,10 @@ public class BlockLocation {
     this.location = location;
   }
 
+  public boolean isOrientationSet() {
+    return !Double.isNaN(orientation);
+  }
+
   /**
    * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
    */

@@ -482,18 +482,18 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       BlockStopTimeEntry targetBlockStopTime, int effectiveScheduleTime,
       int scheduleDeviation) {
 
-    StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
-
     // TargetStopTime
 
-    if (nextStopTime == null
+    if (nextBlockStopTime == null
         || nextBlockStopTime.getBlockSequence() > targetBlockStopTime.getBlockSequence()) {
       return scheduleDeviation;
     }
 
     int a = targetBlockStopTime.getAccumulatedSlackTime();
-    int b = nextStopTime.getAccumulatedSlackTime();
+    int b = nextBlockStopTime.getAccumulatedSlackTime();
     double slack = a - b;
+    
+    StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
 
     if (nextStopTime.getArrivalTime() <= effectiveScheduleTime
         && effectiveScheduleTime <= nextStopTime.getDepartureTime()) {
@@ -512,17 +512,17 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       BlockStopTimeEntry targetBlockStopTime, int effectiveScheduleTime,
       int scheduleDeviation) {
 
-    StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
-    StopTimeEntry targetStopTime = targetBlockStopTime.getStopTime();
-
     // TargetStopTime
-    if (nextStopTime == null
+    if (nextBlockStopTime == null
         || nextBlockStopTime.getBlockSequence() > targetBlockStopTime.getBlockSequence()) {
       return scheduleDeviation;
     }
+    
+    StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
+    StopTimeEntry targetStopTime = targetBlockStopTime.getStopTime();
 
-    double slack = targetStopTime.getAccumulatedSlackTime()
-        - nextStopTime.getAccumulatedSlackTime();
+    double slack = targetBlockStopTime.getAccumulatedSlackTime()
+        - nextBlockStopTime.getAccumulatedSlackTime();
 
     slack += targetStopTime.getSlackTime();
 

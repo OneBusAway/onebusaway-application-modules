@@ -257,7 +257,7 @@ public class BlockLocationRecord {
 
   @Override
   public String toString() {
-    return "TripTimePrediction(id=" + id + " blockId=" + blockId
+    return "BlockLocationRecord(id=" + id + " blockId=" + blockId
         + " serviceDate=" + serviceDate + " time=" + time
         + " scheduleDeviation=" + scheduleDeviation + " vehicleId=" + vehicleId
         + ")";

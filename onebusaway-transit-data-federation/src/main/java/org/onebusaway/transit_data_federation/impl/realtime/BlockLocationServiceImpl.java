@@ -598,12 +598,17 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (BlockLocationRecord record : records) {
       VehicleLocationRecord vlr = new VehicleLocationRecord();
       vlr.setBlockId(blockInstance.getBlock().getBlock().getId());
-      vlr.setCurrentLocationLat(record.getLocationLat());
-      vlr.setCurrentLocationLon(record.getLocationLon());
-      vlr.setCurrentOrientation(record.getOrientation());
-      vlr.setDistanceAlongBlock(record.getDistanceAlongBlock());
+      if (record.isLocationSet()) {
+        vlr.setCurrentLocationLat(record.getLocationLat());
+        vlr.setCurrentLocationLon(record.getLocationLon());
+      }
+      if( record.isOrientationSet() )
+        vlr.setCurrentOrientation(record.getOrientation());
+      if( record.isDistanceAlongBlockSet() )
+        vlr.setDistanceAlongBlock(record.getDistanceAlongBlock());
       vlr.setPhase(record.getPhase());
-      vlr.setScheduleDeviation(record.getScheduleDeviation());
+      if( record.isScheduleDeviationSet())
+        vlr.setScheduleDeviation(record.getScheduleDeviation());
       vlr.setServiceDate(record.getServiceDate());
       vlr.setStatus(record.getStatus());
       vlr.setTimeOfRecord(record.getTime());

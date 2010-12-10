@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -8,6 +9,7 @@ import java.util.Set;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
@@ -33,8 +35,12 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CombinedStateHandler {
+
+  private static Logger _log = LoggerFactory.getLogger(CombinedStateHandler.class);
 
   private WalkPlansImpl _walkPlans;
 
@@ -53,6 +59,8 @@ public class CombinedStateHandler {
   private StopTimeService _stopTimeService;
 
   private StopTransferService _stopTransferService;
+
+  private int _stopTimeSearchWindow = 10;
 
   public CombinedStateHandler(TripContext context) {
     _walkPlans = context.getWalkPlans();
@@ -224,24 +232,35 @@ public class CombinedStateHandler {
 
     StopEntry stopEntry = state.getStop();
 
-    // _stopTimeService.getNextStopTimeDeparture(stopEntry,
-    // state.getCurrentTime());
-    List<StopTimeInstance> departures = Collections.emptyList();
+    /**
+     * Look for departures in the next X minutes
+     */
+    Date from = new Date(state.getCurrentTime());
+    Date to = new Date(SupportLibrary.getNextTimeWindow(_stopTimeSearchWindow,
+        state.getCurrentTime()));
 
-    if (departures.isEmpty()) {
-      System.err.println("unlikely");
-      return;
-    }
+    List<StopTimeInstance> instances = _stopTimeService.getStopTimeInstancesInRange(
+        from, to, stopEntry);
 
-    long nextTime = -1;
-    for (StopTimeInstance sti : departures) {
-      VehicleDepartureState next = new VehicleDepartureState(sti);
-      if (nextTime == -1 || next.getCurrentTime() > nextTime)
-        nextTime = next.getCurrentTime();
+    for (StopTimeInstance instance : instances) {
+
+      long departureTime = instance.getDepartureTime();
+
+      // Prune anything that doesn't have a departure in the proper range, since
+      // the stopTimeService method will also return instances that arrive in
+      // the target interval as well
+      if (departureTime < from.getTime() || to.getTime() <= departureTime)
+        continue;
+
+      // If this is the last stop time in the block, don't continue
+      if (!SupportLibrary.hasNextStopTime(instance))
+        continue;
+
+      VehicleDepartureState next = new VehicleDepartureState(instance);
       transitions.add(next);
     }
 
-    transitions.add(new WaitingAtStopState(nextTime + 1, state.getStop()));
+    transitions.add(new WaitingAtStopState(to.getTime(), state.getStop()));
   }
 
   public void getReverseTransitions(WaitingAtStopState state,

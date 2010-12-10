@@ -31,6 +31,16 @@ public class SupportLibrary {
     return snapped;
   }
 
+  public static long getNextTimeWindow(int stopTimeSearchInterval, long time) {
+    int interval = stopTimeSearchInterval * 60 * 1000;
+    long snapped = (time / interval) * interval;
+    while (snapped < time)
+      snapped += interval;
+    if (snapped == time)
+      return time + interval;
+    return snapped;
+  }
+
   public static long getPreviousTimeWindow(GraphContext context, long time) {
     int interval = context.getStopTimeSearchInterval() * 60 * 1000;
     long snapped = (time / interval) * interval;

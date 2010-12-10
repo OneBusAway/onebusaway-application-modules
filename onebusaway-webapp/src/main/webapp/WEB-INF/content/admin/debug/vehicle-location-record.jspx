@@ -32,6 +32,7 @@
   <s:textfield name="tripId" value="%{tripId}" label="Trip Id"/>
   <s:textfield name="scheduleDeviation" value="%{scheduleDeviation}" label="Schedule Deviation" />
   <s:textfield name="serviceDate" value="%{serviceDate}" label="Service Date"/>
+  <s:textfield name="timeOfRecord" value="%{timeOfRecord}" label="Time"/>
   <s:submit name="submit" value="Submit"/>
 </s:form>
 

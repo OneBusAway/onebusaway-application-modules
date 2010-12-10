@@ -2,10 +2,13 @@ package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 
@@ -66,10 +69,11 @@ public class TripPlannerController extends ApiActionSupport {
     TripPlannerConstraintsBean constraints = new TripPlannerConstraintsBean();
     constraints.setMinDepartureTime(_timeFrom.getTime());
 
-    _transitDataService.getTripsBetween(_latFrom, _lonFrom, _latTo, _lonTo,
-        constraints);
+    List<TripPlanBean> beans = _transitDataService.getTripsBetween(_latFrom,
+        _lonFrom, _latTo, _lonTo, constraints);
 
-    return setOkResponse(null);
+    BeanFactoryV2 factory = getBeanFactoryV2();
+    return setOkResponse(factory.list(beans, false));
   }
 
 }

@@ -13,10 +13,14 @@ public interface VehicleStatusBeanService {
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time);
 
+  public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
+      AgencyAndId id, long targetTime);
+
   public ListBean<VehicleLocationRecordBean> getVehicleLocations(
       VehicleLocationRecordQueryBean query);
 
   public void submitVehicleLocation(VehicleLocationRecordBean record);
 
   public void resetVehicleLocation(AgencyAndId vehicleId);
+
 }

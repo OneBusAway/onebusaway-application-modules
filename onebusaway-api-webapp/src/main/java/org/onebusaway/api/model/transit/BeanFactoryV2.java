@@ -16,7 +16,9 @@ import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetails
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.MinTravelTimeToStopV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -41,6 +43,7 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
+import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
@@ -185,6 +188,24 @@ public class BeanFactoryV2 {
       SituationBean situation) {
     return entry(getSituation(situation));
   }
+
+  public ListWithReferencesBean<MinTravelTimeToStopV2Bean> getMinTravelTimeToStops(
+      MinTravelTimeToStopsBean travelTimes) {
+    List<MinTravelTimeToStopV2Bean> beans = new ArrayList<MinTravelTimeToStopV2Bean>();
+    for (int i = 0; i < travelTimes.getSize(); i++) {
+      MinTravelTimeToStopV2Bean bean = new MinTravelTimeToStopV2Bean();
+      bean.setStopId(travelTimes.getStopId(i));
+      bean.setLocation(new CoordinatePoint(travelTimes.getStopLat(i),
+          travelTimes.getStopLon(i)));
+      bean.setTravelTime(travelTimes.getTravelTime(i));
+      beans.add(bean);
+    }
+    return list(beans, false);
+  }
+
+  /****
+   * 
+   *****/
 
   public ListWithReferencesBean<String> getEntityIdsResponse(
       ListBean<String> ids) {
@@ -897,15 +918,15 @@ public class BeanFactoryV2 {
    * Private Methods
    ****/
 
-  private <T> EntryWithReferencesBean<T> entry(T entry) {
+  public <T> EntryWithReferencesBean<T> entry(T entry) {
     return new EntryWithReferencesBean<T>(entry, _references);
   }
 
-  private <T> ListWithReferencesBean<T> list(List<T> list, boolean limitExceeded) {
+  public <T> ListWithReferencesBean<T> list(List<T> list, boolean limitExceeded) {
     return new ListWithReferencesBean<T>(list, limitExceeded, _references);
   }
 
-  private <T> ListWithReferencesBean<T> list(List<T> list,
+  public <T> ListWithReferencesBean<T> list(List<T> list,
       boolean limitExceeded, boolean outOfRange) {
     return new ListWithRangeAndReferencesBean<T>(list, limitExceeded,
         outOfRange, _references);

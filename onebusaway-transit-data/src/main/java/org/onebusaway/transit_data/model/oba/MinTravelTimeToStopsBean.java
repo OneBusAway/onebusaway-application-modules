@@ -3,61 +3,77 @@ package org.onebusaway.transit_data.model.oba;
 import java.io.Serializable;
 
 public class MinTravelTimeToStopsBean implements Serializable {
-  
+
   private static final long serialVersionUID = 1L;
 
-  private String _agencyId;
+  private String agencyId;
 
-  private String[] _stopIds;
+  private String[] stopIds;
 
-  private double[] _lats;
+  private double[] lats;
 
-  private double[] _lons;
+  private double[] lons;
 
-  private long[] _transitTimes;
+  private long[] transitTimes;
 
-  private double _walkingVelocity;
-  
+  private double walkingVelocity;
+
   public MinTravelTimeToStopsBean() {
-    
+
   }
 
-  public MinTravelTimeToStopsBean(String agencyId, String[] stopIds, double[] lats,
-      double[] lons, long[] times, double walkingVelocity) {
-    _agencyId = agencyId;
-    _stopIds = stopIds;
-    _lats = lats;
-    _lons = lons;
-    _transitTimes = times;
-    _walkingVelocity = walkingVelocity;
+  public MinTravelTimeToStopsBean(String agencyId, String[] stopIds,
+      double[] lats, double[] lons, long[] times, double walkingVelocity) {
+    this.agencyId = agencyId;
+    this.stopIds = stopIds;
+    this.lats = lats;
+    this.lons = lons;
+    this.transitTimes = times;
+    this.walkingVelocity = walkingVelocity;
   }
-  
+
   public String getAgencyId() {
-    return _agencyId;
+    return agencyId;
   }
 
-  public int getSize() {
-    return _stopIds.length;
+  public String[] getStopIds() {
+    return stopIds;
   }
 
-  public String getStopId(int index) {
-    return _stopIds[index];
+  public double[] getLats() {
+    return lats;
   }
 
-  public double getStopLat(int i) {
-    return _lats[i];
+  public double[] getLons() {
+    return lons;
   }
 
-  public double getStopLon(int i) {
-    return _lons[i];
-  }
-  
-  public long getTravelTime(int i) {
-    return _transitTimes[i];
+  public long[] getTransitTimes() {
+    return transitTimes;
   }
 
   public double getWalkingVelocity() {
-    return _walkingVelocity;
+    return walkingVelocity;
+  }
+
+  public int getSize() {
+    return stopIds.length;
+  }
+
+  public String getStopId(int index) {
+    return stopIds[index];
+  }
+
+  public double getStopLat(int i) {
+    return lats[i];
+  }
+
+  public double getStopLon(int i) {
+    return lons[i];
+  }
+
+  public long getTravelTime(int i) {
+    return transitTimes[i];
   }
 
 }

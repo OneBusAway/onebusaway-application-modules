@@ -19,6 +19,8 @@ import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecordD
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,6 +35,8 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   private BlockLocationRecordDao _blockLocationRecordDao;
 
   private VehicleLocationListener _vehicleLocationListener;
+
+  private BlockLocationService _blockLocationService;
 
   @Autowired
   public void setVehicleStatusService(VehicleStatusService vehicleStatusService) {
@@ -85,6 +89,17 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   }
 
   @Override
+  public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
+      AgencyAndId vehicleId, long targetTime) {
+
+    BlockLocation blockLocation = _blockLocationService.getLocationForVehicleAndTime(
+        vehicleId, targetTime);
+    if (blockLocation == null)
+      return null;
+    return getBlockLocationAsVehicleLocationRecord(blockLocation);
+  }
+
+  @Override
   public ListBean<VehicleLocationRecordBean> getVehicleLocations(
       VehicleLocationRecordQueryBean query) {
 
@@ -100,25 +115,7 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
         records.size());
 
     for (BlockLocationRecord record : records) {
-
-      VehicleLocationRecordBean bean = new VehicleLocationRecordBean();
-      bean.setBlockId(AgencyAndIdLibrary.convertToString(record.getBlockId()));
-      if (record.getPhase() != null)
-        bean.setPhase(record.getPhase().toLabel());
-      CoordinatePoint location = record.getLocation();
-      if (location != null)
-        bean.setCurrentLocation(location);
-      if (record.getOrientation() != null)
-        bean.setCurrentOrientation(record.getOrientation());
-      if (record.getDistanceAlongBlock() != null)
-        bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
-      if (record.getScheduleDeviation() != null)
-        bean.setScheduleDeviation(record.getScheduleDeviation());
-      bean.setStatus(record.getStatus());
-      bean.setServiceDate(record.getServiceDate());
-      bean.setTimeOfRecord(record.getTime());
-      bean.setTripId(AgencyAndIdLibrary.convertToString(record.getTripId()));
-      bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
+      VehicleLocationRecordBean bean = getBlockLocationRecordAsVehicleLocationRecord(record);
       beans.add(bean);
     }
 
@@ -159,8 +156,6 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   @Override
   public void resetVehicleLocation(AgencyAndId vehicleId) {
     _vehicleLocationListener.resetVehicleLocation(vehicleId);
-    // TODO Auto-generated method stub
-
   }
 
   /****
@@ -196,4 +191,50 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
     return bean;
   }
 
+  private VehicleLocationRecordBean getBlockLocationRecordAsVehicleLocationRecord(
+      BlockLocationRecord record) {
+    VehicleLocationRecordBean bean = new VehicleLocationRecordBean();
+    bean.setBlockId(AgencyAndIdLibrary.convertToString(record.getBlockId()));
+    if (record.getPhase() != null)
+      bean.setPhase(record.getPhase().toLabel());
+    CoordinatePoint location = record.getLocation();
+    if (location != null)
+      bean.setCurrentLocation(location);
+    if (record.getOrientation() != null)
+      bean.setCurrentOrientation(record.getOrientation());
+    if (record.getDistanceAlongBlock() != null)
+      bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
+    if (record.getScheduleDeviation() != null)
+      bean.setScheduleDeviation(record.getScheduleDeviation());
+    bean.setStatus(record.getStatus());
+    bean.setServiceDate(record.getServiceDate());
+    bean.setTimeOfRecord(record.getTime());
+    bean.setTripId(AgencyAndIdLibrary.convertToString(record.getTripId()));
+    bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
+    return bean;
+  }
+
+  private VehicleLocationRecordBean getBlockLocationAsVehicleLocationRecord(
+      BlockLocation record) {
+    VehicleLocationRecordBean bean = new VehicleLocationRecordBean();
+    bean.setBlockId(AgencyAndIdLibrary.convertToString(record.getBlockInstance().getBlock().getBlock().getId()));
+    if (record.getPhase() != null)
+      bean.setPhase(record.getPhase().toLabel());
+    CoordinatePoint location = record.getLocation();
+    if (location != null)
+      bean.setCurrentLocation(location);
+
+    if (record.isOrientationSet())
+      bean.setCurrentOrientation(record.getOrientation());
+    if (record.isDistanceAlongBlockSet())
+      bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
+    if (record.isScheduleDeviationSet())
+      bean.setScheduleDeviation(record.getScheduleDeviation());
+    bean.setStatus(record.getStatus());
+    bean.setServiceDate(record.getBlockInstance().getServiceDate());
+    bean.setTimeOfRecord(record.getLastUpdateTime());
+    bean.setTripId(AgencyAndIdLibrary.convertToString(record.getActiveTrip().getTrip().getId()));
+    bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
+    return bean;
+  }
 }

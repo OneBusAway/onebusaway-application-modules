@@ -12,6 +12,7 @@ import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.MinTravelTimeToStopsListener;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerService;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ class TripPlannerServiceImpl implements TripPlannerService {
   private TransitGraphDao _transitGraphDao;
 
   private StopTimeService _stopTimeService;
+
+  private StopTransferService _stopTransferService;
 
   @Autowired
   public void setWalkPlannerService(WalkPlannerService walkPlannerService) {
@@ -46,6 +49,11 @@ class TripPlannerServiceImpl implements TripPlannerService {
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
     _stopTimeService = stopTimeService;
+  }
+
+  @Autowired
+  public void setStopTransferService(StopTransferService stopTransferService) {
+    _stopTransferService = stopTransferService;
   }
 
   public Map<StopEntry, Long> getMinTravelTimeToStopsFrom(CoordinatePoint from,
@@ -84,6 +92,7 @@ class TripPlannerServiceImpl implements TripPlannerService {
     context.setTransitGraphDao(_transitGraphDao);
     context.setWalkPlannerService(_walkPlanner);
     context.setStopTimeService(_stopTimeService);
+    context.setStopTransferService(_stopTransferService);
     context.setConstraints(constraints);
 
     return context;

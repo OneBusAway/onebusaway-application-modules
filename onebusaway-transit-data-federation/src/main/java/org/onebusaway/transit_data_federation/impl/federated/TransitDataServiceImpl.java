@@ -326,6 +326,14 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
+      String vehicleId, long targetTime) {
+    AgencyAndId id = convertAgencyAndId(vehicleId);
+    return _vehicleStatusBeanService.getVehicleLocationRecordForVehicleId(id,
+        targetTime);
+  }
+
+  @Override
   public TripDetailsBean getTripDetailsForVehicleAndTime(
       TripForVehicleQueryBean query) {
     AgencyAndId id = convertAgencyAndId(query.getVehicleId());
