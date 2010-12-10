@@ -9,6 +9,7 @@ import java.util.Set;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
@@ -60,7 +61,7 @@ public class CombinedStateHandler {
 
   private StopTransferService _stopTransferService;
 
-  private int _stopTimeSearchWindow = 10;
+  private int _stopTimeSearchWindow = 30;
 
   public CombinedStateHandler(TripContext context) {
     _walkPlans = context.getWalkPlans();
@@ -243,7 +244,7 @@ public class CombinedStateHandler {
         from, to, stopEntry);
 
     for (StopTimeInstance instance : instances) {
-
+      
       long departureTime = instance.getDepartureTime();
 
       // Prune anything that doesn't have a departure in the proper range, since

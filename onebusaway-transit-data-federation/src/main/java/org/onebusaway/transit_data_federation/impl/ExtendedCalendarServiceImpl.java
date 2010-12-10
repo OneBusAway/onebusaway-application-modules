@@ -157,7 +157,7 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
         / _serviceDateRangeCacheInterval) * _serviceDateRangeCacheInterval);
     double m = _serviceDateRangeCacheInterval * 1000;
     long fromTime = (long) (Math.floor(from.getTime() / m) * m);
-    long toTime = (long) (Math.ceil(from.getTime() / m) * m);
+    long toTime = (long) (Math.ceil(to.getTime() / m) * m);
     return new ServiceDateRangeKey(serviceIdsKey, fromStopTime, toStopTime,
         fromTime, toTime);
   }
