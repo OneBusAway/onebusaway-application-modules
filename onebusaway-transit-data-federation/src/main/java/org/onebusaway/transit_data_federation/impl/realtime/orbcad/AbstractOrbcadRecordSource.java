@@ -25,6 +25,7 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -333,11 +334,17 @@ public abstract class AbstractOrbcadRecordSource {
 
       if (_calculateDistanceAlongBlock) {
         BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-        int scheduleTime = (int) (record.getTime() - record.getScheduleDeviation() - blockInstance.getServiceDate() / 1000 );
+        int scheduleTime = (int) (record.getTime()
+            - record.getScheduleDeviation() - blockInstance.getServiceDate() / 1000);
         ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
             blockConfig, scheduleTime);
-        if (location != null)
+        if (location != null) {
           message.setDistanceAlongBlock(location.getDistanceAlongBlock());
+
+          BlockTripEntry activeTrip = location.getActiveTrip();
+          if (activeTrip != null)
+            message.setTripId(activeTrip.getTrip().getId());
+        }
       }
 
       _records.add(message);
