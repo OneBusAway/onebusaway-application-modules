@@ -5,8 +5,11 @@ import java.util.List;
 
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
+import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
+import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockTripV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockV2Bean;
+import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.NaturalLanguageStringV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
@@ -42,11 +45,14 @@ import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
+import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
+import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
+import org.onebusaway.transit_data.model.schedule.StopTimeBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
@@ -438,6 +444,16 @@ public class BeanFactoryV2 {
     return bean;
   }
 
+  public BlockInstanceV2Bean getBlockInstance(BlockInstanceBean blockInstance) {
+    BlockInstanceV2Bean bean = new BlockInstanceV2Bean();
+    bean.setBlockConfiguration(getBlockConfig(blockInstance.getBlockConfiguration()));
+    bean.setBlockId(blockInstance.getBlockId());
+    if (blockInstance.getFrequency() != null)
+      bean.setFrequency(getFrequency(blockInstance.getFrequency()));
+    bean.setServiceDate(blockInstance.getServiceDate());
+    return bean;
+  }
+
   public BlockV2Bean getBlock(BlockBean block) {
     BlockV2Bean bean = new BlockV2Bean();
     bean.setId(block.getId());
@@ -468,6 +484,35 @@ public class BeanFactoryV2 {
 
     addToReferences(blockTrip.getTrip());
     bean.setTripId(blockTrip.getTrip().getId());
+
+    List<BlockStopTimeV2Bean> blockStopTimes = new ArrayList<BlockStopTimeV2Bean>();
+    for (BlockStopTimeBean blockStopTime : blockTrip.getBlockStopTimes()) {
+      BlockStopTimeV2Bean stopTimeBean = getBlockStopTime(blockStopTime);
+      blockStopTimes.add(stopTimeBean);
+    }
+    bean.setBlockStopTimes(blockStopTimes);
+
+    return bean;
+  }
+
+  public BlockStopTimeV2Bean getBlockStopTime(BlockStopTimeBean blockStopTime) {
+    BlockStopTimeV2Bean bean = new BlockStopTimeV2Bean();
+    bean.setAccumulatedSlackTime(blockStopTime.getAccumulatedSlackTime());
+    bean.setBlockSequence(blockStopTime.getBlockSequence());
+    bean.setDistanceAlongBlock(blockStopTime.getDistanceAlongBlock());
+    bean.setStopTime(getStopTime(blockStopTime.getStopTime()));
+    return bean;
+  }
+
+  public StopTimeV2Bean getStopTime(StopTimeBean stopTime) {
+    StopTimeV2Bean bean = new StopTimeV2Bean();
+    bean.setArrivalTime(stopTime.getArrivalTime());
+    bean.setDepartureTime(stopTime.getDepartureTime());
+    bean.setDropOffType(stopTime.getDropOffType());
+    bean.setPickupType(stopTime.getPickupType());
+
+    bean.setStopId(stopTime.getStop().getId());
+    addToReferences(stopTime.getStop());
 
     return bean;
   }

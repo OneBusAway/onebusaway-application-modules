@@ -7,11 +7,21 @@ public final class BlockConfigurationBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private String blockId;
+
   private List<String> activeServiceIds;
 
   private List<String> inactiveServiceIds;
 
   private List<BlockTripBean> trips;
+
+  public String getBlockId() {
+    return blockId;
+  }
+
+  public void setBlockId(String blockId) {
+    this.blockId = blockId;
+  }
 
   public List<String> getActiveServiceIds() {
     return activeServiceIds;

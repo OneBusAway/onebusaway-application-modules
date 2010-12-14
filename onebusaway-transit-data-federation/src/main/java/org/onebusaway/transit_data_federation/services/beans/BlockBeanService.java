@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.services.beans;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
+import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
@@ -24,4 +25,7 @@ public interface BlockBeanService {
   public BlockBean getBlockForId(AgencyAndId blockId);
 
   public BlockTripBean getBlockTripAsBean(BlockTripEntry activeTrip);
+
+  public BlockInstanceBean getBlockInstance(AgencyAndId blockId,
+      long serviceDate);
 }

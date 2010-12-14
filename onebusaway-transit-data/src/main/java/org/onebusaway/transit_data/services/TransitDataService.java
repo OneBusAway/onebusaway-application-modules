@@ -35,6 +35,7 @@ import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
+import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
@@ -183,6 +184,10 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByEntityIdMethod
   public BlockBean getBlockForId(String blockId);
+
+  @FederatedByEntityIdMethod
+  public BlockInstanceBean getBlockInstance(String blockId,
+      long serviceDate);
 
   /****
    * Vehicle Methods

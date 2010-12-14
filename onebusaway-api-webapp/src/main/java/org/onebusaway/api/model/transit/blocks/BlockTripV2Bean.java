@@ -1,8 +1,12 @@
 package org.onebusaway.api.model.transit.blocks;
 
+import java.util.List;
+
 public class BlockTripV2Bean {
 
   private String tripId;
+
+  private List<BlockStopTimeV2Bean> blockStopTimes;
 
   private int accumulatedSlackTime;
 
@@ -14,6 +18,14 @@ public class BlockTripV2Bean {
 
   public void setTripId(String tripId) {
     this.tripId = tripId;
+  }
+
+  public List<BlockStopTimeV2Bean> getBlockStopTimes() {
+    return blockStopTimes;
+  }
+
+  public void setBlockStopTimes(List<BlockStopTimeV2Bean> blockStopTimes) {
+    this.blockStopTimes = blockStopTimes;
   }
 
   public int getAccumulatedSlackTime() {

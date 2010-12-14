@@ -21,6 +21,9 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
@@ -52,9 +55,13 @@ public abstract class AbstractOrbcadRecordSource {
 
   private TransitGraphDao _transitGraph;
 
+  private ScheduledBlockLocationService _scheduledBlockLocationService;
+
   protected List<String> _agencyIds;
 
   private File _blockIdMappingFile;
+
+  private boolean _calculateDistanceAlongBlock;
 
   /****
    * Statistics
@@ -88,6 +95,10 @@ public abstract class AbstractOrbcadRecordSource {
     _blockIdMappingFile = blockIdMappingFile;
   }
 
+  public void setCalculateDistanceAlongBlock(boolean calculateDistanceAlongBlock) {
+    _calculateDistanceAlongBlock = calculateDistanceAlongBlock;
+  }
+
   @Autowired
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
@@ -102,6 +113,12 @@ public abstract class AbstractOrbcadRecordSource {
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraph) {
     _transitGraph = transitGraph;
+  }
+
+  @Autowired
+  public void setScheduledBlockLocationService(
+      ScheduledBlockLocationService scheduledBlockLocationService) {
+    _scheduledBlockLocationService = scheduledBlockLocationService;
   }
 
   /****
@@ -312,6 +329,15 @@ public abstract class AbstractOrbcadRecordSource {
       if (record.hasLat() && record.hasLon()) {
         message.setCurrentLocationLat(record.getLat());
         message.setCurrentLocationLon(record.getLon());
+      }
+
+      if (_calculateDistanceAlongBlock) {
+        BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+        int scheduleTime = (int) (record.getTime() - record.getScheduleDeviation() - blockInstance.getServiceDate() / 1000 );
+        ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
+            blockConfig, scheduleTime);
+        if (location != null)
+          message.setDistanceAlongBlock(location.getDistanceAlongBlock());
       }
 
       _records.add(message);

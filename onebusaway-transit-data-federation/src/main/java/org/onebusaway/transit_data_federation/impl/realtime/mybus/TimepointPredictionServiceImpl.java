@@ -24,6 +24,9 @@ import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -57,11 +60,15 @@ public class TimepointPredictionServiceImpl {
 
   private BlockCalendarService _blockCalendarService;
 
+  private ScheduledBlockLocationService _scheduledBlockLocationService;
+
   private TransitGraphDao _transitGraph;
 
   private VehicleLocationListener _vehicleLocationListener;
 
   private boolean _includeTimepointPredictionRecords = false;
+
+  private boolean _calculateDistanceAlongBlock = false;
 
   public void setServerName(String name) {
     _serverName = name;
@@ -92,6 +99,10 @@ public class TimepointPredictionServiceImpl {
     _includeTimepointPredictionRecords = includeTimepointPredictionRecords;
   }
 
+  public void setCalculateDistanceAlongBlock(boolean calculateDistanceAlongBlock) {
+    _calculateDistanceAlongBlock = calculateDistanceAlongBlock;
+  }
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraph) {
     _transitGraph = transitGraph;
@@ -107,6 +118,16 @@ public class TimepointPredictionServiceImpl {
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
   }
+
+  @Autowired
+  public void setScheduledBlockLocationService(
+      ScheduledBlockLocationService scheduledBlockLocationService) {
+    _scheduledBlockLocationService = scheduledBlockLocationService;
+  }
+
+  /****
+   * 
+   ****/
 
   @PostConstruct
   public void startup() {
@@ -235,7 +256,19 @@ public class TimepointPredictionServiceImpl {
       // TODO : We currently assume that a block won't overlap with itself
       if (instances.size() != 1)
         continue;
-      record.setServiceDate(instances.get(0).getServiceDate());
+
+      BlockInstance instance = instances.get(0);
+      record.setServiceDate(instance.getServiceDate());
+
+      if (_calculateDistanceAlongBlock) {
+        BlockConfigurationEntry blockConfig = instance.getBlock();
+        int scheduleTime = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - record.getScheduleDeviation());
+        ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
+            blockConfig, scheduleTime);
+        if (location != null)
+          record.setDistanceAlongBlock(location.getDistanceAlongBlock());
+      }
+
       records.add(record);
     }
 
