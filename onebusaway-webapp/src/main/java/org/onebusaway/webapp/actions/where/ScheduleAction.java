@@ -1,5 +1,6 @@
 package org.onebusaway.webapp.actions.where;
 
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,7 +44,7 @@ public class ScheduleAction extends ActionSupport {
   private StopScheduleBean _result;
 
   private TimeZone _timeZone;
-  
+
   private boolean _showArrivals = false;
 
   public void setId(String id) {
@@ -54,11 +55,11 @@ public class ScheduleAction extends ActionSupport {
   public void setDate(Date date) {
     _date = date;
   }
-  
+
   public void setShowArrivals(boolean showArrivals) {
     _showArrivals = showArrivals;
   }
-  
+
   public boolean isShowArrivals() {
     return _showArrivals;
   }
@@ -93,6 +94,26 @@ public class ScheduleAction extends ActionSupport {
       _timeZone = TimeZone.getDefault();
 
     return SUCCESS;
+  }
+
+  public List<String> getShortWeekDays() {
+
+    List<String> result = new ArrayList<String>();
+    DateFormatSymbols dateFormatSymbols = new DateFormatSymbols(getLocale());
+    
+    String shortWeekdays[] = dateFormatSymbols.getShortWeekdays();
+    Calendar calendar = Calendar.getInstance(getLocale());
+    int firstDayOfWeek = calendar.getFirstDayOfWeek();
+
+    for (int dayOfWeek = firstDayOfWeek; dayOfWeek < shortWeekdays.length; dayOfWeek++) {
+      result.add(shortWeekdays[dayOfWeek]);
+    }
+
+    for (int dayOfWeek = Calendar.SUNDAY; dayOfWeek < firstDayOfWeek; dayOfWeek++) {
+      result.add(shortWeekdays[dayOfWeek]);
+    }
+
+    return result;
   }
 
   public <T> List<List<T>> getRows(List<T> elements, int rowLength) {
@@ -137,12 +158,13 @@ public class ScheduleAction extends ActionSupport {
     return getTimesByFormatKeyAndValue(stopCalendarDays, format, value,
         _stopCalendarDayAdapter);
   }
-  
+
   public String getFrequencyCellHeight(FrequencyInstanceBean bean) {
-    int hours = (int) Math.round((bean.getEndTime() - bean.getStartTime()) / (60.0 * 60 * 1000));
-    if( hours == 0)
+    int hours = (int) Math.round((bean.getEndTime() - bean.getStartTime())
+        / (60.0 * 60 * 1000));
+    if (hours == 0)
       hours = 1;
-    return hours+"em";
+    return hours + "em";
   }
 
   /****
@@ -177,7 +199,7 @@ public class ScheduleAction extends ActionSupport {
   private <T> List<T> getTimesByFormatKeyAndValue(List<T> times, String format,
       String value, IAdapter<T, Date> adapter) {
 
-    SimpleDateFormat df = new SimpleDateFormat(format);
+    SimpleDateFormat df = new SimpleDateFormat(format,getLocale());
     df.setTimeZone(_timeZone);
     List<T> results = new ArrayList<T>();
 

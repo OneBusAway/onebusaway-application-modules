@@ -4,10 +4,12 @@ import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.struts2.components.ContextBean;
 
+import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
@@ -102,15 +104,18 @@ public class DateComponent extends ContextBean {
   }
 
   private DateFormat getFormat(String format, String dateStyle, String timeStyle) {
+
+    Locale locale = ActionContext.getContext().getLocale();
+
     if (format != null)
-      return new SimpleDateFormat(format);
+      return new SimpleDateFormat(format, locale);
     if (dateStyle != null && timeStyle != null)
       return DateFormat.getDateTimeInstance(getStyleAsValue(dateStyle),
-          getStyleAsValue(timeStyle));
+          getStyleAsValue(timeStyle), locale);
     if (dateStyle != null)
-      return DateFormat.getDateInstance(getStyleAsValue(dateStyle));
+      return DateFormat.getDateInstance(getStyleAsValue(dateStyle), locale);
     if (timeStyle != null)
-      return DateFormat.getTimeInstance(getStyleAsValue(timeStyle));
+      return DateFormat.getTimeInstance(getStyleAsValue(timeStyle), locale);
     throw new IllegalStateException(
         "no format, dateStyle, or timeStyle specified");
   }
