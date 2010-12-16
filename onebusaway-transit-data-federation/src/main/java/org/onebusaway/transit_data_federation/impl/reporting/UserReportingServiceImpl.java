@@ -296,9 +296,14 @@ class UserReportingServiceImpl implements UserReportingService {
     bean.setStopId(AgencyAndIdLibrary.convertToString(record.getStopId()));
     bean.setTime(record.getTime());
     bean.setUserComment(record.getUserComment());
-    bean.setUserLat(record.getUserLat());
-    bean.setUserLon(record.getUserLon());
-    bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
+
+    if( record.getUserLat() != null)
+      bean.setUserLat(record.getUserLat());
+    if( record.getUserLon() != null)
+      bean.setUserLon(record.getUserLon());
+    if( record.getUserLocationAccuracy() != null)
+      bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
+    
     return bean;
   }
 
@@ -312,17 +317,28 @@ class UserReportingServiceImpl implements UserReportingService {
     bean.setTime(record.getTime());
     bean.setTripId(AgencyAndIdLibrary.convertToString(record.getTripId()));
     bean.setUserComment(record.getUserComment());
-    bean.setUserLat(record.getUserLat());
-    bean.setUserLon(record.getUserLon());
-    bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
+    
+    if( record.getUserLat() != null)
+      bean.setUserLat(record.getUserLat());
+    if( record.getUserLon() != null)
+      bean.setUserLon(record.getUserLon());
+    if( record.getUserLocationAccuracy() != null)
+      bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
+    
     bean.setUserOnVehicle(record.isUserOnVehicle());
     bean.setUserVehicleNumber(record.getUserVehicleNumber());
 
     bean.setPredicted(record.isPredicted());
-    bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
-    bean.setScheduleDeviation(record.getScheduleDeviation());
-    bean.setVehicleLat(record.getVehicleLat());
-    bean.setVehicleLon(record.getVehicleLon());
+    
+    if( record.getDistanceAlongBlock() != null)
+      bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
+    if( record.getScheduleDeviation() != null)
+      bean.setScheduleDeviation(record.getScheduleDeviation());
+    if( record.getVehicleLat() != null)
+      bean.setVehicleLat(record.getVehicleLat());
+    if( record.getVehicleLon() != null)
+      bean.setVehicleLon(record.getVehicleLon());
+    
     return bean;
   }
 
