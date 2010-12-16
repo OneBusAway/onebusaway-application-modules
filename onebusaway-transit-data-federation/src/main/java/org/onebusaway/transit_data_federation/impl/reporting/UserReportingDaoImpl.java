@@ -1,9 +1,13 @@
 package org.onebusaway.transit_data_federation.impl.reporting;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
+import org.onebusaway.collections.tuple.T2;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,10 +37,85 @@ class UserReportingDaoImpl implements UserReportingDao {
 
   @SuppressWarnings("unchecked")
   @Override
+  public List<T2<AgencyAndId, Integer>> getStopProblemReportSummaries(
+      String agencyId, long timeFrom, long timeTo, EProblemReportStatus status) {
+
+    List<Object[]> records = null;
+
+    if (status == null) {
+      String[] names = {"agencyId", "timeFrom", "timeTo"};
+      Object[] values = {agencyId, timeFrom, timeTo};
+      records = _template.findByNamedQueryAndNamedParam(
+          "stopProblemReportSummaries", names, values);
+    } else {
+      String[] names = {"agencyId", "timeFrom", "timeTo", "status"};
+      Object[] values = {agencyId, timeFrom, timeTo, status};
+      records = _template.findByNamedQueryAndNamedParam(
+          "stopProblemReportSummariesWithStatus", names, values);
+    }
+
+    List<T2<AgencyAndId, Integer>> results = new ArrayList<T2<AgencyAndId, Integer>>(
+        records.size());
+
+    for (Object[] record : records) {
+      AgencyAndId stopId = (AgencyAndId) record[0];
+      Long count = (Long) record[1];
+      results.add(Tuples.tuple(stopId, count.intValue()));
+    }
+
+    return results;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<T2<AgencyAndId, Integer>> getTripProblemReportSummaries(
+      String agencyId, long timeFrom, long timeTo, EProblemReportStatus status) {
+
+    List<Object[]> records = null;
+
+    if (status == null) {
+      String[] names = {"agencyId", "timeFrom", "timeTo"};
+      Object[] values = {agencyId, timeFrom, timeTo};
+      records = _template.findByNamedQueryAndNamedParam(
+          "tripProblemReportSummaries", names, values);
+    } else {
+      String[] names = {"agencyId", "timeFrom", "timeTo", "status"};
+      Object[] values = {agencyId, timeFrom, timeTo, status};
+      records = _template.findByNamedQueryAndNamedParam(
+          "tripProblemReportSummariesWithStatus", names, values);
+    }
+
+    List<T2<AgencyAndId, Integer>> results = new ArrayList<T2<AgencyAndId, Integer>>(
+        records.size());
+
+    for (Object[] record : records) {
+      AgencyAndId tripId = (AgencyAndId) record[0];
+      Long count = (Long) record[1];
+      results.add(Tuples.tuple(tripId, count.intValue()));
+    }
+
+    return results;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<StopProblemReportRecord> getAllStopProblemReportsForStopId(
+      AgencyAndId stopId) {
+    return _template.findByNamedQueryAndNamedParam(
+        "allStopProblemReportsForStopId", "stopId", stopId);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
   public List<TripProblemReportRecord> getAllTripProblemReportsForTripId(
       AgencyAndId tripId) {
     return _template.findByNamedQueryAndNamedParam(
         "allTripProblemReportsForTripId", "tripId", tripId);
+  }
+
+  @Override
+  public StopProblemReportRecord getStopProblemRecordForId(long id) {
+    return _template.get(StopProblemReportRecord.class, id);
   }
 
   @Override

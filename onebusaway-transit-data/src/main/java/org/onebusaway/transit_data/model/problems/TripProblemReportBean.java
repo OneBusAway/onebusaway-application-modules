@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data.model;
+package org.onebusaway.transit_data.model.problems;
 
 import java.io.Serializable;
 
@@ -41,6 +41,8 @@ public class TripProblemReportBean implements Serializable {
   private double distanceAlongBlock = Double.NaN;
 
   private double scheduleDeviation = Double.NaN;
+
+  private EProblemReportStatus status;
 
   public long getId() {
     return id;
@@ -184,5 +186,13 @@ public class TripProblemReportBean implements Serializable {
 
   public void setScheduleDeviation(double scheduleDeviation) {
     this.scheduleDeviation = scheduleDeviation;
+  }
+
+  public EProblemReportStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(EProblemReportStatus status) {
+    this.status = status;
   }
 }

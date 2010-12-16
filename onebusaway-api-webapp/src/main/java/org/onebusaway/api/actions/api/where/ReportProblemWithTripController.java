@@ -5,7 +5,8 @@ import java.io.IOException;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.TripProblemReportBean;
+import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
+import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -83,7 +84,7 @@ public class ReportProblemWithTripController extends ApiActionSupport {
       return setValidationErrorsResponse();
 
     _model.setTime(System.currentTimeMillis());
-    
+    _model.setStatus(EProblemReportStatus.NEW);
     _service.reportProblemWithTrip(_model);
 
     return setOkResponse(new Object());

@@ -5,11 +5,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.StopProblemReportBean;
-import org.onebusaway.transit_data.model.TripProblemReportBean;
+import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryQueryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
+import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
@@ -30,6 +38,10 @@ class UserReportingServiceImpl implements UserReportingService {
 
   private BlockStatusService _blockStatusService;
 
+  private TripBeanService _tripBeanService;
+
+  private StopBeanService _stopBeanService;
+
   @Autowired
   public void setUserReportingDao(UserReportingDao userReportingDao) {
     _userReportingDao = userReportingDao;
@@ -43,6 +55,16 @@ class UserReportingServiceImpl implements UserReportingService {
   @Autowired
   public void setBlockStatusService(BlockStatusService blockStatusService) {
     _blockStatusService = blockStatusService;
+  }
+
+  @Autowired
+  public void setTripBeanService(TripBeanService tripBeanService) {
+    _tripBeanService = tripBeanService;
+  }
+
+  @Autowired
+  public void setStopBeanService(StopBeanService stopBeanService) {
+    _stopBeanService = stopBeanService;
   }
 
   @Override
@@ -64,6 +86,8 @@ class UserReportingServiceImpl implements UserReportingService {
       record.setUserLon(problem.getUserLon());
     if (!Double.isNaN(problem.getUserLocationAccuracy()))
       record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
+
+    record.setStatus(problem.getStatus());
 
     _userReportingDao.saveOrUpdate(record);
   }
@@ -139,7 +163,68 @@ class UserReportingServiceImpl implements UserReportingService {
       }
     }
 
+    record.setStatus(problem.getStatus());
+
     _userReportingDao.saveOrUpdate(record);
+  }
+
+  @Override
+  public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
+      StopProblemReportSummaryQueryBean query) {
+
+    List<T2<AgencyAndId, Integer>> records = _userReportingDao.getStopProblemReportSummaries(
+        query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
+        query.getStatus());
+
+    List<StopProblemReportSummaryBean> beans = new ArrayList<StopProblemReportSummaryBean>(
+        records.size());
+
+    for (T2<AgencyAndId, Integer> record : records) {
+      AgencyAndId stopId = record.getFirst();
+      Integer count = record.getSecond();
+      StopProblemReportSummaryBean bean = new StopProblemReportSummaryBean();
+      bean.setStop(_stopBeanService.getStopForId(stopId));
+      bean.setStatus(query.getStatus());
+      bean.setCount(count);
+      beans.add(bean);
+    }
+
+    return new ListBean<StopProblemReportSummaryBean>(beans, false);
+  }
+
+  @Override
+  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
+      TripProblemReportSummaryQueryBean query) {
+
+    List<T2<AgencyAndId, Integer>> records = _userReportingDao.getTripProblemReportSummaries(
+        query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
+        query.getStatus());
+
+    List<TripProblemReportSummaryBean> beans = new ArrayList<TripProblemReportSummaryBean>(
+        records.size());
+
+    for (T2<AgencyAndId, Integer> record : records) {
+      AgencyAndId tripId = record.getFirst();
+      Integer count = record.getSecond();
+      TripProblemReportSummaryBean bean = new TripProblemReportSummaryBean();
+      bean.setTrip(_tripBeanService.getTripForId(tripId));
+      bean.setStatus(query.getStatus());
+      bean.setCount(count);
+      beans.add(bean);
+    }
+
+    return new ListBean<TripProblemReportSummaryBean>(beans, false);
+  }
+
+  @Override
+  public List<StopProblemReportBean> getAllStopProblemReportsForStopId(
+      AgencyAndId stopId) {
+    List<StopProblemReportRecord> records = _userReportingDao.getAllStopProblemReportsForStopId(stopId);
+    List<StopProblemReportBean> beans = new ArrayList<StopProblemReportBean>(
+        records.size());
+    for (StopProblemReportRecord record : records)
+      beans.add(getRecordAsBean(record));
+    return beans;
   }
 
   @Override
@@ -154,9 +239,22 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   @Override
+  public StopProblemReportBean getStopProblemReportForId(long id) {
+    StopProblemReportRecord record = _userReportingDao.getStopProblemRecordForId(id);
+    return getRecordAsBean(record);
+  }
+
+  @Override
   public TripProblemReportBean getTripProblemReportForId(long id) {
     TripProblemReportRecord record = _userReportingDao.getTripProblemRecordForId(id);
     return getRecordAsBean(record);
+  }
+
+  @Override
+  public void deleteStopProblemReportForId(long id) {
+    StopProblemReportRecord record = _userReportingDao.getStopProblemRecordForId(id);
+    if (record != null)
+      _userReportingDao.delete(record);
   }
 
   @Override
@@ -190,11 +288,26 @@ class UserReportingServiceImpl implements UserReportingService {
     return blockLocations.get(0);
   }
 
+  private StopProblemReportBean getRecordAsBean(StopProblemReportRecord record) {
+    StopProblemReportBean bean = new StopProblemReportBean();
+    bean.setData(record.getData());
+    bean.setId(record.getId());
+    bean.setStatus(record.getStatus());
+    bean.setStopId(AgencyAndIdLibrary.convertToString(record.getStopId()));
+    bean.setTime(record.getTime());
+    bean.setUserComment(record.getUserComment());
+    bean.setUserLat(record.getUserLat());
+    bean.setUserLon(record.getUserLon());
+    bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
+    return bean;
+  }
+
   private TripProblemReportBean getRecordAsBean(TripProblemReportRecord record) {
     TripProblemReportBean bean = new TripProblemReportBean();
     bean.setData(record.getData());
     bean.setId(record.getId());
     bean.setServiceDate(record.getServiceDate());
+    bean.setStatus(record.getStatus());
     bean.setStopId(AgencyAndIdLibrary.convertToString(record.getStopId()));
     bean.setTime(record.getTime());
     bean.setTripId(AgencyAndIdLibrary.convertToString(record.getTripId()));

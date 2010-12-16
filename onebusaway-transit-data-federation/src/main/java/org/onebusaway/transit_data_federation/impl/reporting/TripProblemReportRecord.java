@@ -11,7 +11,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 
 @Entity
 @Table(name = "oba_trip_problem_reports")
@@ -87,6 +90,16 @@ public class TripProblemReportRecord implements Serializable {
       @AttributeOverride(name = "agencyId", column = @Column(name = "matchedVehicle_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "matchedVehicle_id"))})
   private AgencyAndId matchedVehicleId;
+  
+  /**
+   * Custom Hibernate mapping so that the vehicle phase enum gets mapped to a
+   * string as opposed to an integer, allowing for safe expansion of the enum in
+   * the future and more legibility in the raw SQL. Additionally, the phase
+   * string can be a little shorter than the default length.
+   */
+  @Type(type = "org.onebusaway.container.hibernate.EnumUserType", parameters = {@Parameter(name = "enumClassName", value = "org.onebusaway.transit_data.model.problems.EProblemReportStatus")})
+  @Column(length = 25)
+  private EProblemReportStatus status;
 
   public long getId() {
     return id;
@@ -246,5 +259,13 @@ public class TripProblemReportRecord implements Serializable {
 
   public void setMatchedVehicleId(AgencyAndId matchedVehicleId) {
     this.matchedVehicleId = matchedVehicleId;
+  }
+
+  public EProblemReportStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(EProblemReportStatus status) {
+    this.status = status;
   }
 }

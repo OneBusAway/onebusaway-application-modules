@@ -27,14 +27,12 @@ import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
-import org.onebusaway.transit_data.model.StopProblemReportBean;
 import org.onebusaway.transit_data.model.StopRouteScheduleBean;
 import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.TripProblemReportBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -42,6 +40,12 @@ import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryQueryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryQueryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
@@ -315,10 +319,9 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public BlockInstanceBean getBlockInstance(String blockId,
-      long serviceDate) {
+  public BlockInstanceBean getBlockInstance(String blockId, long serviceDate) {
     AgencyAndId id = AgencyAndIdLibrary.convertFromString(blockId);
-    return _blockBeanService.getBlockInstance(id,serviceDate);
+    return _blockBeanService.getBlockInstance(id, serviceDate);
   }
 
   @Override
@@ -453,15 +456,44 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
+      StopProblemReportSummaryQueryBean query) {
+    return _userReportingService.getStopProblemReportSummaries(query);
+  }
+
+  @Override
+  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
+      TripProblemReportSummaryQueryBean query) {
+    return _userReportingService.getTripProblemReportSummaries(query);
+  }
+
+  @Override
+  public List<StopProblemReportBean> getAllStopProblemReportsForStopId(
+      String stopId) {
+    return _userReportingService.getAllStopProblemReportsForStopId(convertAgencyAndId(stopId));
+  }
+
+  @Override
   public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
       String tripId) {
     return _userReportingService.getAllTripProblemReportsForTripId(convertAgencyAndId(tripId));
   }
 
   @Override
+  public StopProblemReportBean getStopProblemReportForStopIdAndId(
+      String stopId, long id) {
+    return _userReportingService.getStopProblemReportForId(id);
+  }
+
+  @Override
   public TripProblemReportBean getTripProblemReportForTripIdAndId(
       String tripId, long id) {
     return _userReportingService.getTripProblemReportForId(id);
+  }
+
+  @Override
+  public void deleteStopProblemReportForStopIdAndId(String stopId, long id) {
+    _userReportingService.deleteStopProblemReportForId(id);
   }
 
   @Override
@@ -483,4 +515,5 @@ class TransitDataServiceImpl implements TransitDataService {
       converted.add(convertAgencyAndId(id));
     return converted;
   }
+
 }

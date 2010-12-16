@@ -1,10 +1,10 @@
-package org.onebusaway.webapp.actions.admin;
+package org.onebusaway.webapp.actions.admin.problems;
 
 import java.util.List;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.onebusaway.transit_data.model.TripProblemReportBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,7 +16,7 @@ import com.opensymphony.xwork2.validator.annotations.Validations;
 
 @Results( {@Result(type = "redirectAction", name = "list", params = {
     "actionName", "user-reports-for-trip"})})
-public class UserReportsForTripAction extends ActionSupport implements
+public class TripProblemReportsAction extends ActionSupport implements
     ModelDriven<TripProblemReportBean> {
 
   private static final long serialVersionUID = 1L;

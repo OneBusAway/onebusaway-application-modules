@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Stop Problem Reports</title>
+</head>
+<body>
+
+<p><s:a action="index">Back to the Console</s:a></p>
+
+<s:if test="agencyId == null">
+    <h2>Pick an agency:</h2>
+    <ul>
+        <s:iterator value="agencies">
+            <s:url var="url" action="stop-problem-report-summaries!agency">
+                <s:param name="agencyId" value="agency.id" />
+            </s:url>
+            <li><s:a href="%{url}">
+                <s:property value="agency.name" />
+            </s:a></li>
+        </s:iterator>
+    </ul>
+</s:if>
+<s:else>
+    <table>
+        <thead>
+            <tr>
+                <td>Stop</td>
+                <td>Count</td>
+            </tr>
+        </thead>
+        <tbody>
+            <s:iterator value="summaries">
+                <tr>
+                    <td>
+                        <s:a action="stop-problem-reports">
+                            <s:param name="stopId" value="stop.id"/>
+                            <oba:message key="StopNum"/>
+                            <jsp:text> </jsp:text>
+                            <s:property value="stop.code"/>
+                            <jsp:text> - </jsp:text>
+                            <s:property value="stop.name"/>
+                            <s:if test="stop.direction != null">
+                              <jsp:text> - </jsp:text>
+                              <s:property value="stop.direction"/>
+                              <jsp:text> </jsp:text>
+                              <oba:message key="bound"/>
+                            </s:if>
+                        </s:a>
+                    </td>
+                    <td>
+                        <s:property value="count"/>
+                    </td>
+                </tr>
+            </s:iterator>
+        </tbody>
+    </table>
+</s:else>
+
+</body>
+</html>

@@ -18,11 +18,11 @@
 <s:else>
   <ul>
   <s:iterator value="reports">
-    <s:url var="editUrl" action="user-reports-for-trip!edit">
+    <s:url var="editUrl" action="trip-problem-reports!edit">
         <s:param name="tripId"><s:property value="tripId"/></s:param>
         <s:param name="id"><s:property value="id"/></s:param>
     </s:url>
-    <s:url var="deleteUrl" action="user-reports-for-trip!delete">
+    <s:url var="deleteUrl" action="trip-problem-reports!delete">
         <s:param name="tripId"><s:property value="tripId"/></s:param>
         <s:param name="id"><s:property value="id"/></s:param>
     </s:url>
