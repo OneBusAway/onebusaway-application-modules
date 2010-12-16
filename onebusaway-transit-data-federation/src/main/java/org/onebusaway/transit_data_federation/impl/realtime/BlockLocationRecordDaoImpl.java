@@ -8,6 +8,7 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Property;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,8 @@ public class BlockLocationRecordDaoImpl implements BlockLocationRecordDao {
           c.add(Property.forName("time").le(toTime));
         if (recordLimit != 0)
           c.setFetchSize(recordLimit);
+        
+        c.addOrder(Order.asc("time"));
 
         return c.list();
       }
