@@ -15,8 +15,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
@@ -26,7 +28,6 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +51,9 @@ public abstract class AbstractOrbcadRecordSource {
 
   private VehicleLocationListener _vehicleLocationListener;
 
-  private Map<String, String> _blockIdMapping = new HashMap<String, String>();
+  private Map<String, List<String>> _blockIdMapping = new HashMap<String, List<String>>();
 
   private BlockCalendarService _blockCalendarService;
-
-  private TransitGraphDao _transitGraph;
 
   private ScheduledBlockLocationService _scheduledBlockLocationService;
 
@@ -62,7 +61,13 @@ public abstract class AbstractOrbcadRecordSource {
 
   private File _blockIdMappingFile;
 
-  private boolean _calculateDistanceAlongBlock;
+  private double _motionThreshold = 30;
+
+  /****
+   * 
+   ****/
+
+  private Map<AgencyAndId, VehicleLocationRecord> _lastRecordByVehicleId = new HashMap<AgencyAndId, VehicleLocationRecord>();
 
   /****
    * Statistics
@@ -96,10 +101,6 @@ public abstract class AbstractOrbcadRecordSource {
     _blockIdMappingFile = blockIdMappingFile;
   }
 
-  public void setCalculateDistanceAlongBlock(boolean calculateDistanceAlongBlock) {
-    _calculateDistanceAlongBlock = calculateDistanceAlongBlock;
-  }
-
   @Autowired
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
@@ -109,11 +110,6 @@ public abstract class AbstractOrbcadRecordSource {
   @Autowired
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
-  }
-
-  @Autowired
-  public void setTransitGraphDao(TransitGraphDao transitGraph) {
-    _transitGraph = transitGraph;
   }
 
   @Autowired
@@ -203,7 +199,12 @@ public abstract class AbstractOrbcadRecordSource {
         int index = line.indexOf(',');
         String from = line.substring(0, index);
         String to = line.substring(index + 1);
-        _blockIdMapping.put(from, to);
+        List<String> toValues = _blockIdMapping.get(from);
+        if (toValues == null) {
+          toValues = new ArrayList<String>();
+          _blockIdMapping.put(from, toValues);
+        }
+        toValues.add(to);
       }
 
       reader.close();
@@ -214,37 +215,45 @@ public abstract class AbstractOrbcadRecordSource {
     }
   }
 
-  private BlockInstance getBlockInstanceForRecord(OrbcadRecord record,
-      AgencyAndId blockId) {
+  private BlockInstance getBlockInstanceForRecord(OrbcadRecord record) {
 
     long recordTime = record.getTime() * 1000;
     long timeFrom = recordTime - 30 * 60 * 1000;
     long timeTo = recordTime + 30 * 60 * 1000;
 
-    List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
-        blockId, timeFrom, timeTo);
+    List<AgencyAndId> blockIds = getBlockIdsForRecord(record);
+
+    List<BlockInstance> allInstances = new ArrayList<BlockInstance>();
+
+    for (AgencyAndId blockId : blockIds) {
+      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+          blockId, timeFrom, timeTo);
+      allInstances.addAll(instances);
+    }
 
     // TODO : We currently assume we don't have overlapping blocks.
-    if (instances.size() != 1)
+    if (allInstances.size() != 1)
       return null;
 
-    return instances.get(0);
+    return allInstances.get(0);
   }
 
-  private AgencyAndId getBlockIdForRecord(OrbcadRecord record) {
-    String blockId = Integer.toString(record.getBlock());
-    String translated = _blockIdMapping.get(blockId);
-    if (translated != null)
-      blockId = translated;
+  private List<AgencyAndId> getBlockIdsForRecord(OrbcadRecord record) {
+
+    List<AgencyAndId> blockIds = new ArrayList<AgencyAndId>();
+
+    String rawBlockId = Integer.toString(record.getBlock());
+    List<String> rawBlockIds = _blockIdMapping.get(rawBlockId);
+    if (rawBlockIds == null)
+      rawBlockIds = Arrays.asList(rawBlockId);
 
     for (String agencyId : _agencyIds) {
-      AgencyAndId aid = new AgencyAndId(agencyId, blockId);
-      BlockEntry block = _transitGraph.getBlockEntryForId(aid);
-      if (block == null)
-        continue;
-      return aid;
+      for (String rawId : rawBlockIds) {
+        blockIds.add(new AgencyAndId(agencyId, rawId));
+      }
     }
-    return null;
+
+    return blockIds;
   }
 
   protected class AvlRefreshTask implements Runnable {
@@ -301,17 +310,15 @@ public abstract class AbstractOrbcadRecordSource {
         return;
       }
 
-      AgencyAndId blockId = getBlockIdForRecord(record);
-      if (blockId == null) {
-        _recordsWithoutBlockIdInGraph++;
-        return;
-      }
-
-      BlockInstance blockInstance = getBlockInstanceForRecord(record, blockId);
+      BlockInstance blockInstance = getBlockInstanceForRecord(record);
       if (blockInstance == null) {
         _recordsWithoutServiceDate++;
         return;
       }
+
+      BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+      BlockEntry block = blockConfig.getBlock();
+      AgencyAndId blockId = block.getId();
 
       VehicleLocationRecord message = new VehicleLocationRecord();
 
@@ -332,23 +339,46 @@ public abstract class AbstractOrbcadRecordSource {
         message.setCurrentLocationLon(record.getLon());
       }
 
-      if (_calculateDistanceAlongBlock) {
-        BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-        int scheduleTime = (int) (record.getTime()
-            - record.getScheduleDeviation() - blockInstance.getServiceDate() / 1000);
-        ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
-            blockConfig, scheduleTime);
-        if (location != null) {
-          message.setDistanceAlongBlock(location.getDistanceAlongBlock());
+      int effectiveScheduleTime = (int) (record.getTime() - blockInstance.getServiceDate() / 1000);
+      int adjustedScheduleTime = effectiveScheduleTime
+          - record.getScheduleDeviation();
 
-          BlockTripEntry activeTrip = location.getActiveTrip();
-          if (activeTrip != null)
-            message.setTripId(activeTrip.getTrip().getId());
+      ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
+          blockConfig, adjustedScheduleTime);
+
+      if (location != null) {
+        message.setDistanceAlongBlock(location.getDistanceAlongBlock());
+
+        BlockTripEntry activeTrip = location.getActiveTrip();
+        if (activeTrip != null)
+          message.setTripId(activeTrip.getTrip().getId());
+
+        // Are we at the start of the block?
+        if (location.getDistanceAlongBlock() == 0) {
+
+          VehicleLocationRecord lastRecord = _lastRecordByVehicleId.get(message.getVehicleId());
+          boolean inMotion = true;
+          if (lastRecord != null && lastRecord.isCurrentLocationSet()
+              && message.isCurrentLocationSet()) {
+            double d = SphericalGeometryLibrary.distance(
+                lastRecord.getCurrentLocationLat(),
+                lastRecord.getCurrentLocationLon(),
+                message.getCurrentLocationLat(),
+                message.getCurrentLocationLon());
+            inMotion = d > _motionThreshold;
+          }
+
+          if (inMotion)
+            message.setPhase(EVehiclePhase.DEADHEAD_BEFORE);
+          else
+            message.setPhase(EVehiclePhase.LAYOVER_BEFORE);
         }
       }
 
       _records.add(message);
       _recordsValid++;
+
+      _lastRecordByVehicleId.put(message.getVehicleId(), message);
     }
   }
 }
