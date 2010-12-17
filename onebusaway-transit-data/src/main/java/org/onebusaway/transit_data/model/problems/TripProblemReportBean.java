@@ -2,6 +2,9 @@ package org.onebusaway.transit_data.model.problems;
 
 import java.io.Serializable;
 
+import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
+
 public class TripProblemReportBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -43,6 +46,10 @@ public class TripProblemReportBean implements Serializable {
   private double scheduleDeviation = Double.NaN;
 
   private EProblemReportStatus status;
+
+  private TripBean trip;
+
+  private StopBean stop;
 
   public long getId() {
     return id;
@@ -194,5 +201,21 @@ public class TripProblemReportBean implements Serializable {
 
   public void setStatus(EProblemReportStatus status) {
     this.status = status;
+  }
+
+  public TripBean getTrip() {
+    return trip;
+  }
+
+  public void setTrip(TripBean trip) {
+    this.trip = trip;
+  }
+
+  public StopBean getStop() {
+    return stop;
+  }
+
+  public void setStop(StopBean stop) {
+    this.stop = stop;
   }
 }

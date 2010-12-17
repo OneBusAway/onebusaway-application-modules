@@ -23,6 +23,7 @@
 
 <head>
   <title><decorator:title default="One Bus Away" /></title>
+  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereStandardResources.css.url}"/>
   <link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath}/p/Stylesheet!raw.action"/>
   <link rel="icon" type="image/png" href="${resources.OneBusAwayCommonResources.imageBusIcon.url}"/>
   <decorator:head />

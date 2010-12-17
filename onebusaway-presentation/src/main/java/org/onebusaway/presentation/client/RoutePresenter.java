@@ -1,8 +1,17 @@
 package org.onebusaway.presentation.client;
 
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 
 public class RoutePresenter {
+  
+  public static String getNameForRoute(TripBean trip){
+    String name = trip.getRouteShortName();
+    if( name == null)
+      name = getNameForRoute(trip.getRoute());
+    return name;
+  }
+  
   public static String getNameForRoute(RouteBean route) {
     String name = route.getShortName();
     if (name == null)

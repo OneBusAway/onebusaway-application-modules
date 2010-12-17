@@ -15,7 +15,8 @@ import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
 @Results({@Result(type = "redirectAction", name = "list", params = {
-    "actionName", "user-reports-for-trip"})})
+    "actionName", "stop-problem-reports", "stopId", "${model.stopId}", "parse",
+    "true"})})
 public class StopProblemReportsAction extends ActionSupport implements
     ModelDriven<StopProblemReportBean> {
 

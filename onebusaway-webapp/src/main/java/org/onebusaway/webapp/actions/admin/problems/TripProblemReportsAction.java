@@ -14,8 +14,9 @@ import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
-@Results( {@Result(type = "redirectAction", name = "list", params = {
-    "actionName", "user-reports-for-trip"})})
+@Results({@Result(type = "redirectAction", name = "list", params = {
+    "actionName", "trip-problem-reports", "tripId", "${model.tripId}", "parse",
+    "true"})})
 public class TripProblemReportsAction extends ActionSupport implements
     ModelDriven<TripProblemReportBean> {
 

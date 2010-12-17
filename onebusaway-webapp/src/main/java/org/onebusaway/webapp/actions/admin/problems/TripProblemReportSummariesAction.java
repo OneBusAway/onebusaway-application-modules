@@ -8,7 +8,7 @@ import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
-import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryQueryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,7 +69,7 @@ public class TripProblemReportSummariesAction extends ActionSupport {
   @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
   public String agency() {
 
-    TripProblemReportSummaryQueryBean query = new TripProblemReportSummaryQueryBean();
+    TripProblemReportQueryBean query = new TripProblemReportQueryBean();
     query.setAgencyId(_agencyId);
     query.setTimeFrom(0);
     query.setTimeTo(System.currentTimeMillis());

@@ -3,7 +3,7 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags" xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Trip Problem Reports</title>
+<title><oba:message key="TripProblemReports"/></title>
 </head>
 <body>
 

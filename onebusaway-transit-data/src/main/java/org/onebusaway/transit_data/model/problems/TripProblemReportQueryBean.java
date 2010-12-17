@@ -5,7 +5,7 @@ import java.io.Serializable;
 import org.onebusaway.transit_data.model.QueryBean;
 
 @QueryBean
-public class TripProblemReportSummaryQueryBean implements Serializable {
+public class TripProblemReportQueryBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

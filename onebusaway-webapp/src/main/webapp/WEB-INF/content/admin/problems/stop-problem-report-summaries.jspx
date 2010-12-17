@@ -19,14 +19,31 @@
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Stop Problem Reports</title>
+<title><oba:message key="StopProblemReports"/></title>
+<s:if test="agencyId != null">
+  <s:url var="url" namespace="/rss" action="stop-problem-reports">
+    <s:param name="agencyId" value="agencyId"/>
+  </s:url>
+  <jsp:element name="link">
+    <jsp:attribute name="rel">alternate</jsp:attribute>
+    <jsp:attribute name="type">application/rss+xml</jsp:attribute>
+    <jsp:attribute name="title"><oba:message key="StopProblemReports"/> RSS</jsp:attribute>
+    <jsp:attribute name="href"><s:property value="#url"/></jsp:attribute>
+  </jsp:element>
+</s:if>
 </head>
 <body>
 
-<p><s:a action="index">Back to the Console</s:a></p>
+<s:if test="agencyId == null">
+  <p><s:a namespace="/admin" action="index"><oba:message key="admin.BackToTheAdminConsole"/></s:a></p>
+</s:if>
+<s:else>
+  <p><s:a action="stop-problem-report-summaries"><oba:message key="admin.BackToTheAgencyList"/></s:a></p>
+</s:else>
 
 <s:if test="agencyId == null">
-    <h2>Pick an agency:</h2>
+    <h2><oba:message key="StopProblemReports"/></h2>
+    <h3><oba:message key="admin.PickAnAgency"/>:</h3>
     <ul>
         <s:iterator value="agencies">
             <s:url var="url" action="stop-problem-report-summaries!agency">
@@ -39,16 +56,20 @@
     </ul>
 </s:if>
 <s:else>
-    <table>
+    
+    <h2><oba:message key="StopProblemReports"/></h2>
+    
+    <table class="ProblemReportSummaries">
         <thead>
             <tr>
-                <td>Stop</td>
-                <td>Count</td>
+                <td><oba:message key="Stop"/></td>
+                <td><oba:message key="Count"/></td>
             </tr>
         </thead>
         <tbody>
-            <s:iterator value="summaries">
-                <tr>
+            <s:iterator value="summaries" status="rowstatus">
+                <jsp:element name="tr">
+                    <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
                     <td>
                         <s:a action="stop-problem-reports">
                             <s:param name="stopId" value="stop.id"/>
@@ -68,7 +89,7 @@
                     <td>
                         <s:property value="count"/>
                     </td>
-                </tr>
+                </jsp:element>
             </s:iterator>
         </tbody>
     </table>

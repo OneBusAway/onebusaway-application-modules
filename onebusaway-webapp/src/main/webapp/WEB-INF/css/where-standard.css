@@ -394,3 +394,31 @@ div.wiki h1 {
 div.wiki h2 {
   clear: both;
 }
+
+/****
+ *
+ ****/
+ 
+table.ProblemReportSummaries thead tr {
+  background-color: #6D6E72;
+}
+
+table.ProblemReportSummaries thead td {
+  color: white;
+  font-weight: bold;
+  padding: 5px 1em 5px 2em;
+  text-align: center;
+}
+
+table.ProblemReportSummaries tbody tr.odd {
+  background-color: #F1F1F1;
+}
+
+table.ProblemReportSummaries tbody tr.even {
+  background-color: #E0E1E3;
+}
+
+table.ProblemReportSummaries tbody td {
+	padding: 5px;
+	text-align: center;
+}

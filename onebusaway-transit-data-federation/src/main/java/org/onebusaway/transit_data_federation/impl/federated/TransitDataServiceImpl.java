@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -42,10 +43,10 @@ import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
-import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryQueryBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
-import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryQueryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
@@ -457,14 +458,27 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
-      StopProblemReportSummaryQueryBean query) {
+      StopProblemReportQueryBean query) {
     return _userReportingService.getStopProblemReportSummaries(query);
   }
 
   @Override
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
-      TripProblemReportSummaryQueryBean query) {
+      TripProblemReportQueryBean query) {
     return _userReportingService.getTripProblemReportSummaries(query);
+  }
+
+  @Override
+  @FederatedByAgencyIdMethod()
+  public ListBean<StopProblemReportBean> getStopProblemReports(
+      StopProblemReportQueryBean query) {
+    return _userReportingService.getStopProblemReports(query);
+  }
+
+  @Override
+  public ListBean<TripProblemReportBean> getTripProblemReports(
+      TripProblemReportQueryBean query) {
+    return _userReportingService.getTripProblemReports(query);
   }
 
   @Override

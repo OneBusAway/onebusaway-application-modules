@@ -20,6 +20,12 @@ public interface UserReportingDao {
   public List<T2<AgencyAndId, Integer>> getTripProblemReportSummaries(
       String agencyId, long timeFrom, long timeTo, EProblemReportStatus status);
 
+  public List<StopProblemReportRecord> getStopProblemReports(String agencyId,
+      long timeFrom, long timeTo, EProblemReportStatus status);
+  
+  public List<TripProblemReportRecord> getTripProblemReports(String agencyId,
+      long timeFrom, long timeTo, EProblemReportStatus status);
+
   public List<StopProblemReportRecord> getAllStopProblemReportsForStopId(
       AgencyAndId stopId);
 

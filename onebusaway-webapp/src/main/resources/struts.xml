@@ -21,7 +21,11 @@
     <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />
 
     <package name="onebusaway-webapp-default" extends="struts-default">
-
+        
+        <result-types>
+          <result-type name="rome" class="org.onebusaway.webapp.actions.rss.RomeResult"/>
+        </result-types>
+        
         <interceptors>
             <interceptor name="cache-control" class="org.onebusaway.presentation.services.cachecontrol.CacheControlInterceptor" />
             <interceptor name="is-setup" class="org.onebusaway.presentation.impl.users.IsSetupInterceptor" />
@@ -55,6 +59,7 @@
                 <param name="actionName">index</param>
             </result>
             <result name="input">/WEB-INF/content/input.jspx</result>
+            
         </global-results>
 
         <global-exception-mappings>

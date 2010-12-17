@@ -11,10 +11,10 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
-import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryQueryBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
-import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryQueryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
@@ -170,7 +170,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
   @Override
   public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
-      StopProblemReportSummaryQueryBean query) {
+      StopProblemReportQueryBean query) {
 
     List<T2<AgencyAndId, Integer>> records = _userReportingDao.getStopProblemReportSummaries(
         query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
@@ -194,7 +194,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
   @Override
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
-      TripProblemReportSummaryQueryBean query) {
+      TripProblemReportQueryBean query) {
 
     List<T2<AgencyAndId, Integer>> records = _userReportingDao.getTripProblemReportSummaries(
         query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
@@ -214,6 +214,30 @@ class UserReportingServiceImpl implements UserReportingService {
     }
 
     return new ListBean<TripProblemReportSummaryBean>(beans, false);
+  }
+
+  public ListBean<StopProblemReportBean> getStopProblemReports(
+      StopProblemReportQueryBean query) {
+    List<StopProblemReportRecord> records = _userReportingDao.getStopProblemReports(
+        query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
+        query.getStatus());
+    List<StopProblemReportBean> beans = new ArrayList<StopProblemReportBean>(
+        records.size());
+    for (StopProblemReportRecord record : records)
+      beans.add(getRecordAsBean(record));
+    return new ListBean<StopProblemReportBean>(beans, false);
+  }
+
+  public ListBean<TripProblemReportBean> getTripProblemReports(
+      TripProblemReportQueryBean query) {
+    List<TripProblemReportRecord> records = _userReportingDao.getTripProblemReports(
+        query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
+        query.getStatus());
+    List<TripProblemReportBean> beans = new ArrayList<TripProblemReportBean>(
+        records.size());
+    for (TripProblemReportRecord record : records)
+      beans.add(getRecordAsBean(record));
+    return new ListBean<TripProblemReportBean>(beans, false);
   }
 
   @Override
@@ -289,56 +313,72 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   private StopProblemReportBean getRecordAsBean(StopProblemReportRecord record) {
+    
+    AgencyAndId stopId = record.getStopId();
+    
     StopProblemReportBean bean = new StopProblemReportBean();
     bean.setData(record.getData());
     bean.setId(record.getId());
     bean.setStatus(record.getStatus());
-    bean.setStopId(AgencyAndIdLibrary.convertToString(record.getStopId()));
+    bean.setStopId(AgencyAndIdLibrary.convertToString(stopId));
     bean.setTime(record.getTime());
     bean.setUserComment(record.getUserComment());
 
-    if( record.getUserLat() != null)
+    if (record.getUserLat() != null)
       bean.setUserLat(record.getUserLat());
-    if( record.getUserLon() != null)
+    if (record.getUserLon() != null)
       bean.setUserLon(record.getUserLon());
-    if( record.getUserLocationAccuracy() != null)
+    if (record.getUserLocationAccuracy() != null)
       bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
     
+    if( stopId != null)
+      bean.setStop(_stopBeanService.getStopForId(stopId));
+
     return bean;
   }
 
   private TripProblemReportBean getRecordAsBean(TripProblemReportRecord record) {
+    
+    AgencyAndId stopId = record.getStopId();
+    AgencyAndId tripId = record.getTripId();
+    
     TripProblemReportBean bean = new TripProblemReportBean();
+    
     bean.setData(record.getData());
     bean.setId(record.getId());
     bean.setServiceDate(record.getServiceDate());
     bean.setStatus(record.getStatus());
-    bean.setStopId(AgencyAndIdLibrary.convertToString(record.getStopId()));
+    bean.setStopId(AgencyAndIdLibrary.convertToString(stopId));
     bean.setTime(record.getTime());
-    bean.setTripId(AgencyAndIdLibrary.convertToString(record.getTripId()));
+    bean.setTripId(AgencyAndIdLibrary.convertToString(tripId));
     bean.setUserComment(record.getUserComment());
-    
-    if( record.getUserLat() != null)
+
+    if (record.getUserLat() != null)
       bean.setUserLat(record.getUserLat());
-    if( record.getUserLon() != null)
+    if (record.getUserLon() != null)
       bean.setUserLon(record.getUserLon());
-    if( record.getUserLocationAccuracy() != null)
+    if (record.getUserLocationAccuracy() != null)
       bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
-    
+
     bean.setUserOnVehicle(record.isUserOnVehicle());
     bean.setUserVehicleNumber(record.getUserVehicleNumber());
 
     bean.setPredicted(record.isPredicted());
-    
-    if( record.getDistanceAlongBlock() != null)
+
+    if (record.getDistanceAlongBlock() != null)
       bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
-    if( record.getScheduleDeviation() != null)
+    if (record.getScheduleDeviation() != null)
       bean.setScheduleDeviation(record.getScheduleDeviation());
-    if( record.getVehicleLat() != null)
+    if (record.getVehicleLat() != null)
       bean.setVehicleLat(record.getVehicleLat());
-    if( record.getVehicleLon() != null)
+    if (record.getVehicleLon() != null)
       bean.setVehicleLon(record.getVehicleLon());
     
+    if( stopId != null)
+      bean.setStop(_stopBeanService.getStopForId(stopId));
+    if( tripId != null)
+      bean.setTrip(_tripBeanService.getTripForId(tripId));
+
     return bean;
   }
 

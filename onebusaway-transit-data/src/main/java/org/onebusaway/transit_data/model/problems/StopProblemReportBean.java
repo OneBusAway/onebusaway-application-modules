@@ -2,6 +2,8 @@ package org.onebusaway.transit_data.model.problems;
 
 import java.io.Serializable;
 
+import org.onebusaway.transit_data.model.StopBean;
+
 public class StopProblemReportBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -23,6 +25,8 @@ public class StopProblemReportBean implements Serializable {
   private double userLocationAccuracy;
 
   private EProblemReportStatus status;
+  
+  private StopBean stop;
 
   public long getId() {
     return id;
@@ -94,5 +98,13 @@ public class StopProblemReportBean implements Serializable {
 
   public void setStatus(EProblemReportStatus status) {
     this.status = status;
+  }
+
+  public StopBean getStop() {
+    return stop;
+  }
+
+  public void setStop(StopBean stop) {
+    this.stop = stop;
   }
 }
