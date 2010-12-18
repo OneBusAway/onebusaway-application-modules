@@ -19,6 +19,8 @@
     <constant name="struts.convention.action.checkImplementsAction" value="false" />
 
     <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />
+    
+    <bean type="org.apache.struts2.components.template.TemplateEngine" name="jspx" class="org.apache.struts2.components.template.JspTemplateEngine" />
 
     <package name="onebusaway-webapp-default" extends="struts-default">
         

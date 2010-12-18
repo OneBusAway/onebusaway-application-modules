@@ -19,6 +19,7 @@ import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.DateLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -96,11 +97,15 @@ public class ScheduleAction extends ActionSupport {
     return SUCCESS;
   }
 
+  public boolean isAmPmClock() {
+    return DateLibrary.hasAmPmClock(getLocale());
+  }
+
   public List<String> getShortWeekDays() {
 
     List<String> result = new ArrayList<String>();
     DateFormatSymbols dateFormatSymbols = new DateFormatSymbols(getLocale());
-    
+
     String shortWeekdays[] = dateFormatSymbols.getShortWeekdays();
     Calendar calendar = Calendar.getInstance(getLocale());
     int firstDayOfWeek = calendar.getFirstDayOfWeek();
@@ -199,7 +204,7 @@ public class ScheduleAction extends ActionSupport {
   private <T> List<T> getTimesByFormatKeyAndValue(List<T> times, String format,
       String value, IAdapter<T, Date> adapter) {
 
-    SimpleDateFormat df = new SimpleDateFormat(format,getLocale());
+    SimpleDateFormat df = new SimpleDateFormat(format, getLocale());
     df.setTimeZone(_timeZone);
     List<T> results = new ArrayList<T>();
 

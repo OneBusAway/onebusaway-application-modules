@@ -19,6 +19,7 @@
         <pattern>/setup/*</pattern>
         <patterns>/where/mobile/*</patterns>
         <pattern>*.cache.html</pattern>
+        <pattern>*-snippet.jspx</pattern>
     </excludes>
 
     <decorator name="main" page="main.jspx">

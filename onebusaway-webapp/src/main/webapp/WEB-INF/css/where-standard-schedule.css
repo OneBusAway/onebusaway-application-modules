@@ -150,6 +150,10 @@ table.stopScheduleFrequencyTable span.frequency {
 	text-align: left;
 }
 
+.stopScheduleStop p {
+	margin-top: 1em;	
+}
+
 .stopScheduleNearbyStops>div.header {
 	font-weight: bold;
 	margin-bottom: 10px;
@@ -162,6 +166,11 @@ table.stopScheduleFrequencyTable span.frequency {
 	border: 2px solid gray;
 	width: 200px;
 	padding: 5px;
+}
+
+.stopScheduleCalendars > table {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .stopScheduleCalendars>table>tbody>tr>td {
