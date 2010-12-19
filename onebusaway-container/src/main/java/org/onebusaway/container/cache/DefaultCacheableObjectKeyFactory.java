@@ -48,8 +48,12 @@ public class DefaultCacheableObjectKeyFactory implements
       return new CacheKeyInfo(Boolean.FALSE, refreshCache);
     }
 
-    if (object instanceof Serializable)
-      return new CacheKeyInfo((Serializable) object, false);
-    return new CacheKeyInfo(object.toString(), false);
+    if (object != null) {
+      if (object instanceof Serializable)
+        return new CacheKeyInfo((Serializable) object, false);
+      return new CacheKeyInfo(object.toString(), false);
+    }
+
+    return new CacheKeyInfo(null, false);
   }
 }

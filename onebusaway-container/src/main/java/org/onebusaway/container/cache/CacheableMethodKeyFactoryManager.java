@@ -172,7 +172,7 @@ public class CacheableMethodKeyFactoryManager {
               && !arg.getClass().equals(Double.class))
             miss = true;
         } else {
-          if (!argType.isInstance(arg))
+          if (arg != null && !argType.isInstance(arg))
             miss = true;
         }
       }
