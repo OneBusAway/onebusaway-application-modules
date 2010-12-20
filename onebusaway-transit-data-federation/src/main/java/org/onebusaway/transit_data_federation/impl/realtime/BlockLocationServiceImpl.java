@@ -384,6 +384,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
       location.setPredicted(true);
       location.setLastUpdateTime(record.getTimeOfRecord());
+      location.setLastLocationUpdateTime(record.getTimeOfLocationUpdate());
       location.setScheduleDeviation(record.getScheduleDeviation());
       location.setDistanceAlongBlock(record.getDistanceAlongBlock());
       if (record.isCurrentLocationSet()) {

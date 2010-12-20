@@ -16,6 +16,8 @@ public final class VehicleStatusV2Bean implements Serializable {
 
   private long lastUpdateTime;
 
+  private Long lastLocationUpdateTime;
+
   private CoordinatePoint location;
 
   private String tripId;
@@ -52,6 +54,14 @@ public final class VehicleStatusV2Bean implements Serializable {
 
   public void setLastUpdateTime(long lastUpdateTime) {
     this.lastUpdateTime = lastUpdateTime;
+  }
+
+  public Long getLastLocationUpdateTime() {
+    return lastLocationUpdateTime;
+  }
+
+  public void setLastLocationUpdateTime(Long lastLocationUpdateTime) {
+    this.lastLocationUpdateTime = lastLocationUpdateTime;
   }
 
   public CoordinatePoint getLocation() {

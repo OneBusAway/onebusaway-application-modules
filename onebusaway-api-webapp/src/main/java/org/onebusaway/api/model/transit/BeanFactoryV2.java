@@ -343,6 +343,9 @@ public class BeanFactoryV2 {
     if (tripStatus.getLastUpdateTime() > 0)
       bean.setLastUpdateTime(tripStatus.getLastUpdateTime());
 
+    if (tripStatus.getLastLocationUpdateTime() > 0)
+      bean.setLastLocationUpdateTime(tripStatus.getLastLocationUpdateTime());
+
     bean.setLastKnownLocation(tripStatus.getLastKnownLocation());
 
     if (tripStatus.isLastKnownOrientationSet())
@@ -522,6 +525,8 @@ public class BeanFactoryV2 {
     VehicleStatusV2Bean bean = new VehicleStatusV2Bean();
 
     bean.setLastUpdateTime(vehicleStatus.getLastUpdateTime());
+    if (vehicleStatus.getLastLocationUpdateTime() > 0)
+      bean.setLastLocationUpdateTime(vehicleStatus.getLastLocationUpdateTime());
     bean.setLocation(vehicleStatus.getLocation());
     bean.setPhase(vehicleStatus.getPhase());
     bean.setStatus(vehicleStatus.getStatus());
@@ -557,6 +562,7 @@ public class BeanFactoryV2 {
     bean.setServiceDate(record.getServiceDate());
     bean.setStatus(record.getStatus());
     bean.setTimeOfRecord(record.getTimeOfRecord());
+    bean.setTimeOfLocationUpdate(record.getTimeOfLocationUpdate());
     bean.setTripId(record.getTripId());
     bean.setVehicleId(record.getVehicleId());
     return bean;

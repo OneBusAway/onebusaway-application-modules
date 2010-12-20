@@ -42,8 +42,9 @@ public enum EVehiclePhase {
   /**
    * A pause after a vehicle has completed its block
    */
+  @Deprecated
   LAYOVER_AFTER,
-  
+
   /**
    * The vehicle is doing something unexpected
    */
@@ -57,7 +58,8 @@ public enum EVehiclePhase {
       EVehiclePhase.IN_PROGRESS, EVehiclePhase.DEADHEAD_DURING,
       EVehiclePhase.LAYOVER_DURING);
 
-  private static EnumSet<EVehiclePhase> _activeAfterBlock = EnumSet.of(EVehiclePhase.DEADHEAD_AFTER, EVehiclePhase.LAYOVER_AFTER);
+  private static EnumSet<EVehiclePhase> _activeAfterBlock = EnumSet.of(
+      EVehiclePhase.DEADHEAD_AFTER, EVehiclePhase.LAYOVER_AFTER);
 
   public static boolean isActiveBeforeBlock(EVehiclePhase phase) {
     return _activeBeforeBlock.contains(phase);
@@ -70,7 +72,12 @@ public enum EVehiclePhase {
   public static boolean isActiveAfterBlock(EVehiclePhase phase) {
     return _activeAfterBlock.contains(phase);
   }
-  
+
+  public static boolean isLayover(EVehiclePhase phase) {
+    return phase == EVehiclePhase.LAYOVER_BEFORE
+        || phase == EVehiclePhase.LAYOVER_DURING;
+  }
+
   public String toLabel() {
     return toString().toLowerCase();
   }

@@ -41,6 +41,8 @@ public class VehicleLocationRecord implements Serializable {
 
   private long timeOfRecord;
 
+  private long timeOfLocationUpdate;
+
   /**
    * schedule deviation, in seconds, (+deviation is late, -deviation is early)
    */
@@ -73,6 +75,7 @@ public class VehicleLocationRecord implements Serializable {
     this.currentLocationLon = r.currentLocationLon;
     this.currentOrientation = r.currentOrientation;
     this.timeOfRecord = r.timeOfRecord;
+    this.timeOfLocationUpdate = r.timeOfLocationUpdate;
     this.distanceAlongBlock = r.distanceAlongBlock;
     this.scheduleDeviation = r.scheduleDeviation;
     this.serviceDate = r.serviceDate;
@@ -136,6 +139,18 @@ public class VehicleLocationRecord implements Serializable {
    */
   public void setTimeOfRecord(long timeOfRecord) {
     this.timeOfRecord = timeOfRecord;
+  }
+
+  /**
+   * 
+   * @return time when the last vehicle location update made, in unix-time (ms)
+   */
+  public long getTimeOfLocationUpdate() {
+    return timeOfLocationUpdate;
+  }
+
+  public void setTimeOfLocationUpdate(long timeOfLocationUpdate) {
+    this.timeOfLocationUpdate = timeOfLocationUpdate;
   }
 
   /**

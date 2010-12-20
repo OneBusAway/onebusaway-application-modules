@@ -215,6 +215,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     }
 
     bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
+    bean.setLastLocationUpdateTime(blockLocation.getLastLocationUpdateTime());
 
     bean.setLastKnownLocation(blockLocation.getLastKnownLocation());
     bean.setLastKnownOrientation(blockLocation.getLastKnownOrientation());

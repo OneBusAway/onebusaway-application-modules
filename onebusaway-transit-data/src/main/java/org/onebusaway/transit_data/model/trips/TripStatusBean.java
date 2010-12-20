@@ -19,7 +19,7 @@ public final class TripStatusBean implements Serializable {
   private TripBean activeTrip;
 
   private long serviceDate;
-  
+
   private FrequencyBean frequency;
 
   private double scheduledDistanceAlongTrip = Double.NaN;
@@ -56,6 +56,8 @@ public final class TripStatusBean implements Serializable {
   private boolean predicted = false;
 
   private long lastUpdateTime;
+
+  private long lastLocationUpdateTime;
 
   private CoordinatePoint lastKnownLocation;
 
@@ -234,6 +236,18 @@ public final class TripStatusBean implements Serializable {
    */
   public long getLastUpdateTime() {
     return lastUpdateTime;
+  }
+
+  /**
+   * @return the time we last received a location update from the bus
+   *         (Unix-time)
+   */
+  public long getLastLocationUpdateTime() {
+    return lastLocationUpdateTime;
+  }
+
+  public void setLastLocationUpdateTime(long lastLocationUpdateTime) {
+    this.lastLocationUpdateTime = lastLocationUpdateTime;
   }
 
   public CoordinatePoint getLastKnownLocation() {

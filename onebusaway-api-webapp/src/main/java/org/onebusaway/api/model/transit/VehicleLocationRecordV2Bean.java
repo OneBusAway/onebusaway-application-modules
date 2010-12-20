@@ -12,39 +12,41 @@ public class VehicleLocationRecordV2Bean implements Serializable {
 
   private long serviceDate;
 
-  @CsvField(optional=true)
+  @CsvField(optional = true)
   private String blockId;
 
-  @CsvField(optional=true)
+  @CsvField(optional = true)
   private String tripId;
 
-  @CsvField(optional=true)
+  @CsvField(optional = true)
   private String vehicleId;
 
   private long timeOfRecord;
 
+  private long timeOfLocationUpdate;
+
   /**
    * schedule deviation, in seconds, (+deviation is late, -deviation is early)
    */
-  @CsvField(optional=true)
+  @CsvField(optional = true)
   private Double scheduleDeviation;
 
-  @CsvField(optional=true)
+  @CsvField(optional = true)
   private Double distanceAlongBlock;
 
-  @CsvField(optional=true, mapping = FlattenFieldMappingFactory.class)
+  @CsvField(optional = true, mapping = FlattenFieldMappingFactory.class)
   private CoordinatePoint currentLocation;
 
   /**
    * In degrees, 0º is East, 90º is North, 180º is West, and 270º is South
    */
-  @CsvField(optional=true)
+  @CsvField(optional = true)
   private Double currentOrientation;
 
-  @CsvField(optional=true)
+  @CsvField(optional = true)
   private String phase;
 
-  @CsvField(optional=true)
+  @CsvField(optional = true)
   private String status;
 
   public long getServiceDate() {
@@ -85,6 +87,14 @@ public class VehicleLocationRecordV2Bean implements Serializable {
 
   public void setTimeOfRecord(long timeOfRecord) {
     this.timeOfRecord = timeOfRecord;
+  }
+
+  public long getTimeOfLocationUpdate() {
+    return timeOfLocationUpdate;
+  }
+
+  public void setTimeOfLocationUpdate(long timeOfLocationUpdate) {
+    this.timeOfLocationUpdate = timeOfLocationUpdate;
   }
 
   public Double getScheduleDeviation() {

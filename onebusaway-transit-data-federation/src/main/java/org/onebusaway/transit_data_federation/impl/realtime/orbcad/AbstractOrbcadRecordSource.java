@@ -326,6 +326,8 @@ public abstract class AbstractOrbcadRecordSource {
 
       message.setServiceDate(blockInstance.getServiceDate());
       message.setTimeOfRecord(record.getTime() * 1000);
+      message.setTimeOfLocationUpdate(message.getTimeOfRecord());
+      
       // In Orbcad, +scheduleDeviation means the bus is early and -schedule
       // deviation means bus is late, which is opposite the
       // ScheduleAdherenceRecord convention

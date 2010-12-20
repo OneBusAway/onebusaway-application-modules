@@ -18,6 +18,8 @@ public class VehicleLocationRecordBean implements Serializable {
 
   private long timeOfRecord;
 
+  private long timeOfLocationUpdate;
+
   /**
    * schedule deviation, in seconds, (+deviation is late, -deviation is early)
    */
@@ -74,6 +76,14 @@ public class VehicleLocationRecordBean implements Serializable {
 
   public void setTimeOfRecord(long timeOfRecord) {
     this.timeOfRecord = timeOfRecord;
+  }
+
+  public long getTimeOfLocationUpdate() {
+    return timeOfLocationUpdate;
+  }
+
+  public void setTimeOfLocationUpdate(long timeOfLocationUpdate) {
+    this.timeOfLocationUpdate = timeOfLocationUpdate;
   }
 
   public boolean isScheduleDeviationSet() {

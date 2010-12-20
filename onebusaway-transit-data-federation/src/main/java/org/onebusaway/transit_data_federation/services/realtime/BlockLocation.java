@@ -57,6 +57,8 @@ public class BlockLocation {
 
   private long lastUpdateTime;
 
+  private long lastLocationUpdateTime;
+
   private CoordinatePoint lastKnownLocation;
 
   private double lastKnownOrientation = Double.NaN;
@@ -252,6 +254,17 @@ public class BlockLocation {
 
   public void setLastUpdateTime(long lastUpdateTime) {
     this.lastUpdateTime = lastUpdateTime;
+  }
+
+  /**
+   * @return the time we last heard a location update from the bus (Unix-time)
+   */
+  public long getLastLocationUpdateTime() {
+    return lastLocationUpdateTime;
+  }
+
+  public void setLastLocationUpdateTime(long lastLocationUpdateTime) {
+    this.lastLocationUpdateTime = lastLocationUpdateTime;
   }
 
   public CoordinatePoint getLastKnownLocation() {

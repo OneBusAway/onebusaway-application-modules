@@ -127,6 +127,7 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
 
     VehicleLocationRecord r = new VehicleLocationRecord();
     r.setTimeOfRecord(bean.getTimeOfRecord());
+    r.setTimeOfLocationUpdate(bean.getTimeOfLocationUpdate());
     r.setServiceDate(bean.getServiceDate());
 
     r.setBlockId(AgencyAndIdLibrary.convertFromString(bean.getBlockId()));
@@ -167,6 +168,7 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
 
     VehicleStatusBean bean = new VehicleStatusBean();
     bean.setLastUpdateTime(record.getTimeOfRecord());
+    bean.setLastLocationUpdateTime(record.getTimeOfLocationUpdate());
 
     EVehiclePhase phase = record.getPhase();
     if (phase != null)
@@ -233,6 +235,7 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
     bean.setStatus(record.getStatus());
     bean.setServiceDate(record.getBlockInstance().getServiceDate());
     bean.setTimeOfRecord(record.getLastUpdateTime());
+    bean.setTimeOfLocationUpdate(record.getLastLocationUpdateTime());
     bean.setTripId(AgencyAndIdLibrary.convertToString(record.getActiveTrip().getTrip().getId()));
     bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
     return bean;

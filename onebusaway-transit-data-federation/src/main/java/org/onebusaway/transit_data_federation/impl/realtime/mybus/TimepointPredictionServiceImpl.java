@@ -283,6 +283,7 @@ public class TimepointPredictionServiceImpl {
     VehicleLocationRecord r = new VehicleLocationRecord();
     r.setBlockId(best.getBlockId());
     r.setTimeOfRecord(System.currentTimeMillis());
+    r.setTimeOfLocationUpdate(r.getTimeOfRecord());
     r.setScheduleDeviation(best.getScheduleDeviation());
 
     if (_includeTimepointPredictionRecords) {
