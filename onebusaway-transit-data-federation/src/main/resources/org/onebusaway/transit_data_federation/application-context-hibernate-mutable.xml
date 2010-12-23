@@ -37,7 +37,6 @@
     <bean id="hibernatePropertiesMutable" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
         <property name="properties">
             <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.use_sql_comments">true</prop>
