@@ -14,7 +14,7 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
-           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
 
     <!-- This turns on automatic annotation configuration -->
     <context:annotation-config />
@@ -35,7 +35,7 @@
     <sec:http>
         <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR" />
         <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1" />
-        <sec:remember-me />
+        <sec:remember-me token-validity-seconds="63072000" />
         <sec:logout invalidate-session="false" logout-url="/logout.action" />
     </sec:http>
 
