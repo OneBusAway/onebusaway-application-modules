@@ -249,10 +249,6 @@
                 <configuration>
                     <webResources>
                         <resource>
-                            <directory>target/gwt/org.onebusaway.webapp.gwt.AgenciesMap</directory>
-                            <targetPath>where/standard</targetPath>
-                        </resource>
-                        <resource>
                             <directory>target/gwt/org.onebusaway.webapp.gwt.BookmarkEditApplication</directory>
                             <targetPath>where/standard</targetPath>
                         </resource>
