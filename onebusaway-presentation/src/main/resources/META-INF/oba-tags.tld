@@ -4,6 +4,7 @@
     <tlib-version>1</tlib-version>
     <short-name>oba</short-name>
     <uri>/oba-tags</uri>
+    
     <tag>
         <name>group</name>
         <tag-class>org.onebusaway.presentation.tags.GroupTag</tag-class>
@@ -106,4 +107,34 @@
         </attribute>
         <dynamic-attributes>false</dynamic-attributes>
     </tag>
+    <tag>
+        <name>resource-url</name>
+        <tag-class>org.onebusaway.presentation.tags.ResourceUrlTag</tag-class>
+        <body-content>scriptless</body-content>
+        <attribute>
+            <name>var</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>value</name>
+            <required>true</required>
+            <rtexprvalue>false</rtexprvalue>
+        </attribute>
+        <dynamic-attributes>false</dynamic-attributes>
+    </tag>
+    <function>
+      <name>resource</name>
+      <function-class>org.onebusaway.presentation.tags.ResourceUrlFunction</function-class>
+      <function-signature>
+        java.lang.String resource( java.lang.String )
+      </function-signature>
+    </function>
+    <function>
+      <name>url</name>
+      <function-class>org.onebusaway.presentation.tags.UrlFunction</function-class>
+      <function-signature>
+        java.lang.String url( java.lang.String )
+      </function-signature>
+    </function>
 </taglib>

@@ -1,5 +1,7 @@
 package org.onebusaway.users.impl;
 
+import javax.annotation.PostConstruct;
+
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserIndexTypes;
@@ -34,6 +36,7 @@ public class CreateApiKeyAction {
     this.key = key;
   }
 
+  @PostConstruct
   public void execute() {
     UserIndexKey userIndexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
     UserIndex userIndex = _userService.getOrCreateUserForIndexKey(userIndexKey,

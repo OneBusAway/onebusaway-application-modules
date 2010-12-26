@@ -26,6 +26,7 @@
         
         <result-types>
           <result-type name="rome" class="org.onebusaway.webapp.actions.rss.RomeResult"/>
+          <result-type name="json" class="org.apache.struts2.json.JSONResult"/>
         </result-types>
         
         <interceptors>

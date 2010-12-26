@@ -1,5 +1,7 @@
 package org.onebusaway.users.impl;
 
+import javax.annotation.PostConstruct;
+
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.services.UserService;
@@ -44,6 +46,7 @@ public class CreateUserAction {
     this.admin = admin;
   }
 
+  @PostConstruct
   public void execute() {
 
     UserIndex userIndex = _userService.getOrCreateUserForUsernameAndPassword(

@@ -4,6 +4,7 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 <title>Trip Problem Report</title>
+<script type="text/javascript" src="${oba:resource('/js/jquery.js')}"><jsp:text></jsp:text></script>
 </head>
 <body>
 
