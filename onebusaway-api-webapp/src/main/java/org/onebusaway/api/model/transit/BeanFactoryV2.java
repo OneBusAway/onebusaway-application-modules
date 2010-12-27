@@ -721,15 +721,21 @@ public class BeanFactoryV2 {
 
     TripBean trip = ad.getTrip();
     RouteBean route = trip.getRoute();
+    StopBean stop = ad.getStop();
 
     ArrivalAndDepartureV2Bean bean = new ArrivalAndDepartureV2Bean();
 
     bean.setTripId(trip.getId());
+    addToReferences(trip);
+    
     bean.setServiceDate(ad.getServiceDate());
     bean.setVehicleId(ad.getVehicleId());
-    bean.setStopId(ad.getStopId());
+    bean.setStopId(stop.getId());
+    addToReferences(stop);
     bean.setStopSequence(ad.getStopSequence());
+    
     bean.setRouteId(route.getId());
+    addToReferences(route);
 
     if (trip.getRouteShortName() != null)
       bean.setRouteShortName(trip.getRouteShortName());

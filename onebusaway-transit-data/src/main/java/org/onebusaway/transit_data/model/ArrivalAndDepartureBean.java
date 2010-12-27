@@ -32,7 +32,7 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private String vehicleId;
 
-  private String stopId;
+  private StopBean stop;
 
   private int stopSequence;
 
@@ -88,12 +88,12 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.vehicleId = vehicleId;
   }
 
-  public String getStopId() {
-    return stopId;
+  public StopBean getStop() {
+    return stop;
   }
 
-  public void setStopId(String stopId) {
-    this.stopId = stopId;
+  public void setStop(StopBean stop) {
+    this.stop = stop;
   }
 
   public int getStopSequence() {

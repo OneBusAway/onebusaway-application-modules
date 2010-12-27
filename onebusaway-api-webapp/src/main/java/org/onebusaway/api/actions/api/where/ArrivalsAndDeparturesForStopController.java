@@ -13,6 +13,7 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -108,7 +109,8 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
 
       TripBean trip = bean.getTrip();
       RouteBean route = trip.getRoute();
-
+      StopBean stop = bean.getStop();
+      
       ArrivalAndDepartureBeanV1 v1 = new ArrivalAndDepartureBeanV1();
       v1.setPredictedArrivalTime(bean.getPredictedArrivalTime());
       v1.setPredictedDepartureTime(bean.getPredictedDepartureTime());
@@ -119,8 +121,8 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
         v1.setRouteShortName(route.getShortName());
       v1.setScheduledArrivalTime(bean.getScheduledArrivalTime());
       v1.setScheduledDepartureTime(bean.getScheduledDepartureTime());
-      v1.setStatus(bean.getStatus());
-      v1.setStopId(bean.getStopId());
+      v1.setStatus(bean.getStatus());      
+      v1.setStopId(stop.getId());
       v1.setTripHeadsign(trip.getTripHeadsign());
       v1.setTripId(trip.getId());
 

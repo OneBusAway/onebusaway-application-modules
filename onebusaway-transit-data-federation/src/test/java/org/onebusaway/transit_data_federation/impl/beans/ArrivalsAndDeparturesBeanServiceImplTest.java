@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
@@ -33,6 +34,7 @@ import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
+import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -50,6 +52,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private NarrativeService _narrativeService;
   private StopTimeService _stopTimeService;
   private TripBeanService _tripBeanService;
+  private StopBeanService _stopBeanService;
   private TripDetailsBeanService _tripDetailsBeanService;
   private ServiceAlertsBeanService _serviceAlertsBeanService;
 
@@ -69,6 +72,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     _tripBeanService = Mockito.mock(TripBeanService.class);
     _service.setTripBeanService(_tripBeanService);
+    
+    _stopBeanService = Mockito.mock(StopBeanService.class);
+    _service.setStopBeanService(_stopBeanService);
 
     _tripDetailsBeanService = Mockito.mock(TripDetailsBeanService.class);
     _service.setTripDetailsBeanService(_tripDetailsBeanService);
@@ -200,6 +206,18 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     /****
      * 
      ****/
+    
+    StopBean stopABean = new StopBean();
+    stopABean.setId("1_stopA");
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId())).thenReturn(stopABean);
+    
+    StopBean stopBBean = new StopBean();
+    stopBBean.setId("1_stopB");
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId())).thenReturn(stopBBean);
+    
+    /****
+     * 
+     ****/
 
     TripBean tripABean = new TripBean();
     Mockito.when(_tripBeanService.getTripForId(aid("tripA"))).thenReturn(
@@ -253,7 +271,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
         bean.getScheduledDepartureTime());
     assertEquals(serviceDate, bean.getServiceDate());
     assertEquals("default", bean.getStatus());
-    assertEquals("1_stopB", bean.getStopId());
+    assertSame(stopBBean, bean.getStop());
     assertSame(tripABean, bean.getTrip());
     assertSame(tripStatusBeanA, bean.getTripStatus());
     assertEquals("Downtown", bean.getTripHeadsign());
@@ -271,7 +289,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
         bean.getScheduledDepartureTime());
     assertEquals(serviceDate, bean.getServiceDate());
     assertEquals("default", bean.getStatus());
-    assertEquals("1_stopB", bean.getStopId());
+    assertSame(stopBBean, bean.getStop());
     assertSame(tripBBean, bean.getTrip());
     assertSame(tripStatusBeanB, bean.getTripStatus());
     assertNull(bean.getTripHeadsign());

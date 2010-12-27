@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,6 +17,7 @@ import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -25,6 +27,7 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
+import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -74,6 +77,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   private NarrativeService _narrativeService;
 
   private TripBeanService _tripBeanService;
+  
+  private StopBeanService _stopBeanService;
 
   private BlockLocationService _blockLocationService;
 
@@ -101,6 +106,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   @Autowired
   public void setTripBeanService(TripBeanService tripBeanService) {
     _tripBeanService = tripBeanService;
+  }
+  
+  @Autowired
+  public void setStopBeanService(StopBeanService stopBeanService) {
+    _stopBeanService = stopBeanService;
   }
 
   @Autowired
@@ -178,6 +188,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     long frequencyFromTime = time - query.getFrequencyMinutesBefore() * 60
         * 1000;
     long frequencyToTime = time + query.getFrequencyMinutesAfter() * 60 * 1000;
+    
+    Map<AgencyAndId,StopBean> stopBeanCache = new HashMap<AgencyAndId, StopBean>();
 
     for (Map.Entry<BlockInstance, List<StopTimeInstance>> entry : stisByBlockId.entrySet()) {
 
@@ -194,7 +206,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
         for (BlockLocation location : locations) {
 
-          ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
+          ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti, stopBeanCache);
           applyBlockLocationToBean(sti, time, bean, location);
 
           if (isArrivalAndDepartureBeanInRange(bean, from, to)) {
@@ -207,7 +219,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
         if (locations.isEmpty()) {
 
-          ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
+          ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti, stopBeanCache);
 
           if (sti.getFrequency() == null) {
 
@@ -266,7 +278,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     StopTimeInstance sti = getStopTimeInstance(blockInstance, tripId, stopId,
         stopSequence, serviceDate, timeOfServiceDate);
 
-    ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti);
+    ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, sti, new HashMap<AgencyAndId, StopBean>());
 
     if (!locations.isEmpty()) {
       /**
@@ -307,8 +319,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   }
 
   private ArrivalAndDepartureBean getStopTimeInstanceAsBean(long time,
-      StopTimeInstance sti) {
-
+      StopTimeInstance sti, Map<AgencyAndId,StopBean> stopBeanCache) {
+ 
     ArrivalAndDepartureBean pab = new ArrivalAndDepartureBean();
 
     pab.setServiceDate(sti.getServiceDate());
@@ -324,8 +336,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
     pab.setRouteShortName(stopTimeNarrative.getRouteShortName());
     pab.setTripHeadsign(stopTimeNarrative.getStopHeadsign());
+    
+    StopBean stopBean = stopBeanCache.get(stop.getId());
+    
+    if( stopBean == null) {
+      stopBean = _stopBeanService.getStopForId(stop.getId());
+      stopBeanCache.put(stop.getId(),stopBean);
+    }
 
-    pab.setStopId(ApplicationBeanLibrary.getId(stop.getId()));
+    pab.setStop(stopBean);
     pab.setStopSequence(stopTime.getSequence());
 
     pab.setStatus("default");
