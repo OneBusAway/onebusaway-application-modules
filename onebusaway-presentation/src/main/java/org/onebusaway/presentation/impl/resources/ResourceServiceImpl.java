@@ -123,8 +123,10 @@ public class ResourceServiceImpl implements ResourceService {
 
     Resource resource = getResourceForPath(resourcePath, null);
 
-    if (resource == null)
+    if (resource == null) {
+      _log.warn("resource not found: " + resourcePath);
       return null;
+    }
 
     refreshResource(resource);
 
@@ -142,8 +144,10 @@ public class ResourceServiceImpl implements ResourceService {
 
     Resource resource = getResourceForPaths(resourceId, resourcePaths);
 
-    if (resource == null)
+    if (resource == null) {
+      _log.warn("resource not found: " + resourceId);
       return null;
+    }
 
     refreshResource(resource);
 
@@ -154,8 +158,6 @@ public class ResourceServiceImpl implements ResourceService {
   public URL getLocalUrlForExternalId(String externalId) {
     Resource resource = _resourceEntriesByExternalId.get(externalId);
     if (resource == null) {
-      for (String blah : _resourceEntriesByExternalId.keySet())
-        System.out.println("  " + blah);
       /**
        * In case the resource has not been first requested as a resource(url)
        * first
@@ -164,8 +166,12 @@ public class ResourceServiceImpl implements ResourceService {
       if (resourcePath != null)
         resource = getResourceForPath(resourcePath, null);
     }
-    if (resource == null)
+    
+    if (resource == null) {
+      _log.warn("resource not found for external id: " + externalId);
       return null;
+    }
+    
     return resource.getLocalUrl();
   }
 
@@ -202,8 +208,9 @@ public class ResourceServiceImpl implements ResourceService {
     /**
      * If we can't find a source URL, then we can't create an entry
      */
-    if (sourceUrl == null)
+    if (sourceUrl == null) {
       return null;
+    }
 
     File localFile = getBundleResourceAsLocalFile(resourcePath, sourceUrl);
 
