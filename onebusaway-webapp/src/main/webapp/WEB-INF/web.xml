@@ -92,7 +92,7 @@
     </servlet>
     <servlet>
         <servlet-name>ApiProxyServlet</servlet-name>
-        <servlet-class>org.onebusaway.webapp.impl.ProxyServlet</servlet-class>
+        <servlet-class>org.onebusaway.presentation.impl.ProxyServlet</servlet-class>
         <init-param>
             <param-name>source</param-name>
             <param-value>/onebusaway-webapp</param-value>

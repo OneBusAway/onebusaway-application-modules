@@ -18,7 +18,7 @@
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<link rel="stylesheet" type="text/css" media="all" href="${resources.WhereStandardResources.tripCss.url}" />
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-trip.css')}"/>
 <title>Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /> - Trip # <s:property
     value="result.trip.id" /></title>
 </head>

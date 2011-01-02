@@ -19,7 +19,7 @@
 <jsp:directive.page contentType="text/html" />
 <!-- <s:set name="stop" value="result.stop" /> -->
 <head>
-<link rel="stylesheet" type="text/css" media="all" href="${resources.WhereStandardResources.scheduleCss.url}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-schedule.css')}"/>
 <title>
   <oba:message key="Schedule"/>
   <jsp:text> - </jsp:text>

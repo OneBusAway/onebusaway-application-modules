@@ -18,8 +18,8 @@
 <jsp:directive.page contentType="text/html" />
 <s:set name="now" value="getNow()" />
 <head>
-  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.css.url}" />
-  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.standardStopCss.url}" />
+  <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-stop.css')}"/>
+  <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-stop.css')}"/>
   <meta http-equiv="Refresh" content="60" />
   <title>
     <s:if test="bookmarkName != null">Bookmark - <s:property value="bookmarkName"/></s:if>

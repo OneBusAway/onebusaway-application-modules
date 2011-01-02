@@ -3,7 +3,7 @@ package org.onebusaway.presentation.impl.resources;
 import java.io.File;
 import java.net.URL;
 
-class ResourceEntry {
+class ResourceEntry extends AbstractResource {
 
   private final String resourcePath;
 
@@ -11,28 +11,20 @@ class ResourceEntry {
 
   private final File sourceFile;
 
-  private final ResourceStrategy resourceStrategy;
-
-  private String externalId;
-
-  private String externalUrl;
-
-  private URL localUrl;
-
-  private long lastModifiedTime;
+  private final ResourceTransformationStrategy transformationStrategy;
 
   public ResourceEntry(String resourcePath, URL sourceResource,
-      File sourceFile, ResourceStrategy resourceStrategy) {
+      File sourceFile, ResourceTransformationStrategy transformationStrategy) {
 
     this.resourcePath = resourcePath;
     this.sourceResource = sourceResource;
     this.sourceFile = sourceFile;
-    this.resourceStrategy = resourceStrategy;
+    this.transformationStrategy = transformationStrategy;
 
     if (sourceFile != null)
-      lastModifiedTime = sourceFile.lastModified();
+      setLastModifiedTime(sourceFile.lastModified());
     else
-      lastModifiedTime = System.currentTimeMillis();
+      setLastModifiedTime(System.currentTimeMillis());
   }
 
   public String getResourcePath() {
@@ -47,39 +39,7 @@ class ResourceEntry {
     return sourceResource;
   }
 
-  public ResourceStrategy getResourceStrategy() {
-    return resourceStrategy;
-  }
-
-  public String getExternalId() {
-    return externalId;
-  }
-
-  public void setExternalId(String externalId) {
-    this.externalId = externalId;
-  }
-
-  public String getExternalUrl() {
-    return externalUrl;
-  }
-
-  public void setExternalUrl(String externalUrl) {
-    this.externalUrl = externalUrl;
-  }
-
-  public URL getLocalUrl() {
-    return localUrl;
-  }
-
-  public void setLocalUrl(URL localUrl) {
-    this.localUrl = localUrl;
-  }
-
-  public long getLastModifiedTime() {
-    return lastModifiedTime;
-  }
-
-  public void setLastModifiedTime(long lastModifiedTime) {
-    this.lastModifiedTime = lastModifiedTime;
+  public ResourceTransformationStrategy getTransformationStrategy() {
+    return transformationStrategy;
   }
 }

@@ -52,10 +52,6 @@
             <groupId>org.apache.struts</groupId>
             <artifactId>struts2-sitemesh-plugin</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.struts</groupId>
-            <artifactId>struts2-json-plugin</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -196,7 +192,6 @@
                 <configuration>
                     <modules>
                         <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
-                        <module>org.onebusaway.webapp.gwt.MobileApplication</module>
                         <module>org.onebusaway.webapp.gwt.NotificationWidgetApplication</module>
                         <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
                         <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
@@ -255,10 +250,6 @@
                         <resource>
                             <directory>${project.build.directory}/gwt/LoginWidget</directory>
                             <targetPath></targetPath>
-                        </resource>
-                        <resource>
-                            <directory>target/gwt/org.onebusaway.webapp.gwt.MobileApplication</directory>
-                            <targetPath>where/mobile</targetPath>
                         </resource>
                         <resource>
                             <directory>target/gwt/org.onebusaway.webapp.gwt.NotificationWidgetApplication</directory>

@@ -25,13 +25,6 @@ public class WebappArrivalsAndDeparturesModel extends
     _arrivalsAndDeparturesPresentation.setMessages(messages);
   }
 
-  @Autowired
-  public void setClientBundleFactory(ClientBundleFactory factory) {
-    WhereLibraryResources resources = factory.getBundleForType(WhereLibraryResources.class);
-    WhereLibraryCssResource css = resources.getCss();
-    _arrivalsAndDeparturesPresentation.setCss(css);
-  }
-
   public ArrivalsAndDeparturesPresentaion getArrivalsAndDeparturesPresentation() {
     return _arrivalsAndDeparturesPresentation;
   }

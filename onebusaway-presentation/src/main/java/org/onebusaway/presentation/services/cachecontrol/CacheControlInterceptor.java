@@ -33,8 +33,6 @@ public class CacheControlInterceptor extends AbstractInterceptor {
     if (cacheControl == null)
       return invocation.invoke();
 
-    
-
     HttpServletRequest request = ServletActionContext.getRequest();
     HttpServletResponse response = ServletActionContext.getResponse();
 
@@ -57,7 +55,6 @@ public class CacheControlInterceptor extends AbstractInterceptor {
           Date modifiedSince = DateUtil.parseDate(modifiedSinceValue);
           if (!lastModifiedTime.after(modifiedSince)) {
             response.setStatus(304);
-            System.out.println("not-modified:" + invocation.getProxy().getActionName());
             return null;
           }
         } catch (DateParseException ex) {
@@ -74,8 +71,6 @@ public class CacheControlInterceptor extends AbstractInterceptor {
     if (cacheControl.shortCircuit() && "HEAD".equals(method))
       return null;
     
-    System.out.println("fresh:" + invocation.getProxy().getActionName());
-
     return invocation.invoke();
   }
 

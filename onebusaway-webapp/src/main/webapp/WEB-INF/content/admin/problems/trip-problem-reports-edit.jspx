@@ -5,6 +5,14 @@
 <head>
 <title>Trip Problem Report</title>
 <script type="text/javascript" src="${oba:resource('/js/jquery.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript">
+var data = {};
+data.id = '<s:property value="id"/>';
+data.userLat = <s:property value="userLat"/>;
+data.userLon = <s:property value="userLat"/>;
+data.vehicleLat = <s:property value="vehicleLat"/>;
+data.vehicleLon = <s:property value="vehicleLon"/>;
+</script>
 </head>
 <body>
 
@@ -30,5 +38,7 @@
 <tr><td>Position Deviation:</td><td><s:property value="positionDeviation"/></td></tr>
 <tr><td>Status:</td><td><s:property value="status"/></td></tr>
 </table>
+
+
 </body>
 </html>
