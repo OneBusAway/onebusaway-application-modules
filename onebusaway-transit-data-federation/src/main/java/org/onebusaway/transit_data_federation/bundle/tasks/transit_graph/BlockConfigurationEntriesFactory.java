@@ -21,11 +21,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEn
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BlockConfigurationEntriesFactory {
+
+  private static Logger _log = LoggerFactory.getLogger(BlockConfigurationEntriesFactory.class);
 
   private BlockTripComparator _blockTripComparator = new BlockTripComparator();
 
@@ -83,8 +87,7 @@ public class BlockConfigurationEntriesFactory {
     configurations.trimToSize();
 
     if (configurations.isEmpty())
-      System.out.println("no block configurations found for block: "
-          + block.getId());
+      _log.warn("no active block configurations found for block: " + block.getId());
 
     block.setConfigurations(configurations);
 

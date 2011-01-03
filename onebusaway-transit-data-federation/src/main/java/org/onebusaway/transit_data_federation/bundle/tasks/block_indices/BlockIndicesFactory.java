@@ -108,7 +108,7 @@ public class BlockIndicesFactory {
     for (BlockEntry block : blocks) {
       
       if( block.getConfigurations().isEmpty() ) {
-        _log.warn("block has no configurations: " + block.getId());
+        _log.warn("block has no active configurations: " + block.getId());
         continue;
       }
 
