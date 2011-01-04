@@ -51,7 +51,7 @@ public class DistanceAlongShapeLibrary {
 
     for (int i = 0; i < stopTimePoints.length; i++) {
       PointAndIndex pindex = bestAssignment.get(i);
-      if( pindex.distanceAlongShape > maxDistanceTraveled) {
+      if (pindex.distanceAlongShape > maxDistanceTraveled) {
         int index = projectedShapePoints.size() - 1;
         XYPoint point = projectedShapePoints.get(index);
         pindex = new PointAndIndex(point, index, maxDistanceTraveled);
@@ -148,8 +148,8 @@ public class DistanceAlongShapeLibrary {
               distance));
 
         } else {
-          constructError(stopTimes, possibleAssignments, projection,
-              bestAssignment);
+          constructError(shapePoints, stopTimes, possibleAssignments,
+              projection, bestAssignment);
         }
       }
 
@@ -161,15 +161,20 @@ public class DistanceAlongShapeLibrary {
     return bestAssignment;
   }
 
-  private void constructError(List<StopTimeEntryImpl> stopTimes,
+  private void constructError(ShapePoints shapePoints,
+      List<StopTimeEntryImpl> stopTimes,
       List<List<PointAndIndex>> possibleAssignments, UTMProjection projection,
       List<PointAndIndex> bestAssignment) {
     StopTimeEntryImpl first = stopTimes.get(0);
     StopTimeEntryImpl last = stopTimes.get(stopTimes.size() - 1);
 
-    _log.error("error constructing distances along shape for trip="
+    _log.error("We were attempting to compute the distance along a particular trip for each stop time of that trip by snapping them to the shape for that trip.  However, we could not find an assignment for each stop time where the distance traveled along the shape for each stop time was strictly increasing (aka a stop time seemed to travel backwards)");
+
+    _log.error("error constructing stop-time distances along shape for trip="
         + first.getTrip().getId() + " firstStopTime=" + first.getId()
         + " lastStopTime=" + last.getId());
+    
+    
 
     StringBuilder b = new StringBuilder();
     int index = 0;
@@ -204,6 +209,19 @@ public class DistanceAlongShapeLibrary {
     }
 
     _log.error("best assignment:\n" + b.toString());
+    
+    b = new StringBuilder();
+    index = 0;
+    for( int i=0; i<shapePoints.getSize(); i++) {
+      b.append(shapePoints.getLatForIndex(i));
+      b.append(' ');
+      b.append(shapePoints.getLonForIndex(i));
+      b.append(' ' );
+      b.append(shapePoints.getDistTraveledForIndex(i));
+      b.append('\n');
+    }
+    
+    _log.error("shape points:\n" + b.toString());
 
     throw new IllegalStateException();
   }
