@@ -35,4 +35,6 @@ public interface UserReportingDao {
   public StopProblemReportRecord getStopProblemRecordForId(long id);
 
   public TripProblemReportRecord getTripProblemRecordForId(long id);
+
+  public List<String> getAllTripProblemReportLabels();
 }

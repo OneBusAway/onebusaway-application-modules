@@ -15,32 +15,35 @@ public interface UserReportingService {
 
   public void reportProblemWithStop(StopProblemReportBean problem);
 
-  public void reportProblemWithTrip(TripProblemReportBean problem);
-
   public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
       StopProblemReportQueryBean query);
-
-  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
-      TripProblemReportQueryBean query);
 
   public ListBean<StopProblemReportBean> getStopProblemReports(
       StopProblemReportQueryBean query);
 
-  public ListBean<TripProblemReportBean> getTripProblemReports(
-      TripProblemReportQueryBean query);
-
   public List<StopProblemReportBean> getAllStopProblemReportsForStopId(
       AgencyAndId stopId);
+
+  public StopProblemReportBean getStopProblemReportForId(long id);
+
+  public void deleteStopProblemReportForId(long id);
+
+  public void reportProblemWithTrip(TripProblemReportBean problem);
+
+  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
+      TripProblemReportQueryBean query);
+
+  public ListBean<TripProblemReportBean> getTripProblemReports(
+      TripProblemReportQueryBean query);
 
   public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
       AgencyAndId tripId);
 
-  public StopProblemReportBean getStopProblemReportForId(long id);
-
   public TripProblemReportBean getTripProblemReportForId(long id);
 
-  public void deleteStopProblemReportForId(long id);
+  public void updateTripProblemReport(TripProblemReportBean tripProblemReport);
 
   public void deleteTripProblemReportForId(long id);
 
+  public List<String> getAllTripProblemReportLabels();
 }

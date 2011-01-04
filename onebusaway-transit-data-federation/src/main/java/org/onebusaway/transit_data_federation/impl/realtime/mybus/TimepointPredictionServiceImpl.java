@@ -18,6 +18,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationListener;
@@ -69,6 +70,8 @@ public class TimepointPredictionServiceImpl {
   private boolean _includeTimepointPredictionRecords = false;
 
   private boolean _calculateDistanceAlongBlock = false;
+  
+  private boolean _calculateLocation = false;
 
   public void setServerName(String name) {
     _serverName = name;
@@ -101,6 +104,10 @@ public class TimepointPredictionServiceImpl {
 
   public void setCalculateDistanceAlongBlock(boolean calculateDistanceAlongBlock) {
     _calculateDistanceAlongBlock = calculateDistanceAlongBlock;
+  }
+  
+  public void setCalculateLocation(boolean calculateLocation) {
+    _calculateLocation = calculateLocation;
   }
 
   @Autowired
@@ -260,13 +267,22 @@ public class TimepointPredictionServiceImpl {
       BlockInstance instance = instances.get(0);
       record.setServiceDate(instance.getServiceDate());
 
-      if (_calculateDistanceAlongBlock) {
+      if (_calculateDistanceAlongBlock || _calculateLocation) {
         BlockConfigurationEntry blockConfig = instance.getBlock();
         int scheduleTime = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - record.getScheduleDeviation());
         ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
             blockConfig, scheduleTime);
-        if (location != null)
-          record.setDistanceAlongBlock(location.getDistanceAlongBlock());
+        if (location != null) {
+          if( _calculateDistanceAlongBlock )
+            record.setDistanceAlongBlock(location.getDistanceAlongBlock());
+          if( _calculateLocation ) {
+            CoordinatePoint loc = location.getLocation();
+            if( loc != null) {
+              record.setCurrentLocationLat(loc.getLat());
+              record.setCurrentLocationLon(loc.getLon());
+            }
+          }
+        }
       }
 
       records.add(record);

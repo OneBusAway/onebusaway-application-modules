@@ -9,6 +9,9 @@ var obaMapFactory = function() {
 	var that = {};
 
 	that.map = function(element) {
+		
+		if( element instanceof jQuery )
+			element = element.get(0);
 
 		var lat = OBA.Config.centerLat || 47.606828;
 		var lon = OBA.Config.centerLon || -122.332505;

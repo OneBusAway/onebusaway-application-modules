@@ -282,10 +282,25 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   @Override
+  public void updateTripProblemReport(TripProblemReportBean bean) {
+    TripProblemReportRecord record = _userReportingDao.getTripProblemRecordForId(bean.getId());
+    if (record == null)
+      return;
+    record.setStatus(bean.getStatus());
+    record.setLabel(bean.getLabel());
+    _userReportingDao.saveOrUpdate(record);
+  }
+  
+  @Override
   public void deleteTripProblemReportForId(long id) {
     TripProblemReportRecord record = _userReportingDao.getTripProblemRecordForId(id);
     if (record != null)
       _userReportingDao.delete(record);
+  }
+  
+  @Override
+  public List<String> getAllTripProblemReportLabels() {
+    return _userReportingDao.getAllTripProblemReportLabels();
   }
 
   /****
@@ -313,9 +328,9 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   private StopProblemReportBean getRecordAsBean(StopProblemReportRecord record) {
-    
+
     AgencyAndId stopId = record.getStopId();
-    
+
     StopProblemReportBean bean = new StopProblemReportBean();
     bean.setData(record.getData());
     bean.setId(record.getId());
@@ -330,53 +345,47 @@ class UserReportingServiceImpl implements UserReportingService {
       bean.setUserLon(record.getUserLon());
     if (record.getUserLocationAccuracy() != null)
       bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
-    
-    if( stopId != null)
+
+    if (stopId != null)
       bean.setStop(_stopBeanService.getStopForId(stopId));
 
     return bean;
   }
 
   private TripProblemReportBean getRecordAsBean(TripProblemReportRecord record) {
-    
+
     AgencyAndId stopId = record.getStopId();
     AgencyAndId tripId = record.getTripId();
-    
+
     TripProblemReportBean bean = new TripProblemReportBean();
-    
+
     bean.setData(record.getData());
     bean.setId(record.getId());
     bean.setServiceDate(record.getServiceDate());
     bean.setStatus(record.getStatus());
+    bean.setLabel(record.getLabel());
     bean.setStopId(AgencyAndIdLibrary.convertToString(stopId));
     bean.setTime(record.getTime());
     bean.setTripId(AgencyAndIdLibrary.convertToString(tripId));
     bean.setUserComment(record.getUserComment());
 
-    if (record.getUserLat() != null)
-      bean.setUserLat(record.getUserLat());
-    if (record.getUserLon() != null)
-      bean.setUserLon(record.getUserLon());
-    if (record.getUserLocationAccuracy() != null)
-      bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
+    bean.setUserLat(record.getUserLat());
+    bean.setUserLon(record.getUserLon());
+    bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
 
     bean.setUserOnVehicle(record.isUserOnVehicle());
     bean.setUserVehicleNumber(record.getUserVehicleNumber());
 
     bean.setPredicted(record.isPredicted());
 
-    if (record.getDistanceAlongBlock() != null)
-      bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
-    if (record.getScheduleDeviation() != null)
-      bean.setScheduleDeviation(record.getScheduleDeviation());
-    if (record.getVehicleLat() != null)
-      bean.setVehicleLat(record.getVehicleLat());
-    if (record.getVehicleLon() != null)
-      bean.setVehicleLon(record.getVehicleLon());
-    
-    if( stopId != null)
+    bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
+    bean.setScheduleDeviation(record.getScheduleDeviation());
+    bean.setVehicleLat(record.getVehicleLat());
+    bean.setVehicleLon(record.getVehicleLon());
+
+    if (stopId != null)
       bean.setStop(_stopBeanService.getStopForId(stopId));
-    if( tripId != null)
+    if (tripId != null)
       bean.setTrip(_tripBeanService.getTripForId(tripId));
 
     return bean;

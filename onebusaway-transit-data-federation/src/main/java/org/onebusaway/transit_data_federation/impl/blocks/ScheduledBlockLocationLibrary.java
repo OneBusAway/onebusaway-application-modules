@@ -10,6 +10,9 @@ public class ScheduledBlockLocationLibrary {
   public static int computeTravelTimeBetweenLocations(
       ScheduledBlockLocation scheduledBlockLocationA,
       ScheduledBlockLocation scheduledBlockLocationB) {
+    
+    if( scheduledBlockLocationA.getScheduledTime() == scheduledBlockLocationB.getScheduledTime() )
+      return 0;
 
     boolean inOrder = scheduledBlockLocationA.getScheduledTime() <= scheduledBlockLocationB.getScheduledTime();
 

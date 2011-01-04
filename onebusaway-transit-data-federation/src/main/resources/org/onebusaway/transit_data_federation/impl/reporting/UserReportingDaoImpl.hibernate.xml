@@ -71,4 +71,8 @@
 	<query name="allTripProblemReportsForTripId" read-only="true">
       SELECT p FROM TripProblemReportRecord p WHERE p.tripId = :tripId 
     </query>
+    <query name="allTripProblemReportLabels" read-only="true">
+      SELECT p.label FROM TripProblemReportRecord p WHERE p.label != NULL GROUP BY p.label  
+    </query>
+    
 </hibernate-mapping>

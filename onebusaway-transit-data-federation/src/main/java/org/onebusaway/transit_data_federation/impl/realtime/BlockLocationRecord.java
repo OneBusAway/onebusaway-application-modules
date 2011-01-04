@@ -63,6 +63,9 @@ public class BlockLocationRecord {
   private final Double distanceAlongBlock;
 
   @Column(nullable = true)
+  private final Double distanceAlongTrip;
+
+  @Column(nullable = true)
   private final Double locationLat;
 
   @Column(nullable = true)
@@ -70,7 +73,7 @@ public class BlockLocationRecord {
 
   @Column(nullable = true)
   private final Double orientation;
-
+  
   @Embedded
   @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "timepoint_agencyId", length = 50)),
@@ -110,6 +113,7 @@ public class BlockLocationRecord {
     time = 0;
     scheduleDeviation = null;
     distanceAlongBlock = null;
+    distanceAlongTrip = null;
     locationLat = null;
     locationLon = null;
     orientation = null;
@@ -128,6 +132,7 @@ public class BlockLocationRecord {
     this.time = builder.time;
     this.scheduleDeviation = builder.scheduleDeviation;
     this.distanceAlongBlock = builder.distanceAlongBlock;
+    this.distanceAlongTrip = builder.distanceAlongTrip;
     this.locationLat = builder.locationLat;
     this.locationLon = builder.locationLon;
     this.orientation = builder.orientation;
@@ -195,6 +200,10 @@ public class BlockLocationRecord {
    */
   public Double getDistanceAlongBlock() {
     return distanceAlongBlock;
+  }
+  
+  public Double getDistanceAlongTrip() {
+    return distanceAlongTrip;
   }
 
   public boolean isLocationSet() {
@@ -276,6 +285,8 @@ public class BlockLocationRecord {
     private Double scheduleDeviation = null;
 
     private Double distanceAlongBlock = null;
+    
+    private Double distanceAlongTrip = null;
 
     private Double locationLat = null;
 
@@ -317,6 +328,10 @@ public class BlockLocationRecord {
 
     public void setDistanceAlongBlock(Double distanceAlongBlock) {
       this.distanceAlongBlock = distanceAlongBlock;
+    }
+
+    public void setDistanceAlongTrip(Double distanceAlongTrip) {
+      this.distanceAlongTrip = distanceAlongTrip;
     }
 
     public void setLocationLat(Double locationLat) {

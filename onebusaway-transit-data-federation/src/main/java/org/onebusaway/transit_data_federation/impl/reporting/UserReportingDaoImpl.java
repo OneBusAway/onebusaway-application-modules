@@ -96,16 +96,16 @@ class UserReportingDaoImpl implements UserReportingDao {
 
     return results;
   }
-  
+
   @SuppressWarnings("unchecked")
   public List<StopProblemReportRecord> getStopProblemReports(String agencyId,
       long timeFrom, long timeTo, EProblemReportStatus status) {
-    
+
     if (status == null) {
       String[] names = {"agencyId", "timeFrom", "timeTo"};
       Object[] values = {agencyId, timeFrom, timeTo};
-      return _template.findByNamedQueryAndNamedParam(
-          "stopProblemReports", names, values);
+      return _template.findByNamedQueryAndNamedParam("stopProblemReports",
+          names, values);
     } else {
       String[] names = {"agencyId", "timeFrom", "timeTo", "status"};
       Object[] values = {agencyId, timeFrom, timeTo, status};
@@ -113,16 +113,16 @@ class UserReportingDaoImpl implements UserReportingDao {
           "stopProblemReportsWithStatus", names, values);
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   public List<TripProblemReportRecord> getTripProblemReports(String agencyId,
       long timeFrom, long timeTo, EProblemReportStatus status) {
-    
+
     if (status == null) {
       String[] names = {"agencyId", "timeFrom", "timeTo"};
       Object[] values = {agencyId, timeFrom, timeTo};
-      return _template.findByNamedQueryAndNamedParam(
-          "tripProblemReports", names, values);
+      return _template.findByNamedQueryAndNamedParam("tripProblemReports",
+          names, values);
     } else {
       String[] names = {"agencyId", "timeFrom", "timeTo", "status"};
       Object[] values = {agencyId, timeFrom, timeTo, status};
@@ -130,7 +130,6 @@ class UserReportingDaoImpl implements UserReportingDao {
           "tripProblemReportsWithStatus", names, values);
     }
   }
-
 
   @SuppressWarnings("unchecked")
   @Override
@@ -156,5 +155,11 @@ class UserReportingDaoImpl implements UserReportingDao {
   @Override
   public TripProblemReportRecord getTripProblemRecordForId(long id) {
     return _template.get(TripProblemReportRecord.class, id);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<String> getAllTripProblemReportLabels() {
+    return _template.findByNamedQuery("allTripProblemReportLabels");
   }
 }

@@ -33,6 +33,7 @@ import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationR
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -361,7 +362,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     _cache.addRecord(blockInstance, record);
 
     if (_persistBlockLocationRecords) {
-      List<BlockLocationRecord> blockLocationRecords = getVehicleLocationRecordAsBlockLocationRecord(record);
+      List<BlockLocationRecord> blockLocationRecords = getVehicleLocationRecordAsBlockLocationRecord(
+          blockInstance, record);
       addPredictionToPersistenceQueue(blockLocationRecords);
     }
   }
@@ -551,7 +553,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   private List<BlockLocationRecord> getVehicleLocationRecordAsBlockLocationRecord(
-      VehicleLocationRecord record) {
+      BlockInstance blockInstance, VehicleLocationRecord record) {
 
     BlockLocationRecord.Builder builder = BlockLocationRecord.builder();
     builder.setBlockId(record.getBlockId());
@@ -562,8 +564,21 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     if (record.isScheduleDeviationSet())
       builder.setScheduleDeviation(record.getScheduleDeviation());
 
-    if (record.isDistanceAlongBlockSet())
-      builder.setDistanceAlongBlock(record.getDistanceAlongBlock());
+    if (record.isDistanceAlongBlockSet()) {
+      double distanceAlongBlock = record.getDistanceAlongBlock();
+      builder.setDistanceAlongBlock(distanceAlongBlock);
+      AgencyAndId tripId = record.getTripId();
+      if (tripId != null) {
+        BlockConfigurationEntry block = blockInstance.getBlock();
+        for( BlockTripEntry blockTrip : block.getTrips() ) {
+          TripEntry trip = blockTrip.getTrip();
+          if( trip.getId().equals(tripId)) {
+            double distanceAlongTrip = distanceAlongBlock - blockTrip.getDistanceAlongBlock();
+            builder.setDistanceAlongTrip(distanceAlongTrip);
+          }
+        }
+      }
+    }
 
     if (record.isCurrentLocationSet()) {
       builder.setLocationLat(record.getCurrentLocationLat());
@@ -603,12 +618,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
         vlr.setCurrentLocationLat(record.getLocationLat());
         vlr.setCurrentLocationLon(record.getLocationLon());
       }
-      if( record.isOrientationSet() )
+      if (record.isOrientationSet())
         vlr.setCurrentOrientation(record.getOrientation());
-      if( record.isDistanceAlongBlockSet() )
+      if (record.isDistanceAlongBlockSet())
         vlr.setDistanceAlongBlock(record.getDistanceAlongBlock());
       vlr.setPhase(record.getPhase());
-      if( record.isScheduleDeviationSet())
+      if (record.isScheduleDeviationSet())
         vlr.setScheduleDeviation(record.getScheduleDeviation());
       vlr.setServiceDate(record.getServiceDate());
       vlr.setStatus(record.getStatus());

@@ -509,10 +509,20 @@ class TransitDataServiceImpl implements TransitDataService {
   public void deleteStopProblemReportForStopIdAndId(String stopId, long id) {
     _userReportingService.deleteStopProblemReportForId(id);
   }
+  
+  @Override
+  public void updateTripProblemReport(TripProblemReportBean tripProblemReport) {
+    _userReportingService.updateTripProblemReport(tripProblemReport);
+  }
 
   @Override
   public void deleteTripProblemReportForTripIdAndId(String tripId, long id) {
     _userReportingService.deleteTripProblemReportForId(id);
+  }
+  
+  @Override
+  public List<String> getAllTripProblemReportLabels() {
+    return _userReportingService.getAllTripProblemReportLabels();
   }
 
   /****

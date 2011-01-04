@@ -18,6 +18,7 @@ import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.webapp.actions.bundles.ResourceBundleSupport;
 import org.onebusaway.webapp.actions.bundles.service_alerts.EnvironmentReasons;
 import org.onebusaway.webapp.actions.bundles.service_alerts.EquipmentReasons;
 import org.onebusaway.webapp.actions.bundles.service_alerts.MiscellaneousReasons;
@@ -129,19 +130,19 @@ public class ServiceAlertAction extends ActionSupport implements
    ****/
 
   public Map<String, String> getEnvironmentReasonValues() {
-    return getLocaleMap(EnvironmentReasons.class);
+    return ResourceBundleSupport.getLocaleMap(this,EnvironmentReasons.class);
   }
 
   public Map<String, String> getEquipmentReasonValues() {
-    return getLocaleMap(EquipmentReasons.class);
+    return ResourceBundleSupport.getLocaleMap(this,EquipmentReasons.class);
   }
 
   public Map<String, String> getMiscellaneousReasonValues() {
-    return getLocaleMap(MiscellaneousReasons.class);
+    return ResourceBundleSupport.getLocaleMap(this,MiscellaneousReasons.class);
   }
 
   public Map<String, String> getPersonnelReasonValues() {
-    return getLocaleMap(PersonnelReasons.class);
+    return ResourceBundleSupport.getLocaleMap(this,PersonnelReasons.class);
   }
 
   /****
@@ -152,19 +153,6 @@ public class ServiceAlertAction extends ActionSupport implements
     if (value == null || value.isEmpty() || value.equals("null"))
       return null;
     return value;
-  }
-
-  private Map<String, String> getLocaleMap(Class<?> resourceType) {
-    TextProviderFactory factory = new TextProviderFactory();
-    TextProvider provider = factory.createInstance(resourceType, this);
-    ResourceBundle bundle = provider.getTexts();
-    Map<String, String> m = new TreeMap<String, String>();
-    for (Enumeration<String> en = bundle.getKeys(); en.hasMoreElements();) {
-      String key = en.nextElement();
-      String value = bundle.getString(key);
-      m.put(key, value);
-    }
-    return m;
   }
 
   private String getRawSituationAsString() {

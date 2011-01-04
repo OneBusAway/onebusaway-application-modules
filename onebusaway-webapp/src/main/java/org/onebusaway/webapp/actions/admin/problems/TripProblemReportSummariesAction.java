@@ -30,6 +30,8 @@ public class TripProblemReportSummariesAction extends ActionSupport {
 
   private String _status;
 
+  private int _days = 0;
+
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
@@ -51,6 +53,10 @@ public class TripProblemReportSummariesAction extends ActionSupport {
     return _status;
   }
 
+  public void setDays(int days) {
+    _days = days;
+  }
+
   public List<AgencyWithCoverageBean> getAgencies() {
     return _agencies;
   }
@@ -69,10 +75,16 @@ public class TripProblemReportSummariesAction extends ActionSupport {
   @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
   public String agency() {
 
+    long t = System.currentTimeMillis();
+
     TripProblemReportQueryBean query = new TripProblemReportQueryBean();
     query.setAgencyId(_agencyId);
     query.setTimeFrom(0);
-    query.setTimeTo(System.currentTimeMillis());
+    query.setTimeTo(t);
+
+    if (_days > 0)
+      query.setTimeFrom(t - _days * 24 * 60 * 60 * 1000);
+
     if (_status != null)
       query.setStatus(EProblemReportStatus.valueOf(_status.toUpperCase()));
 
@@ -80,7 +92,7 @@ public class TripProblemReportSummariesAction extends ActionSupport {
     _summaries = result.getList();
 
     Collections.sort(_summaries);
-    
+
     return SUCCESS;
   }
 }

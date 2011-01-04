@@ -91,7 +91,7 @@
                     <s:property value="#arrivalsStatusLabelStyle" />
                     <s:if test="arrivalsAndDeparturesPresentation.isNow(top)"> arrivalStatusNow</s:if>
                 </jsp:attribute>
-                <s:a href="notification.html#tripId(%{trip.id})stopId(%{stopId})">
+                <s:a href="notification.action#tripId(%{trip.id})stopId(%{stopId})">
                 	<s:property value="arrivalsAndDeparturesPresentation.getMinutesLabel(top)" />
                 </s:a>
             </jsp:element>

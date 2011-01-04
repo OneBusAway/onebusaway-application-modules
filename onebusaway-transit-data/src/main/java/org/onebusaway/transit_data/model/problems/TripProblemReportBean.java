@@ -25,27 +25,29 @@ public class TripProblemReportBean implements Serializable {
 
   private String userComment;
 
-  private boolean userOnVehicle;
+  private boolean userOnVehicle = false;
 
   private String userVehicleNumber;
 
-  private double userLat = Double.NaN;
+  private Double userLat;
 
-  private double userLon = Double.NaN;
+  private Double userLon;
 
-  private double userLocationAccuracy = Double.NaN;
+  private Double userLocationAccuracy;
 
-  private double vehicleLat = Double.NaN;
+  private Double vehicleLat;
 
-  private double vehicleLon = Double.NaN;
+  private Double vehicleLon;
 
   private boolean predicted = false;
 
-  private double distanceAlongBlock = Double.NaN;
+  private Double distanceAlongBlock;
 
-  private double scheduleDeviation = Double.NaN;
+  private Double scheduleDeviation;
 
   private EProblemReportStatus status;
+
+  private String label;
 
   private TripBean trip;
 
@@ -131,43 +133,43 @@ public class TripProblemReportBean implements Serializable {
     this.userVehicleNumber = userVehicleNumber;
   }
 
-  public double getUserLat() {
+  public Double getUserLat() {
     return userLat;
   }
 
-  public void setUserLat(double userLat) {
+  public void setUserLat(Double userLat) {
     this.userLat = userLat;
   }
 
-  public double getUserLon() {
+  public Double getUserLon() {
     return userLon;
   }
 
-  public void setUserLon(double userLon) {
+  public void setUserLon(Double userLon) {
     this.userLon = userLon;
   }
 
-  public double getUserLocationAccuracy() {
+  public Double getUserLocationAccuracy() {
     return userLocationAccuracy;
   }
 
-  public void setUserLocationAccuracy(double userLocationAccuracy) {
+  public void setUserLocationAccuracy(Double userLocationAccuracy) {
     this.userLocationAccuracy = userLocationAccuracy;
   }
 
-  public double getVehicleLat() {
+  public Double getVehicleLat() {
     return vehicleLat;
   }
 
-  public void setVehicleLat(double vehicleLat) {
+  public void setVehicleLat(Double vehicleLat) {
     this.vehicleLat = vehicleLat;
   }
 
-  public double getVehicleLon() {
+  public Double getVehicleLon() {
     return vehicleLon;
   }
 
-  public void setVehicleLon(double vehicleLon) {
+  public void setVehicleLon(Double vehicleLon) {
     this.vehicleLon = vehicleLon;
   }
 
@@ -179,19 +181,19 @@ public class TripProblemReportBean implements Serializable {
     this.predicted = predicted;
   }
 
-  public double getDistanceAlongBlock() {
+  public Double getDistanceAlongBlock() {
     return distanceAlongBlock;
   }
 
-  public void setDistanceAlongBlock(double distanceAlongBlock) {
+  public void setDistanceAlongBlock(Double distanceAlongBlock) {
     this.distanceAlongBlock = distanceAlongBlock;
   }
 
-  public double getScheduleDeviation() {
+  public Double getScheduleDeviation() {
     return scheduleDeviation;
   }
 
-  public void setScheduleDeviation(double scheduleDeviation) {
+  public void setScheduleDeviation(Double scheduleDeviation) {
     this.scheduleDeviation = scheduleDeviation;
   }
 
@@ -201,6 +203,14 @@ public class TripProblemReportBean implements Serializable {
 
   public void setStatus(EProblemReportStatus status) {
     this.status = status;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   public TripBean getTrip() {

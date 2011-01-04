@@ -32,7 +32,10 @@ public class ResourceUrlFunction {
   }
 
   public static String resource(String resourcePath) {
-    Container container = Dispatcher.getInstance().getContainer();
+    Dispatcher instance = Dispatcher.getInstance();
+    if( instance == null)
+      return null;
+    Container container = instance.getContainer();
     ResourceUrlFunction function = new ResourceUrlFunction();
     container.inject(function);
     return function.getExternalUrlForResource(resourcePath);

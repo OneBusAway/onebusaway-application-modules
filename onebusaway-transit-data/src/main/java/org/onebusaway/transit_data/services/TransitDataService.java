@@ -395,6 +395,29 @@ public interface TransitDataService extends FederatedService {
   @FederatedByEntityIdMethod(propertyExpression = "stopId")
   public void reportProblemWithStop(StopProblemReportBean problem);
 
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
+      StopProblemReportQueryBean query);
+
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<StopProblemReportBean> getStopProblemReports(
+      StopProblemReportQueryBean query);
+
+  @FederatedByEntityIdMethod()
+  public List<StopProblemReportBean> getAllStopProblemReportsForStopId(
+      String stopId);
+
+  @FederatedByEntityIdMethod()
+  public StopProblemReportBean getStopProblemReportForStopIdAndId(
+      String stopId, long id);
+
+  @FederatedByEntityIdMethod()
+  public void deleteStopProblemReportForStopIdAndId(String stopId, long id);
+
+  /****
+   * 
+   ****/
+
   /**
    * Report a problem with a particular trip.
    * 
@@ -404,20 +427,8 @@ public interface TransitDataService extends FederatedService {
   public void reportProblemWithTrip(TripProblemReportBean problem);
 
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
-  public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
-      StopProblemReportQueryBean query);
-
-  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
       TripProblemReportQueryBean query);
-
-  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
-  public ListBean<StopProblemReportBean> getStopProblemReports(
-      StopProblemReportQueryBean query);
-
-  @FederatedByEntityIdMethod()
-  public List<StopProblemReportBean> getAllStopProblemReportsForStopId(
-      String stopId);
 
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public ListBean<TripProblemReportBean> getTripProblemReports(
@@ -428,16 +439,15 @@ public interface TransitDataService extends FederatedService {
       String tripId);
 
   @FederatedByEntityIdMethod()
-  public StopProblemReportBean getStopProblemReportForStopIdAndId(
-      String stopId, long id);
-
-  @FederatedByEntityIdMethod()
   public TripProblemReportBean getTripProblemReportForTripIdAndId(
       String tripId, long id);
 
-  @FederatedByEntityIdMethod()
-  public void deleteStopProblemReportForStopIdAndId(String stopId, long id);
+  @FederatedByEntityIdMethod(propertyExpression="tripId")
+  public void updateTripProblemReport(TripProblemReportBean tripProblemReport);
 
   @FederatedByEntityIdMethod()
   public void deleteTripProblemReportForTripIdAndId(String tripId, long id);
+  
+  @FederatedByAggregateMethod
+  public List<String> getAllTripProblemReportLabels();
 }

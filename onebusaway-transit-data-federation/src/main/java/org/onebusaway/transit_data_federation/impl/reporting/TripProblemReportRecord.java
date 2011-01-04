@@ -90,7 +90,7 @@ public class TripProblemReportRecord implements Serializable {
       @AttributeOverride(name = "agencyId", column = @Column(name = "matchedVehicle_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "matchedVehicle_id"))})
   private AgencyAndId matchedVehicleId;
-  
+
   /**
    * Custom Hibernate mapping so that the vehicle phase enum gets mapped to a
    * string as opposed to an integer, allowing for safe expansion of the enum in
@@ -100,6 +100,8 @@ public class TripProblemReportRecord implements Serializable {
   @Type(type = "org.onebusaway.container.hibernate.EnumUserType", parameters = {@Parameter(name = "enumClassName", value = "org.onebusaway.transit_data.model.problems.EProblemReportStatus")})
   @Column(length = 25)
   private EProblemReportStatus status;
+
+  private String label;
 
   public long getId() {
     return id;
@@ -267,5 +269,13 @@ public class TripProblemReportRecord implements Serializable {
 
   public void setStatus(EProblemReportStatus status) {
     this.status = status;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 }

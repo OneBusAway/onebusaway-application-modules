@@ -25,7 +25,10 @@ public class UrlFunction {
   }
 
   public static String url(String value) {
-    Container container = Dispatcher.getInstance().getContainer();
+    Dispatcher instance = Dispatcher.getInstance();
+    if( instance == null)
+      return null;
+    Container container = instance.getContainer();
     UrlFunction function = new UrlFunction();
     container.inject(function);
     return function.getUrl(value);

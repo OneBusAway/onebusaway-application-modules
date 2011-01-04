@@ -63,6 +63,7 @@
         <value>/js/jquery.js</value>
         <value>classpath:org/onebusaway/presentation/js/oba-api.js</value>
     	<value>classpath:org/onebusaway/presentation/js/oba-maps.js</value>
+        <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value>      
       </list>
     </property>
   </bean>
