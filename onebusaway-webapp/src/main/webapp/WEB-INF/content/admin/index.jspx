@@ -28,7 +28,7 @@
     <li><s:a namespace="/" action="logout">Logout</s:a></li>
     <li><s:a href="user-properties-migration">User Properties Migration</s:a></li>
     <li><s:a action="api-keys">API Key Management</s:a></li>
-    <li><s:a href="create-login">Create a New Login</s:a></li>
+    <li><s:a action="create-login">Create a New Login</s:a></li>
     <li><oba:message key="ProblemReports" /></li>
     <ul>
         <li><s:a namespace="problems" action="stop-problem-report-summaries"><oba:message key="StopProblemReports"/></s:a></li>

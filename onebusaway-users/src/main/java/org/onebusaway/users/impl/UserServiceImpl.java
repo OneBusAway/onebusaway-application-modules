@@ -283,6 +283,18 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public void setPasswordForUsernameUserIndex(UserIndex userIndex,
+      String password) {
+    
+    UserIndexKey id = userIndex.getId();
+    if( ! UserIndexTypes.USERNAME.equals(id.getType()))
+      throw new IllegalArgumentException("expected UserIndex of type " + UserIndexTypes.USERNAME);
+    
+    String credentials = _passwordEncoder.encodePassword(password, id.getValue());
+    setCredentialsForUserIndex(userIndex, credentials);
+  }
+
+  @Override
   public void mergeUsers(User sourceUser, User targetUser) {
 
     if (sourceUser.equals(targetUser))

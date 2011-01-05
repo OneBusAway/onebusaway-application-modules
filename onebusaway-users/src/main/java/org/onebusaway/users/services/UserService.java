@@ -116,6 +116,15 @@ public interface UserService {
   public void setCredentialsForUserIndex(UserIndex userIndex, String credentials);
 
   /**
+   * Update the password for the {@link UserIndexTypes#USERNAME} user index
+   * 
+   * @param userIndex
+   * @param password
+   */
+  public void setPasswordForUsernameUserIndex(UserIndex userIndex,
+      String password);
+
+  /**
    * @param user
    * @return the specified user as a user bean object
    */
