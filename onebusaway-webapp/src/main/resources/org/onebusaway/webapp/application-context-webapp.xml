@@ -30,9 +30,15 @@
   <sec:http>
     <sec:intercept-url pattern="/admin/**" access="ROLE_ADMINISTRATOR" />
     <sec:form-login login-page="/login.action" authentication-failure-url="/login.action?error=1" />
-    <sec:remember-me token-validity-seconds="63072000" />
+    <sec:remember-me services-ref="rememberMeServices" />
     <sec:logout invalidate-session="false" logout-url="/logout.action" />
   </sec:http>
+
+  <bean id="rememberMeServices" class="org.onebusaway.users.impl.authentication.TokenBasedRememberMeExtendedServices">
+    <property name="key" value="SpringSecured" />
+    <property name="tokenValiditySeconds" value="63072000" />
+    <property name="userDetailsService" ref="userDetailsServiceImpl" />
+  </bean>
 
   <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
     <property name="properties">
@@ -57,13 +63,13 @@
   </bean>
 
   <bean id="CommonResources" class="org.onebusaway.presentation.impl.resources.ResourceFactory">
-    <property name="name" value="CommonResources"/>
+    <property name="name" value="CommonResources" />
     <property name="resources">
       <list>
         <value>/js/jquery.js</value>
         <value>classpath:org/onebusaway/presentation/js/oba-api.js</value>
-    	<value>classpath:org/onebusaway/presentation/js/oba-maps.js</value>
-        <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value>      
+        <value>classpath:org/onebusaway/presentation/js/oba-maps.js</value>
+        <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value>
       </list>
     </property>
   </bean>
