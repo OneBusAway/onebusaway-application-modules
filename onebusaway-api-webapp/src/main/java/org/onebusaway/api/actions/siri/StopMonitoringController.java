@@ -47,6 +47,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -267,6 +269,16 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
       delivery.visits.add(MonitoredStopVisit);
     }
+
+    // sort MonitoredStopVisits by distance from stop
+    Collections.sort(delivery.visits, new Comparator<MonitoredStopVisit>() {
+
+      @Override
+      public int compare(MonitoredStopVisit arg0, MonitoredStopVisit arg1) {
+        return (int) (arg0.MonitoredVehicleJourney.MonitoredCall.Extensions.Distances.DistanceFromCall - arg1.MonitoredVehicleJourney.MonitoredCall.Extensions.Distances.DistanceFromCall);
+      }
+
+    });
 
     _response = siri;
     return new DefaultHttpHeaders();
