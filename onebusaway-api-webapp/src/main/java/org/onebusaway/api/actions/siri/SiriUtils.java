@@ -50,6 +50,9 @@ public class SiriUtils {
     for (TripStopTimeBean stopTime : stopTimes) {
       StopBean stop = stopTime.getStop();
       int visitNumber = getVisitNumber(visitNumberForStop, stop);
+      if (stopTime.getDistanceAlongTrip() >= distance) {
+        afterStart = true;
+      }
       if (afterStart) {
         i += 1;
         if (afterStop) {
@@ -84,9 +87,6 @@ public class SiriUtils {
           if (stop == currentStop) {
             afterStop = true;
           }
-      }
-      if (stopTime.getDistanceAlongTrip() >= distance) {
-        afterStart = true;
       }
     }
     if (onwardCalls.size() == 0) {
