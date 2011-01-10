@@ -93,7 +93,11 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           vehicleIdWithAgency, _time.getTime());
       ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
       if (vehicle != null) {
-        activities.add(createActivity(vehicle, onwardCalls));
+          if(!(vehicle.getPhase().equals("DEADHEAD_AFTER") ||
+              vehicle.getPhase().equals("DEADHEAD_BEFORE") ||
+              vehicle.getPhase().equals("DEADHEAD_DURING"))) {
+            activities.add(createActivity(vehicle, onwardCalls));
+          }
       }
       _response = generateSiriResponse(_time, activities);
       return new DefaultHttpHeaders();
@@ -122,7 +126,9 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           continue;
         }
         VehicleActivity activity = createActivity(trip, onwardCalls);
-        activities.add(activity);
+        if (activity != null) {
+          activities.add(activity);
+        }
       }
       _response = generateSiriResponse(_time, activities);
       return new DefaultHttpHeaders();
@@ -146,7 +152,9 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           continue;
         }
         VehicleActivity activity = createActivity(trip, onwardCalls);
-        activities.add(activity);
+        if (activity != null) {
+          activities.add(activity);
+        }
       }
       _response = generateSiriResponse(_time, activities);
       return new DefaultHttpHeaders();
@@ -157,7 +165,10 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         agencyId, _time.getTime());
     ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
     for (VehicleStatusBean v : vehicles.getList()) {
-      activities.add(createActivity(v, onwardCalls));
+      VehicleActivity activity = createActivity(v, onwardCalls);
+      if (activity != null) {
+        activities.add(activity);
+      }
     }
     _response = generateSiriResponse(_time, activities);
     return new DefaultHttpHeaders();
@@ -165,6 +176,12 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
 
   private VehicleActivity createActivity(VehicleStatusBean vehicleStatus,
       boolean onwardCalls) {
+    
+    if (vehicleStatus.getPhase().equals("DEADHEAD_AFTER") ||
+        vehicleStatus.getPhase().equals("DEADHEAD_BEFORE") ||
+        vehicleStatus.getPhase().equals("DEADHEAD_DURING")) {
+      return null;
+    }
     VehicleActivity activity = new VehicleActivity();
 
     Calendar time = Calendar.getInstance();
@@ -240,6 +257,11 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       boolean onwardCalls) {
     VehicleActivity activity = new VehicleActivity();
     TripStatusBean status = trip.getStatus();
+    if (status.getPhase().equals("DEADHEAD_AFTER")
+        || status.getPhase().equals("DEADHEAD_BEFORE")
+        || status.getPhase().equals("DEADHEAD_DURING")) {
+      return null;
+    }
     
     Calendar time = Calendar.getInstance();
     time.setTime(new Date(status.getLastUpdateTime()));
