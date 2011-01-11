@@ -1,19 +1,24 @@
 package org.onebusaway.presentation.impl.resources;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.onebusaway.presentation.services.resources.Resource;
 import org.onebusaway.presentation.services.resources.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
 
 @Results(value = {
-    @Result(type = "stream", params = {"contentType", "contentType"}),
-    @Result(type = "httpheader", name = "NotFound", params = {
-        "status", "404"})})
+    @Result(type = "stream"),
+    @Result(type = "httpheader", name = "NotFound", params = {"status", "404"})})
 public class ResourceAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -25,11 +30,9 @@ public class ResourceAction extends ActionSupport {
     _resourceService = resourceService;
   }
 
-  private String _id;
+  protected String _id;
 
-  private String _contentType;
-
-  private InputStream _inputStream;
+  private Resource _resource;
 
   public void setId(String id) {
     _id = id;
@@ -39,33 +42,71 @@ public class ResourceAction extends ActionSupport {
     return _id;
   }
 
-  public InputStream getInputStream() {
-    return _inputStream;
+  public InputStream getInputStream() throws IOException {
+    if (_resource == null)
+      return null;
+
+    URL localUrl = _resource.getLocalUrl();
+
+    return localUrl.openStream();
   }
 
   public String getContentType() {
-    return _contentType;
+    if (_resource == null)
+      return null;
+
+    URL localUrl = _resource.getLocalUrl();
+
+    String path = localUrl.getPath();
+    if (path.endsWith(".png"))
+      return "image/png";
+    else if (path.endsWith(".css"))
+      return "text/css";
+    else if (path.endsWith(".js"))
+      return "text/javascript";
+    else if (path.endsWith(".mp3"))
+      return "audio/mpeg";
+    return null;
+  }
+
+  public long getContentLength() {
+    if (_resource == null)
+      return -1;
+    return _resource.getContentLength();
+  }
+  
+  public String getContentDisposition() {
+    return "";
+  }
+
+  public Date getLastModified() {
+
+    ensureResource();
+    
+    if (_resource == null)
+      return null;
+
+    return new Date(_resource.getLastModifiedTime());
   }
 
   @Override
   public String execute() throws Exception {
 
-    URL localUrl = _resourceService.getLocalUrlForExternalId(_id);
+    ensureResource();
 
-    if (localUrl != null) {
-      String path = localUrl.getPath();
-      if (path.endsWith(".png"))
-        _contentType = "image/png";
-      else if (path.endsWith(".css"))
-        _contentType = "text/css";
-      else if (path.endsWith(".js"))
-        _contentType = "text/javascript";
+    if (_resource == null)
+      return "NotFound";
 
-      _inputStream = localUrl.openStream();
-      return SUCCESS;
-    }
-
-    return "NotFound";
+    return SUCCESS;
   }
 
+  protected void ensureResource() {
+    if (_resource == null) {
+      if( _id == null) {
+        HttpServletRequest request = ServletActionContext.getRequest();
+        _id = request.getParameter("id");
+      }
+      _resource = _resourceService.getLocalResourceForExternalId(_id);
+    }
+  }
 }

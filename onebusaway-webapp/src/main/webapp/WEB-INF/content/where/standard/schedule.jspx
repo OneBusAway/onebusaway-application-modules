@@ -169,7 +169,7 @@
                     <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
                     <td class="startTime"><oba:date timeStyle="short" value="startTime"/><br/>...</td>
                     <td>
-                      <oba:message key="schedule.everyXMinutes">
+                      <oba:message key="EveryXMinutes">
                         <s:param value="headwaySecs / 60" />
                       </oba:message>
                     </td>

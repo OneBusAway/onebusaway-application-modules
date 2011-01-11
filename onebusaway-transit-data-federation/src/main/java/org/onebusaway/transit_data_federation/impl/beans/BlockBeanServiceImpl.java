@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -15,6 +16,7 @@ import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.StopTimeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.BlockBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopTimeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
@@ -41,6 +43,8 @@ public class BlockBeanServiceImpl implements BlockBeanService {
 
   private BlockCalendarService _blockCalendarService;
 
+  private AgencyService _agencyService;
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao graph) {
     _graph = graph;
@@ -59,6 +63,11 @@ public class BlockBeanServiceImpl implements BlockBeanService {
   @Autowired
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
+  }
+  
+  @Autowired
+  public void setAgencyService(AgencyService agencyService) {
+    _agencyService = agencyService;
   }
 
   @Cacheable
@@ -149,7 +158,8 @@ public class BlockBeanServiceImpl implements BlockBeanService {
     BlockConfigurationBean bean = new BlockConfigurationBean();
     ServiceIdActivation serviceIds = blockConfiguration.getServiceIds();
 
-    bean.setBlockId(AgencyAndIdLibrary.convertToString(blockConfiguration.getBlock().getId()));
+    AgencyAndId blockId = blockConfiguration.getBlock().getId();
+    bean.setBlockId(AgencyAndIdLibrary.convertToString(blockId));
 
     List<String> activeServiceIds = new ArrayList<String>();
     for (LocalizedServiceId lsid : serviceIds.getActiveServiceIds())
@@ -165,6 +175,10 @@ public class BlockBeanServiceImpl implements BlockBeanService {
     for (BlockTripEntry blockTrip : blockConfiguration.getTrips())
       tripBeans.add(getBlockTripAsBean(blockTrip));
     bean.setTrips(tripBeans);
+    
+    TimeZone tz = _agencyService.getTimeZoneForAgencyId(blockId.getAgencyId());
+    bean.setTimeZone(tz.getID());
+
     return bean;
   }
 

@@ -2,6 +2,8 @@ package org.onebusaway.presentation.impl.resources;
 
 import java.net.URL;
 
+import org.onebusaway.presentation.services.resources.Resource;
+
 class AbstractResource implements Resource {
 
   private String externalId;
@@ -9,6 +11,8 @@ class AbstractResource implements Resource {
   private String externalUrl;
 
   private URL localUrl;
+  
+  private long contentLength = -1;
 
   private long lastModifiedTime;
 
@@ -42,5 +46,13 @@ class AbstractResource implements Resource {
 
   public void setLastModifiedTime(long lastModifiedTime) {
     this.lastModifiedTime = lastModifiedTime;
+  }
+
+  public long getContentLength() {
+    return contentLength;
+  }
+
+  public void setContentLength(long contentLength) {
+    this.contentLength = contentLength;
   }
 }

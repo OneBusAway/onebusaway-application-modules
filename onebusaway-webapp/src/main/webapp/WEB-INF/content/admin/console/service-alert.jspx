@@ -19,7 +19,8 @@
     xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>Service Alert</title>
+<title><s:text name="ServiceAlert" /></title>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/admin.css')}"/>
 </head>
 <body>
 
@@ -27,7 +28,7 @@
 <s:url var="url" action="service-alerts!agency">
   <s:param name="agencyId" value="agencyId"/>
 </s:url>
-<p><s:a href="%{url}">Back to Service Alerts</s:a></p>
+<p><s:a href="%{url}">Back to Agency Service Alerts</s:a></p>
 </s:if>
 <s:else>
 <p><s:a action="service-alerts">Back to Service Alerts</s:a></p>
@@ -40,7 +41,7 @@
 <s:select label="Miscellaneous" name="miscellaneousReason" headerKey="null" headerValue="Select Reason" list="miscellaneousReasonValues" value="%{miscellaneousReason}"/>
 <s:textfield label="Other" name="undefinedReason" value="%{undefinedReason}"/>
 <s:textfield label="Summary" name="summary.value" value="%{summary.value}"/>
-<s:textfield label="Description" name="description.value" value="%{description.value}"/>
+<s:textarea label="Description" name="description.value" value="%{description.value}" cols="80" rows="5"/>
 <s:textfield label="Detail" name="detail.value" value="%{detail.value}"/>
 <s:textfield label="Advice" name="advice.value" value="%{advice.value}"/>
 <s:textfield label="Internal" name="internal.value" value="%{internal.value}"/>
@@ -62,17 +63,6 @@
 </s:url>
 <p><s:a href="%{url}">Delete</s:a></p>
 </s:if>
-
-<h2>Example Affects</h2>
-<pre>
-<affects>
-  <stops>
-    <affectedStop>
-      <stopId>1_10020</stopId>
-    </affectedStop>
-  </stops>
-</affects>
-</pre>
 
 </body>
 </html>

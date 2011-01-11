@@ -30,7 +30,7 @@
 
     <div class="tripPanelHeader">
       <div class="tripPanelHeaderRoute">Route <s:property value="trip.route.shortName" /> - <s:property value="trip.tripHeadsign" /></div>
-      <div class="tripPanelHeaderTripId">Trip # <s:property value="trip.id" /><s:if test="trip.id != trip.blockId"><jsp:text> - </jsp:text><oba:message key="Block"/> # <s:property value="trip.blockId" /></s:if></div>
+      <div class="tripPanelHeaderTripId">Trip # <s:property value="trip.id" /><s:if test="trip.id != trip.blockId"><jsp:text> - </jsp:text><s:a action="block"><s:param name="id" value="trip.blockId" /><s:param name="serviceDate" value="serviceDate"/><s:text name="BlockNum"/><jsp:text> </jsp:text><s:property value="trip.blockId" /></s:a></s:if></div>
     </div>
     
     <s:if test="status.vehicleId != null">

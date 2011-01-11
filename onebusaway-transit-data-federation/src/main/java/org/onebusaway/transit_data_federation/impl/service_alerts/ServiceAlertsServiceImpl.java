@@ -23,6 +23,7 @@ import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataB
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
@@ -103,13 +104,20 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
   @Override
   public void updateServiceAlert(Situation situation) {
     updateServiceAlerts(Arrays.asList(situation));
-    saveServiceAlerts();
   }
 
   @Override
   public void updateServiceAlerts(List<Situation> situations) {
-    for (Situation situation : situations)
+    for (Situation situation : situations) {
+      AgencyAndId id = situation.getId();
+      Situation existingSituation = _situations.put(id, situation);
+
+      if (existingSituation != null) {
+        situation.setCreationTime(existingSituation.getCreationTime());
+      }
+
       updateReferences(situation);
+    }
     saveServiceAlerts();
   }
 
@@ -171,8 +179,13 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
         stopId);
 
     Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
+    /*
+     * TODO: Temporarily disable
+     */
+    /*
     getSituationIdsForKey(_situationIdsByAgencyId, lineId.getAgencyId(),
         situationIds);
+        */
     getSituationIdsForKey(_situationIdsByLineId, lineId, situationIds);
     getSituationIdsForKey(_situationIdsByLineAndStopCall, lineAndStopCallRef,
         situationIds);
@@ -258,14 +271,20 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
       AffectsKeyFactory<T> affectsKeyFactory) {
 
     Set<T> existingEffects = Collections.emptySet();
-    if (existingSituation != null && existingSituation.getAffects() != null)
-      existingEffects = affectsKeyFactory.getKeysForAffects(situation,
-          existingSituation.getAffects());
+    if (existingSituation != null) {
+      SituationAffects affects = existingSituation.getAffects();
+      if (affects == null)
+        affects = new SituationAffects();
+      existingEffects = affectsKeyFactory.getKeysForAffects(situation, affects);
+    }
 
     Set<T> newEffects = Collections.emptySet();
-    if (situation != null && situation.getAffects() != null)
-      newEffects = affectsKeyFactory.getKeysForAffects(situation,
-          situation.getAffects());
+    if (situation != null) {
+      SituationAffects affects = situation.getAffects();
+      if (affects == null)
+        affects = new SituationAffects();
+      newEffects = affectsKeyFactory.getKeysForAffects(situation, affects);
+    }
 
     for (T existingEffect : existingEffects) {
       if (newEffects.contains(existingEffect))
@@ -360,6 +379,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     xstream.alias("situationContainer", SituationsContainer.class);
     xstream.alias("situation", Situation.class);
     xstream.alias("affects", SituationAffects.class);
+    xstream.alias("agency",SituationAffectedAgency.class);
     xstream.alias("stop", SituationAffectedStop.class);
     xstream.alias("vehicleJourney", SituationAffectedVehicleJourney.class);
     xstream.alias("call", SituationAffectedCall.class);

@@ -12,6 +12,14 @@ thead.darkHeader > tr > td {
  *
  ****/
  
+#service-alert_summary_value {
+	width: 639px;
+}
+
+/****
+ *
+ ****/
+
 #tripProblemReport {
 	position: relative;	
 }

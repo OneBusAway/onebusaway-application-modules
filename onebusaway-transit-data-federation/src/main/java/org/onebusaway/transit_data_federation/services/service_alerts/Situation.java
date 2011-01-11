@@ -151,4 +151,9 @@ public class Situation implements Serializable {
   public void setConsequences(List<SituationConsequence> consequences) {
     this.consequences = consequences;
   }
+  
+  @Override
+  public String toString() {
+    return "Situation(id=" + id + ")";
+  }
 }

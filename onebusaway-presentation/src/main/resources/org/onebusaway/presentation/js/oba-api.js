@@ -22,9 +22,12 @@ var obaApiFactory = function() {
 			key : OBA.Config.apiKey,
 			version : 2
 		};
-
+		
 		if (otherParams) {
-
+			// Come on now 1
+			for( var name in otherParams) {
+				params[name] = otherParams[name];
+			}
 		}
 
 		return params;
@@ -109,6 +112,10 @@ var obaApiFactory = function() {
 		awc.agency = references.agenciesById[awc.agencyId];
 	};
 	
+	var processArrivalAndDepartureForStop = function(entry, references) {
+		
+	};
+	
 	var processStopsForRoute = function(stopsForRoute, references) {
 		
 	};
@@ -122,6 +129,14 @@ var obaApiFactory = function() {
 		var params = createParams();
 		var handler = createListHandler(callback, errorCallback,
 				processAgencyWithCoverage);
+		jQuery.getJSON(url, params, handler);
+	};
+	
+	that.arrivalAndDepartureForStop = function(userParams, callback, errorCallback) {
+		var url = createUrl('/where/arrival-and-departure-for-stop/' + userParams.stopId + '.json');
+		var params = createParams(userParams);
+		var handler = createEntryHandler(callback, errorCallback,
+				processArrivalAndDepartureForStop);
 		jQuery.getJSON(url, params, handler);
 	};
 	

@@ -1,6 +1,7 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -16,6 +17,7 @@ import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 public class TripsForRouteController extends ApiActionSupport {
@@ -52,10 +54,11 @@ public class TripsForRouteController extends ApiActionSupport {
     return _id;
   }
 
-  public void setTime(long time) {
-    _time = time;
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
+  public void setTime(Date time) {
+    _time = time.getTime();
   }
-
+  
   public void setMaxCount(int maxCount) {
     _maxCount.setMaxCount(maxCount);
   }

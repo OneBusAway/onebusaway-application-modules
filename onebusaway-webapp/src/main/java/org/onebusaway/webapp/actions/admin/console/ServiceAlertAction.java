@@ -1,15 +1,13 @@
-package org.onebusaway.webapp.actions.admin.console;
+   package org.onebusaway.webapp.actions.admin.console;
 
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.TreeMap;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.json.JSONException;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
@@ -27,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
-import com.opensymphony.xwork2.TextProvider;
-import com.opensymphony.xwork2.TextProviderFactory;
 import com.thoughtworks.xstream.XStream;
 
 @Results({
@@ -177,6 +173,7 @@ public class ServiceAlertAction extends ActionSupport implements
 
     xstream.alias("situation", SituationBean.class);
     xstream.alias("affects", SituationAffectsBean.class);
+    xstream.alias("agency", SituationAffectedAgencyBean.class);
     xstream.alias("stop", SituationAffectedStopBean.class);
     xstream.alias("vehicleJourney", SituationAffectedVehicleJourneyBean.class);
     xstream.alias("call", SituationAffectedCallBean.class);

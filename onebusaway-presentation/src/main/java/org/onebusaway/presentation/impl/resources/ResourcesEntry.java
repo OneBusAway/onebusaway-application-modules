@@ -2,6 +2,8 @@ package org.onebusaway.presentation.impl.resources;
 
 import java.util.List;
 
+import org.onebusaway.presentation.services.resources.Resource;
+
 class ResourcesEntry extends AbstractResource {
 
   private final String resourceId;

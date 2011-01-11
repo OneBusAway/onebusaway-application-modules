@@ -134,6 +134,20 @@ public class ArrivalsAndDeparturesPresentaion {
       t = getPredictedTime(pab);
     return t;
   }
+  
+  public String getMinutesElementId(ArrivalAndDepartureBean pab) {
+    StringBuilder b = new StringBuilder();
+    b.append("stopId_");
+    b.append(escapeId(pab.getStop().getId()));
+    b.append("-tripId_");
+    b.append(escapeId(pab.getTrip().getId()));
+    if( pab.getVehicleId() != null) {
+      b.append("-vehicleId_");
+      b.append(escapeId(pab.getVehicleId()));
+    }
+    
+    return b.toString();
+  }
 
   public String getMinutesLabel(ArrivalAndDepartureBean pab) {
 
@@ -183,6 +197,11 @@ public class ArrivalsAndDeparturesPresentaion {
   private long getScheduledTime(ArrivalAndDepartureBean pab) {
     return _showArrivals ? pab.getScheduledArrivalTime()
         : pab.getScheduledDepartureTime();
+  }
+  
+  private String escapeId(String value) {
+    value = value.replaceAll(" ", "_");
+    return value;
   }
 
 }

@@ -42,4 +42,9 @@ class ResourceEntry extends AbstractResource {
   public ResourceTransformationStrategy getTransformationStrategy() {
     return transformationStrategy;
   }
+
+  @Override
+  public String toString() {
+    return "ResourceEntry(path=" + resourcePath + ")";
+  }
 }

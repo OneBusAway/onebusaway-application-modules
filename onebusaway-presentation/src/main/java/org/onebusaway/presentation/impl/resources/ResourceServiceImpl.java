@@ -40,6 +40,7 @@ import javax.servlet.ServletContext;
 
 import org.json.JSONObject;
 import org.onebusaway.presentation.impl.ServletLibrary;
+import org.onebusaway.presentation.services.resources.Resource;
 import org.onebusaway.presentation.services.resources.ResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,7 +129,8 @@ public class ResourceServiceImpl implements ResourceService {
       return null;
     }
 
-    refreshResource(resource);
+    if (_debug)
+      refreshResource(resource);
 
     return resource.getExternalUrl();
   }
@@ -149,13 +151,14 @@ public class ResourceServiceImpl implements ResourceService {
       return null;
     }
 
-    refreshResource(resource);
+    if (_debug)
+      refreshResource(resource);
 
     return resource.getExternalUrl();
   }
 
   @Override
-  public URL getLocalUrlForExternalId(String externalId) {
+  public Resource getLocalResourceForExternalId(String externalId) {
     Resource resource = _resourceEntriesByExternalId.get(externalId);
     if (resource == null) {
       /**
@@ -166,13 +169,13 @@ public class ResourceServiceImpl implements ResourceService {
       if (resourcePath != null)
         resource = getResourceForPath(resourcePath, null);
     }
-    
+
     if (resource == null) {
       _log.warn("resource not found for external id: " + externalId);
       return null;
     }
-    
-    return resource.getLocalUrl();
+
+    return resource;
   }
 
   /****
@@ -295,9 +298,29 @@ public class ResourceServiceImpl implements ResourceService {
   }
 
   private File getBundleResourceAsLocalFile(String resourcePath, URL resourceUrl) {
+
     String protocol = resourceUrl.getProtocol();
+
     if ("file".equals(protocol))
       return new File(resourceUrl.getPath());
+
+    if ("jar".equals(protocol)) {
+
+      String path = resourceUrl.getPath();
+      int index = path.indexOf('!');
+      if (index != -1)
+        path = path.substring(0, index);
+
+      try {
+        URL jarResourceUrl = new URL(path);
+        File file = new File(jarResourceUrl.getPath());
+        if (file.exists())
+          return file;
+      } catch (MalformedURLException e) {
+
+      }
+    }
+
     File path = new File(_servletContext.getRealPath(resourcePath));
     if (path.exists())
       return path;
@@ -354,15 +377,20 @@ public class ResourceServiceImpl implements ResourceService {
     ResourceTransformationStrategy strategy = resource.getTransformationStrategy();
 
     URL localUrl = resource.getSourceResource();
+    long contentLength = -1;
 
     if (strategy.requiresTransformation()) {
       File outputFile = getOutputFile(resource.getResourcePath());
       strategy.transformResource(this, localUrl, outputFile);
       localUrl = getFileAsUrl(outputFile);
+      contentLength = outputFile.length();
     }
 
-    resource.setLocalUrl(localUrl);
+    if (contentLength == -1)
+      contentLength = computeContentLengthForLocalUrl(localUrl);
 
+    resource.setLocalUrl(localUrl);
+    resource.setContentLength(contentLength);
     String key = getResourceKey(localUrl);
 
     String externalId = constructExternalId(resource.getResourcePath(), key);
@@ -372,6 +400,33 @@ public class ResourceServiceImpl implements ResourceService {
     resource.setExternalUrl(externalUrl);
 
     _resourceEntriesByExternalId.put(externalId, resource);
+  }
+
+  private long computeContentLengthForLocalUrl(URL localUrl) {
+
+    InputStream in = null;
+
+    try {
+      in = localUrl.openStream();
+      long contentLength = 0;
+      byte[] buffer = new byte[1024];
+      while (true) {
+        int rc = in.read(buffer);
+        if (rc == -1)
+          return contentLength;
+        contentLength += rc;
+      }
+    } catch (IOException ex) {
+      throw new IllegalStateException("error reading local url " + localUrl, ex);
+    } finally {
+      if (in != null) {
+        try {
+          in.close();
+        } catch (IOException ex) {
+          _log.warn("error closing local url " + localUrl, ex);
+        }
+      }
+    }
   }
 
   private String getResourceKey(URL localResource) {
@@ -573,6 +628,8 @@ public class ResourceServiceImpl implements ResourceService {
     URL localUrl = getFileAsUrl(outputFile);
 
     entry.setLocalUrl(localUrl);
+    entry.setContentLength(outputFile.length());
+
     String key = getResourceKey(localUrl);
 
     String externalId = constructExternalId(entry.getResourceId(), key);

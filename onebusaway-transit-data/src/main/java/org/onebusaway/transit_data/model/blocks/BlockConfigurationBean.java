@@ -14,6 +14,8 @@ public final class BlockConfigurationBean implements Serializable {
   private List<String> inactiveServiceIds;
 
   private List<BlockTripBean> trips;
+  
+  private String timeZone;
 
   public String getBlockId() {
     return blockId;
@@ -45,5 +47,13 @@ public final class BlockConfigurationBean implements Serializable {
 
   public void setTrips(List<BlockTripBean> trips) {
     this.trips = trips;
+  }
+
+  public String getTimeZone() {
+    return timeZone;
+  }
+
+  public void setTimeZone(String timeZone) {
+    this.timeZone = timeZone;
   }
 }

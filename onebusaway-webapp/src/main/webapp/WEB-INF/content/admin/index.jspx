@@ -29,10 +29,11 @@
     <li><s:a href="user-properties-migration">User Properties Migration</s:a></li>
     <li><s:a action="api-keys">API Key Management</s:a></li>
     <li><s:a action="create-login">Create a New Login</s:a></li>
-    <li><oba:message key="ProblemReports" /></li>
+    <li><s:a namespace="/admin/console" action="service-alerts"><s:text name="ServiceAlerts"/></s:a></li>
+    <li><s:text name="ProblemReports" /></li>
     <ul>
-        <li><s:a namespace="problems" action="stop-problem-report-summaries"><oba:message key="StopProblemReports"/></s:a></li>
-        <li><s:a namespace="problems" action="trip-problem-report-summaries"><oba:message key="TripProblemReports"/></s:a></li>
+        <li><s:a namespace="problems" action="stop-problem-report-summaries"><s:text name="StopProblemReports"/></s:a></li>
+        <li><s:a namespace="problems" action="trip-problem-report-summaries"><s:text name="TripProblemReports"/></s:a></li>
     </ul>
 </ul>
 
