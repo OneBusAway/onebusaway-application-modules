@@ -22,16 +22,18 @@
 
 <jsp:directive.page contentType="text/html" />
 
-<s:set var="#unreadServiceAlertCount" value="situations.unreadCount"/> 
-
-<s:if test="serviceA &gt; 0">
+<s:if test="situations.unreadCount &gt; 0">
 <div class="unreadServiceAlerts">
-  <s:a action="service-alerts-for-stop">
-    <s:param name="stopIds" value="stopIds"/>
-    <oba:message key="serviceAlerts.unreadServiceAlerts">
-      <s:param value="#unreadServiceAlertCount"/>
-    </oba:message>
-  </s:a>
+  <ul>
+    <s:iterator value="situations.unreadSituations">
+      <li>
+        <s:a action="service-alert" cssClass="unreadServiceAlert">
+          <s:param name="id" value="id"/>
+          <s:property value="situations.getTitle(top)" />
+        </s:a>
+      </li>
+    </s:iterator>
+  </ul>
 </div>
 </s:if>
 

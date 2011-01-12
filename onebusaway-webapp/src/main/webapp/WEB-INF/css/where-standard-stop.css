@@ -220,3 +220,11 @@
 	margin: 10px;
 	font-weight: bold;
 }
+
+.serviceAlerts {
+	text-align: left;	
+}
+	
+.unreadServiceAlert {
+	font-weight: bold;	
+}

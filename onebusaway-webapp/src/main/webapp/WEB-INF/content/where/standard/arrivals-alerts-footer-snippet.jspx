@@ -26,6 +26,7 @@
 
 <s:if test="totalCount &gt; 0">
 <div class="serviceAlerts">
+  <h4><s:text name="ServiceAlerts"/>:</h4>
   <ul>
     <s:iterator value="unreadSituations">
       <li>

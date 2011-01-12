@@ -419,6 +419,16 @@ div.wiki h2 {
  *
  ****/
  
+.serviceAlertTable td.label {
+  padding: 5px;
+  font-weight: bold;
+  text-align: right;	
+}
+
+/****
+ *
+ ****/
+ 
 table.ProblemReportSummaries thead tr {
   background-color: #6D6E72;
 }

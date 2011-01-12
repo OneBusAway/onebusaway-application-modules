@@ -33,25 +33,25 @@
 
 <h2><s:property value="summary.value"/></h2>
 
-<table>
+<table class="serviceAlertTable">
 
 <s:if test="summary != null">
 <tr>
-  <td><oba:message key="Summary"/>:</td>
+  <td class="label"><oba:message key="Summary"/>:</td>
   <td><s:property value="summary.value"/></td>
 </tr>
 </s:if>
 
 <s:if test="description != null">
 <tr>
-  <td><oba:message key="Description"/>:</td>
-  <td><s:property value="description.value"/></td>
+  <td class="label"><oba:message key="Description"/>:</td>
+  <td><s:property escape="false" value="description.value"/></td>
 </tr>
 </s:if>
 
 <s:if test="advice != null">
 <tr>
-  <td><oba:message key="Advice"/>:</td>
+  <td class="label"><oba:message key="Advice"/>:</td>
   <td><s:property value="advice.value"/></td>
 </tr>
 </s:if>
@@ -60,7 +60,7 @@
 
 <s:if test="condition != null">
 <tr>
-  <td><oba:message key="Condition"/>:</td>
+  <td class="label"><oba:message key="Condition"/>:</td>
   <td><s:i18n name="org.onebusaway.webapp.actions.bundles.service_alerts.ServiceConditions">
     <s:property value="getText(condition)" />
   </s:i18n></td>
@@ -70,21 +70,21 @@
 
 <s:if test="period.from != 0">
 <tr>
-  <td><oba:message key="From"/>:</td>
+  <td class="label"><oba:message key="From"/>:</td>
   <td><oba:date dateStyle="short" timeStyle="short" value="period.from"/></td>
 </tr>
 </s:if>
 
 <s:if test="period.to != 0">
 <tr>
-  <td><oba:message key="Until"/>:</td>
+  <td class="label"><oba:message key="Until"/>:</td>
   <td><oba:date dateStyle="short" timeStyle="short" value="period.to"/></td>
 </tr> 
 </s:if>
 
 <s:if test="conditionDetails.diversionPath != null">
 <tr>
-  <td><oba:message key="Detour"/>:</td>
+  <td class="label"><oba:message key="Detour"/>:</td>
   <td>
     
 <script type="text/javascript">
