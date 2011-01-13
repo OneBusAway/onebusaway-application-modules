@@ -47,12 +47,43 @@ public class ShapePointsLibrary {
     return projectedShapePoints;
   }
 
+  /**
+   * Here is the idea:
+   * 
+   * Given a shape as an array of XY Points, a range over those points, and a
+   * target point, find the closest location(s) along the shape for the target
+   * point.
+   * 
+   * The trick is that there may be multiple good assignments, especially for a
+   * shape that loops back on itself. In this case, we look for assignments
+   * within our _localMinimumThreshold distance. There will typically be ranges
+   * of assignments that apply and we take the local min within each range. We
+   * then return each of these local mins as a potential assignment.
+   * 
+   * If no assignments are found within the _localMinimumThreshold distance, we
+   * just return the global min.
+   * 
+   * @param projectedShapePoints
+   * @param shapePointDistance
+   * @param targetPoint
+   * @param fromIndex
+   * @param toIndex
+   * @return
+   */
   public List<PointAndIndex> computePotentialAssignments(
       List<XYPoint> projectedShapePoints, double[] shapePointDistance,
       XYPoint targetPoint, int fromIndex, int toIndex) {
 
+    /**
+     * The absolute closest assignment
+     */
     Min<PointAndIndex> min = new Min<PointAndIndex>();
+
+    /**
+     * 
+     */
     Min<PointAndIndex> localMin = new Min<PointAndIndex>();
+
     List<PointAndIndex> localMins = new ArrayList<PointAndIndex>();
 
     for (int i = fromIndex; i < toIndex - 1; i++) {
@@ -76,14 +107,26 @@ public class ShapePointsLibrary {
       }
     }
 
+    /**
+     * If don't have ANY potential assignments, return an empty list
+     */
     if (min.isEmpty())
       return Collections.emptyList();
 
+    /**
+     * Check to see if we have a localMin element that needs to be added to our
+     * collection of local mins
+     */
     if (!localMin.isEmpty())
       localMins.add(localMin.getMinElement());
 
+    /**
+     * If we don't have ANY local mins (aka assignments that were within our
+     * _localMinimumThreshold), we just use the best assigment(s) from the
+     * global min
+     */
     if (localMins.isEmpty())
-      localMins.add(min.getMinElement());
+      localMins.addAll(min.getMinElements());
 
     Collections.sort(localMins);
 
