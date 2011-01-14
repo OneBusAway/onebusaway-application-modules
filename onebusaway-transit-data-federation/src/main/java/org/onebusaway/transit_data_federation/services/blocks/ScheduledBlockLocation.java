@@ -26,6 +26,8 @@ public class ScheduledBlockLocation {
 
   private boolean inService;
 
+  private int stopTimeIndex;
+
   /**
    * Should never be null, even if the trip is not in service. In the case of
    * out of service before the start of the block, the active trip will be the
@@ -142,6 +144,18 @@ public class ScheduledBlockLocation {
 
   public void setInService(boolean inService) {
     this.inService = inService;
+  }
+
+  /**
+   * @return the index into the block config's list of stop times that was used
+   *         to find the scheduled block location
+   */
+  public int getStopTimeIndex() {
+    return stopTimeIndex;
+  }
+
+  public void setStopTimeIndex(int stopTimeIndex) {
+    this.stopTimeIndex = stopTimeIndex;
   }
 
   @Override

@@ -241,6 +241,12 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
       TripBean activeTripBean = _tripBeanService.getTripForId(activeTrip.getId());
       bean.setActiveTrip(activeTripBean);
+
+      if (blockLocation.isLastKnownDistanceAlongBlockSet()) {
+        bean.setLastKnownDistanceAlongTrip(blockLocation.getLastKnownDistanceAlongBlock()
+            - activeBlockTrip.getDistanceAlongBlock());
+      }
+
     } else {
       _log.warn("no active block trip for block location: blockInstance="
           + blockLocation.getBlockInstance() + " time=" + time);

@@ -33,6 +33,8 @@ public class BlockLocation {
    * from real-time data when available
    ****/
 
+  private double distanceAlongBlock = Double.NaN;
+
   private CoordinatePoint location;
 
   private double orientation = Double.NaN;
@@ -59,6 +61,8 @@ public class BlockLocation {
 
   private long lastLocationUpdateTime;
 
+  private double lastKnownDistanceAlongBlock = Double.NaN;
+
   private CoordinatePoint lastKnownLocation;
 
   private double lastKnownOrientation = Double.NaN;
@@ -66,8 +70,6 @@ public class BlockLocation {
   private double scheduleDeviation = Double.NaN;
 
   private SortedMap<Integer, Double> scheduleDeviations = null;
-
-  private double distanceAlongBlock = Double.NaN;
 
   private AgencyAndId vehicleId;
 
@@ -118,6 +120,30 @@ public class BlockLocation {
 
   public void setScheduledDistanceAlongBlock(double scheduledDistanceAlongBlock) {
     this.scheduledDistanceAlongBlock = scheduledDistanceAlongBlock;
+  }
+
+  /**
+   * If the trip is non in service (see {@link #isInService()}, this value with
+   * be false.
+   * 
+   * @return
+   */
+  public boolean isDistanceAlongBlockSet() {
+    return !Double.isNaN(distanceAlongBlock);
+  }
+
+  /**
+   * If the trip is not in service (see {@link #isInService()}), this value will
+   * be {@link Double#NaN}. See {@link #isDistanceAlongBlockSet()}.
+   * 
+   * @return the distance traveled along the shape of the block, in meters
+   */
+  public double getDistanceAlongBlock() {
+    return distanceAlongBlock;
+  }
+
+  public void setDistanceAlongBlock(double distanceAlongBlock) {
+    this.distanceAlongBlock = distanceAlongBlock;
   }
 
   /**
@@ -267,6 +293,18 @@ public class BlockLocation {
     this.lastLocationUpdateTime = lastLocationUpdateTime;
   }
 
+  public boolean isLastKnownDistanceAlongBlockSet() {
+    return !Double.isNaN(lastKnownDistanceAlongBlock);
+  }
+
+  public double getLastKnownDistanceAlongBlock() {
+    return lastKnownDistanceAlongBlock;
+  }
+
+  public void setLastKnownDistanceAlongBlock(double lastKnownDistanceAlongBlock) {
+    this.lastKnownDistanceAlongBlock = lastKnownDistanceAlongBlock;
+  }
+
   public CoordinatePoint getLastKnownLocation() {
     return lastKnownLocation;
   }
@@ -328,24 +366,6 @@ public class BlockLocation {
   public void setScheduleDeviations(
       SortedMap<Integer, Double> scheduleDeviations) {
     this.scheduleDeviations = scheduleDeviations;
-  }
-
-  public boolean isDistanceAlongBlockSet() {
-    return !Double.isNaN(distanceAlongBlock);
-  }
-
-  /**
-   * If the trip is not in service (see {@link #isInService()}), this value will
-   * be {@link Double#NaN}.
-   * 
-   * @return the distance traveled along the shape of the block, in meters
-   */
-  public double getDistanceAlongBlock() {
-    return distanceAlongBlock;
-  }
-
-  public void setDistanceAlongBlock(double distanceAlongBlock) {
-    this.distanceAlongBlock = distanceAlongBlock;
   }
 
   public AgencyAndId getVehicleId() {

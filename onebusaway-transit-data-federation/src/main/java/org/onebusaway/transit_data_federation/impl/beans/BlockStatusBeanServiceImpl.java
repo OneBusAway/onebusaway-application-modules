@@ -112,7 +112,8 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
     bean.setLocation(location);
 
     bean.setScheduledDistanceAlongBlock(blockLocation.getScheduledDistanceAlongBlock());
-
+    bean.setDistanceAlongBlock(blockLocation.getDistanceAlongBlock());
+    
     BlockTripEntry activeTrip = blockLocation.getActiveTrip();
     if (activeTrip != null) {
       BlockTripBean activeTripBean = _blockBeanService.getBlockTripAsBean(activeTrip);
@@ -129,7 +130,6 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
     bean.setPredicted(blockLocation.isPredicted());
     bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
     bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
-    bean.setDistanceAlongBlock(blockLocation.getDistanceAlongBlock());
 
     AgencyAndId vid = blockLocation.getVehicleId();
     if (vid != null)

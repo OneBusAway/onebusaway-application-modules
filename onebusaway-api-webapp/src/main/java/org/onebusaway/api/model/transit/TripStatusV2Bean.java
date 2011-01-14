@@ -54,6 +54,8 @@ public final class TripStatusV2Bean implements Serializable {
 
   private Long lastLocationUpdateTime;
 
+  private Double lastKnownDistanceAlongTrip;
+
   private CoordinatePoint lastKnownLocation;
 
   private Double lastKnownOrientation;
@@ -200,6 +202,14 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setLastKnownLocation(CoordinatePoint lastKnownLocation) {
     this.lastKnownLocation = lastKnownLocation;
+  }
+
+  public Double getLastKnownDistanceAlongTrip() {
+    return lastKnownDistanceAlongTrip;
+  }
+
+  public void setLastKnownDistanceAlongTrip(Double lastKnownDistanceAlongTrip) {
+    this.lastKnownDistanceAlongTrip = lastKnownDistanceAlongTrip;
   }
 
   public Double getLastKnownOrientation() {

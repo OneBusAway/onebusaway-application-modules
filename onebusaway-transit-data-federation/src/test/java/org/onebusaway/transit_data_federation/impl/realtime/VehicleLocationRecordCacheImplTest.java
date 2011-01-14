@@ -44,7 +44,7 @@ public class VehicleLocationRecordCacheImplTest {
     assertNull(cacheRecord);
 
     cache.addRecord(blockInstance,
-        record(20, "blockA", serviceDate, "vehicleA", 10.0));
+        record(20, "blockA", serviceDate, "vehicleA", 10.0), null);
 
     records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(1, records.size());
@@ -58,7 +58,7 @@ public class VehicleLocationRecordCacheImplTest {
     assertSame(cacheRecord, cacheRecord2);
 
     cache.addRecord(blockInstance,
-        record(30, "blockA", serviceDate, "vehicleA", 20.0));
+        record(30, "blockA", serviceDate, "vehicleA", 20.0), null);
 
     records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(1, records.size());
@@ -72,7 +72,7 @@ public class VehicleLocationRecordCacheImplTest {
     assertSame(cacheRecord, cacheRecord2);
 
     cache.addRecord(blockInstance,
-        record(40, "blockA", serviceDate, "vehicleB", 5.0));
+        record(40, "blockA", serviceDate, "vehicleB", 5.0), null);
 
     records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(2, records.size());
@@ -122,22 +122,22 @@ public class VehicleLocationRecordCacheImplTest {
     cache.setBlockLocationRecordCacheWindowSize(20);
 
     cache.addRecord(instanceA,
-        record(20, "blockA", serviceDate, "vehicleA", 10.0));
+        record(20, "blockA", serviceDate, "vehicleA", 10.0), null);
 
     Thread.sleep(100);
 
     cache.addRecord(instanceB,
-        record(30, "blockB", serviceDate, "vehicleB", 20.0));
+        record(30, "blockB", serviceDate, "vehicleB", 20.0), null);
 
     Thread.sleep(100);
 
     cache.addRecord(instanceA,
-        record(40, "blockA", serviceDate, "vehicleC", 20.0));
+        record(40, "blockA", serviceDate, "vehicleC", 20.0), null);
 
     Thread.sleep(100);
 
     cache.addRecord(instanceB,
-        record(50, "blockB", serviceDate, "vehicleD", 20.0));
+        record(50, "blockB", serviceDate, "vehicleD", 20.0), null);
 
     cache.clearStaleRecords(System.currentTimeMillis() - 150);
 
@@ -229,7 +229,7 @@ public class VehicleLocationRecordCacheImplTest {
         r.setDistanceAlongBlock(i * 100);
         r.setTimeOfRecord(i * 1000);
 
-        _cache.addRecord(_blockInstance, r);
+        _cache.addRecord(_blockInstance, r, null);
 
         List<VehicleLocationCacheRecord> records = _cache.getRecordsForBlockInstance(_blockInstance);
         VehicleLocationCacheRecord cacheRecord = getCollectionForVehicleId(records);

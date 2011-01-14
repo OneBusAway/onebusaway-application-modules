@@ -47,6 +47,26 @@ public class GenericBinarySearch {
     return search(elements, targetValue, valueAdapter, 0, size);
   }
 
+  /**
+   * Return an index into the element list such that if a new element with the
+   * specified target value was inserted into the list at the specified index,
+   * the list would remain in sorted order with respect to the
+   * {@link IndexAdapter}
+   * 
+   * @param elements a collection of objects, sorted in the order appropriate to
+   *          the {@link IndexAdapter}
+   * @param indexFrom starting index range
+   * @param indexTo ending index range
+   * @param targetValue target value to search for
+   * @param valueAdapter adapter to convert the input element type into a double
+   *          value
+   * @return
+   */
+  public static <T> int searchRange(T elements, int indexFrom, int indexTo,
+      double targetValue, IndexAdapter<T> valueAdapter) {
+    return search(elements, targetValue, valueAdapter, indexFrom, indexTo);
+  }
+
   public interface ValueAdapter<T> {
     public double getValue(T value);
   }

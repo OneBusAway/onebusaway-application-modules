@@ -346,6 +346,9 @@ public class BeanFactoryV2 {
     if (tripStatus.getLastLocationUpdateTime() > 0)
       bean.setLastLocationUpdateTime(tripStatus.getLastLocationUpdateTime());
 
+    if (tripStatus.isLastKnownDistanceAlongTripSet())
+      bean.setLastKnownDistanceAlongTrip(tripStatus.getLastKnownDistanceAlongTrip());
+
     bean.setLastKnownLocation(tripStatus.getLastKnownLocation());
 
     if (tripStatus.isLastKnownOrientationSet())
@@ -727,13 +730,13 @@ public class BeanFactoryV2 {
 
     bean.setTripId(trip.getId());
     addToReferences(trip);
-    
+
     bean.setServiceDate(ad.getServiceDate());
     bean.setVehicleId(ad.getVehicleId());
     bean.setStopId(stop.getId());
     addToReferences(stop);
     bean.setStopSequence(ad.getStopSequence());
-    
+
     bean.setRouteId(route.getId());
     addToReferences(route);
 

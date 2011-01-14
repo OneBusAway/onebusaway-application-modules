@@ -5,6 +5,7 @@ import java.util.List;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 
 public interface VehicleLocationRecordCache {
 
@@ -13,7 +14,7 @@ public interface VehicleLocationRecordCache {
   public List<VehicleLocationCacheRecord> getRecordsForBlockInstance(
       BlockInstance blockInstance);
 
-  public void addRecord(BlockInstance blockInstance, VehicleLocationRecord record);
+  public void addRecord(BlockInstance blockInstance, VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation);
 
   public void clearRecordsForVehicleId(AgencyAndId vehicleId);
 }

@@ -35,6 +35,8 @@ public final class TripStatusBean implements Serializable {
 
   private String status;
 
+  private double distanceAlongTrip = Double.NaN;
+
   private CoordinatePoint location;
 
   private double orientation = Double.NaN;
@@ -59,13 +61,13 @@ public final class TripStatusBean implements Serializable {
 
   private long lastLocationUpdateTime;
 
+  private double lastKnownDistanceAlongTrip = Double.NaN;
+
   private CoordinatePoint lastKnownLocation;
 
   private double lastKnownOrientation = Double.NaN;
 
   private double scheduleDeviation;
-
-  private double distanceAlongTrip = Double.NaN;
 
   private String vehicleId;
 
@@ -130,6 +132,31 @@ public final class TripStatusBean implements Serializable {
 
   public void setStatus(String status) {
     this.status = status;
+  }
+
+  /**
+   * @return true if {@link #getDistanceAlongTrip()} has been set
+   */
+  public boolean isDistanceAlongTripSet() {
+    return !Double.isNaN(distanceAlongTrip);
+  }
+
+  /**
+   * See description in {@link #getDistanceAlongTrip()}.
+   * 
+   * @param distanceAlongTrip
+   */
+  public void setDistanceAlongTrip(double distanceAlongTrip) {
+    this.distanceAlongTrip = distanceAlongTrip;
+  }
+
+  /**
+   * The vehicle's distance along the trip.
+   * 
+   * @return distance, in meters
+   */
+  public double getDistanceAlongTrip() {
+    return distanceAlongTrip;
   }
 
   public CoordinatePoint getLocation() {
@@ -250,6 +277,18 @@ public final class TripStatusBean implements Serializable {
     this.lastLocationUpdateTime = lastLocationUpdateTime;
   }
 
+  public boolean isLastKnownDistanceAlongTripSet() {
+    return !Double.isNaN(lastKnownDistanceAlongTrip);
+  }
+
+  public double getLastKnownDistanceAlongTrip() {
+    return lastKnownDistanceAlongTrip;
+  }
+
+  public void setLastKnownDistanceAlongTrip(double lastKnownDistanceAlongTrip) {
+    this.lastKnownDistanceAlongTrip = lastKnownDistanceAlongTrip;
+  }
+
   public CoordinatePoint getLastKnownLocation() {
     return lastKnownLocation;
   }
@@ -280,31 +319,6 @@ public final class TripStatusBean implements Serializable {
 
   public void setScheduleDeviation(double scheduleDeviation) {
     this.scheduleDeviation = scheduleDeviation;
-  }
-
-  /**
-   * @return true if {@link #getDistanceAlongTrip()} has been set
-   */
-  public boolean isDistanceAlongTripSet() {
-    return !Double.isNaN(distanceAlongTrip);
-  }
-
-  /**
-   * See description in {@link #getDistanceAlongTrip()}.
-   * 
-   * @param distanceAlongTrip
-   */
-  public void setDistanceAlongTrip(double distanceAlongTrip) {
-    this.distanceAlongTrip = distanceAlongTrip;
-  }
-
-  /**
-   * The vehicle's distance along the trip.
-   * 
-   * @return distance, in meters
-   */
-  public double getDistanceAlongTrip() {
-    return distanceAlongTrip;
   }
 
   public String getVehicleId() {

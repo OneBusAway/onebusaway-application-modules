@@ -52,6 +52,90 @@ class ScheduledBlockLocationServiceImpl implements
     int stopTimeIndex = GenericBinarySearch.search(blockConfig, n,
         distanceAlongBlock, BlockConfigDistanceAlongBlockIndexAdapter.INSTANCE);
 
+    return getScheduledBlockLocationFromDistanceAlongBlockAndStopTimeIndex(
+        stopTimes, distanceAlongBlock, stopTimeIndex);
+  }
+
+  @Override
+  public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
+      ScheduledBlockLocation previousLocation, double distanceAlongBlock) {
+
+    if (previousLocation.getDistanceAlongBlock() > distanceAlongBlock)
+      throw new IllegalStateException(
+          "previousLocation's distanceAlongBlock must be before the requested distanceAlongBlock");
+
+    BlockTripEntry trip = previousLocation.getActiveTrip();
+    BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
+
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+
+    int indexFrom = previousLocation.getStopTimeIndex();
+    int indexTo = indexFrom + 1;
+
+    while (indexTo < stopTimes.size()) {
+      double d = blockConfig.getDistanceAlongBlockForIndex(indexTo);
+      if (distanceAlongBlock <= d)
+        break;
+      indexTo++;
+    }
+
+    int stopTimeIndex = GenericBinarySearch.searchRange(blockConfig, indexFrom,
+        indexTo, distanceAlongBlock,
+        BlockConfigDistanceAlongBlockIndexAdapter.INSTANCE);
+
+    return getScheduledBlockLocationFromDistanceAlongBlockAndStopTimeIndex(
+        stopTimes, distanceAlongBlock, stopTimeIndex);
+  }
+
+  @Override
+  public ScheduledBlockLocation getScheduledBlockLocationFromScheduledTime(
+      BlockConfigurationEntry blockConfig, int scheduleTime) {
+
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+    int n = stopTimes.size();
+    int index = GenericBinarySearch.search(blockConfig, n, scheduleTime,
+        BlockConfigDepartureTimeIndexAdapter.INSTANCE);
+
+    return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(stopTimes,
+        scheduleTime, index);
+  }
+
+  @Override
+  public ScheduledBlockLocation getScheduledBlockLocationFromScheduledTime(
+      ScheduledBlockLocation previousLocation, int scheduleTime) {
+
+    if (previousLocation.getScheduledTime() > scheduleTime)
+      throw new IllegalStateException(
+          "previousLocation's scheduledTime must be before the requested scheduleTime");
+
+    BlockTripEntry trip = previousLocation.getActiveTrip();
+    BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
+
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+
+    int index = previousLocation.getStopTimeIndex();
+
+    while (index < stopTimes.size()) {
+      int t = blockConfig.getDepartureTimeForIndex(index);
+      if (scheduleTime <= t)
+        break;
+      index++;
+    }
+
+    return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(stopTimes,
+        scheduleTime, index);
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlockAndStopTimeIndex(
+      List<BlockStopTimeEntry> stopTimes, double distanceAlongBlock,
+      int stopTimeIndex) {
+
+    int n = stopTimes.size();
+
     // Are we out beyond our last stop-time?
     if (stopTimeIndex == n) {
 
@@ -61,7 +145,8 @@ class ScheduledBlockLocationServiceImpl implements
 
       BlockStopTimeEntry blockFrom = stopTimes.get(n - 2);
       BlockStopTimeEntry blockTo = stopTimes.get(n - 1);
-      return interpolateLocation(blockFrom, blockTo, distanceAlongBlock);
+      return interpolateLocation(blockFrom, blockTo, distanceAlongBlock,
+          stopTimeIndex);
     }
 
     // Are we before out first stop-time?
@@ -74,7 +159,8 @@ class ScheduledBlockLocationServiceImpl implements
       BlockStopTimeEntry blockFrom = stopTimes.get(0);
       BlockStopTimeEntry blockTo = stopTimes.get(1);
 
-      return interpolateLocation(blockFrom, blockTo, distanceAlongBlock);
+      return interpolateLocation(blockFrom, blockTo, distanceAlongBlock,
+          stopTimeIndex);
     }
 
     BlockStopTimeEntry blockBefore = stopTimes.get(stopTimeIndex - 1);
@@ -93,23 +179,6 @@ class ScheduledBlockLocationServiceImpl implements
         scheduleTime, stopTimeIndex);
   }
 
-  @Override
-  public ScheduledBlockLocation getScheduledBlockLocationFromScheduledTime(
-      BlockConfigurationEntry blockConfig, int scheduleTime) {
-
-    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
-    int n = stopTimes.size();
-    int index = GenericBinarySearch.search(blockConfig, n, scheduleTime,
-        BlockConfigDepartureTimeIndexAdapter.INSTANCE);
-
-    return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(stopTimes,
-        scheduleTime, index);
-  }
-
-  /****
-   * Private Methods
-   ****/
-
   private ScheduledBlockLocation getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(
       List<BlockStopTimeEntry> stopTimes, int scheduleTime, int stopTimeIndex) {
 
@@ -126,7 +195,7 @@ class ScheduledBlockLocationServiceImpl implements
           && scheduleTime <= stopTime.getDepartureTime()) {
 
         return getScheduledBlockLocationWhenAtStopTime(blockStopTime, stopTime,
-            scheduleTime);
+            scheduleTime, stopTimeIndex);
       }
     }
 
@@ -154,7 +223,8 @@ class ScheduledBlockLocationServiceImpl implements
   }
 
   private ScheduledBlockLocation getScheduledBlockLocationWhenAtStopTime(
-      BlockStopTimeEntry blockStopTime, StopTimeEntry stopTime, int scheduleTime) {
+      BlockStopTimeEntry blockStopTime, StopTimeEntry stopTime,
+      int scheduleTime, int stopTimeIndex) {
     StopEntry stop = stopTime.getStop();
 
     ScheduledBlockLocation result = new ScheduledBlockLocation();
@@ -182,6 +252,7 @@ class ScheduledBlockLocationServiceImpl implements
     result.setDistanceAlongBlock(blockStopTime.getDistanceAlongBlock());
     result.setActiveTrip(blockStopTime.getTrip());
     result.setInService(true);
+    result.setStopTimeIndex(stopTimeIndex);
     return result;
   }
 
@@ -197,6 +268,7 @@ class ScheduledBlockLocationServiceImpl implements
     ScheduledBlockLocation result = new ScheduledBlockLocation();
     result.setScheduledTime(scheduleTime);
     result.setInService(true);
+    result.setStopTimeIndex(stopTimeIndex);
 
     int fromTime = before.getDepartureTime();
     int toTime = after.getArrivalTime();
@@ -330,12 +402,13 @@ class ScheduledBlockLocationServiceImpl implements
     result.setDistanceAlongBlock(distanceAlongBlock);
     result.setActiveTrip(blockStopTime.getTrip());
     result.setInService(inService);
+    result.setStopTimeIndex(0);
     return result;
   }
 
   private ScheduledBlockLocation interpolateLocation(
       BlockStopTimeEntry blockFrom, BlockStopTimeEntry blockTo,
-      double distanceAlongBlock) {
+      double distanceAlongBlock, int stopTimeIndex) {
 
     if (distanceAlongBlock < 0.0)
       return null;
@@ -397,6 +470,7 @@ class ScheduledBlockLocationServiceImpl implements
       location.setNextStopTimeOffset(nextStop.getStopTime().getArrivalTime()
           - scheduledTime);
     location.setInService(nextStop != null);
+    location.setStopTimeIndex(stopTimeIndex);
     location.setDistanceAlongBlock(distanceAlongBlock);
     location.setScheduledTime(scheduledTime);
 

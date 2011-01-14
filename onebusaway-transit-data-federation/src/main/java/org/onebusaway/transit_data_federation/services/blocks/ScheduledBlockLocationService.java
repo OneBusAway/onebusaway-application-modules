@@ -29,6 +29,21 @@ public interface ScheduledBlockLocationService {
       BlockConfigurationEntry blockConfig, int scheduleTime);
 
   /**
+   * Same behavior as
+   * {@link #getScheduledBlockLocationFromDistanceAlongBlock(BlockConfigurationEntry, double)}
+   * except we take advantage of the fact that we might already have a
+   * ScheduledBlockLocation that comes just a bit before the target
+   * scheduleTime, which should make lookup faster.
+   * 
+   * @param previousLocation a scheduled block location that comes right before
+   *          the target schedule time
+   * @param scheduleTime
+   * @return the schedule block position
+   */
+  public ScheduledBlockLocation getScheduledBlockLocationFromScheduledTime(
+      ScheduledBlockLocation previousLocation, int scheduleTime);
+
+  /**
    * 
    * @param stopTimes
    * @param distanceAlongBlock in meters
@@ -37,4 +52,19 @@ public interface ScheduledBlockLocationService {
    */
   public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
       BlockConfigurationEntry blockConfig, double distanceAlongBlock);
+
+  /**
+   * Same behavior as
+   * {@link #getScheduledBlockLocationFromDistanceAlongBlock(BlockConfigurationEntry, double)}
+   * except we take advantage of the fact that we might already have a
+   * ScheduledBlockLocation that comes just a bit before the target
+   * scheduleTime, which should make lookup faster.
+   * 
+   * @param previousLocation a scheduled block location that comes right before
+   *          the target schedule time
+   * @param scheduleTime
+   * @return the schedule block position
+   */
+  public ScheduledBlockLocation getScheduledBlockLocationFromDistanceAlongBlock(
+      ScheduledBlockLocation previousLocation, double distanceAlongBlock);
 }
