@@ -17,9 +17,11 @@ import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
+import org.onebusaway.transit_data_federation.services.blocks.LayoverIntervalBlock;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
@@ -91,10 +93,11 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
       long timeFrom, long timeTo) {
 
     List<BlockTripIndex> indices = _blockIndexService.getBlockTripIndicesForBlock(blockId);
+    List<BlockLayoverIndex> layoverIndices = _blockIndexService.getBlockLayoverIndicesForBlock(blockId);
     List<FrequencyBlockTripIndex> frequencyIndices = _blockIndexService.getFrequencyBlockTripIndicesForBlock(blockId);
 
-    return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
-        timeTo);
+    return getActiveBlocksInTimeRange(indices, layoverIndices,
+        frequencyIndices, timeFrom, timeTo);
   }
 
   @Override
@@ -133,23 +136,26 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
   public List<BlockInstance> getActiveBlocksForAgencyInTimeRange(
       String agencyId, long timeFrom, long timeTo) {
     List<BlockTripIndex> indices = _blockIndexService.getBlockTripIndicesForAgencyId(agencyId);
+    List<BlockLayoverIndex> layoverIndices = _blockIndexService.getBlockLayoverIndicesForAgencyId(agencyId);
     List<FrequencyBlockTripIndex> frequencyIndices = _blockIndexService.getFrequencyBlockTripIndicesForAgencyId(agencyId);
-    return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
-        timeTo);
+    return getActiveBlocksInTimeRange(indices, layoverIndices,
+        frequencyIndices, timeFrom, timeTo);
   }
 
   @Override
   public List<BlockInstance> getActiveBlocksForRouteInTimeRange(
       AgencyAndId routeId, long timeFrom, long timeTo) {
     List<BlockTripIndex> indices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId);
+    List<BlockLayoverIndex> layoverIndices = _blockIndexService.getBlockLayoverIndicesForRouteCollectionId(routeId);
     List<FrequencyBlockTripIndex> frequencyIndices = _blockIndexService.getFrequencyBlockTripIndicesForRouteCollectionId(routeId);
-    return getActiveBlocksInTimeRange(indices, frequencyIndices, timeFrom,
-        timeTo);
+    return getActiveBlocksInTimeRange(indices, layoverIndices,
+        frequencyIndices, timeFrom, timeTo);
   }
 
   @Override
   public List<BlockInstance> getActiveBlocksInTimeRange(
       Iterable<BlockTripIndex> indices,
+      Iterable<BlockLayoverIndex> layoverIndices,
       Iterable<FrequencyBlockTripIndex> frequencyIndices, long timeFrom,
       long timeTo) {
 
@@ -157,6 +163,9 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
 
     for (BlockTripIndex index : indices)
       getActiveBlocksInTimeRange(index, timeFrom, timeTo, instances);
+
+    for (BlockLayoverIndex index : layoverIndices)
+      getActiveLayoversInTimeRange(index, timeFrom, timeTo, instances);
 
     for (FrequencyBlockTripIndex index : frequencyIndices)
       getActiveFrequencyBlocksInTimeRange(index, timeFrom, timeTo, instances);
@@ -218,6 +227,59 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     int indexFrom = index(Arrays.binarySearch(intervals.getMaxDepartures(),
         scheduledTimeFrom));
     int indexTo = index(Arrays.binarySearch(intervals.getMinArrivals(),
+        scheduledTimeTo));
+
+    for (int in = indexFrom; in < indexTo; in++) {
+      BlockTripEntry trip = trips.get(in);
+      BlockConfigurationEntry block = trip.getBlockConfiguration();
+      BlockInstance instance = new BlockInstance(block, serviceDate.getTime());
+      instances.add(instance);
+    }
+  }
+
+  /****
+   * 
+   ****/
+
+  private void getActiveLayoversInTimeRange(BlockLayoverIndex index,
+      long timeFrom, long timeTo, Collection<BlockInstance> results) {
+
+    Date dateFrom = new Date(timeFrom);
+    Date dateTo = new Date(timeTo);
+
+    handleLayoverIndex(index, dateFrom, dateTo, results);
+  }
+
+  private Collection<BlockInstance> handleLayoverIndex(BlockLayoverIndex index,
+      Date timeFrom, Date timeTo, Collection<BlockInstance> instances) {
+
+    List<BlockTripEntry> trips = index.getTrips();
+
+    LayoverIntervalBlock layoverIntervalBlock = index.getLayoverIntervalBlock();
+    ServiceInterval serviceInterval = layoverIntervalBlock.getRange();
+
+    Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
+        index.getServiceIds(), serviceInterval, timeFrom, timeTo);
+
+    for (Date serviceDate : serviceDates) {
+
+      findBlockLayoversInRange(layoverIntervalBlock, serviceDate, timeFrom,
+          timeTo, trips, instances);
+    }
+
+    return instances;
+  }
+
+  private void findBlockLayoversInRange(LayoverIntervalBlock intervals,
+      Date serviceDate, Date timeFrom, Date timeTo, List<BlockTripEntry> trips,
+      Collection<BlockInstance> instances) {
+
+    int scheduledTimeFrom = (int) ((timeFrom.getTime() - serviceDate.getTime()) / 1000);
+    int scheduledTimeTo = (int) ((timeTo.getTime() - serviceDate.getTime()) / 1000);
+
+    int indexFrom = index(Arrays.binarySearch(intervals.getEndTimes(),
+        scheduledTimeFrom));
+    int indexTo = index(Arrays.binarySearch(intervals.getStartTimes(),
         scheduledTimeTo));
 
     for (int in = indexFrom; in < indexTo; in++) {

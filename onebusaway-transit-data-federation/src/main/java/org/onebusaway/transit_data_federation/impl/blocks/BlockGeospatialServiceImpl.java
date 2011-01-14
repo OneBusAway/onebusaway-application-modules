@@ -10,6 +10,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarServi
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
@@ -58,9 +59,10 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
         blockIndices.add(stopTimeIndex.getBlockIndex());
     }
 
+    List<BlockLayoverIndex> layoverIndices = Collections.emptyList();
     List<FrequencyBlockTripIndex> frequencyIndices = Collections.emptyList();
 
     return _blockCalendarService.getActiveBlocksInTimeRange(blockIndices,
-        frequencyIndices, timeFrom, timeTo);
+        layoverIndices, frequencyIndices, timeFrom, timeTo);
   }
 }

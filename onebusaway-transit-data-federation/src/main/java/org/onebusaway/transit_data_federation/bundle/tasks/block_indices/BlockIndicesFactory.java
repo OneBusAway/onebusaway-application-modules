@@ -9,9 +9,11 @@ import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.FrequencyComparator;
+import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
+import org.onebusaway.transit_data_federation.services.blocks.LayoverIntervalBlock;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
@@ -27,6 +29,8 @@ public class BlockIndicesFactory {
   private static Logger _log = LoggerFactory.getLogger(BlockIndicesFactory.class);
 
   private static final BlockTripFirstTimeComparator _blockTripComparator = new BlockTripFirstTimeComparator();
+
+  private static final BlockTripLayoverTimeComparator _blockLayoverComparator = new BlockTripLayoverTimeComparator();
 
   private static final FrequencyComparator _frequencyComparator = new FrequencyComparator();
 
@@ -58,6 +62,31 @@ public class BlockIndicesFactory {
 
       BlockTripIndexData data = new BlockTripIndexData(references,
           serviceIntervalBlock);
+      allData.add(data);
+    }
+
+    return allData;
+  }
+
+  public List<BlockLayoverIndexData> createLayoverData(
+      Iterable<BlockEntry> blocks) {
+
+    List<BlockLayoverIndex> indices = createLayoverIndices(blocks);
+    List<BlockLayoverIndexData> allData = new ArrayList<BlockLayoverIndexData>();
+
+    for (BlockLayoverIndex index : indices) {
+
+      List<BlockTripReference> references = new ArrayList<BlockTripReference>();
+
+      for (BlockTripEntry trip : index.getTrips()) {
+        BlockTripReference ref = ReferencesLibrary.getTripAsReference(trip);
+        references.add(ref);
+      }
+
+      LayoverIntervalBlock layoverIntervalBlock = index.getLayoverIntervalBlock();
+
+      BlockLayoverIndexData data = new BlockLayoverIndexData(references,
+          layoverIntervalBlock);
       allData.add(data);
     }
 
@@ -106,8 +135,8 @@ public class BlockIndicesFactory {
     int tripCount = 0;
 
     for (BlockEntry block : blocks) {
-      
-      if( block.getConfigurations().isEmpty() ) {
+
+      if (block.getConfigurations().isEmpty()) {
         _log.warn("block has no active configurations: " + block.getId());
         continue;
       }
@@ -117,7 +146,7 @@ public class BlockIndicesFactory {
 
       for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
         for (BlockTripEntry blockTrip : blockConfiguration.getTrips()) {
-          BlockTripSequenceKey key = getBlockTripAsKey(blockTrip);
+          BlockTripSequenceKey key = getBlockTripAsTripSequenceKey(blockTrip);
           blockTripsByKey.get(key).add(blockTrip);
           tripCount++;
         }
@@ -141,7 +170,71 @@ public class BlockIndicesFactory {
       List<List<BlockTripEntry>> groupedBlocks = ensureTripGroups(tripsWithSameSequence);
 
       for (List<BlockTripEntry> group : groupedBlocks) {
-        BlockTripIndex index = createIndexForGroupOfBlockTrips(group);
+        BlockTripIndex index = createTripIndexForGroupOfBlockTrips(group);
+        allIndices.add(index);
+      }
+    }
+
+    return allIndices;
+  }
+
+  public List<BlockLayoverIndex> createLayoverIndices(
+      Iterable<BlockEntry> blocks) {
+
+    List<BlockLayoverIndex> allIndices = new ArrayList<BlockLayoverIndex>();
+
+    Map<BlockLayoverSequenceKey, List<BlockTripEntry>> blockTripsByServiceIds = new FactoryMap<BlockLayoverSequenceKey, List<BlockTripEntry>>(
+        new ArrayList<BlockTripEntry>());
+
+    if (_verbose)
+      _log.info("grouping block layovers by sequence key");
+
+    int tripCount = 0;
+
+    for (BlockEntry block : blocks) {
+
+      if (block.getConfigurations().isEmpty()) {
+        _log.warn("block has no active configurations: " + block.getId());
+        continue;
+      }
+
+      if (isFrequencyBased(block))
+        continue;
+
+      for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
+        BlockTripEntry prevTrip = null;
+        for (BlockTripEntry blockTrip : blockConfiguration.getTrips()) {
+
+          if (prevTrip != null) {
+            BlockLayoverSequenceKey key = getBlockTripAsLayoverSequenceKey(blockTrip);
+            blockTripsByServiceIds.get(key).add(blockTrip);
+            tripCount++;
+          }
+
+          prevTrip = blockTrip;
+        }
+
+      }
+    }
+
+    if (_verbose)
+      _log.info("groups found: " + blockTripsByServiceIds.size()
+          + " out of trips: " + tripCount);
+
+    int count = 0;
+
+    for (List<BlockTripEntry> tripsWithSameSequence : blockTripsByServiceIds.values()) {
+
+      if (_verbose && count % 100 == 0)
+        _log.info("groups processed: " + count + "/"
+            + blockTripsByServiceIds.size());
+
+      count++;
+
+      List<List<BlockTripEntry>> groupedBlocks = ensureLayoverGroups(tripsWithSameSequence);
+
+      for (List<BlockTripEntry> group : groupedBlocks) {
+        BlockLayoverIndex index = createLayoverIndexForGroupOfBlockTrips(group);
         allIndices.add(index);
       }
     }
@@ -158,23 +251,23 @@ public class BlockIndicesFactory {
         new ArrayList<BlockTripEntry>());
 
     if (_verbose)
-      _log.info("grouping blocks by sequence key");
+      _log.info("grouping frequency blocks by sequence key");
 
     int tripCount = 0;
 
     for (BlockEntry block : blocks) {
 
-      if( block.getConfigurations().isEmpty() ) {
+      if (block.getConfigurations().isEmpty()) {
         _log.warn("block has no configurations: " + block.getId());
         continue;
       }
-      
+
       if (!isFrequencyBased(block))
         continue;
 
       for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
         for (BlockTripEntry blockTrip : blockConfiguration.getTrips()) {
-          BlockTripSequenceKey key = getBlockTripAsKey(blockTrip);
+          BlockTripSequenceKey key = getBlockTripAsTripSequenceKey(blockTrip);
           blockTripsByKey.get(key).add(blockTrip);
           tripCount++;
         }
@@ -210,10 +303,16 @@ public class BlockIndicesFactory {
    * 
    ****/
 
-  public BlockTripIndex createIndexForGroupOfBlockTrips(
+  public BlockTripIndex createTripIndexForGroupOfBlockTrips(
       List<BlockTripEntry> blocks) {
     ServiceIntervalBlock serviceIntervalBlock = getBlockTripsAsBlockInterval(blocks);
     return new BlockTripIndex(blocks, serviceIntervalBlock);
+  }
+
+  public BlockLayoverIndex createLayoverIndexForGroupOfBlockTrips(
+      List<BlockTripEntry> trips) {
+    LayoverIntervalBlock layoverIntervalBlock = getBlockTripsAsLayoverInterval(trips);
+    return new BlockLayoverIndex(trips, layoverIntervalBlock);
   }
 
   public FrequencyBlockTripIndex createFrequencyIndexForGroupOfBlockTrips(
@@ -232,12 +331,20 @@ public class BlockIndicesFactory {
     return blockEntry.getConfigurations().get(0).getFrequencies() != null;
   }
 
-  private BlockTripSequenceKey getBlockTripAsKey(BlockTripEntry blockTrip) {
+  private BlockTripSequenceKey getBlockTripAsTripSequenceKey(
+      BlockTripEntry blockTrip) {
     List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
     for (StopTimeEntry stopTime : blockTrip.getTrip().getStopTimes())
       stopIds.add(stopTime.getStop().getId());
     return new BlockTripSequenceKey(
         blockTrip.getBlockConfiguration().getServiceIds(), stopIds);
+  }
+
+  private BlockLayoverSequenceKey getBlockTripAsLayoverSequenceKey(
+      BlockTripEntry blockTrip) {
+    AgencyAndId firstStopId = blockTrip.getTrip().getStopTimes().get(0).getStop().getId();
+    return new BlockLayoverSequenceKey(
+        blockTrip.getBlockConfiguration().getServiceIds(), firstStopId);
   }
 
   private List<List<BlockTripEntry>> ensureTripGroups(
@@ -295,6 +402,56 @@ public class BlockIndicesFactory {
       }
     }
     return allGood;
+  }
+
+  private List<List<BlockTripEntry>> ensureLayoverGroups(
+      List<BlockTripEntry> blockTrips) {
+
+    Collections.sort(blockTrips, _blockLayoverComparator);
+
+    List<List<BlockTripEntry>> lists = new ArrayList<List<BlockTripEntry>>();
+
+    for (BlockTripEntry block : blockTrips) {
+      List<BlockTripEntry> list = getBestLayoverList(lists, block);
+      if (list == null) {
+        list = new ArrayList<BlockTripEntry>();
+        lists.add(list);
+      }
+      list.add(block);
+    }
+
+    return lists;
+  }
+
+  private List<BlockTripEntry> getBestLayoverList(
+      List<List<BlockTripEntry>> lists, BlockTripEntry trip) {
+
+    for (List<BlockTripEntry> list : lists) {
+
+      if (list.isEmpty())
+        return list;
+
+      BlockTripEntry prev = list.get(list.size() - 1);
+
+      boolean allGood = areLayoverTimesAlwaysIncreasingOrEqual(prev, trip);
+
+      if (allGood)
+        return list;
+    }
+
+    return null;
+  }
+
+  private boolean areLayoverTimesAlwaysIncreasingOrEqual(BlockTripEntry tripA,
+      BlockTripEntry tripB) {
+
+    int layoverStartA = BlockTripLayoverTimeComparator.getLayoverStartTimeForTrip(tripA);
+    int layoverEndA = BlockTripLayoverTimeComparator.getLayoverEndTimeForTrip(tripA);
+
+    int layoverStartB = BlockTripLayoverTimeComparator.getLayoverStartTimeForTrip(tripB);
+    int layoverEndB = BlockTripLayoverTimeComparator.getLayoverEndTimeForTrip(tripB);
+
+    return layoverStartA <= layoverStartB && layoverEndA <= layoverEndB;
   }
 
   private List<FrequencyTripGroup> ensureFrequencyTripGroups(
@@ -380,6 +537,27 @@ public class BlockIndicesFactory {
 
     return new ServiceIntervalBlock(minArrivals, minDepartures, maxArrivals,
         maxDepartures);
+  }
+
+  private LayoverIntervalBlock getBlockTripsAsLayoverInterval(
+      List<BlockTripEntry> trips) {
+
+    int n = trips.size();
+
+    int[] startTimes = new int[n];
+    int[] endTimes = new int[n];
+
+    int index = 0;
+
+    for (BlockTripEntry trip : trips) {
+
+      startTimes[index] = BlockTripLayoverTimeComparator.getLayoverStartTimeForTrip(trip);
+      endTimes[index] = BlockTripLayoverTimeComparator.getLayoverEndTimeForTrip(trip);
+
+      index++;
+    }
+
+    return new LayoverIntervalBlock(startTimes, endTimes);
   }
 
   private FrequencyServiceIntervalBlock getBlockTripssAsFrequencyBlockInterval(

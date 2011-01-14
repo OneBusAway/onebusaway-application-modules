@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
-import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
+import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
+import org.onebusaway.transit_data_federation.services.blocks.LayoverIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
@@ -15,23 +15,23 @@ public class BlockLayoverIndexData implements Serializable {
 
   private final List<BlockTripReference> _blockTripReferences;
 
-  private final ServiceIntervalBlock _serviceIntervalBlock;
+  private final LayoverIntervalBlock _layoverIntervalBlock;
 
   public BlockLayoverIndexData(List<BlockTripReference> blockTripReferences,
-      ServiceIntervalBlock serviceIntervalBlock) {
+      LayoverIntervalBlock layoverIntervalBlock) {
     _blockTripReferences = blockTripReferences;
-    _serviceIntervalBlock = serviceIntervalBlock;
+    _layoverIntervalBlock = layoverIntervalBlock;
   }
 
   public List<BlockTripReference> getBlockTripReferences() {
     return _blockTripReferences;
   }
 
-  public ServiceIntervalBlock getServiceIntervalBlock() {
-    return _serviceIntervalBlock;
+  public LayoverIntervalBlock getLayoverIntervalBlock() {
+    return _layoverIntervalBlock;
   }
 
-  public BlockTripIndex createIndex(TransitGraphDao dao) {
+  public BlockLayoverIndex createIndex(TransitGraphDao dao) {
 
     List<BlockTripEntry> trips = new ArrayList<BlockTripEntry>();
 
@@ -41,6 +41,6 @@ public class BlockLayoverIndexData implements Serializable {
       trips.add(trip);
     }
 
-    return new BlockTripIndex(trips, _serviceIntervalBlock);
+    return new BlockLayoverIndex(trips, _layoverIntervalBlock);
   }
 }

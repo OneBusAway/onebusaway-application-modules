@@ -58,6 +58,10 @@ public class FederatedTransitDataBundle {
   public File getBlockTripIndicesPath() {
     return new File(_path, "BlockTripIndices.obj");
   }
+  
+  public File getBlockLayoverIndicesPath() {
+    return new File(_path, "BlockLayoverIndices.obj");
+  }
 
   public File getFrequencyBlockTripIndicesPath() {
     return new File(_path, "FrequencyBlockTripIndices.obj");

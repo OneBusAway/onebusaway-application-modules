@@ -42,10 +42,13 @@ public class BlockIndicesTask implements Runnable {
       Iterable<BlockEntry> blocks = _transitGraphDao.getAllBlocks();
 
       List<BlockTripIndexData> tripData = factory.createTripData(blocks);
+      List<BlockLayoverIndexData> layoverData = factory.createLayoverData(blocks);
       List<FrequencyBlockTripIndexData> frequencyTripData = factory.createFrequencyTripData(blocks);
 
       ObjectSerializationLibrary.writeObject(_bundle.getBlockTripIndicesPath(),
           tripData);
+      ObjectSerializationLibrary.writeObject(
+          _bundle.getBlockLayoverIndicesPath(), layoverData);
       ObjectSerializationLibrary.writeObject(
           _bundle.getFrequencyBlockTripIndicesPath(), frequencyTripData);
 

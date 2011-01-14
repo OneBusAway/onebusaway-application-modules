@@ -43,6 +43,6 @@ public interface BlockCalendarService {
 
   public List<BlockInstance> getActiveBlocksInTimeRange(
       Iterable<BlockTripIndex> indices,
-      Iterable<FrequencyBlockTripIndex> frequencyIndices, long timeFrom,
-      long timeTo);
+      Iterable<BlockLayoverIndex> layoverIndices, Iterable<FrequencyBlockTripIndex> frequencyIndices,
+      long timeFrom, long timeTo);
 }

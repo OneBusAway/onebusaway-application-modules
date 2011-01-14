@@ -22,10 +22,12 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.blocks.HasBlockTrips;
+import org.onebusaway.transit_data_federation.services.blocks.LayoverIntervalBlock;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -284,6 +286,82 @@ public class BlockIndicesFactoryTest {
         intervalBlock.getMaxArrivals()));
     assertTrue(Arrays.equals(new int[] {100, 110},
         intervalBlock.getMaxDepartures()));
+
+    /****
+     * Test Layover Indices
+     ****/
+
+    List<BlockLayoverIndex> allLayoverIndices = factory.createLayoverIndices(Arrays.asList(
+        (BlockEntry) blockF, blockE, blockD, blockC, blockB, blockA));
+
+    List<BlockLayoverIndex> layoverIndices = grep(allLayoverIndices, aid("a2"));
+    assertEquals(1, layoverIndices.size());
+    BlockLayoverIndex layoverIndiex = layoverIndices.get(0);
+    trips = trips(layoverIndiex.getTrips());
+    assertEquals(5, trips.size());
+    assertEquals(tripA2, trips.get(0));
+    assertEquals(tripB2, trips.get(1));
+    assertEquals(tripC2, trips.get(2));
+    assertEquals(tripF2, trips.get(3));
+    assertEquals(tripE2, trips.get(4));
+    serviceIds = layoverIndiex.getServiceIds();
+    assertEquals(1, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+    LayoverIntervalBlock layoverIntervalBlock = layoverIndiex.getLayoverIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {20, 50, 60, 70, 80},
+        layoverIntervalBlock.getStartTimes()));
+    assertTrue(Arrays.equals(new int[] {30, 60, 70, 80, 90},
+        layoverIntervalBlock.getEndTimes()));
+
+    layoverIndices = grep(allLayoverIndices, aid("a3"));
+    assertEquals(1, layoverIndices.size());
+    layoverIndiex = layoverIndices.get(0);
+    trips = trips(layoverIndiex.getTrips());
+    assertEquals(5, trips.size());
+    assertEquals(tripA3, trips.get(0));
+    assertEquals(tripB3, trips.get(1));
+    assertEquals(tripC3, trips.get(2));
+    assertEquals(tripF3, trips.get(3));
+    assertEquals(tripE3, trips.get(4));
+    serviceIds = layoverIndiex.getServiceIds();
+    assertEquals(1, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+    layoverIntervalBlock = layoverIndiex.getLayoverIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {40, 70, 80, 90, 100},
+        layoverIntervalBlock.getStartTimes()));
+    assertTrue(Arrays.equals(new int[] {50, 80, 85, 100, 110},
+        layoverIntervalBlock.getEndTimes()));
+
+    layoverIndices = grep(allLayoverIndices, aid("d2"));
+    assertEquals(1, layoverIndices.size());
+    layoverIndiex = layoverIndices.get(0);
+    trips = trips(layoverIndiex.getTrips());
+    assertEquals(1, trips.size());
+    assertEquals(tripD2, trips.get(0));
+    serviceIds = layoverIndiex.getServiceIds();
+    assertEquals(2, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s2")));
+    layoverIntervalBlock = layoverIndiex.getLayoverIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {70},
+        layoverIntervalBlock.getStartTimes()));
+    assertTrue(Arrays.equals(new int[] {80}, layoverIntervalBlock.getEndTimes()));
+
+    layoverIndices = grep(allLayoverIndices, aid("d3"));
+    assertEquals(1, layoverIndices.size());
+    layoverIndiex = layoverIndices.get(0);
+    trips = trips(layoverIndiex.getTrips());
+    assertEquals(1, trips.size());
+    assertEquals(tripD3, trips.get(0));
+    serviceIds = layoverIndiex.getServiceIds();
+    assertEquals(2, serviceIds.getActiveServiceIds().size());
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s1")));
+    assertTrue(serviceIds.getActiveServiceIds().contains(lsid("s2")));
+    layoverIntervalBlock = layoverIndiex.getLayoverIntervalBlock();
+    assertTrue(Arrays.equals(new int[] {90},
+        layoverIntervalBlock.getStartTimes()));
+    assertTrue(Arrays.equals(new int[] {100},
+        layoverIntervalBlock.getEndTimes()));
   }
 
   private List<TripEntry> trips(List<BlockTripEntry> trips) {
