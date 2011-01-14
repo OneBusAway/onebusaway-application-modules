@@ -25,6 +25,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -110,7 +111,9 @@ public class BlockCalendarServiceImplTest {
         serviceIds(lsids("sidA", "sidB"), lsids()));
 
     List<BlockTripIndex> blocks = blockTripIndices(blockA, blockB);
-    
+
+    List<BlockLayoverIndex> layoverIndices = Collections.emptyList();
+
     List<FrequencyBlockTripIndex> frequencyIndices = Collections.emptyList();
 
     /****
@@ -120,7 +123,7 @@ public class BlockCalendarServiceImplTest {
     long time = timeFromString("2010-09-07 09:15");
 
     List<BlockInstance> instances = _service.getActiveBlocksInTimeRange(blocks,
-        ERROR, frequencyIndices, time, time);
+        layoverIndices, frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -134,7 +137,8 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-07 010:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -147,16 +151,16 @@ public class BlockCalendarServiceImplTest {
      ****/
 
     /*
-    time = timeFromString("2010-09-07 011:15");
-
-    instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices, time, time);
-
-    assertEquals(1, instances.size());
-
-    instance = instances.get(0);
-    assertEquals(bcB_A_B, instance.getBlock());
-    assertEquals(serviceDateA.getTime(), instance.getServiceDate());
-    */
+     * time = timeFromString("2010-09-07 011:15");
+     * 
+     * instances = _service.getActiveBlocksInTimeRange(blocks, frequencyIndices,
+     * time, time);
+     * 
+     * assertEquals(1, instances.size());
+     * 
+     * instance = instances.get(0); assertEquals(bcB_A_B, instance.getBlock());
+     * assertEquals(serviceDateA.getTime(), instance.getServiceDate());
+     */
 
     /****
      * 
@@ -164,7 +168,8 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-07 012:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -178,7 +183,8 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-08 09:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -192,10 +198,11 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-08 10:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
-    
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
+
     Collections.sort(instances, new BlockInstanceComparator());
-    
+
     assertEquals(2, instances.size());
 
     instance = instances.get(0);
@@ -212,7 +219,8 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-08 11:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -226,7 +234,8 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-08 12:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -240,7 +249,8 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-09 09:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
 
     assertEquals(0, instances.size());
 
@@ -250,7 +260,8 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-09 10:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 
@@ -264,7 +275,8 @@ public class BlockCalendarServiceImplTest {
 
     time = timeFromString("2010-09-09 11:15");
 
-    instances = _service.getActiveBlocksInTimeRange(blocks, ERROR, frequencyIndices, time, time);
+    instances = _service.getActiveBlocksInTimeRange(blocks, layoverIndices,
+        frequencyIndices, time, time);
 
     assertEquals(1, instances.size());
 

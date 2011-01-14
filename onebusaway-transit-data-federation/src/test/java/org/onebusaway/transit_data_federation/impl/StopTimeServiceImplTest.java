@@ -389,7 +389,7 @@ public class StopTimeServiceImplTest {
     }
 
     BlockIndicesFactory factory = new BlockIndicesFactory();
-    BlockTripIndex blockIndex = factory.createIndexForGroupOfBlockTrips(trips);
+    BlockTripIndex blockIndex = factory.createTripIndexForGroupOfBlockTrips(trips);
 
     _stop.addStopTimeIndex(BlockStopTimeIndex.create(blockIndex, 0));
   }
