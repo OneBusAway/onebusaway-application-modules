@@ -26,7 +26,7 @@
   <s:iterator value="parameters.stops" status="stopsIter">
 
 <s:set name="mapUrl">
-index.html#p(index)m(location)lat(<s:property value="lat" />)lon(<s:property value="lon" />)accuracy(8)stop(<s:property value="id" />)
+index.action#p(index)m(location)lat(<s:property value="lat" />)lon(<s:property value="lon" />)accuracy(8)stop(<s:property value="id" />)
 </s:set>
 	<div>
 		<div class="arrivalsStopAddress"><s:a href="%{mapUrl}"><s:property value="name" /></s:a></div>

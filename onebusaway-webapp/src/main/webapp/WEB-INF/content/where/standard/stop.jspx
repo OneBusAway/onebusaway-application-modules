@@ -24,7 +24,11 @@
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-stop.css')}"/>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-stop.css')}"/>
 <meta http-equiv="Refresh" content="60" />
-<title><jsp:include page="arrivals-title-head-snippet.jspx"/></title>
+<title>
+  <s:component template="stops-title-head-snippet.jspx">
+    <s:param name="stops" value="result.stops"/>
+  </s:component>
+</title>
 </head>
 <body>
 
@@ -32,7 +36,9 @@
 <div class="panel">
 
 <!-- The Arrivals Title Header -->
-<jsp:include page="arrivals-title-snippet.jspx"/>
+<s:component template="stops-title-snippet.jspx">
+    <s:param name="stops" value="result.stops"/>
+</s:component>
 
 <jsp:include page="arrivals-alerts-header-snippet.jspx"/>
 
@@ -43,7 +49,10 @@
 </s:if>
 
 <!-- The Arrivals and Departures Table -->
-<jsp:include page="arrivals-table-snippet.jspx"/>
+<s:component template="arrivals-and-departures-table-snippet.jspx">
+    <s:param name="arrivalsAndDepartures" value="result.arrivalsAndDepartures"/>
+    <s:param name="presentation" value="arrivalsAndDeparturesPresentation" />    
+</s:component>
 
 <jsp:include page="arrivals-alerts-footer-snippet.jspx"/>
 

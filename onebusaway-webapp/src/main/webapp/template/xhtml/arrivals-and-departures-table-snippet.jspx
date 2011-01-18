@@ -34,7 +34,7 @@
                 <s:url var="url" includeParams="get">
                     <s:param name="order">route</s:param>
                 </s:url>
-                <s:a href="%{url}"></s:a>
+                <s:a href="%{url}"><s:text name="route" /></s:a>
             </s:else></td>
             <td class="arrivalsDestinationColumn"><s:if
                 test="#excludeOrderLinks">

@@ -192,7 +192,6 @@
                 <configuration>
                     <modules>
                         <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
-                        <module>org.onebusaway.webapp.gwt.NotificationWidgetApplication</module>
                         <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
                         <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
                         <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
@@ -250,10 +249,6 @@
                         <resource>
                             <directory>${project.build.directory}/gwt/LoginWidget</directory>
                             <targetPath></targetPath>
-                        </resource>
-                        <resource>
-                            <directory>target/gwt/org.onebusaway.webapp.gwt.NotificationWidgetApplication</directory>
-                            <targetPath>where/standard</targetPath>
                         </resource>
                         <resource>
                             <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
