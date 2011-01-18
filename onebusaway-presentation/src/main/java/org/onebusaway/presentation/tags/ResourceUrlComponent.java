@@ -2,11 +2,13 @@ package org.onebusaway.presentation.tags;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Locale;
 
 import org.apache.struts2.components.ContextBean;
 import org.onebusaway.presentation.services.resources.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
@@ -39,8 +41,13 @@ public class ResourceUrlComponent extends ContextBean {
       _value = "top";
 
     String value = findStringIfAltSyntax(_value);
+    
+    Locale locale = Locale.getDefault();
+    ActionContext ctx = ActionContext.getContext();
+    if (ctx != null)
+      locale = ctx.getLocale();
 
-    String url = _resourceService.getExternalUrlForResource(value);
+    String url = _resourceService.getExternalUrlForResource(value, locale);
 
     if (url != null) {
       if (getVar() != null) {

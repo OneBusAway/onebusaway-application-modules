@@ -28,8 +28,10 @@
 <script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('/js/jquery-jplayer-min.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('/js/oba-where-standard-arrival-and-departure-for-stop.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('messages:ArrivalAndDepartureMessages=org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages')}"><jsp:text></jsp:text></script>
 <script type="text/javascript">
   (function() {
+    
     var data = {};
     data.tripId = '<s:property escapeJavaScript="true" value="tripId" />';
     data.serviceDate = <s:property escapeJavaScript="true" value="serviceDate" />;
@@ -71,7 +73,7 @@
 <s:param><input id="notification_time_input" type="text" value="5" /></s:param>
 </s:text></p>
 <p><input id="notification_sound_input" type="checkbox" checked="checked" value="true"/> <s:text name="arrivalAndDepartureForStop.Play_a_sound"/></p>
-<p><input id="notification_alert_input" type="checkbox" /> <s:text name="arrivalAndDepartureForStop.Popup_an_alert"/></p>
+<p><input id="notification_alert_input" type="checkbox" checked="checked" value="true"/> <s:text name="arrivalAndDepartureForStop.Popup_an_alert"/></p>
 </div>
 
 <!--  Attachment point for playing audio -->

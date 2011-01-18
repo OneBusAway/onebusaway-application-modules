@@ -27,9 +27,12 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -49,6 +52,10 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
+import com.opensymphony.xwork2.LocaleProvider;
+import com.opensymphony.xwork2.TextProvider;
+import com.opensymphony.xwork2.TextProviderFactory;
+
 @Component
 public class ResourceServiceImpl implements ResourceService {
 
@@ -59,13 +66,19 @@ public class ResourceServiceImpl implements ResourceService {
 
   private static final String PREFIX_COLLECTION = "collection:";
 
+  private static final String PREFIX_MESSAGES = "messages:";
+
   private static final Pattern _resourcePattern = Pattern.compile("^(.*)-\\w+\\.cache(\\.\\w+){0,1}$");
 
   private static Logger _log = LoggerFactory.getLogger(ResourceServiceImpl.class);
 
+  private static TextProviderFactory _textProviderFactory = new TextProviderFactory();
+
   private ConcurrentMap<String, Resource> _resourceEntriesByResourcePath = new ConcurrentHashMap<String, Resource>();
 
   private ConcurrentMap<String, Resource> _resourceEntriesByExternalId = new ConcurrentHashMap<String, Resource>();
+
+  private ConcurrentMap<String, List<String>> _resourcePathsById = new ConcurrentHashMap<String, List<String>>();
 
   /****
    * 
@@ -120,9 +133,11 @@ public class ResourceServiceImpl implements ResourceService {
    ****/
 
   @Override
-  public String getExternalUrlForResource(String resourcePath) {
+  public String getExternalUrlForResource(String resourcePath, Locale locale) {
 
-    Resource resource = getResourceForPath(resourcePath, null);
+    LocaleProvider localeProvider = new LocaleProviderImpl(locale);
+
+    Resource resource = getResourceForPath(resourcePath, localeProvider, null);
 
     if (resource == null) {
       _log.warn("resource not found: " + resourcePath);
@@ -136,15 +151,20 @@ public class ResourceServiceImpl implements ResourceService {
   }
 
   @Override
-  public String getExternalUrlForResources(List<String> resourcePaths) {
-    return getExternalUrlForResources(null, resourcePaths);
+  public String getExternalUrlForResources(List<String> resourcePaths,
+      Locale locale) {
+
+    return getExternalUrlForResources(null, resourcePaths, locale);
   }
 
   @Override
   public String getExternalUrlForResources(String resourceId,
-      List<String> resourcePaths) {
+      List<String> resourcePaths, Locale locale) {
 
-    Resource resource = getResourceForPaths(resourceId, resourcePaths);
+    LocaleProvider localeProvider = new LocaleProviderImpl(locale);
+
+    Resource resource = getResourceForPaths(resourceId, resourcePaths,
+        localeProvider);
 
     if (resource == null) {
       _log.warn("resource not found: " + resourceId);
@@ -158,16 +178,32 @@ public class ResourceServiceImpl implements ResourceService {
   }
 
   @Override
-  public Resource getLocalResourceForExternalId(String externalId) {
+  public Resource getLocalResourceForExternalId(String externalId, Locale locale) {
+
     Resource resource = _resourceEntriesByExternalId.get(externalId);
+
     if (resource == null) {
+
       /**
        * In case the resource has not been first requested as a resource(url)
        * first
        */
       String resourcePath = getExternalIdAsResourcePath(externalId);
-      if (resourcePath != null)
-        resource = getResourceForPath(resourcePath, null);
+      if (resourcePath != null) {
+
+        LocaleProvider localeProvider = new LocaleProviderImpl(locale);
+
+        /**
+         * First we see if this is a resource identified by id
+         */
+        if (_resourcePathsById.containsKey(resourcePath)) {
+          List<String> paths = _resourcePathsById.get(resourcePath);
+          resource = getResourceForPaths(resourcePath, paths, localeProvider);
+        }
+
+        if (resource == null)
+          resource = getResourceForPath(resourcePath, localeProvider, null);
+      }
     }
 
     if (resource == null) {
@@ -182,19 +218,33 @@ public class ResourceServiceImpl implements ResourceService {
    * Private Methods
    ****/
 
-  private Resource getResourceForPath(String resourcePath, URL sourceUrl) {
+  private String getResourcePathAsKey(String resourcePath,
+      LocaleProvider localeProvider) {
 
-    Resource resource = _resourceEntriesByResourcePath.get(resourcePath);
+    if (resourcePath.startsWith(PREFIX_MESSAGES)) {
+      Locale locale = localeProvider.getLocale();
+      return resourcePath + "-" + locale.toString();
+    }
+
+    return resourcePath;
+  }
+
+  private Resource getResourceForPath(String resourcePath,
+      LocaleProvider localeProvider, URL sourceUrl) {
+
+    String resourcePathKey = getResourcePathAsKey(resourcePath, localeProvider);
+
+    Resource resource = _resourceEntriesByResourcePath.get(resourcePathKey);
 
     if (resource == null) {
 
-      resource = createResourceForPath(resourcePath, sourceUrl);
+      resource = createResourceForPath(resourcePath, sourceUrl, localeProvider);
 
       if (resource == null)
         return null;
 
       Resource existingResource = _resourceEntriesByResourcePath.putIfAbsent(
-          resourcePath, resource);
+          resourcePathKey, resource);
 
       if (existingResource != null)
         return existingResource;
@@ -203,10 +253,11 @@ public class ResourceServiceImpl implements ResourceService {
     return resource;
   }
 
-  private ResourceEntry createResourceForPath(String resourcePath, URL sourceUrl) {
+  private ResourceEntry createResourceForPath(String resourcePath,
+      URL sourceUrl, LocaleProvider localeProvider) {
 
     if (sourceUrl == null)
-      sourceUrl = getResourceAsSourceUrl(resourcePath);
+      sourceUrl = getResourceAsSourceUrl(resourcePath, localeProvider);
 
     /**
      * If we can't find a source URL, then we can't create an entry
@@ -217,7 +268,8 @@ public class ResourceServiceImpl implements ResourceService {
 
     File localFile = getBundleResourceAsLocalFile(resourcePath, sourceUrl);
 
-    ResourceTransformationStrategy strategy = getResourceTransformationStrategyForResource(resourcePath);
+    ResourceTransformationStrategy strategy = getResourceTransformationStrategyForResource(
+        resourcePath, localeProvider);
 
     ResourceEntry resource = new ResourceEntry(resourcePath, sourceUrl,
         localFile, strategy);
@@ -225,11 +277,17 @@ public class ResourceServiceImpl implements ResourceService {
     return resource;
   }
 
-  private URL getResourceAsSourceUrl(String resourceName) {
+  private URL getResourceAsSourceUrl(String resourceName,
+      LocaleProvider localeProvider) {
 
     if (resourceName.startsWith(PREFIX_COLLECTION)) {
       resourceName = resourceName.substring(PREFIX_COLLECTION.length());
-      return getCollectionResourceAsSourceUrl(resourceName);
+      return getCollectionResourceAsSourceUrl(resourceName, localeProvider);
+    }
+
+    if (resourceName.startsWith(PREFIX_MESSAGES)) {
+      resourceName = resourceName.substring(PREFIX_MESSAGES.length());
+      return getMessagesResourceAsSourceUrl(resourceName, localeProvider);
     }
 
     if (resourceName.startsWith(PREFIX_CLASSPATH)) {
@@ -250,7 +308,8 @@ public class ResourceServiceImpl implements ResourceService {
 
   }
 
-  private URL getCollectionResourceAsSourceUrl(String resourceName) {
+  private URL getCollectionResourceAsSourceUrl(String resourceName,
+      LocaleProvider localeProvider) {
 
     int index = resourceName.indexOf('=');
     if (index == -1)
@@ -270,7 +329,7 @@ public class ResourceServiceImpl implements ResourceService {
       for (org.springframework.core.io.Resource resource : resources) {
         URL url = resource.getURL();
         String name = getLocalUrlAsResourceName(url);
-        Resource r = getResourceForPath(name, url);
+        Resource r = getResourceForPath(name, localeProvider, url);
         if (r != null) {
           String path = url.getPath();
           int sepIndex = path.lastIndexOf(File.separator);
@@ -286,6 +345,56 @@ public class ResourceServiceImpl implements ResourceService {
       out.println("var OBA = window.OBA || {};");
       out.println("if(!OBA.Resources) { OBA.Resources = {}; }");
       out.println("OBA.Resources." + collectionPrefix + " = " + obj.toString()
+          + ";");
+      out.close();
+
+      return getFileAsUrl(file);
+
+    } catch (IOException ex) {
+      throw new IllegalStateException("error loading resources", ex);
+    }
+
+  }
+
+  private URL getMessagesResourceAsSourceUrl(String resourceName,
+      LocaleProvider localeProvider) {
+
+    int index = resourceName.indexOf('=');
+    if (index == -1)
+      throw new IllegalStateException("invalid resource messages specifier: "
+          + resourceName);
+
+    String messagesPrefix = resourceName.substring(0, index);
+    String messagesResourceClassName = resourceName.substring(index + 1);
+    Class<?> messagesResourceClass = null;
+
+    try {
+      messagesResourceClass = Class.forName(messagesResourceClassName);
+    } catch (Throwable ex) {
+      throw new IllegalStateException("error loading messages resource class "
+          + messagesResourceClassName, ex);
+    }
+
+    TextProvider provider = _textProviderFactory.createInstance(
+        messagesResourceClass, localeProvider);
+    ResourceBundle bundle = provider.getTexts();
+
+    Map<String, String> resourceMapping = new HashMap<String, String>();
+
+    for (Enumeration<String> en = bundle.getKeys(); en.hasMoreElements();) {
+      String key = en.nextElement();
+      String value = bundle.getString(key);
+      resourceMapping.put(key, value);
+    }
+
+    try {
+
+      File file = getOutputFile(PREFIX_MESSAGES + messagesPrefix + ".js");
+      PrintWriter out = new PrintWriter(file);
+      JSONObject obj = new JSONObject(resourceMapping);
+      out.println("var OBA = window.OBA || {};");
+      out.println("if(!OBA.Resources) { OBA.Resources = {}; }");
+      out.println("OBA.Resources." + messagesPrefix + " = " + obj.toString()
           + ";");
       out.close();
 
@@ -328,9 +437,9 @@ public class ResourceServiceImpl implements ResourceService {
   }
 
   private ResourceTransformationStrategy getResourceTransformationStrategyForResource(
-      String resourcePath) {
+      String resourcePath, LocaleProvider localeProvider) {
     if (resourcePath.endsWith(".css"))
-      return new CssResourceTransformationStrategy();
+      return new CssResourceTransformationStrategy(localeProvider.getLocale());
     return new DefaultResourceTransformationStrategy();
   }
 
@@ -509,22 +618,28 @@ public class ResourceServiceImpl implements ResourceService {
    ****/
 
   private Resource getResourceForPaths(String resourceId,
-      List<String> resourcePaths) {
+      List<String> resourcePaths, LocaleProvider localeProvider) {
 
-    if (resourceId == null)
+    if (resourceId == null) {
       resourceId = getResourceIdForResourcePaths(resourcePaths);
+    } else {
+      _resourcePathsById.putIfAbsent(resourceId, resourcePaths);
+    }
 
-    Resource resource = _resourceEntriesByResourcePath.get(resourceId);
+    String resourceIdKey = getResourcePathAsKey(resourceId, localeProvider);
+
+    Resource resource = _resourceEntriesByResourcePath.get(resourceIdKey);
 
     if (resource == null) {
 
-      resource = createResourceForPaths(resourceId, resourcePaths);
+      resource = createResourceForPaths(resourceId, resourcePaths,
+          localeProvider);
 
       if (resource == null)
         return null;
 
       Resource existingResource = _resourceEntriesByResourcePath.putIfAbsent(
-          resourceId, resource);
+          resourceIdKey, resource);
 
       if (existingResource != null)
         return existingResource;
@@ -534,7 +649,7 @@ public class ResourceServiceImpl implements ResourceService {
   }
 
   private Resource createResourceForPaths(String resourceId,
-      List<String> resourcePaths) {
+      List<String> resourcePaths, LocaleProvider localeProvider) {
 
     List<Resource> resources = new ArrayList<Resource>(resourcePaths.size());
 
@@ -542,7 +657,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     for (String resourcePath : resourcePaths) {
 
-      Resource resource = getResourceForPath(resourcePath, null);
+      Resource resource = getResourceForPath(resourcePath, localeProvider, null);
 
       if (resource == null)
         return null;
@@ -667,4 +782,19 @@ public class ResourceServiceImpl implements ResourceService {
           + outputFile, ex);
     }
   }
+
+  private static class LocaleProviderImpl implements LocaleProvider {
+
+    private final Locale _locale;
+
+    public LocaleProviderImpl(Locale locale) {
+      _locale = locale;
+    }
+
+    @Override
+    public Locale getLocale() {
+      return _locale;
+    }
+  }
+
 }

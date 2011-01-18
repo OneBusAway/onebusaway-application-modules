@@ -58,8 +58,8 @@
     <property name="geocoderService" ref="externalGeocoderImpl" />
   </bean>
 
-  <bean id="whereMessages" class="org.onebusaway.webapp.impl.TypedMessagesFactory">
-    <property name="messagesClass" value="org.onebusaway.webapp.gwt.where_library.WhereMessages" />
+  <bean id="arrivalAndDepartureMessages" class="org.onebusaway.webapp.impl.TypedMessagesFactory">
+    <property name="messagesClass" value="org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages" />
   </bean>
 
   <bean id="CommonResources" class="org.onebusaway.presentation.impl.resources.ResourceFactory">
@@ -68,6 +68,7 @@
       <list>
         <value>/js/jquery.js</value>
         <value>classpath:org/onebusaway/presentation/js/oba-api.js</value>
+        <value>classpath:org/onebusaway/presentation/js/oba-l10n.js</value>
         <value>classpath:org/onebusaway/presentation/js/oba-maps.js</value>
         <value>collection:Map=classpath:org/onebusaway/presentation/resources/map/*.png</value>
       </list>

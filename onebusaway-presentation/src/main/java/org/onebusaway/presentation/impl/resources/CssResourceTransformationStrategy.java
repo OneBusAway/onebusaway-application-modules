@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.onebusaway.presentation.services.resources.ResourceService;
@@ -29,9 +30,16 @@ import org.w3c.css.sac.Parser;
 
 import com.steadystate.css.parser.SACParserCSS2;
 
-public class CssResourceTransformationStrategy implements ResourceTransformationStrategy {
+public class CssResourceTransformationStrategy implements
+    ResourceTransformationStrategy {
 
   static Pattern URL_PATTERN = Pattern.compile("^@url (\\w+) (\\w+);$");
+
+  private Locale _locale;
+
+  public CssResourceTransformationStrategy(Locale locale) {
+    _locale = locale;
+  }
 
   /****
    * {@link ResourceTransformationStrategy} Interface
@@ -68,7 +76,7 @@ public class CssResourceTransformationStrategy implements ResourceTransformation
     InputStreamReader reader2 = new InputStreamReader(url.openStream());
     InputSource source2 = new InputSource(reader2);
     Parser p = new SACParserCSS2();
-    CssDocumentHandler handler = new CssDocumentHandler(resourceService);
+    CssDocumentHandler handler = new CssDocumentHandler(resourceService,_locale);
     p.setDocumentHandler(handler);
     p.parseStyleSheet(source2);
     reader2.close();

@@ -20,7 +20,7 @@ import org.apache.struts2.convention.annotation.Actions;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.gwt.where_library.WhereMessages;
+import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,8 +45,8 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
   }
 
   @Autowired
-  public void setWhereMessages(WhereMessages whereMessages) {
-    _presentation.setMessages(whereMessages);
+  public void setMessages(ArrivalAndDepartureMessages messages) {
+    _presentation.setMessages(messages);
   }
 
   public ArrivalsAndDeparturesPresentaion getPresentation() {

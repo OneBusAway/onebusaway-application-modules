@@ -15,7 +15,11 @@
         <s:set name="arrivalsStatusLabelStyle"
             value="#presentation.getStatusLabelStyle(top)" />
 
-        <tr class="arrivalsRow">
+        <jsp:element name="tr">
+            <jsp:attribute name="id">
+                <s:property value="#presentation.getMinutesElementId(top)"/>
+            </jsp:attribute>
+            <jsp:attribute name="class">arrivalsRow</jsp:attribute>
             <jsp:element name="td">
         	  <jsp:attribute name="class">arrivalsRouteEntry<s:if
                         test="isLongRouteName(#route)"> arrivalsRouteLongNameEntry</s:if>
@@ -49,7 +53,7 @@
                     value="#presentation.getBestTime(top)"
                     format="hh:mm" /> </span> - <jsp:element name="span">
                 <jsp:attribute name="class">
-                    <s:property value="#arrivalsStatusLabelStyle" />
+                    statusLabel <s:property value="#arrivalsStatusLabelStyle" />
                 </jsp:attribute>
                 <s:property
                         value="#presentation.getStatusLabel(top)" />
@@ -72,9 +76,6 @@
             </div>
             </td>
             <jsp:element name="td">
-                <jsp:attribute name="id">
-                    <s:property value="#presentation.getMinutesElementId(top)"/>
-                </jsp:attribute>
                 <jsp:attribute name="class">
                     arrivalsStatusEntry
                     <s:property value="#arrivalsStatusLabelStyle" />
@@ -86,15 +87,19 @@
                         value="#presentation.getMinutesLabel(top)" />
                 </s:if>
                 <s:else>
-                <s:a action="arrival-and-departure-for-stop">
+                <s:url var="url" action="arrival-and-departure-for-stop">
+                    <s:param name="stopId" value="stop.id" />
                     <s:param name="tripId" value="trip.id" />
-                    <s:param name="stopId" value="stopId" />
-                	<s:property
-                        value="#presentation.getMinutesLabel(top)" />
+                    <s:param name="stopSequence" value="stopSequence"/>
+                    <s:param name="serviceDate" value="serviceDate"/> 
+                    <s:param name="vehicleId" value="tripStatus.vehicleId" />
+                </s:url>
+                <s:a href="%{url}">
+                    <s:property value="#presentation.getMinutesLabel(top)" />
                 </s:a>
                 </s:else>
             </jsp:element>
-        </tr>
+        </jsp:element>
 
     </s:push>
 

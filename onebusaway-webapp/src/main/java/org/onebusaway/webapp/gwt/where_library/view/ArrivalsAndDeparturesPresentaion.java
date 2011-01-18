@@ -4,7 +4,7 @@ import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.webapp.gwt.where_library.WhereMessages;
+import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 
 import com.google.gwt.core.client.GWT;
 
@@ -12,7 +12,7 @@ public class ArrivalsAndDeparturesPresentaion {
 
   private static final String CANCELLED = "cancelled";
 
-  private WhereMessages _messages;
+  private ArrivalAndDepartureMessages _messages;
 
   private boolean _showArrivals = false;
 
@@ -22,11 +22,11 @@ public class ArrivalsAndDeparturesPresentaion {
 
   public ArrivalsAndDeparturesPresentaion(boolean useDefaultResources) {
     if (useDefaultResources) {
-      _messages = GWT.create(WhereMessages.class);
+      _messages = GWT.create(ArrivalAndDepartureMessages.class);
     }
   }
 
-  public void setMessages(WhereMessages messages) {
+  public void setMessages(ArrivalAndDepartureMessages messages) {
     _messages = messages;
   }
 

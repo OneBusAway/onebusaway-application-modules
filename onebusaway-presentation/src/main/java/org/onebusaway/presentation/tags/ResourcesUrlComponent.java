@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.struts2.components.ContextBean;
 import org.apache.struts2.components.Param;
 import org.onebusaway.presentation.services.resources.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
@@ -46,7 +48,12 @@ public class ResourcesUrlComponent extends ContextBean implements
   @Override
   public boolean end(Writer writer, String body) {
     
-    String url = _resourceService.getExternalUrlForResources(_id, _resourcePaths);
+    Locale locale = Locale.getDefault();
+    ActionContext ctx = ActionContext.getContext();
+    if (ctx != null)
+      locale = ctx.getLocale();
+    
+    String url = _resourceService.getExternalUrlForResources(_id, _resourcePaths, locale);
 
     if (url != null) {
       if (getVar() != null) {

@@ -91,14 +91,14 @@
                     <s:property value="#arrivalsStatusLabelStyle" />
                     <s:if test="arrivalsAndDeparturesPresentation.isNow(top)"> arrivalStatusNow</s:if>
                 </jsp:attribute>
-                <s:a action="arrival-and-departure-for-stop">
-                    <s:param name="stopId" value="%{stop.id}" />
-                    <s:param name="tripId" value="%{trip.id}" />
-                    <s:param name="stopSequence" value="%{stopSequence}"/>
-                    <s:param name="serviceDate" value="%{serviceDate}"/> 
-                    <s:if test="vehicleId != null">                   
-                        <s:param name="vehicleId" value="%{vehicleId}" />
-                    </s:if>
+                <s:url var="url" action="arrival-and-departure-for-stop">
+                    <s:param name="stopId" value="stop.id" />
+                    <s:param name="tripId" value="trip.id" />
+                    <s:param name="stopSequence" value="stopSequence"/>
+                    <s:param name="serviceDate" value="serviceDate"/> 
+                    <s:param name="vehicleId" value="tripStatus.vehicleId" />
+                </s:url>
+                <s:a href="%{url}">
                 	<s:property value="arrivalsAndDeparturesPresentation.getMinutesLabel(top)" />
                 </s:a>
             </jsp:element>

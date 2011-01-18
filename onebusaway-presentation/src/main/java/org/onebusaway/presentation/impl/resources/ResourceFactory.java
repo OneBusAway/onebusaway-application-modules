@@ -3,6 +3,7 @@ package org.onebusaway.presentation.impl.resources;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.PostConstruct;
 
@@ -16,6 +17,8 @@ public class ResourceFactory {
   private String _name;
 
   private List<String> _resources = new ArrayList<String>();
+
+  private Locale _locale;
 
   @Autowired
   public void setResourceService(ResourceService resourceService) {
@@ -33,9 +36,16 @@ public class ResourceFactory {
   public void setResources(List<String> resources) {
     _resources = resources;
   }
+  
+  public void setLocale(Locale locale) {
+    _locale = locale;
+  }
 
   @PostConstruct
   public void setup() {
-    _resourceService.getExternalUrlForResources(_name, _resources);
+    Locale locale = Locale.getDefault();
+    if( _locale != null )
+      locale = _locale;
+    _resourceService.getExternalUrlForResources(_name, _resources, locale);
   }
 }

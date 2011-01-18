@@ -2,7 +2,7 @@ package org.onebusaway.webapp.impl;
 
 import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
-import org.onebusaway.webapp.gwt.where_library.WhereMessages;
+import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -18,7 +18,7 @@ public class WebappArrivalsAndDeparturesModel extends
   private SituationsPresentation _situations;
 
   @Autowired
-  public void setWhereMessages(WhereMessages messages) {
+  public void setWhereMessages(ArrivalAndDepartureMessages messages) {
     _arrivalsAndDeparturesPresentation.setMessages(messages);
   }
 

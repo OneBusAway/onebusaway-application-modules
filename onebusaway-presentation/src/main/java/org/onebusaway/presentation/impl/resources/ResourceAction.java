@@ -106,7 +106,7 @@ public class ResourceAction extends ActionSupport {
         HttpServletRequest request = ServletActionContext.getRequest();
         _id = request.getParameter("id");
       }
-      _resource = _resourceService.getLocalResourceForExternalId(_id);
+      _resource = _resourceService.getLocalResourceForExternalId(_id, getLocale());
     }
   }
 }

@@ -1,5 +1,6 @@
 package org.onebusaway.presentation.impl.resources;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,8 +30,11 @@ class CssDocumentHandler implements DocumentHandlerExt {
 
   private ResourceService _resourceService;
 
-  public CssDocumentHandler(ResourceService resourceService) {
+  private Locale _locale;
+
+  public CssDocumentHandler(ResourceService resourceService, Locale locale) {
     _resourceService = resourceService;
+    _locale = locale;
   }
 
   public String getResults() {
@@ -139,7 +143,8 @@ class CssDocumentHandler implements DocumentHandlerExt {
         else if (url.startsWith("'") && url.endsWith("'"))
           url = url.substring(1, url.length() - 1);
 
-        String externalUrl = _resourceService.getExternalUrlForResource(url);
+        String externalUrl = _resourceService.getExternalUrlForResource(url,
+            _locale);
 
         if (externalUrl == null) {
           _log.warn("unknown resource: " + url);
