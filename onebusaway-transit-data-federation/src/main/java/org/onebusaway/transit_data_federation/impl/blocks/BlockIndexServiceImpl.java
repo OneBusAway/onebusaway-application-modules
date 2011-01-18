@@ -16,10 +16,10 @@ import javax.annotation.PostConstruct;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockLayoverIndexData;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockStopTimeIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockTripIndexData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.FrequencyBlockTripIndexData;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -32,11 +32,8 @@ import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStop
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.HasBlockTrips;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
@@ -95,6 +92,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
     loadBlockLayoverIndices();
     loadFrequencyBlockTripIndices();
     loadBlockTripIndicesByBlockId();
+
+    loadStopTimeIndices();
   }
 
   @Override
@@ -204,16 +203,11 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
       _log.info("block indices data loaded");
 
-      clearExistingStopTimeIndices();
-      setupBlockStopTimeIndices();
-
     } else {
 
       _blockTripIndices = Collections.emptyList();
       _blockTripIndicesByAgencyId = Collections.emptyMap();
       _blockTripIndicesByRouteId = Collections.emptyMap();
-
-      clearExistingStopTimeIndices();
     }
   }
 
@@ -266,16 +260,11 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
       _log.info("block frequency trip indices data loaded");
 
-      clearExistingFrequencyStopTimeIndices();
-      setupFrequencyBlockStopTimeIndices();
-
     } else {
 
       _frequencyBlockTripIndices = Collections.emptyList();
       _frequencyBlockTripIndicesByAgencyId = Collections.emptyMap();
       _frequencyBlockTripIndicesByRouteId = Collections.emptyMap();
-
-      clearExistingFrequencyStopTimeIndices();
     }
   }
 
@@ -319,112 +308,6 @@ public class BlockIndexServiceImpl implements BlockIndexService {
    * 
    ****/
 
-  private void setupBlockStopTimeIndices() {
-
-    for (BlockTripIndex blockTripIndex : _blockTripIndices) {
-
-      List<BlockTripEntry> trips = blockTripIndex.getTrips();
-
-      BlockTripEntry firstTrip = trips.get(0);
-      BlockTripEntry lastTrip = trips.get(trips.size() - 1);
-
-      List<BlockStopTimeEntry> firstStopTimes = firstTrip.getStopTimes();
-      List<BlockStopTimeEntry> lastStopTimes = lastTrip.getStopTimes();
-
-      int n = firstStopTimes.size();
-
-      for (int i = 0; i < n; i++) {
-
-        BlockStopTimeEntry firstStopTime = firstStopTimes.get(i);
-        BlockStopTimeEntry lastStopTime = lastStopTimes.get(i);
-
-        ServiceInterval serviceInterval = getStopTimesAsServiceInterval(
-            firstStopTime, lastStopTime);
-
-        BlockStopTimeIndex blockStopTimeIndex = new BlockStopTimeIndex(
-            blockTripIndex, i, serviceInterval);
-
-        StopEntryImpl stop = (StopEntryImpl) firstStopTime.getStopTime().getStop();
-        stop.addStopTimeIndex(blockStopTimeIndex);
-      }
-    }
-
-    int stops = 0;
-    int stopIndices = 0;
-
-    for (StopEntry stop : _graphDao.getAllStops()) {
-      StopEntryImpl stopImpl = (StopEntryImpl) stop;
-      List<BlockStopTimeIndex> stopTimeIndices = stopImpl.getStopTimeIndices();
-      stopIndices += stopTimeIndices.size();
-      stops++;
-    }
-
-    if (stops == 0) {
-      _log.info("no stop indices loaded");
-    } else {
-      _log.info("stops=" + stops + " stop_indices=" + stopIndices
-          + " avg (stop_indices/stop)=" + (stopIndices / stops));
-    }
-
-  }
-
-  public void clearExistingStopTimeIndices() {
-    // Clear any existing indices
-    for (StopEntry stop : _graphDao.getAllStops()) {
-      StopEntryImpl stopImpl = (StopEntryImpl) stop;
-      stopImpl.getStopTimeIndices().clear();
-    }
-  }
-
-  /****
-   * 
-   ****/
-
-  private void setupFrequencyBlockStopTimeIndices() {
-
-    for (FrequencyBlockTripIndex blockIndex : _frequencyBlockTripIndices) {
-
-      List<BlockTripEntry> trips = blockIndex.getTrips();
-
-      BlockTripEntry firstTrip = trips.get(0);
-
-      List<BlockStopTimeEntry> firstStopTimes = firstTrip.getStopTimes();
-
-      List<FrequencyEntry> frequencies = blockIndex.getFrequencies();
-      FrequencyEntry firstFrequency = frequencies.get(0);
-      FrequencyEntry lastFrequency = frequencies.get(frequencies.size() - 1);
-
-      int n = firstStopTimes.size();
-
-      for (int i = 0; i < n; i++) {
-
-        BlockStopTimeEntry firstStopTime = firstStopTimes.get(i);
-
-        ServiceInterval serviceInterval = new ServiceInterval(
-            firstFrequency.getStartTime(), lastFrequency.getEndTime());
-
-        FrequencyBlockStopTimeIndex blockStopTimeIndex = new FrequencyBlockStopTimeIndex(
-            blockIndex, i, serviceInterval);
-
-        StopEntryImpl stop = (StopEntryImpl) firstStopTime.getStopTime().getStop();
-        stop.addFrequencyStopTimeIndex(blockStopTimeIndex);
-      }
-    }
-
-  }
-
-  public void clearExistingFrequencyStopTimeIndices() {
-    // Clear any existing indices
-    for (StopEntry stop : _graphDao.getAllStops()) {
-      StopEntryImpl stopImpl = (StopEntryImpl) stop;
-      stopImpl.getFrequencyStopTimeIndices().clear();
-    }
-  }
-
-  /****
-   * 
-   ****/
-
   private void loadBlockTripIndicesByBlockId() {
 
     _log.info("calculating block trip indices by blockId...");
@@ -458,14 +341,29 @@ public class BlockIndexServiceImpl implements BlockIndexService {
    * 
    ****/
 
-  private ServiceInterval getStopTimesAsServiceInterval(
-      BlockStopTimeEntry firstStopTime, BlockStopTimeEntry lastStopTime) {
+  private void loadStopTimeIndices() {
 
-    StopTimeEntry st0 = firstStopTime.getStopTime();
-    StopTimeEntry st1 = lastStopTime.getStopTime();
+    // Clear any existing indices
+    for (StopEntry stop : _graphDao.getAllStops()) {
+      StopEntryImpl stopImpl = (StopEntryImpl) stop;
+      stopImpl.getStopTimeIndices().clear();
+      stopImpl.getFrequencyStopTimeIndices().clear();
+    }
 
-    return new ServiceInterval(st0.getArrivalTime(), st0.getDepartureTime(),
-        st1.getArrivalTime(), st1.getDepartureTime());
+    BlockStopTimeIndicesFactory factory = new BlockStopTimeIndicesFactory();
+    factory.setVerbose(true);
+    List<BlockStopTimeIndex> indices = factory.createIndices(_graphDao.getAllBlocks());
+
+    for (BlockStopTimeIndex index : indices) {
+      StopEntryImpl stop = (StopEntryImpl) index.getStop();
+      stop.addStopTimeIndex(index);
+    }
+
+    List<FrequencyBlockStopTimeIndex> frequencyIndices = factory.createFrequencyIndices(_graphDao.getAllBlocks());
+
+    for (FrequencyBlockStopTimeIndex index : frequencyIndices) {
+      StopEntryImpl stop = (StopEntryImpl) index.getStop();
+      stop.addFrequencyStopTimeIndex(index);
+    }
   }
-
 }

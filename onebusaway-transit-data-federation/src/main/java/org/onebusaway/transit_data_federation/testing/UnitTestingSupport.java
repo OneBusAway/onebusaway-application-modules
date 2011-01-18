@@ -253,6 +253,8 @@ public class UnitTestingSupport {
       stopTimes = new ArrayList<StopTimeEntry>();
       trip.setStopTimes(stopTimes);
     }
+    
+    int sequence = stopTimes.size();
 
     if (!stopTimes.isEmpty()) {
       StopTimeEntry prev = stopTimes.get(stopTimes.size() - 1);
@@ -262,6 +264,7 @@ public class UnitTestingSupport {
 
     stopTimes.add(stopTime);
     stopTime.setTrip(trip);
+    stopTime.setSequence(sequence);
 
     return stopTime;
   }

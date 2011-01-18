@@ -1,40 +1,16 @@
 package org.onebusaway.transit_data_federation.impl.walkplanner;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.PointVector;
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkEdgeEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry;
-import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StreetGraphLibrary {
 
   private static Logger _log = LoggerFactory.getLogger(StreetGraphLibrary.class);
-
-  public static Collection<WalkNodeEntry> getNodesNearLocation(
-      WalkPlannerGraph graph, double lat, double lon,
-      double initialSearchRadius, double maxRadius) {
-
-    double radius = initialSearchRadius;
-
-    while (true) {
-      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(lat, lon,
-          radius);
-      Collection<WalkNodeEntry> nodes = graph.getNodesByLocation(bounds);
-      if (!nodes.isEmpty())
-        return nodes;
-      if (radius == maxRadius)
-        return Collections.emptyList();
-      radius = Math.min(radius * 2, maxRadius);
-    }
-  }
 
   public static ProjectedPoint computeClosestPointOnEdge(WalkEdgeEntry edge,
       ProjectedPoint point) {
@@ -83,10 +59,10 @@ public class StreetGraphLibrary {
     PointVector line = new PointVector(segmentEnd.getX() - segmentStart.getX(),
         segmentEnd.getY() - segmentStart.getY());
     PointVector proj = line.getProjection(v);
-    
+
     double x = segmentStart.getX() + proj.getX();
     double y = segmentStart.getY() + proj.getY();
-    
+
     try {
       return ProjectedPointFactory.reverse(x, y, point.getSrid());
     } catch (Exception ex) {

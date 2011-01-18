@@ -7,7 +7,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
-public class BlockTripFirstTimeComparator implements Comparator<BlockTripEntry> {
+public class BlockTripLooseComparator implements Comparator<BlockTripEntry> {
   @Override
   public int compare(BlockTripEntry o1, BlockTripEntry o2) {
 

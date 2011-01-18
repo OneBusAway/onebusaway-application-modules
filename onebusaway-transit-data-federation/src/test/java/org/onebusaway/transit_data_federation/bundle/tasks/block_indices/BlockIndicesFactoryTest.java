@@ -2,7 +2,6 @@ package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addStopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.frequency;
@@ -56,12 +55,12 @@ public class BlockIndicesFactoryTest {
     TripEntryImpl tripA2 = trip("a2", "s1");
     TripEntryImpl tripA3 = trip("a3", "s1");
 
-    addStopTime(tripA1, stopTime(0, stopA, tripA1, 0, 10, 0));
-    addStopTime(tripA1, stopTime(0, stopB, tripA1, 20, 20, 0));
-    addStopTime(tripA2, stopTime(0, stopC, tripA2, 30, 30, 0));
-    addStopTime(tripA2, stopTime(0, stopA, tripA2, 40, 40, 0));
-    addStopTime(tripA3, stopTime(0, stopA, tripA3, 50, 50, 0));
-    addStopTime(tripA3, stopTime(0, stopB, tripA3, 60, 70, 0));
+    stopTime(0, stopA, tripA1, 0, 10, 0);
+    stopTime(0, stopB, tripA1, 20, 20, 0);
+    stopTime(0, stopC, tripA2, 30, 30, 0);
+    stopTime(0, stopA, tripA2, 40, 40, 0);
+    stopTime(0, stopA, tripA3, 50, 50, 0);
+    stopTime(0, stopB, tripA3, 60, 70, 0);
 
     linkBlockTrips(blockA, tripA1, tripA2, tripA3);
 
@@ -75,12 +74,12 @@ public class BlockIndicesFactoryTest {
     TripEntryImpl tripB2 = trip("b2", "s1");
     TripEntryImpl tripB3 = trip("b3", "s1");
 
-    addStopTime(tripB1, stopTime(0, stopA, tripB1, 20, 30, 0));
-    addStopTime(tripB1, stopTime(0, stopB, tripB1, 50, 50, 0));
-    addStopTime(tripB2, stopTime(0, stopC, tripB2, 60, 60, 0));
-    addStopTime(tripB2, stopTime(0, stopA, tripB2, 70, 70, 0));
-    addStopTime(tripB3, stopTime(0, stopA, tripB3, 80, 80, 0));
-    addStopTime(tripB3, stopTime(0, stopB, tripB3, 90, 100, 0));
+    stopTime(0, stopA, tripB1, 20, 30, 0);
+    stopTime(0, stopB, tripB1, 50, 50, 0);
+    stopTime(0, stopC, tripB2, 60, 60, 0);
+    stopTime(0, stopA, tripB2, 70, 70, 0);
+    stopTime(0, stopA, tripB3, 80, 80, 0);
+    stopTime(0, stopB, tripB3, 90, 100, 0);
 
     linkBlockTrips(blockB, tripB1, tripB2, tripB3);
 
@@ -94,12 +93,12 @@ public class BlockIndicesFactoryTest {
     TripEntryImpl tripC2 = trip("c2", "s1");
     TripEntryImpl tripC3 = trip("c3", "s1");
 
-    addStopTime(tripC1, stopTime(0, stopA, tripC1, 40, 50, 0));
-    addStopTime(tripC1, stopTime(0, stopB, tripC1, 60, 60, 0));
-    addStopTime(tripC2, stopTime(0, stopC, tripC2, 70, 70, 0));
-    addStopTime(tripC2, stopTime(0, stopA, tripC2, 80, 80, 0));
-    addStopTime(tripC3, stopTime(0, stopA, tripC3, 85, 85, 0));
-    addStopTime(tripC3, stopTime(0, stopB, tripC3, 90, 95, 0));
+    stopTime(0, stopA, tripC1, 40, 50, 0);
+    stopTime(0, stopB, tripC1, 60, 60, 0);
+    stopTime(0, stopC, tripC2, 70, 70, 0);
+    stopTime(0, stopA, tripC2, 80, 80, 0);
+    stopTime(0, stopA, tripC3, 85, 85, 0);
+    stopTime(0, stopB, tripC3, 90, 95, 0);
 
     linkBlockTrips(blockC, tripC1, tripC2, tripC3);
 
@@ -113,12 +112,12 @@ public class BlockIndicesFactoryTest {
     TripEntryImpl tripD2 = trip("d2", "s1");
     TripEntryImpl tripD3 = trip("d3", "s2");
 
-    addStopTime(tripD1, stopTime(0, stopA, tripD1, 40, 50, 0));
-    addStopTime(tripD1, stopTime(0, stopB, tripD1, 70, 70, 0));
-    addStopTime(tripD2, stopTime(0, stopC, tripD2, 80, 80, 0));
-    addStopTime(tripD2, stopTime(0, stopA, tripD2, 90, 90, 0));
-    addStopTime(tripD3, stopTime(0, stopA, tripD3, 100, 100, 0));
-    addStopTime(tripD3, stopTime(0, stopB, tripD3, 110, 120, 0));
+    stopTime(0, stopA, tripD1, 40, 50, 0);
+    stopTime(0, stopB, tripD1, 70, 70, 0);
+    stopTime(0, stopC, tripD2, 80, 80, 0);
+    stopTime(0, stopA, tripD2, 90, 90, 0);
+    stopTime(0, stopA, tripD3, 100, 100, 0);
+    stopTime(0, stopB, tripD3, 110, 120, 0);
 
     linkBlockTrips(blockD, tripD1, tripD2, tripD3);
 
@@ -132,11 +131,11 @@ public class BlockIndicesFactoryTest {
     TripEntryImpl tripE2 = trip("e2", "s1");
     TripEntryImpl tripE3 = trip("e3", "s1");
 
-    addStopTime(tripE1, stopTime(0, stopA, tripE1, 50, 60, 0));
-    addStopTime(tripE1, stopTime(0, stopB, tripE1, 80, 80, 0));
-    addStopTime(tripE2, stopTime(0, stopC, tripE2, 90, 90, 0));
-    addStopTime(tripE2, stopTime(0, stopA, tripE2, 100, 100, 0));
-    addStopTime(tripE3, stopTime(0, stopA, tripE3, 110, 110, 0));
+    stopTime(0, stopA, tripE1, 50, 60, 0);
+    stopTime(0, stopB, tripE1, 80, 80, 0);
+    stopTime(0, stopC, tripE2, 90, 90, 0);
+    stopTime(0, stopA, tripE2, 100, 100, 0);
+    stopTime(0, stopA, tripE3, 110, 110, 0);
 
     linkBlockTrips(blockE, tripE1, tripE2, tripE3);
 
@@ -150,11 +149,11 @@ public class BlockIndicesFactoryTest {
     TripEntryImpl tripF2 = trip("f2", "s1");
     TripEntryImpl tripF3 = trip("f3", "s1");
 
-    addStopTime(tripF1, stopTime(0, stopA, tripF1, 40, 50, 0));
-    addStopTime(tripF1, stopTime(0, stopB, tripF1, 70, 70, 0));
-    addStopTime(tripF2, stopTime(0, stopC, tripF2, 80, 80, 0));
-    addStopTime(tripF2, stopTime(0, stopA, tripF2, 90, 90, 0));
-    addStopTime(tripF3, stopTime(0, stopA, tripF3, 100, 100, 0));
+    stopTime(0, stopA, tripF1, 40, 50, 0);
+    stopTime(0, stopB, tripF1, 70, 70, 0);
+    stopTime(0, stopC, tripF2, 80, 80, 0);
+    stopTime(0, stopA, tripF2, 90, 90, 0);
+    stopTime(0, stopA, tripF3, 100, 100, 0);
 
     linkBlockTrips(blockF, tripF1, tripF2, tripF3);
 
@@ -387,8 +386,8 @@ public class BlockIndicesFactoryTest {
 
     TripEntryImpl tripA = trip("a", "s1");
 
-    addStopTime(tripA, stopTime(0, stopA, tripA, 0, 10, 0));
-    addStopTime(tripA, stopTime(0, stopB, tripA, 20, 20, 0));
+    stopTime(0, stopA, tripA, 0, 10, 0);
+    stopTime(0, stopB, tripA, 20, 20, 0);
 
     FrequencyEntry freqA1 = frequency(time(6, 00), time(9, 00), 10);
     FrequencyEntry freqA2 = frequency(time(15, 00), time(18, 00), 10);
@@ -404,8 +403,8 @@ public class BlockIndicesFactoryTest {
 
     TripEntryImpl tripB = trip("b", "s1");
 
-    addStopTime(tripB, stopTime(0, stopA, tripB, 20, 30, 0));
-    addStopTime(tripB, stopTime(0, stopB, tripB, 50, 50, 0));
+    stopTime(0, stopA, tripB, 20, 30, 0);
+    stopTime(0, stopB, tripB, 50, 50, 0);
 
     FrequencyEntry freqB1 = frequency(time(9, 00), time(15, 00), 20);
     FrequencyEntry freqB2 = frequency(time(18, 00), time(21, 00), 20);
@@ -462,8 +461,8 @@ public class BlockIndicesFactoryTest {
 
     TripEntryImpl tripA = trip("a", "s1");
 
-    addStopTime(tripA, stopTime(0, stopA, tripA, 0, 10, 0));
-    addStopTime(tripA, stopTime(0, stopB, tripA, 20, 20, 0));
+    stopTime(0, stopA, tripA, 0, 10, 0);
+    stopTime(0, stopB, tripA, 20, 20, 0);
 
     FrequencyEntry freqA1 = frequency(time(6, 00), time(9, 00), 10);
     FrequencyEntry freqA2 = frequency(time(15, 00), time(18, 00), 10);
@@ -479,8 +478,8 @@ public class BlockIndicesFactoryTest {
 
     TripEntryImpl tripB = trip("b", "s1");
 
-    addStopTime(tripB, stopTime(0, stopA, tripB, 20, 30, 0));
-    addStopTime(tripB, stopTime(0, stopB, tripB, 50, 50, 0));
+    stopTime(0, stopA, tripB, 20, 30, 0);
+    stopTime(0, stopB, tripB, 50, 50, 0);
 
     FrequencyEntry freqB1 = frequency(time(8, 00), time(14, 00), 20);
     FrequencyEntry freqB2 = frequency(time(17, 00), time(20, 00), 20);

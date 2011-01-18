@@ -5,26 +5,34 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyBlockStopTimeEntryImpl;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 
-public class FrequencyBlockStopTimeIndex extends
-    AbstractBlockStopTimeIndex<FrequencyBlockTripIndex> {
+public class FrequencyBlockStopTimeIndex extends AbstractBlockStopTimeIndex {
 
   private final FrequencyBlockStopTimeList _frequencyStopTimes = new FrequencyBlockStopTimeList();
 
-  public FrequencyBlockStopTimeIndex(FrequencyBlockTripIndex blockTripIndex,
-      int blockSequence, ServiceInterval serviceInterval) {
-    super(blockTripIndex, blockSequence, serviceInterval);
+  private final List<FrequencyEntry> _frequencies;
+
+  public FrequencyBlockStopTimeIndex(List<FrequencyEntry> frequencies,
+      List<BlockConfigurationEntry> blockConfigs, int[] stopIndices,
+      ServiceInterval serviceInterval) {
+    super(blockConfigs, stopIndices, serviceInterval);
+    _frequencies = frequencies;
+  }
+  
+  public List<FrequencyEntry> getFrequencies() {
+    return _frequencies;
   }
 
   public double getStartTimeForIndex(int index) {
-    return _blockTripIndex.getFrequencies().get(index).getStartTime();
+    return _frequencies.get(index).getStartTime();
   }
 
   public double getEndTimeForIndex(int index) {
-    return _blockTripIndex.getFrequencies().get(index).getEndTime();
+    return _frequencies.get(index).getEndTime();
   }
 
   public List<FrequencyBlockStopTimeEntry> getFrequencyStopTimes() {
@@ -41,11 +49,9 @@ public class FrequencyBlockStopTimeIndex extends
 
     @Override
     public FrequencyBlockStopTimeEntry get(int index) {
-      BlockStopTimeEntry blockStopTime = getStopTimes().get(index);
-      FrequencyEntry frequency = getBlockIndex().getFrequencies().get(index);
+      BlockStopTimeEntry blockStopTime = getStopTimeForIndex(index);
+      FrequencyEntry frequency = _frequencies.get(index);
       return new FrequencyBlockStopTimeEntryImpl(blockStopTime, frequency);
     }
-
   }
-
 }

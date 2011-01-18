@@ -53,10 +53,12 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
     Set<BlockTripIndex> blockIndices = new HashSet<BlockTripIndex>();
 
     for (StopEntry stop : stops) {
-
+      // TODO : we need to fix this
+      /*
       List<BlockStopTimeIndex> stopTimeIndices = _blockIndexService.getStopTimeIndicesForStop(stop);
       for (BlockStopTimeIndex stopTimeIndex : stopTimeIndices)
         blockIndices.add(stopTimeIndex.getBlockIndex());
+      */
     }
 
     List<BlockLayoverIndex> layoverIndices = Collections.emptyList();

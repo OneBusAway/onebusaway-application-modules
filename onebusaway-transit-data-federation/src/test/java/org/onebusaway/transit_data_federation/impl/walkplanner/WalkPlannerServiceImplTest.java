@@ -153,8 +153,6 @@ public class WalkPlannerServiceImplTest {
     join(n34, n44);
     join(n22, n33);
 
-    graph.initialize();
-
     return graph;
   }
 

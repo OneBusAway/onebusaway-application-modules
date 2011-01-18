@@ -51,6 +51,10 @@ public class BlockIndicesTask implements Runnable {
           _bundle.getBlockLayoverIndicesPath(), layoverData);
       ObjectSerializationLibrary.writeObject(
           _bundle.getFrequencyBlockTripIndicesPath(), frequencyTripData);
+      
+      BlockStopTimeIndicesFactory stopFactory = new BlockStopTimeIndicesFactory();
+      factory.setVerbose(true);
+      stopFactory.createIndices(blocks);
 
       _refreshService.refresh(RefreshableResources.BLOCK_INDEX_DATA);
 

@@ -44,7 +44,9 @@ public class PointToPointStrategy extends AbstractTripSearchStrategy {
 
     addOrigin(start);
 
+    System.out.println("in");
     computeEndpointWalkPlans(pointFrom, pointTo);
+    System.out.println("out");
   }
 
   public Collection<TripPlan> getTrips() {

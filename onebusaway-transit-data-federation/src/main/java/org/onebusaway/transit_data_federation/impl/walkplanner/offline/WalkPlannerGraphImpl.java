@@ -4,30 +4,25 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.collections.adapter.IAdapter;
+import org.onebusaway.collections.adapter.IterableAdapter;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
 import org.onebusaway.transit_data_federation.services.serialization.EntryCallback;
 import org.onebusaway.transit_data_federation.services.serialization.EntryIdAndCallback;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.ItemVisitor;
-import com.vividsolutions.jts.index.strtree.STRtree;
-
 public class WalkPlannerGraphImpl implements Serializable, WalkPlannerGraph {
 
   private static final long serialVersionUID = 1L;
 
-  private transient static ReadHelper _helper;
+  private static final WalkNodeEntryAdapter _walkNodeEntryAdapter = new WalkNodeEntryAdapter();
 
-  private transient STRtree _tree = null;
+  private transient static ReadHelper _helper;
 
   private List<WalkNodeEntryImpl> _nodes;
 
@@ -39,53 +34,15 @@ public class WalkPlannerGraphImpl implements Serializable, WalkPlannerGraph {
     _nodes = new ArrayList<WalkNodeEntryImpl>(size);
   }
 
-  public void initialize() {
-    if (_tree == null) {
-      _tree = new STRtree(_nodes.size());
-
-      for (int i = 0; i < _nodes.size(); i++) {
-        WalkNodeEntryImpl node = _nodes.get(i);
-        ProjectedPoint loc = node.getLocation();
-        double x = loc.getLon();
-        double y = loc.getLat();
-        Envelope r = new Envelope(x, x, y, y);
-        _tree.insert(r, node);
-      }
-
-      _tree.build();
-    }
-  }
-
-  public List<WalkNodeEntryImpl> getNodes() {
-    return Collections.unmodifiableList(_nodes);
+  public Iterable<WalkNodeEntry> getNodes() {
+    return new IterableAdapter<WalkNodeEntryImpl, WalkNodeEntry>(_nodes,
+        _walkNodeEntryAdapter);
   }
 
   public WalkNodeEntryImpl addNode(int id, ProjectedPoint location) {
     WalkNodeEntryImpl node = new WalkNodeEntryImpl(id, location);
     _nodes.add(node);
     return node;
-  }
-
-  public Collection<WalkNodeEntry> getNodesByLocation(CoordinateBounds bounds) {
-    Envelope r = new Envelope(bounds.getMinLon(), bounds.getMaxLon(),
-        bounds.getMinLat(), bounds.getMaxLat());
-    Go go = new Go();
-    _tree.query(r, go);
-    return go.getNodes();
-  }
-
-  private class Go implements ItemVisitor {
-
-    private List<WalkNodeEntry> _nodesInRange = new ArrayList<WalkNodeEntry>();
-
-    public List<WalkNodeEntry> getNodes() {
-      return _nodesInRange;
-    }
-
-    @Override
-    public void visitItem(Object obj) {
-      _nodesInRange.add((WalkNodeEntry) obj);
-    }
   }
 
   public static void handleWalkNodeEntryRead(WalkNodeEntry walkNodeEntry) {
@@ -103,7 +60,6 @@ public class WalkPlannerGraphImpl implements Serializable, WalkPlannerGraph {
     in.defaultReadObject();
     _helper.flush();
     _helper = null;
-    initialize();
   }
 
   private static class ReadHelper {
@@ -143,4 +99,12 @@ public class WalkPlannerGraphImpl implements Serializable, WalkPlannerGraph {
     }
   }
 
+  private static class WalkNodeEntryAdapter implements
+      IAdapter<WalkNodeEntryImpl, WalkNodeEntry> {
+
+    @Override
+    public WalkNodeEntry adapt(WalkNodeEntryImpl source) {
+      return source;
+    }
+  }
 }

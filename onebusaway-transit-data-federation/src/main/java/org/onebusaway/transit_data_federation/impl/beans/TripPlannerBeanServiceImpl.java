@@ -1,7 +1,9 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -12,13 +14,18 @@ import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanner.WalkSegmentBean;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstraints;
+import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.services.beans.TripPlanBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanService;
+import org.onebusaway.transit_data_federation.services.beans.WalkPlanBeanService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerService;
+import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
+import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.spt.GraphPath;
@@ -36,6 +43,10 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
 
   private PathService _pathService;
 
+  private WalkPlannerService _walkPlannerService;
+
+  private WalkPlanBeanService _walkPlanBeanService;
+
   @Autowired
   public void setTripPlannerService(TripPlannerService service) {
     _tripPlanner = service;
@@ -51,21 +62,48 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
     _constants = constants;
   }
 
-  //@Autowired
+  // @Autowired
   public void setPathService(PathService pathService) {
     _pathService = pathService;
+  }
+
+  @Autowired
+  public void setWalkPlannerService(WalkPlannerService walkPlannerService) {
+    _walkPlannerService = walkPlannerService;
+  }
+
+  @Autowired
+  public void setWalkPlanBeanService(WalkPlanBeanService walkPlanBeanService) {
+    _walkPlanBeanService = walkPlanBeanService;
   }
 
   public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
       double latTo, double lonTo, TripPlannerConstraintsBean constraints)
       throws ServiceException {
 
+    if (constraints.isWalkingOnly()) {
+      CoordinatePoint pFrom = new CoordinatePoint(latFrom, lonFrom);
+      CoordinatePoint pTo = new CoordinatePoint(latTo, lonTo);
+      try {
+        WalkPlan plan = _walkPlannerService.getWalkPlan(pFrom, pTo);
+
+        WalkSegmentBean segment = _walkPlanBeanService.getWalkPlanAsBean(
+            constraints.getMinDepartureTime(), 0L, plan);
+
+        TripPlanBean bean = new TripPlanBean();
+        bean.getSegments().add(segment);
+        return Arrays.asList(bean);
+      } catch (NoPathException e) {
+        return Collections.emptyList();
+      }
+    }
+
     if (_pathService != null) {
       String fromPlace = latFrom + "," + lonFrom;
       String toPlace = latTo + "," + lonTo;
       TraverseOptions options = new TraverseOptions();
-      List<GraphPath> plans = _pathService.plan(fromPlace, toPlace,
-          new Date(constraints.getMinDepartureTime()), options, 1);
+      List<GraphPath> plans = _pathService.plan(fromPlace, toPlace, new Date(
+          constraints.getMinDepartureTime()), options, 1);
       return null;
     }
 

@@ -32,6 +32,8 @@ public class TripPlannerController extends ApiActionSupport {
 
   private Date _timeFrom;
 
+  private boolean _walkingOnly = false;
+
   public TripPlannerController() {
     super(V2);
   }
@@ -61,6 +63,10 @@ public class TripPlannerController extends ApiActionSupport {
     _transitDataService = transitDataService;
   }
 
+  public void setWalkingOnly(boolean walkingOnly) {
+    _walkingOnly = walkingOnly;
+  }
+
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
     if (_timeFrom == null)
@@ -68,6 +74,7 @@ public class TripPlannerController extends ApiActionSupport {
 
     TripPlannerConstraintsBean constraints = new TripPlannerConstraintsBean();
     constraints.setMinDepartureTime(_timeFrom.getTime());
+    constraints.setWalkingOnly(_walkingOnly);
 
     List<TripPlanBean> beans = _transitDataService.getTripsBetween(_latFrom,
         _lonFrom, _latTo, _lonTo, constraints);

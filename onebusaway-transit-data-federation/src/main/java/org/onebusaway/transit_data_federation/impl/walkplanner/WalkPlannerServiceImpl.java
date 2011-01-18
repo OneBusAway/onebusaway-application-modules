@@ -3,8 +3,11 @@ package org.onebusaway.transit_data_federation.impl.walkplanner;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +15,11 @@ import javax.annotation.PostConstruct;
 
 import org.onebusaway.collections.Min;
 import org.onebusaway.container.refresh.Refreshable;
+import org.onebusaway.geospatial.HierarchicalSTRtree;
+import org.onebusaway.geospatial.HierarchicalSTRtreeFactory;
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
@@ -47,6 +54,13 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
 
   private WalkPlannerGraph _graph;
 
+  /**
+   * In meters
+   */
+  private double _treeGridLength = 10000;
+
+  private HierarchicalSTRtree<WalkNodeEntry> _tree = null;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -61,6 +75,10 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
     _graph = graph;
   }
 
+  public void setTreeGridLength(double treeGridLength) {
+    _treeGridLength = treeGridLength;
+  }
+
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.WALK_PLANNER_GRAPH)
   public void setup() throws IOException, ClassNotFoundException {
@@ -69,6 +87,24 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
       _graph = ObjectSerializationLibrary.readObject(path);
     } else {
       _graph = new WalkPlannerGraphImpl();
+    }
+
+    HierarchicalSTRtreeFactory<WalkNodeEntry> factory = new HierarchicalSTRtreeFactory<WalkNodeEntry>();
+    _tree = null;
+
+    Iterable<WalkNodeEntry> nodes = _graph.getNodes();
+
+    Iterator<WalkNodeEntry> it = nodes.iterator();
+    if (it.hasNext()) {
+      WalkNodeEntry first = it.next();
+      ProjectedPoint p = first.getLocation();
+      factory.setLatAndLonStep(p.getLat(), p.getLon(), _treeGridLength);
+
+      for (WalkNodeEntry node : nodes) {
+        ProjectedPoint pNode = node.getLocation();
+        factory.add(pNode.getLat(), pNode.getLon(), node);
+      }
+      _tree = factory.create();
     }
   }
 
@@ -119,9 +155,8 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
   private WalkState getClosestWalkSegment(ProjectedPoint point, boolean forward)
       throws NoPathException {
 
-    Collection<WalkNodeEntry> nodes = StreetGraphLibrary.getNodesNearLocation(
-        _graph, point.getLat(), point.getLon(),
-        _constants.getInitialMaxDistanceToWalkNode(),
+    Collection<WalkNodeEntry> nodes = getNodesNearLocation(point.getLat(),
+        point.getLon(), _constants.getInitialMaxDistanceToWalkNode(),
         _constants.getMaxDistanceToWalkNode());
 
     Set<WalkEdgeEntry> edges = getEdgesForNodes(nodes);
@@ -136,6 +171,26 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
     }
 
     return min.getMinElement();
+  }
+
+  private Collection<WalkNodeEntry> getNodesNearLocation(double lat,
+      double lon, double initialSearchRadius, double maxRadius) {
+
+    if (_tree == null)
+      return Collections.emptyList();
+
+    double radius = initialSearchRadius;
+
+    while (true) {
+      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(lat, lon,
+          radius);
+      List<WalkNodeEntry> nodes = _tree.query(bounds);
+      if (!nodes.isEmpty())
+        return nodes;
+      if (radius == maxRadius)
+        return Collections.emptyList();
+      radius = Math.min(radius * 2, maxRadius);
+    }
   }
 
   private Set<WalkEdgeEntry> getEdgesForNodes(Collection<WalkNodeEntry> nodes)

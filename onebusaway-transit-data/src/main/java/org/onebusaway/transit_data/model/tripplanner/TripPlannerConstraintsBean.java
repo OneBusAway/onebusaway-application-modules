@@ -16,6 +16,8 @@ public class TripPlannerConstraintsBean implements Serializable {
 
   private double maxWalkingDistance = -1;
 
+  private boolean walkingOnly = false;
+
   public TripPlannerConstraintsBean() {
 
   }
@@ -26,6 +28,7 @@ public class TripPlannerConstraintsBean implements Serializable {
     maxTripDuration = constraints.maxTripDuration;
     maxTransfers = constraints.maxTransfers;
     maxWalkingDistance = constraints.maxWalkingDistance;
+    walkingOnly = constraints.walkingOnly;
   }
 
   public boolean hasMinDepartureTime() {
@@ -94,5 +97,13 @@ public class TripPlannerConstraintsBean implements Serializable {
 
   public void setMaxWalkingDistance(double maxWalkingDistance) {
     this.maxWalkingDistance = maxWalkingDistance;
+  }
+
+  public boolean isWalkingOnly() {
+    return walkingOnly;
+  }
+
+  public void setWalkingOnly(boolean walkingOnly) {
+    this.walkingOnly = walkingOnly;
   }
 }

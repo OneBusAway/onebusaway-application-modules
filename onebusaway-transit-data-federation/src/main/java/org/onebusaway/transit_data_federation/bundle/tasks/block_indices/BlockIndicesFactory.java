@@ -28,7 +28,9 @@ public class BlockIndicesFactory {
 
   private static Logger _log = LoggerFactory.getLogger(BlockIndicesFactory.class);
 
-  private static final BlockTripFirstTimeComparator _blockTripComparator = new BlockTripFirstTimeComparator();
+  private static final BlockTripLooseComparator _blockTripLooseComparator = new BlockTripLooseComparator();
+
+  private static final BlockTripStrictComparator _blockTripStrictComparator = new BlockTripStrictComparator();
 
   private static final BlockTripLayoverTimeComparator _blockLayoverComparator = new BlockTripLayoverTimeComparator();
 
@@ -141,7 +143,7 @@ public class BlockIndicesFactory {
         continue;
       }
 
-      if (isFrequencyBased(block))
+      if (BlockLibrary.isFrequencyBased(block))
         continue;
 
       for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
@@ -167,7 +169,9 @@ public class BlockIndicesFactory {
 
       count++;
 
-      List<List<BlockTripEntry>> groupedBlocks = ensureTripGroups(tripsWithSameSequence);
+      List<List<BlockTripEntry>> groupedBlocks = BlockLibrary.createStrictlyOrderedGroups(
+          tripsWithSameSequence, _blockTripLooseComparator,
+          _blockTripStrictComparator);
 
       for (List<BlockTripEntry> group : groupedBlocks) {
         BlockTripIndex index = createTripIndexForGroupOfBlockTrips(group);
@@ -198,7 +202,7 @@ public class BlockIndicesFactory {
         continue;
       }
 
-      if (isFrequencyBased(block))
+      if (BlockLibrary.isFrequencyBased(block))
         continue;
 
       for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
@@ -262,7 +266,7 @@ public class BlockIndicesFactory {
         continue;
       }
 
-      if (!isFrequencyBased(block))
+      if (!BlockLibrary.isFrequencyBased(block))
         continue;
 
       for (BlockConfigurationEntry blockConfiguration : block.getConfigurations()) {
@@ -323,14 +327,6 @@ public class BlockIndicesFactory {
         group.getFrequencies(), serviceIntervalBlock);
   }
 
-  /****
-   * Private Methods
-   ****/
-
-  private boolean isFrequencyBased(BlockEntry blockEntry) {
-    return blockEntry.getConfigurations().get(0).getFrequencies() != null;
-  }
-
   private BlockTripSequenceKey getBlockTripAsTripSequenceKey(
       BlockTripEntry blockTrip) {
     List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
@@ -345,63 +341,6 @@ public class BlockIndicesFactory {
     AgencyAndId firstStopId = blockTrip.getTrip().getStopTimes().get(0).getStop().getId();
     return new BlockLayoverSequenceKey(
         blockTrip.getBlockConfiguration().getServiceIds(), firstStopId);
-  }
-
-  private List<List<BlockTripEntry>> ensureTripGroups(
-      List<BlockTripEntry> blockTrips) {
-
-    Collections.sort(blockTrips, _blockTripComparator);
-
-    List<List<BlockTripEntry>> lists = new ArrayList<List<BlockTripEntry>>();
-
-    for (BlockTripEntry block : blockTrips) {
-      List<BlockTripEntry> list = getBestTripList(lists, block);
-      if (list == null) {
-        list = new ArrayList<BlockTripEntry>();
-        lists.add(list);
-      }
-      list.add(block);
-    }
-
-    return lists;
-  }
-
-  private List<BlockTripEntry> getBestTripList(
-      List<List<BlockTripEntry>> lists, BlockTripEntry trip) {
-
-    for (List<BlockTripEntry> list : lists) {
-
-      if (list.isEmpty())
-        return list;
-
-      BlockTripEntry prev = list.get(list.size() - 1);
-
-      List<BlockStopTimeEntry> stopTimesA = prev.getStopTimes();
-      List<BlockStopTimeEntry> stopTimesB = trip.getStopTimes();
-
-      boolean allGood = areStopTimesAlwaysIncreasingOrEqual(stopTimesA,
-          stopTimesB);
-
-      if (allGood)
-        return list;
-    }
-
-    return null;
-  }
-
-  private boolean areStopTimesAlwaysIncreasingOrEqual(
-      List<BlockStopTimeEntry> stopTimesA, List<BlockStopTimeEntry> stopTimesB) {
-    boolean allGood = true;
-
-    for (int i = 0; i < stopTimesA.size(); i++) {
-      StopTimeEntry stopTimeA = stopTimesA.get(i).getStopTime();
-      StopTimeEntry stopTimeB = stopTimesB.get(i).getStopTime();
-      if (!(stopTimeA.getArrivalTime() <= stopTimeB.getArrivalTime() && stopTimeA.getDepartureTime() <= stopTimeB.getDepartureTime())) {
-        allGood = false;
-        break;
-      }
-    }
-    return allGood;
   }
 
   private List<List<BlockTripEntry>> ensureLayoverGroups(
