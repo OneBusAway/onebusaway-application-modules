@@ -73,6 +73,7 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
 
   public void setWalkPlannerGraph(WalkPlannerGraph graph) {
     _graph = graph;
+    refreshTree();
   }
 
   public void setTreeGridLength(double treeGridLength) {
@@ -89,23 +90,7 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
       _graph = new WalkPlannerGraphImpl();
     }
 
-    HierarchicalSTRtreeFactory<WalkNodeEntry> factory = new HierarchicalSTRtreeFactory<WalkNodeEntry>();
-    _tree = null;
-
-    Iterable<WalkNodeEntry> nodes = _graph.getNodes();
-
-    Iterator<WalkNodeEntry> it = nodes.iterator();
-    if (it.hasNext()) {
-      WalkNodeEntry first = it.next();
-      ProjectedPoint p = first.getLocation();
-      factory.setLatAndLonStep(p.getLat(), p.getLon(), _treeGridLength);
-
-      for (WalkNodeEntry node : nodes) {
-        ProjectedPoint pNode = node.getLocation();
-        factory.add(pNode.getLat(), pNode.getLon(), node);
-      }
-      _tree = factory.create();
-    }
+    refreshTree();
   }
 
   /****
@@ -150,6 +135,31 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
       throw new NoPathException();
     }
 
+  }
+
+  /****
+   * 
+   ****/
+
+  private void refreshTree() {
+
+    HierarchicalSTRtreeFactory<WalkNodeEntry> factory = new HierarchicalSTRtreeFactory<WalkNodeEntry>();
+    _tree = null;
+
+    Iterable<WalkNodeEntry> nodes = _graph.getNodes();
+
+    Iterator<WalkNodeEntry> it = nodes.iterator();
+    if (it.hasNext()) {
+      WalkNodeEntry first = it.next();
+      ProjectedPoint p = first.getLocation();
+      factory.setLatAndLonStep(p.getLat(), p.getLon(), _treeGridLength);
+
+      for (WalkNodeEntry node : nodes) {
+        ProjectedPoint pNode = node.getLocation();
+        factory.add(pNode.getLat(), pNode.getLon(), node);
+      }
+      _tree = factory.create();
+    }
   }
 
   private WalkState getClosestWalkSegment(ProjectedPoint point, boolean forward)
