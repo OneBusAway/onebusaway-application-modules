@@ -77,7 +77,7 @@ public class SiriClientService {
   public void start() {
 
     _client = new SiriClient();
-    _client.setTargetUrl(_url);
+    
     if (_identity != null)
       _client.setIdentity(_identity);
 
@@ -273,7 +273,7 @@ public class SiriClientService {
     public void run() {
       try {
         ServiceRequest request = new ServiceRequest();
-        ServiceDelivery delivery = _client.handlServiceRequestWithResponse(request);
+        ServiceDelivery delivery = _client.handleServiceRequestWithResponse(_url, request);
 
         processDelivery(delivery);
         if (_connectionFailure)
