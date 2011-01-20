@@ -67,7 +67,8 @@ public class FederatedTransitDataBundleCreatorMain {
 
       File firstPath = new File(remainingArgs[0]);
 
-      if (remainingArgs.length == 2 && firstPath.isDirectory()) {
+      if (remainingArgs.length == 2
+          && (firstPath.isDirectory() || firstPath.getName().endsWith(".zip"))) {
 
         GtfsBundle gtfsBundle = new GtfsBundle();
         gtfsBundle.setPath(firstPath);
