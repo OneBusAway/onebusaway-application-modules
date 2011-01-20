@@ -59,14 +59,13 @@ public class PropertyOverrideConfigurer extends
        * Make sure we escape the '\' and '$' characters, otherwise they'll be
        * treated as group references
        */
-      propertyValue = propertyValue.replaceAll("\\", "\\\\");
-      propertyValue = propertyValue.replaceAll("$", "\\$");
+      propertyValue = Matcher.quoteReplacement(propertyValue);
 
       try {
         m.appendReplacement(sb, propertyValue);
-      } finally {
+      } catch (Throwable ex) {
         _log.warn("error appending replacement: propertyName=" + property
-            + " propertyValue=" + propertyValue);
+            + " propertyValue=" + propertyValue, ex);
       }
     }
     m.appendTail(sb);
