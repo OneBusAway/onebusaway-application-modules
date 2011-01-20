@@ -79,6 +79,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   private int _blockInstanceMatchingWindow = 60 * 60 * 1000;
 
+  private boolean _distanceAlongBlockLocationInterpolation = false;
+
   /**
    * Should block location records be stored to the database?
    */
@@ -548,7 +550,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     if (record.isDistanceAlongBlockSet()) {
 
-      if (scheduledBlockLocation != null
+      if (_distanceAlongBlockLocationInterpolation
+          && scheduledBlockLocation != null
           && scheduledBlockLocation.getDistanceAlongBlock() <= record.getDistanceAlongBlock()) {
 
         int ellapsedTime = (int) ((targetTime - record.getTimeOfRecord()) / 1000);
@@ -561,6 +564,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           return _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
               blockConfig, effectiveScheduledTime);
         }
+
         return _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
             scheduledBlockLocation, record.getDistanceAlongBlock());
       }
