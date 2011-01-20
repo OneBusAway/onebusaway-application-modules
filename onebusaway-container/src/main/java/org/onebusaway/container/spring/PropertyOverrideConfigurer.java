@@ -55,6 +55,13 @@ public class PropertyOverrideConfigurer extends
         propertyValue = resolveValue(propertyValue);
       }
 
+      /**
+       * Make sure we escape the '\' and '$' characters, otherwise they'll be
+       * treated as group references
+       */
+      propertyValue = propertyValue.replaceAll("\\", "\\\\");
+      propertyValue = propertyValue.replaceAll("$", "\\$");
+
       try {
         m.appendReplacement(sb, propertyValue);
       } finally {
