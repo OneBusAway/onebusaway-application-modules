@@ -50,10 +50,17 @@ public class PropertyOverrideConfigurer extends
       String propertyValue = System.getProperty(property);
       if (propertyValue == null) {
         _log.warn("no such System property: " + property);
+        propertyValue = "${" + property + "}";
       } else {
         propertyValue = resolveValue(propertyValue);
       }
-      m.appendReplacement(sb, propertyValue);
+
+      try {
+        m.appendReplacement(sb, propertyValue);
+      } finally {
+        _log.warn("error appending replacement: propertyName=" + property
+            + " propertyValue=" + propertyValue);
+      }
     }
     m.appendTail(sb);
     return sb.toString();
