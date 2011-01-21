@@ -11,6 +11,8 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
+
 public class VehicleLocationRecordForVehicleController extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -32,6 +34,7 @@ public class VehicleLocationRecordForVehicleController extends ApiActionSupport 
     _id = id;
   }
 
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _time = time.getTime();
   }
