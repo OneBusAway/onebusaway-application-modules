@@ -380,12 +380,15 @@ public class BlockLocation {
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("BlockLocation(");
+    b.append("block=").append(blockInstance.getBlock().getBlock().getId()).append(",");
     if (phase != null)
       b.append("phase=").append(phase).append(",");
     if (status != null)
       b.append("status=").append(status).append(",");
     if (isScheduleDeviationSet())
       b.append("scheduleDeviation=").append(scheduleDeviation).append(",");
+    if( predicted )
+      b.append("predicted=true,");
     if (isDistanceAlongBlockSet())
       b.append("distanceAlongBlock=").append(distanceAlongBlock).append(",");
     if (vehicleId != null)
