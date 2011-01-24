@@ -54,7 +54,10 @@ public class DistanceAlongShapeLibrary {
       if (pindex.distanceAlongShape > maxDistanceTraveled) {
         int index = projectedShapePoints.size() - 1;
         XYPoint point = projectedShapePoints.get(index);
-        pindex = new PointAndIndex(point, index, maxDistanceTraveled);
+        StopEntryImpl stop = stopTimes.get(i).getStop();
+        XYPoint stopPoint = projection.forward(stop.getStopLocation());
+        double d = stopPoint.getDistance(point);
+        pindex = new PointAndIndex(point, index, d, maxDistanceTraveled);
       }
       stopTimePoints[i] = pindex;
     }
@@ -88,27 +91,60 @@ public class DistanceAlongShapeLibrary {
       List<List<PointAndIndex>> possibleAssignments, UTMProjection projection,
       List<XYPoint> projectedShapePoints) {
 
-    List<PointAndIndex> bestAssignment = new ArrayList<PointAndIndex>();
+    checkFirstAndLastStop(stopTimes, possibleAssignments, shapePoints,
+        projection, projectedShapePoints);
 
-    double lastDistanceAlongShape = -1;
+    List<PointAndIndex> currentAssignment = new ArrayList<PointAndIndex>(
+        possibleAssignments.size());
 
-    /**
-     * Special check for an issue with start points where the first stop isn't
-     * all that near the start of the shape (the first stop being more of a
-     * layover point). If the shape is working against us, the closest point for
-     * the first stop can be a point further along the shape, which causes
-     * problems.
-     */
+    List<Assignment> allValidAssignments = new ArrayList<Assignment>();
+
+    recursivelyConstructAssignments(possibleAssignments, currentAssignment, 0,
+        allValidAssignments);
+
+    if (allValidAssignments.isEmpty()) {
+      constructError(shapePoints, stopTimes, possibleAssignments, projection);
+    }
+
+    Min<Assignment> bestAssignments = new Min<Assignment>();
+
+    for (Assignment validAssignment : allValidAssignments)
+      bestAssignments.add(validAssignment.score, validAssignment);
+
+    Assignment bestAssignment = bestAssignments.getMinElement();
+
+    return bestAssignment.assigment;
+  }
+
+  /**
+   * Special check for an issue with start points where the first stop isn't all
+   * that near the start of the shape (the first stop being more of a layover
+   * point). If the shape is working against us, the closest point for the first
+   * stop can be a point further along the shape, which causes problems.
+   */
+  private void checkFirstAndLastStop(List<StopTimeEntryImpl> stopTimes,
+      List<List<PointAndIndex>> possibleAssignments, ShapePoints shapePoints,
+      UTMProjection projection, List<XYPoint> projectedShapePoints) {
+
     if (possibleAssignments.size() >= 2) {
 
       PointAndIndex first = possibleAssignments.get(0).get(0);
       PointAndIndex second = possibleAssignments.get(1).get(0);
       if (first.distanceAlongShape > second.distanceAlongShape) {
+
         StopTimeEntryImpl firstStopTime = stopTimes.get(0);
+
         _log.warn("snapping first stop time id=" + firstStopTime.getId()
             + " to start of shape");
-        possibleAssignments.get(0).add(
-            new PointAndIndex(projectedShapePoints.get(0), 0, 0.0));
+
+        XYPoint point = projectedShapePoints.get(0);
+
+        StopEntryImpl stop = firstStopTime.getStop();
+        XYPoint stopPoint = projection.forward(stop.getStopLocation());
+
+        double d = stopPoint.getDistance(point);
+
+        possibleAssignments.get(0).add(new PointAndIndex(point, 0, d, 0.0));
       }
 
       int n = possibleAssignments.size();
@@ -119,52 +155,102 @@ public class DistanceAlongShapeLibrary {
 
     }
 
-    for (int i = 0; i < possibleAssignments.size(); i++) {
+    if (possibleAssignments.size() > 0) {
 
-      List<PointAndIndex> assignments = possibleAssignments.get(i);
+      /**
+       * We snap the last stop to the end of the shape and add it to the set of
+       * possible assignments. In the worst case, it will be a higher-scoring
+       * assignment and ignored, but it can help in cases where the stop was
+       * weirdly assigned.
+       */
+      PointAndIndex lastSnapped = getLastStopSnappedToEndOfShape(stopTimes,
+          shapePoints, projection, projectedShapePoints);
 
-      Min<PointAndIndex> min = new Min<PointAndIndex>();
+      possibleAssignments.get(possibleAssignments.size() - 1).add(lastSnapped);
+    }
+  }
 
-      for (PointAndIndex assignment : assignments) {
-        if (assignment.distanceAlongShape >= lastDistanceAlongShape)
-          min.add(assignment.distanceAlongShape, assignment);
-      }
+  private PointAndIndex getLastStopSnappedToEndOfShape(
+      List<StopTimeEntryImpl> stopTimes, ShapePoints shapePoints,
+      UTMProjection projection, List<XYPoint> projectedShapePoints) {
 
-      if (min.isEmpty()) {
+    int i = stopTimes.size() - 1;
+    StopTimeEntryImpl lastStopTime = stopTimes.get(i);
 
-        // Is it the last point? We might make an exception
-        if (i == possibleAssignments.size() - 1) {
+    int lastShapePointIndex = projectedShapePoints.size() - 1;
+    XYPoint lastShapePoint = projectedShapePoints.get(lastShapePointIndex);
+    XYPoint stopLocation = projection.forward(lastStopTime.getStop().getStopLocation());
 
-          StopTimeEntryImpl lastStopTime = stopTimes.get(i);
-          _log.warn("snapping last stop time id=" + lastStopTime.getId()
-              + " to end of shape");
-          int lastShapePointIndex = projectedShapePoints.size() - 1;
-          XYPoint lastShapePoint = projectedShapePoints.get(lastShapePointIndex);
-          XYPoint stopLocation = projection.forward(lastStopTime.getStop().getStopLocation());
-          double existingDistance = shapePoints.getDistTraveledForIndex(lastShapePointIndex);
-          double extraDistance = lastShapePoint.getDistance(stopLocation);
-          double distance = existingDistance + extraDistance;
-          min.add(0, new PointAndIndex(stopLocation, lastShapePointIndex,
-              distance));
+    double existingDistanceAlongShape = shapePoints.getDistTraveledForIndex(lastShapePointIndex);
+    double extraDistanceAlongShape = lastShapePoint.getDistance(stopLocation);
+    double distanceAlongShape = existingDistanceAlongShape
+        + extraDistanceAlongShape;
 
-        } else {
-          constructError(shapePoints, stopTimes, possibleAssignments,
-              projection, bestAssignment);
-        }
-      }
+    double d = lastShapePoint.getDistance(stopLocation);
 
-      PointAndIndex best = min.getMinElement();
-      bestAssignment.add(best);
-      lastDistanceAlongShape = best.distanceAlongShape;
+    return new PointAndIndex(lastShapePoint, lastShapePointIndex, d,
+        distanceAlongShape);
+  }
+
+  private void recursivelyConstructAssignments(
+      List<List<PointAndIndex>> possibleAssignments,
+      List<PointAndIndex> currentAssignment, int i, List<Assignment> best) {
+
+    /**
+     * If we've made it through ALL assignments, we have a valid assignment!
+     */
+    if (i == possibleAssignments.size()) {
+
+      double score = 0;
+      for (PointAndIndex p : currentAssignment)
+        score += p.distanceFromTarget;
+      currentAssignment = new ArrayList<PointAndIndex>(currentAssignment);
+      Assignment result = new Assignment(currentAssignment, score);
+      best.add(result);
+      return;
     }
 
-    return bestAssignment;
+    List<PointAndIndex> possibleAssignmentsForIndex = possibleAssignments.get(i);
+
+    List<PointAndIndex> validAssignments = new ArrayList<PointAndIndex>();
+
+    double lastDistanceAlongShape = -1;
+
+    if (i > 0) {
+      PointAndIndex prev = currentAssignment.get(i - 1);
+      lastDistanceAlongShape = prev.distanceAlongShape;
+    }
+
+    for (PointAndIndex possibleAssignmentForIndex : possibleAssignmentsForIndex) {
+      if (possibleAssignmentForIndex.distanceAlongShape >= lastDistanceAlongShape)
+        validAssignments.add(possibleAssignmentForIndex);
+    }
+
+    /**
+     * There is no satisfying assignment for this search tree, so we return
+     */
+    if (validAssignments.isEmpty()) {
+      return;
+    }
+
+    /**
+     * For each valid assignment, pop it onto the current assignment and
+     * recursively evaluate
+     */
+    for (PointAndIndex validAssignment : validAssignments) {
+
+      currentAssignment.add(validAssignment);
+
+      recursivelyConstructAssignments(possibleAssignments, currentAssignment,
+          i + 1, best);
+
+      currentAssignment.remove(currentAssignment.size() - 1);
+    }
   }
 
   private void constructError(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes,
-      List<List<PointAndIndex>> possibleAssignments, UTMProjection projection,
-      List<PointAndIndex> bestAssignment) {
+      List<List<PointAndIndex>> possibleAssignments, UTMProjection projection) {
     StopTimeEntryImpl first = stopTimes.get(0);
     StopTimeEntryImpl last = stopTimes.get(stopTimes.size() - 1);
 
@@ -173,8 +259,6 @@ public class DistanceAlongShapeLibrary {
     _log.error("error constructing stop-time distances along shape for trip="
         + first.getTrip().getId() + " firstStopTime=" + first.getId()
         + " lastStopTime=" + last.getId());
-    
-    
 
     StringBuilder b = new StringBuilder();
     int index = 0;
@@ -195,34 +279,32 @@ public class DistanceAlongShapeLibrary {
 
     b = new StringBuilder();
     index = 0;
-
-    for (PointAndIndex pindex : bestAssignment) {
-      b.append(index);
-      b.append(' ');
-      b.append(pindex.distanceAlongShape);
-      b.append(' ');
-      b.append(projection.reverse(pindex.point));
-      b.append(' ');
-      b.append(pindex.index);
-      b.append('\n');
-      index++;
-    }
-
-    _log.error("best assignment:\n" + b.toString());
-    
-    b = new StringBuilder();
-    index = 0;
-    for( int i=0; i<shapePoints.getSize(); i++) {
+    for (int i = 0; i < shapePoints.getSize(); i++) {
       b.append(shapePoints.getLatForIndex(i));
       b.append(' ');
       b.append(shapePoints.getLonForIndex(i));
-      b.append(' ' );
+      b.append(' ');
       b.append(shapePoints.getDistTraveledForIndex(i));
       b.append('\n');
     }
-    
+
     _log.error("shape points:\n" + b.toString());
 
     throw new IllegalStateException();
+  }
+
+  private static class Assignment implements Comparable<Assignment> {
+    private final List<PointAndIndex> assigment;
+    private final double score;
+
+    public Assignment(List<PointAndIndex> assignment, double score) {
+      this.assigment = assignment;
+      this.score = score;
+    }
+
+    @Override
+    public int compareTo(Assignment o) {
+      return Double.compare(score, o.score);
+    }
   }
 }

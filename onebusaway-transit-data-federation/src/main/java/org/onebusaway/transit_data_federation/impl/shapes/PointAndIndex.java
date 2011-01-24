@@ -4,13 +4,15 @@ import org.onebusaway.geospatial.model.XYPoint;
 
 public class PointAndIndex implements Comparable<PointAndIndex> {
 
-  public XYPoint point;
-  public int index;
-  public double distanceAlongShape;
+  public final XYPoint point;
+  public final int index;
+  public final double distanceFromTarget;
+  public final double distanceAlongShape;
 
-  public PointAndIndex(XYPoint point, int index, double distanceAlongShape) {
+  public PointAndIndex(XYPoint point, int index, double distanceFromTarget, double distanceAlongShape) {
     this.point = point;
     this.index = index;
+    this.distanceFromTarget = distanceFromTarget;
     this.distanceAlongShape = distanceAlongShape;
   }
 

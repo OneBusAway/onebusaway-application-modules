@@ -86,7 +86,7 @@ public class ShapePointsLibrary {
 
     List<PointAndIndex> localMins = new ArrayList<PointAndIndex>();
 
-    boolean previouslyDecreasing = true;
+    boolean previouslyIncreasing = false;
     double previousDistance = Double.POSITIVE_INFINITY;
 
     for (int i = fromIndex; i < toIndex - 1; i++) {
@@ -98,24 +98,23 @@ public class ShapePointsLibrary {
       double d = location.getDistance(targetPoint);
       double distanceAlongShape = shapePointDistance[i]
           + location.getDistance(from);
-      PointAndIndex pindex = new PointAndIndex(location, i, distanceAlongShape);
+      PointAndIndex pindex = new PointAndIndex(location, i, d, distanceAlongShape);
       min.add(d, pindex);
 
       boolean decreasing = d < previousDistance;
-      
+
       if (d <= _localMinimumThreshold) {
-        if( ! previouslyDecreasing && decreasing && ! localMin.isEmpty() ) {
+        if (previouslyIncreasing && decreasing && !localMin.isEmpty()) {
           localMins.add(localMin.getMinElement());
-          localMin = new Min<PointAndIndex>();          
+          localMin = new Min<PointAndIndex>();
         }
         localMin.add(d, pindex);
-      }
-      else if (d > _localMinimumThreshold && !localMin.isEmpty()) {
+      } else if (d > _localMinimumThreshold && !localMin.isEmpty()) {
         localMins.add(localMin.getMinElement());
         localMin = new Min<PointAndIndex>();
       }
 
-      previouslyDecreasing = previousDistance > d;
+      previouslyIncreasing = d > previousDistance;
       previousDistance = d;
     }
 
