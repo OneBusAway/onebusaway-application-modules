@@ -167,7 +167,8 @@ public class ScheduledBlockLocation {
       b.append(activeTrip.getTrip().getId());
     else
       b.append("null");
-    b.append(" scheduledTime=").append(scheduledTime);
+    int mins = scheduledTime / 60;
+    b.append(" scheduledTime=").append(mins/60).append(':').append(mins%60);
     b.append(" distanceAlongBlock=").append(distanceAlongBlock);
     b.append(")");
     return b.toString();
