@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ArrivalAndDepartureV2Bean implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private String routeId;
 
@@ -33,6 +33,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   private String stopId;
 
   private int stopSequence;
+
+  private int blockTripSequence = -1;
 
   private String routeShortName;
 
@@ -134,6 +136,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   public void setStopSequence(int stopSequence) {
     this.stopSequence = stopSequence;
+  }
+
+  public int getBlockTripSequence() {
+    return blockTripSequence;
+  }
+
+  public void setBlockTripSequence(int blockTripSequence) {
+    this.blockTripSequence = blockTripSequence;
   }
 
   public long getScheduledArrivalTime() {

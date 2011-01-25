@@ -10,13 +10,15 @@ import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 
 public final class TripStatusBean implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   /****
    * These are fields that we can supply from schedule data
    ****/
 
   private TripBean activeTrip;
+
+  private int blockTripSequence = -1;
 
   private long serviceDate;
 
@@ -79,6 +81,14 @@ public final class TripStatusBean implements Serializable {
 
   public void setActiveTrip(TripBean activeTrip) {
     this.activeTrip = activeTrip;
+  }
+
+  public int getBlockTripSequence() {
+    return blockTripSequence;
+  }
+
+  public void setBlockTripSequence(int blockTripSequence) {
+    this.blockTripSequence = blockTripSequence;
   }
 
   public long getServiceDate() {

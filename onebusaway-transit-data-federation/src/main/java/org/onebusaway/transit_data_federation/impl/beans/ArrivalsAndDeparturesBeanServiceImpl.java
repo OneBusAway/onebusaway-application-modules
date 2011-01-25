@@ -326,12 +326,14 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     pab.setServiceDate(sti.getServiceDate());
 
     BlockStopTimeEntry blockStopTime = sti.getStopTime();
+    BlockTripEntry blockTrip = blockStopTime.getTrip();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
     StopEntry stop = stopTime.getStop();
     TripEntry trip = stopTime.getTrip();
 
     TripBean tripBean = _tripBeanService.getTripForId(trip.getId());
     pab.setTrip(tripBean);
+    pab.setBlockTripSequence(blockTrip.getSequence());
 
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
     pab.setRouteShortName(stopTimeNarrative.getRouteShortName());

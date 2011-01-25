@@ -10,13 +10,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private BlockConfigurationEntry blockConfiguration;
 
   private TripEntry trip;
+  
+  private short sequence;
 
-  private int accumulatedStopTimeIndex;
+  private short accumulatedStopTimeIndex;
 
   private int accumulatedSlackTime;
 
@@ -33,8 +35,12 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
   public void setBlockConfiguration(BlockConfigurationEntry blockConfiguration) {
     this.blockConfiguration = blockConfiguration;
   }
+  
+  public void setSequence(short sequence) {
+    this.sequence = sequence;
+  }
 
-  public void setAccumulatedStopTimeIndex(int accumulatedStopTimeIndex) {
+  public void setAccumulatedStopTimeIndex(short accumulatedStopTimeIndex) {
     this.accumulatedStopTimeIndex = accumulatedStopTimeIndex;
   }
 
@@ -76,9 +82,14 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
       toIndex = nextTrip.getAccumulatedStopTimeIndex();
     return stopTimes.subList(accumulatedStopTimeIndex, toIndex);
   }
+  
+  @Override
+  public short getSequence() {
+    return sequence;
+  }
 
   @Override
-  public int getAccumulatedStopTimeIndex() {
+  public short getAccumulatedStopTimeIndex() {
     return accumulatedStopTimeIndex;
   }
 

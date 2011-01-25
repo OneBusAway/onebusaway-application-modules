@@ -201,7 +201,7 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
         BlockConfigurationEntryImpl blockConfiguration) {
 
       ArrayList<BlockTripEntry> blockTrips = new ArrayList<BlockTripEntry>();
-      int accumulatedStopTimeIndex = 0;
+      short accumulatedStopTimeIndex = 0;
       int accumulatedSlackTime = 0;
       double distanceAlongBlock = 0;
 
@@ -209,7 +209,7 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
       StopTimeEntry prevTripStopTime = null;
       double prevTripAvgVelocity = 0;
 
-      for (int i = 0; i < trips.size(); i++) {
+      for (short i = 0; i < trips.size(); i++) {
 
         TripEntry tripEntry = trips.get(i);
         List<StopTimeEntry> stopTimes = tripEntry.getStopTimes();
@@ -238,6 +238,7 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
         BlockTripEntryImpl blockTripEntry = new BlockTripEntryImpl();
         blockTripEntry.setTrip(tripEntry);
         blockTripEntry.setBlockConfiguration(blockConfiguration);
+        blockTripEntry.setSequence(i);
         blockTripEntry.setAccumulatedStopTimeIndex(accumulatedStopTimeIndex);
         blockTripEntry.setAccumulatedSlackTime(accumulatedSlackTime);
         blockTripEntry.setDistanceAlongBlock(distanceAlongBlock);
@@ -250,6 +251,12 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
         blockTrips.add(blockTripEntry);
 
         accumulatedStopTimeIndex += stopTimes.size();
+
+        if (accumulatedSlackTime < 0)
+          throw new IllegalStateException(
+              "I didn't think this was possible, but the number of stop times in a particular block exceeded "
+                  + Short.MAX_VALUE
+                  + " causing a wrap-around in the accumulated stop time index");
 
         for (StopTimeEntry stopTime : stopTimes)
           accumulatedSlackTime += stopTime.getSlackTime();

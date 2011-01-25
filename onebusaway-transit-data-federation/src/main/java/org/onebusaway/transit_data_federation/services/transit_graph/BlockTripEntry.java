@@ -8,7 +8,9 @@ public interface BlockTripEntry {
 
   public TripEntry getTrip();
   
-  public int getAccumulatedStopTimeIndex();
+  public short getSequence();
+  
+  public short getAccumulatedStopTimeIndex();
 
   /**
    * The amount of accumulated slack time from the start of the block to the

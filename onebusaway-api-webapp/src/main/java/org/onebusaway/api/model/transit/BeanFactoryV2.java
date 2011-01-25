@@ -305,6 +305,7 @@ public class BeanFactoryV2 {
     TripBean activeTrip = tripStatus.getActiveTrip();
     if (activeTrip != null) {
       bean.setActiveTripId(activeTrip.getId());
+      bean.setBlockTripSequence(tripStatus.getBlockTripSequence());
       addToReferences(activeTrip);
     }
 
@@ -736,6 +737,7 @@ public class BeanFactoryV2 {
     bean.setStopId(stop.getId());
     addToReferences(stop);
     bean.setStopSequence(ad.getStopSequence());
+    bean.setBlockTripSequence(ad.getBlockTripSequence());
 
     bean.setRouteId(route.getId());
     addToReferences(route);

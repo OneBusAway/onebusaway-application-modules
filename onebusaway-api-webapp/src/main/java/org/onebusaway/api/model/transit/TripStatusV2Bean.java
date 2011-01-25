@@ -7,13 +7,15 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 
 public final class TripStatusV2Bean implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   /****
    * These are fields that we can supply from schedule data
    ****/
 
   private String activeTripId;
+
+  private int blockTripSequence = -1;
 
   private long serviceDate;
 
@@ -74,6 +76,14 @@ public final class TripStatusV2Bean implements Serializable {
 
   public void setActiveTripId(String activeTripId) {
     this.activeTripId = activeTripId;
+  }
+
+  public int getBlockTripSequence() {
+    return blockTripSequence;
+  }
+
+  public void setBlockTripSequence(int blockTripSequence) {
+    this.blockTripSequence = blockTripSequence;
   }
 
   public long getServiceDate() {
