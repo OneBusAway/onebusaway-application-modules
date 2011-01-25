@@ -15,7 +15,9 @@
  */
 package org.onebusaway.geospatial.model;
 
-public final class XYPoint implements Point {
+import java.io.Serializable;
+
+public final class XYPoint implements Point, Serializable {
 
   private static final long serialVersionUID = 1L;
 
