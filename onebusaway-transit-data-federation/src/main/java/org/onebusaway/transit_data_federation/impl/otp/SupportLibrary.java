@@ -21,6 +21,7 @@ public class SupportLibrary {
     return stopTime.getBlockSequence() + 1 < stopTimes.size();
   }
 
+  /*
   public static long getNextTimeWindow(GraphContext context, long time) {
     int interval = context.getStopTimeSearchInterval() * 60 * 1000;
     long snapped = (time / interval) * interval;
@@ -30,6 +31,7 @@ public class SupportLibrary {
       return time + interval;
     return snapped;
   }
+  */
 
   public static long getNextTimeWindow(int stopTimeSearchInterval, long time) {
     int interval = stopTimeSearchInterval * 60 * 1000;
@@ -41,6 +43,7 @@ public class SupportLibrary {
     return snapped;
   }
 
+  /*
   public static long getPreviousTimeWindow(GraphContext context, long time) {
     int interval = context.getStopTimeSearchInterval() * 60 * 1000;
     long snapped = (time / interval) * interval;
@@ -48,4 +51,5 @@ public class SupportLibrary {
       return snapped - interval;
     return snapped;
   }
+  */
 }
