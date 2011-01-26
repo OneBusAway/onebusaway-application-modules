@@ -10,10 +10,6 @@
     <artifactId>onebusaway-gwt-common</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <properties>
-        <gwt-version>2.0.0</gwt-version>
-    </properties>
-
     <dependencies>
 
         <!-- OneBusAway Dependencies -->

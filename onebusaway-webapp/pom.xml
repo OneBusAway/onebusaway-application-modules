@@ -6,7 +6,6 @@
     <packaging>war</packaging>
 
     <properties>
-        <gwt-version>2.0.0</gwt-version>
         <xwiki.version>2.3.1</xwiki.version>
         <xwiki.integration.version>0.0.2</xwiki.integration.version>
     </properties>
