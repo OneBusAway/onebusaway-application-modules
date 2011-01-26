@@ -4,12 +4,11 @@
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-webapp</artifactId>
     <packaging>war</packaging>
-    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
         <gwt-version>2.0.0</gwt-version>
         <xwiki.version>2.3.1</xwiki.version>
-        <xwiki.integration.version>0.0.1-SNAPSHOT</xwiki.integration.version>
+        <xwiki.integration.version>0.0.2</xwiki.integration.version>
     </properties>
 
     <parent>
@@ -38,7 +37,7 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-everylastlogin</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
 
         <!-- This is here mostly to support csv record parsing -->
@@ -188,7 +187,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <version>1.3-SNAPSHOT</version>
                 <configuration>
                     <modules>
                         <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
@@ -227,7 +225,7 @@
                                     <groupId>org.onebusaway</groupId>
                                     <artifactId>onebusaway-everylastlogin</artifactId>
                                     <classifier>gwtloginwidget</classifier>
-                                    <version>0.0.1-SNAPSHOT</version>
+                                    <version>0.0.1</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/gwt/LoginWidget</outputDirectory>

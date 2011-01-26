@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-siri-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${onebusaway-siri-version}</version>
         </dependency>
 
         <!-- RMI-like service for wiring up services between VMs -->

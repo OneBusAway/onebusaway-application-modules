@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-siri-core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${onebusaway-siri-version}</version>
         </dependency>
 
         <dependency>
@@ -115,7 +115,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>1.2.2</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

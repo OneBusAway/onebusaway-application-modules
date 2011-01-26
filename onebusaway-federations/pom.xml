@@ -16,7 +16,6 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-collections</artifactId>
-            <version>1.0.1</version>
         </dependency>
         
         <dependency>
@@ -52,7 +51,6 @@
             <artifactId>slf4j-log4j12</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
         	<groupId>org.mortbay.jetty</groupId>
         	<artifactId>jetty</artifactId>
