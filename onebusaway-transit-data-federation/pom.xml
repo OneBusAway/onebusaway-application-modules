@@ -10,6 +10,10 @@
     <packaging>jar</packaging>
 
     <name>onebusaway-transit-data-federation</name>
+    
+    <properties>
+      <opentripplanner-version>0.4-SNAPSHOT</opentripplanner-version>
+    </properties>
 
     <dependencies>
         <!-- OneBusAway Dependencies -->
@@ -43,7 +47,7 @@
         <dependency>
             <groupId>org.opentripplanner</groupId>
             <artifactId>opentripplanner-graph-builder</artifactId>
-            <version>0.3</version>
+            <version>${opentripplanner-version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>hsqldb</groupId>

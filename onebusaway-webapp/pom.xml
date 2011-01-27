@@ -13,7 +13,7 @@
 
     <properties>
         <xwiki.version>2.3.1</xwiki.version>
-        <xwiki.integration.version>0.0.2</xwiki.integration.version>
+        <wiki.integration.version>0.1.0-SNAPSHOT</wiki.integration.version>
     </properties>
 
 
@@ -112,22 +112,22 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-wiki-integration-tags</artifactId>
-            <version>${xwiki.integration.version}</version>
+            <version>${wiki.integration.version}</version>
         </dependency>
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-wiki-integration-xwiki-impl</artifactId>
-            <version>${xwiki.integration.version}</version>
+            <version>${wiki.integration.version}</version>
         </dependency>
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-wiki-integration-xwiki-struts-macros</artifactId>
-            <version>${xwiki.integration.version}</version>
+            <version>${wiki.integration.version}</version>
         </dependency>
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-wiki-integration-xwiki-macros</artifactId>
-            <version>${xwiki.integration.version}</version>
+            <version>${wiki.integration.version}</version>
         </dependency>
         
         <dependency>

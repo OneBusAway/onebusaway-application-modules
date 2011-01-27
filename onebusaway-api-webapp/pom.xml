@@ -11,10 +11,6 @@
 
     <name>onebusaway-api-webapp</name>
 
-    <properties>
-        <struts-version>2.1.8</struts-version>
-    </properties>
-
     <dependencies>
 
         <dependency>
@@ -27,11 +23,13 @@
             <artifactId>onebusaway-presentation</artifactId>
             <version>${project.version}</version>
         </dependency>
+        
+        <!-- We need this for CsvEntityReader, NOT for any of the gtfs classes (I wish it was separate) -->
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-gtfs</artifactId>
         </dependency>
-        <!-- We need this for CsvEntityReader, NOT for any of the gtfs classes (I wish it was separate) -->
+        
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-siri-api</artifactId>
