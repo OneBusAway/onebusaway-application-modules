@@ -27,6 +27,7 @@ import org.onebusaway.siri.model.VehicleLocation;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
@@ -174,102 +175,103 @@ public class StopMonitoringController implements ModelDriven<Object>,
       query.setServiceDate(adbean.getServiceDate());
       query.setTime(now.getTime().getTime());
       query.setVehicleId(adbean.getVehicleId());
-      TripDetailsBean specificTripDetails = _transitDataService.getSingleTripDetails(query);
 
-      MonitoredStopVisit MonitoredStopVisit = new MonitoredStopVisit();
+      ListBean<TripDetailsBean> trips = _transitDataService.getTripDetails(query);
+      for (TripDetailsBean specificTripDetails : trips.getList()) {
+        MonitoredStopVisit MonitoredStopVisit = new MonitoredStopVisit();
 
-      TripStatusBean status = specificTripDetails.getStatus();
-      if (status == null) {
-        // this trip has no status. Let's skip it.
-        continue;
-      }
-      if (status.isPredicted() == false) {
-        /* only show trips with realtime info */
-        continue;
-      }
-
-      MonitoredStopVisit.RecordedAtTime = new GregorianCalendar();
-      MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
-      MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
-
-      MonitoredStopVisit.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(
-          specificTripDetails, new Date(status.getServiceDate()),
-          status.getVehicleId());
-      MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
-
-      MonitoredCall monitoredCall = new MonitoredCall();
-      MonitoredStopVisit.MonitoredVehicleJourney.MonitoredCall = monitoredCall;
-      monitoredCall.Extensions = new DistanceExtensions();
-      monitoredCall.StopPointRef = SiriUtils.getIdWithoutAgency(stopId);
-
-      CoordinatePoint position = status.getLocation();
-      if (position != null) {
-        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation = new VehicleLocation();
-        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getLocation().getLat();
-        MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getLocation().getLon();
-        double distance = status.getDistanceAlongTrip();
-        if (Double.isNaN(distance)) {
-          distance = status.getScheduledDistanceAlongTrip();
+        TripStatusBean status = specificTripDetails.getStatus();
+        if (status == null) {
+          // this trip has no status. Let's skip it.
+          continue;
         }
-      }
-
-      MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(status.getStatus());
-
-      int i = 0;
-      boolean started = false;
-
-      List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
-
-      /*
-       * go through every stop in the trip to (a) find out how far many stops
-       * away the bus is from this stop and (b) populate, if necessary,
-       * onwardCalls
-       */
-      HashMap<String, Integer> visitNumberForStop = new HashMap<String, Integer>();
-      for (TripStopTimeBean stopTime : stopTimes) {
-        StopBean stop = stopTime.getStop();
-        int visitNumber = SiriUtils.getVisitNumber(visitNumberForStop, stop);
-        if (started) {
-          i++;
+        if (status.isPredicted() == false) {
+          /* only show trips with realtime info */
+          continue;
         }
 
-        double distance = status.getDistanceAlongTrip();
-        if (Double.isNaN(distance)) {
-          distance = status.getScheduledDistanceAlongTrip();
-        }
-        if (stopTime.getDistanceAlongTrip() >= distance) {
-          /*
-           * this stop time is further along the route than the vehicle is so we
-           * will now start counting stops until we hit the requested stop
-           */
-          started = true;
-        }
-        if (started && stopTime.getStop().getId().equals(stopId)) {
-          /* we have hit the requested stop */
-          monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip()
-              - distance < 10;
-          monitoredCall.Extensions.Distances = new Distances();
-          monitoredCall.Extensions.Distances.StopsFromCall = i;
-          monitoredCall.Extensions.Distances.CallDistanceAlongRoute = stopTime.getDistanceAlongTrip();;
-          monitoredCall.Extensions.Distances.DistanceFromCall = distanceFromStop;
+        MonitoredStopVisit.RecordedAtTime = new GregorianCalendar();
+        MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
+        MonitoredStopVisit.RecordedAtTime.setTimeInMillis(status.getLastUpdateTime());
 
-          monitoredCall.VisitNumber = visitNumber;
-          if (includeOnwardCalls) {
-            List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(stopTimes,
-                status.getServiceDate(), distance, stop);
-            MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = onwardCalls;
+        MonitoredStopVisit.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(
+            specificTripDetails, new Date(status.getServiceDate()),
+            status.getVehicleId());
+        MonitoredStopVisit.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
+
+        MonitoredCall monitoredCall = new MonitoredCall();
+        MonitoredStopVisit.MonitoredVehicleJourney.MonitoredCall = monitoredCall;
+        monitoredCall.Extensions = new DistanceExtensions();
+        monitoredCall.StopPointRef = SiriUtils.getIdWithoutAgency(stopId);
+
+        CoordinatePoint position = status.getLocation();
+        if (position != null) {
+          MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation = new VehicleLocation();
+          MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Latitude = status.getLocation().getLat();
+          MonitoredStopVisit.MonitoredVehicleJourney.VehicleLocation.Longitude = status.getLocation().getLon();
+          double distance = status.getDistanceAlongTrip();
+          if (Double.isNaN(distance)) {
+            distance = status.getScheduledDistanceAlongTrip();
           }
         }
-      }
 
-      if (started == false) {
-        /* remove trips which have already passed this stop */
-        continue;
-      }
+        MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(status.getStatus());
 
-      delivery.visits.add(MonitoredStopVisit);
+        int i = 0;
+        boolean started = false;
+
+        List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
+
+        /*
+         * go through every stop in the trip to (a) find out how far many stops
+         * away the bus is from this stop and (b) populate, if necessary,
+         * onwardCalls
+         */
+        HashMap<String, Integer> visitNumberForStop = new HashMap<String, Integer>();
+        for (TripStopTimeBean stopTime : stopTimes) {
+          StopBean stop = stopTime.getStop();
+          int visitNumber = SiriUtils.getVisitNumber(visitNumberForStop, stop);
+          if (started) {
+            i++;
+          }
+
+          double distance = status.getDistanceAlongTrip();
+          if (Double.isNaN(distance)) {
+            distance = status.getScheduledDistanceAlongTrip();
+          }
+          if (stopTime.getDistanceAlongTrip() >= distance) {
+            /*
+             * this stop time is further along the route than the vehicle is so
+             * we will now start counting stops until we hit the requested stop
+             */
+            started = true;
+          }
+          if (started && stopTime.getStop().getId().equals(stopId)) {
+            /* we have hit the requested stop */
+            monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip()
+                - distance < 10;
+            monitoredCall.Extensions.Distances = new Distances();
+            monitoredCall.Extensions.Distances.StopsFromCall = i;
+            monitoredCall.Extensions.Distances.CallDistanceAlongRoute = stopTime.getDistanceAlongTrip();;
+            monitoredCall.Extensions.Distances.DistanceFromCall = distanceFromStop;
+
+            monitoredCall.VisitNumber = visitNumber;
+            if (includeOnwardCalls) {
+              List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(
+                  stopTimes, status.getServiceDate(), distance, stop);
+              MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = onwardCalls;
+            }
+          }
+        }
+
+        if (started == false) {
+          /* remove trips which have already passed this stop */
+          continue;
+        }
+
+        delivery.visits.add(MonitoredStopVisit);
+      }
     }
-
     // sort MonitoredStopVisits by distance from stop
     Collections.sort(delivery.visits, new Comparator<MonitoredStopVisit>() {
 
