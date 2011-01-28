@@ -123,10 +123,10 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
     ArrivalsAndDeparturesQueryBean arrivalsQuery = new ArrivalsAndDeparturesQueryBean();
     arrivalsQuery.setTime(_time.getTime());
-    arrivalsQuery.setMinutesBefore(30);
-    arrivalsQuery.setMinutesAfter(30);
-    arrivalsQuery.setFrequencyMinutesBefore(30);
-    arrivalsQuery.setFrequencyMinutesAfter(30);
+    arrivalsQuery.setMinutesBefore(60);
+    arrivalsQuery.setMinutesAfter(60);
+    arrivalsQuery.setFrequencyMinutesBefore(60);
+    arrivalsQuery.setFrequencyMinutesAfter(360);
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _transitDataService.getStopWithArrivalsAndDepartures(
         stopId, arrivalsQuery);
 
@@ -219,6 +219,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
         int i = 0;
         boolean started = false;
+        boolean found = false;
 
         List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
 
@@ -247,6 +248,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
             started = true;
           }
           if (started && stopTime.getStop().getId().equals(stopId)) {
+            found = true;
             /* we have hit the requested stop */
             monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip()
                 - distance < 10;
@@ -264,7 +266,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
           }
         }
 
-        if (started == false) {
+        if (!started || !found) {
           /* remove trips which have already passed this stop */
           continue;
         }
