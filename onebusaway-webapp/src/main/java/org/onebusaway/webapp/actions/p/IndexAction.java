@@ -162,7 +162,7 @@ public class IndexAction extends AbstractAction {
     String namespace = "Main";
     String name = proxy.getActionName();
 
-    _page = _wikiDocumentService.getWikiPage(namespace, name, _forceRefresh);
+    _page = _wikiDocumentService.getWikiPage(namespace, name, getLocale(), _forceRefresh);
   }
 
 }
