@@ -136,7 +136,10 @@ public class SiriUtils {
 
   public static String getProgressRateForStatus(String status) {
     if (status == null) {
-      return "normalProgress";
+      return "unknown";
+    }
+    if (status.equals("default")) {
+      return "unknown";
     }
     if (status.equals("IN_PROGRESS")) {
       return "normalProgress";
