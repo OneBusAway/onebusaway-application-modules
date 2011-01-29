@@ -65,6 +65,8 @@ public class ResourceServiceImpl implements ResourceService {
   private static final String PREFIX_CLASSPATH = "classpath:";
 
   private static final String PREFIX_COLLECTION = "collection:";
+  
+  private static final String PREFIX_COLLECTION_ENTRY = "collection-entry:";
 
   private static final String PREFIX_MESSAGES = "messages:";
 
@@ -336,6 +338,9 @@ public class ResourceServiceImpl implements ResourceService {
           if (sepIndex != -1)
             path = path.substring(sepIndex + 1);
           resourceMapping.put(path, r.getExternalUrl());
+          
+          String alternateId = PREFIX_COLLECTION_ENTRY + collectionPrefix + ":" + path;
+          _resourceEntriesByResourcePath.put(alternateId, r);
         }
       }
 

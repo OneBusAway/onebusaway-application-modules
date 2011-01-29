@@ -242,7 +242,7 @@
                           <s:url var="url" action="trip">
                             <s:param name="id" value="tripId"/>
                             <s:param name="serviceDate" value="serviceDate" />
-                            <s:param name="stopId" value="stop.id"/>
+                            <s:param name="stopId" value="result.stop.id"/>
                           </s:url>
                           <s:a cssClass="stopScheduleMinutes" href="%{url}">
                             <oba:date format="mm" value="departureTime" />

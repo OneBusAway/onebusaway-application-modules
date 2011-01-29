@@ -43,7 +43,7 @@
                 <s:param name="id" value="trip.id" />
                 <s:param name="serviceDate" value="serviceDate" />
                 <s:param name="vehicleId" value="tripStatus.vehicleId" />
-                <s:param name="stop" value="stopId" />
+                <s:param name="stopId" value="stop.id" />
             </s:url> <s:a href="%{tripUrl}">
                 <s:property value="trip.tripHeadsign" />
             </s:a></div>

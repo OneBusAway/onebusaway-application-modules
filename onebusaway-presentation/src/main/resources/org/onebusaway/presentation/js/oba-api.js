@@ -116,8 +116,18 @@ var obaApiFactory = function() {
 		
 	};
 	
+	var processStop = function(stop, references) {
+		
+	};
+	
 	var processStopsForRoute = function(stopsForRoute, references) {
 		
+	};
+	
+	var processTripDetails = function(tripDetails, references) {
+		var trip = references.tripsById[tripDetails.tripId];
+		if( trip )
+			tripDetails.trip = trip;
 	};
 
 	/***************************************************************************
@@ -140,11 +150,32 @@ var obaApiFactory = function() {
 		jQuery.getJSON(url, params, handler);
 	};
 	
+	that.shape = function(shapeId, callback, errorCallback) {
+		var url = createUrl('/where/shape/' + shapeId + '.json');
+		var params = createParams();
+		var handler = createEntryHandler(callback, errorCallback);
+		jQuery.getJSON(url, params, handler);
+	};
+	
+	that.stop = function(stopId, callback, errorCallback) {
+		var url = createUrl('/where/stop/' + stopId + '.json');
+		var params = createParams();
+		var handler = createEntryHandler(callback, errorCallback, processStop);
+		jQuery.getJSON(url, params, handler);
+	};
+	
 	that.stopsForRoute = function(routeId, callback, errorCallback) {
 		var url = createUrl('/where/stops-for-route/' + routeId + '.json');
 		var params = createParams();
 		var handler = createEntryHandler(callback, errorCallback,
 				processStopsForRoute);
+		jQuery.getJSON(url, params, handler);
+	};
+	
+	that.tripDetails = function(params, callback, errorCallback) {
+		var url = createUrl('/where/trip-details/' + params.tripId + '.json');
+		var params = createParams(params);
+		var handler = createEntryHandler(callback, errorCallback, processTripDetails);
 		jQuery.getJSON(url, params, handler);
 	};
 

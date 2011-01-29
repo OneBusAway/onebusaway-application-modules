@@ -14,6 +14,27 @@
  * the License.
  */
  
+div#mapAndSchedulePanel {
+    position: relative;
+    margin-top: 1em;
+}
+
+#map {
+	width: 400px;
+	height: 500px;
+}
+
+ul#mapLegend img {
+  vertical-align:middle; 	
+}
+
+div#schedulePanel {
+    position: absolute;
+    left: 420px;
+    top: 0px;
+}
+
+ 
 #tripPanel {
 	text-align: left;
 	margin-left: 20px;

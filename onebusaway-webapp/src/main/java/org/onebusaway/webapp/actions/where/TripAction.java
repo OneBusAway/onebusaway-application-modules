@@ -54,29 +54,51 @@ public class TripAction extends ActionSupport {
   private long _actualServiceDate;
 
   private String _vehicleId;
+  
+  private String _stopId;
 
   private boolean _showArrivals = false;
 
   public void setId(String id) {
     _id = id;
   }
+  
+  public String getId() {
+    return _id;
+  }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setServiceDate(Date serviceDate) {
     _serviceDate = serviceDate;
+  }
+  
+  public Date getServiceDate() {
+    return _serviceDate;
   }
 
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _time = time;
   }
+  
+  public Date getTime() {
+    return _time;
+  }
 
   public void setVehicleId(String vehicleId) {
     _vehicleId = vehicleId;
   }
+  
+  public String getVehicleId() {
+    return _vehicleId;
+  }
 
-  public void setStop(String stopId) {
-
+  public void setStopId(String stopId) {
+    _stopId = stopId;
+  }
+  
+  public String getStopId() {
+    return _stopId;
   }
 
   public void setShowArrivals(boolean showArrivals) {
@@ -157,4 +179,5 @@ public class TripAction extends ActionSupport {
 
     return c.getTimeInMillis();
   }
+
 }
