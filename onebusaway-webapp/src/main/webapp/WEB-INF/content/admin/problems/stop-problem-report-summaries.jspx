@@ -73,16 +73,16 @@
                     <td>
                         <s:a action="stop-problem-reports">
                             <s:param name="stopId" value="stop.id"/>
-                            <oba:message key="StopNum"/>
-                            <jsp:text> </jsp:text>
-                            <s:property value="stop.code"/>
+                            <s:text key="StopNum">
+                              <s:param value="stop.code"/>    
+                            </s:text>
                             <jsp:text> - </jsp:text>
                             <s:property value="stop.name"/>
                             <s:if test="stop.direction != null">
                               <jsp:text> - </jsp:text>
-                              <s:property value="stop.direction"/>
-                              <jsp:text> </jsp:text>
-                              <oba:message key="bound"/>
+                              <oba:message key="bound">
+                                <s:param value="stop.direction"/>
+                              </oba:message>
                             </s:if>
                         </s:a>
                     </td>

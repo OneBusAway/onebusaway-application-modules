@@ -59,12 +59,30 @@
     <div id="mapAndSchedulePanel">
 
     <div id="mapPanel">
+        
         <div id="map"><jsp:text></jsp:text></div>
-        <ul id="mapLegend">
-            <s:if test="stopId != null">
-                <li><img src="${oba:resource('collection-entry:Map:SelectionCircle36.png')}" /> - <s:text name="trip.Your_selected_stop"/></li>
-            </s:if>
-        </ul>
+        
+        <div class="stopInfoWindowTemplate" style="display:none;">
+            <h3>Stop Name</h3>
+            <h4><span class="stopCode"><s:text name="StopNum"/></span><span class="stopDirection"> - <s:text name="bound"/></span></h4>
+            <p><s:a action="arrival-and-departure-for-stop"><s:text name="Realtime_arrival_info" /></s:a></p>
+        </div>
+        
+        <div id="mapLegendLabel"><s:text name="Legend"/></div>
+        <table id="mapLegend">
+            <tbody>
+                <tr>
+                    <td><img src="${oba:resource('collection-entry:Map:MapIcon-Bus-22.png')}" /></td>
+                    <td><s:text name="trip.Transit_stop"/></td>
+                </tr>
+                <s:if test="stopId != null">
+                <tr>
+                    <td><img src="${oba:resource('collection-entry:Map:SelectionCircle36.png')}" /></td>
+                    <td><s:text name="trip.Your_selected_stop"/></td>
+                </tr>
+                </s:if>
+            </tbody>
+        </table>
     </div>
     
     <div id="schedulePanel">

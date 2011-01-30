@@ -21,9 +21,9 @@
 	xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <s:set var="stop" value="parameters.stop"/>
-<oba:message key="StopNum"/>
-<jsp:text> </jsp:text>
-<s:property value="#stop.code"/>
+<s:text name="StopNum">
+    <s:param value="#stop.code"/>
+</s:text>
 <s:if test="parameters.excludeStopName">
 </s:if>
 <s:else>
@@ -32,8 +32,8 @@
 </s:else>
 <s:if test="#stop.direction != null">
   <jsp:text> - </jsp:text>
-  <s:property value="#stop.direction"/>
-  <jsp:text> </jsp:text>
-  <oba:message key="bound"/>
+  <s:text name="bound">
+    <s:param value="#stop.direction"/>
+  </s:text>
 </s:if>
 </jsp:root>

@@ -100,11 +100,25 @@ var obaApiFactory = function() {
 	};
 
 	var processReferences = function(references) {
+		
 		references.agenciesById = processReferencesById(references.agencies);
 		references.routesById = processReferencesById(references.routes);
 		references.stopsById = processReferencesById(references.stops);
 		references.tripsById = processReferencesById(references.trips);
 		references.situationsById = processReferencesById(references.situations);
+		
+		jQuery.each(references.routes, function(){
+			processRoute(this, references);
+		});
+		
+		jQuery.each(references.stops, function(){
+			processStop(this, references);
+		});
+		
+		jQuery.each(references.trips, function(){
+			processTrip(this, references);
+		});
+		
 		return references;
 	};
 
@@ -116,20 +130,69 @@ var obaApiFactory = function() {
 		
 	};
 	
+	var processRoute = function(route, references ) {
+		var agency = references.agenciesById[route.agencyId];
+		if( agency )
+			route.agency = agency;
+	};
+	
 	var processStop = function(stop, references) {
-		
+		var routes = new Array();
+		stop.routes = routes;
+		jQuery.each(stop.routeIds,function() {
+			var route = references.routesById[this];
+			if( route )
+				routes.push(route);
+		});
 	};
 	
 	var processStopsForRoute = function(stopsForRoute, references) {
 		
 	};
 	
+	var processTrip = function(trip, references) {
+		var route = references.routesById[trip.routeId];
+		if( route )
+			trip.route = route;
+	};
+	
 	var processTripDetails = function(tripDetails, references) {
 		var trip = references.tripsById[tripDetails.tripId];
 		if( trip )
 			tripDetails.trip = trip;
+		if( tripDetails.schedule )
+			processTripSchedule( tripDetails.schedule, references);
+		if( tripDetails.status )
+			processTripStatus( tripDetails.status );
 	};
-
+	
+	var processTripSchedule = function(schedule, references) {
+		
+		var stopTimes = schedule.stopTimes;
+		if( stopTimes ) {
+			jQuery.each(stopTimes, function() {
+				processTripStopTime(this,references);
+			});
+		}
+		var prevTrip = references.tripsById[schedule.previousTripId];
+		if( prevTrip )
+			schedule.previousTrip = prevTrip;
+		
+		var nextTrip = references.tripsById[schedule.nextTripId];
+		if( nextTrip )
+			schedule.nextTrip = nextTrip;
+	};
+	
+	var processTripStopTime = function(stopTime, references) {
+		var stop = references.stopsById[stopTime.stopId];
+		if( stop )
+			stopTime.stop = stop;
+	};
+	
+	var processTripStatus = function(tripStatus, references) {
+		
+	};
+	
 	/***************************************************************************
 	 * Public API Methods
 	 **************************************************************************/
@@ -178,7 +241,7 @@ var obaApiFactory = function() {
 		var handler = createEntryHandler(callback, errorCallback, processTripDetails);
 		jQuery.getJSON(url, params, handler);
 	};
-
+	
 	return that;
 };
 

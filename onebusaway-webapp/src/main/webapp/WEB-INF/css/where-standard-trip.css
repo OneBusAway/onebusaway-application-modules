@@ -24,9 +24,25 @@ div#mapAndSchedulePanel {
 	height: 500px;
 }
 
-ul#mapLegend img {
-  vertical-align:middle; 	
+div#mapLegendLabel {
+	margin-top: 1em;
+	font-weight: bold;
+	border-bottom: 1px black solid;		
+	width: 400px;
 }
+
+table#mapLegend {
+	margin-top: 1em; 	
+}
+
+table#mapLegend td {
+	padding: 4px;
+}
+
+table#mapLegend td:first-child {
+	text-align: center;
+}
+
 
 div#schedulePanel {
     position: absolute;

@@ -69,6 +69,8 @@ public class ResourceServiceImpl implements ResourceService {
   private static final String PREFIX_COLLECTION_ENTRY = "collection-entry:";
 
   private static final String PREFIX_MESSAGES = "messages:";
+  
+  private static final String PREFIX_FILE = "file:";
 
   private static final Pattern _resourcePattern = Pattern.compile("^(.*)-\\w+\\.cache(\\.\\w+){0,1}$");
 
@@ -299,6 +301,16 @@ public class ResourceServiceImpl implements ResourceService {
       if (resource == null)
         _log.warn("unknown classpath resource: name=" + resourceName);
       return resource;
+    }
+    
+    if (resourceName.startsWith(PREFIX_FILE)) {
+      resourceName = resourceName.substring(PREFIX_FILE.length());
+      File file = new File(resourceName);
+      try {
+        return file.toURI().toURL();
+      } catch (MalformedURLException e) {
+        throw new IllegalStateException("error requesting file url: " + resourceName);
+      }
     }
 
     try {
