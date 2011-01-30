@@ -17,6 +17,16 @@ var oba_where_standard_trip = function(data) {
         var opts = {path: path, strokeColor: '#000000'};
         var line = new google.maps.Polyline(opts);
         line.setMap(map);
+        
+        if( path.length > 1) {
+        	var startPoint = path[0];
+        	var startIconUrl = OBA.Resources.Map['RouteStart.png'];
+        	new google.maps.Marker({position: startPoint, map: map, icon: startIconUrl, clickable: false});
+        	
+        	var endPoint = path[path.length-1];
+        	var endIconUrl = OBA.Resources.Map['RouteEnd.png'];
+        	new google.maps.Marker({position: endPoint, map: map, icon: endIconUrl, clickable: false});
+        }
 		
 		var bounds = OBA.Maps.getPointsAsBounds(path);
         

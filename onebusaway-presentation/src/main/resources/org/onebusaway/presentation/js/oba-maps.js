@@ -9,7 +9,9 @@ var obaMapMarkerManagerFactory = function(map) {
 	var that = {};
 	
 	var markersByZoomLevel = {};
-	var prevZoomLevel = -99;
+	var prevZoomLevel = map.getZoom();
+	
+	console.log('prevZoomLevel=' + prevZoomLevel);
 	
 	/****
 	 * Private Methods
@@ -18,10 +20,15 @@ var obaMapMarkerManagerFactory = function(map) {
 	var refreshMarkerEntry = function() {
 		var zoomLevel = map.getZoom();
 		var marker = this.marker;
+		
+		var shouldBeVisible = this.zoomFrom <= zoomLevel && zoomLevel < this.zoomTo;
 		var isVisible = marker.getVisible();
+		
+		console.log('zoomLevel=' + zoomLevel + ' shouldBeVisible=' + shouldBeVisible + ' isVisible=' + isVisible + ' zoomFrom=' + this.zoomFrom + ' zoomTo=' + this.zoomTo);
+		
 		if( isVisible == undefined )
 			isVisible = false;
-		var shouldBeVisible = this.zoomFrom <= zoomLevel && zoomLevel < this.zoomTo;
+		
 		if( isVisible != shouldBeVisible )
 			marker.setVisible(shouldBeVisible);
 	};
@@ -62,13 +69,16 @@ var obaMapMarkerManagerFactory = function(map) {
 	
 	that.refresh = function() {
 		
+		var zoomLevel = map.getZoom();
+		console.log('zoom_changed: prevZoomLevel=' + prevZoomLevel + ' zoomLevel=' + zoomLevel);
+		
 		var markersForPrevZoomLevel = markersByZoomLevel[prevZoomLevel];
 		
 		if( markersForPrevZoomLevel) {
 			jQuery.each(markersForPrevZoomLevel, refreshMarkerEntry);
 		}
 		
-		var zoomLevel = map.getZoom();
+		
 		
 		var markersForZoomLevel = markersByZoomLevel[zoomLevel];
 		
@@ -270,7 +280,7 @@ var obaMapFactory = function() {
 				if( ! anchor )
 					anchor = iconAnchors[size]['default'];
 				var icon = new google.maps.MarkerImage(url, null, null, anchor);
-				return new google.maps.Marker({position: point, icon: icon});
+				return new google.maps.Marker({position: point, icon: icon, visible: false});
 			}
 		}
 		
@@ -279,7 +289,7 @@ var obaMapFactory = function() {
 			
 		var anchor = iconAnchors[size]['default'];
 		var icon = new google.maps.MarkerImage(url, null, null, anchor);
-		return new google.maps.Marker({position: point, icon: icon});
+		return new google.maps.Marker({position: point, icon: icon, visible: false});
 	};
 	
 	var getIconTypeForStop = function(stop) {

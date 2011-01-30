@@ -154,7 +154,15 @@
                         <span class="TripPage-ArrivalTime"> <oba:date format="hh:mm aa"
                             value="getStopTime(top)" /></span>
                     </s:if></td>
-                    <td class="TripPage-StopColumn"><a href="stop.action?id=${stop.id}"><s:property value="stop.name" /></a></td>
+                    <td>
+                    <jsp:element name="div">
+                      <jsp:attribute name="class">TripPage-StopColumn<s:if test="stop.id == stopId"> TripPage-StopColumn-Selected</s:if></jsp:attribute>
+                      <s:a action="stop">
+                        <s:param name="id" value="stop.id"/>
+                        <s:property value="stop.name" />
+                      </s:a>
+                    </jsp:element>
+                    </td>                    
                 </tr>
             </s:iterator>
         </s:iterator>

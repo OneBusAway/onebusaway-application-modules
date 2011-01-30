@@ -118,6 +118,12 @@ td.TripPage-TimeColumn {
 	padding: 5px;
 }
 
+.TripPage-StopColumn-Selected {
+	border-radius: 7px;
+	background-color: #ffefef;
+	border: 2px solid #ff0000;
+}
+
 .TripPage-ArrivalTime {
 	font-weight: bold;
 }
