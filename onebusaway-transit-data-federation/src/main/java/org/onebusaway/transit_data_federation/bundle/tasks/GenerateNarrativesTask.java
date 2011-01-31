@@ -113,9 +113,6 @@ public class GenerateNarrativesTask implements Runnable {
 
     generateAgencyNarratives(provider);
     generateStopNarratives(provider);
-
-    System.exit(-1);
-
     generateNarrativesForTrips(provider);
 
     try {
@@ -229,8 +226,6 @@ public class GenerateNarrativesTask implements Runnable {
 
     double yStdDev = Descriptive.sampleStandardDeviation(ys.size(), yVariance);
     double xStdDev = Descriptive.sampleStandardDeviation(xs.size(), xVariance);
-
-    System.out.println(yStdDev + "," + xStdDev);
 
     if (yStdDev > _stopDirectionStandardDeviationThreshold
         || xStdDev > _stopDirectionStandardDeviationThreshold) {
