@@ -1,7 +1,7 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
-import java.sql.Date;
+import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -31,12 +31,12 @@ public class TripsForAgencyController extends ApiActionSupport {
 
   private String _id;
 
-  private long _time = 0;
+  private Date _time;
 
   private MaxCountSupport _maxCount = new MaxCountSupport();
 
   private boolean _includeTrip = true;
-  
+
   private boolean _includeStatus = false;
 
   private boolean _includeSchedule = false;
@@ -56,7 +56,7 @@ public class TripsForAgencyController extends ApiActionSupport {
 
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
-    _time = time.getTime();
+    _time = time;
   }
 
   public void setMaxCount(int maxCount) {
@@ -66,7 +66,7 @@ public class TripsForAgencyController extends ApiActionSupport {
   public void setIncludeTrip(boolean includeTrip) {
     _includeTrip = includeTrip;
   }
-  
+
   public void setIncludeStatus(boolean includeStatus) {
     _includeStatus = includeStatus;
   }
@@ -84,8 +84,8 @@ public class TripsForAgencyController extends ApiActionSupport {
       return setValidationErrorsResponse();
 
     long time = System.currentTimeMillis();
-    if (_time != 0)
-      time = _time;
+    if (_time != null)
+      time = _time.getTime();
 
     TripsForAgencyQueryBean query = new TripsForAgencyQueryBean();
     query.setAgencyId(_id);
@@ -96,7 +96,7 @@ public class TripsForAgencyController extends ApiActionSupport {
     inclusion.setIncludeTripBean(_includeTrip);
     inclusion.setIncludeTripStatus(_includeStatus);
     inclusion.setIncludeTripSchedule(_includeSchedule);
-    
+
     BeanFactoryV2 factory = getBeanFactoryV2();
 
     try {
