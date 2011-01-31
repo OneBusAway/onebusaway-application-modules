@@ -97,25 +97,13 @@
 
     <bean id="calendarServiceTask" class="org.onebusaway.transit_data_federation.bundle.tasks.CalendarServiceDataTask" />
 
-    <!-- Narratives Task -->
-
-    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="narratives" />
-        <property name="afterTaskName" value="calendar_service" />
-        <property name="task" ref="narrativesTask" />
-    </bean>
-
-    <bean id="narrativesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateNarrativesTask" />
-
     <!-- Walk Graph -->
-
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="walk_graph" />
-        <property name="afterTaskName" value="narratives" />
+        <property name="afterTaskName" value="calendar_service" />
         <property name="task" ref="walkGraphTask" />
     </bean>
-
 
     <bean id="walkGraphTask" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphTask" />
 
@@ -129,11 +117,13 @@
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="transit_graph" />
-        <property name="afterTaskName" value="narratives" />
+        <property name="afterTaskName" value="walk_graph" />
         <property name="task" ref="tripGraphTask" />
     </bean>
 
     <bean id="tripGraphTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.TransitGraphTask" />
+    
+    <!--  -->
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="block_indices" />
@@ -142,12 +132,22 @@
     </bean>
 
     <bean id="blockIndicesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesTask" />
+    
+    <!-- Narratives Task -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="narratives" />
+        <property name="afterTaskName" value="block_indices" />
+        <property name="task" ref="narrativesTask" />
+    </bean>
+
+    <bean id="narrativesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateNarrativesTask" />
 
     <!-- -->
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="stop_transfers" />
-        <property name="afterTaskName" value="block_indices" />
+        <property name="afterTaskName" value="narratives" />
         <property name="task" ref="stopTransfersTask" />
     </bean>
 
