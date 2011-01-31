@@ -387,6 +387,10 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         StopRouteDirectionScheduleBean o2) {
       String tripA = o1.getTripHeadsign();
       String tripB = o2.getTripHeadsign();
+      if( tripA == null)
+        tripA = "";
+      if( tripB == null)
+        tripB = "";
       return tripA.compareTo(tripB);
     }
   }
