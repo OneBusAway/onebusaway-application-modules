@@ -124,9 +124,9 @@ public class StopMonitoringController implements ModelDriven<Object>,
     ArrivalsAndDeparturesQueryBean arrivalsQuery = new ArrivalsAndDeparturesQueryBean();
     arrivalsQuery.setTime(_time.getTime());
     arrivalsQuery.setMinutesBefore(60);
-    arrivalsQuery.setMinutesAfter(60);
+    arrivalsQuery.setMinutesAfter(90);
     arrivalsQuery.setFrequencyMinutesBefore(60);
-    arrivalsQuery.setFrequencyMinutesAfter(360);
+    arrivalsQuery.setFrequencyMinutesAfter(90);
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _transitDataService.getStopWithArrivalsAndDepartures(
         stopId, arrivalsQuery);
 

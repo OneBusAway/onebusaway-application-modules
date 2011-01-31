@@ -144,6 +144,9 @@ public class SiriUtils {
     if (status.equals("IN_PROGRESS")) {
       return "normalProgress";
     }
+    if (status.startsWith("LAYOVER")) {
+      return "noProgress";
+    }
     if (status.equals("STALLED")) {
       return "noProgress";
     }
