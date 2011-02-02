@@ -11,6 +11,10 @@ public abstract class AbstractStopVertex extends AbstractVertex {
     super(context);
     _stop = stop;
   }
+  
+  public StopEntry getStop() {
+    return _stop;
+  }
 
   /****
    * {@link Vertex} Interface

@@ -15,7 +15,7 @@ public final class WalkFromStopVertex extends AbstractStopVertex {
 
   @Override
   public String getLabel() {
-    return "walk_from_stop_" + getStopId();
+    return getVertexLabelForStop(_stop);
   }
 
   /****
@@ -25,5 +25,9 @@ public final class WalkFromStopVertex extends AbstractStopVertex {
   @Override
   public String toString() {
     return "WalkFromStopVertex(stop=" + _stop.getId() + ")";
+  }
+  
+  public static String getVertexLabelForStop(StopEntry stopEntry) {
+    return "walk_from_stop_" + stopEntry.getId();
   }
 }

@@ -106,30 +106,34 @@ var obaMapFactory = function() {
 	
 	that.markerManager = obaMapMarkerManagerFactory;
 
-	that.map = function(element) {
+	that.map = function(element, params) {
+		
+		params = params || {};
 		
 		if( element instanceof jQuery )
 			element = element.get(0);
-
-		var lat = OBA.Config.centerLat || 47.606828;
-		var lon = OBA.Config.centerLon || -122.332505;
+		
+		var lat = params.lat || OBA.Config.centerLat || 47.606828;
+		var lon = params.lon || OBA.Config.centerLon || -122.332505;
+		var zoom = params.zoom || 10;
+		
 		var mapCenter = new google.maps.LatLng(lat, lon);
 		var mapOptions = {
-			zoom : 10,
+			zoom : zoom,
 			center : mapCenter,
 			mapTypeId : google.maps.MapTypeId.ROADMAP
 		};
 		
 		var map = new google.maps.Map(element, mapOptions);
 
-		if( OBA.Config.spanLat && OBA.Config.spanLon) {
+		if( ! (params.lat || params.lon || params.zoom ) && OBA.Config.spanLat && OBA.Config.spanLon) {
 			var spanLat = OBA.Config.spanLat;
 			var spanLon = OBA.Config.spanLon;
 			var bounds = new google.maps.LatLngBounds();
 			bounds.extend(new google.maps.LatLng(lat-spanLat/2,lon-spanLon/2));
 			bounds.extend(new google.maps.LatLng(lat+spanLat/2,lon+spanLon/2));
 			map.fitBounds(bounds);
-		}
+		};
 		
 		return map;
 	};

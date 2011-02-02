@@ -21,8 +21,11 @@ import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
+import org.onebusaway.transit_data_federation.impl.otp.AlightVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockDepartureVertex;
+import org.onebusaway.transit_data_federation.impl.otp.WalkFromStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
@@ -41,6 +44,7 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInsta
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseMode;
+import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.services.PathService;
@@ -193,69 +197,108 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
       if (vFrom instanceof BlockDepartureVertex) {
 
-        BlockDepartureVertex bdv = (BlockDepartureVertex) vFrom;
-        BlockArrivalVertex bav = (BlockArrivalVertex) vTo;
+        builder = extendTransitLegWithDepartureAndArrival(legs, builder,
+            (BlockDepartureVertex) vFrom, (BlockArrivalVertex) vTo);
 
-        StopTimeInstance from = bdv.getInstance();
-        StopTimeInstance to = bav.getInstance();
+      } else if (vFrom instanceof BlockArrivalVertex) {
 
-        BlockTripEntry tripFrom = from.getTrip();
-        BlockTripEntry tripTo = to.getTrip();
+        BlockArrivalVertex arrival = (BlockArrivalVertex) vFrom;
 
-        if (builder.getBlockInstance() == null) {
-          builder.setStartTime(from.getDepartureTime());
-          builder.setBlockInstance(from.getBlockInstance());
-          builder.setBlockTrip(from.getTrip());
-          builder.setFromStop(from);
+        // Did we have a stop transfer?
+        if (vTo instanceof AlightVertex) {
+          
+          // We've finished up our transit leg, so publish the leg
+          builder = getTransitLegBuilderAsLeg(builder, legs);
         }
+        if (vTo instanceof WalkToStopVertex) {
+          
+          // We've finished up our transit leg, so publish the leg
+          builder = getTransitLegBuilderAsLeg(builder, legs);
 
-        if (!tripFrom.equals(tripTo)) {
+          // We've transfered to another stop, so we need to insert the walk leg
+          
+          StopTimeInstance fromStopTimeInstance = arrival.getInstance();
+          StopEntry fromStop = fromStopTimeInstance.getStop();
 
-          /**
-           * We switch trips during the course of the block, so we clean up the
-           * current leg and introduce a new one
-           */
+          WalkToStopVertex toStopVertex = (WalkToStopVertex) vTo;
+          StopEntry toStop = toStopVertex.getStop();
 
-          /**
-           * We just split the difference for now
-           */
-          long transitionTime = (from.getDepartureTime() + to.getArrivalTime()) / 2;
+          if (!fromStop.equals(toStop)) {
 
-          builder.setEndTime(transitionTime);
-          builder.setToStop(null);
+            long timeFrom = sptEdge.fromv.state.getTime();
+            long timeTo = sptEdge.tov.state.getTime();
 
-          getTransitLegBuilderAsLeg(builder, legs);
+            ItineraryBean walk = getWalkingItineraryBetweenStops(fromStop,
+                toStop, timeFrom);
 
-          builder = new TransitLegBuilder();
-          builder.setStartTime(transitionTime);
-          builder.setBlockInstance(to.getBlockInstance());
-          builder.setBlockTrip(tripTo);
-
+            if (walk != null) {
+              scaleItinerary(walk, timeFrom, timeTo);
+              legs.addAll(walk.getLegs());
+            }
+          }
         }
-
-        builder.setToStop(to);
-        builder.setEndTime(to.getArrivalTime());
-
-      } else {
-        // Lots of cases we are still missing
       }
 
       currentIndex++;
     }
 
-    getTransitLegBuilderAsLeg(builder, legs);
-
     return currentIndex;
   }
 
-  private void getTransitLegBuilderAsLeg(TransitLegBuilder builder,
-      List<LegBean> legs) {
+  private TransitLegBuilder extendTransitLegWithDepartureAndArrival(
+      List<LegBean> legs, TransitLegBuilder builder,
+      BlockDepartureVertex vFrom, BlockArrivalVertex vTo) {
+
+    StopTimeInstance from = vFrom.getInstance();
+    StopTimeInstance to = vTo.getInstance();
+
+    BlockTripEntry tripFrom = from.getTrip();
+    BlockTripEntry tripTo = to.getTrip();
+
+    if (builder.getBlockInstance() == null) {
+      builder.setStartTime(from.getDepartureTime());
+      builder.setBlockInstance(from.getBlockInstance());
+      builder.setBlockTrip(from.getTrip());
+      builder.setFromStop(from);
+    }
+
+    if (!tripFrom.equals(tripTo)) {
+
+      /**
+       * We switch trips during the course of the block, so we clean up the
+       * current leg and introduce a new one
+       */
+
+      /**
+       * We just split the difference for now
+       */
+      long transitionTime = (from.getDepartureTime() + to.getArrivalTime()) / 2;
+
+      builder.setEndTime(transitionTime);
+      builder.setToStop(null);
+
+      getTransitLegBuilderAsLeg(builder, legs);
+
+      builder = new TransitLegBuilder();
+      builder.setStartTime(transitionTime);
+      builder.setBlockInstance(to.getBlockInstance());
+      builder.setBlockTrip(tripTo);
+
+    }
+
+    builder.setToStop(to);
+    builder.setEndTime(to.getArrivalTime());
+    return builder;
+  }
+
+  private TransitLegBuilder getTransitLegBuilderAsLeg(
+      TransitLegBuilder builder, List<LegBean> legs) {
 
     BlockInstance blockInstance = builder.getBlockInstance();
     BlockTripEntry blockTrip = builder.getBlockTrip();
 
     if (blockInstance == null || blockTrip == null)
-      return;
+      return new TransitLegBuilder();
 
     LegBean leg = new LegBean();
     legs.add(leg);
@@ -292,6 +335,8 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     applyFromStopDetailsForTransitLeg(builder, transitLeg);
     applyToStopDetailsForTransitLeg(builder, transitLeg);
+
+    return new TransitLegBuilder();
   }
 
   private double getTransitLegBuilderAsDistance(TransitLegBuilder builder) {
@@ -535,4 +580,45 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     throw new IllegalStateException("unknown street mode: " + mode);
   }
+
+  private ItineraryBean getWalkingItineraryBetweenStops(StopEntry from,
+      StopEntry to, long time) {
+
+    String fromPlace = WalkFromStopVertex.getVertexLabelForStop(from);
+    String toPlace = WalkToStopVertex.getVertexLabelForStop(to);
+
+    TraverseOptions options = new TraverseOptions();
+
+    TraverseModeSet modes = new TraverseModeSet(TraverseMode.WALK);
+    options.setModes(modes);
+
+    List<GraphPath> paths = _pathService.plan(fromPlace, toPlace,
+        new Date(time), options, 1);
+
+    if (paths.isEmpty())
+      return null;
+
+    return getPathAsItinerary(paths.get(0));
+  }
+
+  private void scaleItinerary(ItineraryBean bean, long timeFrom, long timeTo) {
+
+    long tStart = bean.getStartTime();
+    long tEnd = bean.getEndTime();
+
+    double ratio = (timeTo - timeFrom) / (tEnd - tStart);
+
+    bean.setStartTime(scaleTime(tStart, timeFrom, ratio, tStart));
+    bean.setEndTime(scaleTime(tStart, timeFrom, ratio, tEnd));
+
+    for (LegBean leg : bean.getLegs()) {
+      leg.setStartTime(scaleTime(tStart, timeFrom, ratio, leg.getStartTime()));
+      leg.setEndTime(scaleTime(tStart, timeFrom, ratio, leg.getEndTime()));
+    }
+  }
+
+  private long scaleTime(long tStartOrig, long tStartNew, double ratio, long t) {
+    return (long) ((t - tStartOrig) * ratio + tStartNew);
+  }
+
 }

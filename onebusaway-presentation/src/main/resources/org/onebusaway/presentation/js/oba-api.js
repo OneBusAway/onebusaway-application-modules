@@ -130,6 +130,28 @@ var obaApiFactory = function() {
 		
 	};
 	
+	var processItineraries = function(entry, references) {
+		var itineraries = entry.itineraries || [];
+		jQuery.each(itineraries,function() {
+			var legs = this.legs || [];
+			jQuery.each(legs, function() {
+				
+				var transitLeg = this.transitLeg;
+				
+				if( ! transitLeg )
+					return;
+				
+				transitLeg.fromStop = references.stopsById[transitLeg.fromStopId];
+				transitLeg.toStop = references.stopsById[transitLeg.toStopId];
+				transitLeg.trip = references.tripsById[transitLeg.tripId];  
+			});
+		});
+	}
+	
+	var processItinerary = function(entry, references) {
+		
+	}
+	
 	var processRoute = function(route, references ) {
 		var agency = references.agenciesById[route.agencyId];
 		if( agency )
@@ -210,6 +232,13 @@ var obaApiFactory = function() {
 		var params = createParams(userParams);
 		var handler = createEntryHandler(callback, errorCallback,
 				processArrivalAndDepartureForStop);
+		jQuery.getJSON(url, params, handler);
+	};
+	
+	that.planTrip = function(params, callback, errorCallback) {
+		var url = createUrl('/where/plan-trip.json');
+		params = createParams(params);
+		var handler = createEntryHandler(callback, errorCallback, processItineraries);
 		jQuery.getJSON(url, params, handler);
 	};
 	
