@@ -42,17 +42,18 @@ import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
-import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
-import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
@@ -66,6 +67,7 @@ import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.BlockBeanService;
+import org.onebusaway.transit_data_federation.services.beans.ItinerariesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RoutesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
@@ -124,6 +126,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private TripPlannerBeanService _tripPlannerBeanService;
+
+  @Autowired
+  private ItinerariesBeanService _itinerariesBeanService;
 
   @Autowired
   private OneBusAwayService _oneBusAwayService;
@@ -364,6 +369,7 @@ class TransitDataServiceImpl implements TransitDataService {
     return _shapeBeanService.getPolylineForShapeId(id);
   }
 
+  @Override
   public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
       double latTo, double lonTo, TripPlannerConstraintsBean constraints)
       throws ServiceException {
@@ -371,6 +377,15 @@ class TransitDataServiceImpl implements TransitDataService {
         lonTo, constraints);
   }
 
+  @Override
+  public ItinerariesBean getItinerariesBetween(double latFrom, double lonFrom,
+      double latTo, double lonTo, TripPlannerConstraintsBean constraints)
+      throws ServiceException {
+    return _itinerariesBeanService.getItinerariesBetween(latFrom, lonFrom,
+        latTo, lonTo, constraints);
+  }
+
+  @Override
   public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(double lat,
       double lon, OneBusAwayConstraintsBean constraints)
       throws ServiceException {
@@ -509,7 +524,7 @@ class TransitDataServiceImpl implements TransitDataService {
   public void deleteStopProblemReportForStopIdAndId(String stopId, long id) {
     _userReportingService.deleteStopProblemReportForId(id);
   }
-  
+
   @Override
   public void updateTripProblemReport(TripProblemReportBean tripProblemReport) {
     _userReportingService.updateTripProblemReport(tripProblemReport);
@@ -519,7 +534,7 @@ class TransitDataServiceImpl implements TransitDataService {
   public void deleteTripProblemReportForTripIdAndId(String tripId, long id) {
     _userReportingService.deleteTripProblemReportForId(id);
   }
-  
+
   @Override
   public List<String> getAllTripProblemReportLabels() {
     return _userReportingService.getAllTripProblemReportLabels();

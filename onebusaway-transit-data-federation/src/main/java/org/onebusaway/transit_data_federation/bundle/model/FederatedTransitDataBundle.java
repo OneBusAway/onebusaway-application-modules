@@ -50,6 +50,10 @@ public class FederatedTransitDataBundle {
   public File getTransitGraphPath() {
     return new File(_path, "TransitGraph.obj");
   }
+  
+  public File getGraphPath() {
+    return new File(_path, "Graph.obj");
+  }
 
   public File getNarrativeProviderPath() {
     return new File(_path, "NarrativeProvider.obj");

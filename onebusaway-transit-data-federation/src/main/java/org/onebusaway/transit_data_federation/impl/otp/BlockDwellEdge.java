@@ -7,7 +7,6 @@ import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
-import org.opentripplanner.routing.core.Vertex;
 
 public class BlockDwellEdge extends AbstractEdge {
 
@@ -16,16 +15,6 @@ public class BlockDwellEdge extends AbstractEdge {
   public BlockDwellEdge(GraphContext context, StopTimeInstance instance) {
     super(context);
     _instance = instance;
-  }
-
-  @Override
-  public Vertex getFromVertex() {
-    return new BlockArrivalVertex(_context, _instance);
-  }
-
-  @Override
-  public Vertex getToVertex() {
-    return new BlockDepartureVertex(_context, _instance);
   }
 
   @Override
@@ -38,7 +27,10 @@ public class BlockDwellEdge extends AbstractEdge {
 
     State state1 = s0.clone();
     state1.incrementTimeInSeconds(dwellTime);
-    return new TraverseResult(dwellTime, state1, this);
+
+    EdgeNarrativeImpl narrative = createNarrative();
+
+    return new TraverseResult(dwellTime, state1, narrative);
   }
 
   @Override
@@ -51,11 +43,16 @@ public class BlockDwellEdge extends AbstractEdge {
 
     State state1 = s0.clone();
     state1.incrementTimeInSeconds(-dwellTime);
-    return new TraverseResult(dwellTime, state1, this);
+
+    EdgeNarrativeImpl narrative = createNarrative();
+
+    return new TraverseResult(dwellTime, state1, narrative);
   }
 
-  @Override
-  public double getDistance() {
-    return 0;
+  private EdgeNarrativeImpl createNarrative() {
+    BlockArrivalVertex fromVertex = new BlockArrivalVertex(_context, _instance);
+    BlockDepartureVertex toVertex = new BlockDepartureVertex(_context,
+        _instance);
+    return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 }

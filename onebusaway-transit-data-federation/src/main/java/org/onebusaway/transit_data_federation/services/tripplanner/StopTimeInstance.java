@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.services.tripplanner;
 import java.text.DateFormat;
 import java.util.Date;
 
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -46,6 +47,11 @@ public class StopTimeInstance {
 
   public FrequencyEntry getFrequency() {
     return _frequency;
+  }
+
+  public BlockInstance getBlockInstance() {
+    return new BlockInstance(_stopTime.getTrip().getBlockConfiguration(),
+        _serviceDate, _frequency);
   }
 
   public BlockTripEntry getTrip() {

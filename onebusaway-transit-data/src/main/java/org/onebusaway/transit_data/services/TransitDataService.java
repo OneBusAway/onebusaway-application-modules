@@ -50,6 +50,7 @@ import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
@@ -320,6 +321,22 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByBoundsMethod
   public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
+      double latTo, double lonTo, TripPlannerConstraintsBean constraints)
+      throws ServiceException;
+  
+  /**
+   * 
+   * @param latFrom
+   * @param lonFrom
+   * @param latTo
+   * @param lonTo
+   * @param constraints
+   * @return a list of trip plans computed between the two locations with the
+   *         specified constraints
+   * @throws ServiceException
+   */
+  @FederatedByBoundsMethod
+  public ItinerariesBean getItinerariesBetween(double latFrom, double lonFrom,
       double latTo, double lonTo, TripPlannerConstraintsBean constraints)
       throws ServiceException;
 

@@ -13,8 +13,10 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
+
     <import resource="classpath:org/onebusaway/transit_data_federation/application-context-hibernate-mutable.xml" />
     <import resource="classpath:org/onebusaway/transit_data_federation/application-context-common.xml" />
+    <import resource="classpath:org/onebusaway/transit_data_federation/application-context-otp.xml" />
 
     <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
 

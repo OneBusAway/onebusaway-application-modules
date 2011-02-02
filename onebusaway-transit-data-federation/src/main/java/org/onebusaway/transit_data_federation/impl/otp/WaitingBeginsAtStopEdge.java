@@ -23,42 +23,59 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   }
 
   @Override
-  public Vertex getToVertex() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public TraverseResult traverse(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    /**
-     * We require a minimum amount of time between arriving at a stop and
-     * actually boarding a bus
-     */
-    TripPlannerPreferences preferences = _context.getPreferences();
-    int transferInterval = preferences.getMinTransferBufferTime();
+    int transferInterval = getTransferInterval();
 
     State s1 = s0.clone();
     s1.incrementTimeInSeconds(transferInterval);
 
-    TraverseResult result = new TraverseResult(transferInterval, s1, this);
-    //result.setVertex(new WaitingAtStopVertex(_context, _stop, s1.getTime()));
+    EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
+
+    TraverseResult result = new TraverseResult(transferInterval, s1, narrative);
+
     return result;
   }
 
   @Override
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
-    return new TraverseResult(0, s0, this);
-  }
 
-  @Override
-  public double getDistance() {
-    return 0;
+    int transferInterval = getTransferInterval();
+
+    State s1 = s0.clone();
+    s1.incrementTimeInSeconds(-transferInterval);
+
+    EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
+    return new TraverseResult(0, s1, narrative);
   }
 
   @Override
   public String toString() {
     return "WaitingBeginsAtStopEdge(stop=" + _stop.getId() + ")";
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  /**
+   * We require a minimum amount of time between arriving at a stop and actually
+   * boarding a bus
+   */
+  private int getTransferInterval() {
+
+    TripPlannerPreferences preferences = _context.getPreferences();
+    int transferInterval = preferences.getMinTransferBufferTime();
+    return transferInterval;
+  }
+
+  private EdgeNarrativeImpl createNarrative(long time) {
+
+    WalkToStopVertex fromVertex = new WalkToStopVertex(_context, _stop);
+    BoardVertex toVertex = new BoardVertex(_context, _stop, time);
+
+    return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 }

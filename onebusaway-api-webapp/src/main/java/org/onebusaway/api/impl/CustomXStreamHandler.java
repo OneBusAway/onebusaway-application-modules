@@ -37,6 +37,12 @@ import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Be
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.ItineraryV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.LegV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.LocationV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.StreetLegV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.TransitLegV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -80,7 +86,8 @@ public class CustomXStreamHandler extends XStreamHandler {
 
     xstream.alias("entryWithReferences", EntryWithReferencesBean.class);
     xstream.alias("listWithReferences", ListWithReferencesBean.class);
-    xstream.alias("listWithRangeAndReferences", ListWithRangeAndReferencesBean.class);
+    xstream.alias("listWithRangeAndReferences",
+        ListWithRangeAndReferencesBean.class);
     xstream.alias("references", ReferencesBean.class);
 
     xstream.alias("agency", AgencyV2Bean.class);
@@ -88,12 +95,12 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("stop", StopV2Bean.class);
     xstream.alias("trip", TripV2Bean.class);
     xstream.alias("tripDetails", TripDetailsV2Bean.class);
-    xstream.alias("blockInstance",BlockInstanceV2Bean.class);
+    xstream.alias("blockInstance", BlockInstanceV2Bean.class);
     xstream.alias("block", BlockV2Bean.class);
-    xstream.alias("blockConfiguration",BlockConfigurationV2Bean.class);
+    xstream.alias("blockConfiguration", BlockConfigurationV2Bean.class);
     xstream.alias("blockTrip", BlockTripV2Bean.class);
     xstream.alias("blockStopTime", BlockStopTimeV2Bean.class);
-    xstream.alias("stopTime",StopTimeV2Bean.class);
+    xstream.alias("stopTime", StopTimeV2Bean.class);
     xstream.alias("tripStopTime", TripStopTimeV2Bean.class);
     xstream.alias("stopSchedule", StopScheduleV2Bean.class);
     xstream.alias("stopRouteSchedule", StopRouteScheduleV2Bean.class);
@@ -106,19 +113,26 @@ public class CustomXStreamHandler extends XStreamHandler {
         StopWithArrivalsAndDeparturesV2Bean.class);
     xstream.alias("arrivalAndDeparture", ArrivalAndDepartureV2Bean.class);
     xstream.alias("agencyWithCoverage", AgencyWithCoverageV2Bean.class);
-    xstream.alias("stopsForRoute",StopsForRouteV2Bean.class);
+    xstream.alias("stopsForRoute", StopsForRouteV2Bean.class);
     xstream.alias("vehicleLocationRecord", VehicleLocationRecordV2Bean.class);
     xstream.alias("vehicleStatus", VehicleStatusV2Bean.class);
-    
-    xstream.alias("situation", SituationV2Bean.class);
-    xstream.alias("stop",SituationAffectedStopV2Bean.class);
-    xstream.alias("vehicleJourney",SituationAffectedVehicleJourneyV2Bean.class);
-    xstream.alias("call",SituationAffectedCallV2Bean.class);
-    xstream.alias("consequence",SituationConsequenceV2Bean.class);
-    xstream.alias("conditionDetails",SituationConditionDetailsBean.class);
 
-    xstream.alias("VehicleLocation",VehicleLocation.class);
-    
+    xstream.alias("situation", SituationV2Bean.class);
+    xstream.alias("stop", SituationAffectedStopV2Bean.class);
+    xstream.alias("vehicleJourney", SituationAffectedVehicleJourneyV2Bean.class);
+    xstream.alias("call", SituationAffectedCallV2Bean.class);
+    xstream.alias("consequence", SituationConsequenceV2Bean.class);
+    xstream.alias("conditionDetails", SituationConditionDetailsBean.class);
+
+    xstream.alias("VehicleLocation", VehicleLocation.class);
+
+    xstream.alias("itineraries", ItinerariesV2Bean.class);
+    xstream.alias("itinerary", ItineraryV2Bean.class);
+    xstream.alias("location", LocationV2Bean.class);
+    xstream.alias("leg", LegV2Bean.class);
+    xstream.alias("transitLeg", TransitLegV2Bean.class);
+    xstream.alias("streetLeg", StreetLegV2Bean.class);
+
     xstream.processAnnotations(VehicleMonitoringRequest.class);
     xstream.processAnnotations(VehicleMonitoringDetailLevel.class);
     xstream.processAnnotations(ServiceRequestContext.class);

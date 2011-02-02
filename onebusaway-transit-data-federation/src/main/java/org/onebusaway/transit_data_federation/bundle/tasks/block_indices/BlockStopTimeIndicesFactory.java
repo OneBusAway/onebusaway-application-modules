@@ -131,7 +131,7 @@ public class BlockStopTimeIndicesFactory {
 
     for (List<BlockStopTimeEntry> stopTimes : stopTimesByKey.values()) {
 
-      if (_verbose && count % 100 == 0)
+      if (_verbose && count % 1000 == 0)
         _log.info("groups processed: " + count + "/" + stopTimesByKey.size());
 
       count++;

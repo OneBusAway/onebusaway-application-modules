@@ -5,7 +5,6 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInsta
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
-import org.opentripplanner.routing.core.Vertex;
 
 /**
  * A transit vehicle's journey between departure at one stop and arrival at the
@@ -31,24 +30,15 @@ public class BlockHopEdge extends AbstractEdge {
   }
 
   @Override
-  public Vertex getFromVertex() {
-    return new BlockDepartureVertex(_context, new StopTimeInstance(_from,
-        _serviceDate));
-  }
-
-  @Override
-  public Vertex getToVertex() {
-    return new BlockArrivalVertex(_context, new StopTimeInstance(_to,
-        _serviceDate));
-  }
-
-  @Override
   public TraverseResult traverse(State state0, TraverseOptions wo) {
     State state1 = state0.clone();
     int runningTime = _to.getStopTime().getArrivalTime()
         - _from.getStopTime().getDepartureTime();
     state1.incrementTimeInSeconds(runningTime);
-    return new TraverseResult(runningTime, state1, this);
+
+    EdgeNarrativeImpl narrative = createNarrative();
+
+    return new TraverseResult(runningTime, state1, narrative);
   }
 
   @Override
@@ -57,11 +47,17 @@ public class BlockHopEdge extends AbstractEdge {
     int runningTime = _to.getStopTime().getArrivalTime()
         - _from.getStopTime().getDepartureTime();
     state1.incrementTimeInSeconds(-runningTime);
-    return new TraverseResult(runningTime, state1, this);
+
+    EdgeNarrativeImpl narrative = createNarrative();
+
+    return new TraverseResult(runningTime, state1, narrative);
   }
 
-  @Override
-  public double getDistance() {
-    return _to.getDistanceAlongBlock() - _from.getDistanceAlongBlock();
+  private EdgeNarrativeImpl createNarrative() {
+    BlockDepartureVertex fromVertex = new BlockDepartureVertex(_context,
+        new StopTimeInstance(_from, _serviceDate));
+    BlockArrivalVertex toVertex = new BlockArrivalVertex(_context,
+        new StopTimeInstance(_to, _serviceDate));
+    return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 }

@@ -11,7 +11,7 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public final class WaitingAtStopVertex extends AbstractVertex implements
+public final class AlightVertex extends AbstractVertex implements
     HasEdges {
 
   private static DateFormat _format = DateFormat.getDateTimeInstance(
@@ -21,7 +21,7 @@ public final class WaitingAtStopVertex extends AbstractVertex implements
 
   private final long _time;
 
-  public WaitingAtStopVertex(GraphContext context, StopEntry stop, long time) {
+  public AlightVertex(GraphContext context, StopEntry stop, long time) {
     super(context);
     _stop = stop;
     _time = time;
@@ -33,7 +33,7 @@ public final class WaitingAtStopVertex extends AbstractVertex implements
 
   @Override
   public String getLabel() {
-    return "stop_" + getStopId() + "_wait_" + _time;
+    return "alight_stop_" + getStopId() + "_wait_" + _time;
   }
 
   @Override
@@ -62,11 +62,9 @@ public final class WaitingAtStopVertex extends AbstractVertex implements
 
   @Override
   public Collection<Edge> getIncoming() {
-    List<Edge> edges = new ArrayList<Edge>(2);
+    List<Edge> edges = new ArrayList<Edge>(1);
     // We could come from a different bus (arrival)
-    edges.add(new ArrivalEdge(_context, _stop));
-    // We could come from the street network
-    edges.add(new WaitingBeginsAtStopEdge(_context, _stop));
+    edges.add(new AlightReverseEdge(_context, _stop));
     return edges;
   }
 
@@ -77,10 +75,8 @@ public final class WaitingAtStopVertex extends AbstractVertex implements
 
   @Override
   public Collection<Edge> getOutgoing() {
-    List<Edge> edges = new ArrayList<Edge>(2);
-    // We can board a different bus
-    edges.add(new DepartureEdge(_context, _stop));
-    // Or we can stop waiting and move back to the street
+    List<Edge> edges = new ArrayList<Edge>(1);
+    // We stop waiting and move back to the street
     edges.add(new WaitingEndsAtStopEdge(_context, _stop));
     return edges;
   }
@@ -91,7 +87,7 @@ public final class WaitingAtStopVertex extends AbstractVertex implements
 
   @Override
   public String toString() {
-    return "WaitingAtStop(stop=" + _stop.getId() + " time="
+    return "AlightVertex(stop=" + _stop.getId() + " time="
         + _format.format(new Date(_time)) + ")";
   }
 
@@ -112,7 +108,7 @@ public final class WaitingAtStopVertex extends AbstractVertex implements
       return false;
     if (getClass() != obj.getClass())
       return false;
-    WaitingAtStopVertex other = (WaitingAtStopVertex) obj;
+    AlightVertex other = (AlightVertex) obj;
     return _stop.equals(other._stop) && _time == other._time;
   }
 }

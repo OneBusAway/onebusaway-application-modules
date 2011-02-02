@@ -2,19 +2,20 @@ package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.ItineraryV2BeanFactory;
+import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
-public class TripPlannerController extends ApiActionSupport {
+public class PlanTripController extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
 
@@ -34,7 +35,7 @@ public class TripPlannerController extends ApiActionSupport {
 
   private boolean _walkingOnly = false;
 
-  public TripPlannerController() {
+  public PlanTripController() {
     super(V2);
   }
 
@@ -76,11 +77,15 @@ public class TripPlannerController extends ApiActionSupport {
     constraints.setMinDepartureTime(_timeFrom.getTime());
     constraints.setWalkingOnly(_walkingOnly);
 
-    List<TripPlanBean> beans = _transitDataService.getTripsBetween(_latFrom,
-        _lonFrom, _latTo, _lonTo, constraints);
+    ItinerariesBean itineraries = _transitDataService.getItinerariesBetween(
+        _latFrom, _lonFrom, _latTo, _lonTo, constraints);
 
     BeanFactoryV2 factory = getBeanFactoryV2();
-    return setOkResponse(factory.list(beans, false));
+    ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(
+        factory);
+
+    ItinerariesV2Bean bean = itineraryFactory.getItineraries(itineraries);
+    return setOkResponse(factory.entry(bean));
   }
 
 }

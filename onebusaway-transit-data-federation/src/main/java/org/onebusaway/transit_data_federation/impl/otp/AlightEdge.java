@@ -1,24 +1,23 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
-public class WaitingEndsAtStopEdge extends AbstractEdge {
+public class AlightEdge extends AbstractEdge {
 
-  private final StopEntry _stop;
+  private final StopTimeInstance _instance;
 
-  public WaitingEndsAtStopEdge(GraphContext context, StopEntry stop) {
+  public AlightEdge(GraphContext context, StopTimeInstance instance) {
     super(context);
-    _stop = stop;
+    _instance = instance;
   }
 
   @Override
   public Vertex getFromVertex() {
-
     throw new UnsupportedOperationException();
   }
 
@@ -27,7 +26,6 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
       throws NegativeWeightException {
 
     EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-
     return new TraverseResult(0, s0, narrative);
   }
 
@@ -36,19 +34,18 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
       throws NegativeWeightException {
 
     EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-
     return new TraverseResult(0, s0, narrative);
   }
 
-  @Override
-  public String toString() {
-    return "WaitingEndsAtStopEdge(stop=" + _stop.getId() + ")";
-  }
+  /****
+   * Private Methods
+   ****/
 
   private EdgeNarrativeImpl createNarrative(long time) {
-
-    AlightVertex fromVertex = new AlightVertex(_context, _stop, time);
-    WalkFromStopVertex toVertex = new WalkFromStopVertex(_context, _stop);
+    BlockArrivalVertex fromVertex = new BlockArrivalVertex(_context, _instance);
+    AlightVertex toVertex = new AlightVertex(_context, _instance.getStop(),
+        time);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
+
 }

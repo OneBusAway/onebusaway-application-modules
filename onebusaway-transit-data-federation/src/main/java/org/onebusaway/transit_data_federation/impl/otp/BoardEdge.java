@@ -12,22 +12,17 @@ import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
-public class DepartureEdge extends AbstractEdge {
+public class BoardEdge extends AbstractEdge {
 
   private final StopEntry _stop;
 
-  public DepartureEdge(GraphContext context, StopEntry stop) {
+  public BoardEdge(GraphContext context, StopEntry stop) {
     super(context);
     _stop = stop;
   }
 
   @Override
   public Vertex getFromVertex() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Vertex getToVertex() {
     throw new UnsupportedOperationException();
   }
 
@@ -63,20 +58,27 @@ public class DepartureEdge extends AbstractEdge {
       if (!SupportLibrary.hasNextStopTime(instance))
         continue;
 
+      BoardVertex fromVertex = new BoardVertex(_context, _stop, time);
+      BlockDepartureVertex toVertex = new BlockDepartureVertex(_context,
+          instance);
+      EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+
       int dwellTime = (int) ((departureTime - time) / 1000);
       State s1 = new State(departureTime);
-      TraverseResult r = new TraverseResult(dwellTime, s1, this);
-      //r.setVertex(new BlockDepartureVertex(_context, instance));
 
+      TraverseResult r = new TraverseResult(dwellTime, s1, narrative);
       result = r.addToExistingResultChain(result);
     }
 
     // In addition to all the departures, we can just remain waiting at the stop
     int dwellTime = (int) ((to.getTime() - from.getTime()) / 1000);
     State s1 = new State(to.getTime());
-    TraverseResult r = new TraverseResult(dwellTime, s1, this);
-    //r.setVertex(new WaitingAtStopVertex(_context, _stop, to.getTime()));
 
+    BoardVertex fromVertex = new BoardVertex(_context, _stop, s0.getTime());
+    BoardVertex toVertex = new BoardVertex(_context, _stop, to.getTime());
+    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+
+    TraverseResult r = new TraverseResult(dwellTime, s1, narrative);
     result = r.addToExistingResultChain(result);
 
     return result;
@@ -85,12 +87,11 @@ public class DepartureEdge extends AbstractEdge {
   @Override
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
-    State s1 = s0.clone();
-    return new TraverseResult(0, s1, this);
-  }
 
-  @Override
-  public double getDistance() {
-    return 0;
+    BoardVertex fromVertex = new BoardVertex(_context, _stop, s0.getTime());
+    Vertex toVertex = null;
+    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+
+    return new TraverseResult(0, s0, narrative);
   }
 }

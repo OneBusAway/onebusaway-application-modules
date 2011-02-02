@@ -22,7 +22,6 @@ import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferData;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
-import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -32,12 +31,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
-import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.opentripplanner.routing.services.PathService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class StopTransfersTask implements Runnable {
+
+  public static final String PROPERTY_PRINT_TRANSFERS = StopTransfersTask.class.getName()
+      + ".printTransfers";
 
   private TripPlannerConstants _constants = new TripPlannerConstants();
 
@@ -53,6 +55,8 @@ public class StopTransfersTask implements Runnable {
 
   private RefreshService _refreshService;
 
+  private PathService _pathService;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -67,10 +71,15 @@ public class StopTransfersTask implements Runnable {
   public void setBlockS(BlockIndexService blockIndexService) {
     _blockIndexService = blockIndexService;
   }
-  
+
   @Autowired
   public void setRefreshService(RefreshService refreshService) {
     _refreshService = refreshService;
+  }
+
+  @Autowired
+  public void setPathService(PathService pathService) {
+    _pathService = pathService;
   }
 
   @Transactional
@@ -78,8 +87,7 @@ public class StopTransfersTask implements Runnable {
 
     try {
 
-      WalkPlannerGraph walkPlannerGraph = ObjectSerializationLibrary.readObject(_bundle.getWalkPlannerGraphPath());
-      _cachedStopTransferWalkPlanner.setWalkPlannerGraph(walkPlannerGraph);
+      _cachedStopTransferWalkPlanner.setPathService(_pathService);
 
       StopSequenceData data = new StopSequenceData();
 
@@ -94,13 +102,31 @@ public class StopTransfersTask implements Runnable {
           + _cachedStopTransferWalkPlanner.getCacheHits() + " / "
           + _cachedStopTransferWalkPlanner.getTotalHits());
 
+      if (System.getProperties().containsKey(PROPERTY_PRINT_TRANSFERS))
+        printTransfers(stopTransfers);
+
       ObjectSerializationLibrary.writeObject(_bundle.getStopTransfersPath(),
           stopTransfers);
-      
+
       _refreshService.refresh(RefreshableResources.STOP_TRANSFER_DATA);
-      
+
     } catch (Exception ex) {
       throw new IllegalStateException("error in stop transfers task", ex);
+    }
+  }
+
+  private void printTransfers(
+      Map<AgencyAndId, List<StopTransferData>> stopTransfers) {
+    for (Map.Entry<AgencyAndId, List<StopTransferData>> entry : stopTransfers.entrySet()) {
+      AgencyAndId stopFromId = entry.getKey();
+      StopEntry stopFrom = _transitGraphDao.getStopEntryForId(stopFromId);
+      List<StopTransferData> datas = entry.getValue();
+      for (StopTransferData stopTransfer : datas) {
+        AgencyAndId toStopId = stopTransfer.getStopId();
+        StopEntry stopTo = _transitGraphDao.getStopEntryForId(toStopId);
+        System.out.println(stopFrom.getStopLat() + "," + stopFrom.getStopLon()
+            + "," + stopTo.getStopLat() + "," + stopTo.getStopLon());
+      }
     }
   }
 
@@ -431,12 +457,12 @@ public class StopTransfersTask implements Runnable {
 
       try {
 
-        WalkPlan walkPlan = _cachedStopTransferWalkPlanner.getWalkPlanForStopToStop(transfer.getStops());
+        double distance = _cachedStopTransferWalkPlanner.getWalkPlanDistanceForStopToStop(transfer.getStops());
 
-        if (walkPlan.getDistance() > _constants.getMaxTransferDistance())
+        if (distance > _constants.getMaxTransferDistance())
           continue;
 
-        transfer.setWalkingDistance(walkPlan.getDistance());
+        transfer.setWalkingDistance(distance);
 
         if (transfer.getTime() < minT) {
           minTransfer = transfer;

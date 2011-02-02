@@ -12,6 +12,10 @@ public abstract class AbstractBlockVertex extends AbstractVertex {
     super(context);
     _instance = instance;
   }
+  
+  public StopTimeInstance getInstance() {
+    return _instance;
+  }
 
   @Override
   public String getStopId() {
