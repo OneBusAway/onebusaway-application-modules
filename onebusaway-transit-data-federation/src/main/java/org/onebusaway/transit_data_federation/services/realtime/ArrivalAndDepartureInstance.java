@@ -23,9 +23,9 @@ public class ArrivalAndDepartureInstance {
 
   private static final long serialVersionUID = 3L;
 
-  private BlockInstance blockInstance;
+  private final BlockInstance blockInstance;
 
-  private BlockStopTimeEntry blockStopTime;
+  private final BlockStopTimeEntry blockStopTime;
 
   private BlockLocation blockLocation;
 
@@ -33,20 +33,18 @@ public class ArrivalAndDepartureInstance {
 
   private long predictedDepartureTime;
 
+  public ArrivalAndDepartureInstance(BlockInstance blockInstance,
+      BlockStopTimeEntry blockStopTime) {
+    this.blockInstance = blockInstance;
+    this.blockStopTime = blockStopTime;
+  }
+
   public BlockInstance getBlockInstance() {
     return blockInstance;
   }
 
-  public void setBlockInstance(BlockInstance blockInstance) {
-    this.blockInstance = blockInstance;
-  }
-
   public BlockStopTimeEntry getBlockStopTime() {
     return blockStopTime;
-  }
-
-  public void setBlockStopTime(BlockStopTimeEntry blockStopTime) {
-    this.blockStopTime = blockStopTime;
   }
 
   public BlockLocation getBlockLocation() {

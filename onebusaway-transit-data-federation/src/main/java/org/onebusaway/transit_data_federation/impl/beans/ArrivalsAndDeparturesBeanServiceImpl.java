@@ -47,20 +47,6 @@ import org.springframework.stereotype.Component;
 public class ArrivalsAndDeparturesBeanServiceImpl implements
     ArrivalsAndDeparturesBeanService {
 
-  /**
-   * This let's us capture trips that were scheduled to start 30 minutes before
-   * the left-most edge of the user's search window, but that might be running
-   * up to 30 minutes late.
-   */
-  static final int MINUTES_BEFORE_BUFFER = 30;
-
-  /**
-   * This let's us capture trips that were scheduled to start 10 minutes after
-   * the right-most edge of the user's search window, but that might be running
-   * up to 10 minutes early.
-   */
-  static final int MINUTES_AFTER_BUFFER = 10;
-
   private TransitGraphDao _transitGraphDao;
 
   private RealTimeStopTimeService _realTimeStopTimeService;

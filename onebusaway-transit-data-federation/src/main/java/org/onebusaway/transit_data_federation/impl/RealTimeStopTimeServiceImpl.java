@@ -194,14 +194,9 @@ class RealTimeStopTimeServiceImpl implements RealTimeStopTimeService {
   private ArrivalAndDepartureInstance getStopTimeInstanceAsArrivalAndDepartureInstance(
       StopTimeInstance sti) {
 
-    ArrivalAndDepartureInstance instance = new ArrivalAndDepartureInstance();
-
     BlockInstance blockInstance = sti.getBlockInstance();
-    instance.setBlockInstance(blockInstance);
-
-    instance.setBlockStopTime(sti.getStopTime());
-
-    return instance;
+    BlockStopTimeEntry blockStopTime = sti.getStopTime();
+    return new ArrivalAndDepartureInstance(blockInstance, blockStopTime);
   }
 
   private void applyBlockLocationToInstance(
@@ -366,10 +361,7 @@ class RealTimeStopTimeServiceImpl implements RealTimeStopTimeService {
     BlockStopTimeEntry blockStopTime = getBlockStopTime(blockTrip, stopId,
         stopSequence, timeOfServiceDate);
 
-    ArrivalAndDepartureInstance instance = new ArrivalAndDepartureInstance();
-    instance.setBlockInstance(blockInstance);
-    instance.setBlockStopTime(blockStopTime);
-    return instance;
+    return new ArrivalAndDepartureInstance(blockInstance, blockStopTime);
   }
 
   private BlockTripEntry getBlockTripEntry(BlockConfigurationEntry blockConfig,
