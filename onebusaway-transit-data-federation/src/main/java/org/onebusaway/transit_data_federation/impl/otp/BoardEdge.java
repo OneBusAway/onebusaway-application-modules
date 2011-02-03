@@ -22,11 +22,6 @@ public class BoardEdge extends AbstractEdge {
   }
 
   @Override
-  public Vertex getFromVertex() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public TraverseResult traverse(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
@@ -63,22 +58,30 @@ public class BoardEdge extends AbstractEdge {
           instance);
       EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
-      int dwellTime = (int) ((departureTime - time) / 1000);
-      State s1 = new State(departureTime);
+      State s1 = s0.clone();
+      s1.time = departureTime;
+      s1.numBoardings++;
+      s1.everBoarded = true;
 
-      TraverseResult r = new TraverseResult(dwellTime, s1, narrative);
+      int dwellTime = (int) ((departureTime - time) / 1000);
+      double w = computeWeightForWait(options, dwellTime, s0);
+
+      TraverseResult r = new TraverseResult(w, s1, narrative);
       result = r.addToExistingResultChain(result);
     }
 
     // In addition to all the departures, we can just remain waiting at the stop
-    int dwellTime = (int) ((to.getTime() - from.getTime()) / 1000);
+    
     State s1 = new State(to.getTime());
 
     BoardVertex fromVertex = new BoardVertex(_context, _stop, s0.getTime());
     BoardVertex toVertex = new BoardVertex(_context, _stop, to.getTime());
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+    
+    int dwellTime = (int) ((to.getTime() - from.getTime()) / 1000);
+    double w = computeWeightForWait(options, dwellTime, s0);
 
-    TraverseResult r = new TraverseResult(dwellTime, s1, narrative);
+    TraverseResult r = new TraverseResult(w, s1, narrative);
     result = r.addToExistingResultChain(result);
 
     return result;
@@ -93,5 +96,23 @@ public class BoardEdge extends AbstractEdge {
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
     return new TraverseResult(0, s0, narrative);
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private double computeWeightForWait(TraverseOptions options, int dwellTime,
+      State s0) {
+
+    double w = dwellTime * options.waitReluctance;
+
+    /**
+     * If this is the initial boarding, we penalize the wait time differently
+     */
+    if (s0.numBoardings == 0)
+      w *= options.waitAtBeginningFactor;
+
+    return w;
   }
 }

@@ -5,6 +5,7 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInsta
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
+import org.opentripplanner.routing.core.Vertex;
 
 /**
  * A transit vehicle's journey between departure at one stop and arrival at the
@@ -54,10 +55,10 @@ public class BlockHopEdge extends AbstractEdge {
   }
 
   private EdgeNarrativeImpl createNarrative() {
-    BlockDepartureVertex fromVertex = new BlockDepartureVertex(_context,
+    Vertex fromVertex = new BlockDepartureVertex(_context,
         new StopTimeInstance(_from, _serviceDate));
-    BlockArrivalVertex toVertex = new BlockArrivalVertex(_context,
-        new StopTimeInstance(_to, _serviceDate));
+    Vertex toVertex = new BlockArrivalVertex(_context, new StopTimeInstance(
+        _to, _serviceDate));
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 }

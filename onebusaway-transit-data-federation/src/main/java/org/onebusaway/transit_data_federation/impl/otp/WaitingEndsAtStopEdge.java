@@ -5,7 +5,6 @@ import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
-import org.opentripplanner.routing.core.Vertex;
 
 public class WaitingEndsAtStopEdge extends AbstractEdge {
 
@@ -14,12 +13,6 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
   public WaitingEndsAtStopEdge(GraphContext context, StopEntry stop) {
     super(context);
     _stop = stop;
-  }
-
-  @Override
-  public Vertex getFromVertex() {
-
-    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -34,6 +27,12 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
   @Override
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
+
+    /**
+     * Only allow transition to a transit stop if transit is enabled
+     */
+    if (!SupportLibrary.isTransitEnabled(options))
+      return null;
 
     EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
 

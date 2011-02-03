@@ -5,7 +5,7 @@ import org.opentripplanner.routing.core.Vertex;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-public abstract class AbstractVertex implements Vertex {
+public abstract class AbstractVertex implements Vertex, TransitVertex {
 
   protected final GraphContext _context;
 

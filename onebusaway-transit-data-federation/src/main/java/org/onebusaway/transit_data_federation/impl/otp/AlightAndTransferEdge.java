@@ -1,13 +1,11 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerPreferences;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
-import org.opentripplanner.routing.core.Vertex;
 
 public class AlightAndTransferEdge extends AbstractEdge {
 
@@ -23,33 +21,42 @@ public class AlightAndTransferEdge extends AbstractEdge {
   }
 
   @Override
-  public Vertex getFromVertex() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public TraverseResult traverse(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    int transferTime = computeTransferTime(_transfer);
+    /**
+     * Check if we've reached our transfer limit
+     */
+    if (s0.numBoardings >= options.maxTransfers)
+      return null;
+
+    int transferTime = computeTransferTime(options);
 
     State s1 = s0.clone();
     s1.incrementTimeInSeconds(transferTime);
 
+    /**
+     * We're using options.boardCost as a transfer penalty
+     */
+    double weight = transferTime * options.walkReluctance + options.boardCost;
+
     EdgeNarrativeImpl narrative = createNarrative();
-    return new TraverseResult(transferTime, s0, narrative);
+    return new TraverseResult(weight, s0, narrative);
   }
 
   @Override
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    int transferTime = computeTransferTime(_transfer);
+    int transferTime = computeTransferTime(options);
 
-    State s1 = new State(_instance.getArrivalTime());
+    State s1 = s0.clone();
+    s1.time = _instance.getArrivalTime();
+
+    double weight = transferTime * options.walkReluctance + options.boardCost;
 
     EdgeNarrativeImpl narrative = createNarrative();
-    return new TraverseResult(transferTime, s1, narrative);
+    return new TraverseResult(weight, s1, narrative);
   }
 
   /****
@@ -63,20 +70,19 @@ public class AlightAndTransferEdge extends AbstractEdge {
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 
-  private int computeTransferTime(StopTransfer transfer) {
+  private int computeTransferTime(TraverseOptions options) {
 
-    int transferTime = transfer.getMinTransferTime();
+    int transferTime = _transfer.getMinTransferTime();
     if (transferTime > 0)
       return transferTime;
 
-    TripPlannerPreferences preferences = _context.getPreferences();
-    double walkingVelocity = preferences.getWalkingVelocity();
-    double distance = transfer.getDistance();
+    double walkingVelocity = options.speed;
+    double distance = _transfer.getDistance();
 
     // time to walk = meters / (meters/sec) = sec
     int t = (int) (distance / walkingVelocity);
 
     // transfer time = time to walk + min transfer buffer time
-    return t + preferences.getMinTransferBufferTime();
+    return t;
   }
 }

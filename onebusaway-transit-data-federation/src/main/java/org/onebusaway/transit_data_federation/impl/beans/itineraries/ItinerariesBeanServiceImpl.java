@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.impl.beans.itineraries;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.onebusaway.exceptions.ServiceException;
@@ -12,7 +13,7 @@ import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.LegBean;
@@ -24,6 +25,7 @@ import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.AlightVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockDepartureVertex;
+import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
@@ -98,16 +100,19 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   @Override
   public ItinerariesBean getItinerariesBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, TripPlannerConstraintsBean constraints)
+      double latTo, double lonTo, ConstraintsBean constraints)
       throws ServiceException {
 
     String fromPlace = latFrom + "," + lonFrom;
     String toPlace = latTo + "," + lonTo;
 
-    TraverseOptions options = new TraverseOptions();
+    Date time = new Date(constraints.getTime());
 
-    List<GraphPath> paths = _pathService.plan(fromPlace, toPlace, new Date(
-        constraints.getMinDepartureTime()), options, 1);
+    TraverseOptions options = createTraverseOptions();
+    applyConstraintsToOptions(constraints, options);
+
+    List<GraphPath> paths = _pathService.plan(fromPlace, toPlace, time,
+        options, 1);
 
     LocationBean from = getPointAsLocation(latFrom, lonFrom);
     LocationBean to = getPointAsLocation(latTo, lonTo);
@@ -118,6 +123,80 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   /****
    * Private Methods
    ****/
+
+  /**
+   * From 'Transit Capacity and Quality of Service Manual' - Part 3 - Exhibit
+   * 3.9
+   * 
+   * http://onlinepubs.trb.org/Onlinepubs/tcrp/tcrp100/part%203.pdf
+   * 
+   * Table of passenger perceptions of time. Given that actual in-vehicle time
+   * seems to occur in real-time (penalty ratio of 1.0), how do passengers
+   * perceived walking, waiting for the first vehicle, and waiting for a
+   * transfer. In addition, is there an additive penalty for making a transfer
+   * of any kind.
+   */
+  private TraverseOptions createTraverseOptions() {
+
+    TraverseOptions options = new TraverseOptions();
+    
+    options.walkReluctance = 2.2;
+    options.waitAtBeginningFactor = 0.1;
+    options.waitReluctance = 2.5;
+    
+    options.boardCost = 14 * 60;
+    options.maxTransfers = 2;
+    
+    options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
+    return options;
+  }
+
+  private void applyConstraintsToOptions(ConstraintsBean constraints,
+      TraverseOptions options) {
+    
+    options.setArriveBy(options.isArriveBy());
+
+    /**
+     * Modes
+     */
+    Set<String> modes = constraints.getModes();
+    if (modes != null) {
+      TraverseModeSet ms = new TraverseModeSet();
+      if (modes.contains("walk"))
+        ms.setWalk(true);
+      if (modes.contains("transit"))
+        ms.setTransit(true);
+      options.setModes(ms);
+    }
+
+    /**
+     * Walking
+     */
+    if (constraints.getWalkSpeed() != -1)
+      options.speed = constraints.getWalkSpeed();
+    if (constraints.getMaxWalkingDistance() != -1)
+      options.maxWalkDistance = constraints.getMaxWalkingDistance();
+    if (constraints.getWalkReluctance() != -1)
+      options.walkReluctance = constraints.getWaitReluctance();
+
+    /**
+     * Waiting
+     */
+    if (constraints.getInitialWaitReluctance() != -1)
+      options.waitAtBeginningFactor = constraints.getInitialWaitReluctance();
+    if (constraints.getInitialWaitReluctance() != -1)
+      options.waitReluctance = constraints.getWaitReluctance();
+
+    /**
+     * Transferring
+     */
+    if (constraints.getTransferCost() != -1)
+      options.boardCost = constraints.getTransferCost();
+    if( constraints.getMinTransferTime() != -1 )
+      options.minTransferTime = constraints.getMinTransferTime();
+    if (constraints.getMaxTransfers() != -1)
+      options.maxTransfers = constraints.getMaxTransfers();
+  }
 
   private LocationBean getPointAsLocation(double lat, double lon) {
     LocationBean bean = new LocationBean();
@@ -206,17 +285,17 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
         // Did we have a stop transfer?
         if (vTo instanceof AlightVertex) {
-          
+
           // We've finished up our transit leg, so publish the leg
           builder = getTransitLegBuilderAsLeg(builder, legs);
         }
         if (vTo instanceof WalkToStopVertex) {
-          
+
           // We've finished up our transit leg, so publish the leg
           builder = getTransitLegBuilderAsLeg(builder, legs);
 
           // We've transfered to another stop, so we need to insert the walk leg
-          
+
           StopTimeInstance fromStopTimeInstance = arrival.getInstance();
           StopEntry fromStop = fromStopTimeInstance.getStop();
 
@@ -587,7 +666,7 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     String fromPlace = WalkFromStopVertex.getVertexLabelForStop(from);
     String toPlace = WalkToStopVertex.getVertexLabelForStop(to);
 
-    TraverseOptions options = new TraverseOptions();
+    TraverseOptions options = createTraverseOptions();
 
     TraverseModeSet modes = new TraverseModeSet(TraverseMode.WALK);
     options.setModes(modes);

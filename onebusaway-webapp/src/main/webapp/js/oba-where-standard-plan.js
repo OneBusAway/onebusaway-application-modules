@@ -35,6 +35,35 @@ var oba_where_standard_plan = function(data) {
 		}
 	});
 	
+	var parseLocation = function() {
+		var params = {};
+		var href = window.location.href;
+		var index = href.indexOf('?');
+		if( index == -1)
+			return;
+		href = href.slice(index+1);
+		index = href.indexOf('#');
+		if( index != -1)
+			href.slice(0, index);
+		var tokens = href.split('&');
+		jQuery.each(tokens,function() {
+			var kvp = this.split('=');
+			var key = kvp[0];
+			var values = params[key] || [];
+			params[key] = values.concat(kvp.slice(1)); 				
+		});
+		
+		return params;
+	};
+	
+	var locationParams = parseLocation();
+	
+	if( locationParams.from )
+		fromElement.val(locationParams.from);
+	
+	if( locationParams.to )
+		toElement.val(locationParams.to);
+	
 	var planOverlays = [];
 	var resultsPanel = data.resultsPanel;	
 	

@@ -1,12 +1,10 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerPreferences;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
-import org.opentripplanner.routing.core.Vertex;
 
 public class WaitingBeginsAtStopEdge extends AbstractEdge {
 
@@ -18,22 +16,25 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   }
 
   @Override
-  public Vertex getFromVertex() {
-    return new WalkToStopVertex(_context, _stop);
-  }
-
-  @Override
   public TraverseResult traverse(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    int transferInterval = getTransferInterval();
+    /**
+     * Only allow transition to a transit stop if transit is enabled
+     */
+    if (!SupportLibrary.isTransitEnabled(options))
+      return null;
+
+    int transferInterval = options.minTransferTime;
 
     State s1 = s0.clone();
     s1.incrementTimeInSeconds(transferInterval);
 
     EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
 
-    TraverseResult result = new TraverseResult(transferInterval, s1, narrative);
+    double w = transferInterval * options.waitReluctance;
+    
+    TraverseResult result = new TraverseResult(w, s1, narrative);
 
     return result;
   }
@@ -42,13 +43,15 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    int transferInterval = getTransferInterval();
+    int transferInterval = options.minTransferTime;
 
     State s1 = s0.clone();
     s1.incrementTimeInSeconds(-transferInterval);
+    
+    double w = transferInterval * options.waitReluctance;
 
     EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
-    return new TraverseResult(0, s1, narrative);
+    return new TraverseResult(w, s1, narrative);
   }
 
   @Override
@@ -59,17 +62,6 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   /****
    * Private Methods
    ****/
-
-  /**
-   * We require a minimum amount of time between arriving at a stop and actually
-   * boarding a bus
-   */
-  private int getTransferInterval() {
-
-    TripPlannerPreferences preferences = _context.getPreferences();
-    int transferInterval = preferences.getMinTransferBufferTime();
-    return transferInterval;
-  }
 
   private EdgeNarrativeImpl createNarrative(long time) {
 

@@ -22,11 +22,6 @@ public class AlightReverseEdge extends AbstractEdge {
   }
 
   @Override
-  public Vertex getFromVertex() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public TraverseResult traverse(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
@@ -73,7 +68,11 @@ public class AlightReverseEdge extends AbstractEdge {
         continue;
 
       int dwellTime = (int) ((time - arrivalTime) / 1000);
-      State s1 = new State(arrivalTime);
+      State s1 = s0.clone();
+      s1.time = arrivalTime;
+      s1.numBoardings++;
+      s1.everBoarded = true;
+      
 
       Vertex fromVertex = new BlockArrivalVertex(_context, instance);
       Vertex toVertex = new AlightVertex(_context, _stop, s0.getTime());

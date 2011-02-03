@@ -1,7 +1,7 @@
 package org.onebusaway.transit_data_federation.services.beans;
 
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 
 public interface ItinerariesBeanService {
@@ -18,6 +18,6 @@ public interface ItinerariesBeanService {
    * @throws ServiceException
    */
   public ItinerariesBean getItinerariesBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, TripPlannerConstraintsBean constraints)
+      double latTo, double lonTo, ConstraintsBean constraints)
       throws ServiceException;
 }

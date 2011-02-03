@@ -2,6 +2,8 @@ package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -9,9 +11,10 @@ import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.ItineraryV2BeanFactory;
 import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
@@ -31,12 +34,15 @@ public class PlanTripController extends ApiActionSupport {
 
   private double _lonTo;
 
-  private Date _timeFrom;
-
-  private boolean _walkingOnly = false;
+  private ConstraintsBean _constraints = new ConstraintsBean();
 
   public PlanTripController() {
     super(V2);
+  }
+
+  @Autowired
+  public void setTransitDataService(TransitDataService transitDataService) {
+    _transitDataService = transitDataService;
   }
 
   public void setLatFrom(double latFrom) {
@@ -56,29 +62,61 @@ public class PlanTripController extends ApiActionSupport {
   }
 
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
-  public void setTimeFrom(Date timeFrom) {
-    _timeFrom = timeFrom;
+  public void setTime(Date time) {
+    _constraints.setTime(time.getTime());
   }
 
-  public void setTransitDataService(TransitDataService transitDataService) {
-    _transitDataService = transitDataService;
+  public void setArriveBy(boolean arriveBy) {
+    _constraints.setArriveBy(arriveBy);
   }
 
-  public void setWalkingOnly(boolean walkingOnly) {
-    _walkingOnly = walkingOnly;
+  public void setResultCount(int resultCount) {
+    _constraints.setResultCount(resultCount);
+  }
+
+  public void setMode(List<String> modes) {
+    _constraints.setModes(new HashSet<String>(modes));
+  }
+
+  public void setWalkSpeed(double walkSpeed) {
+    _constraints.setWalkSpeed(walkSpeed);
+  }
+
+  public void setWalkReluctance(double walkReluctance) {
+    _constraints.setWalkReluctance(walkReluctance);
+  }
+
+  public void setMaxWalkingDistance(double maxWalkingDistance) {
+    _constraints.setMaxWalkingDistance(maxWalkingDistance);
+  }
+
+  public void setInitialWaitReluctance(double initialWaitReluctance) {
+    _constraints.setInitialWaitReluctance(initialWaitReluctance);
+  }
+
+  public void setWaitReluctance(double waitReluctance) {
+    _constraints.setWaitReluctance(waitReluctance);
+  }
+
+  public void setMinTransferTime(int minTransferTime) {
+    _constraints.setMinTransferTime(minTransferTime);
+  }
+
+  public void setTransferCost(int transferCost) {
+    _constraints.setTransferCost(transferCost);
+  }
+
+  public void setMaxTransfers(int maxTransfers) {
+    _constraints.setMaxTransfers(maxTransfers);
   }
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
-    if (_timeFrom == null)
-      _timeFrom = new Date();
-
-    TripPlannerConstraintsBean constraints = new TripPlannerConstraintsBean();
-    constraints.setMinDepartureTime(_timeFrom.getTime());
-    constraints.setWalkingOnly(_walkingOnly);
+    if (_constraints.getTime() == 0)
+      _constraints.setTime(System.currentTimeMillis());
 
     ItinerariesBean itineraries = _transitDataService.getItinerariesBetween(
-        _latFrom, _lonFrom, _latTo, _lonTo, constraints);
+        _latFrom, _lonFrom, _latTo, _lonTo, _constraints);
 
     BeanFactoryV2 factory = getBeanFactoryV2();
     ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(
