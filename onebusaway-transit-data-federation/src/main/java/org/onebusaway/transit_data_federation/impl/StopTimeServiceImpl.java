@@ -53,12 +53,12 @@ class StopTimeServiceImpl implements StopTimeService {
       AgencyAndId stopId, Date from, Date to) {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
-    return getStopTimeInstancesInRange(from, to, stopEntry);
+    return getStopTimeInstancesInTimeRange(stopEntry, from, to);
   }
 
   @Override
-  public List<StopTimeInstance> getStopTimeInstancesInRange(Date from, Date to,
-      StopEntry stopEntry) {
+  public List<StopTimeInstance> getStopTimeInstancesInTimeRange(StopEntry stopEntry, Date from,
+      Date to) {
 
     List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 

@@ -74,6 +74,10 @@ public class PlanTripController extends ApiActionSupport {
     _constraints.setResultCount(resultCount);
   }
 
+  public void setUseRealTime(boolean useRealTime) {
+    _constraints.setUseRealTime(useRealTime);
+  }
+  
   public void setMode(List<String> modes) {
     _constraints.setModes(new HashSet<String>(modes));
   }

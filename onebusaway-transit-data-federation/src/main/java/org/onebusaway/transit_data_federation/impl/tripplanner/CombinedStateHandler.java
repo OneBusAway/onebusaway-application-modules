@@ -240,8 +240,8 @@ public class CombinedStateHandler {
     Date to = new Date(SupportLibrary.getNextTimeWindow(_stopTimeSearchWindow,
         state.getCurrentTime()));
 
-    List<StopTimeInstance> instances = _stopTimeService.getStopTimeInstancesInRange(
-        from, to, stopEntry);
+    List<StopTimeInstance> instances = _stopTimeService.getStopTimeInstancesInTimeRange(
+        stopEntry, from, to);
 
     for (StopTimeInstance instance : instances) {
       

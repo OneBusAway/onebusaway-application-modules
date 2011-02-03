@@ -28,6 +28,6 @@ public interface StopTimeService {
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
       AgencyAndId stopId, Date from, Date to);
 
-  public List<StopTimeInstance> getStopTimeInstancesInRange(Date from,
-      Date to, StopEntry stopEntry);
+  public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
+      StopEntry stopEntry, Date from, Date to);
 }

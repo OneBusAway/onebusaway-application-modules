@@ -13,6 +13,8 @@ public class ConstraintsBean implements Serializable {
 
   private int resultCount = 3;
 
+  private boolean useRealTime = false;
+
   private Set<String> modes = null;
 
   private int maxTripDuration = -1;
@@ -55,6 +57,14 @@ public class ConstraintsBean implements Serializable {
 
   public void setResultCount(int resultCount) {
     this.resultCount = resultCount;
+  }
+
+  public boolean isUseRealTime() {
+    return useRealTime;
+  }
+
+  public void setUseRealTime(boolean useRealTime) {
+    this.useRealTime = useRealTime;
   }
 
   public Set<String> getModes() {

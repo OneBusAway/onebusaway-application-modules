@@ -54,8 +54,8 @@ public class AlightReverseEdge extends AbstractEdge {
         time));
     Date timeTo = new Date(time);
 
-    List<StopTimeInstance> instances = stopTimeService.getStopTimeInstancesInRange(
-        timeFrom, timeTo, _stop);
+    List<StopTimeInstance> instances = stopTimeService.getStopTimeInstancesInTimeRange(
+        _stop, timeFrom, timeTo);
 
     for (StopTimeInstance instance : instances) {
 

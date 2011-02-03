@@ -36,8 +36,8 @@ public class BoardEdge extends AbstractEdge {
     Date from = new Date(time);
     Date to = new Date(SupportLibrary.getNextTimeWindow(_context, time));
 
-    List<StopTimeInstance> instances = stopTimeService.getStopTimeInstancesInRange(
-        from, to, _stop);
+    List<StopTimeInstance> instances = stopTimeService.getStopTimeInstancesInTimeRange(
+        _stop, from, to);
 
     for (StopTimeInstance instance : instances) {
 
