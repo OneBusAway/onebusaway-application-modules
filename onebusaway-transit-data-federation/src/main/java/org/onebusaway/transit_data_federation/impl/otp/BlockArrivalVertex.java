@@ -71,7 +71,7 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges 
     /**
      * We can alight from the vehicle to the street network
      */
-    edges.add(new AlightEdge(_context, _instance));
+    edges.add(new ArrivalEdge(_context, _instance));
 
     /**
      * We can alight from the vehicle AND transfer to another stop
@@ -80,7 +80,7 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges 
     List<StopTransfer> transfers = stopTransferService.getTransfersForStop(stop);
 
     for (StopTransfer transfer : transfers)
-      edges.add(new AlightAndTransferEdge(_context, _instance, transfer));
+      edges.add(new ArrivalAndTransferEdge(_context, _instance, transfer));
 
     return edges;
   }

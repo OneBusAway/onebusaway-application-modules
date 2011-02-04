@@ -7,13 +7,13 @@ import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 
-public class AlightAndTransferEdge extends AbstractEdge {
+public class ArrivalAndTransferEdge extends AbstractEdge {
 
   private ArrivalAndDepartureInstance _instance;
 
   private StopTransfer _transfer;
 
-  public AlightAndTransferEdge(GraphContext context,
+  public ArrivalAndTransferEdge(GraphContext context,
       ArrivalAndDepartureInstance instance, StopTransfer transfer) {
     super(context);
     _instance = instance;

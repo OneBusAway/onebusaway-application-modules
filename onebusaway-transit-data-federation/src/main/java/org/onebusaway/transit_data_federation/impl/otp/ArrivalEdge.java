@@ -6,11 +6,11 @@ import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 
-public class AlightEdge extends AbstractEdge {
+public class ArrivalEdge extends AbstractEdge {
 
   private final ArrivalAndDepartureInstance _instance;
 
-  public AlightEdge(GraphContext context, ArrivalAndDepartureInstance instance) {
+  public ArrivalEdge(GraphContext context, ArrivalAndDepartureInstance instance) {
     super(context);
     _instance = instance;
   }
@@ -37,7 +37,7 @@ public class AlightEdge extends AbstractEdge {
 
   private EdgeNarrativeImpl createNarrative(long time) {
     BlockArrivalVertex fromVertex = new BlockArrivalVertex(_context, _instance);
-    AlightVertex toVertex = new AlightVertex(_context, _instance.getStop(),
+    ArrivalVertex toVertex = new ArrivalVertex(_context, _instance.getStop(),
         time);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }

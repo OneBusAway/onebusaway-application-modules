@@ -11,11 +11,11 @@ import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
-public class AlightReverseEdge extends AbstractEdge {
+public class ArrivalReverseEdge extends AbstractEdge {
 
   private final StopEntry _stop;
 
-  public AlightReverseEdge(GraphContext context, StopEntry stop) {
+  public ArrivalReverseEdge(GraphContext context, StopEntry stop) {
     super(context);
     _stop = stop;
   }
@@ -31,7 +31,7 @@ public class AlightReverseEdge extends AbstractEdge {
      * previously been called.
      */
     Vertex fromVertex = null;
-    Vertex toVertex = new AlightVertex(_context, _stop, s0.getTime());
+    Vertex toVertex = new ArrivalVertex(_context, _stop, s0.getTime());
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
     return new TraverseResult(0, s0, narrative);
@@ -43,7 +43,6 @@ public class AlightReverseEdge extends AbstractEdge {
 
     TraverseResult result = null;
 
-    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
     long time = s0.getTime();
 
     /**
@@ -52,8 +51,8 @@ public class AlightReverseEdge extends AbstractEdge {
     long timeFrom = SupportLibrary.getPreviousTimeWindow(_context, time);
     long timeTo = time;
 
-    List<ArrivalAndDepartureInstance> arrivals = service.getArrivalsAndDeparturesForStopInTimeRange(
-        _stop, time, timeFrom, timeTo);
+    List<ArrivalAndDepartureInstance> arrivals = getArrivalsInTimeRange(time,
+        timeFrom, timeTo, options);
 
     for (ArrivalAndDepartureInstance instance : arrivals) {
 
@@ -72,7 +71,7 @@ public class AlightReverseEdge extends AbstractEdge {
       s1.everBoarded = true;
 
       Vertex fromVertex = new BlockArrivalVertex(_context, instance);
-      Vertex toVertex = new AlightVertex(_context, _stop, s0.getTime());
+      Vertex toVertex = new ArrivalVertex(_context, _stop, s0.getTime());
       EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
       TraverseResult r = new TraverseResult(-dwellTime, s1, narrative);
@@ -83,13 +82,36 @@ public class AlightReverseEdge extends AbstractEdge {
     int dwellTime = (int) ((time - timeFrom) / 1000);
     State s1 = new State(timeFrom);
 
-    Vertex fromVertex = new BoardVertex(_context, _stop, timeFrom);
-    Vertex toVertex = new AlightVertex(_context, _stop, s0.getTime());
+    Vertex fromVertex = new DepartureVertex(_context, _stop, timeFrom);
+    Vertex toVertex = new ArrivalVertex(_context, _stop, s0.getTime());
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
     TraverseResult r = new TraverseResult(dwellTime, s1, narrative);
     result = r.addToExistingResultChain(result);
 
     return result;
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private List<ArrivalAndDepartureInstance> getArrivalsInTimeRange(long time,
+      long timeFrom, long timeTo, TraverseOptions options) {
+
+    boolean useRealTime = false;
+    OTPConfiguration config = options.getExtension(OTPConfiguration.class);
+    if (config != null)
+      useRealTime = config.useRealtime;
+
+    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
+
+    if (useRealTime) {
+      return service.getArrivalsAndDeparturesForStopInTimeRange(_stop, time,
+          timeFrom, timeTo);
+    } else {
+      return service.getScheduledArrivalsAndDeparturesForStopInTimeRange(_stop,
+          time, timeFrom, timeTo);
+    }
   }
 }

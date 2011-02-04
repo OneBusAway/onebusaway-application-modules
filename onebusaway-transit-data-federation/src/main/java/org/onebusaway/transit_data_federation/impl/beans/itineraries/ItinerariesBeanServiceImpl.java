@@ -22,9 +22,10 @@ import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
-import org.onebusaway.transit_data_federation.impl.otp.AlightVertex;
+import org.onebusaway.transit_data_federation.impl.otp.ArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockDepartureVertex;
+import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
 import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.WalkToStopVertex;
@@ -147,7 +148,7 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     options.boardCost = 14 * 60;
     options.maxTransfers = 2;
     options.minTransferTime = 60;
-    
+
     options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
     return options;
   }
@@ -156,6 +157,8 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       TraverseOptions options) {
 
     options.setArriveBy(options.isArriveBy());
+
+    
 
     /**
      * Modes
@@ -197,6 +200,15 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       options.minTransferTime = constraints.getMinTransferTime();
     if (constraints.getMaxTransfers() != -1)
       options.maxTransfers = constraints.getMaxTransfers();
+    
+    /**
+     * Our custom traverse options extension
+     */
+    OTPConfiguration config = new OTPConfiguration();
+    options.putExtension(OTPConfiguration.class,
+        config);
+    
+    config.useRealtime = constraints.isUseRealTime();
   }
 
   private LocationBean getPointAsLocation(double lat, double lon) {
@@ -285,7 +297,7 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         BlockArrivalVertex arrival = (BlockArrivalVertex) vFrom;
 
         // Did we have a stop transfer?
-        if (vTo instanceof AlightVertex) {
+        if (vTo instanceof ArrivalVertex) {
 
           // We've finished up our transit leg, so publish the leg
           builder = getTransitLegBuilderAsLeg(builder, legs);

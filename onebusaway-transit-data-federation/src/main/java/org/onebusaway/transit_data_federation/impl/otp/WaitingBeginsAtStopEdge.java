@@ -56,7 +56,7 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   private EdgeNarrativeImpl createNarrative(long time) {
 
     WalkToStopVertex fromVertex = new WalkToStopVertex(_context, _stop);
-    BoardVertex toVertex = new BoardVertex(_context, _stop, time);
+    DepartureVertex toVertex = new DepartureVertex(_context, _stop, time);
 
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }

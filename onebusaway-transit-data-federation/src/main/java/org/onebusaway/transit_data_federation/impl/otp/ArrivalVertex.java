@@ -11,7 +11,7 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public final class AlightVertex extends AbstractVertex implements
+public final class ArrivalVertex extends AbstractVertex implements
     HasEdges {
 
   private static DateFormat _format = DateFormat.getDateTimeInstance(
@@ -21,7 +21,7 @@ public final class AlightVertex extends AbstractVertex implements
 
   private final long _time;
 
-  public AlightVertex(GraphContext context, StopEntry stop, long time) {
+  public ArrivalVertex(GraphContext context, StopEntry stop, long time) {
     super(context);
     _stop = stop;
     _time = time;
@@ -64,7 +64,7 @@ public final class AlightVertex extends AbstractVertex implements
   public Collection<Edge> getIncoming() {
     List<Edge> edges = new ArrayList<Edge>(1);
     // We could come from a different bus (arrival)
-    edges.add(new AlightReverseEdge(_context, _stop));
+    edges.add(new ArrivalReverseEdge(_context, _stop));
     return edges;
   }
 
@@ -108,7 +108,7 @@ public final class AlightVertex extends AbstractVertex implements
       return false;
     if (getClass() != obj.getClass())
       return false;
-    AlightVertex other = (AlightVertex) obj;
+    ArrivalVertex other = (ArrivalVertex) obj;
     return _stop.equals(other._stop) && _time == other._time;
   }
 }

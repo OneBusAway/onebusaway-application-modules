@@ -11,7 +11,7 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public final class BoardVertex extends AbstractVertex implements
+public final class DepartureVertex extends AbstractVertex implements
     HasEdges {
 
   private static DateFormat _format = DateFormat.getDateTimeInstance(
@@ -21,7 +21,7 @@ public final class BoardVertex extends AbstractVertex implements
 
   private final long _time;
 
-  public BoardVertex(GraphContext context, StopEntry stop, long time) {
+  public DepartureVertex(GraphContext context, StopEntry stop, long time) {
     super(context);
     _stop = stop;
     _time = time;
@@ -77,7 +77,7 @@ public final class BoardVertex extends AbstractVertex implements
   public Collection<Edge> getOutgoing() {
     List<Edge> edges = new ArrayList<Edge>(1);
     // Let's board a bus!
-    edges.add(new BoardEdge(_context, _stop));
+    edges.add(new DepartureEdge(_context, _stop));
     return edges;
   }
 
@@ -108,7 +108,7 @@ public final class BoardVertex extends AbstractVertex implements
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BoardVertex other = (BoardVertex) obj;
+    DepartureVertex other = (DepartureVertex) obj;
     return _stop.equals(other._stop) && _time == other._time;
   }
 }

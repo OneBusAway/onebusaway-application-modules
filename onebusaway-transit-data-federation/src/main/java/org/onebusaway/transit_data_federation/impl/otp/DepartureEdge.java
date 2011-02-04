@@ -11,11 +11,11 @@ import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
-public class BoardEdge extends AbstractEdge {
+public class DepartureEdge extends AbstractEdge {
 
   private final StopEntry _stop;
 
-  public BoardEdge(GraphContext context, StopEntry stop) {
+  public DepartureEdge(GraphContext context, StopEntry stop) {
     super(context);
     _stop = stop;
   }
@@ -26,8 +26,6 @@ public class BoardEdge extends AbstractEdge {
 
     TraverseResult result = null;
 
-    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
-
     long time = s0.getTime();
 
     /**
@@ -36,8 +34,8 @@ public class BoardEdge extends AbstractEdge {
     long fromTime = time;
     long toTime = SupportLibrary.getNextTimeWindow(_context, time);
 
-    List<ArrivalAndDepartureInstance> departures = service.getArrivalsAndDeparturesForStopInTimeRange(
-        _stop, s0.getTime(), fromTime, toTime);
+    List<ArrivalAndDepartureInstance> departures = getDeparturesInTimeRange(s0,
+        fromTime, toTime, options);
 
     for (ArrivalAndDepartureInstance instance : departures) {
 
@@ -55,7 +53,7 @@ public class BoardEdge extends AbstractEdge {
       if (!SupportLibrary.hasNextStopTime(instance))
         continue;
 
-      BoardVertex fromVertex = new BoardVertex(_context, _stop, time);
+      DepartureVertex fromVertex = new DepartureVertex(_context, _stop, time);
       BlockDepartureVertex toVertex = new BlockDepartureVertex(_context,
           instance);
       EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
@@ -76,8 +74,9 @@ public class BoardEdge extends AbstractEdge {
 
     State s1 = new State(toTime);
 
-    BoardVertex fromVertex = new BoardVertex(_context, _stop, s0.getTime());
-    BoardVertex toVertex = new BoardVertex(_context, _stop, toTime);
+    DepartureVertex fromVertex = new DepartureVertex(_context, _stop,
+        s0.getTime());
+    DepartureVertex toVertex = new DepartureVertex(_context, _stop, toTime);
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
     int dwellTime = (int) ((toTime - time) / 1000);
@@ -93,7 +92,8 @@ public class BoardEdge extends AbstractEdge {
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    BoardVertex fromVertex = new BoardVertex(_context, _stop, s0.getTime());
+    DepartureVertex fromVertex = new DepartureVertex(_context, _stop,
+        s0.getTime());
     Vertex toVertex = null;
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
@@ -103,6 +103,25 @@ public class BoardEdge extends AbstractEdge {
   /****
    * Private Methods
    ****/
+
+  private List<ArrivalAndDepartureInstance> getDeparturesInTimeRange(State s0,
+      long fromTime, long toTime, TraverseOptions options) {
+
+    boolean useRealtime = false;
+    OTPConfiguration config = options.getExtension(OTPConfiguration.class);
+    if (config != null)
+      useRealtime = config.useRealtime;
+
+    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
+
+    if (useRealtime) {
+      return service.getArrivalsAndDeparturesForStopInTimeRange(_stop,
+          s0.getTime(), fromTime, toTime);
+    } else {
+      return service.getScheduledArrivalsAndDeparturesForStopInTimeRange(_stop,
+          s0.getTime(), fromTime, toTime);
+    }
+  }
 
   private double computeWeightForWait(TraverseOptions options, int dwellTime,
       State s0) {

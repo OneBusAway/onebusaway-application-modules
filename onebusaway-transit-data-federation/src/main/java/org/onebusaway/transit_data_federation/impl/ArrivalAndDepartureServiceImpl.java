@@ -136,6 +136,48 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   @Override
+  public List<ArrivalAndDepartureInstance> getScheduledArrivalsAndDeparturesForStopInTimeRange(
+      StopEntry stop, long currentTime, long fromTime, long toTime) {
+
+    List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
+        stop, new Date(fromTime), new Date(toTime));
+
+    List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
+
+    for (StopTimeInstance sti : stis) {
+
+      BlockInstance blockInstance = sti.getBlockInstance();
+
+      ArrivalAndDepartureInstance instance = getStopTimeInstanceAsArrivalAndDepartureInstance(sti);
+
+      if (sti.getFrequency() == null) {
+
+        /**
+         * We don't need to get the scheduled location of a vehicle unless its
+         * in our arrival window
+         */
+        if (isArrivalAndDepartureBeanInRange(instance, fromTime, toTime)) {
+
+          BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
+              blockInstance, currentTime);
+          if (scheduledLocation != null)
+            applyBlockLocationToInstance(instance, scheduledLocation,
+                currentTime);
+
+          instances.add(instance);
+        }
+
+      } else {
+        if (isFrequencyBasedArrivalInRange(blockInstance, fromTime, toTime)) {
+          instances.add(instance);
+        }
+      }
+    }
+
+    return instances;
+  }
+
+  @Override
   public ArrivalAndDepartureInstance getArrivalAndDepartureForStop(
       StopEntry stop, int stopSequence, TripEntry trip, long serviceDate,
       AgencyAndId vehicleId, long time) {

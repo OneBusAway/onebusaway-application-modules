@@ -75,9 +75,6 @@
         <span>Walk Only:</span> <input id="walkOnly" type="checkbox" />
       </div>
       <div>
-        <span>Walk Only:</span> <input id="walkOnly" type="checkbox" />
-      </div>
-      <div>
         <span>Walk Speed:</span> <input id="walkSpeed" type="text" />
       </div>
       <div>

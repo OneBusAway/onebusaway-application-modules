@@ -24,6 +24,14 @@ public interface ArrivalAndDepartureService {
    */
   public List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForStopInTimeRange(
       StopEntry stop, long currentTime, long fromTime, long toTime);
+  
+  /**
+   * Determines the set of active arrivals and departures at a given stop,
+   * NOT taking into account real-time arrival information.
+   * 
+   */
+  public List<ArrivalAndDepartureInstance> getScheduledArrivalsAndDeparturesForStopInTimeRange(
+      StopEntry stop, long currentTime, long fromTime, long toTime);
 
   public ArrivalAndDepartureInstance getArrivalAndDepartureForStop(
       StopEntry stop, int stopSequence, TripEntry trip, long serviceDate,
