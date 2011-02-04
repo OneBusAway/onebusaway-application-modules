@@ -29,6 +29,10 @@ public class ArrivalAndDepartureInstance {
 
   private final BlockStopTimeEntry blockStopTime;
 
+  private final long scheduledArrivalTime;
+
+  private final long scheduledDepartureTime;
+
   private BlockLocation blockLocation;
 
   private long predictedArrivalTime;
@@ -36,9 +40,17 @@ public class ArrivalAndDepartureInstance {
   private long predictedDepartureTime;
 
   public ArrivalAndDepartureInstance(BlockInstance blockInstance,
-      BlockStopTimeEntry blockStopTime) {
+      BlockStopTimeEntry blockStopTime, ArrivalAndDepartureTime scheduledTime) {
     this.blockInstance = blockInstance;
     this.blockStopTime = blockStopTime;
+    this.scheduledArrivalTime = scheduledTime.getArrivalTime();
+    this.scheduledDepartureTime = scheduledTime.getDepartureTime();
+  }
+
+  public ArrivalAndDepartureInstance(BlockInstance blockInstance,
+      BlockStopTimeEntry blockStopTime) {
+    this(blockInstance, blockStopTime,
+        ArrivalAndDepartureTime.getScheduledTime(blockInstance, blockStopTime));
   }
 
   public BlockInstance getBlockInstance() {
@@ -55,6 +67,14 @@ public class ArrivalAndDepartureInstance {
 
   public void setBlockLocation(BlockLocation blockLocation) {
     this.blockLocation = blockLocation;
+  }
+
+  public long getScheduledArrivalTime() {
+    return scheduledArrivalTime;
+  }
+
+  public long getScheduledDepartureTime() {
+    return scheduledDepartureTime;
   }
 
   public boolean isPredictedArrivalTimeSet() {
@@ -89,16 +109,6 @@ public class ArrivalAndDepartureInstance {
     return blockInstance.getServiceDate();
   }
 
-  public long getScheduledArrivalTime() {
-    return blockInstance.getServiceDate()
-        + blockStopTime.getStopTime().getArrivalTime() * 1000;
-  }
-
-  public long getScheduledDepartureTime() {
-    return blockInstance.getServiceDate()
-        + blockStopTime.getStopTime().getDepartureTime() * 1000;
-  }
-
   public long getBestArrivalTime() {
     if (isPredictedArrivalTimeSet())
       return getPredictedArrivalTime();
@@ -118,7 +128,7 @@ public class ArrivalAndDepartureInstance {
   public BlockTripEntry getBlockTrip() {
     return blockStopTime.getTrip();
   }
-  
+
   public StopEntry getStop() {
     return blockStopTime.getStopTime().getStop();
   }

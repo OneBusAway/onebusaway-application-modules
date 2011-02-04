@@ -10,6 +10,7 @@ import java.util.Map;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -80,7 +81,8 @@ public class BlockStatusServiceImpl implements BlockStatusService {
 
   @Override
   public BlockLocation getBlockForVehicle(AgencyAndId vehicleId, long time) {
-    return _blockLocationService.getLocationForVehicleAndTime(vehicleId, time);
+    TargetTime target = new TargetTime(time, time);
+    return _blockLocationService.getLocationForVehicleAndTime(vehicleId, target);
   }
 
   @Override
@@ -177,9 +179,11 @@ public class BlockStatusServiceImpl implements BlockStatusService {
     if (instance == null)
       return;
 
+    TargetTime target = new TargetTime(time, time);
+
     // Try real-time trips first
     List<BlockLocation> locations = _blockLocationService.getLocationsForBlockInstance(
-        instance, time);
+        instance, target);
 
     if (!locations.isEmpty()) {
 

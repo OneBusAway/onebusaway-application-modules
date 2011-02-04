@@ -19,7 +19,11 @@ html, body {
 }
 
 #wrapper {
-	height: 100%;
+	position: absolute;
+	top: 0;	
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 
 div#container {
@@ -36,7 +40,8 @@ div#container {
     left: 0;
 	width: 368px;
 	padding-left: 16px;
-	padding-right: 16px;		
+	padding-right: 16px;
+	overflow: auto;
 }
 
 #mapPanel {
@@ -102,8 +107,20 @@ div#container {
 	display: none
 }
 
+#resultsPanel {
+	padding-top: 1em;	
+}
+
+.leg {
+	margin-bottom: 1em;
+}
+
 .stopNameEmphasized {
 	font-weight: bold;
+}
+
+.stopLink {
+	font-size: 0.8em;	
 }
 
 .routeShortName {
@@ -114,6 +131,26 @@ div#container {
 	font-size: 0.8em;
 }
 
+.statusEarly {
+	color: red;
+}
+
+.statusOnTime {
+	color: green;
+}
+
+.statusDelayed {
+	color: blue;
+}
+
 .elapsedTime {
+	color: grey;
+}
+
+.walkFromLocation {
+	font-weight: bold;
+}
+
+.walkToTime {
 	color: grey;
 }

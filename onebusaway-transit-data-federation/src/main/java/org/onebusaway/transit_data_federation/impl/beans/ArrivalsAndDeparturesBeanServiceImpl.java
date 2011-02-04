@@ -18,6 +18,7 @@ import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
@@ -141,8 +142,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         * 1000;
     long frequencyToTime = time + query.getFrequencyMinutesAfter() * 60 * 1000;
 
+    TargetTime target = new TargetTime(time, time);
+
     List<ArrivalAndDepartureInstance> instances = _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
-        stop, time, fromTime, toTime);
+        stop, target, fromTime, toTime);
 
     List<ArrivalAndDepartureBean> beans = new ArrayList<ArrivalAndDepartureBean>();
 
@@ -240,24 +243,14 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     BlockInstance blockInstance = instance.getBlockInstance();
     FrequencyEntry frequency = blockInstance.getFrequency();
 
-    if (frequency == null) {
-      pab.setScheduledArrivalTime(instance.getScheduledArrivalTime());
-      pab.setScheduledDepartureTime(instance.getScheduledDepartureTime());
-      pab.setFrequency(null);
-    } else {
+    pab.setScheduledArrivalTime(instance.getScheduledArrivalTime());
+    pab.setScheduledDepartureTime(instance.getScheduledDepartureTime());
+    pab.setFrequency(null);
 
+    if (frequency != null) {
       FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(
           instance.getServiceDate(), frequency);
       pab.setFrequency(fb);
-
-      long t = time + frequency.getHeadwaySecs() * 1000;
-
-      if (t < fb.getStartTime())
-        t = fb.getStartTime();
-      if (t > fb.getEndTime())
-        t = fb.getEndTime();
-      pab.setScheduledArrivalTime(t);
-      pab.setScheduledDepartureTime(t);
     }
 
     return pab;

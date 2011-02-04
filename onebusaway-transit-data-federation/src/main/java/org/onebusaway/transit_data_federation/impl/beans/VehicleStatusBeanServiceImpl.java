@@ -16,6 +16,7 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecordDao;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
@@ -92,8 +93,10 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       AgencyAndId vehicleId, long targetTime) {
 
+    TargetTime target = new TargetTime(targetTime, targetTime);
+
     BlockLocation blockLocation = _blockLocationService.getLocationForVehicleAndTime(
-        vehicleId, targetTime);
+        vehicleId, target);
     if (blockLocation == null)
       return null;
     return getBlockLocationAsVehicleLocationRecord(blockLocation);

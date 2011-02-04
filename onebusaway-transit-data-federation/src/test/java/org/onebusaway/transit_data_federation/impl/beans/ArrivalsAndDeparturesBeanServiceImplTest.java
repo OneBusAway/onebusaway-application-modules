@@ -29,6 +29,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
@@ -183,9 +184,11 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
         blockInstanceB, bstBB);
     in2.setBlockLocation(blockLocationB);
 
+    TargetTime target = new TargetTime(t,t);
+    
     Mockito.when(
         _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
-            stopB, t, stopTimeFrom, stopTimeTo)).thenReturn(
+            stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(
         Arrays.asList(in1, in2));
 
     /****

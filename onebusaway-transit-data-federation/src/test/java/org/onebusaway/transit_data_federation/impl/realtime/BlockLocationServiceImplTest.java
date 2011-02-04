@@ -17,6 +17,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
@@ -83,9 +84,12 @@ public class BlockLocationServiceImplTest {
 
     double epsilon = 0.001;
 
+    TargetTime target = new TargetTime(System.currentTimeMillis(), t(
+        serviceDate, 0, 0));
+
     BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
     BlockLocation location = _service.getLocationForBlockInstance(
-        blockInstance, t(serviceDate, 0, 0));
+        blockInstance, target);
 
     assertNull(location);
 
@@ -96,13 +100,14 @@ public class BlockLocationServiceImplTest {
     p.setDistanceAlongBlock(0);
     p.setLocation(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
     p.setInService(true);
-    
+
     Mockito.when(
         _blockLocationService.getScheduledBlockLocationFromScheduledTime(
             blockConfig, 1800)).thenReturn(p);
 
-    location = _service.getLocationForBlockInstance(blockInstance,
-        t(serviceDate, 0, 30));
+    target = new TargetTime(System.currentTimeMillis(), t(serviceDate, 0, 30));
+
+    location = _service.getLocationForBlockInstance(blockInstance, target);
 
     assertTrue(location.isInService());
     assertEquals(blockConfig.getStopTimes().get(0), location.getClosestStop());

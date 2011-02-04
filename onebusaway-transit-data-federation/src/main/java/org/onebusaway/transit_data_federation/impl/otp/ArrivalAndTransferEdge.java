@@ -42,7 +42,7 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
         + options.minTransferTime * options.waitReluctance;
 
     EdgeNarrativeImpl narrative = createNarrative();
-    return new TraverseResult(weight, s0, narrative);
+    return new TraverseResult(weight, s1, narrative);
   }
 
   @Override

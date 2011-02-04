@@ -27,6 +27,7 @@
 <script type="text/javascript" src="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/js/oba-api.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/js/oba-l10n.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/js/oba-maps.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('messages:ArrivalAndDepartureMessages=org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('/js/oba-where-standard-plan.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript">
   jQuery(document).ready(function() {
@@ -59,7 +60,7 @@
     <div id="optionsToggle"><a id="optionsToggleAnchor" href="javascript:void(0)" >Show Options</a></div>
     
     <div id="basicSearchOptions">
-        <select id="">
+        <select id="arriveBy">
             <option selected="selected" value="leaveBy">Leave By</option>
             <option value="arriveBy">Arrive By</option>
         </select>
@@ -111,13 +112,14 @@
   <jsp:text></jsp:text>
 </div>
 
-<div class="streetLegTemplate" style="display: none">
+<div class="leg streetLegTemplate" style="display: none">
+    <div class="walkFromLocation">{0}</div>
     <div class="walkToLocation">Walk to {0}</div>
     <div class="walkToTime">About {0} mins</div>
 </div>
 
-<div class="transitLegTemplate" style="display: none">
-    <div class="stopName stopNameEmphasized">stop name</div>
+<div class="leg transitLegTemplate" style="display: none">
+    <div class="stopNameRow"><span class="stopName stopNameEmphasized">stop name</span><jsp:text> </jsp:text><s:a cssClass="stopLink" action="stop"><s:param name="id" value="'STOP_ID'"/>info</s:a></div>
     <div><span class="routeShortName">XX</span> towards <span class="tripHeadsign">XXXXX</span></div>
     <div class="legTimes"><span class="startTime">x:xx am</span> - <span class="endTime">x:xx am</span><jsp:text> </jsp:text><span class="elapsedTime">(x mins)</span></div>
     <div class="legStatus"><jsp:text></jsp:text></div>

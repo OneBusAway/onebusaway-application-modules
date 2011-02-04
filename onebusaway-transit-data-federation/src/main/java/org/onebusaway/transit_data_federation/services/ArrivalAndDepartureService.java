@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.services;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -23,11 +24,11 @@ public interface ArrivalAndDepartureService {
    * 
    */
   public List<ArrivalAndDepartureInstance> getArrivalsAndDeparturesForStopInTimeRange(
-      StopEntry stop, long currentTime, long fromTime, long toTime);
-  
+      StopEntry stop, TargetTime targetTime, long fromTime, long toTime);
+
   /**
-   * Determines the set of active arrivals and departures at a given stop,
-   * NOT taking into account real-time arrival information.
+   * Determines the set of active arrivals and departures at a given stop, NOT
+   * taking into account real-time arrival information.
    * 
    */
   public List<ArrivalAndDepartureInstance> getScheduledArrivalsAndDeparturesForStopInTimeRange(

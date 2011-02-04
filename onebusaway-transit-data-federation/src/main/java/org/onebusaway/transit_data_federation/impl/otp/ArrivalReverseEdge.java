@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.otp;
 
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -107,7 +108,12 @@ public class ArrivalReverseEdge extends AbstractEdge {
     ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
 
     if (useRealTime) {
-      return service.getArrivalsAndDeparturesForStopInTimeRange(_stop, time,
+      /**
+       * TODO : If we want to simulate real-time trip planning with the system
+       * in some past state, we'll need a way to adjust NOW here
+       */
+      TargetTime target = new TargetTime(System.currentTimeMillis(), time);
+      return service.getArrivalsAndDeparturesForStopInTimeRange(_stop, target,
           timeFrom, timeTo);
     } else {
       return service.getScheduledArrivalsAndDeparturesForStopInTimeRange(_stop,

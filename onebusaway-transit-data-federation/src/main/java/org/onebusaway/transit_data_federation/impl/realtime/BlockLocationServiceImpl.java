@@ -21,6 +21,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
@@ -231,30 +232,30 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   @Override
   public BlockLocation getLocationForBlockInstance(BlockInstance blockInstance,
-      long targetTime) {
+      TargetTime time) {
 
     List<VehicleLocationCacheRecord> records = getBlockLocationRecordCollectionForBlock(
-        blockInstance, targetTime);
+        blockInstance, time);
 
     VehicleLocationCacheRecord record = null;
     if (!records.isEmpty())
       record = records.get(0);
 
     // TODO : find a better way to pick?
-    return getBlockLocation(blockInstance, record, targetTime);
+    return getBlockLocation(blockInstance, record, time.getTargetTime());
   }
 
   @Override
   public List<BlockLocation> getLocationsForBlockInstance(
-      BlockInstance blockInstance, long targetTime) {
+      BlockInstance blockInstance, TargetTime time) {
 
     List<VehicleLocationCacheRecord> records = getBlockLocationRecordCollectionForBlock(
-        blockInstance, targetTime);
+        blockInstance, time);
 
     List<BlockLocation> locations = new ArrayList<BlockLocation>();
     for (VehicleLocationCacheRecord cacheRecord : records) {
       BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
-          targetTime);
+          time.getTargetTime());
       if (location != null)
         locations.add(location);
     }
@@ -270,7 +271,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   @Override
   public BlockLocation getLocationForVehicleAndTime(AgencyAndId vehicleId,
-      long targetTime) {
+      TargetTime targetTime) {
 
     List<VehicleLocationCacheRecord> cacheRecords = getBlockLocationRecordCollectionForVehicle(
         vehicleId, targetTime);
@@ -280,7 +281,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (VehicleLocationCacheRecord cacheRecord : cacheRecords) {
       BlockInstance blockInstance = cacheRecord.getBlockInstance();
       BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
-          targetTime);
+          targetTime.getTargetTime());
       if (location != null)
         return location;
     }
@@ -578,19 +579,19 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   private List<VehicleLocationCacheRecord> getBlockLocationRecordCollectionForBlock(
-      BlockInstance blockInstance, long targetTime) {
+      BlockInstance blockInstance, TargetTime time) {
     return getBlockLocationRecordCollections(new BlockInstanceStrategy(
-        blockInstance), targetTime);
+        blockInstance), time);
   }
 
   private List<VehicleLocationCacheRecord> getBlockLocationRecordCollectionForVehicle(
-      AgencyAndId vehicleId, long targetTime) {
+      AgencyAndId vehicleId, TargetTime time) {
     return getBlockLocationRecordCollections(new VehicleIdRecordStrategy(
-        vehicleId), targetTime);
+        vehicleId), time);
   }
 
   private List<VehicleLocationCacheRecord> getBlockLocationRecordCollections(
-      RecordStrategy strategy, long targetTime) {
+      RecordStrategy strategy, TargetTime time) {
 
     List<VehicleLocationCacheRecord> records = strategy.getRecordsFromCache();
 
@@ -599,8 +600,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       long offset = _predictionCacheMaxOffset * 1000;
       for (VehicleLocationCacheRecord entry : records) {
         VehicleLocationRecord record = entry.getRecord();
-        if (record.getTimeOfRecord() - offset <= targetTime
-            && targetTime <= record.getTimeOfRecord() + offset)
+        if (record.getTimeOfRecord() - offset <= time.getCurrentTime()
+            && time.getCurrentTime() <= record.getTimeOfRecord() + offset)
           inRange.add(entry);
       }
       if (!inRange.isEmpty())
@@ -608,15 +609,18 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     }
 
     long offset = _blockLocationRecordCacheWindowSize * 1000 / 2;
-    long fromTime = targetTime - offset;
-    long toTime = targetTime + offset;
 
     // We only consult persisted cache entries if the requested target time is
     // not within our current cache window
-    if (targetTime + offset < System.currentTimeMillis()
-        && _persistBlockLocationRecords) {
+    boolean outOfRange = time.getTargetTime() + offset < time.getCurrentTime()
+        || time.getCurrentTime() < time.getTargetTime() - offset;
+
+    if (outOfRange && _persistBlockLocationRecords) {
 
       _blockLocationRecordPersistentStoreAccessCount.incrementAndGet();
+
+      long fromTime = time.getTargetTime() - offset;
+      long toTime = time.getTargetTime() + offset;
 
       List<BlockLocationRecord> predictions = strategy.getRecordsFromDao(
           fromTime, toTime);

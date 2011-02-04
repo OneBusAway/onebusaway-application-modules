@@ -48,7 +48,7 @@ table {
  *
  ****/
  
-div#wrapper {
+#wrapper {
 	border-top: 5px solid #78AA36;
 	clear: left;
 }
