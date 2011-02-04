@@ -1,8 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
@@ -10,9 +10,9 @@ import org.opentripplanner.routing.core.TraverseResult;
 
 public class BlockDwellEdge extends AbstractEdge {
 
-  private final StopTimeInstance _instance;
+  private final ArrivalAndDepartureInstance _instance;
 
-  public BlockDwellEdge(GraphContext context, StopTimeInstance instance) {
+  public BlockDwellEdge(GraphContext context, ArrivalAndDepartureInstance instance) {
     super(context);
     _instance = instance;
   }
@@ -21,7 +21,7 @@ public class BlockDwellEdge extends AbstractEdge {
   public TraverseResult traverse(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    BlockStopTimeEntry bst = _instance.getStopTime();
+    BlockStopTimeEntry bst = _instance.getBlockStopTime();
     StopTimeEntry stopTime = bst.getStopTime();
     int dwellTime = stopTime.getSlackTime();
 
@@ -37,7 +37,7 @@ public class BlockDwellEdge extends AbstractEdge {
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    BlockStopTimeEntry bst = _instance.getStopTime();
+    BlockStopTimeEntry bst = _instance.getBlockStopTime();
     StopTimeEntry stopTime = bst.getStopTime();
     int dwellTime = stopTime.getSlackTime();
 

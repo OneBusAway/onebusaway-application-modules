@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.otp;
 
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -19,10 +20,18 @@ public class SupportLibrary {
     return modes.contains(TraverseMode.TRANSIT);
   }
 
-  public static boolean hasPreviousStopTime(StopTimeInstance instance) {
-    return instance.getStopTime().getBlockSequence() > 0;
+  public static boolean hasPreviousStopTime(ArrivalAndDepartureInstance instance) {
+    return instance.getBlockStopTime().getBlockSequence() > 0;
   }
 
+  public static boolean hasNextStopTime(ArrivalAndDepartureInstance instance) {
+    BlockStopTimeEntry stopTime = instance.getBlockStopTime();
+    BlockTripEntry trip = stopTime.getTrip();
+    BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+    return stopTime.getBlockSequence() + 1 < stopTimes.size();
+  }
+  
   public static boolean hasNextStopTime(StopTimeInstance instance) {
     BlockStopTimeEntry stopTime = instance.getStopTime();
     BlockTripEntry trip = stopTime.getTrip();

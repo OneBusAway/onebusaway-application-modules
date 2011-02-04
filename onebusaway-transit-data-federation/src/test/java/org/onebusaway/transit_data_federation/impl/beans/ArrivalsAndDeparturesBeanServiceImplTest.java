@@ -31,7 +31,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryIm
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
-import org.onebusaway.transit_data_federation.services.RealTimeStopTimeService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
@@ -49,7 +49,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
   private TransitGraphDao _transitGraphDao;
   private ArrivalsAndDeparturesBeanServiceImpl _service;
   private NarrativeService _narrativeService;
-  private RealTimeStopTimeService _realTimeStopTimeService;
+  private ArrivalAndDepartureService _arrivalAndDepartureService;
   private TripBeanService _tripBeanService;
   private StopBeanService _stopBeanService;
   private TripDetailsBeanService _tripDetailsBeanService;
@@ -63,8 +63,8 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     _transitGraphDao = Mockito.mock(TransitGraphDao.class);
     _service.setTransitGraphDao(_transitGraphDao);
 
-    _realTimeStopTimeService = Mockito.mock(RealTimeStopTimeService.class);
-    _service.setRealTimeStopTimeService(_realTimeStopTimeService);
+    _arrivalAndDepartureService = Mockito.mock(ArrivalAndDepartureService.class);
+    _service.setArrivalAndDepartureService(_arrivalAndDepartureService);
 
     _narrativeService = Mockito.mock(NarrativeService.class);
     _service.setNarrativeService(_narrativeService);
@@ -184,7 +184,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     in2.setBlockLocation(blockLocationB);
 
     Mockito.when(
-        _realTimeStopTimeService.getArrivalsAndDeparturesForStopInTimeRange(
+        _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
             stopB, t, stopTimeFrom, stopTimeTo)).thenReturn(
         Arrays.asList(in1, in2));
 

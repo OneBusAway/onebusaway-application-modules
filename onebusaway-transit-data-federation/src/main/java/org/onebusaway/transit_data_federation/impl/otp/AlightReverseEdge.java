@@ -1,11 +1,10 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import java.util.Date;
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
@@ -44,27 +43,26 @@ public class AlightReverseEdge extends AbstractEdge {
 
     TraverseResult result = null;
 
-    StopTimeService stopTimeService = _context.getStopTimeService();
+    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
     long time = s0.getTime();
 
     /**
      * Look for arrivals in the previous X minutes
      */
-    Date timeFrom = new Date(SupportLibrary.getPreviousTimeWindow(_context,
-        time));
-    Date timeTo = new Date(time);
+    long timeFrom = SupportLibrary.getPreviousTimeWindow(_context, time);
+    long timeTo = time;
 
-    List<StopTimeInstance> instances = stopTimeService.getStopTimeInstancesInTimeRange(
-        _stop, timeFrom, timeTo);
+    List<ArrivalAndDepartureInstance> arrivals = service.getArrivalsAndDeparturesForStopInTimeRange(
+        _stop, time, timeFrom, timeTo);
 
-    for (StopTimeInstance instance : instances) {
+    for (ArrivalAndDepartureInstance instance : arrivals) {
 
-      long arrivalTime = instance.getArrivalTime();
+      long arrivalTime = instance.getBestArrivalTime();
 
       // Prune anything that doesn't have an arrival time in the proper range,
       // since the stopTimeService method will also return instances that depart
       // in the target interval as well
-      if (arrivalTime < timeFrom.getTime() || timeTo.getTime() <= arrivalTime)
+      if (arrivalTime < timeFrom || time <= arrivalTime)
         continue;
 
       int dwellTime = (int) ((time - arrivalTime) / 1000);
@@ -72,7 +70,6 @@ public class AlightReverseEdge extends AbstractEdge {
       s1.time = arrivalTime;
       s1.numBoardings++;
       s1.everBoarded = true;
-      
 
       Vertex fromVertex = new BlockArrivalVertex(_context, instance);
       Vertex toVertex = new AlightVertex(_context, _stop, s0.getTime());
@@ -83,12 +80,12 @@ public class AlightReverseEdge extends AbstractEdge {
     }
 
     // In addition to all the departures, we can just remain waiting at the stop
-    int dwellTime = (int) ((timeTo.getTime() - timeFrom.getTime()) / 1000);
-    State s1 = new State(timeFrom.getTime());
+    int dwellTime = (int) ((time - timeFrom) / 1000);
+    State s1 = new State(timeFrom);
 
-    Vertex fromVertex = new BoardVertex(_context, _stop, timeFrom.getTime());
+    Vertex fromVertex = new BoardVertex(_context, _stop, timeFrom);
     Vertex toVertex = new AlightVertex(_context, _stop, s0.getTime());
-    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex,toVertex);
+    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
     TraverseResult r = new TraverseResult(dwellTime, s1, narrative);
     result = r.addToExistingResultChain(result);

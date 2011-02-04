@@ -5,10 +5,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.opentripplanner.routing.core.Edge;
@@ -17,7 +16,8 @@ import org.opentripplanner.routing.core.Vertex;
 
 public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges {
 
-  public BlockArrivalVertex(GraphContext graphContext, StopTimeInstance instance) {
+  public BlockArrivalVertex(GraphContext graphContext,
+      ArrivalAndDepartureInstance instance) {
     super(graphContext, instance);
   }
 
@@ -42,15 +42,12 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges 
   @Override
   public Collection<Edge> getIncoming() {
 
-    BlockStopTimeEntry bst = _instance.getStopTime();
-    BlockConfigurationEntry config = bst.getTrip().getBlockConfiguration();
-    List<BlockStopTimeEntry> stopTimes = config.getStopTimes();
-
     // The assumption is that we would not have been instantiated unless we had
     // a previous stop time to arrive from.
-    BlockStopTimeEntry prev = stopTimes.get(bst.getBlockSequence() - 1);
-    return Arrays.asList((Edge) new BlockHopEdge(_context, prev, bst,
-        _instance.getServiceDate()));
+    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
+    ArrivalAndDepartureInstance previous = service.getPreviousStopArrivalAndDeparture(_instance);
+
+    return Arrays.asList((Edge) new BlockHopEdge(_context, previous, _instance));
   }
 
   @Override

@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
@@ -15,7 +15,8 @@ import org.opentripplanner.routing.core.Vertex;
 public class BlockDepartureVertex extends AbstractBlockVertex implements
     HasEdges {
 
-  public BlockDepartureVertex(GraphContext context, StopTimeInstance instance) {
+  public BlockDepartureVertex(GraphContext context,
+      ArrivalAndDepartureInstance instance) {
     super(context, instance);
   }
 
@@ -34,7 +35,7 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
 
   @Override
   public int getDegreeIn() {
-    BlockStopTimeEntry bst = _instance.getStopTime();
+    BlockStopTimeEntry bst = _instance.getBlockStopTime();
     return bst.getBlockSequence() > 0 ? 1 : 0;
   }
 
@@ -43,7 +44,7 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
 
     List<Edge> edges = new ArrayList<Edge>();
 
-    BlockStopTimeEntry bst = _instance.getStopTime();
+    BlockStopTimeEntry bst = _instance.getBlockStopTime();
     if (bst.getBlockSequence() > 0) {
       edges.add(new BlockDwellEdge(_context, _instance));
     }
@@ -58,12 +59,9 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
 
   @Override
   public Collection<Edge> getOutgoing() {
-    BlockStopTimeEntry bst = _instance.getStopTime();
-    BlockConfigurationEntry config = bst.getTrip().getBlockConfiguration();
-    BlockStopTimeEntry nextBlockStopTime = config.getStopTimes().get(
-        bst.getBlockSequence() + 1);
-    return Arrays.asList((Edge) new BlockHopEdge(_context, bst,
-        nextBlockStopTime, _instance.getServiceDate()));
+    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
+    ArrivalAndDepartureInstance nextStop = service.getNextStopArrivalAndDeparture(_instance);
+    return Arrays.asList((Edge) new BlockHopEdge(_context, _instance, nextStop));
   }
 
   /****

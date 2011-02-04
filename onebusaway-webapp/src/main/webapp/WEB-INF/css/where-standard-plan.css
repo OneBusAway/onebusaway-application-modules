@@ -39,6 +39,19 @@ div#container {
 	padding-right: 16px;		
 }
 
+#mapPanel {
+    position: absolute;
+    top: 60px;    
+    bottom: 0px;    
+    left: 400px;
+    right: 0px;
+}
+
+#map {
+	width: 100%;
+	height: 100%;	
+}
+
 #searchPanel div span {
 	display: block;
 	float: left;
@@ -52,15 +65,55 @@ div#container {
 	width: 20em;
 }
 
-#mapPanel {
-    position: absolute;
-    top: 60px;    
-    bottom: 0px;    
-    left: 400px;
-    right: 0px;
+#optionsToggle {
+	font-size: 0.8em;
+	padding-left: 70px;	
 }
 
-#map {
-	width: 100%;
-	height: 100%;	
+#basicSearchOptions input[type=text] {
+	width: 7em;
+	margin-left: 1em;
+}
+
+#directionsButton {
+	margin-left: 70px;	
+}
+
+#advancedSearchOptions div {
+	clear: both;
+}
+
+#advancedSearchOptions div span {
+	display: block;
+	float: left;
+	width: 80px;
+	margin-right: 10px;
+	text-align: right;
+	font-weight: bold;
+	font-size: 0.6em;
+}
+
+#advancedSearchOptions input[type=text] {
+	width: 7em;
+}
+
+
+#feedback {
+	display: none
+}
+
+.stopNameEmphasized {
+	font-weight: bold;
+}
+
+.routeShortName {
+	font-weight: bold;
+}
+
+.legTimes {
+	font-size: 0.8em;
+}
+
+.elapsedTime {
+	color: grey;
 }

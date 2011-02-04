@@ -1,26 +1,30 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Vertex;
 
 public abstract class AbstractBlockVertex extends AbstractVertex {
 
-  protected final StopTimeInstance _instance;
+  protected final ArrivalAndDepartureInstance _instance;
 
-  public AbstractBlockVertex(GraphContext context, StopTimeInstance instance) {
+  public AbstractBlockVertex(GraphContext context,
+      ArrivalAndDepartureInstance instance) {
     super(context);
     _instance = instance;
   }
-  
-  public StopTimeInstance getInstance() {
+
+  public ArrivalAndDepartureInstance getInstance() {
     return _instance;
   }
 
   @Override
   public String getStopId() {
-    BlockStopTimeEntry bst = _instance.getStopTime();
-    return bst.getStopTime().getStop().getId().toString();
+    StopEntry stop = _instance.getStop();
+    AgencyAndId id = stop.getId();
+    return id.toString();
   }
 
   @Override
@@ -29,8 +33,8 @@ public abstract class AbstractBlockVertex extends AbstractVertex {
     // We can do a quick calc if the vertices are along the same block
     if (v instanceof AbstractBlockVertex) {
       AbstractBlockVertex bsv = (AbstractBlockVertex) v;
-      BlockStopTimeEntry bst1 = _instance.getStopTime();
-      BlockStopTimeEntry bst2 = bsv._instance.getStopTime();
+      BlockStopTimeEntry bst1 = _instance.getBlockStopTime();
+      BlockStopTimeEntry bst2 = bsv._instance.getBlockStopTime();
       if (bst1.getTrip().getBlockConfiguration() == bst2.getTrip().getBlockConfiguration())
         return Math.abs(bst1.getDistanceAlongBlock()
             - bst2.getDistanceAlongBlock());
@@ -41,14 +45,12 @@ public abstract class AbstractBlockVertex extends AbstractVertex {
 
   @Override
   public double getX() {
-    BlockStopTimeEntry bst = _instance.getStopTime();
-    return bst.getStopTime().getStop().getStopLon();
+    return _instance.getStop().getStopLon();
   }
 
   @Override
   public double getY() {
-    BlockStopTimeEntry bst = _instance.getStopTime();
-    return bst.getStopTime().getStop().getStopLat();
+    return _instance.getStop().getStopLat();
   }
 
   /****

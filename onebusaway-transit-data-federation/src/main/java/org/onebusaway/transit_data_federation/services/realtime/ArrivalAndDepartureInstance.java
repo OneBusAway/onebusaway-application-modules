@@ -17,7 +17,9 @@ package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class ArrivalAndDepartureInstance {
 
@@ -96,9 +98,29 @@ public class ArrivalAndDepartureInstance {
     return blockInstance.getServiceDate()
         + blockStopTime.getStopTime().getDepartureTime() * 1000;
   }
-  
+
+  public long getBestArrivalTime() {
+    if (isPredictedArrivalTimeSet())
+      return getPredictedArrivalTime();
+    return getScheduledArrivalTime();
+  }
+
+  public long getBestDepartureTime() {
+    if (isPredictedDepartureTimeSet())
+      return getPredictedDepartureTime();
+    return getScheduledDepartureTime();
+  }
+
   public FrequencyEntry getFrequency() {
     return blockInstance.getFrequency();
+  }
+
+  public BlockTripEntry getBlockTrip() {
+    return blockStopTime.getTrip();
+  }
+  
+  public StopEntry getStop() {
+    return blockStopTime.getStopTime().getStop();
   }
 
   @Override

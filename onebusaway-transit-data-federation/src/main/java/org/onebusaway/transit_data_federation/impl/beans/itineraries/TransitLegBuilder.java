@@ -1,8 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.beans.itineraries;
 
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 class TransitLegBuilder {
 
@@ -10,11 +10,14 @@ class TransitLegBuilder {
 
   private BlockTripEntry blockTrip = null;
 
-  private long startTime;
-  private long endTime;
+  private long scheduledDepartureTime;
+  private long scheduledArrivalTime;
 
-  private StopTimeInstance fromStop;
-  private StopTimeInstance toStop;
+  private long predictedDepartureTime;
+  private long predictedArrivalTime;
+
+  private ArrivalAndDepartureInstance fromStop;
+  private ArrivalAndDepartureInstance toStop;
 
   public BlockInstance getBlockInstance() {
     return blockInstance;
@@ -32,35 +35,63 @@ class TransitLegBuilder {
     this.blockTrip = blockTrip;
   }
 
-  public long getStartTime() {
-    return startTime;
+  public long getScheduledDepartureTime() {
+    return scheduledDepartureTime;
   }
 
-  public void setStartTime(long startTime) {
-    this.startTime = startTime;
+  public void setScheduledDepartureTime(long scheduledDepartureTime) {
+    this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
-  public long getEndTime() {
-    return endTime;
+  public long getScheduledArrivalTime() {
+    return scheduledArrivalTime;
   }
 
-  public void setEndTime(long endTime) {
-    this.endTime = endTime;
+  public void setScheduledArrivalTime(long scheduledArrivalTime) {
+    this.scheduledArrivalTime = scheduledArrivalTime;
   }
 
-  public StopTimeInstance getFromStop() {
+  public long getPredictedDepartureTime() {
+    return predictedDepartureTime;
+  }
+
+  public void setPredictedDepartureTime(long predictedDepartureTime) {
+    this.predictedDepartureTime = predictedDepartureTime;
+  }
+
+  public long getPredictedArrivalTime() {
+    return predictedArrivalTime;
+  }
+
+  public void setPredictedArrivalTime(long predictedArrivalTime) {
+    this.predictedArrivalTime = predictedArrivalTime;
+  }
+
+  public ArrivalAndDepartureInstance getFromStop() {
     return fromStop;
   }
 
-  public void setFromStop(StopTimeInstance fromStop) {
+  public void setFromStop(ArrivalAndDepartureInstance fromStop) {
     this.fromStop = fromStop;
   }
 
-  public StopTimeInstance getToStop() {
+  public ArrivalAndDepartureInstance getToStop() {
     return toStop;
   }
 
-  public void setToStop(StopTimeInstance toStop) {
+  public void setToStop(ArrivalAndDepartureInstance toStop) {
     this.toStop = toStop;
+  }
+
+  public long getBestDepartureTime() {
+    if (predictedDepartureTime != 0)
+      return predictedDepartureTime;
+    return scheduledDepartureTime;
+  }
+
+  public long getBestArrivalTime() {
+    if (predictedArrivalTime != 0)
+      return predictedArrivalTime;
+    return scheduledArrivalTime;
   }
 }

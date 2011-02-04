@@ -1,23 +1,15 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 
 public class GraphContext {
 
-  private StopTimeService stopTimeService;
+  private ArrivalAndDepartureService arrivalAndDepartureService;
 
   private StopTransferService stopTransferService;
 
   private int stopTimeSearchInterval = 10;
-
-  public StopTimeService getStopTimeService() {
-    return stopTimeService;
-  }
-
-  public void setStopTimeService(StopTimeService stopTimeService) {
-    this.stopTimeService = stopTimeService;
-  }
 
   public StopTransferService getStopTransferService() {
     return stopTransferService;
@@ -25,6 +17,15 @@ public class GraphContext {
 
   public void setStopTransferService(StopTransferService stopTransferService) {
     this.stopTransferService = stopTransferService;
+  }
+
+  public ArrivalAndDepartureService getArrivalAndDepartureService() {
+    return arrivalAndDepartureService;
+  }
+
+  public void setArrivalAndDepartureService(
+      ArrivalAndDepartureService arrivalAndDepartureService) {
+    this.arrivalAndDepartureService = arrivalAndDepartureService;
   }
 
   /**

@@ -2,7 +2,7 @@ package org.onebusaway.transit_data_federation.impl.otp;
 
 import javax.annotation.PostConstruct;
 
-import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
@@ -21,9 +21,9 @@ class StreetToStopGraphLinkerService {
 
   private Graph _otpGraph;
 
-  private StopTimeService _stopTimeService;
-
   private StopTransferService _stopTransferService;
+
+  private ArrivalAndDepartureService _arrivalAndDepartureService;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -36,13 +36,14 @@ class StreetToStopGraphLinkerService {
   }
 
   @Autowired
-  public void setStopTimeService(StopTimeService stopTimeService) {
-    _stopTimeService = stopTimeService;
-  }
-  
-  @Autowired
   public void setStopTranferService(StopTransferService stopTransferService) {
     _stopTransferService = stopTransferService;
+  }
+
+  @Autowired
+  public void setArrivalAndDepartureService(
+      ArrivalAndDepartureService realTimeArrivalAndDepartureService) {
+    _arrivalAndDepartureService = realTimeArrivalAndDepartureService;
   }
 
   @PostConstruct
@@ -96,7 +97,7 @@ class StreetToStopGraphLinkerService {
 
   private GraphContext createContext() {
     GraphContext context = new GraphContext();
-    context.setStopTimeService(_stopTimeService);
+    context.setArrivalAndDepartureService(_arrivalAndDepartureService);
     context.setStopTransferService(_stopTransferService);
     return context;
   }

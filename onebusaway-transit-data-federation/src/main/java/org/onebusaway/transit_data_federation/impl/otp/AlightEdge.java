@@ -1,6 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
@@ -8,9 +8,9 @@ import org.opentripplanner.routing.core.TraverseResult;
 
 public class AlightEdge extends AbstractEdge {
 
-  private final StopTimeInstance _instance;
+  private final ArrivalAndDepartureInstance _instance;
 
-  public AlightEdge(GraphContext context, StopTimeInstance instance) {
+  public AlightEdge(GraphContext context, ArrivalAndDepartureInstance instance) {
     super(context);
     _instance = instance;
   }

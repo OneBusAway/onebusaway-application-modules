@@ -1,11 +1,10 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import java.util.Date;
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
@@ -27,26 +26,29 @@ public class BoardEdge extends AbstractEdge {
 
     TraverseResult result = null;
 
-    StopTimeService stopTimeService = _context.getStopTimeService();
+    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
+
     long time = s0.getTime();
 
     /**
      * Look for departures in the next X minutes
      */
-    Date from = new Date(time);
-    Date to = new Date(SupportLibrary.getNextTimeWindow(_context, time));
+    long fromTime = time;
+    long toTime = SupportLibrary.getNextTimeWindow(_context, time);
 
-    List<StopTimeInstance> instances = stopTimeService.getStopTimeInstancesInTimeRange(
-        _stop, from, to);
+    List<ArrivalAndDepartureInstance> departures = service.getArrivalsAndDeparturesForStopInTimeRange(
+        _stop, s0.getTime(), fromTime, toTime);
 
-    for (StopTimeInstance instance : instances) {
+    for (ArrivalAndDepartureInstance instance : departures) {
 
-      long departureTime = instance.getDepartureTime();
+      long departureTime = instance.getBestDepartureTime();
 
-      // Prune anything that doesn't have a departure in the proper range, since
-      // the stopTimeService method will also return instances that arrive in
-      // the target interval as well
-      if (departureTime < from.getTime() || to.getTime() <= departureTime)
+      /**
+       * Prune anything that doesn't have a departure in the proper range, since
+       * the arrivals and departures method will also return instances that
+       * arrive in the target interval as well
+       */
+      if (departureTime < time || toTime <= departureTime)
         continue;
 
       // If this is the last stop time in the block, don't continue
@@ -71,14 +73,14 @@ public class BoardEdge extends AbstractEdge {
     }
 
     // In addition to all the departures, we can just remain waiting at the stop
-    
-    State s1 = new State(to.getTime());
+
+    State s1 = new State(toTime);
 
     BoardVertex fromVertex = new BoardVertex(_context, _stop, s0.getTime());
-    BoardVertex toVertex = new BoardVertex(_context, _stop, to.getTime());
+    BoardVertex toVertex = new BoardVertex(_context, _stop, toTime);
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
-    
-    int dwellTime = (int) ((to.getTime() - from.getTime()) / 1000);
+
+    int dwellTime = (int) ((toTime - time) / 1000);
     double w = computeWeightForWait(options, dwellTime, s0);
 
     TraverseResult r = new TraverseResult(w, s1, narrative);

@@ -9,7 +9,7 @@ import java.util.SortedMap;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.RealTimeStopTimeService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-class RealTimeStopTimeServiceImpl implements RealTimeStopTimeService {
+class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   /**
    * This let's us capture trips that were scheduled to start 30 minutes before
@@ -158,6 +158,7 @@ class RealTimeStopTimeServiceImpl implements RealTimeStopTimeService {
         timeOfServiceDate);
 
     if (!locations.isEmpty()) {
+
       /**
        * What if there are multiple locations? Pick the first?
        */
@@ -166,6 +167,80 @@ class RealTimeStopTimeServiceImpl implements RealTimeStopTimeService {
     }
 
     return instance;
+  }
+
+  @Override
+  public ArrivalAndDepartureInstance getPreviousStopArrivalAndDeparture(
+      ArrivalAndDepartureInstance instance) {
+
+    BlockStopTimeEntry stopTime = instance.getBlockStopTime();
+    BlockTripEntry trip = stopTime.getTrip();
+    BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+
+    int index = stopTime.getBlockSequence() + 1;
+    if (index < 0)
+      return null;
+
+    BlockInstance blockInstance = instance.getBlockInstance();
+    BlockStopTimeEntry prevStopTime = stopTimes.get(index);
+
+    ArrivalAndDepartureInstance prevInstance = new ArrivalAndDepartureInstance(
+        blockInstance, prevStopTime);
+
+    if (instance.isPredictedArrivalTimeSet()) {
+
+      int scheduledDeviation = (int) ((instance.getPredictedArrivalTime() - instance.getScheduledArrivalTime()) / 1000);
+
+      int departureDeviation = propagateScheduleDeviationBackwardBetweenStops(
+          prevStopTime, stopTime, scheduledDeviation);
+      int arrivalDeviation = propagateScheduleDeviationBackwardAcrossStop(
+          prevStopTime, departureDeviation);
+
+      prevInstance.setPredictedArrivalTime(prevInstance.getScheduledArrivalTime()
+          + arrivalDeviation * 1000);
+      prevInstance.setPredictedDepartureTime(prevInstance.getScheduledDepartureTime()
+          + departureDeviation * 1000);
+    }
+
+    return prevInstance;
+  }
+
+  @Override
+  public ArrivalAndDepartureInstance getNextStopArrivalAndDeparture(
+      ArrivalAndDepartureInstance instance) {
+
+    BlockStopTimeEntry stopTime = instance.getBlockStopTime();
+    BlockTripEntry trip = stopTime.getTrip();
+    BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+
+    int index = stopTime.getBlockSequence() + 1;
+    if (index >= stopTimes.size())
+      return null;
+
+    BlockInstance blockInstance = instance.getBlockInstance();
+    BlockStopTimeEntry nextStopTime = stopTimes.get(index);
+
+    ArrivalAndDepartureInstance nextInstance = new ArrivalAndDepartureInstance(
+        blockInstance, nextStopTime);
+
+    if (instance.isPredictedDepartureTimeSet()) {
+
+      int scheduledDeviation = (int) ((instance.getPredictedDepartureTime() - instance.getScheduledDepartureTime()) / 1000);
+
+      int arrivalDeviation = propagateScheduleDeviationForwardBetweenStops(
+          stopTime, nextStopTime, scheduledDeviation);
+      int departureDeviation = propagateScheduleDeviationForwardAcrossStop(
+          nextStopTime, arrivalDeviation);
+
+      nextInstance.setPredictedArrivalTime(nextInstance.getScheduledArrivalTime()
+          + arrivalDeviation * 1000);
+      nextInstance.setPredictedDepartureTime(nextInstance.getScheduledDepartureTime()
+          + departureDeviation * 1000);
+    }
+
+    return nextInstance;
   }
 
   /****
@@ -314,6 +389,62 @@ class RealTimeStopTimeServiceImpl implements RealTimeStopTimeService {
       scheduleDeviation -= Math.min(scheduleDeviation, slack);
 
     return scheduleDeviation;
+  }
+
+  private int propagateScheduleDeviationForwardBetweenStops(
+      BlockStopTimeEntry prevStopTime, BlockStopTimeEntry nextStopTime,
+      int scheduleDeviation) {
+
+    int slack = nextStopTime.getAccumulatedSlackTime()
+        - prevStopTime.getAccumulatedSlackTime();
+
+    slack -= prevStopTime.getStopTime().getSlackTime();
+
+    return propagateScheduleDeviationForwardWithSlack(scheduleDeviation, slack);
+  }
+
+  private int propagateScheduleDeviationForwardAcrossStop(
+      BlockStopTimeEntry stopTime, int scheduleDeviation) {
+
+    int slack = stopTime.getStopTime().getSlackTime();
+
+    return propagateScheduleDeviationForwardWithSlack(scheduleDeviation, slack);
+  }
+
+  private int propagateScheduleDeviationBackwardBetweenStops(
+      BlockStopTimeEntry prevStopTime, BlockStopTimeEntry nextStopTime,
+      int scheduleDeviation) {
+
+    // TODO: Need to think about this
+
+    return scheduleDeviation;
+  }
+
+  private int propagateScheduleDeviationBackwardAcrossStop(
+      BlockStopTimeEntry stopTime, int scheduleDeviation) {
+
+    return scheduleDeviation;
+  }
+
+  private int propagateScheduleDeviationForwardWithSlack(int scheduleDeviation,
+      int slack) {
+    /**
+     * If the vehicle is running early and there is slack built into the
+     * schedule, we guess that the vehicle will take that opportunity to pause
+     * and let the schedule catch back up. If there is no slack, assume we'll
+     * continue to run early.
+     */
+    if (scheduleDeviation < 0) {
+      if (slack > 0)
+        return 0;
+      return scheduleDeviation;
+    }
+
+    /**
+     * If we're running behind schedule, we allow any slack to eat up part of
+     * our delay.
+     */
+    return Math.max(0, scheduleDeviation - slack);
   }
 
   private boolean isArrivalAndDepartureBeanInRange(

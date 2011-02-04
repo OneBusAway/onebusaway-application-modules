@@ -6,8 +6,29 @@ var oba_where_standard_plan = function(data) {
 	mapParams.zoom = 12;
 	
 	var map = OBA.Maps.map(data.mapElement, mapParams);
-	var markerManager = OBA.Maps.markerManager(map);
 	var infoWindow = new google.maps.InfoWindow();
+	
+	/****
+	 * 
+	 ****/
+	
+	var configureOptionsToggle = function() {
+		
+		var toggleElement = jQuery('#optionsToggleAnchor');
+		var advancedOptionsElement = jQuery('#advancedSearchOptions');
+		
+		toggleElement.click(function() {
+			var isVis = advancedOptionsElement.is(':visible');
+			toggleElement.text(isVis ? 'Show Options' : 'Hide Options');
+			advancedOptionsElement.slideToggle();
+		});
+	};
+	
+	configureOptionsToggle();
+	
+	/****
+	 * 
+	 ****/
 	
 	var fromElement = data.fromElement;
 	var toElement = data.toElement;
@@ -34,6 +55,10 @@ var oba_where_standard_plan = function(data) {
 			focusedElement.val(txt);
 		}
 	});
+	
+	/****
+	 * 
+	 ****/
 	
 	var parseLocation = function() {
 		var params = {};
@@ -64,6 +89,10 @@ var oba_where_standard_plan = function(data) {
 	if( locationParams.to )
 		toElement.val(locationParams.to);
 	
+	/****
+	 * 
+	 ****/
+	
 	var planOverlays = [];
 	var resultsPanel = data.resultsPanel;	
 	
@@ -76,19 +105,20 @@ var oba_where_standard_plan = function(data) {
 		resultsPanel.empty();
 	};
 	
-	var legHandler = function() {
+	var legHandler = function(leg, nextLeg) {
 		
-		if( this.transitLeg ) {
-			transitLegHandler(this, this.transitLeg);
+		if( leg.transitLeg ) {
+			transitLegHandler(leg, leg.transitLeg);
 		}
 		
-		var streetLegs = this.streetLegs;
-		if( streetLegs ) {
-			streetLegsHandler(streetLegs);			
+		var streetLegs = leg.streetLegs || [];
+		if( streetLegs.length > 0 ) {
+			streetLegsHandler(leg, streetLegs, nextLeg);			
 		}
 	};
 	
 	var transitLegHandler = function(leg, transitLeg) {
+		
 		var path = transitLeg.path;
 		if( path ) {
 			var points = OBA.Maps.decodePolyline(path);
@@ -107,6 +137,10 @@ var oba_where_standard_plan = function(data) {
 		if( fromStop ) {
 			stopNameElement.text(fromStop.name);
 		}
+		else {
+			stopNameElement.text("continues as");
+			stopNameElement.removeClass('stopNameEmphasized');
+		}
 		
 		var routeShortNameElement = content.find(".routeShortName");
 		var routeShortName = transitLeg.routeShortName || transitLeg.trip.route.shortName;		
@@ -116,15 +150,50 @@ var oba_where_standard_plan = function(data) {
 		var tripHeadsign = transitLeg.tripHeadsign || transitLeg.trip.tripHeadsign;		
 		tripHeadsignElement.text(tripHeadsign);
 		
+		var startTime = OBA.L10n.formatDate('hh:mm AA',new Date(leg.startTime));
+		var startTimeElement = content.find(".startTime");
+		startTimeElement.text(startTime);
+
+		var endTime = OBA.L10n.formatDate('hh:mm AA',new Date(leg.endTime));
+		var endTimeElement = content.find(".endTime");
+		endTimeElement.text(endTime);
+
 		var mins = Math.ceil((leg.endTime - leg.startTime) / (60 * 1000));
 		var elapsedTimeElement = content.find(".elapsedTime");
 		elapsedTimeElement.text('(' + mins + ' mins)');
+		
+		var legStatus = content.find(".legStatus");
+		
+		if( transitLeg.predictedDepartureTime != 0) {
+			var delta = Math.ceil((transitLeg.predictedDepartureTime - transitLeg.scheduledDepartureTime) / (60 * 1000));
+			legStatus.text('scheduleDeivation: ' + delta)
+		}
+		else {
+			legStatus.hide();
+		}
 		
 		content.show();
 		content.appendTo(resultsPanel);
 	};
 	
-	var streetLegsHandler = function(streetLegs) {
+	var streetLegsHandler = function(leg, streetLegs, nextLeg) {
+		
+		var content = jQuery('.streetLegTemplate').clone();
+		content.removeClass('streetLegTemplate');
+		content.addClass('streetLeg');
+		
+		var label = 'destination';
+		if( nextLeg && nextLeg.transitLeg && nextLeg.transitLeg.fromStop)
+			var label = nextLeg.transitLeg.fromStop.name;
+		var locationElement = content.find(".walkToLocation");
+		locationElement.text(OBA.L10n.format(locationElement.text(),label));
+		
+		var mins = Math.ceil((leg.endTime - leg.startTime) / (60*1000));
+		var timeElement = content.find('.walkToTime');
+		timeElement.text( OBA.L10n.format(timeElement.text(),mins));
+		
+		content.show();
+		content.appendTo(resultsPanel);
 		
 		var points = [];
 		
@@ -153,7 +222,13 @@ var oba_where_standard_plan = function(data) {
 		var itinerary = itineraries[0];
 		var legs = itinerary.legs || [];
 		
-		jQuery.each(legs, legHandler);
+		jQuery.each(legs, function(index) {
+			var leg = this;
+			var nextLeg = undefined;
+			if( index + 1 < legs.length )
+				nextLeg = legs[index+1];
+			legHandler(leg,nextLeg);
+		});
 	};
 	
 	var directionsButton = data.directionsButton;

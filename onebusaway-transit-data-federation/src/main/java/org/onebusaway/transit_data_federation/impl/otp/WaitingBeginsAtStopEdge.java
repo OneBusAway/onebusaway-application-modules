@@ -25,16 +25,11 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
     if (!SupportLibrary.isTransitEnabled(options))
       return null;
 
-    int transferInterval = options.minTransferTime;
-
     State s1 = s0.clone();
-    s1.incrementTimeInSeconds(transferInterval);
 
     EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
 
-    double w = transferInterval * options.waitReluctance;
-    
-    TraverseResult result = new TraverseResult(w, s1, narrative);
+    TraverseResult result = new TraverseResult(0, s1, narrative);
 
     return result;
   }
@@ -43,15 +38,10 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    int transferInterval = options.minTransferTime;
-
     State s1 = s0.clone();
-    s1.incrementTimeInSeconds(-transferInterval);
-    
-    double w = transferInterval * options.waitReluctance;
 
     EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
-    return new TraverseResult(w, s1, narrative);
+    return new TraverseResult(0, s1, narrative);
   }
 
   @Override

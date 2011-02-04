@@ -1,7 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
@@ -16,16 +15,13 @@ public class BlockHopEdge extends AbstractEdge {
 
   private static final long serialVersionUID = 1L;
 
-  private final long _serviceDate;
+  private final ArrivalAndDepartureInstance _from;
 
-  private final BlockStopTimeEntry _from;
+  private final ArrivalAndDepartureInstance _to;
 
-  private final BlockStopTimeEntry _to;
-
-  public BlockHopEdge(GraphContext context, BlockStopTimeEntry from,
-      BlockStopTimeEntry to, long serviceDate) {
+  public BlockHopEdge(GraphContext context, ArrivalAndDepartureInstance from,
+      ArrivalAndDepartureInstance to) {
     super(context);
-    _serviceDate = serviceDate;
     _from = from;
     _to = to;
   }
@@ -33,8 +29,7 @@ public class BlockHopEdge extends AbstractEdge {
   @Override
   public TraverseResult traverse(State state0, TraverseOptions wo) {
     State state1 = state0.clone();
-    int runningTime = _to.getStopTime().getArrivalTime()
-        - _from.getStopTime().getDepartureTime();
+    int runningTime = computeRunningTime();
     state1.incrementTimeInSeconds(runningTime);
 
     EdgeNarrativeImpl narrative = createNarrative();
@@ -45,8 +40,7 @@ public class BlockHopEdge extends AbstractEdge {
   @Override
   public TraverseResult traverseBack(State state0, TraverseOptions wo) {
     State state1 = state0.clone();
-    int runningTime = _to.getStopTime().getArrivalTime()
-        - _from.getStopTime().getDepartureTime();
+    int runningTime = computeRunningTime();
     state1.incrementTimeInSeconds(-runningTime);
 
     EdgeNarrativeImpl narrative = createNarrative();
@@ -54,11 +48,20 @@ public class BlockHopEdge extends AbstractEdge {
     return new TraverseResult(runningTime, state1, narrative);
   }
 
+  /****
+   * Private Methods
+   ****/
+
+  private int computeRunningTime() {
+    long departure = _from.getBestDepartureTime();
+    long arrival = _to.getBestArrivalTime();
+    int runningTime = (int) ((arrival - departure) / 1000);
+    return runningTime;
+  }
+
   private EdgeNarrativeImpl createNarrative() {
-    Vertex fromVertex = new BlockDepartureVertex(_context,
-        new StopTimeInstance(_from, _serviceDate));
-    Vertex toVertex = new BlockArrivalVertex(_context, new StopTimeInstance(
-        _to, _serviceDate));
+    Vertex fromVertex = new BlockDepartureVertex(_context, _from);
+    Vertex toVertex = new BlockArrivalVertex(_context, _to);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 }

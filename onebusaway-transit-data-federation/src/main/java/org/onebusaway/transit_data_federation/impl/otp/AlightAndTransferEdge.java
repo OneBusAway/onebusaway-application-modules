@@ -1,6 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
@@ -9,12 +9,12 @@ import org.opentripplanner.routing.core.TraverseResult;
 
 public class AlightAndTransferEdge extends AbstractEdge {
 
-  private StopTimeInstance _instance;
+  private ArrivalAndDepartureInstance _instance;
 
   private StopTransfer _transfer;
 
-  public AlightAndTransferEdge(GraphContext context, StopTimeInstance instance,
-      StopTransfer transfer) {
+  public AlightAndTransferEdge(GraphContext context,
+      ArrivalAndDepartureInstance instance, StopTransfer transfer) {
     super(context);
     _instance = instance;
     _transfer = transfer;
@@ -33,12 +33,13 @@ public class AlightAndTransferEdge extends AbstractEdge {
     int transferTime = computeTransferTime(options);
 
     State s1 = s0.clone();
-    s1.incrementTimeInSeconds(transferTime);
+    s1.incrementTimeInSeconds(transferTime + options.minTransferTime);
 
     /**
      * We're using options.boardCost as a transfer penalty
      */
-    double weight = transferTime * options.walkReluctance + options.boardCost;
+    double weight = transferTime * options.walkReluctance + options.boardCost
+        + options.minTransferTime * options.waitReluctance;
 
     EdgeNarrativeImpl narrative = createNarrative();
     return new TraverseResult(weight, s0, narrative);
@@ -51,9 +52,10 @@ public class AlightAndTransferEdge extends AbstractEdge {
     int transferTime = computeTransferTime(options);
 
     State s1 = s0.clone();
-    s1.time = _instance.getArrivalTime();
+    s1.time = _instance.getBestArrivalTime();
 
-    double weight = transferTime * options.walkReluctance + options.boardCost;
+    double weight = transferTime * options.walkReluctance + options.boardCost
+        + options.minTransferTime * options.waitReluctance;
 
     EdgeNarrativeImpl narrative = createNarrative();
     return new TraverseResult(weight, s1, narrative);

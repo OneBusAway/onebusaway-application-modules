@@ -36,13 +36,13 @@ import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseMode;
@@ -139,13 +139,14 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private TraverseOptions createTraverseOptions() {
 
     TraverseOptions options = new TraverseOptions();
-    
+
     options.walkReluctance = 2.2;
     options.waitAtBeginningFactor = 0.1;
     options.waitReluctance = 2.5;
-    
+
     options.boardCost = 14 * 60;
     options.maxTransfers = 2;
+    options.minTransferTime = 60;
     
     options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
     return options;
@@ -153,7 +154,7 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private void applyConstraintsToOptions(ConstraintsBean constraints,
       TraverseOptions options) {
-    
+
     options.setArriveBy(options.isArriveBy());
 
     /**
@@ -192,7 +193,7 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
      */
     if (constraints.getTransferCost() != -1)
       options.boardCost = constraints.getTransferCost();
-    if( constraints.getMinTransferTime() != -1 )
+    if (constraints.getMinTransferTime() != -1)
       options.minTransferTime = constraints.getMinTransferTime();
     if (constraints.getMaxTransfers() != -1)
       options.maxTransfers = constraints.getMaxTransfers();
@@ -296,7 +297,7 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
           // We've transfered to another stop, so we need to insert the walk leg
 
-          StopTimeInstance fromStopTimeInstance = arrival.getInstance();
+          ArrivalAndDepartureInstance fromStopTimeInstance = arrival.getInstance();
           StopEntry fromStop = fromStopTimeInstance.getStop();
 
           WalkToStopVertex toStopVertex = (WalkToStopVertex) vTo;
@@ -328,16 +329,17 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       List<LegBean> legs, TransitLegBuilder builder,
       BlockDepartureVertex vFrom, BlockArrivalVertex vTo) {
 
-    StopTimeInstance from = vFrom.getInstance();
-    StopTimeInstance to = vTo.getInstance();
+    ArrivalAndDepartureInstance from = vFrom.getInstance();
+    ArrivalAndDepartureInstance to = vTo.getInstance();
 
-    BlockTripEntry tripFrom = from.getTrip();
-    BlockTripEntry tripTo = to.getTrip();
+    BlockTripEntry tripFrom = from.getBlockTrip();
+    BlockTripEntry tripTo = to.getBlockTrip();
 
     if (builder.getBlockInstance() == null) {
-      builder.setStartTime(from.getDepartureTime());
+      builder.setScheduledDepartureTime(from.getScheduledDepartureTime());
+      builder.setPredictedDepartureTime(from.getPredictedDepartureTime());
       builder.setBlockInstance(from.getBlockInstance());
-      builder.setBlockTrip(from.getTrip());
+      builder.setBlockTrip(tripFrom);
       builder.setFromStop(from);
     }
 
@@ -351,22 +353,29 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       /**
        * We just split the difference for now
        */
-      long transitionTime = (from.getDepartureTime() + to.getArrivalTime()) / 2;
+      long scheduledTransitionTime = (from.getScheduledDepartureTime() + to.getScheduledArrivalTime()) / 2;
+      long predictedTransitionTime = 0;
 
-      builder.setEndTime(transitionTime);
+      if (from.isPredictedDepartureTimeSet() && to.isPredictedArrivalTimeSet())
+        predictedTransitionTime = (from.getPredictedDepartureTime() + to.getPredictedArrivalTime()) / 2;
+
+      builder.setScheduledArrivalTime(scheduledTransitionTime);
+      builder.setPredictedArrivalTime(predictedTransitionTime);
       builder.setToStop(null);
 
       getTransitLegBuilderAsLeg(builder, legs);
 
       builder = new TransitLegBuilder();
-      builder.setStartTime(transitionTime);
+      builder.setScheduledDepartureTime(scheduledTransitionTime);
+      builder.setPredictedDepartureTime(predictedTransitionTime);
       builder.setBlockInstance(to.getBlockInstance());
       builder.setBlockTrip(tripTo);
 
     }
 
     builder.setToStop(to);
-    builder.setEndTime(to.getArrivalTime());
+    builder.setScheduledArrivalTime(to.getScheduledArrivalTime());
+    builder.setPredictedArrivalTime(to.getPredictedArrivalTime());
     return builder;
   }
 
@@ -382,8 +391,8 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     LegBean leg = new LegBean();
     legs.add(leg);
 
-    leg.setStartTime(builder.getStartTime());
-    leg.setEndTime(builder.getEndTime());
+    leg.setStartTime(builder.getBestDepartureTime());
+    leg.setEndTime(builder.getBestArrivalTime());
 
     double distance = getTransitLegBuilderAsDistance(builder);
     leg.setDistance(distance);
@@ -406,8 +415,11 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     TripBean tripBean = _tripBeanService.getTripForId(trip.getId());
     transitLeg.setTrip(tripBean);
 
-    transitLeg.setScheduledDepartureTime(builder.getStartTime());
-    transitLeg.setScheduledArrivalTime(builder.getEndTime());
+    transitLeg.setScheduledDepartureTime(builder.getScheduledDepartureTime());
+    transitLeg.setScheduledArrivalTime(builder.getScheduledArrivalTime());
+
+    transitLeg.setPredictedDepartureTime(builder.getPredictedDepartureTime());
+    transitLeg.setPredictedArrivalTime(builder.getPredictedArrivalTime());
 
     String path = getTransitLegBuilderAsPath(builder);
     transitLeg.setPath(path);
@@ -427,10 +439,10 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     BlockStopTimeEntry toStop = null;
 
     if (builder.getFromStop() != null)
-      fromStop = builder.getFromStop().getStopTime();
+      fromStop = builder.getFromStop().getBlockStopTime();
 
     if (builder.getToStop() != null)
-      toStop = builder.getToStop().getStopTime();
+      toStop = builder.getToStop().getBlockStopTime();
 
     if (fromStop == null && toStop == null)
       return blockConfig.getTotalBlockDistance();
@@ -461,10 +473,10 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     BlockStopTimeEntry toStop = null;
 
     if (builder.getFromStop() != null)
-      fromStop = builder.getFromStop().getStopTime();
+      fromStop = builder.getFromStop().getBlockStopTime();
 
     if (builder.getToStop() != null)
-      toStop = builder.getToStop().getStopTime();
+      toStop = builder.getToStop().getBlockStopTime();
 
     if (fromStop == null && toStop == null) {
       return ShapeSupport.getFullPath(shapePoints);
@@ -487,12 +499,12 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private void applyFromStopDetailsForTransitLeg(TransitLegBuilder builder,
       TransitLegBean transitLeg) {
 
-    StopTimeInstance fromStopTimeInstance = builder.getFromStop();
+    ArrivalAndDepartureInstance fromStopTimeInstance = builder.getFromStop();
 
     if (fromStopTimeInstance == null)
       return;
 
-    BlockStopTimeEntry bstFrom = fromStopTimeInstance.getStopTime();
+    BlockStopTimeEntry bstFrom = fromStopTimeInstance.getBlockStopTime();
 
     StopTimeEntry fromStopTime = bstFrom.getStopTime();
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(fromStopTime);
@@ -509,7 +521,7 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private void applyToStopDetailsForTransitLeg(TransitLegBuilder builder,
       TransitLegBean transitLeg) {
 
-    StopTimeInstance toStopTimeInstance = builder.getToStop();
+    ArrivalAndDepartureInstance toStopTimeInstance = builder.getToStop();
 
     if (toStopTimeInstance == null)
       return;
@@ -518,7 +530,7 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     StopBean toStopBean = _stopBeanService.getStopForId(toStop.getId());
     transitLeg.setToStop(toStopBean);
 
-    BlockStopTimeEntry blockStopTime = toStopTimeInstance.getStopTime();
+    BlockStopTimeEntry blockStopTime = toStopTimeInstance.getBlockStopTime();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
     transitLeg.setToStopSequence(stopTime.getSequence());
   }

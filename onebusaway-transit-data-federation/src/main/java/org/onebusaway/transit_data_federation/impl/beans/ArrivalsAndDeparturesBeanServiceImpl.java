@@ -20,7 +20,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.RealTimeStopTimeService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -49,7 +49,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   private TransitGraphDao _transitGraphDao;
 
-  private RealTimeStopTimeService _realTimeStopTimeService;
+  private ArrivalAndDepartureService _arrivalAndDepartureService;
 
   private NarrativeService _narrativeService;
 
@@ -67,9 +67,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   }
 
   @Autowired
-  public void setRealTimeStopTimeService(
-      RealTimeStopTimeService realTimeStopTimeService) {
-    _realTimeStopTimeService = realTimeStopTimeService;
+  public void setArrivalAndDepartureService(
+      ArrivalAndDepartureService arrivalAndDepartureService) {
+    _arrivalAndDepartureService = arrivalAndDepartureService;
   }
 
   @Autowired
@@ -141,7 +141,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         * 1000;
     long frequencyToTime = time + query.getFrequencyMinutesAfter() * 60 * 1000;
 
-    List<ArrivalAndDepartureInstance> instances = _realTimeStopTimeService.getArrivalsAndDeparturesForStopInTimeRange(
+    List<ArrivalAndDepartureInstance> instances = _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
         stop, time, fromTime, toTime);
 
     List<ArrivalAndDepartureBean> beans = new ArrayList<ArrivalAndDepartureBean>();
@@ -188,7 +188,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       throw new NoSuchTripServiceException(
           AgencyAndIdLibrary.convertToString(tripId));
 
-    ArrivalAndDepartureInstance instance = _realTimeStopTimeService.getArrivalAndDepartureForStop(
+    ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
         stop, stopSequence, trip, serviceDate, vehicleId, time);
 
     ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, instance,
