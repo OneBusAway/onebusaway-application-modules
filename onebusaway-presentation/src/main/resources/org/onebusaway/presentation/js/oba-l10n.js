@@ -27,7 +27,7 @@ OBA.L10n.DateFormat = function(format) {
 		return val;
 	};
 	
-	var	token = /d{1,4}|m{1,4}|yy(?:yy)?|([AHhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g;
+	var	token = /d{1,4}|m{1,4}|yy(?:yy)?|([aAHhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g;
 	var timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
 	var timezoneClip = /[^-+\dA-Z]/g;
 
@@ -49,11 +49,13 @@ OBA.L10n.DateFormat = function(format) {
 		var vo = utc ? 0 : date.getTimezoneOffset();
 				
 		var flags = {};
-		
-		flags.M = OBA.Resources.DateLibrary['shortMonths'][vm];
-		flags.MM = flags.M;
-		flags.MMM = flags.M;
-		flags.MMMM = OBA.Resources.DateLibrary['months'][vm];
+
+		flags.yy = String(vy).slice(2);
+		flags.yyyy = vy;
+		flags.M = vM + 1;
+		flags.MM = pad(flags.M);
+		flags.MMM = OBA.Resources.DateLibrary['shortMonths'][vM];
+		flags.MMMM = OBA.Resources.DateLibrary['months'][vM];
 		flags.d = vd;
 		flags.dd = pad(vd);
 		flags.h = vH % 12 || 12;
@@ -62,6 +64,7 @@ OBA.L10n.DateFormat = function(format) {
 		flags.mm = pad(flags.m);
 		
 		flags.AA = OBA.Resources.DateLibrary['amPm'][vH < 12 ? 0 : 1];
+		flags.aa = flags.AA.toLowerCase();
 		
 		/*
 			flags = {

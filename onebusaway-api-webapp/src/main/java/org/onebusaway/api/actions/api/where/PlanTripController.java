@@ -1,6 +1,8 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -64,6 +66,12 @@ public class PlanTripController extends ApiActionSupport {
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _constraints.setTime(time.getTime());
+  }
+  
+  public void setDateAndTime(String value) throws ParseException {
+    SimpleDateFormat f = new SimpleDateFormat("MM/dd/yy hh:mmaa");
+    Date time = f.parse(value);
+    setTime(time);
   }
 
   public void setArriveBy(boolean arriveBy) {

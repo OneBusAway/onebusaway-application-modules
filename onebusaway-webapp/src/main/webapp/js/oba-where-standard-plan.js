@@ -59,6 +59,21 @@ var oba_where_standard_plan = function(data) {
 	/***************************************************************************
 	 * 
 	 **************************************************************************/
+	
+	var configureTime = function() {
+		var now = new Date();
+		var dateString = OBA.L10n.formatDate('MM/dd/yy',now);
+		var timeString = OBA.L10n.formatDate('hh:mmaa',now);
+		
+		jQuery('#date').val(dateString);
+		jQuery('#time').val(timeString);
+	};
+	
+	configureTime();
+
+	/***************************************************************************
+	 * 
+	 **************************************************************************/
 
 	var parseLocation = function() {
 		var params = {};
@@ -242,35 +257,35 @@ var oba_where_standard_plan = function(data) {
 
 	var directionsButton = data.directionsButton;
 
-	directionsButton
-			.click(function() {
+	directionsButton.click(function() {
 
-				var from = fromElement.val().split(',');
-				var to = toElement.val().split(',');
-				var params = {};
+		var from = fromElement.val().split(',');
+		var to = toElement.val().split(',');
+		var params = {};
 
-				params.latFrom = from[0];
-				params.lonFrom = from[1];
-				params.latTo = to[0];
-				params.lonTo = to[1];
-				params.timeFrom = '2011-01-31_12-48-00';
+		params.latFrom = from[0];
+		params.lonFrom = from[1];
+		params.latTo = to[0];
+		params.lonTo = to[1];
+		params.dateAndTime = jQuery('#date').val() + ' ' + jQuery('#time').val();
 
-				params.useRealTime = jQuery('#useRealtime').is(':checked');
+		params.useRealTime = jQuery('#useRealtime').is(':checked');
 
-				if (jQuery('#walkOnly').is(':checked')) {
-					params.mode = 'walk';
-				}
+		if (jQuery('#walkOnly').is(':checked')) {
+			params.mode = 'walk';
+		}
 
-				var floatParams = [ 'walkSpeed', 'walkReluctance',
-						'maxWalkingDistance', 'initialWaitReluctance',
-						'waitReluctance', 'minTransferTime', 'transferCost', 'maxTransfers' ];
-				
-				jQuery.each(floatParams, function() {
-					var val = jQuery('#'+this).val();
-					if( val.length > 0 )
-						params[this] = parseFloat(val);
-				});
+		var floatParams = [ 'walkSpeed', 'walkReluctance',
+				'maxWalkingDistance', 'initialWaitReluctance',
+				'waitReluctance', 'minTransferTime', 'transferCost',
+				'maxTransfers' ];
 
-				OBA.Api.planTrip(params, planHandler);
-			});
+		jQuery.each(floatParams, function() {
+			var val = jQuery('#' + this).val();
+			if (val.length > 0)
+				params[this] = parseFloat(val);
+		});
+
+		OBA.Api.planTrip(params, planHandler);
+	});
 };
