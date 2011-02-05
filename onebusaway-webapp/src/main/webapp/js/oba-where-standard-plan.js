@@ -364,8 +364,6 @@ var oba_where_standard_plan = function(data) {
 
 	var planHandler = function(entry) {
 
-		clearExistingPlan();
-
 		itinerariesHandler(entry);
 
 		var itineraries = entry.itineraries || [];
@@ -392,7 +390,7 @@ var oba_where_standard_plan = function(data) {
 	var directionsButton = data.directionsButton;
 
 	directionsButton.click(function() {
-
+		
 		var from = fromElement.val().split(',');
 		var to = toElement.val().split(',');
 		var params = {};
@@ -423,6 +421,7 @@ var oba_where_standard_plan = function(data) {
 				params[this] = parseFloat(val);
 		});
 
+		clearExistingPlan();
 		OBA.Api.planTrip(params, planHandler);
 	});
 };

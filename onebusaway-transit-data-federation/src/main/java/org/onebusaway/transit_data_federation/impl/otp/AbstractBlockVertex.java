@@ -1,7 +1,9 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Vertex;
@@ -59,7 +61,7 @@ public abstract class AbstractBlockVertex extends AbstractVertex {
 
   @Override
   public int hashCode() {
-    return _instance.hashCode();
+    return hashCode(_instance);
   }
 
   @Override
@@ -71,6 +73,59 @@ public abstract class AbstractBlockVertex extends AbstractVertex {
     if (getClass() != obj.getClass())
       return false;
     AbstractBlockVertex bav = (AbstractBlockVertex) obj;
-    return _instance.equals(bav._instance);
+    return equals(_instance, bav._instance);
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private static final int hashCode(ArrivalAndDepartureInstance instance) {
+    final int prime = 31;
+    int result = 1;
+
+    result = prime * result + instance.getBlockInstance().hashCode();
+    result = prime * result + instance.getBlockStopTime().hashCode();
+
+    BlockLocation blockLocation = instance.getBlockLocation();
+
+    /**
+     * There can be potentially multiple vehicles serving a block instance, so
+     * we key off the vehicle id when applicable
+     */
+    if (blockLocation != null) {
+      if (blockLocation.getVehicleId() != null)
+        result = prime * result + blockLocation.getVehicleId().hashCode();
+    }
+
+    return result;
+  }
+
+  private static final boolean equals(ArrivalAndDepartureInstance a,
+      ArrivalAndDepartureInstance b) {
+    if (!a.getBlockInstance().equals(b.getBlockInstance()))
+      return false;
+    if (!a.getBlockStopTime().equals(b.getBlockStopTime()))
+      return false;
+
+    /**
+     * There can be potentially multiple vehicles serving a block instance, so
+     * we key off the vehicle id when applicable
+     */
+    AgencyAndId vehicleIdA = getVehicleIdForInstance(a);
+    AgencyAndId vehicleIdB = getVehicleIdForInstance(b);
+
+    if (!ObjectUtils.equals(vehicleIdA, vehicleIdB))
+      return false;
+
+    return true;
+  }
+
+  private static final AgencyAndId getVehicleIdForInstance(
+      ArrivalAndDepartureInstance instance) {
+    BlockLocation location = instance.getBlockLocation();
+    if (location == null)
+      return null;
+    return location.getVehicleId();
   }
 }

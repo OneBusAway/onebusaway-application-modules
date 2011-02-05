@@ -24,9 +24,6 @@
 <script type="text/javascript" src="${oba:url('/config.action')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('messages:DateLibrary')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/js/oba-api.js')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/js/oba-l10n.js')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/js/oba-maps.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('messages:ArrivalAndDepartureMessages=org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('/js/oba-where-standard-plan.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript">

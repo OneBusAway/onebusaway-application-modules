@@ -41,6 +41,10 @@ public class ArrivalAndDepartureInstance {
 
   public ArrivalAndDepartureInstance(BlockInstance blockInstance,
       BlockStopTimeEntry blockStopTime, ArrivalAndDepartureTime scheduledTime) {
+    if (blockInstance == null)
+      throw new IllegalArgumentException("blockInstance is null");
+    if (blockStopTime == null)
+      throw new IllegalArgumentException("blockStopTime is null");
     this.blockInstance = blockInstance;
     this.blockStopTime = blockStopTime;
     this.scheduledArrivalTime = scheduledTime.getArrivalTime();
@@ -137,5 +141,4 @@ public class ArrivalAndDepartureInstance {
   public String toString() {
     return "ArrivalAndDepartureInstance(block=" + blockInstance + ")";
   }
-
 }
