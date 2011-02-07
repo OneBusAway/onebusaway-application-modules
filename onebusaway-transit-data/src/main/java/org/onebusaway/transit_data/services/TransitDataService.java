@@ -52,6 +52,7 @@ import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
@@ -324,7 +325,7 @@ public interface TransitDataService extends FederatedService {
   public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
       double latTo, double lonTo, TripPlannerConstraintsBean constraints)
       throws ServiceException;
-  
+
   /**
    * 
    * @param latFrom
@@ -340,6 +341,10 @@ public interface TransitDataService extends FederatedService {
   public ItinerariesBean getItinerariesBetween(double latFrom, double lonFrom,
       double latTo, double lonTo, ConstraintsBean constraints)
       throws ServiceException;
+
+  @FederatedByBoundsMethod
+  public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
+      double lonFrom, double latTo, double lonTo) throws ServiceException;
 
   /**
    * 
@@ -460,12 +465,12 @@ public interface TransitDataService extends FederatedService {
   public TripProblemReportBean getTripProblemReportForTripIdAndId(
       String tripId, long id);
 
-  @FederatedByEntityIdMethod(propertyExpression="tripId")
+  @FederatedByEntityIdMethod(propertyExpression = "tripId")
   public void updateTripProblemReport(TripProblemReportBean tripProblemReport);
 
   @FederatedByEntityIdMethod()
   public void deleteTripProblemReportForTripIdAndId(String tripId, long id);
-  
+
   @FederatedByAggregateMethod
   public List<String> getAllTripProblemReportLabels();
 }

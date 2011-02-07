@@ -172,6 +172,29 @@ var obaApiFactory = function() {
 		
 	};
 	
+	var processStreetGraphForRegion = function(entry, references) {
+		
+		var verticesById = {};
+		var vertices = entry.vertices || [];
+		
+		jQuery.each(vertices,function() {
+			verticesById[this.id] = this;
+		});
+		
+		var edges = entry.edges || [];
+		
+		jQuery.each(edges,function() {
+			var from = verticesById[this.fromId];
+			if( from )
+				this.from = from;
+			var to = verticesById[this.toId];
+			if( to )
+				this.to = to;
+		});
+		
+		
+	};
+	
 	var processTrip = function(trip, references) {
 		var route = references.routesById[trip.routeId];
 		if( route )
@@ -261,6 +284,29 @@ var obaApiFactory = function() {
 		var params = createParams();
 		var handler = createEntryHandler(callback, errorCallback,
 				processStopsForRoute);
+		jQuery.getJSON(url, params, handler);
+	};
+	
+	that.streetGraphForRegion = function(bounds, callback, errorCallback) {
+		
+		if( bounds.isEmpty() )
+			return;
+		
+		var ne = bounds.getNorthEast();
+		var sw = bounds.getSouthWest();
+		
+		var params = {};
+		params.latFrom = sw.lat();
+		params.lonFrom = sw.lng();
+		params.latTo = ne.lat();
+		params.lonTo = ne.lng();
+		params = createParams(params);
+		
+		var url = createUrl('/where/street-graph-for-region.json');
+		
+		var handler = createEntryHandler(callback, errorCallback,
+				processStreetGraphForRegion);
+		
 		jQuery.getJSON(url, params, handler);
 	};
 	

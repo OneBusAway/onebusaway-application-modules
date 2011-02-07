@@ -9,6 +9,7 @@ import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.beans.itineraries.ItinerariesBeanServiceImpl;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.opentripplanner.routing.contraction.ContractionHierarchy;
 import org.opentripplanner.routing.contraction.ContractionHierarchySet;
@@ -31,6 +32,8 @@ public class ContractionHierarchySetWrapper extends ContractionHierarchySet {
 
   private StreetToStopGraphLinkerService _streetToStopGraphLinkerService;
 
+  private ItinerariesBeanServiceImpl _itinerariesBeanService;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -48,6 +51,12 @@ public class ContractionHierarchySetWrapper extends ContractionHierarchySet {
     _streetToStopGraphLinkerService = streetToStopGraphLinkerService;
   }
 
+  @Autowired
+  public void setItinerariesBeanService(
+      ItinerariesBeanServiceImpl itinerariesBeanService) {
+    _itinerariesBeanService = itinerariesBeanService;
+  }
+
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.OTP_DATA)
   public void setup() throws IOException, ClassNotFoundException {
@@ -59,11 +68,8 @@ public class ContractionHierarchySetWrapper extends ContractionHierarchySet {
     if (path.exists()) {
       _source = ObjectSerializationLibrary.readObject(path);
       graph = _source.getGraph();
-      _streetVertexIndexServiceImpl.setGraph(_source.getGraph());
-      _streetVertexIndexServiceImpl.setup();
     } else {
       _source = null;
-
     }
 
     _streetToStopGraphLinkerService.setOtpGraph(graph);
@@ -71,6 +77,8 @@ public class ContractionHierarchySetWrapper extends ContractionHierarchySet {
 
     _streetVertexIndexServiceImpl.setGraph(graph);
     _streetVertexIndexServiceImpl.setup();
+    
+    _itinerariesBeanService.setGraph(_source.getGraph());
   }
 
   /****

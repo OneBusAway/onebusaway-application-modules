@@ -216,8 +216,12 @@ var obaMapFactory = function() {
 	};
 	
 	that.getSmallMarkerForStop = function(stop) {
+		return that.getSmallMarkerForStop(stop.lat, stop.lon);
+	};
+	
+	that.getSmallMarkerForPoint = function(lat, lon) {
 		
-		var point = new google.maps.LatLng(stop.lat,stop.lon);
+		var point = new google.maps.LatLng(lat,lon);
 		var url = OBA.Resources.Map['WhiteCircle14.png'];
 			
 		var anchor = new google.maps.Point(7, 7);

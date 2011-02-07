@@ -80,7 +80,7 @@ var oba_where_standard_plan = function(data) {
 		var href = window.location.href;
 		var index = href.indexOf('?');
 		if (index == -1)
-			return;
+			return params;
 		href = href.slice(index + 1);
 		index = href.indexOf('#');
 		if (index != -1)

@@ -1,8 +1,11 @@
 package org.onebusaway.transit_data_federation.impl.beans.itineraries;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.ObjectUtils;
@@ -11,17 +14,21 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.EdgeNarrativeBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.LegBean;
 import org.onebusaway.transit_data.model.tripplanning.LocationBean;
 import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
+import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
+import org.onebusaway.transit_data_federation.impl.otp.AbstractStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.ArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockDepartureVertex;
@@ -44,13 +51,21 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEn
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
+import org.opentripplanner.routing.core.Graph;
+import org.opentripplanner.routing.core.GraphVertex;
+import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
+import org.opentripplanner.routing.edgetype.StreetEdge;
+import org.opentripplanner.routing.edgetype.StreetTraversalPermission;
+import org.opentripplanner.routing.edgetype.StreetVertex;
 import org.opentripplanner.routing.services.PathService;
+import org.opentripplanner.routing.services.StreetVertexIndexService;
 import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.routing.spt.SPTEdge;
 import org.opentripplanner.routing.spt.SPTVertex;
@@ -58,13 +73,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 
 @Component
-class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
+public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private PathService _pathService;
+
+  private StreetVertexIndexService _streetVertexIndexService;
+
+  private Graph _graph;
 
   private TripBeanService _tripBeanService;
 
@@ -77,6 +97,17 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   @Autowired
   public void setPathService(PathService pathService) {
     _pathService = pathService;
+  }
+
+  @Autowired
+  public void setStreetVertexIndexService(
+      StreetVertexIndexService streetVertexIndexService) {
+    _streetVertexIndexService = streetVertexIndexService;
+  }
+
+  @Autowired
+  public void setGraph(Graph graph) {
+    _graph = graph;
   }
 
   @Autowired
@@ -121,6 +152,84 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return getPathsAsItineraries(paths, from, to);
   }
 
+  @Override
+  public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
+      double lonFrom, double latTo, double lonTo) {
+
+    double x1 = Math.min(lonFrom, lonTo);
+    double x2 = Math.max(lonFrom, lonTo);
+    double y1 = Math.min(latFrom, latTo);
+    double y2 = Math.max(latFrom, latTo);
+
+    Envelope env = new Envelope(x1, x2, y1, y2);
+
+    Collection<Vertex> vertices = _streetVertexIndexService.getVerticesForEnvelope(env);
+
+    Map<Vertex, VertexBean> beansByVertex = new HashMap<Vertex, VertexBean>();
+
+    for (Vertex vertex : vertices)
+      getVertexAsBean(beansByVertex, vertex);
+
+    for (Vertex vertex : vertices) {
+
+      Collection<Edge> edges = null;
+
+      if (vertex instanceof HasEdges) {
+        HasEdges hasEdges = (HasEdges) vertex;
+        edges = hasEdges.getOutgoing();
+      } else {
+        GraphVertex gv = _graph.getGraphVertex(vertex.getLabel());
+        if (gv != null)
+          edges = gv.getOutgoing();
+      }
+
+      if (edges != null) {
+
+        VertexBean from = getVertexAsBean(beansByVertex, vertex);
+        List<EdgeNarrativeBean> edgeNarratives = new ArrayList<EdgeNarrativeBean>();
+
+        for (Edge edge : edges) {
+          if (edge instanceof EdgeNarrative) {
+            EdgeNarrative narrative = (EdgeNarrative) edge;
+            EdgeNarrativeBean narrativeBean = new EdgeNarrativeBean();
+            narrativeBean.setName(narrative.getName());
+            
+            Geometry geom = narrative.getGeometry();
+            if( geom != null) {
+              List<CoordinatePoint> path = new ArrayList<CoordinatePoint>();
+              appendGeometryToPath(geom, path, true);
+              EncodedPolylineBean polyline = PolylineEncoder.createEncodings(path);
+              narrativeBean.setPath(polyline.getPoints());
+            }
+
+            narrativeBean.setFrom(from);
+            narrativeBean.setTo(getVertexAsBean(beansByVertex,
+                narrative.getToVertex()));
+
+            Map<String,Object> tags = new HashMap<String, Object>();
+            if( edge instanceof StreetEdge ) {
+              StreetEdge streetEdge = (StreetEdge) edge;
+              StreetTraversalPermission permission = streetEdge.getPermission();
+              if( permission != null)
+                  tags.put("access",permission.toString().toLowerCase());
+            }
+            
+            if( ! tags.isEmpty() )
+                narrativeBean.setTags(tags);
+            
+            edgeNarratives.add(narrativeBean);
+          }
+        }
+
+        if (!edgeNarratives.isEmpty())
+          from.setOutgoing(edgeNarratives);
+      }
+    }
+
+    List<VertexBean> beans = new ArrayList<VertexBean>(beansByVertex.values());
+    return new ListBean<VertexBean>(beans, false);
+  }
+
   /****
    * Private Methods
    ****/
@@ -157,8 +266,6 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       TraverseOptions options) {
 
     options.setArriveBy(options.isArriveBy());
-
-    
 
     /**
      * Modes
@@ -200,14 +307,13 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       options.minTransferTime = constraints.getMinTransferTime();
     if (constraints.getMaxTransfers() != -1)
       options.maxTransfers = constraints.getMaxTransfers();
-    
+
     /**
      * Our custom traverse options extension
      */
     OTPConfiguration config = new OTPConfiguration();
-    options.putExtension(OTPConfiguration.class,
-        config);
-    
+    options.putExtension(OTPConfiguration.class, config);
+
     config.useRealtime = constraints.isUseRealTime();
   }
 
@@ -722,6 +828,42 @@ class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private long scaleTime(long tStartOrig, long tStartNew, double ratio, long t) {
     return (long) ((t - tStartOrig) * ratio + tStartNew);
+  }
+
+  private VertexBean getVertexAsBean(Map<Vertex, VertexBean> beansByVertex,
+      Vertex vertex) {
+
+    VertexBean bean = beansByVertex.get(vertex);
+
+    if (bean == null) {
+
+      bean = new VertexBean();
+      bean.setId(vertex.getLabel());
+      bean.setLocation(new CoordinatePoint(vertex.getY(), vertex.getX()));
+
+      Map<String, Object> tags = new HashMap<String, Object>();
+
+      tags.put("class", vertex.getClass().getName());
+
+      if (vertex instanceof StreetVertex) {
+        StreetVertex sv = (StreetVertex) vertex;
+        StreetTraversalPermission perms = sv.getPermission();
+        if (perms != null)
+          tags.put("access", perms.toString().toLowerCase());
+      } else if (vertex instanceof AbstractStopVertex) {
+        AbstractStopVertex stopVertex = (AbstractStopVertex) vertex;
+        StopEntry stop = stopVertex.getStop();
+        StopBean stopBean = _stopBeanService.getStopForId(stop.getId());
+        tags.put("stop", stopBean);
+      }
+
+      bean.setTags(tags);
+
+      beansByVertex.put(vertex, bean);
+
+    }
+
+    return bean;
   }
 
 }

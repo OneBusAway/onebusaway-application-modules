@@ -37,12 +37,15 @@ import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Be
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.EdgeV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.GraphResultV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.ItineraryV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.LegV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.LocationV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.StreetLegV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.TransitLegV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.VertexV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -133,6 +136,10 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("transitLeg", TransitLegV2Bean.class);
     xstream.alias("streetLeg", StreetLegV2Bean.class);
 
+    xstream.alias("graphResult", GraphResultV2Bean.class);
+    xstream.alias("vertex", VertexV2Bean.class);
+    xstream.alias("edge", EdgeV2Bean.class);
+
     xstream.processAnnotations(VehicleMonitoringRequest.class);
     xstream.processAnnotations(VehicleMonitoringDetailLevel.class);
     xstream.processAnnotations(ServiceRequestContext.class);
@@ -141,5 +148,4 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.processAnnotations(MonitoredStopVisit.class);
     return xstream;
   }
-
 }

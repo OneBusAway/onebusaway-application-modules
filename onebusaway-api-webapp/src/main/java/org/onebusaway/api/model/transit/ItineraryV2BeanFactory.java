@@ -1,24 +1,31 @@
 package org.onebusaway.api.model.transit;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.onebusaway.api.model.transit.tripplanning.EdgeV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.GraphResultV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.ItineraryV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.LegV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.LocationV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.StreetLegV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.TransitLegV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.VertexV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.tripplanning.EdgeNarrativeBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.LegBean;
 import org.onebusaway.transit_data.model.tripplanning.LocationBean;
 import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
+import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 
 public class ItineraryV2BeanFactory {
@@ -156,7 +163,7 @@ public class ItineraryV2BeanFactory {
     bean.setRouteLongName(leg.getRouteLongName());
     bean.setTripHeadsign(leg.getTripHeadsign());
     bean.setPath(leg.getPath());
-    
+
     List<SituationBean> situations = leg.getSituations();
     if (!CollectionsLibrary.isEmpty(situations)) {
       List<String> situationIds = new ArrayList<String>(situations.size());
@@ -180,5 +187,76 @@ public class ItineraryV2BeanFactory {
     bean.setDistance(leg.getDistance());
 
     return bean;
+  }
+
+  public GraphResultV2Bean getGraphResult(List<VertexBean> list) {
+
+    GraphResultV2Bean result = new GraphResultV2Bean();
+
+    List<VertexV2Bean> vertices = new ArrayList<VertexV2Bean>();
+
+    for (VertexBean vertex : list) {
+      VertexV2Bean bean = new VertexV2Bean();
+      bean.setId(vertex.getId());
+      bean.setLocation(vertex.getLocation());
+
+      Map<String, String> tags = getTags(vertex.getTags());
+
+      bean.setTags(tags);
+      vertices.add(bean);
+    }
+
+    if (!vertices.isEmpty())
+      result.setVertices(vertices);
+
+    List<EdgeV2Bean> edges = new ArrayList<EdgeV2Bean>();
+
+    for (VertexBean vertex : list) {
+      List<EdgeNarrativeBean> out = vertex.getOutgoing();
+      if (out != null) {
+        for (EdgeNarrativeBean narrative : out) {
+          EdgeV2Bean bean = new EdgeV2Bean();
+          bean.setFromId(narrative.getFrom().getId());
+          bean.setToId(narrative.getTo().getId());
+          bean.setName(narrative.getName());
+          bean.setPath(narrative.getPath());
+          Map<String, String> tags = getTags(narrative.getTags());
+          bean.setTags(tags);
+          
+          edges.add(bean);
+        }
+      }
+    }
+
+    if (!edges.isEmpty())
+      result.setEdges(edges);
+
+    return result;
+  }
+
+  private Map<String, String> getTags(Map<String, Object> tags) {
+
+    Map<String, String> tagBeans = new HashMap<String, String>();
+
+    if( tags == null )
+      return null;
+    
+    for (Map.Entry<String, Object> entry : tags.entrySet()) {
+      String key = entry.getKey();
+      String value = getValueAsString(entry.getValue());
+      tagBeans.put(key, value);
+    }
+    return tagBeans;
+  }
+
+  private String getValueAsString(Object value) {
+
+    if (value instanceof StopBean) {
+      StopBean stop = (StopBean) value;
+      _factory.addToReferences(stop);
+      return stop.getId();
+    } else {
+      return value.toString();
+    }
   }
 }
