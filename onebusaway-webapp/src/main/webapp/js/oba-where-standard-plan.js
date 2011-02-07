@@ -202,8 +202,10 @@ var oba_where_standard_plan = function(data) {
 		if (fromStop) {
 			stopNameElement.text(fromStop.name);
 			
-			var fromStopMarker = OBA.Maps.getSmallMarkerForStop(fromStop);
-			fromStopMarker.setMap(map);
+			var point = new google.maps.LatLng(fromStop.lat,fromStop.lon);
+			var icon = OBA.Maps.getWhiteCircle14MarkerImage();
+			var fromStopMarker = new google.maps.Marker({position: point, icon: icon, map: map});
+			
 			planOverlays.push(fromStopMarker);
 			
 			var href = stopLinkElement.attr('href');

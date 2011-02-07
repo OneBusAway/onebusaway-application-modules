@@ -215,18 +215,10 @@ var obaMapFactory = function() {
 		return new Array(largeMarker, mediumMarker, smallMarker, tinyMarker);
 	};
 	
-	that.getSmallMarkerForStop = function(stop) {
-		return that.getSmallMarkerForStop(stop.lat, stop.lon);
-	};
-	
-	that.getSmallMarkerForPoint = function(lat, lon) {
-		
-		var point = new google.maps.LatLng(lat,lon);
+	that.getWhiteCircle14MarkerImage = function() {
 		var url = OBA.Resources.Map['WhiteCircle14.png'];
-			
 		var anchor = new google.maps.Point(7, 7);
-		var icon = new google.maps.MarkerImage(url, null, null, anchor);
-		return new google.maps.Marker({position: point, icon: icon, visible: true});
+		return new google.maps.MarkerImage(url, null, null, anchor);
 	};
 	
 	/****

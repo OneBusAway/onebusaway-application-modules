@@ -108,9 +108,9 @@ var oba_where_standard_street_graph = function() {
 	var vertexHandler = function(vertex, edgesByFromVertex) {
 		
 		var loc = vertex.location;
-		var marker = OBA.Maps.getSmallMarkerForPoint(loc.lat, loc.lon);
-		marker.setZIndex(10);
-		marker.setMap(map);
+		var point = new google.maps.LatLng(loc.lat,loc.lon);
+		var icon = OBA.Maps.getWhiteCircle14MarkerImage();
+		var marker = new google.maps.Marker({position: point, icon: icon, map: map, zIndex: 10});
 		overlays.push(marker);
 		
 	    google.maps.event.addListener(marker, 'click', function() {
