@@ -78,7 +78,7 @@ public class ContractionHierarchySetWrapper extends ContractionHierarchySet {
     _streetVertexIndexServiceImpl.setGraph(graph);
     _streetVertexIndexServiceImpl.setup();
     
-    _itinerariesBeanService.setGraph(_source.getGraph());
+    _itinerariesBeanService.setGraph(graph);
   }
 
   /****
