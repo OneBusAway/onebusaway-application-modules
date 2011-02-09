@@ -111,6 +111,11 @@ div#container {
 	padding-top: 1em;	
 }
 
+.linkToThisSearchPanel {
+	font-size: 0.8em;
+	margin-bottom: 1em;
+}
+
 .leg {
 	margin-bottom: 1em;
 }

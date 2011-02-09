@@ -41,7 +41,7 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
     double weight = transferTime * options.walkReluctance + options.boardCost
         + options.minTransferTime * options.waitReluctance;
 
-    EdgeNarrativeImpl narrative = createNarrative();
+    EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
     return new TraverseResult(weight, s1, narrative);
   }
 
@@ -57,7 +57,7 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
     double weight = transferTime * options.walkReluctance + options.boardCost
         + options.minTransferTime * options.waitReluctance;
 
-    EdgeNarrativeImpl narrative = createNarrative();
+    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
     return new TraverseResult(weight, s1, narrative);
   }
 
@@ -65,10 +65,9 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
    * Private Methods
    ****/
 
-  private EdgeNarrativeImpl createNarrative() {
+  private EdgeNarrativeImpl createNarrative(long time) {
     BlockArrivalVertex fromVertex = new BlockArrivalVertex(_context, _instance);
-    WalkToStopVertex toVertex = new WalkToStopVertex(_context,
-        _instance.getStop());
+    DepartureVertex toVertex = new DepartureVertex(_context, _transfer.getStop(), time);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 

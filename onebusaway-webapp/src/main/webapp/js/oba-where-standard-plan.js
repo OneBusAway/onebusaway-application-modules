@@ -8,6 +8,12 @@ var oba_where_standard_plan = function(data) {
 	var map = OBA.Maps.map(data.mapElement, mapParams);
 	var infoWindow = new google.maps.InfoWindow();
 
+	var boolParams = [ 'useRealTime' ];
+
+	var floatParams = [ 'walkSpeed', 'walkReluctance', 'maxWalkingDistance',
+			'initialWaitReluctance', 'waitReluctance', 'minTransferTime',
+			'transferCost', 'maxTransfers' ];
+
 	/***************************************************************************
 	 * 
 	 **************************************************************************/
@@ -84,25 +90,64 @@ var oba_where_standard_plan = function(data) {
 		href = href.slice(index + 1);
 		index = href.indexOf('#');
 		if (index != -1)
-			href.slice(0, index);
+			href = href.slice(0, index);
 		var tokens = href.split('&');
 		jQuery.each(tokens, function() {
 			var kvp = this.split('=');
-			var key = kvp[0];
-			var values = params[key] || [];
-			params[key] = values.concat(kvp.slice(1));
+			var key = decodeURIComponent(kvp[0]);
+			var value = decodeURIComponent(kvp[1]);
+			if (!(key in params))
+				params[key] = [];
+			params[key].push(value);
 		});
 
 		return params;
 	};
 
-	var locationParams = parseLocation();
+	var getParam = function(params, name) {
+		if (!(name in params))
+			return undefined;
+		var val = params[name];
+		if (!val)
+			return undefined;
+		val = val[0];
+		return val;
+	};
 
-	if (locationParams.from)
-		fromElement.val(locationParams.from);
+	var setParamsFromLocation = function() {
 
-	if (locationParams.to)
-		toElement.val(locationParams.to);
+		var params = parseLocation();
+
+		var from = getParam(params, 'from');
+		if (from)
+			fromElement.val(from);
+
+		var to = getParam(params, 'to');
+		if (to)
+			toElement.val(to);
+
+		var dateAndTime = getParam(params, 'dateAndTime');
+		if (dateAndTime) {
+			var tokens = dateAndTime.split(' ');
+			jQuery('#date').val(tokens[0]);
+			jQuery('#time').val(tokens[1]);
+		}
+
+		jQuery.each(boolParams, function() {
+			var val = getParam(params, this);
+			if (val)
+				jQuery('#' + this).attr('checked', val == 'true');
+		});
+
+		jQuery.each(floatParams, function() {
+			var val = getParam(params, this);
+			if (val)
+				jQuery('#' + this).val(val);
+		});
+
+	};
+
+	setParamsFromLocation();
 
 	/***************************************************************************
 	 * 
@@ -110,7 +155,7 @@ var oba_where_standard_plan = function(data) {
 
 	var planOverlays = [];
 	var resultsPanel = data.resultsPanel;
-    var bounds = new google.maps.LatLngBounds();
+	var bounds = new google.maps.LatLngBounds();
 
 	var clearExistingPlan = function() {
 		jQuery.each(planOverlays, function() {
@@ -136,7 +181,7 @@ var oba_where_standard_plan = function(data) {
 				clickable : false
 			});
 			planOverlays.push(marker);
-			
+
 			bounds.extend(location);
 		}
 
@@ -152,7 +197,7 @@ var oba_where_standard_plan = function(data) {
 				clickable : false
 			});
 			planOverlays.push(marker);
-			
+
 			bounds.extend(location);
 		}
 	};
@@ -184,8 +229,8 @@ var oba_where_standard_plan = function(data) {
 			var line = new google.maps.Polyline(opts);
 			line.setMap(map);
 			planOverlays.push(line);
-			
-			jQuery.each(points,function() {
+
+			jQuery.each(points, function() {
 				bounds.extend(this);
 			});
 		}
@@ -196,26 +241,30 @@ var oba_where_standard_plan = function(data) {
 
 		var stopNameElement = content.find(".stopName");
 		var stopLinkElement = content.find(".stopLink");
-		
+
 		var fromStop = transitLeg.fromStop;
-		
+
 		if (fromStop) {
 			stopNameElement.text(fromStop.name);
-			
-			var point = new google.maps.LatLng(fromStop.lat,fromStop.lon);
+
+			var point = new google.maps.LatLng(fromStop.lat, fromStop.lon);
 			var icon = OBA.Maps.getWhiteCircle14MarkerImage();
-			var fromStopMarker = new google.maps.Marker({position: point, icon: icon, map: map});
-			
+			var fromStopMarker = new google.maps.Marker({
+				position : point,
+				icon : icon,
+				map : map
+			});
+
 			planOverlays.push(fromStopMarker);
-			
+
 			var href = stopLinkElement.attr('href');
 			href = href.replace(/STOP_ID/, fromStop.id);
-			stopLinkElement.attr('href',href);
-			
+			stopLinkElement.attr('href', href);
+
 		} else {
 			stopNameElement.text("continues as");
 			stopNameElement.removeClass('stopNameEmphasized');
-			
+
 			stopLinkElement.hide();
 		}
 
@@ -357,8 +406,8 @@ var oba_where_standard_plan = function(data) {
 			var line = new google.maps.Polyline(opts);
 			line.setMap(map);
 			planOverlays.push(line);
-			
-			jQuery.each(points,function() {
+
+			jQuery.each(points, function() {
 				bounds.extend(this);
 			});
 		}
@@ -384,23 +433,28 @@ var oba_where_standard_plan = function(data) {
 				nextLeg = legs[index + 1];
 			legHandler(leg, prevLeg, nextLeg);
 		});
-		
-		if( ! bounds.isEmpty() )
+
+		if (!bounds.isEmpty())
 			map.fitBounds(bounds);
 	};
 
-	var directionsButton = data.directionsButton;
+	var constructParams = function() {
 
-	directionsButton.click(function() {
-		
-		var from = fromElement.val().split(',');
-		var to = toElement.val().split(',');
 		var params = {};
 
-		params.latFrom = from[0];
-		params.lonFrom = from[1];
-		params.latTo = to[0];
-		params.lonTo = to[1];
+		var from = fromElement.val();
+		var to = toElement.val();
+
+		params.from = from;
+		params.to = to;
+
+		var fromTokens = from.split(',');
+		var toTokens = to.split(',');
+
+		params.latFrom = fromTokens[0];
+		params.lonFrom = fromTokens[1];
+		params.latTo = toTokens[0];
+		params.lonTo = toTokens[1];
 		params.dateAndTime = jQuery('#date').val() + ' '
 				+ jQuery('#time').val();
 
@@ -412,18 +466,50 @@ var oba_where_standard_plan = function(data) {
 			params.mode = 'walk';
 		}
 
-		var floatParams = [ 'walkSpeed', 'walkReluctance',
-				'maxWalkingDistance', 'initialWaitReluctance',
-				'waitReluctance', 'minTransferTime', 'transferCost',
-				'maxTransfers' ];
-
 		jQuery.each(floatParams, function() {
 			var val = jQuery('#' + this).val();
 			if (val.length > 0)
 				params[this] = parseFloat(val);
 		});
 
+		return params;
+	};
+
+	var createUrlForParams = function(params) {
+
+		var parent = jQuery('<div/>');
+		parent.appendTo(resultsPanel);
+		parent.addClass('linkToThisSearchPanel');
+
+		var link = jQuery('<a/>');
+		link.text('Link to this search');
+
+		var href = window.location.href;
+		var index = href.indexOf('?');
+		if (index != -1)
+			href = href.slice(0, index);
+
+		var first = true;
+		for ( var key in params) {
+			href += first ? '?' : '&';
+			first = false;
+			href += encodeURIComponent(key) + '='
+					+ encodeURIComponent(params[key]);
+		}
+
+		link.attr('href', href);
+		link.appendTo(parent);
+	};
+
+	var directionsButton = data.directionsButton;
+
+	directionsButton.click(function() {
+
 		clearExistingPlan();
+
+		var params = constructParams();
+		createUrlForParams(params);
+
 		OBA.Api.planTrip(params, planHandler);
 	});
 };

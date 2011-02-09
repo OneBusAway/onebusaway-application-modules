@@ -24,14 +24,19 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
      */
     if (!SupportLibrary.isTransitEnabled(options))
       return null;
+    
+    /**
+     * If we've already boarded a transit vehicle, we only allow additional boardings
+     * from a direct transfer
+     */
+    if( s0.numBoardings > 0)
+      return null;
 
     State s1 = s0.clone();
 
     EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
 
-    TraverseResult result = new TraverseResult(0, s1, narrative);
-
-    return result;
+    return new TraverseResult(0, s1, narrative);
   }
 
   @Override
