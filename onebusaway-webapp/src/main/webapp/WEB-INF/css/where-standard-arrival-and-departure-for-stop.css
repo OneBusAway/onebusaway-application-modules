@@ -1,0 +1,18 @@
+#notificationPanel p {
+	font-size: 1.25em;
+	text-align: center;
+}
+
+#notificationPanel input {
+	font-size: 1em;
+	text-align: center;
+}
+
+#notificationPanel input {
+	width: 2em;
+}
+
+#jquery_jplayer {
+	width: 0px;
+	height: 0px;
+}

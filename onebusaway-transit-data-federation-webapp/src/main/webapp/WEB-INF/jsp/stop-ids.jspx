@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<jsp:directive.page contentType="text/xml" />
+<stop-ids>
+<c:forEach var="id" items="${ids}">
+    <value>${id}</value>    
+</c:forEach>
+</stop-ids>
+</result>

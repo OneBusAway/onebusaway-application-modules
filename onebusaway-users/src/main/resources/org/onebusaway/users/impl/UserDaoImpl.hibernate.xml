@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <query name="numberOfUsers" read-only="true">
+        SELECT count(*) FROM User
+    </query>
+    <query name="numberOfUserRoles" read-only="true">
+        SELECT count(*) FROM UserRole
+	</query>
+    <query name="numberOfUsersWithRole" read-only="true">
+        SELECT count(*) FROM User user left join user.roles as role
+        WHERE role = :role
+    </query>
+    <query name="userIndexKeyValuesForKeyType" read-only="true">
+        SELECT index.id.value FROM UserIndex index WHERE index.id.type = :type
+    </query>
+</hibernate-mapping>

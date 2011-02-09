@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <import resource="classpath:org/onebusaway/container/application-context-common.xml" />
+
+    <!--
+        Typically, EhCache is configured with an "ehcache.xml" resource file. That approach doesn't work so well when
+        various cache configurations need to be managed across project modules. So instead, we configure EhCache
+        programmatically in Spring. There are a number of factory classes in the
+        "org.onebusaway.container.spring.ehcache" package to assist in the process. Here, we create the main
+        ehCacheConfiguration object with some cache defaults and a diskstore path, which we can override programatically
+        as needed.
+    -->
+    <bean id="ehCacheConfiguration" class="org.onebusaway.container.spring.ehcache.EhCacheConfigurationFactoryBean">
+        <property name="configLocation" value="classpath:org/onebusaway/container/ehcache.xml" />
+        <property name="diskStorePath" value="java.io.tmpdir/cache-onebusaway" />
+    </bean>
+
+    <!--
+        The EhCache CacheManager instance. Caches can be dynamically added to the CacheManager with
+        org.onebusaway.container.spring.ehcache.EhCacheFactoryBean bean factories.
+    -->
+    <bean id="cacheManager" class="org.onebusaway.container.spring.ehcache.EhCacheManagerFactoryBean">
+        <property name="configuration" ref="ehCacheConfiguration" />
+        <property name="cacheManagerName" value="org.onebusaway.cacheManager" />
+    </bean>
+
+    <!--
+        This empty map can be extended with BeanPostProcessors to add additional cacheable key factories to the
+        CacheableInterceptor
+    -->
+    <bean id="cacheableKeyFactories" class="org.springframework.beans.factory.config.MapFactoryBean">
+        <property name="sourceMap">
+            <map />
+        </property>
+    </bean>
+    
+    <bean id="cacheableMethodKeyFactoryManager" class="org.onebusaway.container.cache.CacheableMethodKeyFactoryManager">
+        <property name="cacheKeyFactories" ref="cacheableKeyFactories" />
+    </bean>
+    
+    <bean id="cacheableMethodManager" class="org.onebusaway.container.cache.CacheableMethodManager">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheableMethodKeyFactoryManager" ref="cacheableMethodKeyFactoryManager" />
+    </bean>
+
+    <!-- Here we set up support for @Cacheable annotations -->
+    <bean id="cacheableAnnotationInterceptor" class="org.onebusaway.container.cache.CacheableAnnotationInterceptor">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheableMethodKeyFactoryManager" ref="cacheableMethodKeyFactoryManager" />
+    </bean>
+
+</beans>

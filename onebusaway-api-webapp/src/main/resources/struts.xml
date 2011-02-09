@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
+
+<!DOCTYPE struts PUBLIC 
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+    <constant name="struts.convention.action.suffix" value="Controller" />
+    <constant name="struts.convention.action.mapAllMatches" value="true" />
+    <constant name="struts.convention.default.parent.package" value="rest-custom" />
+    <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.api.actions" />
+    <constant name="struts.convention.action.checkImplementsAction" value="false" />
+
+    <constant name="struts.multipart.maxSize" value="10485760" />
+
+    <bean name="myXml" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.api.impl.CustomXStreamHandler" />
+    <bean name="myJson" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.api.impl.CustomJsonLibHandler" />
+    <bean name="myCsv" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.api.impl.CustomCsvHandler" />
+    
+    <constant name="struts.rest.handlerOverride.xml" value="myXml" />
+    <constant name="struts.rest.handlerOverride.json" value="myJson" />
+    <constant name="struts.rest.handlerOverride.csv" value="myCsv" />
+    
+    <constant name="struts.action.extension" value="xhtml,,xml,json,csv" />
+
+    <package name="rest-custom" extends="rest-default">
+
+        <result-types>
+            <result-type name="xml" class="org.onebusaway.api.impl.XmlResult" />
+        </result-types>
+
+        <interceptors>
+            <interceptor name="applicationKey" class="org.onebusaway.api.actions.api.ApiKeyInterceptor" />
+            <interceptor name="obaException" class="org.onebusaway.api.actions.api.ExceptionInterceptor" />
+
+            <interceptor name="fileUploadBigger" class="org.apache.struts2.interceptor.FileUploadInterceptor">
+                <param name="maximumSize">10485760</param>
+            </interceptor>
+            <interceptor-stack name="restCustomStack">
+                <interceptor-ref name="exception" />
+                <interceptor-ref name="alias" />
+                <interceptor-ref name="servletConfig" />
+                <interceptor-ref name="messages">
+                    <param name="operationMode">AUTOMATIC</param>
+                </interceptor-ref>
+                <interceptor-ref name="prepare" />
+                <interceptor-ref name="i18n" />
+                <interceptor-ref name="chain" />
+                <interceptor-ref name="debugging" />
+                <interceptor-ref name="profiling" />
+                <interceptor-ref name="actionMappingParams" />
+                <interceptor-ref name="scopedModelDriven" />
+                <interceptor-ref name="modelDriven">
+                    <param name="refreshModelBeforeResult">true</param>
+                </interceptor-ref>
+                <interceptor-ref name="fileUpload" />
+                <interceptor-ref name="checkbox" />
+                <interceptor-ref name="staticParams" />
+                <interceptor-ref name="params">
+                    <param name="excludeParams">dojo\..*</param>
+                </interceptor-ref>
+                <interceptor-ref name="rest" />
+                <interceptor-ref name="conversionError" />
+                <interceptor-ref name="validation">
+                    <!-- <param name="excludeMethods">input,back,cancel,browse,index,show,edit,editNew</param> -->
+                </interceptor-ref>
+                <interceptor-ref name="restWorkflow">
+                    <param name="excludeMethods">input,back,cancel,browse,index,show,edit,editNew</param>
+                </interceptor-ref>
+                <interceptor-ref name="applicationKey" />
+                <interceptor-ref name="obaException" />
+            </interceptor-stack>
+        </interceptors>
+        <default-interceptor-ref name="restCustomStack" />
+    </package>
+</struts>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<jsp:directive.page contentType="text/xml" />
+	<stop><c:out value="${status.closestStop.id}"/></stop>
+	<trip><c:out value="${tripId}"/></trip>
+</result>

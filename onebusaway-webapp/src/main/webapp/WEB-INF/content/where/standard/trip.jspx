@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-trip.css')}"/>
+<title>Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /> - Trip # <s:property
+    value="result.trip.id" /></title>
+</head>
+<body>
+
+<div id="container">
+<div id="tripPanel">
+<s:push value="result">
+
+    <div class="tripPanelHeader">
+      <div class="tripPanelHeaderRoute">Route <s:property value="trip.route.shortName" /> - <s:property value="trip.tripHeadsign" /></div>
+      <div class="tripPanelHeaderTripId">Trip # <s:property value="trip.id" /><s:if test="trip.id != trip.blockId"><jsp:text> - </jsp:text><s:a action="block"><s:param name="id" value="trip.blockId" /><s:param name="serviceDate" value="serviceDate"/><s:text name="BlockNum"/><jsp:text> </jsp:text><s:property value="trip.blockId" /></s:a></s:if></div>
+    </div>
+    
+    <s:if test="status.vehicleId != null">
+      <s:url var="url" action="vehicle-status">
+        <s:param name="vehicleId" value="status.vehicleId"/>
+      </s:url>
+      
+      <p><span class="tripPanelLabel">Real-time status:</span> <s:a href="%{url}">More Info</s:a></p>
+    </s:if>
+    
+
+    <s:if test="schedule.previousTrip != null">
+        <s:url var="url" action="trip">
+            <s:param name="id" value="schedule.previousTrip.id"/>
+            <s:param name="serviceDate" value="serviceDate" />
+            <s:param name="vehicleId" value="status.vehicleId"/>
+        </s:url>
+        <div class="block">Incoming Route: <s:a href="%{url}"><oba:routeName
+            value="schedule.previousTrip.route" /> - <s:property
+            value="schedule.previousTrip.tripHeadsign" /></s:a></div>
+    </s:if>
+
+    <s:if test="schedule.frequency != null">
+      <s:set var="freq" value="schedule.frequency"/>
+      <div class="block">
+      <p>Service every <span class="frequency"><s:property value="#freq.headway / 60"/></span> mins from <oba:date format="hh:mm aa" value="#freq.startTime"/> to <oba:date format="hh:mm aa" value="#freq.endTime"/></p>
+      </div>
+      
+      <div class="block">
+        
+        <s:set var="firstStopTime" value="schedule.stopTimes[0]"/>
+        
+        <oba:group value="schedule.stopTimes" var="groups">
+          <s:property value="getdepartureTime / 300" />
+        </oba:group>
+
+        <table>
+        <s:iterator value="#groups">
+            <s:iterator status="groupStatus">
+                <tr>
+                    <td class="TripPage-TimeColumn"><s:if test="#groupStatus.first">
+                        <span class="TripPage-ArrivalTime">
+                          <s:property value="(top.arrivalTime - #firstStopTime.departureTime) / 60"/> mins
+                        </span>
+                    </s:if></td>
+                    <td class="TripPage-StopColumn"><a href="stop.action?id=${stop.id}"><s:property value="stop.name" /></a></td>
+                </tr>
+            </s:iterator>
+        </s:iterator>
+        </table>
+      
+      </div>
+    </s:if>
+    <s:else>
+    
+    <div class="block">
+    
+    <oba:group value="schedule.stopTimes" var="groups">
+        <s:property value="getStopTimeRaw(top) / 300" />
+    </oba:group>
+
+    <table>
+        <s:iterator value="#groups">
+            <s:iterator status="groupStatus">
+                <tr>
+                    <td class="TripPage-TimeColumn"><s:if test="#groupStatus.first">
+                        <span class="TripPage-ArrivalTime"> <oba:date format="hh:mm aa"
+                            value="getStopTime(top)" /></span>
+                    </s:if></td>
+                    <td class="TripPage-StopColumn"><a href="stop.action?id=${stop.id}"><s:property value="stop.name" /></a></td>
+                </tr>
+            </s:iterator>
+        </s:iterator>
+    </table>
+    </div>
+    </s:else>
+
+    <s:if test="schedule.nextTrip != null">
+        <s:url var="url" action="trip">
+            <s:param name="id" value="schedule.nextTrip.id"/>
+            <s:param name="serviceDate" value="serviceDate" />
+            <s:param name="vehicleId" value="status.vehicleId"/>
+        </s:url>
+        <div class="block">Continues as Route: <s:a href="%{url}"><oba:routeName
+            value="schedule.nextTrip.route" /> - <s:property
+            value="schedule.nextTrip.tripHeadsign" /></s:a></div>
+    </s:if>
+
+</s:push>
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+div#wrapper {
+        height: 100%;
+}
+
+div#container {
+    height: 100%;
+    width: 100%;
+}
+
+div#header {
+        margin-bottom: 10px;
+}
+
+a#headerTitle {
+  left: 10px;
+}
+
+#feedback {
+  display: none;	
+}

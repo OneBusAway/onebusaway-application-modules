@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Federated Service Registry - Management Console</title>
+</head>
+<body>
+
+<h2>Registered Services</h2>
+<table>
+    <tr>
+        <td>class</td>
+        <td>url</td>
+        <td>enabled</td>
+        <td>properties</td>
+        <td>swap</td>
+        <td>delete</td>
+    </tr>
+
+<c:forEach var="entry" items="${entries}" >
+    <tr>
+    	<td>${entry.serviceClass}</td>
+        <td><a href="${entry.serviceUrl}">${entry.serviceUrl}</a></td>
+        <td>${entry.enabled}</td>
+        <td>${entry.properties}</td>
+        <td><a href="set-service-status.action?url=${entry.serviceUrl}&amp;enabled=${! entry.enabled}">status</a></td>
+        <td><a href="delete-service.action?url=${entry.serviceUrl}">delete</a></td>
+    </tr>
+</c:forEach>
+    
+</table>
+
+<h2>Add a Service</h2>
+
+<form name="addServiceForm" action="add-service.action">
+
+<table>
+    <tr><td>url:</td><td><input type="text" name="url"/></td></tr>
+    <tr><td>class:</td><td><input type="text" name="serviceClass"/></td></tr>
+    <tr><td>properties:</td><td><input type="text" name="properties"/></td></tr>
+    <tr><td></td><td><input type="submit" name="submit" value="Add Service"/></td></tr>
+</table>
+     
+</form>
+
+</body>
+</html>

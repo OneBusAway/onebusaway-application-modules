@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
+    except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
+    Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS 
+    IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language 
+    governing permissions and limitations under the License. -->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <import resource="classpath:org/onebusaway/transit_data_federation/application-context-services.xml" />
+
+    <!-- Database Connection Configuration -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+        <property name="url" value="jdbc:hsqldb:file:${bundlePath}/org_onebusaway_transit_data" />
+        <property name="username" value="sa" />
+        <property name="password" value="" />
+    </bean>
+
+    <bean id="bundleCreatorHibernateProperties" class="org.onebusaway.container.spring.PropertiesBeanPostProcessor">
+        <property name="target" value="hibernateProperties" />
+        <property name="properties">
+            <props>
+                <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+            </props>
+        </property>
+    </bean>
+
+    <alias name="dataSource" alias="mutableDataSource" />
+
+    <bean id="modifications" class="org.onebusaway.transit_data_federation.model.modifications.Modifications" />
+
+    <context:component-scan base-package="org.onebusaway.transit_data_federation.bundle.tasks" />
+
+    <!-- Task Definitions -->
+    
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="start" />
+        <property name="task" ref="startTask" />
+    </bean>
+
+    <bean id="startTask" class="org.onebusaway.transit_data_federation.bundle.tasks.NullTask" />
+
+    <!-- Load GTFS -->
+
+    <bean id="task_gtfs" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="gtfs" />
+        <property name="afterTaskName" value="start" />
+        <property name="task" ref="loadGtfsTask" />
+    </bean>
+
+    <bean id="loadGtfsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.LoadGtfsTask" />
+
+    <!-- Route Collections -->
+
+    <bean id="task_route_collections" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="route_collections" />
+        <property name="afterTaskName" value="gtfs" />
+        <property name="task" ref="routeCollectionsTask" />
+    </bean>
+
+    <bean id="routeCollectionsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionsTask" />
+
+    <!-- Route Search -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="route_search_index" />
+        <property name="afterTaskName" value="route_collections" />
+        <property name="task" ref="routeCollectionsSearchIndexTask" />
+    </bean>
+
+    <bean id="routeCollectionsSearchIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionSearchIndexTask" />
+
+    <!-- Stop Search -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="stop_search_index" />
+        <property name="afterTaskName" value="route_search_index" />
+        <property name="task" ref="stopSearchIndexTask" />
+    </bean>
+
+    <bean id="stopSearchIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateStopSearchIndexTask" />
+
+    <!-- Calendar Data -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="calendar_service" />
+        <property name="afterTaskName" value="stop_search_index" />
+        <property name="task" ref="calendarServiceTask" />
+    </bean>
+
+    <bean id="calendarServiceTask" class="org.onebusaway.transit_data_federation.bundle.tasks.CalendarServiceDataTask" />
+
+    <!-- Narratives Task -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="narratives" />
+        <property name="afterTaskName" value="calendar_service" />
+        <property name="task" ref="narrativesTask" />
+    </bean>
+
+    <bean id="narrativesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateNarrativesTask" />
+
+    <!-- Walk Graph -->
+
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="walk_graph" />
+        <property name="afterTaskName" value="narratives" />
+        <property name="task" ref="walkGraphTask" />
+    </bean>
+
+
+    <bean id="walkGraphTask" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphTask" />
+
+    <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
+        <property name="regionsSource">
+            <bean class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.GtfsStopRegionsSourceImpl" />
+        </property>
+    </bean>
+
+    <!-- Trip Graph -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="transit_graph" />
+        <property name="afterTaskName" value="narratives" />
+        <property name="task" ref="tripGraphTask" />
+    </bean>
+
+    <bean id="tripGraphTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.TransitGraphTask" />
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="block_indices" />
+        <property name="afterTaskName" value="transit_graph" />
+        <property name="task" ref="blockIndicesTask" />
+    </bean>
+
+    <bean id="blockIndicesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesTask" />
+
+    <!-- -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="stop_transfers" />
+        <property name="afterTaskName" value="block_indices" />
+        <property name="task" ref="stopTransfersTask" />
+    </bean>
+
+    <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.bundle.tasks.stop_transfers.StopTransfersTask" />
+
+    <!-- Pre Cache -->
+
+    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+        <property name="taskName" value="pre_cache" />
+        <property name="afterTaskName" value="stop_transfers" />
+        <property name="task" ref="preCacheTask" />
+    </bean>
+
+    <bean id="preCacheTask" class="org.onebusaway.transit_data_federation.bundle.tasks.PreCacheTask" />
+
+</beans>

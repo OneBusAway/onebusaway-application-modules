@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<query name="routeCollectionsByStop" read-only="true">
+	  SELECT rc
+	    FROM RouteCollection rc, 
+          StopTime stopTime
+        WHERE
+          stopTime.stop = :stop
+          AND stopTime.trip.route IN elements(rc.routes)
+        GROUP BY rc.id.agencyId, rc.id.id
+    </query>
+    <query name="routeCollectionsForRoutes" read-only="true">
+      SELECT rc FROM RouteCollection rc left join rc.routes as route WHERE route in (:routes)
+    </query>
+    <query name="routeCollectionsForServiceId" read-only="true">
+      SELECT rc.id
+        FROM RouteCollection rc, Trip trip
+        WHERE trip.serviceId = :serviceId
+          AND trip.route IN elements(rc.routes)
+        GROUP BY rc.id.agencyId, rc.id.id
+    </query>
+    <query name="tripsForServiceIdAndRouteId" read-only="true">
+      SELECT trip.id
+        FROM RouteCollection rc, Trip trip
+        WHERE trip.serviceId = :serviceId
+          AND trip.route IN elements(rc.routes)
+          AND rc.id = :routeId
+    </query>
+    <query name="shapeIdsForStop" read-only="true">
+      SELECT trip.shapeId
+        FROM StopTime stopTime, Trip trip
+      WHERE stopTime.stop = :stop
+        AND stopTime.trip = trip
+      GROUP BY trip.shapeId.agencyId, trip.shapeId.id
+    </query>
+</hibernate-mapping>

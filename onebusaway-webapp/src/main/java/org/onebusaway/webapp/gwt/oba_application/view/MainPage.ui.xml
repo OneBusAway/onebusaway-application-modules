@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <!-- RefineViewWidget.ui.xml -->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:my='urn:import:org.onebusaway.webapp.gwt.where_library.view' xmlns:oba="urn:import:org.onebusaway.webapp.gwt.oba_application.view">
+
+    <ui:style>
+        .resultsPanel {
+        padding-top: 1em;
+        padding-left: 1em;
+        padding-right: 1em;
+        overflow:auto;
+        }
+    </ui:style>
+
+    <g:ResizableDockLayoutPanel unit='EM' ui:field="_dockLayoutPanel">
+        <g:north size='4'>
+            <oba:SearchWidget ui:field="_searchWidget" />
+        </g:north>
+        <g:west size='18'>
+            <g:FlowPanel ui:field="_resultsPanel" addStyleNames="{style.resultsPanel}" />
+        </g:west>
+        <g:center>
+            <my:MapWidgetComposite ui:field="_mapPanel" />
+        </g:center>
+    </g:ResizableDockLayoutPanel>
+
+</ui:UiBinder>
