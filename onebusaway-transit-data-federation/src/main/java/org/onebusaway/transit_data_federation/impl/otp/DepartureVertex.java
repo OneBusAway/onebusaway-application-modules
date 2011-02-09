@@ -64,7 +64,7 @@ public final class DepartureVertex extends AbstractVertex implements
   public Collection<Edge> getIncoming() {
     List<Edge> edges = new ArrayList<Edge>(1);
     // Return to the street network
-    edges.add(new WaitingBeginsAtStopEdge(_context, _stop));
+    edges.add(new WaitingBeginsAtStopEdge(_context, _stop, true));
     return edges;
   }
 

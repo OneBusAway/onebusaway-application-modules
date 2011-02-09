@@ -65,7 +65,7 @@ public class DepartureEdge extends AbstractEdge {
       s1.everBoarded = true;
 
       int dwellTime = (int) ((departureTime - time) / 1000);
-      double w = computeWeightForWait(options, dwellTime, s0);
+      double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
 
       TraverseResult r = new TraverseResult(w, s1, narrative);
       result = r.addToExistingResultChain(result);
@@ -81,7 +81,7 @@ public class DepartureEdge extends AbstractEdge {
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
     int dwellTime = (int) ((toTime - time) / 1000);
-    double w = computeWeightForWait(options, dwellTime, s0);
+    double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
 
     TraverseResult r = new TraverseResult(w, s1, narrative);
     result = r.addToExistingResultChain(result);
@@ -127,19 +127,5 @@ public class DepartureEdge extends AbstractEdge {
       return service.getScheduledArrivalsAndDeparturesForStopInTimeRange(_stop,
           s0.getTime(), fromTime, toTime);
     }
-  }
-
-  private double computeWeightForWait(TraverseOptions options, int dwellTime,
-      State s0) {
-
-    double w = dwellTime * options.waitReluctance;
-
-    /**
-     * If this is the initial boarding, we penalize the wait time differently
-     */
-    if (s0.numBoardings == 0)
-      w *= options.waitAtBeginningFactor;
-
-    return w;
   }
 }

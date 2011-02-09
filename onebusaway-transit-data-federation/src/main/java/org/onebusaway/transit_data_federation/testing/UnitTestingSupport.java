@@ -31,7 +31,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyEntryI
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
-import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferList;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -124,11 +124,11 @@ public class UnitTestingSupport {
     StopTransfer transfer = new StopTransfer(to, 0, distance);
 
     List<StopTransfer> transfers = new ArrayList<StopTransfer>();
-    StopTransferList existing = from.getTransfers();
-    if (existing != null)
-      transfers.addAll(existing);
+    StopTransfers existing = from.getTransfers();
+    if (existing != null && existing.getTransfersFromStop() != null)
+      transfers.addAll(existing.getTransfersFromStop());
     transfers.add(transfer);
-    existing = new StopTransferList(transfers);
+    existing = new StopTransfers(transfers,null);
     from.setTransfers(existing);
   }
 

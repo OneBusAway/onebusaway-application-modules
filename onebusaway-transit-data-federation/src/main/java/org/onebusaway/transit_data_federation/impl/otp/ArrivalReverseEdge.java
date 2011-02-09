@@ -70,24 +70,28 @@ public class ArrivalReverseEdge extends AbstractEdge {
       s1.time = arrivalTime;
       s1.numBoardings++;
       s1.everBoarded = true;
+      
+      double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
 
       Vertex fromVertex = new BlockArrivalVertex(_context, instance);
       Vertex toVertex = new ArrivalVertex(_context, _stop, s0.getTime());
       EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
-      TraverseResult r = new TraverseResult(-dwellTime, s1, narrative);
+      TraverseResult r = new TraverseResult(w, s1, narrative);
       result = r.addToExistingResultChain(result);
     }
 
     // In addition to all the departures, we can just remain waiting at the stop
     int dwellTime = (int) ((time - timeFrom) / 1000);
+    double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
+    
     State s1 = new State(timeFrom);
 
-    Vertex fromVertex = new DepartureVertex(_context, _stop, timeFrom);
+    Vertex fromVertex = new ArrivalVertex(_context, _stop, timeFrom);
     Vertex toVertex = new ArrivalVertex(_context, _stop, s0.getTime());
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
-    TraverseResult r = new TraverseResult(dwellTime, s1, narrative);
+    TraverseResult r = new TraverseResult(w, s1, narrative);
     result = r.addToExistingResultChain(result);
 
     return result;

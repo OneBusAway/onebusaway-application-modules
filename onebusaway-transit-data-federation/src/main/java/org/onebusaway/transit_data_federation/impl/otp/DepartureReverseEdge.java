@@ -7,11 +7,12 @@ import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
-public class ArrivalEdge extends AbstractEdge {
+public class DepartureReverseEdge extends AbstractEdge {
 
   private final ArrivalAndDepartureInstance _instance;
 
-  public ArrivalEdge(GraphContext context, ArrivalAndDepartureInstance instance) {
+  public DepartureReverseEdge(GraphContext context,
+      ArrivalAndDepartureInstance instance) {
     super(context);
     _instance = instance;
   }
@@ -37,8 +38,8 @@ public class ArrivalEdge extends AbstractEdge {
    ****/
 
   private EdgeNarrativeImpl createNarrative(long time) {
-    Vertex fromVertex = new BlockArrivalVertex(_context, _instance);
-    Vertex toVertex = new ArrivalVertex(_context, _instance.getStop(), time);
+    Vertex fromVertex = new DepartureVertex(_context, _instance.getStop(), time);
+    Vertex toVertex = new BlockDepartureVertex(_context, _instance);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 

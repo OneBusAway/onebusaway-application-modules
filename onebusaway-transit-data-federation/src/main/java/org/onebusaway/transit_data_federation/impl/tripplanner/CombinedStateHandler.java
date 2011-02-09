@@ -155,7 +155,7 @@ public class CombinedStateHandler {
     StopEntry entry = state.getStop();
 
     // StopEntriesWithValues transferMap = entry.getTransfers();
-    List<StopTransfer> transfers = _stopTransferService.getTransfersForStop(entry);
+    List<StopTransfer> transfers = _stopTransferService.getTransfersFromStop(entry);
 
     for (StopTransfer transfer : transfers) {
       StopEntry nearbyEntry = transfer.getStop();
@@ -205,7 +205,7 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry stopEntry = state.getStop();
-    List<StopTransfer> transfers = _stopTransferService.getTransfersForStop(stopEntry);
+    List<StopTransfer> transfers = _stopTransferService.getTransfersFromStop(stopEntry);
 
     for (StopTransfer transfer : transfers) {
 

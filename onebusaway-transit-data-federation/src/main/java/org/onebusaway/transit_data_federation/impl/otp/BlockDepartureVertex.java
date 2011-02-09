@@ -8,6 +8,9 @@ import java.util.List;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
@@ -35,26 +38,44 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
 
   @Override
   public int getDegreeIn() {
-    BlockStopTimeEntry bst = _instance.getBlockStopTime();
-    return bst.getBlockSequence() > 0 ? 1 : 0;
+    return getIncoming().size();
   }
 
   @Override
   public Collection<Edge> getIncoming() {
 
     List<Edge> edges = new ArrayList<Edge>();
-
+    StopEntry stop = _instance.getStop();
+    
+    /**
+     * We can stay on the bus if applicable
+     */
     BlockStopTimeEntry bst = _instance.getBlockStopTime();
     if (bst.getBlockSequence() > 0) {
       edges.add(new BlockDwellEdge(_context, _instance));
     }
+
+    /**
+     * We can get off the bus
+     */
+    edges.add(new DepartureReverseEdge(_context, _instance));
+    
+    /**
+     * We can be coming from a transfer from another stop.
+     */
+    StopTransferService stopTransferService = _context.getStopTransferService();
+    List<StopTransfer> transfers = stopTransferService.getTransfersToStop(stop);
+
+    for (StopTransfer transfer : transfers)
+      edges.add(new TransferAndDepartureEdge(_context, _instance, transfer));
+
 
     return edges;
   }
 
   @Override
   public int getDegreeOut() {
-    return 1;
+    return getOutgoing().size();
   }
 
   @Override

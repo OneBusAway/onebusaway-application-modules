@@ -139,6 +139,6 @@ public class ArrivalAndDepartureInstance {
 
   @Override
   public String toString() {
-    return "ArrivalAndDepartureInstance(block=" + blockInstance + ")";
+    return "ArrivalAndDepartureInstance(" + blockStopTime + ")";
   }
 }

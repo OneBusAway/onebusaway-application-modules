@@ -10,9 +10,13 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
 
   private final StopEntry _stop;
 
-  public WaitingBeginsAtStopEdge(GraphContext context, StopEntry stop) {
+  private final boolean _isReverseEdge;
+
+  public WaitingBeginsAtStopEdge(GraphContext context, StopEntry stop,
+      boolean isReverseEdge) {
     super(context);
     _stop = stop;
+    _isReverseEdge = isReverseEdge;
   }
 
   @Override
@@ -24,12 +28,17 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
      */
     if (!SupportLibrary.isTransitEnabled(options))
       return null;
-    
+
     /**
-     * If we've already boarded a transit vehicle, we only allow additional boardings
-     * from a direct transfer
+     * If we've already boarded a transit vehicle, we only allow additional
+     * boardings from a direct transfer. Note that we only apply this rule when
+     * doing forward traversal of the graph. In a backwards traversal, this edge
+     * traversal will be called in the optimization step where the number of
+     * boardings is greater than zero. However, we still want the traversal to
+     * proceed.
+     * 
      */
-    if( s0.numBoardings > 0)
+    if (!_isReverseEdge && s0.numBoardings > 0)
       return null;
 
     State s1 = s0.clone();

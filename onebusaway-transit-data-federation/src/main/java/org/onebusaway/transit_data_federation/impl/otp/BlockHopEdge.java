@@ -22,6 +22,12 @@ public class BlockHopEdge extends AbstractEdge {
   public BlockHopEdge(GraphContext context, ArrivalAndDepartureInstance from,
       ArrivalAndDepartureInstance to) {
     super(context);
+    
+    if( from == null)
+      throw new IllegalArgumentException("from cannot be null");
+    if( to == null)
+      throw new IllegalArgumentException("to cannot be null");
+      
     _from = from;
     _to = to;
   }

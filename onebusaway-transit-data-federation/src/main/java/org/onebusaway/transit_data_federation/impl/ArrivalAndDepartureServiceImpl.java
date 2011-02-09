@@ -231,7 +231,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
     List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
 
-    int index = stopTime.getBlockSequence() + 1;
+    int index = stopTime.getBlockSequence() - 1;
     if (index < 0)
       return null;
 

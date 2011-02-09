@@ -77,7 +77,7 @@ public final class ArrivalVertex extends AbstractVertex implements
   public Collection<Edge> getOutgoing() {
     List<Edge> edges = new ArrayList<Edge>(1);
     // We stop waiting and move back to the street
-    edges.add(new WaitingEndsAtStopEdge(_context, _stop));
+    edges.add(new WaitingEndsAtStopEdge(_context, _stop, false));
     return edges;
   }
 

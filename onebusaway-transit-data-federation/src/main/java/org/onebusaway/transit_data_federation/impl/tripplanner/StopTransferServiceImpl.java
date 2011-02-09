@@ -3,11 +3,15 @@ package org.onebusaway.transit_data_federation.impl.tripplanner;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
@@ -54,11 +58,13 @@ public class StopTransferServiceImpl implements StopTransferService {
     if (path.exists()) {
 
       Map<AgencyAndId, List<StopTransferData>> stopTransferDataByStopId = ObjectSerializationLibrary.readObject(path);
+      Map<AgencyAndId, List<StopTransferData>> reversedStopTransfersByStopId = reverseTransfers(stopTransferDataByStopId);
 
-      for (Map.Entry<AgencyAndId, List<StopTransferData>> entry : stopTransferDataByStopId.entrySet()) {
+      Set<AgencyAndId> stopIds = new HashSet<AgencyAndId>();
+      stopIds.addAll(stopTransferDataByStopId.keySet());
+      stopIds.addAll(reversedStopTransfersByStopId.keySet());
 
-        AgencyAndId stopId = entry.getKey();
-        List<StopTransferData> transferData = entry.getValue();
+      for (AgencyAndId stopId : stopIds) {
 
         StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
 
@@ -67,38 +73,88 @@ public class StopTransferServiceImpl implements StopTransferService {
           continue;
         }
 
-        List<StopTransfer> transfers = new ArrayList<StopTransfer>();
+        List<StopTransferData> transfersFromStopData = stopTransferDataByStopId.get(stopId);
+        List<StopTransferData> transfersToStopData = reversedStopTransfersByStopId.get(stopId);
 
-        for (StopTransferData data : transferData) {
-          AgencyAndId targetStopId = data.getStopId();
-          StopEntry targetStop = _transitGraphDao.getStopEntryForId(targetStopId);
-          if (targetStop == null) {
-            _log.warn("unkown stop: " + targetStopId);
-            continue;
-          }
-          StopTransfer transfer = new StopTransfer(targetStop,
-              data.getMinTransferTime(), data.getDistance());
-
-          /*
-          System.out.println(stop.getStopLat() + " " + stop.getStopLon() + " "
-              + targetStop.getStopLat() + " " + targetStop.getStopLon());
-          */
-
-          transfers.add(transfer);
-        }
+        List<StopTransfer> transfersFromStop = getTransferDataAsList(transfersFromStopData);
+        List<StopTransfer> transfersToStop = getTransferDataAsList(transfersToStopData);
 
         StopEntryImpl stopEntry = (StopEntryImpl) stop;
-        stopEntry.setTransfers(new StopTransferList(transfers));
+        stopEntry.setTransfers(new StopTransfers(transfersFromStop,
+            transfersToStop));
       }
     }
   }
 
+  private List<StopTransfer> getTransferDataAsList(
+      List<StopTransferData> transferData) {
+
+    if (CollectionsLibrary.isEmpty(transferData))
+      return null;
+
+    List<StopTransfer> transfers = new ArrayList<StopTransfer>();
+
+    for (StopTransferData data : transferData) {
+      AgencyAndId targetStopId = data.getStopId();
+      StopEntry targetStop = _transitGraphDao.getStopEntryForId(targetStopId);
+      if (targetStop == null) {
+        _log.warn("unkown stop: " + targetStopId);
+        continue;
+      }
+      StopTransfer transfer = new StopTransfer(targetStop,
+          data.getMinTransferTime(), data.getDistance());
+
+      transfers.add(transfer);
+    }
+
+    return new StopTransferList(transfers);
+  }
+
   @Override
-  public List<StopTransfer> getTransfersForStop(StopEntry stop) {
+  public List<StopTransfer> getTransfersFromStop(StopEntry stop) {
     StopEntryImpl impl = (StopEntryImpl) stop;
-    StopTransferList transfers = impl.getTransfers();
-    if (transfers == null)
+    StopTransfers transfers = impl.getTransfers();
+    if (transfers == null || transfers.getTransfersFromStop() == null)
       return EMPTY;
-    return transfers;
+    return transfers.getTransfersFromStop();
+  }
+
+  @Override
+  public List<StopTransfer> getTransfersToStop(StopEntry stop) {
+    StopEntryImpl impl = (StopEntryImpl) stop;
+    StopTransfers transfers = impl.getTransfers();
+    if (transfers == null || transfers.getTransfersToStop() == null)
+      return EMPTY;
+    return transfers.getTransfersToStop();
+  }
+
+  /****
+   * 
+   ****/
+
+  private Map<AgencyAndId, List<StopTransferData>> reverseTransfers(
+      Map<AgencyAndId, List<StopTransferData>> stopTransferDataByStopId) {
+
+    Map<AgencyAndId, List<StopTransferData>> reversed = new HashMap<AgencyAndId, List<StopTransferData>>();
+
+    for (Map.Entry<AgencyAndId, List<StopTransferData>> entry : stopTransferDataByStopId.entrySet()) {
+      AgencyAndId fromStop = entry.getKey();
+      for (StopTransferData transfer : entry.getValue()) {
+        AgencyAndId toStop = transfer.getStopId();
+
+        List<StopTransferData> transfers = reversed.get(toStop);
+
+        if (transfers == null) {
+          transfers = new ArrayList<StopTransferData>();
+          reversed.put(toStop, transfers);
+        }
+
+        StopTransferData reversedTransfer = new StopTransferData(fromStop,
+            transfer.getMinTransferTime(), transfer.getDistance());
+        transfers.add(reversedTransfer);
+      }
+    }
+
+    return reversed;
   }
 }

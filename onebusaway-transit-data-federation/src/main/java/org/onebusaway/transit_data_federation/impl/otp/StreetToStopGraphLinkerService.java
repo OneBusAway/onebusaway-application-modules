@@ -68,7 +68,7 @@ class StreetToStopGraphLinkerService {
 
       if (linker.determineIncomingEdgesForVertex(walkToStopVertex, true)) {
         GraphVertex gv = _otpGraph.getGraphVertex(walkToStopVertex.getLabel());
-        gv.addOutgoing(new WaitingBeginsAtStopEdge(context, stop));
+        gv.addOutgoing(new WaitingBeginsAtStopEdge(context, stop, false));
       } else {
         _log.warn("error linking stop: " + stop.getId() + " to street network");
       }
@@ -82,7 +82,7 @@ class StreetToStopGraphLinkerService {
 
       if (linker.determineOutgoingEdgesForVertex(walkFromStopVertex, true)) {
         GraphVertex gv = _otpGraph.getGraphVertex(walkFromStopVertex.getLabel());
-        gv.addIncoming(new WaitingEndsAtStopEdge(context, stop));
+        gv.addIncoming(new WaitingEndsAtStopEdge(context, stop, true));
       } else {
         _log.warn("error linking stop: " + stop.getId() + " to street network");
       }

@@ -265,7 +265,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private void applyConstraintsToOptions(ConstraintsBean constraints,
       TraverseOptions options) {
 
-    options.setArriveBy(options.isArriveBy());
+    options.setArriveBy(constraints.isArriveBy());
 
     /**
      * Modes

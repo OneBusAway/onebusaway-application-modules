@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.impl.otp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
@@ -42,11 +43,12 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges 
   @Override
   public Collection<Edge> getIncoming() {
 
-    // The assumption is that we would not have been instantiated unless we had
-    // a previous stop time to arrive from.
     ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
     ArrivalAndDepartureInstance previous = service.getPreviousStopArrivalAndDeparture(_instance);
 
+    if(previous == null)
+      return Collections.emptyList();
+    
     return Arrays.asList((Edge) new BlockHopEdge(_context, previous, _instance));
   }
 
@@ -77,7 +79,7 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges 
      * We can alight from the vehicle AND transfer to another stop
      */
     StopTransferService stopTransferService = _context.getStopTransferService();
-    List<StopTransfer> transfers = stopTransferService.getTransfersForStop(stop);
+    List<StopTransfer> transfers = stopTransferService.getTransfersFromStop(stop);
 
     for (StopTransfer transfer : transfers)
       edges.add(new ArrivalAndTransferEdge(_context, _instance, transfer));
