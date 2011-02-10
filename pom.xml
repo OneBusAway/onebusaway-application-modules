@@ -18,7 +18,7 @@
     <struts-version>2.1.8.1</struts-version>
     <gwt-version>2.1.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
-    <gtfs-version>1.1.10-SNAPSHOT</gtfs-version>
+    <gtfs-version>1.1.12-SNAPSHOT</gtfs-version>
     <onebusaway-siri-version>0.0.3-SNAPSHOT</onebusaway-siri-version>
   </properties>
 

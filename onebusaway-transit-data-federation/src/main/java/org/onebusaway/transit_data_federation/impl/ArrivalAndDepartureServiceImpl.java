@@ -382,9 +382,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     SortedMap<Integer, Double> scheduleDeviations = blockLocation.getScheduleDeviations();
 
     if (scheduleDeviations != null && !scheduleDeviations.isEmpty()) {
-      return (int) InterpolationLibrary.interpolate(scheduleDeviations,
-          instance.getBlockStopTime().getStopTime().getArrivalTime(),
-          EOutOfRangeStrategy.LAST_VALUE);
+      int arrivalTime = instance.getBlockStopTime().getStopTime().getArrivalTime();
+      return (int) InterpolationLibrary.interpolate(
+          scheduleDeviations, arrivalTime, EOutOfRangeStrategy.LAST_VALUE);
     } else if (blockLocation.isScheduleDeviationSet()) {
       return (int) blockLocation.getScheduleDeviation();
     } else {
@@ -407,12 +407,19 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         blockLocation.getNextStop(), destinationStopTime,
         effectiveScheduleTime, scheduleDeviation);
 
-    long arrivalTime = instance.getScheduledArrivalTime() + arrivalDeviation
-        * 1000;
+    /**
+     * Why don't we use the ArrivalAndDepartureTime scheduled arrival and
+     * departures here? Because they may have been artificially shifted for a
+     * frequency-based method
+     */
+    ArrivalAndDepartureTime schedule = ArrivalAndDepartureTime.getScheduledTime(
+        instance.getBlockInstance(), instance.getBlockStopTime());
+
+    long arrivalTime = schedule.getArrivalTime() + arrivalDeviation * 1000;
     instance.setPredictedArrivalTime(arrivalTime);
 
-    long departureTime = instance.getScheduledDepartureTime()
-        + departureDeviation * 1000;
+    long departureTime = schedule.getDepartureTime() + departureDeviation
+        * 1000;
     instance.setPredictedDepartureTime(departureTime);
   }
 
