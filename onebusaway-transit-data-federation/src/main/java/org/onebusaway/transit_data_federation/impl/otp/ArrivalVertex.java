@@ -11,8 +11,7 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public final class ArrivalVertex extends AbstractVertex implements
-    HasEdges {
+public final class ArrivalVertex extends AbstractVertex implements HasEdges {
 
   private static DateFormat _format = DateFormat.getDateTimeInstance(
       DateFormat.SHORT, DateFormat.SHORT);
@@ -27,13 +26,17 @@ public final class ArrivalVertex extends AbstractVertex implements
     _time = time;
   }
 
+  public StopEntry getStop() {
+    return _stop;
+  }
+
   /****
    * {@link Vertex} Interface
    ****/
 
   @Override
   public String getLabel() {
-    return "alight_stop_" + getStopId() + "_wait_" + _time;
+    return "stop_arrival_" + getStopId() + "_wait_" + _time;
   }
 
   @Override

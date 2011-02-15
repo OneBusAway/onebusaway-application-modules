@@ -32,6 +32,7 @@ import org.onebusaway.transit_data_federation.impl.otp.AbstractStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.ArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.BlockDepartureVertex;
+import org.onebusaway.transit_data_federation.impl.otp.DepartureVertex;
 import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
 import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.WalkFromStopVertex;
@@ -193,9 +194,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
             EdgeNarrative narrative = (EdgeNarrative) edge;
             EdgeNarrativeBean narrativeBean = new EdgeNarrativeBean();
             narrativeBean.setName(narrative.getName());
-            
+
             Geometry geom = narrative.getGeometry();
-            if( geom != null) {
+            if (geom != null) {
               List<CoordinatePoint> path = new ArrayList<CoordinatePoint>();
               appendGeometryToPath(geom, path, true);
               EncodedPolylineBean polyline = PolylineEncoder.createEncodings(path);
@@ -206,17 +207,17 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
             narrativeBean.setTo(getVertexAsBean(beansByVertex,
                 narrative.getToVertex()));
 
-            Map<String,Object> tags = new HashMap<String, Object>();
-            if( edge instanceof StreetEdge ) {
+            Map<String, Object> tags = new HashMap<String, Object>();
+            if (edge instanceof StreetEdge) {
               StreetEdge streetEdge = (StreetEdge) edge;
               StreetTraversalPermission permission = streetEdge.getPermission();
-              if( permission != null)
-                  tags.put("access",permission.toString().toLowerCase());
+              if (permission != null)
+                tags.put("access", permission.toString().toLowerCase());
             }
-            
-            if( ! tags.isEmpty() )
-                narrativeBean.setTags(tags);
-            
+
+            if (!tags.isEmpty())
+              narrativeBean.setTags(tags);
+
             edgeNarratives.add(narrativeBean);
           }
         }
@@ -402,38 +403,55 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
         BlockArrivalVertex arrival = (BlockArrivalVertex) vFrom;
 
-        // Did we have a stop transfer?
+        /**
+         * Did we finish up a transit leg?
+         */
         if (vTo instanceof ArrivalVertex) {
 
-          // We've finished up our transit leg, so publish the leg
+          /**
+           * We've finished up our transit leg, so publish the leg
+           */
           builder = getTransitLegBuilderAsLeg(builder, legs);
+
         }
-        if (vTo instanceof WalkToStopVertex) {
+        /**
+         * Did we have a transfer to another stop?
+         */
+        else if (vTo instanceof DepartureVertex) {
 
-          // We've finished up our transit leg, so publish the leg
+          /**
+           * We've finished up our transit leg either way, so publish the leg
+           */
           builder = getTransitLegBuilderAsLeg(builder, legs);
 
-          // We've transfered to another stop, so we need to insert the walk leg
-
+          /**
+           * We've possibly transfered to another stop, so we need to insert the
+           * walk leg
+           */
           ArrivalAndDepartureInstance fromStopTimeInstance = arrival.getInstance();
           StopEntry fromStop = fromStopTimeInstance.getStop();
 
-          WalkToStopVertex toStopVertex = (WalkToStopVertex) vTo;
+          DepartureVertex toStopVertex = (DepartureVertex) vTo;
           StopEntry toStop = toStopVertex.getStop();
 
-          if (!fromStop.equals(toStop)) {
+          addTransferLegIfNeeded(sptEdge, fromStop, toStop, legs);
+        }
+      } else if (vFrom instanceof ArrivalVertex) {
+        if (vTo instanceof BlockDepartureVertex) {
 
-            long timeFrom = sptEdge.fromv.state.getTime();
-            long timeTo = sptEdge.tov.state.getTime();
+          /**
+           * This vertex combination occurs when we are doing an "arrive by"
+           * trip and we need to do a transfer between two stops.
+           */
 
-            ItineraryBean walk = getWalkingItineraryBetweenStops(fromStop,
-                toStop, timeFrom);
+          ArrivalVertex fromStopVertex = (ArrivalVertex) vFrom;
+          StopEntry fromStop = fromStopVertex.getStop();
 
-            if (walk != null) {
-              scaleItinerary(walk, timeFrom, timeTo);
-              legs.addAll(walk.getLegs());
-            }
-          }
+          BlockDepartureVertex toStopVertex = (BlockDepartureVertex) vTo;
+          ArrivalAndDepartureInstance departureInstance = toStopVertex.getInstance();
+          StopEntry toStop = departureInstance.getStop();
+
+          addTransferLegIfNeeded(sptEdge, fromStop, toStop, legs);
         }
       }
 
@@ -441,6 +459,23 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     }
 
     return currentIndex;
+  }
+
+  private void addTransferLegIfNeeded(SPTEdge sptEdge, StopEntry fromStop,
+      StopEntry toStop, List<LegBean> legs) {
+    if (!fromStop.equals(toStop)) {
+
+      long timeFrom = sptEdge.fromv.state.getTime();
+      long timeTo = sptEdge.tov.state.getTime();
+
+      ItineraryBean walk = getWalkingItineraryBetweenStops(fromStop, toStop,
+          timeFrom);
+
+      if (walk != null) {
+        scaleItinerary(walk, timeFrom, timeTo);
+        legs.addAll(walk.getLegs());
+      }
+    }
   }
 
   private TransitLegBuilder extendTransitLegWithDepartureAndArrival(

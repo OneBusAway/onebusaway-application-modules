@@ -26,6 +26,10 @@ public final class DepartureVertex extends AbstractVertex implements
     _stop = stop;
     _time = time;
   }
+  
+  public StopEntry getStop() {
+    return _stop;
+  }
 
   /****
    * {@link Vertex} Interface
@@ -33,7 +37,7 @@ public final class DepartureVertex extends AbstractVertex implements
 
   @Override
   public String getLabel() {
-    return "board_stop_" + getStopId() + "_wait_" + _time;
+    return "stop_departure_" + getStopId() + "_wait_" + _time;
   }
 
   @Override
