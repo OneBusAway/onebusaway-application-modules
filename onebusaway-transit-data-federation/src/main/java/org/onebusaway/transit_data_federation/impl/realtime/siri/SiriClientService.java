@@ -16,6 +16,7 @@ import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.siri.ConditionDetails;
 import org.onebusaway.siri.core.SiriClient;
+import org.onebusaway.siri.core.SiriClientServiceRequest;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
@@ -272,8 +273,11 @@ public class SiriClientService {
     @Override
     public void run() {
       try {
-        ServiceRequest request = new ServiceRequest();
-        ServiceDelivery delivery = _client.handleServiceRequestWithResponse(_url, request);
+        SiriClientServiceRequest request = new SiriClientServiceRequest();
+        request.setTargetUrl(_url);
+        request.setRequest(new ServiceRequest());
+
+        ServiceDelivery delivery = _client.handleServiceRequestWithResponse(request);
 
         processDelivery(delivery);
         if (_connectionFailure)
