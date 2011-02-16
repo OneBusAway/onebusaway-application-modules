@@ -289,7 +289,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     if (constraints.getMaxWalkingDistance() != -1)
       options.maxWalkDistance = constraints.getMaxWalkingDistance();
     if (constraints.getWalkReluctance() != -1)
-      options.walkReluctance = constraints.getWaitReluctance();
+      options.walkReluctance = constraints.getWalkReluctance();
 
     /**
      * Waiting
