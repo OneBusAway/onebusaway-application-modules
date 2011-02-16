@@ -270,10 +270,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       int arrivalDeviation = propagateScheduleDeviationBackwardAcrossStop(
           prevStopTime, departureDeviation);
 
-      prevInstance.setPredictedArrivalTime(prevInstance.getScheduledArrivalTime()
-          + arrivalDeviation * 1000);
-      prevInstance.setPredictedDepartureTime(prevInstance.getScheduledDepartureTime()
-          + departureDeviation * 1000);
+      setPredictedArrivalTimeForInstance(prevInstance,
+          prevInstance.getScheduledArrivalTime() + arrivalDeviation * 1000);
+      setPredictedDepartureTimeForInstance(prevInstance,
+          prevInstance.getScheduledDepartureTime() + departureDeviation * 1000);
     }
 
     return prevInstance;
@@ -327,10 +327,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       int departureDeviation = propagateScheduleDeviationForwardAcrossStop(
           nextStopTime, arrivalDeviation);
 
-      nextInstance.setPredictedArrivalTime(nextInstance.getScheduledArrivalTime()
-          + arrivalDeviation * 1000);
-      nextInstance.setPredictedDepartureTime(nextInstance.getScheduledDepartureTime()
-          + departureDeviation * 1000);
+      setPredictedArrivalTimeForInstance(nextInstance,
+          nextInstance.getScheduledArrivalTime() + arrivalDeviation * 1000);
+      setPredictedDepartureTimeForInstance(nextInstance,
+          nextInstance.getScheduledDepartureTime() + departureDeviation * 1000);
     }
 
     return nextInstance;
@@ -383,8 +383,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     if (scheduleDeviations != null && !scheduleDeviations.isEmpty()) {
       int arrivalTime = instance.getBlockStopTime().getStopTime().getArrivalTime();
-      return (int) InterpolationLibrary.interpolate(
-          scheduleDeviations, arrivalTime, EOutOfRangeStrategy.LAST_VALUE);
+      return (int) InterpolationLibrary.interpolate(scheduleDeviations,
+          arrivalTime, EOutOfRangeStrategy.LAST_VALUE);
     } else if (blockLocation.isScheduleDeviationSet()) {
       return (int) blockLocation.getScheduleDeviation();
     } else {
@@ -416,11 +416,43 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         instance.getBlockInstance(), instance.getBlockStopTime());
 
     long arrivalTime = schedule.getArrivalTime() + arrivalDeviation * 1000;
-    instance.setPredictedArrivalTime(arrivalTime);
+    setPredictedArrivalTimeForInstance(instance, arrivalTime);
 
     long departureTime = schedule.getDepartureTime() + departureDeviation
         * 1000;
+    setPredictedDepartureTimeForInstance(instance, departureTime);
+  }
+
+  /**
+   * This method both sets the predicted arrival time for an instance, but also
+   * updates the scheduled arrival time for a frequency-based instance
+   * 
+   * @param instance
+   * @param arrivalTime
+   */
+  private void setPredictedArrivalTimeForInstance(
+      ArrivalAndDepartureInstance instance, long arrivalTime) {
+
+    instance.setPredictedArrivalTime(arrivalTime);
+
+    if (instance.getFrequency() != null)
+      instance.setScheduledArrivalTime(arrivalTime);
+  }
+
+  /**
+   * This method both sets the predicted departure time for an instance, but
+   * also updates the scheduled departure time for a frequency-based instance
+   * 
+   * @param instance
+   * @param departureTime
+   */
+  private void setPredictedDepartureTimeForInstance(
+      ArrivalAndDepartureInstance instance, long departureTime) {
+
     instance.setPredictedDepartureTime(departureTime);
+
+    if (instance.getFrequency() != null)
+      instance.setScheduledDepartureTime(departureTime);
   }
 
   private int calculateArrivalDeviation(BlockStopTimeEntry nextBlockStopTime,

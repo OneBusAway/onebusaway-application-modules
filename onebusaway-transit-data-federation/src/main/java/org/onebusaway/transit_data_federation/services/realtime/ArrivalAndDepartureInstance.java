@@ -29,9 +29,9 @@ public class ArrivalAndDepartureInstance {
 
   private final BlockStopTimeEntry blockStopTime;
 
-  private final long scheduledArrivalTime;
+  private long scheduledArrivalTime;
 
-  private final long scheduledDepartureTime;
+  private long scheduledDepartureTime;
 
   private BlockLocation blockLocation;
 
@@ -73,8 +73,16 @@ public class ArrivalAndDepartureInstance {
     this.blockLocation = blockLocation;
   }
 
+  public void setScheduledArrivalTime(long scheduledArrivalTime) {
+    this.scheduledArrivalTime = scheduledArrivalTime;
+  }
+
   public long getScheduledArrivalTime() {
     return scheduledArrivalTime;
+  }
+
+  public void setScheduledDepartureTime(long scheduledDepartureTime) {
+    this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
   public long getScheduledDepartureTime() {
