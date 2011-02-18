@@ -160,7 +160,14 @@ var obaApiFactory = function() {
 	
 	that.processSituation = function(situation, references) {
 		var affects = situation.affects || {};
+		var affectedAgencies = affects.agencies || [];		
 		var affectedStops = affects.stops || [];
+		
+		jQuery.each(affectedAgencies, function() {
+			var agency = references.agenciesById[this.agencyId];
+			if( agency != undefined )
+				this.agency = agency;
+		});
 		
 		jQuery.each(affectedStops, function() {
 			var stop = references.stopsById[this.stopId];

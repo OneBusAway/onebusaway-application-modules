@@ -11,6 +11,7 @@ import org.onebusaway.api.model.transit.blocks.BlockTripV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockV2Bean;
 import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.NaturalLanguageStringV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationAffectedAgencyV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
@@ -54,6 +55,7 @@ import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.model.schedule.StopTimeBean;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
@@ -803,7 +805,7 @@ public class BeanFactoryV2 {
     if (situation.getPublicationWindow() != null)
       bean.setPublicationWindow(getTimeRange(situation.getPublicationWindow()));
 
-    if( situation.getAffects() != null)
+    if (situation.getAffects() != null)
       bean.setAffects(getSituationAffects(situation.getAffects()));
 
     if (!CollectionsLibrary.isEmpty(situation.getConsequences())) {
@@ -834,6 +836,15 @@ public class BeanFactoryV2 {
   public SituationAffectsV2Bean getSituationAffects(SituationAffectsBean affects) {
 
     SituationAffectsV2Bean bean = new SituationAffectsV2Bean();
+
+    List<SituationAffectedAgencyBean> agencies = affects.getAgencies();
+
+    if (!CollectionsLibrary.isEmpty(agencies)) {
+      List<SituationAffectedAgencyV2Bean> beans = new ArrayList<SituationAffectedAgencyV2Bean>();
+      for (SituationAffectedAgencyBean agency : agencies)
+        beans.add(getSituationAffectedAgency(agency));
+      bean.setAgencies(beans);
+    }
 
     List<SituationAffectedStopBean> stops = affects.getStops();
 
@@ -871,6 +882,13 @@ public class BeanFactoryV2 {
       }
       bean.setCalls(calls);
     }
+    return bean;
+  }
+
+  public SituationAffectedAgencyV2Bean getSituationAffectedAgency(
+      SituationAffectedAgencyBean agency) {
+    SituationAffectedAgencyV2Bean bean = new SituationAffectedAgencyV2Bean();
+    bean.setAgencyId(agency.getAgencyId());
     return bean;
   }
 

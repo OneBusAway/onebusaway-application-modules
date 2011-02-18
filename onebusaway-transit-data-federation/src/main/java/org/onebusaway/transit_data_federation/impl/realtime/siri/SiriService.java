@@ -12,6 +12,7 @@ import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBea
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
@@ -23,15 +24,18 @@ import org.springframework.stereotype.Component;
 
 import uk.org.siri.siri.AbstractServiceDeliveryStructure;
 import uk.org.siri.siri.AffectedCallStructure;
+import uk.org.siri.siri.AffectedOperatorStructure;
 import uk.org.siri.siri.AffectedStopPointStructure;
 import uk.org.siri.siri.AffectedVehicleJourneyStructure;
 import uk.org.siri.siri.AffectedVehicleJourneyStructure.Calls;
 import uk.org.siri.siri.AffectsScopeStructure;
+import uk.org.siri.siri.AffectsScopeStructure.Operators;
 import uk.org.siri.siri.AffectsScopeStructure.StopPoints;
 import uk.org.siri.siri.AffectsScopeStructure.VehicleJourneys;
 import uk.org.siri.siri.DefaultedTextStructure;
 import uk.org.siri.siri.EntryQualifierStructure;
 import uk.org.siri.siri.ExtensionsStructure;
+import uk.org.siri.siri.OperatorRefStructure;
 import uk.org.siri.siri.PtConsequenceStructure;
 import uk.org.siri.siri.PtConsequencesStructure;
 import uk.org.siri.siri.PtSituationElementStructure;
@@ -165,24 +169,45 @@ public class SiriService {
       SituationAffects situationAffects = new SituationAffects();
       situation.setAffects(situationAffects);
 
+      Operators operators = affectsStructure.getOperators();
+
+      if (operators != null
+          && !CollectionsLibrary.isEmpty(operators.getAffectedOperator())) {
+
+        List<SituationAffectedAgency> affectedAgencies = new ArrayList<SituationAffectedAgency>();
+
+        for (AffectedOperatorStructure operator : operators.getAffectedOperator()) {
+          OperatorRefStructure operatorRef = operator.getOperatorRef();
+          if (operatorRef == null || operatorRef.getValue() == null)
+            continue;
+          String agencyId = operatorRef.getValue();
+          SituationAffectedAgency affectedAgency = new SituationAffectedAgency();
+          affectedAgency.setAgencyId(agencyId);
+          affectedAgencies.add(affectedAgency);
+        }
+
+        if (!affectedAgencies.isEmpty())
+          situationAffects.setAgencies(affectedAgencies);
+      }
+
       StopPoints stopPoints = affectsStructure.getStopPoints();
-      
+
       if (stopPoints != null
           && !CollectionsLibrary.isEmpty(stopPoints.getAffectedStopPoint())) {
 
         List<SituationAffectedStop> affectedStops = new ArrayList<SituationAffectedStop>();
-        
+
         for (AffectedStopPointStructure stopPoint : stopPoints.getAffectedStopPoint()) {
           StopPointRefStructure stopRef = stopPoint.getStopPointRef();
-          if( stopRef == null || stopRef.getValue() == null)
+          if (stopRef == null || stopRef.getValue() == null)
             continue;
           AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(stopRef.getValue());
           SituationAffectedStop affectedStop = new SituationAffectedStop();
           affectedStop.setStopId(stopId);
           affectedStops.add(affectedStop);
         }
-        
-        if( ! affectedStops.isEmpty() )
+
+        if (!affectedStops.isEmpty())
           situationAffects.setStops(affectedStops);
       }
 
