@@ -21,9 +21,11 @@
 <title>Route <s:property value="result.trip.route.shortName" /> - <s:property value="result.trip.tripHeadsign" /> - Trip # <s:property
     value="result.trip.id" /></title>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-trip.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/css/oba-presentation.css')}"/>
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:url('/config.action')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/js/oba-presentation.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('/js/oba-where-standard-trip.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript">
   jQuery(document).ready(function() {
@@ -62,11 +64,11 @@
         
         <div id="map"><jsp:text></jsp:text></div>
         
-        <div class="stopInfoWindowTemplate" style="display:none;">
-            <h3>Stop Name</h3>
-            <h4><span class="stopCode"><s:text name="StopNum"/></span><span class="stopDirection"> - <s:text name="bound"/></span></h4>
-            <p><s:a action="arrival-and-departure-for-stop"><s:text name="Realtime_arrival_info" /></s:a></p>
-        </div>
+        <s:component template="oba-stop-info-window-template.ftl">
+            <s:param name="content">
+                <p><s:a action="arrival-and-departure-for-stop"><s:text name="Realtime_arrival_info" /></s:a></p>
+            </s:param>
+        </s:component>
         
         <div id="mapLegendLabel"><s:text name="Legend"/></div>
         <table id="mapLegend">

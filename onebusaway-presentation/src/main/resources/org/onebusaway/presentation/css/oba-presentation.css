@@ -1,0 +1,40 @@
+.StopInfoWindow > .stopName {
+	font-size: 14pt;	
+}
+
+.StopInfoWindow > .stopDescription {
+	font-size: 12pt;	
+}
+
+.StopInfoWindow .routesSubSection {
+	overflow: auto;
+}
+
+.StopInfoWindow .routeShortName {
+    border: 2px solid #000000;
+    cursor: pointer;
+    float: left;
+    font-weight: bold;
+    margin-right: 5px;
+    margin-top: 5px;
+    padding: 2px;
+    text-align: center;
+    width: 25px;
+}
+
+.StopInfoWindow .routeLongName {
+	border: 2px solid #000000;
+    font-weight: bold;
+    margin-top: 5px;
+    padding: 2px;
+    text-align: center;
+}
+
+.StopInfoWindow .routeReallyLongName {
+	font-size: 0.8em;
+}
+
+.StopInfoWindow .clearBottom {
+	height: 1px;
+	clear: both;	
+}

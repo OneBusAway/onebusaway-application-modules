@@ -76,6 +76,7 @@
   </scm>
 
   <modules>
+    <module>onebusaway-api-core</module>
     <module>onebusaway-api-webapp</module>
     <module>onebusaway-cli</module>
     <module>onebusaway-container</module>
@@ -105,7 +106,7 @@
       <dependency>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-collections</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5-SNAPSHOT</version>
       </dependency>
 
       <dependency>

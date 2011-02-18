@@ -11,8 +11,6 @@ var obaMapMarkerManagerFactory = function(map) {
 	var markersByZoomLevel = {};
 	var prevZoomLevel = map.getZoom();
 	
-	console.log('prevZoomLevel=' + prevZoomLevel);
-	
 	/****
 	 * Private Methods
 	 ****/
@@ -21,10 +19,8 @@ var obaMapMarkerManagerFactory = function(map) {
 		var zoomLevel = map.getZoom();
 		var marker = this.marker;
 		
-		var shouldBeVisible = this.zoomFrom <= zoomLevel && zoomLevel < this.zoomTo;
+		var shouldBeVisible = this.zoomFrom <= zoomLevel && zoomLevel < this.zoomTo && ! marker.remove;
 		var isVisible = marker.getVisible();
-		
-		console.log('zoomLevel=' + zoomLevel + ' shouldBeVisible=' + shouldBeVisible + ' isVisible=' + isVisible + ' zoomFrom=' + this.zoomFrom + ' zoomTo=' + this.zoomTo);
 		
 		if( isVisible == undefined )
 			isVisible = false;
@@ -49,6 +45,8 @@ var obaMapMarkerManagerFactory = function(map) {
 			'refreshMarkerEntry': refreshMarkerEntry
 		};
 		
+		marker.obaMarkerManagerEntry = entry;
+		
 		var addMarkerEntryForZoomLevel = function(zoom,entry) {
 			var markersForZoomLevel = markersByZoomLevel[zoom];
 			if( ! markersForZoomLevel ) {
@@ -64,26 +62,42 @@ var obaMapMarkerManagerFactory = function(map) {
 		
 		marker.setMap(map);
 		entry.refreshMarkerEntry();
+		
+		
 	};
 	
+	that.removeMarker = function(marker) {
+		
+		var entry = marker.obaMarkerManagerEntry;
+		
+		if( entry == undefined )
+			return;
+		
+		delete marker.obaMarkerManagerEntry;
+		
+		/**
+		 * Removal of the entry from the 'markersByZoomLevel' object is delayed
+		 * until the next iteration of a zoom level.  See 'refreshEntries()' for
+		 * details.
+		 */
+		entry.remove = true;
+		entry.refreshMarkerEntry();
+	};
 	
 	that.refresh = function() {
 		
 		var zoomLevel = map.getZoom();
-		console.log('zoom_changed: prevZoomLevel=' + prevZoomLevel + ' zoomLevel=' + zoomLevel);
 		
 		var markersForPrevZoomLevel = markersByZoomLevel[prevZoomLevel];
 		
 		if( markersForPrevZoomLevel) {
-			jQuery.each(markersForPrevZoomLevel, refreshMarkerEntry);
+			refreshEntries(markersForPrevZoomLevel);
 		}
-		
-		
 		
 		var markersForZoomLevel = markersByZoomLevel[zoomLevel];
 		
 		if( markersForZoomLevel) {
-			jQuery.each(markersForZoomLevel, refreshMarkerEntry);
+			refreshEntries(markersForZoomLevel);
 		}
 		
 		prevZoomLevel = zoomLevel;
@@ -93,12 +107,44 @@ var obaMapMarkerManagerFactory = function(map) {
 	    that.refresh();
     });
 	
+	var refreshEntries = function(entries) {
+		var writeIndex = 0;
+		for( var readIndex=0; readIndex < entries.length; readIndex++) {
+			
+			var entry = entries[readIndex];
+
+			/**
+			 * If the entry is marked for removal, we skip it 
+			 */
+			if( entry.remove )
+				continue;
+			
+			entry.refreshMarkerEntry = entry;
+			
+			/**
+			 * Do we need to copy an entry forward?
+			 */
+			if( readIndex != writeIndex) {
+				entries[writeIndex] = entry;
+			}
+			
+			writeIndex++;
+		}
+		
+		// Remove any trailing elements
+		if( writeIndex < entries.length ) {
+			entries.splice(writeIndex,entries.length - writeIndex);
+		}
+	};
+	
 	return that;
 };
 
 var obaMapFactory = function() {
 
 	var that = {};
+	
+	const RADIUS_OF_EARTH_IN_KM = 6371.01;
 	
 	/****
 	 * Public Methods
@@ -196,6 +242,34 @@ var obaMapFactory = function() {
 		return bounds;
 	};
 	
+	that.boundsForPointAndRadius = function(point, radius) {
+		return that.boundsForLatLonAndRadius(point.lat(), point.lng(), radius, radius);
+	};
+	
+	that.boundsForLatLonAndRadius = function(lat, lon, latDistance, lonDistance) {
+
+		var radiusOfEarth = RADIUS_OF_EARTH_IN_KM * 1000;
+
+		var latRadians = toRadians(lat);
+		var lonRadians = toRadians(lon);
+
+		var latRadius = radiusOfEarth;
+		var lonRadius = Math.cos(latRadians) * radiusOfEarth;
+
+		var latOffset = latDistance / latRadius;
+		var lonOffset = lonDistance / lonRadius;
+
+		var latFrom = toDegrees(latRadians - latOffset);
+		var latTo = toDegrees(latRadians + latOffset);
+
+		var lonFrom = toDegrees(lonRadians - lonOffset);
+		var lonTo = toDegrees(lonRadians + lonOffset);
+
+		var p1 = new google.maps.LatLng(latFrom,lonFrom);
+		var p2 = new google.maps.LatLng(latTo,lonTo);
+		return new google.maps.LatLngBounds(p1,p2);
+	};
+	
 	that.addStopToMarkerManager = function(stop, markerManager) {
 		
 		var iconType = getIconTypeForStop(stop);
@@ -224,6 +298,14 @@ var obaMapFactory = function() {
 	/****
 	 * Private Methods
 	 ****/
+	
+	var toRadians = function(angdeg) {
+		return angdeg / 180.0 * Math.PI;
+	};
+	
+	var toDegrees = function(angrad) {
+		return angrad * 180.0 / Math.PI;
+	};
 	
 	var iconSizes = {
 		'large': '22',

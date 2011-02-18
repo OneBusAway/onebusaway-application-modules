@@ -1,27 +1,17 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.ItineraryV2BeanFactory;
 import org.onebusaway.api.model.transit.tripplanning.GraphResultV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
 public class StreetGraphForRegionController extends ApiActionSupport {
 

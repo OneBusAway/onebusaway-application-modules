@@ -31,11 +31,11 @@ function oba_where_standard_agencies() {
 	    });
 	};
 
-	OBA.Api.agenciesWithCoverage(function(list) {
+	OBA.Api.agenciesWithCoverage(function(entry) {
 
-		for( var i=0; i<list.length; i++) {
-			handleAgencyWithCoverage(list[i]);
-		}
+		jQuery.each(entry.list, function() {
+			handleAgencyWithCoverage(this);
+		});
 		
 		if( ! bounds.isEmpty() )
 			map.fitBounds(bounds);

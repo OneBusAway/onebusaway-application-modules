@@ -2,6 +2,9 @@ package org.onebusaway.presentation.tags;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.xwork.StringEscapeUtils;
 import org.apache.struts2.components.ContextBean;
@@ -17,6 +20,10 @@ public class JsonComponent extends ContextBean {
   private static final Logger LOG = LoggerFactory.getLogger(JsonComponent.class);
 
   private boolean _escapeJavaScript = false;
+  
+  private boolean _ignoreHierarchy = true;
+  
+  private boolean _excludeNullProperties = true;
 
   private String _value;
 
@@ -31,6 +38,14 @@ public class JsonComponent extends ContextBean {
   public void setEscapeJavaScript(boolean escapeJavaScript) {
     _escapeJavaScript = escapeJavaScript;
   }
+  
+  public void setIgnoreHierarchy(boolean ignoreHiearchy) {
+    _ignoreHierarchy = ignoreHiearchy;
+  }
+  
+  public void setExcludeNullProperties(boolean excludeNullProperties) {
+    _excludeNullProperties = excludeNullProperties;
+  }
 
   @Override
   public boolean end(Writer writer, String body) {
@@ -43,7 +58,8 @@ public class JsonComponent extends ContextBean {
     String json = null;
 
     try {
-      json = JSONUtil.serialize(value);
+      Collection<Pattern> empty = Collections.emptyList();
+      json = JSONUtil.serialize(value, empty, empty, _ignoreHierarchy, _excludeNullProperties);
     } catch (JSONException ex) {
       LOG.error("Could not generate json from value", ex);
     }

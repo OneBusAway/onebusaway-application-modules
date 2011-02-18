@@ -1,4 +1,4 @@
-package org.onebusaway.api.actions.api;
+package org.onebusaway.api;
 
 public class ResponseCodes {
 

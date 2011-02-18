@@ -41,29 +41,12 @@ var oba_where_standard_trip = function(data) {
 		
 		var markers = OBA.Maps.addStopToMarkerManager(stop, markerManager);
 		
-		var infoWindowContent = 
-		
 		jQuery.each(markers,function(){
 			google.maps.event.addListener(this, 'click', function() {
 				
-				var content = jQuery('.stopInfoWindowTemplate').clone();
-			    content.find("h3").text(stop.name);
+				var content = OBA.Presentation.createStopInfoWindow(stop);
 			    
-			    var stopCodeSpan = content.find("span.stopCode");
-			    var stopCodeText = OBA.L10n.format(stopCodeSpan.text(), stop.code);
-			    stopCodeSpan.text(stopCodeText);
-			    
-			    var stopDirectionSpan = content.find("span.stopDirection");
-			    
-			    if( stop.direction ) {
-				    var stopDirectionText = OBA.L10n.format(stopDirectionSpan.text(), stop.direction);
-				    stopDirectionSpan.text(stopDirectionText);
-			    }
-			    else {
-			    	stopDirectionSpan.hide();
-			    }
-			    
-			    var anchor = content.find("p>a");
+			    var anchor = content.find(".stopContent>p>a");
 			    var url = anchor.attr("href");
 			    
 				var params = {};

@@ -10,6 +10,10 @@ public class TimeRangeBean implements Serializable {
 
   private long to;
 
+  /**
+   * 
+   * @return the from time, or zero if not set
+   */
   public long getFrom() {
     return from;
   }
@@ -18,6 +22,10 @@ public class TimeRangeBean implements Serializable {
     this.from = from;
   }
 
+  /**
+   * 
+   * @return the to time, or zero if not set
+   */
   public long getTo() {
     return to;
   }

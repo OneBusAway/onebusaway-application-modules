@@ -46,6 +46,10 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
     CoordinateBounds bounds = new CoordinateBounds();
 
     for (AgencyWithCoverageBean awc : agenciesWithCoverage) {
+      
+      if( awc.getLatSpan() <= 0 || awc.getLonSpan() <= 0)
+        continue;
+      
       bounds.addPoint(awc.getLat() + awc.getLatSpan() / 2,
           awc.getLon() + awc.getLonSpan() / 2);
       bounds.addPoint(awc.getLat() - awc.getLatSpan() / 2,

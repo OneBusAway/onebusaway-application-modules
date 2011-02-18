@@ -803,7 +803,8 @@ public class BeanFactoryV2 {
     if (situation.getPublicationWindow() != null)
       bean.setPublicationWindow(getTimeRange(situation.getPublicationWindow()));
 
-    bean.setAffects(getSituationAffects(situation.getAffects()));
+    if( situation.getAffects() != null)
+      bean.setAffects(getSituationAffects(situation.getAffects()));
 
     if (!CollectionsLibrary.isEmpty(situation.getConsequences())) {
       List<SituationConsequenceV2Bean> beans = new ArrayList<SituationConsequenceV2Bean>();

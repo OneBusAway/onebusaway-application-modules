@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
@@ -16,7 +17,6 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.webapp.actions.bundles.ProblemReportStatus;
-import org.onebusaway.webapp.actions.bundles.ResourceBundleSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;

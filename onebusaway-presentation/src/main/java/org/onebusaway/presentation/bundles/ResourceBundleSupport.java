@@ -1,4 +1,4 @@
-package org.onebusaway.webapp.actions.bundles;
+package org.onebusaway.presentation.bundles;
 
 import java.util.Enumeration;
 import java.util.LinkedHashMap;

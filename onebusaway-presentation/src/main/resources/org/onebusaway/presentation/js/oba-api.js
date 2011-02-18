@@ -78,7 +78,7 @@ var obaApiFactory = function() {
 					postProcess(list[i], references);
 				}
 			}
-			callback(list);
+			callback(json);
 		};
 
 		return createHandler(listHandler, errorCallback);
@@ -107,15 +107,15 @@ var obaApiFactory = function() {
 		references.tripsById = processReferencesById(references.trips);
 		references.situationsById = processReferencesById(references.situations);
 		
-		jQuery.each(references.routes, function(){
+		jQuery.each(references.routes || [], function(){
 			processRoute(this, references);
 		});
 		
-		jQuery.each(references.stops, function(){
+		jQuery.each(references.stops || [], function(){
 			processStop(this, references);
 		});
 		
-		jQuery.each(references.trips, function(){
+		jQuery.each(references.trips || [], function(){
 			processTrip(this, references);
 		});
 		
@@ -157,6 +157,17 @@ var obaApiFactory = function() {
 		if( agency )
 			route.agency = agency;
 	};
+	
+	that.processSituation = function(situation, references) {
+		var affects = situation.affects || {};
+		var affectedStops = affects.stops || [];
+		
+		jQuery.each(affectedStops, function() {
+			var stop = references.stopsById[this.stopId];
+			if( stop != undefined )
+				this.stop = stop;
+		});
+	}
 	
 	var processStop = function(stop, references) {
 		var routes = new Array();
@@ -241,6 +252,9 @@ var obaApiFactory = function() {
 	/***************************************************************************
 	 * Public API Methods
 	 **************************************************************************/
+	
+	that.createEntryHandler = createEntryHandler;
+	that.createListHandler = createListHandler;
 
 	that.agenciesWithCoverage = function(callback, errorCallback) {
 		var url = createUrl('/where/agencies-with-coverage.json');
@@ -277,6 +291,13 @@ var obaApiFactory = function() {
 		var params = createParams();
 		var handler = createEntryHandler(callback, errorCallback, processStop);
 		jQuery.getJSON(url, params, handler);
+	};
+	
+	that.stopsForLocation = function(params, callback, errorCallback) {		
+		var url = createUrl('/where/stops-for-location.json');
+		var urlParams = createParams(params);
+		var handler = createListHandler(callback, errorCallback, processStop);
+		jQuery.getJSON(url, urlParams, handler);
 	};
 	
 	that.stopsForRoute = function(routeId, callback, errorCallback) {
