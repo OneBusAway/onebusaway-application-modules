@@ -115,8 +115,8 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
       if (existingSituation != null) {
         situation.setCreationTime(existingSituation.getCreationTime());
       }
-
-      updateReferences(situation);
+      
+      updateReferences(existingSituation, situation);
     }
     saveServiceAlerts();
   }

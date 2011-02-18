@@ -18,7 +18,9 @@
 
     <!-- <import resource="remoting-servlet-extra.xml" /> -->
 
-    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" />
+    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+      <property name="detectHandlersInAncestorContexts" value="true"/>
+    </bean>
     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
 
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
