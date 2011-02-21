@@ -46,7 +46,6 @@ import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -585,8 +584,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private double getTransitLegBuilderAsDistance(TransitLegBuilder builder) {
 
-    BlockInstance blockInstance = builder.getBlockInstance();
-    BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+    BlockTripEntry trip = builder.getBlockTrip();
 
     BlockStopTimeEntry fromStop = null;
     BlockStopTimeEntry toStop = null;
@@ -598,13 +596,13 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       toStop = builder.getToStop().getBlockStopTime();
 
     if (fromStop == null && toStop == null)
-      return blockConfig.getTotalBlockDistance();
+      return trip.getTrip().getTotalTripDistance();
 
     if (fromStop == null && toStop != null)
-      return toStop.getDistanceAlongBlock();
+      return toStop.getDistanceAlongBlock() - trip.getDistanceAlongBlock();
 
     if (fromStop != null && toStop == null)
-      return blockConfig.getTotalBlockDistance()
+      return trip.getDistanceAlongBlock() + trip.getTrip().getTotalTripDistance()
           - fromStop.getDistanceAlongBlock();
 
     return toStop.getDistanceAlongBlock() - fromStop.getDistanceAlongBlock();
