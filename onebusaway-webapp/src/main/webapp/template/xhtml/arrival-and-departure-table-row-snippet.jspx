@@ -37,6 +37,11 @@
               </s:else>
             </jsp:element>
             <td>
+            
+            <s:component template="arrival-and-departure-service-alert-snippet.jspx">
+                <s:param name="arrivalAndDeparture" value="top"/>
+                <s:param name="presentation" value="#presentation"/>
+            </s:component>
             <div>
             <div class="arrivalsDestinationEntry"><s:url
                 var="tripUrl" action="trip" includeParams="none">

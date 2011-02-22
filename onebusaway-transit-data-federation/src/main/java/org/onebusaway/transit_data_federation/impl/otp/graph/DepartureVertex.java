@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.otp;
+package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -6,12 +6,14 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public final class ArrivalVertex extends AbstractVertex implements HasEdges {
+public final class DepartureVertex extends AbstractVertex implements
+    HasEdges {
 
   private static DateFormat _format = DateFormat.getDateTimeInstance(
       DateFormat.SHORT, DateFormat.SHORT);
@@ -20,12 +22,12 @@ public final class ArrivalVertex extends AbstractVertex implements HasEdges {
 
   private final long _time;
 
-  public ArrivalVertex(GraphContext context, StopEntry stop, long time) {
+  public DepartureVertex(GraphContext context, StopEntry stop, long time) {
     super(context);
     _stop = stop;
     _time = time;
   }
-
+  
   public StopEntry getStop() {
     return _stop;
   }
@@ -36,7 +38,7 @@ public final class ArrivalVertex extends AbstractVertex implements HasEdges {
 
   @Override
   public String getLabel() {
-    return "stop_arrival_" + getStopId() + "_wait_" + _time;
+    return "stop_departure_" + getStopId() + "_wait_" + _time;
   }
 
   @Override
@@ -66,8 +68,8 @@ public final class ArrivalVertex extends AbstractVertex implements HasEdges {
   @Override
   public Collection<Edge> getIncoming() {
     List<Edge> edges = new ArrayList<Edge>(1);
-    // We could come from a different bus (arrival)
-    edges.add(new ArrivalReverseEdge(_context, _stop));
+    // Return to the street network
+    edges.add(new WaitingBeginsAtStopEdge(_context, _stop, true));
     return edges;
   }
 
@@ -79,8 +81,8 @@ public final class ArrivalVertex extends AbstractVertex implements HasEdges {
   @Override
   public Collection<Edge> getOutgoing() {
     List<Edge> edges = new ArrayList<Edge>(1);
-    // We stop waiting and move back to the street
-    edges.add(new WaitingEndsAtStopEdge(_context, _stop, false));
+    // Let's board a bus!
+    edges.add(new DepartureEdge(_context, _stop));
     return edges;
   }
 
@@ -90,7 +92,7 @@ public final class ArrivalVertex extends AbstractVertex implements HasEdges {
 
   @Override
   public String toString() {
-    return "AlightVertex(stop=" + _stop.getId() + " time="
+    return "BoardVertex(stop=" + _stop.getId() + " time="
         + _format.format(new Date(_time)) + ")";
   }
 
@@ -111,7 +113,7 @@ public final class ArrivalVertex extends AbstractVertex implements HasEdges {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    ArrivalVertex other = (ArrivalVertex) obj;
+    DepartureVertex other = (DepartureVertex) obj;
     return _stop.equals(other._stop) && _time == other._time;
   }
 }

@@ -1,5 +1,6 @@
-package org.onebusaway.transit_data_federation.impl.otp;
+package org.onebusaway.transit_data_federation.impl.otp.graph;
 
+import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.Vertex;
 

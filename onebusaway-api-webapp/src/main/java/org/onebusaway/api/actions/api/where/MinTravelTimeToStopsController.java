@@ -5,20 +5,23 @@ import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.impl.StackInterceptor.AddToStack;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.TripDetailsV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.MinTravelTimeToStopV2Bean;
 import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
+@AddToStack({"constraints", "constraints.constraints"})
 public class MinTravelTimeToStopsController extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -31,7 +34,9 @@ public class MinTravelTimeToStopsController extends ApiActionSupport {
 
   private double _lon;
 
-  private OneBusAwayConstraintsBean _constraints = new OneBusAwayConstraintsBean();
+  private long _time;
+
+  private TransitShedConstraintsBean _constraints = new TransitShedConstraintsBean();
 
   public MinTravelTimeToStopsController() {
     super(V2);
@@ -62,15 +67,15 @@ public class MinTravelTimeToStopsController extends ApiActionSupport {
 
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
-    _constraints.setMinDepartureTime(time.getTime());
-
+    _time = time.getTime();
   }
 
-  /**
-   * @param maxTripDuration in minutes
-   */
-  public void setMaxTripDuration(int maxTripDuration) {
-    _constraints.setMaxTripDuration(maxTripDuration);
+  public void setConstraints(TransitShedConstraintsBean constraints) {
+    _constraints = constraints;
+  }
+
+  public TransitShedConstraintsBean getConstraints() {
+    return _constraints;
   }
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {
@@ -81,14 +86,13 @@ public class MinTravelTimeToStopsController extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    if (_constraints.getMinDepartureTime() <= 0)
-      _constraints.setMinDepartureTime(System.currentTimeMillis());
+    if (_time == 0)
+      _time = System.currentTimeMillis();
 
-    if (_constraints.getMaxDepartureTime() <= 0)
-      _constraints.setMaxDepartureTime(_constraints.getMinDepartureTime() + 60 * 60 * 1000);
+    CoordinatePoint location = new CoordinatePoint(_lat, _lon);
 
-    MinTravelTimeToStopsBean result = _transitDataService.getMinTravelTimeToStopsFrom(
-        _lat, _lon, _constraints);
+    MinTravelTimeToStopsBean result = _transitDataService.getMinTravelTimeToStopsFromNew(
+        location, _time, _constraints);
 
     BeanFactoryV2 factory = getBeanFactoryV2();
 

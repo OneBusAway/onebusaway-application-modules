@@ -1,11 +1,12 @@
-package org.onebusaway.transit_data_federation.impl.otp;
+package org.onebusaway.transit_data_federation.impl.otp.graph;
 
+import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Vertex;
 
-public final class WalkFromStopVertex extends AbstractStopVertex {
+public final class WalkToStopVertex extends AbstractStopVertex {
 
-  public WalkFromStopVertex(GraphContext context, StopEntry stop) {
+  public WalkToStopVertex(GraphContext context, StopEntry stop) {
     super(context, stop);
   }
 
@@ -24,10 +25,10 @@ public final class WalkFromStopVertex extends AbstractStopVertex {
 
   @Override
   public String toString() {
-    return "WalkFromStopVertex(stop=" + _stop.getId() + ")";
+    return "WalkToStopVertex(stop=" + _stop.getId() + ")";
   }
-  
+
   public static String getVertexLabelForStop(StopEntry stopEntry) {
-    return "walk_from_stop_" + stopEntry.getId();
+    return "walk_to_stop_" + stopEntry.getId();
   }
 }

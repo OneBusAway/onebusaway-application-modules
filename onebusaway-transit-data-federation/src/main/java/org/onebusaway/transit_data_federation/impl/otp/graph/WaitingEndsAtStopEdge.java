@@ -1,5 +1,7 @@
-package org.onebusaway.transit_data_federation.impl.otp;
+package org.onebusaway.transit_data_federation.impl.otp.graph;
 
+import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
+import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;

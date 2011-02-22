@@ -14,6 +14,7 @@ import java.util.Map;
  * @see FederatedByAggregateMethod
  * @see FederatedByBoundsMethod
  * @see FederatedByCoordinateBoundsMethod
+ * @see FederatedByCoordinatePointsMethod
  * @see FederatedByEntityIdMethod
  * @see FederatedByEntityIdsMethod
  * @see FederatedByLocationMethod
@@ -65,6 +66,16 @@ public class FederatedServiceMethodInvocationHandlerFactory {
     if (ann5 != null)
       return new FederatedByCoordinateBoundsMethodInvocationHandlerImpl(method,
           ann5.argument(), ann5.propertyExpression());
+
+    FederatedByCoordinatePointsMethod ann6 = method.getAnnotation(FederatedByCoordinatePointsMethod.class);
+    if (ann6 != null) {
+      int[] argumentIndices = ann6.arguments();
+      String[] expressions = ann6.propertyExpressions();
+      if (expressions.length == 0)
+        expressions = new String[argumentIndices.length];
+      return new FederatedByCoordinatePointsMethodInvocationHandlerImpl(method,
+          argumentIndices, expressions);
+    }
 
     throw new IllegalArgumentException(
         "No FederatedService method annotation for method: " + method);

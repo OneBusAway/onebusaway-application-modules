@@ -1,13 +1,15 @@
-package org.onebusaway.transit_data_federation.impl.otp;
+package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
+import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
@@ -15,12 +17,11 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public class BlockDepartureVertex extends AbstractBlockVertex implements
-    HasEdges {
+public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges {
 
-  public BlockDepartureVertex(GraphContext context,
+  public BlockArrivalVertex(GraphContext graphContext,
       ArrivalAndDepartureInstance instance) {
-    super(context, instance);
+    super(graphContext, instance);
   }
 
   /****
@@ -29,7 +30,7 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
 
   @Override
   public String getLabel() {
-    return "block_departure: " + _instance.toString();
+    return "block_arrival: " + _instance.toString();
   }
 
   /****
@@ -44,33 +45,13 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
   @Override
   public Collection<Edge> getIncoming() {
 
-    List<Edge> edges = new ArrayList<Edge>();
-    StopEntry stop = _instance.getStop();
+    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
+    ArrivalAndDepartureInstance previous = service.getPreviousStopArrivalAndDeparture(_instance);
+
+    if(previous == null)
+      return Collections.emptyList();
     
-    /**
-     * We can stay on the bus if applicable
-     */
-    BlockStopTimeEntry bst = _instance.getBlockStopTime();
-    if (bst.getBlockSequence() > 0) {
-      edges.add(new BlockDwellEdge(_context, _instance));
-    }
-
-    /**
-     * We can get off the bus
-     */
-    edges.add(new DepartureReverseEdge(_context, _instance));
-    
-    /**
-     * We can be coming from a transfer from another stop.
-     */
-    StopTransferService stopTransferService = _context.getStopTransferService();
-    List<StopTransfer> transfers = stopTransferService.getTransfersToStop(stop);
-
-    for (StopTransfer transfer : transfers)
-      edges.add(new TransferAndDepartureEdge(_context, _instance, transfer));
-
-
-    return edges;
+    return Arrays.asList((Edge) new BlockHopEdge(_context, previous, _instance));
   }
 
   @Override
@@ -80,9 +61,32 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
 
   @Override
   public Collection<Edge> getOutgoing() {
-    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
-    ArrivalAndDepartureInstance nextStop = service.getNextStopArrivalAndDeparture(_instance);
-    return Arrays.asList((Edge) new BlockHopEdge(_context, _instance, nextStop));
+
+    List<Edge> edges = new ArrayList<Edge>();
+    StopEntry stop = _instance.getStop();
+
+    /**
+     * We can continue on our current route if applicable
+     */
+    if (SupportLibrary.hasNextStopTime(_instance)) {
+      edges.add(new BlockDwellEdge(_context, _instance));
+    }
+
+    /**
+     * We can alight from the vehicle to the street network
+     */
+    edges.add(new ArrivalEdge(_context, _instance));
+
+    /**
+     * We can alight from the vehicle AND transfer to another stop
+     */
+    StopTransferService stopTransferService = _context.getStopTransferService();
+    List<StopTransfer> transfers = stopTransferService.getTransfersFromStop(stop);
+
+    for (StopTransfer transfer : transfers)
+      edges.add(new ArrivalAndTransferEdge(_context, _instance, transfer));
+
+    return edges;
   }
 
   /****
@@ -91,6 +95,6 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
 
   @Override
   public String toString() {
-    return "block_departure: " + _instance.toString();
+    return "block_arrival: " + _instance.toString();
   }
 }

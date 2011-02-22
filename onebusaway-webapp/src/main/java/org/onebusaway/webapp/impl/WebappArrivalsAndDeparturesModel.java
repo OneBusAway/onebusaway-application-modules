@@ -2,6 +2,7 @@ package org.onebusaway.webapp.impl;
 
 import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 import org.onebusaway.webapp.gwt.where_library.view.ArrivalsAndDeparturesPresentaion;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,14 @@ public class WebappArrivalsAndDeparturesModel extends
       _situations.setUser(_user);
     }
     return _situations;
+  }
+
+  public SituationsPresentation getSituationsForArrivalAndDeparture(
+      ArrivalAndDepartureBean arrivalAndDeparture) {
+    SituationsPresentation situations = new SituationsPresentation();
+    situations.setSituations(arrivalAndDeparture.getSituations());
+    situations.setUser(_user);
+    return situations;
   }
 
 }

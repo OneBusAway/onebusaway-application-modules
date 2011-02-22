@@ -12,9 +12,11 @@ import org.onebusaway.federations.annotations.FederatedByAggregateMethod;
 import org.onebusaway.federations.annotations.FederatedByAnyEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByCoordinateBoundsMethod;
+import org.onebusaway.federations.annotations.FederatedByCoordinatePointsMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.federations.annotations.FederatedByLocationMethod;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -52,6 +54,7 @@ import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
@@ -327,19 +330,20 @@ public interface TransitDataService extends FederatedService {
       throws ServiceException;
 
   /**
+   * Plan a trip between two locations at a particular time, with the specified
+   * constraints.
    * 
-   * @param latFrom
-   * @param lonFrom
-   * @param latTo
-   * @param lonTo
+   * @param from
+   * @param to
+   * @param time
    * @param constraints
    * @return a list of trip plans computed between the two locations with the
    *         specified constraints
    * @throws ServiceException
    */
-  @FederatedByBoundsMethod
-  public ItinerariesBean getItinerariesBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, ConstraintsBean constraints)
+  @FederatedByCoordinatePointsMethod(arguments = {0, 1})
+  public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
+      CoordinatePoint to, long time, ConstraintsBean constraints)
       throws ServiceException;
 
   @FederatedByBoundsMethod
@@ -356,10 +360,16 @@ public interface TransitDataService extends FederatedService {
    *         constraints
    * @throws ServiceException
    */
+
   @FederatedByLocationMethod
   public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(double lat,
       double lon, OneBusAwayConstraintsBean constraints)
       throws ServiceException;
+
+  @FederatedByCoordinatePointsMethod
+  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFromNew(
+      CoordinatePoint location, long time,
+      TransitShedConstraintsBean constraints) throws ServiceException;
 
   /**
    * 

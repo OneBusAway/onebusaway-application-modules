@@ -7,8 +7,6 @@ public class ConstraintsBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private long time;
-
   private boolean arriveBy = false;
 
   private int resultCount = 3;
@@ -34,14 +32,6 @@ public class ConstraintsBean implements Serializable {
   private int transferCost = -1;
 
   private int maxTransfers = -1;
-
-  public long getTime() {
-    return time;
-  }
-
-  public void setTime(long time) {
-    this.time = time;
-  }
 
   public boolean isArriveBy() {
     return arriveBy;

@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
+import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
 import org.opentripplanner.routing.algorithm.RemainingWeightHeuristic;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;

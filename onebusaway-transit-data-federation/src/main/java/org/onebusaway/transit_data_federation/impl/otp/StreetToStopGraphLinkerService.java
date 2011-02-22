@@ -2,6 +2,10 @@ package org.onebusaway.transit_data_federation.impl.otp;
 
 import javax.annotation.PostConstruct;
 
+import org.onebusaway.transit_data_federation.impl.otp.graph.WaitingBeginsAtStopEdge;
+import org.onebusaway.transit_data_federation.impl.otp.graph.WaitingEndsAtStopEdge;
+import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;

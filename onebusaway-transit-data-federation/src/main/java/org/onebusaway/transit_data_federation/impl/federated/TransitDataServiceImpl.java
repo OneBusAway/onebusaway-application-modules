@@ -12,8 +12,10 @@ import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
+import org.onebusaway.federations.annotations.FederatedByCoordinatePointsMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
@@ -55,6 +57,7 @@ import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
@@ -380,13 +383,13 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public ItinerariesBean getItinerariesBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, ConstraintsBean constraints)
+  public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
+      CoordinatePoint to, long time, ConstraintsBean constraints)
       throws ServiceException {
-    return _itinerariesBeanService.getItinerariesBetween(latFrom, lonFrom,
-        latTo, lonTo, constraints);
+    return _itinerariesBeanService.getItinerariesBetween(from, to, time,
+        constraints);
   }
-  
+
   @Override
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
       double lonFrom, double latTo, double lonTo) throws ServiceException {
@@ -400,6 +403,14 @@ class TransitDataServiceImpl implements TransitDataService {
       throws ServiceException {
 
     return _tripPlannerBeanService.getMinTravelTimeToStopsFrom(lat, lon,
+        constraints);
+  }
+
+  @FederatedByCoordinatePointsMethod
+  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFromNew(
+      CoordinatePoint location, long time,
+      TransitShedConstraintsBean constraints) throws ServiceException {
+    return _itinerariesBeanService.getMinTravelTimeToStopsFrom(location, time,
         constraints);
   }
 

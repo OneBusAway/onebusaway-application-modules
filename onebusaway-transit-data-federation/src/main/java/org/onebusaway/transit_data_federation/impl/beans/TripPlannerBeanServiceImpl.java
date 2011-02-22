@@ -177,17 +177,15 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
 
     Map<StopEntry, Long> results = _tripPlanner.getMinTravelTimeToStopsFrom(p,
         tpc);
-    return getStopTravelTimesAsResultsBean(results, constraints);
+    return getStopTravelTimesAsResultsBean(results);
   }
 
   /****
    * Private Methods
-   * 
-   * @param constraints
    ****/
 
   private MinTravelTimeToStopsBean getStopTravelTimesAsResultsBean(
-      Map<StopEntry, Long> results, OneBusAwayConstraintsBean constraints) {
+      Map<StopEntry, Long> results) {
 
     int n = results.size();
 

@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.impl.StackInterceptor.AddToStack;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.ItineraryV2BeanFactory;
 import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
+@AddToStack("constraints")
 public class PlanTripController extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -35,6 +36,8 @@ public class PlanTripController extends ApiActionSupport {
   private double _latTo;
 
   private double _lonTo;
+
+  private long _time;
 
   private ConstraintsBean _constraints = new ConstraintsBean();
 
@@ -65,70 +68,33 @@ public class PlanTripController extends ApiActionSupport {
 
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
-    _constraints.setTime(time.getTime());
+    _time = time.getTime();
   }
-  
+
   public void setDateAndTime(String value) throws ParseException {
     SimpleDateFormat f = new SimpleDateFormat("MM/dd/yy hh:mmaa");
     Date time = f.parse(value);
     setTime(time);
   }
 
-  public void setArriveBy(boolean arriveBy) {
-    _constraints.setArriveBy(arriveBy);
+  public void setConstraints(ConstraintsBean constraints) {
+    _constraints = constraints;
   }
 
-  public void setResultCount(int resultCount) {
-    _constraints.setResultCount(resultCount);
-  }
-
-  public void setUseRealTime(boolean useRealTime) {
-    _constraints.setUseRealTime(useRealTime);
-  }
-  
-  public void setMode(List<String> modes) {
-    _constraints.setModes(new HashSet<String>(modes));
-  }
-
-  public void setWalkSpeed(double walkSpeed) {
-    _constraints.setWalkSpeed(walkSpeed);
-  }
-
-  public void setWalkReluctance(double walkReluctance) {
-    _constraints.setWalkReluctance(walkReluctance);
-  }
-
-  public void setMaxWalkingDistance(double maxWalkingDistance) {
-    _constraints.setMaxWalkingDistance(maxWalkingDistance);
-  }
-
-  public void setInitialWaitReluctance(double initialWaitReluctance) {
-    _constraints.setInitialWaitReluctance(initialWaitReluctance);
-  }
-
-  public void setWaitReluctance(double waitReluctance) {
-    _constraints.setWaitReluctance(waitReluctance);
-  }
-
-  public void setMinTransferTime(int minTransferTime) {
-    _constraints.setMinTransferTime(minTransferTime);
-  }
-
-  public void setTransferCost(int transferCost) {
-    _constraints.setTransferCost(transferCost);
-  }
-
-  public void setMaxTransfers(int maxTransfers) {
-    _constraints.setMaxTransfers(maxTransfers);
+  public ConstraintsBean getConstraints() {
+    return _constraints;
   }
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
-    if (_constraints.getTime() == 0)
-      _constraints.setTime(System.currentTimeMillis());
+    if (_time == 0)
+      _time = System.currentTimeMillis();
+
+    CoordinatePoint from = new CoordinatePoint(_latFrom, _lonFrom);
+    CoordinatePoint to = new CoordinatePoint(_latTo, _lonTo);
 
     ItinerariesBean itineraries = _transitDataService.getItinerariesBetween(
-        _latFrom, _lonFrom, _latTo, _lonTo, _constraints);
+        from, to, _time, _constraints);
 
     BeanFactoryV2 factory = getBeanFactoryV2();
     ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(

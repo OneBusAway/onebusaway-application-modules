@@ -16,6 +16,7 @@ import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.EdgeNarrativeBean;
@@ -25,18 +26,21 @@ import org.onebusaway.transit_data.model.tripplanning.LegBean;
 import org.onebusaway.transit_data.model.tripplanning.LocationBean;
 import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data_federation.impl.beans.ApplicationBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
-import org.onebusaway.transit_data_federation.impl.otp.AbstractStopVertex;
-import org.onebusaway.transit_data_federation.impl.otp.ArrivalVertex;
-import org.onebusaway.transit_data_federation.impl.otp.BlockArrivalVertex;
-import org.onebusaway.transit_data_federation.impl.otp.BlockDepartureVertex;
-import org.onebusaway.transit_data_federation.impl.otp.DepartureVertex;
 import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
 import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
-import org.onebusaway.transit_data_federation.impl.otp.WalkFromStopVertex;
-import org.onebusaway.transit_data_federation.impl.otp.WalkToStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractBlockVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.ArrivalVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.BlockArrivalVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.BlockDepartureVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.DepartureVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
@@ -45,6 +49,7 @@ import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.otp.TransitShedPathService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -66,6 +71,7 @@ import org.opentripplanner.routing.edgetype.StreetTraversalPermission;
 import org.opentripplanner.routing.edgetype.StreetVertex;
 import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.services.StreetVertexIndexService;
+import org.opentripplanner.routing.spt.BasicShortestPathTree;
 import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.routing.spt.SPTEdge;
 import org.opentripplanner.routing.spt.SPTVertex;
@@ -82,6 +88,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private PathService _pathService;
 
+  private TransitShedPathService _transitShedPathService;
+
   private StreetVertexIndexService _streetVertexIndexService;
 
   private Graph _graph;
@@ -97,6 +105,12 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   @Autowired
   public void setPathService(PathService pathService) {
     _pathService = pathService;
+  }
+
+  @Autowired
+  public void setTransitShedPathService(
+      TransitShedPathService transitShedPathService) {
+    _transitShedPathService = transitShedPathService;
   }
 
   @Autowired
@@ -131,25 +145,24 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   @Override
-  public ItinerariesBean getItinerariesBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, ConstraintsBean constraints)
+  public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
+      CoordinatePoint to, long time, ConstraintsBean constraints)
       throws ServiceException {
 
-    String fromPlace = latFrom + "," + lonFrom;
-    String toPlace = latTo + "," + lonTo;
+    String fromPlace = from.getLat() + "," + from.getLon();
+    String toPlace = to.getLat() + "," + to.getLon();
 
-    Date time = new Date(constraints.getTime());
+    Date t = new Date(time);
 
     TraverseOptions options = createTraverseOptions();
     applyConstraintsToOptions(constraints, options);
 
-    List<GraphPath> paths = _pathService.plan(fromPlace, toPlace, time,
-        options, 1);
+    List<GraphPath> paths = _pathService.plan(fromPlace, toPlace, t, options, 1);
 
-    LocationBean from = getPointAsLocation(latFrom, lonFrom);
-    LocationBean to = getPointAsLocation(latTo, lonTo);
+    LocationBean fromBean = getPointAsLocation(from);
+    LocationBean toBean = getPointAsLocation(to);
 
-    return getPathsAsItineraries(paths, from, to);
+    return getPathsAsItineraries(paths, fromBean, toBean);
   }
 
   @Override
@@ -228,6 +241,46 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     List<VertexBean> beans = new ArrayList<VertexBean>(beansByVertex.values());
     return new ListBean<VertexBean>(beans, false);
+  }
+
+  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(
+      CoordinatePoint location, long time,
+      TransitShedConstraintsBean constraints) {
+
+    TraverseOptions options = createTraverseOptions();
+    applyConstraintsToOptions(constraints.getConstraints(), options);
+
+    Coordinate c = new Coordinate(location.getLon(), location.getLat());
+    Vertex origin = _streetVertexIndexService.getClosestVertex(c, options);
+
+    State originState = new State(time);
+    BasicShortestPathTree tree = _transitShedPathService.getTransitShed(origin,
+        originState, options);
+
+    Map<StopEntry, Long> results = new HashMap<StopEntry, Long>();
+
+    for (SPTVertex vertex : tree.getVertices()) {
+      Vertex v = vertex.mirror;
+      if (v instanceof AbstractStopVertex) {
+        AbstractStopVertex stopVertex = (AbstractStopVertex) v;
+        StopEntry stop = stopVertex.getStop();
+        State state = vertex.state;
+        long duration = Math.abs(state.time - time);
+        if (!results.containsKey(stop) || results.get(stop) > duration)
+          results.put(stop, duration);
+      }
+      else if( v instanceof AbstractBlockVertex) {
+        AbstractBlockVertex blockVertex = (AbstractBlockVertex) v;
+        ArrivalAndDepartureInstance instance = blockVertex.getInstance();
+        StopEntry stop = instance.getStop();
+        State state = vertex.state;
+        long duration = Math.abs(state.time - time);
+        if (!results.containsKey(stop) || results.get(stop) > duration)
+          results.put(stop, duration);
+      }
+    }
+
+    return getStopTravelTimesAsResultsBean(results, options.speed);
   }
 
   /****
@@ -315,11 +368,14 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     options.putExtension(OTPConfiguration.class, config);
 
     config.useRealtime = constraints.isUseRealTime();
+    
+    if( constraints.getMaxTripDuration() != -1)
+      config.maxTripDuration = constraints.getMaxTripDuration();
   }
 
-  private LocationBean getPointAsLocation(double lat, double lon) {
+  private LocationBean getPointAsLocation(CoordinatePoint p) {
     LocationBean bean = new LocationBean();
-    bean.setLocation(new CoordinatePoint(lat, lon));
+    bean.setLocation(p);
     return bean;
   }
 
@@ -602,7 +658,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       return toStop.getDistanceAlongBlock() - trip.getDistanceAlongBlock();
 
     if (fromStop != null && toStop == null)
-      return trip.getDistanceAlongBlock() + trip.getTrip().getTotalTripDistance()
+      return trip.getDistanceAlongBlock()
+          + trip.getTrip().getTotalTripDistance()
           - fromStop.getDistanceAlongBlock();
 
     return toStop.getDistanceAlongBlock() - fromStop.getDistanceAlongBlock();
@@ -899,4 +956,30 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return bean;
   }
 
+  private MinTravelTimeToStopsBean getStopTravelTimesAsResultsBean(
+      Map<StopEntry, Long> results, double walkingVelocity) {
+
+    int n = results.size();
+
+    String[] stopIds = new String[n];
+    double[] lats = new double[n];
+    double[] lons = new double[n];
+    long[] times = new long[n];
+
+    int index = 0;
+    String agencyId = null;
+
+    for (Map.Entry<StopEntry, Long> entry : results.entrySet()) {
+      StopEntry stop = entry.getKey();
+      agencyId = stop.getId().getAgencyId();
+      Long time = entry.getValue();
+      stopIds[index] = ApplicationBeanLibrary.getId(stop.getId());
+      lats[index] = stop.getStopLat();
+      lons[index] = stop.getStopLon();
+      times[index] = time;
+      index++;
+    }
+    return new MinTravelTimeToStopsBean(agencyId, stopIds, lats, lons, times,
+        walkingVelocity);
+  }
 }

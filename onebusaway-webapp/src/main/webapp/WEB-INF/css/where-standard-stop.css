@@ -228,3 +228,11 @@
 .unreadServiceAlert {
 	font-weight: bold;	
 }
+
+.tripUnreadServiceAlert {
+	background-image: oba-resource("/images/Alert.png");
+	width: 28px;
+	height: 26px;
+	float: right;
+	margin-left: 5px;
+}

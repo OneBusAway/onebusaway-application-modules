@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.otp;
+package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import org.onebusaway.gtfs.model.Trip;
 import org.opentripplanner.routing.core.EdgeNarrative;
@@ -19,7 +19,7 @@ public class EdgeNarrativeImpl implements EdgeNarrative, MutableEdgeNarrative {
     this.fromVertex = fromVertex;
     this.toVertex = toVertex;
   }
-  
+
   /****
    * {@link MutableEdgeNarrative} Interface
    ****/
@@ -76,5 +76,10 @@ public class EdgeNarrativeImpl implements EdgeNarrative, MutableEdgeNarrative {
   @Override
   public String getName(State state) {
     return null;
+  }
+
+  @Override
+  public boolean isRoundabout() {
+    return false;
   }
 }
