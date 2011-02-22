@@ -286,6 +286,13 @@ var obaApiFactory = function() {
 		jQuery.getJSON(url, params, handler);
 	};
 	
+	that.routesForLocation = function(params, callback, errorCallback) {
+		var url = createUrl('/where/routes-for-location.json');
+		params = createParams(params);
+		var handler = createListHandler(callback, errorCallback, processRoute);
+		jQuery.getJSON(url, params, handler);
+	};
+	
 	that.shape = function(shapeId, callback, errorCallback) {
 		var url = createUrl('/where/shape/' + shapeId + '.json');
 		var params = createParams();

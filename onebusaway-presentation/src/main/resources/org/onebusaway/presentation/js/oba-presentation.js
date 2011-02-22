@@ -8,6 +8,16 @@ OBA.Presentation = function() {
 	
 	var that = {};
 	
+	that.nameAsString = function(name) {
+		var result = '';
+		jQuery.each(name.names, function() {
+			if( result.length > 0)
+				result += ' ';
+			result += this;
+		});
+		return result;		
+	};
+	
 	that.getNameForRoute = function(route) {
 		var name = route.shortName;
 		if( name == undefined || name == null || name.length == 0)
