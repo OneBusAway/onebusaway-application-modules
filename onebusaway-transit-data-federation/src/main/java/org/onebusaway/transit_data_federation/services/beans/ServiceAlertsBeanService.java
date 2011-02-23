@@ -18,8 +18,10 @@ public interface ServiceAlertsBeanService {
   public void removeServiceAlert(AgencyAndId situationId);
 
   public SituationBean getServiceAlertForId(AgencyAndId situationId);
-  
+
   public List<SituationBean> getAllSituationsForAgencyId(String agencyId);
+
+  public void removeAllSituationsForAgencyId(String agencyId);
 
   public List<SituationBean> getSituationsForStopId(long time,
       AgencyAndId stopId);

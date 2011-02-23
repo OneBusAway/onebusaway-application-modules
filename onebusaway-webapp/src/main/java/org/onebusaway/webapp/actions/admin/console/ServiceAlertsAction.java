@@ -3,6 +3,8 @@ package org.onebusaway.webapp.actions.admin.console;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
@@ -16,6 +18,9 @@ import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
+@Results({@Result(type = "redirectAction", name = "redirect", params = {
+    "actionName", "service-alerts!agency", "agencyId", "${agencyId}", "parse",
+    "true"})})
 public class ServiceAlertsAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -77,4 +82,11 @@ public class ServiceAlertsAction extends ActionSupport {
     return SUCCESS;
   }
 
+  @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "agencyId", message = "missing required agencyId field")})
+  public String removeAllForAgency() {
+
+    _transitDataService.removeAllServiceAlertsForAgencyId(_agencyId);
+
+    return "redirect";
+  }
 }

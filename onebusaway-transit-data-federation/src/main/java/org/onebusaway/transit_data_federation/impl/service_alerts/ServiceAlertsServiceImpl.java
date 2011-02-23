@@ -115,7 +115,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
       if (existingSituation != null) {
         situation.setCreationTime(existingSituation.getCreationTime());
       }
-      
+
       updateReferences(existingSituation, situation);
     }
     saveServiceAlerts();
@@ -153,6 +153,13 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   @Override
+  public void removeAllSituationsForAgencyId(String agencyId) {
+    Set<AgencyAndId> ids = _situationIdsBySituationAgencyId.get(agencyId);
+    if (ids != null)
+      removeServiceAlerts(new ArrayList<AgencyAndId>(ids));
+  }
+
+  @Override
   public List<Situation> getSituationsForStopId(long time, AgencyAndId stopId) {
 
     Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
@@ -183,9 +190,9 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
      * TODO: Temporarily disable
      */
     /*
-    getSituationIdsForKey(_situationIdsByAgencyId, lineId.getAgencyId(),
-        situationIds);
-        */
+     * getSituationIdsForKey(_situationIdsByAgencyId, lineId.getAgencyId(),
+     * situationIds);
+     */
     getSituationIdsForKey(_situationIdsByLineId, lineId, situationIds);
     getSituationIdsForKey(_situationIdsByLineAndStopCall, lineAndStopCallRef,
         situationIds);
@@ -379,7 +386,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     xstream.alias("situationContainer", SituationsContainer.class);
     xstream.alias("situation", Situation.class);
     xstream.alias("affects", SituationAffects.class);
-    xstream.alias("agency",SituationAffectedAgency.class);
+    xstream.alias("agency", SituationAffectedAgency.class);
     xstream.alias("stop", SituationAffectedStop.class);
     xstream.alias("vehicleJourney", SituationAffectedVehicleJourney.class);
     xstream.alias("call", SituationAffectedCall.class);

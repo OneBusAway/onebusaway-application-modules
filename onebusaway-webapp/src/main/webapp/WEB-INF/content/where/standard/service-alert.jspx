@@ -19,12 +19,10 @@
 <jsp:directive.page contentType="text/html" />
 <head>
 <title><oba:message key="ServiceAlert"/></title>
-<c:set var="url"><s:url value="/js/jquery.js"/></c:set>
-<script type="text/javascript" src="${url}"><jsp:text></jsp:text></script>
-<c:set var="url"><s:url value="/js/oba-maps.js"/></c:set>
-<script type="text/javascript" src="${url}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
-
+<script type="text/javascript" src="${oba:url('/config.action')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/oba-where-standard-trip.js')}"><jsp:text></jsp:text></script>
 </head>
 <body>
 
@@ -93,21 +91,13 @@
     
     var showDiversionHandler = function() {   
     
-        var diversionPath = OBA.decodePolyline(encodedDiversionPath);
+        var diversionPath = OBA.Maps.decodePolyline(encodedDiversionPath);
         
-        var bounds = OBA.getPointsAsBounds(diversionPath);
+        var bounds = OBA.Maps.getPointsAsBounds(diversionPath);
         if( bounds.isEmpty() )
             return;
-        
-        var mapCenter = bounds.getCenter();
-	    
-        var mapOptions = {
-			zoom: 13,
-			center: mapCenter,
-			mapTypeId : google.maps.MapTypeId.ROADMAP };
-	    
-        var mapElement = jQuery(".diversionPath").get(0);
-        var map = new google.maps.Map(mapElement, mapOptions);
+
+        var map = OBA.Maps.map(jQuery('.diversionPath'));
         
         map.fitBounds(bounds); 
         

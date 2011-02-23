@@ -72,12 +72,18 @@ public class BeanFactoryV2 {
 
   private boolean _includeReferences = true;
 
+  private boolean _includeConditionDetails = true;
+
   private ReferencesBean _references = new ReferencesBean();
 
   private MaxCountSupport _maxCount;
 
   public BeanFactoryV2(boolean includeReferences) {
     _includeReferences = includeReferences;
+  }
+
+  public void setIncludeConditionDetails(boolean includeConditionDetails) {
+    _includeConditionDetails = includeConditionDetails;
   }
 
   public void setMaxCount(MaxCountSupport maxCount) {
@@ -917,7 +923,7 @@ public class BeanFactoryV2 {
     bean.setCondition(consequence.getCondition());
 
     SituationConditionDetailsBean details = consequence.getConditionDetails();
-    if (details != null) {
+    if (_includeConditionDetails && details != null) {
       SituationConditionDetailsV2Bean detailsBean = new SituationConditionDetailsV2Bean();
       detailsBean.setDiversionPath(details.getDiversionPath());
       detailsBean.setDiversionStopIds(details.getDiversionStopIds());

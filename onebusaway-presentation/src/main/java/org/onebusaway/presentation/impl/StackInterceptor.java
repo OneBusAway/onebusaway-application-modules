@@ -1,4 +1,4 @@
-package org.onebusaway.api.impl;
+package org.onebusaway.presentation.impl;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

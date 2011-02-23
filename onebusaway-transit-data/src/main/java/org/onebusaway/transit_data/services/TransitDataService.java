@@ -412,6 +412,9 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod()
   public ListBean<SituationBean> getAllServiceAlertsForAgencyId(String agencyId);
 
+  @FederatedByAgencyIdMethod()
+  public void removeAllServiceAlertsForAgencyId(String agencyId);
+
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query);
 

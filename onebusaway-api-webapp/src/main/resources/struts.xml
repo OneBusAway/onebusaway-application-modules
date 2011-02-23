@@ -40,7 +40,7 @@
         <interceptors>
             <interceptor name="applicationKey" class="org.onebusaway.api.actions.api.ApiKeyInterceptor" />
             <interceptor name="obaException" class="org.onebusaway.api.actions.api.ExceptionInterceptor" />
-            <interceptor name="stack" class="org.onebusaway.api.impl.StackInterceptor"/>
+            <interceptor name="stack" class="org.onebusaway.presentation.impl.StackInterceptor"/>
 
             <interceptor name="fileUploadBigger" class="org.apache.struts2.interceptor.FileUploadInterceptor">
                 <param name="maximumSize">10485760</param>

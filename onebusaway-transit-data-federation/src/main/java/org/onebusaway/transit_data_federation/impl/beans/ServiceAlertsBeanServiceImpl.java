@@ -76,6 +76,11 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   }
 
   @Override
+  public void removeAllSituationsForAgencyId(String agencyId) {
+    _serviceAlertsService.removeAllSituationsForAgencyId(agencyId);
+  }
+
+  @Override
   public List<SituationBean> getSituationsForStopId(long time,
       AgencyAndId stopId) {
 

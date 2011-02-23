@@ -233,6 +233,52 @@ var obaMapFactory = function() {
 
 		return array;
 	};
+	
+	var encodeNumber = function(num) {
+		var encodeString = '';
+	    while (num >= 0x20) {
+	      var nextValue = (0x20 | (num & 0x1f)) + 63;
+	      encodeString += (String.fromCharCode(nextValue))
+	      num >>= 5;
+	    }
+
+	    num += 63;
+	    encodeString += (String.fromCharCode(num))
+
+	    return encodeString;
+	};
+	
+	var encodedSignedNumber = function(num) {
+	    var sgn_num = num << 1;
+	    if (num < 0) {
+	      sgn_num = ~(sgn_num);
+	    }
+	    return (encodeNumber(sgn_num));
+	};
+	
+	that.encodePolyline = function(points) {
+		
+		var encoded = '';
+		var pLat = 0;
+		var pLng = 0;
+		
+		for( var index = 0; index<points.length; index++) {
+			var point = points[index];
+			var late5 = point.lat() * 1e5;
+			var lnge5 = point.lng() * 1e5;
+			
+		    var dlat = late5 - pLat;
+		    var dlng = lnge5 - pLng;
+		    
+		    pLat = late5;
+		    pLng = lnge5;
+		    
+		    encoded += encodedSignedNumber(dlat);
+		    encoded += encodedSignedNumber(dlng);
+		}
+
+		return encoded;
+	};
 
 	that.getPointsAsBounds = function(points) {
 		var bounds = new google.maps.LatLngBounds();

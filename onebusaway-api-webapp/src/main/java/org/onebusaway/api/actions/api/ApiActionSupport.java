@@ -16,7 +16,7 @@ public class ApiActionSupport extends ActionSupport implements
     ModelDriven<ResponseBean> {
 
   private static final long serialVersionUID = 1L;
-  
+
   private static final int NO_VERSION = -999;
 
   private int _defaultVersion;
@@ -24,6 +24,8 @@ public class ApiActionSupport extends ActionSupport implements
   private ResponseBean _response;
 
   private int _version = -999;
+
+  private String _key;
 
   private boolean _includeReferences = true;
 
@@ -33,6 +35,10 @@ public class ApiActionSupport extends ActionSupport implements
 
   public void setVersion(int version) {
     _version = version;
+  }
+
+  public void setKey(String key) {
+    _key = key;
   }
 
   public void setIncludeReferences(boolean includeReferences) {
@@ -58,7 +64,10 @@ public class ApiActionSupport extends ActionSupport implements
   }
 
   protected BeanFactoryV2 getBeanFactoryV2() {
-    return new BeanFactoryV2(_includeReferences);
+    BeanFactoryV2 factory = new BeanFactoryV2(_includeReferences);
+    // Temporary hack
+    factory.setIncludeConditionDetails(!"org.onebusaway.iphone".equals(_key));
+    return factory;
   }
 
   protected BeanFactoryV2 getBeanFactoryV2(MaxCountSupport maxCount) {

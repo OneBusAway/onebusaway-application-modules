@@ -474,6 +474,11 @@ class TransitDataServiceImpl implements TransitDataService {
     List<SituationBean> situations = _serviceAlertsBeanService.getAllSituationsForAgencyId(agencyId);
     return new ListBean<SituationBean>(situations, false);
   }
+  
+  @Override
+  public void removeAllServiceAlertsForAgencyId(String agencyId) {
+    _serviceAlertsBeanService.removeAllSituationsForAgencyId(agencyId);
+  }
 
   @Override
   public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query) {
