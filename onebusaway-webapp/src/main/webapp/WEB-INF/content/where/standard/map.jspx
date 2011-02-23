@@ -25,7 +25,7 @@
 <script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('messages:DateLibrary')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('messages:ArrivalAndDepartureMessages=org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages')}"><jsp:text></jsp:text></script>
-<script type="text/javascript" src="${oba:resource('file:/Users/bdferris/oba/onebusaway-application-modules/onebusaway-presentation/src/main/resources/org/onebusaway/presentation/js/oba-transit-map.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('classpath:org/onebusaway/presentation/js/oba-transit-map.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:resource('/js/oba-where-standard-plan.js')}"><jsp:text></jsp:text></script>
 <script type="text/javascript">
   jQuery(document).ready(function() {
