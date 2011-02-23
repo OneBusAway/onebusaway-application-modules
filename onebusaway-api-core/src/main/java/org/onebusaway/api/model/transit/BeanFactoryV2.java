@@ -672,6 +672,13 @@ public class BeanFactoryV2 {
   public StopsForRouteV2Bean getStopsForRoute(StopsForRouteBean stopsForRoute,
       boolean includePolylines) {
     StopsForRouteV2Bean bean = new StopsForRouteV2Bean();
+
+    RouteBean route = stopsForRoute.getRoute();
+    if (route != null) {
+      addToReferences(route);
+      bean.setRouteId(route.getId());
+    }
+
     List<String> stopIds = new ArrayList<String>();
     for (StopBean stop : stopsForRoute.getStops()) {
       stopIds.add(stop.getId());
@@ -871,7 +878,7 @@ public class BeanFactoryV2 {
       SituationAffectedVehicleJourneyBean journey) {
     SituationAffectedVehicleJourneyV2Bean bean = new SituationAffectedVehicleJourneyV2Bean();
     bean.setLineId(journey.getLineId());
-    bean.setDirection(journey.getDirection());
+    bean.setDirectionId(journey.getDirection());
 
     if (!CollectionsLibrary.isEmpty(journey.getCalls())) {
       List<SituationAffectedCallV2Bean> calls = new ArrayList<SituationAffectedCallV2Bean>();

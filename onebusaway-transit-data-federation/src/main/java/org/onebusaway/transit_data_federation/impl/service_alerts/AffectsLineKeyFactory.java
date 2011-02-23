@@ -35,7 +35,7 @@ public class AffectsLineKeyFactory implements AffectsKeyFactory<AgencyAndId> {
   }
 
   private boolean isActivated(SituationAffectedVehicleJourney journey) {
-    return journey.getLineId() != null && journey.getDirection() == null
+    return journey.getLineId() != null && journey.getDirectionId() == null
         && CollectionsLibrary.isEmpty(journey.getCalls());
   }
 }

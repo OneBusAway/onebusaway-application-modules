@@ -29,6 +29,14 @@ OBA.StopSelectionWidget = function(parentElement, params) {
 		transitMapParams.stopClickHandler = params.stopClickHandler;
 	
 	var transitMap = OBA.TransitMap(map, transitMapParams);
+	
+	if ( params.routeId ) {
+		if( params.directionId )
+			transitMap.showStopsForRouteAndDirectionId(params.routeId, params.directionId);
+		else
+			transitMap.showStopsForRouteId(params.routeId);
+	}
+	
 
 	/***************************************************************************
 	 * Public Methods

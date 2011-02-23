@@ -40,7 +40,10 @@
     <s:param name="stops" value="result.stops"/>
 </s:component>
 
-<jsp:include page="arrivals-alerts-header-snippet.jspx"/>
+<!--  Alerts -->
+<s:component template="service-alerts-header-snippet.jspx">
+    <s:param name="situations" value="situations"/>
+</s:component>
 
 <s:if test="filtered">
     <div class="arrivalsFilterPanel"><s:url var="removeFilterUrl" includeParams="get">
@@ -54,7 +57,9 @@
     <s:param name="presentation" value="arrivalsAndDeparturesPresentation" />    
 </s:component>
 
-<jsp:include page="arrivals-alerts-footer-snippet.jspx"/>
+<s:component template="service-alerts-footer-snippet.jspx">
+    <s:param name="situations" value="situations"/>
+</s:component>
 
 <div id="nearbyStops" class="stop_links">
 <h4>Nearby stops:</h4>

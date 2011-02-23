@@ -6,7 +6,8 @@ var OBA = window.OBA || {};
 
 OBA.StopsForRegionService = function() {
 
-	const MAX_STOP_COUNT_PER_REGION = 200;
+	const
+	MAX_STOP_COUNT_PER_REGION = 200;
 
 	var pendingOps = [];
 	var callback = undefined;
@@ -231,7 +232,7 @@ OBA.StopsForRegionService = function() {
 	var snap = function(latOrLon, factor) {
 		return Math.round(latOrLon * factor) / factor;
 	};
-	
+
 	var hashRegion = function(region) {
 		return region.toUrlValue();
 	};
@@ -293,7 +294,7 @@ OBA.StopsForRegionService = function() {
 		});
 
 		var asList = [];
-		jQuery.each( stopsByBounds, function(k,v) {
+		jQuery.each(stopsByBounds, function(k, v) {
 			asList.push(v);
 		})
 		return asList;
@@ -347,7 +348,7 @@ OBA.StopsForRegionService = function() {
 
 		return that;
 	};
-	
+
 	return that;
 };
 
@@ -356,71 +357,131 @@ OBA.StopsForRegionService = function() {
  ******************************************************************************/
 
 OBA.TransitMap = function(map, params) {
-	
-	var needsRefresh = false;
-	var visibleStopsById = {};
+
+	var _needsRefresh = false;
+	var _visibleStopsById = {};
 	var markerManager = OBA.Maps.markerManager(map);
 	var stopsForRegionService = OBA.StopsForRegionService();
 	var _stopClickHandler = params.stopClickHandler;
 	
+	var _showStopsInCurrentView = true;
+	var _stopIdsToAlwaysShow = {};
+	var _otherOverlays = [];
+	var _selectedRoute = undefined;
+
 	google.maps.event.addListener(map, "bounds_changed", function() {
-		needsRefresh = true;
+		_needsRefresh = true;
 	});
-	
+
 	google.maps.event.addListener(map, "idle", function() {
-		
-		if( ! needsRefresh )
+
+		if (!_needsRefresh)
 			return;
-		
+
 		refresh();
-		
-		needsRefresh = false;
+
+		_needsRefresh = false;
 	});
 	
+	var reset = function(showStopsInCurrentView, stopsToAlwaysShow) {
+
+	    _showStopsInCurrentView = showStopsInCurrentView;
+
+	    _stopIdsToAlwaysShow = {};
+	    jQuery.each(stopsToAlwaysShow, function() {
+	    	_stopIdsToAlwaysShow[this.id] = true;
+	    });
+
+	    jQuery.each(_otherOverlays, function() {
+	    	this.setMap(null);
+	    });
+	    _otherOverlays = [];
+	    
+	    jQuery.each(_visibleStopsById, function(stopId, stopAndOverlays) {
+	    	jQuery.each(stopAndOverlays.overlays, function() {
+				markerManager.removeMarker(this);
+			});
+		});
+	    _visibleStopsById = {};
+
+	    jQuery.each(stopsToAlwaysShow, function() {
+	    	stopHandler(this);
+	    });
+
+	    _selectedRoute = null;
+
+	    refresh();
+	  }
+
 	var refresh = function() {
 
-		if (map.getZoom() < 17) {
-	        return;
+		if( _showStopsInCurrentView ) { 
+			refreshStopsInCurrentView();
 		}
-
-	    var bounds = map.getBounds();
-
-	    var toRemove = [];
-	    
-	    jQuery.each(visibleStopsById, function(stopId,stopAndOverlays ){
-	    	var stop = stopAndOverlays.stop;
-	    	var p = new google.maps.LatLng(stop.lat, stop.lon);
-	    	if( ! bounds.contains(p) ) {
-	    		toRemove.push(stop.id);
-	    		jQuery.each(stopAndOverlays.overlays, function() {
-	    			markerManager.removeMarker(this);
-	    		});
-	    	}
-	    });
-	    
-	    jQuery.each(toRemove, function() {
-	    	delete visibleStopsById[this];
-	    });
-
-	    stopsForRegionService.stopsForRegion(bounds, function(stops) {
-	    	jQuery.each(stops, function(){
-	    		stopHandler(this);
-	    	});
-	    });
+		else {
+			
+			var toRemove = [];
+			
+			jQuery.each(_visibleStopsById, function(stopId, stopAndOverlays) {
+				if( stopId in _stopIdsToAlwaysShow)
+					return;
+		    	jQuery.each(stopAndOverlays.overlays, function() {
+					markerManager.removeMarker(this);
+				});
+		    	toRemove.push(stopId);
+			});
+			
+			jQuery.each(toRemove, function() {
+				delete _visibleStopsById[this];
+			});
+		}
 	};
 	
-	var stopHandler = function(stop) {
+	var refreshStopsInCurrentView = function() {
 		
-		if( visibleStopsById[stop.id] )
+		if (map.getZoom() < 17) {
+			return;
+		}
+
+		var bounds = map.getBounds();
+
+		var toRemove = [];
+
+		jQuery.each(_visibleStopsById, function(stopId, stopAndOverlays) {
+			var stop = stopAndOverlays.stop;
+			var p = new google.maps.LatLng(stop.lat, stop.lon);
+			if (!bounds.contains(p)) {
+				toRemove.push(stop.id);
+				jQuery.each(stopAndOverlays.overlays, function() {
+					markerManager.removeMarker(this);
+				});
+			}
+		});
+
+		jQuery.each(toRemove, function() {
+			delete _visibleStopsById[this];
+		});
+
+		stopsForRegionService.stopsForRegion(bounds, function(stops) {
+			jQuery.each(stops, function() {
+				stopHandler(this);
+			});
+		});
+	};
+
+	var stopHandler = function(stop) {
+
+		if (_visibleStopsById[stop.id])
 			return;
 
 		var stopAndOverlays = {};
 		stopAndOverlays.stop = stop;
-		stopAndOverlays.overlays = OBA.Maps.addStopToMarkerManager(stop,markerManager);
-		visibleStopsById[stop.id] = stopAndOverlays;
-		
+		stopAndOverlays.overlays = OBA.Maps.addStopToMarkerManager(stop,
+				markerManager);
+		_visibleStopsById[stop.id] = stopAndOverlays;
+
 		jQuery.each(stopAndOverlays.overlays, function() {
-			if( _stopClickHandler != undefined ) {
+			if (_stopClickHandler != undefined) {
 				google.maps.event.addListener(this, 'click', function() {
 					_stopClickHandler(stop);
 				});
@@ -428,7 +489,83 @@ OBA.TransitMap = function(map, params) {
 		});
 	};
 	
+	var showStopsAndPaths = function(stops, polylines) {
+		
+		reset(false, stops);
+		
+		var bounds = new google.maps.LatLngBounds();
+		
+		jQuery.each(polylines, function() {
+			var points = OBA.Maps.decodePolyline(this.points);
+			var opts = {
+				path : points,
+				strokeColor : '#4F64BA',
+				strokeWeight : 3,
+				strokeOpacity : 1.0,
+				zIndex : 1
+			};
+			var line = new google.maps.Polyline(opts);
+			line.setMap(map);
+
+			jQuery.each(points, function() {
+				bounds.extend(this);
+			});
+		});
+
+		jQuery.each(stops, function() {
+			bounds.extend(new google.maps.LatLng(this.lat,this.lon));
+		});
+		
+		if( ! bounds.isEmpty() )
+			map.fitBounds(bounds);
+	};
+
+	/***************************************************************************
+	 * Public Methods
+	 **************************************************************************/
+
 	var that = {};
 	
+	that.showStopsInCurrentView = function() {
+		reset(true,[]);
+	}
+	
+	that.showStopsForRoute = function(stopsForRoute) {
+		var stops = stopsForRoute.stops || [];
+		var polylines = stopsForRoute.polylines || [];
+		showStopsAndPaths(stops, polylines);
+		_selectedRoute = stopsForRoute.route;
+	};
+	
+	that.showStopsForRouteAndDirection = function(stopsForRoute, directionId) {
+		
+		var stopGroupings = stopsForRoute.stopGroupings || [];
+		jQuery.each(stopGroupings, function() {
+			if( this.type != 'direction')
+				return;
+			jQuery.each(this.stopGroups,function() {
+				var stopGroup = this;
+				if( stopGroup.id != directionId )
+					return;
+				var stops = stopGroup.stops || [];
+				var polylines = stopGroup.polylines || [];
+				showStopsAndPaths(stops, polylines);
+				_selectedRoute = stopsForRoute.route;
+			});
+		});
+	};
+
+	that.showStopsForRouteId = function(routeId) {
+		OBA.Api.stopsForRoute(routeId,function(stopsForRoute){
+			that.showStopsForRoute(stopsForRoute);
+		});
+	};
+
+	that.showStopsForRouteAndDirectionId = function(routeId, directionId) {
+		OBA.Api.stopsForRoute(routeId,function(){
+			that.showStopsForRouteAndDirection(stopsForRoute, directionId);
+		});
+	};
+
 	return that;
 };

@@ -91,7 +91,7 @@ public final class ArrivalVertex extends AbstractVertex implements HasEdges {
 
   @Override
   public String toString() {
-    return "AlightVertex(stop=" + _stop.getId() + " time="
+    return "ArrivalVertex(stop=" + _stop.getId() + " time="
         + _format.format(new Date(_time)) + ")";
   }
 

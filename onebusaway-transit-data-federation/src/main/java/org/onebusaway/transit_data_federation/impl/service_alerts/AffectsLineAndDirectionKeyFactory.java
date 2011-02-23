@@ -29,7 +29,7 @@ public class AffectsLineAndDirectionKeyFactory implements
     for (SituationAffectedVehicleJourney journey : journeys) {
       if (isActivated(journey)) {
         LineAndDirectionRef ref = new LineAndDirectionRef(journey.getLineId(),
-            journey.getDirection());
+            journey.getDirectionId());
         lineIds.add(ref);
       }
     }
@@ -38,7 +38,7 @@ public class AffectsLineAndDirectionKeyFactory implements
   }
 
   private boolean isActivated(SituationAffectedVehicleJourney journey) {
-    return journey.getLineId() != null && journey.getDirection() != null
+    return journey.getLineId() != null && journey.getDirectionId() != null
         && CollectionsLibrary.isEmpty(journey.getCalls());
   }
 }

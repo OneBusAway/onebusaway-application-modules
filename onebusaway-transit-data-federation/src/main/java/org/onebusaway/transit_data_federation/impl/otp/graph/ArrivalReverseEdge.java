@@ -75,6 +75,11 @@ public class ArrivalReverseEdge extends AbstractEdge {
       s1.numBoardings++;
       s1.everBoarded = true;
       
+      /*
+      if (s0.numBoardings == 0)
+        s1.initialWaitTime += dwellTime * 1000;
+      */
+      
       double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
 
       Vertex fromVertex = new BlockArrivalVertex(_context, instance);
@@ -90,6 +95,10 @@ public class ArrivalReverseEdge extends AbstractEdge {
     double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
     
     State s1 = new State(timeFrom);
+    /*
+    if (s0.numBoardings == 0)
+      s1.initialWaitTime += dwellTime * 1000;
+    */
 
     Vertex fromVertex = new ArrivalVertex(_context, _stop, timeFrom);
     Vertex toVertex = new ArrivalVertex(_context, _stop, s0.getTime());

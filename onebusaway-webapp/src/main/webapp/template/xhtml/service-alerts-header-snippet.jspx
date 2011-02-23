@@ -22,14 +22,21 @@
 
 <jsp:directive.page contentType="text/html" />
 
-<s:set var="ad" value="parameters.arrivalAndDeparture"/>
-<s:set var="sits" value="model.getSituationsForArrivalAndDeparture(#ad)"/>
+<s:set var="situations" value="parameters.situations"/>
 
-<s:if test="#sits.unreadCount != 0">
-<span class="tripUnreadServiceAlert"><jsp:text></jsp:text></span>
+<s:if test="#situations.unreadCount &gt; 0">
+<div class="unreadServiceAlerts">
+  <ul>
+    <s:iterator value="#situations.unreadSituations">
+      <li>
+        <s:a action="service-alert" cssClass="unreadServiceAlert">
+          <s:param name="id" value="id"/>
+          <s:property value="#situations.getTitle(top)" />
+        </s:a>
+      </li>
+    </s:iterator>
+  </ul>
+</div>
 </s:if>
-<s:elseif test="#sits.totalCount != 0">
-<span class="tripReadServiceAlert"><jsp:text></jsp:text></span>
-</s:elseif>
 
 </jsp:root>

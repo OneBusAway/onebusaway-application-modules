@@ -8,13 +8,23 @@ import java.util.List;
 
 public class StopsForRouteBean implements Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 3L;
+
+  private RouteBean route;
 
   private List<StopBean> stops;
 
   private List<StopGroupingBean> stopGroupings;
 
   private List<EncodedPolylineBean> polylines;
+
+  public RouteBean getRoute() {
+    return route;
+  }
+
+  public void setRoute(RouteBean route) {
+    this.route = route;
+  }
 
   public List<StopBean> getStops() {
     return stops;

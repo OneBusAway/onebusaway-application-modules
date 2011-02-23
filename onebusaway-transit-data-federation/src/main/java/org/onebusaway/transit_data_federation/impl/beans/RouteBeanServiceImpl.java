@@ -119,20 +119,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
     if (rc == null)
       return null;
 
-    RouteBean.Builder bean = RouteBean.builder();
-    bean.setId(ApplicationBeanLibrary.getId(id));
-    bean.setShortName(rc.getShortName());
-    bean.setLongName(rc.getLongName());
-    bean.setColor(rc.getColor());
-    bean.setDescription(rc.getDescription());
-    bean.setTextColor(rc.getTextColor());
-    bean.setType(rc.getType());
-    bean.setUrl(rc.getUrl());
-
-    AgencyBean agency = _agencyBeanService.getAgencyForId(id.getAgencyId());
-    bean.setAgency(agency);
-
-    return bean.create();
+    return getRouteBeanForRouteCollection(rc);
   }
 
   @Cacheable
@@ -150,6 +137,26 @@ class RouteBeanServiceImpl implements RouteBeanService {
   /****
    * Private Methods
    ****/
+
+  private RouteBean getRouteBeanForRouteCollection(RouteCollection rc) {
+
+    AgencyAndId id = rc.getId();
+
+    RouteBean.Builder bean = RouteBean.builder();
+    bean.setId(ApplicationBeanLibrary.getId(id));
+    bean.setShortName(rc.getShortName());
+    bean.setLongName(rc.getLongName());
+    bean.setColor(rc.getColor());
+    bean.setDescription(rc.getDescription());
+    bean.setTextColor(rc.getTextColor());
+    bean.setType(rc.getType());
+    bean.setUrl(rc.getUrl());
+
+    AgencyBean agency = _agencyBeanService.getAgencyForId(id.getAgencyId());
+    bean.setAgency(agency);
+
+    return bean.create();
+  }
 
   private List<StopBean> getStopBeansForRoute(AgencyAndId routeId) {
 
@@ -176,6 +183,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
     StopsForRouteBean result = new StopsForRouteBean();
 
     AgencyAndId routeCollectionId = routeCollection.getId();
+    result.setRoute(getRouteBeanForRouteCollection(routeCollection));
     result.setStops(getStopBeansForRoute(routeCollectionId));
 
     result.setPolylines(getEncodedPolylinesForRoute(routeCollection));

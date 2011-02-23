@@ -92,7 +92,7 @@ public final class DepartureVertex extends AbstractVertex implements
 
   @Override
   public String toString() {
-    return "BoardVertex(stop=" + _stop.getId() + " time="
+    return "DepartureVertex(stop=" + _stop.getId() + " time="
         + _format.format(new Date(_time)) + ")";
   }
 

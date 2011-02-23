@@ -314,7 +314,10 @@ var obaMapFactory = function() {
 		'tiny': '10'
 	};
 	
-	var iconAnchors = {
+	var iconAnchors = {};
+	
+	if( window.google ) {
+		iconAnchors = {
 		'large': {
 			'default': new google.maps.Point(11, 11),
 			'N': new google.maps.Point(11, 19),
@@ -343,7 +346,8 @@ var obaMapFactory = function() {
 		'tiny': {
 			'default': new google.maps.Point(5, 5),
 		}
-	};
+		};
+	}
 	
 	var iconDirections = {
 		'N': 'North',

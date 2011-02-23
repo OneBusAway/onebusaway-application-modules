@@ -321,7 +321,7 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
     SituationAffectedVehicleJourneyBean bean = new SituationAffectedVehicleJourneyBean();
     bean.setLineId(AgencyAndIdLibrary.convertToString(vehicleJourney.getLineId()));
-    bean.setDirection(vehicleJourney.getDirection());
+    bean.setDirection(vehicleJourney.getDirectionId());
 
     List<SituationAffectedCall> calls = vehicleJourney.getCalls();
     if (!CollectionsLibrary.isEmpty(calls)) {
@@ -338,7 +338,7 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
     SituationAffectedVehicleJourney vehicleJourney = new SituationAffectedVehicleJourney();
     vehicleJourney.setLineId(AgencyAndIdLibrary.convertFromString(bean.getLineId()));
-    vehicleJourney.setDirection(bean.getDirection());
+    vehicleJourney.setDirectionId(bean.getDirection());
 
     List<SituationAffectedCallBean> beans = bean.getCalls();
     if (!CollectionsLibrary.isEmpty(beans)) {

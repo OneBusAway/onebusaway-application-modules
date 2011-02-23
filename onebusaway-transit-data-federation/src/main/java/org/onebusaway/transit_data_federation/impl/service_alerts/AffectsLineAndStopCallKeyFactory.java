@@ -41,7 +41,7 @@ public class AffectsLineAndStopCallKeyFactory implements
   }
 
   private boolean isActivated(SituationAffectedVehicleJourney journey) {
-    return journey.getLineId() != null && journey.getDirection() == null
+    return journey.getLineId() != null && journey.getDirectionId() == null
         && !CollectionsLibrary.isEmpty(journey.getCalls());
   }
 

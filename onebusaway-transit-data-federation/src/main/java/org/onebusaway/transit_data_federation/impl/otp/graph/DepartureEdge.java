@@ -70,6 +70,11 @@ public class DepartureEdge extends AbstractEdge {
 
       int dwellTime = (int) ((departureTime - time) / 1000);
       double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
+      
+      /*
+      if (s0.numBoardings == 0)
+        s1.initialWaitTime += dwellTime * 1000;
+      */  
 
       TraverseResult r = new TraverseResult(w, s1, narrative);
       result = r.addToExistingResultChain(result);
@@ -86,7 +91,12 @@ public class DepartureEdge extends AbstractEdge {
 
     int dwellTime = (int) ((toTime - time) / 1000);
     double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
-
+    
+    /*
+    if (s0.numBoardings == 0)
+      s1.initialWaitTime += dwellTime * 1000;
+    */
+    
     TraverseResult r = new TraverseResult(w, s1, narrative);
     result = r.addToExistingResultChain(result);
 

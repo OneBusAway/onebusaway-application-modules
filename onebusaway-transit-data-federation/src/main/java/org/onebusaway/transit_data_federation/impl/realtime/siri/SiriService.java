@@ -225,7 +225,7 @@ public class SiriService {
             avj.setLineId(AgencyAndIdLibrary.convertFromString(vj.getLineRef().getValue()));
 
           if (vj.getDirectionRef() != null)
-            avj.setDirection(vj.getDirectionRef().getValue());
+            avj.setDirectionId(vj.getDirectionRef().getValue());
 
           Calls calls = vj.getCalls();
 

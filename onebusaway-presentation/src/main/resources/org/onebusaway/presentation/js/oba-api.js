@@ -162,6 +162,7 @@ var obaApiFactory = function() {
 		var affects = situation.affects || {};
 		var affectedAgencies = affects.agencies || [];		
 		var affectedStops = affects.stops || [];
+		var affectedVehicleJourneys = affects.vehicleJourneys || [];
 		
 		jQuery.each(affectedAgencies, function() {
 			var agency = references.agenciesById[this.agencyId];
@@ -173,6 +174,18 @@ var obaApiFactory = function() {
 			var stop = references.stopsById[this.stopId];
 			if( stop != undefined )
 				this.stop = stop;
+		});
+		
+		jQuery.each(affectedVehicleJourneys, function() {
+			var route = references.routesById[this.lineId];
+			if( route != undefined)
+				this.route = route;
+			var calls = this.calls || [];
+			jQuery.each(calls, function() {
+				var stop = references.stopsById[this.stopId];
+				if( stop != undefined )
+					this.stop = stop;
+			});
 		});
 	}
 	
@@ -186,8 +199,31 @@ var obaApiFactory = function() {
 		});
 	};
 	
+	var processStopIds = function(stopIds, stops, references) {
+		jQuery.each(stopIds || [], function() {
+			var stop = references.stopsById[this];
+			if( stop )
+				stops.push(stop);
+		});
+	};
+	
 	var processStopsForRoute = function(stopsForRoute, references) {
 		
+		var route = references.routesById[stopsForRoute.routeId];
+		if( route )
+			stopsForRoute.route = route;
+		
+		stopsForRoute.stops = [];
+		processStopIds( stopsForRoute.stopIds, stopsForRoute.stops, references);
+		
+		jQuery.each(stopsForRoute.stopGroupings || [], function() {
+			var stopGrouping = this;
+			jQuery.each(stopGrouping.stopGroups, function() {
+				var stopGroup = this;
+				stopGroup.stops = [];
+				processStopIds( stopGroup.stopIds, stopGroup.stops, references);
+			});
+		});
 	};
 	
 	var processStreetGraphForRegion = function(entry, references) {

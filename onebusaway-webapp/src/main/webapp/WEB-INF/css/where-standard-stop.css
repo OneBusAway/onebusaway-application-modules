@@ -224,15 +224,40 @@
 .serviceAlerts {
 	text-align: left;	
 }
-	
+
+.unreadServiceAlerts {
+	background-image: oba-resource("/images/Alert.png");
+	background-repeat: no-repeat;
+	background-position: 10px 7px;
+    background-color: #FFFFCC;
+    border: 1px solid grey;
+    margin-bottom: 1em;
+    margin-top: 1em;
+    text-align: left;
+}
+
+.unreadServiceAlerts ul {
+	margin-left: 2em;	
+}
+
 .unreadServiceAlert {
 	font-weight: bold;	
 }
 
 .tripUnreadServiceAlert {
 	background-image: oba-resource("/images/Alert.png");
+	background-repeat: no-repeat;
 	width: 28px;
 	height: 26px;
 	float: right;
-	margin-left: 5px;
+	margin-right: 10px;
+}
+
+.tripReadServiceAlert {
+	background-image: oba-resource("/images/Alert-Grey.png");
+	background-repeat: no-repeat;
+	width: 28px;
+	height: 26px;
+	float: right;
+	margin-right: 10px;
 }

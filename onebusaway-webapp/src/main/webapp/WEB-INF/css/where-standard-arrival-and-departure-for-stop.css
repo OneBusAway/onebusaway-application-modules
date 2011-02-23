@@ -1,6 +1,6 @@
-#notificationPanel p {
+#notificationPanel {
 	font-size: 1.25em;
-	text-align: center;
+	text-align: left;
 }
 
 #notificationPanel input {

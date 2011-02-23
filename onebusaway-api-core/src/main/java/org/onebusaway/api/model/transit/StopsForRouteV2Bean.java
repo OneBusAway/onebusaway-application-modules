@@ -11,11 +11,21 @@ public class StopsForRouteV2Bean implements Serializable {
 
   private static final long serialVersionUID = 2L;
 
+  private String routeId;
+
   private List<String> stopIds;
 
   private List<StopGroupingBean> stopGroupings;
 
   private List<EncodedPolylineBean> polylines;
+
+  public String getRouteId() {
+    return routeId;
+  }
+
+  public void setRouteId(String routeId) {
+    this.routeId = routeId;
+  }
 
   public List<String> getStopIds() {
     return stopIds;

@@ -43,6 +43,7 @@ import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.ItineraryV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.LegV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.LocationV2Bean;
+import org.onebusaway.api.model.transit.tripplanning.MinTravelTimeToStopV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.StreetLegV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.TransitLegV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.VertexV2Bean;
@@ -135,6 +136,8 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("leg", LegV2Bean.class);
     xstream.alias("transitLeg", TransitLegV2Bean.class);
     xstream.alias("streetLeg", StreetLegV2Bean.class);
+
+    xstream.alias("minTravelTimeToStop", MinTravelTimeToStopV2Bean.class);
 
     xstream.alias("graphResult", GraphResultV2Bean.class);
     xstream.alias("vertex", VertexV2Bean.class);

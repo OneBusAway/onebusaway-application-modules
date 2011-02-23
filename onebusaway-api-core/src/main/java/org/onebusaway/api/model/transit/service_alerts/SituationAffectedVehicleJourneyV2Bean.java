@@ -13,7 +13,7 @@ public final class SituationAffectedVehicleJourneyV2Bean implements
    */
   private String lineId;
 
-  private String direction;
+  private String directionId;
 
   private List<SituationAffectedCallV2Bean> calls;
 
@@ -25,12 +25,12 @@ public final class SituationAffectedVehicleJourneyV2Bean implements
     this.lineId = lineId;
   }
 
-  public String getDirection() {
-    return direction;
+  public String getDirectionId() {
+    return directionId;
   }
 
-  public void setDirection(String direction) {
-    this.direction = direction;
+  public void setDirectionId(String directionId) {
+    this.directionId = directionId;
   }
 
   public List<SituationAffectedCallV2Bean> getCalls() {

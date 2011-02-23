@@ -14,7 +14,7 @@ public final class SituationAffectedVehicleJourney implements Serializable {
    */
   private AgencyAndId lineId;
 
-  private String direction;
+  private String directionId;
 
   private List<SituationAffectedCall> calls;
 
@@ -26,12 +26,12 @@ public final class SituationAffectedVehicleJourney implements Serializable {
     this.lineId = lineId;
   }
 
-  public String getDirection() {
-    return direction;
+  public String getDirectionId() {
+    return directionId;
   }
 
-  public void setDirection(String direction) {
-    this.direction = direction;
+  public void setDirectionId(String directionId) {
+    this.directionId = directionId;
   }
 
   public List<SituationAffectedCall> getCalls() {

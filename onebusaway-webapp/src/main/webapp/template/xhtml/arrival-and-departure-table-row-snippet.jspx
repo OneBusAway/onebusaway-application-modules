@@ -38,10 +38,6 @@
             </jsp:element>
             <td>
             
-            <s:component template="arrival-and-departure-service-alert-snippet.jspx">
-                <s:param name="arrivalAndDeparture" value="top"/>
-                <s:param name="presentation" value="#presentation"/>
-            </s:component>
             <div>
             <div class="arrivalsDestinationEntry"><s:url
                 var="tripUrl" action="trip" includeParams="none">
@@ -84,12 +80,14 @@
                 <jsp:attribute name="class">
                     arrivalsStatusEntry
                     <s:property value="#arrivalsStatusLabelStyle" />
-                    <s:if
-                        test="#presentation.isNow(top)"> arrivalStatusNow</s:if>
+                    <s:if test="#presentation.isNow(top)"> arrivalStatusNow</s:if>
                 </jsp:attribute>
                 <s:if test="#excludeOrderLinks">
-                  <s:property
-                        value="#presentation.getMinutesLabel(top)" />
+                  <span><s:property value="#presentation.getMinutesLabel(top)" /></span>
+                  <s:component template="arrival-and-departure-service-alert-snippet.jspx">
+                    <s:param name="arrivalAndDeparture" value="top"/>
+                    <s:param name="presentation" value="#presentation"/>
+                  </s:component>
                 </s:if>
                 <s:else>
                 <s:url var="url" action="arrival-and-departure-for-stop">
@@ -100,7 +98,11 @@
                     <s:param name="vehicleId" value="tripStatus.vehicleId" />
                 </s:url>
                 <s:a href="%{url}">
-                    <s:property value="#presentation.getMinutesLabel(top)" />
+                    <span><s:property value="#presentation.getMinutesLabel(top)" /></span>
+                    <s:component template="arrival-and-departure-service-alert-snippet.jspx">
+                        <s:param name="arrivalAndDeparture" value="top"/>
+                        <s:param name="presentation" value="#presentation"/>
+                    </s:component>
                 </s:a>
                 </s:else>
             </jsp:element>

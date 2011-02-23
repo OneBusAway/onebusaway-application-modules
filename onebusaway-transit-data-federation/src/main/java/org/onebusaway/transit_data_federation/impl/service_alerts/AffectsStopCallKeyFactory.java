@@ -27,10 +27,10 @@ public class AffectsStopCallKeyFactory implements
     Set<LineAndDirectionRef> lineIds = new HashSet<LineAndDirectionRef>();
 
     for (SituationAffectedVehicleJourney journey : journeys) {
-      if (journey.getLineId() == null || journey.getDirection() == null)
+      if (journey.getLineId() == null || journey.getDirectionId() == null)
         continue;
       LineAndDirectionRef ref = new LineAndDirectionRef(journey.getLineId(),
-          journey.getDirection());
+          journey.getDirectionId());
       lineIds.add(ref);
     }
 

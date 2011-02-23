@@ -27,8 +27,6 @@ import org.springframework.stereotype.Component;
 @Component
 class TransitShedPathServiceImpl implements TransitShedPathService {
 
-  private SearchTerminationStrategy _terminationStrategy = new TransitShedSearchTerminationStrategy();
-
   private VertexSkipStrategy _vertexSkipStrategy = new TransitShetVertexSkipStrategy();
 
   private ContractionHierarchySet _hierarchies;
@@ -63,21 +61,15 @@ class TransitShedPathServiceImpl implements TransitShedPathService {
 
     while (!queue.empty()) {
 
-      SPTVertex spt_u = queue.peek_min();
-
-      if (_terminationStrategy.terminateSearch(origin, originState, spt_u,
-          options)) {
-        return spt;
-      }
-
-      if (_vertexSkipStrategy.isVertexSkippedInFowardSearch(spt_u))
-        continue;
+      SPTVertex spt_u = queue.extract_min();
 
       Vertex fromVertex = spt_u.mirror;
 
-      queue.extract_min();
-
       closed.add(fromVertex);
+
+      if (_vertexSkipStrategy.isVertexSkippedInFowardSearch(origin,
+          originState, spt_u, options))
+        continue;
 
       Iterable<Edge> outgoing = GraphLibrary.getOutgoingEdges(graph,
           fromVertex, extraEdges);
@@ -86,31 +78,30 @@ class TransitShedPathServiceImpl implements TransitShedPathService {
         State state = spt_u.state;
 
         TraverseResult wr = edge.traverse(state, options);
-        // When an edge leads nowhere (as indicated by returning NULL), the
-        // iteration is
-        // over.
-        if (wr == null) {
-          continue;
-        }
 
-        if (wr.weight < 0) {
-          throw new NegativeWeightException(String.valueOf(wr.weight));
-        }
+        while (wr != null) {
 
-        EdgeNarrative er = wr.getEdgeNarrative();
-        Vertex toVertex = er.getToVertex();
-        if (closed.contains(toVertex)) {
-          continue;
-        }
+          if (wr.weight < 0) {
+            throw new NegativeWeightException(String.valueOf(wr.weight));
+          }
 
-        double new_w = spt_u.weightSum + wr.weight;
+          EdgeNarrative er = wr.getEdgeNarrative();
+          Vertex toVertex = er.getToVertex();
 
-        SPTVertex spt_v = spt.addVertex(toVertex, wr.state, new_w, options,
-            spt_u.hops + 1);
+          if (!closed.contains(toVertex)) {
 
-        if (spt_v != null) {
-          spt_v.setParent(spt_u, edge, er);
-          queue.insert_or_dec_key(spt_v, new_w);
+            double new_w = spt_u.weightSum + wr.weight;
+
+            SPTVertex spt_v = spt.addVertex(toVertex, wr.state, new_w, options,
+                spt_u.hops + 1);
+
+            if (spt_v != null) {
+              spt_v.setParent(spt_u, edge, er);
+              queue.insert_or_dec_key(spt_v, new_w);
+            }
+          }
+
+          wr = wr.getNextResult();
         }
       }
     }

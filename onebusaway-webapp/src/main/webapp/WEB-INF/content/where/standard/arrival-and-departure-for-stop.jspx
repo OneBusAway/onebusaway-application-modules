@@ -62,18 +62,31 @@
     <s:param name="stops" value="result.stop"/>
 </s:component>
 
+<s:component template="service-alerts-header-snippet.jspx">
+    <s:param name="situations" value="situations"/>
+</s:component>
+
 <s:component template="arrivals-and-departures-table-snippet.jspx">
     <s:param name="arrivalsAndDepartures" value="result"/>
     <s:param name="excludeOrderLinks" value="true"/>
     <s:param name="presentation" value="presentation" />    
 </s:component>
 
+<s:component template="service-alerts-footer-snippet.jspx">
+    <s:param name="situations" value="situations"/>
+</s:component>
+
 <div id="notificationPanel">
-<p><s:text name="arrivalAndDepartureForStop.Notify_me_minutes_before_arrival">
-<s:param><input id="notification_time_input" type="text" value="5" /></s:param>
-</s:text></p>
-<p><input id="notification_sound_input" type="checkbox" checked="checked" value="true"/> <s:text name="arrivalAndDepartureForStop.Play_a_sound"/></p>
-<p><input id="notification_alert_input" type="checkbox" checked="checked" value="true"/> <s:text name="arrivalAndDepartureForStop.Popup_an_alert"/></p>
+<h4><s:text name="Notifications"/>:</h4>
+<ul>
+<li>
+  <s:text name="arrivalAndDepartureForStop.Notify_me_minutes_before_arrival">
+    <s:param><input id="notification_time_input" type="text" value="5" /></s:param>
+  </s:text>
+</li>
+<li><input id="notification_sound_input" type="checkbox" checked="checked" value="true"/> <s:text name="arrivalAndDepartureForStop.Play_a_sound"/></li>
+<li><input id="notification_alert_input" type="checkbox" checked="checked" value="true"/> <s:text name="arrivalAndDepartureForStop.Popup_an_alert"/></li>
+</ul>
 </div>
 
 <!--  Attachment point for playing audio -->

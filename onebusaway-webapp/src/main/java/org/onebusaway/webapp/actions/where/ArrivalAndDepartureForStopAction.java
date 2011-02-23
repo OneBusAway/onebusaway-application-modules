@@ -17,6 +17,7 @@ package org.onebusaway.webapp.actions.where;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
+import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -39,6 +40,8 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
 
   private ArrivalAndDepartureBean _result;
 
+  private SituationsPresentation _situations;
+
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _service = transitDataService;
@@ -49,10 +52,6 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
     _presentation.setMessages(messages);
   }
 
-  public ArrivalsAndDeparturesPresentaion getPresentation() {
-    return _presentation;
-  }
-
   @Override
   public ArrivalAndDepartureForStopQueryBean getModel() {
     return _model;
@@ -60,6 +59,20 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
 
   public ArrivalAndDepartureBean getResult() {
     return _result;
+  }
+
+  public ArrivalsAndDeparturesPresentaion getPresentation() {
+    return _presentation;
+  }
+
+  public SituationsPresentation getSituations() {
+    if (_situations == null) {
+      _situations = new SituationsPresentation();
+      if (_result != null)
+        _situations.setSituations(_result.getSituations());
+      _situations.setUser(_currentUserService.getCurrentUser());
+    }
+    return _situations;
   }
 
   @Override
@@ -76,4 +89,5 @@ public class ArrivalAndDepartureForStopAction extends AbstractWhereAction
 
     return SUCCESS;
   }
+
 }

@@ -31,7 +31,7 @@ public class AffectsLineDirectionAndStopCallKeyFactory implements
       if (isActivated(journey)) {
         for (SituationAffectedCall call : journey.getCalls()) {
           LineDirectionAndStopCallRef ref = new LineDirectionAndStopCallRef(
-              journey.getLineId(), journey.getDirection(), call.getStopId());
+              journey.getLineId(), journey.getDirectionId(), call.getStopId());
           keys.add(ref);
         }
       }
@@ -41,7 +41,7 @@ public class AffectsLineDirectionAndStopCallKeyFactory implements
   }
 
   private boolean isActivated(SituationAffectedVehicleJourney journey) {
-    return journey.getLineId() != null && journey.getDirection() != null
+    return journey.getLineId() != null && journey.getDirectionId() != null
         && !CollectionsLibrary.isEmpty(journey.getCalls());
   }
 
