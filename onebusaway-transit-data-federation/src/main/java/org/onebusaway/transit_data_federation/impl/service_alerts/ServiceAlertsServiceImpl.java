@@ -66,9 +66,15 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private FederatedTransitDataBundle _bundle;
 
+  private File _serviceAlertsPath;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
+  }
+
+  public void setServiceAlertsPath(File path) {
+    _serviceAlertsPath = path;
   }
 
   @PostConstruct
@@ -335,7 +341,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private synchronized void loadServieAlerts() {
 
-    File path = _bundle.getServiceAlertsPath();
+    File path = getServiceAlertsPath();
 
     if (path == null || !path.exists())
       return;
@@ -357,7 +363,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private synchronized void saveServiceAlerts() {
 
-    File path = _bundle.getServiceAlertsPath();
+    File path = getServiceAlertsPath();
 
     if (path == null)
       return;
@@ -377,6 +383,12 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     } catch (Exception ex) {
       _log.error("error saving service alerts to path " + path, ex);
     }
+  }
+
+  private File getServiceAlertsPath() {
+    if (_serviceAlertsPath != null)
+      return _serviceAlertsPath;
+    return _bundle.getServiceAlertsPath();
   }
 
   private XStream createXStream() {
