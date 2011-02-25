@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -83,6 +85,10 @@ public class PlanTripController extends ApiActionSupport {
 
   public ConstraintsBean getConstraints() {
     return _constraints;
+  }
+
+  public void setMode(List<String> modes) {
+    _constraints.setModes(new HashSet<String>(modes));
   }
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {

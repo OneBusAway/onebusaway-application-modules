@@ -73,7 +73,7 @@ OBA.Presentation = function() {
 	    var routesSection = content.find('.routesSection');
 	    var routeClickHandler = params.routeClickHandler;
 	    
-	    if( routes == undefined || routes.length == 0) {
+	    if( routes == undefined || routes.length == 0 || params.hideRoutes) {
 	    	routesSection.hide();
 	    	return
 	    }

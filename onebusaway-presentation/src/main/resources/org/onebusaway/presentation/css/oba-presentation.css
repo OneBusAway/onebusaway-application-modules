@@ -7,6 +7,7 @@
 }
 
 .StopInfoWindow .routesSubSection {
+	width: 228px;
 	overflow: auto;
 }
 
@@ -20,6 +21,7 @@
     padding: 2px;
     text-align: center;
     width: 25px;
+    font-size: 11pt;
 }
 
 .StopInfoWindow .routeLongName {
@@ -38,3 +40,4 @@
 	height: 1px;
 	clear: both;	
 }
+

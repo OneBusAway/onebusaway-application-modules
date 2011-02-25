@@ -88,15 +88,19 @@ var obaMapMarkerManagerFactory = function(map) {
 		
 		var zoomLevel = map.getZoom();
 		
+		console.log('zoom level changed=' + zoomLevel + ' prevZoomLevel=' + prevZoomLevel);
+		
 		var markersForPrevZoomLevel = markersByZoomLevel[prevZoomLevel];
 		
 		if( markersForPrevZoomLevel) {
+			console.log('  markersForPrevZoomLevel=' + markersForPrevZoomLevel.length);
 			refreshEntries(markersForPrevZoomLevel);
 		}
 		
 		var markersForZoomLevel = markersByZoomLevel[zoomLevel];
 		
 		if( markersForZoomLevel) {
+			console.log('  markersForZoomLevel=' + markersForZoomLevel.length);
 			refreshEntries(markersForZoomLevel);
 		}
 		
@@ -119,7 +123,7 @@ var obaMapMarkerManagerFactory = function(map) {
 			if( entry.remove )
 				continue;
 			
-			entry.refreshMarkerEntry = entry;
+			entry.refreshMarkerEntry();
 			
 			/**
 			 * Do we need to copy an entry forward?
