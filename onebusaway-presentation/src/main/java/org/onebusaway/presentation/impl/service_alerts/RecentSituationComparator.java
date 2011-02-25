@@ -22,7 +22,7 @@ public class RecentSituationComparator implements Comparator<SituationBean> {
     if (window != null && window.getFrom() != 0)
       return window.getFrom();
 
-    if (CollectionsLibrary.isEmpty(bean.getConsequences())) {
+    if (! CollectionsLibrary.isEmpty(bean.getConsequences())) {
       long t = Long.MAX_VALUE;
       for (SituationConsequenceBean consequence : bean.getConsequences()) {
         TimeRangeBean period = consequence.getPeriod();
