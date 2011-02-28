@@ -2,7 +2,7 @@ package org.onebusaway.api.model;
 
 import java.io.Serializable;
 
-import org.onebusaway.gtfs.csv.schema.annotations.CsvField;
+import org.onebusaway.csv_entities.schema.annotations.CsvField;
 
 public class ResponseBean implements Serializable {
 

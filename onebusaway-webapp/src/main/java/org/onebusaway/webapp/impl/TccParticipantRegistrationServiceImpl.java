@@ -6,9 +6,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.onebusaway.gtfs.csv.CsvEntityReader;
-import org.onebusaway.gtfs.csv.EntityHandler;
-import org.onebusaway.gtfs.csv.schema.AnnotationDrivenEntitySchemaFactory;
+import org.onebusaway.csv_entities.CsvEntityReader;
+import org.onebusaway.csv_entities.EntityHandler;
+import org.onebusaway.csv_entities.schema.AnnotationDrivenEntitySchemaFactory;
 import org.onebusaway.users.impl.PhoneNumberLibrary;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;

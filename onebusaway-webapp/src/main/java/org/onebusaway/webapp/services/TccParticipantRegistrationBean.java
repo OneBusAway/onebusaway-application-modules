@@ -1,6 +1,6 @@
 package org.onebusaway.webapp.services;
 
-import org.onebusaway.gtfs.csv.schema.annotations.CsvFields;
+import org.onebusaway.csv_entities.schema.annotations.CsvFields;
 
 @CsvFields(filename = "participant_registration")
 public class TccParticipantRegistrationBean {

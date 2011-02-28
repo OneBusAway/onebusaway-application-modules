@@ -19,10 +19,10 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- We need this for CsvEntityReader, NOT for any of the gtfs classes (I wish it was separate) -->
+    <!-- We use this for exposing API calls as CSV data -->
     <dependency>
       <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-gtfs</artifactId>
+      <artifactId>onebusaway-csv-entities</artifactId>
     </dependency>
 
     <dependency>

@@ -15,8 +15,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationListener;

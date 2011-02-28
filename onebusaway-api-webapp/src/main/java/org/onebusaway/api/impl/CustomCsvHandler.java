@@ -10,8 +10,8 @@ import org.apache.struts2.rest.handler.ContentTypeHandler;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.transit.EntryWithReferencesBean;
 import org.onebusaway.api.model.transit.ListWithReferencesBean;
-import org.onebusaway.gtfs.csv.CsvEntityWriterFactory;
-import org.onebusaway.gtfs.csv.EntityHandler;
+import org.onebusaway.csv_entities.CsvEntityWriterFactory;
+import org.onebusaway.csv_entities.EntityHandler;
 
 public class CustomCsvHandler implements ContentTypeHandler {
 

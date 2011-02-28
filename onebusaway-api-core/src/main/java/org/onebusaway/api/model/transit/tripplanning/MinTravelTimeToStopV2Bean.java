@@ -2,9 +2,9 @@ package org.onebusaway.api.model.transit.tripplanning;
 
 import java.io.Serializable;
 
+import org.onebusaway.csv_entities.schema.FlattenFieldMappingFactory;
+import org.onebusaway.csv_entities.schema.annotations.CsvField;
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.gtfs.csv.schema.FlattenFieldMappingFactory;
-import org.onebusaway.gtfs.csv.schema.annotations.CsvField;
 
 public class MinTravelTimeToStopV2Bean implements Serializable {
 

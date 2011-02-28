@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.onebusaway.gtfs.csv.EntityHandler;
+import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 

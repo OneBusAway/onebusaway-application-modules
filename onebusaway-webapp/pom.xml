@@ -43,7 +43,7 @@
         <!-- This is here mostly to support csv record parsing -->
         <dependency>
             <groupId>org.onebusaway</groupId>
-            <artifactId>onebusaway-gtfs</artifactId>
+            <artifactId>onebusaway-csv-entities</artifactId>
         </dependency>
 
         <!-- Struts2 Dependencies -->

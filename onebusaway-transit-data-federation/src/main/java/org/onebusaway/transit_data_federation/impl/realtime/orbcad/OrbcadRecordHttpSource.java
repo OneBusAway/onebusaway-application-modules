@@ -13,13 +13,13 @@ import java.util.TimeZone;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.onebusaway.gtfs.csv.CsvEntityContext;
-import org.onebusaway.gtfs.csv.CsvEntityReader;
-import org.onebusaway.gtfs.csv.schema.AbstractFieldMapping;
-import org.onebusaway.gtfs.csv.schema.BeanWrapper;
-import org.onebusaway.gtfs.csv.schema.DefaultEntitySchemaFactory;
-import org.onebusaway.gtfs.csv.schema.EntitySchemaFactoryHelper;
-import org.onebusaway.gtfs.csv.schema.beans.CsvEntityMappingBean;
+import org.onebusaway.csv_entities.CsvEntityContext;
+import org.onebusaway.csv_entities.CsvEntityReader;
+import org.onebusaway.csv_entities.schema.AbstractFieldMapping;
+import org.onebusaway.csv_entities.schema.BeanWrapper;
+import org.onebusaway.csv_entities.schema.DefaultEntitySchemaFactory;
+import org.onebusaway.csv_entities.schema.EntitySchemaFactoryHelper;
+import org.onebusaway.csv_entities.schema.beans.CsvEntityMappingBean;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,19 +69,19 @@ public class OrbcadRecordHttpSource extends AbstractOrbcadRecordSource {
    ****/
 
   protected void setup() {
-    
+
     TimeZone tz = TimeZone.getDefault();
-    
-    if( _agencyIds != null) {
-      for( String agencyId : _agencyIds ) {
+
+    if (_agencyIds != null) {
+      for (String agencyId : _agencyIds) {
         TimeZone agencyTimeZone = _agencyService.getTimeZoneForAgencyId(agencyId);
-        if( agencyTimeZone != null) {
+        if (agencyTimeZone != null) {
           tz = agencyTimeZone;
           break;
         }
       }
     }
-    
+
     _reader = new CsvEntityReader();
 
     DefaultEntitySchemaFactory factory = new DefaultEntitySchemaFactory();
@@ -109,8 +109,7 @@ public class OrbcadRecordHttpSource extends AbstractOrbcadRecordSource {
   private static class OrbcadRecordTranslatorFieldMapping extends
       AbstractFieldMapping {
 
-    private DateFormat _format = new SimpleDateFormat(
-        "yyyy-MM-dd HH:mm:ss");
+    private DateFormat _format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public OrbcadRecordTranslatorFieldMapping(TimeZone timeZone) {
       super(OrbcadRecord.class, "", "", true);
