@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.container.ContainerLibrary;
-import org.onebusaway.csv_entities.schema.DefaultEntitySchemaFactory;
+import org.onebusaway.gtfs.csv.schema.DefaultEntitySchemaFactory;
 import org.onebusaway.gtfs.impl.GtfsDaoImpl;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.Trip;

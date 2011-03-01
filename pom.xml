@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
@@ -76,6 +77,14 @@
     <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/trunk</url>
   </scm>
 
+  <distributionManagement>
+    <!-- Even though we specify this in the parent pom, we need to specify it here to have full control over the url -->
+    <site>
+      <id>${site_id}</id>
+      <url>${site_url}</url>
+    </site>
+  </distributionManagement>
+
   <modules>
     <module>onebusaway-api-core</module>
     <module>onebusaway-api-webapp</module>
@@ -109,7 +118,7 @@
         <artifactId>onebusaway-collections</artifactId>
         <version>1.1.1-SNAPSHOT</version>
       </dependency>
-      
+
       <dependency>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-csv-entities</artifactId>
@@ -377,7 +386,6 @@
                 <requireJavaVersion>
                   <version>1.6</version>
                 </requireJavaVersion>
-                <requirePluginVersions />
                 <requireReleaseDeps>
                   <onlyWhenRelease>true</onlyWhenRelease>
                 </requireReleaseDeps>
@@ -385,6 +393,35 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <configuration>
+          <reportPlugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-project-info-reports-plugin</artifactId>
+              <version>2.3.1</version>
+              <reportSets>
+                <reportSet>
+                  <reports>
+                    <report>project-team</report>
+                    <report>mailing-list</report>
+                    <report>cim</report>
+                    <report>issue-tracking</report>
+                    <report>license</report>
+                    <report>scm</report>
+                  </reports>
+                </reportSet>
+              </reportSets>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+          </reportPlugins>
+        </configuration>
       </plugin>
       <!-- By default, we use the gwt-maven-plugin to detect any GWT modules and copy the .java source files as resources 
         into the compiled output -->

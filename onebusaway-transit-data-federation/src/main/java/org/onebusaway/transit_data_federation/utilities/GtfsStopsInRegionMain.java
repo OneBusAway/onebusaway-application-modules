@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 

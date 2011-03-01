@@ -6,11 +6,11 @@ package org.onebusaway.transit_data_federation.utilities;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.onebusaway.csv_entities.CsvEntityContext;
-import org.onebusaway.csv_entities.schema.AbstractFieldMapping;
-import org.onebusaway.csv_entities.schema.BeanWrapper;
-import org.onebusaway.csv_entities.schema.DefaultEntitySchemaFactory;
-import org.onebusaway.csv_entities.schema.beans.CsvEntityMappingBean;
+import org.onebusaway.gtfs.csv.CsvEntityContext;
+import org.onebusaway.gtfs.csv.schema.AbstractFieldMapping;
+import org.onebusaway.gtfs.csv.schema.BeanWrapper;
+import org.onebusaway.gtfs.csv.schema.DefaultEntitySchemaFactory;
+import org.onebusaway.gtfs.csv.schema.beans.CsvEntityMappingBean;
 
 /**
  * Field mapping to add a field to the serialized csv fields of an object

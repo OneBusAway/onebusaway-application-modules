@@ -3,7 +3,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks;
 import java.io.IOException;
 import java.util.Map;
 
-import org.onebusaway.csv_entities.schema.DefaultEntitySchemaFactory;
+import org.onebusaway.gtfs.csv.schema.DefaultEntitySchemaFactory;
 import org.onebusaway.gtfs.serialization.GtfsEntitySchemaFactory;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GenericMutableDao;

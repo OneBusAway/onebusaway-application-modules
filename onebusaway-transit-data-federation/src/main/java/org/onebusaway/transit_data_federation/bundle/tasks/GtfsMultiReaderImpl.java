@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.collections.Counter;
-import org.onebusaway.csv_entities.EntityHandler;
+import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.IdentityBean;
 import org.onebusaway.gtfs.model.ShapePoint;
