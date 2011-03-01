@@ -318,6 +318,20 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     BlockInstance blockInstance = getBestBlockForRecord(blockId,
         record.getServiceDate(), record.getTimeOfRecord());
 
+    if (blockInstance == null)
+      return null;
+
+    if (!record.isScheduleDeviationSet()
+        && _scheduleDeviationComputationEnabled) {
+
+      BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+      double distanceAlongBlock = record.getDistanceAlongBlock();
+      ScheduledBlockLocation scheduledBlockLocation = _scheduledBlockLocationService.getScheduledBlockLocationFromDistanceAlongBlock(
+          blockConfig, distanceAlongBlock);
+      int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
+      record.setScheduleDeviation(deviation);
+    }
+
     return blockInstance;
   }
 
