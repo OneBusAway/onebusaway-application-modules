@@ -52,6 +52,10 @@ public class EntityReplacementStrategyFactory {
   public void setEntityMappings(Map<Class<?>, String> mappings) {
     _mappings.putAll(mappings);
   }
+  
+  public void test() {
+    
+  }
 
   public EntityReplacementStrategy create() throws IOException {
     EntityReplacementStrategyImpl impl = new EntityReplacementStrategyImpl();
