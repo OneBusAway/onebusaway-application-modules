@@ -2,8 +2,11 @@ package org.onebusaway.transit_data_federation.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -48,11 +51,14 @@ public class GtfsStopReplacementVerificationMain {
 
     Set<AgencyAndId> ids = handler.getIds();
 
-    BufferedReader reader = new BufferedReader(new FileReader(args[0]));
+    InputStream in = getSourceAsInputStream(args[0]);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+    
     String line = null;
 
     while ((line = reader.readLine()) != null) {
-      if (line.startsWith("#") || line.startsWith("{{{") || line.startsWith("}}}") || line.length() == 0)
+      if (line.startsWith("#") || line.startsWith("{{{")
+          || line.startsWith("}}}") || line.length() == 0)
         continue;
       String[] tokens = line.split("\\s+");
       AgencyAndId id = AgencyAndIdLibrary.convertFromString(tokens[0]);
@@ -60,6 +66,16 @@ public class GtfsStopReplacementVerificationMain {
         System.out.println(id + " <- " + line);
     }
 
+  }
+
+  private static InputStream getSourceAsInputStream(String path)
+      throws IOException {
+    if (path.startsWith("http")) {
+      URL url = new URL(path);
+      return url.openStream();
+    } else {
+      return new FileInputStream(new File(path));
+    }
   }
 
   private static class EntityHandlerImpl implements EntityHandler {
