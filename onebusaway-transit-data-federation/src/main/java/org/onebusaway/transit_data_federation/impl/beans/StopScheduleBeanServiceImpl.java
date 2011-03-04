@@ -24,6 +24,7 @@ import org.onebusaway.transit_data.model.StopCalendarDayBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopRouteDirectionScheduleBean;
 import org.onebusaway.transit_data.model.StopRouteScheduleBean;
+import org.onebusaway.transit_data.model.StopTimeGroupBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
@@ -51,6 +52,8 @@ import org.springframework.stereotype.Component;
 @Component
 class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
+  private static final int DEFAULT_CONTINUES_AS_THRESHOLD = 7 * 60;
+
   private static StopTimeBeanComparator _stopTimeComparator = new StopTimeBeanComparator();
 
   private static FrequencyBeanComparator _frequencyComparator = new FrequencyBeanComparator();
@@ -70,6 +73,8 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
   private NarrativeService _narrativeService;
 
   private BlockIndexService _blockIndexService;
+
+  private int _continuesAsThreshold = DEFAULT_CONTINUES_AS_THRESHOLD;
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -99,6 +104,19 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
   @Autowired
   public void setBlockIndexService(BlockIndexService blockIndexService) {
     _blockIndexService = blockIndexService;
+  }
+
+  /**
+   * When determining if one trip "continues as" another, we have a time
+   * threshold to determine if a rider is likely to actually stay on that bus.
+   * The idea is that if the time delay between the previous trip and the next
+   * trip, it's likely that there is a layover in there that the user wouldn't
+   * stick around for.
+   * 
+   * @param continuesAsThreshold - time in seconds
+   */
+  public void setContinuesAsThreshold(int continuesAsThreshold) {
+    _continuesAsThreshold = continuesAsThreshold;
   }
 
   @Cacheable
@@ -193,8 +211,16 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         if (directionId == null)
           directionId = "0";
 
+        String tripHeadsign = narrative.getTripHeadsign();
+
+        TripHeadsignStopTimeGroupKey groupKey = new TripHeadsignStopTimeGroupKey(
+            tripHeadsign);
+        ContinuesAsStopTimeGroupKey continuesAsGroupKey = getContinuesAsGroupKeyForStopTimeInstance(sti);
+
         StopTimeByDirectionEntry stopTimesForDirection = stopTimesByDirection.get(directionId);
-        stopTimesForDirection.addEntry(stiBean, narrative.getTripHeadsign());
+
+        stopTimesForDirection.addEntry(stiBean, tripHeadsign, groupKey,
+            continuesAsGroupKey);
       }
 
       List<StopTimeInstance> frequenciesForRoute = frequenciesByRouteCollectionId.get(routeId);
@@ -243,6 +269,13 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
         Collections.sort(directionBean.getStopTimes(), _stopTimeComparator);
         Collections.sort(directionBean.getFrequencies(), _frequencyComparator);
+
+        List<StopTimeGroupBean> groups = new ArrayList<StopTimeGroupBean>();
+
+        applyTripHeadsignStopTimeGroups(stopTimesForDirection, groups);
+        applyContinuesAsStopTimeGroups(stopTimesForDirection, groups);
+
+        directionBean.setGroups(groups);
 
         routeScheduleBean.getDirections().add(directionBean);
       }
@@ -361,6 +394,107 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     return frequenciesByRouteCollectionId;
   }
 
+  private ContinuesAsStopTimeGroupKey getContinuesAsGroupKeyForStopTimeInstance(
+      StopTimeInstance instance) {
+
+    BlockTripEntry blockTrip = instance.getTrip();
+    AgencyAndId lineId = getContinuesAsLineId(blockTrip);
+    return new ContinuesAsStopTimeGroupKey(lineId);
+  }
+
+  private AgencyAndId getContinuesAsLineId(BlockTripEntry blockTrip) {
+
+    BlockTripEntry nextTrip = blockTrip.getNextTrip();
+    if (nextTrip == null)
+      return null;
+
+    TripEntry prevTrip = blockTrip.getTrip();
+    AgencyAndId prevLineId = prevTrip.getRouteCollectionId();
+    AgencyAndId nextLineId = nextTrip.getTrip().getRouteCollectionId();
+    if (prevLineId.equals(nextLineId))
+      return null;
+
+    List<BlockStopTimeEntry> stopTimes = blockTrip.getStopTimes();
+    BlockStopTimeEntry prevStopTime = stopTimes.get(stopTimes.size() - 1);
+
+    List<BlockStopTimeEntry> nextStopTimes = nextTrip.getStopTimes();
+    BlockStopTimeEntry nextStopTime = nextStopTimes.get(0);
+
+    int prevTime = prevStopTime.getStopTime().getDepartureTime();
+    int nextTime = nextStopTime.getStopTime().getArrivalTime();
+
+    if (nextTime - prevTime > _continuesAsThreshold)
+      return null;
+
+    return nextLineId;
+  }
+
+  private void applyTripHeadsignStopTimeGroups(
+      StopTimeByDirectionEntry stopTimesForDirection,
+      List<StopTimeGroupBean> groups) {
+
+    Counter<TripHeadsignStopTimeGroupKey> keyCounts = stopTimesForDirection.getTripHeadsignKeyCounts();
+    List<TripHeadsignStopTimeGroupKey> sortedKeys = keyCounts.getSortedKeys();
+
+    for (int i = 0; i < sortedKeys.size() - 1; i++) {
+
+      TripHeadsignStopTimeGroupKey key = sortedKeys.get(i);
+      StopTimeGroupBean group = new StopTimeGroupBean();
+
+      String groupId = Integer.toString(groups.size());
+      group.setId(groupId);
+
+      String tripHeadsign = key.getTripHeadsign();
+      group.setTripHeadsign(tripHeadsign);
+      
+      applyGroupIdForGroupKey(stopTimesForDirection, key, groupId);
+
+      groups.add(group);
+    }
+  }
+
+  private void applyContinuesAsStopTimeGroups(
+      StopTimeByDirectionEntry stopTimesForDirection,
+      List<StopTimeGroupBean> groups) {
+
+    Counter<ContinuesAsStopTimeGroupKey> keyCounts = stopTimesForDirection.getContinuesAsKeyCounts();
+    List<ContinuesAsStopTimeGroupKey> sortedKeys = keyCounts.getSortedKeys();
+
+    for( ContinuesAsStopTimeGroupKey key : sortedKeys ) {
+      
+      AgencyAndId lineId = key.getLineId();
+      if( lineId == null)
+        continue;
+      StopTimeGroupBean group = new StopTimeGroupBean();
+
+      String groupId = Integer.toString(groups.size());
+      group.setId(groupId);
+      
+      RouteBean route = _routeBeanService.getRouteForId(lineId);
+      group.setContinuesAs(route);
+      
+      applyGroupIdForGroupKey(stopTimesForDirection, key, groupId);
+
+      groups.add(group);
+    }
+  }
+
+  private void applyGroupIdForGroupKey(
+      StopTimeByDirectionEntry stopTimesForDirection, Object key, String groupId) {
+
+    List<StopTimeInstanceBean> stopTimesForGroup = stopTimesForDirection.getStopTimesForGroupKey(key);
+
+    for (StopTimeInstanceBean stiBean : stopTimesForGroup) {
+
+      List<String> groupIds = stiBean.getGroupIds();
+      if (groupIds == null) {
+        groupIds = new ArrayList<String>();
+        stiBean.setGroupIds(groupIds);
+      }
+      groupIds.add(groupId);
+    }
+  }
+
   private static class StopRouteScheduleBeanComparator implements
       Comparator<StopRouteScheduleBean> {
 
@@ -387,9 +521,9 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         StopRouteDirectionScheduleBean o2) {
       String tripA = o1.getTripHeadsign();
       String tripB = o2.getTripHeadsign();
-      if( tripA == null)
+      if (tripA == null)
         tripA = "";
-      if( tripB == null)
+      if (tripB == null)
         tripB = "";
       return tripA.compareTo(tripB);
     }
@@ -403,6 +537,13 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     private Counter<String> _headsigns = new Counter<String>();
 
+    private Counter<TripHeadsignStopTimeGroupKey> _tripHeadsignKeyCounts = new Counter<TripHeadsignStopTimeGroupKey>();
+
+    private Counter<ContinuesAsStopTimeGroupKey> _continuesAsKeyCounts = new Counter<ContinuesAsStopTimeGroupKey>();
+
+    private Map<Object, List<StopTimeInstanceBean>> _stopTimesByGroupKey = new FactoryMap<Object, List<StopTimeInstanceBean>>(
+        new ArrayList<StopTimeInstanceBean>());
+
     public Collection<? extends StopTimeInstanceBean> getStopTimes() {
       return _stopTimes;
     }
@@ -411,9 +552,15 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
       return _frequencies;
     }
 
-    public void addEntry(StopTimeInstanceBean sti, String headsign) {
+    public void addEntry(StopTimeInstanceBean sti, String headsign,
+        TripHeadsignStopTimeGroupKey groupKey,
+        ContinuesAsStopTimeGroupKey continuesAsGroupKey) {
       _stopTimes.add(sti);
       _headsigns.increment(headsign);
+      _tripHeadsignKeyCounts.increment(groupKey);
+      _continuesAsKeyCounts.increment(continuesAsGroupKey);
+      _stopTimesByGroupKey.get(groupKey).add(sti);
+      _stopTimesByGroupKey.get(continuesAsGroupKey).add(sti);
     }
 
     public void addEntry(FrequencyInstanceBean fi, String headsign) {
@@ -429,6 +576,94 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     public String getBestHeadsign() {
       return _headsigns.getMax();
+    }
+
+    public Counter<TripHeadsignStopTimeGroupKey> getTripHeadsignKeyCounts() {
+      return _tripHeadsignKeyCounts;
+    }
+
+    public Counter<ContinuesAsStopTimeGroupKey> getContinuesAsKeyCounts() {
+      return _continuesAsKeyCounts;
+    }
+
+    public List<StopTimeInstanceBean> getStopTimesForGroupKey(Object key) {
+      return _stopTimesByGroupKey.get(key);
+    }
+  }
+
+  private static class TripHeadsignStopTimeGroupKey {
+    private final String tripHeadsign;
+
+    public TripHeadsignStopTimeGroupKey(String tripHeadsign) {
+      this.tripHeadsign = tripHeadsign;
+    }
+
+    public String getTripHeadsign() {
+      return tripHeadsign;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result
+          + ((tripHeadsign == null) ? 0 : tripHeadsign.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      TripHeadsignStopTimeGroupKey other = (TripHeadsignStopTimeGroupKey) obj;
+      if (tripHeadsign == null) {
+        if (other.tripHeadsign != null)
+          return false;
+      } else if (!tripHeadsign.equals(other.tripHeadsign))
+        return false;
+      return true;
+    }
+  }
+
+  private static class ContinuesAsStopTimeGroupKey {
+
+    private final AgencyAndId _lineId;
+
+    public ContinuesAsStopTimeGroupKey(AgencyAndId lineId) {
+      _lineId = lineId;
+    }
+
+    public AgencyAndId getLineId() {
+      return _lineId;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((_lineId == null) ? 0 : _lineId.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      ContinuesAsStopTimeGroupKey other = (ContinuesAsStopTimeGroupKey) obj;
+      if (_lineId == null) {
+        if (other._lineId != null)
+          return false;
+      } else if (!_lineId.equals(other._lineId))
+        return false;
+      return true;
     }
   }
 }

@@ -22,7 +22,7 @@
 <jsp:directive.page contentType="text/html" />
 <s:set var="stop" value="parameters.stop"/>
 <s:text name="StopNum">
-  <param value="#stop.code"/>
+  <s:param value="#stop.code"/>
 </s:text>
 <s:if test="parameters.excludeStopName">
 </s:if>

@@ -1,19 +1,22 @@
 package org.onebusaway.transit_data.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 
-public class StopRouteDirectionScheduleBean extends ApplicationBean {
+public class StopRouteDirectionScheduleBean implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private String tripHeadsign;
 
   private List<StopTimeInstanceBean> stopTimes = new ArrayList<StopTimeInstanceBean>();
 
   private List<FrequencyInstanceBean> frequencies = new ArrayList<FrequencyInstanceBean>();
+  
+  private List<StopTimeGroupBean> groups;
 
   public String getTripHeadsign() {
     return tripHeadsign;
@@ -39,4 +42,11 @@ public class StopRouteDirectionScheduleBean extends ApplicationBean {
     this.frequencies = frequencies;
   }
 
+  public List<StopTimeGroupBean> getGroups() {
+    return groups;
+  }
+
+  public void setGroups(List<StopTimeGroupBean> groups) {
+    this.groups = groups;
+  }
 }

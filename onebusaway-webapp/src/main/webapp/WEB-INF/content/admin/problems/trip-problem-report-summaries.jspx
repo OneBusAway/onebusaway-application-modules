@@ -72,8 +72,10 @@
                 <jsp:element name="tr">
                     <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
                     <td>
-                        <s:a action="trip-problem-reports">
+                        <s:url var="url" action="trip-problem-reports">
                             <s:param name="tripId" value="trip.id"/>
+                        </s:url>
+                        <s:a href="%{url}">
                             <oba:routeName value="trip"/>
                             <jsp:text> - </jsp:text>
                             <s:property value="trip.tripHeadsign"/>

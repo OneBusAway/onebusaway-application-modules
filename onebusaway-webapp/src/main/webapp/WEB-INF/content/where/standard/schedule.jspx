@@ -20,6 +20,11 @@
 <!-- <s:set name="stop" value="result.stop" /> -->
 <head>
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-schedule.css')}"/>
+<script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/oba-where-standard-schedule.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript">
+  jQuery(document).ready(oba_where_standard_schedule);
+</script>
 <title>
   <oba:message key="Schedule"/>
   <jsp:text> - </jsp:text>
@@ -244,9 +249,17 @@
                             <s:param name="serviceDate" value="serviceDate" />
                             <s:param name="stopId" value="result.stop.id"/>
                           </s:url>
-                          <s:a cssClass="stopScheduleMinutes" href="%{url}">
+                          <jsp:element name="a">
+                            <jsp:attribute name="class">stopScheduleMinutes</jsp:attribute>
+                            <jsp:attribute name="href"><s:property value="url"/></jsp:attribute>
+                            <jsp:attribute name="data-groupIds">
+                                <s:iterator value="groupIds" status="it">
+                                    <s:property value="top"/>
+                                    <s:if test="! #it.last"><jsp:text> </jsp:text></s:if>
+                                </s:iterator> 
+                            </jsp:attribute>                            
                             <oba:date format="mm" value="departureTime" />
-                          </s:a>
+                          </jsp:element>
                         </s:iterator>
                       </td>
                     </jsp:element>
@@ -254,6 +267,39 @@
                 </s:iterator>
               </tbody>
             </table>
+            
+            <s:if test="! groups.empty">
+            <div>
+                <p><s:text name="schedule.To_highlight_specific_trips_select"/></p>
+                <form>
+                <ul>
+                    <li><input type="radio" name="group" checked="checked" class="tripSelectionInput"/> <s:text name="schedule.Show_all_trips"/></li>
+                <s:iterator value="groups">
+                    <li>
+                      <jsp:element name="input">
+                        <jsp:attribute name="type">radio</jsp:attribute>
+                        <jsp:attribute name="class">tripSelectionInput</jsp:attribute>
+                        <jsp:attribute name="name">group</jsp:attribute>
+                        <jsp:attribute name="data-groupId"><s:property value="id"/></jsp:attribute>
+                      </jsp:element>
+                      <s:if test="tripHeadsign != null">
+                        <s:property value="tripHeadsign" />
+                      </s:if>
+                      <s:if test="continuesAs != null">
+                        <s:if test="tripHeadsign != null">
+                          <jsp:text> - </jsp:text>
+                        </s:if>
+                        <s:text name="schedule.Continues_as_route">
+                          <s:param><oba:routeName value="continuesAs"/></s:param>
+                        </s:text>
+                      </s:if>
+                    </li>
+                </s:iterator>
+                </ul>
+                </form>
+            </div>
+            </s:if>
+            
             </s:if>
 
             </jsp:element>

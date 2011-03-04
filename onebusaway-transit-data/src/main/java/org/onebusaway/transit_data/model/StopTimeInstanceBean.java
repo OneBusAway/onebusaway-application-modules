@@ -1,8 +1,11 @@
 package org.onebusaway.transit_data.model;
 
-public class StopTimeInstanceBean extends ApplicationBean {
+import java.io.Serializable;
+import java.util.List;
 
-  private static final long serialVersionUID = 1L;
+public class StopTimeInstanceBean implements Serializable {
+
+  private static final long serialVersionUID = 3L;
 
   private long serviceDate;
 
@@ -15,6 +18,8 @@ public class StopTimeInstanceBean extends ApplicationBean {
   private String tripId;
 
   private String stopHeadsign;
+
+  private List<String> groupIds;
 
   public long getServiceDate() {
     return serviceDate;
@@ -62,5 +67,13 @@ public class StopTimeInstanceBean extends ApplicationBean {
 
   public void setStopHeadsign(String stopHeadsign) {
     this.stopHeadsign = stopHeadsign;
+  }
+
+  public List<String> getGroupIds() {
+    return groupIds;
+  }
+
+  public void setGroupIds(List<String> groupIds) {
+    this.groupIds = groupIds;
   }
 }

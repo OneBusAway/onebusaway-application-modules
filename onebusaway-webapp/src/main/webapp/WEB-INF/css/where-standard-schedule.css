@@ -123,6 +123,10 @@ table.stopScheduleNonFrequencyTable td.am_pm_label {
   font-weight:bold;
 }
 
+.stopScheduleNonFrequencyTable .highlightedTrip {
+	background-color: #ffaaaa;	
+}
+
 table.stopScheduleFrequencyTable > tbody > tr > td { 
   text-align: center;
   padding: 5px 2em 5px 2em;
@@ -144,6 +148,7 @@ table.stopScheduleFrequencyTable span.frequency {
 
 .stopScheduleMinutes {
 	margin-right: 10px;
+	padding: 2px;
 }
 
 .stopScheduleStop {
