@@ -251,7 +251,7 @@
                           </s:url>
                           <jsp:element name="a">
                             <jsp:attribute name="class">stopScheduleMinutes</jsp:attribute>
-                            <jsp:attribute name="href"><s:property value="url"/></jsp:attribute>
+                            <jsp:attribute name="href"><s:property value="url" escape="false"/></jsp:attribute>
                             <jsp:attribute name="data-groupIds">
                                 <s:iterator value="groupIds" status="it">
                                     <s:property value="top"/>
