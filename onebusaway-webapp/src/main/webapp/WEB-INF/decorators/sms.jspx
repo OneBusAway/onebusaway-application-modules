@@ -20,7 +20,7 @@
 <jsp:directive.page contentType="text/html" />
 
 <head>
-<title><decorator:title default="One Bus Away" /></title>
+<title><decorator:title default="OneBusAway" /></title>
 <decorator:head />
 </head>
 

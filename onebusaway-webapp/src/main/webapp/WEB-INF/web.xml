@@ -8,7 +8,7 @@
 <web-app id="starter" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-    <display-name>One Bus Away Server</display-name>
+    <display-name>OneBusAway Server</display-name>
 
     <context-param>
         <param-name>contextConfigLocation</param-name>

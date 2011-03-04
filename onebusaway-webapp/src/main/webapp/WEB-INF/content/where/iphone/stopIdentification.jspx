@@ -17,7 +17,7 @@
 <html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>One Bus Away - Search For Stops</title>
+<title>OneBusAway - Search For Stops</title>
 </head>
 
 <body>

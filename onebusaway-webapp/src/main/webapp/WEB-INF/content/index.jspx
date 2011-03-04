@@ -19,7 +19,7 @@
      xmlns:wiki="/oba-wiki-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>One Bus Away</title>
+<title>OneBusAway</title>
 </head>
 <body>
 
