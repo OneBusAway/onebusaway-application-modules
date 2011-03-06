@@ -5,6 +5,7 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
+import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 
@@ -28,13 +29,13 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
     /**
      * Check if we've reached our transfer limit
      */
-    if (s0.numBoardings >= options.maxTransfers)
+    StateData data = s0.getData();
+    if (data.getNumBoardings() >= options.maxTransfers)
       return null;
 
     int transferTime = computeTransferTime(options);
 
-    State s1 = s0.clone();
-    s1.incrementTimeInSeconds(transferTime + options.minTransferTime);
+    State s1 = s0.incrementTimeInSeconds(transferTime + options.minTransferTime);
 
     /**
      * We're using options.boardCost as a transfer penalty
@@ -52,8 +53,7 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
 
     int transferTime = computeTransferTime(options);
 
-    State s1 = s0.clone();
-    s1.time = _instance.getBestArrivalTime();
+    State s1 = s0.setTime(_instance.getBestArrivalTime());
 
     double weight = transferTime * options.walkReluctance + options.boardCost
         + options.minTransferTime * options.waitReluctance;

@@ -42,14 +42,14 @@ public class TransitShetVertexSkipStrategy implements VertexSkipStrategy {
       maxInitialWaitTime = config.maxInitialWaitTime;
 
     State currentState = vertex.state;
-    long tripDuration = currentState.time - originState.time;
+    long tripDuration = currentState.getTime() - originState.getTime();
 
-    /*
-    if (currentState.initialWaitTime > maxInitialWaitTime)
+    long initialWaitTime = OTPState.getInitialWaitTime(currentState);
+
+    if (initialWaitTime > maxInitialWaitTime)
       return true;
 
-    tripDuration -= currentState.initialWaitTime;
-    */
+    tripDuration -= initialWaitTime;
 
     if (tripDuration > maxTripDuration)
       return true;

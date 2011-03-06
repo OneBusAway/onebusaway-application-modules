@@ -5,6 +5,7 @@ import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
+import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 
@@ -48,7 +49,8 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
      * boardings is greater than zero. However, we still want the traversal to
      * proceed.
      */
-    if (_isReverseEdge && s0.numBoardings > 0)
+    StateData data = s0.getData();
+    if (_isReverseEdge && data.getNumBoardings() > 0)
       return null;
 
     EdgeNarrativeImpl narrative = createNarrative(s0.getTime());

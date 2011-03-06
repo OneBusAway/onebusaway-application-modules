@@ -3,7 +3,6 @@ package org.onebusaway.transit_data_federation.impl.otp.graph;
 import org.onebusaway.gtfs.model.Trip;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.MutableEdgeNarrative;
-import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.Vertex;
 
@@ -71,11 +70,6 @@ public class EdgeNarrativeImpl implements EdgeNarrative, MutableEdgeNarrative {
   @Override
   public Trip getTrip() {
     throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public String getName(State state) {
-    return null;
   }
 
   @Override

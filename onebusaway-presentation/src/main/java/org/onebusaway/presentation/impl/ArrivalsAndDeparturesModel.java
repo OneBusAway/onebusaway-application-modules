@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -15,8 +17,10 @@ import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
@@ -57,6 +61,10 @@ public class ArrivalsAndDeparturesModel {
   private boolean _filtered = false;
 
   protected UserBean _user;
+
+  private boolean _onlyNext = false;
+  
+  private int _refresh = 60;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -122,6 +130,18 @@ public class ArrivalsAndDeparturesModel {
     _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
   }
 
+  public void setOnlyNext(boolean onlyNext) {
+    _onlyNext = onlyNext;
+  }
+  
+  public void setRefresh(int refresh) {
+    _refresh = refresh;
+  }
+  
+  public int getRefresh() {
+    return _refresh;
+  }
+
   public boolean isMissingData() {
     return _stopIds == null || _stopIds.isEmpty();
   }
@@ -163,7 +183,7 @@ public class ArrivalsAndDeparturesModel {
   public List<AgencyBean> getAgencies() {
     return _agencies;
   }
-  
+
   /****
    * Private Methods
    ****/
@@ -179,6 +199,11 @@ public class ArrivalsAndDeparturesModel {
 
   private void filterResults() {
 
+    applyRouteFilter();
+    applyOnlyNextFilter();
+  }
+
+  private void applyRouteFilter() {
     if (_routeFilter == null || _routeFilter.isEmpty())
       return;
 
@@ -191,6 +216,43 @@ public class ArrivalsAndDeparturesModel {
     }
 
     _result.setArrivalsAndDepartures(filtered);
+  }
+
+  private void applyOnlyNextFilter() {
+    
+    if( ! _onlyNext)
+      return;
+    
+    List<ArrivalAndDepartureBean> current = _result.getArrivalsAndDepartures();
+    Collections.sort( current,SORT_BY_TIME);
+    
+    Map<String,ArrivalAndDepartureBean> keepers = new HashMap<String, ArrivalAndDepartureBean>();
+    for( ArrivalAndDepartureBean bean : current) {
+      String key = getRouteKeyForArrivalAndDeparture(bean);
+      if( ! keepers.containsKey(key))
+        keepers.put(key,bean);
+    }
+    
+    List<ArrivalAndDepartureBean> filtered = new ArrayList<ArrivalAndDepartureBean>(keepers.values());
+    OrderConstraint c = _order == null ? SORT_BY_TIME : _order;
+    Collections.sort(filtered,c);
+
+    _result.setArrivalsAndDepartures(filtered);
+  }
+  
+  private String getRouteKeyForArrivalAndDeparture(ArrivalAndDepartureBean bean) {
+    String name = bean.getRouteShortName();
+    if( name != null)
+      return name;
+    TripBean trip = bean.getTrip();
+    name = trip.getRouteShortName();
+    if( name != null)
+      return name;
+    RouteBean route = trip.getRoute();
+    name = route.getShortName();
+    if( name != null)
+      return name;
+    return route.getId();
   }
 
   private void orderResults() {

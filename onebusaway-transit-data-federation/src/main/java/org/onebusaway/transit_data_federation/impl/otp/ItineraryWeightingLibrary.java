@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
 import org.opentripplanner.routing.core.State;
+import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
 
 public class ItineraryWeightingLibrary {
@@ -13,7 +14,8 @@ public class ItineraryWeightingLibrary {
     /**
      * If this is the initial boarding, we penalize the wait time differently
      */
-    if (state.numBoardings == 0)
+    StateData data = state.getData();
+    if (data.getNumBoardings() == 0)
       w *= options.waitAtBeginningFactor;
 
     return w;

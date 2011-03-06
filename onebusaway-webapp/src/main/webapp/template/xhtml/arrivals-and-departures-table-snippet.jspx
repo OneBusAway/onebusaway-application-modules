@@ -24,6 +24,8 @@
 
     <s:set var="excludeOrderLinks"
         value="parameters.excludeOrderLinks == true" />
+    <s:set var="excludeTripLinks"
+        value="parameters.excludeTripLinks == true" />        
 
     <table class="arrivalsTable">
         <tr class="arrivalsHeader">
@@ -65,6 +67,7 @@
                 <s:param name="arrivalAndDeparture" value="top"/>
                 <s:param name="presentation" value="parameters.presentation"/>
                 <s:param name="excludeOrderLinks" value="#excludeOrderLinks" />
+                <s:param name="excludeTripLinks" value="#excludeTripLinks" />
             </s:component>
         </s:iterator>
 

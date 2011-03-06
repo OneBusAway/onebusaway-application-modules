@@ -35,9 +35,9 @@ public class BlockHopEdge extends AbstractEdge {
 
   @Override
   public TraverseResult traverse(State state0, TraverseOptions wo) {
-    State state1 = state0.clone();
+    
     int runningTime = computeRunningTime();
-    state1.incrementTimeInSeconds(runningTime);
+    State state1 = state0.incrementTimeInSeconds(runningTime);
 
     EdgeNarrativeImpl narrative = createNarrative();
 
@@ -46,9 +46,9 @@ public class BlockHopEdge extends AbstractEdge {
 
   @Override
   public TraverseResult traverseBack(State state0, TraverseOptions wo) {
-    State state1 = state0.clone();
+    
     int runningTime = computeRunningTime();
-    state1.incrementTimeInSeconds(-runningTime);
+    State state1 = state0.incrementTimeInSeconds(-runningTime);
 
     EdgeNarrativeImpl narrative = createNarrative();
 

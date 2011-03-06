@@ -8,6 +8,8 @@
     <s:set var="presentation" value="parameters.presentation"/>
     <s:set var="excludeOrderLinks"
         value="parameters.excludeOrderLinks == true" />
+    <s:set var="excludeTripLinks"
+        value="parameters.excludeTripLinks == true" />        
 
     <s:push value="parameters.arrivalAndDeparture">
 
@@ -36,18 +38,25 @@
               </s:a>
               </s:else>
             </jsp:element>
-            <td>
+            <td class="arrivalsDescriptionEntry">
             
             <div>
-            <div class="arrivalsDestinationEntry"><s:url
-                var="tripUrl" action="trip" includeParams="none">
+            <div class="arrivalsDestinationEntry">
+              <s:url var="tripUrl" action="trip" includeParams="none">
                 <s:param name="id" value="trip.id" />
                 <s:param name="serviceDate" value="serviceDate" />
                 <s:param name="vehicleId" value="tripStatus.vehicleId" />
                 <s:param name="stopId" value="stop.id" />
-            </s:url> <s:a href="%{tripUrl}">
+              </s:url>
+              <s:if test="#excludeTripLinks">
                 <s:property value="trip.tripHeadsign" />
-            </s:a></div>
+              </s:if>
+              <s:else>
+                <s:a href="%{tripUrl}">
+                  <s:property value="trip.tripHeadsign" />
+                </s:a>
+              </s:else>
+            </div>
             <div class="arrivalsTimePanel"><s:if
                 test="frequency == null">
                 <span class="arrivalsTimeEntry"> <oba:date

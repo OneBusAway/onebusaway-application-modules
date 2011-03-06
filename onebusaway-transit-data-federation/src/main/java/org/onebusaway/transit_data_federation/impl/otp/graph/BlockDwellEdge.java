@@ -26,8 +26,7 @@ public class BlockDwellEdge extends AbstractEdge {
     StopTimeEntry stopTime = bst.getStopTime();
     int dwellTime = stopTime.getSlackTime();
 
-    State state1 = s0.clone();
-    state1.incrementTimeInSeconds(dwellTime);
+    State state1 = s0.incrementTimeInSeconds(dwellTime);
 
     EdgeNarrativeImpl narrative = createNarrative();
 
@@ -42,8 +41,7 @@ public class BlockDwellEdge extends AbstractEdge {
     StopTimeEntry stopTime = bst.getStopTime();
     int dwellTime = stopTime.getSlackTime();
 
-    State state1 = s0.clone();
-    state1.incrementTimeInSeconds(-dwellTime);
+    State state1 = s0.incrementTimeInSeconds(-dwellTime);
 
     EdgeNarrativeImpl narrative = createNarrative();
 

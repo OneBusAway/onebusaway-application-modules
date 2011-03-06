@@ -5,6 +5,7 @@ import java.util.List;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
+import org.onebusaway.transit_data_federation.impl.otp.OTPState;
 import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
@@ -12,6 +13,8 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
+import org.opentripplanner.routing.core.StateData;
+import org.opentripplanner.routing.core.StateData.Editor;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
@@ -32,6 +35,7 @@ public class DepartureEdge extends AbstractEdge {
     TraverseResult result = null;
 
     long time = s0.getTime();
+    StateData data = s0.getData();
 
     /**
      * Look for departures in the next X minutes
@@ -63,27 +67,26 @@ public class DepartureEdge extends AbstractEdge {
           instance);
       EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
-      State s1 = s0.clone();
-      s1.time = departureTime;
-      s1.numBoardings++;
-      s1.everBoarded = true;
+      Editor edit = s0.edit();
+      edit.setTime(departureTime);
+      edit.incrementNumBoardings();
+      edit.setEverBoarded(true);
 
       int dwellTime = (int) ((departureTime - time) / 1000);
       double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
       
-      /*
-      if (s0.numBoardings == 0)
-        s1.initialWaitTime += dwellTime * 1000;
-      */  
+      if (data.getNumBoardings() == 0)
+        OTPState.incrementInitialWaitTime(edit, dwellTime * 1000);
 
-      TraverseResult r = new TraverseResult(w, s1, narrative);
+      TraverseResult r = new TraverseResult(w, edit.createState(), narrative);
       result = r.addToExistingResultChain(result);
     }
 
     // In addition to all the departures, we can just remain waiting at the stop
 
-    State s1 = new State(toTime);
-
+    Editor edit = s0.edit();
+    edit.setTime(toTime);
+    
     DepartureVertex fromVertex = new DepartureVertex(_context, _stop,
         s0.getTime());
     DepartureVertex toVertex = new DepartureVertex(_context, _stop, toTime);
@@ -92,12 +95,10 @@ public class DepartureEdge extends AbstractEdge {
     int dwellTime = (int) ((toTime - time) / 1000);
     double w = ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
     
-    /*
-    if (s0.numBoardings == 0)
-      s1.initialWaitTime += dwellTime * 1000;
-    */
+    if (data.getNumBoardings() == 0)
+      OTPState.incrementInitialWaitTime(edit, dwellTime * 1000);
     
-    TraverseResult r = new TraverseResult(w, s1, narrative);
+    TraverseResult r = new TraverseResult(w, edit.createState(), narrative);
     result = r.addToExistingResultChain(result);
 
     return result;

@@ -122,7 +122,7 @@ public class StopAction extends AbstractWhereAction implements
   public boolean isShowArrivals() {
     return _model.isShowArrivals();
   }
-
+  
   @Override
   public WebappArrivalsAndDeparturesModel getModel() {
     return _model;
@@ -132,7 +132,8 @@ public class StopAction extends AbstractWhereAction implements
   @Actions( {
       @Action(value = "/where/standard/stop"),
       @Action(value = "/where/iphone/stop"),
-      @Action(value = "/where/text/stop")})
+      @Action(value = "/where/text/stop"),
+      @Action(value = "/where/sign/stop")})
   public String execute() throws ServiceException {
 
     if (_ids == null || _ids.isEmpty())

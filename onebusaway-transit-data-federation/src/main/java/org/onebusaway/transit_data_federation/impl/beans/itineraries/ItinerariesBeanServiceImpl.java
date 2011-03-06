@@ -265,7 +265,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         AbstractStopVertex stopVertex = (AbstractStopVertex) v;
         StopEntry stop = stopVertex.getStop();
         State state = vertex.state;
-        long duration = Math.abs(state.time - time);
+        long duration = Math.abs(state.getTime() - time);
         if (!results.containsKey(stop) || results.get(stop) > duration)
           results.put(stop, duration);
       }
@@ -274,7 +274,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         ArrivalAndDepartureInstance instance = blockVertex.getInstance();
         StopEntry stop = instance.getStop();
         State state = vertex.state;
-        long duration = Math.abs(state.time - time);
+        long duration = Math.abs(state.getTime() - time);
         if (!results.containsKey(stop) || results.get(stop) > duration)
           results.put(stop, duration);
       }

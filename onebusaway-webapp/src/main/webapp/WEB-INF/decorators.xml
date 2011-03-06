@@ -42,6 +42,10 @@
         <pattern>/sms/*</pattern>
         <pattern>/where/mobile/*</pattern>
     </decorator>
+    
+    <decorator name="sign" page="sign.jspx">
+        <pattern>/where/sign/*</pattern>
+    </decorator>
 
     <decorator name="main-research" page="main-research.jspx">
         <pattern>/p/Research*</pattern>

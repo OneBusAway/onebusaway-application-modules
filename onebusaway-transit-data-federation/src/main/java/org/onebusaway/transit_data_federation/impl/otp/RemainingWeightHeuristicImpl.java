@@ -5,6 +5,7 @@ import org.opentripplanner.routing.algorithm.RemainingWeightHeuristic;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
+import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
@@ -90,7 +91,8 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
      * guarantee that we'll never get back on transit. Thus, we can assume
      * walking speed as our max velocity.
      */
-    if (state.everBoarded && !(v instanceof TransitVertex))
+    StateData data = state.getData();
+    if (data.isEverBoarded() && !(v instanceof TransitVertex))
       return _options.speed;
 
     return _maxTransitSpeed;
