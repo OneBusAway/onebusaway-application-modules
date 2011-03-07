@@ -97,17 +97,6 @@
 
   <bean id="calendarServiceTask" class="org.onebusaway.transit_data_federation.bundle.tasks.CalendarServiceDataTask" />
 
-  <!-- Walk Graph -->
-
-  <!-- <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition"> -->
-  <!-- <property name="taskName" value="walk_graph" /> -->
-  <!-- <property name="afterTaskName" value="calendar_service" /> -->
-  <!-- <property name="task" ref="walkGraphTask" /> -->
-  <!-- </bean> -->
-  <!-- -->
-  <!-- <bean id="walkGraphTask" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphTask" 
-    /> -->
-
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="otp_graph" />
     <property name="afterTaskName" value="calendar_service" />

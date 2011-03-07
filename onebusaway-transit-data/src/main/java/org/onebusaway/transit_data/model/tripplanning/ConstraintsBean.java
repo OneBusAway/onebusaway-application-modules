@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data.model.tripplanning;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ConstraintsBean implements Serializable {
@@ -32,6 +33,27 @@ public class ConstraintsBean implements Serializable {
   private int transferCost = -1;
 
   private int maxTransfers = -1;
+
+  public ConstraintsBean() {
+
+  }
+
+  public ConstraintsBean(ConstraintsBean c) {
+    this.arriveBy = c.arriveBy;
+    this.initialWaitReluctance = c.initialWaitReluctance;
+    this.maxTransfers = c.maxTransfers;
+    this.maxTripDuration = c.maxTripDuration;
+    this.maxWalkingDistance = c.maxWalkingDistance;
+    this.minTransferTime = c.minTransferTime;
+    if (c.modes != null)
+      this.modes = new HashSet<String>(c.modes);
+    this.resultCount = c.resultCount;
+    this.transferCost = c.transferCost;
+    this.useRealTime = c.useRealTime;
+    this.waitReluctance = c.waitReluctance;
+    this.walkReluctance = c.walkReluctance;
+    this.walkSpeed = c.walkSpeed;
+  }
 
   public boolean isArriveBy() {
     return arriveBy;
@@ -65,10 +87,16 @@ public class ConstraintsBean implements Serializable {
     this.modes = modes;
   }
 
+  /**
+   * @return maximum trip duration, in seconds
+   */
   public int getMaxTripDuration() {
     return maxTripDuration;
   }
 
+  /**
+   * @param maxTripDuration time, in seconds
+   */
   public void setMaxTripDuration(int maxTripDuration) {
     this.maxTripDuration = maxTripDuration;
   }

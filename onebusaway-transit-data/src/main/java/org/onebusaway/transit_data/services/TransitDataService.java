@@ -15,7 +15,6 @@ import org.onebusaway.federations.annotations.FederatedByCoordinateBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByCoordinatePointsMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
-import org.onebusaway.federations.annotations.FederatedByLocationMethod;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
@@ -38,7 +37,6 @@ import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
@@ -50,8 +48,6 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
@@ -314,22 +310,6 @@ public interface TransitDataService extends FederatedService {
   public EncodedPolylineBean getShapeForId(String shapeId);
 
   /**
-   * 
-   * @param latFrom
-   * @param lonFrom
-   * @param latTo
-   * @param lonTo
-   * @param constraints
-   * @return a list of trip plans computed between the two locations with the
-   *         specified constraints
-   * @throws ServiceException
-   */
-  @FederatedByBoundsMethod
-  public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, TripPlannerConstraintsBean constraints)
-      throws ServiceException;
-
-  /**
    * Plan a trip between two locations at a particular time, with the specified
    * constraints.
    * 
@@ -352,22 +332,16 @@ public interface TransitDataService extends FederatedService {
 
   /**
    * 
-   * @param lat
-   * @param lon
+   * @param location
+   * @param time
    * @param constraints
    * @return min travel time transit-shed computation to a list of stops from
    *         the specified starting location with the specified travel
    *         constraints
    * @throws ServiceException
    */
-
-  @FederatedByLocationMethod
-  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(double lat,
-      double lon, OneBusAwayConstraintsBean constraints)
-      throws ServiceException;
-
   @FederatedByCoordinatePointsMethod
-  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFromNew(
+  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(
       CoordinatePoint location, long time,
       TransitShedConstraintsBean constraints) throws ServiceException;
 
@@ -384,7 +358,7 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByAgencyIdMethod
   public List<TimedPlaceBean> getLocalPaths(String agencyId,
-      OneBusAwayConstraintsBean constraints,
+      ConstraintsBean constraints,
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException;
 

@@ -7,13 +7,15 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.grid.GridFactory;
 import org.onebusaway.geospatial.grid.TimedGridFactory;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTransitTimeResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.webapp.services.oba.OneBusAwayService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,24 +31,27 @@ public class OneBusAwayServiceImpl implements OneBusAwayService {
     _transitDataService = transitDataService;
   }
 
-  public MinTransitTimeResult getMinTravelTimeToStopsFrom(double lat,
-      double lon, OneBusAwayConstraintsBean constraints, int timeSegmentSize)
+  public MinTransitTimeResult getMinTravelTimeToStopsFrom(
+      CoordinatePoint location, long time,
+      TransitShedConstraintsBean constraints, int timeSegmentSize)
       throws ServiceException {
 
     MinTravelTimeToStopsBean minTravelTimeToStops = _transitDataService.getMinTravelTimeToStopsFrom(
-        lat, lon, constraints);
+        location, time, constraints);
 
-    double maxWalkDistance = constraints.getMaxWalkingDistance();
-    double walkingVelocity = minTravelTimeToStops.getWalkingVelocity();
+    ConstraintsBean c = constraints.getConstraints();
 
-    CoordinateBounds b = SphericalGeometryLibrary.bounds(lat, lon, 800);
+    double maxWalkDistance = c.getMaxWalkingDistance();
+    double walkingVelocity = minTravelTimeToStops.getWalkingVelocity() / 1000;
+
+    CoordinateBounds b = SphericalGeometryLibrary.bounds(location, 800);
     double latStep = b.getMaxLat() - b.getMinLat();
     double lonStep = b.getMaxLon() - b.getMinLon();
     GridFactory gridFactory = new GridFactory(latStep, lonStep);
     TimedGridFactory timedGridFactory = new TimedGridFactory(latStep / 4,
         lonStep / 4, walkingVelocity);
 
-    long maxTripLength = constraints.getMaxTripDuration() * 60 * 1000;
+    long maxTripLength = c.getMaxTripDuration() * 1000;
 
     for (int i = 0; i < minTravelTimeToStops.getSize(); i++) {
 
@@ -89,8 +94,7 @@ public class OneBusAwayServiceImpl implements OneBusAwayService {
     return result;
   }
 
-  public List<TimedPlaceBean> getLocalPaths(
-      OneBusAwayConstraintsBean constraints,
+  public List<TimedPlaceBean> getLocalPaths(ConstraintsBean constraints,
       MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)
       throws ServiceException {
 

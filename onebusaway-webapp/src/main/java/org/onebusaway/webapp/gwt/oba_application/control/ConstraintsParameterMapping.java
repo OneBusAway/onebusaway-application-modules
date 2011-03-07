@@ -1,9 +1,10 @@
 package org.onebusaway.webapp.gwt.oba_application.control;
 
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
-import org.onebusaway.webapp.gwt.common.context.Context;
-
 import java.util.Map;
+
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
+import org.onebusaway.webapp.gwt.common.context.Context;
 
 public class ConstraintsParameterMapping {
 
@@ -17,39 +18,44 @@ public class ConstraintsParameterMapping {
   public static final String PARAM_MAX_WALKING_DISTANCE = "walk";
 
   public static void addConstraintsToParams(
-      OneBusAwayConstraintsBean constraints, Map<String, String> params) {
+      TransitShedConstraintsBean constraints, Map<String, String> params) {
 
-    long minDepartureTime = constraints.getMinDepartureTime();
-    params.put(PARAM_TIME, Long.toString(minDepartureTime));
+    ConstraintsBean c = constraints.getConstraints();
 
-    params.put(PARAM_MAX_TRANSFERS,
-        Integer.toString(constraints.getMaxTransfers()));
+    params.put(PARAM_MAX_TRANSFERS, Integer.toString(c.getMaxTransfers()));
     params.put(PARAM_MAX_TRIP_LENGTH,
-        Integer.toString(constraints.getMaxTripDuration()));
+        Integer.toString(c.getMaxTripDuration() / 60));
     params.put(PARAM_MAX_WALKING_DISTANCE,
-        Double.toString(constraints.getMaxWalkingDistance()));
+        Double.toString(c.getMaxWalkingDistance()));
+  }
 
+  public static void addTimeToParams(long time, Map<String, String> params) {
+    params.put(PARAM_TIME, Long.toString(time));
   }
 
   public static void addParamsToConstraints(Context context,
-      OneBusAwayConstraintsBean constraints) {
+      TransitShedConstraintsBean constraints) {
 
-    String minDepartureTimeValue = context.getParam(PARAM_TIME);
-    if (minDepartureTimeValue != null) {
-      long minDepartureTime = Long.parseLong(minDepartureTimeValue);
-      constraints.setMinDepartureTime(minDepartureTime);
-      constraints.setMaxDepartureTime(constraints.getMinDepartureTime() + 60 * 60 * 1000);
-    }
+    ConstraintsBean c = constraints.getConstraints();
+
     String maxWalkingDistance = context.getParam(PARAM_MAX_WALKING_DISTANCE);
     if (maxWalkingDistance != null)
-      constraints.setMaxWalkingDistance(Double.parseDouble(maxWalkingDistance));
+      c.setMaxWalkingDistance(Double.parseDouble(maxWalkingDistance));
 
     String maxTransfers = context.getParam(PARAM_MAX_TRANSFERS);
     if (maxTransfers != null)
-      constraints.setMaxTransfers(Integer.parseInt(maxTransfers));
+      c.setMaxTransfers(Integer.parseInt(maxTransfers));
 
     String maxTripLength = context.getParam(PARAM_MAX_TRIP_LENGTH);
     if (maxTripLength != null)
-      constraints.setMaxTripDuration(Integer.parseInt(maxTripLength));
+      c.setMaxTripDuration(Integer.parseInt(maxTripLength) * 60);
+  }
+
+  public static long getParamsAsTime(Context context) {
+    String minDepartureTimeValue = context.getParam(PARAM_TIME);
+    if (minDepartureTimeValue != null) {
+      return Long.parseLong(minDepartureTimeValue);
+    }
+    return 0;
   }
 }

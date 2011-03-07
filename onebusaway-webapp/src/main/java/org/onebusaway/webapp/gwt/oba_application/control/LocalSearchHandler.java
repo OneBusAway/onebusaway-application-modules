@@ -1,11 +1,16 @@
 package org.onebusaway.webapp.gwt.oba_application.control;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTransitTimeResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.webapp.gwt.common.model.ModelEventSink;
 import org.onebusaway.webapp.gwt.oba_application.control.state.SearchCompleteState;
 import org.onebusaway.webapp.gwt.oba_application.control.state.SearchProgressState;
@@ -16,11 +21,6 @@ import org.onebusaway.webapp.gwt.oba_application.search.LocalSearchProvider;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappServiceAsync;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class LocalSearchHandler implements LocalSearchCallback {
 
@@ -34,7 +34,7 @@ public class LocalSearchHandler implements LocalSearchCallback {
 
   private ResultsModel _model;
 
-  private OneBusAwayConstraintsBean _constraints;
+  private TransitShedConstraintsBean _constraints;
 
   private MinTravelTimeToStopsBean _travelTimes;
 
@@ -54,13 +54,13 @@ public class LocalSearchHandler implements LocalSearchCallback {
 
   private String _resultId;
 
-  public LocalSearchHandler(OneBusAwayConstraintsBean constraints,
+  public LocalSearchHandler(TransitShedConstraintsBean constraints,
       MinTransitTimeResult result) {
     _constraints = constraints;
     _travelTimes = result.getMinTravelTimeToStops();
     _searchGrid = result.getSearchGrid();
     _resultId = Long.toString(System.currentTimeMillis());
-    for( CoordinateBounds bounds : _searchGrid)
+    for (CoordinateBounds bounds : _searchGrid)
       System.out.println(bounds);
   }
 
@@ -100,8 +100,8 @@ public class LocalSearchHandler implements LocalSearchCallback {
         _placeResults.put(result.getId(), result);
 
       WebappServiceAsync service = WebappServiceAsync.SERVICE;
-      service.getLocalPathsToStops(_constraints, _travelTimes, results,
-          _placeHandler);
+      service.getLocalPathsToStops(_constraints.getConstraints(), _travelTimes,
+          results, _placeHandler);
     }
   }
 

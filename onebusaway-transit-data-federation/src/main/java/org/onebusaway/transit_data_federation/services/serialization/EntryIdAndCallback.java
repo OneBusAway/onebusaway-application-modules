@@ -4,7 +4,6 @@
 package org.onebusaway.transit_data_federation.services.serialization;
 
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
-import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl;
 
 /**
  * A sort of delayed-binding mechanism to help with serializing large, highly

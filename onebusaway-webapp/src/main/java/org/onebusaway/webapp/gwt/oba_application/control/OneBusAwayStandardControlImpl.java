@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.onebusaway.transit_data.model.oba.MinTransitTimeResult;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.webapp.gwt.common.context.Context;
 import org.onebusaway.webapp.gwt.common.control.Place;
 import org.onebusaway.webapp.gwt.oba_application.control.state.SearchStartedState;
@@ -22,7 +22,7 @@ public class OneBusAwayStandardControlImpl extends CommonControlImpl implements
   }
 
   public void query(String query, String locationQuery, LatLng location,
-      OneBusAwayConstraintsBean constraints) {
+      long time, TransitShedConstraintsBean constraints) {
 
     // We push the query onto the context so it can be bookmarked
     Map<String, String> params = new LinkedHashMap<String, String>();
@@ -36,6 +36,7 @@ public class OneBusAwayStandardControlImpl extends CommonControlImpl implements
           Double.toString(location.getLongitude()));
     }
 
+    ConstraintsParameterMapping.addTimeToParams(time, params);
     ConstraintsParameterMapping.addConstraintsToParams(constraints, params);
 
     params.put("_", Integer.toString(_contextIndex++));
@@ -70,24 +71,30 @@ public class OneBusAwayStandardControlImpl extends CommonControlImpl implements
         }
       }
 
-      OneBusAwayConstraintsBean constraints = new OneBusAwayConstraintsBean();
+      TransitShedConstraintsBean constraints = new TransitShedConstraintsBean();
+      constraints.setMaxInitialWaitTime(60*60);
       ConstraintsParameterMapping.addParamsToConstraints(context, constraints);
 
-      _queryModel.setQuery(query, locationQuery, location, constraints);
+      long time = ConstraintsParameterMapping.getParamsAsTime(context);
+      if (time == 0)
+        time = System.currentTimeMillis();
+
+      _queryModel.setQuery(query, locationQuery, location, time, constraints);
       _stateEvents.fireModelChange(new StateEvent(new SearchStartedState()));
     }
   }
 
   public void setQueryLocation(LatLng point) {
     String query = _queryModel.getQuery();
-    OneBusAwayConstraintsBean constraints = _queryModel.getConstraints();
-    query(query, "", point, constraints);
+    long time = _queryModel.getTime();
+    TransitShedConstraintsBean constraints = _queryModel.getConstraints();
+    query(query, "", point, time, constraints);
   }
 
   public void search(MinTransitTimeResult result) {
 
     _resultsModel.clear();
-    
+
     System.out.println("here?");
 
     String query = _queryModel.getQuery();
@@ -96,9 +103,9 @@ public class OneBusAwayStandardControlImpl extends CommonControlImpl implements
     if (query.equals("NOTHING") || query.length() == 0)
       return;
 
-    OneBusAwayConstraintsBean constraints = _queryModel.getConstraints();
-    
-    LocalSearchHandler handler = new LocalSearchHandler(constraints,result);
+    TransitShedConstraintsBean constraints = _queryModel.getConstraints();
+
+    LocalSearchHandler handler = new LocalSearchHandler(constraints, result);
     handler.setEventSink(_stateEvents);
     handler.setLocalSearchProvider(_localSearchProvider);
     handler.setModel(_resultsModel);
@@ -117,7 +124,12 @@ public class OneBusAwayStandardControlImpl extends CommonControlImpl implements
   }
 
   @Override
-  protected OneBusAwayConstraintsBean getQueryConstraints() {
+  protected long getQueryTime() {
+    return _queryModel.getTime();
+  }
+
+  @Override
+  protected TransitShedConstraintsBean getQueryConstraints() {
     return _queryModel.getConstraints();
   }
 
@@ -125,4 +137,5 @@ public class OneBusAwayStandardControlImpl extends CommonControlImpl implements
   protected void setQueryLocationLookupResult(Place place) {
     _queryModel.setQueryLocation(place.getLocation());
   }
+
 }

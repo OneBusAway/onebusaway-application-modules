@@ -1,29 +1,30 @@
 package org.onebusaway.webapp.gwt.tripplanner_library.model;
 
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripSegmentBean;
-import org.onebusaway.webapp.gwt.common.model.AbstractModel;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
+import org.onebusaway.transit_data.model.tripplanning.LegBean;
+import org.onebusaway.webapp.gwt.common.model.AbstractModel;
+
 public class TripPlanModel extends AbstractModel<TripPlanModel> {
 
-  private static TripBeanComparator _comparator = new TripBeanComparator();
+  private static ItineraryBeanComparator _comparator = new ItineraryBeanComparator();
 
-  private List<TripPlanBean> _trips;
+  private List<ItineraryBean> _trips;
 
   private int _selectedIndex = 0;
 
-  public void setTripPlans(List<TripPlanBean> trips) {
-    _trips = trips;
+  public void setTripPlans(ItinerariesBean trips) {
+    _trips = trips.getItineraries();
     Collections.sort(_trips, _comparator);
     _selectedIndex = _trips.isEmpty() ? -1 : 0;
     fireModelChange(this);
   }
 
-  public List<TripPlanBean> getTrips() {
+  public List<ItineraryBean> getTrips() {
     return _trips;
   }
 
@@ -36,25 +37,22 @@ public class TripPlanModel extends AbstractModel<TripPlanModel> {
     fireModelChange(this);
   }
 
-  private static class TripBeanComparator implements Comparator<TripPlanBean> {
+  private static class ItineraryBeanComparator implements Comparator<ItineraryBean> {
 
-    public int compare(TripPlanBean o1, TripPlanBean o2) {
+    public int compare(ItineraryBean o1, ItineraryBean o2) {
 
-      List<TripSegmentBean> segments1 = o1.getSegments();
-      List<TripSegmentBean> segments2 = o2.getSegments();
+      List<LegBean> legs1 = o1.getLegs();
+      List<LegBean> leg2 = o2.getLegs();
 
-      if (segments1.isEmpty() && segments2.isEmpty())
+      if (legs1.isEmpty() && leg2.isEmpty())
         return 0;
-      else if (segments1.isEmpty())
+      else if (legs1.isEmpty())
         return -1;
-      else if (segments2.isEmpty())
+      else if (leg2.isEmpty())
         return 1;
 
-      TripSegmentBean segment1 = segments1.get(segments1.size() - 1);
-      TripSegmentBean segment2 = segments2.get(segments2.size() - 1);
-
-      long d1 = segment1.getTime();
-      long d2 = segment2.getTime();
+      long d1 = o1.getEndTime();
+      long d2 = o2.getEndTime();
 
       return d1 == d2 ? 0 : (d1 < d2 ? -1 : 1);
     }

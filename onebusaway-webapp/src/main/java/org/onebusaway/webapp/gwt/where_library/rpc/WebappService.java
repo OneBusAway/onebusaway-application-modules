@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -33,10 +34,10 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTransitTimeResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.users.client.model.UserBean;
@@ -77,16 +78,17 @@ public interface WebappService extends RemoteService {
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query);
 
-  public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, TripPlannerConstraintsBean constraints)
+  public ItinerariesBean getTripsBetween(CoordinatePoint from,
+      CoordinatePoint to, long time, ConstraintsBean constraints)
       throws ServiceException;
 
-  public MinTransitTimeResult getMinTravelTimeToStopsFrom(double lat,
-      double lon, OneBusAwayConstraintsBean constraints, int timeSegmentSize)
+  public MinTransitTimeResult getMinTravelTimeToStopsFrom(
+      CoordinatePoint location, long time,
+      TransitShedConstraintsBean constraints, int timeSegmentSize)
       throws ServiceException;
 
   public List<TimedPlaceBean> getLocalPathsToStops(
-      OneBusAwayConstraintsBean constraints,
+      ConstraintsBean constraints,
       MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)
       throws ServiceException;
 }

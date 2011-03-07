@@ -1,9 +1,11 @@
 package org.onebusaway.webapp.gwt.tripplanner_library.view;
 
-import org.onebusaway.transit_data.model.tripplanner.DepartureSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.WalkSegmentBean;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
+import org.onebusaway.transit_data.model.tripplanning.LegBean;
 import org.onebusaway.webapp.gwt.common.model.ModelListener;
 import org.onebusaway.webapp.gwt.tripplanner_library.model.TripPlanModel;
 import org.onebusaway.webapp.gwt.tripplanner_library.resources.TripPlannerCssResource;
@@ -20,10 +22,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class TripPlanResultTablePresenter implements
     ModelListener<TripPlanModel> {
@@ -71,16 +69,16 @@ public class TripPlanResultTablePresenter implements
     _panel.clear();
     _panel.setVisible(true);
 
-    List<TripPlanBean> trips = model.getTrips();
+    List<ItineraryBean> trips = model.getTrips();
     int selectedIndex = model.getSelectedIndex();
 
     Grid grid = new Grid(trips.size(), 4);
     _panel.add(grid);
 
     for (int index = 0; index < trips.size(); index++) {
-      TripPlanBean trip = trips.get(index);
-      Date start = TripBeanSupport.getStartTime(trip);
-      Date end = TripBeanSupport.getEndTime(trip);
+      ItineraryBean trip = trips.get(index);
+      Date start = new Date(trip.getStartTime());
+      Date end = new Date(trip.getEndTime());
 
       String timeStartAndEndLabel = _timeFormat.format(start) + " - "
           + _timeFormat.format(end);
@@ -107,22 +105,20 @@ public class TripPlanResultTablePresenter implements
     }
   }
 
-  private Widget getTripTypeWidget(TripPlanBean trip) {
+  private Widget getTripTypeWidget(ItineraryBean trip) {
 
     FlowPanel panel = new FlowPanel();
     TripPlannerResources resources = TripPlannerResources.INSTANCE;
 
-    for (TripSegmentBean segment : trip.getSegments()) {
-      if (segment instanceof WalkSegmentBean) {
-        WalkSegmentBean walk = (WalkSegmentBean) segment;
-        if (walk.getDistance() > 5280 / 4) {
+    for (LegBean segment : trip.getLegs()) {
+      if( segment.getMode().equals("walk") ) {
+        if (segment.getDistance() > 400) {
           DataResource walkIcon = resources.getWalkTripTypeIcon();
           Image image = new Image(walkIcon.getUrl());
           panel.add(image);
         }
       }
-
-      if (segment instanceof DepartureSegmentBean) {
+      else if( segment.getMode().equals("transit")) {
         DataResource busIcon = resources.getBusTripTypeIcon();
         Image image = new Image(busIcon.getUrl());
         panel.add(image);
@@ -132,7 +128,7 @@ public class TripPlanResultTablePresenter implements
     return panel;
   }
 
-  private void displayTrip(TripPlanBean trip, int index) {
+  private void displayTrip(ItineraryBean trip, int index) {
 
     _singleTripPresenter.displayTrip(trip, index + 1, "your destination");
 

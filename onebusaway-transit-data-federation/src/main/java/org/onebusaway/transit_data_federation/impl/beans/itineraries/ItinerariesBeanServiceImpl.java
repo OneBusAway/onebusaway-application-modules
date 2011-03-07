@@ -24,6 +24,7 @@ import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.LegBean;
 import org.onebusaway.transit_data.model.tripplanning.LocationBean;
+import org.onebusaway.transit_data.model.tripplanning.Modes;
 import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
@@ -32,6 +33,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.beans.ApplicationBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
+import org.onebusaway.transit_data_federation.impl.otp.OTPState;
 import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractBlockVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertex;
@@ -260,21 +262,23 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     Map<StopEntry, Long> results = new HashMap<StopEntry, Long>();
 
     for (SPTVertex vertex : tree.getVertices()) {
+
+      State state = vertex.state;
       Vertex v = vertex.mirror;
+
       if (v instanceof AbstractStopVertex) {
         AbstractStopVertex stopVertex = (AbstractStopVertex) v;
         StopEntry stop = stopVertex.getStop();
-        State state = vertex.state;
-        long duration = Math.abs(state.getTime() - time);
+        long initialWaitTime = OTPState.getInitialWaitTime(state);
+        long duration = Math.abs(state.getTime() - time) - initialWaitTime;
         if (!results.containsKey(stop) || results.get(stop) > duration)
           results.put(stop, duration);
-      }
-      else if( v instanceof AbstractBlockVertex) {
+      } else if (v instanceof AbstractBlockVertex) {
         AbstractBlockVertex blockVertex = (AbstractBlockVertex) v;
         ArrivalAndDepartureInstance instance = blockVertex.getInstance();
         StopEntry stop = instance.getStop();
-        State state = vertex.state;
-        long duration = Math.abs(state.getTime() - time);
+        long initialWaitTime = OTPState.getInitialWaitTime(state);
+        long duration = Math.abs(state.getTime() - time) - initialWaitTime;
         if (!results.containsKey(stop) || results.get(stop) > duration)
           results.put(stop, duration);
       }
@@ -326,9 +330,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     Set<String> modes = constraints.getModes();
     if (modes != null) {
       TraverseModeSet ms = new TraverseModeSet();
-      if (modes.contains("walk"))
+      if (modes.contains(Modes.WALK))
         ms.setWalk(true);
-      if (modes.contains("transit"))
+      if (modes.contains(Modes.TRANSIT))
         ms.setTransit(true);
       options.setModes(ms);
     }
@@ -368,9 +372,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     options.putExtension(OTPConfiguration.class, config);
 
     config.useRealtime = constraints.isUseRealTime();
-    
-    if( constraints.getMaxTripDuration() != -1)
-      config.maxTripDuration = constraints.getMaxTripDuration();
+
+    if (constraints.getMaxTripDuration() != -1)
+      config.maxTripDuration = constraints.getMaxTripDuration() * 1000;
   }
 
   private LocationBean getPointAsLocation(CoordinatePoint p) {
@@ -389,9 +393,11 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     List<ItineraryBean> beans = new ArrayList<ItineraryBean>();
     bean.setItineraries(beans);
 
-    for (GraphPath path : paths) {
-      ItineraryBean itinerary = getPathAsItinerary(path);
-      beans.add(itinerary);
+    if (paths != null) {
+      for (GraphPath path : paths) {
+        ItineraryBean itinerary = getPathAsItinerary(path);
+        beans.add(itinerary);
+      }
     }
 
     return bean;

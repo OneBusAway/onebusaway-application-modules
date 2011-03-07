@@ -3,9 +3,11 @@ package org.onebusaway.webapp.gwt.oba_application.control;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.webapp.gwt.common.context.Context;
 import org.onebusaway.webapp.gwt.common.context.ContextHelper;
 import org.onebusaway.webapp.gwt.common.context.ContextManager;
@@ -128,13 +130,13 @@ public abstract class CommonControlImpl implements CommonControl {
     WebappServiceAsync service = WebappServiceAsync.SERVICE;
 
     LatLng fromPoint = getQueryLocation();
-    double latFrom = fromPoint.getLatitude();
-    double lonFrom = fromPoint.getLongitude();
-    double latTo = place.getLat();
-    double lonTo = place.getLon();
-    OneBusAwayConstraintsBean constraints = getQueryConstraints();
+    CoordinatePoint from = new CoordinatePoint(fromPoint.getLatitude(),
+        fromPoint.getLongitude());
+    CoordinatePoint to = new CoordinatePoint(place.getLat(), place.getLon());
+    long time = getQueryTime();
+    TransitShedConstraintsBean constraints = getQueryConstraints();
 
-    service.getTripsBetween(latFrom, lonFrom, latTo, lonTo, constraints,
+    service.getTripsBetween(from, to, time, constraints.getConstraints(),
         new TripPlanHandler());
   }
 
@@ -144,7 +146,9 @@ public abstract class CommonControlImpl implements CommonControl {
 
   protected abstract LatLng getQueryLocation();
 
-  protected abstract OneBusAwayConstraintsBean getQueryConstraints();
+  protected abstract long getQueryTime();
+
+  protected abstract TransitShedConstraintsBean getQueryConstraints();
 
   protected abstract void setQueryLocationLookupResult(Place place);
 
@@ -174,14 +178,17 @@ public abstract class CommonControlImpl implements CommonControl {
             new SearchLocationUpdatedState()));
 
         LatLng location = model.getLocation();
-        OneBusAwayConstraintsBean constraints = model.getConstraints();
+        long time = model.getTime();
+        TransitShedConstraintsBean constraints = model.getConstraints();
+        ConstraintsBean c = constraints.getConstraints();
         WebappServiceAsync service = WebappServiceAsync.SERVICE;
 
-        int timeSegmentSize = (constraints.getMaxTripDuration() / 10);
+        int timeSegmentSize = (c.getMaxTripDuration() /  600);
 
-        service.getMinTravelTimeToStopsFrom(location.getLatitude(),
-            location.getLongitude(), constraints, timeSegmentSize,
-            _minTransitTimeResultHandler);
+        CoordinatePoint p = new CoordinatePoint(location.getLatitude(),
+            location.getLongitude());
+        service.getMinTravelTimeToStopsFrom(p, time, constraints,
+            timeSegmentSize, _minTransitTimeResultHandler);
       }
     }
   }
@@ -209,9 +216,9 @@ public abstract class CommonControlImpl implements CommonControl {
 
   }
 
-  private class TripPlanHandler implements AsyncCallback<List<TripPlanBean>> {
+  private class TripPlanHandler implements AsyncCallback<ItinerariesBean> {
 
-    public void onSuccess(List<TripPlanBean> trips) {
+    public void onSuccess(ItinerariesBean trips) {
       _tripModel.setTripPlans(trips);
     }
 

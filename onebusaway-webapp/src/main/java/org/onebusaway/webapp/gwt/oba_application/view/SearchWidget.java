@@ -2,7 +2,8 @@ package org.onebusaway.webapp.gwt.oba_application.view;
 
 import java.util.Date;
 
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.webapp.gwt.common.control.FlexibleDateParser;
 import org.onebusaway.webapp.gwt.common.model.ModelListener;
 import org.onebusaway.webapp.gwt.common.resources.CommonResources;
@@ -32,13 +33,13 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
+import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ResizableDockLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitHandler;
 
 public class SearchWidget extends FlowPanel {
 
@@ -62,7 +63,9 @@ public class SearchWidget extends FlowPanel {
 
   private OneBusAwayStandardControl _control;
 
-  private OneBusAwayConstraintsBean _constraints = new OneBusAwayConstraintsBean();
+  private long _time = System.currentTimeMillis();
+
+  private TransitShedConstraintsBean _constraints = new TransitShedConstraintsBean();
 
   /*****************************************************************************
    * 
@@ -129,12 +132,15 @@ public class SearchWidget extends FlowPanel {
   }
 
   private void setDefaultConstraints() {
-    _constraints.setMaxTransfers(DEFAULT_TRANSFERS);
-    _constraints.setMaxTripDuration(DEFAULT_TRIP_DURATION);
-    _constraints.setMaxWalkingDistance(DEFAULT_WALKING_DISTANCE);
-    long t = System.currentTimeMillis();
-    _constraints.setMinDepartureTime(t);
-    _constraints.setMaxDepartureTime(t + DEFAULT_SEARCH_WINDOW * 60 * 1000);
+
+    _time = System.currentTimeMillis();
+
+    _constraints.setMaxInitialWaitTime(DEFAULT_SEARCH_WINDOW * 60);
+
+    ConstraintsBean c = _constraints.getConstraints();
+    c.setMaxTransfers(DEFAULT_TRANSFERS);
+    c.setMaxTripDuration(DEFAULT_TRIP_DURATION * 60);
+    c.setMaxWalkingDistance(DEFAULT_WALKING_DISTANCE);
   }
 
   private void initializeWidget() {
@@ -323,14 +329,14 @@ public class SearchWidget extends FlowPanel {
 
   private void refreshWidgets() {
 
-    Date time = new Date(_constraints.getMinDepartureTime());
+    Date time = new Date(_time);
     _dateTextBox.setText(_dateFormat.format(time));
     _timeTextBox.setText(_timeFormat.format(time));
 
-    setClosestIndex(_maxTransfersListBox, _constraints.getMaxTransfers());
-    setClosestIndex(_maxTripLengthBox, _constraints.getMaxTripDuration());
-    setClosestIndex(_maxWalkDistance,
-        (int) _constraints.getMaxWalkingDistance());
+    ConstraintsBean c = _constraints.getConstraints();
+    setClosestIndex(_maxTransfersListBox, c.getMaxTransfers());
+    setClosestIndex(_maxTripLengthBox, c.getMaxTripDuration() / 60);
+    setClosestIndex(_maxWalkDistance, (int) c.getMaxWalkingDistance());
   }
 
   private void setClosestIndex(ListBox listBox, int value) {
@@ -368,21 +374,21 @@ public class SearchWidget extends FlowPanel {
 
     System.out.println("date=" + date);
 
-    _constraints.setMinDepartureTime(date.getTime());
-    _constraints.setMaxDepartureTime(date.getTime() + DEFAULT_SEARCH_WINDOW
-        * 60 * 1000);
+    _time = date.getTime();
+
+    ConstraintsBean c = _constraints.getConstraints();
 
     int maxTransfersIndex = _maxTransfersListBox.getSelectedIndex();
     if (maxTransfersIndex != -1)
-      _constraints.setMaxTransfers(Integer.parseInt(_maxTransfersListBox.getValue(maxTransfersIndex)));
+      c.setMaxTransfers(Integer.parseInt(_maxTransfersListBox.getValue(maxTransfersIndex)));
 
     int maxTripDurationIndex = _maxTripLengthBox.getSelectedIndex();
     if (maxTripDurationIndex != -1)
-      _constraints.setMaxTripDuration(Integer.parseInt(_maxTripLengthBox.getValue(maxTripDurationIndex)));
+      c.setMaxTripDuration(Integer.parseInt(_maxTripLengthBox.getValue(maxTripDurationIndex)) * 60);
 
     int maxWalkDistanceindex = _maxWalkDistance.getSelectedIndex();
     if (maxWalkDistanceindex != -1)
-      _constraints.setMaxWalkingDistance(Integer.parseInt(_maxWalkDistance.getValue(maxWalkDistanceindex)));
+      c.setMaxWalkingDistance(Integer.parseInt(_maxWalkDistance.getValue(maxWalkDistanceindex)));
   }
 
   private void toggleExpansion() {
@@ -411,7 +417,7 @@ public class SearchWidget extends FlowPanel {
     if (_usingLocation)
       addressText = "";
 
-    _control.query(queryText, addressText, _location, _constraints);
+    _control.query(queryText, addressText, _location, _time, _constraints);
   }
 
   private void setLocation(LatLng location) {
@@ -480,7 +486,7 @@ public class SearchWidget extends FlowPanel {
 
       _queryTextBox.setText(model.getQuery());
 
-      _constraints = new OneBusAwayConstraintsBean(model.getConstraints());
+      _constraints = new TransitShedConstraintsBean(model.getConstraints());
 
       String locationValue = model.getLocationQuery();
       if ((locationValue == null || locationValue.length() == 0)

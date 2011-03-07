@@ -1,13 +1,16 @@
 package org.onebusaway.webapp.gwt.tripplanner_library.view;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.tripplanner.DepartureSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.LocationSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.RideSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.WalkSegmentBean;
+import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
+import org.onebusaway.transit_data.model.tripplanning.LegBean;
+import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
 import org.onebusaway.webapp.gwt.common.widgets.SpanPanel;
 import org.onebusaway.webapp.gwt.common.widgets.SpanWidget;
 import org.onebusaway.webapp.gwt.tripplanner_library.resources.TripPlannerCssResource;
@@ -21,8 +24,6 @@ import com.google.gwt.maps.client.overlay.Overlay;
 import com.google.gwt.maps.client.overlay.PolyStyleOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.user.client.ui.Image;
-
-import java.util.List;
 
 public class TripBeanMapPresenter {
 
@@ -40,55 +41,67 @@ public class TripBeanMapPresenter {
     _centerOnTrip = centerOnTrip;
   }
 
-  public void displayTrip(TripPlanBean trip, List<Overlay> resultingOverlays) {
+  public void displayTrip(ItineraryBean trip, List<Overlay> resultingOverlays) {
 
     resultingOverlays.clear();
 
     LatLngBounds bounds = LatLngBounds.newInstance();
 
-    for (TripSegmentBean segment : trip.getSegments()) {
+    for (LegBean segment : trip.getLegs()) {
 
-      if (segment instanceof LocationSegmentBean) {
+      String mode = segment.getMode();
 
-        LocationSegmentBean lsb = (LocationSegmentBean) segment;
-        LatLng p = LatLng.newInstance(lsb.getLat(), lsb.getLon());
-        bounds.extend(p);
+      if (mode.equals("transit")) {
 
-      } else if (segment instanceof DepartureSegmentBean) {
+        TransitLegBean leg = segment.getTransitLeg();
+        String path = leg.getPath();
 
-        DepartureSegmentBean depart = (DepartureSegmentBean) segment;
-        StopBean stop = depart.getStop();
-        String routeName = depart.getRouteShortName();
+        if (path != null) {
 
-        TripPlannerResources resources = TripPlannerResources.INSTANCE;
-        SpanPanel w = new SpanPanel();
-        w.addStyleName(_css.routeTinyInfoWindow());
-        Image image = new Image(resources.getBus14x14().getUrl());
-        image.addStyleName(_css.routeModeIcon());
-        w.add(image);
-        SpanWidget name = new SpanWidget(routeName);
-        name.setStyleName(_css.routeName());
-        w.add(name);
+          List<CoordinatePoint> points = PolylineEncoder.decode(path);
+          EncodedPolylineBean bean = PolylineEncoder.createEncodings(points);
+          
+          Polyline line = getPathAsPolyline(bean);
+          PolyStyleOptions style = PolyStyleOptions.newInstance("#0000FF", 4,
+              0.5);
+          line.setStrokeStyle(style);
+          resultingOverlays.add(line);
 
-        LatLng point = LatLng.newInstance(stop.getLat(), stop.getLon());
-        TinyInfoWindowMarker marker = new TinyInfoWindowMarker(point, w);
-        resultingOverlays.add(marker);
+          addBoundsToBounds(line.getBounds(), bounds);
+        }
 
-        bounds.extend(point);
+        StopBean stop = leg.getFromStop();
 
-      } else if (segment instanceof WalkSegmentBean) {
-        WalkSegmentBean walk = (WalkSegmentBean) segment;
-        Polyline line = getPathAsPolyline(walk.getPath());
+        if (stop != null) {
+          String routeName = leg.getRouteShortName();
+
+          TripPlannerResources resources = TripPlannerResources.INSTANCE;
+          SpanPanel w = new SpanPanel();
+          w.addStyleName(_css.routeTinyInfoWindow());
+          Image image = new Image(resources.getBus14x14().getUrl());
+          image.addStyleName(_css.routeModeIcon());
+          w.add(image);
+          SpanWidget name = new SpanWidget(routeName);
+          name.setStyleName(_css.routeName());
+          w.add(name);
+
+          LatLng point = LatLng.newInstance(stop.getLat(), stop.getLon());
+          TinyInfoWindowMarker marker = new TinyInfoWindowMarker(point, w);
+          resultingOverlays.add(marker);
+
+          bounds.extend(point);
+        }
+      } else if (mode.equals("walk")) {
+        List<StreetLegBean> streetLegs = segment.getStreetLegs();
+        List<CoordinatePoint> allPoints = new ArrayList<CoordinatePoint>();
+        for (StreetLegBean streetLeg : streetLegs) {
+          String path = streetLeg.getPath();
+          List<CoordinatePoint> points = PolylineEncoder.decode(path);
+          allPoints.addAll(points);
+        }
+        EncodedPolylineBean polyline = PolylineEncoder.createEncodings(allPoints);
+        Polyline line = getPathAsPolyline(polyline);
         PolyStyleOptions style = PolyStyleOptions.newInstance("#000000", 4, 0.8);
-        line.setStrokeStyle(style);
-        resultingOverlays.add(line);
-
-        addBoundsToBounds(line.getBounds(), bounds);
-
-      } else if (segment instanceof RideSegmentBean) {
-        RideSegmentBean ride = (RideSegmentBean) segment;
-        Polyline line = getPathAsPolyline(ride.getPath());
-        PolyStyleOptions style = PolyStyleOptions.newInstance("#0000FF", 4, 0.5);
         line.setStrokeStyle(style);
         resultingOverlays.add(line);
 
@@ -113,7 +126,11 @@ public class TripBeanMapPresenter {
   }
 
   private void addBoundsToBounds(LatLngBounds source, LatLngBounds dest) {
-    dest.extend(source.getNorthEast());
-    dest.extend(source.getSouthWest());
+    if (source == null || source.isEmpty()) {
+      System.out.println("empty bounds");
+    } else {
+      dest.extend(source.getNorthEast());
+      dest.extend(source.getSouthWest());
+    }
   }
 }

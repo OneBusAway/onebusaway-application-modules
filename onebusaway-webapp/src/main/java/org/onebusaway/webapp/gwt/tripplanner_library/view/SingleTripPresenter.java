@@ -1,10 +1,14 @@
 package org.onebusaway.webapp.gwt.tripplanner_library.view;
 
-import org.onebusaway.transit_data.model.tripplanner.ArrivalSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.DepartureSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripSegmentBean;
-import org.onebusaway.transit_data.model.tripplanner.WalkSegmentBean;
+import java.util.Date;
+import java.util.List;
+
+import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
+import org.onebusaway.transit_data.model.tripplanning.LegBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.webapp.gwt.common.widgets.DivPanel;
 import org.onebusaway.webapp.gwt.common.widgets.DivWidget;
 import org.onebusaway.webapp.gwt.tripplanner_library.resources.TripPlannerCssResource;
@@ -15,9 +19,6 @@ import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-
-import java.util.Date;
-import java.util.List;
 
 public class SingleTripPresenter {
 
@@ -36,12 +37,12 @@ public class SingleTripPresenter {
     return _panel;
   }
 
-  public void displayTrip(TripPlanBean trip, int index, String destination) {
+  public void displayTrip(ItineraryBean trip, int index, String destination) {
 
     _panel.clear();
     _panel.setVisible(true);
 
-    List<TripSegmentBean> segments = trip.getSegments();
+    List<LegBean> legs = trip.getLegs();
     TripPlannerResources resources = TripPlannerResources.INSTANCE;
 
     DivPanel summaryPanel = new DivPanel(_css.tripPanelSummaryPanel());
@@ -53,15 +54,15 @@ public class SingleTripPresenter {
     summaryPanel.add(new DivWidget("Travel time: about " + duration,
         _css.tripPanelSummaryDuration()));
 
-    for (int i = 0; i < segments.size(); i++) {
-      TripSegmentBean segment = segments.get(i);
+    for (int i = 0; i < legs.size(); i++) {
+      LegBean leg = legs.get(i);
 
-      if (segment instanceof DepartureSegmentBean) {
+      String mode = leg.getMode();
+      if( mode.equals("transit")) {
 
-        DepartureSegmentBean departure = (DepartureSegmentBean) segment;
-        ArrivalSegmentBean arrival = getNextArrival(segments, i);
-
-        // if (arrival == null)
+        TransitLegBean transitLeg = leg.getTransitLeg();
+        TripBean tripBean = transitLeg.getTrip();
+        RouteBean routeBean = tripBean.getRoute();
 
         DivPanel panel = new DivPanel();
         panel.addStyleName(_css.tripPanelVehiclePanel());
@@ -74,13 +75,17 @@ public class SingleTripPresenter {
         image.addStyleName(_css.tripPanelVehiclePanelModeImage());
         row1.add(image);
 
-        int minutes = Math.round((arrival.getTime() - departure.getTime())
+        int minutes = Math.round((leg.getEndTime() - leg.getStartTime())
             / (1000 * 60));
-        row1.add(new DivWidget("Bus - " + departure.getRouteShortName() + " - "
-            + departure.getTripHeadsign(), _css.tripPanelVehiclePanelTitle()));
+        
+        String routeShortName = getBestName(transitLeg.getRouteShortName(),tripBean.getRouteShortName(), routeBean.getShortName(),"");
+        String tripHeadsign = getBestName(transitLeg.getTripHeadsign(),tripBean.getTripHeadsign(),routeBean.getLongName(),"");
+        
+        row1.add(new DivWidget("Bus - " + routeShortName + " - "
+            + tripHeadsign, _css.tripPanelVehiclePanelTitle()));
 
-        String departureTime = _timeFormat.format(new Date(departure.getTime()));
-        String arrivalTime = _timeFormat.format(new Date(arrival.getTime()));
+        String departureTime = _timeFormat.format(new Date(leg.getStartTime()));
+        String arrivalTime = _timeFormat.format(new Date(leg.getEndTime()));
 
         DivPanel row2 = new DivPanel(_css.tripPanelVehiclePanelRow2());
         panel.add(row2);
@@ -90,11 +95,21 @@ public class SingleTripPresenter {
 
         DivPanel row4 = new DivPanel(_css.tripPanelVehiclePanelRow4());
         panel.add(row4);
+        
+        String fromStopName = "";
+        StopBean fromStop = transitLeg.getFromStop();
+        if( fromStop != null)
+          fromStopName = fromStop.getName();
+        
+        String toStopName = "";
+        StopBean toStop = transitLeg.getToStop();
+        if( toStop != null)
+          toStopName = toStop.getName();
 
         row2.add(new DivWidget(departureTime,
             _css.tripPlanVehiclePanelDepartureTime(),
             _css.tripPlanVehiclePanelA()));
-        row2.add(new DivWidget("Depart " + departure.getStop().getName(),
+        row2.add(new DivWidget("Depart " + fromStopName,
             _css.tripPlanVehiclePanelDepartureLabel(),
             _css.tripPlanVehiclePanelB()));
         row3.add(new DivWidget("...",
@@ -106,15 +121,13 @@ public class SingleTripPresenter {
         row4.add(new DivWidget(arrivalTime,
             _css.tripPlanVehiclePanelArrivalLabel(),
             _css.tripPlanVehiclePanelA()));
-        row4.add(new DivWidget("Arrive " + arrival.getStop().getName(),
+        row4.add(new DivWidget("Arrive " + toStopName,
             _css.tripPlanVehiclePanelArrivalTime(),
             _css.tripPlanVehiclePanelB()));
         _panel.add(panel);
 
-      } else if (segment instanceof WalkSegmentBean) {
-
-        WalkSegmentBean walk = (WalkSegmentBean) segment;
-
+      } else if (mode.equals("walk")) {
+        
         DivPanel panel = new DivPanel();
         panel.addStyleName(_css.tripPanelWalkPanel());
 
@@ -126,42 +139,41 @@ public class SingleTripPresenter {
         image.addStyleName(_css.tripPanelWalkPanelModeImage());
         row1.add(image);
 
-        String target = getWalkToTarget(segments, i, destination);
+        String target = getWalkToTarget(legs, i, destination);
         row1.add(new DivWidget("Walk to " + target,
             _css.tripPanelWalkPanelTitle()));
 
         DivPanel row2 = new DivPanel(_css.tripPanelWalkPanelRow2());
         panel.add(row2);
+        
+        long dur = leg.getEndTime() - leg.getStartTime();
 
         row2.add(new DivWidget("About "
-            + TripBeanSupport.getDurationLabel(walk.getDuration())));
+            + TripBeanSupport.getDurationLabel(dur)));
         _panel.add(panel);
       }
     }
   }
 
-  private ArrivalSegmentBean getNextArrival(List<TripSegmentBean> segments,
-      int i) {
-    for (; i < segments.size(); i++) {
-      TripSegmentBean segment = segments.get(i);
-      if (segment instanceof ArrivalSegmentBean) {
-        return (ArrivalSegmentBean) segment;
-      }
-    }
-
-    return null;
-  }
-
-  private String getWalkToTarget(List<TripSegmentBean> segments, int i,
+  private String getWalkToTarget(List<LegBean> legs, int i,
       String finalDestination) {
-    for (; i < segments.size(); i++) {
-      TripSegmentBean segment = segments.get(i);
-      if (segment instanceof DepartureSegmentBean) {
-        DepartureSegmentBean departure = (DepartureSegmentBean) segment;
-        return departure.getStop().getName();
+    for (; i < legs.size(); i++) {
+      LegBean segment = legs.get(i);
+      if( segment.getMode().equals("transit")) {
+        TransitLegBean transitLeg = segment.getTransitLeg();
+        if( transitLeg.getFromStop() != null)
+          return transitLeg.getFromStop().getName();
       }
     }
 
     return finalDestination;
+  }
+  
+  private String getBestName(String... names) {
+    for( String name : names) {
+      if( name != null && ! name.isEmpty() )
+        return name;
+    }
+    return null;
   }
 }

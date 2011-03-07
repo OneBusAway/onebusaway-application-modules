@@ -1,12 +1,12 @@
 package org.onebusaway.transit_data_federation.services.oba;
 
+import java.util.List;
+
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
-
-import java.util.List;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 
 /**
  * Service methods for the "one bus ride away" transit-shed calculation aka what
@@ -30,7 +30,7 @@ public interface OneBusAwayService {
    * @throws ServiceException
    */
   public List<TimedPlaceBean> getLocalPaths(
-      OneBusAwayConstraintsBean constraints,
+      ConstraintsBean constraints,
       MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)
       throws ServiceException;
 }

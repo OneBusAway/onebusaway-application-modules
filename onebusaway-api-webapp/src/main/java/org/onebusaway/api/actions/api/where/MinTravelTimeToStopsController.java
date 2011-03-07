@@ -91,7 +91,7 @@ public class MinTravelTimeToStopsController extends ApiActionSupport {
 
     CoordinatePoint location = new CoordinatePoint(_lat, _lon);
 
-    MinTravelTimeToStopsBean result = _transitDataService.getMinTravelTimeToStopsFromNew(
+    MinTravelTimeToStopsBean result = _transitDataService.getMinTravelTimeToStopsFrom(
         location, _time, _constraints);
 
     BeanFactoryV2 factory = getBeanFactoryV2();

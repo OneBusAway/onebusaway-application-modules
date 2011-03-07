@@ -9,6 +9,15 @@ public class TransitShedConstraintsBean implements Serializable {
   private ConstraintsBean constraints = new ConstraintsBean();
 
   private long maxInitialWaitTime;
+  
+  public TransitShedConstraintsBean() {
+    
+  }
+  
+  public TransitShedConstraintsBean(TransitShedConstraintsBean c) {
+    this.maxInitialWaitTime = c.maxInitialWaitTime;
+    this.constraints = new ConstraintsBean(c.getConstraints());
+  }
 
   public ConstraintsBean getConstraints() {
     return constraints;

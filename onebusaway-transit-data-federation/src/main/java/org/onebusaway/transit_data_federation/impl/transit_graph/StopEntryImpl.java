@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferList;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;

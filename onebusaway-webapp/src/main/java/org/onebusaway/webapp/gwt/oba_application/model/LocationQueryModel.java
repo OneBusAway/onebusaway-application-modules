@@ -1,6 +1,6 @@
 package org.onebusaway.webapp.gwt.oba_application.model;
 
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.webapp.gwt.common.model.ModelEventSink;
 
 import com.google.gwt.maps.client.geom.LatLng;
@@ -13,7 +13,9 @@ public class LocationQueryModel {
 
   private String _locationQuery;
 
-  private OneBusAwayConstraintsBean _constraints;
+  private long _time;
+
+  private TransitShedConstraintsBean _constraints;
 
   public void setEventSink(ModelEventSink<LocationQueryModel> events) {
     _events = events;
@@ -30,15 +32,20 @@ public class LocationQueryModel {
   public LatLng getLocation() {
     return _location;
   }
+  
+  public long getTime() {
+    return _time;
+  }
 
-  public OneBusAwayConstraintsBean getConstraints() {
+  public TransitShedConstraintsBean getConstraints() {
     return _constraints;
   }
 
-  public void setQuery(String locationQuery, LatLng location,
-      OneBusAwayConstraintsBean constraints) {
+  public void setQuery(String locationQuery, LatLng location, long time,
+      TransitShedConstraintsBean constraints) {
     _locationQuery = locationQuery;
     _location = location;
+    _time = time;
     _constraints = constraints;
     fireModelChanged();
   }

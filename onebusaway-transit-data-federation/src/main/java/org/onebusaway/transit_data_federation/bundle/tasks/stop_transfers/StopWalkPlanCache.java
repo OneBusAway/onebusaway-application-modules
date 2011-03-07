@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.opentripplanner.routing.core.OptimizeType;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
@@ -41,8 +40,12 @@ class StopWalkPlanCache {
     return _totalHits;
   }
 
-  public double getWalkPlanDistanceForStopToStop(Pair<StopEntry> pair)
-      throws NoPathException {
+  /**
+   * 
+   * @param pair
+   * @return -1 if no path can be found between the two stops
+   */
+  public double getWalkPlanDistanceForStopToStop(Pair<StopEntry> pair) {
 
     _totalHits++;
 
@@ -70,8 +73,10 @@ class StopWalkPlanCache {
     }
 
     Double distance = _cache.get(pair);
+
     if (distance == null)
-      throw new NoPathException();
+      return -1;
+
     return distance;
   }
 

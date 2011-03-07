@@ -19,7 +19,6 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
-import org.onebusaway.transit_data_federation.impl.tripplanner.DistanceLibrary;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferData;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
@@ -30,7 +29,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.opentripplanner.routing.services.PathService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -220,7 +218,7 @@ public class StopTransfersTask implements Runnable {
 
     for (StopEntry stop : key.getStops()) {
 
-      CoordinateBounds bounds = DistanceLibrary.bounds(stop.getStopLocation(),
+      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(stop.getStopLocation(),
           _constants.getMaxTransferDistance());
 
       List<StopEntry> nearbyStops = _transitGraphDao.getStopsByLocation(bounds);
@@ -455,21 +453,16 @@ public class StopTransfersTask implements Runnable {
       if (transfer.getTime() > minT)
         break;
 
-      try {
+      double distance = _cachedStopTransferWalkPlanner.getWalkPlanDistanceForStopToStop(transfer.getStops());
 
-        double distance = _cachedStopTransferWalkPlanner.getWalkPlanDistanceForStopToStop(transfer.getStops());
+      if (distance < 0 || distance > _constants.getMaxTransferDistance())
+        continue;
 
-        if (distance > _constants.getMaxTransferDistance())
-          continue;
+      transfer.setWalkingDistance(distance);
 
-        transfer.setWalkingDistance(distance);
-
-        if (transfer.getTime() < minT) {
-          minTransfer = transfer;
-          minT = transfer.getTime();
-        }
-      } catch (NoPathException ex) {
-
+      if (transfer.getTime() < minT) {
+        minTransfer = transfer;
+        minT = transfer.getTime();
       }
     }
 

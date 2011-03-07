@@ -1,28 +1,11 @@
 package org.onebusaway.webapp.gwt.tripplanner_library.view;
 
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripSegmentBean;
-
-import java.util.Date;
-import java.util.List;
+import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 
 public class TripBeanSupport {
 
-  public static Date getStartTime(TripPlanBean trip) {
-    TripSegmentBean segment = trip.getSegments().get(0);
-    return new Date(segment.getTime());
-  }
-
-  public static Date getEndTime(TripPlanBean trip) {
-    List<TripSegmentBean> segments = trip.getSegments();
-    TripSegmentBean segment = segments.get(segments.size() - 1);
-    return new Date(segment.getTime());
-  }
-
-  public static String getDurationLabel(TripPlanBean bean) {
-    Date from = getStartTime(bean);
-    Date to = getEndTime(bean);
-    return getDurationLabel(to.getTime() - from.getTime());
+  public static String getDurationLabel(ItineraryBean bean) {
+    return getDurationLabel(bean.getEndTime() - bean.getStartTime());
   }
 
   public static String getDurationLabel(long duration) {

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
@@ -21,10 +22,10 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTransitTimeResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -142,24 +143,24 @@ class WebappServiceImpl implements WebappService {
   }
 
   @Override
-  public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, TripPlannerConstraintsBean constraints)
+  public ItinerariesBean getTripsBetween(CoordinatePoint from,
+      CoordinatePoint to, long time, ConstraintsBean constraints)
       throws ServiceException {
-    return _transitDataService.getTripsBetween(latFrom, lonFrom, latTo, lonTo,
+    return _transitDataService.getItinerariesBetween(from, to, time,
         constraints);
   }
 
   @Override
-  public MinTransitTimeResult getMinTravelTimeToStopsFrom(double lat,
-      double lon, OneBusAwayConstraintsBean constraints, int timeSegmentSize)
+  public MinTransitTimeResult getMinTravelTimeToStopsFrom(
+      CoordinatePoint location, long time,
+      TransitShedConstraintsBean constraints, int timeSegmentSize)
       throws ServiceException {
-    return _oneBusAwayService.getMinTravelTimeToStopsFrom(lat, lon,
+    return _oneBusAwayService.getMinTravelTimeToStopsFrom(location, time,
         constraints, timeSegmentSize);
   }
 
   @Override
-  public List<TimedPlaceBean> getLocalPathsToStops(
-      OneBusAwayConstraintsBean constraints,
+  public List<TimedPlaceBean> getLocalPathsToStops(ConstraintsBean constraints,
       MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)
       throws ServiceException {
 
