@@ -13,7 +13,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.onebusaway.transit_data_federation.impl.walkplanner.offline;
+package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.util.ArrayList;
 import java.util.List;

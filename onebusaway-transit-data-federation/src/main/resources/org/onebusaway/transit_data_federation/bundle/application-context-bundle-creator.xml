@@ -127,7 +127,7 @@
 
   <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
     <property name="regionsSource">
-      <bean class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.GtfsStopRegionsSourceImpl" />
+      <bean class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsStopRegionsSourceImpl" />
     </property>
   </bean>
 

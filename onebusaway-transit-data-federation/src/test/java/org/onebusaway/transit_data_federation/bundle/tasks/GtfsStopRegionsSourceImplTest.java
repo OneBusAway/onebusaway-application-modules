@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.walkplanner.offline;
+package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsDao;
+import org.onebusaway.transit_data_federation.bundle.tasks.GtfsStopRegionsSourceImpl;
 
 import com.vividsolutions.jts.geom.Envelope;
 
