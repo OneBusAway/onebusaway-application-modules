@@ -25,6 +25,7 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.utility.text.NaturalStringOrder;
+import org.onebusaway.utility.text.StringLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ArrivalsAndDeparturesModel {
@@ -301,12 +302,12 @@ public class ArrivalsAndDeparturesModel {
 
   private static class SortByDestination implements OrderConstraint {
     public int compare(ArrivalAndDepartureBean o1, ArrivalAndDepartureBean o2) {
-      int i = o1.getTrip().getTripHeadsign().compareTo(
-          o2.getTrip().getTripHeadsign());
+      String a = StringLibrary.getBestName(o1.getTripHeadsign(), o1.getTrip().getTripHeadsign(),"");
+      String b = StringLibrary.getBestName(o2.getTripHeadsign(), o2.getTrip().getTripHeadsign(),"");
+      int i = a.compareTo(b);
       if (i == 0)
         return SORT_BY_TIME.compare(o1, o2);
       return i;
     }
   }
-
 }
