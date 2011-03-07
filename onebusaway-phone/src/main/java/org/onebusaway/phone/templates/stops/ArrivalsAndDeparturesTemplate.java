@@ -71,7 +71,7 @@ public class ArrivalsAndDeparturesTemplate extends AbstractAgiTemplate {
     ValueStack valueStack = context.getValueStack();
     PhoneArrivalsAndDeparturesModel model = (PhoneArrivalsAndDeparturesModel) valueStack.findValue("model");
     StopsWithArrivalsAndDeparturesBean result = model.getResult();
-    
+
     buildPredictedArrivalsTemplate(result.getArrivalsAndDepartures());
 
     addMessage(Messages.ARRIVAL_INFO_ON_SPECIFIC_ROUTE);
@@ -115,10 +115,13 @@ public class ArrivalsAndDeparturesTemplate extends AbstractAgiTemplate {
       String routeNumber = RoutePresenter.getNameForRoute(route);
       addText(_routeNumberPronunciation.modify(routeNumber));
 
-      addMessage(Messages.TO);
+      String headsign = trip.getTripHeadsign();
+      if (headsign != null) {
+        addMessage(Messages.TO);
 
-      String destination = _destinationPronunciation.modify(trip.getTripHeadsign());
-      addText(destination);
+        String destination = _destinationPronunciation.modify(headsign);
+        addText(destination);
+      }
 
       if (TransitDataConstants.STATUS_CANCELLED.equals(adb.getStatus())) {
         addText("is currently not in service");

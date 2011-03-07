@@ -12,15 +12,6 @@ public class ApplicationBeanLibrary {
     return id.getAgencyId() + "_" + id.getId();
   }
 
-  public static String getBestName(String... names) {
-    for (String name : names) {
-      name = name == null ? "" : name.trim();
-      if (name.length() > 0)
-        return name;
-    }
-    return "";
-  }
-
   public static PathBean getShapePointsAsPathBean(List<ShapePoint> points) {
 
     double[] lat = new double[points.size()];

@@ -47,6 +47,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlanSource;
+import org.onebusaway.utility.text.StringLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -157,7 +158,7 @@ class TripPlanBeanServiceImpl implements TripPlanBeanService {
 
     String routeShortName = tripBean.getRoute().getShortName();
     String routeLongName = tripBean.getRoute().getLongName();
-    String tripHeadsign = ApplicationBeanLibrary.getBestName(tripBean.getTripHeadsign());
+    String tripHeadsign = StringLibrary.getBestName(tripBean.getTripHeadsign());
 
     DepartureSegmentBean departure = new DepartureSegmentBean();
     departure.setTime(from.getCurrentTime());
