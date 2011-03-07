@@ -18,6 +18,7 @@ import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.utility.text.NaturalStringOrder;
+import org.onebusaway.utility.text.StringLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -96,7 +97,7 @@ class StopBeanServiceImpl implements StopBeanService {
       bean.setDirection(stopNarrative.getDireciton());
 
     bean.setName(stop.getName());
-    bean.setCode(ApplicationBeanLibrary.getBestName(stop.getCode(),
+    bean.setCode(StringLibrary.getBestName(stop.getCode(),
         stop.getId().getId()));
     bean.setLocationType(stop.getLocationType());
 
