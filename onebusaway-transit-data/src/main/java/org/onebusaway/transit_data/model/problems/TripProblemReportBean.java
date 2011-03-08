@@ -3,6 +3,7 @@ package org.onebusaway.transit_data.model.problems;
 import java.io.Serializable;
 
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 
 public class TripProblemReportBean implements Serializable {
@@ -52,6 +53,8 @@ public class TripProblemReportBean implements Serializable {
   private TripBean trip;
 
   private StopBean stop;
+  
+  private StopTimeInstanceBean stopTime;
 
   public long getId() {
     return id;
@@ -227,5 +230,13 @@ public class TripProblemReportBean implements Serializable {
 
   public void setStop(StopBean stop) {
     this.stop = stop;
+  }
+
+  public StopTimeInstanceBean getStopTime() {
+    return stopTime;
+  }
+
+  public void setStopTime(StopTimeInstanceBean stopTime) {
+    this.stopTime = stopTime;
   }
 }

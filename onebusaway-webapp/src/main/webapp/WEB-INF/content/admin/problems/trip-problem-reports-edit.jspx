@@ -38,11 +38,17 @@
     </tr>
     <tr>
         <td>Trip:</td>
-        <td><s:a namespace="/where/standard" action="trip">
-          <s:param name="id" value="tripId"/>
-          <s:param name="serviceDate" value="serviceDate"/>
-          <oba:routeName value="trip"/> - <s:property value="trip.tripHeadsign" />
-        </s:a></td>
+        <td>
+          <s:url var="url" namespace="/where/standard" action="trip">
+            <s:param name="id" value="tripId"/>
+            <s:param name="serviceDate" value="serviceDate"/>
+            <s:param name="stopId" value="stop.id"/> 
+            <s:param name="vehicleId" value="vehicleId"/>          
+          </s:url> 
+          <s:a href="%{url}">
+            <oba:routeName value="trip"/> - <s:property value="trip.tripHeadsign" />
+          </s:a>
+        </td>
     </tr>
     <tr>
         <td>Stop:</td>
@@ -51,6 +57,16 @@
           <s:component template="stop-name-snippet.jspx"><s:param name="stop" value="stop"/></s:component>
         </s:a></td>
     </tr>
+    <s:if test="stopTime != null">
+    <tr>
+        <td>Arrival Time:</td>
+        <td><oba:date format="hh:mm aa" value="stopTime.arrivalTime"/></td>
+    </tr>
+    <tr>
+        <td>Departure Time:</td>
+        <td><oba:date format="hh:mm aa" value="stopTime.departureTime"/></td>
+    </tr>
+    </s:if>
     <tr>
         <td>Data:</td>
         <td><s:property value="data" /></td>

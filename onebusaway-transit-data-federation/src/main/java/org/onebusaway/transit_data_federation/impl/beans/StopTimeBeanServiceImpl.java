@@ -1,10 +1,13 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.schedule.StopTimeBean;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopTimeBeanService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +33,16 @@ class StopTimeBeanServiceImpl implements StopTimeBeanService {
     StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
     bean.setStop(stopBean);
 
+    return bean;
+  }
+  
+  @Override
+  public StopTimeInstanceBean getStopTimeInstanceAsBean(StopTimeInstance instance) {
+    StopTimeInstanceBean bean = new StopTimeInstanceBean();
+    bean.setArrivalTime(instance.getArrivalTime());
+    bean.setDepartureTime(instance.getDepartureTime());
+    bean.setServiceDate(instance.getServiceDate());
+    bean.setTripId(AgencyAndIdLibrary.convertToString(instance.getTrip().getTrip().getId()));
     return bean;
   }
 }

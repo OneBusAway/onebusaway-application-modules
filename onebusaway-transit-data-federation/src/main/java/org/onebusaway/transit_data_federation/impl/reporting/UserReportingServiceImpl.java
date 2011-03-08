@@ -9,23 +9,29 @@ import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
-import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
-import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
+import org.onebusaway.transit_data_federation.services.beans.StopTimeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,9 +44,13 @@ class UserReportingServiceImpl implements UserReportingService {
 
   private BlockStatusService _blockStatusService;
 
+  private ArrivalAndDepartureService _arrivalAndDepartureService;
+
   private TripBeanService _tripBeanService;
 
   private StopBeanService _stopBeanService;
+
+  private StopTimeBeanService _stopTimeBeanService;
 
   @Autowired
   public void setUserReportingDao(UserReportingDao userReportingDao) {
@@ -58,6 +68,12 @@ class UserReportingServiceImpl implements UserReportingService {
   }
 
   @Autowired
+  public void setArrivalAndDepartureService(
+      ArrivalAndDepartureService arrivalAndDepartureService) {
+    _arrivalAndDepartureService = arrivalAndDepartureService;
+  }
+
+  @Autowired
   public void setTripBeanService(TripBeanService tripBeanService) {
     _tripBeanService = tripBeanService;
   }
@@ -65,6 +81,11 @@ class UserReportingServiceImpl implements UserReportingService {
   @Autowired
   public void setStopBeanService(StopBeanService stopBeanService) {
     _stopBeanService = stopBeanService;
+  }
+
+  @Autowired
+  public void setStopTimeBeanService(StopTimeBeanService stopTimeBeanService) {
+    _stopTimeBeanService = stopTimeBeanService;
   }
 
   @Override
@@ -290,14 +311,14 @@ class UserReportingServiceImpl implements UserReportingService {
     record.setLabel(bean.getLabel());
     _userReportingDao.saveOrUpdate(record);
   }
-  
+
   @Override
   public void deleteTripProblemReportForId(long id) {
     TripProblemReportRecord record = _userReportingDao.getTripProblemRecordForId(id);
     if (record != null)
       _userReportingDao.delete(record);
   }
-  
+
   @Override
   public List<String> getAllTripProblemReportLabels() {
     return _userReportingDao.getAllTripProblemReportLabels();
@@ -388,7 +409,28 @@ class UserReportingServiceImpl implements UserReportingService {
     if (tripId != null)
       bean.setTrip(_tripBeanService.getTripForId(tripId));
 
+    if (tripId != null && stopId != null) {
+      TripEntry trip = _graph.getTripEntryForId(tripId);
+      StopEntry stop = _graph.getStopEntryForId(stopId);
+      if (trip != null && stop != null) {
+
+        AgencyAndId vehicleId = record.getMatchedVehicleId();
+        if (vehicleId == null)
+          vehicleId = record.getVehicleId();
+
+        ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
+            stop, -1, trip, record.getServiceDate(), vehicleId,
+            record.getTime());
+
+        if (instance != null) {
+          StopTimeInstance sti = new StopTimeInstance(
+              instance.getBlockStopTime(), instance.getServiceDate());
+          StopTimeInstanceBean stopTimeBean = _stopTimeBeanService.getStopTimeInstanceAsBean(sti);
+          bean.setStopTime(stopTimeBean);
+        }
+      }
+    }
+
     return bean;
   }
-
 }

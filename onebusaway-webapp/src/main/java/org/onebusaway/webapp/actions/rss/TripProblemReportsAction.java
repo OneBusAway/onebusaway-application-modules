@@ -127,7 +127,7 @@ public class TripProblemReportsAction extends ActionSupport {
 
       StopBean stop = report.getStop();
       TripBean trip = report.getTrip();
-      
+
       SyndEntry entry = new SyndEntryImpl();
 
       StringBuilder entryTitle = new StringBuilder();
@@ -135,13 +135,12 @@ public class TripProblemReportsAction extends ActionSupport {
       entryTitle.append(" - ");
       entryTitle.append(trip.getTripHeadsign());
       entryTitle.append(" - ");
-      entryTitle.append(getText("StopNum"));
-      entryTitle.append(stop.getCode());
+      entryTitle.append(getText("StopNum", new String[] {stop.getCode()}));
       entryTitle.append(" - ");
       entryTitle.append(stop.getName());
       if (stop.getDirection() != null)
-        entryTitle.append(" - ").append(stop.getDirection()).append(" ").append(
-            getText("bound"));
+        entryTitle.append(" - ").append(
+            getText("bound", new String[] {stop.getDirection()}));
 
       StringBuilder entryUrl = new StringBuilder();
       entryUrl.append(baseUrl);
