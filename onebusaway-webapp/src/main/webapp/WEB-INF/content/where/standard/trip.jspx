@@ -147,8 +147,10 @@
     </oba:group>
 
     <table>
+        <s:set var="stopSequenceCount" value="0"/>
         <s:iterator value="#groups">
             <s:iterator status="groupStatus">
+                
                 <tr>
                     <td class="TripPage-TimeColumn"><s:if test="#groupStatus.first">
                         <span class="TripPage-ArrivalTime"> <oba:date format="hh:mm aa"
@@ -157,13 +159,20 @@
                     <td>
                     <jsp:element name="div">
                       <jsp:attribute name="class">TripPage-StopColumn<s:if test="stop.id == stopId"> TripPage-StopColumn-Selected</s:if></jsp:attribute>
-                      <s:a action="stop">
-                        <s:param name="id" value="stop.id"/>
+                      <s:url var="url" action="arrival-and-departure-for-stop">
+                        <s:param name="stopId" value="stop.id"/>
+                        <s:param name="tripId" value="tripId"/>
+                        <s:param name="serviceDate" value="serviceDate" />
+                        <s:param name="vehicleId" value="status.vehicleId"/>
+                        <s:param name="stopSequence" value="#stopSequenceCount" />
+                      </s:url>
+                      <s:a href="%{url}">
                         <s:property value="stop.name" />
                       </s:a>
                     </jsp:element>
                     </td>                    
                 </tr>
+                <s:set var="stopSequenceCount" value="#stopSequenceCount + 1"/>
             </s:iterator>
         </s:iterator>
     </table>

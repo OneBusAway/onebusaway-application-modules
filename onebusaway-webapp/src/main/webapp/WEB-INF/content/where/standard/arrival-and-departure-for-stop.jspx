@@ -62,6 +62,13 @@
     <s:param name="stops" value="result.stop"/>
 </s:component>
 
+<p class="showAllArrivals">
+    <s:url var="url" action="stop">
+        <s:param name="id" value="result.stop.id"/>
+    </s:url>
+    <s:a href="%{url}"><s:text name="arrivalAndDepartureForStop.Show_all_arrivals_for_this_stop"/></s:a>
+</p>
+
 <s:component template="service-alerts-header-snippet.jspx">
     <s:param name="situations" value="situations"/>
 </s:component>
