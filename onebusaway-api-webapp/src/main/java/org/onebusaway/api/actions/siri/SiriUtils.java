@@ -37,9 +37,18 @@ public class SiriUtils {
     return id;
   }
 
+  /**
+   * @param stopTimes The list of all stops this trip makes
+   * @param serviceDate
+   * @param distance How far in meters the bus is along the trip
+   * @param currentStop The stop the bus is presently at
+   * @param limit The max number of OnwardCall elements to return
+   * @return A list of Siri OnwardCall objects
+   */
   public static List<OnwardCall> getOnwardCalls(
       List<TripStopTimeBean> stopTimes, long serviceDate,
-      double distance, StopBean currentStop) {
+ double distance,
+      StopBean currentStop, int limit) {
 
     ArrayList<OnwardCall> onwardCalls = new ArrayList<OnwardCall>();
 
@@ -82,11 +91,14 @@ public class SiriUtils {
            * onwardCall.AimedDepartureTime = departureTime;
            */
         
-           onwardCalls.add(onwardCall);
+          onwardCalls.add(onwardCall);
+          if (limit > 0 && onwardCalls.size() == limit) {
+            break;
           }
-          if (stop == currentStop) {
-            afterStop = true;
-          }
+        }
+        if (stop == currentStop) {
+          afterStop = true;
+        }
       }
     }
     if (onwardCalls.size() == 0) {

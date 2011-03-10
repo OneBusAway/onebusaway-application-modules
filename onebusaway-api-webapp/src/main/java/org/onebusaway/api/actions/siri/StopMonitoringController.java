@@ -219,7 +219,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
 
         int i = 0;
         boolean started = false;
-        boolean found = false;
 
         List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
 
@@ -248,7 +247,6 @@ public class StopMonitoringController implements ModelDriven<Object>,
             started = true;
           }
           if (started && stopTime.getStop().getId().equals(stopId)) {
-            found = true;
             /* we have hit the requested stop */
             monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip()
                 - distance < 10;
@@ -260,13 +258,13 @@ public class StopMonitoringController implements ModelDriven<Object>,
             monitoredCall.VisitNumber = visitNumber;
             if (includeOnwardCalls) {
               List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(
-                  stopTimes, status.getServiceDate(), distance, stop);
+                  stopTimes, status.getServiceDate(), distance, stop, -1);
               MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = onwardCalls;
             }
           }
         }
 
-        if (!started || !found) {
+        if (monitoredCall.Extensions.Distances == null) {
           /* remove trips which have already passed this stop */
           continue;
         }
