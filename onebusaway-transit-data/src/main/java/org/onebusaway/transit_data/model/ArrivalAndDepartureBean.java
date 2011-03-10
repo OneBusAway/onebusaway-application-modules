@@ -15,15 +15,28 @@
  */
 package org.onebusaway.transit_data.model;
 
+import java.util.List;
+
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
 public class ArrivalAndDepartureBean extends ApplicationBean {
 
-  private static final long serialVersionUID = 2L;
-  
+  private static final long serialVersionUID = 3L;
+
   private TripBean trip;
 
-  private String stopId;
+  private long serviceDate;
+
+  private String vehicleId;
+
+  private StopBean stop;
+
+  private int stopSequence;
+
+  private int blockTripSequence;
 
   private long predictedArrivalTime;
 
@@ -33,22 +46,72 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private long scheduledDepartureTime;
 
+  private FrequencyBean frequency;
+
+  private boolean predicted = false;
+
+  private Long lastUpdateTime;
+
   private String status;
+
+  private double distanceFromStop = Double.NaN;
+
+  private int numberOfStopsAway;
+
+  private String routeShortName;
+
+  private String tripHeadsign;
+
+  private TripStatusBean tripStatus;
+
+  private List<SituationBean> situations;
 
   public TripBean getTrip() {
     return trip;
   }
-  
+
   public void setTrip(TripBean trip) {
     this.trip = trip;
   }
 
-  public String getStopId() {
-    return stopId;
+  public long getServiceDate() {
+    return serviceDate;
   }
 
-  public void setStopId(String stopId) {
-    this.stopId = stopId;
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
+  }
+
+  public String getVehicleId() {
+    return vehicleId;
+  }
+
+  public void setVehicleId(String vehicleId) {
+    this.vehicleId = vehicleId;
+  }
+
+  public StopBean getStop() {
+    return stop;
+  }
+
+  public void setStop(StopBean stop) {
+    this.stop = stop;
+  }
+
+  public int getStopSequence() {
+    return stopSequence;
+  }
+
+  public void setStopSequence(int stopSequence) {
+    this.stopSequence = stopSequence;
+  }
+
+  public int getBlockTripSequence() {
+    return blockTripSequence;
+  }
+
+  public void setBlockTripSequence(int blockTripSequence) {
+    this.blockTripSequence = blockTripSequence;
   }
 
   public long getPredictedArrivalTime() {
@@ -83,6 +146,30 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
+  public FrequencyBean getFrequency() {
+    return frequency;
+  }
+
+  public void setFrequency(FrequencyBean frequency) {
+    this.frequency = frequency;
+  }
+
+  public boolean isPredicted() {
+    return predicted;
+  }
+
+  public void setPredicted(boolean predicted) {
+    this.predicted = predicted;
+  }
+
+  public Long getLastUpdateTime() {
+    return lastUpdateTime;
+  }
+
+  public void setLastUpdateTime(Long lastUpdateTime) {
+    this.lastUpdateTime = lastUpdateTime;
+  }
+
   public String getStatus() {
     return status;
   }
@@ -91,12 +178,64 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.status = status;
   }
 
+  public boolean isDistanceFromStopSet() {
+    return !Double.isNaN(distanceFromStop);
+  }
+
+  public double getDistanceFromStop() {
+    return distanceFromStop;
+  }
+
+  public void setDistanceFromStop(double distanceFromStop) {
+    this.distanceFromStop = distanceFromStop;
+  }
+
+  public int getNumberOfStopsAway() {
+    return numberOfStopsAway;
+  }
+
+  public void setNumberOfStopsAway(int numberOfStopsAway) {
+    this.numberOfStopsAway = numberOfStopsAway;
+  }
+
+  public String getRouteShortName() {
+    return routeShortName;
+  }
+
+  public void setRouteShortName(String routeShortName) {
+    this.routeShortName = routeShortName;
+  }
+
+  public String getTripHeadsign() {
+    return tripHeadsign;
+  }
+
+  public void setTripHeadsign(String tripHeadsign) {
+    this.tripHeadsign = tripHeadsign;
+  }
+
+  public TripStatusBean getTripStatus() {
+    return tripStatus;
+  }
+
+  public void setTripStatus(TripStatusBean tripStatus) {
+    this.tripStatus = tripStatus;
+  }
+
+  public List<SituationBean> getSituations() {
+    return situations;
+  }
+
+  public void setSituations(List<SituationBean> situations) {
+    this.situations = situations;
+  }
+
   public boolean hasPredictedArrivalTime() {
     return this.predictedArrivalTime > 0;
   }
 
   public boolean hasPredictedDepartureTime() {
-    return this.predictedArrivalTime > 0;
+    return this.predictedDepartureTime > 0;
   }
 
   public long computeBestArrivalTime() {

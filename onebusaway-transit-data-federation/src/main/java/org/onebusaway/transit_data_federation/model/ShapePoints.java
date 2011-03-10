@@ -49,6 +49,10 @@ public class ShapePoints implements Serializable {
     this.lats = lat;
   }
 
+  public double getLatForIndex(int index) {
+    return lats[index];
+  }
+
   public double[] getLons() {
     return lons;
   }
@@ -57,12 +61,20 @@ public class ShapePoints implements Serializable {
     this.lons = lon;
   }
 
+  public double getLonForIndex(int index) {
+    return lons[index];
+  }
+
   public double[] getDistTraveled() {
     return distTraveled;
   }
 
   public void setDistTraveled(double[] distTraveled) {
     this.distTraveled = distTraveled;
+  }
+
+  public double getDistTraveledForIndex(int index) {
+    return distTraveled[index];
   }
 
   public void ensureDistTraveled() {

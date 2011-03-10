@@ -12,6 +12,17 @@ public final class TripDetailsInclusionBean implements Serializable {
 
   private boolean includeTripStatus = true;
 
+  public TripDetailsInclusionBean() {
+
+  }
+
+  public TripDetailsInclusionBean(boolean includeTripBean,
+      boolean includeTripSchedule, boolean includeTripStatus) {
+    this.includeTripBean = includeTripBean;
+    this.includeTripSchedule = includeTripSchedule;
+    this.includeTripStatus = includeTripStatus;
+  }
+
   public boolean isIncludeTripBean() {
     return includeTripBean;
   }

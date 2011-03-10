@@ -102,7 +102,7 @@ public class StopAction extends AbstractWhereAction implements
       addFieldError("order", "unknown order value: " + order);
   }
 
-  @TypeConversion(converter = "org.onebusaway.webapp.actions.where.DateTimeConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _model.setTargetTime(time);
   }

@@ -1,8 +1,11 @@
 package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.onebusaway.transit_data.model.TripStopTimesBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 
 public final class TripDetailsBean implements Serializable {
 
@@ -10,27 +13,17 @@ public final class TripDetailsBean implements Serializable {
 
   private String tripId;
 
+  private long serviceDate;
+
+  private FrequencyBean frequency;
+
   private TripBean trip;
 
   private TripStopTimesBean schedule;
 
   private TripStatusBean status;
 
-  public TripDetailsBean() {
-
-  }
-
-  public TripDetailsBean(String tripId, TripBean trip, TripStopTimesBean schedule) {
-    this.tripId = tripId;
-    this.trip = trip;
-    this.schedule = schedule;
-  }
-
-  public TripDetailsBean(String tripId, TripBean trip, TripStopTimesBean schedule,
-      TripStatusBean status) {
-    this(tripId, trip, schedule);
-    this.status = status;
-  }
+  private List<SituationBean> situations;
 
   public String getTripId() {
     return tripId;
@@ -38,6 +31,22 @@ public final class TripDetailsBean implements Serializable {
 
   public void setTripId(String tripId) {
     this.tripId = tripId;
+  }
+
+  public long getServiceDate() {
+    return serviceDate;
+  }
+
+  public void setServiceDate(long serviceDate) {
+    this.serviceDate = serviceDate;
+  }
+
+  public FrequencyBean getFrequency() {
+    return frequency;
+  }
+
+  public void setFrequency(FrequencyBean frequency) {
+    this.frequency = frequency;
   }
 
   public TripBean getTrip() {
@@ -62,5 +71,13 @@ public final class TripDetailsBean implements Serializable {
 
   public void setStatus(TripStatusBean status) {
     this.status = status;
+  }
+
+  public List<SituationBean> getSituations() {
+    return situations;
+  }
+
+  public void setSituations(List<SituationBean> situations) {
+    this.situations = situations;
   }
 }

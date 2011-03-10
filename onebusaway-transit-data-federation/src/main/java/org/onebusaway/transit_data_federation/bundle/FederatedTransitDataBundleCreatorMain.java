@@ -1,19 +1,24 @@
 package org.onebusaway.transit_data_federation.bundle;
 
-import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreator.Stages;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
+import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
 /**
  * Command line tool for federated transit data bundle creator. Allows
@@ -31,14 +36,18 @@ public class FederatedTransitDataBundleCreatorMain {
 
   private static final String ARG_SKIP = "skip";
 
+  private static final String ARG_ONLY_IF_DNE = "onlyIfDoesNotExist";
+
+  private static final String ARG_ADDITIONAL_RESOURCES_DIRECTORY = "additionalResourcesDirectory";
+
   public static void main(String[] args) throws IOException,
       ClassNotFoundException {
-
     FederatedTransitDataBundleCreatorMain main = new FederatedTransitDataBundleCreatorMain();
     main.run(args);
   }
 
   public void run(String[] args) {
+
     try {
       Parser parser = new GnuParser();
 
@@ -55,15 +64,48 @@ public class FederatedTransitDataBundleCreatorMain {
       }
 
       FederatedTransitDataBundleCreator creator = new FederatedTransitDataBundleCreator();
-      List<File> contextPaths = new ArrayList<File>();
-      for (int i = 0; i < remainingArgs.length - 1; i++)
-        contextPaths.add(new File(remainingArgs[i]));
-      creator.setContextPaths(contextPaths);
-      creator.setOutputPath(new File(remainingArgs[remainingArgs.length - 1]));
+
+      File firstPath = new File(remainingArgs[0]);
+
+      if (remainingArgs.length == 2
+          && (firstPath.isDirectory() || firstPath.getName().endsWith(".zip"))) {
+
+        GtfsBundle gtfsBundle = new GtfsBundle();
+        gtfsBundle.setPath(firstPath);
+
+        BeanDefinitionBuilder gtfsBundles = BeanDefinitionBuilder.genericBeanDefinition(GtfsBundles.class);
+        gtfsBundles.addPropertyValue("bundles", Arrays.asList(gtfsBundle));
+
+        Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
+        beans.put("gtfs-bundles", gtfsBundles.getBeanDefinition());
+        creator.setContextBeans(beans);
+
+      } else {
+        List<File> contextPaths = new ArrayList<File>();
+        for (int i = 0; i < remainingArgs.length - 1; i++)
+          contextPaths.add(new File(remainingArgs[i]));
+        creator.setContextPaths(contextPaths);
+      }
+
+      File outputPath = new File(remainingArgs[remainingArgs.length - 1]);
+
+      if (commandLine.hasOption(ARG_ONLY_IF_DNE) && outputPath.exists()) {
+        System.err.println("Bundle path already exists.  Exiting...");
+        System.exit(0);
+      }
+
+      creator.setOutputPath(outputPath);
 
       setStagesToSkip(commandLine, creator);
 
       try {
+
+        if (commandLine.hasOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY)) {
+          File additionalResourceDirectory = new File(
+              commandLine.getOptionValue(ARG_ADDITIONAL_RESOURCES_DIRECTORY));
+          copyFiles(additionalResourceDirectory, outputPath);
+        }
+
         creator.run();
       } catch (Exception ex) {
         ex.printStackTrace();
@@ -82,6 +124,8 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_SKIP_TO, true, "");
     options.addOption(ARG_ONLY, true, "");
     options.addOption(ARG_SKIP, true, "");
+    options.addOption(ARG_ONLY_IF_DNE, false, "");
+    options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
   }
 
   protected void printUsage() {
@@ -93,30 +137,52 @@ public class FederatedTransitDataBundleCreatorMain {
 
     if (commandLine.hasOption(ARG_SKIP_TO)) {
       String value = commandLine.getOptionValue(ARG_SKIP_TO);
-      Stages stage = FederatedTransitDataBundleCreator.Stages.valueOf(value);
-      Stages[] stages = FederatedTransitDataBundleCreator.Stages.values();
-      for (Stages s : stages) {
-        if (s.equals(stage))
-          break;
-        creator.setStageToSkip(s);
-      }
+      creator.setSkipToTask(value);
     }
 
     if (commandLine.hasOption(ARG_ONLY)) {
       String[] values = commandLine.getOptionValues(ARG_ONLY);
-      Set<Stages> stages = new HashSet<Stages>();
       for (String value : values)
-        stages.add(Stages.valueOf(value));
-      for (Stages stage : Stages.values()) {
-        if (!stages.contains(stage))
-          creator.setStageToSkip(stage);
-      }
+        creator.addTaskToOnlyRun(value);
     }
 
     if (commandLine.hasOption(ARG_SKIP)) {
       String[] values = commandLine.getOptionValues(ARG_SKIP);
       for (String value : values)
-        creator.setStageToSkip(Stages.valueOf(value));
+        creator.addTaskToSkip(value);
+    }
+  }
+
+  protected void copyFiles(File from, File to) throws IOException {
+
+    if (!from.exists())
+      return;
+
+    if (from.isDirectory()) {
+      to.mkdirs();
+      for (File fromChild : from.listFiles()) {
+        File toChild = new File(to, fromChild.getName());
+        copyFiles(fromChild, toChild);
+      }
+    } else {
+      FileInputStream in = null;
+      FileOutputStream out = null;
+
+      try {
+        in = new FileInputStream(from);
+        out = new FileOutputStream(to);
+
+        int byteCount = 0;
+        byte[] buffer = new byte[1024];
+        while ((byteCount = in.read(buffer)) >= 0)
+          out.write(buffer, 0, byteCount);
+      } finally {
+        if (in != null)
+          in.close();
+        if (out != null)
+          out.close();
+      }
+
     }
   }
 }

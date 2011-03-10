@@ -14,11 +14,15 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 class ShapeBeanServiceImpl implements ShapeBeanService {
+
+  private static Logger _log = LoggerFactory.getLogger(ShapeBeanServiceImpl.class);
 
   private ShapePointService _shapePointService;
 
@@ -30,6 +34,8 @@ class ShapeBeanServiceImpl implements ShapeBeanService {
   @Cacheable
   public EncodedPolylineBean getPolylineForShapeId(AgencyAndId id) {
     ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(id);
+    if (shapePoints == null)
+      return null;
     return PolylineEncoder.createEncodings(shapePoints.getLats(),
         shapePoints.getLons(), -1);
   }
@@ -49,9 +55,15 @@ class ShapeBeanServiceImpl implements ShapeBeanService {
     for (AgencyAndId shapeId : shapeIds) {
 
       ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(shapeId);
+
+      if (shapePoints == null) {
+        _log.warn("no shape points for shapeId=" + shapeId);
+        continue;
+      }
+
       double[] lats = shapePoints.getLats();
       double[] lons = shapePoints.getLons();
-      
+
       CoordinatePoint prev = null;
 
       for (int i = 0; i < shapePoints.getSize(); i++) {
@@ -66,9 +78,9 @@ class ShapeBeanServiceImpl implements ShapeBeanService {
           }
         }
 
-        if( prev == null || ! prev.equals(loc))
+        if (prev == null || !prev.equals(loc))
           currentLine.add(loc);
-        
+
         prev = loc;
       }
 

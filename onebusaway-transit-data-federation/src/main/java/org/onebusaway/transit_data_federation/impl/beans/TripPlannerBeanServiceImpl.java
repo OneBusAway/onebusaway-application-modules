@@ -1,27 +1,36 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanner.WalkSegmentBean;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstraints;
+import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.services.beans.TripPlanBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanService;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.beans.WalkPlanBeanService;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerService;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
+import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
+import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
+import org.opentripplanner.routing.core.TraverseOptions;
+import org.opentripplanner.routing.services.PathService;
+import org.opentripplanner.routing.spt.GraphPath;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 @Component
 class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
@@ -31,6 +40,12 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
   private TripPlanBeanService _beanFactory;
 
   private TripPlannerConstants _constants;
+
+  private PathService _pathService;
+
+  private WalkPlannerService _walkPlannerService;
+
+  private WalkPlanBeanService _walkPlanBeanService;
 
   @Autowired
   public void setTripPlannerService(TripPlannerService service) {
@@ -47,9 +62,50 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
     _constants = constants;
   }
 
+  // @Autowired
+  public void setPathService(PathService pathService) {
+    _pathService = pathService;
+  }
+
+  @Autowired
+  public void setWalkPlannerService(WalkPlannerService walkPlannerService) {
+    _walkPlannerService = walkPlannerService;
+  }
+
+  @Autowired
+  public void setWalkPlanBeanService(WalkPlanBeanService walkPlanBeanService) {
+    _walkPlanBeanService = walkPlanBeanService;
+  }
+
   public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
       double latTo, double lonTo, TripPlannerConstraintsBean constraints)
       throws ServiceException {
+
+    if (constraints.isWalkingOnly()) {
+      CoordinatePoint pFrom = new CoordinatePoint(latFrom, lonFrom);
+      CoordinatePoint pTo = new CoordinatePoint(latTo, lonTo);
+      try {
+        WalkPlan plan = _walkPlannerService.getWalkPlan(pFrom, pTo);
+
+        WalkSegmentBean segment = _walkPlanBeanService.getWalkPlanAsBean(
+            constraints.getMinDepartureTime(), 0L, plan);
+
+        TripPlanBean bean = new TripPlanBean();
+        bean.getSegments().add(segment);
+        return Arrays.asList(bean);
+      } catch (NoPathException e) {
+        return Collections.emptyList();
+      }
+    }
+
+    if (_pathService != null) {
+      String fromPlace = latFrom + "," + lonFrom;
+      String toPlace = latTo + "," + lonTo;
+      TraverseOptions options = new TraverseOptions();
+      List<GraphPath> plans = _pathService.plan(fromPlace, toPlace, new Date(
+          constraints.getMinDepartureTime()), options, 1);
+      return null;
+    }
 
     TripPlannerConstraints c = new TripPlannerConstraints();
 
@@ -86,7 +142,8 @@ class TripPlannerBeanServiceImpl implements TripPlannerBeanService {
   }
 
   public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(double lat,
-      double lon, OneBusAwayConstraintsBean constraints) throws ServiceException {
+      double lon, OneBusAwayConstraintsBean constraints)
+      throws ServiceException {
 
     final CoordinatePoint p = new CoordinatePoint(lat, lon);
 

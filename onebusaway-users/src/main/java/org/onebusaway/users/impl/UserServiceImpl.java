@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.container.cache.CacheableArgument;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.client.model.UserIndexBean;
 import org.onebusaway.users.model.User;
@@ -23,7 +25,9 @@ import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.providers.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class UserServiceImpl implements UserService {
@@ -37,6 +41,8 @@ public class UserServiceImpl implements UserService {
   private UserPropertiesService _userPropertiesService;
 
   private UserIndexRegistrationService _userIndexRegistrationService;
+
+  private PasswordEncoder _passwordEncoder;
 
   @Autowired
   public void setUserDao(UserDao dao) {
@@ -61,6 +67,11 @@ public class UserServiceImpl implements UserService {
     _userIndexRegistrationService = userIndexRegistrationService;
   }
 
+  @Autowired
+  public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+    _passwordEncoder = passwordEncoder;
+  }
+
   /****
    * {@link UserService} Interface
    ****/
@@ -78,6 +89,12 @@ public class UserServiceImpl implements UserService {
   @Override
   public List<Integer> getAllUserIdsInRange(int offset, int limit) {
     return _userDao.getAllUserIdsInRange(offset, limit);
+  }
+
+  @Override
+  public int getNumberOfAdmins() {
+    UserRole admin = _authoritiesService.getAdministratorRole();
+    return _userDao.getNumberOfUsersWithRole(admin);
   }
 
   @Override
@@ -221,6 +238,15 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
+  public UserIndex getOrCreateUserForUsernameAndPassword(String username,
+      String password) {
+
+    String credentials = _passwordEncoder.encodePassword(password, username);
+    UserIndexKey key = new UserIndexKey(UserIndexTypes.USERNAME, username);
+    return getOrCreateUserForIndexKey(key, credentials, false);
+  }
+
+  @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return _userDao.getUserIndexForId(key);
   }
@@ -254,6 +280,18 @@ public class UserServiceImpl implements UserService {
   public void setCredentialsForUserIndex(UserIndex userIndex, String credentials) {
     userIndex.setCredentials(credentials);
     _userDao.saveOrUpdateUserIndex(userIndex);
+  }
+
+  @Override
+  public void setPasswordForUsernameUserIndex(UserIndex userIndex,
+      String password) {
+    
+    UserIndexKey id = userIndex.getId();
+    if( ! UserIndexTypes.USERNAME.equals(id.getType()))
+      throw new IllegalArgumentException("expected UserIndex of type " + UserIndexTypes.USERNAME);
+    
+    String credentials = _passwordEncoder.encodePassword(password, id.getValue());
+    setCredentialsForUserIndex(userIndex, credentials);
   }
 
   @Override
@@ -364,20 +402,6 @@ public class UserServiceImpl implements UserService {
     return _userPropertiesMigration.getUserPropertiesBulkMigrationStatus();
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> T getAdditionalPropertyForUser(User user, String propertyName) {
-    return (T) _userPropertiesService.getAdditionalPropertyForUser(user,
-        propertyName);
-  }
-
-  @Override
-  public void setAdditionalPropertyForUser(User user, String propertyName,
-      Object propertyValue) {
-    _userPropertiesService.setAdditionalPropertyForUser(user, propertyName,
-        propertyValue);
-  }
-
   /****
    * Private Methods
    ****/
@@ -393,5 +417,23 @@ public class UserServiceImpl implements UserService {
       roles.remove(anon);
 
     targetUser.setRoles(roles);
+  }
+
+  @Cacheable
+  @Transactional
+  @Override
+  public Long getMinApiRequestIntervalForKey(String key,
+      @CacheableArgument(cacheRefreshIndicator = true) boolean forceRefresh) {
+
+    UserIndexKey indexKey = new UserIndexKey(UserIndexTypes.API_KEY, key);
+    UserIndex userIndex = getUserIndexForId(indexKey);
+
+    if (userIndex == null) {
+      return null;
+    }
+
+    User user = userIndex.getUser();
+    UserBean bean = getUserAsBean(user);
+    return bean.getMinApiRequestInterval();
   }
 }

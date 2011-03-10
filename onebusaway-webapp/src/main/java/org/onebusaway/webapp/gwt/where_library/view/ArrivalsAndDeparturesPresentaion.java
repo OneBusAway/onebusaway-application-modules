@@ -3,9 +3,8 @@ package org.onebusaway.webapp.gwt.where_library.view;
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.webapp.gwt.where_library.WhereLibrary;
-import org.onebusaway.webapp.gwt.where_library.WhereMessages;
-import org.onebusaway.webapp.gwt.where_library.resources.WhereLibraryCssResource;
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
+import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 
 import com.google.gwt.core.client.GWT;
 
@@ -13,9 +12,7 @@ public class ArrivalsAndDeparturesPresentaion {
 
   private static final String CANCELLED = "cancelled";
 
-  private WhereLibraryCssResource _css;
-
-  private WhereMessages _messages;
+  private ArrivalAndDepartureMessages _messages;
 
   private boolean _showArrivals = false;
 
@@ -25,17 +22,12 @@ public class ArrivalsAndDeparturesPresentaion {
 
   public ArrivalsAndDeparturesPresentaion(boolean useDefaultResources) {
     if (useDefaultResources) {
-      _css = WhereLibrary.INSTANCE.getCss();
-      _messages = GWT.create(WhereMessages.class);
+      _messages = GWT.create(ArrivalAndDepartureMessages.class);
     }
   }
 
-  public void setMessages(WhereMessages messages) {
+  public void setMessages(ArrivalAndDepartureMessages messages) {
     _messages = messages;
-  }
-
-  public void setCss(WhereLibraryCssResource css) {
-    _css = css;
   }
 
   public void setShowArrivals(boolean showArrivals) {
@@ -99,7 +91,7 @@ public class ArrivalsAndDeparturesPresentaion {
   public String getStatusLabelStyle(ArrivalAndDepartureBean pab) {
 
     if (CANCELLED.equals(pab.getStatus()))
-      return _css.arrivalStatusCancelled();
+      return "arrivalStatusCancelled";
 
     long now = System.currentTimeMillis();
     long predicted = getPredictedTime(pab);
@@ -112,27 +104,27 @@ public class ArrivalsAndDeparturesPresentaion {
       if (predicted < now) {
 
         if (diff < -1.5) {
-          return _css.arrivalStatusDepartedEarly();
+          return "arrivalStatusDepartedEarly";
         } else if (diff < 1.5) {
-          return _css.arrivalStatusDepartedOnTime();
+          return "arrivalStatusDepartedOnTime";
         } else {
-          return _css.arrivalStatusDepartedDelayed();
+          return "arrivalStatusDepartedDelayed";
         }
       } else {
         if (diff < -1.5) {
-          return _css.arrivalStatusEarly();
+          return "arrivalStatusEarly";
         } else if (diff < 1.5) {
-          return _css.arrivalStatusOnTime();
+          return "arrivalStatusOnTime";
         } else {
-          return _css.arrivalStatusDelayed();
+          return "arrivalStatusDelayed";
         }
       }
 
     } else {
       if (scheduled < now)
-        return _css.arrivalStatusDepartedNoInfo();
+        return "arrivalStatusDepartedNoInfo";
       else
-        return _css.arrivalStatusNoInfo();
+        return "arrivalStatusNoInfo";
     }
   }
 
@@ -141,6 +133,20 @@ public class ArrivalsAndDeparturesPresentaion {
     if (hasPredictedTime(pab))
       t = getPredictedTime(pab);
     return t;
+  }
+  
+  public String getMinutesElementId(ArrivalAndDepartureBean pab) {
+    StringBuilder b = new StringBuilder();
+    b.append("stopId_");
+    b.append(escapeId(pab.getStop().getId()));
+    b.append("-tripId_");
+    b.append(escapeId(pab.getTrip().getId()));
+    if( pab.getVehicleId() != null) {
+      b.append("-vehicleId_");
+      b.append(escapeId(pab.getVehicleId()));
+    }
+    
+    return b.toString();
   }
 
   public String getMinutesLabel(ArrivalAndDepartureBean pab) {
@@ -169,6 +175,10 @@ public class ArrivalsAndDeparturesPresentaion {
     String name = RoutePresenter.getNameForRoute(route);
     return RoutePresenter.isRouteNameLong(name);
   }
+  
+  public boolean isShowFrequencyFrom(FrequencyBean frequency) { 
+    return frequency.getStartTime() > System.currentTimeMillis();
+  }
 
   /****
    * Private Methods
@@ -187,6 +197,11 @@ public class ArrivalsAndDeparturesPresentaion {
   private long getScheduledTime(ArrivalAndDepartureBean pab) {
     return _showArrivals ? pab.getScheduledArrivalTime()
         : pab.getScheduledDepartureTime();
+  }
+  
+  private String escapeId(String value) {
+    value = value.replaceAll(" ", "_");
+    return value;
   }
 
 }

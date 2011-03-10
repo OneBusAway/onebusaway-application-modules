@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.walkplanner.offline;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,9 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.collections.combinations.Combinations;
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.container.refresh.RefreshService;
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
-import org.onebusaway.transit_data_federation.services.RunnableWithOutputPath;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.opentripplanner.graph_builder.model.osm.OSMNode;
@@ -21,25 +25,29 @@ import org.opentripplanner.graph_builder.services.osm.OpenStreetMapContentHandle
 import org.opentripplanner.graph_builder.services.osm.OpenStreetMapProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import edu.washington.cs.rse.collections.combinations.Combinations;
-import edu.washington.cs.rse.collections.tuple.Pair;
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
-public class WalkPlannerGraphTask implements RunnableWithOutputPath {
+public class WalkPlannerGraphTask implements Runnable {
 
   private OpenStreetMapProvider _provider;
 
-  private File _outputPath;
-
   private boolean _createEmptyGraph = false;
+
+  private FederatedTransitDataBundle _bundle;
+
+  private RefreshService _refreshService;
 
   @Autowired
   public void setOpenStreetMapProvider(OpenStreetMapProvider provider) {
     _provider = provider;
   }
 
-  public void setOutputPath(File path) {
-    _outputPath = path;
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
+  }
+
+  @Autowired
+  public void setRefreshService(RefreshService refreshService) {
+    _refreshService = refreshService;
   }
 
   public void setCreateEmptyGraph(boolean createEmptyGraph) {
@@ -58,7 +66,9 @@ public class WalkPlannerGraphTask implements RunnableWithOutputPath {
         populateGraph(handler);
 
       WalkPlannerGraph graph = handler.getGraph();
-      ObjectSerializationLibrary.writeObject(_outputPath, graph);
+      ObjectSerializationLibrary.writeObject(_bundle.getWalkPlannerGraphPath(),
+          graph);
+      _refreshService.refresh(RefreshableResources.WALK_PLANNER_GRAPH);
     } catch (Exception ex) {
       throw new IllegalStateException("error constructing WalkPlannerGraph", ex);
     }

@@ -54,7 +54,7 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
 
   @UiField
   public MyStyle style;
-
+  
   @UiField
   public Anchor _addStopAnchor;
 
@@ -224,6 +224,7 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
           _dialog.hide();
         }
       });
+      getStopLinksPanel().clear();
       getStopLinksPanel().add(anchor);
     }
   }
@@ -238,7 +239,7 @@ public class AbstractStopAndRouteSelectionWidget extends Composite {
       context.getTransitMapManager().showStopsInCurrentView();
     }
   }
-
+  
   public interface MyStyle extends CssResource {
     String StopFinderDialog();
   }

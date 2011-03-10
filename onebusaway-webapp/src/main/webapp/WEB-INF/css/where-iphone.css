@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Brian Ferris
+ * Copyright 2008-2010 Brian Ferris
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,15 +14,6 @@
  * the License.
  */
 
-@url arrowUrl ImageArrow;
-@url arrowBusUrl ImageArrowBus;
-@url barUrl ImageBar;
-@url bgUrl ImageBackground;
-@url bgbotUrl ImageBackgroundBot;
-@url bgbot2Url ImageBackgroundBot2;
-@url hborderUrl ImageHBorder;
-@url nearbyStopsForRouteArrowUrl NearbyStopsForRouteArrow;
-
 body {
 	margin: 0;
 	padding: 0;
@@ -30,8 +21,8 @@ body {
 	display: block;
 	font-size: 14pt;
 	font-family: Helvetica, sans-serif;
-	background-image: bgUrl;
-	background-image: bgbot2Url, bgbotUrl, bgUrl;
+	background-image: oba-resource("/images/where/iphone/bg.png");
+	background-image: oba-resource("/images/where/iphone/bgbot2.png"), oba-resource("/images/where/iphone/bgbot.png"), oba-resource("/images/where/iphone/bg.png");
 	background-repeat: repeat-x, repeat-x, repeat;
 	background-position: left bottom, left bottom, left top;
 }
@@ -43,7 +34,7 @@ body {
 
 #topBar {
 	background-repeat: repeat-x;
-	background-image: barUrl;
+	background-image: oba-resource("/images/where/iphone/bar.png");
 	text-shadow: -2px -1px #4c4c4c;
 	text-align: center;
 	font-weight: bold;
@@ -111,7 +102,7 @@ span.label {
 }
 
 ul.buttons li {
-	background-image: arrowUrl;
+	background-image: oba-resource("/images/where/iphone/arrow.gif");
 	background-position: right center;
 	background-repeat: no-repeat;
 	border: 1px solid #A5A5A5;
@@ -131,7 +122,7 @@ ul.buttons li a {
 }
 
 .button {
-	background-image: arrowUrl;
+	background-image: oba-resource("/images/where/iphone/arrow.gif");
 	background-position: right center;
 	background-repeat: no-repeat;
 	border: 1px solid #A5A5A5;
@@ -152,7 +143,7 @@ ul.buttons li a {
 }
 
 .inputButton {
-	background: transparent hborderUrl repeat-x scroll 0px -27px;
+	background: transparent oba-resource("/images/where/iphone/hborder.png") repeat-x scroll 0px -27px;
 	border: 1px outset #CCCCCC;
 	cursor: pointer;
 	font-size: small;
@@ -199,7 +190,7 @@ ul.buttons li a {
 }
 
 .buttons a.stop {
-	background-image: arrowBusUrl;
+	background-image: oba-resource("/images/where/iphone/arrow-bus.png");
 	font-size: 10pt;
 }
 
@@ -477,65 +468,6 @@ ul.buttons li a {
 
 .snow a:visited {
 	color: red;
-}
-
-/****
- *
- ****/
- 
-.nearbyRoutesGrid {
-  width: 100%; 
-  border-collapse: collapse;
-  padding: 0px; 
-}
-
-.nearbyRoutesGrid td {
-	width: 25%;
-	padding: 1px;
-}
-
-.nearbyRouteEntry {
-  padding: 2px;
-  border: 1px solid #A5A5A5;
-  text-align: center;
-  font-weight: bold;
-  background-color: white;
-}
-
-.nearbyStopsForRouteButtons {
-	border-top: 5px solid #A5A5A5;
-	border-bottom: 5px solid #A5A5A5;
-	margin-left: 1px;
-	margin-right: 1px;
-	margin-top: 0px;
-	margin-bottom: 10px;
-}
-
-.nearbyStopsForRouteButton {
-	width: 256px;
-}
-
-.nearbyStopsForRouteArrow {
-	background-image: nearbyStopsForRouteArrowUrl;
-	background-repeat: no-repeat;
-	margin-top: 2px;
-	height: 13px;
-}
-
-.nearbyStopsForRouteArrow0 {
-	background-position: 26px 0px;		
-}
-
-.nearbyStopsForRouteArrow1 {
-	background-position: 101px 0px;	
-}
-
-.nearbyStopsForRouteArrow2 {
-	background-position: 176px 0px;	
-}
-
-.nearbyStopsForRouteArrow3 {
-	background-position: 251px 0px;
 }
 
 .TripPage-ArrivalTime {

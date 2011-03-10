@@ -28,6 +28,8 @@ public class StopWithArrivalsAndDeparturesV2Bean implements Serializable {
 
   private List<String> nearbyStopIds;
 
+  private List<String> situationIds;
+
   public String getStopId() {
     return stopId;
   }
@@ -51,5 +53,13 @@ public class StopWithArrivalsAndDeparturesV2Bean implements Serializable {
 
   public void setNearbyStopIds(List<String> nearbyStopIds) {
     this.nearbyStopIds = nearbyStopIds;
+  }
+
+  public List<String> getSituationIds() {
+    return situationIds;
+  }
+
+  public void setSituationIds(List<String> situationIds) {
+    this.situationIds = situationIds;
   }
 }

@@ -29,8 +29,13 @@ public class SpringHibernateOperationsImpl implements HibernateOperations {
   }
 
   @Override
+  public SessionFactory getSessionFactory() {
+    return _ops.getSessionFactory();
+  }
+
+  @Override
   public Object execute(final HibernateOperation callback) {
-    return _ops.execute(new HibernateCallback() {
+    return _ops.execute(new HibernateCallback<Object>() {
       @Override
       public Object doInHibernate(Session session) throws HibernateException,
           SQLException {
@@ -79,7 +84,6 @@ public class SpringHibernateOperationsImpl implements HibernateOperations {
     return _ops.findByNamedParam(queryString, paramNames, values);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public <T> T get(Class<T> entityType, Serializable id) {
     return (T) _ops.get(entityType, id);
@@ -90,8 +94,18 @@ public class SpringHibernateOperationsImpl implements HibernateOperations {
    ****/
 
   @Override
+  public void update(Object entity) {
+    _ops.update(entity);
+  }
+
+  @Override
   public void save(Object entity) {
     _ops.save(entity);
+  }
+
+  @Override
+  public void saveOrUpdate(Object entity) {
+    _ops.saveOrUpdate(entity);
   }
 
   @Override
@@ -118,5 +132,4 @@ public class SpringHibernateOperationsImpl implements HibernateOperations {
   public void flush() {
     _ops.flush();
   }
-
 }

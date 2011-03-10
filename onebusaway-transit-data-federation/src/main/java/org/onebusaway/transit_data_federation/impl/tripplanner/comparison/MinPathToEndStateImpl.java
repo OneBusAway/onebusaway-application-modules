@@ -1,7 +1,16 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner.comparison;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
+
+import org.onebusaway.collections.Min;
 import org.onebusaway.transit_data_federation.model.tripplanner.AtStopState;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
+import org.onebusaway.transit_data_federation.model.tripplanner.EmptyStopEntriesWithValues;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StopEntriesWithValues;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripState;
@@ -9,19 +18,10 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripStats;
 import org.onebusaway.transit_data_federation.model.tripplanner.VehicleArrivalState;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkFromStopState;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
-
-import edu.washington.cs.rse.collections.stats.Min;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
 
 public class MinPathToEndStateImpl implements TripStateScoringStrategy {
 
@@ -39,8 +39,9 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
 
   private double _walkingVelocity;
 
-  public MinPathToEndStateImpl(TripStatsScoringStrategy scoring, Map<StopEntry, Double> statsFromStopsToEndPoint,
-      double walkingVelocity, long minTransferTime) {
+  public MinPathToEndStateImpl(TripStatsScoringStrategy scoring,
+      Map<StopEntry, Double> statsFromStopsToEndPoint, double walkingVelocity,
+      long minTransferTime) {
 
     _scoring = scoring;
     _minTransferTime = minTransferTime;
@@ -62,7 +63,8 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
     return _scoring.getTripScore(stats);
   }
 
-  public TripStats getMinStatsForTripState(TripState state) throws NoPathException {
+  public TripStats getMinStatsForTripState(TripState state)
+      throws NoPathException {
 
     if (state instanceof WalkToStopState) {
       WalkToStopState wtss = (WalkToStopState) state;
@@ -88,7 +90,8 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
     }
   }
 
-  private TripStats getVehcileArrivalState(StopEntry stopId) throws NoPathException {
+  private TripStats getVehcileArrivalState(StopEntry stopId)
+      throws NoPathException {
 
     Min<TripStats> m = new Min<TripStats>();
 
@@ -115,18 +118,21 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
     return m.getMinElement();
   }
 
-  private TripStats getWaitingAtStopState(StopEntry stopId) throws NoPathException {
+  private TripStats getWaitingAtStopState(StopEntry stopId)
+      throws NoPathException {
     return getMinScoreForStop(stopId);
   }
 
-  private TripStats getWalkFromStopState(StopEntry stopEntry) throws NoPathException {
+  private TripStats getWalkFromStopState(StopEntry stopEntry)
+      throws NoPathException {
 
     TripStats stats = _walkFromStopToEnd.get(stopEntry);
 
     if (stats != null)
       return stats;
 
-    StopEntriesWithValues transfers = stopEntry.getTransfers();
+    // StopEntriesWithValues transfers = stopEntry.getTransfers();
+    StopEntriesWithValues transfers = new EmptyStopEntriesWithValues();
 
     Min<TripStats> m = new Min<TripStats>();
 
@@ -160,23 +166,21 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
     return toStopStats;
   }
 
-  private TripStats getBlockTransferState(BlockTransferState bt, TripEntry entry) throws NoPathException {
+  private TripStats getBlockTransferState(BlockTransferState bt,
+      BlockTripEntry entry) throws NoPathException {
 
     if (entry == null)
       throw new NoPathException();
 
-    List<StopTimeEntry> stopTimes = entry.getStopTimes();
+    List<BlockStopTimeEntry> stopTimes = entry.getStopTimes();
 
-    if (stopTimes.isEmpty()) {
-      return getBlockTransferState(bt, entry.getNextTrip());
-    } else {
-      StopTimeEntry first = stopTimes.get(0);
-      StopEntry stopEntry = first.getStop();
-      return getMinScoreForStop(stopEntry);
-    }
+    BlockStopTimeEntry first = stopTimes.get(0);
+    StopEntry stopEntry = first.getStopTime().getStop();
+    return getMinScoreForStop(stopEntry);
   }
 
-  private TripStats getMinScoreForStop(StopEntry stopEntry) throws NoPathException {
+  private TripStats getMinScoreForStop(StopEntry stopEntry)
+      throws NoPathException {
 
     while (true) {
 
@@ -201,7 +205,8 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
       // We can only transfer between stops if we're currently on a vehicle
       // Stop to Stop to Stop transfers are not allowed
 
-      StopEntriesWithValues transfers = currentStop.getTransfers();
+      // StopEntriesWithValues transfers = currentStop.getTransfers();
+      StopEntriesWithValues transfers = new EmptyStopEntriesWithValues();
 
       for (int i = 0; i < transfers.size(); i++) {
 
@@ -218,13 +223,13 @@ public class MinPathToEndStateImpl implements TripStateScoringStrategy {
     }
   }
 
-  private void exploreIncomingRoutesToStop(StopEntry entry, TripStats statsFromTargetStop, boolean startOfTrip) {
+  private void exploreIncomingRoutesToStop(StopEntry entry,
+      TripStats statsFromTargetStop, boolean startOfTrip) {
 
     StopEntriesWithValues incomingStops = entry.getPreviousStopsWithMinTimes();
 
     for (int i = 0; i < incomingStops.size(); i++) {
 
-      
       StopEntry toStop = incomingStops.getStopEntry(i);
       int transitTime = incomingStops.getValue(i);
       TripStats potential = new TripStats(statsFromTargetStop);

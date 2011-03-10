@@ -40,4 +40,6 @@ public @interface Cacheable {
    * @return a factory class for creating cache keys from method arguments
    */
   Class<? extends CacheableMethodKeyFactory> keyFactory() default CacheableMethodKeyFactory.class;
+  
+  boolean isValueSerializable() default true;
 }

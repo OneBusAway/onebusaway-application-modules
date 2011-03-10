@@ -184,17 +184,6 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
     mergeProperties(getProperties(sourceUser), getProperties(targetUser));
   }
 
-  @Override
-  public <T> T getAdditionalPropertyForUser(User user, String propertyName) {
-    return null;
-  }
-
-  @Override
-  public void setAdditionalPropertyForUser(User user, String propertyName,
-      Object propertyValue) {
-
-  }
-
   /****
    * Private Methods
    ****/
@@ -232,5 +221,16 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
       bookmarks.add(stopId);
 
     destProps.setBookmarkedStopIds(bookmarks);
+  }
+
+  @Override
+  public void authorizeApi(User user, long minRequestInteval) {
+    throw new IllegalStateException("V1 user properties don't support api keys");
+  }
+
+  @Override
+  public void markServiceAlertAsRead(User user, String situationId, long time,
+      boolean isRead) {
+    throw new UnsupportedOperationException();
   }
 }

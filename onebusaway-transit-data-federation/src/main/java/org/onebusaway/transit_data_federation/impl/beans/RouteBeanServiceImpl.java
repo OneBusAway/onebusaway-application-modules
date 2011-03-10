@@ -4,19 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Route;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.model.StopTime;
-import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.NameBean;
 import org.onebusaway.transit_data.model.NameBeanTypes;
@@ -40,6 +34,11 @@ import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +61,8 @@ class RouteBeanServiceImpl implements RouteBeanService {
   private StopSequencesService _stopSequencesService;
 
   private StopSequenceCollectionService _stopSequenceBlocksService;
+
+  private BlockIndexService _blockIndexService;
 
   @Autowired
   public void setGtfsDao(ExtendedGtfsRelationalDao gtfsDao) {
@@ -103,6 +104,11 @@ class RouteBeanServiceImpl implements RouteBeanService {
   public void setStopSequencesBlocksService(
       StopSequenceCollectionService stopSequenceBlocksService) {
     _stopSequenceBlocksService = stopSequenceBlocksService;
+  }
+
+  @Autowired
+  public void setBlockIndexService(BlockIndexService blockIndexService) {
+    _blockIndexService = blockIndexService;
   }
 
   @Cacheable
@@ -169,7 +175,8 @@ class RouteBeanServiceImpl implements RouteBeanService {
 
     StopsForRouteBean result = new StopsForRouteBean();
 
-    result.setStops(getStopBeansForRoute(routeCollection.getId()));
+    AgencyAndId routeCollectionId = routeCollection.getId();
+    result.setStops(getStopBeansForRoute(routeCollectionId));
 
     result.setPolylines(getEncodedPolylinesForRoute(routeCollection));
 
@@ -180,41 +187,42 @@ class RouteBeanServiceImpl implements RouteBeanService {
     directionGrouping.setOrdered(true);
     result.addGrouping(directionGrouping);
 
-    Set<AgencyAndId> stopIds = new HashSet<AgencyAndId>();
-    List<Route> routes = routeCollection.getRoutes();
+    List<BlockTripIndex> blockIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeCollectionId);
 
-    Map<Trip, List<StopTime>> stopTimesByTrip = new HashMap<Trip, List<StopTime>>();
+    List<BlockTripEntry> blockTrips = new ArrayList<BlockTripEntry>();
 
-    for (Route route : routes) {
-      List<Trip> trips = _gtfsDao.getTripsForRoute(route);
-      for (Trip trip : trips) {
-        List<StopTime> stopTimes = _gtfsDao.getStopTimesForTrip(trip);
-        stopTimesByTrip.put(trip, stopTimes);
-        for (StopTime stopTime : stopTimes)
-          stopIds.add(stopTime.getStop().getId());
+    for (BlockTripIndex blockIndex : blockIndices) {
+
+      // Do we really need to do all of them?
+      for (BlockTripEntry blockTrip : blockIndex.getTrips()) {
+        TripEntry trip = blockTrip.getTrip();
+        AgencyAndId rcId = trip.getRouteCollectionId();
+        if (!rcId.equals(routeCollectionId))
+          continue;
+        blockTrips.add(blockTrip);
       }
     }
 
-    List<StopSequence> sequences = _stopSequencesService.getStopSequencesForTrips(stopTimesByTrip);
+    List<StopSequence> sequences = _stopSequencesService.getStopSequencesForTrips(blockTrips);
 
-    List<StopSequenceCollection> blocks = _stopSequenceBlocksService.getStopSequencesAsBlocks(sequences);
+    List<StopSequenceCollection> blocks = _stopSequenceBlocksService.getStopSequencesAsCollections(sequences);
 
     for (StopSequenceCollection block : blocks) {
 
       NameBean name = new NameBean(NameBeanTypes.DESTINATION,
           block.getDescription());
 
-      List<Stop> stops = getStopsInOrder(block);
+      List<StopEntry> stops = getStopsInOrder(block);
       List<String> groupStopIds = new ArrayList<String>();
-      for (Stop stop : stops)
+      for (StopEntry stop : stops)
         groupStopIds.add(ApplicationBeanLibrary.getId(stop.getId()));
 
       Set<AgencyAndId> shapeIds = getShapeIdsForStopSequenceBlock(block);
       List<EncodedPolylineBean> polylines = _shapeBeanService.getMergedPolylinesForShapeIds(shapeIds);
 
       StopGroupBean group = new StopGroupBean();
+      group.setId(block.getPublicId());
       group.setName(name);
-
       group.setStopIds(groupStopIds);
       group.setPolylines(polylines);
       directionGroups.add(group);
@@ -225,11 +233,11 @@ class RouteBeanServiceImpl implements RouteBeanService {
     return result;
   }
 
-  private List<Stop> getStopsInOrder(StopSequenceCollection block) {
-    DirectedGraph<Stop> graph = new DirectedGraph<Stop>();
+  private List<StopEntry> getStopsInOrder(StopSequenceCollection block) {
+    DirectedGraph<StopEntry> graph = new DirectedGraph<StopEntry>();
     for (StopSequence sequence : block.getStopSequences()) {
-      Stop prev = null;
-      for (Stop stop : sequence.getStops()) {
+      StopEntry prev = null;
+      for (StopEntry stop : sequence.getStops()) {
         if (prev != null) {
           // We do this to avoid cycles
           if (!graph.isConnected(stop, prev))
@@ -247,7 +255,8 @@ class RouteBeanServiceImpl implements RouteBeanService {
       StopSequenceCollection block) {
     Set<AgencyAndId> shapeIds = new HashSet<AgencyAndId>();
     for (StopSequence sequence : block.getStopSequences()) {
-      for (Trip trip : sequence.getTrips()) {
+      for (BlockTripEntry blockTrip : sequence.getTrips()) {
+        TripEntry trip = blockTrip.getTrip();
         AgencyAndId shapeId = trip.getShapeId();
         if (shapeId != null && shapeId.hasValues())
           shapeIds.add(shapeId);

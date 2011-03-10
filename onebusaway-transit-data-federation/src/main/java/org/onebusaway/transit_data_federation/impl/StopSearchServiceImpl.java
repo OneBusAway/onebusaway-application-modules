@@ -1,7 +1,9 @@
 package org.onebusaway.transit_data_federation.impl;
 
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.offline.GenerateStopSearchIndexTask;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.bundle.tasks.GenerateStopSearchIndexTask;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.StopSearchService;
 
@@ -18,6 +20,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TopDocCollector;
 import org.apache.lucene.search.TopDocs;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -38,18 +41,26 @@ public class StopSearchServiceImpl implements StopSearchService {
 
   private static String[] NAME_FIELDS = {GenerateStopSearchIndexTask.FIELD_STOP_NAME};
 
-  private File _indexPath;
+  private FederatedTransitDataBundle _bundle;
 
   private Searcher _searcher;
 
-  public void setIndexPath(File indexPath) {
-    _indexPath = indexPath;
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
   }
 
   @PostConstruct
+  @Refreshable(dependsOn = RefreshableResources.STOP_SEARCH_DATA)
   public void initialize() throws IOException {
-    IndexReader reader = IndexReader.open(_indexPath);
-    _searcher = new IndexSearcher(reader);
+    File path = _bundle.getStopSearchIndexPath();
+
+    if (path.exists()) {
+      IndexReader reader = IndexReader.open(path);
+      _searcher = new IndexSearcher(reader);
+    } else {
+      _searcher = null;
+    }
   }
 
   public SearchResult<AgencyAndId> searchForStopsByCode(String id,
@@ -70,31 +81,34 @@ public class StopSearchServiceImpl implements StopSearchService {
       int maxResultCount, double minScoreToKeep) throws IOException,
       ParseException {
 
+    if (_searcher == null)
+      return new SearchResult<AgencyAndId>();
+
     TopDocCollector collector = new TopDocCollector(maxResultCount);
 
     Query query = parser.parse(value);
     _searcher.search(query, collector);
 
     TopDocs top = collector.topDocs();
-    
+
     Map<AgencyAndId, Float> topScores = new HashMap<AgencyAndId, Float>();
 
     for (ScoreDoc sd : top.scoreDocs) {
       Document document = _searcher.doc(sd.doc);
-      if( sd.score < minScoreToKeep)
+      if (sd.score < minScoreToKeep)
         continue;
       String agencyId = document.get(GenerateStopSearchIndexTask.FIELD_AGENCY_ID);
       String stopId = document.get(GenerateStopSearchIndexTask.FIELD_STOP_ID);
       AgencyAndId id = new AgencyAndId(agencyId, stopId);
-      
+
       Float existingScore = topScores.get(id);
-      if( existingScore == null || existingScore < sd.score)
-        topScores.put(id,sd.score);
+      if (existingScore == null || existingScore < sd.score)
+        topScores.put(id, sd.score);
     }
-    
+
     List<AgencyAndId> ids = new ArrayList<AgencyAndId>(top.totalHits);
     double[] scores = new double[top.totalHits];
-    
+
     int index = 0;
     for (AgencyAndId id : topScores.keySet()) {
       ids.add(id);

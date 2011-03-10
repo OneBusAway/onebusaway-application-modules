@@ -15,4 +15,6 @@ public final class UserIndexTypes {
   public static final String FACEBOOK = "facebook";
 
   public static final String EMAIL = "email";
+
+  public static final String API_KEY = "api";
 }

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<query name="blockLocationRecordsForBlockServiceDateAndTimeRange" read-only="true">
+      SELECT p FROM BlockLocationRecord p WHERE p.blockId = :blockId AND p.serviceDate = :serviceDate AND :fromTime &lt;= p.time AND p.time &lt;= :toTime 
+    </query>
+    <query name="blockLocationRecordsForVehicleAndTimeRange" read-only="true">
+      SELECT p FROM BlockLocationRecord p WHERE p.vehicleId = :vehicleId AND :fromTime &lt;= p.time AND p.time &lt;= :toTime
+    </query> 
+</hibernate-mapping>

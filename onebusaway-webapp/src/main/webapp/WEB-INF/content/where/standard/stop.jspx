@@ -21,10 +21,14 @@
 <jsp:directive.page contentType="text/html" />
 <s:set name="now" value="getNow()" />
 <head>
-  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.css.url}" />
-  <link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.standardStopCss.url}" />
-  <meta http-equiv="Refresh" content="60" />
-  <title><jsp:include page="arrivals-title-head-snippet.jspx"/></title>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-stop.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-stop.css')}"/>
+<meta http-equiv="Refresh" content="60" />
+<title>
+  <s:component template="stops-title-head-snippet.jspx">
+    <s:param name="stops" value="result.stops"/>
+  </s:component>
+</title>
 </head>
 <body>
 
@@ -32,7 +36,11 @@
 <div class="panel">
 
 <!-- The Arrivals Title Header -->
-<jsp:include page="arrivals-title-snippet.jspx"/>
+<s:component template="stops-title-snippet.jspx">
+    <s:param name="stops" value="result.stops"/>
+</s:component>
+
+<jsp:include page="arrivals-alerts-header-snippet.jspx"/>
 
 <s:if test="filtered">
     <div class="arrivalsFilterPanel"><s:url var="removeFilterUrl" includeParams="get">
@@ -41,20 +49,12 @@
 </s:if>
 
 <!-- The Arrivals and Departures Table -->
-<jsp:include page="arrivals-table-snippet.jspx"/>
+<s:component template="arrivals-and-departures-table-snippet.jspx">
+    <s:param name="arrivalsAndDepartures" value="result.arrivalsAndDepartures"/>
+    <s:param name="presentation" value="arrivalsAndDeparturesPresentation" />    
+</s:component>
 
-<!-- 
-<div class="arrivalsNearbyStops">
-<div>Nearby stops:</div>
-<s:iterator value="result.nearbyStops">
-    <s:url var="nearbyStopUrl" action="stop" includeParams="none">
-        <s:param name="id" value="id" />
-    </s:url>
-    <div><s:a href="%{nearbyStopUrl}">
-        <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if>
-    </s:a></div>
-</s:iterator></div>
--->
+<jsp:include page="arrivals-alerts-footer-snippet.jspx"/>
 
 <div id="nearbyStops" class="stop_links">
 <h4>Nearby stops:</h4>

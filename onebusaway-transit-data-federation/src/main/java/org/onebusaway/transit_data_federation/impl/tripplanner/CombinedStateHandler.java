@@ -1,11 +1,20 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
-import org.onebusaway.transit_data_federation.impl.time.StopTimeSearchOperations;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.BlockTransferState;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StartState;
-import org.onebusaway.transit_data_federation.model.tripplanner.StopEntriesWithValues;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripContext;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripState;
@@ -17,35 +26,30 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WaitingAtStopSta
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkFromStopState;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndex;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndexContext;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndexResult;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
+import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CombinedStateHandler {
-  
+
+  private static Logger _log = LoggerFactory.getLogger(CombinedStateHandler.class);
+
   private WalkPlansImpl _walkPlans;
 
   private TripPlannerConstants _constants;
 
-  private TripPlannerGraph _graph;
+  private TransitGraphDao _transitGraphDao;
 
   private WalkPlannerService _walkPlanner;
-
-  private StopTimeIndexContext _indexContext;
 
   private CoordinatePoint _endPoint;
 
@@ -53,12 +57,19 @@ public class CombinedStateHandler {
 
   private Map<StopEntry, WalkPlan> _walkFromStopsToEndpointPlans;
 
+  private StopTimeService _stopTimeService;
+
+  private StopTransferService _stopTransferService;
+
+  private int _stopTimeSearchWindow = 30;
+
   public CombinedStateHandler(TripContext context) {
     _walkPlans = context.getWalkPlans();
     _constants = context.getConstants();
-    _graph = context.getGraph();
+    _transitGraphDao = context.getTransitGraphDao();
     _walkPlanner = context.getWalkPlannerService();
-    _indexContext = context;
+    _stopTimeService = context.getStopTimeService();
+    _stopTransferService = context.getStopTransferService();
   }
 
   public void setEndPointWalkPlans(CoordinatePoint endPoint,
@@ -106,8 +117,8 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     double d = _constants.getMaxTransferDistance();
-    CoordinateRectangle bounds = DistanceLibrary.bounds(state.getLocation(), d);
-    List<StopEntry> stopEntries = _graph.getStopsByLocation(bounds);
+    CoordinateBounds bounds = DistanceLibrary.bounds(state.getLocation(), d);
+    List<StopEntry> stopEntries = _transitGraphDao.getStopsByLocation(bounds);
 
     for (StopEntry stop : stopEntries) {
 
@@ -143,15 +154,16 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry entry = state.getStop();
-    StopEntriesWithValues transferMap = entry.getTransfers();
 
-    for (int i = 0; i < transferMap.size(); i++) {
+    // StopEntriesWithValues transferMap = entry.getTransfers();
+    List<StopTransfer> transfers = _stopTransferService.getTransfersForStop(entry);
 
-      StopEntry nearbyEntry = transferMap.getStopEntry(i);
+    for (StopTransfer transfer : transfers) {
+      StopEntry nearbyEntry = transfer.getStop();
       if (nearbyEntry.equals(entry))
         continue;
 
-      int transferDistance = transferMap.getValue(i);
+      double transferDistance = transfer.getDistance();
       double walkingTime = transferDistance / _constants.getWalkingVelocity();
       long t = (long) (state.getCurrentTime() + walkingTime);
 
@@ -194,15 +206,15 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry stopEntry = state.getStop();
-    StopEntriesWithValues transferMap = stopEntry.getTransfers();
+    List<StopTransfer> transfers = _stopTransferService.getTransfersForStop(stopEntry);
 
-    for (int i = 0; i < transferMap.size(); i++) {
+    for (StopTransfer transfer : transfers) {
 
-      StopEntry nearbyEntry = transferMap.getStopEntry(i);
+      StopEntry nearbyEntry = transfer.getStop();
       if (nearbyEntry.equals(stopEntry))
         continue;
 
-      int transferDistance = transferMap.getValue(i);
+      double transferDistance = transfer.getDistance();
       double walkingTime = transferDistance / _constants.getWalkingVelocity();
       long t = (long) (state.getCurrentTime() - walkingTime);
 
@@ -220,39 +232,46 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     StopEntry stopEntry = state.getStop();
-    StopTimeIndex stopTimeIndex = stopEntry.getStopTimes();
 
-    
-    StopTimeIndexResult result = StopTimeSearchOperations.getNextStopTimeDeparture(stopTimeIndex,
-        _indexContext, state.getCurrentTime(), null);
-    List<StopTimeInstanceProxy> departures = result.getStopTimeInstances();
+    /**
+     * Look for departures in the next X minutes
+     */
+    Date from = new Date(state.getCurrentTime());
+    Date to = new Date(SupportLibrary.getNextTimeWindow(_stopTimeSearchWindow,
+        state.getCurrentTime()));
 
-    if (departures.isEmpty()) {
-      System.err.println("unlikely");
-      return;
-    }
+    List<StopTimeInstance> instances = _stopTimeService.getStopTimeInstancesInRange(
+        from, to, stopEntry);
 
-    long nextTime = -1;
-    for (StopTimeInstanceProxy sti : departures) {
-      VehicleDepartureState next = new VehicleDepartureState(sti);
-      if (nextTime == -1 || next.getCurrentTime() > nextTime)
-        nextTime = next.getCurrentTime();
+    for (StopTimeInstance instance : instances) {
+      
+      long departureTime = instance.getDepartureTime();
+
+      // Prune anything that doesn't have a departure in the proper range, since
+      // the stopTimeService method will also return instances that arrive in
+      // the target interval as well
+      if (departureTime < from.getTime() || to.getTime() <= departureTime)
+        continue;
+
+      // If this is the last stop time in the block, don't continue
+      if (!SupportLibrary.hasNextStopTime(instance))
+        continue;
+
+      VehicleDepartureState next = new VehicleDepartureState(instance);
       transitions.add(next);
     }
 
-    transitions.add(new WaitingAtStopState(nextTime + 1, state.getStop()));
+    transitions.add(new WaitingAtStopState(to.getTime(), state.getStop()));
   }
 
   public void getReverseTransitions(WaitingAtStopState state,
       Set<TripState> transitions) {
 
     StopEntry stopEntry = state.getStop();
-    StopTimeIndex stopTimeIndex = stopEntry.getStopTimes();
 
-    StopTimeIndexResult result = StopTimeSearchOperations.getPreviousStopTimeArrival(stopTimeIndex,
-        _indexContext, state.getCurrentTime(), null);
-
-    List<StopTimeInstanceProxy> arrivals = result.getStopTimeInstances();
+    // _stopTimeService.getPreviousStopTimeArrival(stopEntry,
+    // state.getCurrentTime());
+    List<StopTimeInstance> arrivals = Collections.emptyList();
 
     if (arrivals.isEmpty()) {
       System.err.println("unlikely");
@@ -260,7 +279,7 @@ public class CombinedStateHandler {
     }
 
     long prevTime = -1;
-    for (StopTimeInstanceProxy sti : arrivals) {
+    for (StopTimeInstance sti : arrivals) {
       VehicleArrivalState prev = new VehicleArrivalState(sti);
       if (prevTime == -1 || prev.getCurrentTime() < prevTime)
         prevTime = prev.getCurrentTime();
@@ -277,28 +296,30 @@ public class CombinedStateHandler {
   public void getVehicleDepartureOrContinuationForwardTransitions(
       VehicleState state, Set<TripState> transitions) {
 
-    StopTimeInstanceProxy sti = state.getStopTimeInstance();
+    StopTimeInstance sti = state.getStopTimeInstance();
 
-    TripEntry entry = sti.getTrip();
-    List<StopTimeEntry> stopTimes = entry.getStopTimes();
-    int nextIndex = sti.getSequence() + 1;
+    BlockTripEntry blockTrip = sti.getTrip();
+    List<BlockStopTimeEntry> stopTimes = blockTrip.getStopTimes();
+
+    int nextIndex = sti.getSequence() - blockTrip.getAccumulatedStopTimeIndex()
+        + 1;
 
     if (nextIndex > stopTimes.size())
       throw new IllegalStateException("not good");
 
     if (nextIndex == stopTimes.size()) {
 
-      TripEntry nextTrip = entry.getNextTrip();
+      BlockTripEntry nextTrip = blockTrip.getNextTrip();
 
       if (nextTrip != null) {
-        transitions.add(new BlockTransferState(state.getCurrentTime(), entry,
-            nextTrip, sti.getServiceDate()));
+        transitions.add(new BlockTransferState(state.getCurrentTime(),
+            blockTrip, nextTrip, sti.getServiceDate()));
       }
 
     } else {
-      StopTimeEntry nextStopTime = stopTimes.get(nextIndex);
+      BlockStopTimeEntry nextStopTime = stopTimes.get(nextIndex);
 
-      StopTimeInstanceProxy nextSti = new StopTimeInstanceProxy(nextStopTime,
+      StopTimeInstance nextSti = new StopTimeInstance(nextStopTime,
           sti.getServiceDate());
 
       // We can continue on
@@ -321,9 +342,9 @@ public class CombinedStateHandler {
     }
   }
 
-  private boolean hasReasonToGetOffAtThisStop(StopTimeInstanceProxy nextSti) {
+  private boolean hasReasonToGetOffAtThisStop(StopTimeInstance nextSti) {
 
-    StopEntry stopEntry = nextSti.getStopEntry();
+    StopEntry stopEntry = nextSti.getStop();
 
     if (_walkFromStopsToEndpointPlans != null
         && _walkFromStopsToEndpointPlans.containsKey(stopEntry))
@@ -332,8 +353,9 @@ public class CombinedStateHandler {
     if (stopEntry.getNextStopsWithMinTimes().size() > 1)
       return true;
 
-    if (!stopEntry.getTransfers().isEmpty())
-      return true;
+    /*
+     * if (!stopEntry.getTransfers().isEmpty()) return true;
+     */
 
     return false;
   }
@@ -357,24 +379,25 @@ public class CombinedStateHandler {
   public void getVehicleContinuationAndArrivalReverseTransitions(
       VehicleState state, Set<TripState> transitions) {
 
-    StopTimeInstanceProxy sti = state.getStopTimeInstance();
-    TripEntry entry = sti.getTrip();
+    StopTimeInstance sti = state.getStopTimeInstance();
+    BlockTripEntry blockTrip = sti.getTrip();
 
-    List<StopTimeEntry> stopTimes = entry.getStopTimes();
-    int prevIndex = sti.getSequence() - 1;
+    List<BlockStopTimeEntry> stopTimes = blockTrip.getStopTimes();
+    int prevIndex = sti.getSequence() - blockTrip.getAccumulatedStopTimeIndex()
+        - 1;
 
     if (prevIndex < 0) {
 
-      TripEntry prevTrip = entry.getPrevTrip();
+      BlockTripEntry prevTrip = blockTrip.getPreviousTrip();
 
       if (prevTrip != null) {
         transitions.add(new BlockTransferState(state.getCurrentTime(),
-            prevTrip, entry, sti.getServiceDate()));
+            prevTrip, blockTrip, sti.getServiceDate()));
       }
     } else {
-      StopTimeEntry prevStopTime = stopTimes.get(prevIndex);
+      BlockStopTimeEntry prevStopTime = stopTimes.get(prevIndex);
 
-      StopTimeInstanceProxy nextSti = new StopTimeInstanceProxy(prevStopTime,
+      StopTimeInstance nextSti = new StopTimeInstance(prevStopTime,
           sti.getServiceDate());
 
       // We can either get on at the previous stop
@@ -388,15 +411,15 @@ public class CombinedStateHandler {
   public void getVehicleArrivalForwardTransitions(VehicleArrivalState state,
       Set<TripState> transitions) {
 
-    StopTimeInstanceProxy sti = state.getStopTimeInstance();
+    StopTimeInstance sti = state.getStopTimeInstance();
 
     // We can wait here
     transitions.add(new WaitingAtStopState(state.getCurrentTime()
-        + _constants.getMinTransferTime(), sti.getStopEntry()));
+        + _constants.getMinTransferTime(), sti.getStop()));
 
     // Or we can walk to another stop
     transitions.add(new WalkFromStopState(state.getCurrentTime() + 1,
-        sti.getStopEntry()));
+        sti.getStop()));
   }
 
   /*****************************************************************************
@@ -406,41 +429,24 @@ public class CombinedStateHandler {
   public void getBlockTransferForwardTransitions(BlockTransferState state,
       Set<TripState> transitions) {
 
-    TripEntry entry = state.getNextTrip();
-    List<StopTimeEntry> stopTimes = entry.getStopTimes();
-
-    if (stopTimes.isEmpty()) {
-      TripEntry nextTrip = entry.getNextTrip();
-      if (nextTrip != null)
-        transitions.add(new BlockTransferState(state.getCurrentTime(), entry,
-            nextTrip, state.getServiceDate()));
-    } else {
-      StopTimeEntry first = stopTimes.get(0);
-      StopTimeInstanceProxy sti = new StopTimeInstanceProxy(first,
-          state.getServiceDate());
-      transitions.add(new VehicleContinuationState(sti));
-      transitions.add(new VehicleArrivalState(sti));
-    }
+    BlockTripEntry entry = state.getNextTrip();
+    List<BlockStopTimeEntry> stopTimes = entry.getStopTimes();
+    BlockStopTimeEntry first = stopTimes.get(0);
+    StopTimeInstance sti = new StopTimeInstance(first, state.getServiceDate());
+    transitions.add(new VehicleContinuationState(sti));
+    transitions.add(new VehicleArrivalState(sti));
   }
 
   public void getBlockTransferReverseTransitions(BlockTransferState state,
       Set<TripState> transitions) {
 
-    TripEntry entry = state.getPrevTrip();
-    List<StopTimeEntry> stopTimes = entry.getStopTimes();
+    BlockTripEntry entry = state.getPrevTrip();
+    List<BlockStopTimeEntry> stopTimes = entry.getStopTimes();
 
-    if (stopTimes.isEmpty()) {
-      TripEntry prevTrip = entry.getPrevTrip();
-      if (prevTrip != null)
-        transitions.add(new BlockTransferState(state.getCurrentTime(),
-            prevTrip, entry, state.getServiceDate()));
-    } else {
-      StopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
-      StopTimeInstanceProxy sti = new StopTimeInstanceProxy(last,
-          state.getServiceDate());
-      transitions.add(new VehicleContinuationState(sti));
-      transitions.add(new VehicleDepartureState(sti));
-    }
+    BlockStopTimeEntry last = stopTimes.get(stopTimes.size() - 1);
+    StopTimeInstance sti = new StopTimeInstance(last, state.getServiceDate());
+    transitions.add(new VehicleContinuationState(sti));
+    transitions.add(new VehicleDepartureState(sti));
   }
 
   /*****************************************************************************
@@ -451,8 +457,9 @@ public class CombinedStateHandler {
       Set<TripState> transitions) {
 
     double d = _constants.getMaxTransferDistance();
-    CoordinateRectangle bounds = DistanceLibrary.bounds(state.getLocation(), d);
-    List<StopEntry> stopEntries = _graph.getStopsByLocation(bounds);
+    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
+        state.getLocation(), d);
+    List<StopEntry> stopEntries = _transitGraphDao.getStopsByLocation(bounds);
 
     for (StopEntry stop : stopEntries) {
 

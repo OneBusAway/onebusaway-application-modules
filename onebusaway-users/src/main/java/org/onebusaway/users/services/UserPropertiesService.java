@@ -12,7 +12,7 @@ public interface UserPropertiesService {
   public Class<? extends UserProperties> getUserPropertiesType();
 
   public UserBean getUserAsBean(User user, UserBean bean);
-  
+
   public UserBean getAnonymousUserAsBean(UserBean bean);
 
   public void setRememberUserPreferencesEnabled(User user,
@@ -41,11 +41,19 @@ public interface UserPropertiesService {
 
   public void deleteStopBookmarks(User user, int id);
 
+  /**
+   * Authorize this user to use the api
+   * 
+   * @param User the user
+   * @param minApiRequestInteval the minimum time between requests in
+   *          milliseconds
+   */
+  public void authorizeApi(User user, long minApiRequestInteval);
+
+  public void markServiceAlertAsRead(User user, String situationId, long time,
+      boolean isRead);
+  
   public void resetUser(User user);
 
   public void mergeProperties(User sourceUser, User targetUser);
-  
-  public <T> T getAdditionalPropertyForUser(User user, String propertyName);
-  
-  public void setAdditionalPropertyForUser(User user, String propertyName, Object propertyValue);
 }

@@ -7,7 +7,7 @@
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:org/onebusaway/phone/application-context.xml
+            classpath:org/onebusaway/phone/application-context-webapp.xml
             classpath:data-sources.xml
         </param-value>
     </context-param>

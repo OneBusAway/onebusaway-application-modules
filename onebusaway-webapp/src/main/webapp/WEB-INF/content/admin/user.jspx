@@ -62,7 +62,7 @@
 <ul>
     <s:iterator value="indices">
         <li><s:property value="type" /> - <s:property
-            value="value" /></li>
+            value="value" /><s:if test="type == 'username'"><jsp:text> </jsp:text><s:a action="user-for-index!changePassword" ><s:param name="type" value="type"/><s:param name="id" value="value"/>Change Password</s:a></s:if></li>
     </s:iterator>
 </ul>
 </div>

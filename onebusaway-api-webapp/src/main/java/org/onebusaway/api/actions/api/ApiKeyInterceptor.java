@@ -1,7 +1,7 @@
 package org.onebusaway.api.actions.api;
 
 import org.onebusaway.api.model.ResponseBean;
-import org.onebusaway.users.services.validation.KeyValidationService;
+import org.onebusaway.users.services.ApiKeyPermissionService;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
@@ -13,15 +13,20 @@ import org.apache.struts2.rest.ContentTypeHandlerManager;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Ensures that there is a valid API key for the API request, and that a given API key
+ * is not used more frequently than it is permitted to.
+ */
 public class ApiKeyInterceptor extends AbstractInterceptor {
 
   private static final long serialVersionUID = 1L;
 
   @Autowired
-  private KeyValidationService _validationService;
-
+  private ApiKeyPermissionService _keyService;
+  
   private ContentTypeHandlerManager _handlerSelector;
 
   @Inject
@@ -41,25 +46,41 @@ public class ApiKeyInterceptor extends AbstractInterceptor {
         return invocation.invoke();
     }
 
-    ActionContext context = invocation.getInvocationContext();
-    Map<String, Object> parameters = context.getParameters();
-    String[] key = (String[]) parameters.get("key");
-
-    if (!isValidKey(key)) {
-      ActionProxy proxy = invocation.getProxy();
-      ResponseBean response = new ResponseBean(1, ResponseCodes.RESPONSE_UNAUTHORIZED, "invalid api key", null);
-      DefaultHttpHeaders methodResult = new DefaultHttpHeaders().withStatus(response.getCode());
-      return _handlerSelector.handleResult(proxy.getConfig(), methodResult, response);
+    boolean allowed = isAllowed(invocation);
+    
+    if (!allowed) {
+      //this user is not authorized to use the API, at least for now
+      return unauthorized(invocation, "permission denied");
     }
-
+        
     return invocation.invoke();
   }
 
-  private boolean isValidKey(String[] keys) {
-    if (keys == null)
+  private boolean isAllowed(ActionInvocation invocation) {
+    ActionContext context = invocation.getInvocationContext();
+    Map<String, Object> parameters = context.getParameters();
+    String[] keys = (String[]) parameters.get("key");
+    
+    if( keys == null || keys.length == 0)
       return false;
-    if (keys.length == 0)
-      return false;
-    return _validationService.isValidKey(keys[0]);
+
+    return _keyService.getPermission(keys[0], "api");
   }
+
+  private String unauthorized(ActionInvocation invocation, String reason) throws IOException {
+    ActionProxy proxy = invocation.getProxy();
+    ResponseBean response = new ResponseBean(1, ResponseCodes.RESPONSE_UNAUTHORIZED, reason, null);
+    DefaultHttpHeaders methodResult = new DefaultHttpHeaders().withStatus(response.getCode());
+    return _handlerSelector.handleResult(proxy.getConfig(), methodResult, response);
+  }
+
+  @Autowired
+  public void setKeyService(ApiKeyPermissionService _keyService) {
+    this._keyService = _keyService;
+  }
+
+  public ApiKeyPermissionService getKeyService() {
+    return _keyService;
+  }
+
 }

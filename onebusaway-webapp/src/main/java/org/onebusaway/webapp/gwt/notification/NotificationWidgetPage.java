@@ -294,7 +294,7 @@ public class NotificationWidgetPage extends WhereCommonPage {
         _stopCss.arrivalsDestinationEntry());
     divPanel.add(destinationPanel);
     String href = "trip.action?id=" + trip.getId() + "&stop="
-        + bean.getStopId();
+        + bean.getStop().getId();
     destinationPanel.add(new Anchor(trip.getTripHeadsign(), href));
 
     DivPanel timeAndStatusPanel = new DivPanel(_stopCss.arrivalsTimePanel());

@@ -13,11 +13,12 @@ import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.utility.text.NaturalStringOrder;
+import org.onebusaway.utility.text.StringLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,10 +29,10 @@ class StopBeanServiceImpl implements StopBeanService {
 
   private GtfsRelationalDao _gtfsDao;
 
+  private RouteService _routeService;
+
   private RouteBeanService _routeBeanService;
 
-  private TransitGraphDao _graphDao;
-  
   private NarrativeService _narrativeService;
 
   @Autowired
@@ -40,15 +41,15 @@ class StopBeanServiceImpl implements StopBeanService {
   }
 
   @Autowired
+  public void setRouteService(RouteService routeService) {
+    _routeService = routeService;
+  }
+
+  @Autowired
   public void setRouteBeanService(RouteBeanService routeBeanService) {
     _routeBeanService = routeBeanService;
   }
 
-  @Autowired
-  public void setTransitGraphDao(TransitGraphDao dao) {
-    _graphDao = dao;
-  }
-  
   @Autowired
   public void setNarrativeService(NarrativeService narrativeService) {
     _narrativeService = narrativeService;
@@ -70,7 +71,7 @@ class StopBeanServiceImpl implements StopBeanService {
 
   private void fillRoutesForStopBean(Stop stop, StopBean sb) {
 
-    Set<AgencyAndId> routeCollectionIds = _graphDao.getRouteCollectionIdsForStop(stop.getId());
+    Set<AgencyAndId> routeCollectionIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
 
     List<RouteBean> routeBeans = new ArrayList<RouteBean>(
         routeCollectionIds.size());
@@ -86,19 +87,20 @@ class StopBeanServiceImpl implements StopBeanService {
   }
 
   private StopBean fillStopBean(Stop stop, StopBean bean) {
-    
+
     bean.setId(ApplicationBeanLibrary.getId(stop.getId()));
     bean.setLat(stop.getLat());
     bean.setLon(stop.getLon());
-    
+
     StopNarrative stopNarrative = _narrativeService.getStopForId(stop.getId());
-    if( stopNarrative != null)
+    if (stopNarrative != null)
       bean.setDirection(stopNarrative.getDireciton());
-    
+
     bean.setName(stop.getName());
-    bean.setCode(ApplicationBeanLibrary.getBestName(stop.getCode(),stop.getId().getId()));
+    bean.setCode(StringLibrary.getBestName(stop.getCode(),
+        stop.getId().getId()));
     bean.setLocationType(stop.getLocationType());
-    
+
     return bean;
   }
 

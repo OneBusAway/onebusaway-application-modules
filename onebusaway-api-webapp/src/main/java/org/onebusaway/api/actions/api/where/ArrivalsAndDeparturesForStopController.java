@@ -1,7 +1,6 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -12,12 +11,15 @@ import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.api.model.where.StopWithArrivalsAndDeparturesBeanV1;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
@@ -32,12 +34,8 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
   private TransitDataService _service;
 
   private String _id;
-
-  private Date _time;
-
-  private int _minutesBefore = 5;
-
-  private int _minutesAfter = 35;
+  
+  private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
   public ArrivalsAndDeparturesForStopController() {
     super(V1);
@@ -52,37 +50,38 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
     return _id;
   }
 
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
-    _time = time;
+    _query.setTime(time.getTime());
   }
 
   public void setMinutesBefore(int minutesBefore) {
-    _minutesBefore = minutesBefore;
+    _query.setMinutesBefore(minutesBefore);
   }
 
   public void setMinutesAfter(int minutesAfter) {
-    _minutesAfter = minutesAfter;
+    _query.setMinutesAfter(minutesAfter);
   }
+  
+  public void setFrequencyMinutesBefore(int frequncyMinutesBefore) {
+    _query.setFrequencyMinutesBefore(frequncyMinutesBefore);
+  }
+
+  public void setFrequencyMinutesAfter(int frequencyMinutesAfter) {
+    _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
+  }
+
 
   public DefaultHttpHeaders show() throws ServiceException {
 
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    if (_time == null)
-      _time = new Date();
-
-    Calendar c = Calendar.getInstance();
-    c.setTime(_time);
-    c.add(Calendar.MINUTE, -_minutesBefore);
-    Date timeFrom = c.getTime();
-
-    c.setTime(_time);
-    c.add(Calendar.MINUTE, _minutesAfter);
-    Date timeTo = c.getTime();
+    if( _query.getTime() == 0)
+      _query.setTime(System.currentTimeMillis());
 
     StopWithArrivalsAndDeparturesBean result = _service.getStopWithArrivalsAndDepartures(
-        _id, timeFrom, timeTo);
+        _id, _query);
 
     if (result == null)
       return setResourceNotFoundResponse();
@@ -110,16 +109,20 @@ public class ArrivalsAndDeparturesForStopController extends ApiActionSupport {
 
       TripBean trip = bean.getTrip();
       RouteBean route = trip.getRoute();
-
+      StopBean stop = bean.getStop();
+      
       ArrivalAndDepartureBeanV1 v1 = new ArrivalAndDepartureBeanV1();
       v1.setPredictedArrivalTime(bean.getPredictedArrivalTime());
       v1.setPredictedDepartureTime(bean.getPredictedDepartureTime());
       v1.setRouteId(route.getId());
-      v1.setRouteShortName(route.getShortName());
+      if (trip.getRouteShortName() != null)
+        v1.setRouteShortName(trip.getRouteShortName());
+      else
+        v1.setRouteShortName(route.getShortName());
       v1.setScheduledArrivalTime(bean.getScheduledArrivalTime());
       v1.setScheduledDepartureTime(bean.getScheduledDepartureTime());
-      v1.setStatus(bean.getStatus());
-      v1.setStopId(bean.getStopId());
+      v1.setStatus(bean.getStatus());      
+      v1.setStopId(stop.getId());
       v1.setTripHeadsign(trip.getTripHeadsign());
       v1.setTripId(trip.getId());
 

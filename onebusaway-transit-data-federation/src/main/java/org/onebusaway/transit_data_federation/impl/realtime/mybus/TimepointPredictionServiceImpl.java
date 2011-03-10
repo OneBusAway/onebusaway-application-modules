@@ -10,7 +10,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -19,20 +18,20 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.onebusaway.container.model.HasListeners;
-import org.onebusaway.container.model.Listeners;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.calendar.BlockCalendarService;
-import org.onebusaway.transit_data_federation.services.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionListener;
-import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class TimepointPredictionServiceImpl implements
-    HasListeners<VehiclePositionListener> {
+public class TimepointPredictionServiceImpl {
 
   private final Logger _log = LoggerFactory.getLogger(TimepointPredictionServiceImpl.class);
 
@@ -41,8 +40,6 @@ public class TimepointPredictionServiceImpl implements
   private static final int TIMEPOINT_PREDICTION_SERVER_PORT = 9002;
 
   private TimepointPredictionReceiver _receiver;
-
-  private Listeners<VehiclePositionListener> _listeners = new Listeners<VehiclePositionListener>();
 
   private String _serverName = TIMEPOINT_PREDICTION_SERVER_NAME;
 
@@ -61,6 +58,10 @@ public class TimepointPredictionServiceImpl implements
   private BlockCalendarService _blockCalendarService;
 
   private TransitGraphDao _transitGraph;
+
+  private VehicleLocationListener _vehicleLocationListener;
+
+  private boolean _includeTimepointPredictionRecords = false;
 
   public void setServerName(String name) {
     _serverName = name;
@@ -86,6 +87,11 @@ public class TimepointPredictionServiceImpl implements
     _agencyIds = agencyIds;
   }
 
+  public void setIncludeTimepointPredictionRecords(
+      boolean includeTimepointPredictionRecords) {
+    _includeTimepointPredictionRecords = includeTimepointPredictionRecords;
+  }
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraph) {
     _transitGraph = transitGraph;
@@ -96,15 +102,15 @@ public class TimepointPredictionServiceImpl implements
     _blockCalendarService = blockCalendarService;
   }
 
-  @Override
-  public void addListener(VehiclePositionListener listener) {
-    _listeners.addListener(listener);
+  @Autowired
+  public void setVehicleLocationListener(
+      VehicleLocationListener vehicleLocationListener) {
+    _vehicleLocationListener = vehicleLocationListener;
   }
 
-  @Override
-  public void removeListener(VehiclePositionListener listener) {
-    _listeners.removeListener(listener);
-  }
+  /****
+   * 
+   ****/
 
   @PostConstruct
   public void startup() {
@@ -165,7 +171,7 @@ public class TimepointPredictionServiceImpl implements
 
   private void parsePredictions(Hashtable<?, ?> ht) {
 
-    Map<AgencyAndId, List<TimepointPrediction>> predictionsByTripId = new HashMap<AgencyAndId, List<TimepointPrediction>>();
+    Map<AgencyAndId, List<TimepointPrediction>> predictionsByBlockId = new HashMap<AgencyAndId, List<TimepointPrediction>>();
 
     if (ht.containsKey("PREDICTIONS")) {
       ContentsData data = (ContentsData) ht.get("PREDICTIONS");
@@ -177,9 +183,9 @@ public class TimepointPredictionServiceImpl implements
         String agencyId = data.getString(0);
 
         // We override the agency id in the stream, since it's usually 0
-        if( ! _agencyIds.isEmpty() )
+        if (!_agencyIds.isEmpty())
           agencyId = _agencyIds.get(0);
-        
+
         String tripId = data.getString(2);
 
         TripEntry tripEntry = getTripEntryForId(agencyId, tripId);
@@ -187,11 +193,12 @@ public class TimepointPredictionServiceImpl implements
         if (tripEntry == null)
           continue;
 
+        BlockEntry block = tripEntry.getBlock();
+
         TimepointPrediction record = new TimepointPrediction();
 
-        // record.setBlockId(new AgencyAndId(agencyId, data.getString(1)));
+        record.setBlockId(block.getId());
         record.setTripId(tripEntry.getId());
-        record.setBlockId(tripEntry.getBlockId());
 
         String tripAgencyId = tripEntry.getId().getAgencyId();
         record.setVehicleId(new AgencyAndId(tripAgencyId, data.getString(6)));
@@ -206,56 +213,72 @@ public class TimepointPredictionServiceImpl implements
         if (record.getTimepointPredictedTime() == -1)
           continue;
 
-        List<TimepointPrediction> records = predictionsByTripId.get(record.getTripId());
+        List<TimepointPrediction> records = predictionsByBlockId.get(record.getBlockId());
         if (records == null) {
           records = new ArrayList<TimepointPrediction>();
-          predictionsByTripId.put(record.getTripId(), records);
+          predictionsByBlockId.put(record.getBlockId(), records);
         }
 
         records.add(record);
       }
     }
 
-    if (predictionsByTripId.isEmpty())
+    if (predictionsByBlockId.isEmpty())
       return;
 
     long t = System.currentTimeMillis();
-    Date from = new Date(t - 30 * 60 * 1000);
-    Date to = new Date(t + 30 * 60 * 1000);
+    long timeFrom = t - 30 * 60 * 1000;
+    long timeTo = t + 30 * 60 * 1000;
 
-    List<VehiclePositionRecord> records = new ArrayList<VehiclePositionRecord>();
+    List<VehicleLocationRecord> records = new ArrayList<VehicleLocationRecord>();
 
-    for (List<TimepointPrediction> recordsForTrip : predictionsByTripId.values()) {
-      VehiclePositionRecord record = getBestScheduleAdherenceRecord(recordsForTrip);
-      List<Date> dates = _blockCalendarService.getServiceDatesWithinRangeForBlockId(
-          record.getBlockId(), from, to);
-      if (dates.size() != 1)
+    for (List<TimepointPrediction> recordsForBlock : predictionsByBlockId.values()) {
+      VehicleLocationRecord record = getBestScheduleAdherenceRecord(recordsForBlock);
+      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+          record.getBlockId(), timeFrom, timeTo);
+      // TODO : We currently assume that a block won't overlap with itself
+      if (instances.size() != 1)
         continue;
-      record.setServiceDate(dates.get(0).getTime());
+
+      BlockInstance instance = instances.get(0);
+      record.setServiceDate(instance.getServiceDate());
+
       records.add(record);
     }
 
-    for (VehiclePositionListener listener : _listeners)
-      listener.handleVehiclePositionRecords(records);
+    _vehicleLocationListener.handleVehicleLocationRecords(records);
   }
 
-  private VehiclePositionRecord getBestScheduleAdherenceRecord(
-      List<TimepointPrediction> recordsForTrip) {
+  private VehicleLocationRecord getBestScheduleAdherenceRecord(
+      List<TimepointPrediction> recordsForBlock) {
 
-    TimepointPrediction best = getBestTimepointPrediction(recordsForTrip);
+    TimepointPrediction best = getBestTimepointPrediction(recordsForBlock);
 
-    VehiclePositionRecord r = new VehiclePositionRecord();
+    VehicleLocationRecord r = new VehicleLocationRecord();
     r.setBlockId(best.getBlockId());
-    r.setCurrentTime(System.currentTimeMillis());
+    r.setTimeOfRecord(System.currentTimeMillis());
+    r.setTimeOfLocationUpdate(r.getTimeOfRecord());
     r.setScheduleDeviation(best.getScheduleDeviation());
-    r.setTimepointId(best.getTimepointId());
-    r.setTimepointPredictedTime(best.getTimepointPredictedTime());
-    r.setTimepointScheduledTime(best.getTimepointScheduledTime());
+
+    if (_includeTimepointPredictionRecords) {
+      TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+      tpr.setTimepointId(best.getTimepointId());
+      tpr.setTimepointPredictedTime(best.getTimepointPredictedTime());
+      tpr.setTimepointScheduledTime(best.getTimepointScheduledTime());
+      r.setTimepointPredictions(Arrays.asList(tpr));
+    }
+
     r.setTripId(best.getTripId());
     r.setVehicleId(best.getVehicleId());
     return r;
   }
 
+  /**
+   * We want the SECOND record whose timepoint has not already been passed.
+   * 
+   * @param recordsForTrip
+   * @return
+   */
   private TimepointPrediction getBestTimepointPrediction(
       List<TimepointPrediction> recordsForTrip) {
 
@@ -286,7 +309,6 @@ public class TimepointPredictionServiceImpl implements
     if (mappedTripId != null)
       tripId = mappedTripId;
 
-    // TODO - what about ST routes?
     for (String aid : _agencyIds) {
       AgencyAndId fullTripId = new AgencyAndId(aid, tripId);
       TripEntry tripEntry = _transitGraph.getTripEntryForId(fullTripId);
@@ -304,9 +326,9 @@ public class TimepointPredictionServiceImpl implements
       super(serverName, serverPort);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void extractedDataReceived(Hashtable ht, String serialNum) {
+    public void extractedDataReceived(
+        @SuppressWarnings("rawtypes") Hashtable ht, String serialNum) {
       super.extractedDataReceived(ht, serialNum);
 
       try {

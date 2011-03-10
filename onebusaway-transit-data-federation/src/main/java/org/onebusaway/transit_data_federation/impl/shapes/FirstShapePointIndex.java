@@ -3,10 +3,9 @@
  */
 package org.onebusaway.transit_data_federation.impl.shapes;
 
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 
-public class FirstShapePointIndex implements ShapePointIndex {
+public class FirstShapePointIndex extends AbstractShapePointIndex {
   
   @Override
   public int getIndex(ShapePoints point) {
@@ -14,9 +13,16 @@ public class FirstShapePointIndex implements ShapePointIndex {
   }
 
   @Override
-  public CoordinatePoint getPoint(ShapePoints points) {
-    double[] lats = points.getLats();
-    double[] lons = points.getLons();
-    return new CoordinatePoint(lats[0],lons[0]);
-  }
+  public PointAndOrientation getPointAndOrientation(ShapePoints points) {
+
+    int n = points.getSize();
+
+    if (n == 0)
+      throw new IndexOutOfBoundsException();
+
+    if (n == 1)
+      return computePointAndOrientation(points, 0, 0, 0);
+
+    return computePointAndOrientation(points, 0, 0, 1);
+  }  
 }

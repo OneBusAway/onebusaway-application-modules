@@ -22,7 +22,7 @@
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
             classpath:data-sources.xml
-            classpath:org/onebusaway/api/application-context.xml
+            classpath:org/onebusaway/api/application-context-webapp.xml
         </param-value>
 	</context-param>
 

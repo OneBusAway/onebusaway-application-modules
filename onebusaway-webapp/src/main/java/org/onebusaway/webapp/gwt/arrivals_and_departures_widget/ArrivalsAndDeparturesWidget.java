@@ -131,7 +131,7 @@ public class ArrivalsAndDeparturesWidget extends WhereCommonPage {
     DivPanel destinationPanel = new DivPanel("arrivalsDestinationEntry");
     divPanel.add(destinationPanel);
     String href = "trip.action?id=" + trip.getId() + "&stop="
-        + bean.getStopId();
+        + bean.getStop().getId();
     destinationPanel.add(new Anchor(trip.getTripHeadsign(), href));
 
     DivPanel timeAndStatusPanel = new DivPanel("arrivalsTimePanel");

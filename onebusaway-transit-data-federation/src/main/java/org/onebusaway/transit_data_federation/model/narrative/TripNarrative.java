@@ -1,10 +1,9 @@
 package org.onebusaway.transit_data_federation.model.narrative;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
+import java.io.Serializable;
+
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-
-import java.io.Serializable;
 
 /**
  * Trip narrative information. Includes information about the trip short name,
@@ -24,12 +23,6 @@ public final class TripNarrative implements Serializable {
 
   private final String routeShortName;
 
-  private final String directionId;
-
-  private final AgencyAndId shapeId;
-
-  private String blockId;
-
   public static Builder builder() {
     return new Builder();
   }
@@ -38,9 +31,6 @@ public final class TripNarrative implements Serializable {
     this.tripShortName = builder.tripShortName;
     this.tripHeadsign = builder.tripHeadsign;
     this.routeShortName = builder.routeShortName;
-    this.directionId = builder.directionId;
-    this.shapeId = builder.shapeId;
-    this.blockId = builder.blockId;
   }
 
   public String getTripShortName() {
@@ -55,22 +45,6 @@ public final class TripNarrative implements Serializable {
     return routeShortName;
   }
 
-  public String getDirectionId() {
-    return directionId;
-  }
-
-  public AgencyAndId getShapeId() {
-    return shapeId;
-  }
-
-  public String getBlockId() {
-    return blockId;
-  }
-  
-  public void setBlockId(String blockId) {
-    this.blockId = blockId;
-  }
-  
   public static class Builder {
 
     private String tripShortName;
@@ -78,12 +52,6 @@ public final class TripNarrative implements Serializable {
     private String tripHeadsign;
 
     private String routeShortName;
-
-    private String directionId;
-
-    private String blockId;
-    
-    private AgencyAndId shapeId;
 
     public TripNarrative create() {
       return new TripNarrative(this);
@@ -101,21 +69,6 @@ public final class TripNarrative implements Serializable {
 
     public Builder setRouteShortName(String routeShortName) {
       this.routeShortName = routeShortName;
-      return this;
-    }
-
-    public Builder setDirectionId(String directionId) {
-      this.directionId = directionId;
-      return this;
-    }
-
-    public Builder setShapeId(AgencyAndId shapeId) {
-      this.shapeId = shapeId;
-      return this;
-    }
-    
-    public Builder setBlockId(String blockId) {
-      this.blockId = blockId;
       return this;
     }
   }

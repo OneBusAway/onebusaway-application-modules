@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -24,10 +25,8 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
 
   private GtfsRelationalDao _dao;
 
-  private volatile boolean _initialized = false;
-
   private STRtree _tree;
-  
+
   @Autowired
   public void setGtfsRelationalDao(GtfsRelationalDao dao) {
     _dao = dao;
@@ -36,29 +35,23 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
   @PostConstruct
   public void initialize() {
 
-    if (!_initialized) {
+    Collection<Stop> stops = _dao.getAllStops();
+    
+    if (stops.size() == 0) {
+      _tree = null;
+      return;
+    }
+    
+    _tree = new STRtree(stops.size());
 
-      synchronized (this) {
-
-        if (!_initialized) {
-
-          Collection<Stop> stops = _dao.getAllStops();
-
-          _tree = new STRtree(stops.size());
-
-          for (Stop stop : stops) {
-            float x = (float) stop.getLon();
-            float y = (float) stop.getLat();
-            Envelope env = new Envelope(x, x, y, y);
-            _tree.insert(env, stop.getId());
-          }
-
-          _tree.build();
-          _initialized = true;
-        }
-      }
+    for (Stop stop : stops) {
+      float x = (float) stop.getLon();
+      float y = (float) stop.getLat();
+      Envelope env = new Envelope(x, x, y, y);
+      _tree.insert(env, stop.getId());
     }
 
+    _tree.build();
   }
 
   /****
@@ -68,7 +61,8 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
   @Override
   public List<AgencyAndId> getStopsByBounds(CoordinateBounds bounds) {
     
-    initialize();
+    if( _tree == null)
+      return Collections.emptyList();
 
     double xMin = bounds.getMinLon();
     double yMin = bounds.getMinLat();
@@ -76,7 +70,7 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
     double yMax = bounds.getMaxLat();
 
     TreeVisistor v = new TreeVisistor();
-    _tree.query(new Envelope(xMin,xMax,yMin,yMax), v);
+    _tree.query(new Envelope(xMin, xMax, yMin, yMax), v);
     return v.getIdsInRange();
   }
 

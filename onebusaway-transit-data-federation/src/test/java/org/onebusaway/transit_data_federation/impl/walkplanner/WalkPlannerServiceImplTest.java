@@ -2,10 +2,16 @@ package org.onebusaway.transit_data_federation.impl.walkplanner;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
-import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlannerServiceImpl;
 import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkNodeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
@@ -14,15 +20,6 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WalkNode;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry;
-
-import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class WalkPlannerServiceImplTest {
 
@@ -155,8 +152,6 @@ public class WalkPlannerServiceImplTest {
     join(n33, n34);
     join(n34, n44);
     join(n22, n33);
-
-    graph.initialize();
 
     return graph;
   }

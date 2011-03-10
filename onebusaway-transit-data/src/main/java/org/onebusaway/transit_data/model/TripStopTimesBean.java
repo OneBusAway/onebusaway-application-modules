@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 
 public final class TripStopTimesBean implements Serializable {
@@ -18,6 +19,8 @@ public final class TripStopTimesBean implements Serializable {
 
   private String timeZone;
 
+  private FrequencyBean frequency;
+
   public List<TripStopTimeBean> getStopTimes() {
     return stopTimes;
   }
@@ -25,7 +28,7 @@ public final class TripStopTimesBean implements Serializable {
   public void setStopTimes(List<TripStopTimeBean> stopTimes) {
     this.stopTimes = stopTimes;
   }
-  
+
   public void addStopTime(TripStopTimeBean stopTime) {
     stopTimes.add(stopTime);
   }
@@ -52,5 +55,13 @@ public final class TripStopTimesBean implements Serializable {
 
   public void setTimeZone(String timeZone) {
     this.timeZone = timeZone;
+  }
+
+  public FrequencyBean getFrequency() {
+    return frequency;
+  }
+
+  public void setFrequency(FrequencyBean frequency) {
+    this.frequency = frequency;
   }
 }

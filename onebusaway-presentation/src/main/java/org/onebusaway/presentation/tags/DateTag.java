@@ -14,6 +14,10 @@ public class DateTag extends ContextBeanTag {
 
   private String _format;
 
+  private String _dateStyle;
+
+  private String _timeStyle;
+
   protected String _value;
 
   private String _timeZone;
@@ -25,6 +29,14 @@ public class DateTag extends ContextBeanTag {
 
   public void setFormat(String format) {
     _format = format;
+  }
+
+  public void setDateStyle(String dateStyle) {
+    _dateStyle = dateStyle;
+  }
+
+  public void setTimeStyle(String timeStyle) {
+    _timeStyle = timeStyle;
   }
 
   public void setValue(String value) {
@@ -39,6 +51,8 @@ public class DateTag extends ContextBeanTag {
     super.populateParams();
     DateComponent tag = (DateComponent) getComponent();
     tag.setFormat(_format);
+    tag.setDateStyle(_dateStyle);
+    tag.setTimeStyle(_timeStyle);
     tag.setValue(_value);
     tag.setTimeZone(_timeZone);
   }

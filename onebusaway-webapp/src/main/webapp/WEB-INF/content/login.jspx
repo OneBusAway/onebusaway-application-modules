@@ -38,7 +38,7 @@
     	  if(typeof(everylastlogin) !== 'undefined') {
             var prefix = '${pageContext.request.contextPath}';
             var mode = '<s:property value="mode" />';
-            everylastlogin.LoginWidgetLibrary.createWidget('login_widget',prefix+'/services/login',prefix+'/everylastlogin_login?mode=' + mode);
+            everylastlogin.LoginWidgetLibrary.createWidget('login_widget',prefix+'/services/login',prefix+'/everylastlogin_login?mode=' + mode + '&amp;_spring_security_remember_me=true');
             clearInterval(intervalId);
           }
       },10);	  

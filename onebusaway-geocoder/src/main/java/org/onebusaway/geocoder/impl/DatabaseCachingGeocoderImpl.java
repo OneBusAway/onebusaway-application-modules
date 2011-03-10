@@ -7,6 +7,7 @@ import org.onebusaway.geocoder.services.GeocoderService;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 public class DatabaseCachingGeocoderImpl implements GeocoderService {
 
@@ -23,6 +24,7 @@ public class DatabaseCachingGeocoderImpl implements GeocoderService {
     _template = new HibernateTemplate(sessionFactory);
   }
 
+  @Transactional
   public GeocoderResults geocode(String location) {
 
     GeocoderResultsEntity entity = (GeocoderResultsEntity) _template.get(

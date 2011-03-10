@@ -6,6 +6,7 @@ import java.io.Writer;
 import org.apache.struts2.components.ContextBean;
 import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 
 import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.logging.Logger;
@@ -38,6 +39,23 @@ public class RouteNameComponent extends ContextBean {
 
     Object obj = findValue(_value);
 
+    if( obj instanceof TripBean) {
+      
+      TripBean trip = (TripBean) obj;
+      String routeShortName = trip.getRouteShortName();
+      
+      if( routeShortName != null) {
+        try {
+          writer.write(routeShortName);
+        } catch (IOException e) {
+          LOG.error("Could not write out Text tag", e);
+        } 
+      }
+      else {
+        obj = trip.getRoute();
+      }
+    }
+    
     if (obj instanceof RouteBean) {
       RouteBean route = (RouteBean) obj;
       String name = RoutePresenter.getNameForRoute(route);

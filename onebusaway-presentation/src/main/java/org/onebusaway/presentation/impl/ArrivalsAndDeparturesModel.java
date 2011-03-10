@@ -1,7 +1,6 @@
 package org.onebusaway.presentation.impl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -15,12 +14,14 @@ import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.utility.text.NaturalStringOrder;
+import org.onebusaway.utility.text.StringLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ArrivalsAndDeparturesModel {
@@ -45,13 +46,9 @@ public class ArrivalsAndDeparturesModel {
 
   private TimeZone _timeZone;
 
-  private Date _time = new Date();
+  private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
-  private int _minutesBefore = 5;
-
-  private int _minutesAfter = 35;
-
-  private StopsWithArrivalsAndDeparturesBean _result;
+  protected StopsWithArrivalsAndDeparturesBean _result;
 
   private List<AgencyBean> _agencies;
 
@@ -59,6 +56,8 @@ public class ArrivalsAndDeparturesModel {
    * True if we filtered the results (ex. only include particular set of routes)
    */
   private boolean _filtered = false;
+
+  protected UserBean _user;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -105,15 +104,23 @@ public class ArrivalsAndDeparturesModel {
   }
 
   public void setTargetTime(Date time) {
-    _time = time;
+    _query.setTime(time.getTime());
   }
 
   public void setMinutesBefore(int minutesBefore) {
-    _minutesBefore = minutesBefore;
+    _query.setMinutesBefore(minutesBefore);
   }
 
   public void setMinutesAfter(int minutesAfter) {
-    _minutesAfter = minutesAfter;
+    _query.setMinutesAfter(minutesAfter);
+  }
+
+  public void setFrequencyMinutesBefore(int frequencyMinutesBefore) {
+    _query.setFrequencyMinutesBefore(frequencyMinutesBefore);
+  }
+
+  public void setFrequencyMinutesAfter(int frequencyMinutesAfter) {
+    _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
   }
 
   public boolean isMissingData() {
@@ -122,17 +129,8 @@ public class ArrivalsAndDeparturesModel {
 
   public void process() {
 
-    Calendar c = Calendar.getInstance();
-    c.setTime(_time);
-    c.add(Calendar.MINUTE, -_minutesBefore);
-    Date timeFrom = c.getTime();
-
-    c.setTime(_time);
-    c.add(Calendar.MINUTE, _minutesAfter);
-    Date timeTo = c.getTime();
-
     _result = _transitDataService.getStopsWithArrivalsAndDepartures(_stopIds,
-        timeFrom, timeTo);
+        _query);
 
     checkForEmptyResult();
     filterResults();
@@ -166,7 +164,7 @@ public class ArrivalsAndDeparturesModel {
   public List<AgencyBean> getAgencies() {
     return _agencies;
   }
-
+  
   /****
    * Private Methods
    ****/
@@ -205,8 +203,8 @@ public class ArrivalsAndDeparturesModel {
     // Save the last selected stop id
     _currentUserService.setLastSelectedStopIds(_stopIds);
 
-    UserBean user = _currentUserService.getCurrentUser();
-    if (user == null || !user.hasDefaultLocation()) {
+    _user = _currentUserService.getCurrentUser();
+    if (_user == null || !_user.hasDefaultLocation()) {
       List<StopBean> stops = _result.getStops();
       StopBean stop = stops.get(0);
       _defaultSearchLocationService.setDefaultLocationForCurrentUser(
@@ -242,12 +240,12 @@ public class ArrivalsAndDeparturesModel {
 
   private static class SortByDestination implements OrderConstraint {
     public int compare(ArrivalAndDepartureBean o1, ArrivalAndDepartureBean o2) {
-      int i = o1.getTrip().getTripHeadsign().compareTo(
-          o2.getTrip().getTripHeadsign());
+      String a = StringLibrary.getBestName(o1.getTripHeadsign(), o1.getTrip().getTripHeadsign(),"");
+      String b = StringLibrary.getBestName(o2.getTripHeadsign(), o2.getTrip().getTripHeadsign(),"");
+      int i = a.compareTo(b);
       if (i == 0)
         return SORT_BY_TIME.compare(o1, o2);
       return i;
     }
   }
-
 }

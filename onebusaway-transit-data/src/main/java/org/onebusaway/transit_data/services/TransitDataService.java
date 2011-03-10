@@ -9,6 +9,7 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByAggregateMethod;
+import org.onebusaway.federations.annotations.FederatedByAnyEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByCoordinateBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
@@ -17,6 +18,9 @@ import org.onebusaway.federations.annotations.FederatedByLocationMethod;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
@@ -27,17 +31,32 @@ import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.model.blocks.BlockBean;
+import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
+import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
 import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
+import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
+import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 
 /**
  * The {@link TransitDataService} is the primary interface separating
@@ -130,7 +149,18 @@ public interface TransitDataService extends FederatedService {
    * @throws ServiceException
    */
   @FederatedByEntityIdMethod(propertyExpression = "tripId")
-  public TripDetailsBean getSpecificTripDetails(TripDetailsQueryBean query)
+  public TripDetailsBean getSingleTripDetails(TripDetailsQueryBean query)
+      throws ServiceException;
+
+  /**
+   * @param query details about which trips to query, and what to include in the
+   *          response
+   * @return trip details for trips matching the specified query, or empty if
+   *         not found
+   * @throws ServiceException
+   */
+  @FederatedByEntityIdMethod(propertyExpression = "tripId")
+  public ListBean<TripDetailsBean> getTripDetails(TripDetailsQueryBean query)
       throws ServiceException;
 
   /**
@@ -140,6 +170,57 @@ public interface TransitDataService extends FederatedService {
   @FederatedByCoordinateBoundsMethod(propertyExpression = "bounds")
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query);
+
+  /**
+   * @param query determines the time and location of the query
+   * @return trips details for the trips matching the specified bounds query
+   */
+  @FederatedByEntityIdMethod(propertyExpression = "routeId")
+  public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query);
+
+  /**
+   * @param query determines the time and location of the query
+   * @return trips details for the trips matching the specified bounds query
+   */
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<TripDetailsBean> getTripsForAgency(
+      TripsForAgencyQueryBean query);
+
+  @FederatedByEntityIdMethod
+  public BlockBean getBlockForId(String blockId);
+
+  @FederatedByEntityIdMethod
+  public BlockInstanceBean getBlockInstance(String blockId, long serviceDate);
+
+  /****
+   * Vehicle Methods
+   *****/
+
+  @FederatedByEntityIdMethod
+  public VehicleStatusBean getVehicleForAgency(String vehicleId, long time);
+
+  @FederatedByAgencyIdMethod
+  public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
+      long time);
+
+  @FederatedByEntityIdMethod
+  public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
+      String vehicleId, long targetTime);
+
+  /**
+   * 
+   * @param query
+   * @return
+   */
+  @FederatedByAnyEntityIdMethod(properties = {"blockId", "tripId", "vehicleId"})
+  public ListBean<VehicleLocationRecordBean> getVehicleLocationRecords(
+      VehicleLocationRecordQueryBean query);
+
+  @FederatedByEntityIdMethod(propertyExpression = "vehicleId")
+  public void submitVehicleLocation(VehicleLocationRecordBean record);
+
+  @FederatedByEntityIdMethod
+  public void resetVehicleLocation(String vehicleId);
 
   /**
    * 
@@ -161,7 +242,8 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdMethod
   public StopWithArrivalsAndDeparturesBean getStopWithArrivalsAndDepartures(
-      String stopId, Date timeFrom, Date timeTo) throws ServiceException;
+      String stopId, ArrivalsAndDeparturesQueryBean query)
+      throws ServiceException;
 
   /**
    * @param stopIds
@@ -175,8 +257,12 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdsMethod
   public StopsWithArrivalsAndDeparturesBean getStopsWithArrivalsAndDepartures(
-      Collection<String> stopIds, Date timeFrom, Date timeTo)
+      Collection<String> stopIds, ArrivalsAndDeparturesQueryBean query)
       throws ServiceException;
+
+  @FederatedByEntityIdMethod(propertyExpression = "stopId")
+  public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
+      ArrivalAndDepartureForStopQueryBean query) throws ServiceException;
 
   /**
    * @param stopId
@@ -268,4 +354,100 @@ public interface TransitDataService extends FederatedService {
       OneBusAwayConstraintsBean constraints,
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException;
+
+  /****
+   * Historical Data
+   ****/
+
+  /****
+   * Service Alert Methods
+   ****/
+
+  @FederatedByAgencyIdMethod
+  public SituationBean createServiceAlert(String agencyId,
+      SituationBean situation);
+
+  @FederatedByEntityIdMethod(propertyExpression = "id")
+  public void updateServiceAlert(SituationBean situation);
+
+  @FederatedByEntityIdMethod
+  public void removeServiceAlert(String situationId);
+
+  @FederatedByEntityIdMethod
+  public SituationBean getServiceAlertForId(String situationId);
+
+  @FederatedByAgencyIdMethod()
+  public ListBean<SituationBean> getAllServiceAlertsForAgencyId(String agencyId);
+
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query);
+
+  /****
+   * These methods are going to pile up. How do we handle this gracefully in the
+   * future?
+   ****/
+
+  /**
+   * Report a problem with a particular stop.
+   * 
+   * @param problem the problem summary bean
+   */
+  @FederatedByEntityIdMethod(propertyExpression = "stopId")
+  public void reportProblemWithStop(StopProblemReportBean problem);
+
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
+      StopProblemReportQueryBean query);
+
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<StopProblemReportBean> getStopProblemReports(
+      StopProblemReportQueryBean query);
+
+  @FederatedByEntityIdMethod()
+  public List<StopProblemReportBean> getAllStopProblemReportsForStopId(
+      String stopId);
+
+  @FederatedByEntityIdMethod()
+  public StopProblemReportBean getStopProblemReportForStopIdAndId(
+      String stopId, long id);
+
+  @FederatedByEntityIdMethod()
+  public void deleteStopProblemReportForStopIdAndId(String stopId, long id);
+
+  /****
+   * 
+   ****/
+
+  /**
+   * Report a problem with a particular trip.
+   * 
+   * @param problem the problem summary bean
+   */
+  @FederatedByEntityIdMethod(propertyExpression = "tripId")
+  public void reportProblemWithTrip(TripProblemReportBean problem);
+
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
+      TripProblemReportQueryBean query);
+
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public ListBean<TripProblemReportBean> getTripProblemReports(
+      TripProblemReportQueryBean query);
+
+  @FederatedByEntityIdMethod()
+  public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
+      String tripId);
+
+  @FederatedByEntityIdMethod()
+  public TripProblemReportBean getTripProblemReportForTripIdAndId(
+      String tripId, long id);
+
+  @FederatedByEntityIdMethod(propertyExpression="tripId")
+  public void updateTripProblemReport(TripProblemReportBean tripProblemReport);
+
+  @FederatedByEntityIdMethod()
+  public void deleteTripProblemReportForTripIdAndId(String tripId, long id);
+  
+  @FederatedByAggregateMethod
+  public List<String> getAllTripProblemReportLabels();
 }

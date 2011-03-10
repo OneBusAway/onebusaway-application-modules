@@ -3,6 +3,8 @@ package org.onebusaway.api.model.transit;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
+
 public class ReferencesBean {
 
   private List<AgencyV2Bean> agencies;
@@ -12,6 +14,8 @@ public class ReferencesBean {
   private List<StopV2Bean> stops;
 
   private List<TripV2Bean> trips;
+
+  private List<SituationV2Bean> situations;
 
   public List<AgencyV2Bean> getAgencies() {
     return agencies;
@@ -67,5 +71,19 @@ public class ReferencesBean {
     if (trips == null)
       trips = new ArrayList<TripV2Bean>();
     trips.add(trip);
+  }
+
+  public List<SituationV2Bean> getSituations() {
+    return situations;
+  }
+
+  public void setSituations(List<SituationV2Bean> situations) {
+    this.situations = situations;
+  }
+
+  public void addSituation(SituationV2Bean situation) {
+    if (situations == null)
+      situations = new ArrayList<SituationV2Bean>();
+    situations.add(situation);
   }
 }

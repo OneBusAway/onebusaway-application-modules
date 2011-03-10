@@ -28,4 +28,6 @@ public @interface FederatedByAgencyIdMethod {
    * @return the index of the method argument containing the agency id
    */
   public int argument() default 0;
+  
+  public String propertyExpression() default "";
 }

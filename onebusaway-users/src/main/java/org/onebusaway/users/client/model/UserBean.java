@@ -3,6 +3,7 @@ package org.onebusaway.users.client.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UserBean implements Serializable {
 
@@ -23,7 +24,11 @@ public class UserBean implements Serializable {
   private List<String> lastSelectedStopIds = new ArrayList<String>();
 
   private List<BookmarkBean> bookmarks = new ArrayList<BookmarkBean>();
-  
+
+  private Long minApiRequestInterval = null;
+
+  private Map<String, Long> readServiceAlerts = null;
+
   private boolean anonymous = true;
 
   private boolean admin = false;
@@ -96,6 +101,22 @@ public class UserBean implements Serializable {
 
   public void addBookmark(BookmarkBean bookmark) {
     bookmarks.add(bookmark);
+  }
+
+  public Long getMinApiRequestInterval() {
+    return minApiRequestInterval;
+  }
+
+  public void setMinApiRequestInterval(Long minApiRequestInterval) {
+    this.minApiRequestInterval = minApiRequestInterval;
+  }
+
+  public Map<String, Long> getReadServiceAlerts() {
+    return readServiceAlerts;
+  }
+
+  public void setReadServiceAlerts(Map<String, Long> readServiceAlerts) {
+    this.readServiceAlerts = readServiceAlerts;
   }
 
   public boolean isAnonymous() {

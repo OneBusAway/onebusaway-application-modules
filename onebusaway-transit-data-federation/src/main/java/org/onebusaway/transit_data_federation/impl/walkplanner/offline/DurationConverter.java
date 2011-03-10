@@ -36,8 +36,7 @@ public class DurationConverter implements SingleValueConverter {
     return _factory.newDuration(vObj.longValue()).toString();
   }
 
-  @SuppressWarnings("unchecked")
-  public boolean canConvert(Class type) {
+  public boolean canConvert(@SuppressWarnings("rawtypes") Class type) {
     return Long.class.equals(type);
   }
 }

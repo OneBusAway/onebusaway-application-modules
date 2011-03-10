@@ -31,6 +31,10 @@ public class FederatedTransitDataBundle {
     return _path;
   }
 
+  public File getCalendarServiceDataPath() {
+    return new File(_path, "CalendarServiceData.obj");
+  }
+
   public File getRouteSearchIndexPath() {
     return new File(_path, "RouteSearchIndex");
   }
@@ -43,12 +47,32 @@ public class FederatedTransitDataBundle {
     return new File(_path, "WalkPlannerGraph.obj");
   }
 
-  public File getTripPlannerGraphPath() {
-    return new File(_path, "TripPlannerGraph.obj");
+  public File getTransitGraphPath() {
+    return new File(_path, "TransitGraph.obj");
   }
 
   public File getNarrativeProviderPath() {
     return new File(_path, "NarrativeProvider.obj");
+  }
+
+  public File getBlockTripIndicesPath() {
+    return new File(_path, "BlockTripIndices.obj");
+  }
+  
+  public File getBlockLayoverIndicesPath() {
+    return new File(_path, "BlockLayoverIndices.obj");
+  }
+
+  public File getFrequencyBlockTripIndicesPath() {
+    return new File(_path, "FrequencyBlockTripIndices.obj");
+  }
+
+  public File getStopTransfersPath() {
+    return new File(_path, "StopTransfers.obj");
+  }
+  
+  public File getServiceAlertsPath() {
+    return new File(_path, "ServiceAlerts.xml");
   }
 
   public File getCachePath() {

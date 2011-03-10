@@ -1,5 +1,6 @@
 package org.onebusaway.webapp.actions.where;
 
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -16,7 +17,9 @@ import org.onebusaway.transit_data.model.StopCalendarDayBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
+import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.DateLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -43,6 +46,8 @@ public class ScheduleAction extends ActionSupport {
 
   private TimeZone _timeZone;
 
+  private boolean _showArrivals = false;
+
   public void setId(String id) {
     _id = id;
   }
@@ -52,16 +57,24 @@ public class ScheduleAction extends ActionSupport {
     _date = date;
   }
 
+  public void setShowArrivals(boolean showArrivals) {
+    _showArrivals = showArrivals;
+  }
+
+  public boolean isShowArrivals() {
+    return _showArrivals;
+  }
+
   public StopScheduleBean getResult() {
     return _result;
   }
-  
+
   public TimeZone getTimeZone() {
     return _timeZone;
   }
 
   @Override
-  @Actions( {@Action(value = "/where/standard/schedule")})
+  @Actions({@Action(value = "/where/standard/schedule")})
   public String execute() throws Exception {
 
     if (_date == null)
@@ -84,6 +97,30 @@ public class ScheduleAction extends ActionSupport {
     return SUCCESS;
   }
 
+  public boolean isAmPmClock() {
+    return DateLibrary.hasAmPmClock(getLocale());
+  }
+
+  public List<String> getShortWeekDays() {
+
+    List<String> result = new ArrayList<String>();
+    DateFormatSymbols dateFormatSymbols = new DateFormatSymbols(getLocale());
+
+    String shortWeekdays[] = dateFormatSymbols.getShortWeekdays();
+    Calendar calendar = Calendar.getInstance(getLocale());
+    int firstDayOfWeek = calendar.getFirstDayOfWeek();
+
+    for (int dayOfWeek = firstDayOfWeek; dayOfWeek < shortWeekdays.length; dayOfWeek++) {
+      result.add(shortWeekdays[dayOfWeek]);
+    }
+
+    for (int dayOfWeek = Calendar.SUNDAY; dayOfWeek < firstDayOfWeek; dayOfWeek++) {
+      result.add(shortWeekdays[dayOfWeek]);
+    }
+
+    return result;
+  }
+
   public <T> List<List<T>> getRows(List<T> elements, int rowLength) {
 
     List<List<T>> rows = new ArrayList<List<T>>();
@@ -103,6 +140,13 @@ public class ScheduleAction extends ActionSupport {
     return rows;
   }
 
+  /****
+   * 
+   * @param stopTimes
+   * @param format
+   * @return
+   ****/
+
   public List<T2<String, List<StopTimeInstanceBean>>> getStopTimesByFormatKey(
       List<StopTimeInstanceBean> stopTimes, String format) {
     return getTimesByFormatKey(stopTimes, format, _stopTimeAdapter);
@@ -120,10 +164,22 @@ public class ScheduleAction extends ActionSupport {
         _stopCalendarDayAdapter);
   }
 
+  public String getFrequencyCellHeight(FrequencyInstanceBean bean) {
+    int hours = (int) Math.round((bean.getEndTime() - bean.getStartTime())
+        / (60.0 * 60 * 1000));
+    if (hours == 0)
+      hours = 1;
+    return hours + "em";
+  }
+
+  /****
+   * 
+   ****/
+
   public Date getShiftedDate(Date date) {
     return getShiftedDateStatic(date);
   }
-  
+
   public String getFormattedDate(String format, Date date) {
     SimpleDateFormat df = new SimpleDateFormat(format);
     df.setTimeZone(_timeZone);
@@ -133,7 +189,7 @@ public class ScheduleAction extends ActionSupport {
   /****
    * Private Methods
    ****/
-  
+
   private static interface IAdapter<FROM, TO> {
     public TO adapt(FROM source);
   }
@@ -148,7 +204,7 @@ public class ScheduleAction extends ActionSupport {
   private <T> List<T> getTimesByFormatKeyAndValue(List<T> times, String format,
       String value, IAdapter<T, Date> adapter) {
 
-    SimpleDateFormat df = new SimpleDateFormat(format);
+    SimpleDateFormat df = new SimpleDateFormat(format, getLocale());
     df.setTimeZone(_timeZone);
     List<T> results = new ArrayList<T>();
 
@@ -166,7 +222,7 @@ public class ScheduleAction extends ActionSupport {
 
     SimpleDateFormat df = new SimpleDateFormat(format);
     df.setTimeZone(_timeZone);
-    
+
     List<T2<String, List<T>>> tuples = new ArrayList<T2<String, List<T>>>();
     T2<String, List<T>> tuple = null;
 

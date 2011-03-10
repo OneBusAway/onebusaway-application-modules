@@ -39,7 +39,7 @@ public class ScheduleForStopController extends ApiActionSupport {
     return _id;
   }
 
-  @TypeConversion(converter = "org.onebusaway.api.impl.DateConverter")
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
   public void setDate(Date date) {
     _date = date;
   }
