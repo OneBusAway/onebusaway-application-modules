@@ -10,16 +10,13 @@ import org.onebusaway.users.model.UserProperties;
 
 /**
  * DO NO RENAME OR MOVE THIS CLASS. Serialized instances of this class will be
- * around forever. See notes in {@link UserProperties} for more info.
+ * around forever.
  * 
  * @author bdferris
  * @see UserProperties
  */
 public class UserPropertiesV2 implements Serializable, UserProperties {
 
-  /**
-   * Don't EVER change this. See notes in {@link UserProperties}.
-   */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -35,10 +32,8 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
   private double defaultLocationLon = Double.NaN;
 
   private List<Bookmark> bookmarks = new ArrayList<Bookmark>();
-
-  private Long minApiRequestInterval = null;
-
-  private Map<String, Long> readSituationIdsWithReadTime = new HashMap<String, Long>();
+  
+  private Map<String,Object> additionalProperties = new HashMap<String, Object>();
 
   public UserPropertiesV2() {
 
@@ -50,7 +45,6 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
     this.defaultLocationLat = o.defaultLocationLat;
     this.defaultLocationLon = o.defaultLocationLon;
     this.defaultLocationName = o.defaultLocationName;
-    this.minApiRequestInterval = o.minApiRequestInterval;
   }
 
   public boolean isRememberPreferencesEnabled() {
@@ -101,42 +95,14 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
     this.bookmarks = bookmarks;
   }
 
-  /**
-   * API request throttling information
-   * 
-   * @return the minimum interval time (in ms) between successive API requests
-   *         for this account.
-   */
-  public Long getMinApiRequestInterval() {
-    return minApiRequestInterval;
+  public Map<String, Object> getAdditionalProperties() {
+    if( additionalProperties == null)
+      additionalProperties = new HashMap<String, Object>();
+    return additionalProperties;
   }
 
-  /**
-   * API request throttling information
-   * 
-   * @param minApiRequestInterval minimum time interval (in ms)
-   */
-  public void setMinApiRequestInterval(Long minApiRequestInterval) {
-    this.minApiRequestInterval = minApiRequestInterval;
-  }
-
-  /**
-   * Information about when a service alert situation id was read by the user.
-   * 
-   * @return a map from situation id to the time it was read (unix-time)
-   */
-  public Map<String, Long> getReadSituationIdsWithReadTime() {
-    return readSituationIdsWithReadTime;
-  }
-
-  /**
-   * Information about when a service alert situation id was read by the user.
-   * 
-   * @param a map from situation id to the time it was read (unix-time)
-   */
-  public void setReadSituationIdsWithReadTime(
-      Map<String, Long> readSituationIdsWithReadTime) {
-    this.readSituationIdsWithReadTime = readSituationIdsWithReadTime;
+  public void setAdditionalProperties(Map<String, Object> additionalProperties) {
+    this.additionalProperties = additionalProperties;
   }
 
   public void clear() {
@@ -144,7 +110,6 @@ public class UserPropertiesV2 implements Serializable, UserProperties {
     this.defaultLocationLat = Double.NaN;
     this.defaultLocationLon = Double.NaN;
     this.defaultLocationName = null;
-    this.minApiRequestInterval = null;
-    this.readSituationIdsWithReadTime = null;
+    this.additionalProperties = new HashMap<String, Object>();
   }
 }

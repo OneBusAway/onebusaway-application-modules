@@ -19,14 +19,11 @@ import com.vividsolutions.jts.geom.Point;
  * @see StopSequence
  * @see StopSequenceCollectionService
  */
-public class StopSequenceCollection extends
-    IdentityBean<StopSequenceCollectionKey> {
+public class StopSequenceCollection extends IdentityBean<StopSequenceCollectionKey> {
 
   private static final long serialVersionUID = 1L;
 
   private StopSequenceCollectionKey id;
-
-  private String publicId;
 
   private String description;
 
@@ -50,14 +47,6 @@ public class StopSequenceCollection extends
 
   public void setId(StopSequenceCollectionKey id) {
     this.id = id;
-  }
-
-  public String getPublicId() {
-    return publicId;
-  }
-
-  public void setPublicId(String publicId) {
-    this.publicId = publicId;
   }
 
   /**

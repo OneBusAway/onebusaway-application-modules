@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.onebusaway.transit_data.model.QueryBean;
 
@@ -11,11 +12,9 @@ public final class TripDetailsQueryBean implements Serializable {
 
   private String tripId;
   
-  private long serviceDate;
+  private Date serviceDate;
   
-  private String vehicleId;
-  
-  private long time;
+  private Date time;
   
   private TripDetailsInclusionBean inclusion = new TripDetailsInclusionBean();
   
@@ -27,27 +26,19 @@ public final class TripDetailsQueryBean implements Serializable {
     this.tripId = tripId;
   }
 
-  public long getServiceDate() {
+  public Date getServiceDate() {
     return serviceDate;
   }
 
-  public void setServiceDate(long serviceDate) {
+  public void setServiceDate(Date serviceDate) {
     this.serviceDate = serviceDate;
   }
 
-  public String getVehicleId() {
-    return vehicleId;
-  }
-
-  public void setVehicleId(String vehicleId) {
-    this.vehicleId = vehicleId;
-  }
-
-  public long getTime() {
+  public Date getTime() {
     return time;
   }
 
-  public void setTime(long time) {
+  public void setTime(Date time) {
     this.time = time;
   }
 

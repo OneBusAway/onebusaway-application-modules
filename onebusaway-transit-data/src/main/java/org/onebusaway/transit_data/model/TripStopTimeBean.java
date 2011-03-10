@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class TripStopTimeBean implements Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 1L;
 
   private int arrivalTime;
 
@@ -13,8 +13,6 @@ public class TripStopTimeBean implements Serializable {
   private StopBean stop;
 
   private String stopHeadsign;
-  
-  private double distanceAlongTrip;
 
   public int getArrivalTime() {
     return arrivalTime;
@@ -46,13 +44,5 @@ public class TripStopTimeBean implements Serializable {
 
   public void setStopHeadsign(String stopHeadsign) {
     this.stopHeadsign = stopHeadsign;
-  }
-
-  public double getDistanceAlongTrip() {
-    return distanceAlongTrip;
-  }
-
-  public void setDistanceAlongTrip(double distanceAlongTrip) {
-    this.distanceAlongTrip = distanceAlongTrip;
   }
 }

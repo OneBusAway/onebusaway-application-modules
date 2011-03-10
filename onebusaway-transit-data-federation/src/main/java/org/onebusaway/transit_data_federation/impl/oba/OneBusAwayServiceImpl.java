@@ -1,11 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.oba;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
@@ -20,8 +15,15 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
+
+import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 class OneBusAwayServiceImpl implements OneBusAwayService {

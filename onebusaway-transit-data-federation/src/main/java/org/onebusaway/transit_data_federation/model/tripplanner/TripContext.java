@@ -1,33 +1,41 @@
 package org.onebusaway.transit_data_federation.model.tripplanner;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.gtfs.model.calendar.ServiceIdIntervals;
+import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
-import org.onebusaway.transit_data_federation.services.StopTimeService;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeIndexContext;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 
-public class TripContext {
+public class TripContext implements StopTimeIndexContext {
 
-  private TransitGraphDao _transitGraphDao;
+  private TripPlannerGraph _graph;
 
   private TripPlannerConstants _constants = new TripPlannerConstants();
 
   private WalkPlannerService _walkPlannerService;
 
+  private CalendarService _calendarService;
+
   private TripPlannerConstraints _constraints;
 
   private WalkPlansImpl _walkPlans = new WalkPlansImpl();
 
-  private StopTimeService _stopTimeService;
-
-  private StopTransferService _stopTransferService;
-
-  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
-    _transitGraphDao = transitGraphDao;
+  public void setGraph(TripPlannerGraph graph) {
+    _graph = graph;
   }
 
-  public TransitGraphDao getTransitGraphDao() {
-    return _transitGraphDao;
+  public TripPlannerGraph getGraph() {
+    return _graph;
+  }
+
+  public void setCalendarService(CalendarService calendarService) {
+    _calendarService = calendarService;
   }
 
   public TripPlannerConstants getConstants() {
@@ -58,19 +66,19 @@ public class TripContext {
     return _walkPlans;
   }
 
-  public void setStopTimeService(StopTimeService stopTimeService) {
-    _stopTimeService = stopTimeService;
+  /*****************************************************************************
+   * {@link StopTimeIndexContext} Interface
+   ****************************************************************************/
+
+  public Map<LocalizedServiceId, List<Date>> getNextServiceDates(
+      ServiceIdIntervals serviceIdIntervals, long targetTime) {
+    return _calendarService.getNextDepartureServiceDates(serviceIdIntervals,
+        targetTime);
   }
 
-  public StopTimeService getStopTimeService() {
-    return _stopTimeService;
-  }
-
-  public void setStopTransferService(StopTransferService stopTransferService) {
-    _stopTransferService = stopTransferService;
-  }
-
-  public StopTransferService getStopTransferService() {
-    return _stopTransferService;
+  public Map<LocalizedServiceId, List<Date>> getPreviousServiceDates(
+      ServiceIdIntervals serviceIdIntervals, long targetTime) {
+    return _calendarService.getPreviousArrivalServiceDates(serviceIdIntervals,
+        targetTime);
   }
 }

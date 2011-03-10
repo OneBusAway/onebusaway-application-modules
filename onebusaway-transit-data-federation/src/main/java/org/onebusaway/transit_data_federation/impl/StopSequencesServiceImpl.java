@@ -1,50 +1,55 @@
 package org.onebusaway.transit_data_federation.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.Stop;
+import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.model.StopSequence;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+
+import edu.washington.cs.rse.collections.FactoryMap;
+
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class StopSequencesServiceImpl implements StopSequencesService {
 
-  private static final AgencyAndId NO_SHAPE_ID = new AgencyAndId("no agency",
-      StopSequencesServiceImpl.class.getName() + ".noShapeId");
+  private static final AgencyAndId NO_SHAPE_ID = new AgencyAndId("no agency", StopSequencesServiceImpl.class.getName()
+      + ".noShapeId");
 
-  private static final String NO_DIRECTION_ID = StopSequencesServiceImpl.class.getName()
-      + ".noDirectionId";
+  private static final String NO_DIRECTION_ID = StopSequencesServiceImpl.class.getName() + ".noDirectionId";
 
-  @Override
-  public List<StopSequence> getStopSequencesForTrips(List<BlockTripEntry> trips) {
+  /* (non-Javadoc)
+   * @see org.onebusaway.transit_data_federation.impl.StopSequencesService#getStopSequencesForTrips(java.util.Map)
+   */
+  public List<StopSequence> getStopSequencesForTrips(Map<Trip, List<StopTime>> stopTimesByTrip) {
 
-    Map<StopSequenceKey, List<BlockTripEntry>> tripsByStopSequenceKey = new FactoryMap<StopSequenceKey, List<BlockTripEntry>>(
-        new ArrayList<BlockTripEntry>());
+    Map<StopSequenceKey, List<Trip>> tripsByStopSequenceKey = new FactoryMap<StopSequenceKey, List<Trip>>(
+        new ArrayList<Trip>());
 
-    for (BlockTripEntry blockTrip : trips) {
-      TripEntry trip = blockTrip.getTrip();
+    for (Map.Entry<Trip, List<StopTime>> entry : stopTimesByTrip.entrySet()) {
+      Trip trip = entry.getKey();
+      List<StopTime> stopTimes = entry.getValue();
       String directionId = trip.getDirectionId();
       if (directionId == null)
         directionId = NO_DIRECTION_ID;
       AgencyAndId shapeId = trip.getShapeId();
       if (shapeId == null || !shapeId.hasValues())
         shapeId = NO_SHAPE_ID;
-      List<StopEntry> stops = getStopTimesAsStops(trip.getStopTimes());
+      Collections.sort(stopTimes);
+      List<Stop> stops = getStopTimesAsStops(stopTimes);
       StopSequenceKey key = new StopSequenceKey(stops, directionId, shapeId);
-      tripsByStopSequenceKey.get(key).add(blockTrip);
+      tripsByStopSequenceKey.get(key).add(trip);
     }
 
     List<StopSequence> sequences = new ArrayList<StopSequence>();
 
-    for (Map.Entry<StopSequenceKey, List<BlockTripEntry>> entry : tripsByStopSequenceKey.entrySet()) {
+    for (Map.Entry<StopSequenceKey, List<Trip>> entry : tripsByStopSequenceKey.entrySet()) {
       StopSequenceKey key = entry.getKey();
       StopSequence ss = new StopSequence();
       ss.setId(sequences.size());
@@ -62,26 +67,25 @@ public class StopSequencesServiceImpl implements StopSequencesService {
     return sequences;
   }
 
-  private List<StopEntry> getStopTimesAsStops(List<StopTimeEntry> stopTimes) {
-    List<StopEntry> stops = new ArrayList<StopEntry>(stopTimes.size());
-    for (StopTimeEntry st : stopTimes)
+  private List<Stop> getStopTimesAsStops(List<StopTime> stopTimes) {
+    List<Stop> stops = new ArrayList<Stop>(stopTimes.size());
+    for (StopTime st : stopTimes)
       stops.add(st.getStop());
     return stops;
   }
 
   private static class StopSequenceKey {
-    private List<StopEntry> stops;
+    private List<Stop> stops;
     private String directionId;
     private AgencyAndId shapeId;
 
-    public StopSequenceKey(List<StopEntry> stops, String directionId,
-        AgencyAndId shapeId) {
+    public StopSequenceKey(List<Stop> stops, String directionId, AgencyAndId shapeId) {
       this.stops = stops;
       this.directionId = directionId;
       this.shapeId = shapeId;
     }
 
-    public List<StopEntry> getStops() {
+    public List<Stop> getStops() {
       return stops;
     }
 
@@ -97,8 +101,7 @@ public class StopSequencesServiceImpl implements StopSequencesService {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result
-          + ((directionId == null) ? 0 : directionId.hashCode());
+      result = prime * result + ((directionId == null) ? 0 : directionId.hashCode());
       result = prime * result + ((shapeId == null) ? 0 : shapeId.hashCode());
       result = prime * result + ((stops == null) ? 0 : stops.hashCode());
       return result;
@@ -131,5 +134,4 @@ public class StopSequencesServiceImpl implements StopSequencesService {
       return true;
     }
   }
-
 }

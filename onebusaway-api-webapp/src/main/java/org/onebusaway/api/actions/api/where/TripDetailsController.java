@@ -28,11 +28,9 @@ public class TripDetailsController extends ApiActionSupport {
 
   private String _id;
 
-  private Date _serviceDate;
+  private Date _serviceDate = new Date();
 
   private Date _time = new Date();
-  
-  private String _vehicleId;
   
   private boolean _includeTrip = true;
 
@@ -53,20 +51,16 @@ public class TripDetailsController extends ApiActionSupport {
     return _id;
   }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
+  @TypeConversion(converter = "org.onebusaway.api.impl.DateConverter")
   public void setServiceDate(Date date) {
     _serviceDate = date;
   }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
+  @TypeConversion(converter = "org.onebusaway.api.impl.DateTimeConverter")
   public void setTime(Date time) {
     _time = time;
   }
 
-  public void setVehicleId(String vehicleId) {
-    _vehicleId = vehicleId;
-  }
-  
   public void setIncludeTrip(boolean includeTrip) {
     _includeTrip = includeTrip;
   }
@@ -89,17 +83,15 @@ public class TripDetailsController extends ApiActionSupport {
     
     TripDetailsQueryBean query = new TripDetailsQueryBean();
     query.setTripId(_id);
-    if( _serviceDate != null)
-      query.setServiceDate(_serviceDate.getTime());
-    query.setTime(_time.getTime());
-    query.setVehicleId(_vehicleId);
+    query.setServiceDate(_serviceDate);
+    query.setTime(_time);
     
     TripDetailsInclusionBean inclusion = query.getInclusion();
     inclusion.setIncludeTripBean(_includeTrip);
     inclusion.setIncludeTripSchedule(_includeSchedule);
     inclusion.setIncludeTripStatus(_includeStatus);
 
-    TripDetailsBean trip = _service.getSingleTripDetails(query);
+    TripDetailsBean trip = _service.getSpecificTripDetails(query);
 
     if (trip == null)
       return setResourceNotFoundResponse();

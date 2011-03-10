@@ -50,7 +50,7 @@ public class UserIndexKey implements Serializable, Comparable<UserIndexKey> {
     if (type == null)
       throw new IllegalArgumentException("type cannot be null");
     if (value == null)
-      throw new IllegalArgumentException("value cannot be null");
+      throw new IllegalArgumentException("type cannot be null");
     if (type.indexOf('_') != -1)
       throw new IllegalArgumentException("type cannot contain \"_\" character");
     this.type = type;

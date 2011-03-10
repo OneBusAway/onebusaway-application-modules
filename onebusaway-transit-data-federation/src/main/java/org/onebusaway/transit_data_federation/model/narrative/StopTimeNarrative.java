@@ -1,13 +1,13 @@
 package org.onebusaway.transit_data_federation.model.narrative;
 
+import java.io.Serializable;
+
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 
-import java.io.Serializable;
-
 /**
- * Stop time narrative information. Includes information about the stop headsign
- * and route shortname.
+ * Stop time narrative information. Includes information about the stop
+ * headsign, route shortname and shape distance travelled.
  * 
  * @author bdferris
  * @see StopTime
@@ -21,6 +21,8 @@ public final class StopTimeNarrative implements Serializable {
 
   private final String routeShortName;
 
+  private final double shapeDistTraveled;
+
   public static Builder builder() {
     return new Builder();
   }
@@ -28,6 +30,7 @@ public final class StopTimeNarrative implements Serializable {
   private StopTimeNarrative(Builder builder) {
     this.stopHeadsign = builder.stopHeadsign;
     this.routeShortName = builder.routeShortName;
+    this.shapeDistTraveled = builder.shapeDistTraveled;
   }
 
   public String getStopHeadsign() {
@@ -36,6 +39,10 @@ public final class StopTimeNarrative implements Serializable {
 
   public String getRouteShortName() {
     return routeShortName;
+  }
+
+  public double getShapeDistTraveled() {
+    return shapeDistTraveled;
   }
 
   /****
@@ -48,6 +55,9 @@ public final class StopTimeNarrative implements Serializable {
     int result = 1;
     result = prime * result
         + ((routeShortName == null) ? 0 : routeShortName.hashCode());
+    long temp;
+    temp = Double.doubleToLongBits(shapeDistTraveled);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
     result = prime * result
         + ((stopHeadsign == null) ? 0 : stopHeadsign.hashCode());
     return result;
@@ -67,6 +77,8 @@ public final class StopTimeNarrative implements Serializable {
         return false;
     } else if (!routeShortName.equals(other.routeShortName))
       return false;
+    if (Double.doubleToLongBits(shapeDistTraveled) != Double.doubleToLongBits(other.shapeDistTraveled))
+      return false;
     if (stopHeadsign == null) {
       if (other.stopHeadsign != null)
         return false;
@@ -81,6 +93,8 @@ public final class StopTimeNarrative implements Serializable {
 
     private String routeShortName;
 
+    private double shapeDistTraveled = -1;
+
     public StopTimeNarrative create() {
       return new StopTimeNarrative(this);
     }
@@ -92,6 +106,11 @@ public final class StopTimeNarrative implements Serializable {
 
     public Builder setRouteShortName(String routeShortName) {
       this.routeShortName = routeShortName;
+      return this;
+    }
+
+    public Builder setShapeDistTraveled(double shapeDistTraveled) {
+      this.shapeDistTraveled = shapeDistTraveled;
       return this;
     }
   }

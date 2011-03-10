@@ -23,9 +23,8 @@
 
 <head>
   <title><decorator:title default="One Bus Away" /></title>
-  <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard.css')}"/>
-   <link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath}/p/Stylesheet!raw.action"/> 
-  <link rel="icon" type="image/png" href="${oba:resource('/images/Bus.png')}"/>
+  <link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath}/p/Stylesheet.action?raw=true"/>
+  <link rel="icon" type="image/png" href="${resources.OneBusAwayCommonResources.imageBusIcon.url}"/>
   <decorator:head />
 </head>
 
@@ -86,7 +85,7 @@
 
 <div id="feedback">
   <a href="http://onebusaway.ideascale.com">
-    <img src="${oba:resource('/images/Feedback.png')}"/>
+    <img src="${resources.WhereStandardResources.feedback.url}"/>
   </a>
 </div>
 

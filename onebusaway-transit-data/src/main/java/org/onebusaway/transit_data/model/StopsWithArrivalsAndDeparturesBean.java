@@ -17,8 +17,6 @@ package org.onebusaway.transit_data.model;
 
 import java.util.List;
 
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
-
 public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   private static final long serialVersionUID = 1L;
@@ -28,9 +26,7 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
   private List<ArrivalAndDepartureBean> arrivalsAndDepartures;
 
   private List<StopBean> nearbyStops;
-
-  private List<SituationBean> situations;
-
+  
   private String timeZone;
 
   public StopsWithArrivalsAndDeparturesBean() {
@@ -39,11 +35,9 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   public StopsWithArrivalsAndDeparturesBean(List<StopBean> stops,
       List<ArrivalAndDepartureBean> arrivalsAndDepartures,
-      List<StopBean> nearbyStops, List<SituationBean> situations) {
+      List<StopBean> nearbyStops) {
     this.stops = stops;
     this.arrivalsAndDepartures = arrivalsAndDepartures;
-    this.nearbyStops = nearbyStops;
-    this.situations = situations;
   }
 
   public List<StopBean> getStops() {
@@ -69,14 +63,6 @@ public class StopsWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   public void setNearbyStops(List<StopBean> nearbyStops) {
     this.nearbyStops = nearbyStops;
-  }
-
-  public List<SituationBean> getSituations() {
-    return situations;
-  }
-
-  public void setSituations(List<SituationBean> situations) {
-    this.situations = situations;
   }
 
   public String getTimeZone() {

@@ -1,8 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
 import static org.junit.Assert.assertEquals;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addTransfer;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,11 +10,10 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
-import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.impl.tripplanner.offline.GraphEntryFactory;
 import org.onebusaway.transit_data_federation.impl.walkplanner.WalkPlansImpl;
 import org.onebusaway.transit_data_federation.model.tripplanner.EndState;
 import org.onebusaway.transit_data_federation.model.tripplanner.StartState;
@@ -28,13 +25,17 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WalkFromStopStat
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkNode;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.NoPathException;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 
+import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
+import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
+
 public class CombinedStateHandlerTest {
+
+  private GraphEntryFactory _factory = new GraphEntryFactory();
 
   private TripContext _context;
 
@@ -42,11 +43,11 @@ public class CombinedStateHandlerTest {
 
   private TripPlannerConstraints _constraints;
 
-  private TransitGraphDao _transitGraphDao;
+  private CalendarService _calendarService;
+
+  private TripPlannerGraph _graph;
 
   private WalkPlannerService _walkPlannerService;
-  
-  private StopTransferService _stopTransferService;
 
   private CombinedStateHandler _handler;
 
@@ -61,14 +62,14 @@ public class CombinedStateHandlerTest {
     _constraints = new TripPlannerConstraints();
     _context.setConstraints(_constraints);
 
-    _transitGraphDao = Mockito.mock(TransitGraphDao.class);
-    _context.setTransitGraphDao(_transitGraphDao);
+    _calendarService = Mockito.mock(CalendarService.class);
+    _context.setCalendarService(_calendarService);
+
+    _graph = Mockito.mock(TripPlannerGraph.class);
+    _context.setGraph(_graph);
 
     _walkPlannerService = Mockito.mock(WalkPlannerService.class);
     _context.setWalkPlannerService(_walkPlannerService);
-    
-    _stopTransferService = new StopTransferServiceImpl();
-    _context.setStopTransferService(_stopTransferService);
 
     _handler = new CombinedStateHandler(_context);
     _results = new HashSet<TripState>();
@@ -96,12 +97,13 @@ public class CombinedStateHandlerTest {
     CoordinatePoint startPoint = new CoordinatePoint(47.5, -122.5);
     StartState state = new StartState(startTime, startPoint);
 
-    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(startPoint,
+    CoordinateRectangle bounds = DistanceLibrary.bounds(startPoint,
         _constants.getMaxTransferDistance());
 
-    StopEntry stopEntry = stop("stopIdA", 47.501, -122.501);
+    StopEntry stopEntry = mockStopEntry(new AgencyAndId("1", "stopIdA"),
+        47.501, -122.501);
     CoordinatePoint stopLocation = stopEntry.getStopLocation();
-    Mockito.when(_transitGraphDao.getStopsByLocation(bounds)).thenReturn(
+    Mockito.when(_graph.getStopsByLocation(bounds)).thenReturn(
         Arrays.asList(stopEntry));
 
     WalkPlan walkToStopPlan = new WalkPlan(Arrays.asList(walkNode(startPoint),
@@ -146,9 +148,11 @@ public class CombinedStateHandlerTest {
   public void testGetWalkFromStopForwardTransitions() {
 
     // Setup
-    StopEntryImpl stopEntryA = stop("stopIdA", 47.5, -122.5);
-    StopEntryImpl stopEntryB = stop("stopIdB", 47.501, -122.501);
-    addTransfer(stopEntryA, stopEntryB);
+
+    StopEntry stopEntryB = mockStopEntry(new AgencyAndId("1", "stopIdB"),
+        47.501, -122.501);
+    StopEntry stopEntryA = mockStopEntry(new AgencyAndId("1", "stopIdA"), 47.5,
+        -122.5, stopEntryB);
 
     CoordinatePoint stopLocationA = stopEntryA.getStopLocation();
     CoordinatePoint stopLocationB = stopEntryB.getStopLocation();
@@ -182,7 +186,7 @@ public class CombinedStateHandlerTest {
     int d = (int) walkToStopPlan.getDistance();
     double walkingTime = d / _constants.getWalkingVelocity();
     long walkToStopTime = (long) (startTime + walkingTime);
-    assertEquals(walkToStopTime, walkToStopState.getCurrentTime(), 200);
+    assertEquals(walkToStopTime, walkToStopState.getCurrentTime(), 100);
 
     EndState endState = getResultOfType(EndState.class);
     assertEquals(endPoint, endState.getLocation());
@@ -259,6 +263,11 @@ public class CombinedStateHandlerTest {
 
   private WalkNode walkNode(CoordinatePoint p) {
     return new WalkNode(ProjectedPointFactory.forward(p));
+  }
+
+  private StopEntry mockStopEntry(AgencyAndId stopId, double lat, double lon,
+      StopEntry... transfers) {
+    return _factory.createStopEntry(stopId, lat, lon, transfers);
   }
 
   @SuppressWarnings("unchecked")

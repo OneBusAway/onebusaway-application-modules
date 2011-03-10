@@ -5,7 +5,6 @@ import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * Service methods for querying {@link Route} and {@link RouteCollection}
@@ -35,12 +34,4 @@ public interface RouteService {
    * @return the route collection containing the specified route
    */
   public AgencyAndId getRouteCollectionIdForRoute(Route route);
-
-  /**
-   * Return the set of route collection ids serving the specified stop.
-   * 
-   * @param stopId
-   * @return the set of of route collection ids
-   */
-  public Set<AgencyAndId> getRouteCollectionIdsForStop(AgencyAndId stopId);
 }

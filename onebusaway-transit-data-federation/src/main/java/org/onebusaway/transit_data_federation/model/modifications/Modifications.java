@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.GenerateNarrativesTask;
+import org.onebusaway.transit_data_federation.impl.offline.GenerateNarrativesTask;
 
 /**
  * Used for overriding values during narrative generation to spot-fix bad values

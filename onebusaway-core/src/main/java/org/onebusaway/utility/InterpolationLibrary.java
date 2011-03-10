@@ -82,22 +82,6 @@ public class InterpolationLibrary {
   }
 
   /**
-   * Simple numeric interpolation between two pairs of key-values and a third
-   * key. Here, {@code ratio = (targetKey - keyA) / (keyB - keyA)} and the
-   * result is {@code ratio * (valueB - valueA) + valueA}.
-   * 
-   * @param fromValue
-   * @param toValue
-   * @param ratio
-   * @return {@code ratio * (toValue - fromValue) + fromValue}
-   */
-  public static double interpolatePair(double keyA, double valueA, double keyB,
-      double valueB, double targetKey) {
-    double ratio = (targetKey - keyA) / (keyB - keyA);
-    return interpolatePair(valueA, valueB, ratio);
-  }
-
-  /**
    * Given a {@link SortedMap} with key-values that all extend from
    * {@link Number}, interpolate using linear interpolation a value for a target
    * key within the key-range of the map. For a key outside the range of the

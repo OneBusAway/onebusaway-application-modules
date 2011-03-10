@@ -1,17 +1,17 @@
 package org.onebusaway.transit_data_federation.model.tripplanner;
 
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 
 public abstract class VehicleState extends AtStopState {
 
-  private final StopTimeInstance _sti;
+  private final StopTimeInstanceProxy _sti;
 
-  public VehicleState(StopTimeInstance sti, boolean arrival) {
-    super(arrival ? sti.getArrivalTime() : sti.getDepartureTime(), sti.getStopTime().getStopTime().getStop());
+  public VehicleState(StopTimeInstanceProxy sti, boolean arrival) {
+    super(arrival ? sti.getArrivalTime() : sti.getDepartureTime(), sti.getStopTime().getStop());
     _sti = sti;
   }
 
-  public StopTimeInstance getStopTimeInstance() {
+  public StopTimeInstanceProxy getStopTimeInstance() {
     return _sti;
   }
 

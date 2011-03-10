@@ -1,0 +1,109 @@
+<!--
+  Copyright 2008 Brian Ferris
+
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+-->
+<!DOCTYPE html PUBLIC 
+	"-//W3C//DTD XHTML 1.1 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+<head>
+<title>One Bus Away</title>
+</head>
+<body>
+
+<h2>Text-Messaging Interface</h2>
+
+<p><i>You can get real-time arrival info over SMS. Just text your stop number in and get real-time bus arrival
+info back on your phone.</i></p>
+
+<h3>Quick Start</h3>
+
+<ol>
+    <li>Find your <a href="stopNumber.html">stop number</a></li>
+    <li>Text "<span class="sms">onebus stop_number_here</span>" to <span class="sms">41411</span>.</li>
+    <li>Wait for arrival information to be texted back to your phone.</li>
+</ol>
+
+<p>As a quick example, to get real-time arrival info for stop# 75414, text "<span class="sms">onebus 75414</span>" to 41411.</p>
+
+<h3>Your Default Search Location</h3>
+
+<p>When you use the SMS system for the first time, we will ask you to enter your zip-code so that we can provide
+results relevant to your area among the <a href="standard/agencies.action">multiple transit agencies</a> supported
+by OneBusAway</p>
+
+<p>If you need to change your default search location, see the <a href="#default_search_location">instructions below</a>.</p>
+
+<h3>Tips and Tricks</h3>
+
+<ol>
+    <li><a href="#single_route">How can I get arrival info for just a single route?</a></li>
+    <li><a href="#default_search_location">How can I change my default search location?</a></li>
+    <li><a href="#bookmarks">How can I bookmark stops for easier access?</a></li>
+    <li><a href="#help">What other commands are available?</a></li>
+</ol>
+
+<div class="section">
+<a name="single_route"></a>
+<h4>How can I get arrival info for just a single route?</h4>
+
+<p>For busy stops, you may wish to view arrival information for just one or two routes. To specify a route, text "<span class="sms">onebus
+stop# route#</span>".</p>
+
+<p>For example, stop # 578 at 3rd and Pike is served by 21 different routes. To see just arrivals for routes 16 and
+26, you can text "<span class="sms">onebus 578 16,26</span>" to 41411 to get real-time arrival info for just those routes.</p>
+</div>
+
+<div class="section">
+<a name="default_search_location"></a>
+<h4>How can I change my default search location?</h4>
+
+<p>When you use the SMS system for the first time, we will ask you to enter your zip-code so that we can provide
+results relevant to your area among the <a href="standard/agencies.action">multiple transit agencies</a> supported
+by OneBusAway.  You can change your default search location using the following steps:</p>
+
+<ol>
+    <li>Text "<span class="sms">onebus #setSearchLocation</span>" to 41411.</li>
+    <li>You'll get an SMS back asking you to enter you zip code.</li>
+    <li>Text back your zip-code for your location.</li>
+    <li>You'll receive a confirmation text noting that your default search location has been updated.</li>
+</ol>
+</div>
+
+<div class="section">
+<a name="bookmarks"></a>
+<h4>How can I bookmark stops for easier access?</h4>
+
+<p>You can bookmark stops through the SMS interface for quicker access.</p>
+
+<ul>
+<li><span class="label">Add a bookmark:</span> Text "<span class="sms">onebus #bookmarks add</span>" will create a bookmark for your most recently access stop.</li>
+<li><span class="label">List your bookmarks:</span> Text "<span class="sms">onebus #bookmarks</span>" to show your set of bookmarks.</li>
+<li><span class="label">Access a bookmark:</span> Text "<span class="sms">onebus #bookmarks X</span>" where X is the bookmark index.</li>
+<li><span class="label">Delete a bookmark:</span> Text "<span class="sms">onebus #bookmarks delete X</span>" where X is the bookmark index.</li>
+</ul>
+
+<p>Special tip: you don't actually have to type out all of #bookmarks.  #book and even #boo will work.</p>
+
+</div>
+
+<div class="section">
+<a name="help"></a>
+<h4>What other commands are available?</h4>
+<p>You can text "<span class="sms">onebus #help</span>" to see the list of available commands.</p>
+</div>
+
+
+</body>
+</html>

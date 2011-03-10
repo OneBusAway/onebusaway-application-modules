@@ -73,7 +73,7 @@ public class WalkNodeEntryImpl implements Serializable, WalkNodeEntry {
 
   @Override
   public String toString() {
-    return Integer.toString(_id) + " " + _location.getLat() + " " + _location.getLon();
+    return Integer.toString(_id);
   }
 
   /*****************************************************************************

@@ -64,8 +64,8 @@ public class ArrivalsAndDeparturesForRouteAction extends AbstractAction {
     }
 
     m = new StopsWithArrivalsAndDeparturesBean(m.getStops(), arrivals,
-        m.getNearbyStops(), m.getSituations());
-
+        m.getNearbyStops());
+    
     _model.setResult(m);
 
     logUserInteraction("routeIds", routeIds);

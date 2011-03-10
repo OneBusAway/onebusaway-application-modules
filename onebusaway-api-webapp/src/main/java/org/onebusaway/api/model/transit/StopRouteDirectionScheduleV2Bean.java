@@ -1,5 +1,6 @@
 package org.onebusaway.api.model.transit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StopRouteDirectionScheduleV2Bean {
@@ -8,9 +9,7 @@ public class StopRouteDirectionScheduleV2Bean {
 
   private String tripHeadsign;
 
-  private List<ScheduleStopTimeInstanceV2Bean> scheduleStopTimes;
-  
-  private List<ScheduleFrequencyInstanceV2Bean> scheduleFrequencies;
+  private List<ScheduleStopTimeInstanceV2Bean> scheduleStopTimes = new ArrayList<ScheduleStopTimeInstanceV2Bean>();
 
   public String getTripHeadsign() {
     return tripHeadsign;
@@ -26,14 +25,5 @@ public class StopRouteDirectionScheduleV2Bean {
 
   public void setScheduleStopTimes(List<ScheduleStopTimeInstanceV2Bean> stopTimes) {
     this.scheduleStopTimes = stopTimes;
-  }
-
-  public List<ScheduleFrequencyInstanceV2Bean> getScheduleFrequencies() {
-    return scheduleFrequencies;
-  }
-
-  public void setScheduleFrequencies(
-      List<ScheduleFrequencyInstanceV2Bean> scheduleFrequencies) {
-    this.scheduleFrequencies = scheduleFrequencies;
   }
 }

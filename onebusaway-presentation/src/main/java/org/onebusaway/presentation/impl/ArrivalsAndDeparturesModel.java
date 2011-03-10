@@ -1,6 +1,7 @@
 package org.onebusaway.presentation.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -14,7 +15,6 @@ import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
-import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -45,9 +45,13 @@ public class ArrivalsAndDeparturesModel {
 
   private TimeZone _timeZone;
 
-  private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
+  private Date _time = new Date();
 
-  protected StopsWithArrivalsAndDeparturesBean _result;
+  private int _minutesBefore = 5;
+
+  private int _minutesAfter = 35;
+
+  private StopsWithArrivalsAndDeparturesBean _result;
 
   private List<AgencyBean> _agencies;
 
@@ -55,8 +59,6 @@ public class ArrivalsAndDeparturesModel {
    * True if we filtered the results (ex. only include particular set of routes)
    */
   private boolean _filtered = false;
-
-  protected UserBean _user;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -103,23 +105,15 @@ public class ArrivalsAndDeparturesModel {
   }
 
   public void setTargetTime(Date time) {
-    _query.setTime(time.getTime());
+    _time = time;
   }
 
   public void setMinutesBefore(int minutesBefore) {
-    _query.setMinutesBefore(minutesBefore);
+    _minutesBefore = minutesBefore;
   }
 
   public void setMinutesAfter(int minutesAfter) {
-    _query.setMinutesAfter(minutesAfter);
-  }
-
-  public void setFrequencyMinutesBefore(int frequencyMinutesBefore) {
-    _query.setFrequencyMinutesBefore(frequencyMinutesBefore);
-  }
-
-  public void setFrequencyMinutesAfter(int frequencyMinutesAfter) {
-    _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
+    _minutesAfter = minutesAfter;
   }
 
   public boolean isMissingData() {
@@ -128,8 +122,17 @@ public class ArrivalsAndDeparturesModel {
 
   public void process() {
 
+    Calendar c = Calendar.getInstance();
+    c.setTime(_time);
+    c.add(Calendar.MINUTE, -_minutesBefore);
+    Date timeFrom = c.getTime();
+
+    c.setTime(_time);
+    c.add(Calendar.MINUTE, _minutesAfter);
+    Date timeTo = c.getTime();
+
     _result = _transitDataService.getStopsWithArrivalsAndDepartures(_stopIds,
-        _query);
+        timeFrom, timeTo);
 
     checkForEmptyResult();
     filterResults();
@@ -163,7 +166,7 @@ public class ArrivalsAndDeparturesModel {
   public List<AgencyBean> getAgencies() {
     return _agencies;
   }
-  
+
   /****
    * Private Methods
    ****/
@@ -202,8 +205,8 @@ public class ArrivalsAndDeparturesModel {
     // Save the last selected stop id
     _currentUserService.setLastSelectedStopIds(_stopIds);
 
-    _user = _currentUserService.getCurrentUser();
-    if (_user == null || !_user.hasDefaultLocation()) {
+    UserBean user = _currentUserService.getCurrentUser();
+    if (user == null || !user.hasDefaultLocation()) {
       List<StopBean> stops = _result.getStops();
       StopBean stop = stops.get(0);
       _defaultSearchLocationService.setDefaultLocationForCurrentUser(

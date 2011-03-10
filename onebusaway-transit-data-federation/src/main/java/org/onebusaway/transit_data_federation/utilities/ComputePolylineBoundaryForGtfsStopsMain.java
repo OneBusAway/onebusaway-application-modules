@@ -15,10 +15,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
 import org.onebusaway.container.ContainerLibrary;
-import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.geospatial.model.XYPoint;
-import org.onebusaway.geospatial.services.UTMLibrary;
-import org.onebusaway.geospatial.services.UTMProjection;
 import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
@@ -33,6 +29,12 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+
+import edu.washington.cs.rse.geospatial.GeoPoint;
+import edu.washington.cs.rse.geospatial.IGeoPoint;
+import edu.washington.cs.rse.geospatial.UTMLibrary;
+import edu.washington.cs.rse.geospatial.UTMProjection;
+import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 /**
  * Utility script to compute a polygon boundary for the set of stops in a GTFS,
@@ -199,8 +201,8 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
       LineString line, boolean latFirst) {
     for (int i = 0; i < line.getNumPoints(); i++) {
       Point point = line.getPointN(i);
-      XYPoint p = new XYPoint(point.getX(), point.getY());
-      CoordinatePoint c = proj.reverse(p);
+      GeoPoint p = new GeoPoint(proj, point.getX(), point.getY(), 0);
+      CoordinatePoint c = p.getCoordinates();
       if (latFirst)
         out.println(c.getLat() + " " + c.getLon());
       else
@@ -213,7 +215,7 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
   }
 
   protected void printUsage() {
-    System.err.println("usage: [-format osm|xml|encoded] data-sources.xml [data-sources.xml ...] output_path");
+    System.err.println("usage: [-format osm|xml|encoded] data-sources.xml [data-sources.xml ...] output_directory");
   }
 
   protected EFormat getFormat(CommandLine cli) {
@@ -259,12 +261,11 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
       Stop stop = (Stop) bean;
 
       if (_projection == null) {
-        int zone = UTMLibrary.getUTMZoneForLongitude(stop.getLon());
+        int zone = UTMLibrary.getUTMIndexForLatitude(stop.getLat());
         _projection = new UTMProjection(zone);
       }
 
-      
-      XYPoint point = _projection.forward(new CoordinatePoint(stop.getLat(),
+      IGeoPoint point = _projection.forward(new CoordinatePoint(stop.getLat(),
           stop.getLon()));
 
       Point p = _factory.createPoint(new Coordinate(point.getX(), point.getY()));

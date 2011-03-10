@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 class UserDaoImpl implements UserDao {
@@ -52,10 +51,10 @@ class UserDaoImpl implements UserDao {
   @Override
   public List<Integer> getAllUserIdsInRange(final int firstResult,
       final int maxResults) {
-    return _template.execute(new HibernateCallback<List<Integer>>() {
+    return (List<Integer>) _template.execute(new HibernateCallback() {
       @Override
-      public List<Integer> doInHibernate(Session session)
-          throws HibernateException, SQLException {
+      public Object doInHibernate(Session session) throws HibernateException,
+          SQLException {
         Query query = session.createQuery("SELECT user.id FROM User user");
         query.setFirstResult(firstResult);
         query.setMaxResults(maxResults);
@@ -69,7 +68,6 @@ class UserDaoImpl implements UserDao {
     return (User) _template.get(User.class, id);
   }
 
-  @Transactional
   @Override
   public void saveOrUpdateUser(User user) {
     _template.saveOrUpdate(user);
@@ -124,7 +122,6 @@ class UserDaoImpl implements UserDao {
         "userIndexKeyValuesForKeyType", "type", keyType);
   }
 
-  @Transactional
   @Override
   public UserIndex getUserIndexForId(UserIndexKey key) {
     return (UserIndex) _template.get(UserIndex.class, key);

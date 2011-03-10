@@ -16,7 +16,6 @@
 package org.onebusaway.container.cache;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.ehcache.Cache;
@@ -77,22 +76,15 @@ public class CacheableMethodManager {
       cache.put(element);
     }
 
-    if (entry.isValueSerializable())
-      return element.getValue();
-    else
-      return element.getObjectValue();
+    return element.getValue();
   }
 
   /***************************************************************************
    * Protected Methods
-   * 
-   * @param method
    **************************************************************************/
 
-  protected CacheableMethodKeyFactory getKeyFactory(ProceedingJoinPoint pjp,
-      Method method) {
-    return _cacheableMethodKeyFactoryManager.getCacheableMethodKeyFactoryForJoinPoint(
-        pjp, method);
+  protected CacheableMethodKeyFactory getKeyFactory(ProceedingJoinPoint pjp) {
+    return _cacheableMethodKeyFactoryManager.getCacheableMethodKeyFactoryForJoinPoint(pjp);
   }
 
   protected String getCacheName(ProceedingJoinPoint pjp) {
@@ -119,9 +111,7 @@ public class CacheableMethodManager {
     CacheEntry entry = _entries.get(name);
 
     if (entry == null) {
-      Method method = _cacheableMethodKeyFactoryManager.getMatchingMethodForJoinPoint(pjp);
-      CacheableMethodKeyFactory keyFactory = getKeyFactory(pjp, method);
-      boolean valueSerializable = isValueSerializable(pjp, method);
+      CacheableMethodKeyFactory keyFactory = getKeyFactory(pjp);
       Cache cache = _cacheManager.getCache(name);
       if (cache == null) {
         cache = createCache(pjp, name);
@@ -132,40 +122,25 @@ public class CacheableMethodManager {
           _cacheManager.addCache(cache);
         }
       }
-      entry = new CacheEntry(keyFactory, valueSerializable, cache);
+      entry = new CacheEntry(keyFactory, cache);
       _entries.put(name, entry);
     }
     return entry;
-  }
-
-  private boolean isValueSerializable(ProceedingJoinPoint pjp, Method method) {
-    Cacheable c = method.getAnnotation(Cacheable.class);
-    if (c == null)
-      return true;
-    return c.isValueSerializable();
   }
 
   private static class CacheEntry {
 
     private CacheableMethodKeyFactory _keyFactory;
 
-    private boolean _valueSerializable;
-
     private Cache _cache;
 
-    public CacheEntry(CacheableMethodKeyFactory keyFactory,
-        boolean valueSerializable, Cache cache) {
+    public CacheEntry(CacheableMethodKeyFactory keyFactory, Cache cache) {
       _keyFactory = keyFactory;
-      _valueSerializable = valueSerializable;
       _cache = cache;
     }
 
     public CacheableMethodKeyFactory getKeyFactory() {
       return _keyFactory;
-    }
-
-    public boolean isValueSerializable() {
-      return _valueSerializable;
     }
 
     public Cache getCache() {

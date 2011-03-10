@@ -3,33 +3,36 @@ package org.onebusaway.transit_data_federation.impl.tripplanner;
 import java.util.Collection;
 import java.util.Map;
 
-import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripContext;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstraints;
-import org.onebusaway.transit_data_federation.services.StopTimeService;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.MinTravelTimeToStopsListener;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerService;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
+
 @Component
 class TripPlannerServiceImpl implements TripPlannerService {
+
+  private CalendarService _calendarService;
 
   private WalkPlannerService _walkPlanner;
 
   private TripPlannerConstants _constants;
 
-  private TransitGraphDao _transitGraphDao;
+  private TripPlannerGraph _graph;
 
-  private StopTimeService _stopTimeService;
-
-  private StopTransferService _stopTransferService;
+  @Autowired
+  public void setCalendarService(CalendarService calendarService) {
+    _calendarService = calendarService;
+  }
 
   @Autowired
   public void setWalkPlannerService(WalkPlannerService walkPlannerService) {
@@ -42,18 +45,8 @@ class TripPlannerServiceImpl implements TripPlannerService {
   }
 
   @Autowired
-  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
-    _transitGraphDao = transitGraphDao;
-  }
-
-  @Autowired
-  public void setStopTimeService(StopTimeService stopTimeService) {
-    _stopTimeService = stopTimeService;
-  }
-
-  @Autowired
-  public void setStopTransferService(StopTransferService stopTransferService) {
-    _stopTransferService = stopTransferService;
+  public void setTripPlannerGraph(TripPlannerGraph graph) {
+    _graph = graph;
   }
 
   public Map<StopEntry, Long> getMinTravelTimeToStopsFrom(CoordinatePoint from,
@@ -89,10 +82,9 @@ class TripPlannerServiceImpl implements TripPlannerService {
     TripContext context = new TripContext();
 
     context.setConstants(_constants);
-    context.setTransitGraphDao(_transitGraphDao);
+    context.setGraph(_graph);
     context.setWalkPlannerService(_walkPlanner);
-    context.setStopTimeService(_stopTimeService);
-    context.setStopTransferService(_stopTransferService);
+    context.setCalendarService(_calendarService);
     context.setConstraints(constraints);
 
     return context;

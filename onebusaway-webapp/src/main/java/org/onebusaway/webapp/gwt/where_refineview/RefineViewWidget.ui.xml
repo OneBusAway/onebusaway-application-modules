@@ -2,7 +2,7 @@
     <!-- RefineViewWidget.ui.xml -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <ui:style type="org.onebusaway.webapp.gwt.stop_and_route_selection.AbstractStopAndRouteSelectionWidget.MyStyle">
+    <ui:style type="org.onebusaway.webapp.gwt.where_refineview.RefineViewWidget.MyStyle">
 
         .StopFinderDialog {
             background-color: white;

@@ -67,7 +67,7 @@
 }
 
 .stopScheduleRouteEntry {
-	margin-top: 2em;
+	margin-bottom: 10px;
 }
 
 .stopScheduleRouteHeader {
@@ -78,62 +78,29 @@
 	text-align: left;
 }
 
-table.stopScheduleTable {
-  margin-top: 1em;
-  width: 100%;
+table.stopScheduleRouteTable>tbody>tr>td {
+	vertical-align: top;
+	padding-right: 20px;
 }
 
-table.stopScheduleTable > thead > tr {
-  background-color: #6d6e72;
+.stopScheduleAmPmKey {
+	vertical-align: top;
+	font-weight: bold;
+	padding-top: 4px;
+	padding-right: 4px;
+	color: green;
 }
 
-table.stopScheduleTable > thead > tr > td { 
-  text-align: center;
-  color: white;
-  font-weight: bold;
-  padding: 5px;
+.stopScheduleAmPmValues {
+	vertical-align: top;
 }
 
-table.stopScheduleTable tr.even {
-  background-color: #e0e1e3;
+.stopScheduleHoursTable {
+	margin-top: 5px;	
 }
 
-table.stopScheduleTable tr.odd {
-  background-color: #f1f1f1;
-}
-
-table.stopScheduleNonFrequencyTable > tbody > tr > td {
-  padding: 5px 5px 5px 5px;
-}
-
-table.stopScheduleNonFrequencyTable td.am_pm_header {
-  width: 2em;
-}
-
-table.stopScheduleNonFrequencyTable td.hour_header {
-  width: 2em;
-}
-
-table.stopScheduleNonFrequencyTable td.minute_header {
-  text-align: left;
-}
-
-table.stopScheduleNonFrequencyTable td.am_pm_label {
-  color:green;
-  font-weight:bold;
-}
-
-table.stopScheduleFrequencyTable > tbody > tr > td { 
-  text-align: center;
-  padding: 5px 2em 5px 2em;
-}
-
-table.stopScheduleFrequencyTable td.startTime {
-  vertical-align: top;
-}
-
-table.stopScheduleFrequencyTable span.frequency {
-  font-weight: bold;
+.stopScheduleHoursTable tr td {
+	padding-bottom: 5px;	
 }
 
 .stopScheduleHoursKey {
@@ -142,16 +109,16 @@ table.stopScheduleFrequencyTable span.frequency {
 	padding-right: 5px;
 }
 
+.stopScheduleHoursValues {
+
+}
+
 .stopScheduleMinutes {
 	margin-right: 10px;
 }
 
 .stopScheduleStop {
 	text-align: left;
-}
-
-.stopScheduleStop p {
-	margin-top: 1em;	
 }
 
 .stopScheduleNearbyStops>div.header {
@@ -164,13 +131,8 @@ table.stopScheduleFrequencyTable span.frequency {
 	width: 310px;
 	padding: 10px;
 	border: 2px solid gray;
-	width: 200px;
+	width: 280px;
 	padding: 5px;
-}
-
-.stopScheduleCalendars > table {
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .stopScheduleCalendars>table>tbody>tr>td {

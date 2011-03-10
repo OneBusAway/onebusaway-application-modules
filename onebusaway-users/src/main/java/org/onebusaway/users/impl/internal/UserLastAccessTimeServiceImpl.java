@@ -27,7 +27,7 @@ public class UserLastAccessTimeServiceImpl implements UserLastAccessTimeService 
   public void setUserDao(UserDao userDao) {
     _userDao = userDao;
   }
-
+  
   public void setCache(Cache cache) {
     _cache = cache;
   }
@@ -39,13 +39,13 @@ public class UserLastAccessTimeServiceImpl implements UserLastAccessTimeService 
 
   public void handleAccessForUser(int userId, long accessTime) {
     Element element = _cache.get(userId);
-    if (element == null) {
+    if( element == null) {
       User user = _userDao.getUserForId(userId);
       user.setLastAccessTime(new Date(accessTime));
       _userDao.saveOrUpdateUser(user);
       if (_log.isDebugEnabled())
         _log.debug("user last access set " + userId);
-      element = new Element(userId, accessTime);
+      element = new Element(userId,accessTime);
       _cache.put(element);
     }
   }

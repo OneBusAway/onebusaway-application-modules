@@ -40,7 +40,7 @@ public class BookmarkAction extends AbstractAction implements
       addFieldError("order", "unknown order value: " + order);
   }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
+  @TypeConversion(converter = "org.onebusaway.webapp.actions.where.DateTimeConverter")
   public void setTime(Date time) {
     _model.setTargetTime(time);
   }

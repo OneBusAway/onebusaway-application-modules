@@ -1,15 +1,12 @@
 package org.onebusaway.presentation.tags;
 
 import java.io.Writer;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.struts2.components.ContextBean;
 
-import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.util.ValueStack;
 import com.opensymphony.xwork2.util.logging.Logger;
 import com.opensymphony.xwork2.util.logging.LoggerFactory;
@@ -19,10 +16,6 @@ public class DateComponent extends ContextBean {
   private static final Logger LOG = LoggerFactory.getLogger(DateComponent.class);
 
   private String _format;
-
-  private String _dateStyle;
-
-  private String _timeStyle;
 
   private String _value;
 
@@ -34,14 +27,6 @@ public class DateComponent extends ContextBean {
 
   public void setFormat(String format) {
     _format = format;
-  }
-
-  public void setDateStyle(String dateStyle) {
-    _dateStyle = dateStyle;
-  }
-
-  public void setTimeStyle(String timeStyle) {
-    _timeStyle = timeStyle;
   }
 
   public void setValue(String value) {
@@ -61,33 +46,31 @@ public class DateComponent extends ContextBean {
   public boolean end(Writer writer, String body) {
 
     String format = getFormat();
-    String dateStyle = getDateStyle();
-    String timeStyle = getTimeStyle();
-
-    if (format == null && dateStyle == null && timeStyle == null) {
-      LOG.debug("no \"format\", \"dateStyle\", or \"timeStyle\" property specified for oba:date component");
+    
+    if( format == null) {
+      LOG.debug("no \"format\" property specified for oba:date component");
       return super.end(writer, "");
     }
-
+    
     if (_value == null)
       _value = "top";
 
     Object obj = findValue(_value);
-
-    if (obj instanceof Long)
+    
+    if( obj instanceof Long) 
       obj = new Date((Long) obj);
-    else if (obj instanceof String) {
+    else if( obj instanceof String) {
       String v = (String) obj;
-      if (v.equals("now"))
+      if( v.equals("now"))
         obj = new Date();
     }
-
+    
     if (obj instanceof Date) {
 
       try {
 
         Date date = (Date) obj;
-        DateFormat sdf = getFormat(format, dateStyle, timeStyle);
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
 
         TimeZone timeZone = getTimeZone();
         sdf.setTimeZone(timeZone);
@@ -103,48 +86,10 @@ public class DateComponent extends ContextBean {
     return super.end(writer, "");
   }
 
-  private DateFormat getFormat(String format, String dateStyle, String timeStyle) {
-
-    Locale locale = ActionContext.getContext().getLocale();
-
-    if (format != null)
-      return new SimpleDateFormat(format, locale);
-    if (dateStyle != null && timeStyle != null)
-      return DateFormat.getDateTimeInstance(getStyleAsValue(dateStyle),
-          getStyleAsValue(timeStyle), locale);
-    if (dateStyle != null)
-      return DateFormat.getDateInstance(getStyleAsValue(dateStyle), locale);
-    if (timeStyle != null)
-      return DateFormat.getTimeInstance(getStyleAsValue(timeStyle), locale);
-    throw new IllegalStateException(
-        "no format, dateStyle, or timeStyle specified");
-  }
-
-  private int getStyleAsValue(String style) {
-    style = style.toLowerCase();
-    if ("medium".equals(style))
-      return DateFormat.MEDIUM;
-    if ("long".equals(style))
-      return DateFormat.LONG;
-    return DateFormat.SHORT;
-  }
-
   private String getFormat() {
-    if (_format == null)
+    if( _format == null)
       return null;
     return findStringIfAltSyntax(_format);
-  }
-
-  private String getDateStyle() {
-    if (_dateStyle == null)
-      return null;
-    return findStringIfAltSyntax(_dateStyle);
-  }
-
-  private String getTimeStyle() {
-    if (_timeStyle == null)
-      return null;
-    return findStringIfAltSyntax(_timeStyle);
   }
 
   private TimeZone getTimeZone() {

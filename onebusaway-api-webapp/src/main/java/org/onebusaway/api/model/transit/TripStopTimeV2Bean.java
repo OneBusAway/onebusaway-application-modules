@@ -14,8 +14,6 @@ public class TripStopTimeV2Bean implements Serializable {
 
   private String stopHeadsign;
 
-  private double distanceAlongTrip;
-
   public long getArrivalTime() {
     return arrivalTime;
   }
@@ -46,13 +44,5 @@ public class TripStopTimeV2Bean implements Serializable {
 
   public void setStopHeadsign(String stopHeadsign) {
     this.stopHeadsign = stopHeadsign;
-  }
-
-  public double getDistanceAlongTrip() {
-    return distanceAlongTrip;
-  }
-
-  public void setDistanceAlongTrip(double distanceAlongTrip) {
-    this.distanceAlongTrip = distanceAlongTrip;
   }
 }

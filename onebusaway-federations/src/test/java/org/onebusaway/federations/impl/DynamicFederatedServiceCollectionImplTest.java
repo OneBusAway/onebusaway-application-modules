@@ -23,8 +23,6 @@ import com.caucho.hessian.server.HessianServlet;
 
 public class DynamicFederatedServiceCollectionImplTest {
 
-  private static final int TIMEOUT = 10000;
-
   private static final int PORT = 9999;
 
   private FederatedServiceRegistryImpl _registry;
@@ -72,7 +70,7 @@ public class DynamicFederatedServiceCollectionImplTest {
     _registry.addService("http://localhost:" + PORT + "/service-A/service",
         SimpleFederatedService.class.getName(), new HashMap<String, String>());
 
-    Thread.sleep(TIMEOUT);
+    Thread.sleep(4000);
 
     services = _collection.getAllServices();
     assertEquals(1, services.size());
@@ -83,7 +81,7 @@ public class DynamicFederatedServiceCollectionImplTest {
     _registry.addService("http://localhost:" + PORT + "/service-B/service",
         SimpleFederatedService.class.getName(), new HashMap<String, String>());
 
-    Thread.sleep(TIMEOUT);
+    Thread.sleep(4000);
 
     services = _collection.getAllServices();
     assertEquals(2, services.size());
@@ -98,7 +96,7 @@ public class DynamicFederatedServiceCollectionImplTest {
     _server.stop();
     _server = null;
 
-    Thread.sleep(TIMEOUT);
+    Thread.sleep(4000);
 
     services = _collection.getAllServices();
     assertTrue(services.isEmpty());

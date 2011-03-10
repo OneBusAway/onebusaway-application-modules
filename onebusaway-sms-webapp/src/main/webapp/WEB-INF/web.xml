@@ -18,7 +18,7 @@
         <param-name>contextConfigLocation</param-name>
         <param-value>
             classpath:data-sources.xml
-            classpath:org/onebusaway/sms/application-context-webapp.xml
+            classpath:org/onebusaway/sms/application-context-sms-webapp.xml
         </param-value>
     </context-param>
 

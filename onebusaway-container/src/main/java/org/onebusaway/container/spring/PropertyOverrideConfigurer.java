@@ -26,19 +26,11 @@ public class PropertyOverrideConfigurer extends
 
   private static final Pattern _pattern = Pattern.compile("\\$\\{([^}]+)\\}");
 
-  private boolean ignoreInvalidBeans = false;
-
-  public void setIgnoreInvalidBeans(boolean ignoreInvalidBeans) {
-    this.ignoreInvalidBeans = ignoreInvalidBeans;
-  }
-
   @Override
   protected void applyPropertyValue(ConfigurableListableBeanFactory factory,
       String beanName, String property, String value) {
     if (value != null)
       value = resolveValue(value);
-    if (!factory.containsBeanDefinition(beanName) && ignoreInvalidBeans)
-      return;
     super.applyPropertyValue(factory, beanName, property, value);
   }
 
@@ -50,23 +42,10 @@ public class PropertyOverrideConfigurer extends
       String propertyValue = System.getProperty(property);
       if (propertyValue == null) {
         _log.warn("no such System property: " + property);
-        propertyValue = "${" + property + "}";
       } else {
         propertyValue = resolveValue(propertyValue);
       }
-
-      /**
-       * Make sure we escape the '\' and '$' characters, otherwise they'll be
-       * treated as group references
-       */
-      propertyValue = Matcher.quoteReplacement(propertyValue);
-
-      try {
-        m.appendReplacement(sb, propertyValue);
-      } catch (Throwable ex) {
-        _log.warn("error appending replacement: propertyName=" + property
-            + " propertyValue=" + propertyValue, ex);
-      }
+      m.appendReplacement(sb, propertyValue);
     }
     m.appendTail(sb);
     return sb.toString();

@@ -34,9 +34,13 @@
 
     <import resource="classpath:org/onebusaway/container/application-context-caching.xml" />
 
-    <bean id="hibernatePropertiesMutable" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-        <property name="properties">
+    <!-- Hibernate session factory -->
+    <bean id="mutableSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean" primary="false">
+        <qualifier value="mutable" />
+        <property name="dataSource" ref="mutableDataSource" />
+        <property name="hibernateProperties">
             <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
                 <prop key="hibernate.hbm2ddl.auto">update</prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.use_sql_comments">true</prop>
@@ -47,44 +51,17 @@
                 <prop key="hibernate.jdbc.batch_size">1000</prop>
             </props>
         </property>
-    </bean>
-
-    <!--
-        List of Hibernate annotated classes: classes configured for Hibernate using annotations, as opposed to a
-        Hibernate xml mapping file. This list can be extended by other modules with an
-        org.onebusaway.container.spring.ListBeanPostProcessor
-    -->
-    <bean id="hibernateAnnotatedClassesMutable" class="org.springframework.beans.factory.config.ListFactoryBean">
-        <property name="sourceList">
+        <property name="annotatedClasses">
             <list>
-                <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
-                <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
-                <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
+                <value>org.onebusaway.transit_data_federation.impl.realtime.TripPositionRecord</value>
             </list>
         </property>
-    </bean>
-
-    <!--
-        List of Hibernate xml mapping files, which control the mapping of Java objects in Hibernate. This list can be
-        extended by other modules with an org.onebusaway.container.spring.ListBeanPostProcessor
-    -->
-    <bean id="hibernateMappingLocationsMutable" class="org.springframework.beans.factory.config.ListFactoryBean">
-        <property name="sourceList">
+        <property name="mappingLocations">
             <list>
-                <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/BlockLocationRecordDaoImpl.hibernate.xml</value>
-                <value>classpath:org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml</value>
+                <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/TripPositionRecordDaoImpl.hibernate.xml
+                </value>
             </list>
         </property>
-    </bean>
-
-    <!-- Hibernate session factory -->
-    <bean id="mutableSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
-        primary="false">
-        <qualifier value="mutable" />
-        <property name="dataSource" ref="mutableDataSource" />
-        <property name="hibernateProperties" ref="hibernatePropertiesMutable" />
-        <property name="annotatedClasses" ref="hibernateAnnotatedClassesMutable" />
-        <property name="mappingLocations" ref="hibernateMappingLocationsMutable"/>
         <property name="cacheProvider">
             <bean class="org.onebusaway.container.spring.ehcache.EhCacheProvider">
                 <property name="cacheManager" ref="cacheManager" />

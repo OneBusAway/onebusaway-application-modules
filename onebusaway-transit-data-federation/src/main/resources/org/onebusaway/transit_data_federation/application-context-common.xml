@@ -18,12 +18,11 @@
 
     <import resource="classpath:org/onebusaway/gtfs/application-context.xml" />
 
-
-    <bean id="bundle" class="org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle">
+    <bean id="gtfsBundle" class="org.onebusaway.gtfs.model.GtfsServiceBundle">
         <property name="path" value="${bundlePath}" />
     </bean>
-    
-    <bean id="otpGraphBundle" class="org.opentripplanner.model.GraphBundle">
+
+    <bean id="bundle" class="org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle">
         <property name="path" value="${bundlePath}" />
     </bean>
 

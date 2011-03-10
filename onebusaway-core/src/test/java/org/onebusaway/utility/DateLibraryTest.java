@@ -20,17 +20,4 @@ public class DateLibraryTest {
     String string = DateLibrary.getTimeAsIso8601String(date, tz);
     assertEquals("2010-01-10T11:24:36-08:00", string);
   }
-
-  @Test
-  public void testGetIso8601StringAsTime() throws ParseException {
-
-    DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-    Date expected = format.parse("2010-01-10 11:24:36 PST");
-
-    TimeZone tz = TimeZone.getTimeZone("America/Los_Angeles");
-    Date actual = DateLibrary.getIso8601StringAsTime(
-        "2010-01-10T11:24:36-08:00", tz);
-
-    assertEquals(expected, actual);
-  }
 }

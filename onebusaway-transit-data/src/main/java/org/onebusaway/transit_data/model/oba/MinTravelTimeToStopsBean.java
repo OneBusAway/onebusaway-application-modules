@@ -3,77 +3,61 @@ package org.onebusaway.transit_data.model.oba;
 import java.io.Serializable;
 
 public class MinTravelTimeToStopsBean implements Serializable {
-
+  
   private static final long serialVersionUID = 1L;
 
-  private String agencyId;
+  private String _agencyId;
 
-  private String[] stopIds;
+  private String[] _stopIds;
 
-  private double[] lats;
+  private double[] _lats;
 
-  private double[] lons;
+  private double[] _lons;
 
-  private long[] transitTimes;
+  private long[] _transitTimes;
 
-  private double walkingVelocity;
-
+  private double _walkingVelocity;
+  
   public MinTravelTimeToStopsBean() {
-
+    
   }
 
-  public MinTravelTimeToStopsBean(String agencyId, String[] stopIds,
-      double[] lats, double[] lons, long[] times, double walkingVelocity) {
-    this.agencyId = agencyId;
-    this.stopIds = stopIds;
-    this.lats = lats;
-    this.lons = lons;
-    this.transitTimes = times;
-    this.walkingVelocity = walkingVelocity;
+  public MinTravelTimeToStopsBean(String agencyId, String[] stopIds, double[] lats,
+      double[] lons, long[] times, double walkingVelocity) {
+    _agencyId = agencyId;
+    _stopIds = stopIds;
+    _lats = lats;
+    _lons = lons;
+    _transitTimes = times;
+    _walkingVelocity = walkingVelocity;
   }
-
+  
   public String getAgencyId() {
-    return agencyId;
-  }
-
-  public String[] getStopIds() {
-    return stopIds;
-  }
-
-  public double[] getLats() {
-    return lats;
-  }
-
-  public double[] getLons() {
-    return lons;
-  }
-
-  public long[] getTransitTimes() {
-    return transitTimes;
-  }
-
-  public double getWalkingVelocity() {
-    return walkingVelocity;
+    return _agencyId;
   }
 
   public int getSize() {
-    return stopIds.length;
+    return _stopIds.length;
   }
 
   public String getStopId(int index) {
-    return stopIds[index];
+    return _stopIds[index];
   }
 
   public double getStopLat(int i) {
-    return lats[i];
+    return _lats[i];
   }
 
   public double getStopLon(int i) {
-    return lons[i];
+    return _lons[i];
+  }
+  
+  public long getTravelTime(int i) {
+    return _transitTimes[i];
   }
 
-  public long getTravelTime(int i) {
-    return transitTimes[i];
+  public double getWalkingVelocity() {
+    return _walkingVelocity;
   }
 
 }

@@ -15,18 +15,21 @@
   the License.
 -->
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
-    xmlns:c="http://java.sun.com/jsp/jstl/core"
-    xmlns:oba="/oba-tags"
-    xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
 
 <jsp:directive.page contentType="text/html" />
 
 <head>
 <title><decorator:title default="iphone" /></title>
+<!-- <meta content="width=320, user-scalable=no" name="viewport"/>  -->
 <meta name="viewport" content="user-scalable=no, width=device-width" />
-<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-iphone.css')}"/>
-<link rel="icon" type="image/png" href="${oba:resource('/images/Bus.png')}"/>
-<link rel="apple-touch-icon" type="image/png" href="${oba:resource('/images/iphone.png')}"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<link rel="stylesheet" type="text/css" media="all" href="${resources.WhereIPhoneResources.css.url}" />
+<link rel="icon" type="image/png" href="${resources.OneBusAwayCommonResources.imageBusIcon.url}"/>
+<jsp:element name="link">
+<jsp:attribute name="rel">apple-touch-icon</jsp:attribute>
+<jsp:attribute name="href"><c:url value="/images/iphone.png" /></jsp:attribute>
+</jsp:element>
 <decorator:head />
 </head>
 

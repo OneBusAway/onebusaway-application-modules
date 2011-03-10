@@ -107,9 +107,9 @@
     </bean>
 
     <context:component-scan base-package="org.onebusaway.users.impl" />
-
-    <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.CurrentUserStrategyImpl" />
-
+    
+    <bean id="currentUserStrategyImpl" class="org.onebusaway.users.impl.CurrentUserStrategyImpl"/>
+    
     <bean id="userPropertiesService" class="org.onebusaway.container.spring.ProxyFactoryBean" primary="true">
         <property name="proxyInterface" value="org.onebusaway.users.services.UserPropertiesService" />
         <property name="invocationHandler">
@@ -121,16 +121,6 @@
                 <property name="userPropertiesServiceV2">
                     <bean class="org.onebusaway.users.impl.UserPropertiesServiceV2Impl" />
                 </property>
-            </bean>
-        </property>
-    </bean>
-    
-    <bean id="passwordEncoderV1" class="org.onebusaway.users.impl.authentication.VersionedPasswordEncoder">
-        <property name="versionId" value="v1" />
-        <property name="passwordEncoder">
-            <bean class="org.springframework.security.providers.encoding.ShaPasswordEncoder">
-                <constructor-arg value="256" />
-                <property name="encodeHashAsBase64" value="true" />
             </bean>
         </property>
     </bean>
@@ -180,15 +170,5 @@
         <property name="cache" ref="userIndexRegistrationServiceCache" />
     </bean>
 
-    <bean id="minApiRequestIntervalForKeyCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
-        <property name="cacheManager" ref="cacheManager" />
-        <property name="cacheName" value="org.onebusaway.users.services.UserService.getMinApiRequestIntervalForKey" />
-        <property name="maxElementsInMemory" value="50" />
-        <property name="eternal" value="false" />
-        <property name="timeToLive" value="0" />
-        <property name="timeToIdle" value="3600" />
-        <property name="overflowToDisk" value="false" />
-        <property name="diskPersistent" value="false" />
-    </bean>
 
 </beans>

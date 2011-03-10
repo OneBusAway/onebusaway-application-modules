@@ -98,10 +98,6 @@ public final class CoordinateBounds implements Serializable {
     return _minLat <= lat && lat <= _maxLat && _minLon <= lon && lon <= _maxLon;
   }
 
-  public boolean contains(CoordinatePoint point) {
-    return contains(point.getLat(), point.getLon());
-  }
-
   public boolean intersects(CoordinateBounds r) {
     double minLat = Math.max(_minLat, r._minLat);
     double minLon = Math.max(_minLon, r._minLon);
@@ -129,10 +125,10 @@ public final class CoordinateBounds implements Serializable {
 
     return new CoordinateBounds(minLat, minLon, maxLat, maxLon);
   }
-
+  
   @Override
   public String toString() {
-    return _minLat + "," + _minLon + "," + _maxLat + "," + _maxLon;
+    return _minLat +"," +_minLon + "," + _maxLat + "," + _maxLon;
   }
 
   @Override
@@ -168,5 +164,6 @@ public final class CoordinateBounds implements Serializable {
       return false;
     return true;
   }
-
+  
+  
 }

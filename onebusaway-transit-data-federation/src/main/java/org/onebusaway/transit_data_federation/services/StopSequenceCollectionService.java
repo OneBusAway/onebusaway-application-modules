@@ -25,6 +25,6 @@ public interface StopSequenceCollectionService {
    * @param sequences the set of stop sequences
    * @return the collection of stop sequence collection groups
    */
-  public List<StopSequenceCollection> getStopSequencesAsCollections(
+  public List<StopSequenceCollection> getStopSequencesAsBlocks(
       List<StopSequence> sequences);
 }

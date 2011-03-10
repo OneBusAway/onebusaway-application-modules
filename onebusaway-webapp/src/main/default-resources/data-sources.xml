@@ -19,6 +19,15 @@
         <property name="password" value="" />
     </bean>
 
+    <bean id="webappHibernateProperties" class="org.onebusaway.container.spring.PropertiesBeanPostProcessor">
+        <property name="target" value="hibernateProperties" />
+        <property name="properties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+            </props>
+        </property>
+    </bean>
+
     <!--
         The Geocoder is used in the SMS interface for determining your default search location. The DefaultGeocoderImpl
         doesn't actually do much geocoding... it's just there for testing

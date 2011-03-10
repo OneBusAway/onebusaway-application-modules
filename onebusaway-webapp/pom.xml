@@ -1,21 +1,22 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.onebusaway</groupId>
-        <artifactId>onebusaway-application-modules</artifactId>
-        <version>0.0.1</version>
-    </parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-webapp</artifactId>
     <packaging>war</packaging>
-
-    <name>onebusaway-webapp</name>
+    <version>0.0.1-SNAPSHOT</version>
 
     <properties>
+        <gwt-version>2.0.0</gwt-version>
         <xwiki.version>2.3.1</xwiki.version>
-        <xwiki.integration.version>0.0.2</xwiki.integration.version>
+        <xwiki.integration.version>0.0.1-SNAPSHOT</xwiki.integration.version>
     </properties>
 
+    <parent>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-application-modules</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
 
     <repositories>
         <!-- Required for the xwiki-rendering-macros -->
@@ -31,39 +32,44 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-presentation</artifactId>
-            <version>${project.version}</version>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-everylastlogin</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <!-- This is here mostly to support csv record parsing -->
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-gtfs</artifactId>
+            <version>1.1.3</version>
         </dependency>
 
         <!-- Struts2 Dependencies -->
         <dependency>
             <groupId>org.apache.struts</groupId>
             <artifactId>struts2-sitemesh-plugin</artifactId>
+            <version>${struts-version}</version>
         </dependency>
 
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jsp-api</artifactId>
+            <version>2.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>jstl</artifactId>
+            <version>1.1.2</version>
         </dependency>
         <dependency>
             <groupId>taglibs</groupId>
             <artifactId>standard</artifactId>
+            <version>1.1.2</version>
         </dependency>
 
         <!-- GWT -->
@@ -100,6 +106,13 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.0.0-rc9</version>
         </dependency>
 
         <!-- Wiki Integration Support -->
@@ -129,27 +142,20 @@
             <artifactId>onebusaway-wiki-integration-xwiki-macros</artifactId>
             <version>${xwiki.integration.version}</version>
         </dependency>
-        
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>4.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+            <version>1.8.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-        	<groupId>net.java.dev.rome</groupId>
-        	<artifactId>rome</artifactId>
-        	<version>1.0.0</version>
-        </dependency>
+
     </dependencies>
 
     <build>
@@ -158,6 +164,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.2</version>
                 <configuration>
                     <fork>true</fork>
                     <maxmem>512m</maxmem>
@@ -187,9 +194,13 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
+                <version>1.3-SNAPSHOT</version>
                 <configuration>
                     <modules>
+                        <module>org.onebusaway.webapp.gwt.AgenciesMap</module>
                         <module>org.onebusaway.webapp.gwt.BookmarkEditApplication</module>
+                        <module>org.onebusaway.webapp.gwt.MobileApplication</module>
+                        <module>org.onebusaway.webapp.gwt.NotificationWidgetApplication</module>
                         <module>org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</module>
                         <module>org.onebusaway.webapp.gwt.SearchLocationLibrary</module>
                         <module>org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication</module>
@@ -212,6 +223,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.1</version>
                 <executions>
                     <execution>
                         <id>unpack</id>
@@ -225,7 +237,7 @@
                                     <groupId>org.onebusaway</groupId>
                                     <artifactId>onebusaway-everylastlogin</artifactId>
                                     <classifier>gwtloginwidget</classifier>
-                                    <version>0.0.1</version>
+                                    <version>0.0.1-SNAPSHOT</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/gwt/LoginWidget</outputDirectory>
@@ -241,12 +253,24 @@
                 <configuration>
                     <webResources>
                         <resource>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.AgenciesMap</directory>
+                            <targetPath>where/standard</targetPath>
+                        </resource>
+                        <resource>
                             <directory>target/gwt/org.onebusaway.webapp.gwt.BookmarkEditApplication</directory>
                             <targetPath>where/standard</targetPath>
                         </resource>
                         <resource>
                             <directory>${project.build.directory}/gwt/LoginWidget</directory>
-                            <targetPath />
+                            <targetPath></targetPath>
+                        </resource>
+                        <resource>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.MobileApplication</directory>
+                            <targetPath>where/mobile</targetPath>
+                        </resource>
+                        <resource>
+                            <directory>target/gwt/org.onebusaway.webapp.gwt.NotificationWidgetApplication</directory>
+                            <targetPath>where/standard</targetPath>
                         </resource>
                         <resource>
                             <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>

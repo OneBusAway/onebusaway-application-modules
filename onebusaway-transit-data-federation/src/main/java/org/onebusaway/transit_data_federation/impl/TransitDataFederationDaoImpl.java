@@ -49,13 +49,13 @@ class TransitDataFederationDaoImpl implements TransitDataFederationDao {
 
   @Override
   public RouteCollection getRouteCollectionForId(final AgencyAndId id) {
-    return (RouteCollection) _template.execute(new HibernateCallback<RouteCollection>() {
-      public RouteCollection doInHibernate(Session session) throws HibernateException,
+    return (RouteCollection) _template.execute(new HibernateCallback() {
+      public Object doInHibernate(Session session) throws HibernateException,
           SQLException {
         Object object = session.get(RouteCollection.class, id);
         if (object != null)
           session.setReadOnly(object, true);
-        return (RouteCollection) object;
+        return object;
       }
     });
   }

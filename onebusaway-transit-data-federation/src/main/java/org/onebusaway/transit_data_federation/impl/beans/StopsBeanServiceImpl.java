@@ -1,16 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.lucene.queryParser.ParseException;
-import org.onebusaway.collections.Min;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
@@ -24,10 +16,21 @@ import org.onebusaway.transit_data_federation.services.StopSearchService;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
+
+import edu.washington.cs.rse.collections.stats.Min;
+import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
+import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
+
+import org.apache.lucene.queryParser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 class StopsBeanServiceImpl implements StopsBeanService {
@@ -89,11 +92,13 @@ class StopsBeanServiceImpl implements StopsBeanService {
   private StopsBean getStopsByBoundsAndQuery(SearchQueryBean queryBean)
       throws ServiceException {
 
-    CoordinateBounds bounds = queryBean.getBounds();
+    CoordinateBounds b = queryBean.getBounds();
     String query = queryBean.getQuery();
     int maxCount = queryBean.getMaxCount();
 
-    CoordinatePoint center = SphericalGeometryLibrary.getCenterOfBounds(bounds);
+    CoordinateRectangle bounds = new CoordinateRectangle(b.getMinLat(),
+        b.getMinLon(), b.getMaxLat(), b.getMaxLon());
+    CoordinatePoint center = bounds.getCenter();
 
     SearchResult<AgencyAndId> stops;
     try {
@@ -143,7 +148,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
     Collections.sort(stopBeans, new StopBeanIdComparator());
 
     StopsBean result = new StopsBean();
-    result.setStops(stopBeans);
+    result.setStopBeans(stopBeans);
     result.setLimitExceeded(limitExceeded);
     return result;
   }

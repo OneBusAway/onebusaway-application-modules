@@ -3,11 +3,12 @@
  */
 package org.onebusaway.transit_data_federation.impl.shapes;
 
-import org.onebusaway.collections.Min;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 
-public class LocationShapePointIndex extends AbstractShapePointIndex {
+import edu.washington.cs.rse.collections.stats.Min;
+
+public class LocationShapePointIndex implements ShapePointIndex {
 
   private double _lat;
 
@@ -34,11 +35,6 @@ public class LocationShapePointIndex extends AbstractShapePointIndex {
   @Override
   public CoordinatePoint getPoint(ShapePoints points) {
     return new CoordinatePoint(_lat, _lon);
-  }
-
-  @Override
-  public PointAndOrientation getPointAndOrientation(ShapePoints points) {
-    return new PointAndOrientation(_lat, _lon, 0);
   }
 
   private static double distance(double lat1, double lon1, double lat2,

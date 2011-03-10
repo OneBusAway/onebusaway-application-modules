@@ -22,7 +22,7 @@
 <s:set name="now" value="getNow()" />
 <head>
 <meta http-equiv="Refresh" content="60" />
-<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-stop.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${resources.WhereLibraryResources.css.url}" />
 <title><s:iterator value="result.stops" status="stopsIter">
     <s:property value="name" /> - <s:property value="direction" /> bound - Stop # <s:property value="code" />
     <s:if test="!#stopsIter.last">, </s:if>
@@ -63,7 +63,7 @@
                   <s:param name="route" value="#route.id" />
               </s:url>
               <s:a href="%{url}">
-            	<oba:routeName value="trip"/>
+            	<oba:routeName value="#route"/>
               </s:a>
             </jsp:element>
             <td>
@@ -75,31 +75,16 @@
                 <s:property value="trip.tripHeadsign" />
             </s:a></div>            
             <div class="arrivalsTimePanel">
-                  <s:if test="frequency == null">
-                    <span class="arrivalsTimeEntry">
-                      <oba:date value="arrivalsAndDeparturesPresentation.getBestTime(top)" format="hh:mm" />
-                    </span>
-                    <jsp:text> - </jsp:text>            
-                    <jsp:element name="span">
-                      <jsp:attribute name="class">
-                        <s:property value="#arrivalsStatusLabelStyle" />
-                      </jsp:attribute>
-                      <s:property value="arrivalsAndDeparturesPresentation.getStatusLabel(top)" />
-                    </jsp:element>
-                  </s:if>
-                  <s:else>
-                    <jsp:text>Every </jsp:text>
-                    <s:property value="frequency.headway/60"/>
-                    <jsp:text> mins</jsp:text>
-                    <s:if test="arrivalsAndDeparturesPresentation.isShowFrequencyFrom(frequency)">
-                      <jsp:text> from </jsp:text>
-                      <oba:date format="hh:mmaa" value="frequency.startTime"/>
-                    </s:if>
-                    <s:else>
-                      <jsp:text> until </jsp:text>
-                      <oba:date format="hh:mmaa" value="frequency.endTime"/>
-                    </s:else>
-                  </s:else>
+              <span class="arrivalsTimeEntry">
+                <oba:date value="arrivalsAndDeparturesPresentation.getBestTime(top)" format="hh:mm" />
+              </span>
+              <jsp:text> - </jsp:text>
+              <jsp:element name="span">
+                <jsp:attribute name="class">
+                    <s:property value="#arrivalsStatusLabelStyle" />
+                </jsp:attribute>
+                <s:property value="arrivalsAndDeparturesPresentation.getStatusLabel(top)" />
+              </jsp:element>
             </div>
             </div>
             </td>

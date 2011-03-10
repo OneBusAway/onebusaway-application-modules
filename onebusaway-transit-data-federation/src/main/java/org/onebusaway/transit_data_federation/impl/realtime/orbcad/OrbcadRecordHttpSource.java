@@ -113,7 +113,7 @@ public class OrbcadRecordHttpSource extends AbstractOrbcadRecordSource {
         "yyyy-MM-dd HH:mm:ss");
 
     public OrbcadRecordTranslatorFieldMapping(TimeZone timeZone) {
-      super(OrbcadRecord.class, "", "", true);
+      super("", "", true);
       _format.setTimeZone(timeZone);
     }
 

@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.model;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,11 +15,6 @@ public class SearchResult<T> {
   private List<T> _results;
 
   private double[] _scores;
-
-  public SearchResult() {
-    _results = Collections.emptyList();
-    _scores = new double[] {};
-  }
 
   public SearchResult(List<T> results, double[] scores) {
     _results = results;

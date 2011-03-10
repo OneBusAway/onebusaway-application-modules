@@ -3,51 +3,34 @@
  */
 package org.onebusaway.transit_data_federation.impl.tripplanner.offline;
 
-import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch.ValueAdapter;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
 
 import java.util.Comparator;
 
-public abstract class StopTimeOp implements Comparator<StopTimeEntry>, ValueAdapter<StopTimeEntry> {
+public class StopTimeOp implements Comparator<StopTimeEntry> {
 
-  public static final StopTimeOp ARRIVAL = new ByArrivalTime();
+  public static final StopTimeOp ARRIVAL = new StopTimeOp(true);
 
-  public static final StopTimeOp DEPARTURE = new ByDepartureTime();
+  public static final StopTimeOp DEPARTURE = new StopTimeOp(false);
 
-  public abstract double getValue(StopTimeEntry proxy);
+  private final boolean _useArrivalTime;
 
-  public abstract double getValue(StopTimeInstance proxy);
+  private StopTimeOp(boolean useArrivalTime) {
+    _useArrivalTime = useArrivalTime;
+  }
+
+  public int getTime(StopTimeEntry proxy) {
+    return _useArrivalTime ? proxy.getArrivalTime() : proxy.getDepartureTime();
+  }
+
+  public long getTime(StopTimeInstanceProxy proxy) {
+    return _useArrivalTime ? proxy.getArrivalTime() : proxy.getDepartureTime();
+  }
 
   public int compare(StopTimeEntry o1, StopTimeEntry o2) {
-    double a = getValue(o1);
-    double b = getValue(o2);
+    int a = getTime(o1);
+    int b = getTime(o2);
     return a == b ? 0 : (a < b ? -1 : 1);
-  }
-
-  private static class ByArrivalTime extends StopTimeOp {
-
-    @Override
-    public double getValue(StopTimeEntry proxy) {
-      return proxy.getArrivalTime();
-    }
-
-    @Override
-    public double getValue(StopTimeInstance proxy) {
-      return proxy.getArrivalTime();
-    }
-  }
-
-  private static class ByDepartureTime extends StopTimeOp {
-
-    @Override
-    public double getValue(StopTimeEntry proxy) {
-      return proxy.getDepartureTime();
-    }
-
-    @Override
-    public double getValue(StopTimeInstance proxy) {
-      return proxy.getDepartureTime();
-    }
   }
 }

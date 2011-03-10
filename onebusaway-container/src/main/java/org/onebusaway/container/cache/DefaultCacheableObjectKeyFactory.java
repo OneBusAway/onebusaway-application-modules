@@ -42,18 +42,14 @@ public class DefaultCacheableObjectKeyFactory implements
 
       /**
        * We short-circuit the cache key to Boolean.FALSE, no matter the actual
-       * key value so that the resulting cache key will be the same whether a
+       * key value so that the resulting cache key will be the same wether a
        * refresh has been requested or not
        */
       return new CacheKeyInfo(Boolean.FALSE, refreshCache);
     }
 
-    if (object != null) {
-      if (object instanceof Serializable)
-        return new CacheKeyInfo((Serializable) object, false);
-      return new CacheKeyInfo(object.toString(), false);
-    }
-
-    return new CacheKeyInfo(null, false);
+    if (object instanceof Serializable)
+      return new CacheKeyInfo((Serializable) object, false);
+    return new CacheKeyInfo(object.toString(), false);
   }
 }

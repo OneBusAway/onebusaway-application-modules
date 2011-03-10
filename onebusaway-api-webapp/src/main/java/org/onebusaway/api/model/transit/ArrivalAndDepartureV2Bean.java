@@ -16,25 +16,16 @@
 package org.onebusaway.api.model.transit;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class ArrivalAndDepartureV2Bean implements Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 1L;
 
   private String routeId;
 
   private String tripId;
 
-  private long serviceDate;
-
-  private String vehicleId;
-
   private String stopId;
-
-  private int stopSequence;
-
-  private int blockTripSequence = -1;
 
   private String routeShortName;
 
@@ -42,29 +33,15 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private String tripHeadsign;
 
-  private long scheduledArrivalTime;
-
-  private long scheduledDepartureTime;
-
-  private FrequencyV2Bean frequency;
-
-  private String status;
-
-  private boolean predicted = false;
-
-  private Long lastUpdateTime;
-
   private long predictedArrivalTime;
+
+  private long scheduledArrivalTime;
 
   private long predictedDepartureTime;
 
-  private double distanceFromStop;
+  private long scheduledDepartureTime;
 
-  private int numberOfStopsAway;
-
-  private TripStatusV2Bean tripStatus;
-
-  private List<String> situationIds;
+  private String status;
 
   public String getRouteId() {
     return routeId;
@@ -98,22 +75,6 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.tripId = tripId;
   }
 
-  public long getServiceDate() {
-    return serviceDate;
-  }
-
-  public void setServiceDate(long serviceDate) {
-    this.serviceDate = serviceDate;
-  }
-
-  public String getVehicleId() {
-    return vehicleId;
-  }
-
-  public void setVehicleId(String vehicleId) {
-    this.vehicleId = vehicleId;
-  }
-
   public String getTripHeadsign() {
     return tripHeadsign;
   }
@@ -130,20 +91,12 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.stopId = stopId;
   }
 
-  public int getStopSequence() {
-    return stopSequence;
+  public long getPredictedArrivalTime() {
+    return predictedArrivalTime;
   }
 
-  public void setStopSequence(int stopSequence) {
-    this.stopSequence = stopSequence;
-  }
-
-  public int getBlockTripSequence() {
-    return blockTripSequence;
-  }
-
-  public void setBlockTripSequence(int blockTripSequence) {
-    this.blockTripSequence = blockTripSequence;
+  public void setPredictedArrivalTime(long predictedArrivalTime) {
+    this.predictedArrivalTime = predictedArrivalTime;
   }
 
   public long getScheduledArrivalTime() {
@@ -154,20 +107,20 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.scheduledArrivalTime = scheduledArrivalTime;
   }
 
+  public long getPredictedDepartureTime() {
+    return predictedDepartureTime;
+  }
+
+  public void setPredictedDepartureTime(long predictedDepartureTime) {
+    this.predictedDepartureTime = predictedDepartureTime;
+  }
+
   public long getScheduledDepartureTime() {
     return scheduledDepartureTime;
   }
 
   public void setScheduledDepartureTime(long scheduledDepartureTime) {
     this.scheduledDepartureTime = scheduledDepartureTime;
-  }
-
-  public FrequencyV2Bean getFrequency() {
-    return frequency;
-  }
-
-  public void setFrequency(FrequencyV2Bean frequency) {
-    this.frequency = frequency;
   }
 
   public String getStatus() {
@@ -178,72 +131,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.status = status;
   }
 
-  public boolean isPredicted() {
-    return predicted;
-  }
-
-  public void setPredicted(boolean predicted) {
-    this.predicted = predicted;
-  }
-
-  public Long getLastUpdateTime() {
-    return lastUpdateTime;
-  }
-
-  public void setLastUpdateTime(Long lastUpdateTime) {
-    this.lastUpdateTime = lastUpdateTime;
-  }
-
-  public double getDistanceFromStop() {
-    return distanceFromStop;
-  }
-
-  public void setDistanceFromStop(double distanceFromStop) {
-    this.distanceFromStop = distanceFromStop;
-  }
-
-  public int getNumberOfStopsAway() {
-    return numberOfStopsAway;
-  }
-
-  public void setNumberOfStopsAway(int numberOfStopsAway) {
-    this.numberOfStopsAway = numberOfStopsAway;
-  }
-
-  public TripStatusV2Bean getTripStatus() {
-    return tripStatus;
-  }
-
-  public void setTripStatus(TripStatusV2Bean tripStatus) {
-    this.tripStatus = tripStatus;
-  }
-
-  public List<String> getSituationIds() {
-    return situationIds;
-  }
-
-  public void setSituationIds(List<String> situationIds) {
-    this.situationIds = situationIds;
-  }
-
   public boolean hasPredictedArrivalTime() {
     return this.predictedArrivalTime > 0;
-  }
-
-  public long getPredictedArrivalTime() {
-    return predictedArrivalTime;
-  }
-
-  public void setPredictedArrivalTime(long predictedArrivalTime) {
-    this.predictedArrivalTime = predictedArrivalTime;
-  }
-
-  public long getPredictedDepartureTime() {
-    return predictedDepartureTime;
-  }
-
-  public void setPredictedDepartureTime(long predictedDepartureTime) {
-    this.predictedDepartureTime = predictedDepartureTime;
   }
 
   public boolean hasPredictedDepartureTime() {
@@ -265,4 +154,5 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     return "route=" + routeShortName + " scheduled=" + scheduledArrivalTime
         + " predicted=" + predictedArrivalTime;
   }
+
 }

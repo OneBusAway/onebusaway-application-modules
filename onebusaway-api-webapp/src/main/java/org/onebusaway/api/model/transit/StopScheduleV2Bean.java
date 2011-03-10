@@ -9,9 +9,13 @@ public class StopScheduleV2Bean implements Serializable {
 
   private long date;
 
-  private String stopId;
+  private StopV2Bean stop;
 
   private List<StopRouteScheduleV2Bean> stopRouteSchedules;
+
+  private String timeZone;
+
+  private List<StopCalendarDayV2Bean> stopCalendarDays;
 
   public long getDate() {
     return date;
@@ -21,20 +25,35 @@ public class StopScheduleV2Bean implements Serializable {
     this.date = date;
   }
 
-  public String getStopId() {
-    return stopId;
+  public StopV2Bean getStop() {
+    return stop;
   }
 
-  public void setStopId(String stopId) {
-    this.stopId = stopId;
+  public void setStop(StopV2Bean stop) {
+    this.stop = stop;
   }
 
   public List<StopRouteScheduleV2Bean> getStopRouteSchedules() {
     return stopRouteSchedules;
   }
 
-  public void setStopRouteSchedules(
-      List<StopRouteScheduleV2Bean> stopRouteSchedules) {
+  public void setStopRouteSchedules(List<StopRouteScheduleV2Bean> stopRouteSchedules) {
     this.stopRouteSchedules = stopRouteSchedules;
+  }
+
+  public String getTimeZone() {
+    return timeZone;
+  }
+
+  public void setTimeZone(String timeZone) {
+    this.timeZone = timeZone;
+  }
+
+  public List<StopCalendarDayV2Bean> getStopCalendarDays() {
+    return stopCalendarDays;
+  }
+
+  public void setStopCalendarDays(List<StopCalendarDayV2Bean> stopCalendarDays) {
+    this.stopCalendarDays = stopCalendarDays;
   }
 }

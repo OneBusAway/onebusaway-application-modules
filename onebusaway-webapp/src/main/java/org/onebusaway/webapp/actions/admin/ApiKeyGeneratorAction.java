@@ -1,62 +1,39 @@
 package org.onebusaway.webapp.actions.admin;
 
-import org.onebusaway.users.model.UserIndex;
-import org.onebusaway.users.model.UserIndexKey;
-import org.onebusaway.users.services.UserIndexTypes;
-import org.onebusaway.users.services.UserPropertiesService;
-import org.onebusaway.users.services.UserService;
+import org.onebusaway.users.services.validation.KeyValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.UUID;
 
 public class ApiKeyGeneratorAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
   @Autowired
-  private UserService _userService;
+  private KeyValidationService _validationService;
 
-  @Autowired
-  private UserPropertiesService _propertiesService;
-  
-  private long _interval;
+  private String _value;
 
-  private String _apiKey;
+  private String _key;
 
   @RequiredFieldValidator
-  public void setInterval(long value) {
-    _interval = value;
+  public void setValue(String value) {
+    _value = value;
   }
   
-  public long getInterval() {
-    return _interval;
+  public String getValue() {
+    return _value;
   }
 
-  public void setApiKey(String apiKey) {
-    _apiKey = apiKey;
-  }
-
-  public String getApiKey() {
-    return _apiKey;
+  public String getKey() {
+    return _key;
   }
 
   @Override
   public String execute() {
-    if (_apiKey == null) {
-      _apiKey = UUID.randomUUID().toString();
-    }
-    UserIndexKey key = new UserIndexKey(UserIndexTypes.API_KEY, _apiKey);
-    
-    _userService.getUserIndexForId(key);
-    
-    UserIndex userIndex = _userService.getOrCreateUserForIndexKey(key, _apiKey,
-        false);
-    _propertiesService.authorizeApi(userIndex.getUser(), _interval);
 
+    _key = _validationService.generateKeyWithDefaultProvider(_value);
 
     return SUCCESS;
   }

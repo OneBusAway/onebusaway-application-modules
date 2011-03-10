@@ -18,11 +18,6 @@ public class MockServiceImpl implements MockService {
   }
 
   @Override
-  public String evalauteMultiArg(String valueA, String valueB) {
-    return valueA;
-  }
-
-  @Override
   public String evalauteBean(MockBean bean) {
     return "test";
   }

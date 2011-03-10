@@ -49,7 +49,7 @@ public class TripForVehicleController extends ApiActionSupport {
     return _id;
   }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
+  @TypeConversion(converter = "org.onebusaway.api.impl.DateTimeConverter")
   public void setTime(Date time) {
     _time = time;
   }

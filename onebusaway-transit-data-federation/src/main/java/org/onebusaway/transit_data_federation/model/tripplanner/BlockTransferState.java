@@ -1,27 +1,27 @@
 package org.onebusaway.transit_data_federation.model.tripplanner;
 
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 
 public class BlockTransferState extends TripState {
 
-  private final BlockTripEntry _prevTrip;
+  private final TripEntry _prevTrip;
 
-  private final BlockTripEntry _nextTrip;
+  private final TripEntry _nextTrip;
 
   private long _serviceDate;
 
-  public BlockTransferState(long currentTime, BlockTripEntry prevTrip, BlockTripEntry nextTrip, long serviceDate) {
+  public BlockTransferState(long currentTime, TripEntry prevTrip, TripEntry nextTrip, long serviceDate) {
     super(currentTime);
     _prevTrip = prevTrip;
     _nextTrip = nextTrip;
     _serviceDate = serviceDate;
   }
 
-  public BlockTripEntry getPrevTrip() {
+  public TripEntry getPrevTrip() {
     return _prevTrip;
   }
 
-  public BlockTripEntry getNextTrip() {
+  public TripEntry getNextTrip() {
     return _nextTrip;
   }
 

@@ -1,29 +1,25 @@
 package org.onebusaway.transit_data_federation.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 
 import org.onebusaway.container.cache.Cacheable;
-import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.AgencyService;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
 
 @Component
 public class AgencyServiceImpl implements AgencyService {
@@ -40,23 +36,8 @@ public class AgencyServiceImpl implements AgencyService {
   public TimeZone getTimeZoneForAgencyId(String agencyId) {
     Agency agency = _dao.getAgencyForId(agencyId);
     if (agency == null)
-      throw new NoSuchAgencyServiceException(agencyId);
+      return null;
     return TimeZone.getTimeZone(agency.getTimezone());
-  }
-
-  @Cacheable
-  @Override
-  public List<String> getAllAgencyIds() {
-
-    Set<String> agencyIds = new HashSet<String>();
-
-    for (TripEntry trip : _graph.getAllTrips()) {
-      AgencyAndId id = trip.getId();
-      String agencyId = id.getAgencyId();
-      agencyIds.add(agencyId);
-    }
-
-    return new ArrayList<String>(agencyIds);
   }
 
   @Cacheable
@@ -129,9 +110,11 @@ public class AgencyServiceImpl implements AgencyService {
     for (Agency agency : _dao.getAllAgencies()) {
 
       CoordinateBounds bounds = boundsByAgencyId.get(agency.getId());
-      
-      if( bounds == null)
-        boundsByAgencyId.put(agency.getId(),new CoordinateBounds());
+
+      if (bounds == null || bounds.isEmpty()) {
+        _log.warn("Agency has no service: " + agency);
+        boundsByAgencyId.remove(agency.getId());
+      }
     }
 
     return boundsByAgencyId;
@@ -142,5 +125,4 @@ public class AgencyServiceImpl implements AgencyService {
     public double lons = 0;
     public double count = 0;
   }
-
 }

@@ -46,7 +46,7 @@ public class CurrentUserServiceImpl implements CurrentUserService {
       StandardAuthoritiesService authoritiesService) {
     _authoritiesService = authoritiesService;
   }
-
+  
   @Autowired
   public void setCurrentUserStrategy(CurrentUserStrategy currentUserStrategy) {
     _currentUserStrategy = currentUserStrategy;
@@ -101,8 +101,8 @@ public class CurrentUserServiceImpl implements CurrentUserService {
   }
 
   @Override
-  public IndexedUserDetails handleUserAction(String type, String id,
-      String credentials, boolean isAnonymous, String mode) {
+  public IndexedUserDetails handleUserAction(String type,
+      String id, String credentials, boolean isAnonymous, String mode) {
     Mode m = getModeForRequest(mode);
     switch (m) {
       case LOGIN:
@@ -283,16 +283,6 @@ public class CurrentUserServiceImpl implements CurrentUserService {
     if (details == null)
       return;
     _userService.clearPhoneNumberRegistration(details.getUserIndexKey());
-  }
-
-  @Override
-  public void markServiceAlertAsRead(String situationId, long time,
-      boolean isRead) {
-    User user = _currentUserStrategy.getCurrentUser(true);
-    if (user == null)
-      return;
-    _userPropertiesService.markServiceAlertAsRead(user, situationId, time,
-        isRead);
   }
 
   @Override

@@ -2,13 +2,6 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockTripIndices;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +13,9 @@ import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
+import org.onebusaway.gtfs.model.Stop;
+import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.NameBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -27,24 +23,18 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
-import org.onebusaway.transit_data_federation.impl.StopSequenceCollectionServiceImpl;
+import org.onebusaway.transit_data_federation.impl.StopSequenceBlocksServiceImpl;
 import org.onebusaway.transit_data_federation.impl.StopSequencesServiceImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
-import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.RouteService;
+import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
+import org.onebusaway.transit_data_federation.services.StopSequencesService;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
-import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 
 public class RouteBeanServiceImplTest {
 
@@ -60,15 +50,11 @@ public class RouteBeanServiceImplTest {
 
   private ShapeBeanService _shapeBeanService;
 
-  private StopSequencesServiceImpl _stopSequencesService;
+  private StopSequencesService _stopSequencesService;
 
   private StopBeanService _stopBeanService;
 
-  private StopSequenceCollectionServiceImpl _stopSequenceBlocksService;
-
-  private BlockIndexService _blockIndexService;
-
-  private NarrativeService _narrativeService;
+  private StopSequenceCollectionService _stopSequenceBlocksService;
 
   @Before
   public void setup() {
@@ -94,15 +80,9 @@ public class RouteBeanServiceImplTest {
 
     _stopSequencesService = new StopSequencesServiceImpl();
     _service.setStopSequencesLibrary(_stopSequencesService);
-
-    _stopSequenceBlocksService = new StopSequenceCollectionServiceImpl();
+    
+    _stopSequenceBlocksService = new StopSequenceBlocksServiceImpl();
     _service.setStopSequencesBlocksService(_stopSequenceBlocksService);
-
-    _narrativeService = Mockito.mock(NarrativeService.class);
-    _stopSequenceBlocksService.setNarrativeService(_narrativeService);
-
-    _blockIndexService = Mockito.mock(BlockIndexService.class);
-    _service.setBlockIndexService(_blockIndexService);
   }
 
   @Test
@@ -154,57 +134,25 @@ public class RouteBeanServiceImplTest {
     Mockito.when(_transitDataFederationDao.getRouteCollectionForId(routeId)).thenReturn(
         routeCollection);
 
-    StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
-    StopEntryImpl stopB = stop("stopB", 47.1, -122.1);
-    StopEntryImpl stopC = stop("stopC", 47.2, -122.2);
+    AgencyAndId stopIdA = new AgencyAndId("1", "stopA");
+    AgencyAndId stopIdB = new AgencyAndId("1", "stopB");
+    AgencyAndId stopIdC = new AgencyAndId("1", "stopC");
 
-    BlockEntryImpl blockA = block("blockA");
-    TripEntryImpl tripA = trip("tripA", "sidA");
-    TripEntryImpl tripB = trip("tripB", "sidA");
+    Stop stopA = getStop(stopIdA, 47.0, -122.0);
+    Stop stopB = getStop(stopIdB, 47.1, -122.1);
+    Stop stopC = getStop(stopIdC, 47.2, -122.2);
 
-    tripA.setRouteCollectionId(routeId);
-    tripA.setDirectionId("0");
-    tripB.setRouteCollectionId(routeId);
-    tripB.setDirectionId("1");
-    
-    Builder tnA = TripNarrative.builder();
-    tnA.setTripHeadsign("Destination A");
-    Mockito.when(_narrativeService.getTripForId(tripA.getId())).thenReturn(
-        tnA.create());
+    StopBean stopBeanA = getStopBean(stopIdA);
+    StopBean stopBeanB = getStopBean(stopIdB);
+    StopBean stopBeanC = getStopBean(stopIdC);
 
-    Builder tnB = TripNarrative.builder();
-    tnB.setTripHeadsign("Destination B");
-    Mockito.when(_narrativeService.getTripForId(tripB.getId())).thenReturn(
-        tnB.create());
-
-    stopTime(0, stopA, tripA, time(9, 00), time(9, 00), 0);
-    stopTime(1, stopB, tripA, time(9, 30), time(9, 30), 100);
-    stopTime(2, stopC, tripA, time(10, 00), time(10, 00), 200);
-    stopTime(3, stopC, tripB, time(11, 30), time(11, 30), 0);
-    stopTime(4, stopA, tripB, time(12, 30), time(12, 30), 200);
-
-    linkBlockTrips(blockA, tripA, tripB);
-
-    List<BlockTripIndex> blockIndices = blockTripIndices(blockA);
-    Mockito.when(
-        _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeId)).thenReturn(
-        blockIndices);
-
-    StopBean stopBeanA = getStopBean(stopA);
-    StopBean stopBeanB = getStopBean(stopB);
-    StopBean stopBeanC = getStopBean(stopC);
-
-    List<AgencyAndId> stopIds = Arrays.asList(stopA.getId(), stopB.getId(),
-        stopC.getId());
+    List<AgencyAndId> stopIds = Arrays.asList(stopIdA, stopIdB, stopIdC);
     Mockito.when(_routeService.getStopsForRouteCollection(routeId)).thenReturn(
         stopIds);
 
-    Mockito.when(_stopBeanService.getStopForId(stopA.getId())).thenReturn(
-        stopBeanA);
-    Mockito.when(_stopBeanService.getStopForId(stopB.getId())).thenReturn(
-        stopBeanB);
-    Mockito.when(_stopBeanService.getStopForId(stopC.getId())).thenReturn(
-        stopBeanC);
+    Mockito.when(_stopBeanService.getStopForId(stopIdA)).thenReturn(stopBeanA);
+    Mockito.when(_stopBeanService.getStopForId(stopIdB)).thenReturn(stopBeanB);
+    Mockito.when(_stopBeanService.getStopForId(stopIdC)).thenReturn(stopBeanC);
 
     AgencyAndId shapeId = new AgencyAndId("1", "shapeId");
 
@@ -216,21 +164,23 @@ public class RouteBeanServiceImplTest {
     Mockito.when(_shapeBeanService.getMergedPolylinesForShapeIds(shapeIds)).thenReturn(
         Arrays.asList(polyline));
 
-    /*
-     * Trip tripA = new Trip(); tripA.setId(new AgencyAndId("1", "tripA"));
-     * tripA.setTripHeadsign("Destination A"); tripA.setDirectionId("0");
-     * List<StopTime> stopTimesA = getStopTimesForStops(stopA, stopB, stopC);
-     * 
-     * Trip tripB = new Trip(); tripB.setId(new AgencyAndId("1", "tripB"));
-     * tripB.setTripHeadsign("Destination B"); tripB.setDirectionId("1");
-     * List<StopTime> stopTimesB = getStopTimesForStops(stopC, stopA);
-     * 
-     * List<Trip> trips = Arrays.asList(tripA, tripB);
-     * 
-     * Mockito.when(_gtfsDao.getTripsForRoute(route)).thenReturn(trips);
-     * Mockito.when(_gtfsDao.getStopTimesForTrip(tripA)).thenReturn(stopTimesA);
-     * Mockito.when(_gtfsDao.getStopTimesForTrip(tripB)).thenReturn(stopTimesB);
-     */
+    Trip tripA = new Trip();
+    tripA.setId(new AgencyAndId("1", "tripA"));
+    tripA.setTripHeadsign("Destination A");
+    tripA.setDirectionId("0");
+    List<StopTime> stopTimesA = getStopTimesForStops(stopA, stopB, stopC);
+
+    Trip tripB = new Trip();
+    tripB.setId(new AgencyAndId("1", "tripB"));
+    tripB.setTripHeadsign("Destination B");
+    tripB.setDirectionId("1");
+    List<StopTime> stopTimesB = getStopTimesForStops(stopC, stopA);
+
+    List<Trip> trips = Arrays.asList(tripA, tripB);
+
+    Mockito.when(_gtfsDao.getTripsForRoute(route)).thenReturn(trips);
+    Mockito.when(_gtfsDao.getStopTimesForTrip(tripA)).thenReturn(stopTimesA);
+    Mockito.when(_gtfsDao.getStopTimesForTrip(tripB)).thenReturn(stopTimesB);
 
     // Setup complete
 
@@ -263,7 +213,7 @@ public class RouteBeanServiceImplTest {
 
     List<String> stopIdsA = groupA.getStopIds();
     assertEquals(3, stopIdsA.size());
-    assertEquals(ids(stopA.getId(), stopB.getId(), stopC.getId()), stopIdsA);
+    assertEquals(ids(stopIdA, stopIdB, stopIdC), stopIdsA);
 
     NameBean nameB = groupB.getName();
     assertEquals("destination", nameB.getType());
@@ -271,14 +221,37 @@ public class RouteBeanServiceImplTest {
 
     List<String> stopIdsB = groupB.getStopIds();
     assertEquals(2, stopIdsB.size());
-    assertEquals(ids(stopC.getId(), stopA.getId()), stopIdsB);
+    assertEquals(ids(stopIdC, stopIdA), stopIdsB);
 
   }
 
-  private StopBean getStopBean(StopEntryImpl stopEntry) {
-    StopBean stop = new StopBean();
-    stop.setId(AgencyAndIdLibrary.convertToString(stopEntry.getId()));
+  private Stop getStop(AgencyAndId stopId, double lat, double lon) {
+    Stop stop = new Stop();
+    stop.setId(stopId);
+    stop.setLat(lat);
+    stop.setLon(lon);
     return stop;
+  }
+
+  private StopBean getStopBean(AgencyAndId stopId) {
+    StopBean stop = new StopBean();
+    stop.setId(AgencyAndIdLibrary.convertToString(stopId));
+    return stop;
+  }
+
+  private List<StopTime> getStopTimesForStops(Stop... stops) {
+
+    List<StopTime> stopTimes = new ArrayList<StopTime>();
+
+    for (Stop stop : stops) {
+
+      StopTime stopTime = new StopTime();
+      stopTime.setStop(stop);
+
+      stopTimes.add(stopTime);
+    }
+
+    return stopTimes;
   }
 
   private List<String> ids(AgencyAndId... ids) {

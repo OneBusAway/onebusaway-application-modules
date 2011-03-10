@@ -12,14 +12,10 @@
 <decorators defaultdir="/WEB-INF/decorators">
     <!-- Any urls that are excluded will never be decorated by Sitemesh -->
     <excludes>
-        <pattern>/api</pattern>
-        <pattern>/js</pattern>
         <pattern>/styles/*</pattern>
         <pattern>/images/*</pattern>
-        <pattern>/setup/*</pattern>
         <patterns>/where/mobile/*</patterns>
         <pattern>*.cache.html</pattern>
-        <pattern>*-snippet.jspx</pattern>
     </excludes>
 
     <decorator name="main" page="main.jspx">

@@ -1,10 +1,9 @@
 package org.onebusaway.transit_data.model;
 
+
 public class StopTimeInstanceBean extends ApplicationBean {
 
   private static final long serialVersionUID = 1L;
-
-  private long serviceDate;
 
   private long arrivalTime;
 
@@ -15,14 +14,6 @@ public class StopTimeInstanceBean extends ApplicationBean {
   private String tripId;
 
   private String stopHeadsign;
-
-  public long getServiceDate() {
-    return serviceDate;
-  }
-
-  public void setServiceDate(long serviceDate) {
-    this.serviceDate = serviceDate;
-  }
 
   public long getArrivalTime() {
     return arrivalTime;

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
-    except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
-    Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS 
-    IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language 
-    governing permissions and limitations under the License. -->
+    <!--
+        Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License. You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+        either express or implied. See the License for the specific language governing permissions and limitations under
+        the License.
+    -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
     xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
@@ -18,28 +21,71 @@
 
     <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
 
-    <bean id="refreshServiceImpl" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
+    <bean id="tripPositionRecordCache" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName"
+            value="org.onebusaway.transit_data_federation.impl.realtime.TripPositionServiceImpl.tripPositionRecordCache" />
+        <property name="maxElementsInMemory" value="1400" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="480" />
+        <property name="overflowToDisk" value="true" />
+        <property name="diskPersistent" value="false" />
+    </bean>
 
-    <bean id="blockLocationServiceImpl" class="org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl">
-        <property name="persistBlockLocationRecords" value="true" />
+    <bean id="tripPositionServiceImpl" class="org.onebusaway.transit_data_federation.impl.realtime.TripPositionServiceImpl">
+        <property name="tripPositionRecordCache" ref="tripPositionRecordCache" />
+        <property name="persistTripPositionRecords" value="true" />
     </bean>
 
     <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
 
-    <bean id="extendedCalendarServiceServiceDateRangeCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
-        <property name="cacheManager" ref="cacheManager" />
-        <property name="cacheName"
-            value="org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl.serviceDateRangeCache" />
-        <property name="maxElementsInMemory" value="200" />
-        <property name="eternal" value="false" />
-        <property name="timeToLive" value="0" />
-        <property name="timeToIdle" value="3600" />
-        <property name="overflowToDisk" value="false" />
-        <property name="diskPersistent" value="false" />
+    <bean id="routeSearchIndexPath" factory-bean="bundle" factory-method="getRouteSearchIndexPath" />
+    <bean id="stopSearchIndexPath" factory-bean="bundle" factory-method="getStopSearchIndexPath" />
+    <bean id="walkPlannerGraphPath" factory-bean="bundle" factory-method="getWalkPlannerGraphPath" />
+    <bean id="tripPlannerGraphPath" factory-bean="bundle" factory-method="getTripPlannerGraphPath" />
+    <bean id="narrativeProviderPath" factory-bean="bundle" factory-method="getNarrativeProviderPath" />
+
+    <bean id="calendarServiceDataFactory" class="org.onebusaway.gtfs.impl.SerializedCalendarServiceDataFactoryImpl"
+        primary="true">
+        <property name="path">
+            <bean factory-bean="gtfsBundle" factory-method="getCalendarServiceDataPath" />
+        </property>
     </bean>
 
-    <bean id="extendedCalendarServiceImpl" class="org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl">
-        <property name="serviceDateRangeCache" ref="extendedCalendarServiceServiceDateRangeCache" />
+    <bean id="calendarServiceImpl" class="org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl">
+        <property name="data">
+            <bean factory-bean="calendarServiceDataFactory" factory-method="createData" />
+        </property>
+    </bean>
+
+    <!-- Don't bother loading the walk graph... we're not using it and it takes up a lot of memory -->
+    <bean id="walkPlannerGraph" class="org.onebusaway.container.spring.SerializedFactoryBean">
+        <property name="objectType" value="org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph" />
+        <property name="path" ref="walkPlannerGraphPath" />
+    </bean>
+
+    <!--
+        <bean id="walkPlannerGraph"
+        class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl"/>
+    -->
+
+    <bean id="tripPlannerGraph" class="org.onebusaway.container.spring.SerializedFactoryBean">
+        <property name="objectType" value="org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph" />
+        <property name="path" ref="tripPlannerGraphPath" />
+    </bean>
+
+    <bean id="routeCollectionSearchServiceImpl" class="org.onebusaway.transit_data_federation.impl.RouteCollectionSearchServiceImpl">
+        <property name="indexPath" ref="routeSearchIndexPath" />
+    </bean>
+
+    <bean id="stopSearchServiceImpl" class="org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl">
+        <property name="indexPath" ref="stopSearchIndexPath" />
+    </bean>
+
+    <bean id="narrativeProviderImpl" class="org.onebusaway.container.spring.SerializedFactoryBean">
+        <property name="objectType" value="org.onebusaway.transit_data_federation.impl.narrative.NarrativeProviderImpl" />
+        <property name="path" ref="narrativeProviderPath" />
     </bean>
 
 </beans>

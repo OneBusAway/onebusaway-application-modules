@@ -1,32 +1,11 @@
 package org.onebusaway.transit_data_federation.impl.walkplanner;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
-import org.onebusaway.collections.Min;
-import org.onebusaway.container.refresh.Refreshable;
-import org.onebusaway.geospatial.HierarchicalSTRtree;
-import org.onebusaway.geospatial.HierarchicalSTRtreeFactory;
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
-import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch;
 import org.onebusaway.transit_data_federation.impl.tripplanner.AStarSearch.NoPathToGoalException;
 import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkEdgeEntryImpl;
-import org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphImpl;
 import org.onebusaway.transit_data_federation.impl.walkplanner.states.AtNodeWalkState;
 import org.onebusaway.transit_data_federation.impl.walkplanner.states.NearEdgeWalkState;
 import org.onebusaway.transit_data_federation.impl.walkplanner.states.NearNodeWalkState;
@@ -41,65 +20,35 @@ import org.onebusaway.transit_data_federation.services.walkplanner.WalkEdgeEntry
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkNodeEntry;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerGraph;
 import org.onebusaway.transit_data_federation.services.walkplanner.WalkPlannerService;
-import org.onebusaway.utility.ObjectSerializationLibrary;
+
+import edu.washington.cs.rse.collections.stats.Min;
+import edu.washington.cs.rse.geospatial.PointVector;
+import edu.washington.cs.rse.geospatial.latlon.CoordinatePoint;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 public class WalkPlannerServiceImpl implements WalkPlannerService {
 
-  private FederatedTransitDataBundle _bundle;
-
   private TripPlannerConstants _constants;
 
   private WalkPlannerGraph _graph;
-
-  /**
-   * In meters
-   */
-  private double _treeGridLength = 10000;
-
-  private HierarchicalSTRtree<WalkNodeEntry> _tree = null;
-
-  @Autowired
-  public void setBundle(FederatedTransitDataBundle bundle) {
-    _bundle = bundle;
-  }
 
   @Autowired
   public void setTripPlannerConstants(TripPlannerConstants constants) {
     _constants = constants;
   }
 
+  @Autowired
   public void setWalkPlannerGraph(WalkPlannerGraph graph) {
     _graph = graph;
-    refreshTree();
-  }
-
-  public void setTreeGridLength(double treeGridLength) {
-    _treeGridLength = treeGridLength;
-  }
-
-  @PostConstruct
-  @Refreshable(dependsOn = RefreshableResources.WALK_PLANNER_GRAPH)
-  public void setup() throws IOException, ClassNotFoundException {
-    File path = _bundle.getWalkPlannerGraphPath();
-    if (path.exists()) {
-      _graph = ObjectSerializationLibrary.readObject(path);
-    } else {
-      _graph = new WalkPlannerGraphImpl();
-    }
-
-    refreshTree();
-  }
-
-  /****
-   * {@link WalkPlannerService} Service
-   ****/
-
-  @Override
-  public WalkPlannerGraph getWalkPlannerGraph() {
-    return _graph;
   }
 
   public WalkPlan getWalkPlan(CoordinatePoint latLonFrom,
@@ -137,38 +86,10 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
 
   }
 
-  /****
-   * 
-   ****/
-
-  private void refreshTree() {
-
-    HierarchicalSTRtreeFactory<WalkNodeEntry> factory = new HierarchicalSTRtreeFactory<WalkNodeEntry>();
-    _tree = null;
-
-    Iterable<WalkNodeEntry> nodes = _graph.getNodes();
-
-    Iterator<WalkNodeEntry> it = nodes.iterator();
-    if (it.hasNext()) {
-      WalkNodeEntry first = it.next();
-      ProjectedPoint p = first.getLocation();
-      factory.setLatAndLonStep(p.getLat(), p.getLon(), _treeGridLength);
-
-      for (WalkNodeEntry node : nodes) {
-        ProjectedPoint pNode = node.getLocation();
-        factory.add(pNode.getLat(), pNode.getLon(), node);
-      }
-      _tree = factory.create();
-    }
-  }
-
   private WalkState getClosestWalkSegment(ProjectedPoint point, boolean forward)
       throws NoPathException {
 
-    Collection<WalkNodeEntry> nodes = getNodesNearLocation(point.getLat(),
-        point.getLon(), _constants.getInitialMaxDistanceToWalkNode(),
-        _constants.getMaxDistanceToWalkNode());
-
+    Collection<WalkNodeEntry> nodes = getNodesNearLocation(point);
     Set<WalkEdgeEntry> edges = getEdgesForNodes(nodes);
 
     if (edges.isEmpty())
@@ -183,23 +104,20 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
     return min.getMinElement();
   }
 
-  private Collection<WalkNodeEntry> getNodesNearLocation(double lat,
-      double lon, double initialSearchRadius, double maxRadius) {
+  private Collection<WalkNodeEntry> getNodesNearLocation(ProjectedPoint point)
+      throws NoPathException {
 
-    if (_tree == null)
-      return Collections.emptyList();
-
-    double radius = initialSearchRadius;
+    double distance = _constants.getInitialMaxDistanceToWalkNode();
 
     while (true) {
-      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(lat, lon,
-          radius);
-      List<WalkNodeEntry> nodes = _tree.query(bounds);
+      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(point.getLat(),
+          point.getLon(), distance);
+      Collection<WalkNodeEntry> nodes = _graph.getNodesByLocation(bounds);
       if (!nodes.isEmpty())
         return nodes;
-      if (radius == maxRadius)
-        return Collections.emptyList();
-      radius = Math.min(radius * 2, maxRadius);
+      distance *= 2;
+      if (distance > _constants.getMaxDistanceToWalkNode())
+        throw new NoPathException();
     }
   }
 
@@ -235,16 +153,53 @@ public class WalkPlannerServiceImpl implements WalkPlannerService {
 
     ProjectedPoint pointFrom = nodeFrom.getLocation();
     ProjectedPoint pointTo = nodeTo.getLocation();
+    ProjectedPoint pointOnEdge = projectPointOntoSegment(point, pointFrom,
+        pointTo);
 
-    ProjectedPoint pointOnEdge = StreetGraphLibrary.computeClosestPointOnEdge(
-        edge, point);
+    double edgeLength = edge.getDistance();
 
-    if (pointFrom.equals(pointOnEdge))
-      return new NearNodeWalkState(nodeFrom, point, forward);
-    else if (pointTo.equals(pointOnEdge))
-      return new NearNodeWalkState(nodeTo, point, forward);
-    else
-      return new NearEdgeWalkState(edge, point, pointOnEdge, forward);
+    // If the point on the edge is beyond the endpoints of the edge
+    if (pointFrom.distance(pointOnEdge) > edgeLength
+        || pointTo.distance(pointOnEdge) > edgeLength) {
+
+      double distanceToNodeFrom = point.distance(pointFrom);
+      double distanceToNodeTo = point.distance(pointTo);
+
+      if (distanceToNodeFrom < distanceToNodeTo)
+        return new NearNodeWalkState(nodeFrom, point, forward);
+      else
+        return new NearNodeWalkState(nodeTo, point, forward);
+    }
+
+    return new NearEdgeWalkState(edge, point, pointOnEdge, forward);
+  }
+
+  private ProjectedPoint projectPointOntoSegment(ProjectedPoint point,
+      ProjectedPoint segmentStart, ProjectedPoint segmentEnd) {
+    
+    segmentStart = ProjectedPointFactory.ensureSrid(segmentStart,
+        point.getSrid());
+    segmentEnd = ProjectedPointFactory.ensureSrid(segmentEnd, point.getSrid());
+    
+    if( segmentStart.getX() == segmentEnd.getX() && segmentStart.getY() == segmentEnd.getY())
+      return segmentStart;
+
+    PointVector v = new PointVector(point.getX() - segmentStart.getX(),
+        point.getY() - segmentStart.getY());
+    PointVector line = new PointVector(segmentEnd.getX() - segmentStart.getX(),
+        segmentEnd.getY() - segmentStart.getY());
+    PointVector proj = line.getProjection(v);
+    double x = segmentStart.getX() + proj.getX();
+    double y = segmentStart.getY() + proj.getY();
+    try {
+      return ProjectedPointFactory.reverse(x, y, point.getSrid());
+    } catch (Exception ex) {
+      System.out.println("point=" + point);
+      System.out.println("segmentStart=" + segmentStart);
+      System.out.println("segmentEnd=" + segmentEnd);
+      System.out.println("result=" + x + " " + y);
+      throw new IllegalStateException(ex);
+    }
   }
 
   private void exportStateToPath(WalkState state, LinkedList<WalkNode> path) {

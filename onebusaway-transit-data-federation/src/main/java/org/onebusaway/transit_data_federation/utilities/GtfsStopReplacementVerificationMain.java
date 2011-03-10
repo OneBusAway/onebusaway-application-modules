@@ -13,7 +13,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
-import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyFactory;
+import org.onebusaway.transit_data_federation.impl.offline.EntityReplacementStrategyFactory;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 /**

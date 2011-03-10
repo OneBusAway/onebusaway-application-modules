@@ -40,11 +40,6 @@ public interface UserService {
    */
   public User getUserForId(int userId);
 
-  /**
-   * @return the number of users with the admin role set
-   */
-  public int getNumberOfAdmins();
-
   /****
    * {@link UserIndex} Methods
    ****/
@@ -76,16 +71,6 @@ public interface UserService {
       String credentials, boolean isAnonymous);
 
   /**
-   * @param username
-   * @param password
-   * @return an existing user index with the specified username if it already
-   *         exists, or a newly created user index (and underlying user) with
-   *         the specified username and password credentials
-   */
-  public UserIndex getOrCreateUserForUsernameAndPassword(String username,
-      String password);
-
-  /**
    * Add a {@link UserIndex} with the specified id and credentials to an
    * existing user, returning the new index. If an index with the specified id
    * already exists, it is returned instead.
@@ -114,15 +99,6 @@ public interface UserService {
    * @param credentials
    */
   public void setCredentialsForUserIndex(UserIndex userIndex, String credentials);
-
-  /**
-   * Update the password for the {@link UserIndexTypes#USERNAME} user index
-   * 
-   * @param userIndex
-   * @param password
-   */
-  public void setPasswordForUsernameUserIndex(UserIndex userIndex,
-      String password);
 
   /**
    * @param user
@@ -256,10 +232,28 @@ public interface UserService {
   public void clearPhoneNumberRegistration(UserIndexKey userIndexKey);
 
   /**
-   * @param key an API key
-   * @param forceRefresh guarantees that supplied value has not been cached
-   * @return the minimum interval between requests in milliseconds for the key,
-   *         or null for a key with no permission to access the API
+   * EXPERIMENTAL: Get an additional property for the specified user. Allows for
+   * flexible extension of a user with temporary data.
+   * 
+   * NOTE: I'm not sure I really want to support this in the long run.
+   * 
+   * @param user
+   * @param propertyName
+   * @return the property value
    */
-  public Long getMinApiRequestIntervalForKey(String key, boolean forceRefresh);
+  public <T> T getAdditionalPropertyForUser(User user, String propertyName);
+
+  /**
+   * EXPERIMENTAL: Set an additional property for the specified user. Allows for
+   * flexible extension of a user with temporary data.
+   * 
+   * NOTE: I'm not sure I really want to support this in the long run.
+   * 
+   * @param user
+   * @param propertyName
+   * @param propertyValue
+   */
+  public void setAdditionalPropertyForUser(User user, String propertyName,
+      Object propertyValue);
+
 }

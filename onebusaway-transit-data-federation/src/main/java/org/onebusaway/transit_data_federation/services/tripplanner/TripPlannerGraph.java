@@ -1,12 +1,10 @@
 package org.onebusaway.transit_data_federation.services.tripplanner;
 
-import java.util.List;
-
-import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+
+import edu.washington.cs.rse.geospatial.latlon.CoordinateRectangle;
+
+import java.util.List;
 
 public interface TripPlannerGraph {
   
@@ -14,13 +12,11 @@ public interface TripPlannerGraph {
  
   public Iterable<TripEntry> getAllTrips();
   
-  public Iterable<BlockEntry> getAllBlocks();
-  
-  public List<StopEntry> getStopsByLocation(CoordinateBounds bounds);
-  
-  public BlockEntry getBlockEntryForId(AgencyAndId blockId);
+  public List<StopEntry> getStopsByLocation(CoordinateRectangle bounds);
   
   public TripEntry getTripEntryForId(AgencyAndId id);
   
   public StopEntry getStopEntryForId(AgencyAndId id);
+  
+  public List<TripEntry> getTripsForBlockId(AgencyAndId blockId);
 }

@@ -9,7 +9,7 @@ import org.onebusaway.transit_data_federation.model.tripplanner.TripPlan;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripState;
 import org.onebusaway.transit_data_federation.model.tripplanner.VehicleDepartureState;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstanceProxy;
 import org.onebusaway.transit_data_federation.services.tripplanner.TripAggregationStrategy;
 
 import java.util.HashMap;
@@ -31,8 +31,8 @@ public abstract class AbstractTripStrategy implements TripAggregationStrategy {
 
       if (state instanceof VehicleDepartureState) {
         VehicleDepartureState vds = (VehicleDepartureState) state;
-        StopTimeInstance sti = vds.getStopTimeInstance();
-        AgencyAndId tripId = sti.getTrip().getTrip().getId();
+        StopTimeInstanceProxy sti = vds.getStopTimeInstance();
+        AgencyAndId tripId = sti.getTrip().getId();
         tripIds.add(tripId);
       }
 
@@ -50,13 +50,13 @@ public abstract class AbstractTripStrategy implements TripAggregationStrategy {
         if (prev instanceof VehicleDepartureState) {
 
           VehicleDepartureState vds = (VehicleDepartureState) prev;
-          StopTimeInstance sti = vds.getStopTimeInstance();
-          AgencyAndId tripId = sti.getTrip().getTrip().getId();
+          StopTimeInstanceProxy sti = vds.getStopTimeInstance();
+          AgencyAndId tripId = sti.getTrip().getId();
           long duration = state.getCurrentTime() - prev.getCurrentTime();
           addTime(results, tripId, duration);
         } else if (prev instanceof BlockTransferState) {
           BlockTransferState bt = (BlockTransferState) prev;
-          AgencyAndId tripId = bt.getNextTrip().getTrip().getId();
+          AgencyAndId tripId = bt.getNextTrip().getId();
           long duration = state.getCurrentTime() - prev.getCurrentTime();
           addTime(results, tripId, duration);
         }
@@ -79,10 +79,10 @@ public abstract class AbstractTripStrategy implements TripAggregationStrategy {
     for (TripState state : trip.getStates()) {
       if (state instanceof VehicleDepartureState) {
         VehicleDepartureState vds = (VehicleDepartureState) state;
-        StopTimeInstance sti = vds.getStopTimeInstance();
+        StopTimeInstanceProxy sti = vds.getStopTimeInstance();
         if (b.length() > 0)
           b.append(',');
-        b.append(sti.getTrip().getTrip().getId());
+        b.append(sti.getTrip().getId());
       }
     }
 

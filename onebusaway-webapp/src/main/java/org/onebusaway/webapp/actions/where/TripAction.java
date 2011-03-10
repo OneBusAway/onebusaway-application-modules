@@ -32,7 +32,6 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionSupport;
-import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
 public class TripAction extends ActionSupport {
 
@@ -43,9 +42,9 @@ public class TripAction extends ActionSupport {
 
   private String _id;
 
-  private Date _serviceDate;
+  private Date _serviceDate = new Date();
 
-  private Date _time;
+  private Date _time = new Date();
 
   private TripDetailsBean _tripDetails;
 
@@ -53,38 +52,20 @@ public class TripAction extends ActionSupport {
 
   private long _actualServiceDate;
 
-  private String _vehicleId;
-
-  private boolean _showArrivals = false;
-
   public void setId(String id) {
     _id = id;
   }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
   public void setServiceDate(Date serviceDate) {
     _serviceDate = serviceDate;
   }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _time = time;
   }
 
-  public void setVehicleId(String vehicleId) {
-    _vehicleId = vehicleId;
-  }
-
   public void setStop(String stopId) {
 
-  }
-
-  public void setShowArrivals(boolean showArrivals) {
-    _showArrivals = showArrivals;
-  }
-
-  public boolean isShowArrivals() {
-    return _showArrivals;
   }
 
   public TripDetailsBean getResult() {
@@ -96,7 +77,7 @@ public class TripAction extends ActionSupport {
   }
 
   @Override
-  @Actions({
+  @Actions( {
       @Action(value = "/where/standard/trip"),
       @Action(value = "/where/iphone/trip"),
       @Action(value = "/where/text/trip")})
@@ -105,18 +86,11 @@ public class TripAction extends ActionSupport {
     if (_id == null)
       return INPUT;
 
-    if (_time == null)
-      _time = new Date();
-
     TripDetailsQueryBean query = new TripDetailsQueryBean();
     query.setTripId(_id);
-    if (_serviceDate != null)
-      query.setServiceDate(_serviceDate.getTime());
-    query.setVehicleId(_vehicleId);
-
-    query.setTime(_time.getTime());
-
-    _tripDetails = _service.getSingleTripDetails(query);
+    query.setServiceDate(_serviceDate);
+    query.setTime(_time);
+    _tripDetails = _service.getSpecificTripDetails(query);
 
     if (_tripDetails == null)
       throw new NoSuchTripServiceException(_id);
@@ -128,14 +102,8 @@ public class TripAction extends ActionSupport {
     return SUCCESS;
   }
 
-  public int getStopTimeRaw(TripStopTimeBean stopTime) {
-    return _showArrivals ? stopTime.getArrivalTime()
-        : stopTime.getDepartureTime();
-  }
-
   public Date getStopTime(TripStopTimeBean stopTime) {
-    int t = getStopTimeRaw(stopTime);
-    return new Date(_actualServiceDate + t * 1000);
+    return new Date(_actualServiceDate + stopTime.getDepartureTime() * 1000);
   }
 
   private long getActualServiceDate() {

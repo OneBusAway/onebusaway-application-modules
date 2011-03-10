@@ -55,31 +55,12 @@ public class StopsForRouteNavigationTemplate extends AbstractAgiTemplate {
     if (index < 0)
       index = 0;
 
-    /**
-     * We always listen for the key-press for the previous name in case it takes
-     * the user a second to press
-     */
-    if (index > 0)
-      addNavigationSelectionActionForIndex(navigation, index - 1);
-
-    /**
-     * If we're at the first entry and there is a second, we allow the user to
-     * jump ahead
-     */
-    if (index == 0 && names.size() > 1) {
-      addNavigationSelectionActionForIndex(navigation, index + 1);
-    }
-
     if (index >= names.size()) {
 
       AgiActionName action = setNextAction("/search/navigate-to");
       action.putParam("navigation", navigation);
       action.putParam("index", 0);
       action.setExcludeFromHistory(true);
-
-      // Add an extra pause so the user has a chance to make a selection from
-      // the previous entry
-      addPause(1000);
 
       addMessage(Messages.TO_REPEAT);
 
@@ -89,6 +70,11 @@ public class StopsForRouteNavigationTemplate extends AbstractAgiTemplate {
 
       NameBean name = names.get(index);
       handleName(name, key);
+
+      // We always listen for the key-press for the previous name in case it
+      // takes the user a second to press
+      if (index > 0)
+        addNavigationSelectionActionForIndex(navigation, index - 1);
 
       addNavigateToAction(navigation, "4", first(index - 1));
       addNavigateToAction(navigation, "6", index + 1);
@@ -100,7 +86,7 @@ public class StopsForRouteNavigationTemplate extends AbstractAgiTemplate {
       action.putParam("index", index + 1);
       action.setExcludeFromHistory(true);
     }
-
+    
     addAction("\\*", "/back");
   }
 

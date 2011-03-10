@@ -118,7 +118,7 @@ public class IndexPage extends WhereCommonPage {
 
       for (final TripDetailsBean bean : result.getList()) {
         TripStatusBean status = bean.getStatus();
-        CoordinatePoint position = status.getLocation();
+        CoordinatePoint position = status.getPosition();
         final LatLng point = LatLng.newInstance(position.getLat(),
             position.getLon());
         Marker marker = new Marker(point);

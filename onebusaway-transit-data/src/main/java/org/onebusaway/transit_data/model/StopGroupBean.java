@@ -7,9 +7,7 @@ import java.util.List;
 
 public class StopGroupBean implements Serializable {
 
-  private static final long serialVersionUID = 2L;
-
-  private String id;
+  private static final long serialVersionUID = 1L;
 
   private NameBean name;
 
@@ -18,14 +16,6 @@ public class StopGroupBean implements Serializable {
   private List<StopGroupBean> subGroups;
 
   private List<EncodedPolylineBean> polylines;
-
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
 
   public NameBean getName() {
     return name;

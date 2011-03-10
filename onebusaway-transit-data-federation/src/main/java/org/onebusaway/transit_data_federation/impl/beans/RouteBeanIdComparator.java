@@ -1,8 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.util.Comparator;
-
 import org.onebusaway.transit_data.model.RouteBean;
+
+import java.util.Comparator;
 
 /**
  * Comparator to sort {@link RouteBean} beans by their id

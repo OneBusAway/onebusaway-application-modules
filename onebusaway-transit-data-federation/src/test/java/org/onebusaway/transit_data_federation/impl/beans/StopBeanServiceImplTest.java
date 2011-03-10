@@ -18,7 +18,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.RouteService;
+import org.onebusaway.transit_data_federation.services.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 
@@ -30,7 +30,7 @@ public class StopBeanServiceImplTest {
 
   private NarrativeService _narrativeService;
 
-  private RouteService _routeService;
+  private TransitGraphDao _graphDao;
 
   private RouteBeanService _routeBeanService;
 
@@ -44,8 +44,8 @@ public class StopBeanServiceImplTest {
     _narrativeService = Mockito.mock(NarrativeService.class);
     _service.setNarrativeService(_narrativeService);
 
-    _routeService = Mockito.mock(RouteService.class);
-    _service.setRouteService(_routeService);
+    _graphDao = Mockito.mock(TransitGraphDao.class);
+    _service.setTransitGraphDao(_graphDao);
 
     _routeBeanService = Mockito.mock(RouteBeanService.class);
     _service.setRouteBeanService(_routeBeanService);
@@ -83,7 +83,7 @@ public class StopBeanServiceImplTest {
     Set<AgencyAndId> routeIds = new HashSet<AgencyAndId>();
     routeIds.add(routeId);
 
-    Mockito.when(_routeService.getRouteCollectionIdsForStop(stopId)).thenReturn(
+    Mockito.when(_graphDao.getRouteCollectionIdsForStop(stopId)).thenReturn(
         routeIds);
 
     RouteBean.Builder routeBuilder = RouteBean.builder();

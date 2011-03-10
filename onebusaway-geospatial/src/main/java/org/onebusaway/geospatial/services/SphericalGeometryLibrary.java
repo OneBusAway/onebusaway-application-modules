@@ -8,8 +8,6 @@ import static java.lang.Math.toDegrees;
 import static java.lang.Math.toRadians;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.geospatial.model.XYPoint;
 
 public class SphericalGeometryLibrary {
 
@@ -41,10 +39,6 @@ public class SphericalGeometryLibrary {
     return distance(lat1, lon1, lat2, lon2, RADIUS_OF_EARTH_IN_KM * 1000);
   }
 
-  public static final double distance(CoordinatePoint a, CoordinatePoint b) {
-    return distance(a.getLat(), a.getLon(), b.getLat(), b.getLon());
-  }
-
   public static final double distance(double lat1, double lon1, double lat2,
       double lon2, double radius) {
 
@@ -63,9 +57,9 @@ public class SphericalGeometryLibrary {
     return radius * atan2(y, x);
   }
 
-  public static final CoordinateBounds bounds(CoordinatePoint point,
+  public static final CoordinateBounds bounds(double lat, double lon,
       double distance) {
-    return bounds(point.getLat(), point.getLon(), distance);
+    return bounds(lat, lon, distance, RADIUS_OF_EARTH_IN_KM * 1000);
   }
 
   public static CoordinateBounds bounds(CoordinateBounds b, double distance) {
@@ -76,23 +70,16 @@ public class SphericalGeometryLibrary {
   }
 
   public static final CoordinateBounds bounds(double lat, double lon,
-      double distance) {
-    return bounds(lat, lon, distance, distance);
-  }
-
-  public static final CoordinateBounds bounds(double lat, double lon,
-      double latDistance, double lonDistance) {
-
-    double radiusOfEarth = RADIUS_OF_EARTH_IN_KM * 1000;
+      double distance, double radius) {
 
     double latRadians = toRadians(lat);
     double lonRadians = toRadians(lon);
 
-    double latRadius = radiusOfEarth;
-    double lonRadius = Math.cos(latRadians) * radiusOfEarth;
+    double latRadius = radius;
+    double lonRadius = Math.cos(latRadians) * radius;
 
-    double latOffset = latDistance / latRadius;
-    double lonOffset = lonDistance / lonRadius;
+    double latOffset = distance / latRadius;
+    double lonOffset = distance / lonRadius;
 
     double latFrom = toDegrees(latRadians - latOffset);
     double latTo = toDegrees(latRadians + latOffset);
@@ -109,9 +96,7 @@ public class SphericalGeometryLibrary {
    * @param lon
    * @param latOffset
    * @param lonOffset
-   * @return 
-   *         CoordinateBounds(lat-latOffser,lon-lonOffset,lat+latOffset,lon+lonOffset
-   *         )
+   * @return CoordinateBounds(lat-latOffser,lon-lonOffset,lat+latOffset,lon+lonOffset)
    */
   public static final CoordinateBounds boundsFromLatLonOffset(double lat,
       double lon, double latOffset, double lonOffset) {
@@ -121,78 +106,14 @@ public class SphericalGeometryLibrary {
     double lonTo = lon + lonOffset;
     return new CoordinateBounds(latFrom, lonFrom, latTo, lonTo);
   }
-
+  
   public static final CoordinateBounds boundsFromLatLonSpan(double lat,
       double lon, double latSpan, double lonSpan) {
-    return boundsFromLatLonOffset(lat, lon, latSpan / 2, lonSpan / 2);
+    return boundsFromLatLonOffset(lat,lon,latSpan/2,lonSpan/2);
   }
-
-  public static CoordinatePoint getCenterOfBounds(CoordinateBounds b) {
-    return new CoordinatePoint((b.getMinLat() + b.getMaxLat()) / 2,
-        (b.getMinLon() + b.getMaxLon()) / 2);
-  }
-
-  /**
-   * If Wikipedia is to be trusted, then:
-   * 
-   * http://en.wikipedia.org/wiki/Spherical_law_of_cosines
-   * 
-   * claims that the standard ordinary planar law of cosines is a reasonable
-   * approximation for the more-complex spherical law of cosines when the
-   * central angles of the spherical triangle are small.
-   * 
-   * @param latFrom
-   * @param lonFrom
-   * @param latTo
-   * @param lonTo
-   * @return the orientation angle in degrees, 0º is East, 90º is North, 180º is
-   *         West, and 270º is South
-   */
-  public static double getOrientation(double latFrom, double lonFrom,
-      double latTo, double lonTo) {
-
-    double d = distance(latFrom, lonFrom, latTo, lonTo);
-    CoordinateBounds bounds = bounds(latFrom, lonFrom, d);
-
-    XYPoint origin = new XYPoint(lonFrom, latFrom);
-    XYPoint axis = new XYPoint(bounds.getMaxLon(), latFrom);
-    XYPoint target = new XYPoint(lonTo, latTo);
-
-    double angle = GeometryLibrary.getAngle(origin, axis, target);
-    if (latTo < latFrom)
-      angle = 2 * Math.PI - angle;
-
-    return Math.toDegrees(angle);
-  }
-
-  /**
-   * Note that this is an approximate method at best that will perform
-   * increasingly worse as the distance between the points increases.
-   * 
-   * @param point
-   * @param segmentStart
-   * @param segmentEnd
-   * @return
-   */
-  public static CoordinatePoint projectPointToSegmentAppropximate(
-      CoordinatePoint point, CoordinatePoint segmentStart,
-      CoordinatePoint segmentEnd) {
-
-    XYPoint pPoint = new XYPoint(point.getLon(), point.getLat());
-    XYPoint pSegmentStart = new XYPoint(segmentStart.getLon(),
-        segmentStart.getLat());
-    XYPoint pSegmentEnd = new XYPoint(segmentEnd.getLon(), segmentEnd.getLat());
-
-    XYPoint pResult = GeometryLibrary.projectPointToSegment(pPoint,
-        pSegmentStart, pSegmentEnd);
-    return new CoordinatePoint(pResult.getY(), pResult.getX());
-  }
-
-  /****
-   * Private Methods
-   ****/
 
   private static final double p2(double a) {
     return a * a;
   }
+
 }

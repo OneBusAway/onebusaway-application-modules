@@ -13,35 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
-html,body {
-	margin: 0;
-	padding: 0
-}
+ 
+@url logoUrl getLogoImage;
 
 body {
 	background: #fff;
-	font-family: Arial, Helvetica, Helvetica Neue, Verdana, sans-serif;
 	font-size: 16px;
 	line-height: 20px;
 	color: #000;
-}
-
-h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,cite,code,img,small,strike,sub,sup,tt,dd,dl,dt,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	font-weight: normal;
-	font-style: normal;
-	font-size: 100%;
-	line-height: 1;
-	font-family: inherit;
-	text-align: left
-}
-
-table {
-	border-collapse: collapse;
-	border-spacing: 0
 }
 
 /****
@@ -251,6 +230,10 @@ div.page-header h2 {
 	letter-spacing: 0
 }
 
+div.home-header {
+	background: logoUrl no-repeat scroll 100% bottom transparent;
+}
+
 table#tools {
   width: 100%;	
 }
@@ -344,10 +327,6 @@ img#stopIdImage02 {
 	
 }
 
-div.stop_links {
-    text-align: left;
-}
-
 div#agencies_map {
 	margin-top: 1em;
 	width: 100%;
@@ -396,6 +375,7 @@ div.agencyDisclaimerContent {
 }
  
 div#feedback {
+  display: none;
   position: absolute;
   top: 350px;
   left: 0px;
@@ -413,42 +393,4 @@ div.wiki h1 {
 
 div.wiki h2 {
   clear: both;
-}
-
-/****
- *
- ****/
- 
-.serviceAlertTable td.label {
-  padding: 5px;
-  font-weight: bold;
-  text-align: right;	
-}
-
-/****
- *
- ****/
- 
-table.ProblemReportSummaries thead tr {
-  background-color: #6D6E72;
-}
-
-table.ProblemReportSummaries thead td {
-  color: white;
-  font-weight: bold;
-  padding: 5px 1em 5px 2em;
-  text-align: center;
-}
-
-table.ProblemReportSummaries tbody tr.odd {
-  background-color: #F1F1F1;
-}
-
-table.ProblemReportSummaries tbody tr.even {
-  background-color: #E0E1E3;
-}
-
-table.ProblemReportSummaries tbody td {
-	padding: 5px;
-	text-align: center;
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,19 +16,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.container.model.HasListeners;
+import org.onebusaway.container.model.Listeners;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.csv.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.realtime.api.EVehiclePhase;
-import org.onebusaway.realtime.api.VehicleLocationListener;
-import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.impl.calendar.BlockCalendarService;
+import org.onebusaway.transit_data_federation.impl.realtime.BlockToTripScheduleAdherenceInterpolation;
+import org.onebusaway.transit_data_federation.services.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionListener;
+import org.onebusaway.transit_data_federation.services.realtime.VehiclePositionRecord;
+import org.onebusaway.transit_data_federation.services.tripplanner.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,8 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime.orbcad:name=OrbcadRecordFtpSource")
-public abstract class AbstractOrbcadRecordSource {
+public abstract class AbstractOrbcadRecordSource implements
+    HasListeners<VehiclePositionListener> {
 
   private static final int REFRESH_INTERVAL_IN_SECONDS = 30;
 
@@ -43,31 +43,23 @@ public abstract class AbstractOrbcadRecordSource {
 
   protected ScheduledExecutorService _executor = Executors.newSingleThreadScheduledExecutor();
 
-  private List<VehicleLocationRecord> _records = new ArrayList<VehicleLocationRecord>();
+  private List<VehiclePositionRecord> _records = new ArrayList<VehiclePositionRecord>();
 
   private int _refreshInterval = REFRESH_INTERVAL_IN_SECONDS;
 
   private long _lastRefresh = 0;
 
-  private VehicleLocationListener _vehicleLocationListener;
+  private Listeners<VehiclePositionListener> _listeners = new Listeners<VehiclePositionListener>();
 
-  private Map<String, List<String>> _blockIdMapping = new HashMap<String, List<String>>();
+  private Map<String, String> _blockIdMapping = new HashMap<String, String>();
 
   private BlockCalendarService _blockCalendarService;
 
-  private ScheduledBlockLocationService _scheduledBlockLocationService;
+  private TransitGraphDao _transitGraph;
 
   protected List<String> _agencyIds;
 
   private File _blockIdMappingFile;
-
-  private double _motionThreshold = 30;
-
-  /****
-   * 
-   ****/
-
-  private Map<AgencyAndId, VehicleLocationRecord> _lastRecordByVehicleId = new HashMap<AgencyAndId, VehicleLocationRecord>();
 
   /****
    * Statistics
@@ -85,6 +77,8 @@ public abstract class AbstractOrbcadRecordSource {
 
   private transient int _recordsValid = 0;
 
+  private BlockToTripScheduleAdherenceInterpolation _interpolation;
+
   public void setRefreshInterval(int refreshIntervalInSeconds) {
     _refreshInterval = refreshIntervalInSeconds;
   }
@@ -101,10 +95,14 @@ public abstract class AbstractOrbcadRecordSource {
     _blockIdMappingFile = blockIdMappingFile;
   }
 
-  @Autowired
-  public void setVehicleLocationListener(
-      VehicleLocationListener vehicleLocationListener) {
-    _vehicleLocationListener = vehicleLocationListener;
+  @Override
+  public void addListener(VehiclePositionListener listener) {
+    _listeners.addListener(listener);
+  }
+
+  @Override
+  public void removeListener(VehiclePositionListener listener) {
+    _listeners.removeListener(listener);
   }
 
   @Autowired
@@ -113,9 +111,14 @@ public abstract class AbstractOrbcadRecordSource {
   }
 
   @Autowired
-  public void setScheduledBlockLocationService(
-      ScheduledBlockLocationService scheduledBlockLocationService) {
-    _scheduledBlockLocationService = scheduledBlockLocationService;
+  public void setTransitGraphDao(TransitGraphDao transitGraph) {
+    _transitGraph = transitGraph;
+  }
+
+  @Autowired
+  public void setBlockToTripScheduleAdherenceInterpolation(
+      BlockToTripScheduleAdherenceInterpolation interpolation) {
+    _interpolation = interpolation;
   }
 
   /****
@@ -199,12 +202,7 @@ public abstract class AbstractOrbcadRecordSource {
         int index = line.indexOf(',');
         String from = line.substring(0, index);
         String to = line.substring(index + 1);
-        List<String> toValues = _blockIdMapping.get(from);
-        if (toValues == null) {
-          toValues = new ArrayList<String>();
-          _blockIdMapping.put(from, toValues);
-        }
-        toValues.add(to);
+        _blockIdMapping.put(from, to);
       }
 
       reader.close();
@@ -215,45 +213,35 @@ public abstract class AbstractOrbcadRecordSource {
     }
   }
 
-  private BlockInstance getBlockInstanceForRecord(OrbcadRecord record) {
+  private Date getServiceDateForRecord(OrbcadRecord record, AgencyAndId blockId) {
 
     long recordTime = record.getTime() * 1000;
-    long timeFrom = recordTime - 30 * 60 * 1000;
-    long timeTo = recordTime + 30 * 60 * 1000;
+    Date from = new Date(recordTime - 30 * 60 * 1000);
+    Date to = new Date(recordTime + 30 * 60 * 1000);
 
-    List<AgencyAndId> blockIds = getBlockIdsForRecord(record);
+    List<Date> serviceDates = _blockCalendarService.getServiceDatesWithinRangeForBlockId(
+        blockId, from, to);
 
-    List<BlockInstance> allInstances = new ArrayList<BlockInstance>();
-
-    for (AgencyAndId blockId : blockIds) {
-      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
-          blockId, timeFrom, timeTo);
-      allInstances.addAll(instances);
-    }
-
-    // TODO : We currently assume we don't have overlapping blocks.
-    if (allInstances.size() != 1)
+    if (serviceDates.size() != 1)
       return null;
 
-    return allInstances.get(0);
+    return serviceDates.get(0);
   }
 
-  private List<AgencyAndId> getBlockIdsForRecord(OrbcadRecord record) {
-
-    List<AgencyAndId> blockIds = new ArrayList<AgencyAndId>();
-
-    String rawBlockId = Integer.toString(record.getBlock());
-    List<String> rawBlockIds = _blockIdMapping.get(rawBlockId);
-    if (rawBlockIds == null)
-      rawBlockIds = Arrays.asList(rawBlockId);
+  private AgencyAndId getBlockIdForRecord(OrbcadRecord record) {
+    String blockId = Integer.toString(record.getBlock());
+    String translated = _blockIdMapping.get(blockId);
+    if (translated != null)
+      blockId = translated;
 
     for (String agencyId : _agencyIds) {
-      for (String rawId : rawBlockIds) {
-        blockIds.add(new AgencyAndId(agencyId, rawId));
-      }
+      AgencyAndId aid = new AgencyAndId(agencyId, blockId);
+      List<TripEntry> trips = _transitGraph.getTripsForBlockId(aid);
+      if (trips == null || trips.isEmpty())
+        continue;
+      return aid;
     }
-
-    return blockIds;
+    return null;
   }
 
   protected class AvlRefreshTask implements Runnable {
@@ -274,10 +262,13 @@ public abstract class AbstractOrbcadRecordSource {
 
         handleRefresh();
 
-        try {
-          _vehicleLocationListener.handleVehicleLocationRecords(_records);
-        } catch (Throwable ex) {
-          _log.warn("error passing schedule adherence records to listener", ex);
+        for (VehiclePositionListener listener : _listeners) {
+          try {
+            listener.handleVehiclePositionRecords(_records);
+          } catch (Throwable ex) {
+            _log.warn("error passing schedule adherence records to listener",
+                ex);
+          }
         }
 
         _records.clear();
@@ -310,24 +301,24 @@ public abstract class AbstractOrbcadRecordSource {
         return;
       }
 
-      BlockInstance blockInstance = getBlockInstanceForRecord(record);
-      if (blockInstance == null) {
+      AgencyAndId blockId = getBlockIdForRecord(record);
+      if (blockId == null) {
+        _recordsWithoutBlockIdInGraph++;
+        return;
+      }
+
+      Date serviceDate = getServiceDateForRecord(record, blockId);
+      if (serviceDate == null) {
         _recordsWithoutServiceDate++;
         return;
       }
 
-      BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-      BlockEntry block = blockConfig.getBlock();
-      AgencyAndId blockId = block.getId();
-
-      VehicleLocationRecord message = new VehicleLocationRecord();
+      VehiclePositionRecord message = new VehiclePositionRecord();
 
       message.setBlockId(blockId);
 
-      message.setServiceDate(blockInstance.getServiceDate());
-      message.setTimeOfRecord(record.getTime() * 1000);
-      message.setTimeOfLocationUpdate(message.getTimeOfRecord());
-      
+      message.setServiceDate(serviceDate.getTime());
+      message.setCurrentTime(record.getTime() * 1000);
       // In Orbcad, +scheduleDeviation means the bus is early and -schedule
       // deviation means bus is late, which is opposite the
       // ScheduleAdherenceRecord convention
@@ -336,51 +327,14 @@ public abstract class AbstractOrbcadRecordSource {
       message.setVehicleId(new AgencyAndId(blockId.getAgencyId(),
           Integer.toString(record.getVehicleId())));
 
-      if (record.hasLat() && record.hasLon()) {
-        message.setCurrentLocationLat(record.getLat());
-        message.setCurrentLocationLon(record.getLon());
-      }
+      if (record.hasLat() && record.hasLon())
+        message.setCurrentLocation(new CoordinatePoint(record.getLat(),
+            record.getLon()));
+      
+      List<VehiclePositionRecord> messages = _interpolation.interpolate(message);
 
-      int effectiveScheduleTime = (int) (record.getTime() - blockInstance.getServiceDate() / 1000);
-      int adjustedScheduleTime = effectiveScheduleTime
-          - record.getScheduleDeviation();
-
-      ScheduledBlockLocation location = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
-          blockConfig, adjustedScheduleTime);
-
-      if (location != null) {
-        message.setDistanceAlongBlock(location.getDistanceAlongBlock());
-
-        BlockTripEntry activeTrip = location.getActiveTrip();
-        if (activeTrip != null)
-          message.setTripId(activeTrip.getTrip().getId());
-
-        // Are we at the start of the block?
-        if (location.getDistanceAlongBlock() == 0) {
-
-          VehicleLocationRecord lastRecord = _lastRecordByVehicleId.get(message.getVehicleId());
-          boolean inMotion = true;
-          if (lastRecord != null && lastRecord.isCurrentLocationSet()
-              && message.isCurrentLocationSet()) {
-            double d = SphericalGeometryLibrary.distance(
-                lastRecord.getCurrentLocationLat(),
-                lastRecord.getCurrentLocationLon(),
-                message.getCurrentLocationLat(),
-                message.getCurrentLocationLon());
-            inMotion = d > _motionThreshold;
-          }
-
-          if (inMotion)
-            message.setPhase(EVehiclePhase.DEADHEAD_BEFORE);
-          else
-            message.setPhase(EVehiclePhase.LAYOVER_BEFORE);
-        }
-      }
-
-      _records.add(message);
+      _records.addAll(messages);
       _recordsValid++;
-
-      _lastRecordByVehicleId.put(message.getVehicleId(), message);
     }
   }
 }

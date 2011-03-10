@@ -29,7 +29,7 @@ public class StopsBean extends ApplicationBean {
     return stops;
   }
 
-  public void setStops(List<StopBean> stops) {
+  public void setStopBeans(List<StopBean> stops) {
     this.stops = stops;
   }
 
