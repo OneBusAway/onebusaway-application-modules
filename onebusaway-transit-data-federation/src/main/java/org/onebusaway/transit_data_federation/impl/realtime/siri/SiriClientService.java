@@ -17,6 +17,8 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.siri.ConditionDetails;
 import org.onebusaway.siri.core.SiriClient;
 import org.onebusaway.siri.core.SiriClientServiceRequest;
+import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
+import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
@@ -40,8 +42,10 @@ import uk.org.siri.siri.ExtensionsStructure;
 import uk.org.siri.siri.PtConsequenceStructure;
 import uk.org.siri.siri.PtConsequencesStructure;
 import uk.org.siri.siri.PtSituationElementStructure;
+import uk.org.siri.siri.SensitivityEnumeration;
 import uk.org.siri.siri.ServiceDelivery;
 import uk.org.siri.siri.ServiceRequest;
+import uk.org.siri.siri.SeverityEnumeration;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure.Situations;
 
@@ -138,6 +142,7 @@ public class SiriClientService {
 
     handleDescriptions(ptSituation, situation);
     handlReasons(ptSituation, situation);
+    handleOtherFields(ptSituation, situation);
     handleAffects(ptSituation, situation);
     handleConsequences(ptSituation, situation);
 
@@ -167,6 +172,22 @@ public class SiriClientService {
       situation.setMiscellaneousReason(ptSituation.getPersonnelReason().value());
 
     situation.setUndefinedReason(ptSituation.getUndefinedReason());
+  }
+  
+  private void handleOtherFields(PtSituationElementStructure ptSituation,
+      Situation situation) {
+    
+    SensitivityEnumeration sensitivity = ptSituation.getSensitivity();
+    if( sensitivity != null) {
+      ESensitivity sensitivityEnum = ESensitivity.valueOfXmlId(sensitivity.value());
+      situation.setSensitivity(sensitivityEnum);
+    }
+    
+    SeverityEnumeration severity = ptSituation.getSeverity();
+    if( severity != null) {
+      ESeverity severityEnum = ESeverity.valueOfTpegCode(severity.value());
+      situation.setSeverity(severityEnum);
+    }
   }
 
   /****

@@ -39,6 +39,10 @@ public class SituationV2Bean implements HasId, Serializable {
 
   private List<SituationConsequenceV2Bean> consequences;
 
+  private String severity;
+
+  private String sensitivity;
+
   public String getId() {
     return id;
   }
@@ -157,5 +161,21 @@ public class SituationV2Bean implements HasId, Serializable {
 
   public void setConsequences(List<SituationConsequenceV2Bean> consequences) {
     this.consequences = consequences;
+  }
+
+  public String getSeverity() {
+    return severity;
+  }
+
+  public void setSeverity(String severity) {
+    this.severity = severity;
+  }
+
+  public String getSensitivity() {
+    return sensitivity;
+  }
+
+  public void setSensitivity(String sensitivity) {
+    this.sensitivity = sensitivity;
   }
 }

@@ -1,4 +1,4 @@
-   package org.onebusaway.webapp.actions.admin.console;
+package org.onebusaway.webapp.actions.admin.console;
 
 import java.io.IOException;
 import java.util.Map;
@@ -12,6 +12,8 @@ import org.onebusaway.presentation.bundles.service_alerts.EnvironmentReasons;
 import org.onebusaway.presentation.bundles.service_alerts.EquipmentReasons;
 import org.onebusaway.presentation.bundles.service_alerts.MiscellaneousReasons;
 import org.onebusaway.presentation.bundles.service_alerts.PersonnelReasons;
+import org.onebusaway.presentation.bundles.service_alerts.Sensitivity;
+import org.onebusaway.presentation.bundles.service_alerts.Severity;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
@@ -97,7 +99,7 @@ public class ServiceAlertAction extends ActionSupport implements
     _model.setPersonnelReason(string(_model.getPersonnelReason()));
     _model.setMiscellaneousReason(string(_model.getMiscellaneousReason()));
     _model.setUndefinedReason(string(_model.getUndefinedReason()));
-
+    
     if (_raw != null && !_raw.trim().isEmpty()) {
       SituationBean rawSituation = getStringAsRawSituation(_raw);
       _model.setAffects(rawSituation.getAffects());
@@ -126,19 +128,27 @@ public class ServiceAlertAction extends ActionSupport implements
    ****/
 
   public Map<String, String> getEnvironmentReasonValues() {
-    return ResourceBundleSupport.getLocaleMap(this,EnvironmentReasons.class);
+    return ResourceBundleSupport.getLocaleMap(this, EnvironmentReasons.class);
   }
 
   public Map<String, String> getEquipmentReasonValues() {
-    return ResourceBundleSupport.getLocaleMap(this,EquipmentReasons.class);
+    return ResourceBundleSupport.getLocaleMap(this, EquipmentReasons.class);
   }
 
   public Map<String, String> getMiscellaneousReasonValues() {
-    return ResourceBundleSupport.getLocaleMap(this,MiscellaneousReasons.class);
+    return ResourceBundleSupport.getLocaleMap(this, MiscellaneousReasons.class);
   }
 
   public Map<String, String> getPersonnelReasonValues() {
-    return ResourceBundleSupport.getLocaleMap(this,PersonnelReasons.class);
+    return ResourceBundleSupport.getLocaleMap(this, PersonnelReasons.class);
+  }
+
+  public Map<String, String> getSeverityValues() {
+    return ResourceBundleSupport.getLocaleMap(this, Severity.class);
+  }
+
+  public Map<String, String> getSensitivityValues() {
+    return ResourceBundleSupport.getLocaleMap(this, Sensitivity.class);
   }
 
   /****

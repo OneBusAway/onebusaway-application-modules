@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
@@ -50,6 +51,13 @@ public class SituationsPresentation {
         unreadServiceAlertCount++;
     }
     return unreadServiceAlertCount;
+  }
+
+  public String getUnreadServiceAlertsClass() {
+    ESeverity severity = getHighestUnreadSeverity();
+    if( severity == ESeverity.NO_IMPACT)
+      return "unreadServiceAlertsNoImpactSeverity";
+    return "unreadServiceAlertsNormalSeverity";
   }
 
   public List<SituationBean> getUnreadSituations() {
@@ -126,6 +134,8 @@ public class SituationsPresentation {
   }
 
   private boolean isSituationActiveAtTime(SituationBean situation, long time) {
+    if( situation.getConsequences() == null)
+      return true;
     for (SituationConsequenceBean consequences : situation.getConsequences()) {
       TimeRangeBean period = consequences.getPeriod();
       if (isTimeRangeActive(period, time, false))
@@ -160,6 +170,25 @@ public class SituationsPresentation {
       return true;
 
     return (from <= _time && _time <= to);
+  }
+
+  private ESeverity getHighestUnreadSeverity() {
+
+    ESeverity maxSeverity = null;
+
+    Map<String, Long> readServiceAlerts = _user.getReadServiceAlerts();
+    for (SituationBean situation : _situations) {
+
+      if (isSituationUnread(readServiceAlerts, situation)) {
+        ESeverity s = situation.getSeverity();
+        if (s == null)
+          s = ESeverity.UNDEFINED;
+        if (maxSeverity == null
+            || maxSeverity.getNumericValue() < s.getNumericValue())
+          maxSeverity = s;
+      }
+    }
+    return maxSeverity;
   }
 
 }

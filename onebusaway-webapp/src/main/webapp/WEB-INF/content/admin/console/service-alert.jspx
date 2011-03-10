@@ -35,16 +35,18 @@
 </s:else>
 
 <s:form action="service-alert!submit">
-<s:select label="Equipment" name="equipmentReason" headerKey="null" headerValue="Select Reason" list="equipmentReasonValues" value="%{equipmentReason}"/>
-<s:select label="Environment" name="environmentReason" headerKey="null" headerValue="Select Reason" list="environmentReasonValues" value="%{environmentReason}"/>
-<s:select label="Personnel" name="personnelReason" headerKey="null" headerValue="Select Reason" list="personnelReasonValues" value="%{personnelReason}"/>
-<s:select label="Miscellaneous" name="miscellaneousReason" headerKey="null" headerValue="Select Reason" list="miscellaneousReasonValues" value="%{miscellaneousReason}"/>
-<s:textfield label="Other" name="undefinedReason" value="%{undefinedReason}"/>
 <s:textfield label="Summary" name="summary.value" value="%{summary.value}"/>
 <s:textarea label="Description" name="description.value" value="%{description.value}" cols="80" rows="5"/>
 <s:textfield label="Detail" name="detail.value" value="%{detail.value}"/>
 <s:textfield label="Advice" name="advice.value" value="%{advice.value}"/>
 <s:textfield label="Internal" name="internal.value" value="%{internal.value}"/>
+<s:select label="Equipment" name="equipmentReason" headerKey="null" headerValue="Select Reason" list="equipmentReasonValues" value="%{equipmentReason}"/>
+<s:select label="Environment" name="environmentReason" headerKey="null" headerValue="Select Reason" list="environmentReasonValues" value="%{environmentReason}"/>
+<s:select label="Personnel" name="personnelReason" headerKey="null" headerValue="Select Reason" list="personnelReasonValues" value="%{personnelReason}"/>
+<s:select label="Miscellaneous" name="miscellaneousReason" headerKey="null" headerValue="Select Reason" list="miscellaneousReasonValues" value="%{miscellaneousReason}"/>
+<s:textfield label="Other" name="undefinedReason" value="%{undefinedReason}"/>
+<s:select label="Severity" name="severity" headerKey="null" headerValue="Select Severity" list="severityValues" value="%{severity}"/>
+<s:select label="Sensitivity" name="sensitivity" headerKey="null" headerValue="Select Sensitivity" list="sensitivityValues" value="%{sensitivity}"/>
 <s:textarea label="Raw" name="raw" value="%{raw}" cols="80" rows="10"/>
 <s:hidden name="agencyId" value="%{agencyId}"/>
 <s:hidden name="id" value="%{id}"/>

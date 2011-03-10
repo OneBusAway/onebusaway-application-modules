@@ -36,6 +36,10 @@ public class SituationBean implements Serializable {
   private SituationAffectsBean affects;
 
   private List<SituationConsequenceBean> consequences;
+  
+  private ESeverity severity;
+  
+  private ESensitivity sensitivity;
 
   public String getId() {
     return id;
@@ -155,5 +159,21 @@ public class SituationBean implements Serializable {
 
   public void setConsequences(List<SituationConsequenceBean> consequences) {
     this.consequences = consequences;
+  }
+
+  public ESeverity getSeverity() {
+    return severity;
+  }
+
+  public void setSeverity(ESeverity severity) {
+    this.severity = severity;
+  }
+
+  public ESensitivity getSensitivity() {
+    return sensitivity;
+  }
+
+  public void setSensitivity(ESensitivity sensitivity) {
+    this.sensitivity = sensitivity;
   }
 }

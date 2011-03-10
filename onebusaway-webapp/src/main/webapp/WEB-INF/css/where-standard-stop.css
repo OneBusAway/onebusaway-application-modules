@@ -226,14 +226,25 @@
 }
 
 .unreadServiceAlerts {
+    margin-bottom: 1em;
+    margin-top: 1em;
+    text-align: left;
+}
+
+.unreadServiceAlertsNormalSeverity {
 	background-image: oba-resource("/images/Alert.png");
 	background-repeat: no-repeat;
 	background-position: 10px 7px;
     background-color: #FFFFCC;
     border: 1px solid grey;
-    margin-bottom: 1em;
-    margin-top: 1em;
-    text-align: left;
+}
+
+.unreadServiceAlertsNoImpactSeverity {
+	background-image: oba-resource("/images/Alert-Info.png");
+	background-repeat: no-repeat;
+	background-position: 10px 7px;
+    background-color: #EEEEEE;
+    border: 1px solid black;
 }
 
 .unreadServiceAlerts ul {

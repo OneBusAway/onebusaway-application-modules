@@ -25,7 +25,8 @@
 <s:set var="situations" value="parameters.situations"/>
 
 <s:if test="#situations.unreadCount &gt; 0">
-<div class="unreadServiceAlerts">
+<jsp:element name="div">
+  <jsp:attribute name="class">unreadServiceAlerts <s:property value="#situations.unreadServiceAlertsClass"/></jsp:attribute>
   <ul>
     <s:iterator value="#situations.unreadSituations">
       <li>
@@ -36,7 +37,7 @@
       </li>
     </s:iterator>
   </ul>
-</div>
+</jsp:element>
 </s:if>
 
 </jsp:root>

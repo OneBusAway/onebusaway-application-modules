@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
+import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 
 public class Situation implements Serializable {
@@ -13,7 +15,7 @@ public class Situation implements Serializable {
   private AgencyAndId id;
 
   private long creationTime;
-  
+
   private TimeRange publicationWindow;
 
   private String miscellaneousReason;
@@ -39,6 +41,10 @@ public class Situation implements Serializable {
   private SituationAffects affects;
 
   private List<SituationConsequence> consequences;
+
+  private ESeverity severity;
+
+  private ESensitivity sensitivity;
 
   public AgencyAndId getId() {
     return id;
@@ -151,7 +157,23 @@ public class Situation implements Serializable {
   public void setConsequences(List<SituationConsequence> consequences) {
     this.consequences = consequences;
   }
-  
+
+  public ESeverity getSeverity() {
+    return severity;
+  }
+
+  public void setSeverity(ESeverity severity) {
+    this.severity = severity;
+  }
+
+  public ESensitivity getSensitivity() {
+    return sensitivity;
+  }
+
+  public void setSensitivity(ESensitivity sensitivity) {
+    this.sensitivity = sensitivity;
+  }
+
   @Override
   public String toString() {
     return "Situation(id=" + id + ")";

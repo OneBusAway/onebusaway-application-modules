@@ -54,6 +54,8 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.model.schedule.StopTimeBean;
+import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
+import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
@@ -842,6 +844,16 @@ public class BeanFactoryV2 {
 
     bean.setDetail(getString(situation.getDetail()));
     bean.setInternal(getString(situation.getInternal()));
+
+    ESeverity severity = situation.getSeverity();
+    if (severity != null) {
+      String[] codes = severity.getTpegCodes();
+      bean.setSeverity(codes[0]);
+    }
+
+    ESensitivity sensitivity = situation.getSensitivity();
+    if (sensitivity != null)
+      bean.setSensitivity(sensitivity.getXmlValue());
 
     return bean;
   }
