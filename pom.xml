@@ -8,7 +8,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.onebusaway</groupId>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -69,10 +69,10 @@
   </pluginRepositories>
 
   <scm>
-    <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.2</connection>
-    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.2
+    <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.1</connection>
+    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.1
         </developerConnection>
-    <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.2</url>
+    <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.1</url>
   </scm>
 
   <modules>
