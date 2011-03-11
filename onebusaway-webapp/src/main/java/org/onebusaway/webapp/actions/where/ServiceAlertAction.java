@@ -77,9 +77,6 @@ public class ServiceAlertAction extends ActionSupport {
 
   private String htmlify(String content) {
 
-    content = content.replaceAll("\r\n", "<br/>");
-    content = content.replaceAll("\n", "<br/>");
-
     Pattern p = Pattern.compile("(http://[^\\s]+)");
     Matcher m = p.matcher(content);
     StringBuffer sb = new StringBuffer();
@@ -90,6 +87,9 @@ public class ServiceAlertAction extends ActionSupport {
     m.appendTail(sb);
 
     content = sb.toString();
+    
+    content = content.replaceAll("\r\n", "<br/>");
+    content = content.replaceAll("\n", "<br/>");
 
     return content;
   }
