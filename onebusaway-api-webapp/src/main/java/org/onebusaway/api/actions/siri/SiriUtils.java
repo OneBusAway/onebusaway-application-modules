@@ -17,6 +17,7 @@ package org.onebusaway.api.actions.siri;
 import org.onebusaway.siri.model.DistanceExtensions;
 import org.onebusaway.siri.model.Distances;
 import org.onebusaway.siri.model.FramedVehicleJourneyRef;
+import org.onebusaway.siri.model.MonitoredCall;
 import org.onebusaway.siri.model.MonitoredVehicleJourney;
 import org.onebusaway.siri.model.OnwardCall;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -42,13 +43,12 @@ public class SiriUtils {
    * @param serviceDate
    * @param distance How far in meters the bus is along the trip
    * @param currentStop The stop the bus is presently at
-   * @param limit The max number of OnwardCall elements to return
    * @return A list of Siri OnwardCall objects
    */
+
   public static List<OnwardCall> getOnwardCalls(
-      List<TripStopTimeBean> stopTimes, long serviceDate,
- double distance,
-      StopBean currentStop, int limit) {
+      List<TripStopTimeBean> stopTimes, long serviceDate, double distance,
+      StopBean currentStop) {
 
     ArrayList<OnwardCall> onwardCalls = new ArrayList<OnwardCall>();
 
@@ -70,7 +70,7 @@ public class SiriUtils {
           onwardCall.StopPointName = stop.getName();
           onwardCall.VisitNumber = visitNumber;
           onwardCall.Extensions = new DistanceExtensions();
-          
+
           onwardCall.Extensions.Distances = new Distances();
           onwardCall.Extensions.Distances.DistanceFromCall = stopTime.getDistanceAlongTrip()
               - distance;
@@ -78,23 +78,20 @@ public class SiriUtils {
           onwardCall.Extensions.Distances.StopsFromCall = i - 1;
 
           /*
-           * This is not really that useful without being more certain about what
-           * trip we're on, so it's commented out 
-           * Calendar arrivalTime = new GregorianCalendar(); 
-           * long millis = serviceDate + stopTime.getArrivalTime() * 1000;
-           * arrivalTime.setTimeInMillis(millis); 
-           * onwardCall.AimedArrivalTime = arrivalTime;
+           * This is not really that useful without being more certain about
+           * what trip we're on, so it's commented out Calendar arrivalTime =
+           * new GregorianCalendar(); long millis = serviceDate +
+           * stopTime.getArrivalTime() * 1000;
+           * arrivalTime.setTimeInMillis(millis); onwardCall.AimedArrivalTime =
+           * arrivalTime;
            * 
-           * Calendar departureTime = new GregorianCalendar(); 
-           * millis = serviceDate + stopTime.getDepartureTime() * 1000;
-           * departureTime.setTimeInMillis(millis); 
+           * Calendar departureTime = new GregorianCalendar(); millis =
+           * serviceDate + stopTime.getDepartureTime() * 1000;
+           * departureTime.setTimeInMillis(millis);
            * onwardCall.AimedDepartureTime = departureTime;
            */
-        
+
           onwardCalls.add(onwardCall);
-          if (limit > 0 && onwardCalls.size() == limit) {
-            break;
-          }
         }
         if (stop == currentStop) {
           afterStop = true;
@@ -143,6 +140,11 @@ public class SiriUtils {
     StopBean lastStop = stops.get(stops.size() - 1).getStop();
     monitoredVehicleJourney.DestinationRef = getIdWithoutAgency(lastStop.getId());
 
+    StopBean nextStop = trip.getStatus().getNextStop();
+    if (nextStop != null) {
+      monitoredVehicleJourney.MonitoredCall = new MonitoredCall();
+      monitoredVehicleJourney.MonitoredCall.StopPointRef = nextStop.getId();
+    }
     return monitoredVehicleJourney;
   }
 

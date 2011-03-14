@@ -79,13 +79,9 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       _time = new Date();
 
     String detailLevel = _request.getParameter("VehicleMonitoringDetailLevel");
-    int onwardCalls = 0;
+    boolean onwardCalls = false;
     if (detailLevel != null) {
-      if (detailLevel.toLowerCase().equals("onecall")) {
-        onwardCalls = 1;
-      } else if (detailLevel.toLowerCase().equals("calls")) {
-        onwardCalls = -1;
-      }
+      onwardCalls = detailLevel.equals("calls");
     }
 
     String vehicleId = _request.getParameter("VehicleRef");
@@ -179,7 +175,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
   }
 
   private VehicleActivity createActivity(VehicleStatusBean vehicleStatus,
-      int onwardCalls) {
+      boolean onwardCalls) {
     
     if (vehicleStatus.getPhase().equals("DEADHEAD_AFTER") ||
         vehicleStatus.getPhase().equals("DEADHEAD_BEFORE") ||
@@ -206,7 +202,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           tripDetails, new Date(tripStatus.getServiceDate()),
           vehicleStatus.getVehicleId());
 
-      if (onwardCalls != 0) {
+      if (onwardCalls) {
 
         List<TripStopTimeBean> stopTimes = tripDetails.getSchedule().getStopTimes();
 
@@ -216,7 +212,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           distance = tripStatus.getScheduledDistanceAlongTrip();
         }
         activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-            stopTimes, serviceDateMillis, distance, null, onwardCalls);
+            stopTimes, serviceDateMillis, distance, null);
       }
     } else {
       activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
@@ -258,7 +254,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
    * Create a VehicleActivity for a given vehicle's trip.
    */
   private VehicleActivity createActivity(TripDetailsBean trip,
- int onwardCalls) {
+      boolean onwardCalls) {
     VehicleActivity activity = new VehicleActivity();
     TripStatusBean status = trip.getStatus();
     if (status.getPhase().equals("DEADHEAD_AFTER")
@@ -285,7 +281,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     
     activity.MonitoredVehicleJourney.VehicleLocation = location;
     
-    if (onwardCalls != 0) {
+    if (onwardCalls) {
       List<TripStopTimeBean> stopTimes = trip.getSchedule().getStopTimes();
       
       long serviceDateMillis = status.getServiceDate();
@@ -294,7 +290,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         distance = status.getScheduledDistanceAlongTrip();
       }
       activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-          stopTimes, serviceDateMillis, distance, null, onwardCalls);
+          stopTimes, serviceDateMillis, distance, null);
     }
     
     return activity;

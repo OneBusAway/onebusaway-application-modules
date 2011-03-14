@@ -213,6 +213,8 @@ public class StopMonitoringController implements ModelDriven<Object>,
           if (Double.isNaN(distance)) {
             distance = status.getScheduledDistanceAlongTrip();
           }
+        } else {
+          continue;
         }
 
         MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(status.getStatus());
@@ -258,7 +260,7 @@ public class StopMonitoringController implements ModelDriven<Object>,
             monitoredCall.VisitNumber = visitNumber;
             if (includeOnwardCalls) {
               List<OnwardCall> onwardCalls = SiriUtils.getOnwardCalls(
-                  stopTimes, status.getServiceDate(), distance, stop, -1);
+                  stopTimes, status.getServiceDate(), distance, stop);
               MonitoredStopVisit.MonitoredVehicleJourney.OnwardCalls = onwardCalls;
             }
           }
