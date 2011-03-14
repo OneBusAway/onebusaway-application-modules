@@ -144,6 +144,12 @@ public class SiriUtils {
     if (nextStop != null) {
       monitoredVehicleJourney.MonitoredCall = new MonitoredCall();
       monitoredVehicleJourney.MonitoredCall.StopPointRef = nextStop.getId();
+      monitoredVehicleJourney.MonitoredCall.StopPointName = nextStop.getName();
+      monitoredVehicleJourney.MonitoredCall.VisitNumber = 1; // FIXME: this is
+                                                             // theoretically
+                                                             // wrong but
+                                                             // practically
+                                                             // rarely so
     }
     return monitoredVehicleJourney;
   }
