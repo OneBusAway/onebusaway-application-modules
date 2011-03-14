@@ -134,22 +134,20 @@ public class SiriUtils {
     return monitoredVehicleJourney;
   }
 
-  public static String getProgressRateForStatus(String status) {
-    if (status == null) {
-      return "unknown";
+  public static String getProgressRateForStatus(String status, String phase) {
+    if (phase == null) {
+    	return "unknown";
     }
-    if (status.equals("default")) {
-      return "unknown";
+    if (phase.toLowerCase().startsWith("layover") || phase.toLowerCase().startsWith("deadhead")) {
+        return "noProgress";
     }
-    if (status.equals("IN_PROGRESS")) {
-      return "normalProgress";
+    if (status != null && status.toLowerCase().equals("stalled")) {
+        return "noProgress";
     }
-    if (status.startsWith("LAYOVER")) {
-      return "noProgress";
+    if (phase.toLowerCase().equals("in_progress")) {
+    	return "normalProgress";
     }
-    if (status.equals("STALLED")) {
-      return "noProgress";
-    }
-    return null; /* something unknown */
+        
+    return "unknown";
   }
 }

@@ -221,7 +221,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
 
     activity.MonitoredVehicleJourney.VehicleRef = vehicleStatus.getVehicleId();
 
-    activity.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(vehicleStatus.getStatus());
+    activity.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(vehicleStatus.getStatus(), vehicleStatus.getPhase());
 
     VehicleLocation location = new VehicleLocation();
     location.Latitude = vehicleStatus.getLocation().getLat();
