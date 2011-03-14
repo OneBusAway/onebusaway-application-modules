@@ -138,8 +138,10 @@ public class SiriUtils {
     if (phase == null) {
     	return "unknown";
     }
-    if (phase.toLowerCase().startsWith("layover") || phase.toLowerCase().startsWith("deadhead")) {
-        return "noProgress";
+    if (phase.toLowerCase().startsWith("layover") 
+    		|| phase.toLowerCase().startsWith("deadhead") 
+    		|| phase.toLowerCase().equals("at_base")) {
+    	return "noProgress";
     }
     if (status != null && status.toLowerCase().equals("stalled")) {
         return "noProgress";
