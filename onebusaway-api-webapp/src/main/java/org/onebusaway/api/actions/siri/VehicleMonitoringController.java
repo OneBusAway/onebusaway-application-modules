@@ -212,7 +212,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           distance = tripStatus.getScheduledDistanceAlongTrip();
         }
         activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-            stopTimes, serviceDateMillis, distance, null);
+            stopTimes, serviceDateMillis, distance, tripStatus.getNextStop());
       }
     } else {
       activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
@@ -290,7 +290,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         distance = status.getScheduledDistanceAlongTrip();
       }
       activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-          stopTimes, serviceDateMillis, distance, null);
+          stopTimes, serviceDateMillis, distance, status.getNextStop());
     }
     
     return activity;
