@@ -215,14 +215,20 @@ public class StopMonitoringController implements ModelDriven<Object>,
           }
         }
 
-        MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(status.getStatus(), status.getPhase());
+        MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(
+            status.getStatus(), status.getPhase());
 
         int i = 0;
         boolean started = false;
         boolean found = false;
 
         List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
-
+        Collections.sort(stopTimes, new Comparator<TripStopTimeBean>() {
+          public int compare(TripStopTimeBean arg0, TripStopTimeBean arg1) {
+            return (int) (arg0.getDistanceAlongTrip() - arg1.getDistanceAlongTrip());
+          }
+        });
+        
         /*
          * go through every stop in the trip to (a) find out how far many stops
          * away the bus is from this stop and (b) populate, if necessary,
@@ -250,12 +256,12 @@ public class StopMonitoringController implements ModelDriven<Object>,
           if (started && stopTime.getStop().getId().equals(stopId)) {
             found = true;
             /* we have hit the requested stop */
-            monitoredCall.VehicleAtStop = stopTime.getDistanceAlongTrip()
-                - distance < 10;
+            monitoredCall.VehicleAtStop = Math.abs(status.getNextStopDistanceFromVehicle()
+                - distance) < 10;
             monitoredCall.Extensions.Distances = new Distances();
-            monitoredCall.Extensions.Distances.StopsFromCall = i;
-            monitoredCall.Extensions.Distances.CallDistanceAlongRoute = stopTime.getDistanceAlongTrip();;
-            monitoredCall.Extensions.Distances.DistanceFromCall = distanceFromStop;
+            monitoredCall.Extensions.Distances.StopsFromCall = adbean.getNumberOfStopsAway();
+            monitoredCall.Extensions.Distances.CallDistanceAlongRoute = status.getDistanceAlongTrip();
+            monitoredCall.Extensions.Distances.DistanceFromCall = adbean.getDistanceFromStop();
 
             monitoredCall.VisitNumber = visitNumber;
             if (includeOnwardCalls) {
