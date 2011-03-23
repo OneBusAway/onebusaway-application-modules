@@ -650,8 +650,24 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       ScheduledBlockLocation scheduledBlockLocation) {
 
     BlockLocationRecord.Builder builder = BlockLocationRecord.builder();
-    builder.setBlockId(record.getBlockId());
-    builder.setTripId(record.getTripId());
+    
+    if( scheduledBlockLocation != null) {
+      
+      BlockTripEntry activeTrip = scheduledBlockLocation.getActiveTrip();
+      builder.setTripId(activeTrip.getTrip().getId());
+      builder.setBlockId(activeTrip.getBlockConfiguration().getBlock().getId());
+      
+      double distanceAlongBlock = scheduledBlockLocation.getDistanceAlongBlock();
+      builder.setDistanceAlongBlock(distanceAlongBlock);
+      
+      double distanceAlongTrip = distanceAlongBlock - activeTrip.getDistanceAlongBlock();
+      builder.setDistanceAlongTrip(distanceAlongTrip);
+    }
+
+    if( record.getBlockId() != null)
+      builder.setBlockId(record.getBlockId());
+    if( record.getTripId() != null)
+      builder.setTripId(record.getTripId());
     builder.setTime(record.getTimeOfRecord());
     builder.setServiceDate(record.getServiceDate());
 
