@@ -296,7 +296,7 @@ public class SiriClientService {
       try {
         SiriClientServiceRequest request = new SiriClientServiceRequest();
         request.setTargetUrl(_url);
-        request.setRequest(new ServiceRequest());
+        request.setPayload(new ServiceRequest());
 
         ServiceDelivery delivery = _client.handleServiceRequestWithResponse(request);
 

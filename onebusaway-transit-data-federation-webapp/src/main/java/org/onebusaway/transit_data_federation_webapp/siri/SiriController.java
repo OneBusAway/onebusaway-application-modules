@@ -72,7 +72,7 @@ public class SiriController extends SiriClient {
 
         Map<String, String> args = SiriLibrary.getLineAsMap(endpoint);
         SiriClientSubscriptionRequest request = factory.createSubscriptionRequest(args);
-        SubscriptionRequest subRequest = request.getRequest();
+        SubscriptionRequest subRequest = request.getPayload();
 
         SiriEndpointDetails details = new SiriEndpointDetails();
         String agencyId = args.get("AgencyId");
@@ -94,7 +94,7 @@ public class SiriController extends SiriClient {
           }
         }
         
-        handleSubscriptionRequest(request);
+        handleSubscriptionRequestWithResponse(request);
       }
     }
   }
