@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Edge;
@@ -42,8 +43,8 @@ public final class DepartureVertex extends AbstractVertex implements
   }
 
   @Override
-  public String getStopId() {
-    return _stop.getId().toString();
+  public AgencyAndId getStopId() {
+    return _stop.getId();
   }
 
   @Override

@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Vertex;
@@ -22,8 +23,8 @@ public abstract class AbstractStopVertex extends AbstractVertex {
    ****/
 
   @Override
-  public String getStopId() {
-    return _stop.getId().toString();
+  public AgencyAndId getStopId() {
+    return _stop.getId();
   }
 
   @Override

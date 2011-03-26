@@ -24,10 +24,9 @@ public abstract class AbstractBlockVertex extends AbstractVertex {
   }
 
   @Override
-  public String getStopId() {
+  public AgencyAndId getStopId() {
     StopEntry stop = _instance.getStop();
-    AgencyAndId id = stop.getId();
-    return id.toString();
+    return stop.getId();
   }
 
   @Override
