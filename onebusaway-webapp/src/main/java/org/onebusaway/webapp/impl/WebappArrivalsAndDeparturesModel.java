@@ -1,5 +1,7 @@
 package org.onebusaway.webapp.impl;
 
+import java.util.Date;
+
 import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -25,6 +27,12 @@ public class WebappArrivalsAndDeparturesModel extends
 
   public ArrivalsAndDeparturesPresentaion getArrivalsAndDeparturesPresentation() {
     return _arrivalsAndDeparturesPresentation;
+  }
+  
+  @Override
+  public void setTargetTime(Date time){
+    super.setTargetTime(time);
+    _arrivalsAndDeparturesPresentation.setTime(time.getTime());
   }
 
   public void setShowArrivals(boolean showArrivals) {

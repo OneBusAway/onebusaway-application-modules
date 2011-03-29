@@ -30,7 +30,10 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
 
+@ManagedResource("org.onebusaway.transit_data_federation.impl.realtime.mybus:name=TimepointPredictionServiceImpl")
 public class TimepointPredictionServiceImpl {
 
   private final Logger _log = LoggerFactory.getLogger(TimepointPredictionServiceImpl.class);
@@ -51,9 +54,13 @@ public class TimepointPredictionServiceImpl {
 
   private List<String> _agencyIds = Arrays.asList("1", "40");
 
-  private int _predictionCount = 0;
+  private long _predictionCount = 0;
+  
+  private long _unmappedTripIdCount = 0;
+  
+  private long _noPredictionCount = 0;
 
-  private int _mappedTripIdCount = 0;
+  private long _mappedTripIdCount = 0;
 
   private BlockCalendarService _blockCalendarService;
 
@@ -137,11 +144,23 @@ public class TimepointPredictionServiceImpl {
    * Statistics Methods
    ****/
 
-  public int getPredictionCount() {
+  @ManagedAttribute
+  public long getPredictionCount() {
     return _predictionCount;
   }
+  
+  @ManagedAttribute
+  public long getUnmappedTripIdCount() {
+    return _unmappedTripIdCount;
+  }
+  
+  @ManagedAttribute
+  public long getNoPredictionCount() {
+    return _noPredictionCount;
+  }
 
-  public int getMappedTripIdCount() {
+  @ManagedAttribute
+  public long getMappedTripIdCount() {
     return _mappedTripIdCount;
   }
 
@@ -190,8 +209,10 @@ public class TimepointPredictionServiceImpl {
 
         TripEntry tripEntry = getTripEntryForId(agencyId, tripId);
 
-        if (tripEntry == null)
+        if (tripEntry == null) {
+          _unmappedTripIdCount++;
           continue;
+        }
 
         BlockEntry block = tripEntry.getBlock();
 
@@ -207,11 +228,14 @@ public class TimepointPredictionServiceImpl {
         record.setTimepointScheduledTime(data.getInt(4));
         record.setTimepointPredictedTime(data.getInt(13));
         record.setTimeOfPrediction(data.getInt(9));
-
+        record.setPredictorType(data.getString(12));
+        
         // Indicates that we don't have any real-time predictions for this
         // record
-        if (record.getTimepointPredictedTime() == -1)
+        if (record.getTimepointPredictedTime() == -1 || ! "p".equals(record.getPredictorType())) {
+          _noPredictionCount++;
           continue;
+        }
 
         List<TimepointPrediction> records = predictionsByBlockId.get(record.getBlockId());
         if (records == null) {
@@ -219,6 +243,7 @@ public class TimepointPredictionServiceImpl {
           predictionsByBlockId.put(record.getBlockId(), records);
         }
 
+        _mappedTripIdCount++;
         records.add(record);
       }
     }

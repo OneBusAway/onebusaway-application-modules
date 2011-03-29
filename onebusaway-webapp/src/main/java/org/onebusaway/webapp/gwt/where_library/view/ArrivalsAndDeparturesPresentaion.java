@@ -13,6 +13,8 @@ public class ArrivalsAndDeparturesPresentaion {
   private static final String CANCELLED = "cancelled";
 
   private ArrivalAndDepartureMessages _messages;
+  
+  private long _time = System.currentTimeMillis();
 
   private boolean _showArrivals = false;
 
@@ -28,6 +30,10 @@ public class ArrivalsAndDeparturesPresentaion {
 
   public void setMessages(ArrivalAndDepartureMessages messages) {
     _messages = messages;
+  }
+  
+  public void setTime(long time){
+    _time = time;
   }
 
   public void setShowArrivals(boolean showArrivals) {
@@ -49,7 +55,6 @@ public class ArrivalsAndDeparturesPresentaion {
     if (CANCELLED.equals(pab.getStatus()))
       return "suspended";
 
-    long now = System.currentTimeMillis();
     long predicted = getPredictedTime(pab);
     long scheduled = getScheduledTime(pab);
 
@@ -58,7 +63,7 @@ public class ArrivalsAndDeparturesPresentaion {
       double diff = ((predicted - scheduled) / (1000.0 * 60));
       int minutes = (int) Math.abs(Math.round(diff));
 
-      boolean pastTense = predicted < now;
+      boolean pastTense = predicted < _time;
 
       if (diff < -1.5) {
         if (pastTense)
@@ -93,7 +98,6 @@ public class ArrivalsAndDeparturesPresentaion {
     if (CANCELLED.equals(pab.getStatus()))
       return "arrivalStatusCancelled";
 
-    long now = System.currentTimeMillis();
     long predicted = getPredictedTime(pab);
     long scheduled = getScheduledTime(pab);
 
@@ -101,7 +105,7 @@ public class ArrivalsAndDeparturesPresentaion {
 
       double diff = ((predicted - scheduled) / (1000.0 * 60));
 
-      if (predicted < now) {
+      if (predicted < _time) {
 
         if (diff < -1.5) {
           return "arrivalStatusDepartedEarly";
@@ -121,7 +125,7 @@ public class ArrivalsAndDeparturesPresentaion {
       }
 
     } else {
-      if (scheduled < now)
+      if (scheduled < _time)
         return "arrivalStatusDepartedNoInfo";
       else
         return "arrivalStatusNoInfo";
@@ -151,23 +155,20 @@ public class ArrivalsAndDeparturesPresentaion {
 
   public String getMinutesLabel(ArrivalAndDepartureBean pab) {
 
-    long now = System.currentTimeMillis();
-
     if (CANCELLED.equals(pab.getStatus()))
       return "-";
 
     boolean isNow = isNow(pab);
     long t = getBestTime(pab);
-    int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
+    int minutes = (int) Math.round((t - _time) / (1000.0 * 60.0));
     return isNow ? "NOW" : Integer.toString(minutes);
   }
 
   public boolean isNow(ArrivalAndDepartureBean pab) {
     if (CANCELLED.equals(pab.getStatus()))
       return true;
-    long now = System.currentTimeMillis();
     long t = getBestTime(pab);
-    int minutes = (int) Math.round((t - now) / (1000.0 * 60.0));
+    int minutes = (int) Math.round((t - _time) / (1000.0 * 60.0));
     return Math.abs(minutes) <= 1;
   }
 
@@ -177,7 +178,7 @@ public class ArrivalsAndDeparturesPresentaion {
   }
   
   public boolean isShowFrequencyFrom(FrequencyBean frequency) { 
-    return frequency.getStartTime() > System.currentTimeMillis();
+    return frequency.getStartTime() > _time;
   }
 
   /****
