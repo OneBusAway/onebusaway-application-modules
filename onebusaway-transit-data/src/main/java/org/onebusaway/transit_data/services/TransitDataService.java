@@ -35,6 +35,7 @@ import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
+import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -193,6 +194,9 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByEntityIdMethod
   public BlockInstanceBean getBlockInstance(String blockId, long serviceDate);
+  
+  @FederatedByEntityIdMethod
+  public ScheduledBlockLocationBean getScheduledBlockLocationFromScheduledTime(String blockId, long serviceDate, int scheduledTime);
 
   /****
    * Vehicle Methods
