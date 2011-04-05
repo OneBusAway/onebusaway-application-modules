@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.ObjectUtils;
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -35,6 +36,8 @@ import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
 import org.onebusaway.transit_data_federation.impl.otp.OTPState;
 import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
+import org.onebusaway.transit_data_federation.impl.otp.SearchTerminationStrategyImpl;
+import org.onebusaway.transit_data_federation.impl.otp.TripSequenceShortestPathTree;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractBlockVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.ArrivalVertex;
@@ -314,8 +317,13 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     options.boardCost = 14 * 60;
     options.maxTransfers = 2;
     options.minTransferTime = 60;
-
+    
+    options.useServiceDays = false;
+    
     options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
+    options.searchTerminationStrategy = new SearchTerminationStrategyImpl();
+    options.shortestPathTreeFactory = TripSequenceShortestPathTree.FACTORY;
+    
     return options;
   }
 
@@ -364,7 +372,11 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       options.minTransferTime = constraints.getMinTransferTime();
     if (constraints.getMaxTransfers() != -1)
       options.maxTransfers = constraints.getMaxTransfers();
+    if( constraints.getMaxComputationTime() > 0 )
+      options.maxComputationTime = constraints.getMaxComputationTime();
 
+    options.numItineraries = constraints.getResultCount();
+    
     /**
      * Our custom traverse options extension
      */
@@ -392,13 +404,18 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     List<ItineraryBean> beans = new ArrayList<ItineraryBean>();
     bean.setItineraries(beans);
+    
+    boolean computationTimeLimitReached = false;
 
-    if (paths != null) {
+    if( ! CollectionsLibrary.isEmpty(paths)) {
       for (GraphPath path : paths) {
+        computationTimeLimitReached |= path.isComputationTimeLimitReached();
         ItineraryBean itinerary = getPathAsItinerary(path);
         beans.add(itinerary);
       }
     }
+    
+    bean.setComputationTimeLimitReached(computationTimeLimitReached);
 
     return bean;
   }
@@ -900,7 +917,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     List<GraphPath> paths = _pathService.plan(fromPlace, toPlace,
         new Date(time), options, 1);
 
-    if (paths.isEmpty())
+    if (CollectionsLibrary.isEmpty(paths))
       return null;
 
     return getPathAsItinerary(paths.get(0));

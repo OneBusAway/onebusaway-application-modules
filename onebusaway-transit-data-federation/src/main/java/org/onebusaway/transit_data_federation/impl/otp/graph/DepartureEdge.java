@@ -77,6 +77,8 @@ public class DepartureEdge extends AbstractEdge {
       
       if (data.getNumBoardings() == 0)
         OTPState.incrementInitialWaitTime(edit, dwellTime * 1000);
+      
+      OTPState.appendTripSequence(edit, instance.getBlockTrip());
 
       TraverseResult r = new TraverseResult(w, edit.createState(), narrative);
       result = r.addToExistingResultChain(result);

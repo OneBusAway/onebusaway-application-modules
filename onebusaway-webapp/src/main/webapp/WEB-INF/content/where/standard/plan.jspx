@@ -109,6 +109,13 @@
   <jsp:text></jsp:text>
 </div>
 
+<div class="itinerarySummaryTemplate" style="display: none">
+    <div class="itinerarySummary-index">X.</div>
+    <div class="itinerarySummary-timeLength">X mins</div>
+    <div class="itinerarySummary-timeRange"><span class="startTime">x:xx am</span> - <span class="endTime">x:xx am</span></div>
+    <div class="itinerarySummary-details"><jsp:text></jsp:text></div>    
+</div>
+
 <div class="leg streetLegTemplate" style="display: none">
     <div class="walkFromLocation">{0}</div>
     <div class="walkToLocation">Walk to {0}</div>

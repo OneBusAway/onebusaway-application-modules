@@ -157,20 +157,73 @@ var oba_where_standard_plan = function(data) {
 	var resultsPanel = data.resultsPanel;
 	var bounds = new google.maps.LatLngBounds();
 
+	var itinerariesPanel = null;
+	var itineraryPanel = null;
+	var itinerariesEntry = null;
+	
 	var clearExistingPlan = function() {
+
+		resultsPanel.empty();
+		
+		itinerariesPanel = jQuery("<div/>");
+		itineraryPanel = jQuery("<div/>");
+		
+		itinerariesPanel.appendTo(resultsPanel);
+		itineraryPanel.appendTo(resultsPanel);
+		
+		itinerariesEntry = null;		
+	};
+
+	var itinerariesHandler = function(entry) {
+		
+		itinerariesEntry = entry;
+		jQuery.each(entry.itineraries, itinerarySummaryHandler);
+	};
+
+	var itinerarySummaryHandler = function(index) {
+		
+		var itinerary = this;
+
+		var content = jQuery('.itinerarySummaryTemplate').clone();
+		content.removeClass('itinerarySummaryTemplate');
+		content.addClass('itinerarySummary');
+		
+		var indexElement = content.find('.itinerarySummary-index');
+		indexElement.text((index+1)+'.');
+		
+		var timeLengthElement = content.find('.itinerarySummary-timeLength');
+		var mins = Math.round((itinerary.endTime - itinerary.startTime) / (1000*60));
+		timeLengthElement.text(mins + ' mins');
+		
+		var timeRangeElement = content.find('.itinerarySummary-timeRange');
+		
+		var startTime = OBA.L10n.formatDate('hh:mm AA', new Date(itinerary.startTime));
+		var startTimeElement = timeRangeElement.find(".startTime");
+		startTimeElement.text(startTime);
+
+		var endTime = OBA.L10n.formatDate('hh:mm AA', new Date(itinerary.endTime));
+		var endTimeElement = timeRangeElement.find(".endTime");
+		endTimeElement.text(endTime);		
+		
+		content.click(function() {
+			itineraryHandler(itinerary);
+		});
+		
+		content.show();
+		content.appendTo(itinerariesPanel);
+	};
+	
+	var itineraryHandler = function(itinerary){
+		
 		jQuery.each(planOverlays, function() {
 			this.setMap(null);
 		});
 		planOverlays = [];
-
-		resultsPanel.empty();
 		bounds = new google.maps.LatLngBounds();
-	};
-
-	var itinerariesHandler = function(itineraries) {
-
-		if (itineraries.from) {
-			var from = itineraries.from;
+		itineraryPanel.empty();
+		
+		if (itinerariesEntry.from) {
+			var from = itinerariesEntry.from;
 			var location = new google.maps.LatLng(from.location.lat,
 					from.location.lon);
 			var startIconUrl = OBA.Resources.Map['RouteStart.png'];
@@ -181,12 +234,11 @@ var oba_where_standard_plan = function(data) {
 				clickable : false
 			});
 			planOverlays.push(marker);
-
 			bounds.extend(location);
 		}
 
-		if (itineraries.to) {
-			var to = itineraries.to;
+		if (itinerariesEntry.to) {
+			var to = itinerariesEntry.to;
 			var location = new google.maps.LatLng(to.location.lat,
 					to.location.lon);
 			var endIconUrl = OBA.Resources.Map['RouteEnd.png'];
@@ -197,11 +249,26 @@ var oba_where_standard_plan = function(data) {
 				clickable : false
 			});
 			planOverlays.push(marker);
-
 			bounds.extend(location);
 		}
-	};
+		
+		var legs = itinerary.legs || [];
 
+		jQuery.each(legs, function(index) {
+			var leg = this;
+			var prevLeg = undefined;
+			if (index > 0)
+				prevLeg = legs[index - 1];
+			var nextLeg = undefined;
+			if (index + 1 < legs.length)
+				nextLeg = legs[index + 1];
+			legHandler(leg, prevLeg, nextLeg);
+		});
+
+		if (!bounds.isEmpty())
+			map.fitBounds(bounds);
+	};
+	
 	var legHandler = function(leg, prevLeg, nextLeg) {
 
 		if (leg.transitLeg) {
@@ -306,7 +373,7 @@ var oba_where_standard_plan = function(data) {
 		}
 
 		content.show();
-		content.appendTo(resultsPanel);
+		content.appendTo(itineraryPanel);
 	};
 
 	/***************************************************************************
@@ -386,7 +453,7 @@ var oba_where_standard_plan = function(data) {
 		timeElement.text(OBA.L10n.format(timeElement.text(), mins));
 
 		content.show();
-		content.appendTo(resultsPanel);
+		content.appendTo(itineraryPanel);
 
 		var points = [];
 
@@ -420,22 +487,7 @@ var oba_where_standard_plan = function(data) {
 		var itineraries = entry.itineraries || [];
 		if (itineraries.length == 0)
 			return;
-		var itinerary = itineraries[0];
-		var legs = itinerary.legs || [];
-
-		jQuery.each(legs, function(index) {
-			var leg = this;
-			var prevLeg = undefined;
-			if (index > 0)
-				prevLeg = legs[index - 1];
-			var nextLeg = undefined;
-			if (index + 1 < legs.length)
-				nextLeg = legs[index + 1];
-			legHandler(leg, prevLeg, nextLeg);
-		});
-
-		if (!bounds.isEmpty())
-			map.fitBounds(bounds);
+		itineraryHandler(itineraries[0]);
 	};
 
 	var constructParams = function() {

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<jsp:directive.page contentType="text/xml" />
+  <c:forEach var="transfer" items="${transfers}">
+    <transfer>
+	  <stopId><c:out value="${transfer.stop.id}"/></stopId>
+	  <minTransferTime><c:out value="${transfer.minTransferTime}"/></minTransferTime>
+      <distance><c:out value="${transfer.distance}"/></distance>
+    </transfer>
+  </c:forEach>
+</result>

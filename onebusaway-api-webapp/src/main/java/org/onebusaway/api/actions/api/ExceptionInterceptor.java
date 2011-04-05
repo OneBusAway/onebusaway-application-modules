@@ -7,6 +7,7 @@ import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.exceptions.NoSuchRouteServiceException;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
@@ -40,12 +41,30 @@ public class ExceptionInterceptor extends AbstractInterceptor {
       return invocation.invoke();
     } catch (Exception ex) {
       ActionProxy proxy = invocation.getProxy();
-      String url = getActionAsUrl(invocation);
-      _log.warn("exception for action: url=" + url, ex);
-      ResponseBean response = getExceptionAsResponseBean(ex);
+      ResponseBean response = getExceptionAsResponseBean(invocation, ex);
       DefaultHttpHeaders methodResult = new DefaultHttpHeaders().withStatus(response.getCode());
       return _handlerSelector.handleResult(proxy.getConfig(), methodResult,
           response);
+    }
+  }
+
+
+  protected ResponseBean getExceptionAsResponseBean(ActionInvocation invocation, Exception ex) {
+    if (ex instanceof NoSuchStopServiceException
+        || ex instanceof NoSuchTripServiceException
+        || ex instanceof NoSuchRouteServiceException) {
+      return new ResponseBean(V1, ResponseCodes.RESPONSE_RESOURCE_NOT_FOUND,
+          ex.getMessage(), null);
+    }
+    else if( ex instanceof OutOfServiceAreaServiceException) {
+      return new ResponseBean(V1, ResponseCodes.RESPONSE_OUT_OF_SERVICE_AREA,
+          ex.getMessage(), null);
+    }
+    else {
+      String url = getActionAsUrl(invocation);
+      _log.warn("exception for action: url=" + url, ex);
+      return new ResponseBean(V1, ResponseCodes.RESPONSE_SERVICE_EXCEPTION,
+          ex.getMessage(), null);
     }
   }
 
@@ -89,16 +108,4 @@ public class ExceptionInterceptor extends AbstractInterceptor {
 
     return b.toString();
   }
-
-  protected ResponseBean getExceptionAsResponseBean(Exception ex) {
-    if (ex instanceof NoSuchStopServiceException
-        || ex instanceof NoSuchTripServiceException
-        || ex instanceof NoSuchRouteServiceException)
-      return new ResponseBean(V1, ResponseCodes.RESPONSE_RESOURCE_NOT_FOUND,
-          ex.getMessage(), null);
-    else
-      return new ResponseBean(V1, ResponseCodes.RESPONSE_SERVICE_EXCEPTION,
-          ex.getMessage(), null);
-  }
-
 }

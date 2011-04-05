@@ -33,6 +33,8 @@ public class ConstraintsBean implements Serializable {
   private int transferCost = -1;
 
   private int maxTransfers = -1;
+  
+  private long maxComputationTime = 0;
 
   public ConstraintsBean() {
 
@@ -163,5 +165,13 @@ public class ConstraintsBean implements Serializable {
 
   public void setMaxTransfers(int maxTransfers) {
     this.maxTransfers = maxTransfers;
+  }
+
+  public long getMaxComputationTime() {
+    return maxComputationTime;
+  }
+
+  public void setMaxComputationTime(long maxComputationTime) {
+    this.maxComputationTime = maxComputationTime;
   }
 }

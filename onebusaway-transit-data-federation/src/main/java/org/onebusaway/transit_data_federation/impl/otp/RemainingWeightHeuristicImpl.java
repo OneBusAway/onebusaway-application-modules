@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
 import org.opentripplanner.routing.algorithm.RemainingWeightHeuristic;
 import org.opentripplanner.routing.core.Edge;
@@ -32,7 +33,7 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
 
     double maxSpeed = getMaxSpeed();
 
-    return from.distance(to) / maxSpeed;
+    return distance(from,to) / maxSpeed;
   }
 
   @Override
@@ -42,7 +43,7 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
     EdgeNarrative narrative = traverseResult.getEdgeNarrative();
     Vertex v = narrative.getToVertex();
 
-    double distanceEstimate = v.distance(target);
+    double distanceEstimate = distance(v,target);
 
     double maxSpeed = getMaxSpeedForCurrentState(traverseResult, v);
 
@@ -96,5 +97,9 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
       return _options.speed;
 
     return _maxTransitSpeed;
+  }
+  
+  private double distance(Vertex a, Vertex b) {
+    return SphericalGeometryLibrary.distance(a.getY(),a.getX(), b.getY(),b.getX());
   }
 }
