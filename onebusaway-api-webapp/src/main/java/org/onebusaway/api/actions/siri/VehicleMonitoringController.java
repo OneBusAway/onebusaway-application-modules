@@ -28,7 +28,6 @@ import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
@@ -212,7 +211,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           distance = tripStatus.getScheduledDistanceAlongTrip();
         }
         activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-            stopTimes, serviceDateMillis, distance, null);
+            stopTimes, serviceDateMillis, distance, tripStatus.getNextStop());
       }
     } else {
       activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
@@ -263,6 +262,8 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
       return null;
     }
     
+    boolean deviated = status.getStatus().toLowerCase().equals("deviated");
+
     Calendar time = Calendar.getInstance();
     time.setTime(new Date(status.getLastUpdateTime()));
     
@@ -281,7 +282,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
     
     activity.MonitoredVehicleJourney.VehicleLocation = location;
     
-    if (onwardCalls) {
+    if (onwardCalls && !deviated) {
       List<TripStopTimeBean> stopTimes = trip.getSchedule().getStopTimes();
       
       long serviceDateMillis = status.getServiceDate();
@@ -290,7 +291,7 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
         distance = status.getScheduledDistanceAlongTrip();
       }
       activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-          stopTimes, serviceDateMillis, distance, null);
+          stopTimes, serviceDateMillis, distance, status.getNextStop());
     }
     
     return activity;
