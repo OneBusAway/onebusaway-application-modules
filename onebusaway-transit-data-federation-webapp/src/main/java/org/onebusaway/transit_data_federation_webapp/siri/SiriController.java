@@ -3,16 +3,15 @@ package org.onebusaway.transit_data_federation_webapp.siri;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.siri.core.ESiriModuleType;
+import org.onebusaway.siri.core.SiriChannelInfo;
 import org.onebusaway.siri.core.SiriClient;
 import org.onebusaway.siri.core.SiriClientSubscriptionRequest;
 import org.onebusaway.siri.core.SiriLibrary;
@@ -27,12 +26,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import uk.org.siri.siri.AbstractServiceDeliveryStructure;
-import uk.org.siri.siri.AbstractSubscriptionStructure;
 import uk.org.siri.siri.ServiceDelivery;
-import uk.org.siri.siri.Siri;
-import uk.org.siri.siri.SubscriptionQualifierStructure;
-import uk.org.siri.siri.SubscriptionRequest;
-import uk.org.siri.siri.SubscriptionResponseStructure;
 
 @Controller
 public class SiriController extends SiriClient {
@@ -44,8 +38,6 @@ public class SiriController extends SiriClient {
   private ServiceDeliveryHandlerImpl _handler = new ServiceDeliveryHandlerImpl();
 
   private List<String> _endpoints;
-
-  private Map<String, SiriEndpointDetails> _endpointsBySubscriptionId = new HashMap<String, SiriEndpointDetails>();
 
   @Autowired
   public void setSiriService(SiriService siriService) {
@@ -74,31 +66,14 @@ public class SiriController extends SiriClient {
 
         Map<String, String> args = SiriLibrary.getLineAsMap(endpoint);
         SiriClientSubscriptionRequest request = factory.createSubscriptionRequest(args);
-        SubscriptionRequest subRequest = request.getPayload();
 
-        SiriEndpointDetails details = new SiriEndpointDetails();
+        SiriEndpointDetails context = new SiriEndpointDetails();
         String agencyId = args.get("AgencyId");
-        details.setAgencyId(agencyId);
+        context.setAgencyId(agencyId);
 
-        for (ESiriModuleType moduleType : ESiriModuleType.values()) {
+        request.setChannelContext(context);
 
-          List<AbstractSubscriptionStructure> subscriptionsForModule = SiriLibrary.getSubscriptionRequestsForModule(
-              subRequest, moduleType);
-
-          for (AbstractSubscriptionStructure subscriptionForModule : subscriptionsForModule) {
-            SubscriptionQualifierStructure subId = subscriptionForModule.getSubscriptionIdentifier();
-            if (subId == null) {
-              subId = new SubscriptionQualifierStructure();
-              subId.setValue(UUID.randomUUID().toString());
-              subscriptionForModule.setSubscriptionIdentifier(subId);
-            }
-            _log.info("subscription id=" + subId.getValue());
-            _endpointsBySubscriptionId.put(subId.getValue(), details);
-          }
-        }
-        
-        Siri response = handleSubscriptionRequestWithResponse(request);
-        SubscriptionResponseStructure subResponse = response.getSubscriptionResponse();
+        handleSubscriptionRequest(request);
       }
     }
   }
@@ -118,7 +93,15 @@ public class SiriController extends SiriClient {
       SiriServiceDeliveryHandler {
 
     @Override
-    public void handleServiceDelivery(ServiceDelivery serviceDelivery) {
+    public void handleServiceDelivery(SiriChannelInfo channelInfo,
+        ServiceDelivery serviceDelivery) {
+
+      SiriEndpointDetails endpoint = channelInfo.getContext();
+
+      if (endpoint == null) {
+        _log.warn("could not find siri delivery info");
+        return;
+      }
 
       for (ESiriModuleType moduleType : ESiriModuleType.values()) {
 
@@ -126,21 +109,6 @@ public class SiriController extends SiriClient {
             serviceDelivery, moduleType);
 
         for (AbstractServiceDeliveryStructure deliveryForModule : deliveriesForModule) {
-
-          SubscriptionQualifierStructure subscriptionRef = deliveryForModule.getSubscriptionRef();
-
-          if (subscriptionRef == null || subscriptionRef.getValue() == null) {
-            _log.warn("siri delivery without a subscription ref");
-            continue;
-          }
-
-          SiriEndpointDetails endpoint = _endpointsBySubscriptionId.get(subscriptionRef.getValue());
-
-          if (endpoint == null) {
-            _log.warn("could not find siri delivery info with a subscription ref="
-                + subscriptionRef.getValue());
-            continue;
-          }
 
           _siriService.handleServiceDelivery(serviceDelivery,
               deliveryForModule, moduleType, endpoint);

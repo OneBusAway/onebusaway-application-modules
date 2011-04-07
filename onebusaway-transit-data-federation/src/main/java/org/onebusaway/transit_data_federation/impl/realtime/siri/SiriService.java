@@ -6,6 +6,9 @@ import java.util.List;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.siri.AffectedApplicationStructure;
+import org.onebusaway.siri.OneBusAwayAffects;
+import org.onebusaway.siri.OneBusAwayAffectsStructure.Applications;
 import org.onebusaway.siri.OneBusAwayConsequence;
 import org.onebusaway.siri.core.ESiriModuleType;
 import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
@@ -15,6 +18,7 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedApplication;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
@@ -185,86 +189,110 @@ public class SiriService {
 
     AffectsScopeStructure affectsStructure = ptSituation.getAffects();
 
-    if (affectsStructure != null) {
+    if (affectsStructure == null)
+      return;
 
-      SituationAffects situationAffects = new SituationAffects();
-      situation.setAffects(situationAffects);
+    SituationAffects situationAffects = new SituationAffects();
+    situation.setAffects(situationAffects);
 
-      Operators operators = affectsStructure.getOperators();
+    Operators operators = affectsStructure.getOperators();
 
-      if (operators != null
-          && !CollectionsLibrary.isEmpty(operators.getAffectedOperator())) {
+    if (operators != null
+        && !CollectionsLibrary.isEmpty(operators.getAffectedOperator())) {
 
-        List<SituationAffectedAgency> affectedAgencies = new ArrayList<SituationAffectedAgency>();
+      List<SituationAffectedAgency> affectedAgencies = new ArrayList<SituationAffectedAgency>();
 
-        for (AffectedOperatorStructure operator : operators.getAffectedOperator()) {
-          OperatorRefStructure operatorRef = operator.getOperatorRef();
-          if (operatorRef == null || operatorRef.getValue() == null)
-            continue;
-          String agencyId = operatorRef.getValue();
-          SituationAffectedAgency affectedAgency = new SituationAffectedAgency();
-          affectedAgency.setAgencyId(agencyId);
-          affectedAgencies.add(affectedAgency);
-        }
-
-        if (!affectedAgencies.isEmpty())
-          situationAffects.setAgencies(affectedAgencies);
+      for (AffectedOperatorStructure operator : operators.getAffectedOperator()) {
+        OperatorRefStructure operatorRef = operator.getOperatorRef();
+        if (operatorRef == null || operatorRef.getValue() == null)
+          continue;
+        String agencyId = operatorRef.getValue();
+        SituationAffectedAgency affectedAgency = new SituationAffectedAgency();
+        affectedAgency.setAgencyId(agencyId);
+        affectedAgencies.add(affectedAgency);
       }
 
-      StopPoints stopPoints = affectsStructure.getStopPoints();
+      if (!affectedAgencies.isEmpty())
+        situationAffects.setAgencies(affectedAgencies);
+    }
 
-      if (stopPoints != null
-          && !CollectionsLibrary.isEmpty(stopPoints.getAffectedStopPoint())) {
+    StopPoints stopPoints = affectsStructure.getStopPoints();
 
-        List<SituationAffectedStop> affectedStops = new ArrayList<SituationAffectedStop>();
+    if (stopPoints != null
+        && !CollectionsLibrary.isEmpty(stopPoints.getAffectedStopPoint())) {
 
-        for (AffectedStopPointStructure stopPoint : stopPoints.getAffectedStopPoint()) {
-          StopPointRefStructure stopRef = stopPoint.getStopPointRef();
-          if (stopRef == null || stopRef.getValue() == null)
-            continue;
-          AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(stopRef.getValue());
-          SituationAffectedStop affectedStop = new SituationAffectedStop();
-          affectedStop.setStopId(stopId);
-          affectedStops.add(affectedStop);
-        }
+      List<SituationAffectedStop> affectedStops = new ArrayList<SituationAffectedStop>();
 
-        if (!affectedStops.isEmpty())
-          situationAffects.setStops(affectedStops);
+      for (AffectedStopPointStructure stopPoint : stopPoints.getAffectedStopPoint()) {
+        StopPointRefStructure stopRef = stopPoint.getStopPointRef();
+        if (stopRef == null || stopRef.getValue() == null)
+          continue;
+        AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(stopRef.getValue());
+        SituationAffectedStop affectedStop = new SituationAffectedStop();
+        affectedStop.setStopId(stopId);
+        affectedStops.add(affectedStop);
       }
 
-      VehicleJourneys vjs = affectsStructure.getVehicleJourneys();
-      if (vjs != null
-          && !CollectionsLibrary.isEmpty(vjs.getAffectedVehicleJourney())) {
+      if (!affectedStops.isEmpty())
+        situationAffects.setStops(affectedStops);
+    }
 
-        List<SituationAffectedVehicleJourney> avjs = new ArrayList<SituationAffectedVehicleJourney>();
+    VehicleJourneys vjs = affectsStructure.getVehicleJourneys();
+    if (vjs != null
+        && !CollectionsLibrary.isEmpty(vjs.getAffectedVehicleJourney())) {
 
-        for (AffectedVehicleJourneyStructure vj : vjs.getAffectedVehicleJourney()) {
+      List<SituationAffectedVehicleJourney> avjs = new ArrayList<SituationAffectedVehicleJourney>();
 
-          SituationAffectedVehicleJourney avj = new SituationAffectedVehicleJourney();
+      for (AffectedVehicleJourneyStructure vj : vjs.getAffectedVehicleJourney()) {
 
-          if (vj.getLineRef() != null)
-            avj.setLineId(AgencyAndIdLibrary.convertFromString(vj.getLineRef().getValue()));
+        SituationAffectedVehicleJourney avj = new SituationAffectedVehicleJourney();
 
-          if (vj.getDirectionRef() != null)
-            avj.setDirectionId(vj.getDirectionRef().getValue());
+        if (vj.getLineRef() != null)
+          avj.setLineId(AgencyAndIdLibrary.convertFromString(vj.getLineRef().getValue()));
 
-          Calls calls = vj.getCalls();
+        if (vj.getDirectionRef() != null)
+          avj.setDirectionId(vj.getDirectionRef().getValue());
 
-          if (calls != null && !CollectionsLibrary.isEmpty(calls.getCall())) {
-            List<SituationAffectedCall> stopIds = new ArrayList<SituationAffectedCall>();
-            for (AffectedCallStructure call : calls.getCall()) {
-              AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(call.getStopPointRef().getValue());
-              SituationAffectedCall ac = new SituationAffectedCall();
-              ac.setStopId(stopId);
-              stopIds.add(ac);
-            }
-            avj.setCalls(stopIds);
+        Calls calls = vj.getCalls();
+
+        if (calls != null && !CollectionsLibrary.isEmpty(calls.getCall())) {
+          List<SituationAffectedCall> stopIds = new ArrayList<SituationAffectedCall>();
+          for (AffectedCallStructure call : calls.getCall()) {
+            AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(call.getStopPointRef().getValue());
+            SituationAffectedCall ac = new SituationAffectedCall();
+            ac.setStopId(stopId);
+            stopIds.add(ac);
+          }
+          avj.setCalls(stopIds);
+        }
+
+        avjs.add(avj);
+      }
+
+      situationAffects.setVehicleJourneys(avjs);
+    }
+
+    ExtensionsStructure extension = affectsStructure.getExtensions();
+    if (extension != null && extension.getAny() != null) {
+      Object ext = extension.getAny();
+      if (ext instanceof OneBusAwayAffects) {
+        OneBusAwayAffects obaAffects = (OneBusAwayAffects) ext;
+
+        Applications applications = obaAffects.getApplications();
+        if (applications != null
+            && ! CollectionsLibrary.isEmpty(applications.getAffectedApplication())) {
+
+          List<SituationAffectedApplication> affectedApps = new ArrayList<SituationAffectedApplication>();
+          List<AffectedApplicationStructure> apps = applications.getAffectedApplication();
+
+          for (AffectedApplicationStructure sApp : apps) {
+            SituationAffectedApplication app = new SituationAffectedApplication();
+            app.setApiKey(sApp.getApiKey());
+            affectedApps.add(app);
           }
 
-          avjs.add(avj);
+          situationAffects.setApplications(affectedApps);
         }
-
-        situationAffects.setVehicleJourneys(avjs);
       }
     }
   }

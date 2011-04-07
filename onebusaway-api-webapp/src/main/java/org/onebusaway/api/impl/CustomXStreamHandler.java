@@ -21,6 +21,7 @@ import org.onebusaway.api.model.transit.StopScheduleV2Bean;
 import org.onebusaway.api.model.transit.StopV2Bean;
 import org.onebusaway.api.model.transit.StopWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.api.model.transit.StopsForRouteV2Bean;
+import org.onebusaway.api.model.transit.TimeIntervalV2;
 import org.onebusaway.api.model.transit.TripDetailsV2Bean;
 import org.onebusaway.api.model.transit.TripStopTimeV2Bean;
 import org.onebusaway.api.model.transit.TripV2Bean;
@@ -32,6 +33,7 @@ import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockTripV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockV2Bean;
 import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationAffectedAgencyV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedApplicationV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
@@ -123,6 +125,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("vehicleStatus", VehicleStatusV2Bean.class);
 
     xstream.alias("situation", SituationV2Bean.class);
+    xstream.alias("agency", SituationAffectedAgencyV2Bean.class);
     xstream.alias("stop", SituationAffectedStopV2Bean.class);
     xstream.alias("vehicleJourney", SituationAffectedVehicleJourneyV2Bean.class);
     xstream.alias("call", SituationAffectedCallV2Bean.class);
@@ -138,6 +141,8 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("leg", LegV2Bean.class);
     xstream.alias("transitLeg", TransitLegV2Bean.class);
     xstream.alias("streetLeg", StreetLegV2Bean.class);
+
+    xstream.alias("timeInterval", TimeIntervalV2.class);
 
     xstream.alias("minTravelTimeToStop", MinTravelTimeToStopV2Bean.class);
 

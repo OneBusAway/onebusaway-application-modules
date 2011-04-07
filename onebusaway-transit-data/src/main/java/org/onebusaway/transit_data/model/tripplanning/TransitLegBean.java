@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -38,12 +39,19 @@ public class TransitLegBean implements Serializable {
 
   private long scheduledDepartureTime;
 
+  private TimeIntervalBean scheduledDepartureInterval;
+
   private long predictedDepartureTime;
+
+  private TimeIntervalBean predictedDepartureInterval;
 
   private long scheduledArrivalTime;
 
+  private TimeIntervalBean scheduledArrivalInterval;
+
   private long predictedArrivalTime;
 
+  private TimeIntervalBean predictedArrivalInterval;
   private List<SituationBean> situations;
 
   public TripBean getTrip() {
@@ -150,12 +158,30 @@ public class TransitLegBean implements Serializable {
     this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
+  public TimeIntervalBean getScheduledDepartureInterval() {
+    return scheduledDepartureInterval;
+  }
+
+  public void setScheduledDepartureInterval(
+      TimeIntervalBean scheduledDepartureInterval) {
+    this.scheduledDepartureInterval = scheduledDepartureInterval;
+  }
+
   public long getPredictedDepartureTime() {
     return predictedDepartureTime;
   }
 
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
+  }
+
+  public TimeIntervalBean getPredictedDepartureInterval() {
+    return predictedDepartureInterval;
+  }
+
+  public void setPredictedDepartureInterval(
+      TimeIntervalBean predictedDepartureInterval) {
+    this.predictedDepartureInterval = predictedDepartureInterval;
   }
 
   public long getScheduledArrivalTime() {
@@ -166,12 +192,30 @@ public class TransitLegBean implements Serializable {
     this.scheduledArrivalTime = scheduledArrivalTime;
   }
 
+  public TimeIntervalBean getScheduledArrivalInterval() {
+    return scheduledArrivalInterval;
+  }
+
+  public void setScheduledArrivalInterval(
+      TimeIntervalBean scheduledArrivalInterval) {
+    this.scheduledArrivalInterval = scheduledArrivalInterval;
+  }
+
   public long getPredictedArrivalTime() {
     return predictedArrivalTime;
   }
 
   public void setPredictedArrivalTime(long predictedArrivalTime) {
     this.predictedArrivalTime = predictedArrivalTime;
+  }
+
+  public TimeIntervalBean getPredictedArrivalInterval() {
+    return predictedArrivalInterval;
+  }
+
+  public void setPredictedArrivalInterval(
+      TimeIntervalBean predictedArrivalInterval) {
+    this.predictedArrivalInterval = predictedArrivalInterval;
   }
 
   public List<SituationBean> getSituations() {

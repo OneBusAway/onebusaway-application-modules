@@ -15,6 +15,7 @@ import org.onebusaway.presentation.bundles.service_alerts.PersonnelReasons;
 import org.onebusaway.presentation.bundles.service_alerts.Sensitivity;
 import org.onebusaway.presentation.bundles.service_alerts.Severity;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedApplicationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
@@ -187,6 +188,7 @@ public class ServiceAlertAction extends ActionSupport implements
     xstream.alias("stop", SituationAffectedStopBean.class);
     xstream.alias("vehicleJourney", SituationAffectedVehicleJourneyBean.class);
     xstream.alias("call", SituationAffectedCallBean.class);
+    xstream.alias("application",SituationAffectedApplicationBean.class);
     xstream.alias("consequence", SituationConsequenceBean.class);
     xstream.alias("conditionDetails", SituationConditionDetailsBean.class);
     xstream.alias("encodedPolyline", EncodedPolylineBean.class);

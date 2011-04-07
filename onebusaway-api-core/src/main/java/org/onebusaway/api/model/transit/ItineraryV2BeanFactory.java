@@ -148,6 +148,8 @@ public class ItineraryV2BeanFactory {
 
     bean.setScheduledDepartureTime(leg.getScheduledDepartureTime());
     bean.setPredictedDepartureTime(leg.getPredictedDepartureTime());
+    bean.setScheduledDepartureInterval(_factory.getTimeInterval(leg.getScheduledDepartureInterval()));
+    bean.setPredictedDepartureInterval(_factory.getTimeInterval(leg.getPredictedDepartureInterval()));
 
     StopBean toStop = leg.getToStop();
     if (toStop != null) {
@@ -158,6 +160,8 @@ public class ItineraryV2BeanFactory {
 
     bean.setScheduledArrivalTime(leg.getScheduledArrivalTime());
     bean.setPredictedArrivalTime(leg.getPredictedArrivalTime());
+    bean.setScheduledArrivalInterval(_factory.getTimeInterval(leg.getScheduledArrivalInterval()));
+    bean.setPredictedArrivalInterval(_factory.getTimeInterval(leg.getPredictedArrivalInterval()));
 
     bean.setRouteShortName(leg.getRouteShortName());
     bean.setRouteLongName(leg.getRouteLongName());
@@ -222,7 +226,7 @@ public class ItineraryV2BeanFactory {
           bean.setPath(narrative.getPath());
           Map<String, String> tags = getTags(narrative.getTags());
           bean.setTags(tags);
-          
+
           edges.add(bean);
         }
       }
@@ -238,9 +242,9 @@ public class ItineraryV2BeanFactory {
 
     Map<String, String> tagBeans = new HashMap<String, String>();
 
-    if( tags == null )
+    if (tags == null)
       return null;
-    
+
     for (Map.Entry<String, Object> entry : tags.entrySet()) {
       String key = entry.getKey();
       String value = getValueAsString(entry.getValue());

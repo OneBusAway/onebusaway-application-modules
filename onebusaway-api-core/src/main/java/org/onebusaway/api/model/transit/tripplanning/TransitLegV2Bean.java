@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.onebusaway.api.model.transit.FrequencyV2Bean;
+import org.onebusaway.api.model.transit.TimeIntervalV2;
 
 public class TransitLegV2Bean implements Serializable {
 
@@ -35,11 +36,19 @@ public class TransitLegV2Bean implements Serializable {
 
   private long scheduledDepartureTime;
 
+  private TimeIntervalV2 scheduledDepartureInterval;
+
   private long predictedDepartureTime;
+
+  private TimeIntervalV2 predictedDepartureInterval;
 
   private long scheduledArrivalTime;
 
+  private TimeIntervalV2 scheduledArrivalInterval;
+
   private long predictedArrivalTime;
+
+  private TimeIntervalV2 predictedArrivalInterval;
 
   private List<String> situationIds;
 
@@ -147,12 +156,30 @@ public class TransitLegV2Bean implements Serializable {
     this.scheduledDepartureTime = scheduledDepartureTime;
   }
 
+  public TimeIntervalV2 getScheduledDepartureInterval() {
+    return scheduledDepartureInterval;
+  }
+
+  public void setScheduledDepartureInterval(
+      TimeIntervalV2 scheduledDepartureInterval) {
+    this.scheduledDepartureInterval = scheduledDepartureInterval;
+  }
+
   public long getPredictedDepartureTime() {
     return predictedDepartureTime;
   }
 
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
+  }
+
+  public TimeIntervalV2 getPredictedDepartureInterval() {
+    return predictedDepartureInterval;
+  }
+
+  public void setPredictedDepartureInterval(
+      TimeIntervalV2 predictedDepartureInterval) {
+    this.predictedDepartureInterval = predictedDepartureInterval;
   }
 
   public long getScheduledArrivalTime() {
@@ -163,12 +190,30 @@ public class TransitLegV2Bean implements Serializable {
     this.scheduledArrivalTime = scheduledArrivalTime;
   }
 
+  public TimeIntervalV2 getScheduledArrivalInterval() {
+    return scheduledArrivalInterval;
+  }
+
+  public void setScheduledArrivalInterval(
+      TimeIntervalV2 scheduledArrivalInterval) {
+    this.scheduledArrivalInterval = scheduledArrivalInterval;
+  }
+
   public long getPredictedArrivalTime() {
     return predictedArrivalTime;
   }
 
   public void setPredictedArrivalTime(long predictedArrivalTime) {
     this.predictedArrivalTime = predictedArrivalTime;
+  }
+
+  public TimeIntervalV2 getPredictedArrivalInterval() {
+    return predictedArrivalInterval;
+  }
+
+  public void setPredictedArrivalInterval(
+      TimeIntervalV2 predictedArrivalInterval) {
+    this.predictedArrivalInterval = predictedArrivalInterval;
   }
 
   public List<String> getSituationIds() {

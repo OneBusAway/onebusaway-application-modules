@@ -42,6 +42,7 @@ import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
+import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
@@ -244,6 +245,15 @@ public class BeanFactoryV2 {
   /****
    * 
    ***/
+
+  public TimeIntervalV2 getTimeInterval(TimeIntervalBean interval) {
+    if (interval == null)
+      return null;
+    TimeIntervalV2 bean = new TimeIntervalV2();
+    bean.setFrom(interval.getFrom());
+    bean.setTo(interval.getTo());
+    return bean;
+  }
 
   public AgencyV2Bean getAgency(AgencyBean agency) {
     AgencyV2Bean bean = new AgencyV2Bean();
@@ -1054,7 +1064,7 @@ public class BeanFactoryV2 {
   }
 
   public void addToReferences(SituationBean situation) {
-    if (!isSituationExcludedForApplication(situation))
+    if (isSituationExcludedForApplication(situation))
       return;
     if (!shouldAddReferenceWithId(_references.getSituations(),
         situation.getId()))
