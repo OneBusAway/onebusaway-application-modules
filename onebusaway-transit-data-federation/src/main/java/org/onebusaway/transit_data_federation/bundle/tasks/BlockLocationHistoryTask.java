@@ -97,11 +97,6 @@ public class BlockLocationHistoryTask implements Runnable {
 
     Iterable<BlockEntry> allBlocks = _transitGraphDao.getAllBlocks();
 
-    if (true)
-      allBlocks = Arrays.asList(_transitGraphDao.getBlockEntryForId(new AgencyAndId(
-          "1", "2535417")));
-    // 2527793
-
     for (BlockEntry block : allBlocks) {
 
       if (blockIndex % 100 == 0)
