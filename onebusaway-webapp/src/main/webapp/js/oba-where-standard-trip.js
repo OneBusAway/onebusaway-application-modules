@@ -51,7 +51,7 @@ var oba_where_standard_trip = function(data) {
 			    
 				var params = {};
 				
-				params.stopId = data.stopId;
+				params.stopId = stop.id;
 				params.tripId = data.tripId;
 				params.serviceDate = data.serviceDate;
 				params.stopSequence = stopSequence;

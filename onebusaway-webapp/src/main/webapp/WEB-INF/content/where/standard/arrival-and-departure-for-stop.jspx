@@ -96,6 +96,38 @@
 </ul>
 </div>
 
+<div class="stop_links">
+<h4>Historical Real-Time Stats:</h4>
+<s:if test="result.scheduleDeviationHistogram == null">
+<p>No historical real-time data is available for this trip + stop.</p>
+</s:if>
+<s:else>
+<s:push value="result.scheduleDeviationHistogram">
+<s:url var="url" value="http://chart.apis.google.com/chart">
+  <s:param name="cht">bvg</s:param>
+  <s:param name="chs">300x225</s:param>
+  <s:param name="chco">A2C180</s:param>
+  <s:param name="chbh">a</s:param>
+  <s:param name="chxr">1,0,<s:property value="maxCount"/>,5</s:param>
+  <s:param name="chds">0,<s:property value="maxCount"/></s:param>
+  <s:param name="chtt">Schedule Adherence History</s:param>
+  <!-- Specify an extra X axis title -->
+  <s:param name="chxt">x,y,x,y</s:param>
+  <!-- Specify the extra X axis title value -->
+  <s:param name="chxl">0:<s:iterator value="labels">|<s:property /></s:iterator>|2:|Schedule Deviation (mins)||3:|Count|</s:param>
+  <!-- Position the X axis label at the middle (50%) -->
+  <s:param name="chxp">2,50|3,50</s:param>
+  <!-- Data! -->
+  <s:param name="chd">t:<s:iterator value="counts" status="it"><s:if test="!#it.first">,</s:if><s:property /></s:iterator></s:param>
+  <!-- ?chxr=0,6,12 -->
+</s:url>
+<jsp:element name="img">
+  <jsp:attribute name="src"><s:property value="%{url}" escape="false"/></jsp:attribute>
+</jsp:element>
+</s:push>
+</s:else>
+</div>
+
 <!--  Attachment point for playing audio -->
 <div id="jquery_jplayer"><jsp:text></jsp:text></div>
 

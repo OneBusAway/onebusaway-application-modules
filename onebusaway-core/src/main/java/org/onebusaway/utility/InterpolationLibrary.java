@@ -67,6 +67,28 @@ public class InterpolationLibrary {
     return result.doubleValue();
   }
 
+  public static <K extends Number, V> V nearestNeighbor(SortedMap<K, V> values,
+      K target) {
+    if (values.isEmpty())
+      return null;
+    SortedMap<K, V> before = values.headMap(target);
+    SortedMap<K, V> after = values.tailMap(target);
+    if (before.isEmpty()) {
+      return after.get(after.firstKey());
+    } else if (after.isEmpty()) {
+      return before.get(before.lastKey());
+    } else {
+      K a = before.lastKey();
+      K b = after.firstKey();
+      if (Math.abs(b.doubleValue() - target.doubleValue()) < Math.abs(a.doubleValue()
+          - target.doubleValue())) {
+        return after.get(b);
+      } else {
+        return before.get(a);
+      }
+    }
+  }
+
   /**
    * Simple numeric interpolation between two double values using the equation
    * {@code ratio * (toValue - fromValue) + fromValue}

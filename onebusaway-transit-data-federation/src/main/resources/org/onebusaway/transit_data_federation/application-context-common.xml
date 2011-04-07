@@ -41,6 +41,7 @@
         <property name="values">
             <list>
                 <value>org.onebusaway.transit_data_federation.model.RouteCollection</value>
+                <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
             </list>
         </property>
     </bean>

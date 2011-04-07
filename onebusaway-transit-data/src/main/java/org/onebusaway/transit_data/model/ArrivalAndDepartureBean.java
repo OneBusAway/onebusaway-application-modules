@@ -17,6 +17,7 @@ package org.onebusaway.transit_data.model;
 
 import java.util.List;
 
+import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -65,6 +66,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   private TripStatusBean tripStatus;
 
   private List<SituationBean> situations;
+
+  private HistogramBean scheduleDeviationHistogram;
 
   public TripBean getTrip() {
     return trip;
@@ -228,6 +231,15 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setSituations(List<SituationBean> situations) {
     this.situations = situations;
+  }
+
+  public HistogramBean getScheduleDeviationHistogram() {
+    return scheduleDeviationHistogram;
+  }
+
+  public void setScheduleDeviationHistogram(
+      HistogramBean scheduleDeviationHistogram) {
+    this.scheduleDeviationHistogram = scheduleDeviationHistogram;
   }
 
   public boolean hasPredictedArrivalTime() {

@@ -14,6 +14,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -31,6 +32,8 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.RealTimeHistoryService;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistogram;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -61,6 +64,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   private TripDetailsBeanService _tripDetailsBeanService;
 
   private ServiceAlertsBeanService _serviceAlertsBeanService;
+
+  private RealTimeHistoryService _realTimeHistoryService;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -98,6 +103,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   public void setServiceAlertsBeanService(
       ServiceAlertsBeanService serviceAlertsBeanService) {
     _serviceAlertsBeanService = serviceAlertsBeanService;
+  }
+
+  @Autowired
+  public void setRealTimeHistoryService(
+      RealTimeHistoryService realTimeHistoryService) {
+    _realTimeHistoryService = realTimeHistoryService;;
   }
 
   private AtomicInteger _stopTimesTotal = new AtomicInteger();
@@ -198,6 +209,30 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
         new HashMap<AgencyAndId, StopBean>());
     applyBlockLocationToBean(instance, bean, time);
     applySituationsToBean(time, instance, bean);
+
+    int step = 240;
+    
+    ScheduleDeviationHistogram histo = _realTimeHistoryService.getScheduleDeviationHistogramForArrivalAndDepartureInstance(
+        instance, step);
+    
+    if (histo != null) {
+
+      int[] sds = histo.getScheduleDeviations();
+      
+      double[] values = new double[sds.length];
+      String[] labels = new String[sds.length];
+      for (int i = 0; i < sds.length; i++) {
+        int sd = sds[i];
+        values[i] = sd;
+        labels[i] = (sd/60) + "-" + ((sd+step)/60);
+      }
+      
+      HistogramBean hb = new HistogramBean();
+      hb.setValues(values);
+      hb.setCounts(histo.getCounts());
+      hb.setLabels(labels);
+      bean.setScheduleDeviationHistogram(hb);
+    }
 
     return bean;
   }

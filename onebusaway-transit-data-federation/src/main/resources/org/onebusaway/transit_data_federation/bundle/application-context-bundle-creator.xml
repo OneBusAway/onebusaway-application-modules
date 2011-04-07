@@ -178,12 +178,22 @@
   </bean>
 
   <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.bundle.tasks.stop_transfers.StopTransfersTask" />
+  
+  <!-- -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="block_location_history" />
+    <property name="afterTaskName" value="stop_transfers" />
+    <property name="task" ref="blockLocationHistoryTask" />
+  </bean>
+
+  <bean id="blockLocationHistoryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.BlockLocationHistoryTask" />
 
   <!-- Pre Cache -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="pre_cache" />
-    <property name="afterTaskName" value="stop_transfers" />
+    <property name="afterTaskName" value="block_location_history" />
     <property name="task" ref="preCacheTask" />
   </bean>
 

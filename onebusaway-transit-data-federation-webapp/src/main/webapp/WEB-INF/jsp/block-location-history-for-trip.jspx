@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jsp:root version="1.2" xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<jsp:directive.page contentType="text/plain" />
+<c:forEach var="records" items="${histories}" varStatus="status">
+<c:forEach var="record" items="${records.value}">
+<c:out value="${status.count}"/><jsp:text>,</jsp:text><c:out value="${record.distanceAlongBlock}"/><jsp:text>,</jsp:text><c:out value="${record.scheduleDeviation}"/><jsp:text>
+</jsp:text>
+</c:forEach>
+</c:forEach>
+</jsp:root>
