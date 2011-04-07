@@ -65,8 +65,7 @@ public class ApiActionSupport extends ActionSupport implements
 
   protected BeanFactoryV2 getBeanFactoryV2() {
     BeanFactoryV2 factory = new BeanFactoryV2(_includeReferences);
-    // TODO : Temporary hack
-    // factory.setIncludeConditionDetails(!"org.onebusaway.iphone".equals(_key));
+    factory.setApplicationKey(_key);
     return factory;
   }
 

@@ -6,7 +6,7 @@ import java.util.List;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.siri.ConditionDetails;
+import org.onebusaway.siri.OneBusAwayConsequence;
 import org.onebusaway.siri.core.ESiriModuleType;
 import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
@@ -145,20 +145,20 @@ public class SiriService {
 
   private void handleOtherFields(PtSituationElementStructure ptSituation,
       Situation situation) {
-    
+
     SensitivityEnumeration sensitivity = ptSituation.getSensitivity();
-    if( sensitivity != null) {
+    if (sensitivity != null) {
       ESensitivity sensitivityEnum = ESensitivity.valueOfXmlId(sensitivity.value());
       situation.setSensitivity(sensitivityEnum);
     }
-    
+
     SeverityEnumeration severity = ptSituation.getSeverity();
-    if( severity != null) {
+    if (severity != null) {
       ESeverity severityEnum = ESeverity.valueOfTpegCode(severity.value());
       situation.setSeverity(severityEnum);
     }
   }
-  
+
   private void handlReasons(PtSituationElementStructure ptSituation,
       Situation situation) {
     if (ptSituation.getEnvironmentReason() != null)
@@ -286,12 +286,12 @@ public class SiriService {
       ExtensionsStructure extensions = consequence.getExtensions();
       if (extensions != null) {
         Object obj = extensions.getAny();
-        if (obj instanceof ConditionDetails) {
-          ConditionDetails conditionDetails = (ConditionDetails) obj;
+        if (obj instanceof OneBusAwayConsequence) {
+          OneBusAwayConsequence obaConsequence = (OneBusAwayConsequence) obj;
           SituationConditionDetails details = new SituationConditionDetails();
-          if (conditionDetails.getDiversionPath() != null) {
+          if (obaConsequence.getDiversionPath() != null) {
             EncodedPolylineBean polyline = new EncodedPolylineBean();
-            polyline.setPoints(conditionDetails.getDiversionPath());
+            polyline.setPoints(obaConsequence.getDiversionPath());
             details.setDiversionPath(polyline);
           }
           result.setConditionDetails(details);

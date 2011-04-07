@@ -14,7 +14,7 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.siri.ConditionDetails;
+import org.onebusaway.siri.OneBusAwayConsequence;
 import org.onebusaway.siri.core.SiriClient;
 import org.onebusaway.siri.core.SiriClientServiceRequest;
 import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
@@ -82,7 +82,7 @@ public class SiriClientService {
   public void start() {
 
     _client = new SiriClient();
-    
+
     if (_identity != null)
       _client.setIdentity(_identity);
 
@@ -173,18 +173,18 @@ public class SiriClientService {
 
     situation.setUndefinedReason(ptSituation.getUndefinedReason());
   }
-  
+
   private void handleOtherFields(PtSituationElementStructure ptSituation,
       Situation situation) {
-    
+
     SensitivityEnumeration sensitivity = ptSituation.getSensitivity();
-    if( sensitivity != null) {
+    if (sensitivity != null) {
       ESensitivity sensitivityEnum = ESensitivity.valueOfXmlId(sensitivity.value());
       situation.setSensitivity(sensitivityEnum);
     }
-    
+
     SeverityEnumeration severity = ptSituation.getSeverity();
-    if( severity != null) {
+    if (severity != null) {
       ESeverity severityEnum = ESeverity.valueOfTpegCode(severity.value());
       situation.setSeverity(severityEnum);
     }
@@ -258,12 +258,12 @@ public class SiriClientService {
       ExtensionsStructure extensions = consequence.getExtensions();
       if (extensions != null) {
         Object obj = extensions.getAny();
-        if (obj instanceof ConditionDetails) {
-          ConditionDetails conditionDetails = (ConditionDetails) obj;
+        if (obj instanceof OneBusAwayConsequence) {
+          OneBusAwayConsequence obaConsequence = (OneBusAwayConsequence) obj;
           SituationConditionDetails details = new SituationConditionDetails();
-          if (conditionDetails.getDiversionPath() != null) {
+          if (obaConsequence.getDiversionPath() != null) {
             EncodedPolylineBean polyline = new EncodedPolylineBean();
-            polyline.setPoints(conditionDetails.getDiversionPath());
+            polyline.setPoints(obaConsequence.getDiversionPath());
             details.setDiversionPath(polyline);
           }
           result.setConditionDetails(details);

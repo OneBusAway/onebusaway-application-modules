@@ -13,6 +13,8 @@ public final class SituationAffectsBean implements Serializable {
 
   private List<SituationAffectedVehicleJourneyBean> vehicleJourneys;
 
+  private List<SituationAffectedApplicationBean> applications;
+
   public List<SituationAffectedAgencyBean> getAgencies() {
     return agencies;
   }
@@ -36,5 +38,14 @@ public final class SituationAffectsBean implements Serializable {
   public void setVehicleJourneys(
       List<SituationAffectedVehicleJourneyBean> vehicleJourneys) {
     this.vehicleJourneys = vehicleJourneys;
+  }
+
+  public List<SituationAffectedApplicationBean> getApplications() {
+    return applications;
+  }
+
+  public void setApplications(
+      List<SituationAffectedApplicationBean> applications) {
+    this.applications = applications;
   }
 }

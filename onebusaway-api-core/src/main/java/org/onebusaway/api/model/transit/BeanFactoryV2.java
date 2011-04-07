@@ -12,6 +12,7 @@ import org.onebusaway.api.model.transit.blocks.BlockV2Bean;
 import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.NaturalLanguageStringV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedAgencyV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationAffectedApplicationV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
@@ -58,6 +59,7 @@ import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedApplicationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
@@ -80,6 +82,8 @@ public class BeanFactoryV2 {
 
   private MaxCountSupport _maxCount;
 
+  private String _applicationKey;
+
   public BeanFactoryV2(boolean includeReferences) {
     _includeReferences = includeReferences;
   }
@@ -90,6 +94,10 @@ public class BeanFactoryV2 {
 
   public void setMaxCount(MaxCountSupport maxCount) {
     _maxCount = maxCount;
+  }
+
+  public void setApplicationKey(String applicationKey) {
+    _applicationKey = applicationKey;
   }
 
   /****
@@ -810,6 +818,22 @@ public class BeanFactoryV2 {
     return bean;
   }
 
+  public boolean isSituationExcludedForApplication(SituationBean situation) {
+    SituationAffectsBean affects = situation.getAffects();
+    if (affects == null)
+      return false;
+    List<SituationAffectedApplicationBean> applications = affects.getApplications();
+    if (CollectionsLibrary.isEmpty(applications))
+      return false;
+    if (_applicationKey == null)
+      return true;
+    for (SituationAffectedApplicationBean application : applications) {
+      if (_applicationKey.equals(application.getApiKey()))
+        return false;
+    }
+    return true;
+  }
+
   public SituationV2Bean getSituation(SituationBean situation) {
 
     SituationV2Bean bean = new SituationV2Bean();
@@ -889,6 +913,16 @@ public class BeanFactoryV2 {
       bean.setVehicleJourneys(beans);
     }
 
+    List<SituationAffectedApplicationBean> applications = affects.getApplications();
+
+    if (!CollectionsLibrary.isEmpty(applications)) {
+      List<SituationAffectedApplicationV2Bean> beans = new ArrayList<SituationAffectedApplicationV2Bean>();
+      for (SituationAffectedApplicationBean application : applications) {
+        beans.add(getSituationAffectedApplication(application));
+      }
+      bean.setApplications(beans);
+    }
+
     return bean;
   }
 
@@ -921,6 +955,13 @@ public class BeanFactoryV2 {
       SituationAffectedStopBean stop) {
     SituationAffectedStopV2Bean bean = new SituationAffectedStopV2Bean();
     bean.setStopId(stop.getStopId());
+    return bean;
+  }
+
+  public SituationAffectedApplicationV2Bean getSituationAffectedApplication(
+      SituationAffectedApplicationBean app) {
+    SituationAffectedApplicationV2Bean bean = new SituationAffectedApplicationV2Bean();
+    bean.setApiKey(app.getApiKey());
     return bean;
   }
 
@@ -1013,6 +1054,8 @@ public class BeanFactoryV2 {
   }
 
   public void addToReferences(SituationBean situation) {
+    if (!isSituationExcludedForApplication(situation))
+      return;
     if (!shouldAddReferenceWithId(_references.getSituations(),
         situation.getId()))
       return;

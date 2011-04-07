@@ -5,8 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedApplicationBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
@@ -24,8 +27,18 @@ public class SituationsPresentation {
 
   private long _redisplayIfNowActiveThhreshold = 24 * 60 * 60 * 1000;
 
+  private String _apiKey = "web";
+
+  public void setApiKey(String apiKey) {
+    _apiKey = apiKey;
+  }
+
+  public String getApiKey() {
+    return _apiKey;
+  }
+
   public void setSituations(List<SituationBean> situations) {
-    _situations = situations;
+    _situations = determineApplicationSituations(situations);
   }
 
   public void setUser(UserBean user) {
@@ -55,7 +68,7 @@ public class SituationsPresentation {
 
   public String getUnreadServiceAlertsClass() {
     ESeverity severity = getHighestUnreadSeverity();
-    if( severity == ESeverity.NO_IMPACT)
+    if (severity == ESeverity.NO_IMPACT)
       return "unreadServiceAlertsNoImpactSeverity";
     return "unreadServiceAlertsNormalSeverity";
   }
@@ -134,7 +147,7 @@ public class SituationsPresentation {
   }
 
   private boolean isSituationActiveAtTime(SituationBean situation, long time) {
-    if( situation.getConsequences() == null)
+    if (situation.getConsequences() == null)
       return true;
     for (SituationConsequenceBean consequences : situation.getConsequences()) {
       TimeRangeBean period = consequences.getPeriod();
@@ -191,4 +204,29 @@ public class SituationsPresentation {
     return maxSeverity;
   }
 
+  private List<SituationBean> determineApplicationSituations(
+      List<SituationBean> situations) {
+    List<SituationBean> applicable = new ArrayList<SituationBean>();
+    for (SituationBean situation : situations) {
+      if (isSituationApplicable(situation))
+        applicable.add(situation);
+    }
+    return applicable;
+  }
+
+  private boolean isSituationApplicable(SituationBean situation) {
+    SituationAffectsBean affects = situation.getAffects();
+    if (affects == null)
+      return true;
+    List<SituationAffectedApplicationBean> applications = affects.getApplications();
+    if (CollectionsLibrary.isEmpty(applications))
+      return true;
+    if (_apiKey == null)
+      return false;
+    for (SituationAffectedApplicationBean application : applications) {
+      if (_apiKey.equals(application.getApiKey()))
+        return true;
+    }
+    return false;
+  }
 }

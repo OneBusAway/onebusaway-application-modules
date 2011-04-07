@@ -6,6 +6,7 @@ import java.util.List;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectedApplicationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
@@ -19,6 +20,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedApplication;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
@@ -146,7 +148,7 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     bean.setAdvice(situation.getAdvice());
     bean.setDetail(situation.getDetail());
     bean.setInternal(situation.getInternal());
-    
+
     bean.setSeverity(situation.getSeverity());
     bean.setSensitivity(situation.getSensitivity());
 
@@ -187,7 +189,7 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     situation.setAdvice(bean.getAdvice());
     situation.setDetail(bean.getDetail());
     situation.setInternal(bean.getInternal());
-    
+
     situation.setSeverity(bean.getSeverity());
     situation.setSensitivity(bean.getSensitivity());
 
@@ -244,6 +246,17 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
       }
       bean.setVehicleJourneys(beans);
     }
+
+    List<SituationAffectedApplication> apps = affects.getApplications();
+    if (!CollectionsLibrary.isEmpty(apps)) {
+      List<SituationAffectedApplicationBean> appBeans = new ArrayList<SituationAffectedApplicationBean>();
+      for (SituationAffectedApplication app : apps) {
+        SituationAffectedApplicationBean appBean = getSituationAffectedApplicationAsBean(app);
+        appBeans.add(appBean);
+      }
+      bean.setApplications(appBeans);
+    }
+
     return bean;
   }
 
@@ -280,6 +293,17 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
       }
       affects.setVehicleJourneys(vehicleJourneys);
     }
+
+    List<SituationAffectedApplicationBean> appBeans = bean.getApplications();
+    if (!CollectionsLibrary.isEmpty(appBeans)) {
+      List<SituationAffectedApplication> apps = new ArrayList<SituationAffectedApplication>();
+      for (SituationAffectedApplicationBean appBean : appBeans) {
+        SituationAffectedApplication app = getBeanAsSituationAffectedApplication(appBean);
+        apps.add(app);
+      }
+      affects.setApplications(apps);
+    }
+
     return affects;
   }
 
@@ -359,6 +383,22 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
       vehicleJourney.setCalls(calls);
     }
     return vehicleJourney;
+  }
+
+  private SituationAffectedApplicationBean getSituationAffectedApplicationAsBean(
+      SituationAffectedApplication app) {
+
+    SituationAffectedApplicationBean bean = new SituationAffectedApplicationBean();
+    bean.setApiKey(app.getApiKey());
+    return bean;
+  }
+
+  private SituationAffectedApplication getBeanAsSituationAffectedApplication(
+      SituationAffectedApplicationBean bean) {
+
+    SituationAffectedApplication app = new SituationAffectedApplication();
+    app.setApiKey(bean.getApiKey());
+    return app;
   }
 
   /****

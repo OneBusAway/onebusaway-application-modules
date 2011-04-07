@@ -13,6 +13,8 @@ public final class SituationAffects implements Serializable {
 
   private List<SituationAffectedVehicleJourney> vehicleJourneys;
 
+  private List<SituationAffectedApplication> applications;
+
   public List<SituationAffectedAgency> getAgencies() {
     return agencies;
   }
@@ -36,5 +38,13 @@ public final class SituationAffects implements Serializable {
   public void setVehicleJourneys(
       List<SituationAffectedVehicleJourney> vehicleJourneys) {
     this.vehicleJourneys = vehicleJourneys;
+  }
+
+  public List<SituationAffectedApplication> getApplications() {
+    return applications;
+  }
+
+  public void setApplications(List<SituationAffectedApplication> applications) {
+    this.applications = applications;
   }
 }

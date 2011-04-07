@@ -24,6 +24,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
+import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedApplication;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
@@ -402,6 +403,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     xstream.alias("stop", SituationAffectedStop.class);
     xstream.alias("vehicleJourney", SituationAffectedVehicleJourney.class);
     xstream.alias("call", SituationAffectedCall.class);
+    xstream.alias("application", SituationAffectedApplication.class);
     xstream.alias("consequence", SituationConsequence.class);
     xstream.alias("conditionDetails", SituationConditionDetails.class);
     xstream.alias("agencyAndId", AgencyAndId.class);

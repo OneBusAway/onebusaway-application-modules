@@ -29,8 +29,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import uk.org.siri.siri.AbstractServiceDeliveryStructure;
 import uk.org.siri.siri.AbstractSubscriptionStructure;
 import uk.org.siri.siri.ServiceDelivery;
+import uk.org.siri.siri.Siri;
 import uk.org.siri.siri.SubscriptionQualifierStructure;
 import uk.org.siri.siri.SubscriptionRequest;
+import uk.org.siri.siri.SubscriptionResponseStructure;
 
 @Controller
 public class SiriController extends SiriClient {
@@ -90,11 +92,13 @@ public class SiriController extends SiriClient {
               subId.setValue(UUID.randomUUID().toString());
               subscriptionForModule.setSubscriptionIdentifier(subId);
             }
+            _log.info("subscription id=" + subId.getValue());
             _endpointsBySubscriptionId.put(subId.getValue(), details);
           }
         }
         
-        handleSubscriptionRequestWithResponse(request);
+        Siri response = handleSubscriptionRequestWithResponse(request);
+        SubscriptionResponseStructure subResponse = response.getSubscriptionResponse();
       }
     }
   }
