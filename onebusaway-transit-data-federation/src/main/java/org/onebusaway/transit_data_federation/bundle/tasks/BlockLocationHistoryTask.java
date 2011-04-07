@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -103,34 +102,43 @@ public class BlockLocationHistoryTask implements Runnable {
         _log.info("blocksProcessed=" + blockIndex);
       blockIndex++;
 
-      List<File> files = getFilesForBlockId(block.getId());
+      try {
+        processBlock(block);
+      } catch (Throwable ex) {
+        _log.warn("error processing block " + block.getId(), ex);
+      }
+    }
+  }
 
-      if (files.isEmpty())
+  private void processBlock(BlockEntry block) {
+
+    List<File> files = getFilesForBlockId(block.getId());
+
+    if (files.isEmpty())
+      return;
+
+    Map<AgencyAndId, BlockLocationArchiveRecordMap> recordsByTrip = loadRecords(files);
+
+    List<ScheduleDeviationHistory> histories = new ArrayList<ScheduleDeviationHistory>();
+
+    for (Map.Entry<AgencyAndId, BlockLocationArchiveRecordMap> entry : recordsByTrip.entrySet()) {
+
+      AgencyAndId tripId = entry.getKey();
+      BlockLocationArchiveRecordMap recordsByInstance = entry.getValue();
+
+      /**
+       * If we don't have enough samples, skip the trip
+       */
+      if (recordsByInstance.size() < _minSampleSize)
         continue;
 
-      Map<AgencyAndId, BlockLocationArchiveRecordMap> recordsByTrip = loadRecords(files);
-
-      List<ScheduleDeviationHistory> histories = new ArrayList<ScheduleDeviationHistory>();
-
-      for (Map.Entry<AgencyAndId, BlockLocationArchiveRecordMap> entry : recordsByTrip.entrySet()) {
-
-        AgencyAndId tripId = entry.getKey();
-        BlockLocationArchiveRecordMap recordsByInstance = entry.getValue();
-
-        /**
-         * If we don't have enough samples, skip the trip
-         */
-        if (recordsByInstance.size() < _minSampleSize)
-          continue;
-
-        ScheduleDeviationHistory history = constructHistory(tripId,
-            recordsByInstance);
-        histories.add(history);
-      }
-
-      if (!histories.isEmpty())
-        _scheduleDeviationHistoryDao.saveScheduleDeviationHistory(histories);
+      ScheduleDeviationHistory history = constructHistory(tripId,
+          recordsByInstance);
+      histories.add(history);
     }
+
+    if (!histories.isEmpty())
+      _scheduleDeviationHistoryDao.saveScheduleDeviationHistory(histories);
   }
 
   private List<File> getFilesForBlockId(AgencyAndId blockId) {
@@ -184,15 +192,14 @@ public class BlockLocationHistoryTask implements Runnable {
 
     double step = computeSamplingStep(traces);
 
-    double from = Math.ceil(xRange.getMin() / step)
-        * step;
-    double to = Math.floor(xRange.getMax() / step)
-        * step;
+    double from = Math.ceil(xRange.getMin() / step) * step;
+    double to = Math.floor(xRange.getMax() / step) * step;
 
     SortedMap<Double, Double> mus = new TreeMap<Double, Double>();
     SortedMap<Double, Double> sigmas = new TreeMap<Double, Double>();
 
-    computeMeanAndStandardDeviationForTraces(traces, from, to, step, mus, sigmas);
+    computeMeanAndStandardDeviationForTraces(traces, from, to, step, mus,
+        sigmas);
 
     removeOutlierTraces(traces, mus, sigmas);
 
@@ -279,18 +286,19 @@ public class BlockLocationHistoryTask implements Runnable {
       if (m.size() < 5)
         continue;
       double step = (m.lastKey() - m.firstKey()) / m.size();
-      minStep = Math.min(step,minStep);
+      minStep = Math.min(step, minStep);
     }
-    
-    if( Double.isInfinite(minStep))
+
+    if (Double.isInfinite(minStep))
       return _distanceAlongBlockStep;
-    
+
     return Math.ceil(minStep / 100) * 100;
   }
 
   private void computeMeanAndStandardDeviationForTraces(
       List<SortedMap<Double, Double>> traces, double from, double to,
-      double step, SortedMap<Double, Double> mus, SortedMap<Double, Double> sigmas) {
+      double step, SortedMap<Double, Double> mus,
+      SortedMap<Double, Double> sigmas) {
 
     for (double x = from; x <= to; x += step) {
       DoubleArrayList values = new DoubleArrayList();

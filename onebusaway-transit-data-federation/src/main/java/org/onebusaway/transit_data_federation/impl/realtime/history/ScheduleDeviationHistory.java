@@ -26,10 +26,10 @@ public class ScheduleDeviationHistory implements Serializable {
       @AttributeOverride(name = "id", column = @Column(name = "trip_id"))})
   private final AgencyAndId tripId;
 
-  @Column(columnDefinition = "BLOB")
+  @Column(columnDefinition = "longblob")
   private double[] distancesAlongBlock;
 
-  @Column(columnDefinition = "BLOB")
+  @Column(columnDefinition = "longblob")
   private final double[][] scheduleDeviations;
 
   public ScheduleDeviationHistory(AgencyAndId tripId,
