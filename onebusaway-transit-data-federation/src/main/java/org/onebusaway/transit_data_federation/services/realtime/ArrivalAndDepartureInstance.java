@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.services.realtime;
 
+import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -37,7 +38,11 @@ public class ArrivalAndDepartureInstance {
 
   private long predictedArrivalTime;
 
+  private TimeIntervalBean predictedArrivalInterval;
+
   private long predictedDepartureTime;
+
+  private TimeIntervalBean predictedDepartureInterval;
 
   public ArrivalAndDepartureInstance(BlockInstance blockInstance,
       BlockStopTimeEntry blockStopTime, ArrivalAndDepartureTime scheduledTime) {
@@ -101,6 +106,15 @@ public class ArrivalAndDepartureInstance {
     this.predictedArrivalTime = predictedArrivalTime;
   }
 
+  public TimeIntervalBean getPredictedArrivalInterval() {
+    return predictedArrivalInterval;
+  }
+
+  public void setPredictedArrivalInterval(
+      TimeIntervalBean predictedArrivalInterval) {
+    this.predictedArrivalInterval = predictedArrivalInterval;
+  }
+
   public boolean isPredictedDepartureTimeSet() {
     return predictedDepartureTime != 0;
   }
@@ -111,6 +125,15 @@ public class ArrivalAndDepartureInstance {
 
   public void setPredictedDepartureTime(long predictedDepartureTime) {
     this.predictedDepartureTime = predictedDepartureTime;
+  }
+
+  public TimeIntervalBean getPredictedDepartureInterval() {
+    return predictedDepartureInterval;
+  }
+
+  public void setPredictedDepartureInterval(
+      TimeIntervalBean predictedDepartureInterval) {
+    this.predictedDepartureInterval = predictedDepartureInterval;
   }
 
   /****

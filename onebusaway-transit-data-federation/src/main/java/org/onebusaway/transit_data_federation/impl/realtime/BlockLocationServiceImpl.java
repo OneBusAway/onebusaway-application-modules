@@ -21,6 +21,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -29,6 +30,9 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
+import org.onebusaway.transit_data_federation.services.realtime.RealTimeHistoryService;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheRecord;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationRecordCache;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -70,6 +74,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   private ScheduledBlockLocationService _scheduledBlockLocationService;
 
   private BlockCalendarService _blockCalendarService;
+
+  private RealTimeHistoryService _realTimeHistoryService;
 
   /**
    * By default, we keep around 20 minutes of cache entries
@@ -115,8 +121,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    */
   private AtomicInteger _blockLocationRecordPersistentStoreAccessCount = new AtomicInteger();
 
-  private boolean _scheduleDeviationComputationEnabled = false;
-
   @Autowired
   public void setVehicleLocationRecordCache(VehicleLocationRecordCache cache) {
     _cache = cache;
@@ -144,6 +148,12 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     _blockCalendarService = blockCalendarService;
   }
 
+  @Autowired
+  public void setRealTimeHistoryService(
+      RealTimeHistoryService realTimeHistoryService) {
+    _realTimeHistoryService = realTimeHistoryService;
+  }
+
   /**
    * Controls how far back in time we include records in the
    * {@link BlockLocationRecordCollection} for each active trip.
@@ -162,11 +172,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    */
   public void setPersistBlockLocationRecords(boolean persistBlockLocationRecords) {
     _persistBlockLocationRecords = persistBlockLocationRecords;
-  }
-
-  public void setScheduleDeviationComputationEnabled(
-      boolean scheduleDeviationComputationEnabled) {
-    _scheduleDeviationComputationEnabled = scheduleDeviationComputationEnabled;
   }
 
   /****
@@ -217,7 +222,10 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       ScheduledBlockLocation scheduledBlockLocation = getScheduledBlockLocationForVehicleLocationRecord(
           record, instance);
 
-      putBlockLocationRecord(instance, record, scheduledBlockLocation);
+      ScheduleDeviationSamples samples = _realTimeHistoryService.sampleScheduleDeviationsForVehicle(
+          instance, record, scheduledBlockLocation);
+
+      putBlockLocationRecord(instance, record, scheduledBlockLocation, samples);
     }
   }
 
@@ -347,17 +355,30 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   /**
+   * 
+   * @param instance
+   * @param record
+   * @param scheduledBlockLocation
+   */
+  private void history(BlockInstance instance, VehicleLocationRecord record,
+      ScheduledBlockLocation scheduledBlockLocation) {
+
+  }
+
+  /**
    * We add the {@link BlockPositionRecord} to the local cache and persist it to
    * a back-end data-store if necessary
    * 
    * @param scheduledBlockLocation TODO
+   * @param samples
    */
   private void putBlockLocationRecord(BlockInstance blockInstance,
       VehicleLocationRecord record,
-      ScheduledBlockLocation scheduledBlockLocation) {
+      ScheduledBlockLocation scheduledBlockLocation,
+      ScheduleDeviationSamples samples) {
 
     // Cache the result
-    _cache.addRecord(blockInstance, record, scheduledBlockLocation);
+    _cache.addRecord(blockInstance, record, scheduledBlockLocation, samples);
 
     if (_persistBlockLocationRecords) {
       List<BlockLocationRecord> blockLocationRecords = getVehicleLocationRecordAsBlockLocationRecord(
@@ -390,13 +411,16 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           cacheRecord, targetTime);
 
       if (scheduledLocation != null) {
+        location.setEffectiveScheduleTime(scheduledLocation.getScheduledTime());
         location.setDistanceAlongBlock(scheduledLocation.getDistanceAlongBlock());
+
       }
 
       location.setPredicted(true);
       location.setLastUpdateTime(record.getTimeOfRecord());
       location.setLastLocationUpdateTime(record.getTimeOfLocationUpdate());
       location.setScheduleDeviation(record.getScheduleDeviation());
+      location.setScheduleDeviations(cacheRecord.getScheduleDeviations());
 
       if (record.isCurrentLocationSet()) {
         CoordinatePoint p = new CoordinatePoint(record.getCurrentLocationLat(),
@@ -432,7 +456,20 @@ public class BlockLocationServiceImpl implements BlockLocationService,
           }
         }
 
-        location.setScheduleDeviations(scheduleDeviations);
+        double[] scheduleTimes = new double[scheduleDeviations.size()];
+        double[] scheduleDeviationMus = new double[scheduleDeviations.size()];
+        double[] scheduleDeviationSigmas = new double[scheduleDeviations.size()];
+
+        int index = 0;
+        for (Map.Entry<Integer, Double> entry : scheduleDeviations.entrySet()) {
+          scheduleTimes[index] = entry.getKey();
+          scheduleDeviationMus[index] = entry.getValue();
+          index++;
+        }
+
+        ScheduleDeviationSamples samples = new ScheduleDeviationSamples(
+            scheduleTimes, scheduleDeviationMus, scheduleDeviationSigmas);
+        location.setScheduleDeviations(samples);
       }
 
     } else {
@@ -650,23 +687,24 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       ScheduledBlockLocation scheduledBlockLocation) {
 
     BlockLocationRecord.Builder builder = BlockLocationRecord.builder();
-    
-    if( scheduledBlockLocation != null) {
-      
+
+    if (scheduledBlockLocation != null) {
+
       BlockTripEntry activeTrip = scheduledBlockLocation.getActiveTrip();
       builder.setTripId(activeTrip.getTrip().getId());
       builder.setBlockId(activeTrip.getBlockConfiguration().getBlock().getId());
-      
+
       double distanceAlongBlock = scheduledBlockLocation.getDistanceAlongBlock();
       builder.setDistanceAlongBlock(distanceAlongBlock);
-      
-      double distanceAlongTrip = distanceAlongBlock - activeTrip.getDistanceAlongBlock();
+
+      double distanceAlongTrip = distanceAlongBlock
+          - activeTrip.getDistanceAlongBlock();
       builder.setDistanceAlongTrip(distanceAlongTrip);
     }
 
-    if( record.getBlockId() != null)
+    if (record.getBlockId() != null)
       builder.setBlockId(record.getBlockId());
-    if( record.getTripId() != null)
+    if (record.getTripId() != null)
       builder.setTripId(record.getTripId());
     builder.setTime(record.getTimeOfRecord());
     builder.setServiceDate(record.getServiceDate());
@@ -742,7 +780,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       vlr.setVehicleId(record.getVehicleId());
 
       VehicleLocationCacheRecord cacheRecord = new VehicleLocationCacheRecord(
-          blockInstance, vlr, null);
+          blockInstance, vlr, null, null);
       results.add(cacheRecord);
     }
 

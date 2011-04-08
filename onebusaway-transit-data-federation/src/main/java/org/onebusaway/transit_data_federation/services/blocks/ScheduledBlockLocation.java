@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
@@ -157,7 +158,7 @@ public class ScheduledBlockLocation {
   public void setStopTimeIndex(int stopTimeIndex) {
     this.stopTimeIndex = stopTimeIndex;
   }
-
+  
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder();
@@ -168,7 +169,7 @@ public class ScheduledBlockLocation {
     else
       b.append("null");
     int mins = scheduledTime / 60;
-    b.append(" scheduledTime=").append(mins/60).append(':').append(mins%60);
+    b.append(" scheduledTime=").append(mins / 60).append(':').append(mins % 60);
     b.append(" distanceAlongBlock=").append(distanceAlongBlock);
     b.append(")");
     return b.toString();

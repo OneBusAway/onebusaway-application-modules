@@ -210,7 +210,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     applyBlockLocationToBean(instance, bean, time);
     applySituationsToBean(time, instance, bean);
 
-    int step = 240;
+    int step = 120;
     
     ScheduleDeviationHistogram histo = _realTimeHistoryService.getScheduleDeviationHistogramForArrivalAndDepartureInstance(
         instance, step);

@@ -25,6 +25,8 @@ public class BlockLocationArchiveRecord {
 
   private long serviceDate;
 
+  private long time;
+
   @CsvField(mapping = AgencyIdFieldMappingFactory.class)
   private AgencyAndId tripId;
 
@@ -71,6 +73,14 @@ public class BlockLocationArchiveRecord {
 
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
+  }
+
+  public long getTime() {
+    return time;
+  }
+
+  public void setTime(long time) {
+    this.time = time;
   }
 
   public AgencyAndId getTripId() {

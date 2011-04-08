@@ -27,21 +27,21 @@ public class ScheduleDeviationHistory implements Serializable {
   private final AgencyAndId tripId;
 
   @Column(columnDefinition = "longblob")
-  private double[] distancesAlongBlock;
+  private double[] scheduleTimes;
 
   @Column(columnDefinition = "longblob")
   private final double[][] scheduleDeviations;
 
   public ScheduleDeviationHistory(AgencyAndId tripId,
-      double[] distancesAlongBlock, double[][] scheduleDeviations) {
+      double[] scheduleTimes, double[][] scheduleDeviations) {
     this.tripId = tripId;
-    this.distancesAlongBlock = distancesAlongBlock;
+    this.scheduleTimes = scheduleTimes;
     this.scheduleDeviations = scheduleDeviations;
   }
 
   ScheduleDeviationHistory() {
     this.tripId = null;
-    this.distancesAlongBlock = null;
+    this.scheduleTimes = null;
     this.scheduleDeviations = null;
   }
 
@@ -50,11 +50,11 @@ public class ScheduleDeviationHistory implements Serializable {
   }
 
   public int getNumberOfSamples() {
-    return scheduleDeviations[0].length;
+    return scheduleDeviations.length;
   }
 
-  public double[] getDistancesAlongBlock() {
-    return distancesAlongBlock;
+  public double[] getScheduleTimes() {
+    return scheduleTimes;
   }
 
   public double[][] getScheduleDeviations() {

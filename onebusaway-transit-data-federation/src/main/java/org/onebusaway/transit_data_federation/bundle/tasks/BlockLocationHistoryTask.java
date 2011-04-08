@@ -5,8 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +24,8 @@ import org.onebusaway.transit_data_federation.impl.realtime.history.BlockLocatio
 import org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,15 +38,13 @@ public class BlockLocationHistoryTask implements Runnable {
 
   private static Logger _log = LoggerFactory.getLogger(BlockLocationHistoryTask.class);
 
-  private static final DistanceAlongBlockComparator _distanceAlongBlockComparator = new DistanceAlongBlockComparator();
-
   private TransitGraphDao _transitGraphDao;
 
   private ScheduleDeviationHistoryDao _scheduleDeviationHistoryDao;
 
   private File _path;
 
-  private double _distanceAlongBlockStep = 500;
+  private int _sampleTimeStep = 300;
 
   private int _minSampleSize = 10;
 
@@ -68,8 +65,8 @@ public class BlockLocationHistoryTask implements Runnable {
     _path = path;
   }
 
-  public void setDistanceAlongBlockStep(double distanceAlongBlockStep) {
-    _distanceAlongBlockStep = distanceAlongBlockStep;
+  public void setSampleStepSize(int sampleTimeStep) {
+    _sampleTimeStep = sampleTimeStep;
   }
 
   public void seMinSampleSize(int minSampleSize) {
@@ -92,27 +89,31 @@ public class BlockLocationHistoryTask implements Runnable {
       return;
     }
 
-    int blockIndex = 0;
+    int tripIndex = 0;
 
-    Iterable<BlockEntry> allBlocks = _transitGraphDao.getAllBlocks();
+    Iterable<TripEntry> allTrips = _transitGraphDao.getAllTrips();
 
-    for (BlockEntry block : allBlocks) {
+    if (true)
+      allTrips = Arrays.asList(_transitGraphDao.getTripEntryForId(new AgencyAndId(
+          "1", "15455577")));
 
-      if (blockIndex % 100 == 0)
-        _log.info("blocksProcessed=" + blockIndex);
-      blockIndex++;
+    for (TripEntry trip : allTrips) {
+
+      if (tripIndex % 100 == 0)
+        _log.info("tripsProcessed=" + tripIndex);
+      tripIndex++;
 
       try {
-        processBlock(block);
+        processTrip(trip);
       } catch (Throwable ex) {
-        _log.warn("error processing block " + block.getId(), ex);
+        _log.warn("error processing trip " + trip.getId(), ex);
       }
     }
   }
 
-  private void processBlock(BlockEntry block) {
+  private void processTrip(TripEntry trip) {
 
-    List<File> files = getFilesForBlockId(block.getId());
+    List<File> files = getFilesForTripId(trip.getId());
 
     if (files.isEmpty())
       return;
@@ -141,12 +142,16 @@ public class BlockLocationHistoryTask implements Runnable {
       _scheduleDeviationHistoryDao.saveScheduleDeviationHistory(histories);
   }
 
-  private List<File> getFilesForBlockId(AgencyAndId blockId) {
+  private List<File> getFilesForTripId(AgencyAndId tripId) {
+
+    String id = AgencyAndIdLibrary.convertToString(tripId);
+    int n = id.length();
+    String key = id.substring(n - 2, n);
 
     List<File> files = new ArrayList<File>();
     for (File dateDir : _path.listFiles()) {
-      File dataFile = new File(dateDir,
-          AgencyAndIdLibrary.convertToString(blockId) + ".gz");
+      File dataFile = new File(dateDir, key + File.separator + "trip-" + id
+          + ".gz");
       if (dataFile.exists())
         files.add(dataFile);
     }
@@ -185,18 +190,18 @@ public class BlockLocationHistoryTask implements Runnable {
   private ScheduleDeviationHistory constructHistory(AgencyAndId tripId,
       BlockLocationArchiveRecordMap recordsByInstance) {
 
-    List<SortedMap<Double, Double>> traces = new ArrayList<SortedMap<Double, Double>>();
-    Range xRange = new Range();
+    List<SortedMap<Integer, Double>> traces = new ArrayList<SortedMap<Integer, Double>>();
+    Range tRange = new Range();
 
-    sortAndArrangeTraces(recordsByInstance, traces, xRange);
+    sortAndArrangeTraces(recordsByInstance, traces, tRange);
 
-    double step = computeSamplingStep(traces);
+    int step = computeSamplingStep(traces);
 
-    double from = Math.ceil(xRange.getMin() / step) * step;
-    double to = Math.floor(xRange.getMax() / step) * step;
+    int from = (int) (Math.ceil(tRange.getMin() / step) * step);
+    int to = (int) (Math.floor(tRange.getMax() / step) * step);
 
-    SortedMap<Double, Double> mus = new TreeMap<Double, Double>();
-    SortedMap<Double, Double> sigmas = new TreeMap<Double, Double>();
+    SortedMap<Integer, Double> mus = new TreeMap<Integer, Double>();
+    SortedMap<Integer, Double> sigmas = new TreeMap<Integer, Double>();
 
     computeMeanAndStandardDeviationForTraces(traces, from, to, step, mus,
         sigmas);
@@ -205,23 +210,23 @@ public class BlockLocationHistoryTask implements Runnable {
 
     int numOfTraces = traces.size();
 
-    DoubleArrayList distancesAlongBlock = new DoubleArrayList();
+    DoubleArrayList scheduleTimes = new DoubleArrayList();
     List<DoubleArrayList> scheduleDeviations = new ArrayList<DoubleArrayList>();
 
     for (int i = 0; i < numOfTraces; i++)
       scheduleDeviations.add(new DoubleArrayList());
 
-    for (double x = from; x <= to; x += step) {
+    for (int t = from; t <= to; t += step) {
 
       DoubleArrayList rawValues = new DoubleArrayList();
       DoubleArrayList values = new DoubleArrayList();
 
-      for (SortedMap<Double, Double> m : traces) {
-        if (x < m.firstKey() || x > m.lastKey()) {
+      for (SortedMap<Integer, Double> m : traces) {
+        if (t < m.firstKey() || t > m.lastKey()) {
           rawValues.add(Double.NaN);
           continue;
         }
-        double schedDev = InterpolationLibrary.interpolate(m, x);
+        double schedDev = InterpolationLibrary.interpolate(m, t);
         values.add(schedDev);
         rawValues.add(schedDev);
       }
@@ -237,72 +242,66 @@ public class BlockLocationHistoryTask implements Runnable {
       if (goodValueCount < _minSampleSize)
         continue;
 
-      distancesAlongBlock.add(x);
+      scheduleTimes.add(t);
       for (int traceIndex = 0; traceIndex < traces.size(); traceIndex++)
         scheduleDeviations.get(traceIndex).add(rawValues.get(traceIndex));
     }
 
-    distancesAlongBlock.trimToSize();
-    double[] distanceAlongBlockArray = distancesAlongBlock.elements();
+    scheduleTimes.trimToSize();
+    double[] scheduleTimesArray = scheduleTimes.elements();
 
-    int numOfValues = distancesAlongBlock.size();
+    double[][] scheduleDeviationsArrays = new double[numOfTraces][];
 
-    double[][] scheduleDeviationsArrays = new double[numOfValues][numOfTraces];
-
-    for (int valueIndex = 0; valueIndex < numOfValues; valueIndex++) {
-      for (int traceIndex = 0; traceIndex < numOfTraces; traceIndex++) {
-        scheduleDeviationsArrays[valueIndex][traceIndex] = scheduleDeviations.get(
-            traceIndex).get(valueIndex);
-      }
+    for (int traceIndex = 0; traceIndex < numOfTraces; traceIndex++) {
+      DoubleArrayList list = scheduleDeviations.get(traceIndex);
+      list.trimToSize();
+      scheduleDeviationsArrays[traceIndex] = list.elements();
     }
 
-    return new ScheduleDeviationHistory(tripId, distanceAlongBlockArray,
+    return new ScheduleDeviationHistory(tripId, scheduleTimesArray,
         scheduleDeviationsArrays);
   }
 
   private void sortAndArrangeTraces(
       BlockLocationArchiveRecordMap recordsByInstance,
-      List<SortedMap<Double, Double>> maps, Range xRange) {
+      List<SortedMap<Integer, Double>> maps, Range tRange) {
 
     for (List<BlockLocationArchiveRecord> records : recordsByInstance.values()) {
 
-      Collections.sort(records, _distanceAlongBlockComparator);
-
-      SortedMap<Double, Double> m = new TreeMap<Double, Double>();
+      SortedMap<Integer, Double> m = new TreeMap<Integer, Double>();
       for (BlockLocationArchiveRecord record : records) {
-        m.put(record.getDistanceAlongBlock(),
-            (double) record.getScheduleDeviation());
-        xRange.addValue(record.getDistanceAlongBlock());
+        int effectiveScheduleTime = (int) ((record.getTime() - record.getServiceDate()) / 1000 - record.getScheduleDeviation());
+        m.put(effectiveScheduleTime, (double) record.getScheduleDeviation());
+        tRange.addValue(effectiveScheduleTime);
       }
       maps.add(m);
     }
   }
 
-  private double computeSamplingStep(List<SortedMap<Double, Double>> traces) {
+  private int computeSamplingStep(List<SortedMap<Integer, Double>> traces) {
 
-    double minStep = Double.POSITIVE_INFINITY;
+    int minStep = Integer.MAX_VALUE;
 
-    for (SortedMap<Double, Double> m : traces) {
+    for (SortedMap<Integer, Double> m : traces) {
       if (m.size() < 5)
         continue;
-      double step = (m.lastKey() - m.firstKey()) / m.size();
+      int step = (m.lastKey() - m.firstKey()) / m.size();
       minStep = Math.min(step, minStep);
     }
 
-    if (Double.isInfinite(minStep))
-      return _distanceAlongBlockStep;
+    if (minStep == Integer.MAX_VALUE)
+      return _sampleTimeStep;
 
-    return Math.ceil(minStep / 100) * 100;
+    return (int) (Math.ceil(minStep / 60.0) * 60);
   }
 
   private void computeMeanAndStandardDeviationForTraces(
-      List<SortedMap<Double, Double>> traces, double from, double to,
-      double step, SortedMap<Double, Double> mus,
-      SortedMap<Double, Double> sigmas) {
+      List<SortedMap<Integer, Double>> traces, int from, int to, int step,
+      SortedMap<Integer, Double> mus, SortedMap<Integer, Double> sigmas) {
 
-    for (double x = from; x <= to; x += step) {
+    for (int x = from; x <= to; x += step) {
       DoubleArrayList values = new DoubleArrayList();
-      for (SortedMap<Double, Double> m : traces) {
+      for (SortedMap<Integer, Double> m : traces) {
         if (x < m.firstKey() || x > m.lastKey())
           continue;
         double schedDev = InterpolationLibrary.interpolate(m, x);
@@ -318,27 +317,27 @@ public class BlockLocationHistoryTask implements Runnable {
     }
   }
 
-  private void removeOutlierTraces(List<SortedMap<Double, Double>> maps,
-      SortedMap<Double, Double> mus, SortedMap<Double, Double> sigmas) {
+  private void removeOutlierTraces(List<SortedMap<Integer, Double>> maps,
+      SortedMap<Integer, Double> mus, SortedMap<Integer, Double> sigmas) {
 
-    Iterator<SortedMap<Double, Double>> it = maps.iterator();
+    Iterator<SortedMap<Integer, Double>> it = maps.iterator();
     while (it.hasNext()) {
-      SortedMap<Double, Double> m = it.next();
+      SortedMap<Integer, Double> m = it.next();
       if (isTraceAnOutlier(m, mus, sigmas))
         it.remove();
     }
   }
 
-  private boolean isTraceAnOutlier(SortedMap<Double, Double> m,
-      SortedMap<Double, Double> mus, SortedMap<Double, Double> sigmas) {
+  private boolean isTraceAnOutlier(SortedMap<Integer, Double> m,
+      SortedMap<Integer, Double> mus, SortedMap<Integer, Double> sigmas) {
 
     double outliers = 0;
 
-    for (Map.Entry<Double, Double> entry : m.entrySet()) {
-      double x = entry.getKey();
+    for (Map.Entry<Integer, Double> entry : m.entrySet()) {
+      int t = entry.getKey();
       double value = entry.getValue();
-      double mu = InterpolationLibrary.interpolate(mus, x);
-      double sigma = InterpolationLibrary.interpolate(sigmas, x);
+      double mu = InterpolationLibrary.interpolate(mus, t);
+      double sigma = InterpolationLibrary.interpolate(sigmas, t);
       if (Math.abs(value - mu) > _outlierRatio * sigma)
         outliers++;
     }
@@ -396,16 +395,4 @@ public class BlockLocationHistoryTask implements Runnable {
       super(new ArrayList<BlockLocationArchiveRecord>());
     }
   }
-
-  private static class DistanceAlongBlockComparator implements
-      Comparator<BlockLocationArchiveRecord> {
-
-    @Override
-    public int compare(BlockLocationArchiveRecord o1,
-        BlockLocationArchiveRecord o2) {
-      return Double.compare(o1.getDistanceAlongBlock(),
-          o2.getDistanceAlongBlock());
-    }
-  }
-
 }

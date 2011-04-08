@@ -20,6 +20,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheRecord;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationRecordCache;
 import org.slf4j.Logger;
@@ -118,12 +119,14 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
 
   @Override
   public void addRecord(BlockInstance blockInstance,
-      VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation) {
+      VehicleLocationRecord record,
+      ScheduledBlockLocation scheduledBlockLocation,
+      ScheduleDeviationSamples samples) {
 
     AgencyAndId vehicleId = record.getVehicleId();
 
     VehicleLocationCacheRecord cacheRecord = new VehicleLocationCacheRecord(
-        blockInstance, record, scheduledBlockLocation);
+        blockInstance, record, scheduledBlockLocation, samples);
     VehicleLocationCacheRecord existing = _recordsByVehicleId.put(vehicleId,
         cacheRecord);
 

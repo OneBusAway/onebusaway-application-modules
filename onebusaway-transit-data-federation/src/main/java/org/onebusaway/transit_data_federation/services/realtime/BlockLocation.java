@@ -1,7 +1,5 @@
 package org.onebusaway.transit_data_federation.services.realtime;
 
-import java.util.SortedMap;
-
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
@@ -34,6 +32,11 @@ public class BlockLocation {
    ****/
 
   private double distanceAlongBlock = Double.NaN;
+
+  /**
+   * Time, in seconds
+   */
+  private int effectiveScheduleTime;
 
   private CoordinatePoint location;
 
@@ -69,7 +72,7 @@ public class BlockLocation {
 
   private double scheduleDeviation = Double.NaN;
 
-  private SortedMap<Integer, Double> scheduleDeviations = null;
+  private ScheduleDeviationSamples scheduleDeviations = null;
 
   private AgencyAndId vehicleId;
 
@@ -120,6 +123,22 @@ public class BlockLocation {
 
   public void setScheduledDistanceAlongBlock(double scheduledDistanceAlongBlock) {
     this.scheduledDistanceAlongBlock = scheduledDistanceAlongBlock;
+  }
+
+  /**
+   * The effective schedule time measures the progress of the transit vehicle in
+   * serving the underlying schedule.
+   * 
+   * effectiveScheduleTime = currentTime - scheduleDeviation
+   * 
+   * @return time, in seconds
+   */
+  public int getEffectiveScheduleTime() {
+    return effectiveScheduleTime;
+  }
+
+  public void setEffectiveScheduleTime(int effectiveScheduleTime) {
+    this.effectiveScheduleTime = effectiveScheduleTime;
   }
 
   /**
@@ -359,12 +378,11 @@ public class BlockLocation {
     return scheduleDeviations != null && !scheduleDeviations.isEmpty();
   }
 
-  public SortedMap<Integer, Double> getScheduleDeviations() {
+  public ScheduleDeviationSamples getScheduleDeviations() {
     return scheduleDeviations;
   }
 
-  public void setScheduleDeviations(
-      SortedMap<Integer, Double> scheduleDeviations) {
+  public void setScheduleDeviations(ScheduleDeviationSamples scheduleDeviations) {
     this.scheduleDeviations = scheduleDeviations;
   }
 
@@ -380,14 +398,15 @@ public class BlockLocation {
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("BlockLocation(");
-    b.append("block=").append(blockInstance.getBlock().getBlock().getId()).append(",");
+    b.append("block=").append(blockInstance.getBlock().getBlock().getId()).append(
+        ",");
     if (phase != null)
       b.append("phase=").append(phase).append(",");
     if (status != null)
       b.append("status=").append(status).append(",");
     if (isScheduleDeviationSet())
       b.append("scheduleDeviation=").append(scheduleDeviation).append(",");
-    if( predicted )
+    if (predicted)
       b.append("predicted=true,");
     if (isDistanceAlongBlockSet())
       b.append("distanceAlongBlock=").append(distanceAlongBlock).append(",");

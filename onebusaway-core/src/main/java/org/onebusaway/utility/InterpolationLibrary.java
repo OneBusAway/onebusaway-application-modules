@@ -15,6 +15,7 @@
  */
 package org.onebusaway.utility;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.SortedMap;
 
@@ -87,6 +88,50 @@ public class InterpolationLibrary {
         return before.get(a);
       }
     }
+  }
+
+  public static double interpolate(double[] keys, double[] values,
+      double target, EOutOfRangeStrategy outOfRangeStrategy) {
+
+    if (values.length == 0)
+      throw new IndexOutOfBoundsException(OUT_OF_RANGE);
+
+    int index = Arrays.binarySearch(keys, target);
+    if (index >= 0)
+      return values[index];
+
+    index = -(index + 1);
+
+    if (index == values.length) {
+      switch (outOfRangeStrategy) {
+        case INTERPOLATE:
+          if (values.length > 1)
+            return interpolatePair(keys[index - 2], values[index - 2],
+                keys[index - 1], values[index - 1], target);
+          return values[index - 1];
+        case LAST_VALUE:
+          return values[index - 1];
+        case EXCEPTION:
+          throw new IndexOutOfBoundsException(OUT_OF_RANGE);
+      }
+    }
+
+    if (index == 0) {
+      switch (outOfRangeStrategy) {
+        case INTERPOLATE:
+          if (values.length > 1)
+            return interpolatePair(keys[0], values[0], keys[1], values[1],
+                target);
+          return values[0];
+        case LAST_VALUE:
+          return values[0];
+        case EXCEPTION:
+          throw new IndexOutOfBoundsException(OUT_OF_RANGE);
+      }
+    }
+
+    return interpolatePair(keys[index - 1], values[index - 1], keys[index],
+        values[index], target);
   }
 
   /**

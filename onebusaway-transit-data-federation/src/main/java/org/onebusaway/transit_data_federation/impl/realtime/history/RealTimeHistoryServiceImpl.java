@@ -4,27 +4,44 @@ import java.util.Arrays;
 
 import org.onebusaway.collections.Range;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.realtime.RealTimeHistoryService;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistogram;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cern.colt.list.DoubleArrayList;
+import cern.jet.random.Normal;
+import cern.jet.random.engine.RandomEngine;
+import cern.jet.stat.Descriptive;
 
 @Component
 public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
 
   private ScheduleDeviationHistoryDaoImpl _scheduleDeviationHistoryDao;
 
+  private int _predictionLookahead = 20 * 60;
+
+  private Normal _schedDevScaleParam = new Normal(0, 5 * 60,
+      RandomEngine.makeDefault());
+
   @Autowired
   public void setScheduleDeviationHistoryDao(
       ScheduleDeviationHistoryDaoImpl scheduleDeviationHistoryDao) {
     _scheduleDeviationHistoryDao = scheduleDeviationHistoryDao;
+  }
+
+  public void setPredictionLookahead(int predictionLookahead) {
+    _predictionLookahead = predictionLookahead;
   }
 
   @Override
@@ -38,53 +55,114 @@ public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
     ScheduleDeviationHistory history = _scheduleDeviationHistoryDao.getScheduleDeviationHistoryForTripId(tripId);
 
     BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
-    double distanceAlongBlock = blockStopTime.getDistanceAlongBlock();
+    StopTimeEntry stopTime = blockStopTime.getStopTime();
 
-    double[] values = getScheduleDeviationsForDistanceAlongBlock(history,
-        distanceAlongBlock);
+    double[] values = getScheduleDeviationsForScheduleTime(history,
+        stopTime.getDepartureTime());
     return createHistogramFromValues(values, stepSizeInSeconds);
   }
 
-  private double[] getScheduleDeviationsForDistanceAlongBlock(
-      ScheduleDeviationHistory history, double distanceAlongBlock) {
+  @Override
+  public ScheduleDeviationSamples sampleScheduleDeviationsForVehicle(
+      BlockInstance instance, VehicleLocationRecord record,
+      ScheduledBlockLocation scheduledBlockLocation) {
 
-    double[] distancesAlongBlock = history.getDistancesAlongBlock();
+    BlockTripEntry blockTrip = scheduledBlockLocation.getActiveTrip();
+    TripEntry trip = blockTrip.getTrip();
+
+    ScheduleDeviationHistory history = _scheduleDeviationHistoryDao.getScheduleDeviationHistoryForTripId(trip.getId());
+
+    if (history == null)
+      return null;
+
+    ScheduleDeviationHistory resampledHistory = resampleHistory(history,
+        scheduledBlockLocation.getScheduledTime(),
+        record.getScheduleDeviation());
+
+    DoubleArrayList scheduleTimes = new DoubleArrayList();
+    DoubleArrayList mus = new DoubleArrayList();
+    DoubleArrayList sigmas = new DoubleArrayList();
+
+    for (int t = 0; t <= _predictionLookahead; t += 5 * 60) {
+
+      int scheduleTime = scheduledBlockLocation.getScheduledTime() + t;
+      double[] deviations = getScheduleDeviationsForScheduleTime(
+          resampledHistory, scheduleTime);
+
+      deviations = noNans(deviations);
+      DoubleArrayList values = new DoubleArrayList(deviations);
+
+      double mu = Descriptive.mean(values);
+      double var = Descriptive.sampleVariance(values, mu);
+      double sigma = Descriptive.sampleStandardDeviation(values.size(), var);
+
+      scheduleTimes.add(scheduleTime);
+      mus.add(mu);
+      sigmas.add(sigma);
+    }
+
+    scheduleTimes.trimToSize();
+    mus.trimToSize();
+    sigmas.trimToSize();
+
+    return new ScheduleDeviationSamples(scheduleTimes.elements(),
+        mus.elements(), sigmas.elements());
+  }
+
+  /****
+   * Private
+   ****/
+
+  /**
+   * @param history
+   * @param distanceAlongBlock
+   * @return
+   */
+
+  private double[] getScheduleDeviationsForScheduleTime(
+      ScheduleDeviationHistory history, int scheduleTime) {
+
+    double[] scheduleTimes = history.getScheduleTimes();
     double[][] scheduleDeviations = history.getScheduleDeviations();
 
-    int index = Arrays.binarySearch(distancesAlongBlock, distanceAlongBlock);
+    int index = Arrays.binarySearch(scheduleTimes, scheduleTime);
 
     if (index >= 0)
-      return scheduleDeviations[index];
+      return getColumn(scheduleDeviations, index);
 
     index = -(index + 1);
 
-    if (index == distancesAlongBlock.length)
-      return noNans(scheduleDeviations[index - 1]);
+    if (index == scheduleTimes.length)
+      return getColumn(scheduleDeviations, index - 1);
     if (index == 0)
-      return noNans(scheduleDeviations[0]);
+      return getColumn(scheduleDeviations, 0);
 
     int numSamples = history.getNumberOfSamples();
-    DoubleArrayList values = new DoubleArrayList();
+    double[] values = new double[numSamples];
 
     for (int i = 0; i < numSamples; i++) {
-      double fromKey = distancesAlongBlock[index - 1];
-      double toKey = distancesAlongBlock[index];
-      double fromValue = scheduleDeviations[index - 1][i];
-      double toValue = scheduleDeviations[index][i];
-      double v = InterpolationLibrary.interpolatePair(fromKey, fromValue,
-          toKey, toValue, distanceAlongBlock);
-      if (!Double.isNaN(v))
-        values.add(v);
+      double fromKey = scheduleTimes[index - 1];
+      double toKey = scheduleTimes[index];
+      double fromValue = scheduleDeviations[i][index - 1];
+      double toValue = scheduleDeviations[i][index];
+      values[i] = InterpolationLibrary.interpolatePair(fromKey, fromValue,
+          toKey, toValue, scheduleTime);
     }
 
-    values.trimToSize();
-    return values.elements();
+    return values;
   }
-  
+
+  private double[] getColumn(double[][] values, int index) {
+    double[] v = new double[values.length];
+    for (int i = 0; i < values.length; i++)
+      v[i] = values[i][index];
+    return v;
+  }
+
   private double[] noNans(double[] values) {
     DoubleArrayList vs = new DoubleArrayList();
-    for(double v : values) {
-      if( ! Double.isNaN(v))
+    for (double v : values) {
+      if (!Double.isNaN(v))
         vs.add(v);
     }
     vs.trimToSize();
@@ -93,6 +171,8 @@ public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
 
   private ScheduleDeviationHistogram createHistogramFromValues(double[] values,
       int stepSizeInSeconds) {
+
+    values = noNans(values);
 
     if (values.length == 0)
       return new ScheduleDeviationHistogram(new int[0], new int[0]);
@@ -121,5 +201,36 @@ public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
     }
 
     return new ScheduleDeviationHistogram(scheduleDeviations, counts);
+  }
+
+  private ScheduleDeviationHistory resampleHistory(
+      ScheduleDeviationHistory history, int scheduleTime, double activeDeviation) {
+
+    double[] deviations = getScheduleDeviationsForScheduleTime(history,
+        scheduleTime);
+
+    CDFMap<Integer> cdf = new CDFMap<Integer>();
+    for (int i = 0; i < deviations.length; i++) {
+      double deviation = deviations[i];
+      if (Double.isNaN(deviation))
+        continue;
+      double p = _schedDevScaleParam.apply(activeDeviation - deviation);
+      cdf.put(p, i);
+    }
+
+    int numSamples = deviations.length;
+
+    double[] scheduleTimes = history.getScheduleTimes();
+    double[][] scheduleDeviations = history.getScheduleDeviations();
+
+    double[][] sampledScheduleDeviations = new double[numSamples][];
+
+    for (int i = 0; i < numSamples; i++) {
+      int index = cdf.sample();
+      sampledScheduleDeviations[i] = scheduleDeviations[index];
+    }
+
+    return new ScheduleDeviationHistory(history.getTripId(), scheduleTimes,
+        sampledScheduleDeviations);
   }
 }

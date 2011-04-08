@@ -39,13 +39,21 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private int blockTripSequence;
 
+  private long scheduledArrivalTime;
+
+  private TimeIntervalBean scheduledArrivalInterval;
+
   private long predictedArrivalTime;
 
-  private long scheduledArrivalTime;
+  private TimeIntervalBean predictedArrivalInterval;
+
+  private long scheduledDepartureTime;
+
+  private TimeIntervalBean scheduledDepartureInterval;
 
   private long predictedDepartureTime;
 
-  private long scheduledDepartureTime;
+  private TimeIntervalBean predictedDepartureInterval;
 
   private FrequencyBean frequency;
 
@@ -117,6 +125,23 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.blockTripSequence = blockTripSequence;
   }
 
+  public long getScheduledArrivalTime() {
+    return scheduledArrivalTime;
+  }
+
+  public void setScheduledArrivalTime(long scheduledArrivalTime) {
+    this.scheduledArrivalTime = scheduledArrivalTime;
+  }
+
+  public TimeIntervalBean getScheduledArrivalInterval() {
+    return scheduledArrivalInterval;
+  }
+
+  public void setScheduledArrivalInterval(
+      TimeIntervalBean scheduledArrivalInterval) {
+    this.scheduledArrivalInterval = scheduledArrivalInterval;
+  }
+
   public long getPredictedArrivalTime() {
     return predictedArrivalTime;
   }
@@ -125,12 +150,30 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.predictedArrivalTime = predictedArrivalTime;
   }
 
-  public long getScheduledArrivalTime() {
-    return scheduledArrivalTime;
+  public TimeIntervalBean getPredictedArrivalInterval() {
+    return predictedArrivalInterval;
   }
 
-  public void setScheduledArrivalTime(long scheduledArrivalTime) {
-    this.scheduledArrivalTime = scheduledArrivalTime;
+  public void setPredictedArrivalInterval(
+      TimeIntervalBean predictedArrivalInterval) {
+    this.predictedArrivalInterval = predictedArrivalInterval;
+  }
+
+  public long getScheduledDepartureTime() {
+    return scheduledDepartureTime;
+  }
+
+  public void setScheduledDepartureTime(long scheduledDepartureTime) {
+    this.scheduledDepartureTime = scheduledDepartureTime;
+  }
+
+  public TimeIntervalBean getScheduledDepartureInterval() {
+    return scheduledDepartureInterval;
+  }
+
+  public void setScheduledDepartureInterval(
+      TimeIntervalBean scheduledDepartureInterval) {
+    this.scheduledDepartureInterval = scheduledDepartureInterval;
   }
 
   public long getPredictedDepartureTime() {
@@ -141,12 +184,13 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.predictedDepartureTime = predictedDepartureTime;
   }
 
-  public long getScheduledDepartureTime() {
-    return scheduledDepartureTime;
+  public TimeIntervalBean getPredictedDepartureInterval() {
+    return predictedDepartureInterval;
   }
 
-  public void setScheduledDepartureTime(long scheduledDepartureTime) {
-    this.scheduledDepartureTime = scheduledDepartureTime;
+  public void setPredictedDepartureInterval(
+      TimeIntervalBean predictedDepartureInterval) {
+    this.predictedDepartureInterval = predictedDepartureInterval;
   }
 
   public FrequencyBean getFrequency() {

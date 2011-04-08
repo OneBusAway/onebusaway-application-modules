@@ -42,9 +42,17 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private String tripHeadsign;
 
+  private long scheduledDepartureTime;
+
+  private TimeIntervalV2 scheduledDepartureInterval;
+
+  private long predictedDepartureTime;
+
+  private TimeIntervalV2 predictedDepartureInterval;
+
   private long scheduledArrivalTime;
 
-  private long scheduledDepartureTime;
+  private TimeIntervalV2 scheduledArrivalInterval;
 
   private FrequencyV2Bean frequency;
 
@@ -56,7 +64,7 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
 
   private long predictedArrivalTime;
 
-  private long predictedDepartureTime;
+  private TimeIntervalV2 predictedArrivalInterval;
 
   private double distanceFromStop;
 
@@ -154,12 +162,30 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.scheduledArrivalTime = scheduledArrivalTime;
   }
 
+  public TimeIntervalV2 getScheduledArrivalInterval() {
+    return scheduledArrivalInterval;
+  }
+
+  public void setScheduledArrivalInterval(
+      TimeIntervalV2 scheduledArrivalInterval) {
+    this.scheduledArrivalInterval = scheduledArrivalInterval;
+  }
+
   public long getScheduledDepartureTime() {
     return scheduledDepartureTime;
   }
 
   public void setScheduledDepartureTime(long scheduledDepartureTime) {
     this.scheduledDepartureTime = scheduledDepartureTime;
+  }
+
+  public TimeIntervalV2 getScheduledDepartureInterval() {
+    return scheduledDepartureInterval;
+  }
+
+  public void setScheduledDepartureInterval(
+      TimeIntervalV2 scheduledDepartureInterval) {
+    this.scheduledDepartureInterval = scheduledDepartureInterval;
   }
 
   public FrequencyV2Bean getFrequency() {
@@ -238,6 +264,19 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.predictedArrivalTime = predictedArrivalTime;
   }
 
+  public TimeIntervalV2 getPredictedArrivalInterval() {
+    return predictedArrivalInterval;
+  }
+
+  public void setPredictedArrivalInterval(
+      TimeIntervalV2 predictedArrivalInterval) {
+    this.predictedArrivalInterval = predictedArrivalInterval;
+  }
+
+  public boolean hasPredictedDepartureTime() {
+    return this.predictedArrivalTime > 0;
+  }
+
   public long getPredictedDepartureTime() {
     return predictedDepartureTime;
   }
@@ -246,8 +285,13 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.predictedDepartureTime = predictedDepartureTime;
   }
 
-  public boolean hasPredictedDepartureTime() {
-    return this.predictedArrivalTime > 0;
+  public TimeIntervalV2 getPredictedDepartureInterval() {
+    return predictedDepartureInterval;
+  }
+
+  public void setPredictedDepartureInterval(
+      TimeIntervalV2 predictedDepartureInterval) {
+    this.predictedDepartureInterval = predictedDepartureInterval;
   }
 
   public long computeBestArrivalTime() {

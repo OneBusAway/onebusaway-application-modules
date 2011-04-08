@@ -790,6 +790,11 @@ public class BeanFactoryV2 {
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());
     bean.setPredictedDepartureTime(ad.getPredictedDepartureTime());
 
+    bean.setScheduledArrivalInterval(getTimeInterval(ad.getScheduledArrivalInterval()));
+    bean.setScheduledDepartureInterval(getTimeInterval(ad.getScheduledDepartureInterval()));
+    bean.setPredictedArrivalInterval(getTimeInterval(ad.getPredictedArrivalInterval()));
+    bean.setPredictedDepartureInterval(getTimeInterval(ad.getPredictedDepartureInterval()));
+
     if (ad.getFrequency() != null)
       bean.setFrequency(getFrequency(ad.getFrequency()));
 

@@ -10,6 +10,15 @@ public class TimeIntervalBean implements Serializable {
 
   private long to = 0;
 
+  public TimeIntervalBean() {
+
+  }
+
+  public TimeIntervalBean(long from, long to) {
+    this.from = from;
+    this.to = to;
+  }
+
   public long getFrom() {
     return from;
   }

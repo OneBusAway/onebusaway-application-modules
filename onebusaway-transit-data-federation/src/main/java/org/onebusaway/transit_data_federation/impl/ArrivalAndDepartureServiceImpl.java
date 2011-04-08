@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
@@ -18,6 +18,7 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureTime;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -365,26 +366,26 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     instance.setBlockLocation(blockLocation);
 
-    BlockStopTimeEntry destinationStopTime = instance.getBlockStopTime();
-
     if (blockLocation.isScheduleDeviationSet()
         || blockLocation.areScheduleDeviationsSet()) {
 
       int scheduleDeviation = getBestScheduleDeviation(instance, blockLocation);
       setPredictedTimesFromScheduleDeviation(instance, blockLocation,
-          destinationStopTime, scheduleDeviation, targetTime);
+          scheduleDeviation, targetTime);
     }
   }
 
   private int getBestScheduleDeviation(ArrivalAndDepartureInstance instance,
       BlockLocation blockLocation) {
 
-    SortedMap<Integer, Double> scheduleDeviations = blockLocation.getScheduleDeviations();
+    ScheduleDeviationSamples scheduleDeviations = blockLocation.getScheduleDeviations();
 
     if (scheduleDeviations != null && !scheduleDeviations.isEmpty()) {
       int arrivalTime = instance.getBlockStopTime().getStopTime().getArrivalTime();
-      return (int) InterpolationLibrary.interpolate(scheduleDeviations,
-          arrivalTime, EOutOfRangeStrategy.LAST_VALUE);
+      return (int) InterpolationLibrary.interpolate(
+          scheduleDeviations.getScheduleTimes(),
+          scheduleDeviations.getScheduleDeviationMus(), arrivalTime,
+          EOutOfRangeStrategy.LAST_VALUE);
     } else if (blockLocation.isScheduleDeviationSet()) {
       return (int) blockLocation.getScheduleDeviation();
     } else {
@@ -394,18 +395,19 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   private void setPredictedTimesFromScheduleDeviation(
       ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
-      BlockStopTimeEntry destinationStopTime, int scheduleDeviation,
-      long targetTime) {
+      int scheduleDeviation, long targetTime) {
+
+    BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
 
     int effectiveScheduleTime = (int) (((targetTime - instance.getServiceDate()) / 1000) - scheduleDeviation);
 
     int arrivalDeviation = calculateArrivalDeviation(
-        blockLocation.getNextStop(), destinationStopTime,
-        effectiveScheduleTime, scheduleDeviation);
+        blockLocation.getNextStop(), blockStopTime, effectiveScheduleTime,
+        scheduleDeviation);
 
     int departureDeviation = calculateDepartureDeviation(
-        blockLocation.getNextStop(), destinationStopTime,
-        effectiveScheduleTime, scheduleDeviation);
+        blockLocation.getNextStop(), blockStopTime, effectiveScheduleTime,
+        scheduleDeviation);
 
     /**
      * Why don't we use the ArrivalAndDepartureTime scheduled arrival and
@@ -418,9 +420,18 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     long arrivalTime = schedule.getArrivalTime() + arrivalDeviation * 1000;
     setPredictedArrivalTimeForInstance(instance, arrivalTime);
 
+    TimeIntervalBean predictedArrivalTimeInterval = computePredictedArrivalTimeInterval(
+        instance, blockLocation, targetTime);
+    instance.setPredictedArrivalInterval(predictedArrivalTimeInterval);
+
     long departureTime = schedule.getDepartureTime() + departureDeviation
         * 1000;
     setPredictedDepartureTimeForInstance(instance, departureTime);
+
+    TimeIntervalBean predictedDepartureTimeInterval = computePredictedDepartureTimeInterval(
+        instance, blockLocation, targetTime);
+    instance.setPredictedDepartureInterval(predictedDepartureTimeInterval);
+
   }
 
   /**
@@ -570,6 +581,66 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
      * our delay.
      */
     return Math.max(0, scheduleDeviation - slack);
+  }
+
+  private TimeIntervalBean computePredictedArrivalTimeInterval(
+      ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
+      long targetTime) {
+
+    BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
+    StopTimeEntry stopTime = blockStopTime.getStopTime();
+
+    // If the vehicle has already passed the stop, then there is no prediction
+    // interval
+    if (stopTime.getArrivalTime() <= blockLocation.getEffectiveScheduleTime())
+      return null;
+
+    ScheduleDeviationSamples samples = blockLocation.getScheduleDeviations();
+
+    if (samples == null || samples.isEmpty())
+      return null;
+
+    double mu = InterpolationLibrary.interpolate(samples.getScheduleTimes(),
+        samples.getScheduleDeviationMus(), stopTime.getArrivalTime(),
+        EOutOfRangeStrategy.LAST_VALUE);
+    double sigma = InterpolationLibrary.interpolate(samples.getScheduleTimes(),
+        samples.getScheduleDeviationSigmas(), stopTime.getArrivalTime(),
+        EOutOfRangeStrategy.LAST_VALUE);
+
+    long from = (long) (instance.getScheduledArrivalTime() + (mu - sigma) * 1000);
+    long to = (long) (instance.getScheduledArrivalTime() + (mu + sigma) * 1000);
+
+    return new TimeIntervalBean(from, to);
+  }
+
+  private TimeIntervalBean computePredictedDepartureTimeInterval(
+      ArrivalAndDepartureInstance instance, BlockLocation blockLocation,
+      long targetTime) {
+
+    BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
+    StopTimeEntry stopTime = blockStopTime.getStopTime();
+
+    // If the vehicle has already passed the stop, then there is no prediction
+    // interval
+    if (stopTime.getDepartureTime() <= blockLocation.getEffectiveScheduleTime())
+      return null;
+
+    ScheduleDeviationSamples samples = blockLocation.getScheduleDeviations();
+
+    if (samples == null || samples.isEmpty())
+      return null;
+
+    double mu = InterpolationLibrary.interpolate(samples.getScheduleTimes(),
+        samples.getScheduleDeviationMus(), stopTime.getDepartureTime(),
+        EOutOfRangeStrategy.LAST_VALUE);
+    double sigma = InterpolationLibrary.interpolate(samples.getScheduleTimes(),
+        samples.getScheduleDeviationSigmas(), stopTime.getDepartureTime(),
+        EOutOfRangeStrategy.LAST_VALUE);
+
+    long from = (long) (instance.getScheduledDepartureTime() + (mu - sigma) * 1000);
+    long to = (long) (instance.getScheduledDepartureTime() + (mu + sigma) * 1000);
+
+    return new TimeIntervalBean(from, to);
   }
 
   private boolean isArrivalAndDepartureBeanInRange(

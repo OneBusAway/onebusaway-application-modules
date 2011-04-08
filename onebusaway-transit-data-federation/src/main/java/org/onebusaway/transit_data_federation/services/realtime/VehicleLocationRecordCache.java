@@ -14,7 +14,7 @@ public interface VehicleLocationRecordCache {
   public List<VehicleLocationCacheRecord> getRecordsForBlockInstance(
       BlockInstance blockInstance);
 
-  public void addRecord(BlockInstance blockInstance, VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation);
+  public void addRecord(BlockInstance blockInstance, VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation, ScheduleDeviationSamples samples);
 
   public void clearRecordsForVehicleId(AgencyAndId vehicleId);
 }
