@@ -377,10 +377,10 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
-      CoordinatePoint to, long time, ConstraintsBean constraints)
+      CoordinatePoint to, long targetTime, long currentTime, ConstraintsBean constraints)
       throws ServiceException {
-    return _itinerariesBeanService.getItinerariesBetween(from, to, time,
-        constraints);
+    return _itinerariesBeanService.getItinerariesBetween(from, to, targetTime,
+        currentTime, constraints);
   }
 
   @Override

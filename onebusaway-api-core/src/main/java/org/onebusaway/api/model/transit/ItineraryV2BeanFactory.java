@@ -78,6 +78,7 @@ public class ItineraryV2BeanFactory {
 
     bean.setStartTime(itinerary.getStartTime());
     bean.setEndTime(itinerary.getEndTime());
+    bean.setProbability(itinerary.getProbability());
 
     List<LegBean> legs = itinerary.getLegs();
     if (!CollectionsLibrary.isEmpty(legs)) {
@@ -92,12 +93,33 @@ public class ItineraryV2BeanFactory {
     return bean;
   }
 
+  public ItineraryBean reverseItinerary(ItineraryV2Bean bean) {
+    if (bean == null)
+      return null;
+    ItineraryBean itinerary = new ItineraryBean();
+    itinerary.setStartTime(bean.getStartTime());
+    itinerary.setEndTime(bean.getEndTime());
+    itinerary.setProbability(bean.getProbability());
+    List<LegV2Bean> legBeans = bean.getLegs();
+    if (!CollectionsLibrary.isEmpty(legBeans)) {
+      List<LegBean> legs = new ArrayList<LegBean>();
+      for (LegV2Bean legBean : legBeans) {
+        LegBean leg = reverseLeg(legBean);
+        legs.add(leg);
+      }
+      itinerary.setLegs(legs);
+    }
+    return itinerary;
+  }
+
   public LegV2Bean getLeg(LegBean leg) {
 
     LegV2Bean bean = new LegV2Bean();
 
     bean.setStartTime(leg.getStartTime());
     bean.setEndTime(leg.getEndTime());
+    bean.setFrom(_factory.getPoint(leg.getFrom()));
+    bean.setTo(_factory.getPoint(leg.getTo()));
     bean.setDistance(leg.getDistance());
     bean.setMode(leg.getMode());
 
@@ -118,6 +140,37 @@ public class ItineraryV2BeanFactory {
     }
 
     return bean;
+  }
+
+  public LegBean reverseLeg(LegV2Bean bean) {
+
+    LegBean leg = new LegBean();
+
+    leg.setStartTime(bean.getStartTime());
+    leg.setEndTime(bean.getEndTime());
+    leg.setFrom(_factory.reversePoint(bean.getFrom()));
+    leg.setTo(_factory.reversePoint(bean.getTo()));
+    leg.setDistance(bean.getDistance());
+    if(_factory.isStringSet(bean.getMode()))
+      leg.setMode(bean.getMode());
+
+    TransitLegV2Bean transitLegBean = bean.getTransitLeg();
+    if (transitLegBean != null) {
+      TransitLegBean transitLeg = reverseTransitLeg(transitLegBean);
+      leg.setTransitLeg(transitLeg);
+    }
+
+    List<StreetLegV2Bean> streetLegBeans = bean.getStreetLegs();
+    if (!CollectionsLibrary.isEmpty(streetLegBeans)) {
+      List<StreetLegBean> streetLegs = new ArrayList<StreetLegBean>();
+      for (StreetLegV2Bean streetLegBean : streetLegBeans) {
+        StreetLegBean streetLeg = reverseStreetLeg(streetLegBean);
+        streetLegs.add(streetLeg);
+      }
+      leg.setStreetLegs(streetLegs);
+    }
+
+    return leg;
   }
 
   public TransitLegV2Bean getTransitLeg(TransitLegBean leg) {
@@ -181,6 +234,50 @@ public class ItineraryV2BeanFactory {
     return bean;
   }
 
+  private TransitLegBean reverseTransitLeg(TransitLegV2Bean leg) {
+
+    TransitLegBean bean = new TransitLegBean();
+
+    String tripId = leg.getTripId();
+    if (tripId != null && ! tripId.isEmpty()) {
+      TripBean trip = new TripBean();
+      trip.setId(tripId);
+      bean.setTrip(trip);
+    }
+
+    bean.setServiceDate(leg.getServiceDate());
+    if( _factory.isStringSet(leg.getVehicleId()) )
+      bean.setVehicleId(leg.getVehicleId());
+
+    FrequencyV2Bean frequency = leg.getFrequency();
+    if (frequency != null) {
+      FrequencyBean freqBean = _factory.reverseFrequency(frequency);
+      bean.setFrequency(freqBean);
+    }
+
+    String fromStopId = leg.getFromStopId();
+    if (_factory.isStringSet(fromStopId)) {
+      StopBean stop = new StopBean();
+      stop.setId(fromStopId);
+      bean.setFromStop(stop);
+      bean.setFromStopSequence(leg.getFromStopSequence());
+    }
+
+    bean.setScheduledDepartureTime(leg.getScheduledDepartureTime());
+
+    String toStopId = leg.getToStopId();
+    if (_factory.isStringSet(toStopId)) {
+      StopBean stop = new StopBean();
+      stop.setId(toStopId);
+      bean.setToStop(stop);
+      bean.setToStopSequence(leg.getToStopSequence());
+    }
+
+    bean.setScheduledArrivalTime(leg.getScheduledArrivalTime());
+
+    return bean;
+  }
+
   public StreetLegV2Bean getStreetLeg(StreetLegBean leg) {
 
     StreetLegV2Bean bean = new StreetLegV2Bean();
@@ -188,6 +285,20 @@ public class ItineraryV2BeanFactory {
     bean.setStreetName(leg.getStreetName());
 
     bean.setPath(leg.getPath());
+    bean.setDistance(leg.getDistance());
+
+    return bean;
+  }
+
+  public StreetLegBean reverseStreetLeg(StreetLegV2Bean leg) {
+
+    StreetLegBean bean = new StreetLegBean();
+
+    if( _factory.isStringSet(leg.getStreetName()))
+      bean.setStreetName(leg.getStreetName());
+
+    if( _factory.isStringSet(leg.getPath()))
+      bean.setPath(leg.getPath());
     bean.setDistance(leg.getDistance());
 
     return bean;
@@ -263,4 +374,5 @@ public class ItineraryV2BeanFactory {
       return value.toString();
     }
   }
+
 }

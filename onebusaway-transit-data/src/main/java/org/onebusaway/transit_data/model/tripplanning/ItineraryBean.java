@@ -12,6 +12,8 @@ public class ItineraryBean implements Serializable {
 
   private long endTime;
 
+  private double probability;
+
   private List<LegBean> legs = new ArrayList<LegBean>();
 
   public long getStartTime() {
@@ -28,6 +30,14 @@ public class ItineraryBean implements Serializable {
 
   public void setEndTime(long endTime) {
     this.endTime = endTime;
+  }
+
+  public double getProbability() {
+    return probability;
+  }
+
+  public void setProbability(double probability) {
+    this.probability = probability;
   }
 
   public List<LegBean> getLegs() {

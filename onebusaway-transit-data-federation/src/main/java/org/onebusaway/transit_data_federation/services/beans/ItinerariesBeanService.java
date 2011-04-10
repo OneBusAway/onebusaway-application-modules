@@ -16,13 +16,14 @@ public interface ItinerariesBeanService {
    * @param from
    * @param to
    * @param time
+   * @param currentTime TODO
    * @param constraints
    * @return a list of trip plans computed between the two locations with the
    *         specified constraints
    * @throws ServiceException
    */
   public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
-      CoordinatePoint to, long time, ConstraintsBean constraints)
+      CoordinatePoint to, long time, long currentTime, ConstraintsBean constraints)
       throws ServiceException;
 
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,

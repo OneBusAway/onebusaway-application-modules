@@ -9,6 +9,8 @@ public class ItineraryV2Bean {
 
   private long endTime;
 
+  private double probability;
+
   private List<LegV2Bean> legs = new ArrayList<LegV2Bean>();
 
   public long getStartTime() {
@@ -25,6 +27,14 @@ public class ItineraryV2Bean {
 
   public void setEndTime(long endTime) {
     this.endTime = endTime;
+  }
+
+  public double getProbability() {
+    return probability;
+  }
+
+  public void setProbability(double probability) {
+    this.probability = probability;
   }
 
   public List<LegV2Bean> getLegs() {

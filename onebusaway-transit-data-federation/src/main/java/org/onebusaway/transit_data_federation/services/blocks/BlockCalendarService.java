@@ -3,6 +3,8 @@ package org.onebusaway.transit_data_federation.services.blocks;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 /**
  * Methods for determining which {@link BlockInstance} instances are active for
@@ -29,6 +31,9 @@ public interface BlockCalendarService {
    */
   public BlockInstance getBlockInstance(AgencyAndId blockId, long serviceDate);
 
+  public BlockTripEntry getTargetBlockTrip(BlockInstance blockInstance,
+      TripEntry trip);
+
   public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
       long timeFrom, long timeTo);
 
@@ -43,6 +48,7 @@ public interface BlockCalendarService {
 
   public List<BlockInstance> getActiveBlocksInTimeRange(
       Iterable<BlockTripIndex> indices,
-      Iterable<BlockLayoverIndex> layoverIndices, Iterable<FrequencyBlockTripIndex> frequencyIndices,
-      long timeFrom, long timeTo);
+      Iterable<BlockLayoverIndex> layoverIndices,
+      Iterable<FrequencyBlockTripIndex> frequencyIndices, long timeFrom,
+      long timeTo);
 }

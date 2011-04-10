@@ -2,11 +2,17 @@ package org.onebusaway.api.model.transit.tripplanning;
 
 import java.util.List;
 
+import org.onebusaway.api.model.transit.CoordinatePointV2Bean;
+
 public class LegV2Bean {
 
   private long startTime;
 
   private long endTime;
+
+  private CoordinatePointV2Bean from;
+
+  private CoordinatePointV2Bean to;
 
   private double distance;
 
@@ -30,6 +36,22 @@ public class LegV2Bean {
 
   public void setEndTime(long endTime) {
     this.endTime = endTime;
+  }
+
+  public CoordinatePointV2Bean getFrom() {
+    return from;
+  }
+
+  public void setFrom(CoordinatePointV2Bean from) {
+    this.from = from;
+  }
+
+  public CoordinatePointV2Bean getTo() {
+    return to;
+  }
+
+  public void setTo(CoordinatePointV2Bean to) {
+    this.to = to;
   }
 
   public double getDistance() {

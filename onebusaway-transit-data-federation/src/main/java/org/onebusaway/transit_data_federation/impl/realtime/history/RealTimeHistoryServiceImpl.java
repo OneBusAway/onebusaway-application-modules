@@ -66,6 +66,9 @@ public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
   public ScheduleDeviationSamples sampleScheduleDeviationsForVehicle(
       BlockInstance instance, VehicleLocationRecord record,
       ScheduledBlockLocation scheduledBlockLocation) {
+    
+    if( true )
+      return null;
 
     BlockTripEntry blockTrip = scheduledBlockLocation.getActiveTrip();
     TripEntry trip = blockTrip.getTrip();

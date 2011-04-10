@@ -8,6 +8,8 @@ public class ConstraintsBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private boolean departNow = true;
+
   private boolean arriveBy = false;
 
   private int resultCount = 3;
@@ -33,14 +35,17 @@ public class ConstraintsBean implements Serializable {
   private int transferCost = -1;
 
   private int maxTransfers = -1;
-  
+
   private long maxComputationTime = 0;
+
+  private ItineraryBean includeItinerary = null;
 
   public ConstraintsBean() {
 
   }
 
   public ConstraintsBean(ConstraintsBean c) {
+    this.departNow = c.departNow;
     this.arriveBy = c.arriveBy;
     this.initialWaitReluctance = c.initialWaitReluctance;
     this.maxTransfers = c.maxTransfers;
@@ -55,6 +60,14 @@ public class ConstraintsBean implements Serializable {
     this.waitReluctance = c.waitReluctance;
     this.walkReluctance = c.walkReluctance;
     this.walkSpeed = c.walkSpeed;
+  }
+
+  public boolean isDepartNow() {
+    return departNow;
+  }
+
+  public void setDepartNow(boolean departNow) {
+    this.departNow = departNow;
   }
 
   public boolean isArriveBy() {
@@ -173,5 +186,13 @@ public class ConstraintsBean implements Serializable {
 
   public void setMaxComputationTime(long maxComputationTime) {
     this.maxComputationTime = maxComputationTime;
+  }
+
+  public ItineraryBean getIncludeItinerary() {
+    return includeItinerary;
+  }
+
+  public void setIncludeItinerary(ItineraryBean includeItinerary) {
+    this.includeItinerary = includeItinerary;
   }
 }

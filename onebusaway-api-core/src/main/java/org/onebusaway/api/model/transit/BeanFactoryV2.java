@@ -833,6 +833,14 @@ public class BeanFactoryV2 {
     return bean;
   }
 
+  public FrequencyBean reverseFrequency(FrequencyV2Bean frequency) {
+    FrequencyBean bean = new FrequencyBean();
+    bean.setStartTime(frequency.getStartTime());
+    bean.setEndTime(frequency.getEndTime());
+    bean.setHeadway(frequency.getHeadway());
+    return bean;
+  }
+
   public boolean isSituationExcludedForApplication(SituationBean situation) {
     SituationAffectsBean affects = situation.getAffects();
     if (affects == null)
@@ -1035,6 +1043,21 @@ public class BeanFactoryV2 {
     bean.setTo(range.getTo());
     return bean;
   }
+  
+  public CoordinatePointV2Bean getPoint(CoordinatePoint point) {
+    if( point == null)
+      return null;
+    CoordinatePointV2Bean bean = new CoordinatePointV2Bean();
+    bean.setLat(point.getLat());
+    bean.setLon(point.getLon());
+    return bean;
+  }
+  
+  public CoordinatePoint reversePoint(CoordinatePointV2Bean bean) {
+    if( bean == null)
+      return null;
+    return new CoordinatePoint(bean.getLat(), bean.getLon());
+  }
 
   /****
    * References Methods
@@ -1096,6 +1119,10 @@ public class BeanFactoryV2 {
         outOfRange, _references);
   }
 
+  public boolean isStringSet(String value) {
+    return value != null && ! value.isEmpty();
+  }
+  
   private <T> List<T> filter(List<T> beans) {
     if (_maxCount == null)
       return beans;

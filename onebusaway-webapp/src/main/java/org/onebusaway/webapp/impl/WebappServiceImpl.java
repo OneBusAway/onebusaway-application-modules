@@ -147,7 +147,7 @@ class WebappServiceImpl implements WebappService {
       CoordinatePoint to, long time, ConstraintsBean constraints)
       throws ServiceException {
     return _transitDataService.getItinerariesBetween(from, to, time,
-        constraints);
+        ERROR, constraints);
   }
 
   @Override

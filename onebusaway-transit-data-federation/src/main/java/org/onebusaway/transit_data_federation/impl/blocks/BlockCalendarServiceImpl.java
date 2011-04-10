@@ -28,6 +28,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -85,6 +86,19 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
       index++;
     }
 
+    return null;
+  }
+
+  @Override
+  public BlockTripEntry getTargetBlockTrip(BlockInstance blockInstance,
+      TripEntry trip) {
+
+    BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+
+    for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
+      if (blockTrip.getTrip().equals(trip))
+        return blockTrip;
+    }
     return null;
   }
 
