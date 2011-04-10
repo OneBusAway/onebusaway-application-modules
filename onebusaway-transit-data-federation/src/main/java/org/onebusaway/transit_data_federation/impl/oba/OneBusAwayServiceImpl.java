@@ -100,7 +100,7 @@ class OneBusAwayServiceImpl implements OneBusAwayService {
         double stopLon = travelTimes.getStopLon(index);
         CoordinatePoint stopLocation = new CoordinatePoint(stopLat, stopLon);
         ItinerariesBean itineraries = _itinerariesService.getItinerariesBetween(
-            stopLocation, place, time, currentTime, walkConstraints);
+            stopLocation, place, time, System.currentTimeMillis(), walkConstraints);
 
         for (ItineraryBean plan : itineraries.getItineraries()) {
           double t = currentTripDuration
