@@ -53,6 +53,9 @@ public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
     AgencyAndId tripId = trip.getId();
 
     ScheduleDeviationHistory history = _scheduleDeviationHistoryDao.getScheduleDeviationHistoryForTripId(tripId);
+    
+    if( history == null)
+      return null;
 
     BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
