@@ -11,10 +11,6 @@
 
     <name>onebusaway-api-webapp</name>
 
-    <properties>
-        <struts-version>2.1.8</struts-version>
-    </properties>
-
     <dependencies>
 
         <dependency>
