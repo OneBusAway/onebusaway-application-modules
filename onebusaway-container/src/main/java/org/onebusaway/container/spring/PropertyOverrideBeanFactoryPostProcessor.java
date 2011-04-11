@@ -6,11 +6,11 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.RuntimeBeanNameReference;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 
-public class MyBeanFactoryPostProcessor extends PropertyOverrideConfigurer {
+public class PropertyOverrideBeanFactoryPostProcessor extends PropertyOverrideConfigurer {
 
-  private static Logger _log = LoggerFactory.getLogger(MyBeanFactoryPostProcessor.class);
+  private static Logger _log = LoggerFactory.getLogger(PropertyOverrideBeanFactoryPostProcessor.class);
 
   @Override
   protected void applyPropertyValue(ConfigurableListableBeanFactory factory,
@@ -23,7 +23,7 @@ public class MyBeanFactoryPostProcessor extends PropertyOverrideConfigurer {
       return;
     }
 
-    RuntimeBeanNameReference ref = new RuntimeBeanNameReference(value);
+    RuntimeBeanReference ref = new RuntimeBeanReference(value);
 
     MutablePropertyValues pvs = beanDefinition.getPropertyValues();
     PropertyValue pv = pvs.getPropertyValue(property);

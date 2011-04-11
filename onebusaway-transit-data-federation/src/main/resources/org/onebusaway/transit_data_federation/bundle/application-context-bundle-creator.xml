@@ -187,7 +187,7 @@
     <property name="task" ref="blockLocationHistoryTask" />
   </bean>
 
-  <bean id="blockLocationHistoryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.BlockLocationHistoryTask" />
+  <bean id="blockLocationHistoryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.history.BlockLocationHistoryTask" />
 
   <!-- Pre Cache -->
 

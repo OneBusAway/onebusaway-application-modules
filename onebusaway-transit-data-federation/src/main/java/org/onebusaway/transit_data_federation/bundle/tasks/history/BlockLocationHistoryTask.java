@@ -1,30 +1,21 @@
-package org.onebusaway.transit_data_federation.bundle.tasks;
+package org.onebusaway.transit_data_federation.bundle.tasks.history;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.zip.GZIPInputStream;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Range;
-import org.onebusaway.csv_entities.CsvEntityReader;
-import org.onebusaway.csv_entities.DelimiterTokenizerStrategy;
-import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.AgencyAndIdInstance;
 import org.onebusaway.transit_data_federation.impl.realtime.history.BlockLocationArchiveRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +32,7 @@ public class BlockLocationHistoryTask implements Runnable {
 
   private ScheduleDeviationHistoryDao _scheduleDeviationHistoryDao;
 
-  private File _path;
+  private BlockLocationArchiveSource _source;
 
   private int _sampleTimeStep = 300;
 
@@ -60,8 +51,8 @@ public class BlockLocationHistoryTask implements Runnable {
     _scheduleDeviationHistoryDao = scheduleDeviationHistoryDao;
   }
 
-  public void setPath(File path) {
-    _path = path;
+  public void setSource(BlockLocationArchiveSource source) {
+    _source = source;
   }
 
   public void setSampleStepSize(int sampleTimeStep) {
@@ -79,41 +70,33 @@ public class BlockLocationHistoryTask implements Runnable {
   @Override
   public void run() {
 
-    if (_path == null) {
-      _log.info("No BlockLocationHistoryTask data path specified.  Skipping this optional task");
+    if (_source == null) {
+      _log.info("No BlockLocationHistoryTask data source specified.  Skipping this optional task");
     }
 
-    if (!_path.exists()) {
-      _log.warn("The specified BlockLocationHistoryTask data path does not exist!");
-      return;
-    }
+    int blockIndex = 0;
 
-    int tripIndex = 0;
+    Iterable<BlockEntry> allBlocks = _transitGraphDao.getAllBlocks();
 
-    Iterable<TripEntry> allTrips = _transitGraphDao.getAllTrips();
+    for (BlockEntry block : allBlocks) {
 
-    for (TripEntry trip : allTrips) {
-
-      if (tripIndex % 100 == 0)
-        _log.info("tripsProcessed=" + tripIndex);
-      tripIndex++;
+      if (blockIndex % 100 == 0)
+        _log.info("blocksProcessed=" + blockIndex);
+      blockIndex++;
 
       try {
-        processTrip(trip);
+        processBlock(block);
       } catch (Throwable ex) {
-        _log.warn("error processing trip " + trip.getId(), ex);
+        _log.warn("error processing trip " + block.getId(), ex);
       }
     }
   }
 
-  private void processTrip(TripEntry trip) {
+  private void processBlock(BlockEntry block) {
 
-    List<File> files = getFilesForTripId(trip.getId());
+    List<BlockLocationArchiveRecord> records = _source.getRecordsForBlock(block.getId());
 
-    if (files.isEmpty())
-      return;
-
-    Map<AgencyAndId, BlockLocationArchiveRecordMap> recordsByTrip = loadRecords(files);
+    Map<AgencyAndId, BlockLocationArchiveRecordMap> recordsByTrip = loadRecords(records);
 
     List<ScheduleDeviationHistory> histories = new ArrayList<ScheduleDeviationHistory>();
 
@@ -137,49 +120,20 @@ public class BlockLocationHistoryTask implements Runnable {
       _scheduleDeviationHistoryDao.saveScheduleDeviationHistory(histories);
   }
 
-  private List<File> getFilesForTripId(AgencyAndId tripId) {
-
-    String id = AgencyAndIdLibrary.convertToString(tripId);
-    int n = id.length();
-    String key = id.substring(n - 2, n);
-
-    List<File> files = new ArrayList<File>();
-    for (File dateDir : _path.listFiles()) {
-      File dataFile = new File(dateDir, key + File.separator + "trip-" + id
-          + ".gz");
-      if (dataFile.exists())
-        files.add(dataFile);
-    }
-    return files;
-  }
-
   private Map<AgencyAndId, BlockLocationArchiveRecordMap> loadRecords(
-      List<File> files) {
+      List<BlockLocationArchiveRecord> records) {
 
-    CsvEntityReader reader = new CsvEntityReader();
-    reader.setTokenizerStrategy(new DelimiterTokenizerStrategy("\t"));
+    Map<AgencyAndId, BlockLocationArchiveRecordMap> recordsByTrip = new FactoryMap<AgencyAndId, BlockLocationArchiveRecordMap>(
+        new BlockLocationArchiveRecordMap());
 
-    EntityHandlerImpl handler = new EntityHandlerImpl();
-    reader.addEntityHandler(handler);
-
-    try {
-      for (File file : files) {
-        InputStream in = openFileForInput(file);
-        reader.readEntities(BlockLocationArchiveRecord.class, in);
-        in.close();
-      }
-    } catch (IOException ex) {
-      throw new IllegalStateException(ex);
+    for (BlockLocationArchiveRecord record : records) {
+      AgencyAndId tripId = record.getTripId();
+      AgencyAndIdInstance instance = new AgencyAndIdInstance(tripId,
+          record.getServiceDate());
+      recordsByTrip.get(record.getTripId()).get(instance).add(record);
     }
 
-    return handler.getRecordsByTrip();
-  }
-
-  private InputStream openFileForInput(File path) throws IOException {
-    InputStream in = new FileInputStream(path);
-    if (path.getName().endsWith(".gz"))
-      in = new GZIPInputStream(in);
-    return in;
+    return recordsByTrip;
   }
 
   private ScheduleDeviationHistory constructHistory(AgencyAndId tripId,
@@ -361,25 +315,6 @@ public class BlockLocationHistoryTask implements Runnable {
   /****
    * 
    ****/
-
-  private class EntityHandlerImpl implements EntityHandler {
-
-    private Map<AgencyAndId, BlockLocationArchiveRecordMap> _recordsByTrip = new FactoryMap<AgencyAndId, BlockLocationArchiveRecordMap>(
-        new BlockLocationArchiveRecordMap());
-
-    public Map<AgencyAndId, BlockLocationArchiveRecordMap> getRecordsByTrip() {
-      return _recordsByTrip;
-    }
-
-    @Override
-    public void handleEntity(Object bean) {
-      BlockLocationArchiveRecord record = (BlockLocationArchiveRecord) bean;
-      AgencyAndId tripId = record.getTripId();
-      AgencyAndIdInstance instance = new AgencyAndIdInstance(tripId,
-          record.getServiceDate());
-      _recordsByTrip.get(tripId).get(instance).add(record);
-    }
-  }
 
   public static class BlockLocationArchiveRecordMap extends
       FactoryMap<AgencyAndIdInstance, List<BlockLocationArchiveRecord>> {
