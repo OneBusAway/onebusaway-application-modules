@@ -1,7 +1,6 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.history;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +15,8 @@ import org.onebusaway.transit_data_federation.impl.realtime.history.BlockLocatio
 import org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +41,7 @@ public class BlockLocationHistoryTask implements Runnable {
 
   private double _outlierRatio = 2;
 
-  private AgencyAndId _skipToBlock = null;
+  private AgencyAndId _skipToTrip = null;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -71,8 +70,8 @@ public class BlockLocationHistoryTask implements Runnable {
     _outlierRatio = outlierRatio;
   }
 
-  public void setSkipToBlock(String blockId) {
-    _skipToBlock = AgencyAndIdLibrary.convertFromString(blockId);
+  public void setSkipToTrip(String tripId) {
+    _skipToTrip = AgencyAndIdLibrary.convertFromString(tripId);
   }
 
   @Override
@@ -82,39 +81,33 @@ public class BlockLocationHistoryTask implements Runnable {
       _log.info("No BlockLocationHistoryTask data source specified.  Skipping this optional task");
     }
 
-    int blockIndex = 0;
+    int tripIndex = 0;
 
-    Iterable<BlockEntry> allBlocks = _transitGraphDao.getAllBlocks();
+    Iterable<TripEntry> allTrips = _transitGraphDao.getAllTrips();
 
-    int totalCount = 0;
-    if (allBlocks instanceof Collection) {
-      Collection<BlockEntry> c = (Collection<BlockEntry>) allBlocks;
-      totalCount = c.size();
-    }
+    boolean skipTo = _skipToTrip != null;
 
-    boolean skipTo = _skipToBlock != null;
+    for (TripEntry trip : allTrips) {
 
-    for (BlockEntry block : allBlocks) {
+      if (tripIndex % 20 == 0)
+        _log.info("tripsProcessed=" + tripIndex);
+      tripIndex++;
 
-      if (blockIndex % 20 == 0)
-        _log.info("blocksProcessed=" + blockIndex + "/" + totalCount);
-      blockIndex++;
-
-      if (_skipToBlock != null && block.getId().equals(_skipToBlock)) {
+      if (_skipToTrip != null && trip.getId().equals(_skipToTrip)) {
         skipTo = false;
       } else if (!skipTo) {
         try {
-          processBlock(block);
+          processTrip(trip);
         } catch (Throwable ex) {
-          _log.warn("error processing trip " + block.getId(), ex);
+          _log.warn("error processing trip " + trip.getId(), ex);
         }
       }
     }
   }
 
-  private void processBlock(BlockEntry block) {
+  private void processTrip(TripEntry trip) {
 
-    List<BlockLocationArchiveRecord> records = _source.getRecordsForBlock(block.getId());
+    List<BlockLocationArchiveRecord> records = _source.getRecordsForTrip(trip.getId());
 
     Map<AgencyAndId, BlockLocationArchiveRecordMap> recordsByTrip = loadRecords(records);
 

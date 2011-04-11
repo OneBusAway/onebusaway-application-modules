@@ -18,9 +18,9 @@ public class DatabaseBlockLocationArchiveSource implements
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<BlockLocationArchiveRecord> getRecordsForBlock(AgencyAndId blockId) {
+  public List<BlockLocationArchiveRecord> getRecordsForTrip(AgencyAndId tripId) {
     return _template.findByNamedParam(
-        "from BlockLocationArchiveRecord where blockId=:blockId", "blockId",
-        blockId);
+        "from BlockLocationArchiveRecord where tripId=:tripId", "tripId",
+        tripId);
   }
 }

@@ -21,8 +21,8 @@ import org.onebusaway.realtime.api.EVehiclePhase;
 
 @Entity
 @Table(name = "oba_block_location_records_historical")
-@org.hibernate.annotations.Table(appliesTo = "oba_block_location_records_historical", indexes = {@Index(name = "oba_block_location_records_historical_block", columnNames = {
-    "block_agencyId", "block_id"})})
+@org.hibernate.annotations.Table(appliesTo = "oba_block_location_records_historical", indexes = {@Index(name = "oba_block_location_records_historical_trip", columnNames = {
+    "trip_agencyId", "trip_id"})})
 @org.hibernate.annotations.Entity(mutable = false)
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 @CsvFields(filename = "block_location_records.csv", fieldOrder = {

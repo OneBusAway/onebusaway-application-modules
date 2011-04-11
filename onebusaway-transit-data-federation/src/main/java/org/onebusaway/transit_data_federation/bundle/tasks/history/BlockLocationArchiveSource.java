@@ -6,5 +6,5 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.realtime.history.BlockLocationArchiveRecord;
 
 public interface BlockLocationArchiveSource {
-  public List<BlockLocationArchiveRecord> getRecordsForBlock(AgencyAndId blockId);
+  public List<BlockLocationArchiveRecord> getRecordsForTrip(AgencyAndId blockId);
 }
