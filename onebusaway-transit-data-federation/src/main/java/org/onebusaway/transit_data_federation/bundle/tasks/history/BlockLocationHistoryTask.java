@@ -104,8 +104,6 @@ public class BlockLocationHistoryTask implements Runnable {
         skipTo = false;
       } else if (!skipTo) {
         try {
-          if (_skipToBlock != null)
-            _log.info("block: " + block.getId());
           processBlock(block);
         } catch (Throwable ex) {
           _log.warn("error processing trip " + block.getId(), ex);
@@ -257,10 +255,12 @@ public class BlockLocationHistoryTask implements Runnable {
       if (m.size() < 5)
         continue;
       int step = (m.lastKey() - m.firstKey()) / m.size();
+      if (step == 0)
+        continue;
       minStep = Math.min(step, minStep);
     }
 
-    if (minStep == Integer.MAX_VALUE)
+    if (minStep == Integer.MAX_VALUE || minStep == 0)
       return _sampleTimeStep;
 
     return (int) (Math.ceil(minStep / 60.0) * 60);
