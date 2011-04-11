@@ -80,7 +80,7 @@ public class BlockLocationHistoryTask implements Runnable {
 
     for (BlockEntry block : allBlocks) {
 
-      if (blockIndex % 100 == 0)
+      if (blockIndex % 20 == 0)
         _log.info("blocksProcessed=" + blockIndex);
       blockIndex++;
 
