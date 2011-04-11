@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.history;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.AgencyAndIdInstance;
 import org.onebusaway.transit_data_federation.impl.realtime.history.BlockLocationArchiveRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -39,6 +41,8 @@ public class BlockLocationHistoryTask implements Runnable {
   private int _minSampleSize = 10;
 
   private double _outlierRatio = 2;
+
+  private AgencyAndId _skipToBlock = null;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -67,6 +71,10 @@ public class BlockLocationHistoryTask implements Runnable {
     _outlierRatio = outlierRatio;
   }
 
+  public void setSkipToBlock(String blockId) {
+    _skipToBlock = AgencyAndIdLibrary.convertFromString(blockId);
+  }
+
   @Override
   public void run() {
 
@@ -78,16 +86,30 @@ public class BlockLocationHistoryTask implements Runnable {
 
     Iterable<BlockEntry> allBlocks = _transitGraphDao.getAllBlocks();
 
+    int totalCount = 0;
+    if (allBlocks instanceof Collection) {
+      Collection<BlockEntry> c = (Collection<BlockEntry>) allBlocks;
+      totalCount = c.size();
+    }
+
+    boolean skipTo = _skipToBlock != null;
+
     for (BlockEntry block : allBlocks) {
 
       if (blockIndex % 20 == 0)
-        _log.info("blocksProcessed=" + blockIndex);
+        _log.info("blocksProcessed=" + blockIndex + "/" + totalCount);
       blockIndex++;
 
-      try {
-        processBlock(block);
-      } catch (Throwable ex) {
-        _log.warn("error processing trip " + block.getId(), ex);
+      if (_skipToBlock != null && block.getId().equals(_skipToBlock)) {
+        skipTo = false;
+      } else if (!skipTo) {
+        try {
+          if (_skipToBlock != null)
+            _log.info("block: " + block.getId());
+          processBlock(block);
+        } catch (Throwable ex) {
+          _log.warn("error processing trip " + block.getId(), ex);
+        }
       }
     }
   }
