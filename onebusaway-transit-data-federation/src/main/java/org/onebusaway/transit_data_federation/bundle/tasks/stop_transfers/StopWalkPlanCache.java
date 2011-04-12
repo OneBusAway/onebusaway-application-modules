@@ -61,6 +61,7 @@ class StopWalkPlanCache {
       TraverseOptions options = new TraverseOptions();
       options.optimizeFor = OptimizeType.WALK;
       options.setModes(new TraverseModeSet(TraverseMode.WALK));
+      options.useServiceDays = false;
 
       List<GraphPath> paths = _pathService.plan(fromPlace, toPlace, targetTime,
           options, 1);
