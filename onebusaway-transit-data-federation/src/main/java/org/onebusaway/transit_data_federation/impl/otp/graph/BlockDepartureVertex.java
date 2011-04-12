@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
-import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -80,10 +79,8 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
   }
 
   @Override
-  public Collection<Edge> getOutgoing() {
-    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
-    ArrivalAndDepartureInstance nextStop = service.getNextStopArrivalAndDeparture(_instance);
-    return Arrays.asList((Edge) new BlockHopEdge(_context, _instance, nextStop));
+  public Collection<Edge> getOutgoing() {    
+    return Arrays.asList((Edge) new BlockForwardHopEdge(_context, _instance));
   }
 
   /****

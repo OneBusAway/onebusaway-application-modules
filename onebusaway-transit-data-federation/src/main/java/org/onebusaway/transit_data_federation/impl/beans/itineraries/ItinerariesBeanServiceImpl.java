@@ -35,8 +35,8 @@ import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.beans.ApplicationBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
+import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
 import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
-import org.onebusaway.transit_data_federation.impl.otp.OTPState;
 import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.SearchTerminationStrategyImpl;
 import org.onebusaway.transit_data_federation.impl.otp.TripSequenceShortestPathTree;
@@ -315,12 +315,13 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     for (SPTVertex vertex : tree.getVertices()) {
 
       State state = vertex.state;
+      OBAStateData data = (OBAStateData) state.getData();
       Vertex v = vertex.mirror;
 
       if (v instanceof AbstractStopVertex) {
         AbstractStopVertex stopVertex = (AbstractStopVertex) v;
         StopEntry stop = stopVertex.getStop();
-        long initialWaitTime = OTPState.getInitialWaitTime(state);
+        long initialWaitTime = data.getInitialWaitTime();
         long duration = Math.abs(state.getTime() - time) - initialWaitTime;
         if (!results.containsKey(stop) || results.get(stop) > duration)
           results.put(stop, duration);
@@ -328,7 +329,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         AbstractBlockVertex blockVertex = (AbstractBlockVertex) v;
         ArrivalAndDepartureInstance instance = blockVertex.getInstance();
         StopEntry stop = instance.getStop();
-        long initialWaitTime = OTPState.getInitialWaitTime(state);
+        long initialWaitTime = data.getInitialWaitTime();
         long duration = Math.abs(state.getTime() - time) - initialWaitTime;
         if (!results.containsKey(stop) || results.get(stop) > duration)
           results.put(stop, duration);
@@ -368,6 +369,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     options.useServiceDays = false;
 
+    options.stateFactory = OBAStateData.STATE_FACTORY;
     options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
     options.searchTerminationStrategy = new SearchTerminationStrategyImpl();
     options.shortestPathTreeFactory = TripSequenceShortestPathTree.FACTORY;

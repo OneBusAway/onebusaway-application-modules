@@ -19,10 +19,14 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopHopData;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferAndHopData;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferData;
 import org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -83,34 +87,48 @@ public class StopTransfersTask implements Runnable {
   @Transactional
   public void run() {
 
+    _cachedStopTransferWalkPlanner.setPathService(_pathService);
+
     try {
 
-      _cachedStopTransferWalkPlanner.setPathService(_pathService);
+      Map<AgencyAndId, List<StopHopData>> stopHops = getStopHopData();
+      Map<AgencyAndId, List<StopTransferData>> stopTransfers = getStopTransferData();
 
-      StopSequenceData data = new StopSequenceData();
-
-      for (TripEntry trip : _transitGraphDao.getAllTrips())
-        generateStatsForTrip(trip, data);
-
-      System.out.println("stopSequences=" + data.size());
-
-      Map<AgencyAndId, List<StopTransferData>> stopTransfers = processStopTransfers(data);
-
-      System.out.println("stop walk cache: "
-          + _cachedStopTransferWalkPlanner.getCacheHits() + " / "
-          + _cachedStopTransferWalkPlanner.getTotalHits());
-
-      if (System.getProperties().containsKey(PROPERTY_PRINT_TRANSFERS))
-        printTransfers(stopTransfers);
+      StopTransferAndHopData allData = new StopTransferAndHopData();
+      allData.setTransferData(stopTransfers);
+      allData.setHopData(stopHops);
 
       ObjectSerializationLibrary.writeObject(_bundle.getStopTransfersPath(),
-          stopTransfers);
+          allData);
 
       _refreshService.refresh(RefreshableResources.STOP_TRANSFER_DATA);
 
     } catch (Exception ex) {
       throw new IllegalStateException("error in stop transfers task", ex);
     }
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private Map<AgencyAndId, List<StopTransferData>> getStopTransferData() {
+    StopSequenceData data = new StopSequenceData();
+
+    for (TripEntry trip : _transitGraphDao.getAllTrips())
+      generateStatsForTrip(trip, data);
+
+    System.out.println("stopSequences=" + data.size());
+
+    Map<AgencyAndId, List<StopTransferData>> stopTransfers = processStopTransfers(data);
+
+    System.out.println("stop walk cache: "
+        + _cachedStopTransferWalkPlanner.getCacheHits() + " / "
+        + _cachedStopTransferWalkPlanner.getTotalHits());
+
+    if (System.getProperties().containsKey(PROPERTY_PRINT_TRANSFERS))
+      printTransfers(stopTransfers);
+    return stopTransfers;
   }
 
   private void printTransfers(
@@ -218,8 +236,8 @@ public class StopTransfersTask implements Runnable {
 
     for (StopEntry stop : key.getStops()) {
 
-      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(stop.getStopLocation(),
-          _constants.getMaxTransferDistance());
+      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
+          stop.getStopLocation(), _constants.getMaxTransferDistance());
 
       List<StopEntry> nearbyStops = _transitGraphDao.getStopsByLocation(bounds);
       for (StopEntry nearbyStop : nearbyStops) {
@@ -472,6 +490,68 @@ public class StopTransfersTask implements Runnable {
     }
   }
 
+  private Map<AgencyAndId, List<StopHopData>> getStopHopData() {
+
+    Map<Pair<StopEntry>, Integer> minTravelTimes = new HashMap<Pair<StopEntry>, Integer>();
+
+    for (BlockEntry block : _transitGraphDao.getAllBlocks()) {
+      for (BlockConfigurationEntry blockConfig : block.getConfigurations()) {
+
+        List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+        BlockStopTimeEntry prevBlockStopTime = null;
+
+        for (BlockStopTimeEntry blockStopTime : stopTimes) {
+
+          if (prevBlockStopTime != null) {
+
+            StopTimeEntry from = prevBlockStopTime.getStopTime();
+            StopTimeEntry to = blockStopTime.getStopTime();
+            int time = to.getArrivalTime() - from.getDepartureTime();
+
+            StopEntry stopFrom = from.getStop();
+            StopEntry stopTo = to.getStop();
+
+            Pair<StopEntry> stopPair = Tuples.pair(stopFrom, stopTo);
+
+            Integer prevTime = minTravelTimes.get(stopPair);
+            if (prevTime == null || time < prevTime)
+              minTravelTimes.put(stopPair, time);
+          }
+
+          prevBlockStopTime = blockStopTime;
+        }
+      }
+    }
+
+    Map<AgencyAndId, List<StopHopData>> hopsByStop = new HashMap<AgencyAndId, List<StopHopData>>();
+
+    for (Map.Entry<Pair<StopEntry>, Integer> entry : minTravelTimes.entrySet()) {
+
+      Pair<StopEntry> pair = entry.getKey();
+      AgencyAndId fromStopId = pair.getFirst().getId();
+      AgencyAndId toStopId = pair.getSecond().getId();
+
+      int minTravelTime = entry.getValue();
+      List<StopHopData> hops = hopsByStop.get(fromStopId);
+
+      if (hops == null) {
+        hops = new ArrayList<StopHopData>();
+        hopsByStop.put(fromStopId, hops);
+      }
+
+      hops.add(new StopHopData(toStopId, minTravelTime));
+      
+      if( fromStopId.toString().equals("1_75403") || fromStopId.toString().equals("1_75414") || fromStopId.toString().equals("1_18120") )
+        System.out.println(fromStopId + " " + toStopId + " " + minTravelTime ); 
+    }
+
+    return hopsByStop;
+  }
+
+  /****
+   * Private Classes
+   ****/
+
   private class Transfer implements Comparable<Transfer> {
 
     private Pair<StopEntry> _stops;
@@ -634,6 +714,5 @@ public class StopTransfersTask implements Runnable {
           _minTravelTime[i] = Integer.MAX_VALUE;
       }
     }
-
   }
 }

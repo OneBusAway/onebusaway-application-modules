@@ -44,7 +44,8 @@ public class TransitShetVertexSkipStrategy implements VertexSkipStrategy {
     State currentState = vertex.state;
     long tripDuration = currentState.getTime() - originState.getTime();
 
-    long initialWaitTime = OTPState.getInitialWaitTime(currentState);
+    OBAStateData data = (OBAStateData) currentState.getData();
+    long initialWaitTime = data.getInitialWaitTime();
 
     if (initialWaitTime > maxInitialWaitTime)
       return true;

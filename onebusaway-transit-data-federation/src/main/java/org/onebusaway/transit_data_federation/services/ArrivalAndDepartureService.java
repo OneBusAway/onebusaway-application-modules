@@ -59,4 +59,15 @@ public interface ArrivalAndDepartureService {
    */
   public ArrivalAndDepartureInstance getNextStopArrivalAndDeparture(
       ArrivalAndDepartureInstance instance);
+  
+  /**
+   * Given an arrival and departure instance, compute the arrival and departure
+   * instance for the next stop along the block. If at the end of the block,
+   * this method will return null.
+   * 
+   * @param instance
+   * @return
+   */
+  public ArrivalAndDepartureInstance getNextTransferStopArrivalAndDeparture(
+      ArrivalAndDepartureInstance instance);
 }

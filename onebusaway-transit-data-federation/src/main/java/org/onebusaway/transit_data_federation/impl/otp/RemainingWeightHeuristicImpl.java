@@ -1,7 +1,16 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
+import java.util.List;
+
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractBlockVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.opentripplanner.routing.algorithm.RemainingWeightHeuristic;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
@@ -33,7 +42,7 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
 
     double maxSpeed = getMaxSpeed();
 
-    return distance(from,to) / maxSpeed;
+    return distance(from, to) / maxSpeed;
   }
 
   @Override
@@ -43,11 +52,7 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
     EdgeNarrative narrative = traverseResult.getEdgeNarrative();
     Vertex v = narrative.getToVertex();
 
-    double distanceEstimate = distance(v,target);
-
-    double maxSpeed = getMaxSpeedForCurrentState(traverseResult, v);
-
-    return distanceEstimate / maxSpeed;
+    return computeWeight(traverseResult, target, v);
   }
 
   @Override
@@ -57,16 +62,63 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
     EdgeNarrative narrative = traverseResult.getEdgeNarrative();
     Vertex v = narrative.getFromVertex();
 
-    double distanceEstimate = v.distance(target);
-
-    double maxSpeed = getMaxSpeedForCurrentState(traverseResult, v);
-
-    return distanceEstimate / maxSpeed;
+    return computeWeight(traverseResult, target, v);
   }
 
   /****
    * Private Methods
    ****/
+
+  private double computeWeight(TraverseResult traverseResult, Vertex target,
+      Vertex v) {
+
+    State state = traverseResult.state;
+    OBAStateData data = (OBAStateData) state.getData();
+
+    if (data.getMaxBlockSequence() >= 0 && v instanceof AbstractBlockVertex) {
+
+      AbstractBlockVertex abv = (AbstractBlockVertex) v;
+      ArrivalAndDepartureInstance instance = abv.getInstance();
+
+      BlockInstance blockInstance = instance.getBlockInstance();
+      BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+      List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+      int maxBlockSequence = Math.min(data.getMaxBlockSequence(),
+          stopTimes.size());
+
+      BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
+      int sequence = blockStopTime.getBlockSequence();
+      StopTimeEntry origStopTime = blockStopTime.getStopTime();
+
+      double minTime = Double.POSITIVE_INFINITY;
+
+      while (sequence < maxBlockSequence) {
+
+        blockStopTime = stopTimes.get(sequence);
+        StopTimeEntry stopTime = blockStopTime.getStopTime();
+        StopEntry stop = stopTime.getStop();
+
+        double d = SphericalGeometryLibrary.distance(stop.getStopLat(),
+            stop.getStopLon(), target.getY(), target.getX());
+
+        double transitTime = Math.max(0, stopTime.getArrivalTime()
+            - origStopTime.getDepartureTime());
+        double walkingTime = d / _options.speed;
+        minTime = Math.min(minTime, transitTime + walkingTime);
+        
+        sequence++;
+      }
+
+      if (!Double.isInfinite(minTime))
+        return minTime;
+    }
+
+    double distanceEstimate = distance(v, target);
+
+    double maxSpeed = getMaxSpeedForCurrentState(traverseResult, v);
+
+    return distanceEstimate / maxSpeed;
+  }
 
   private double getMaxSpeed() {
 
@@ -98,8 +150,9 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
 
     return _maxTransitSpeed;
   }
-  
+
   private double distance(Vertex a, Vertex b) {
-    return SphericalGeometryLibrary.distance(a.getY(),a.getX(), b.getY(),b.getX());
+    return SphericalGeometryLibrary.distance(a.getY(), a.getX(), b.getY(),
+        b.getX());
   }
 }

@@ -27,6 +27,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +57,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   private BlockStatusService _blockStatusService;
 
+  private StopTransferService _stopTransferService;
+
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
     _stopTimeService = stopTimeService;
@@ -68,6 +72,11 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   @Autowired
   public void setBlockStatusService(BlockStatusService blockStatusService) {
     _blockStatusService = blockStatusService;
+  }
+
+  @Autowired
+  public void setStopTransferService(StopTransferService stopTransferService) {
+    _stopTransferService = stopTransferService;
   }
 
   @Override
@@ -335,6 +344,58 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     }
 
     return nextInstance;
+  }
+
+  @Override
+  public ArrivalAndDepartureInstance getNextTransferStopArrivalAndDeparture(
+      ArrivalAndDepartureInstance instance) {
+
+    BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
+    BlockTripEntry trip = blockStopTime.getTrip();
+    BlockConfigurationEntry blockConfig = trip.getBlockConfiguration();
+    List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
+
+    int index = blockStopTime.getBlockSequence() + 1;
+
+    while (true) {
+
+      if (index >= stopTimes.size())
+        return null;
+
+      BlockStopTimeEntry nextBlockStopTime = stopTimes.get(index);
+
+      StopTimeEntry nextStopTime = nextBlockStopTime.getStopTime();
+      StopEntry nextStop = nextStopTime.getStop();
+
+      List<StopTransfer> transfers = _stopTransferService.getTransfersFromStop(nextStop);
+
+      if (!transfers.isEmpty()) {
+        ArrivalAndDepartureInstance nextInstance = new ArrivalAndDepartureInstance(
+            instance.getBlockInstance(), nextBlockStopTime);
+
+        BlockInstance nextBlockInstance = nextInstance.getBlockInstance();
+
+        if (nextBlockInstance.getFrequency() != null) {
+
+          int betweenStopDelta = nextStopTime.getArrivalTime()
+              - blockStopTime.getStopTime().getDepartureTime();
+          int atStopDelta = nextStopTime.getDepartureTime()
+              - nextStopTime.getArrivalTime();
+
+          long scheduledArrivalTime = instance.getScheduledDepartureTime()
+              + betweenStopDelta * 1000;
+          long scheduledDepartureTime = scheduledArrivalTime + atStopDelta
+              * 1000;
+
+          nextInstance.setScheduledArrivalTime(scheduledArrivalTime);
+          nextInstance.setScheduledDepartureTime(scheduledDepartureTime);
+        }
+
+        return nextInstance;
+      }
+      
+      index++;
+    }
   }
 
   /****

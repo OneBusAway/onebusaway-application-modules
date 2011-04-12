@@ -57,7 +57,8 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
   public SPTVertex addVertex(Vertex vertex, State state, double weightSum,
       TraverseOptions options) {
 
-    TripSequence tripSequence = OTPState.getTripSequence(state);
+    OBAStateData data = (OBAStateData) state.getData();
+    TripSequence tripSequence = data.getTripSequence();
 
     Map<TripSequence, SPTVertex> map = sptVerticesByTripSequence.get(vertex);
 
