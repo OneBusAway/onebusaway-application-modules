@@ -9,6 +9,7 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopHopService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.GraphVertex;
@@ -25,6 +26,8 @@ class StreetToStopGraphLinkerService {
 
   private Graph _otpGraph;
 
+  private StopHopService _stopHopService;
+
   private StopTransferService _stopTransferService;
 
   private ArrivalAndDepartureService _arrivalAndDepartureService;
@@ -37,6 +40,11 @@ class StreetToStopGraphLinkerService {
   @Autowired
   public void setOtpGraph(Graph otpGraph) {
     _otpGraph = otpGraph;
+  }
+
+  @Autowired
+  public void setStopHopService(StopHopService stopHopService) {
+    _stopHopService = stopHopService;
   }
 
   @Autowired
@@ -102,7 +110,9 @@ class StreetToStopGraphLinkerService {
   private GraphContext createContext() {
     GraphContext context = new GraphContext();
     context.setArrivalAndDepartureService(_arrivalAndDepartureService);
+    context.setStopHopService(_stopHopService);
     context.setStopTransferService(_stopTransferService);
+    context.setTransitGraphDao(_transitGraphDao);
     return context;
   }
 

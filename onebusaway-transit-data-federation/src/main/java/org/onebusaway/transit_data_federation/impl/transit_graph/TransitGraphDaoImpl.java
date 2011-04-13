@@ -54,7 +54,7 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
    ****/
 
   @Override
-  public Iterable<StopEntry> getAllStops() {
+  public List<StopEntry> getAllStops() {
     return _graph.getAllStops();
   }
 
@@ -69,7 +69,7 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   }
 
   @Override
-  public Iterable<BlockEntry> getAllBlocks() {
+  public List<BlockEntry> getAllBlocks() {
     return _graph.getAllBlocks();
   }
 
@@ -79,7 +79,7 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   }
 
   @Override
-  public Iterable<TripEntry> getAllTrips() {
+  public List<TripEntry> getAllTrips() {
     return _graph.getAllTrips();
   }
 

@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopHops;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
@@ -29,6 +30,8 @@ public class StopEntryImpl implements StopEntry, Serializable {
   private transient List<FrequencyBlockStopTimeIndex> _frequencyStopTimeIndices = null;
 
   private transient StopTransfers _transfers = null;
+  
+  private transient StopHops _hops = null;
 
   private StopIdsWithValuesImpl _prevStopsWithMinTravelTime = new StopIdsWithValuesImpl();
 
@@ -73,6 +76,14 @@ public class StopEntryImpl implements StopEntry, Serializable {
 
   public void setTransfers(StopTransfers transfers) {
     _transfers = transfers;
+  }
+  
+  public StopHops getHops() {
+    return _hops;
+  }
+  
+  public void setHops(StopHops hops) {
+    _hops = hops;
   }
 
   public void addPreviousStopWithMinTravelTime(StopEntry stop, int travelTime) {

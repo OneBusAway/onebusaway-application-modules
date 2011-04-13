@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.collections.adapter.IAdapter;
-import org.onebusaway.collections.adapter.IterableAdapter;
+import org.onebusaway.collections.adapter.ListAdapter;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.serialization.EntryCallback;
@@ -147,20 +147,18 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
    ****/
 
   @Override
-  public Iterable<StopEntry> getAllStops() {
-    return new IterableAdapter<StopEntryImpl, StopEntry>(_stops,
-        _stopEntryAdapter);
+  public List<StopEntry> getAllStops() {
+    return new ListAdapter<StopEntryImpl, StopEntry>(_stops, _stopEntryAdapter);
   }
 
   @Override
-  public Iterable<TripEntry> getAllTrips() {
-    return new IterableAdapter<TripEntryImpl, TripEntry>(_trips,
-        _tripEntryAdapter);
+  public List<TripEntry> getAllTrips() {
+    return new ListAdapter<TripEntryImpl, TripEntry>(_trips, _tripEntryAdapter);
   }
 
   @Override
-  public Iterable<BlockEntry> getAllBlocks() {
-    return new IterableAdapter<BlockEntryImpl, BlockEntry>(_blocks,
+  public List<BlockEntry> getAllBlocks() {
+    return new ListAdapter<BlockEntryImpl, BlockEntry>(_blocks,
         _blockEntryAdapter);
   }
 

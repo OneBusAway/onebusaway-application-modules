@@ -224,7 +224,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       for (int i = 0; i < sds.length; i++) {
         int sd = sds[i];
         values[i] = sd;
-        labels[i] = (sd/60) + "-" + ((sd+step)/60);
+        labels[i] = Integer.toString(sd/60);
       }
       
       HistogramBean hb = new HistogramBean();

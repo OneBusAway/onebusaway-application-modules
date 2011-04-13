@@ -13,6 +13,10 @@ public abstract class AbstractVertex implements Vertex, TransitVertex {
   public AbstractVertex(GraphContext context) {
     _context = context;
   }
+  
+  public GraphContext getContext() {
+    return _context;
+  }
 
   @Override
   public String getLabel() {

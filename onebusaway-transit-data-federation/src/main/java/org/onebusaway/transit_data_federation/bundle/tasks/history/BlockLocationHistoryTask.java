@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.history;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,10 @@ public class BlockLocationHistoryTask implements Runnable {
     int tripIndex = 0;
 
     Iterable<TripEntry> allTrips = _transitGraphDao.getAllTrips();
+
+    if (true)
+      allTrips = Arrays.asList(_transitGraphDao.getTripEntryForId(new AgencyAndId(
+          "1", "15455577")));
 
     boolean skipTo = _skipToTrip != null;
 

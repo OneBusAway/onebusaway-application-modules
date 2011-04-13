@@ -18,8 +18,8 @@ public interface TransitGraphDao {
   /**
    * @return the list of all stop entries in the transit graph
    */
-  public Iterable<StopEntry> getAllStops();
-
+  public List<StopEntry> getAllStops();
+  
   /**
    * @param id a stop id to query
    * @return the stop entry with the specified id, or null if not found
@@ -35,7 +35,7 @@ public interface TransitGraphDao {
   /**
    * @return the list of all block entries in the transit graph
    */
-  public Iterable<BlockEntry> getAllBlocks();
+  public List<BlockEntry> getAllBlocks();
 
   /**
    * @param blockId a block id to query
@@ -46,7 +46,7 @@ public interface TransitGraphDao {
   /**
    * @return the list of all trip entries in the transit graph
    */
-  public Iterable<TripEntry> getAllTrips();
+  public List<TripEntry> getAllTrips();
 
   /**
    * @param id a trip id to query

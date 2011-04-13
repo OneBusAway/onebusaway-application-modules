@@ -190,16 +190,18 @@ public class RealTimeHistoryServiceImpl implements RealTimeHistoryService {
     if (r.getRange() == 0)
       return new ScheduleDeviationHistogram(new int[] {(int) values[0]},
           new int[] {values.length});
+    
+    int halfStep = stepSizeInSeconds / 2;
 
-    int from = (int) (Math.floor(r.getMin() / stepSizeInSeconds) * stepSizeInSeconds);
-    int to = (int) (Math.ceil(r.getMax() / stepSizeInSeconds) * stepSizeInSeconds);
-    int columns = (to - from) / stepSizeInSeconds + 1;
+    int from = (int) (Math.floor((r.getMin()-halfStep) / stepSizeInSeconds) * stepSizeInSeconds) + halfStep;
+    int to = (int) (Math.ceil((r.getMax()+halfStep) / stepSizeInSeconds) * stepSizeInSeconds) - halfStep;
+    int columns = (to - from) / stepSizeInSeconds;
 
     int[] scheduleDeviations = new int[columns];
     int[] counts = new int[columns];
 
     for (int i = 0; i < columns; i++)
-      scheduleDeviations[i] = from + stepSizeInSeconds * i;
+      scheduleDeviations[i] = from + stepSizeInSeconds * i + halfStep;
 
     for (double value : values) {
       int index = (int) ((value - from) / stepSizeInSeconds);

@@ -367,6 +367,14 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     options.maxTransfers = 2;
     options.minTransferTime = 60;
 
+    options.maxWalkDistance = 1000;
+    options.maxTransfers = 2;
+
+    /**
+     * Ten seconds max
+     */
+    options.maxComputationTime = 10000;
+
     options.useServiceDays = false;
 
     options.stateFactory = OBAStateData.STATE_FACTORY;
@@ -422,7 +430,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       options.minTransferTime = constraints.getMinTransferTime();
     if (constraints.getMaxTransfers() != -1)
       options.maxTransfers = constraints.getMaxTransfers();
-    if (constraints.getMaxComputationTime() > 0)
+    if (constraints.getMaxComputationTime() > 0
+        && constraints.getMaxComputationTime() < 15000)
       options.maxComputationTime = constraints.getMaxComputationTime();
 
     options.numItineraries = constraints.getResultCount();
@@ -877,7 +886,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     long startTime = 0;
     long endTime = 0;
-    
+
     CoordinatePoint from = null;
     CoordinatePoint to = null;
 
@@ -915,11 +924,11 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       if (startTime == 0)
         startTime = sptEdge.fromv.state.getTime();
       endTime = sptEdge.tov.state.getTime();
-      
-      if( ! path.isEmpty() ) {
-        if( from == null)
+
+      if (!path.isEmpty()) {
+        if (from == null)
           from = path.get(0);
-        to = path.get(path.size()-1);
+        to = path.get(path.size() - 1);
       }
 
     }
@@ -1177,7 +1186,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
         prevTime = leg.getEndTime();
       }
-      
+
       itinerary.setStartTime(nextTime);
       itinerary.setEndTime(prevTime);
     }

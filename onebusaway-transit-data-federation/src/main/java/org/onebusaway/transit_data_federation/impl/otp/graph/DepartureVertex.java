@@ -14,7 +14,7 @@ import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
 public final class DepartureVertex extends AbstractVertex implements
-    HasEdges {
+    HasEdges, HasStopTransitVertex {
 
   private static DateFormat _format = DateFormat.getDateTimeInstance(
       DateFormat.SHORT, DateFormat.SHORT);
@@ -29,6 +29,7 @@ public final class DepartureVertex extends AbstractVertex implements
     _time = time;
   }
   
+  @Override
   public StopEntry getStop() {
     return _stop;
   }

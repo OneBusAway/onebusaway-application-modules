@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.ContainerLibrary;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
@@ -54,6 +55,8 @@ public class FederatedTransitDataBundleCreator {
 
   private Set<String> _skipTasks = new HashSet<String>();
 
+  private Set<String> _includeTasks = new HashSet<String>();
+
   private Set<String> _onlyTasks = new HashSet<String>();
 
   private String _skipToTask;
@@ -87,6 +90,10 @@ public class FederatedTransitDataBundleCreator {
 
   public void addTaskToSkip(String taskToSkip) {
     _skipTasks.add(taskToSkip);
+  }
+
+  public void addTaskToInclude(String taskToInclude) {
+    _includeTasks.add(taskToInclude);
   }
 
   public void setSkipToTask(String taskName) {
@@ -232,11 +239,13 @@ public class FederatedTransitDataBundleCreator {
         graph.addEdge(taskName, before);
       }
 
-      String after = taskDefinition.getAfterTaskName();
-      if (after != null) {
-        if (!taskDefinitionsByTaskName.containsKey(after))
-          throw new UnknownTaskException(after);
-        graph.addEdge(after, taskName);
+      List<String> afters = taskDefinition.getAfterTaskNames();
+      if (!CollectionsLibrary.isEmpty(afters)) {
+        for (String after : afters) {
+          if (!taskDefinitionsByTaskName.containsKey(after))
+            throw new UnknownTaskException(after);
+          graph.addEdge(after, taskName);
+        }
       }
     }
 
@@ -277,6 +286,8 @@ public class FederatedTransitDataBundleCreator {
     List<String> tasks = new ArrayList<String>();
 
     for (TaskDefinition taskDef : taskDefinitions) {
+      if (! isTaskEnabled(taskDef))
+        continue;
       String taskName = taskDef.getTaskName();
       tasks.add(taskName);
     }
@@ -306,5 +317,10 @@ public class FederatedTransitDataBundleCreator {
     tasks.removeAll(_skipTasks);
 
     return new HashSet<String>(tasks);
+  }
+
+  private boolean isTaskEnabled(TaskDefinition taskDef) {
+    return _onlyTasks.contains(taskDef.getTaskName())
+        || _includeTasks.contains(taskDef.getTaskName()) || taskDef.isEnabled();
   }
 }

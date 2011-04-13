@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
@@ -35,6 +36,8 @@ public class FederatedTransitDataBundleCreatorMain {
   private static final String ARG_ONLY = "only";
 
   private static final String ARG_SKIP = "skip";
+
+  private static final String ARG_INCLUDE = "include";
 
   private static final String ARG_ONLY_IF_DNE = "onlyIfDoesNotExist";
 
@@ -124,8 +127,14 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_SKIP_TO, true, "");
     options.addOption(ARG_ONLY, true, "");
     options.addOption(ARG_SKIP, true, "");
+    options.addOption(ARG_INCLUDE, true, "");
     options.addOption(ARG_ONLY_IF_DNE, false, "");
     options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
+
+    Option property = new Option("D", "use value for given property");
+    property.setArgName("property=value");
+    property.setArgs(2);
+    property.setValueSeparator('=');
   }
 
   protected void printUsage() {
@@ -150,6 +159,12 @@ public class FederatedTransitDataBundleCreatorMain {
       String[] values = commandLine.getOptionValues(ARG_SKIP);
       for (String value : values)
         creator.addTaskToSkip(value);
+    }
+
+    if (commandLine.hasOption(ARG_INCLUDE)) {
+      String[] values = commandLine.getOptionValues(ARG_INCLUDE);
+      for (String value : values)
+        creator.addTaskToInclude(value);
     }
   }
 

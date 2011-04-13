@@ -1,12 +1,15 @@
 package org.onebusaway.transit_data_federation.bundle.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TaskDefinition {
 
   private String taskName;
 
   private String beforeTaskName;
 
-  private String afterTaskName;
+  private List<String> afterTaskNames = new ArrayList<String>();
 
   private Runnable task;
 
@@ -15,6 +18,8 @@ public class TaskDefinition {
   private Runnable taskWhenSkipped;
 
   private String taskWhenSkippedBeanName;
+
+  private boolean enabled = false;
 
   public String getTaskName() {
     return taskName;
@@ -32,12 +37,16 @@ public class TaskDefinition {
     this.beforeTaskName = beforeTaskName;
   }
 
-  public String getAfterTaskName() {
-    return afterTaskName;
+  public void setAfterTaskName(String afterTaskName) {
+    this.afterTaskNames.add(afterTaskName);
   }
 
-  public void setAfterTaskName(String afterTaskName) {
-    this.afterTaskName = afterTaskName;
+  public List<String> getAfterTaskNames() {
+    return afterTaskNames;
+  }
+  
+  public void setAfterTaskNames(List<String> afterTaskNames) {
+    this.afterTaskNames.addAll(afterTaskNames);
   }
 
   public Runnable getTask() {
@@ -72,10 +81,18 @@ public class TaskDefinition {
     this.taskWhenSkippedBeanName = taskWhenSkippedBeanName;
   }
 
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
   @Override
   public String toString() {
     return "TaskDef(taskName=" + taskName + " beforeTaskName=" + beforeTaskName
-        + " afterTaskName=" + afterTaskName + " task=" + task
-        + " taskBeanName=" + taskBeanName + ")";
+        + " afterTaskNames=" + afterTaskNames + " task=" + task
+        + " taskBeanName=" + taskBeanName + " enabled=" + enabled + ")";
   }
 }

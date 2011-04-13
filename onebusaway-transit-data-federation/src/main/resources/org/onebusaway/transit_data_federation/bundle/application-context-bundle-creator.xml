@@ -178,12 +178,35 @@
   </bean>
 
   <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.bundle.tasks.stop_transfers.StopTransfersTask" />
-  
+
+  <!-- -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="hubs" />
+    <property name="afterTaskName" value="stop_transfers" />
+    <property name="task" ref="hubTask" />
+  </bean>
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="hubs_incremental" />
+    <property name="afterTaskName" value="stop_transfers" />
+    <property name="enabled" value="false" />
+    <property name="task" ref="hubIncrementalTask" />
+  </bean>
+
+  <bean id="hubTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubTask" />
+  <bean id="hubIncrementalTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubIncrementalTask" />
+
   <!-- -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="block_location_history" />
-    <property name="afterTaskName" value="stop_transfers" />
+    <property name="afterTaskNames">
+      <list>
+        <value>hubs</value>
+        <value>hubs_incremental</value>
+      </list>
+    </property>
     <property name="task" ref="blockLocationHistoryTask" />
   </bean>
 

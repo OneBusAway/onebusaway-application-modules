@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
-public interface StopTransferService {
+public interface StopHopService {
 
-  public List<StopTransfer> getTransfersFromStop(StopEntry stop);
+  public List<StopHop> getHopsFromStop(StopEntry stop);
 
-  public List<StopTransfer> getTransfersToStop(StopEntry stop);
+  public List<StopHop> getHopsToStop(StopEntry stop);
 }

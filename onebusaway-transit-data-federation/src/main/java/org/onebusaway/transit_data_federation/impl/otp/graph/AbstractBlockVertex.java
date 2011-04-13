@@ -9,7 +9,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Vertex;
 
-public abstract class AbstractBlockVertex extends AbstractVertex {
+public abstract class AbstractBlockVertex extends AbstractVertex implements
+    HasStopTransitVertex {
 
   protected final ArrivalAndDepartureInstance _instance;
 
@@ -21,6 +22,11 @@ public abstract class AbstractBlockVertex extends AbstractVertex {
 
   public ArrivalAndDepartureInstance getInstance() {
     return _instance;
+  }
+
+  @Override
+  public StopEntry getStop() {
+    return _instance.getStop();
   }
 
   @Override

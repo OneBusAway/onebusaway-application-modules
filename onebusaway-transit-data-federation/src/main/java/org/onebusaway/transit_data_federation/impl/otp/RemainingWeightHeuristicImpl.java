@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractBlockVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.HasStopTransitVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
@@ -32,6 +33,8 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
    * far true for New York and Portland
    */
   private double _maxTransitSpeed = 10.0;
+
+  private MinTravelTimeUsingTransitHeuristic _heuristic = null;
 
   @Override
   public double computeInitialWeight(Vertex from, Vertex to,
@@ -105,7 +108,7 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
             - origStopTime.getDepartureTime());
         double walkingTime = d / _options.speed;
         minTime = Math.min(minTime, transitTime + walkingTime);
-        
+
         sequence++;
       }
 
@@ -113,6 +116,23 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
         return minTime;
     }
 
+    /*
+    if (v instanceof HasStopTransitVertex) {
+      HasStopTransitVertex hasStop = (HasStopTransitVertex) v;
+      StopEntry stop = hasStop.getStop();
+      if (_heuristic == null) {
+        GraphContext context = hasStop.getContext();
+        _heuristic = new MinTravelTimeUsingTransitHeuristic(target, _options,
+            context, _maxTransitSpeed);
+      }
+      
+      int travelTime = _heuristic.getMinTravelTimeFromStopToTarget(stop);
+      
+      if (travelTime >= 0)
+        return travelTime;
+    }
+    */
+    
     double distanceEstimate = distance(v, target);
 
     double maxSpeed = getMaxSpeedForCurrentState(traverseResult, v);

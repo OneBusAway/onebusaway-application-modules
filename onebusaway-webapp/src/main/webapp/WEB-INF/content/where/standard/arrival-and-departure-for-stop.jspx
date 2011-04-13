@@ -117,6 +117,8 @@
   <s:param name="chxl">0:<s:iterator value="labels">|<s:property /></s:iterator>|2:|Schedule Deviation (mins)||3:|Count|</s:param>
   <!-- Position the X axis label at the middle (50%) -->
   <s:param name="chxp">2,50|3,50</s:param>
+  <!--  Style the X-Axis Labe -->
+  <s:param name="chxs">2,,16|3,,16</s:param>
   <!-- Data! -->
   <s:param name="chd">t:<s:iterator value="counts" status="it"><s:if test="!#it.first">,</s:if><s:property /></s:iterator></s:param>
   <!-- ?chxr=0,6,12 -->

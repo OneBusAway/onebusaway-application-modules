@@ -50,7 +50,7 @@ public class FederatedTransitDataBundle {
   public File getTransitGraphPath() {
     return new File(_path, "TransitGraph.obj");
   }
-  
+
   public File getGraphPath() {
     return new File(_path, "Graph.obj");
   }
@@ -62,7 +62,7 @@ public class FederatedTransitDataBundle {
   public File getBlockTripIndicesPath() {
     return new File(_path, "BlockTripIndices.obj");
   }
-  
+
   public File getBlockLayoverIndicesPath() {
     return new File(_path, "BlockLayoverIndices.obj");
   }
@@ -74,7 +74,11 @@ public class FederatedTransitDataBundle {
   public File getStopTransfersPath() {
     return new File(_path, "StopTransfers.obj");
   }
-  
+
+  public File getHubStopsPath() {
+    return new File(_path,"HubStops.txt");
+  }
+
   public File getServiceAlertsPath() {
     return new File(_path, "ServiceAlerts.xml");
   }
@@ -82,4 +86,5 @@ public class FederatedTransitDataBundle {
   public File getCachePath() {
     return new File(_path, "cache");
   }
+
 }

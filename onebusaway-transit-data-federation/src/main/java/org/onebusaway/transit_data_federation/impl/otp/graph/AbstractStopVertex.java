@@ -5,7 +5,8 @@ import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Vertex;
 
-public abstract class AbstractStopVertex extends AbstractVertex {
+public abstract class AbstractStopVertex extends AbstractVertex implements
+    HasStopTransitVertex {
 
   protected final StopEntry _stop;
 
@@ -13,7 +14,8 @@ public abstract class AbstractStopVertex extends AbstractVertex {
     super(context);
     _stop = stop;
   }
-  
+
+  @Override
   public StopEntry getStop() {
     return _stop;
   }

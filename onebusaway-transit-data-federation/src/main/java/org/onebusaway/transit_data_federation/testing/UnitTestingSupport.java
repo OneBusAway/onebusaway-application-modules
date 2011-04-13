@@ -128,7 +128,7 @@ public class UnitTestingSupport {
     if (existing != null && existing.getTransfersFromStop() != null)
       transfers.addAll(existing.getTransfersFromStop());
     transfers.add(transfer);
-    existing = new StopTransfers(transfers,null,null,null);
+    existing = new StopTransfers(transfers,null);
     from.setTransfers(existing);
   }
 
