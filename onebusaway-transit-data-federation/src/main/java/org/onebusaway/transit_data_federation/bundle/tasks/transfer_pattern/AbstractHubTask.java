@@ -14,6 +14,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopHopService;
 import org.opentripplanner.routing.algorithm.GenericDijkstra;
+import org.opentripplanner.routing.algorithm.strategies.WeightLimitSearchTerminationStrategy;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
@@ -39,6 +40,8 @@ public abstract class AbstractHubTask implements Runnable {
   protected double _stopSubsetRatio = 0.1;
 
   protected int _stopSubsetCount = 0;
+
+  protected int _maxWeight = 60 * 60;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -88,6 +91,8 @@ public abstract class AbstractHubTask implements Runnable {
       HubVertex v = new HubVertex(context, stop);
 
       GenericDijkstra d = new GenericDijkstra(graph, options);
+      d.setSearchTerminationStrategy(new WeightLimitSearchTerminationStrategy(
+          _maxWeight));
 
       ShortestPathTree spt = d.getShortestPathTree(v, new State());
 
