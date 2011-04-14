@@ -39,7 +39,7 @@ public abstract class AbstractHubTask implements Runnable {
 
   protected double _stopSubsetRatio = 0.1;
 
-  protected int _stopSubsetCount = 1;
+  protected int _stopSubsetCount = 0;
 
   protected int _maxWeight = 30 * 60;
 
