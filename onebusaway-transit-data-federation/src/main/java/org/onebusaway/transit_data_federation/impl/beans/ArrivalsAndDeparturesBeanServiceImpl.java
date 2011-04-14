@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.onebusaway.exceptions.NoSuchStopServiceException;
-import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
@@ -22,6 +21,7 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
@@ -187,23 +187,12 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
   @Override
   public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
-      AgencyAndId stopId, int stopSequence, AgencyAndId tripId,
-      long serviceDate, AgencyAndId vehicleId, long time) {
+      ArrivalAndDepartureQuery query) {
 
-    StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
-
-    if (stop == null)
-      throw new NoSuchStopServiceException(
-          AgencyAndIdLibrary.convertToString(stopId));
-
-    TripEntry trip = _transitGraphDao.getTripEntryForId(tripId);
-
-    if (trip == null)
-      throw new NoSuchTripServiceException(
-          AgencyAndIdLibrary.convertToString(tripId));
-
+    long time = query.getTime();
+    
     ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
-        stop, stopSequence, trip, serviceDate, vehicleId, time);
+        query);
 
     ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, instance,
         new HashMap<AgencyAndId, StopBean>());
@@ -211,22 +200,22 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     applySituationsToBean(time, instance, bean);
 
     int step = 120;
-    
+
     ScheduleDeviationHistogram histo = _realTimeHistoryService.getScheduleDeviationHistogramForArrivalAndDepartureInstance(
         instance, step);
-    
+
     if (histo != null) {
 
       int[] sds = histo.getScheduleDeviations();
-      
+
       double[] values = new double[sds.length];
       String[] labels = new String[sds.length];
       for (int i = 0; i < sds.length; i++) {
         int sd = sds[i];
         values[i] = sd;
-        labels[i] = Integer.toString(sd/60);
+        labels[i] = Integer.toString(sd / 60);
       }
-      
+
       HistogramBean hb = new HistogramBean();
       hb.setValues(values);
       hb.setCounts(histo.getCounts());

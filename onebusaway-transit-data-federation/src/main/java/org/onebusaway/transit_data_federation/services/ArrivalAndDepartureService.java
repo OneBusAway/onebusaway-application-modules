@@ -2,11 +2,9 @@ package org.onebusaway.transit_data_federation.services;
 
 import java.util.List;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 /**
@@ -35,8 +33,7 @@ public interface ArrivalAndDepartureService {
       StopEntry stop, long currentTime, long fromTime, long toTime);
 
   public ArrivalAndDepartureInstance getArrivalAndDepartureForStop(
-      StopEntry stop, int stopSequence, TripEntry trip, long serviceDate,
-      AgencyAndId vehicleId, long time);
+      ArrivalAndDepartureQuery query);
 
   /**
    * Given an arrival and departure instance, compute the arrival and departure

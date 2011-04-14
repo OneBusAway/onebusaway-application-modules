@@ -10,6 +10,7 @@ import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -200,8 +201,14 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   @Override
   public ArrivalAndDepartureInstance getArrivalAndDepartureForStop(
-      StopEntry stop, int stopSequence, TripEntry trip, long serviceDate,
-      AgencyAndId vehicleId, long time) {
+      ArrivalAndDepartureQuery query) {
+
+    StopEntry stop = query.getStop();
+    int stopSequence = query.getStopSequence();
+    TripEntry trip = query.getTrip();
+    long serviceDate = query.getServiceDate();
+    AgencyAndId vehicleId = query.getVehicleId();
+    long time = query.getTime();
 
     Map<BlockInstance, List<BlockLocation>> locationsByInstance = _blockStatusService.getBlocks(
         trip.getBlock().getId(), serviceDate, vehicleId, time);
@@ -393,7 +400,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
         return nextInstance;
       }
-      
+
       index++;
     }
   }

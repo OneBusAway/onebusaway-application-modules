@@ -23,6 +23,7 @@ import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
@@ -194,9 +195,10 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByEntityIdMethod
   public BlockInstanceBean getBlockInstance(String blockId, long serviceDate);
-  
+
   @FederatedByEntityIdMethod
-  public ScheduledBlockLocationBean getScheduledBlockLocationFromScheduledTime(String blockId, long serviceDate, int scheduledTime);
+  public ScheduledBlockLocationBean getScheduledBlockLocationFromScheduledTime(
+      String blockId, long serviceDate, int scheduledTime);
 
   /****
    * Vehicle Methods
@@ -270,6 +272,13 @@ public interface TransitDataService extends FederatedService {
   public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
       ArrivalAndDepartureForStopQueryBean query) throws ServiceException;
 
+  @FederatedByEntityIdMethod(propertyExpression = "stopId")
+  public String registerAlarmForArrivalAndDepartureAtStop(
+      ArrivalAndDepartureForStopQueryBean query, RegisterAlarmQueryBean alarm);
+
+  @FederatedByEntityIdMethod()
+  public void cancelAlarmForArrivalAndDepartureAtStop(String alarmId);
+
   /**
    * @param stopId
    * @param date
@@ -328,8 +337,8 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByCoordinatePointsMethod(arguments = {0, 1})
   public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
-      CoordinatePoint to, long targetTime, long currentTime, ConstraintsBean constraints)
-      throws ServiceException;
+      CoordinatePoint to, long targetTime, long currentTime,
+      ConstraintsBean constraints) throws ServiceException;
 
   @FederatedByBoundsMethod
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
@@ -465,4 +474,5 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByAggregateMethod
   public List<String> getAllTripProblemReportLabels();
+
 }

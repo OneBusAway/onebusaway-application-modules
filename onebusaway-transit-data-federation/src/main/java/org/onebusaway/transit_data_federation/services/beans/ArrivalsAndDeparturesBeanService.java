@@ -6,6 +6,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 
 /**
  * Service for querying arrivals and departures at a particular stop in a given
@@ -38,6 +39,5 @@ public interface ArrivalsAndDeparturesBeanService {
    * @return the arrival and departure information, or null if not found
    */
   public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
-      AgencyAndId stopId, int stopSequence, AgencyAndId tripId, long serviceDate,
-      AgencyAndId vehicleId, long time);
+      ArrivalAndDepartureQuery query);
 }

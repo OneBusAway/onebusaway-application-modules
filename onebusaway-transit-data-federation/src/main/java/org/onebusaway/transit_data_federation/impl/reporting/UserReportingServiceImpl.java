@@ -17,6 +17,7 @@ import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopTimeBeanService;
@@ -418,9 +419,16 @@ class UserReportingServiceImpl implements UserReportingService {
         if (vehicleId == null)
           vehicleId = record.getVehicleId();
 
+        ArrivalAndDepartureQuery query = new ArrivalAndDepartureQuery();
+        query.setStop(stop);
+        query.setStopSequence(-1);
+        query.setTrip(trip);
+        query.setServiceDate(record.getServiceDate());
+        query.setVehicleId(vehicleId);
+        query.setTime(record.getTime());
+        
         ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
-            stop, -1, trip, record.getServiceDate(), vehicleId,
-            record.getTime());
+            query);
 
         if (instance != null) {
           StopTimeInstance sti = new StopTimeInstance(

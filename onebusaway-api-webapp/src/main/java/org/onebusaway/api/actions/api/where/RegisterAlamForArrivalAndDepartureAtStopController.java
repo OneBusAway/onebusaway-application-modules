@@ -1,19 +1,17 @@
 package org.onebusaway.api.actions.api.where;
 
-import java.util.Date;
-
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
-import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.presentation.impl.StackInterceptor.AddToStack;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
+import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
+@AddToStack({"query", "alarm"})
 public class RegisterAlamForArrivalAndDepartureAtStopController extends
     ApiActionSupport {
 
@@ -25,6 +23,8 @@ public class RegisterAlamForArrivalAndDepartureAtStopController extends
   private TransitDataService _service;
 
   private ArrivalAndDepartureForStopQueryBean _query = new ArrivalAndDepartureForStopQueryBean();
+
+  private RegisterAlarmQueryBean _alarm = new RegisterAlarmQueryBean();
 
   public RegisterAlamForArrivalAndDepartureAtStopController() {
     super(V2);
@@ -39,57 +39,20 @@ public class RegisterAlamForArrivalAndDepartureAtStopController extends
     return _query.getStopId();
   }
 
-  @RequiredFieldValidator(message = Messages.MISSING_REQUIRED_FIELD)
-  public void setTripId(String tripId) {
-    _query.setTripId(tripId);
+  public ArrivalAndDepartureForStopQueryBean getQuery() {
+    return _query;
   }
 
-  public String getTripId() {
-    return _query.getTripId();
+  public void setQuery(ArrivalAndDepartureForStopQueryBean query) {
+    _query = query;
   }
 
-  @RequiredFieldValidator(message = Messages.MISSING_REQUIRED_FIELD)
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateConverter")
-  public void setServiceDate(Date date) {
-    _query.setServiceDate(date.getTime());
+  public RegisterAlarmQueryBean getAlarm() {
+    return _alarm;
   }
 
-  public Date getServiceDate() {
-    if (_query.getServiceDate() == 0)
-      return null;
-    return new Date(_query.getServiceDate());
-  }
-
-  public void setVehicleId(String vehicleId) {
-    _query.setVehicleId(vehicleId);
-  }
-
-  public String getVehicleId() {
-    return _query.getVehicleId();
-  }
-
-  public void setStopSequence(int stopSequence) {
-    _query.setStopSequence(stopSequence);
-  }
-
-  public int getStopSequence() {
-    return _query.getStopSequence();
-  }
-
-  public void setOnArrival(boolean onArrival) {
-
-  }
-
-  public void setAlarmTimeOffset(int alarmTimeOffset) {
-
-  }
-
-  public void setAlarmMethod(String alarmMethod) {
-
-  }
-
-  public void setAlarmData(String alarmData) {
-
+  public void setAlarm(RegisterAlarmQueryBean alarm) {
+    _alarm = alarm;
   }
 
   public DefaultHttpHeaders show() throws ServiceException {
@@ -100,14 +63,14 @@ public class RegisterAlamForArrivalAndDepartureAtStopController extends
     if (_query.getTime() == 0)
       _query.setTime(System.currentTimeMillis());
 
-    ArrivalAndDepartureBean result = _service.getArrivalAndDepartureForStop(_query);
+    String alarmId = _service.registerAlarmForArrivalAndDepartureAtStop(_query,
+        _alarm);
 
-    if (result == null)
+    if (alarmId == null)
       return setResourceNotFoundResponse();
 
     if (isVersion(V2)) {
-      BeanFactoryV2 factory = getBeanFactoryV2();
-      return setOkResponse(factory.getResponse(result));
+      return setOkResponse(alarmId);
     } else {
       return setUnknownVersionResponse();
     }

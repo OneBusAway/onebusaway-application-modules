@@ -2,7 +2,7 @@ package org.onebusaway.transit_data_federation.impl.otp;
 
 import java.util.Map;
 
-import org.opentripplanner.routing.algorithm.SearchTerminationStrategy;
+import org.opentripplanner.routing.algorithm.strategies.SearchTerminationStrategy;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.spt.SPTVertex;

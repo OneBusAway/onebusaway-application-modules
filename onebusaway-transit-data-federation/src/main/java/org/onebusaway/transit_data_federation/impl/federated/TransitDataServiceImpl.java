@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.exceptions.NoSuchStopServiceException;
+import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
@@ -24,6 +26,7 @@ import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
@@ -66,6 +69,8 @@ import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureAlarmService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.BlockBeanService;
@@ -83,11 +88,17 @@ import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanServ
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
 import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 class TransitDataServiceImpl implements TransitDataService {
+
+  @Autowired
+  private TransitGraphDao _transitGraphDao;
 
   @Autowired
   private AgencyBeanService _agencyBeanService;
@@ -109,6 +120,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private ArrivalsAndDeparturesBeanService _arrivalsAndDeparturesBeanService;
+
+  @Autowired
+  private ArrivalAndDepartureAlarmService _arrivalAndDepartureAlarmService;
 
   @Autowired
   private StopsBeanService _stopsBeanService;
@@ -256,15 +270,27 @@ class TransitDataServiceImpl implements TransitDataService {
   public ArrivalAndDepartureBean getArrivalAndDepartureForStop(
       ArrivalAndDepartureForStopQueryBean query) throws ServiceException {
 
-    AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(query.getStopId());
-    int stopSequence = query.getStopSequence();
-    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
-    long serviceDate = query.getServiceDate();
-    AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(query.getVehicleId());
-    long time = query.getTime();
+    ArrivalAndDepartureQuery adQuery = createArrivalAndDepartureQuery(query);
 
-    return _arrivalsAndDeparturesBeanService.getArrivalAndDepartureForStop(
-        stopId, stopSequence, tripId, serviceDate, vehicleId, time);
+    return _arrivalsAndDeparturesBeanService.getArrivalAndDepartureForStop(adQuery);
+  }
+
+  @Override
+  public String registerAlarmForArrivalAndDepartureAtStop(
+      ArrivalAndDepartureForStopQueryBean query, RegisterAlarmQueryBean alarm) {
+
+    ArrivalAndDepartureQuery adQuery = createArrivalAndDepartureQuery(query);
+
+    AgencyAndId alarmId = _arrivalAndDepartureAlarmService.registerAlarmForArrivalAndDepartureAtStop(
+        adQuery, alarm);
+
+    return AgencyAndIdLibrary.convertToString(alarmId);
+  }
+
+  @Override
+  public void cancelAlarmForArrivalAndDepartureAtStop(String alarmId) {
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(alarmId);
+    _arrivalAndDepartureAlarmService.cancelAlarmForArrivalAndDepartureAtStop(id);
   }
 
   @Override
@@ -377,8 +403,8 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
-      CoordinatePoint to, long targetTime, long currentTime, ConstraintsBean constraints)
-      throws ServiceException {
+      CoordinatePoint to, long targetTime, long currentTime,
+      ConstraintsBean constraints) throws ServiceException {
     return _itinerariesBeanService.getItinerariesBetween(from, to, targetTime,
         currentTime, constraints);
   }
@@ -562,6 +588,31 @@ class TransitDataServiceImpl implements TransitDataService {
     for (String id : ids)
       converted.add(convertAgencyAndId(id));
     return converted;
+  }
+
+  private ArrivalAndDepartureQuery createArrivalAndDepartureQuery(
+      ArrivalAndDepartureForStopQueryBean query) {
+
+    ArrivalAndDepartureQuery adQuery = new ArrivalAndDepartureQuery();
+
+    AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(query.getStopId());
+    StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
+    if (stop == null)
+      throw new NoSuchStopServiceException(query.getStopId());
+
+    AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
+    TripEntry trip = _transitGraphDao.getTripEntryForId(tripId);
+    if (trip == null)
+      throw new NoSuchTripServiceException(query.getTripId());
+
+    adQuery.setStop(stop);
+    adQuery.setStopSequence(query.getStopSequence());
+    adQuery.setTrip(trip);
+    adQuery.setServiceDate(query.getServiceDate());
+    adQuery.setVehicleId(AgencyAndIdLibrary.convertFromString(query.getVehicleId()));
+    adQuery.setTime(query.getTime());
+
+    return adQuery;
   }
 
 }

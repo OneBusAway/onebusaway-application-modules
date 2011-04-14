@@ -51,6 +51,7 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.beans.ItinerariesBeanService;
@@ -1223,8 +1224,16 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         throw new NoSuchStopServiceException(transitLeg.getFromStop().getId());
       int fromStopSequence = transitLeg.getFromStopSequence();
 
+      ArrivalAndDepartureQuery query = new ArrivalAndDepartureQuery();
+      query.setStop(fromStop);
+      query.setStopSequence(fromStopSequence);
+      query.setTrip(trip);
+      query.setServiceDate(serviceDate);
+      query.setVehicleId(vehicleId);
+      query.setTime(time);
+
       ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
-          fromStop, fromStopSequence, trip, serviceDate, vehicleId, time);
+          query);
 
       b.setFromStop(instance);
       b.setBlockInstance(instance.getBlockInstance());
@@ -1243,8 +1252,16 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         throw new NoSuchStopServiceException(transitLeg.getToStop().getId());
       int toStopSequence = transitLeg.getToStopSequence();
 
+      ArrivalAndDepartureQuery query = new ArrivalAndDepartureQuery();
+      query.setStop(toStop);
+      query.setStopSequence(toStopSequence);
+      query.setTrip(trip);
+      query.setServiceDate(serviceDate);
+      query.setVehicleId(vehicleId);
+      query.setTime(time);
+      
       ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
-          toStop, toStopSequence, trip, serviceDate, vehicleId, time);
+          query);
 
       b.setToStop(instance);
       b.setBlockInstance(instance.getBlockInstance());

@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -29,6 +30,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocati
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocationListener;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.RealTimeHistoryService;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistoryDao;
@@ -76,6 +78,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   private BlockCalendarService _blockCalendarService;
 
   private RealTimeHistoryService _realTimeHistoryService;
+
+  private List<BlockLocationListener> _blockLocationListeners = Collections.emptyList();
 
   /**
    * By default, we keep around 20 minutes of cache entries
@@ -152,6 +156,11 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   public void setRealTimeHistoryService(
       RealTimeHistoryService realTimeHistoryService) {
     _realTimeHistoryService = realTimeHistoryService;
+  }
+
+  @Autowired
+  public void setBlockLocationListeners(List<BlockLocationListener> listeners) {
+    _blockLocationListeners = listeners;
   }
 
   /**
@@ -379,6 +388,13 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     // Cache the result
     _cache.addRecord(blockInstance, record, scheduledBlockLocation, samples);
+
+    if (!CollectionsLibrary.isEmpty(_blockLocationListeners)) {
+      BlockLocation location = null;
+      for (BlockLocationListener listener : _blockLocationListeners) {
+        listener.handleBlockLocation(location);
+      }
+    }
 
     if (_persistBlockLocationRecords) {
       List<BlockLocationRecord> blockLocationRecords = getVehicleLocationRecordAsBlockLocationRecord(
