@@ -39,11 +39,19 @@ public class DateConverter extends StrutsTypeConverter {
 
       String value = values[0];
 
-      if (value.matches("^(\\d+)$"))
-        return new Date(Long.parseLong(value));
+      if (value.matches("^(\\d+)$")) {
+        long v = Long.parseLong(value);
+        if( toClass == Long.TYPE || toClass == Long.class)
+          return v;
+        else
+          return new Date(v);
+      }
 
       try {
-        return _format.parse(value);
+        Date d = _format.parse(value);
+        if( toClass == Long.TYPE || toClass == Long.class)
+          return d.getTime();
+        return d;
       } catch (ParseException e) {
         e.printStackTrace();
         throw new TypeConversionException(e);

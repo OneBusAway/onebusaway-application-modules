@@ -41,6 +41,8 @@ public class FederatedTransitDataBundleCreatorMain {
 
   private static final String ARG_ONLY_IF_DNE = "onlyIfDoesNotExist";
 
+  private static final String ARG_RANDOMIZE_CACHE_DIR = "randomizeCacheDir";
+
   private static final String ARG_ADDITIONAL_RESOURCES_DIRECTORY = "additionalResourcesDirectory";
 
   public static void main(String[] args) throws IOException,
@@ -97,6 +99,9 @@ public class FederatedTransitDataBundleCreatorMain {
         System.exit(0);
       }
 
+      if (commandLine.hasOption(ARG_RANDOMIZE_CACHE_DIR))
+        creator.setRandomizeCacheDir(true);
+
       creator.setOutputPath(outputPath);
 
       setStagesToSkip(commandLine, creator);
@@ -129,6 +134,7 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_SKIP, true, "");
     options.addOption(ARG_INCLUDE, true, "");
     options.addOption(ARG_ONLY_IF_DNE, false, "");
+    options.addOption(ARG_RANDOMIZE_CACHE_DIR, false, "");
     options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
 
     Option property = new Option("D", "use value for given property");

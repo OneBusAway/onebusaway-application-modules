@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.ContainerLibrary;
@@ -61,6 +62,8 @@ public class FederatedTransitDataBundleCreator {
 
   private String _skipToTask;
 
+  private boolean _randomizeCacheDir = false;
+
   /**
    * Additional context paths that will be added when constructing the Spring
    * container that controls the build process. See
@@ -99,6 +102,11 @@ public class FederatedTransitDataBundleCreator {
   public void setSkipToTask(String taskName) {
     _skipToTask = taskName;
   }
+  
+
+  public void setRandomizeCacheDir(boolean randomizeCacheDir) {
+    _randomizeCacheDir = randomizeCacheDir;
+  }
 
   /**
    * Build the bundle!
@@ -117,7 +125,12 @@ public class FederatedTransitDataBundleCreator {
      * references in the Spring config
      */
     System.setProperty("bundlePath", _outputPath.getAbsolutePath());
-
+    
+    String cacheDir = _outputPath.getAbsolutePath() + File.separator + "cache";
+    if( _randomizeCacheDir )
+      cacheDir += "-" + UUID.randomUUID().toString();
+    System.setProperty("bundleCacheDir", cacheDir );
+    
     List<String> contextPaths = getPrimaryApplicatonContextPaths();
     Map<String, BeanDefinition> contextBeans = getPrimaryBeanDefintions();
 

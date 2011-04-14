@@ -146,25 +146,26 @@ class ArrivalAndDepartureAlarmServiceImpl implements
   private AlarmsForBlockInstance getAlarmsForBlockInstance(
       BlockInstance blockInstance) {
 
-    AlarmsForBlockInstance alarms = _alarmsByBlockInstance.get(blockInstance);
+    while (true) {
+      AlarmsForBlockInstance alarms = _alarmsByBlockInstance.get(blockInstance);
 
-    if (alarms == null) {
-      AlarmsForBlockInstance newAlarms = new AlarmsForBlockInstance(
-          blockInstance);
-      alarms = _alarmsByBlockInstance.putIfAbsent(blockInstance, newAlarms);
-      if (alarms == null)
-        alarms = newAlarms;
+      if (alarms == null) {
+        AlarmsForBlockInstance newAlarms = new AlarmsForBlockInstance(
+            blockInstance);
+        alarms = _alarmsByBlockInstance.putIfAbsent(blockInstance, newAlarms);
+        if (alarms == null)
+          alarms = newAlarms;
+      }
+
+      if (alarms.isCanceled())
+        continue;
+
+      return alarms;
     }
-
-    return alarms;
   }
 
   private void fireAlarm(AlarmForBlockInstance alarm) {
     _executor.submit(new FireAlarmTask(alarm.action));
-  }
-
-  private void clearAlarms(AlarmsForBlockInstance alarms) {
-
   }
 
   /****
@@ -181,12 +182,14 @@ class ArrivalAndDepartureAlarmServiceImpl implements
 
     private Future<?> _alarmTask = null;
 
+    private boolean _canceled = false;
+
     public AlarmsForBlockInstance(BlockInstance blockInstance) {
       _blockInstance = blockInstance;
     }
 
-    public BlockInstance getBlockInstance() {
-      return _blockInstance;
+    public synchronized boolean isCanceled() {
+      return _canceled;
     }
 
     public synchronized AlarmForBlockInstance registerAlarm(AlarmAction action,
@@ -320,8 +323,8 @@ class ArrivalAndDepartureAlarmServiceImpl implements
       if (allQueuesAreEmpty) {
 
         _vehicleInfoByVehicleId.clear();
-        _alarmsByBlockInstance.remove(_blockInstance,
-            new AlarmsForBlockInstance(_blockInstance));
+        _canceled = true;
+        _alarmsByBlockInstance.remove(_blockInstance);
 
       } else {
         /**

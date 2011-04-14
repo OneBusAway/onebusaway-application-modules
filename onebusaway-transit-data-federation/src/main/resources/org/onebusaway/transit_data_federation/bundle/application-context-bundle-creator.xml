@@ -32,6 +32,15 @@
     </property>
   </bean>
 
+  <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+    <property name="properties">
+      <props>
+        <prop key="ehCacheConfiguration.diskStorePath">${bundleCacheDir}</prop>
+      </props>
+    </property>
+    <property name="order" value="50" />
+  </bean>
+
   <alias name="dataSource" alias="mutableDataSource" />
 
   <bean id="modifications" class="org.onebusaway.transit_data_federation.model.modifications.Modifications" />

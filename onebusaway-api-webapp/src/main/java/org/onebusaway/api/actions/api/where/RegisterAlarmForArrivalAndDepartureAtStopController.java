@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 @AddToStack({"query", "alarm"})
-public class RegisterAlamForArrivalAndDepartureAtStopController extends
+public class RegisterAlarmForArrivalAndDepartureAtStopController extends
     ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -26,7 +26,7 @@ public class RegisterAlamForArrivalAndDepartureAtStopController extends
 
   private RegisterAlarmQueryBean _alarm = new RegisterAlarmQueryBean();
 
-  public RegisterAlamForArrivalAndDepartureAtStopController() {
+  public RegisterAlarmForArrivalAndDepartureAtStopController() {
     super(V2);
   }
 
