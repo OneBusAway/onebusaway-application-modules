@@ -39,9 +39,9 @@ public abstract class AbstractHubTask implements Runnable {
 
   protected double _stopSubsetRatio = 0.1;
 
-  protected int _stopSubsetCount = 0;
+  protected int _stopSubsetCount = 1;
 
-  protected int _maxWeight = 60 * 60;
+  protected int _maxWeight = 30 * 60;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -64,6 +64,10 @@ public abstract class AbstractHubTask implements Runnable {
 
   public void setStopSubsetCount(int stopSubsetCount) {
     _stopSubsetCount = stopSubsetCount;
+  }
+  
+  public void setMaxWeight(int maxWeight) {
+    _maxWeight = maxWeight;
   }
 
   protected Counter<StopEntry> countStops() {
