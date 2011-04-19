@@ -1,7 +1,7 @@
 package org.onebusaway.transit_data_federation.impl;
 
 public final class RefreshableResources {
-  
+
   public static final String CALENDAR_DATA = "calendarData";
 
   public static final String ROUTE_COLLECTIONS_DATA = "routeCollectionsData";
@@ -17,8 +17,6 @@ public final class RefreshableResources {
   public static final String BLOCK_INDEX_DATA = "blockIndexData";
 
   public static final String BLOCK_INDEX_SERVICE = "blockIndexService";
-  
-  public static final String OTP_DATA = "otp";
 
   public static final String STOP_TRANSFER_DATA = "stopTransferData";
 

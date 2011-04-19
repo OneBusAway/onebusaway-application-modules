@@ -56,6 +56,7 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
@@ -402,8 +403,8 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
-      CoordinatePoint to, long targetTime, long currentTime,
+  public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
+      TransitLocationBean to, long targetTime, long currentTime,
       ConstraintsBean constraints) throws ServiceException {
     return _itinerariesBeanService.getItinerariesBetween(from, to, targetTime,
         currentTime, constraints);

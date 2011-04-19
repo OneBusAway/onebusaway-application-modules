@@ -5,7 +5,7 @@ import java.util.List;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData.OBAEditor;
-import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
+import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
@@ -120,7 +120,7 @@ public class ArrivalReverseEdge extends AbstractEdge {
       long timeFrom, long timeTo, TraverseOptions options) {
 
     boolean useRealTime = false;
-    OTPConfiguration config = options.getExtension(OTPConfiguration.class);
+    OBATraverseOptions config = options.getExtension(OBATraverseOptions.class);
     if (config != null)
       useRealTime = config.useRealtime;
 

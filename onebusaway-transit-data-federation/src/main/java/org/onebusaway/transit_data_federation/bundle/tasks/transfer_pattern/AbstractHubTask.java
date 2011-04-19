@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.onebusaway.collections.Counter;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.HubVertex;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -20,9 +21,9 @@ import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.pqueue.PriorityQueueImpl;
+import org.opentripplanner.routing.spt.BasicShortestPathTree;
 import org.opentripplanner.routing.spt.SPTEdge;
 import org.opentripplanner.routing.spt.SPTVertex;
-import org.opentripplanner.routing.spt.ShortestPathTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +99,7 @@ public abstract class AbstractHubTask implements Runnable {
       d.setSearchTerminationStrategy(new WeightLimitSearchTerminationStrategy(
           _maxWeight));
 
-      ShortestPathTree spt = d.getShortestPathTree(v, new State());
+      BasicShortestPathTree spt = (BasicShortestPathTree) d.getShortestPathTree(v, new State());
 
       for (SPTVertex sptVertex : spt.getVertices()) {
         while (sptVertex != null) {

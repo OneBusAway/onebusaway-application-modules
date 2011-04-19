@@ -19,7 +19,7 @@ public class TaskDefinition {
 
   private String taskWhenSkippedBeanName;
 
-  private boolean enabled = false;
+  private boolean enabled = true;
 
   public String getTaskName() {
     return taskName;

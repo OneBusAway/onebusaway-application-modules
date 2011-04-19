@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.onebusaway.collections.CollectionsLibrary;
@@ -22,12 +21,12 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.EdgeNarrativeBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.LegBean;
 import org.onebusaway.transit_data.model.tripplanning.LocationBean;
-import org.onebusaway.transit_data.model.tripplanning.Modes;
 import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
@@ -36,7 +35,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.beans.ApplicationBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
-import org.onebusaway.transit_data_federation.impl.otp.OTPConfiguration;
+import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.SearchTerminationStrategyImpl;
 import org.onebusaway.transit_data_federation.impl.otp.TripSequenceShortestPathTree;
@@ -60,6 +59,7 @@ import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.otp.TransitShedPathService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
@@ -82,6 +82,7 @@ import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 import org.opentripplanner.routing.edgetype.StreetTraversalPermission;
 import org.opentripplanner.routing.edgetype.StreetVertex;
+import org.opentripplanner.routing.services.GraphService;
 import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.services.StreetVertexIndexService;
 import org.opentripplanner.routing.spt.BasicShortestPathTree;
@@ -111,7 +112,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private StreetVertexIndexService _streetVertexIndexService;
 
-  private Graph _graph;
+  private GraphService _graphService;
+
+  private OTPConfigurationService _otpConfigurationService;
 
   private TripBeanService _tripBeanService;
 
@@ -145,8 +148,14 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   @Autowired
-  public void setGraph(Graph graph) {
-    _graph = graph;
+  public void setGraphService(GraphService graphService) {
+    _graphService = graphService;
+  }
+
+  @Autowired
+  public void setOtpConfigurationService(
+      OTPConfigurationService otpConfigurationService) {
+    _otpConfigurationService = otpConfigurationService;
   }
 
   @Autowired
@@ -190,19 +199,20 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
    ****/
 
   @Override
-  public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
-      CoordinatePoint to, long targetTime, long currentTime,
+  public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
+      TransitLocationBean to, long targetTime, long currentTime,
       ConstraintsBean constraints) throws ServiceException {
 
-    String fromPlace = getVertexLabelForPoint(from);
-    String toPlace = getVertexLabelForPoint(to);
+    OBATraverseOptions options = createTraverseOptions();
+    applyConstraintsToOptions(constraints, options);
+
+    Vertex fromVertex = getTransitLocationAsVertex(from, options);
+    Vertex toVertex = getTransitLocationAsVertex(to, options);
 
     Date t = new Date(targetTime);
 
-    TraverseOptions options = createTraverseOptions();
-    applyConstraintsToOptions(constraints, options);
-
-    List<GraphPath> paths = _pathService.plan(fromPlace, toPlace, t, options, 1);
+    List<GraphPath> paths = _pathService.plan(fromVertex, toVertex, t, options,
+        1);
 
     LocationBean fromBean = getPointAsLocation(from);
     LocationBean toBean = getPointAsLocation(to);
@@ -245,7 +255,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         HasEdges hasEdges = (HasEdges) vertex;
         edges = hasEdges.getOutgoing();
       } else {
-        GraphVertex gv = _graph.getGraphVertex(vertex.getLabel());
+        Graph graph = _graphService.getGraph();
+        GraphVertex gv = graph.getGraphVertex(vertex.getLabel());
         if (gv != null)
           edges = gv.getOutgoing();
       }
@@ -301,7 +312,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       CoordinatePoint location, long time,
       TransitShedConstraintsBean constraints) {
 
-    TraverseOptions options = createTraverseOptions();
+    OBATraverseOptions options = createTraverseOptions();
     applyConstraintsToOptions(constraints.getConstraints(), options);
 
     Coordinate c = new Coordinate(location.getLon(), location.getLat());
@@ -344,41 +355,16 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
    * Private Methods
    ****/
 
-  /**
-   * From 'Transit Capacity and Quality of Service Manual' - Part 3 - Exhibit
-   * 3.9
-   * 
-   * http://onlinepubs.trb.org/Onlinepubs/tcrp/tcrp100/part%203.pdf
-   * 
-   * Table of passenger perceptions of time. Given that actual in-vehicle time
-   * seems to occur in real-time (penalty ratio of 1.0), how do passengers
-   * perceived walking, waiting for the first vehicle, and waiting for a
-   * transfer. In addition, is there an additive penalty for making a transfer
-   * of any kind.
-   */
-  private TraverseOptions createTraverseOptions() {
+  private Vertex getTransitLocationAsVertex(TransitLocationBean from,
+      OBATraverseOptions options) {
+    Coordinate c = new Coordinate(from.getLon(), from.getLat());
+    return _streetVertexIndexService.getClosestVertex(c, options);
+  }
 
-    TraverseOptions options = new TraverseOptions();
+  private OBATraverseOptions createTraverseOptions() {
 
-    options.walkReluctance = 2.2;
-    options.waitAtBeginningFactor = 0.1;
-    options.waitReluctance = 2.5;
+    OBATraverseOptions options = _otpConfigurationService.createTraverseOptions();
 
-    options.boardCost = 14 * 60;
-    options.maxTransfers = 2;
-    options.minTransferTime = 60;
-
-    options.maxWalkDistance = 1000;
-    options.maxTransfers = 2;
-
-    /**
-     * Ten seconds max
-     */
-    options.maxComputationTime = 10000;
-
-    options.useServiceDays = false;
-
-    options.stateFactory = OBAStateData.STATE_FACTORY;
     options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
     options.searchTerminationStrategy = new SearchTerminationStrategyImpl();
     options.shortestPathTreeFactory = TripSequenceShortestPathTree.FACTORY;
@@ -387,71 +373,15 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private void applyConstraintsToOptions(ConstraintsBean constraints,
-      TraverseOptions options) {
+      OBATraverseOptions options) {
 
-    options.setArriveBy(constraints.isArriveBy());
-
-    /**
-     * Modes
-     */
-    Set<String> modes = constraints.getModes();
-    if (modes != null) {
-      TraverseModeSet ms = new TraverseModeSet();
-      if (modes.contains(Modes.WALK))
-        ms.setWalk(true);
-      if (modes.contains(Modes.TRANSIT))
-        ms.setTransit(true);
-      options.setModes(ms);
-    }
-
-    /**
-     * Walking
-     */
-    if (constraints.getWalkSpeed() != -1)
-      options.speed = constraints.getWalkSpeed();
-    if (constraints.getMaxWalkingDistance() != -1)
-      options.maxWalkDistance = constraints.getMaxWalkingDistance();
-    if (constraints.getWalkReluctance() != -1)
-      options.walkReluctance = constraints.getWalkReluctance();
-
-    /**
-     * Waiting
-     */
-    if (constraints.getInitialWaitReluctance() != -1)
-      options.waitAtBeginningFactor = constraints.getInitialWaitReluctance();
-    if (constraints.getInitialWaitReluctance() != -1)
-      options.waitReluctance = constraints.getWaitReluctance();
-
-    /**
-     * Transferring
-     */
-    if (constraints.getTransferCost() != -1)
-      options.boardCost = constraints.getTransferCost();
-    if (constraints.getMinTransferTime() != -1)
-      options.minTransferTime = constraints.getMinTransferTime();
-    if (constraints.getMaxTransfers() != -1)
-      options.maxTransfers = constraints.getMaxTransfers();
-    if (constraints.getMaxComputationTime() > 0
-        && constraints.getMaxComputationTime() < 15000)
-      options.maxComputationTime = constraints.getMaxComputationTime();
-
-    options.numItineraries = constraints.getResultCount();
-
-    /**
-     * Our custom traverse options extension
-     */
-    OTPConfiguration config = new OTPConfiguration();
-    options.putExtension(OTPConfiguration.class, config);
-
-    config.useRealtime = constraints.isUseRealTime();
-
-    if (constraints.getMaxTripDuration() != -1)
-      config.maxTripDuration = constraints.getMaxTripDuration() * 1000;
+    _otpConfigurationService.applyConstraintsToTraverseOptions(constraints,
+        options);
   }
 
-  private LocationBean getPointAsLocation(CoordinatePoint p) {
+  private LocationBean getPointAsLocation(TransitLocationBean p) {
     LocationBean bean = new LocationBean();
-    bean.setLocation(p);
+    bean.setLocation(new CoordinatePoint(p.getLat(), p.getLon()));
     return bean;
   }
 
@@ -1042,8 +972,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return (long) ((t - tStartOrig) * ratio + tStartNew);
   }
 
-  private void ensureAdditionalItineraryIsIncluded(CoordinatePoint from,
-      CoordinatePoint to, long targetTime, long currentTime,
+  private void ensureAdditionalItineraryIsIncluded(TransitLocationBean from,
+      TransitLocationBean to, long targetTime, long currentTime,
       ConstraintsBean constraints, ItinerariesBean itineraries) {
 
     ItineraryBean toInclude = constraints.getIncludeItinerary();
@@ -1122,8 +1052,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return instances;
   }
 
-  private void updateItinerary(ItineraryBean itinerary, CoordinatePoint from,
-      CoordinatePoint to, long time, long currentTime,
+  private void updateItinerary(ItineraryBean itinerary, TransitLocationBean from,
+      TransitLocationBean to, long time, long currentTime,
       ConstraintsBean constraints) {
 
     List<LegBean> legs = itinerary.getLegs();
@@ -1232,8 +1162,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       query.setVehicleId(vehicleId);
       query.setTime(time);
 
-      ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
-          query);
+      ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
       b.setFromStop(instance);
       b.setBlockInstance(instance.getBlockInstance());
@@ -1259,9 +1188,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       query.setServiceDate(serviceDate);
       query.setVehicleId(vehicleId);
       query.setTime(time);
-      
-      ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
-          query);
+
+      ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
       b.setToStop(instance);
       b.setBlockInstance(instance.getBlockInstance());

@@ -52,7 +52,6 @@ public class OrbcadRecordHttpSource extends AbstractOrbcadRecordSource {
   protected void setup() {
 
     _reader = new CsvEntityReader();
-    _reader.goFerris();
 
     AnnotationDrivenEntitySchemaFactory entitySchemaFactory = new AnnotationDrivenEntitySchemaFactory();
     entitySchemaFactory.addEntityClass(OrbcadRecord.class);

@@ -25,6 +25,7 @@ import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
@@ -146,7 +147,13 @@ class WebappServiceImpl implements WebappService {
   public ItinerariesBean getTripsBetween(CoordinatePoint from,
       CoordinatePoint to, long time, ConstraintsBean constraints)
       throws ServiceException {
-    return _transitDataService.getItinerariesBetween(from, to, time,
+    TransitLocationBean fromLoc = new TransitLocationBean();
+    fromLoc.setLat(from.getLat());
+    fromLoc.setLon(from.getLon());
+    TransitLocationBean toLoc = new TransitLocationBean();
+    toLoc.setLat(to.getLat());
+    toLoc.setLon(to.getLon());
+    return _transitDataService.getItinerariesBetween(fromLoc, toLoc, time,
         System.currentTimeMillis(), constraints);
   }
 

@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
+package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph;
 
 import java.util.Arrays;
 import java.util.Collection;

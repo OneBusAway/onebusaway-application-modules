@@ -15,10 +15,17 @@ public interface ExtendedCalendarService {
       ServiceIdActivation serviceIds);
 
   public Set<Date> getDatesForServiceIds(ServiceIdActivation serviceIds);
-  
-  public List<Date> getDatesForServiceIdsAsOrderedList(ServiceIdActivation serviceIds);
+
+  public List<Date> getDatesForServiceIdsAsOrderedList(
+      ServiceIdActivation serviceIds);
 
   public Collection<Date> getServiceDatesWithinRange(
       ServiceIdActivation serviceIds, ServiceInterval interval, Date from,
       Date to);
+
+  public boolean areServiceIdsActiveOnServiceDate(
+      ServiceIdActivation serviceIds, Date serviceDate);
+
+  public List<Date> getNextServiceDatesForDepartureInterval(
+      ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time);
 }

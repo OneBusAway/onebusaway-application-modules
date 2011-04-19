@@ -49,11 +49,6 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
    ****/
 
   @Override
-  public Collection<SPTVertex> getVertices() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public SPTVertex addVertex(Vertex vertex, State state, double weightSum,
       TraverseOptions options) {
 

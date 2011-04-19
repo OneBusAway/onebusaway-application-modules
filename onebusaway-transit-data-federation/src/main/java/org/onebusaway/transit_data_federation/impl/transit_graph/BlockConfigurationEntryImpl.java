@@ -338,7 +338,9 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
       int stopTimeIndex = index - accumulatedStopTimeIndices[tripIndex];
       StopTimeEntry stopTime = stopTimes.get(stopTimeIndex);
 
-      return new BlockStopTimeEntryImpl(stopTime, index, blockTrip);
+      boolean hasNextStop = index + 1 < tripIndices.length;
+
+      return new BlockStopTimeEntryImpl(stopTime, index, blockTrip, hasNextStop);
     }
   }
 

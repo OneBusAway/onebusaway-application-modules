@@ -17,7 +17,8 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges {
+public class BlockArrivalVertex extends AbstractBlockVertex implements
+    HasEdges, Comparable<BlockArrivalVertex> {
 
   public BlockArrivalVertex(GraphContext graphContext,
       ArrivalAndDepartureInstance instance) {
@@ -48,9 +49,9 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges 
     ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
     ArrivalAndDepartureInstance previous = service.getPreviousStopArrivalAndDeparture(_instance);
 
-    if(previous == null)
+    if (previous == null)
       return Collections.emptyList();
-    
+
     return Arrays.asList((Edge) new BlockHopEdge(_context, previous, _instance));
   }
 
@@ -96,5 +97,12 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements HasEdges 
   @Override
   public String toString() {
     return "block_arrival: " + _instance.toString();
+  }
+
+  @Override
+  public int compareTo(BlockArrivalVertex o) {
+    long t1 = this._instance.getBestArrivalTime();
+    long t2 = o._instance.getBestArrivalTime();
+    return t1 == t2 ? 0 : (t1 < t2 ? -1 : 1);
   }
 }

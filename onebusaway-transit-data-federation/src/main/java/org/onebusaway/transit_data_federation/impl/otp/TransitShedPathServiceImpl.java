@@ -19,6 +19,7 @@ import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.pqueue.FibHeap;
+import org.opentripplanner.routing.services.GraphService;
 import org.opentripplanner.routing.spt.BasicShortestPathTree;
 import org.opentripplanner.routing.spt.SPTVertex;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +30,11 @@ class TransitShedPathServiceImpl implements TransitShedPathService {
 
   private VertexSkipStrategy _vertexSkipStrategy = new TransitShetVertexSkipStrategy();
 
-  private ContractionHierarchySet _hierarchies;
+  private GraphService _graphService;
 
   @Autowired
-  public void setHierarchies(ContractionHierarchySet hierarchies) {
-    _hierarchies = hierarchies;
+  public void setGraphService(GraphService graphService) {
+    _graphService = graphService;
   }
 
   @Override
@@ -42,7 +43,7 @@ class TransitShedPathServiceImpl implements TransitShedPathService {
 
     BasicShortestPathTree spt = new BasicShortestPathTree();
 
-    Graph graph = _hierarchies.getGraph();
+    Graph graph = _graphService.getGraph();
 
     FibHeap<SPTVertex> queue = new FibHeap<SPTVertex>(
         graph.getVertices().size());

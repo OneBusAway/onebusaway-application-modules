@@ -15,8 +15,10 @@ public interface BlockIndexService {
       AgencyAndId routeCollectionId);
 
   public List<BlockTripIndex> getBlockTripIndicesForBlock(AgencyAndId blockId);
-
+  
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry);
+  
+  public List<BlockStopTripIndex> getStopTripIndicesForStop(StopEntry stopEntry);
 
   /****
    * Layover Indices

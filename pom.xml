@@ -19,61 +19,28 @@
     <struts-version>2.1.8.1</struts-version>
     <gwt-version>2.1.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
-    <csv-entities-version>1.0.1-SNAPSHOT</csv-entities-version>
-    <gtfs-version>1.2.1-SNAPSHOT</gtfs-version>
+    <csv-entities-version>1.0.2-SNAPSHOT</csv-entities-version>
+    <gtfs-version>1.2.2-SNAPSHOT</gtfs-version>
     <onebusaway-siri-version>0.1.0-SNAPSHOT</onebusaway-siri-version>
   </properties>
 
   <repositories>
     <repository>
-      <id>releases.developer.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/maven/repository/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>snapshots.developer.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/maven/snapshot-repository/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
+      <id>public.onebusaway.org</id>
+      <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </repository>
   </repositories>
-
+  
   <pluginRepositories>
     <pluginRepository>
-      <id>releases.developer.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/maven/repository/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>snapshots.developer.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/maven/snapshot-repository/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
+      <id>public.onebusaway.org</id>
+      <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </pluginRepository>
   </pluginRepositories>
 
   <scm>
     <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</connection>
-    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk
-        </developerConnection>
+    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</developerConnection>
     <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/trunk</url>
   </scm>
 
@@ -116,7 +83,7 @@
       <dependency>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-collections</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
 
       <dependency>

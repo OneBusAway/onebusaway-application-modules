@@ -50,7 +50,7 @@ class ScheduledBlockLocationServiceImpl implements
     int n = stopTimes.size();
 
     int stopTimeIndex = GenericBinarySearch.search(blockConfig, n,
-        distanceAlongBlock, BlockConfigDistanceAlongBlockIndexAdapter.INSTANCE);
+        distanceAlongBlock, IndexAdapters.BLOCK_CONFIG_DISTANCE_INSTANCE);
 
     return getScheduledBlockLocationFromDistanceAlongBlockAndStopTimeIndex(
         stopTimes, distanceAlongBlock, stopTimeIndex);
@@ -81,7 +81,7 @@ class ScheduledBlockLocationServiceImpl implements
 
     int stopTimeIndex = GenericBinarySearch.searchRange(blockConfig, indexFrom,
         indexTo, distanceAlongBlock,
-        BlockConfigDistanceAlongBlockIndexAdapter.INSTANCE);
+        IndexAdapters.BLOCK_CONFIG_DISTANCE_INSTANCE);
 
     return getScheduledBlockLocationFromDistanceAlongBlockAndStopTimeIndex(
         stopTimes, distanceAlongBlock, stopTimeIndex);
@@ -94,7 +94,7 @@ class ScheduledBlockLocationServiceImpl implements
     List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
     int n = stopTimes.size();
     int index = GenericBinarySearch.search(blockConfig, n, scheduleTime,
-        BlockConfigDepartureTimeIndexAdapter.INSTANCE);
+        IndexAdapters.BLOCK_CONFIG_DEPARTURE_INSTANCE);
 
     return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(stopTimes,
         scheduleTime, index);

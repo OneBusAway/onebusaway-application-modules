@@ -105,6 +105,8 @@
   </bean>
 
   <bean id="calendarServiceTask" class="org.onebusaway.transit_data_federation.bundle.tasks.CalendarServiceDataTask" />
+  
+  <!--  OTP Graph -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="otp_graph" />
@@ -115,7 +117,6 @@
   </bean>
 
   <bean id="otpGraphBuidlerTask" class="org.opentripplanner.graph_builder.GraphBuilderTask">
-    <property name="graph" ref="otpGraph" />
     <property name="graphBundle" ref="otpGraphBundle" />
     <property name="graphBuilders">
       <list>
@@ -124,8 +125,6 @@
     </property>
     <property name="alwaysRebuild" value="true" />
   </bean>
-
-  <bean id="otpGraph" class="org.opentripplanner.routing.core.Graph" />
 
   <bean id="osmBuilder" class="org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl">
     <property name="provider" ref="osmProvider" />
@@ -140,19 +139,11 @@
     </property>
   </bean>
 
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="otp_graph_cleanup" />
-    <property name="afterTaskName" value="otp_graph" />
-    <property name="task">
-      <bean class="org.onebusaway.transit_data_federation.impl.otp.OpenTripPlannerCleanupTask" />
-    </property>
-  </bean>
-
   <!-- Trip Graph -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="transit_graph" />
-    <property name="afterTaskName" value="otp_graph_cleanup" />
+    <property name="afterTaskName" value="otp_graph" />
     <property name="task" ref="tripGraphTask" />
   </bean>
 
@@ -188,7 +179,7 @@
 
   <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.bundle.tasks.stop_transfers.StopTransfersTask" />
 
-  <!-- -->
+  <!-- Hub Stops -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="hubs" />
@@ -205,17 +196,27 @@
 
   <bean id="hubTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubTask" />
   <bean id="hubIncrementalTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubIncrementalTask" />
-
-  <!-- -->
-
+  
+  <!-- Transfer Patterns -->
+  
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="block_location_history" />
+    <property name="taskName" value="transfer_patterns_for_hubs" />
     <property name="afterTaskNames">
       <list>
         <value>hubs</value>
         <value>hubs_incremental</value>
       </list>
     </property>
+    <property name="task" ref="transferPatternFromHubsTask" />
+  </bean>
+
+  <bean id="transferPatternFromHubsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternFromHubsTask" />
+
+  <!-- Block Location History -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="block_location_history" />
+    <property name="afterTaskName" value="transfer_patterns_for_hubs" />
     <property name="task" ref="blockLocationHistoryTask" />
   </bean>
 

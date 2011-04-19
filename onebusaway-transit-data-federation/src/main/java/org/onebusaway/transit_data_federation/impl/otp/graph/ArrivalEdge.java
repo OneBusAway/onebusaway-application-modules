@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
+import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.State;
@@ -21,6 +22,10 @@ public class ArrivalEdge extends AbstractEdge {
   public TraverseResult traverse(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
+    OBATraverseOptions obaOpts = (OBATraverseOptions) options;
+    if( obaOpts.extraSpecialMode )
+      return null;
+    
     EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
     return new TraverseResult(0, s0, narrative);
   }

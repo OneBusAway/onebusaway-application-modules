@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-class StopHopServiceImpl implements StopHopService {
+public class StopHopServiceImpl implements StopHopService {
 
   private static final StopHopList EMPTY_HOPS = new StopHopList(
       new ArrayList<StopHop>());

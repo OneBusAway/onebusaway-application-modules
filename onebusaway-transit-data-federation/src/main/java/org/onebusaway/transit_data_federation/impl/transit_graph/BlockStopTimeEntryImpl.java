@@ -6,14 +6,16 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 
 public class BlockStopTimeEntryImpl implements BlockStopTimeEntry {
 
-  private StopTimeEntry stopTime;
+  private final StopTimeEntry stopTime;
 
-  private BlockTripEntry trip;
+  private final BlockTripEntry trip;
 
-  private int blockSequence;
+  private final int blockSequence;
+
+  private final boolean hasNextStop;
 
   public BlockStopTimeEntryImpl(StopTimeEntry stopTime, int blockSequence,
-      BlockTripEntry trip) {
+      BlockTripEntry trip, boolean hasNextStop) {
 
     if (stopTime == null)
       throw new IllegalArgumentException("stopTime is null");
@@ -23,6 +25,7 @@ public class BlockStopTimeEntryImpl implements BlockStopTimeEntry {
     this.stopTime = stopTime;
     this.trip = trip;
     this.blockSequence = blockSequence;
+    this.hasNextStop = hasNextStop;
   }
 
   @Override
@@ -48,6 +51,21 @@ public class BlockStopTimeEntryImpl implements BlockStopTimeEntry {
   @Override
   public int getAccumulatedSlackTime() {
     return trip.getAccumulatedSlackTime() + stopTime.getAccumulatedSlackTime();
+  }
+
+  @Override
+  public boolean hasPreviousStop() {
+    return blockSequence > 0;
+  }
+
+  @Override
+  public boolean hasNextStop() {
+    return hasNextStop;
+  }
+
+  @Override
+  public BlockStopTimeEntry getNextStop() {
+    return trip.getBlockConfiguration().getStopTimes().get(blockSequence + 1);
   }
 
   @Override

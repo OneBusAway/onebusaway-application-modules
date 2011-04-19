@@ -5,6 +5,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
@@ -22,8 +23,8 @@ public interface ItinerariesBeanService {
    *         specified constraints
    * @throws ServiceException
    */
-  public ItinerariesBean getItinerariesBetween(CoordinatePoint from,
-      CoordinatePoint to, long time, long currentTime, ConstraintsBean constraints)
+  public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
+      TransitLocationBean to, long time, long currentTime, ConstraintsBean constraints)
       throws ServiceException;
 
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,

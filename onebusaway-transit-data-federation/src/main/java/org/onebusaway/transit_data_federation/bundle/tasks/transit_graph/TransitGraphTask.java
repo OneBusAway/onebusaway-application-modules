@@ -65,11 +65,11 @@ public class TransitGraphTask implements Runnable {
       ObjectSerializationLibrary.writeObject(_bundle.getTransitGraphPath(),
           graph);
 
-      _refreshService.refresh(RefreshableResources.TRANSIT_GRAPH);
-
     } catch (Exception ex) {
       throw new IllegalStateException("error writing graph to file", ex);
     }
+
+    _refreshService.refresh(RefreshableResources.TRANSIT_GRAPH);
 
   }
 }

@@ -15,14 +15,6 @@
 
   <!-- OTP Beans -->
   
-  <!-- An empty graph to satisfy initial dependencies -->
-  <bean id="otpGraph" class="org.opentripplanner.routing.core.Graph" />
-  
-  <bean id="streetToStopGraphLinkerService" class="org.onebusaway.transit_data_federation.impl.otp.StreetToStopGraphLinkerService"/>
-
-  <!-- A custom ContractionHierarchySet wrapper with custom reloading behavior -->
-  <bean id="otpContractionHierarchySet" class="org.onebusaway.transit_data_federation.impl.otp.ContractionHierarchySetWrapper" />
-
   <context:component-scan base-package="org.opentripplanner.routing.impl" />
 
 </beans>

@@ -21,11 +21,11 @@ import org.onebusaway.api.model.transit.tripplanning.ItineraryV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.LegV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.StreetLegV2Bean;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.presentation.impl.StackInterceptor.AddToStack;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,18 +40,14 @@ public class PlanTripController extends ApiActionSupport {
 
   private TransitDataService _transitDataService;
 
-  private double _latFrom;
-
-  private double _lonFrom;
-
-  private double _latTo;
-
-  private double _lonTo;
+  private TransitLocationBean _from = new TransitLocationBean();
+  
+  private TransitLocationBean _to = new TransitLocationBean();
 
   private long _time;
 
   private long _currentTime;
-  
+
   private String _includeSpecificItinerary;
 
   private ConstraintsBean _constraints = new ConstraintsBean();
@@ -66,19 +62,31 @@ public class PlanTripController extends ApiActionSupport {
   }
 
   public void setLatFrom(double latFrom) {
-    _latFrom = latFrom;
+    _from.setLat(latFrom);
   }
 
   public void setLonFrom(double lonFrom) {
-    _lonFrom = lonFrom;
+    _from.setLon(lonFrom);
+  }
+
+  public void setFromBlockId(String fromBlockId) {
+    _from.setBlockId(fromBlockId);
+  }
+
+  public void setFromServiceDate(long fromServiceDate) {
+    _from.setServiceDate(fromServiceDate);
+  }
+
+  public void setFromVehicleId(String fromVehicleId) {
+    _from.setVehicleId(fromVehicleId);
   }
 
   public void setLatTo(double latTo) {
-    _latTo = latTo;
+    _to.setLat(latTo);
   }
 
   public void setLonTo(double lonTo) {
-    _lonTo = lonTo;
+    _to.setLon(lonTo);
   }
 
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
@@ -91,17 +99,16 @@ public class PlanTripController extends ApiActionSupport {
     Date time = f.parse(value);
     setTime(time);
   }
-  
+
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setCurrentTime(Date time) {
     _currentTime = time.getTime();
   }
 
-
   public void setIncludeSpecificItinerary(String includeSpecificItinerary) {
     _includeSpecificItinerary = includeSpecificItinerary;
   }
-  
+
   public String getIncludeSpecificItinerary() {
     return _includeSpecificItinerary;
   }
@@ -117,7 +124,7 @@ public class PlanTripController extends ApiActionSupport {
   public void setMode(List<String> modes) {
     _constraints.setModes(new HashSet<String>(modes));
   }
-  
+
   public DefaultHttpHeaders create() throws IOException, ServiceException {
     return index();
   }
@@ -126,11 +133,8 @@ public class PlanTripController extends ApiActionSupport {
 
     if (_time == 0)
       _time = System.currentTimeMillis();
-    if( _currentTime == 0)
+    if (_currentTime == 0)
       _currentTime = System.currentTimeMillis();
-
-    CoordinatePoint from = new CoordinatePoint(_latFrom, _lonFrom);
-    CoordinatePoint to = new CoordinatePoint(_latTo, _lonTo);
 
     BeanFactoryV2 factory = getBeanFactoryV2();
     ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(
@@ -139,7 +143,7 @@ public class PlanTripController extends ApiActionSupport {
     parseAdditionalItinerary(itineraryFactory);
 
     ItinerariesBean itineraries = _transitDataService.getItinerariesBetween(
-        from, to, _time, _currentTime, _constraints);
+        _from, _to, _time, _currentTime, _constraints);
 
     ItinerariesV2Bean bean = itineraryFactory.getItineraries(itineraries);
     return setOkResponse(factory.entry(bean));
@@ -147,20 +151,21 @@ public class PlanTripController extends ApiActionSupport {
 
   private void parseAdditionalItinerary(ItineraryV2BeanFactory itineraryFactory) {
 
-    if (_includeSpecificItinerary == null || _includeSpecificItinerary.isEmpty())
+    if (_includeSpecificItinerary == null
+        || _includeSpecificItinerary.isEmpty())
       return;
 
     ItineraryV2Bean bean = new ItineraryV2Bean();
     JSONObject jsonObject = JSONObject.fromObject(_includeSpecificItinerary);
-    
+
     JsonConfig config = new JsonConfig();
-    
-    Map<Object,Object> classMap = new HashMap<Object, Object>();
+
+    Map<Object, Object> classMap = new HashMap<Object, Object>();
     classMap.put("legs", LegV2Bean.class);
     classMap.put("streetLegs", StreetLegV2Bean.class);
     classMap.put("situationIds", String.class);
     config.setClassMap(classMap);
-    
+
     JSONObject.toBean(jsonObject, bean, config);
 
     ItineraryBean itinerary = itineraryFactory.reverseItinerary(bean);

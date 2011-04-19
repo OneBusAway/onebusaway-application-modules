@@ -2,23 +2,32 @@ package org.onebusaway.transit_data_federation.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,13 +36,34 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
   private CalendarService _calendarService;
 
+  private TransitGraphDao _transitGraphDao;
+
+  private Map<ServiceIdActivation, List<Date>> _serviceDatesByServiceIds = new HashMap<ServiceIdActivation, List<Date>>();
+
   private double _serviceDateRangeCacheInterval = 4 * 60 * 60;
 
   private Cache _serviceDateRangeCache;
 
+  private int _serviceDateLowerBoundsInWeeks = -1;
+
+  private int _serviceDateUpperBoundsInWeeks = -1;
+
+  public void setServiceDateLowerBoundsInWeeks(int serviceDateLowerBoundsInWeeks) {
+    _serviceDateLowerBoundsInWeeks = serviceDateLowerBoundsInWeeks;
+  }
+
+  public void setServiceDateUpperBoundsInWeeks(int serviceDateUpperBoundsInWeeks) {
+    _serviceDateUpperBoundsInWeeks = serviceDateUpperBoundsInWeeks;
+  }
+
   @Autowired
   public void setCalendarService(CalendarService calendarService) {
     _calendarService = calendarService;
+  }
+
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
   }
 
   public void setServiceDateRangeCacheInterval(int hours) {
@@ -42,6 +72,11 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
   public void setServiceDateRangeCache(Cache serviceDateRangeCache) {
     _serviceDateRangeCache = serviceDateRangeCache;
+  }
+
+  @PostConstruct
+  public void start() {
+    cacheServiceDatesForServiceIds();
   }
 
   @Cacheable
@@ -143,6 +178,81 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     return (Collection<Date>) element.getValue();
   }
 
+  @Override
+  @Cacheable
+  public boolean areServiceIdsActiveOnServiceDate(
+      ServiceIdActivation serviceIds, Date serviceDate) {
+
+    List<LocalizedServiceId> activeServiceIds = serviceIds.getActiveServiceIds();
+    List<LocalizedServiceId> inactiveServiceIds = serviceIds.getInactiveServiceIds();
+
+    // 95% of configs look like this
+    if (activeServiceIds.size() == 1 && inactiveServiceIds.isEmpty()) {
+      LocalizedServiceId lsid = activeServiceIds.get(0);
+      return _calendarService.isLocalizedServiceIdActiveOnDate(lsid,
+          serviceDate);
+    }
+
+    for (LocalizedServiceId lsid : activeServiceIds) {
+      if (!_calendarService.isLocalizedServiceIdActiveOnDate(lsid, serviceDate))
+        return false;
+    }
+
+    for (LocalizedServiceId lsid : inactiveServiceIds) {
+      if (_calendarService.isLocalizedServiceIdActiveOnDate(lsid, serviceDate))
+        return false;
+    }
+
+    return true;
+  }
+
+  @Override
+  public List<Date> getNextServiceDatesForDepartureInterval(
+      ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time) {
+
+    List<Date> serviceDates = _serviceDatesByServiceIds.get(serviceIds);
+
+    if (CollectionsLibrary.isEmpty(serviceDates))
+      return Collections.emptyList();
+
+    int offset = (serviceInterval.getMaxDeparture() - serviceInterval.getMinDeparture()) * 1000;
+    Date offsetDate = new Date(time - offset);
+    int startIndex = Collections.binarySearch(serviceDates, offsetDate);
+
+    if (startIndex < 0)
+      startIndex = -(startIndex + 1);
+    startIndex = Math.max(0, startIndex - 1);
+
+    List<Date> serviceDatesToReturn = new ArrayList<Date>();
+    boolean directHit = false;
+
+    for (int index = startIndex; index < serviceDates.size(); index++) {
+
+      Date serviceDate = serviceDates.get(index);
+
+      long timeFrom = serviceDate.getTime() + serviceInterval.getMinDeparture()
+          * 1000;
+      long timeTo = serviceDate.getTime() + serviceInterval.getMaxDeparture()
+          * 1000;
+
+      if (time < timeFrom) {
+
+        if (!directHit) {
+          serviceDatesToReturn.add(serviceDate);
+        }
+
+        return serviceDatesToReturn;
+      }
+
+      if (timeFrom <= time && time <= timeTo) {
+        serviceDatesToReturn.add(serviceDate);
+        directHit = true;
+      }
+    }
+
+    return serviceDatesToReturn;
+  }
+
   /****
    * Private Methods
    ****/
@@ -216,6 +326,73 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     }
 
     return serviceDates;
+  }
+
+  private void cacheServiceDatesForServiceIds() {
+
+    Set<ServiceIdActivation> allServiceIds = determineAllServiceIds();
+
+    Date lowerBounds = null;
+    if (_serviceDateLowerBoundsInWeeks != -1) {
+      Calendar c = Calendar.getInstance();
+      c.add(Calendar.WEEK_OF_YEAR, -_serviceDateLowerBoundsInWeeks);
+      lowerBounds = c.getTime();
+    }
+
+    Date upperBounds = null;
+    if (_serviceDateUpperBoundsInWeeks != -1) {
+      Calendar c = Calendar.getInstance();
+      c.add(Calendar.WEEK_OF_YEAR, _serviceDateUpperBoundsInWeeks);
+      upperBounds = c.getTime();
+    }
+
+    for (ServiceIdActivation serviceIds : allServiceIds) {
+
+      List<Date> dates = computeServiceDatesForServiceIds(serviceIds,
+          lowerBounds, upperBounds);
+      _serviceDatesByServiceIds.put(serviceIds, dates);
+    }
+  }
+
+  private Set<ServiceIdActivation> determineAllServiceIds() {
+    Set<ServiceIdActivation> allServiceIds = new HashSet<ServiceIdActivation>();
+
+    for (BlockEntry block : _transitGraphDao.getAllBlocks()) {
+      for (BlockConfigurationEntry blockConfig : block.getConfigurations()) {
+        ServiceIdActivation serviceIds = blockConfig.getServiceIds();
+        allServiceIds.add(serviceIds);
+      }
+    }
+    return allServiceIds;
+  }
+
+  private List<Date> computeServiceDatesForServiceIds(
+      ServiceIdActivation serviceIds, Date lowerBounds, Date upperBounds) {
+    Set<Date> serviceDates = null;
+
+    for (LocalizedServiceId lsid : serviceIds.getActiveServiceIds()) {
+      List<Date> dates = _calendarService.getDatesForLocalizedServiceId(lsid);
+      if (serviceDates == null)
+        serviceDates = new HashSet<Date>(dates);
+      else
+        serviceDates.retainAll(dates);
+    }
+
+    for (LocalizedServiceId lsid : serviceIds.getInactiveServiceIds()) {
+      List<Date> dates = _calendarService.getDatesForLocalizedServiceId(lsid);
+      if (serviceDates != null)
+        dates.removeAll(dates);
+    }
+
+    List<Date> dates = new ArrayList<Date>();
+    for (Date serviceDate : serviceDates) {
+      if ((lowerBounds == null || lowerBounds.before(serviceDate))
+          && (upperBounds == null || serviceDate.before(upperBounds)))
+        dates.add(serviceDate);
+    }
+
+    Collections.sort(dates);
+    return dates;
   }
 
   private class ServiceDateRangeKey {

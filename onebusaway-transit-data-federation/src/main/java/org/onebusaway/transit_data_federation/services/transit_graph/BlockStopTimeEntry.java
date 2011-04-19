@@ -23,4 +23,10 @@ public interface BlockStopTimeEntry {
    * @return the accumulated slack time, in seconds
    */
   public int getAccumulatedSlackTime();
+  
+  public boolean hasPreviousStop();
+  
+  public boolean hasNextStop();
+  
+  public BlockStopTimeEntry getNextStop();
 }

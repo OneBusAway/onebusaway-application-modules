@@ -3,22 +3,31 @@ package org.onebusaway.transit_data_federation.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addServiceDates;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.date;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.timeZone;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.testing.UnitTestingSupport;
 
 public class ExtendedCalendarServiceImplTest {
@@ -28,6 +37,8 @@ public class ExtendedCalendarServiceImplTest {
   private CalendarServiceImpl _calendarService;
 
   private ServiceInterval interval;
+
+  private TransitGraphDao _transitGraphDao;
 
   @Before
   public void before() {
@@ -48,8 +59,11 @@ public class ExtendedCalendarServiceImplTest {
     interval = new ServiceInterval(time(9, 00), time(9, 05), time(10, 00),
         time(10, 05));
 
+    _transitGraphDao = Mockito.mock(TransitGraphDao.class);
+
     _service = new ExtendedCalendarServiceImpl();
     _service.setCalendarService(_calendarService);
+    _service.setTransitGraphDao(_transitGraphDao);
   }
 
   @Test
@@ -89,7 +103,7 @@ public class ExtendedCalendarServiceImplTest {
   public void testGetServiceDatesWithinRange02() {
 
     ServiceIdActivation serviceIds = serviceIds(lsids("sA", "sB"), lsids());
-   
+
     Date from = UnitTestingSupport.date("2010-09-11 09:30");
     Date to = UnitTestingSupport.date("2010-09-11 10:30");
 
@@ -178,6 +192,44 @@ public class ExtendedCalendarServiceImplTest {
     ServiceIdActivation serviceIds = serviceIds(lsids("sA", "sC"), lsids());
 
     Set<Date> dates = _service.getDatesForServiceIds(serviceIds);
+
+    assertEquals(0, dates.size());
+  }
+
+  @Test
+  public void go() {
+
+    BlockEntry blockA = block("blockA");
+    blockConfiguration(blockA, serviceIds(lsids("sA"), lsids()));
+
+    List<BlockEntry> blocks = Arrays.asList(blockA);
+
+    Mockito.when(_transitGraphDao.getAllBlocks()).thenReturn(blocks);
+
+    _service.start();
+
+    ServiceIdActivation serviceIds = serviceIds(lsids("sA"), lsids());
+    int inFrom = time(8, 00);
+    int inTo = time(20, 00);
+    ServiceInterval interval = new ServiceInterval(inFrom, inFrom, inTo, inTo);
+    long time = dateAsLong("2010-09-10 09:30");
+
+    List<Date> dates = _service.getNextServiceDatesForDepartureInterval(
+        serviceIds, interval, time);
+
+    assertEquals(1, dates.size());
+    assertEquals(date("2010-09-10 00:00"), dates.get(0));
+
+    time = dateAsLong("2010-09-10 21:30");
+    dates = _service.getNextServiceDatesForDepartureInterval(serviceIds,
+        interval, time);
+
+    assertEquals(1, dates.size());
+    assertEquals(date("2010-09-11 00:00"), dates.get(0));
+
+    time = dateAsLong("2010-09-11 21:30");
+    dates = _service.getNextServiceDatesForDepartureInterval(serviceIds,
+        interval, time);
 
     assertEquals(0, dates.size());
   }

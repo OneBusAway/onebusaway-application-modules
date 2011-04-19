@@ -7,6 +7,7 @@ import java.util.Map;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyBlockStopTimeEntryImpl;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -20,6 +21,16 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Construct {@link BlockStopTimeIndex} indices from all {@link BlockEntry} in
+ * the transit graph. The indices created by this factory are grouped by
+ * serviceIds, such that all {@link BlockStopTimeEntry} stop entries with the
+ * same active service ids are grouped together.
+ * 
+ * @author bdferris
+ * @see BlockStopTimeIndex
+ * @see BlockIndexService
+ */
 public class BlockStopTimeIndicesFactory {
 
   private static Logger _log = LoggerFactory.getLogger(BlockStopTimeIndicesFactory.class);

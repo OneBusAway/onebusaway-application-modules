@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.impl.transit_graph;
 import java.io.Serializable;
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.services.blocks.AbstractBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -15,7 +16,7 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
   private BlockConfigurationEntry blockConfiguration;
 
   private TripEntry trip;
-  
+
   private short sequence;
 
   private short accumulatedStopTimeIndex;
@@ -28,6 +29,8 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
 
   private BlockTripEntry nextTrip;
 
+  private AbstractBlockTripIndex pattern;
+
   public void setTrip(TripEntry trip) {
     this.trip = trip;
   }
@@ -35,7 +38,7 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
   public void setBlockConfiguration(BlockConfigurationEntry blockConfiguration) {
     this.blockConfiguration = blockConfiguration;
   }
-  
+
   public void setSequence(short sequence) {
     this.sequence = sequence;
   }
@@ -60,6 +63,10 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
     this.nextTrip = nextTrip;
   }
 
+  public void setPattern(AbstractBlockTripIndex pattern) {
+    this.pattern = pattern;
+  }
+
   /****
    * {@link BlockTripEntry} Interface
    ****/
@@ -82,7 +89,7 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
       toIndex = nextTrip.getAccumulatedStopTimeIndex();
     return stopTimes.subList(accumulatedStopTimeIndex, toIndex);
   }
-  
+
   @Override
   public short getSequence() {
     return sequence;
@@ -127,6 +134,11 @@ public class BlockTripEntryImpl implements BlockTripEntry, Serializable {
   public double getDistanceAlongBlockForIndex(int stopIndex) {
     return distanceAlongBlock
         + trip.getStopTimes().get(stopIndex).getShapeDistTraveled();
+  }
+
+  @Override
+  public AbstractBlockTripIndex getPattern() {
+    return pattern;
   }
 
   @Override

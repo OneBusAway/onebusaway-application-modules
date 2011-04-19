@@ -1,0 +1,161 @@
+package org.onebusaway.transit_data_federation.impl.otp;
+
+import java.util.Set;
+
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.Modes;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
+import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopHopService;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
+import org.opentripplanner.routing.core.TraverseModeSet;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+class OTPConfigurationServiceImpl implements OTPConfigurationService {
+
+  private TransitGraphDao _transitGraphDao;
+  private StopHopService _stopHopService;
+  private StopTransferService _stopTransferService;
+  private ArrivalAndDepartureService _arrivalAndDepartureService;
+  private StopTimeService _stopTimeService;
+
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setStopHopService(StopHopService stopHopService) {
+    _stopHopService = stopHopService;
+  }
+
+  @Autowired
+  public void setStopTranferService(StopTransferService stopTransferService) {
+    _stopTransferService = stopTransferService;
+  }
+
+  @Autowired
+  public void setArrivalAndDepartureService(
+      ArrivalAndDepartureService realTimeArrivalAndDepartureService) {
+    _arrivalAndDepartureService = realTimeArrivalAndDepartureService;
+  }
+  
+  @Autowired
+  public void setStopTimeService(StopTimeService stopTimeService) {
+    _stopTimeService = stopTimeService;
+  }
+
+  @Override
+  public GraphContext createGraphContext() {
+
+    GraphContext context = new GraphContext();
+    context.setArrivalAndDepartureService(_arrivalAndDepartureService);
+    context.setStopTimeService(_stopTimeService);
+    context.setStopHopService(_stopHopService);
+    context.setStopTransferService(_stopTransferService);
+    context.setTransitGraphDao(_transitGraphDao);
+    return context;
+  }
+
+  /**
+   * From 'Transit Capacity and Quality of Service Manual' - Part 3 - Exhibit
+   * 3.9
+   * 
+   * http://onlinepubs.trb.org/Onlinepubs/tcrp/tcrp100/part%203.pdf
+   * 
+   * Table of passenger perceptions of time. Given that actual in-vehicle time
+   * seems to occur in real-time (penalty ratio of 1.0), how do passengers
+   * perceived walking, waiting for the first vehicle, and waiting for a
+   * transfer. In addition, is there an additive penalty for making a transfer
+   * of any kind.
+   */
+  @Override
+  public OBATraverseOptions createTraverseOptions() {
+
+    OBATraverseOptions options = new OBATraverseOptions();
+
+    options.walkReluctance = 2.2;
+    options.waitAtBeginningFactor = 0.1;
+    options.waitReluctance = 2.5;
+
+    options.boardCost = 14 * 60;
+    options.maxTransfers = 2;
+    options.minTransferTime = 60;
+
+    options.maxWalkDistance = 1000;
+    options.maxTransfers = 2;
+
+    /**
+     * Ten seconds max
+     */
+    options.maxComputationTime = 10000;
+
+    options.useServiceDays = false;
+
+    options.stateFactory = OBAStateData.STATE_FACTORY;
+    
+    return options;
+  }
+
+  @Override
+  public void applyConstraintsToTraverseOptions(ConstraintsBean constraints,
+      OBATraverseOptions options) {
+
+    options.setArriveBy(constraints.isArriveBy());
+
+    /**
+     * Modes
+     */
+    Set<String> modes = constraints.getModes();
+    if (modes != null) {
+      TraverseModeSet ms = new TraverseModeSet();
+      if (modes.contains(Modes.WALK))
+        ms.setWalk(true);
+      if (modes.contains(Modes.TRANSIT))
+        ms.setTransit(true);
+      options.setModes(ms);
+    }
+
+    /**
+     * Walking
+     */
+    if (constraints.getWalkSpeed() != -1)
+      options.speed = constraints.getWalkSpeed();
+    if (constraints.getMaxWalkingDistance() != -1)
+      options.maxWalkDistance = constraints.getMaxWalkingDistance();
+    if (constraints.getWalkReluctance() != -1)
+      options.walkReluctance = constraints.getWalkReluctance();
+
+    /**
+     * Waiting
+     */
+    if (constraints.getInitialWaitReluctance() != -1)
+      options.waitAtBeginningFactor = constraints.getInitialWaitReluctance();
+    if (constraints.getInitialWaitReluctance() != -1)
+      options.waitReluctance = constraints.getWaitReluctance();
+
+    /**
+     * Transferring
+     */
+    if (constraints.getTransferCost() != -1)
+      options.boardCost = constraints.getTransferCost();
+    if (constraints.getMinTransferTime() != -1)
+      options.minTransferTime = constraints.getMinTransferTime();
+    if (constraints.getMaxTransfers() != -1)
+      options.maxTransfers = constraints.getMaxTransfers();
+    if (constraints.getMaxComputationTime() > 0
+        && constraints.getMaxComputationTime() < 15000)
+      options.maxComputationTime = constraints.getMaxComputationTime();
+
+    options.numItineraries = constraints.getResultCount();
+
+    options.useRealtime = constraints.isUseRealTime();
+
+    if (constraints.getMaxTripDuration() != -1)
+      options.maxTripDuration = constraints.getMaxTripDuration() * 1000;
+  }
+}

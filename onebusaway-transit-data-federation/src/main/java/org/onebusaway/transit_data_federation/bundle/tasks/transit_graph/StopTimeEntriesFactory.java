@@ -158,13 +158,8 @@ public class StopTimeEntriesFactory {
         if (duration < 0) {
           throw new IllegalStateException();
         }
-
-        StopEntryImpl fromStopEntry = prevStopTimeEntry.getStop();
-        StopEntryImpl toStopEntry = stopTimeEntry.getStop();
-
-        fromStopEntry.addNextStopWithMinTravelTime(toStopEntry, duration);
-        toStopEntry.addPreviousStopWithMinTravelTime(fromStopEntry, duration);
       }
+      
       prevStopTimeEntry = stopTimeEntry;
 
       sequence++;

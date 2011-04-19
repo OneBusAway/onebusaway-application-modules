@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.impl.otp.graph;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData.OBAEditor;
+import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.opentripplanner.routing.core.EdgeNarrative;
@@ -34,6 +35,10 @@ public class BlockForwardHopEdge extends AbstractEdge {
 
   @Override
   public TraverseResult traverse(State state0, TraverseOptions wo) {
+
+    OBATraverseOptions obaOpts = (OBATraverseOptions) wo;
+    if (obaOpts.extraSpecialMode)
+      return extraSpecialMode(state0, obaOpts);
 
     ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
 
@@ -94,6 +99,28 @@ public class BlockForwardHopEdge extends AbstractEdge {
     }
 
     return r;
+  }
+
+  private TraverseResult extraSpecialMode(State state0,
+      OBATraverseOptions obaOpts) {
+
+    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
+    ArrivalAndDepartureInstance nextStop = service.getNextStopArrivalAndDeparture(_from);
+    
+    if( nextStop == null)
+      return null;
+
+    long departure = _from.getBestDepartureTime();
+    long arrival = nextStop.getBestArrivalTime();
+    int runningTime = (int) ((arrival - departure) / 1000);
+
+    State state1 = state0.incrementTimeInSeconds(runningTime);
+
+    Vertex fromVertex = new BlockDepartureVertex(_context, _from);
+    Vertex toVertex = new BlockArrivalVertex(_context, nextStop);
+    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+
+    return new TraverseResult(runningTime, state1, narrative);
   }
 
   @Override

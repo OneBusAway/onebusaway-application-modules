@@ -307,7 +307,17 @@ public class UnitTestingSupport {
     builder.setServiceIds(serviceIds);
     builder.setTrips(Arrays.asList(trips));
     builder.setTripGapDistances(new double[trips.length]);
-    return builder.create();
+    BlockConfigurationEntry blockConfig = builder.create();
+    
+    BlockEntryImpl blockImpl = (BlockEntryImpl) block;
+    List<BlockConfigurationEntry> configs = block.getConfigurations();
+    if( configs == null) {
+      configs = new ArrayList<BlockConfigurationEntry>();
+      blockImpl.setConfigurations(configs);
+    }
+    configs.add(blockConfig);
+    
+    return blockConfig;
   }
 
   public static BlockTripEntryImpl blockTrip(
@@ -320,7 +330,7 @@ public class UnitTestingSupport {
 
   public static BlockStopTimeEntryImpl blockStopTime(StopTimeEntry stopTime,
       int blockSequence, BlockTripEntry trip) {
-    return new BlockStopTimeEntryImpl(stopTime, blockSequence, trip);
+    return new BlockStopTimeEntryImpl(stopTime, blockSequence, trip, true);
   }
 
   public static LocalizedServiceId lsid(String id) {

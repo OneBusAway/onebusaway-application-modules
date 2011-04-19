@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
@@ -16,6 +15,7 @@ import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.Modes;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data_federation.impl.beans.ApplicationBeanLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ItinerariesBeanService;
@@ -79,8 +79,9 @@ class OneBusAwayServiceImpl implements OneBusAwayService {
       double minTime = 0;
       TripToStop minStop = null;
 
-      CoordinatePoint place = new CoordinatePoint(result.getLat(),
-          result.getLon());
+      TransitLocationBean place = new TransitLocationBean();
+      place.setLat(result.getLat());
+      place.setLon(result.getLon());
 
       for (TripToStop o : closestStops) {
 
@@ -96,9 +97,10 @@ class OneBusAwayServiceImpl implements OneBusAwayService {
         walkConstraints.setMaxTripDuration(remainingTime);
 
         int index = o.getIndex();
-        double stopLat = travelTimes.getStopLat(index);
-        double stopLon = travelTimes.getStopLon(index);
-        CoordinatePoint stopLocation = new CoordinatePoint(stopLat, stopLon);
+        TransitLocationBean stopLocation = new TransitLocationBean();
+        stopLocation.setLat(travelTimes.getStopLat(index));
+        stopLocation.setLon(travelTimes.getStopLon(index));
+        
         ItinerariesBean itineraries = _itinerariesService.getItinerariesBetween(
             stopLocation, place, time, System.currentTimeMillis(), walkConstraints);
 

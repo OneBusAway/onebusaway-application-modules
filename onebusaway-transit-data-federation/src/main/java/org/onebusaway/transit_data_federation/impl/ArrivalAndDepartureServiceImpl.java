@@ -200,6 +200,24 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   @Override
+  public List<ArrivalAndDepartureInstance> getNextScheduledBlockTripDeparturesForStop(
+      StopEntry stop, long time) {
+
+    List<StopTimeInstance> stopTimes = _stopTimeService.getNextScheduledBlockTripDeparturesForStop(
+        stop, time);
+
+    List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
+
+    for (StopTimeInstance sti : stopTimes) {
+      ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
+          sti, time);
+      instances.add(instance);
+    }
+
+    return instances;
+  }
+
+  @Override
   public ArrivalAndDepartureInstance getArrivalAndDepartureForStop(
       ArrivalAndDepartureQuery query) {
 

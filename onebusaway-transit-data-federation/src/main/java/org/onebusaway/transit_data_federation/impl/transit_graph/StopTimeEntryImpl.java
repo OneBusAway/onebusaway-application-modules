@@ -135,19 +135,6 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof StopTimeEntryImpl))
-      return false;
-    StopTimeEntryImpl other = (StopTimeEntryImpl) obj;
-    return _stopTimeId == other._stopTimeId;
-  }
-
-  @Override
-  public int hashCode() {
-    return _stopTimeId;
-  }
-
-  @Override
   public String toString() {
     return "StopTimeEntryImpl(stop=" + _stop.getId() + " trip=" + _trip
         + " arrival=" + _arrivalTime + " departure=" + _departureTime + ")";

@@ -32,6 +32,15 @@ public interface ArrivalAndDepartureService {
   public List<ArrivalAndDepartureInstance> getScheduledArrivalsAndDeparturesForStopInTimeRange(
       StopEntry stop, long currentTime, long fromTime, long toTime);
 
+  /**
+   * 
+   * @param stop
+   * @param time
+   * @return
+   */
+  public List<ArrivalAndDepartureInstance> getNextScheduledBlockTripDeparturesForStop(
+      StopEntry stop, long time);
+
   public ArrivalAndDepartureInstance getArrivalAndDepartureForStop(
       ArrivalAndDepartureQuery query);
 
@@ -56,7 +65,7 @@ public interface ArrivalAndDepartureService {
    */
   public ArrivalAndDepartureInstance getNextStopArrivalAndDeparture(
       ArrivalAndDepartureInstance instance);
-  
+
   /**
    * Given an arrival and departure instance, compute the arrival and departure
    * instance for the next stop along the block. If at the end of the block,

@@ -31,7 +31,7 @@ public class TransitShetVertexSkipStrategy implements VertexSkipStrategy {
     if (vertex.mirror instanceof WalkFromStopVertex)
       return true;
 
-    OTPConfiguration config = options.getExtension(OTPConfiguration.class);
+    OBATraverseOptions config = options.getExtension(OBATraverseOptions.class);
 
     long maxTripDuration = DEFAULT_MAX_TRIP_DURATION;
     if (config != null && config.maxTripDuration != -1)
