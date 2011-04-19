@@ -40,6 +40,8 @@ public class FederatedTransitDataBundleCreatorMain {
   private static final String ARG_INCLUDE = "include";
 
   private static final String ARG_ONLY_IF_DNE = "onlyIfDoesNotExist";
+  
+  private static final String ARG_BUNDLE_KEY = "bundleKey";
 
   private static final String ARG_RANDOMIZE_CACHE_DIR = "randomizeCacheDir";
 
@@ -101,6 +103,11 @@ public class FederatedTransitDataBundleCreatorMain {
 
       if (commandLine.hasOption(ARG_RANDOMIZE_CACHE_DIR))
         creator.setRandomizeCacheDir(true);
+      
+      if( commandLine.hasOption(ARG_BUNDLE_KEY)) {
+        String key = commandLine.getOptionValue(ARG_BUNDLE_KEY);
+        creator.setBundleKey(key);
+      }
 
       creator.setOutputPath(outputPath);
 
@@ -134,6 +141,7 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_SKIP, true, "");
     options.addOption(ARG_INCLUDE, true, "");
     options.addOption(ARG_ONLY_IF_DNE, false, "");
+    options.addOption(ARG_BUNDLE_KEY, true, "");
     options.addOption(ARG_RANDOMIZE_CACHE_DIR, false, "");
     options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
 
@@ -141,6 +149,7 @@ public class FederatedTransitDataBundleCreatorMain {
     property.setArgName("property=value");
     property.setArgs(2);
     property.setValueSeparator('=');
+    
   }
 
   protected void printUsage() {

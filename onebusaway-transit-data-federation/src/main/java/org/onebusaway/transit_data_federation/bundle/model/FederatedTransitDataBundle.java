@@ -15,6 +15,8 @@ public class FederatedTransitDataBundle {
 
   private File _path;
 
+  private String _key;
+
   public FederatedTransitDataBundle(File path) {
     _path = path;
   }
@@ -29,6 +31,14 @@ public class FederatedTransitDataBundle {
 
   public File getPath() {
     return _path;
+  }
+
+  public String getKey() {
+    return _key;
+  }
+
+  public void setKey(String key) {
+    _key = key;
   }
 
   public File getCalendarServiceDataPath() {
@@ -76,7 +86,11 @@ public class FederatedTransitDataBundle {
   }
 
   public File getHubStopsPath() {
-    return new File(_path,"HubStops.txt");
+    return new File(_path, keyed("HubStops.txt"));
+  }
+
+  public File getTransferPatternsPath() {
+    return new File(_path, keyed("TransferPatterns.obj"));
   }
 
   public File getServiceAlertsPath() {
@@ -85,6 +99,12 @@ public class FederatedTransitDataBundle {
 
   public File getCachePath() {
     return new File(_path, "cache");
+  }
+
+  private String keyed(String value) {
+    if (_key != null)
+      return value + "-" + _key;
+    return value;
   }
 
 }

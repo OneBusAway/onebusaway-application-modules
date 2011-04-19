@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,32 +10,30 @@ import java.util.Set;
 
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.gtfs.model.AgencyAndId;
 
-public class TransferPattern {
+public class TransferPatternData implements Serializable {
 
-  private final Map<StopEntry, Set<Entry>> _stops = new HashMap<StopEntry, Set<Entry>>();
+  private static final long serialVersionUID = 1L;
+
+  private final Map<AgencyAndId, Set<Entry>> _stops = new HashMap<AgencyAndId, Set<Entry>>();
 
   private final Entry _root;
 
-  public TransferPattern(StopEntry origin) {
+  public TransferPatternData(AgencyAndId origin) {
     _root = new Entry(origin, true, null, 0);
   }
-  
-  public StopEntry getOriginStop() {
-    return _root.stop;
-  }
 
-  public void addPath(List<Pair<StopEntry>> path) {
+  public void addPath(List<Pair<AgencyAndId>> path) {
 
     if (path.isEmpty())
       return;
 
     Entry node = _root;
 
-    for (Pair<StopEntry> segment : path) {
-      StopEntry from = segment.getFirst();
-      StopEntry to = segment.getSecond();
+    for (Pair<AgencyAndId> segment : path) {
+      AgencyAndId from = segment.getFirst();
+      AgencyAndId to = segment.getSecond();
 
       if (node == _root) {
         if (from != _root.stop)
@@ -46,7 +45,7 @@ public class TransferPattern {
       node = node.extend(to);
     }
 
-    StopEntry stop = node.stop;
+    AgencyAndId stop = node.stop;
     Set<Entry> nodes = _stops.get(stop);
     if (nodes == null) {
       nodes = new HashSet<Entry>();
@@ -55,17 +54,17 @@ public class TransferPattern {
     nodes.add(node);
   }
 
-  public Set<StopEntry> getStops() {
+  public Set<AgencyAndId> getStops() {
     return _stops.keySet();
   }
 
-  public List<List<Pair<StopEntry>>> getPathsForStop(StopEntry stop) {
+  public List<List<Pair<AgencyAndId>>> getPathsForStop(AgencyAndId stop) {
 
-    List<List<Pair<StopEntry>>> paths = new ArrayList<List<Pair<StopEntry>>>();
+    List<List<Pair<AgencyAndId>>> paths = new ArrayList<List<Pair<AgencyAndId>>>();
     Set<Entry> nodes = _stops.get(stop);
 
     for (Entry node : nodes) {
-      List<Pair<StopEntry>> path = new ArrayList<Pair<StopEntry>>();
+      List<Pair<AgencyAndId>> path = new ArrayList<Pair<AgencyAndId>>();
       paths.add(path);
       while (node != null) {
         Entry b = node;
@@ -80,15 +79,17 @@ public class TransferPattern {
     return paths;
   }
 
-  private static class Entry {
+  private static class Entry implements Serializable {
 
-    private final StopEntry stop;
+    private static final long serialVersionUID = 1L;
+    
+    private final AgencyAndId stop;
     private final boolean transfer;
-    private final Map<StopEntry, Entry> _children = new HashMap<StopEntry, TransferPattern.Entry>();
+    private final Map<AgencyAndId, Entry> _children = new HashMap<AgencyAndId, TransferPatternData.Entry>();
     private final Entry parent;
     private final int depth;
 
-    public Entry(StopEntry stop, boolean transfer, Entry parent, int depth) {
+    public Entry(AgencyAndId stop, boolean transfer, Entry parent, int depth) {
       if (stop == null)
         throw new IllegalArgumentException();
       this.stop = stop;
@@ -97,7 +98,7 @@ public class TransferPattern {
       this.depth = depth;
     }
 
-    public Entry extend(StopEntry from) {
+    public Entry extend(AgencyAndId from) {
       Entry node = _children.get(from);
       if (node == null) {
         node = new Entry(from, !this.transfer, this, depth + 1);
@@ -111,5 +112,4 @@ public class TransferPattern {
       return stop.getId() + " " + transfer;
     }
   }
-
 }

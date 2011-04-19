@@ -46,7 +46,6 @@ public class OBAStateData extends StateData {
   public static class OBAEditor extends StateData.Editor {
 
     private int maxBlockSequence = -1;
-    
 
     private long initialWaitTime = 0;
 

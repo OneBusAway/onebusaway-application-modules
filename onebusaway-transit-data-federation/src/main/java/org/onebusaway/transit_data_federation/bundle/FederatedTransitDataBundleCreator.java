@@ -7,16 +7,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.ContainerLibrary;
+import org.onebusaway.container.spring.PropertyOverrideConfigurer;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.TaskDefinition;
 import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -64,6 +67,8 @@ public class FederatedTransitDataBundleCreator {
 
   private boolean _randomizeCacheDir = false;
 
+  private String _bundleKey;
+
   /**
    * Additional context paths that will be added when constructing the Spring
    * container that controls the build process. See
@@ -87,6 +92,10 @@ public class FederatedTransitDataBundleCreator {
     _outputPath = outputPath;
   }
 
+  public void setBundleKey(String key) {
+    _bundleKey = key;
+  }
+
   public void addTaskToOnlyRun(String onlyTask) {
     _onlyTasks.add(onlyTask);
   }
@@ -102,7 +111,6 @@ public class FederatedTransitDataBundleCreator {
   public void setSkipToTask(String taskName) {
     _skipToTask = taskName;
   }
-  
 
   public void setRandomizeCacheDir(boolean randomizeCacheDir) {
     _randomizeCacheDir = randomizeCacheDir;
@@ -125,12 +133,12 @@ public class FederatedTransitDataBundleCreator {
      * references in the Spring config
      */
     System.setProperty("bundlePath", _outputPath.getAbsolutePath());
-    
+
     String cacheDir = _outputPath.getAbsolutePath() + File.separator + "cache";
-    if( _randomizeCacheDir )
+    if (_randomizeCacheDir)
       cacheDir += "-" + UUID.randomUUID().toString();
-    System.setProperty("bundleCacheDir", cacheDir );
-    
+    System.setProperty("bundleCacheDir", cacheDir);
+
     List<String> contextPaths = getPrimaryApplicatonContextPaths();
     Map<String, BeanDefinition> contextBeans = getPrimaryBeanDefintions();
 
@@ -211,6 +219,17 @@ public class FederatedTransitDataBundleCreator {
   private Map<String, BeanDefinition> getPrimaryBeanDefintions() {
     Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
     beans.putAll(_contextBeans);
+
+    Properties p = new Properties();
+    if (_bundleKey != null) {
+      p.setProperty("bundle.key", _bundleKey);
+    }
+
+    BeanDefinitionBuilder propertyOverrides = BeanDefinitionBuilder.genericBeanDefinition(PropertyOverrideConfigurer.class);
+    propertyOverrides.addPropertyValue("properties", p);
+    beans.put("myCustomPropertyOverrides",
+        propertyOverrides.getBeanDefinition());
+
     return beans;
   }
 
@@ -299,7 +318,7 @@ public class FederatedTransitDataBundleCreator {
     List<String> tasks = new ArrayList<String>();
 
     for (TaskDefinition taskDef : taskDefinitions) {
-      if (! isTaskEnabled(taskDef))
+      if (!isTaskEnabled(taskDef))
         continue;
       String taskName = taskDef.getTaskName();
       tasks.add(taskName);
@@ -336,4 +355,5 @@ public class FederatedTransitDataBundleCreator {
     return _onlyTasks.contains(taskDef.getTaskName())
         || _includeTasks.contains(taskDef.getTaskName()) || taskDef.isEnabled();
   }
+
 }
