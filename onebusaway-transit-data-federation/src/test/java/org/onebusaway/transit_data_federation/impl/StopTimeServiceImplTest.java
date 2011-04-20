@@ -52,7 +52,7 @@ public class StopTimeServiceImplTest {
     _stopId = _stop.getId();
 
     TransitGraphDao graph = Mockito.mock(TransitGraphDao.class);
-    Mockito.when(graph.getStopEntryForId(_stop.getId())).thenReturn(_stop);
+    Mockito.when(graph.getStopEntryForId(_stop.getId(),true)).thenReturn(_stop);
 
     CalendarServiceData data = new CalendarServiceData();
     data.putDatesForLocalizedServiceId(lsid("sA"),

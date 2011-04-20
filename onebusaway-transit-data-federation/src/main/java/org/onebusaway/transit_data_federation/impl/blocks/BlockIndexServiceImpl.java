@@ -50,7 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-class BlockIndexServiceImpl implements BlockIndexService {
+public class BlockIndexServiceImpl implements BlockIndexService {
 
   private Logger _log = LoggerFactory.getLogger(BlockIndexServiceImpl.class);
 
