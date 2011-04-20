@@ -26,6 +26,7 @@ import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.HasStopTimeInstanceTransitVertex;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.OriginVertex;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPArrivalAndTransferEdge;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPBlockArrivalVertex;
@@ -171,7 +172,7 @@ public class TransferPatternFromHubsTask implements Runnable {
         options.extraSpecialMode = true;
 
         GenericDijkstra dijkstra = new GenericDijkstra(graph, options);
-        dijkstra.setSkipVertexStrategy(new VertexCounter());
+        dijkstra.setSkipVertexStrategy(new VertexCounter(tFrom));
 
         OriginVertex origin = new OriginVertex(context, stop, instances);
         State state = new State(tFrom, new OBAStateData());
@@ -467,25 +468,29 @@ public class TransferPatternFromHubsTask implements Runnable {
 
     private final Set<StopEntry> _stops = new HashSet<StopEntry>();
 
+    private final long _serviceDate;
+
+    public VertexCounter(long serviceDate) {
+      _serviceDate = serviceDate;
+    }
+
     @Override
     public boolean shouldSkipVertex(Vertex origin, Vertex target,
         SPTVertex parent, Vertex current, State state, ShortestPathTree spt,
         TraverseOptions traverseOptions) {
-
-      /**
-       * Let's only wait so long...
-       */
-      long t0 = parent.state.getTime();
-      long t1 = state.getTime();
-
-      if (Math.abs(t1 - t0) > 8 * 60 * 60 * 1000 && t1 > state.getStartTime())
-        return true;
 
       if (current instanceof HasStopTransitVertex) {
         HasStopTransitVertex v = (HasStopTransitVertex) current;
         StopEntry stop = v.getStop();
         if (_stops.add(stop))
           System.out.println("stops=" + _stops.size());
+      }
+
+      if (current instanceof HasStopTimeInstanceTransitVertex) {
+        HasStopTimeInstanceTransitVertex v = (HasStopTimeInstanceTransitVertex) current;
+        StopTimeInstance instance = v.getInstance();
+        if (instance.getServiceDate() > _serviceDate + 12 * 60 * 60 * 1000)
+          return true;
       }
 
       return false;

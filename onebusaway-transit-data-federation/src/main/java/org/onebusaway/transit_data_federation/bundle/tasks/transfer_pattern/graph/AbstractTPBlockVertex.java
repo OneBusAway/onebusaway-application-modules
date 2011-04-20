@@ -8,7 +8,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 public abstract class AbstractTPBlockVertex extends AbstractVertex implements
-    HasStopTransitVertex {
+    HasStopTransitVertex, HasStopTimeInstanceTransitVertex {
 
   protected final StopTimeInstance _instance;
 
