@@ -194,7 +194,8 @@ public class TransferPatternFromHubsTask implements Runnable {
     writeData(patternsByStopId);
   }
 
-  private void writeData(Map<AgencyAndId, MutableTransferPattern> patternsByStopId) {
+  private void writeData(
+      Map<AgencyAndId, MutableTransferPattern> patternsByStopId) {
 
     File path = _bundle.getTransferPatternsPath();
 
@@ -270,8 +271,8 @@ public class TransferPatternFromHubsTask implements Runnable {
     return serviceDates;
   }
 
-  private void processTree(MultiShortestPathTree spt, MutableTransferPattern pattern,
-      StopEntry originStop) {
+  private void processTree(MultiShortestPathTree spt,
+      MutableTransferPattern pattern, StopEntry originStop) {
 
     Map<SPTVertex, List<StopEntry>> parentsBySPTVertex = new HashMap<SPTVertex, List<StopEntry>>();
 
@@ -294,7 +295,8 @@ public class TransferPatternFromHubsTask implements Runnable {
   }
 
   private void processArrivalsForStop(List<TPBlockArrivalVertex> arrivals,
-      StopEntry originStop, MultiShortestPathTree spt, MutableTransferPattern pattern,
+      StopEntry originStop, MultiShortestPathTree spt,
+      MutableTransferPattern pattern,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
 
     Collections.sort(arrivals);

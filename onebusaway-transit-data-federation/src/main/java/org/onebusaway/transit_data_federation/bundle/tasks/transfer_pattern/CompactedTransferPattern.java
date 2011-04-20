@@ -46,7 +46,10 @@ public class CompactedTransferPattern implements TransferPattern {
 
     List<List<Pair<StopEntry>>> paths = new ArrayList<List<Pair<StopEntry>>>();
 
-    for (int leafIndex : leafIndices) {
+    for (int rootIndex : leafIndices) {
+
+      int leafIndex = rootIndex;
+
       List<Pair<StopEntry>> path = new ArrayList<Pair<StopEntry>>();
       paths.add(path);
       while (leafIndex >= 0) {

@@ -100,7 +100,8 @@ public class MutableTransferPattern implements TransferPattern {
 
     String line = null;
     String stopId = AgencyAndIdLibrary.convertToString(entry.stop.getId());
-    String endpoint = _stops.containsKey(entry.stop) ? "1" : "0";
+    Set<Entry> endpoints = _stops.get(entry.stop);
+    String endpoint = (endpoints != null && endpoints.contains(entry)) ? "1" : "0";
 
     if (entry.parent != null)
       line = CSVLibrary.getAsCSV(index, stopId, endpoint, parentIndex);
