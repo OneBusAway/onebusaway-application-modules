@@ -16,12 +16,10 @@ import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPattern;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternData;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
-import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +53,7 @@ class TransferPatternServiceImpl implements TransferPatternService {
     if (!filePath.exists())
       return;
 
+    /*
     Map<AgencyAndId, TransferPatternData> dataByStopId = ObjectSerializationLibrary.readObject(filePath);
     for (Map.Entry<AgencyAndId, TransferPatternData> entry : dataByStopId.entrySet()) {
 
@@ -73,6 +72,12 @@ class TransferPatternServiceImpl implements TransferPatternService {
         }
       }
     }
+    */
+  }
+
+  @Override
+  public boolean isServiceEnabled() {
+    return !_transferPatternsByStop.isEmpty();
   }
 
   @Override

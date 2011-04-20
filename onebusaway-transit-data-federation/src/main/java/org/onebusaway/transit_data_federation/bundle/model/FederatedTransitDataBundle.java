@@ -80,7 +80,7 @@ public class FederatedTransitDataBundle {
   public File getFrequencyBlockTripIndicesPath() {
     return new File(_path, "FrequencyBlockTripIndices.obj");
   }
-  
+
   public File getBlockSequenceIndicesPath() {
     return new File(_path, "BlockSequenceIndices.obj");
   }
@@ -94,7 +94,7 @@ public class FederatedTransitDataBundle {
   }
 
   public File getTransferPatternsPath() {
-    return new File(_path, keyed("TransferPatterns.obj"));
+    return new File(_path, keyed("TransferPatterns.gz"));
   }
 
   public File getServiceAlertsPath() {
@@ -106,9 +106,13 @@ public class FederatedTransitDataBundle {
   }
 
   private String keyed(String value) {
-    if (_key != null)
-      return value + "-" + _key;
+    if (_key != null) {
+      int index = value.lastIndexOf('.');
+      if (index == -1)
+        return value + "-" + _key;
+      else
+        return value.substring(0, index) + "-" + _key + value.substring(index);
+    }
     return value;
   }
-
 }

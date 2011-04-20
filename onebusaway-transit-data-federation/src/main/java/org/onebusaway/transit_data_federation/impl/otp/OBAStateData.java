@@ -6,7 +6,7 @@ import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.StateFactory;
 
 public class OBAStateData extends StateData {
-  
+
   public static final StateFactory STATE_FACTORY = new StateFactoryImpl();
 
   private final int maxBlockSequence;

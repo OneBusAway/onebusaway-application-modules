@@ -39,11 +39,6 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements
    ****/
 
   @Override
-  public int getDegreeIn() {
-    return getIncoming().size();
-  }
-
-  @Override
   public Collection<Edge> getIncoming() {
 
     ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
@@ -53,11 +48,6 @@ public class BlockArrivalVertex extends AbstractBlockVertex implements
       return Collections.emptyList();
 
     return Arrays.asList((Edge) new BlockHopEdge(_context, previous, _instance));
-  }
-
-  @Override
-  public int getDegreeOut() {
-    return getOutgoing().size();
   }
 
   @Override

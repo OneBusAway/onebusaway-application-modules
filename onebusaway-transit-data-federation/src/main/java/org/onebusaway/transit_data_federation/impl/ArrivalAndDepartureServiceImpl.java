@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
+import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.model.TargetTime;
@@ -421,6 +422,13 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
       index++;
     }
+  }
+
+  @Override
+  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesAndArrivalsForStopPair(
+      StopEntry fromStop, StopEntry toStop, long time) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   /****
@@ -910,4 +918,5 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       return new ArrivalAndDepartureTime(arrivalTime, departureTime);
     }
   }
+
 }

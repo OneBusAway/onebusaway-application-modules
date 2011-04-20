@@ -3,11 +3,12 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.gra
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractVertexWithEdges;
 import org.onebusaway.transit_data_federation.impl.otp.graph.HasStopTransitVertex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
-public abstract class AbstractTPBlockVertex extends AbstractVertex implements
+public abstract class AbstractTPBlockVertex extends AbstractVertexWithEdges implements
     HasStopTransitVertex, HasStopTimeInstanceTransitVertex {
 
   protected final StopTimeInstance _instance;

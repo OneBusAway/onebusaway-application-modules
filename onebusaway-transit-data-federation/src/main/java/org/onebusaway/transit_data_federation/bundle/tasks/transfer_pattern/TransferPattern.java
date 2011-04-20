@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,8 @@ import java.util.Set;
 
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
+import org.onebusaway.csv_entities.CSVLibrary;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class TransferPattern {
@@ -20,7 +23,7 @@ public class TransferPattern {
   public TransferPattern(StopEntry origin) {
     _root = new Entry(origin, true, null, 0);
   }
-  
+
   public StopEntry getOriginStop() {
     return _root.stop;
   }
@@ -78,6 +81,33 @@ public class TransferPattern {
     }
 
     return paths;
+  }
+
+  public long writeTransferPatternsToPrintWriter(PrintWriter out, long index) {
+    return writeEntryToPrintWriter(_root, out, index, -1);
+  }
+
+  private long writeEntryToPrintWriter(Entry entry, PrintWriter out,
+      long index, long parentIndex) {
+
+    String line = null;
+    String stopId = AgencyAndIdLibrary.convertToString(entry.stop.getId());
+    String endpoint = _stops.containsKey(entry.stop) ? "1" : "0";
+
+    if (entry.parent != null)
+      line = CSVLibrary.getAsCSV(index, stopId, endpoint, parentIndex);
+    else
+      line = CSVLibrary.getAsCSV(index, stopId, endpoint);
+
+    out.println(line);
+
+    parentIndex = index;
+    index++;
+
+    for (Entry child : entry._children.values())
+      index = writeEntryToPrintWriter(child, out, index, parentIndex);
+
+    return index;
   }
 
   private static class Entry {

@@ -13,7 +13,7 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public final class ArrivalVertex extends AbstractVertex implements HasEdges,
+public final class ArrivalVertex extends AbstractVertexWithEdges implements
     HasStopTransitVertex {
 
   private static DateFormat _format = DateFormat.getDateTimeInstance(
@@ -63,21 +63,11 @@ public final class ArrivalVertex extends AbstractVertex implements HasEdges,
    ****/
 
   @Override
-  public int getDegreeIn() {
-    return getIncoming().size();
-  }
-
-  @Override
   public Collection<Edge> getIncoming() {
     List<Edge> edges = new ArrayList<Edge>(1);
     // We could come from a different bus (arrival)
     edges.add(new ArrivalReverseEdge(_context, _stop));
     return edges;
-  }
-
-  @Override
-  public int getDegreeOut() {
-    return getOutgoing().size();
   }
 
   @Override

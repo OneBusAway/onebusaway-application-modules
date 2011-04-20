@@ -2,7 +2,6 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.gra
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
@@ -15,7 +14,7 @@ import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
 public class TPBlockArrivalVertex extends AbstractTPBlockVertex implements
-    HasEdges, Comparable<TPBlockArrivalVertex> {
+    Comparable<TPBlockArrivalVertex> {
 
   public TPBlockArrivalVertex(GraphContext graphContext,
       StopTimeInstance instance) {
@@ -34,21 +33,6 @@ public class TPBlockArrivalVertex extends AbstractTPBlockVertex implements
   /****
    * {@link HasEdges} Interface
    ****/
-
-  @Override
-  public int getDegreeIn() {
-    return getIncoming().size();
-  }
-
-  @Override
-  public Collection<Edge> getIncoming() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public int getDegreeOut() {
-    return getOutgoing().size();
-  }
 
   @Override
   public Collection<Edge> getOutgoing() {

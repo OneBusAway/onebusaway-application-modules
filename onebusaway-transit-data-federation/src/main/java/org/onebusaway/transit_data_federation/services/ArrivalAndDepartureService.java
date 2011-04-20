@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.services;
 
 import java.util.List;
 
+import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -76,4 +77,7 @@ public interface ArrivalAndDepartureService {
    */
   public ArrivalAndDepartureInstance getNextTransferStopArrivalAndDeparture(
       ArrivalAndDepartureInstance instance);
+
+  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesAndArrivalsForStopPair(
+      StopEntry fromStop, StopEntry toStop, long time);
 }

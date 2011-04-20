@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.opentripplanner.routing.core.Vertex;
 
@@ -13,7 +14,7 @@ public abstract class AbstractVertex implements Vertex, TransitVertex {
   public AbstractVertex(GraphContext context) {
     _context = context;
   }
-  
+
   public GraphContext getContext() {
     return _context;
   }
@@ -21,6 +22,11 @@ public abstract class AbstractVertex implements Vertex, TransitVertex {
   @Override
   public String getLabel() {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public AgencyAndId getStopId() {
+    return null;
   }
 
   @Override

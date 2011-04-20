@@ -38,16 +38,11 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
    ****/
 
   @Override
-  public int getDegreeIn() {
-    return getIncoming().size();
-  }
-
-  @Override
   public Collection<Edge> getIncoming() {
 
     List<Edge> edges = new ArrayList<Edge>();
     StopEntry stop = _instance.getStop();
-    
+
     /**
      * We can stay on the bus if applicable
      */
@@ -60,7 +55,7 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
      * We can get off the bus
      */
     edges.add(new DepartureReverseEdge(_context, _instance));
-    
+
     /**
      * We can be coming from a transfer from another stop.
      */
@@ -70,21 +65,18 @@ public class BlockDepartureVertex extends AbstractBlockVertex implements
     for (StopTransfer transfer : transfers)
       edges.add(new TransferAndDepartureEdge(_context, _instance, transfer));
 
-
     return edges;
-  }
-
-  @Override
-  public int getDegreeOut() {
-    return getOutgoing().size();
   }
 
   @Override
   public Collection<Edge> getOutgoing() {
     return Arrays.asList((Edge) new BlockForwardHopEdge(_context, _instance));
-//    ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
-//    ArrivalAndDepartureInstance nextStop = service.getNextStopArrivalAndDeparture(_instance);
-//    return Arrays.asList((Edge) new BlockHopEdge(_context, _instance, nextStop));
+    // ArrivalAndDepartureService service =
+    // _context.getArrivalAndDepartureService();
+    // ArrivalAndDepartureInstance nextStop =
+    // service.getNextStopArrivalAndDeparture(_instance);
+    // return Arrays.asList((Edge) new BlockHopEdge(_context, _instance,
+    // nextStop));
   }
 
   /****

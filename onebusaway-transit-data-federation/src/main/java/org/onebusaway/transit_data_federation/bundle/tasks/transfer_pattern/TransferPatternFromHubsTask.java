@@ -2,8 +2,12 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.zip.GZIPOutputStream;
 
 import org.onebusaway.collections.Counter;
 import org.onebusaway.collections.FactoryMap;
@@ -42,7 +47,6 @@ import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationServi
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
-import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.opentripplanner.routing.algorithm.GenericDijkstra;
 import org.opentripplanner.routing.algorithm.strategies.SkipVertexStrategy;
 import org.opentripplanner.routing.core.Edge;
@@ -134,7 +138,7 @@ public class TransferPatternFromHubsTask implements Runnable {
     Graph graph = _graphService.getGraph();
     GraphContext context = _otpConfigurationService.createGraphContext();
 
-    Map<AgencyAndId, TransferPatternData> dataByStopId = new HashMap<AgencyAndId, TransferPatternData>();
+    Map<AgencyAndId, TransferPattern> patternsByStopId = new HashMap<AgencyAndId, TransferPattern>();
 
     for (StopEntry stop : stops) {
 
@@ -184,42 +188,35 @@ public class TransferPatternFromHubsTask implements Runnable {
 
       avgPaths(pattern, stop);
 
-      TransferPatternData data = translatePatterns(pattern);
-      dataByStopId.put(stop.getId(), data);
+      patternsByStopId.put(stop.getId(), pattern);
     }
 
-    writeData(dataByStopId);
+    writeData(patternsByStopId);
   }
 
-  private void writeData(Map<AgencyAndId, TransferPatternData> dataByStopId) {
+  private void writeData(Map<AgencyAndId, TransferPattern> patternsByStopId) {
 
     File path = _bundle.getTransferPatternsPath();
 
     try {
-      ObjectSerializationLibrary.writeObject(path, dataByStopId);
+
+      PrintWriter out = openOutput(path);
+
+      long index = 0;
+      for (TransferPattern pattern : patternsByStopId.values()) {
+        index = pattern.writeTransferPatternsToPrintWriter(out, index);
+      }
+      out.close();
     } catch (Throwable ex) {
       throw new IllegalStateException("error writing output to " + path, ex);
     }
   }
 
-  private TransferPatternData translatePatterns(TransferPattern pattern) {
-
-    StopEntry origin = pattern.getOriginStop();
-    TransferPatternData data = new TransferPatternData(origin.getId());
-
-    for (StopEntry stop : pattern.getStops()) {
-      for (List<Pair<StopEntry>> path : pattern.getPathsForStop(stop)) {
-        List<Pair<AgencyAndId>> idPath = new ArrayList<Pair<AgencyAndId>>(
-            path.size());
-        for (Pair<StopEntry> pair : path) {
-          idPath.add(Tuples.pair(pair.getFirst().getId(),
-              pair.getSecond().getId()));
-        }
-        data.addPath(idPath);
-      }
-    }
-
-    return data;
+  private PrintWriter openOutput(File path) throws IOException {
+    OutputStream out = new FileOutputStream(path);
+    if (path.getName().endsWith(".gz"))
+      out = new GZIPOutputStream(out);
+    return new PrintWriter(new OutputStreamWriter(out));
   }
 
   private void avgPaths(TransferPattern pattern, StopEntry origin) {
@@ -245,7 +242,7 @@ public class TransferPatternFromHubsTask implements Runnable {
       String line = null;
       while ((line = reader.readLine()) != null) {
         AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(line);
-        StopEntry stop = _transitGraphDao.getStopEntryForId(stopId,true);
+        StopEntry stop = _transitGraphDao.getStopEntryForId(stopId, true);
         stops.add(stop);
       }
     } catch (IOException ex) {

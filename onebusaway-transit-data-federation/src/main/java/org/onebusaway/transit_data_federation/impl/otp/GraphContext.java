@@ -3,8 +3,10 @@ package org.onebusaway.transit_data_federation.impl.otp;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopHopService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 
 public class GraphContext {
 
@@ -17,6 +19,10 @@ public class GraphContext {
   private StopHopService stopHopService;
 
   private StopTransferService stopTransferService;
+
+  private TransferPatternService transferPatternService;
+
+  private ItinerariesService itinerariesService;
 
   private int stopTimeSearchInterval = 10;
 
@@ -72,6 +78,23 @@ public class GraphContext {
 
   public void setStopTimeService(StopTimeService stopTimeService) {
     this.stopTimeService = stopTimeService;
+  }
+
+  public TransferPatternService getTransferPatternService() {
+    return transferPatternService;
+  }
+
+  public void setTransferPatternService(
+      TransferPatternService transferPatternService) {
+    this.transferPatternService = transferPatternService;
+  }
+
+  public ItinerariesService getItinerariesService() {
+    return itinerariesService;
+  }
+
+  public void setItinerariesService(ItinerariesService itinerariesService) {
+    this.itinerariesService = itinerariesService;
   }
 
   /**
