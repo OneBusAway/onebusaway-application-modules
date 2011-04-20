@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.onebusaway.collections.Min;
 import org.onebusaway.collections.Range;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
@@ -90,39 +91,6 @@ class StopTimeServiceImpl implements StopTimeService {
   }
 
   @Override
-  public List<StopTimeInstance> getNextScheduledBlockTripDeparturesForStop(
-      StopEntry stopEntry, long time) {
-
-    List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
-
-    List<BlockStopSequenceIndex> blockStopTripIndices = _blockIndexService.getStopSequenceIndicesForStop(stopEntry);
-
-    for (BlockStopSequenceIndex index : blockStopTripIndices) {
-
-      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
-          index.getServiceIds(), index.getServiceInterval(), time);
-
-      for (Date serviceDate : serviceDates) {
-
-        int relativeFrom = effectiveTime(serviceDate.getTime(), time);
-
-        int fromIndex = GenericBinarySearch.search(index, index.size(),
-            relativeFrom, IndexAdapters.BLOCK_STOP_SEQUENCE_DEPARTURE_INSTANCE);
-
-        if (fromIndex < index.size()) {
-          BlockStopTimeEntry blockStopTime = index.getBlockStopTimeForIndex(fromIndex);
-          StopTimeInstance sti = new StopTimeInstance(blockStopTime,
-              serviceDate);
-          stopTimeInstances.add(sti);
-        }
-      }
-    }
-
-    return stopTimeInstances;
-
-  }
-
-  @Override
   public Range getDepartureForStopAndServiceDate(AgencyAndId stopId,
       ServiceDate serviceDate) {
 
@@ -155,7 +123,40 @@ class StopTimeServiceImpl implements StopTimeService {
   }
 
   @Override
-  public List<Pair<StopTimeInstance>> getDepartureSegmentsInRange(
+  public List<StopTimeInstance> getNextBlockSequenceDeparturesForStop(
+      StopEntry stopEntry, long time) {
+
+    List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
+
+    List<BlockStopSequenceIndex> blockStopTripIndices = _blockIndexService.getStopSequenceIndicesForStop(stopEntry);
+
+    for (BlockStopSequenceIndex index : blockStopTripIndices) {
+
+      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
+          index.getServiceIds(), index.getServiceInterval(), time);
+
+      for (Date serviceDate : serviceDates) {
+
+        int relativeFrom = effectiveTime(serviceDate.getTime(), time);
+
+        int fromIndex = GenericBinarySearch.search(index, index.size(),
+            relativeFrom, IndexAdapters.BLOCK_STOP_SEQUENCE_DEPARTURE_INSTANCE);
+
+        if (fromIndex < index.size()) {
+          BlockStopTimeEntry blockStopTime = index.getBlockStopTimeForIndex(fromIndex);
+          StopTimeInstance sti = new StopTimeInstance(blockStopTime,
+              serviceDate);
+          stopTimeInstances.add(sti);
+        }
+      }
+    }
+
+    return stopTimeInstances;
+
+  }
+
+  @Override
+  public List<Pair<StopTimeInstance>> getDeparturesBetweenStopPairInTimeRange(
       StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
       Date toDepartureTime) {
 
@@ -193,6 +194,62 @@ class StopTimeServiceImpl implements StopTimeService {
 
     return results;
   }
+
+  @Override
+  public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
+      StopEntry fromStop, StopEntry toStop, Date fromTime,
+      boolean includeAllSequences) {
+
+    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
+        fromStop, toStop);
+
+    List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
+    Min<Pair<StopTimeInstance>> min = new Min<Pair<StopTimeInstance>>();
+
+    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+
+      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
+      BlockStopSequenceIndex toStopIndex = pair.getSecond();
+
+      List<BlockStopTimeEntry> toStopTimes = toStopIndex.getStopTimes();
+
+      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
+          fromStopIndex.getServiceIds(), fromStopIndex.getServiceInterval(),
+          fromTime.getTime());
+
+      for (Date serviceDate : serviceDates) {
+
+        int relativeFrom = effectiveTime(serviceDate.getTime(),
+            fromTime.getTime());
+
+        int fromIndex = GenericBinarySearch.search(fromStopIndex,
+            fromStopIndex.size(), relativeFrom,
+            IndexAdapters.BLOCK_STOP_SEQUENCE_DEPARTURE_INSTANCE);
+
+        if (fromIndex < fromStopIndex.size()) {
+          BlockStopTimeEntry blockStopTime = fromStopIndex.getBlockStopTimeForIndex(fromIndex);
+          StopTimeInstance stiFrom = new StopTimeInstance(blockStopTime,
+              serviceDate);
+          BlockStopTimeEntry stopTimeTo = toStopTimes.get(fromIndex);
+          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          if (includeAllSequences)
+            results.add(stiPair);
+          else
+            min.add(stiFrom.getDepartureTime(), stiPair);
+        }
+      }
+    }
+
+    if (includeAllSequences)
+      return results;
+    else
+      return min.getMinElements();
+  }
+
+  /****
+   * Private Methods
+   ****/
 
   private int getStopTimesForStopAndServiceDateAndTimeRange(
       HasIndexedBlockStopTimes index, Date serviceDate, Date from, Date to,

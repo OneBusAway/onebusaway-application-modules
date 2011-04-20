@@ -17,13 +17,19 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
+import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPDestinationVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPSourceVertex;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
+import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
@@ -67,6 +73,8 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
   private TransferPatternService _transferPathService;
 
+  private OTPConfigurationService _configService;
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -97,19 +105,24 @@ class ItinerariesServiceImpl implements ItinerariesService {
   public void setTransf(TransferPatternService transferPathService) {
     _transferPathService = transferPathService;
   }
+  
+  @Autowired
+  public void set(OTPConfigurationService configService) {
+    _configService = configService;
+  }
 
   /****
    * {@link ItinerariesService} Interface
    ****/
 
   public List<GraphPath> getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, long currentTime,
-      OBATraverseOptions options) throws ServiceException {
+      TransitLocationBean to, TargetTime targetTime, OBATraverseOptions options)
+      throws ServiceException {
 
     Vertex fromVertex = getTransitLocationAsVertex(from, options);
     Vertex toVertex = getTransitLocationAsVertex(to, options);
 
-    Date t = new Date(targetTime);
+    Date t = new Date(targetTime.getTargetTime());
 
     if (_transferPathService.isServiceEnabled()) {
       return getTransferPatternStops(fromVertex, toVertex, t, options);
@@ -149,11 +162,18 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
     if (stopsNearbyFromVertex.isEmpty() || stopsNearbyToVertex.isEmpty())
       return Collections.emptyList();
+    
+    
+    GraphContext context = _configService.createGraphContext();
+    TPQueryData queryData = new TPQueryData(fromVertex, stopsNearbyFromVertex, toVertex, stopsNearbyToVertex);
+    
+    Vertex source = new TPSourceVertex(context, queryData);
+    Vertex dest = new TPDestinationVertex(context, queryData);
 
     Graph graph = _graphService.getGraph();
     State init = new State(time.getTime(), new OBAStateData());
-    ShortestPathTree spt = AStar.getShortestPathTree(graph, fromVertex,
-        toVertex, init, options);
+    ShortestPathTree spt = AStar.getShortestPathTree(graph, source,
+        dest, init, options);
 
     return spt.getPaths(toVertex, true);
   }

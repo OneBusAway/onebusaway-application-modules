@@ -7,6 +7,7 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
@@ -34,15 +35,36 @@ public interface StopTimeService {
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
       StopEntry stopEntry, Date from, Date to);
 
-  public List<StopTimeInstance> getNextScheduledBlockTripDeparturesForStop(
-      StopEntry stopEntry, long time);
-
   public Range getDepartureForStopAndServiceDate(AgencyAndId stopId,
       ServiceDate serviceDate);
 
   public StopTimeInstance getNextStopTimeInstance(StopTimeInstance instance);
 
-  public List<Pair<StopTimeInstance>> getDepartureSegmentsInRange(
+  /**
+   * Given the set of {@link BlockSequence} sequences incident on a particular
+   * stop, compute the next departure for each sequence at or after the
+   * specified time.
+   * 
+   * @param stop
+   * @param time
+   * @return
+   */
+  public List<StopTimeInstance> getNextBlockSequenceDeparturesForStop(
+      StopEntry stop, long time);
+
+  /**
+   * 
+   * @param fromStop
+   * @param toStop
+   * @param fromDepartureTime
+   * @param toDepartureTime
+   * @return
+   */
+  public List<Pair<StopTimeInstance>> getDeparturesBetweenStopPairInTimeRange(
       StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
       Date toDepartureTime);
+
+  public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
+      StopEntry fromStop, StopEntry toStop, Date fromTime,
+      boolean includeAllSequences);
 }

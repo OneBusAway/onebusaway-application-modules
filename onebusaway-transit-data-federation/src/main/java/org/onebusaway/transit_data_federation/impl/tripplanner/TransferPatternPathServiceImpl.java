@@ -49,7 +49,7 @@ class TransferPatternPathServiceImpl implements TransferPatternPathService {
     Date fromDepartureTime = new Date(targetTime);
     Date toDepartureTime = new Date(targetTime + 30 * 60 * 1000);
 
-    List<Pair<StopTimeInstance>> pairs = _stopTimeService.getDepartureSegmentsInRange(
+    List<Pair<StopTimeInstance>> pairs = _stopTimeService.getDeparturesBetweenStopPairInTimeRange(
         fromStop, toStop, fromDepartureTime, toDepartureTime);
   }
 }

@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.onebusaway.collections.CollectionsLibrary;
-import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -21,7 +20,6 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.EdgeNarrativeBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
@@ -29,6 +27,7 @@ import org.onebusaway.transit_data.model.tripplanning.LegBean;
 import org.onebusaway.transit_data.model.tripplanning.LocationBean;
 import org.onebusaway.transit_data.model.tripplanning.StreetLegBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLegBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -48,6 +47,7 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.DepartureVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
@@ -69,6 +69,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.Graph;
@@ -106,6 +107,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private static final String MODE_TRANSIT = "transit";
 
+  private ItinerariesService _itinerariesService;
+
   private PathService _pathService;
 
   private TransitShedPathService _transitShedPathService;
@@ -129,6 +132,11 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private ArrivalAndDepartureService _arrivalAndDepartureService;
 
   private BlockCalendarService _blockCalendarService;
+
+  @Autowired
+  public void setItinerariesService(ItinerariesService itinerariesService) {
+    _itinerariesService = itinerariesService;
+  }
 
   @Autowired
   public void setPathService(PathService pathService) {
@@ -206,13 +214,10 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     OBATraverseOptions options = createTraverseOptions();
     applyConstraintsToOptions(constraints, options);
 
-    Vertex fromVertex = getTransitLocationAsVertex(from, options);
-    Vertex toVertex = getTransitLocationAsVertex(to, options);
+    TargetTime tt = new TargetTime(currentTime, targetTime);
 
-    Date t = new Date(targetTime);
-
-    List<GraphPath> paths = _pathService.plan(fromVertex, toVertex, t, options,
-        1);
+    List<GraphPath> paths = _itinerariesService.getItinerariesBetween(from, to,
+        tt, options);
 
     LocationBean fromBean = getPointAsLocation(from);
     LocationBean toBean = getPointAsLocation(to);
@@ -354,12 +359,6 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   /****
    * Private Methods
    ****/
-
-  private Vertex getTransitLocationAsVertex(TransitLocationBean from,
-      OBATraverseOptions options) {
-    Coordinate c = new Coordinate(from.getLon(), from.getLat());
-    return _streetVertexIndexService.getClosestVertex(c, options);
-  }
 
   private OBATraverseOptions createTraverseOptions() {
 
@@ -1052,9 +1051,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return instances;
   }
 
-  private void updateItinerary(ItineraryBean itinerary, TransitLocationBean from,
-      TransitLocationBean to, long time, long currentTime,
-      ConstraintsBean constraints) {
+  private void updateItinerary(ItineraryBean itinerary,
+      TransitLocationBean from, TransitLocationBean to, long time,
+      long currentTime, ConstraintsBean constraints) {
 
     List<LegBean> legs = itinerary.getLegs();
 
@@ -1148,7 +1147,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         && transitLeg.getFromStop().getId() != null) {
 
       AgencyAndId fromStopId = AgencyAndIdLibrary.convertFromString(transitLeg.getFromStop().getId());
-      StopEntry fromStop = _transitGraphDao.getStopEntryForId(fromStopId,true);
+      StopEntry fromStop = _transitGraphDao.getStopEntryForId(fromStopId, true);
       int fromStopSequence = transitLeg.getFromStopSequence();
 
       ArrivalAndDepartureQuery query = new ArrivalAndDepartureQuery();
@@ -1172,7 +1171,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         && transitLeg.getToStop().getId() != null) {
 
       AgencyAndId toStopId = AgencyAndIdLibrary.convertFromString(transitLeg.getToStop().getId());
-      StopEntry toStop = _transitGraphDao.getStopEntryForId(toStopId,true);
+      StopEntry toStop = _transitGraphDao.getStopEntryForId(toStopId, true);
       int toStopSequence = transitLeg.getToStopSequence();
 
       ArrivalAndDepartureQuery query = new ArrivalAndDepartureQuery();

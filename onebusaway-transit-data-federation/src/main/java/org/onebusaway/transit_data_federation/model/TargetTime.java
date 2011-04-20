@@ -31,6 +31,14 @@ public final class TargetTime implements Serializable {
 
   private final long targetTime;
 
+  public TargetTime() {
+    this(System.currentTimeMillis());
+  }
+
+  public TargetTime(long time) {
+    this(System.currentTimeMillis(), time);
+  }
+
   public TargetTime(long currentTime, long targetTime) {
     this.currentTime = currentTime;
     this.targetTime = targetTime;

@@ -336,7 +336,7 @@ public interface TransitDataService extends FederatedService {
    *         specified constraints
    * @throws ServiceException
    */
-  @FederatedByCoordinatePointsMethod(arguments = {0, 1})
+  @FederatedByCoordinatePointsMethod(arguments = {0, 1},propertyExpressions={"location","location"})
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
       TransitLocationBean to, long targetTime, long currentTime,
       ConstraintsBean constraints) throws ServiceException;

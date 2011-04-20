@@ -138,13 +138,13 @@ public class TransferPatternFromHubsTask implements Runnable {
     Graph graph = _graphService.getGraph();
     GraphContext context = _otpConfigurationService.createGraphContext();
 
-    Map<AgencyAndId, TransferPattern> patternsByStopId = new HashMap<AgencyAndId, TransferPattern>();
+    Map<AgencyAndId, MutableTransferPattern> patternsByStopId = new HashMap<AgencyAndId, MutableTransferPattern>();
 
     for (StopEntry stop : stops) {
 
       System.out.println("stop=" + stop.getId());
 
-      TransferPattern pattern = new TransferPattern(stop);
+      MutableTransferPattern pattern = new MutableTransferPattern(stop);
 
       List<ServiceDate> serviceDates = computeServiceDates(stop);
 
@@ -194,7 +194,7 @@ public class TransferPatternFromHubsTask implements Runnable {
     writeData(patternsByStopId);
   }
 
-  private void writeData(Map<AgencyAndId, TransferPattern> patternsByStopId) {
+  private void writeData(Map<AgencyAndId, MutableTransferPattern> patternsByStopId) {
 
     File path = _bundle.getTransferPatternsPath();
 
@@ -203,7 +203,7 @@ public class TransferPatternFromHubsTask implements Runnable {
       PrintWriter out = openOutput(path);
 
       long index = 0;
-      for (TransferPattern pattern : patternsByStopId.values()) {
+      for (MutableTransferPattern pattern : patternsByStopId.values()) {
         index = pattern.writeTransferPatternsToPrintWriter(out, index);
       }
       out.close();
@@ -219,7 +219,7 @@ public class TransferPatternFromHubsTask implements Runnable {
     return new PrintWriter(new OutputStreamWriter(out));
   }
 
-  private void avgPaths(TransferPattern pattern, StopEntry origin) {
+  private void avgPaths(MutableTransferPattern pattern, StopEntry origin) {
     DoubleArrayList values = new DoubleArrayList();
     for (StopEntry stop : pattern.getStops()) {
       List<List<Pair<StopEntry>>> paths = pattern.getPathsForStop(stop);
@@ -270,7 +270,7 @@ public class TransferPatternFromHubsTask implements Runnable {
     return serviceDates;
   }
 
-  private void processTree(MultiShortestPathTree spt, TransferPattern pattern,
+  private void processTree(MultiShortestPathTree spt, MutableTransferPattern pattern,
       StopEntry originStop) {
 
     Map<SPTVertex, List<StopEntry>> parentsBySPTVertex = new HashMap<SPTVertex, List<StopEntry>>();
@@ -294,7 +294,7 @@ public class TransferPatternFromHubsTask implements Runnable {
   }
 
   private void processArrivalsForStop(List<TPBlockArrivalVertex> arrivals,
-      StopEntry originStop, MultiShortestPathTree spt, TransferPattern pattern,
+      StopEntry originStop, MultiShortestPathTree spt, MutableTransferPattern pattern,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
 
     Collections.sort(arrivals);

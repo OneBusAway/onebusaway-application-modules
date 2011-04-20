@@ -52,7 +52,7 @@ public class TPArrivalAndTransferEdge extends AbstractEdge {
 
     StopTimeService stopTimeService = _context.getStopTimeService();
 
-    List<StopTimeInstance> instances = stopTimeService.getNextScheduledBlockTripDeparturesForStop(
+    List<StopTimeInstance> instances = stopTimeService.getNextBlockSequenceDeparturesForStop(
         _transfer.getStop(), s1.getTime());
 
     TraverseResult results = null;

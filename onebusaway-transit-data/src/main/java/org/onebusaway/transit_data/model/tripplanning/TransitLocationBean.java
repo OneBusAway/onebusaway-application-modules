@@ -2,6 +2,8 @@ package org.onebusaway.transit_data.model.tripplanning;
 
 import java.io.Serializable;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
+
 public class TransitLocationBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -15,6 +17,10 @@ public class TransitLocationBean implements Serializable {
   private long serviceDate;
 
   private String vehicleId;
+  
+  public CoordinatePoint getLocation() {
+    return new CoordinatePoint(lat,lon);
+  }
 
   public double getLat() {
     return lat;

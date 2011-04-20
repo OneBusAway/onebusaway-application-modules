@@ -8,6 +8,7 @@ import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
 import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -44,12 +45,22 @@ public class TPStopPairEdge extends AbstractEdge {
 
     Pair<StopEntry> stopPair = _pathState.getCurrentStopPair();
 
+    long offset = 20 * 60 * 1000;
+    TargetTime targetTime = new TargetTime();
+
+    long maxScheduledDeparture = s0.getTime() + offset;
+
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getNextDeparturesAndArrivalsForStopPair(
-        stopPair.getFirst(), stopPair.getSecond(), s0.getTime());
+        stopPair.getFirst(), stopPair.getSecond(), targetTime, s0.getTime(),
+        maxScheduledDeparture);
 
     TraverseResult results = null;
 
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
+
+      ArrivalAndDepartureInstance departure = pair.getFirst();
+      maxScheduledDeparture = Math.max(maxScheduledDeparture,
+          departure.getScheduledDepartureTime());
 
       int dwellTime = computeWaitTime(s0, pair);
       int transitTime = computeTransitTime(pair);
@@ -100,6 +111,24 @@ public class TPStopPairEdge extends AbstractEdge {
 
       Vertex fromV = new TPPathVertex(_context, _pathState);
       Vertex toV = new TPPathVertex(_context, pathState);
+
+      EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
+
+      TraverseResult r = new TraverseResult(w, s1.createState(), narrative);
+      results = r.addToExistingResultChain(results);
+    }
+
+    if (!instances.isEmpty()) {
+
+      int dwellTime = (int) ((maxScheduledDeparture - s0.getTime()) / 1000);
+      Editor s1 = s0.edit();
+      s1.incrementTimeInSeconds(dwellTime);
+
+      double w = ItineraryWeightingLibrary.computeWeightForWait(options,
+          dwellTime, s0);
+
+      Vertex fromV = new TPPathVertex(_context, _pathState);
+      Vertex toV = new TPPathVertex(_context, _pathState);
 
       EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
 

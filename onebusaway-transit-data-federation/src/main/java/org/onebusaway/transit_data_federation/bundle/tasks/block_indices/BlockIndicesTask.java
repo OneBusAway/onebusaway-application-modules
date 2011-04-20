@@ -44,7 +44,6 @@ public class BlockIndicesTask implements Runnable {
       List<BlockTripIndexData> tripData = factory.createTripData(blocks);
       List<BlockLayoverIndexData> layoverData = factory.createLayoverData(blocks);
       List<FrequencyBlockTripIndexData> frequencyTripData = factory.createFrequencyTripData(blocks);
-      List<BlockSequenceIndexData> sequenceData = factory.createSequenceData(blocks);
 
       ObjectSerializationLibrary.writeObject(_bundle.getBlockTripIndicesPath(),
           tripData);
@@ -52,8 +51,6 @@ public class BlockIndicesTask implements Runnable {
           _bundle.getBlockLayoverIndicesPath(), layoverData);
       ObjectSerializationLibrary.writeObject(
           _bundle.getFrequencyBlockTripIndicesPath(), frequencyTripData);
-      ObjectSerializationLibrary.writeObject(
-          _bundle.getBlockSequenceIndicesPath(), sequenceData);
 
       BlockStopTimeIndicesFactory stopFactory = new BlockStopTimeIndicesFactory();
       factory.setVerbose(true);

@@ -22,7 +22,6 @@ import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataB
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockLayoverIndexData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequenceIndexData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockStopTimeIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockTripIndexData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.FrequencyBlockTripIndexData;
@@ -31,8 +30,8 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
-import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
@@ -82,7 +81,7 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
   private Map<AgencyAndId, List<FrequencyBlockTripIndex>> _frequencyBlockTripIndicesByBlockId;
 
-  private List<BlockSequenceIndex> _blockSequenceIndices;
+  private List<BlockSequenceIndex> _blockSequenceIndices = Collections.emptyList();
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
@@ -397,18 +396,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   private void loadBlockSequenceIndices() throws IOException,
       ClassNotFoundException {
 
-    _blockSequenceIndices = new ArrayList<BlockSequenceIndex>();
-
-    File path = _bundle.getBlockSequenceIndicesPath();
-
-    if (path.exists()) {
-
-      List<BlockSequenceIndexData> datas = ObjectSerializationLibrary.readObject(path);
-      for (BlockSequenceIndexData data : datas) {
-        BlockSequenceIndex index = data.createIndex(_graphDao);
-        _blockSequenceIndices.add(index);
-      }
-    }
+    BlockIndicesFactory factory = new BlockIndicesFactory();
+    _blockSequenceIndices = factory.createSequenceIndices(_graphDao.getAllBlocks());
   }
 
   private void loadStopTimeIndices() {

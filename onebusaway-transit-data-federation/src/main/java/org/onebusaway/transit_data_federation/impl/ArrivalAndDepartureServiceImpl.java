@@ -8,6 +8,7 @@ import java.util.Map;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
 import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.model.TargetTime;
@@ -204,7 +205,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   public List<ArrivalAndDepartureInstance> getNextScheduledBlockTripDeparturesForStop(
       StopEntry stop, long time) {
 
-    List<StopTimeInstance> stopTimes = _stopTimeService.getNextScheduledBlockTripDeparturesForStop(
+    List<StopTimeInstance> stopTimes = _stopTimeService.getNextBlockSequenceDeparturesForStop(
         stop, time);
 
     List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
@@ -426,9 +427,37 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   @Override
   public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesAndArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, long time) {
-    // TODO Auto-generated method stub
-    return null;
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
+      long fromTime, long toTime) {
+
+    Date dFrom = new Date(fromTime);
+    Date dTo = new Date(toTime);
+
+    List<Pair<StopTimeInstance>> pairs = _stopTimeService.getDeparturesBetweenStopPairInTimeRange(
+        fromStop, toStop, dFrom, dTo);
+    if (pairs.isEmpty())
+      pairs = _stopTimeService.getNextDeparturesBetweenStopPair(fromStop,
+          toStop, dFrom, false);
+
+    long frequencyOffsetTime = Math.max(targetTime.getTargetTime(), fromTime);
+
+    List<Pair<ArrivalAndDepartureInstance>> results = new ArrayList<Pair<ArrivalAndDepartureInstance>>();
+
+    for (Pair<StopTimeInstance> pair : pairs) {
+      StopTimeInstance stiFrom = pair.getFirst();
+      StopTimeInstance stiTo = pair.getSecond();
+
+      ArrivalAndDepartureInstance instanceFrom = createArrivalAndDepartureForStopTimeInstance(
+          stiFrom, frequencyOffsetTime);
+      ArrivalAndDepartureInstance instanceTo = createArrivalAndDepartureForStopTimeInstance(
+          stiTo, frequencyOffsetTime);
+
+      Pair<ArrivalAndDepartureInstance> instancePair = Tuples.pair(
+          instanceFrom, instanceTo);
+      results.add(instancePair);
+    }
+
+    return results;
   }
 
   /****

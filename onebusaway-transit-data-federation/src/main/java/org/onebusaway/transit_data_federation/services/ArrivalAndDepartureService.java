@@ -79,5 +79,5 @@ public interface ArrivalAndDepartureService {
       ArrivalAndDepartureInstance instance);
 
   public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesAndArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, long time);
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, long fromTime, long toTime);
 }

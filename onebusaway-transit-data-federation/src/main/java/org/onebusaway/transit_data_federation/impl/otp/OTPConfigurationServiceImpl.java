@@ -8,8 +8,10 @@ import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureServic
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopHopService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,8 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
   private StopTransferService _stopTransferService;
   private ArrivalAndDepartureService _arrivalAndDepartureService;
   private StopTimeService _stopTimeService;
+  private ItinerariesService _itinerariesService;
+  private TransferPatternService _transferPatternService;
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -48,16 +52,30 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
   public void setStopTimeService(StopTimeService stopTimeService) {
     _stopTimeService = stopTimeService;
   }
+  
+  @Autowired
+  public void setItinerariesService(ItinerariesService itinerariesService) {
+    _itinerariesService = itinerariesService;
+  }
+  
+  @Autowired
+  public void setTransferPatternService(TransferPatternService transferPatternService) {
+    _transferPatternService = transferPatternService;
+  }
 
   @Override
   public GraphContext createGraphContext() {
 
     GraphContext context = new GraphContext();
     context.setArrivalAndDepartureService(_arrivalAndDepartureService);
+    context.setItinerariesService(_itinerariesService);
+    
     context.setStopTimeService(_stopTimeService);
     context.setStopHopService(_stopHopService);
     context.setStopTransferService(_stopTransferService);
+    context.setTransferPatternService(_transferPatternService);
     context.setTransitGraphDao(_transitGraphDao);
+    
     return context;
   }
 

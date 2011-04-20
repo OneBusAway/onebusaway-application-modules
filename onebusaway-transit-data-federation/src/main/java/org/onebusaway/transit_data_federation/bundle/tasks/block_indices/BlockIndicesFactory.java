@@ -142,40 +142,6 @@ public class BlockIndicesFactory {
     return allData;
   }
 
-  public List<BlockSequenceIndexData> createSequenceData(
-      Iterable<BlockEntry> blocks) {
-
-    List<BlockSequenceIndex> indices = createSequenceIndices(blocks);
-    List<BlockSequenceIndexData> allData = new ArrayList<BlockSequenceIndexData>();
-
-    for (BlockSequenceIndex index : indices) {
-
-      List<BlockSequence> sequences = index.getSequences();
-
-      List<BlockConfigurationReference> references = new ArrayList<BlockConfigurationReference>();
-      int[] blockSequenceFrom = new int[sequences.size()];
-      int[] blockSequenceTo = new int[sequences.size()];
-
-      for (int i = 0; i < sequences.size(); i++) {
-
-        BlockSequence sequence = sequences.get(i);
-        BlockConfigurationReference ref = ReferencesLibrary.getBlockAsReference(sequence.getBlockConfig());
-        references.add(ref);
-
-        blockSequenceFrom[i] = sequence.getBlockSequenceFrom();
-        blockSequenceTo[i] = sequence.getBlockSequenceTo();
-      }
-
-      ServiceIntervalBlock serviceIntervalBlock = index.getServiceIntervalBlock();
-
-      BlockSequenceIndexData data = new BlockSequenceIndexData(references,
-          blockSequenceFrom, blockSequenceTo, serviceIntervalBlock);
-      allData.add(data);
-    }
-
-    return allData;
-  }
-
   /****
    * 
    ****/
