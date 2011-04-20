@@ -22,7 +22,6 @@ import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Range;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
-import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
@@ -246,9 +245,7 @@ public class TransferPatternFromHubsTask implements Runnable {
       String line = null;
       while ((line = reader.readLine()) != null) {
         AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(line);
-        StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
-        if (stop == null)
-          throw new NoSuchStopServiceException(line);
+        StopEntry stop = _transitGraphDao.getStopEntryForId(stopId,true);
         stops.add(stop);
       }
     } catch (IOException ex) {

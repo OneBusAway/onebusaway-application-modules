@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
@@ -56,8 +55,8 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -597,9 +596,7 @@ class TransitDataServiceImpl implements TransitDataService {
     ArrivalAndDepartureQuery adQuery = new ArrivalAndDepartureQuery();
 
     AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(query.getStopId());
-    StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
-    if (stop == null)
-      throw new NoSuchStopServiceException(query.getStopId());
+    StopEntry stop = _transitGraphDao.getStopEntryForId(stopId, true);
 
     AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(query.getTripId());
     TripEntry trip = _transitGraphDao.getTripEntryForId(tripId);

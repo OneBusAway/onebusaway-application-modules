@@ -3,7 +3,6 @@ package org.onebusaway.webapp.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.presentation.services.DefaultSearchLocationService;
@@ -117,10 +116,7 @@ class WebappServiceImpl implements WebappService {
 
   @Override
   public StopBean getStop(String stopId) throws ServiceException {
-    StopBean stop = _transitDataService.getStop(stopId);
-    if (stop == null)
-      throw new NoSuchStopServiceException(stopId);
-    return stop;
+    return _transitDataService.getStop(stopId);
   }
 
   @Override

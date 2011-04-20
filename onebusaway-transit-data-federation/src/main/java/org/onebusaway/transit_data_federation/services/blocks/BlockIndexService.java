@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
+import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
@@ -15,22 +16,27 @@ public interface BlockIndexService {
       AgencyAndId routeCollectionId);
 
   public List<BlockTripIndex> getBlockTripIndicesForBlock(AgencyAndId blockId);
-  
+
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry);
-  
-  public List<BlockStopTripIndex> getStopTripIndicesForStop(StopEntry stopEntry);
+
+  public List<BlockStopSequenceIndex> getStopSequenceIndicesForStop(
+      StopEntry stopEntry);
+
+  public List<Pair<BlockStopSequenceIndex>> getBlockSequenceIndicesBetweenStops(
+      StopEntry fromStop, StopEntry toStop);
 
   /****
    * Layover Indices
    ****/
-  
+
   public List<BlockLayoverIndex> getBlockLayoverIndicesForAgencyId(
       String agencyId);
 
   public List<BlockLayoverIndex> getBlockLayoverIndicesForRouteCollectionId(
       AgencyAndId rotueCollectionId);
-  
-  public List<BlockLayoverIndex> getBlockLayoverIndicesForBlock(AgencyAndId blockId);
+
+  public List<BlockLayoverIndex> getBlockLayoverIndicesForBlock(
+      AgencyAndId blockId);
 
   /****
    * Frequency Indices
@@ -49,4 +55,9 @@ public interface BlockIndexService {
 
   public List<FrequencyBlockStopTimeIndex> getFrequencyStopTimeIndicesForStop(
       StopEntry stopEntry);
+
+  /****
+   * Block Sequence Indices
+   ****/
+
 }

@@ -1,17 +1,15 @@
 package org.onebusaway.transit_data_federation.services.transit_graph;
 
-import java.util.List;
-
 import org.onebusaway.transit_data_federation.services.blocks.AbstractBlockTripIndex;
 
-public interface BlockTripEntry {
-  
+public interface BlockTripEntry extends HasBlockStopTimes {
+
   public BlockConfigurationEntry getBlockConfiguration();
 
   public TripEntry getTrip();
-  
+
   public short getSequence();
-  
+
   public short getAccumulatedStopTimeIndex();
 
   /**
@@ -27,26 +25,24 @@ public interface BlockTripEntry {
    *         block
    */
   public double getDistanceAlongBlock();
-  
-  public List<BlockStopTimeEntry> getStopTimes();
 
   public BlockTripEntry getPreviousTrip();
 
   public BlockTripEntry getNextTrip();
-  
+
   /****
    * Stop Methods
    ****/
-  
+
   public int getArrivalTimeForIndex(int index);
-  
+
   public int getDepartureTimeForIndex(int index);
 
   public double getDistanceAlongBlockForIndex(int blockSequence);
-  
+
   /****
    * Pattern Methods
    ****/
-  
+
   public AbstractBlockTripIndex getPattern();
 }

@@ -4,12 +4,14 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.HasBlockStopTimes;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
-public class BlockTripLooseComparator implements Comparator<BlockTripEntry> {
+public class BlockStopTimeLooseComparator<T extends HasBlockStopTimes>
+    implements Comparator<T> {
+
   @Override
-  public int compare(BlockTripEntry o1, BlockTripEntry o2) {
+  public int compare(T o1, T o2) {
 
     List<BlockStopTimeEntry> stopTimes1 = o1.getStopTimes();
     List<BlockStopTimeEntry> stopTimes2 = o2.getStopTimes();
@@ -21,7 +23,7 @@ public class BlockTripLooseComparator implements Comparator<BlockTripEntry> {
 
     BlockStopTimeEntry bst1 = stopTimes1.get(0);
     BlockStopTimeEntry bst2 = stopTimes2.get(0);
-    
+
     StopTimeEntry st1 = bst1.getStopTime();
     StopTimeEntry st2 = bst2.getStopTime();
 

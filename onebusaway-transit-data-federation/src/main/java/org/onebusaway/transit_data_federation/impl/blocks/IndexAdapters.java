@@ -1,18 +1,18 @@
 package org.onebusaway.transit_data_federation.impl.blocks;
 
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch.IndexAdapter;
-import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
-import org.onebusaway.transit_data_federation.services.blocks.BlockStopTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.HasIndexedBlockStopTimes;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 
 public class IndexAdapters {
 
-  public static final IndexAdapter<BlockStopTimeIndex> BLOCK_STOP_TIME_ARRIVAL_INSTANCE = new BlockStopTimeArrivalTimeIndexAdapter();
+  public static final IndexAdapter<HasIndexedBlockStopTimes> BLOCK_STOP_TIME_ARRIVAL_INSTANCE = new BlockStopTimeArrivalTimeIndexAdapter();
 
-  public static final IndexAdapter<BlockStopTimeIndex> BLOCK_STOP_TIME_DEPARTURE_INSTANCE = new BlockStopTimeDepartureTimeIndexAdapter();
+  public static final IndexAdapter<HasIndexedBlockStopTimes> BLOCK_STOP_TIME_DEPARTURE_INSTANCE = new BlockStopTimeDepartureTimeIndexAdapter();
 
-  public static final IndexAdapter<BlockStopTripIndex> BLOCK_STOP_TRIP_DEPARTURE_INSTANCE = new BlockStopTripDepartureTimeIndexAdapter();
+  public static final IndexAdapter<BlockStopSequenceIndex> BLOCK_STOP_SEQUENCE_DEPARTURE_INSTANCE = new BlockStopSequenceDepartureTimeIndexAdapter();
 
   public static final IndexAdapter<BlockConfigurationEntry> BLOCK_CONFIG_DEPARTURE_INSTANCE = new BlockConfigDepartureTimeIndexAdapter();
 
@@ -27,28 +27,28 @@ public class IndexAdapters {
    ****/
 
   private static class BlockStopTimeArrivalTimeIndexAdapter implements
-      IndexAdapter<BlockStopTimeIndex> {
+      IndexAdapter<HasIndexedBlockStopTimes> {
 
     @Override
-    public double getValue(BlockStopTimeIndex source, int index) {
+    public double getValue(HasIndexedBlockStopTimes source, int index) {
       return source.getArrivalTimeForIndex(index);
     }
   }
 
   private static class BlockStopTimeDepartureTimeIndexAdapter implements
-      IndexAdapter<BlockStopTimeIndex> {
+      IndexAdapter<HasIndexedBlockStopTimes> {
 
     @Override
-    public double getValue(BlockStopTimeIndex source, int index) {
+    public double getValue(HasIndexedBlockStopTimes source, int index) {
       return source.getDepartureTimeForIndex(index);
     }
   }
 
-  private static class BlockStopTripDepartureTimeIndexAdapter implements
-      IndexAdapter<BlockStopTripIndex> {
+  private static class BlockStopSequenceDepartureTimeIndexAdapter implements
+      IndexAdapter<BlockStopSequenceIndex> {
 
     @Override
-    public double getValue(BlockStopTripIndex source, int index) {
+    public double getValue(BlockStopSequenceIndex source, int index) {
       return source.getDepartureTimeForIndex(index);
     }
   }

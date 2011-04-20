@@ -19,6 +19,8 @@ public final class RefreshableResources {
   public static final String BLOCK_INDEX_SERVICE = "blockIndexService";
 
   public static final String STOP_TRANSFER_DATA = "stopTransferData";
+  
+  public static final String TRANSFER_PATTERNS = "transfer_patterns";
 
   public static final String NARRATIVE_DATA = "narrativeData";
 

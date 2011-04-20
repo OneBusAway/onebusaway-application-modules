@@ -8,7 +8,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
-public class BlockStopTimeIndex extends AbstractBlockStopTimeIndex {
+public class BlockStopTimeIndex extends AbstractBlockStopTimeIndex implements HasIndexedBlockStopTimes {
 
   public static BlockStopTimeIndex create(BlockTripIndex blockTripIndex,
       int blockSequence) {
@@ -36,12 +36,18 @@ public class BlockStopTimeIndex extends AbstractBlockStopTimeIndex {
     super(blockConfigs, stopIndices, serviceInterval);
   }
 
+  /****
+   * {@link HasIndexedBlockStopTimes} Interface
+   ****/
+  
+  @Override
   public int getArrivalTimeForIndex(int index) {
     BlockConfigurationEntry blockConfig = _blockConfigs.get(index);
     int stopIndex = _stopIndices[index];
     return blockConfig.getArrivalTimeForIndex(stopIndex);
   }
 
+  @Override
   public int getDepartureTimeForIndex(int index) {
     BlockConfigurationEntry blockConfig = _blockConfigs.get(index);
     int stopIndex = _stopIndices[index];

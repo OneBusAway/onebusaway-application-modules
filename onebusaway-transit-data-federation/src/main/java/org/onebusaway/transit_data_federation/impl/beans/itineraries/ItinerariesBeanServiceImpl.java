@@ -1148,10 +1148,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         && transitLeg.getFromStop().getId() != null) {
 
       AgencyAndId fromStopId = AgencyAndIdLibrary.convertFromString(transitLeg.getFromStop().getId());
-      StopEntry fromStop = _transitGraphDao.getStopEntryForId(fromStopId);
-
-      if (fromStop == null)
-        throw new NoSuchStopServiceException(transitLeg.getFromStop().getId());
+      StopEntry fromStop = _transitGraphDao.getStopEntryForId(fromStopId,true);
       int fromStopSequence = transitLeg.getFromStopSequence();
 
       ArrivalAndDepartureQuery query = new ArrivalAndDepartureQuery();
@@ -1175,10 +1172,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         && transitLeg.getToStop().getId() != null) {
 
       AgencyAndId toStopId = AgencyAndIdLibrary.convertFromString(transitLeg.getToStop().getId());
-      StopEntry toStop = _transitGraphDao.getStopEntryForId(toStopId);
-
-      if (toStop == null)
-        throw new NoSuchStopServiceException(transitLeg.getToStop().getId());
+      StopEntry toStop = _transitGraphDao.getStopEntryForId(toStopId,true);
       int toStopSequence = transitLeg.getToStopSequence();
 
       ArrivalAndDepartureQuery query = new ArrivalAndDepartureQuery();

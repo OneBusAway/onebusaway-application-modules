@@ -5,14 +5,14 @@ import java.util.List;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
-class BlockTripSequenceKey {
+class BlockSequenceKey {
 
   private final ServiceIdActivation _serviceIds;
 
   private final List<AgencyAndId> _stopIds;
 
 
-  public BlockTripSequenceKey(ServiceIdActivation serviceIds, List<AgencyAndId> stopIds) {
+  public BlockSequenceKey(ServiceIdActivation serviceIds, List<AgencyAndId> stopIds) {
     _serviceIds = serviceIds;
     _stopIds = stopIds;
   }
@@ -34,7 +34,7 @@ class BlockTripSequenceKey {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BlockTripSequenceKey other = (BlockTripSequenceKey) obj;
+    BlockSequenceKey other = (BlockSequenceKey) obj;
     return _serviceIds.equals(other._serviceIds)
         && _stopIds.equals(other._stopIds);
   }

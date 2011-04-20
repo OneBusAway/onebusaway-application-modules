@@ -83,11 +83,6 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     for (AgencyAndId id : ids) {
 
       StopBean stopBean = _stopBeanService.getStopForId(id);
-
-      if (stopBean == null)
-        throw new NoSuchStopServiceException(
-            AgencyAndIdLibrary.convertToString(id));
-
       stops.add(stopBean);
 
       List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(

@@ -6,20 +6,21 @@ import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.collections.Range;
-import org.onebusaway.exceptions.NoSuchStopServiceException;
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.impl.blocks.IndexAdapters;
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.blocks.AbstractBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
-import org.onebusaway.transit_data_federation.services.blocks.BlockStopTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.HasIndexedBlockStopTimes;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
@@ -57,7 +58,7 @@ class StopTimeServiceImpl implements StopTimeService {
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
       AgencyAndId stopId, Date from, Date to) {
 
-    StopEntry stopEntry = getStop(stopId);
+    StopEntry stopEntry = _graph.getStopEntryForId(stopId, true);
     return getStopTimeInstancesInTimeRange(stopEntry, from, to);
   }
 
@@ -68,10 +69,14 @@ class StopTimeServiceImpl implements StopTimeService {
     List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 
     for (BlockStopTimeIndex index : _blockIndexService.getStopTimeIndicesForStop(stopEntry)) {
+
       Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
           index.getServiceIds(), index.getServiceInterval(), from, to);
-      getStopTimesForStopAndServiceIdsAndTimeRange(index, serviceDates, from,
-          to, stopTimeInstances);
+
+      for (Date serviceDate : serviceDates) {
+        getStopTimesForStopAndServiceDateAndTimeRange(index, serviceDate, from,
+            to, stopTimeInstances);
+      }
     }
 
     for (FrequencyBlockStopTimeIndex index : _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry)) {
@@ -90,9 +95,9 @@ class StopTimeServiceImpl implements StopTimeService {
 
     List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 
-    List<BlockStopTripIndex> blockStopTripIndices = _blockIndexService.getStopTripIndicesForStop(stopEntry);
+    List<BlockStopSequenceIndex> blockStopTripIndices = _blockIndexService.getStopSequenceIndicesForStop(stopEntry);
 
-    for (BlockStopTripIndex index : blockStopTripIndices) {
+    for (BlockStopSequenceIndex index : blockStopTripIndices) {
 
       List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
           index.getServiceIds(), index.getServiceInterval(), time);
@@ -102,7 +107,7 @@ class StopTimeServiceImpl implements StopTimeService {
         int relativeFrom = effectiveTime(serviceDate.getTime(), time);
 
         int fromIndex = GenericBinarySearch.search(index, index.size(),
-            relativeFrom, IndexAdapters.BLOCK_STOP_TRIP_DEPARTURE_INSTANCE);
+            relativeFrom, IndexAdapters.BLOCK_STOP_SEQUENCE_DEPARTURE_INSTANCE);
 
         if (fromIndex < index.size()) {
           BlockStopTimeEntry blockStopTime = index.getBlockStopTimeForIndex(fromIndex);
@@ -121,7 +126,7 @@ class StopTimeServiceImpl implements StopTimeService {
   public Range getDepartureForStopAndServiceDate(AgencyAndId stopId,
       ServiceDate serviceDate) {
 
-    StopEntry stop = getStop(stopId);
+    StopEntry stop = _graph.getStopEntryForId(stopId, true);
 
     List<BlockStopTimeIndex> indices = _blockIndexService.getStopTimeIndicesForStop(stop);
 
@@ -149,32 +154,66 @@ class StopTimeServiceImpl implements StopTimeService {
     return sti;
   }
 
-  /****
-   * Private Methods
-   ****/
+  @Override
+  public List<Pair<StopTimeInstance>> getDepartureSegmentsInRange(
+      StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
+      Date toDepartureTime) {
 
-  private void getStopTimesForStopAndServiceIdsAndTimeRange(
-      BlockStopTimeIndex index, Collection<Date> serviceDates, Date from,
-      Date to, List<StopTimeInstance> stopTimeInstances) {
+    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
+        fromStop, toStop);
 
-    List<BlockStopTimeEntry> blockStopTimes = index.getStopTimes();
+    List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
 
-    for (Date serviceDate : serviceDates) {
+    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
+      BlockStopSequenceIndex toStopIndex = pair.getSecond();
 
-      int relativeFrom = effectiveTime(serviceDate, from);
-      int relativeTo = effectiveTime(serviceDate, to);
+      List<BlockStopTimeEntry> toStopTimes = toStopIndex.getStopTimes();
 
-      int fromIndex = GenericBinarySearch.search(index, blockStopTimes.size(),
-          relativeFrom, IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
-      int toIndex = GenericBinarySearch.search(index, blockStopTimes.size(),
-          relativeTo, IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE);
+      ServiceIdActivation serviceIds = fromStopIndex.getServiceIds();
+      ServiceInterval interval = fromStopIndex.getServiceInterval();
 
-      for (int in = fromIndex; in < toIndex; in++) {
-        BlockStopTimeEntry blockStopTime = blockStopTimes.get(in);
-        stopTimeInstances.add(new StopTimeInstance(blockStopTime, serviceDate));
+      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
+          serviceIds, interval, fromDepartureTime, toDepartureTime);
+
+      for (Date serviceDate : serviceDates) {
+        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
+        int fromIndex = getStopTimesForStopAndServiceDateAndTimeRange(
+            fromStopIndex, serviceDate, fromDepartureTime, toDepartureTime,
+            instances);
+        for (int i = 0; i < instances.size(); i++) {
+          StopTimeInstance stiFrom = instances.get(i);
+          BlockStopTimeEntry stopTimeTo = toStopTimes.get(fromIndex + i);
+          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          results.add(stiPair);
+        }
       }
     }
 
+    return results;
+  }
+
+  private int getStopTimesForStopAndServiceDateAndTimeRange(
+      HasIndexedBlockStopTimes index, Date serviceDate, Date from, Date to,
+      List<StopTimeInstance> instances) {
+
+    List<BlockStopTimeEntry> blockStopTimes = index.getStopTimes();
+
+    int relativeFrom = effectiveTime(serviceDate, from);
+    int relativeTo = effectiveTime(serviceDate, to);
+
+    int fromIndex = GenericBinarySearch.search(index, blockStopTimes.size(),
+        relativeFrom, IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
+    int toIndex = GenericBinarySearch.search(index, blockStopTimes.size(),
+        relativeTo, IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE);
+
+    for (int in = fromIndex; in < toIndex; in++) {
+      BlockStopTimeEntry blockStopTime = blockStopTimes.get(in);
+      instances.add(new StopTimeInstance(blockStopTime, serviceDate));
+    }
+
+    return fromIndex;
   }
 
   private void getFrequenciesForStopAndServiceIdsAndTimeRange(
@@ -211,14 +250,6 @@ class StopTimeServiceImpl implements StopTimeService {
       interval.addValue(tFrom);
       interval.addValue(tTo);
     }
-  }
-
-  private StopEntry getStop(AgencyAndId stopId) {
-    StopEntry stopEntry = _graph.getStopEntryForId(stopId);
-    if (stopEntry == null)
-      throw new NoSuchStopServiceException(
-          AgencyAndIdLibrary.convertToString(stopId));
-    return stopEntry;
   }
 
   private static final int effectiveTime(Date serviceDate, Date targetTime) {

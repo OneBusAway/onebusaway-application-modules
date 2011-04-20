@@ -25,6 +25,8 @@ public interface TransitGraphDao {
    * @return the stop entry with the specified id, or null if not found
    */
   public StopEntry getStopEntryForId(AgencyAndId id);
+  
+  public StopEntry getStopEntryForId(AgencyAndId id, boolean throwExceptionIfNotFound);
 
   /**
    * @param bounds coordinate bounds query

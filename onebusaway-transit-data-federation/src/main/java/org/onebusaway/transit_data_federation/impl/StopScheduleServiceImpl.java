@@ -52,10 +52,7 @@ class StopScheduleServiceImpl implements StopScheduleService {
   public List<ServiceDateSummary> getServiceDateSummariesForStop(
       AgencyAndId stopId) {
 
-    StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
-    if (stop == null)
-      throw new NoSuchStopServiceException(
-          AgencyAndIdLibrary.convertToString(stopId));
+    StopEntry stop = _transitGraphDao.getStopEntryForId(stopId, true);
 
     Set<ServiceIdActivation> allServiceIds = getAllServiceIdsForStop(stop);
 

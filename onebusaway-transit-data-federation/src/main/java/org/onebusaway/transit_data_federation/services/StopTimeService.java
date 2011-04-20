@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.collections.Range;
+import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -40,4 +41,8 @@ public interface StopTimeService {
       ServiceDate serviceDate);
 
   public StopTimeInstance getNextStopTimeInstance(StopTimeInstance instance);
+
+  public List<Pair<StopTimeInstance>> getDepartureSegmentsInRange(
+      StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
+      Date toDepartureTime);
 }

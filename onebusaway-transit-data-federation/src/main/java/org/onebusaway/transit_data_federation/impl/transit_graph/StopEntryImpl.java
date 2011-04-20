@@ -12,7 +12,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopHops;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
-import org.onebusaway.transit_data_federation.services.blocks.BlockStopTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
@@ -30,7 +30,7 @@ public class StopEntryImpl implements StopEntry, Serializable {
 
   private transient List<FrequencyBlockStopTimeIndex> _frequencyStopTimeIndices = null;
 
-  private transient List<BlockStopTripIndex> _stopTripIndices = null;
+  private transient List<BlockStopSequenceIndex> _stopTripIndices = null;
 
   private transient StopTransfers _transfers = null;
 
@@ -69,13 +69,13 @@ public class StopEntryImpl implements StopEntry, Serializable {
     return _frequencyStopTimeIndices;
   }
 
-  public void addBlockStopTripIndex(BlockStopTripIndex index) {
+  public void addBlockStopTripIndex(BlockStopSequenceIndex index) {
     if (_stopTripIndices == null)
-      _stopTripIndices = new ArrayList<BlockStopTripIndex>();
+      _stopTripIndices = new ArrayList<BlockStopSequenceIndex>();
     _stopTripIndices.add(index);
   }
 
-  public List<BlockStopTripIndex> getStopTripIndices() {
+  public List<BlockStopSequenceIndex> getStopTripIndices() {
     if (_stopTripIndices == null)
       return Collections.emptyList();
     return _stopTripIndices;

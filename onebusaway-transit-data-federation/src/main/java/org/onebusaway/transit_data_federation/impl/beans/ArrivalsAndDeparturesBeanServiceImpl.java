@@ -133,11 +133,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   public List<ArrivalAndDepartureBean> getArrivalsAndDeparturesByStopId(
       AgencyAndId stopId, ArrivalsAndDeparturesQueryBean query) {
 
-    StopEntry stop = _transitGraphDao.getStopEntryForId(stopId);
-
-    if (stop == null)
-      throw new NoSuchStopServiceException(
-          AgencyAndIdLibrary.convertToString(stopId));
+    StopEntry stop = _transitGraphDao.getStopEntryForId(stopId, true);
 
     long time = query.getTime();
 
@@ -190,9 +186,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       ArrivalAndDepartureQuery query) {
 
     long time = query.getTime();
-    
-    ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
-        query);
+
+    ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
     ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, instance,
         new HashMap<AgencyAndId, StopBean>());

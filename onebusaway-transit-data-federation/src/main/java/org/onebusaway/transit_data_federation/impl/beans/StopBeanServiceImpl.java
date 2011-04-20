@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
@@ -61,7 +63,8 @@ class StopBeanServiceImpl implements StopBeanService {
     Stop stop = _gtfsDao.getStopForId(id);
 
     if (stop == null)
-      return null;
+      throw new NoSuchStopServiceException(
+          AgencyAndIdLibrary.convertToString(id));
 
     StopBean sb = new StopBean();
     fillStopBean(stop, sb);
@@ -97,8 +100,7 @@ class StopBeanServiceImpl implements StopBeanService {
       bean.setDirection(stopNarrative.getDireciton());
 
     bean.setName(stop.getName());
-    bean.setCode(StringLibrary.getBestName(stop.getCode(),
-        stop.getId().getId()));
+    bean.setCode(StringLibrary.getBestName(stop.getCode(), stop.getId().getId()));
     bean.setLocationType(stop.getLocationType());
 
     return bean;

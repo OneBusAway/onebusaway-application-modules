@@ -7,10 +7,12 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.container.refresh.Refreshable;
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -61,6 +63,16 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   @Override
   public StopEntry getStopEntryForId(AgencyAndId id) {
     return _graph.getStopEntryForId(id);
+  }
+
+  @Override
+  public StopEntry getStopEntryForId(AgencyAndId id,
+      boolean throwExceptionIfNotFound) {
+    StopEntry stop = _graph.getStopEntryForId(id);
+    if (stop == null && throwExceptionIfNotFound)
+      throw new NoSuchStopServiceException(
+          AgencyAndIdLibrary.convertToString(id));
+    return stop;
   }
 
   @Override

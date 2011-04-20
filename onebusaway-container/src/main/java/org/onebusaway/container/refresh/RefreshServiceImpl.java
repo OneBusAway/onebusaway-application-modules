@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.util.ReflectionUtils;
 
 class RefreshServiceImpl implements RefreshService, BeanPostProcessor {
 
@@ -91,6 +92,7 @@ class RefreshServiceImpl implements RefreshService, BeanPostProcessor {
     Object object = pair.getObject();
     Method method = pair.getMethod();
     try {
+      ReflectionUtils.makeAccessible(method);
       method.invoke(object);
     } catch (Exception ex) {
       throw new IllegalStateException("error invoking refresh method=" + method
