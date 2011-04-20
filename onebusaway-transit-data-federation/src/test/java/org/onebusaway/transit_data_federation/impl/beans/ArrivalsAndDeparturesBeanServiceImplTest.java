@@ -94,9 +94,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
     StopEntryImpl stopB = stop("stopB", 47.0, -122.0);
 
-    Mockito.when(_transitGraphDao.getStopEntryForId(stopA.getId())).thenReturn(
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopA.getId(),true)).thenReturn(
         stopA);
-    Mockito.when(_transitGraphDao.getStopEntryForId(stopB.getId())).thenReturn(
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopB.getId(),true)).thenReturn(
         stopB);
 
     /****
