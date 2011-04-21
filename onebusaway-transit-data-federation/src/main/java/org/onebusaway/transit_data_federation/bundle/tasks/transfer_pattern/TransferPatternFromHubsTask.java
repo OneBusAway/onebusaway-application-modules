@@ -226,7 +226,12 @@ public class TransferPatternFromHubsTask implements Runnable {
       List<List<Pair<StopEntry>>> paths = pattern.getPathsForStop(stop);
       values.add(paths.size());
     }
+
+    if (values.isEmpty())
+      return;
+
     values.sort();
+
     System.out.println("    mu=" + Descriptive.mean(values));
     System.out.println("median=" + Descriptive.median(values));
     System.out.println("   max=" + Descriptive.max(values));
