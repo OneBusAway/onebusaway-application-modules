@@ -107,14 +107,15 @@ public class TPStopPairEdge extends AbstractEdge {
           s1.incrementTimeInSeconds(transferTime + options.minTransferTime);
         }
 
-        TPState pathState = _pathState.extend(pair);
+        TPState pathState = _pathState.next();
         toV = new TPPathVertex(_context, pathState);
 
       } else {
         toV = new WalkFromStopVertex(_context, stopPair.getSecond());
       }
 
-      EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
+      EdgeNarrative narrative = new TPEdgeNarrativeImpl(fromV, toV,
+          pair.getFirst(), pair.getSecond());
 
       TraverseResult r = new TraverseResult(w, s1.createState(), narrative);
       results = r.addToExistingResultChain(results);

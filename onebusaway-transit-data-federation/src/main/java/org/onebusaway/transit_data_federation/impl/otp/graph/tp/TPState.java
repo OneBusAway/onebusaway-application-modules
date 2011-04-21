@@ -1,11 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph.tp;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.collections.tuple.Pair;
-import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class TPState {
@@ -16,19 +13,15 @@ public class TPState {
 
   private final int pathIndex;
 
-  private final List<Pair<ArrivalAndDepartureInstance>> instances;
-
   public static TPState start(TPQueryData queryData, List<Pair<StopEntry>> path) {
-    List<Pair<ArrivalAndDepartureInstance>> instances = Collections.emptyList();
-    return new TPState(queryData, path, 0, instances);
+    return new TPState(queryData, path, 0);
   }
 
   private TPState(TPQueryData queryData, List<Pair<StopEntry>> path,
-      int pathIndex, List<Pair<ArrivalAndDepartureInstance>> instances) {
+      int pathIndex) {
     this.queryData = queryData;
     this.path = path;
     this.pathIndex = pathIndex;
-    this.instances = instances;
   }
 
   public TPQueryData getQueryData() {
@@ -43,16 +36,8 @@ public class TPState {
     return pathIndex;
   }
 
-  public List<Pair<ArrivalAndDepartureInstance>> getInstances() {
-    return instances;
-  }
-
-  public TPState extend(Pair<ArrivalAndDepartureInstance> pair) {
-    List<Pair<ArrivalAndDepartureInstance>> extendedInstances = new ArrayList<Pair<ArrivalAndDepartureInstance>>(
-        instances.size());
-    extendedInstances.addAll(instances);
-    extendedInstances.add(pair);
-    return new TPState(queryData, path, pathIndex + 1, extendedInstances);
+  public TPState next() {
+    return new TPState(queryData, path, pathIndex + 1);
   }
 
   public boolean hasCurrentStopPair() {

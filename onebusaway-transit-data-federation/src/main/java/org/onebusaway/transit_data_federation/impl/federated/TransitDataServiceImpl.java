@@ -67,6 +67,7 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureAlarmService;
@@ -405,8 +406,9 @@ class TransitDataServiceImpl implements TransitDataService {
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
       TransitLocationBean to, long targetTime, long currentTime,
       ConstraintsBean constraints) throws ServiceException {
-    return _itinerariesBeanService.getItinerariesBetween(from, to, targetTime,
-        currentTime, constraints);
+    TargetTime tt = new TargetTime(currentTime, targetTime);
+    return _itinerariesBeanService.getItinerariesBetween(from, to, tt,
+        constraints);
   }
 
   @Override

@@ -17,7 +17,6 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
-import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.TPRemainingWeightHeuristicImpl;
@@ -28,7 +27,6 @@ import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
-import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
@@ -72,8 +70,6 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
   private TransferPatternService _transferPathService;
 
-  private OTPConfigurationService _configService;
-
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -105,11 +101,6 @@ class ItinerariesServiceImpl implements ItinerariesService {
     _transferPathService = transferPathService;
   }
 
-  @Autowired
-  public void set(OTPConfigurationService configService) {
-    _configService = configService;
-  }
-
   /****
    * {@link ItinerariesService} Interface
    ****/
@@ -139,6 +130,42 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
     return getWalkingItineraryBetweenVertices(fromVertex, toVertex, time,
         options);
+  }
+
+  @Override
+  public GraphPath getWalkingItineraryBetweenPoints(CoordinatePoint from,
+      CoordinatePoint to, Date time, TraverseOptions options) {
+
+    Coordinate a = new Coordinate(from.getLon(), from.getLat());
+    Coordinate b = new Coordinate(to.getLon(), to.getLat());
+
+    Vertex v1 = _streetVertexIndexService.getClosestVertex(a, options);
+    Vertex v2 = _streetVertexIndexService.getClosestVertex(b, options);
+
+    if (v1 == null || v2 == null)
+      return null;
+
+    return getWalkingItineraryBetweenVertices(v1, v2, time, options);
+  }
+
+  @Override
+  public GraphPath getWalkingItineraryBetweenVertices(Vertex from, Vertex to,
+      Date time, TraverseOptions options) {
+
+    options = options.clone();
+
+    /**
+     * Set walk only
+     */
+    TraverseModeSet modes = new TraverseModeSet(TraverseMode.WALK);
+    options.setModes(modes);
+
+    List<GraphPath> paths = _pathService.plan(from, to, time, options, 1);
+
+    if (CollectionsLibrary.isEmpty(paths))
+      return null;
+
+    return paths.get(0);
   }
 
   /****
@@ -280,26 +307,6 @@ class ItinerariesServiceImpl implements ItinerariesService {
     Graph graph = _graphService.getGraph();
     String label = WalkToStopVertex.getVertexLabelForStop(stop);
     return (WalkToStopVertex) graph.getVertex(label);
-  }
-
-  private GraphPath getWalkingItineraryBetweenVertices(Vertex fromVertex,
-      Vertex toVertex, Date time, TraverseOptions options) {
-
-    options = options.clone();
-
-    /**
-     * Set walk only
-     */
-    TraverseModeSet modes = new TraverseModeSet(TraverseMode.WALK);
-    options.setModes(modes);
-
-    List<GraphPath> paths = _pathService.plan(fromVertex, toVertex, time,
-        options, 1);
-
-    if (CollectionsLibrary.isEmpty(paths))
-      return null;
-
-    return paths.get(0);
   }
 
   /****

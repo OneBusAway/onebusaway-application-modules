@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.onebusaway.collections.CollectionsLibrary;
+import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -44,8 +45,9 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.ArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.BlockArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.BlockDepartureVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.DepartureVertex;
-import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
-import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPEdgeNarrativeImpl;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPPathVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
@@ -77,14 +79,12 @@ import org.opentripplanner.routing.core.GraphVertex;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseMode;
-import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 import org.opentripplanner.routing.edgetype.StreetTraversalPermission;
 import org.opentripplanner.routing.edgetype.StreetVertex;
 import org.opentripplanner.routing.services.GraphService;
-import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.services.StreetVertexIndexService;
 import org.opentripplanner.routing.spt.BasicShortestPathTree;
 import org.opentripplanner.routing.spt.GraphPath;
@@ -108,8 +108,6 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private static final String MODE_TRANSIT = "transit";
 
   private ItinerariesService _itinerariesService;
-
-  private PathService _pathService;
 
   private TransitShedPathService _transitShedPathService;
 
@@ -136,11 +134,6 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   @Autowired
   public void setItinerariesService(ItinerariesService itinerariesService) {
     _itinerariesService = itinerariesService;
-  }
-
-  @Autowired
-  public void setPathService(PathService pathService) {
-    _pathService = pathService;
   }
 
   @Autowired
@@ -208,30 +201,25 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   @Override
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, long currentTime,
-      ConstraintsBean constraints) throws ServiceException {
+      TransitLocationBean to, TargetTime targetTime, ConstraintsBean constraints)
+      throws ServiceException {
 
     OBATraverseOptions options = createTraverseOptions();
     applyConstraintsToOptions(constraints, options);
 
-    TargetTime tt = new TargetTime(currentTime, targetTime);
-
     List<GraphPath> paths = _itinerariesService.getItinerariesBetween(from, to,
-        tt, options);
+        targetTime, options);
 
     LocationBean fromBean = getPointAsLocation(from);
     LocationBean toBean = getPointAsLocation(to);
 
-    ItinerariesBean itineraries = getPathsAsItineraries(paths, fromBean, toBean);
+    ItinerariesBean itineraries = getPathsAsItineraries(paths, fromBean,
+        toBean, options);
 
-    ensureAdditionalItineraryIsIncluded(from, to, targetTime, currentTime,
-        constraints, itineraries);
+    ensureAdditionalItineraryIsIncluded(from, to, targetTime, itineraries,
+        constraints.getIncludeItinerary(), options);
 
     return itineraries;
-  }
-
-  private String getVertexLabelForPoint(CoordinatePoint point) {
-    return point.getLat() + "," + point.getLon();
   }
 
   @Override
@@ -385,7 +373,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private ItinerariesBean getPathsAsItineraries(List<GraphPath> paths,
-      LocationBean from, LocationBean to) {
+      LocationBean from, LocationBean to, OBATraverseOptions options) {
 
     ItinerariesBean bean = new ItinerariesBean();
     bean.setFrom(from);
@@ -399,7 +387,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     if (!CollectionsLibrary.isEmpty(paths)) {
       for (GraphPath path : paths) {
         computationTimeLimitReached |= path.isComputationTimeLimitReached();
-        ItineraryBean itinerary = getPathAsItinerary(path);
+        ItineraryBean itinerary = getPathAsItinerary(path, options);
         beans.add(itinerary);
       }
     }
@@ -409,7 +397,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return bean;
   }
 
-  private ItineraryBean getPathAsItinerary(GraphPath path) {
+  private ItineraryBean getPathAsItinerary(GraphPath path,
+      TraverseOptions options) {
 
     ItineraryBean itinerary = new ItineraryBean();
 
@@ -435,7 +424,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       TraverseMode mode = edgeNarrative.getMode();
 
       if (mode.isTransit()) {
-        currentIndex = extendTransitLeg(edges, currentIndex, legs);
+        currentIndex = extendTransitLeg(edges, currentIndex, options, legs);
       } else {
         currentIndex = extendStreetLeg(edges, currentIndex, mode, legs);
       }
@@ -445,7 +434,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private int extendTransitLeg(List<SPTEdge> edges, int currentIndex,
-      List<LegBean> legs) {
+      TraverseOptions options, List<LegBean> legs) {
 
     TransitLegBuilder builder = new TransitLegBuilder();
 
@@ -468,42 +457,11 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
       } else if (vFrom instanceof BlockArrivalVertex) {
 
-        BlockArrivalVertex arrival = (BlockArrivalVertex) vFrom;
+        builder = extendTransitLegWithArrival(legs, builder,
+            (BlockArrivalVertex) vFrom, vTo, sptEdge, options);
 
-        /**
-         * Did we finish up a transit leg?
-         */
-        if (vTo instanceof ArrivalVertex) {
-
-          /**
-           * We've finished up our transit leg, so publish the leg
-           */
-          builder = getTransitLegBuilderAsLeg(builder, legs);
-
-        }
-        /**
-         * Did we have a transfer to another stop?
-         */
-        else if (vTo instanceof DepartureVertex) {
-
-          /**
-           * We've finished up our transit leg either way, so publish the leg
-           */
-          builder = getTransitLegBuilderAsLeg(builder, legs);
-
-          /**
-           * We've possibly transfered to another stop, so we need to insert the
-           * walk leg
-           */
-          ArrivalAndDepartureInstance fromStopTimeInstance = arrival.getInstance();
-          StopEntry fromStop = fromStopTimeInstance.getStop();
-
-          DepartureVertex toStopVertex = (DepartureVertex) vTo;
-          StopEntry toStop = toStopVertex.getStop();
-
-          addTransferLegIfNeeded(sptEdge, fromStop, toStop, legs);
-        }
       } else if (vFrom instanceof ArrivalVertex) {
+
         if (vTo instanceof BlockDepartureVertex) {
 
           /**
@@ -518,8 +476,11 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
           ArrivalAndDepartureInstance departureInstance = toStopVertex.getInstance();
           StopEntry toStop = departureInstance.getStop();
 
-          addTransferLegIfNeeded(sptEdge, fromStop, toStop, legs);
+          addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
         }
+      } else if (vFrom instanceof TPPathVertex) {
+        builder = extendTransitLegWithTransferPattern(legs, builder,
+            (TPPathVertex) vFrom, vTo, sptEdge, options);
       }
 
       currentIndex++;
@@ -529,16 +490,18 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private void addTransferLegIfNeeded(SPTEdge sptEdge, StopEntry fromStop,
-      StopEntry toStop, List<LegBean> legs) {
+      StopEntry toStop, TraverseOptions options, List<LegBean> legs) {
+
     if (!fromStop.equals(toStop)) {
 
       long timeFrom = sptEdge.fromv.state.getTime();
       long timeTo = sptEdge.tov.state.getTime();
 
-      ItineraryBean walk = getWalkingItineraryBetweenStops(fromStop, toStop,
-          timeFrom);
+      GraphPath path = _itinerariesService.getWalkingItineraryBetweenStops(
+          fromStop, toStop, new Date(timeFrom), options);
 
-      if (walk != null) {
+      if (path != null) {
+        ItineraryBean walk = getPathAsItinerary(path, options);
         scaleItinerary(walk, timeFrom, timeTo);
         legs.addAll(walk.getLegs());
       }
@@ -551,6 +514,13 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     ArrivalAndDepartureInstance from = vFrom.getInstance();
     ArrivalAndDepartureInstance to = vTo.getInstance();
+
+    return extendTransitLegWithDepartureAndArrival(legs, builder, from, to);
+  }
+
+  private TransitLegBuilder extendTransitLegWithDepartureAndArrival(
+      List<LegBean> legs, TransitLegBuilder builder,
+      ArrivalAndDepartureInstance from, ArrivalAndDepartureInstance to) {
 
     BlockTripEntry tripFrom = from.getBlockTrip();
     BlockTripEntry tripTo = to.getBlockTrip();
@@ -596,6 +566,80 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     builder.setToStop(to);
     builder.setScheduledArrivalTime(to.getScheduledArrivalTime());
     builder.setPredictedArrivalTime(to.getPredictedArrivalTime());
+    return builder;
+  }
+
+  private TransitLegBuilder extendTransitLegWithArrival(List<LegBean> legs,
+      TransitLegBuilder builder, BlockArrivalVertex arrival, Vertex vTo,
+      SPTEdge sptEdge, TraverseOptions options) {
+
+    /**
+     * Did we finish up a transit leg?
+     */
+    if (vTo instanceof ArrivalVertex) {
+
+      /**
+       * We've finished up our transit leg, so publish the leg
+       */
+      builder = getTransitLegBuilderAsLeg(builder, legs);
+
+    }
+    /**
+     * Did we have a transfer to another stop?
+     */
+    else if (vTo instanceof DepartureVertex) {
+
+      /**
+       * We've finished up our transit leg either way, so publish the leg
+       */
+      builder = getTransitLegBuilderAsLeg(builder, legs);
+
+      /**
+       * We've possibly transfered to another stop, so we need to insert the
+       * walk leg
+       */
+      ArrivalAndDepartureInstance fromStopTimeInstance = arrival.getInstance();
+      StopEntry fromStop = fromStopTimeInstance.getStop();
+
+      DepartureVertex toStopVertex = (DepartureVertex) vTo;
+      StopEntry toStop = toStopVertex.getStop();
+
+      addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
+    }
+
+    return builder;
+  }
+
+  private TransitLegBuilder extendTransitLegWithTransferPattern(
+      List<LegBean> legs, TransitLegBuilder builder, TPPathVertex vFrom,
+      Vertex vTo, SPTEdge sptEdge, TraverseOptions options) {
+
+    TPEdgeNarrativeImpl narrative = (TPEdgeNarrativeImpl) sptEdge.narrative;
+
+    ArrivalAndDepartureInstance departure = narrative.getDeparture();
+    ArrivalAndDepartureInstance arrival = narrative.getArrival();
+
+    builder = extendTransitLegWithDepartureAndArrival(legs, builder, departure,
+        arrival);
+
+    /**
+     * Clean up the transit leg
+     */
+    builder = getTransitLegBuilderAsLeg(builder, legs);
+
+    TPState pathState = vFrom.getPathState();
+
+    /**
+     * Do we need to add the transfer to another station?
+     */
+    if (pathState.hasNextStopPair()) {
+      Pair<StopEntry> fromPair = pathState.getCurrentStopPair();
+      Pair<StopEntry> toPair = pathState.getNextStopPair();
+      StopEntry fromStop = fromPair.getSecond();
+      StopEntry toStop = toPair.getFirst();
+      addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
+    }
+
     return builder;
   }
 
@@ -926,31 +970,6 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     throw new IllegalStateException("unknown street mode: " + mode);
   }
 
-  private ItineraryBean getWalkingItineraryBetweenStops(StopEntry from,
-      StopEntry to, long time) {
-
-    String fromPlace = WalkFromStopVertex.getVertexLabelForStop(from);
-    String toPlace = WalkToStopVertex.getVertexLabelForStop(to);
-
-    return getWalkingItineraryBetweenVertexLabels(fromPlace, toPlace, time);
-  }
-
-  private ItineraryBean getWalkingItineraryBetweenVertexLabels(
-      String fromPlace, String toPlace, long time) {
-    TraverseOptions options = createTraverseOptions();
-
-    TraverseModeSet modes = new TraverseModeSet(TraverseMode.WALK);
-    options.setModes(modes);
-
-    List<GraphPath> paths = _pathService.plan(fromPlace, toPlace,
-        new Date(time), options, 1);
-
-    if (CollectionsLibrary.isEmpty(paths))
-      return null;
-
-    return getPathAsItinerary(paths.get(0));
-  }
-
   private void scaleItinerary(ItineraryBean bean, long timeFrom, long timeTo) {
 
     long tStart = bean.getStartTime();
@@ -972,10 +991,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private void ensureAdditionalItineraryIsIncluded(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, long currentTime,
-      ConstraintsBean constraints, ItinerariesBean itineraries) {
-
-    ItineraryBean toInclude = constraints.getIncludeItinerary();
+      TransitLocationBean to, TargetTime targetTime,
+      ItinerariesBean itineraries, ItineraryBean toInclude,
+      TraverseOptions options) {
 
     if (toInclude == null)
       return;
@@ -988,7 +1006,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         return;
     }
 
-    updateItinerary(toInclude, from, to, targetTime, currentTime, constraints);
+    updateItinerary(toInclude, from, to, targetTime, options);
 
     itineraries.getItineraries().add(toInclude);
   }
@@ -1052,8 +1070,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private void updateItinerary(ItineraryBean itinerary,
-      TransitLocationBean from, TransitLocationBean to, long time,
-      long currentTime, ConstraintsBean constraints) {
+      TransitLocationBean from, TransitLocationBean to, TargetTime targetTime,
+      TraverseOptions options) {
 
     List<LegBean> legs = itinerary.getLegs();
 
@@ -1068,7 +1086,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       TransitLegBean transitLeg = leg.getTransitLeg();
 
       if (transitLeg != null) {
-        LegBean updatedLeg = updateTransitLeg(transitLeg, time);
+        LegBean updatedLeg = updateTransitLeg(transitLeg, targetTime);
         legs.set(i, updatedLeg);
 
         if (firstTransitLegIndex == -1)
@@ -1076,10 +1094,16 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
       } else if (isStreetLeg(leg)) {
 
-        String fromPlace = getVertexLabelForPoint(leg.getFrom());
-        String toPlace = getVertexLabelForPoint(leg.getTo());
-        ItineraryBean walkItinerary = getWalkingItineraryBetweenVertexLabels(
-            fromPlace, toPlace, currentTime);
+        Date time = new Date(targetTime.getTargetTime());
+
+        GraphPath path = _itinerariesService.getWalkingItineraryBetweenPoints(
+            leg.getFrom(), leg.getTo(), time, options);
+
+        if (path == null) {
+          throw new IllegalStateException("expected walking path to exist");
+        }
+
+        ItineraryBean walkItinerary = getPathAsItinerary(path, options);
         legs.set(i, walkItinerary.getLegs().get(0));
       }
     }
@@ -1127,7 +1151,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         || MODE_BICYCLE.equals(leg.getMode());
   }
 
-  private LegBean updateTransitLeg(TransitLegBean transitLeg, long time) {
+  private LegBean updateTransitLeg(TransitLegBean transitLeg,
+      TargetTime targetTime) {
 
     TransitLegBuilder b = new TransitLegBuilder();
 
@@ -1156,7 +1181,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       query.setTrip(trip);
       query.setServiceDate(serviceDate);
       query.setVehicleId(vehicleId);
-      query.setTime(time);
+      query.setTime(targetTime.getCurrentTime());
 
       ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
@@ -1180,7 +1205,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       query.setTrip(trip);
       query.setServiceDate(serviceDate);
       query.setVehicleId(vehicleId);
-      query.setTime(time);
+      query.setTime(targetTime.getCurrentTime());
 
       ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
