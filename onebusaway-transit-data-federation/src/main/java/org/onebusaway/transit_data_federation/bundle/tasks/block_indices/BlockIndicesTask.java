@@ -36,7 +36,7 @@ public class BlockIndicesTask implements Runnable {
 
     try {
 
-      BlockIndicesFactory factory = new BlockIndicesFactory();
+      BlockIndexFactory factory = new BlockIndexFactory();
       factory.setVerbose(true);
 
       Iterable<BlockEntry> blocks = _transitGraphDao.getAllBlocks();

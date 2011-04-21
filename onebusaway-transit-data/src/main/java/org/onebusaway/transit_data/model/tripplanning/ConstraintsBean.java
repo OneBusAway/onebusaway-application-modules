@@ -36,7 +36,7 @@ public class ConstraintsBean implements Serializable {
 
   private int maxTransfers = -1;
 
-  private long maxComputationTime = 0;
+  private long maxComputationTime = -1;
 
   private ItineraryBean includeItinerary = null;
 

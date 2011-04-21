@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.geospatial.services.GeometryLibrary;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.FrequencyComparator;
@@ -23,14 +25,15 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.HasBlockStopTimes;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BlockIndicesFactory {
+public class BlockIndexFactory {
 
-  private static Logger _log = LoggerFactory.getLogger(BlockIndicesFactory.class);
+  private static Logger _log = LoggerFactory.getLogger(BlockIndexFactory.class);
 
   private static final Comparator<BlockTripEntry> _blockTripLooseComparator = new BlockStopTimeLooseComparator<BlockTripEntry>();
 
@@ -49,7 +52,9 @@ public class BlockIndicesFactory {
   /**
    * Time, in seconds
    */
-  private int _maxSlackBetweenConsecutiveTrips = 10 * 60;
+  private int _maxSlackBetweenConsecutiveTrips = 5 * 60;
+
+  private int _maxScheduledTimeBetweenConsecutiveTrips = 15 * 60;
 
   public void setVerbose(boolean verbose) {
     _verbose = verbose;
@@ -62,6 +67,19 @@ public class BlockIndicesFactory {
   public void setMaxSlackBetweenConsecutiveTrips(
       int maxSlackBetweenConsecutiveTrips) {
     _maxSlackBetweenConsecutiveTrips = maxSlackBetweenConsecutiveTrips;
+  }
+
+  public void setMaxScheduledTimeBetweenConsecutiveTrips(
+      int maxScheduledTimeBetweenConsecutiveTrips) {
+    _maxScheduledTimeBetweenConsecutiveTrips = maxScheduledTimeBetweenConsecutiveTrips;
+  }
+
+  public BlockIndexFactory() {
+
+  }
+
+  public BlockIndexFactory(boolean verbose) {
+    _verbose = verbose;
   }
 
   /****
@@ -663,18 +681,27 @@ public class BlockIndicesFactory {
       BlockTripEntry nextBlockTrip) {
 
     List<BlockStopTimeEntry> prevStopTimes = prevBlockTrip.getStopTimes();
-    List<BlockStopTimeEntry> stopTimes = nextBlockTrip.getStopTimes();
+    List<BlockStopTimeEntry> nextStopTimes = nextBlockTrip.getStopTimes();
 
     BlockStopTimeEntry from = prevStopTimes.get(prevStopTimes.size() - 1);
-    BlockStopTimeEntry to = stopTimes.get(0);
+    BlockStopTimeEntry to = nextStopTimes.get(0);
 
     int slack = to.getAccumulatedSlackTime()
         - (from.getAccumulatedSlackTime() + from.getStopTime().getSlackTime());
+
+    int schedTime = to.getStopTime().getArrivalTime()
+        - from.getStopTime().getDepartureTime();
 
     /**
      * If the slack time is too much, the trips are not continuous
      */
     if (slack >= _maxSlackBetweenConsecutiveTrips)
+      return false;
+
+    /**
+     * If the sched time is too much, the trips are not continuous
+     */
+    if (schedTime >= _maxScheduledTimeBetweenConsecutiveTrips)
       return false;
 
     TripEntry prevTrip = prevBlockTrip.getTrip();
@@ -693,8 +720,22 @@ public class BlockIndicesFactory {
     if (lineIdA.equals(lineIdB)
         && (directionA == null || !directionA.equals(directionB)))
       return false;
+    
+    double prevOrientation = computeDirectionOfTravel(prevStopTimes);
+    double nextOrientation = computeDirectionOfTravel(nextStopTimes);
+    double delta = GeometryLibrary.getAngleDifference(prevOrientation, nextOrientation);
 
+//    System.out.println(delta + " " + prevTrip.getId() + " " + nextTrip.getId());
+    
     return true;
+  }
+  
+  private double computeDirectionOfTravel(List<BlockStopTimeEntry> bsts) {
+    BlockStopTimeEntry fromBst = bsts.get(0);
+    BlockStopTimeEntry toBst = bsts.get(bsts.size()-1);
+    StopEntry fromStop = fromBst.getStopTime().getStop();
+    StopEntry toStop = toBst.getStopTime().getStop();
+    return SphericalGeometryLibrary.getOrientation(fromStop.getStopLat(), fromStop.getStopLon(), toStop.getStopLat(), toStop.getStopLon());
   }
 
   private ServiceInterval extend(ServiceInterval interval,

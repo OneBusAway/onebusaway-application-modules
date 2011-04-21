@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
+import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
@@ -33,15 +34,16 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
     if (data.getNumBoardings() >= options.maxTransfers)
       return null;
 
-    int transferTime = computeTransferTime(options);
+    int transferTime = ItineraryWeightingLibrary.computeTransferTime(_transfer,
+        options);
+    double weight = ItineraryWeightingLibrary.computeTransferWeight(
+        transferTime, options);
 
     State s1 = s0.incrementTimeInSeconds(transferTime + options.minTransferTime);
 
     /**
      * We're using options.boardCost as a transfer penalty
      */
-    double weight = transferTime * options.walkReluctance + options.boardCost
-        + options.minTransferTime * options.waitReluctance;
 
     EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
     return new TraverseResult(weight, s1, narrative);
@@ -51,12 +53,12 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    int transferTime = computeTransferTime(options);
+    int transferTime = ItineraryWeightingLibrary.computeTransferTime(_transfer,
+        options);
+    double weight = ItineraryWeightingLibrary.computeTransferWeight(
+        transferTime, options);
 
     State s1 = s0.setTime(_instance.getBestArrivalTime());
-
-    double weight = transferTime * options.walkReluctance + options.boardCost
-        + options.minTransferTime * options.waitReluctance;
 
     EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
     return new TraverseResult(weight, s1, narrative);
@@ -68,23 +70,8 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
 
   private EdgeNarrativeImpl createNarrative(long time) {
     BlockArrivalVertex fromVertex = new BlockArrivalVertex(_context, _instance);
-    DepartureVertex toVertex = new DepartureVertex(_context, _transfer.getStop(), time);
+    DepartureVertex toVertex = new DepartureVertex(_context,
+        _transfer.getStop(), time);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
-  }
-
-  private int computeTransferTime(TraverseOptions options) {
-
-    int transferTime = _transfer.getMinTransferTime();
-    if (transferTime > 0)
-      return transferTime;
-
-    double walkingVelocity = options.speed;
-    double distance = _transfer.getDistance();
-
-    // time to walk = meters / (meters/sec) = sec
-    int t = (int) (distance / walkingVelocity);
-
-    // transfer time = time to walk + min transfer buffer time
-    return t;
   }
 }

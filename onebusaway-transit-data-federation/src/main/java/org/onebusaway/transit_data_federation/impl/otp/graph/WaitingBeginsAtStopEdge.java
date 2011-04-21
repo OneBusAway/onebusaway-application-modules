@@ -1,13 +1,23 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
+import java.util.List;
+import java.util.Set;
+
+import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPPathVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
+import org.opentripplanner.routing.core.Vertex;
 
 public class WaitingBeginsAtStopEdge extends AbstractEdge {
 
@@ -45,6 +55,10 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
     if (!_isReverseEdge && data.getNumBoardings() > 0)
       return null;
 
+    TransferPatternService tpService = _context.getTransferPatternService();
+    if (tpService.isEnabled())
+      return traverseTransferPatterns(s0, options);
+
     EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
 
     return new TraverseResult(0, s0, narrative);
@@ -73,5 +87,36 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
     DepartureVertex toVertex = new DepartureVertex(_context, _stop, time);
 
     return new EdgeNarrativeImpl(fromVertex, toVertex);
+  }
+
+  private TraverseResult traverseTransferPatterns(State s0,
+      TraverseOptions options) {
+
+    TransferPatternService tpService = _context.getTransferPatternService();
+
+    TPQueryData queryData = options.getExtension(TPQueryData.class);
+
+    Set<StopEntry> destStops = queryData.getDestStops2();
+
+    TraverseResult results = null;
+
+    for (StopEntry toStop : destStops) {
+
+      List<List<Pair<StopEntry>>> paths = tpService.getTransferPatternForStops(
+          _stop, toStop);
+
+      for (List<Pair<StopEntry>> path : paths) {
+
+        TPState pathState = TPState.start(queryData, path);
+
+        Vertex fromVertex = new WalkToStopVertex(_context, _stop);
+        Vertex toVertex = new TPPathVertex(_context, pathState);
+        EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+
+        TraverseResult r = new TraverseResult(0, s0, narrative);
+        results = r.addToExistingResultChain(results);
+      }
+    }
+    return results;
   }
 }

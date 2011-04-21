@@ -62,7 +62,7 @@ class TransferPatternServiceImpl implements TransferPatternService {
   }
 
   @Override
-  public boolean isServiceEnabled() {
+  public boolean isEnabled() {
     return !_transferPatternsByStop.isEmpty();
   }
 

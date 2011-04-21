@@ -11,7 +11,7 @@ public interface TransferPatternService {
    * 
    * @return true is transfer path functionality is enabled
    */
-  public boolean isServiceEnabled();
+  public boolean isEnabled();
 
   List<List<Pair<StopEntry>>> getTransferPatternForStops(StopEntry stopFrom,
       StopEntry stopTo);

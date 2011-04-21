@@ -19,7 +19,7 @@ import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockLayoverIndexData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockStopTimeIndicesFactory;
@@ -56,6 +56,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   private FederatedTransitDataBundle _bundle;
 
   private TransitGraphDao _graphDao;
+  
+  private BlockIndexFactory _factory = new BlockIndexFactory();
 
   private List<BlockTripIndex> _blockTripIndices;
 
@@ -370,11 +372,10 @@ public class BlockIndexServiceImpl implements BlockIndexService {
     _frequencyBlockTripIndicesByBlockId = new HashMap<AgencyAndId, List<FrequencyBlockTripIndex>>();
 
     for (BlockEntry block : _graphDao.getAllBlocks()) {
-      BlockIndicesFactory factory = new BlockIndicesFactory();
       List<BlockEntry> list = Arrays.asList(block);
-      List<BlockTripIndex> indices = factory.createTripIndices(list);
-      List<BlockLayoverIndex> layoverIndices = factory.createLayoverIndices(list);
-      List<FrequencyBlockTripIndex> frequencyIndices = factory.createFrequencyTripIndices(list);
+      List<BlockTripIndex> indices = _factory.createTripIndices(list);
+      List<BlockLayoverIndex> layoverIndices = _factory.createLayoverIndices(list);
+      List<FrequencyBlockTripIndex> frequencyIndices = _factory.createFrequencyTripIndices(list);
 
       if (!indices.isEmpty())
         _blockTripIndicesByBlockId.put(block.getId(), indices);
@@ -396,8 +397,7 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   private void loadBlockSequenceIndices() throws IOException,
       ClassNotFoundException {
 
-    BlockIndicesFactory factory = new BlockIndicesFactory();
-    _blockSequenceIndices = factory.createSequenceIndices(_graphDao.getAllBlocks());
+    _blockSequenceIndices = _factory.createSequenceIndices(_graphDao.getAllBlocks());
   }
 
   private void loadStopTimeIndices() {

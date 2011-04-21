@@ -7,7 +7,6 @@ import java.util.List;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.opentripplanner.routing.spt.GraphPath;
 
 public class TPState {
 
@@ -19,26 +18,17 @@ public class TPState {
 
   private final List<Pair<ArrivalAndDepartureInstance>> instances;
 
-  private final GraphPath walkFromSource;
-
-  private final GraphPath walkToDest;
-
-  public static TPState start(TPQueryData queryData, GraphPath walkFromSource,
-      List<Pair<StopEntry>> path, GraphPath walkToDest) {
+  public static TPState start(TPQueryData queryData, List<Pair<StopEntry>> path) {
     List<Pair<ArrivalAndDepartureInstance>> instances = Collections.emptyList();
-    return new TPState(queryData, path, 0, instances, walkFromSource,
-        walkToDest);
+    return new TPState(queryData, path, 0, instances);
   }
 
   private TPState(TPQueryData queryData, List<Pair<StopEntry>> path,
-      int pathIndex, List<Pair<ArrivalAndDepartureInstance>> instances,
-      GraphPath walkFromSource, GraphPath walkToDest) {
+      int pathIndex, List<Pair<ArrivalAndDepartureInstance>> instances) {
     this.queryData = queryData;
     this.path = path;
     this.pathIndex = pathIndex;
     this.instances = instances;
-    this.walkFromSource = walkFromSource;
-    this.walkToDest = walkToDest;
   }
 
   public TPQueryData getQueryData() {
@@ -57,21 +47,12 @@ public class TPState {
     return instances;
   }
 
-  public GraphPath getWalkFromSource() {
-    return walkFromSource;
-  }
-
-  public GraphPath getWalkToDest() {
-    return walkToDest;
-  }
-
   public TPState extend(Pair<ArrivalAndDepartureInstance> pair) {
     List<Pair<ArrivalAndDepartureInstance>> extendedInstances = new ArrayList<Pair<ArrivalAndDepartureInstance>>(
         instances.size());
     extendedInstances.addAll(instances);
     extendedInstances.add(pair);
-    return new TPState(queryData, path, pathIndex + 1, extendedInstances,
-        walkFromSource, walkToDest);
+    return new TPState(queryData, path, pathIndex + 1, extendedInstances);
   }
 
   public boolean hasCurrentStopPair() {
@@ -90,4 +71,8 @@ public class TPState {
     return path.get(pathIndex + 1);
   }
 
+  @Override
+  public String toString() {
+    return "path=" + path + " pathIndex=" + pathIndex;
+  }
 }

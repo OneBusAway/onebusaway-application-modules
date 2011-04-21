@@ -24,7 +24,7 @@ import org.mockito.Mockito;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactory;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
@@ -388,7 +388,7 @@ public class StopTimeServiceImplTest {
       trips.add(blockConfig.getTrips().get(0));
     }
 
-    BlockIndicesFactory factory = new BlockIndicesFactory();
+    BlockIndexFactory factory = new BlockIndexFactory();
     BlockTripIndex blockIndex = factory.createTripIndexForGroupOfBlockTrips(trips);
 
     _stop.addStopTimeIndex(BlockStopTimeIndex.create(blockIndex, 0));

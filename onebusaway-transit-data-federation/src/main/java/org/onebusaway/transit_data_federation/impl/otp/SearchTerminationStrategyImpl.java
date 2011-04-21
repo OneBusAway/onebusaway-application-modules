@@ -18,6 +18,8 @@ public class SearchTerminationStrategyImpl implements SearchTerminationStrategy 
 
     if (target == currentVertex) {
 
+      return false;
+      /*
       TripSequenceShortestPathTree tsSPT = (TripSequenceShortestPathTree) spt;
       Map<TripSequence, SPTVertex> byTripSequence = tsSPT.getVerticesByTripSequence(currentVertex);
 
@@ -31,6 +33,7 @@ public class SearchTerminationStrategyImpl implements SearchTerminationStrategy 
 
       if (current.weightSum > minVertex.weightSum * 1.5)
         return false;
+      */
     }
 
     return true;

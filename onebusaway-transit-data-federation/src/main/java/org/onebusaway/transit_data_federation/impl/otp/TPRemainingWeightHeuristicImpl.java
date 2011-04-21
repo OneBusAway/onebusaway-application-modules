@@ -2,16 +2,13 @@ package org.onebusaway.transit_data_federation.impl.otp;
 
 import java.util.List;
 
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractBlockVertex;
-import org.onebusaway.transit_data_federation.impl.otp.graph.HasStopTransitVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
-import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPPathVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.opentripplanner.routing.algorithm.RemainingWeightHeuristic;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
@@ -22,7 +19,7 @@ import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.spt.SPTVertex;
 
-public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
+public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
 
   private TraverseOptions _options;
 
@@ -73,64 +70,37 @@ public class RemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
   private double computeWeight(TraverseResult traverseResult, Vertex target,
       Vertex v) {
 
-    State state = traverseResult.state;
-    OBAStateData data = (OBAStateData) state.getData();
+    if (v instanceof TPPathVertex) {
+      TPPathVertex tpV = (TPPathVertex) v;
+      TPState pathState = tpV.getPathState();
+      List<Pair<StopEntry>> path = pathState.getPath();
+      int index = pathState.getPathIndex();
 
-    if (data.getMaxBlockSequence() >= 0 && v instanceof AbstractBlockVertex) {
+      double transitDistance = 0.0;
+      double walkDistance = 0.0;
 
-      AbstractBlockVertex abv = (AbstractBlockVertex) v;
-      ArrivalAndDepartureInstance instance = abv.getInstance();
+      for (int i = index; i < path.size(); i++) {
+        Pair<StopEntry> pair = path.get(i);
+        StopEntry fromStop = pair.getFirst();
+        StopEntry toStop = pair.getSecond();
+        transitDistance += SphericalGeometryLibrary.distance(
+            fromStop.getStopLat(), fromStop.getStopLon(), toStop.getStopLat(),
+            toStop.getStopLon());
 
-      BlockInstance blockInstance = instance.getBlockInstance();
-      BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-      List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
-      int maxBlockSequence = Math.min(data.getMaxBlockSequence(),
-          stopTimes.size());
+        CoordinatePoint dest = null;
+        if (i + 1 < path.size()) {
+          dest = path.get(i + 1).getFirst().getStopLocation();
+        } else {
+          dest = new CoordinatePoint(target.getY(), target.getX());
+        }
 
-      BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
-      int sequence = blockStopTime.getBlockSequence();
-      StopTimeEntry origStopTime = blockStopTime.getStopTime();
-
-      double minTime = Double.POSITIVE_INFINITY;
-
-      while (sequence < maxBlockSequence) {
-
-        blockStopTime = stopTimes.get(sequence);
-        StopTimeEntry stopTime = blockStopTime.getStopTime();
-        StopEntry stop = stopTime.getStop();
-
-        double d = SphericalGeometryLibrary.distance(stop.getStopLat(),
-            stop.getStopLon(), target.getY(), target.getX());
-
-        double transitTime = Math.max(0, stopTime.getArrivalTime()
-            - origStopTime.getDepartureTime());
-        double walkingTime = d / _options.speed;
-        minTime = Math.min(minTime, transitTime + walkingTime);
-
-        sequence++;
+        walkDistance += SphericalGeometryLibrary.distance(
+            toStop.getStopLocation(), dest);
       }
 
-      if (!Double.isInfinite(minTime))
-        return minTime;
+      return transitDistance / _maxTransitSpeed + walkDistance / _options.speed;
     }
 
-    /*
-    if (v instanceof HasStopTransitVertex) {
-      HasStopTransitVertex hasStop = (HasStopTransitVertex) v;
-      StopEntry stop = hasStop.getStop();
-      if (_heuristic == null) {
-        GraphContext context = hasStop.getContext();
-        _heuristic = new MinTravelTimeUsingTransitHeuristic(target, _options,
-            context, _maxTransitSpeed);
-      }
-      
-      int travelTime = _heuristic.getMinTravelTimeFromStopToTarget(stop);
-      
-      if (travelTime >= 0)
-        return travelTime;
-    }
-    */
-    
     double distanceEstimate = distance(v, target);
 
     double maxSpeed = getMaxSpeedForCurrentState(traverseResult, v);

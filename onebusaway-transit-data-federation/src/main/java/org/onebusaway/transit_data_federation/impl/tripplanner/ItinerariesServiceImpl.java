@@ -20,11 +20,10 @@ import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
+import org.onebusaway.transit_data_federation.impl.otp.TPRemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
-import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPDestinationVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
-import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPSourceVertex;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
@@ -105,7 +104,7 @@ class ItinerariesServiceImpl implements ItinerariesService {
   public void setTransf(TransferPatternService transferPathService) {
     _transferPathService = transferPathService;
   }
-  
+
   @Autowired
   public void set(OTPConfigurationService configService) {
     _configService = configService;
@@ -124,7 +123,7 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
     Date t = new Date(targetTime.getTargetTime());
 
-    if (_transferPathService.isServiceEnabled()) {
+    if (_transferPathService.isEnabled()) {
       return getTransferPatternStops(fromVertex, toVertex, t, options);
     } else {
       return _pathService.plan(fromVertex, toVertex, t, options, 1);
@@ -155,31 +154,30 @@ class ItinerariesServiceImpl implements ItinerariesService {
   private List<GraphPath> getTransferPatternStops(Vertex fromVertex,
       Vertex toVertex, Date time, OBATraverseOptions options) {
 
-    Map<StopEntry, GraphPath> stopsNearbyFromVertex = getNearbyStops(
-        fromVertex, options, time, true);
-    Map<StopEntry, GraphPath> stopsNearbyToVertex = getNearbyStops(toVertex,
-        options, time, false);
+    /*
+     * Map<StopEntry, GraphPath> stopsNearbyFromVertex = getNearbyStops(
+     * fromVertex, options, time, true);
+     */
 
-    if (stopsNearbyFromVertex.isEmpty() || stopsNearbyToVertex.isEmpty())
+    List<StopEntry> stops = getNearbyStops(toVertex, options, time, false);
+
+    if (stops.isEmpty())
       return Collections.emptyList();
-    
-    
-    GraphContext context = _configService.createGraphContext();
-    TPQueryData queryData = new TPQueryData(fromVertex, stopsNearbyFromVertex, toVertex, stopsNearbyToVertex);
-    
-    Vertex source = new TPSourceVertex(context, queryData);
-    Vertex dest = new TPDestinationVertex(context, queryData);
+
+    TPQueryData queryData = new TPQueryData(new HashSet<StopEntry>(stops));
+    options.putExtension(TPQueryData.class, queryData);
 
     Graph graph = _graphService.getGraph();
     State init = new State(time.getTime(), new OBAStateData());
-    ShortestPathTree spt = AStar.getShortestPathTree(graph, source,
-        dest, init, options);
+    options.remainingWeightHeuristic = new TPRemainingWeightHeuristicImpl();
+    ShortestPathTree spt = AStar.getShortestPathTree(graph, fromVertex,
+        toVertex, init, options);
 
-    return spt.getPaths(toVertex, true);
+    return spt.getPaths(toVertex, false);
   }
 
-  public Map<StopEntry, GraphPath> getNearbyStops(Vertex v,
-      TraverseOptions options, Date time, boolean isOrigin) {
+  public List<StopEntry> getNearbyStops(Vertex v, TraverseOptions options,
+      Date time, boolean isOrigin) {
 
     double initialRadius = Math.min(_walkSearchInitialRadius,
         options.maxWalkDistance);
@@ -201,16 +199,11 @@ class ItinerariesServiceImpl implements ItinerariesService {
       if (stops.isEmpty())
         continue;
 
-      Map<StopEntry, GraphPath> results = computeWalkPathsToStops(v, options,
-          time, isOrigin, stops, stopsWithoutPath);
+      return stops;
 
-      results = pruneResults(results);
-
-      if (!results.isEmpty())
-        return results;
     }
 
-    return Collections.emptyMap();
+    return Collections.emptyList();
   }
 
   private Map<StopEntry, GraphPath> computeWalkPathsToStops(Vertex v,

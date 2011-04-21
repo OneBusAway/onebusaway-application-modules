@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph.tp;
 
-import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.collections.tuple.Pair;
@@ -8,11 +7,13 @@ import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
 import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
+import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
@@ -20,8 +21,6 @@ import org.opentripplanner.routing.core.StateData.Editor;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
-import org.opentripplanner.routing.spt.GraphPath;
-import org.opentripplanner.routing.spt.SPTVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +40,9 @@ public class TPStopPairEdge extends AbstractEdge {
       throws NegativeWeightException {
 
     ArrivalAndDepartureService adService = _context.getArrivalAndDepartureService();
-    ItinerariesService itinService = _context.getItinerariesService();
+
+    Vertex fromV = new TPPathVertex(_context, _pathState);
+    Vertex toV = null;
 
     Pair<StopEntry> stopPair = _pathState.getCurrentStopPair();
 
@@ -87,30 +88,31 @@ public class TPStopPairEdge extends AbstractEdge {
          */
         if (from != to) {
 
-          GraphPath path = itinService.getWalkingItineraryBetweenStops(from,
-              to, new Date(s1.getTime()), options);
+          StopTransfer transfer = findTransferToStop(from, to);
 
           /**
-           * No path found, even though we expected one
+           * No transfer found, even though we expected one
            */
-          if (path == null) {
-            _log.warn("expected walking path between stops " + from.getId()
+          if (transfer == null) {
+            _log.warn("expected transfer path between stops " + from.getId()
                 + " and " + to.getId());
             continue;
           }
 
-          SPTVertex sptFrom = path.getFirstVertex();
-          SPTVertex sptTo = path.getLastVertex();
+          int transferTime = ItineraryWeightingLibrary.computeTransferTime(
+              transfer, options);
+          w += ItineraryWeightingLibrary.computeTransferWeight(transferTime,
+              options);
 
-          w += (sptTo.weightSum - sptFrom.weightSum);
-          s1.incrementWithStateDelta(sptFrom.state, sptTo.state);
+          s1.incrementTimeInSeconds(transferTime + options.minTransferTime);
         }
+
+        TPState pathState = _pathState.extend(pair);
+        toV = new TPPathVertex(_context, pathState);
+
+      } else {
+        toV = new WalkFromStopVertex(_context, stopPair.getSecond());
       }
-
-      TPState pathState = _pathState.extend(pair);
-
-      Vertex fromV = new TPPathVertex(_context, _pathState);
-      Vertex toV = new TPPathVertex(_context, pathState);
 
       EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
 
@@ -127,10 +129,10 @@ public class TPStopPairEdge extends AbstractEdge {
       double w = ItineraryWeightingLibrary.computeWeightForWait(options,
           dwellTime, s0);
 
-      Vertex fromV = new TPPathVertex(_context, _pathState);
-      Vertex toV = new TPPathVertex(_context, _pathState);
+      Vertex fromV2 = new TPPathVertex(_context, _pathState);
+      Vertex toV2 = new TPPathVertex(_context, _pathState);
 
-      EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
+      EdgeNarrative narrative = new EdgeNarrativeImpl(fromV2, toV2);
 
       TraverseResult r = new TraverseResult(w, s1.createState(), narrative);
       results = r.addToExistingResultChain(results);
@@ -143,6 +145,20 @@ public class TPStopPairEdge extends AbstractEdge {
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
     throw new UnsupportedOperationException();
+  }
+
+  /****
+   * 
+   ****/
+
+  private StopTransfer findTransferToStop(StopEntry fromStop, StopEntry toStop) {
+    StopTransferService stService = _context.getStopTransferService();
+    List<StopTransfer> transfers = stService.getTransfersFromStop(fromStop);
+    for (StopTransfer transfer : transfers) {
+      if (transfer.getStop() == toStop)
+        return transfer;
+    }
+    return null;
   }
 
   private int computeWaitTime(State s0, Pair<ArrivalAndDepartureInstance> pair) {

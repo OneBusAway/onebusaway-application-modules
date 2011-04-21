@@ -19,7 +19,7 @@ import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
@@ -240,7 +240,7 @@ public class UnitTestingSupport {
     List<BlockEntry> list = new ArrayList<BlockEntry>();
     for (BlockEntryImpl block : blocks)
       list.add(block);
-    BlockIndicesFactory factory = new BlockIndicesFactory();
+    BlockIndexFactory factory = new BlockIndexFactory();
     return factory.createTripIndices(list);
   }
 

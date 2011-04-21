@@ -32,6 +32,10 @@ public class TPPathVertex extends AbstractVertexWithEdges implements
     return getStop().getStopLat();
   }
 
+  public TPState getPathState() {
+    return _pathState;
+  }
+  
   /****
    * {@link HasStopTransitVertex} Interface
    ****/
@@ -39,8 +43,14 @@ public class TPPathVertex extends AbstractVertexWithEdges implements
   @Override
   public StopEntry getStop() {
     List<Pair<StopEntry>> path = _pathState.getPath();
-    Pair<StopEntry> pair = path.get(_pathState.getPathIndex());
-    return pair.getFirst();
+    int index = _pathState.getPathIndex();
+    if (index >= path.size()) {
+      Pair<StopEntry> pair = path.get(path.size() - 1);
+      return pair.getSecond();
+    } else {
+      Pair<StopEntry> pair = path.get(index);
+      return pair.getFirst();
+    }
   }
 
   /****
@@ -49,12 +59,12 @@ public class TPPathVertex extends AbstractVertexWithEdges implements
 
   @Override
   public Collection<Edge> getOutgoing() {
-    if (_pathState.hasCurrentStopPair()) {
-      Edge edge = new TPStopPairEdge(_context, _pathState);
-      return Arrays.asList(edge);
-    } else {
-      Edge edge = new TPWalkFromStopToDestEdge(_context, _pathState);
-      return Arrays.asList(edge);
-    }
+    Edge edge = new TPStopPairEdge(_context, _pathState);
+    return Arrays.asList(edge);
+  }
+
+  @Override
+  public String toString() {
+    return _pathState.toString();
   }
 }

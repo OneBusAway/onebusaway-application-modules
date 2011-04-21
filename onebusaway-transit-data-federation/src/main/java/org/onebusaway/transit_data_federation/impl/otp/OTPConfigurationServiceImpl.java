@@ -165,7 +165,7 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
       options.minTransferTime = constraints.getMinTransferTime();
     if (constraints.getMaxTransfers() != -1)
       options.maxTransfers = constraints.getMaxTransfers();
-    if (constraints.getMaxComputationTime() > 0
+    if (constraints.getMaxComputationTime() != -1
         && constraints.getMaxComputationTime() < 15000)
       options.maxComputationTime = constraints.getMaxComputationTime();
 
