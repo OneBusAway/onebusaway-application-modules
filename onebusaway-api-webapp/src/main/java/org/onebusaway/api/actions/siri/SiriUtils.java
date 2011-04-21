@@ -81,7 +81,7 @@ public class SiriUtils {
 
           onwardCalls.add(onwardCall);
         }
-        if (stop == currentStop) {
+        if (stop.equals(currentStop)) {
           afterStop = true;
         }
       }
