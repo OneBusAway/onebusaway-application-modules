@@ -141,6 +141,13 @@ public class SiriUtils {
                                                              // wrong but
                                                              // practically
                                                              // rarely so
+      monitoredVehicleJourney.MonitoredCall.Extensions = new DistanceExtensions();
+      monitoredVehicleJourney.MonitoredCall.Extensions.Distances = new Distances();
+      monitoredVehicleJourney.MonitoredCall.Extensions.Distances.StopsFromCall = 1;
+      monitoredVehicleJourney.MonitoredCall.Extensions.Distances.CallDistanceAlongRoute = status.getDistanceAlongTrip()
+          + status.getNextStopDistanceFromVehicle();
+      monitoredVehicleJourney.MonitoredCall.Extensions.Distances.DistanceFromCall = status.getNextStopDistanceFromVehicle();
+
     }
     return monitoredVehicleJourney;
   }
