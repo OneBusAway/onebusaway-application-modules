@@ -690,7 +690,8 @@ public class BlockIndicesFactory {
      * If the route has not changed, but the direction has, the trips are not
      * continuous
      */
-    if (lineIdA.equals(lineIdB) && !directionA.equals(directionB))
+    if (lineIdA.equals(lineIdB)
+        && (directionA == null || !directionA.equals(directionB)))
       return false;
 
     return true;
