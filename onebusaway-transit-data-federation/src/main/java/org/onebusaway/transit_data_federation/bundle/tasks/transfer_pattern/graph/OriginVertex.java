@@ -66,13 +66,6 @@ public class OriginVertex extends AbstractStopVertex implements HasEdges {
 
         State state = new State(instance.getDepartureTime(), new OBAStateData());
 
-        TPBlockArrivalVertex vArrival = new TPBlockArrivalVertex(_context,
-            instance);
-        EdgeNarrative nArrival = new EdgeNarrativeImpl(OriginVertex.this,
-            vArrival);
-        TraverseResult rArrival = new TraverseResult(0, state, nArrival);
-        results = rArrival.addToExistingResultChain(results);
-
         TPTransferVertex vTransfer = new TPTransferVertex(_context, instance);
         EdgeNarrative nTransfer = new EdgeNarrativeImpl(OriginVertex.this,
             vTransfer);

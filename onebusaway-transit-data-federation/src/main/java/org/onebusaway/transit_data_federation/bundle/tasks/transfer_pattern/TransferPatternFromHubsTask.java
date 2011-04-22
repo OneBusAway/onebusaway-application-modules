@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,6 +68,8 @@ import cern.jet.stat.Descriptive;
 
 public class TransferPatternFromHubsTask implements Runnable {
 
+  private static SPTVertexDurationComparator _sptVertexDurationComparator = new SPTVertexDurationComparator();
+
   private FederatedTransitDataBundle _bundle;
 
   private TransitGraphDao _transitGraphDao;
@@ -83,7 +86,9 @@ public class TransferPatternFromHubsTask implements Runnable {
 
   private double _transferPatternFrequencyCutoff = 0.1;
 
-  private double _transferPatternFrequencySlack = 0.33;
+  private double _transferPatternFrequencySlack = 0.5;
+
+  private double _transferPatternWeightImprovement = 0.66;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
@@ -175,7 +180,7 @@ public class TransferPatternFromHubsTask implements Runnable {
         options.extraSpecialMode = true;
 
         GenericDijkstra dijkstra = new GenericDijkstra(graph, options);
-        dijkstra.setSkipVertexStrategy(new VertexCounter(tFrom));
+        dijkstra.setSkipVertexStrategy(new SkipVertexImpl(stop, tFrom));
 
         OriginVertex origin = new OriginVertex(context, stop, instances);
         State state = new State(tFrom, new OBAStateData());
@@ -293,15 +298,15 @@ public class TransferPatternFromHubsTask implements Runnable {
       arrivalsByStop.get(stop).add(bav);
     }
 
-    for (List<TPBlockArrivalVertex> arrivals : arrivalsByStop.values()) {
-      processArrivalsForStop(arrivals, originStop, spt, pattern,
-          parentsBySPTVertex);
+    for (Map.Entry<StopEntry, List<TPBlockArrivalVertex>> entry : arrivalsByStop.entrySet()) {
+      processArrivalsForStop(entry.getKey(), entry.getValue(), originStop, spt,
+          pattern, parentsBySPTVertex);
     }
   }
 
-  private void processArrivalsForStop(List<TPBlockArrivalVertex> arrivals,
-      StopEntry originStop, MultiShortestPathTree spt,
-      MutableTransferPattern pattern,
+  private void processArrivalsForStop(StopEntry arrivalStop,
+      List<TPBlockArrivalVertex> arrivals, StopEntry originStop,
+      MultiShortestPathTree spt, MutableTransferPattern pattern,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
 
     Collections.sort(arrivals);
@@ -319,7 +324,7 @@ public class TransferPatternFromHubsTask implements Runnable {
 
     for (TPBlockArrivalVertex arrival : arrivals) {
 
-      Collection<SPTVertex> sptVertices = spt.getSPTVerticesForVertex(arrival);
+      Collection<SPTVertex> sptVertices = pruneSptVertices(spt.getSPTVerticesForVertex(arrival));
 
       for (SPTVertex sptVertex : sptVertices) {
 
@@ -382,6 +387,38 @@ public class TransferPatternFromHubsTask implements Runnable {
 
     for (List<Pair<StopEntry>> path : toKeep)
       pattern.addPath(path);
+  }
+
+  private Collection<SPTVertex> pruneSptVertices(
+      Collection<SPTVertex> sptVerticesOrig) {
+
+    if (sptVerticesOrig.size() == 1)
+      return sptVerticesOrig;
+
+    List<SPTVertex> sptVertices = new ArrayList<SPTVertex>(sptVerticesOrig);
+
+    /**
+     * This will put the spt vertices in order of increasing trip duration
+     */
+    Collections.sort(sptVertices, _sptVertexDurationComparator);
+
+    double bestRatio = Double.MAX_VALUE;
+
+    for (int i = 0; i < sptVertices.size(); i++) {
+      SPTVertex sptVertex = sptVertices.get(i);
+      double duration = getSPTVertexDuration(sptVertex);
+      double weight = sptVertex.weightSum;
+      double ratio = weight / duration;
+
+      if (ratio / bestRatio > _transferPatternWeightImprovement) {
+        return sptVertices.subList(0, i);
+      } else {
+        bestRatio = ratio;
+      }
+    }
+
+    return sptVertices;
+
   }
 
   private SPTVertex getNextVertex(SortedMap<Long, List<SPTVertex>> m,
@@ -465,13 +502,21 @@ public class TransferPatternFromHubsTask implements Runnable {
     return parent;
   }
 
-  private static class VertexCounter implements SkipVertexStrategy {
+  private static int getSPTVertexDuration(SPTVertex v) {
+    State state = v.state;
+    return (int) (Math.abs(state.getTime() - state.getStartTime()) / 1000);
+  }
+
+  private static class SkipVertexImpl implements SkipVertexStrategy {
 
     private final Set<StopEntry> _stops = new HashSet<StopEntry>();
 
+    private final StopEntry _originStop;
+
     private final long _serviceDate;
 
-    public VertexCounter(long serviceDate) {
+    public SkipVertexImpl(StopEntry originStop, long serviceDate) {
+      _originStop = originStop;
       _serviceDate = serviceDate;
     }
 
@@ -480,13 +525,19 @@ public class TransferPatternFromHubsTask implements Runnable {
         SPTVertex parent, Vertex current, State state, ShortestPathTree spt,
         TraverseOptions traverseOptions) {
 
-      if (current instanceof HasStopTransitVertex) {
-        HasStopTransitVertex v = (HasStopTransitVertex) current;
-        StopEntry stop = v.getStop();
-        if (_stops.add(stop))
-          System.out.println("stops=" + _stops.size());
+      /**
+       * We prune any arrivals that loop back to the origin stop
+       */
+      if (current instanceof TPBlockArrivalVertex) {
+        TPBlockArrivalVertex bav = (TPBlockArrivalVertex) current;
+        StopTimeInstance instance = bav.getInstance();
+        if (instance.getStop() == _originStop)
+          return true;
       }
 
+      /**
+       * Skip a vertex that has moved on to the next service date
+       */
       if (current instanceof HasStopTimeInstanceTransitVertex) {
         HasStopTimeInstanceTransitVertex v = (HasStopTimeInstanceTransitVertex) current;
         StopTimeInstance instance = v.getInstance();
@@ -494,8 +545,34 @@ public class TransferPatternFromHubsTask implements Runnable {
           return true;
       }
 
+      /**
+       * Print the visited stop count as a show of progress
+       */
+      if (current instanceof HasStopTransitVertex) {
+        HasStopTransitVertex v = (HasStopTransitVertex) current;
+        StopEntry stop = v.getStop();
+        if (_stops.add(stop) && _stops.size() % 100 == 0) {
+          System.out.println("stops=" + _stops.size());
+        }
+      }
+
       return false;
     }
+  }
 
+  private static class SPTVertexDurationComparator implements
+      Comparator<SPTVertex> {
+
+    @Override
+    public int compare(SPTVertex o1, SPTVertex o2) {
+      int t1 = getSPTVertexDuration(o1);
+      int t2 = getSPTVertexDuration(o2);
+      if (t1 != t2)
+        return (t1 < t2 ? -1 : 1);
+
+      double w1 = o1.weightSum;
+      double w2 = o2.weightSum;
+      return Double.compare(w1, w2);
+    }
   }
 }
