@@ -82,7 +82,8 @@ public class MinTravelTimeUsingTransitHeuristic {
 
     MinStopVertex from = new MinStopVertex(_context, stop);
 
-    ShortestPathTree sptTree = AStar.getShortestPathTree(graph, from, _target,
+    AStar search = new AStar();
+    ShortestPathTree sptTree = search.getShortestPathTree(graph, from, _target,
         init, options);
 
     GraphPath path = sptTree.getPath(_target);

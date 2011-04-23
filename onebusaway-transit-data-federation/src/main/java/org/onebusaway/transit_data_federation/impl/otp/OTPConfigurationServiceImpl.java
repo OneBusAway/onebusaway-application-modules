@@ -116,6 +116,8 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
 
     options.stateFactory = OBAStateData.STATE_FACTORY;
     
+    options.currentTime = System.currentTimeMillis();
+    
     return options;
   }
 
@@ -175,5 +177,8 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
 
     if (constraints.getMaxTripDuration() != -1)
       options.maxTripDuration = constraints.getMaxTripDuration() * 1000;
+    
+    if( constraints.getCurrentTime() != -1)
+      options.currentTime = constraints.getCurrentTime();
   }
 }

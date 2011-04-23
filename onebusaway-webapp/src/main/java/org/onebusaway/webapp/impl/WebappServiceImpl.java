@@ -150,7 +150,7 @@ class WebappServiceImpl implements WebappService {
     toLoc.setLat(to.getLat());
     toLoc.setLon(to.getLon());
     return _transitDataService.getItinerariesBetween(fromLoc, toLoc, time,
-        System.currentTimeMillis(), constraints);
+        constraints);
   }
 
   @Override

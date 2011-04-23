@@ -11,11 +11,11 @@ import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 
-public class TPBlockDwellEdge extends AbstractEdge {
+public class TPOfflineBlockDwellEdge extends AbstractEdge {
 
   private final StopTimeInstance _instance;
 
-  public TPBlockDwellEdge(GraphContext context, StopTimeInstance instance) {
+  public TPOfflineBlockDwellEdge(GraphContext context, StopTimeInstance instance) {
     super(context);
     _instance = instance;
   }
@@ -51,8 +51,8 @@ public class TPBlockDwellEdge extends AbstractEdge {
   }
 
   private EdgeNarrativeImpl createNarrative() {
-    TPBlockArrivalVertex fromVertex = new TPBlockArrivalVertex(_context, _instance);
-    TPBlockDepartureVertex toVertex = new TPBlockDepartureVertex(_context,
+    TPOfflineBlockArrivalVertex fromVertex = new TPOfflineBlockArrivalVertex(_context, _instance);
+    TPOfflineBlockDepartureVertex toVertex = new TPOfflineBlockDepartureVertex(_context,
         _instance);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }

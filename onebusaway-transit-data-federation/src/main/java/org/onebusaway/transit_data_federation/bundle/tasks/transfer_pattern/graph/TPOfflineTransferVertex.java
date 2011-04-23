@@ -9,9 +9,9 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.edgetype.FreeEdge;
 
-public class TPTransferVertex extends AbstractTPBlockVertex {
+public class TPOfflineTransferVertex extends AbstractTPOfflineBlockVertex {
 
-  public TPTransferVertex(GraphContext context, StopTimeInstance instance) {
+  public TPOfflineTransferVertex(GraphContext context, StopTimeInstance instance) {
     super(context, instance);
   }
 
@@ -21,7 +21,7 @@ public class TPTransferVertex extends AbstractTPBlockVertex {
 
   @Override
   public Collection<Edge> getOutgoing() {
-    return Arrays.asList((Edge) new FreeEdge(this, new TPBlockDepartureVertex(
+    return Arrays.asList((Edge) new FreeEdge(this, new TPOfflineBlockDepartureVertex(
         _context, _instance)));
   }
 }

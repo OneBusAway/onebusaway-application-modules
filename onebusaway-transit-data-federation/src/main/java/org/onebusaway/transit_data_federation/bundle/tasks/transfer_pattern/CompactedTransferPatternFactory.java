@@ -38,13 +38,15 @@ public class CompactedTransferPatternFactory {
   }
 
   public void readPatternsFromFile(File path) throws IOException {
-    
+
     BufferedReader reader = openFile(path);
     String line = null;
 
     List<StopEntry> stops = new ArrayList<StopEntry>();
     List<Integer> parentIndices = new ArrayList<Integer>();
     Map<StopEntry, List<Integer>> leafIndices = new FactoryMap<StopEntry, List<Integer>>(
+        new ArrayList<Integer>());
+    Map<StopEntry, List<Integer>> hubLeafIndices = new FactoryMap<StopEntry, List<Integer>>(
         new ArrayList<Integer>());
 
     Map<Long, Integer> indicesByKey = new HashMap<Long, Integer>();
@@ -54,7 +56,7 @@ public class CompactedTransferPatternFactory {
       List<String> tokens = CSVLibrary.parse(line);
 
       if (tokens.size() == 3) {
-        compact(stops, parentIndices, leafIndices);
+        compact(stops, parentIndices, leafIndices, hubLeafIndices);
         indicesByKey.clear();
       }
 
@@ -66,24 +68,30 @@ public class CompactedTransferPatternFactory {
       StopEntry stop = _dao.getStopEntryForId(stopId, true);
 
       boolean endpoint = tokens.get(2).equals("1");
+      boolean hub = tokens.get(2).equals("2");
 
-      stops.add(stop);
-      indicesByKey.put(key, index);
-
-      if (endpoint)
-        leafIndices.get(stop).add(index);
-
+      int parentIndex = -1;
       if (tokens.size() == 4) {
         long parentKey = Long.parseLong(tokens.get(3));
-        int parentIndex = indicesByKey.get(parentKey);
+        parentIndex = indicesByKey.get(parentKey);
+      }
+
+      if (!hub) {
+
+        stops.add(stop);
+        indicesByKey.put(key, index);
+
+        if (endpoint)
+          leafIndices.get(stop).add(index);
+
         parentIndices.add(parentIndex);
       } else {
-        parentIndices.add(-1);
+        hubLeafIndices.get(stop).add(parentIndex);
       }
     }
 
     if (!stops.isEmpty())
-      compact(stops, parentIndices, leafIndices);
+      compact(stops, parentIndices, leafIndices, hubLeafIndices);
 
     reader.close();
   }
@@ -100,31 +108,25 @@ public class CompactedTransferPatternFactory {
   }
 
   private void compact(List<StopEntry> stops, List<Integer> parentIndices,
-      Map<StopEntry, List<Integer>> leafIndicesByStop) {
+      Map<StopEntry, List<Integer>> leafIndicesByStop, Map<StopEntry, List<Integer>> hubLeafIndicesByStop) {
 
     if (stops.isEmpty())
       return;
 
     StopEntry[] stopArray = new StopEntry[stops.size()];
     int[] parentIndicesArray = new int[stops.size()];
-    Map<StopEntry, int[]> leafIndices = new HashMap<StopEntry, int[]>();
-
+    
     for (int i = 0; i < stops.size(); i++) {
       stopArray[i] = stops.get(i);
       parentIndicesArray[i] = parentIndices.get(i);
     }
 
-    for (Map.Entry<StopEntry, List<Integer>> entry : leafIndicesByStop.entrySet()) {
-      StopEntry stop = entry.getKey();
-      List<Integer> indices = entry.getValue();
-      int[] array = new int[indices.size()];
-      for (int i = 0; i < indices.size(); i++)
-        array[i] = indices.get(i);
-      leafIndices.put(stop, array);
-    }
+    Map<StopEntry, int[]> leafIndices = compactLeafIndices(leafIndicesByStop);
+    Map<StopEntry, int[]> hubLeafIndices = compactLeafIndices(hubLeafIndicesByStop);
 
     CompactedTransferPattern pattern = new CompactedTransferPattern(stopArray,
-        parentIndicesArray, leafIndices);
+        parentIndicesArray, leafIndices, hubLeafIndices);
+    
     StopEntry originStop = pattern.getOriginStop();
 
     TransferPattern existing = _patternsByOriginStop.put(originStop, pattern);
@@ -134,5 +136,19 @@ public class CompactedTransferPatternFactory {
     stops.clear();
     parentIndices.clear();
     leafIndicesByStop.clear();
+  }
+
+  private Map<StopEntry, int[]> compactLeafIndices(
+      Map<StopEntry, List<Integer>> leafIndicesByStop) {
+    Map<StopEntry, int[]> leafIndices = new HashMap<StopEntry, int[]>();
+    for (Map.Entry<StopEntry, List<Integer>> entry : leafIndicesByStop.entrySet()) {
+      StopEntry stop = entry.getKey();
+      List<Integer> indices = entry.getValue();
+      int[] array = new int[indices.size()];
+      for (int i = 0; i < indices.size(); i++)
+        array[i] = indices.get(i);
+      leafIndices.put(stop, array);
+    }
+    return leafIndices;
   }
 }

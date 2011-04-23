@@ -16,13 +16,13 @@ import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 
-public class TPArrivalAndTransferEdge extends AbstractEdge {
+public class TPOfflineArrivalAndTransferEdge extends AbstractEdge {
 
   private StopTimeInstance _instance;
 
   private StopTransfer _transfer;
 
-  public TPArrivalAndTransferEdge(GraphContext context,
+  public TPOfflineArrivalAndTransferEdge(GraphContext context,
       StopTimeInstance instance, StopTransfer transfer) {
     super(context);
     _instance = instance;
@@ -102,9 +102,9 @@ public class TPArrivalAndTransferEdge extends AbstractEdge {
 
     long departureTime = instance.getDepartureTime();
 
-    TPBlockArrivalVertex fromVertex = new TPBlockArrivalVertex(_context,
+    TPOfflineBlockArrivalVertex fromVertex = new TPOfflineBlockArrivalVertex(_context,
         _instance);
-    TPTransferVertex toVertex = new TPTransferVertex(_context, instance);
+    TPOfflineTransferVertex toVertex = new TPOfflineTransferVertex(_context, instance);
     EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
     OBAEditor edit = (OBAEditor) s0.edit();

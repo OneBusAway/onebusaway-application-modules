@@ -9,7 +9,6 @@ import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
-import org.onebusaway.transit_data_federation.model.TargetTime;
 
 public interface ItinerariesBeanService {
 
@@ -24,7 +23,7 @@ public interface ItinerariesBeanService {
    * @throws ServiceException
    */
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, TargetTime targetTime, ConstraintsBean constraints)
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints)
       throws ServiceException;
 
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,

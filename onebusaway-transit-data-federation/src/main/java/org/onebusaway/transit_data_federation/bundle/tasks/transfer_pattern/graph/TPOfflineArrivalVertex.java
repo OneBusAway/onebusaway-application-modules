@@ -2,45 +2,48 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.gra
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
-import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractVertexWithEdges;
 import org.onebusaway.transit_data_federation.impl.otp.graph.HasStopTransitVertex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.opentripplanner.routing.core.Vertex;
 
-public abstract class AbstractTPBlockVertex extends AbstractVertexWithEdges implements
-    HasStopTransitVertex, HasStopTimeInstanceTransitVertex {
+public final class TPOfflineArrivalVertex extends AbstractVertexWithEdges implements
+    HasStopTransitVertex {
 
-  protected final StopTimeInstance _instance;
+  private final StopEntry _stop;
 
-  public AbstractTPBlockVertex(GraphContext context, StopTimeInstance instance) {
+  public TPOfflineArrivalVertex(GraphContext context, StopEntry stop) {
     super(context);
-    _instance = instance;
-  }
-
-  public StopTimeInstance getInstance() {
-    return _instance;
+    _stop = stop;
   }
 
   @Override
   public StopEntry getStop() {
-    return _instance.getStop();
+    return _stop;
+  }
+
+  /****
+   * {@link Vertex} Interface
+   ****/
+
+  @Override
+  public String getLabel() {
+    return "stop_arrival_" + getStopId();
   }
 
   @Override
   public AgencyAndId getStopId() {
-    StopEntry stop = _instance.getStop();
-    return stop.getId();
+    return _stop.getId();
   }
 
   @Override
   public double getX() {
-    return _instance.getStop().getStopLon();
+    return _stop.getStopLon();
   }
 
   @Override
   public double getY() {
-    return _instance.getStop().getStopLat();
+    return _stop.getStopLat();
   }
 
   /****
@@ -48,8 +51,13 @@ public abstract class AbstractTPBlockVertex extends AbstractVertexWithEdges impl
    ****/
 
   @Override
+  public String toString() {
+    return "ArrivalVertex(stop=" + _stop.getId() + ")";
+  }
+
+  @Override
   public int hashCode() {
-    return _instance.hashCode();
+    return _stop.hashCode();
   }
 
   @Override
@@ -60,7 +68,7 @@ public abstract class AbstractTPBlockVertex extends AbstractVertexWithEdges impl
       return false;
     if (getClass() != obj.getClass())
       return false;
-    AbstractTPBlockVertex bav = (AbstractTPBlockVertex) obj;
-    return _instance.equals(bav.getInstance());
+    TPOfflineArrivalVertex other = (TPOfflineArrivalVertex) obj;
+    return _stop.equals(other._stop);
   }
 }

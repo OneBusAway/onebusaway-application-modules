@@ -94,7 +94,7 @@ class ScheduledBlockLocationServiceImpl implements
     List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
     int n = stopTimes.size();
     int index = GenericBinarySearch.search(blockConfig, n, scheduleTime,
-        IndexAdapters.BLOCK_CONFIG_DEPARTURE_INSTANCE);
+        IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
 
     return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(stopTimes,
         scheduleTime, index);

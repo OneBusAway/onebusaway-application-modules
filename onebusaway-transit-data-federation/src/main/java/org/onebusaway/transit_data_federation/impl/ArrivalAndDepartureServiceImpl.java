@@ -426,12 +426,11 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   @Override
-  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesAndArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
-      long fromTime, long toTime) {
+  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window) {
 
-    Date dFrom = new Date(fromTime);
-    Date dTo = new Date(toTime);
+    Date dFrom = new Date(targetTime.getTargetTime());
+    Date dTo = new Date(targetTime.getTargetTime() + window * 1000);
 
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getDeparturesBetweenStopPairInTimeRange(
         fromStop, toStop, dFrom, dTo);
@@ -439,7 +438,30 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       pairs = _stopTimeService.getNextDeparturesBetweenStopPair(fromStop,
           toStop, dFrom, false);
 
-    long frequencyOffsetTime = Math.max(targetTime.getTargetTime(), fromTime);
+    return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs);
+  }
+
+  @Override
+  public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window) {
+
+    Date dFrom = new Date(targetTime.getTargetTime() - window * 1000);
+    Date dTo = new Date(targetTime.getTargetTime());
+
+    List<Pair<StopTimeInstance>> pairs = _stopTimeService.getArrivalsBetweenStopPairInTimeRange(
+        fromStop, toStop, dFrom, dTo);
+    if (pairs.isEmpty())
+      pairs = _stopTimeService.getPreviousArrivalsBetweenStopPair(fromStop,
+          toStop, dFrom, false);
+
+    return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs);
+  }
+
+  private List<Pair<ArrivalAndDepartureInstance>> getArrivalsAndDeparturesFromStopTimeInstancePairs(
+      TargetTime targetTime, List<Pair<StopTimeInstance>> pairs) {
+
+    long frequencyOffsetTime = Math.max(targetTime.getTargetTime(),
+        targetTime.getCurrentTime());
 
     List<Pair<ArrivalAndDepartureInstance>> results = new ArrayList<Pair<ArrivalAndDepartureInstance>>();
 

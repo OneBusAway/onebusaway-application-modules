@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.onebusaway.collections.CollectionsLibrary;
-import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -45,11 +44,10 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.ArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.BlockArrivalVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.BlockDepartureVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.DepartureVertex;
-import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPEdgeNarrativeImpl;
-import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPPathVertex;
-import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPBlockArrivalVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPBlockDepartureVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPTransferEdge;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
@@ -79,7 +77,6 @@ import org.opentripplanner.routing.core.GraphVertex;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseMode;
-import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.edgetype.StreetEdge;
 import org.opentripplanner.routing.edgetype.StreetTraversalPermission;
@@ -201,7 +198,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   @Override
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, TargetTime targetTime, ConstraintsBean constraints)
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints)
       throws ServiceException {
 
     OBATraverseOptions options = createTraverseOptions();
@@ -398,7 +395,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private ItineraryBean getPathAsItinerary(GraphPath path,
-      TraverseOptions options) {
+      OBATraverseOptions options) {
 
     ItineraryBean itinerary = new ItineraryBean();
 
@@ -434,13 +431,14 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private int extendTransitLeg(List<SPTEdge> edges, int currentIndex,
-      TraverseOptions options, List<LegBean> legs) {
+      OBATraverseOptions options, List<LegBean> legs) {
 
     TransitLegBuilder builder = new TransitLegBuilder();
 
     while (currentIndex < edges.size()) {
 
       SPTEdge sptEdge = edges.get(currentIndex);
+      Edge edge = sptEdge.payload;
       EdgeNarrative narrative = sptEdge.narrative;
       TraverseMode mode = narrative.getMode();
 
@@ -454,6 +452,11 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
         builder = extendTransitLegWithDepartureAndArrival(legs, builder,
             (BlockDepartureVertex) vFrom, (BlockArrivalVertex) vTo);
+
+      } else if (vFrom instanceof TPBlockDepartureVertex) {
+
+        builder = extendTransitLegWithTPDepartureAndArrival(legs, builder,
+            (TPBlockDepartureVertex) vFrom, (TPBlockArrivalVertex) vTo);
 
       } else if (vFrom instanceof BlockArrivalVertex) {
 
@@ -478,9 +481,13 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
           addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
         }
-      } else if (vFrom instanceof TPPathVertex) {
-        builder = extendTransitLegWithTransferPattern(legs, builder,
-            (TPPathVertex) vFrom, vTo, sptEdge, options);
+      } else if (edge instanceof TPTransferEdge) {
+
+        TPTransferEdge transferEdge = (TPTransferEdge) edge;
+        StopEntry fromStop = transferEdge.getFromStop();
+        StopEntry toStop = transferEdge.getToStop();
+
+        addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
       }
 
       currentIndex++;
@@ -490,7 +497,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private void addTransferLegIfNeeded(SPTEdge sptEdge, StopEntry fromStop,
-      StopEntry toStop, TraverseOptions options, List<LegBean> legs) {
+      StopEntry toStop, OBATraverseOptions options, List<LegBean> legs) {
 
     if (!fromStop.equals(toStop)) {
 
@@ -516,6 +523,18 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     ArrivalAndDepartureInstance to = vTo.getInstance();
 
     return extendTransitLegWithDepartureAndArrival(legs, builder, from, to);
+  }
+
+  private TransitLegBuilder extendTransitLegWithTPDepartureAndArrival(
+      List<LegBean> legs, TransitLegBuilder builder,
+      TPBlockDepartureVertex vFrom, TPBlockArrivalVertex vTo) {
+
+    ArrivalAndDepartureInstance from = vFrom.getDeparture();
+    ArrivalAndDepartureInstance to = vFrom.getArrival();
+
+    builder = extendTransitLegWithDepartureAndArrival(legs, builder, from, to);
+    
+    return getTransitLegBuilderAsLeg(builder, legs);
   }
 
   private TransitLegBuilder extendTransitLegWithDepartureAndArrival(
@@ -571,7 +590,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private TransitLegBuilder extendTransitLegWithArrival(List<LegBean> legs,
       TransitLegBuilder builder, BlockArrivalVertex arrival, Vertex vTo,
-      SPTEdge sptEdge, TraverseOptions options) {
+      SPTEdge sptEdge, OBATraverseOptions options) {
 
     /**
      * Did we finish up a transit leg?
@@ -604,39 +623,6 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       DepartureVertex toStopVertex = (DepartureVertex) vTo;
       StopEntry toStop = toStopVertex.getStop();
 
-      addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
-    }
-
-    return builder;
-  }
-
-  private TransitLegBuilder extendTransitLegWithTransferPattern(
-      List<LegBean> legs, TransitLegBuilder builder, TPPathVertex vFrom,
-      Vertex vTo, SPTEdge sptEdge, TraverseOptions options) {
-
-    TPEdgeNarrativeImpl narrative = (TPEdgeNarrativeImpl) sptEdge.narrative;
-
-    ArrivalAndDepartureInstance departure = narrative.getDeparture();
-    ArrivalAndDepartureInstance arrival = narrative.getArrival();
-
-    builder = extendTransitLegWithDepartureAndArrival(legs, builder, departure,
-        arrival);
-
-    /**
-     * Clean up the transit leg
-     */
-    builder = getTransitLegBuilderAsLeg(builder, legs);
-
-    TPState pathState = vFrom.getPathState();
-
-    /**
-     * Do we need to add the transfer to another station?
-     */
-    if (pathState.hasNextStopPair()) {
-      Pair<StopEntry> fromPair = pathState.getCurrentStopPair();
-      Pair<StopEntry> toPair = pathState.getNextStopPair();
-      StopEntry fromStop = fromPair.getSecond();
-      StopEntry toStop = toPair.getFirst();
       addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
     }
 
@@ -991,9 +977,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private void ensureAdditionalItineraryIsIncluded(TransitLocationBean from,
-      TransitLocationBean to, TargetTime targetTime,
-      ItinerariesBean itineraries, ItineraryBean toInclude,
-      TraverseOptions options) {
+      TransitLocationBean to, long targetTime, ItinerariesBean itineraries,
+      ItineraryBean toInclude, OBATraverseOptions options) {
 
     if (toInclude == null)
       return;
@@ -1070,8 +1055,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private void updateItinerary(ItineraryBean itinerary,
-      TransitLocationBean from, TransitLocationBean to, TargetTime targetTime,
-      TraverseOptions options) {
+      TransitLocationBean from, TransitLocationBean to, long targetTime,
+      OBATraverseOptions options) {
 
     List<LegBean> legs = itinerary.getLegs();
 
@@ -1086,7 +1071,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       TransitLegBean transitLeg = leg.getTransitLeg();
 
       if (transitLeg != null) {
-        LegBean updatedLeg = updateTransitLeg(transitLeg, targetTime);
+        LegBean updatedLeg = updateTransitLeg(transitLeg, options);
         legs.set(i, updatedLeg);
 
         if (firstTransitLegIndex == -1)
@@ -1094,7 +1079,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
       } else if (isStreetLeg(leg)) {
 
-        Date time = new Date(targetTime.getTargetTime());
+        Date time = new Date(targetTime);
 
         GraphPath path = _itinerariesService.getWalkingItineraryBetweenPoints(
             leg.getFrom(), leg.getTo(), time, options);
@@ -1152,7 +1137,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   }
 
   private LegBean updateTransitLeg(TransitLegBean transitLeg,
-      TargetTime targetTime) {
+      OBATraverseOptions options) {
 
     TransitLegBuilder b = new TransitLegBuilder();
 
@@ -1181,7 +1166,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       query.setTrip(trip);
       query.setServiceDate(serviceDate);
       query.setVehicleId(vehicleId);
-      query.setTime(targetTime.getCurrentTime());
+      query.setTime(options.currentTime);
 
       ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
@@ -1205,7 +1190,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       query.setTrip(trip);
       query.setServiceDate(serviceDate);
       query.setVehicleId(vehicleId);
-      query.setTime(targetTime.getCurrentTime());
+      query.setTime(options.currentTime);
 
       ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 

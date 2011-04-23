@@ -13,10 +13,10 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public class TPBlockArrivalVertex extends AbstractTPBlockVertex implements
-    Comparable<TPBlockArrivalVertex> {
+public class TPOfflineBlockArrivalVertex extends AbstractTPOfflineBlockVertex implements
+    Comparable<TPOfflineBlockArrivalVertex> {
 
-  public TPBlockArrivalVertex(GraphContext graphContext,
+  public TPOfflineBlockArrivalVertex(GraphContext graphContext,
       StopTimeInstance instance) {
     super(graphContext, instance);
   }
@@ -44,13 +44,13 @@ public class TPBlockArrivalVertex extends AbstractTPBlockVertex implements
      * We can continue on our current route if applicable
      */
     if (_instance.getStopTime().hasNextStop()) {
-      edges.add(new TPBlockDwellEdge(_context, _instance));
+      edges.add(new TPOfflineBlockDwellEdge(_context, _instance));
     }
 
     /**
      * We can alight from the vehicle
      */
-    edges.add(new TPArrivalEdge(_context, _instance));
+    edges.add(new TPOfflineArrivalEdge(_context, _instance));
 
     /**
      * We can alight from the vehicle AND transfer to another stop
@@ -59,7 +59,7 @@ public class TPBlockArrivalVertex extends AbstractTPBlockVertex implements
     List<StopTransfer> transfers = stopTransferService.getTransfersFromStop(stop);
 
     for (StopTransfer transfer : transfers)
-      edges.add(new TPArrivalAndTransferEdge(_context, _instance, transfer));
+      edges.add(new TPOfflineArrivalAndTransferEdge(_context, _instance, transfer));
 
     return edges;
   }
@@ -74,7 +74,7 @@ public class TPBlockArrivalVertex extends AbstractTPBlockVertex implements
   }
 
   @Override
-  public int compareTo(TPBlockArrivalVertex o) {
+  public int compareTo(TPOfflineBlockArrivalVertex o) {
     long t1 = this._instance.getArrivalTime();
     long t2 = o._instance.getArrivalTime();
     return t1 == t2 ? 0 : (t1 < t2 ? -1 : 1);

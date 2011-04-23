@@ -197,7 +197,7 @@ public class ExtendedCalendarServiceImplTest {
   }
 
   @Test
-  public void go() {
+  public void testGetNextServiceDatesForDepartureInterval() {
 
     BlockEntry blockA = block("blockA");
     blockConfiguration(blockA, serviceIds(lsids("sA"), lsids()));
@@ -229,6 +229,65 @@ public class ExtendedCalendarServiceImplTest {
 
     time = dateAsLong("2010-09-11 21:30");
     dates = _service.getNextServiceDatesForDepartureInterval(serviceIds,
+        interval, time);
+
+    assertEquals(0, dates.size());
+  }
+
+  @Test
+  public void testGetPreviousServiceDatesForArrivalInterval() {
+
+    BlockEntry blockA = block("blockA");
+    blockConfiguration(blockA, serviceIds(lsids("sA"), lsids()));
+
+    List<BlockEntry> blocks = Arrays.asList(blockA);
+
+    Mockito.when(_transitGraphDao.getAllBlocks()).thenReturn(blocks);
+
+    _service.start();
+
+    ServiceIdActivation serviceIds = serviceIds(lsids("sA"), lsids());
+    int inFrom = time(8, 00);
+    int inTo = time(20, 00);
+    ServiceInterval interval = new ServiceInterval(inFrom, inFrom, inTo, inTo);
+    long time = dateAsLong("2010-09-11 21:30");
+
+    List<Date> dates = _service.getPreviousServiceDatesForArrivalInterval(
+        serviceIds, interval, time);
+
+    assertEquals(1, dates.size());
+    assertEquals(date("2010-09-11 00:00"), dates.get(0));
+
+    time = dateAsLong("2010-09-11 18:00");
+    dates = _service.getPreviousServiceDatesForArrivalInterval(serviceIds,
+        interval, time);
+
+    assertEquals(1, dates.size());
+    assertEquals(date("2010-09-11 00:00"), dates.get(0));
+
+    time = dateAsLong("2010-09-11 07:00");
+    dates = _service.getPreviousServiceDatesForArrivalInterval(serviceIds,
+        interval, time);
+
+    assertEquals(1, dates.size());
+    assertEquals(date("2010-09-10 00:00"), dates.get(0));
+
+    time = dateAsLong("2010-09-10 21:30");
+    dates = _service.getPreviousServiceDatesForArrivalInterval(serviceIds,
+        interval, time);
+
+    assertEquals(1, dates.size());
+    assertEquals(date("2010-09-10 00:00"), dates.get(0));
+
+    time = dateAsLong("2010-09-10 18:00");
+    dates = _service.getPreviousServiceDatesForArrivalInterval(serviceIds,
+        interval, time);
+
+    assertEquals(1, dates.size());
+    assertEquals(date("2010-09-10 00:00"), dates.get(0));
+
+    time = dateAsLong("2010-09-10 07:00");
+    dates = _service.getPreviousServiceDatesForArrivalInterval(serviceIds,
         interval, time);
 
     assertEquals(0, dates.size());

@@ -17,7 +17,6 @@ import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.Modes;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data_federation.impl.beans.ApplicationBeanLibrary;
-import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ItinerariesBeanService;
 import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
@@ -47,8 +46,6 @@ class OneBusAwayServiceImpl implements OneBusAwayService {
 
     ConstraintsBean walkConstraints = new ConstraintsBean(constraints);
     walkConstraints.setModes(CollectionsLibrary.set(Modes.WALK));
-
-    TargetTime tt = new TargetTime();
 
     for (LocalSearchResult result : localResults) {
 
@@ -104,7 +101,7 @@ class OneBusAwayServiceImpl implements OneBusAwayService {
         stopLocation.setLon(travelTimes.getStopLon(index));
 
         ItinerariesBean itineraries = _itinerariesService.getItinerariesBetween(
-            stopLocation, place, tt, walkConstraints);
+            stopLocation, place, System.currentTimeMillis(), walkConstraints);
 
         for (ItineraryBean plan : itineraries.getItineraries()) {
           double t = currentTripDuration

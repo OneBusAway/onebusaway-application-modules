@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
-import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;

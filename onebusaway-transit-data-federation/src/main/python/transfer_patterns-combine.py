@@ -6,12 +6,12 @@ import getopt
 import sys
 
 def usage():
-    print "usage: -s,stops=HubStops.txt TransferPattern-0000.txt [TranferPattern-0001.gz ...]"
+    print "usage: -s,stops=HubStops.txt -r,--retain=stopId[,stopId,...] TransferPattern-0000.txt [TranferPattern-0001.gz ...]"
 
 def main():
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "stops="])
+        opts, args = getopt.getopt(sys.argv[1:], "hs:r:", ["help", "stops=","retain="])
     except getopt.GetoptError, err:
         # print help information and exit:
         print str(err) # will print something like "option -a not recognized"
@@ -19,6 +19,7 @@ def main():
         sys.exit(3)
 
     hubStopsFile = None
+    stopsToRetain = {}
 
     for o, a in opts:
         if o in ("-h", "--help"):
@@ -26,6 +27,9 @@ def main():
             sys.exit()
         elif o in ("-s", "--stops"):
             hubStopsFile = a
+        elif o in ("-r", "--retain"):
+            for stopId in a.split(","):
+                stopsToRetain[stopId] = True
         else:
             assert False, "unhandled option"
 
@@ -45,6 +49,7 @@ def main():
     originStop = None
     originStopIsHub = False
     pruneFromParent = {}
+    skipTree = False
 
     out = csv.writer(sys.stdout,lineterminator='\n')
 
@@ -62,6 +67,12 @@ def main():
                 originStop = row[1]
                 originStopIsHub = originStop in hubStops
                 pruneFromParent = {}
+                skipTree = False
+                if len(stopsToRetain) > 0:
+                    skipTree = originStop not in stopsToRetain
+                
+            if skipTree:
+                continue
 
             index = row[0]
             newIndex = totalLineCount
@@ -83,8 +94,7 @@ def main():
                 row[3] = str(newParentIndex)
 
             out.writerow(row)
-
-        totalLineCount += 1
+            totalLineCount += 1
 
 if __name__ == "__main__":
   main()

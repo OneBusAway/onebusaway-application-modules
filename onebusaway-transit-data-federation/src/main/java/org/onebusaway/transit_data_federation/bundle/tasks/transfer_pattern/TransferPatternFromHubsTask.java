@@ -32,10 +32,10 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.HasStopTimeInstanceTransitVertex;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.OriginVertex;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPArrivalAndTransferEdge;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPBlockArrivalVertex;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPTransferVertex;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineOriginVertex;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineArrivalAndTransferEdge;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineBlockArrivalVertex;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferVertex;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
@@ -182,7 +182,7 @@ public class TransferPatternFromHubsTask implements Runnable {
         GenericDijkstra dijkstra = new GenericDijkstra(graph, options);
         dijkstra.setSkipVertexStrategy(new SkipVertexImpl(stop, tFrom));
 
-        OriginVertex origin = new OriginVertex(context, stop, instances);
+        TPOfflineOriginVertex origin = new TPOfflineOriginVertex(context, stop, instances);
         State state = new State(tFrom, new OBAStateData());
 
         MultiShortestPathTree spt = (MultiShortestPathTree) dijkstra.getShortestPathTree(
@@ -228,8 +228,9 @@ public class TransferPatternFromHubsTask implements Runnable {
   private void avgPaths(MutableTransferPattern pattern, StopEntry origin) {
     DoubleArrayList values = new DoubleArrayList();
     for (StopEntry stop : pattern.getStops()) {
-      List<List<Pair<StopEntry>>> paths = pattern.getPathsForStop(stop);
-      values.add(paths.size());
+      TransferTreeNode root = new TransferTreeNode();
+      pattern.getTransfersForStop(stop, root);
+      values.add(root.size());
     }
 
     if (values.isEmpty())
@@ -286,26 +287,26 @@ public class TransferPatternFromHubsTask implements Runnable {
 
     Map<SPTVertex, List<StopEntry>> parentsBySPTVertex = new HashMap<SPTVertex, List<StopEntry>>();
 
-    Map<StopEntry, List<TPBlockArrivalVertex>> arrivalsByStop = new FactoryMap<StopEntry, List<TPBlockArrivalVertex>>(
-        new ArrayList<TPBlockArrivalVertex>());
+    Map<StopEntry, List<TPOfflineBlockArrivalVertex>> arrivalsByStop = new FactoryMap<StopEntry, List<TPOfflineBlockArrivalVertex>>(
+        new ArrayList<TPOfflineBlockArrivalVertex>());
 
     for (Vertex v : spt.getVertices()) {
-      if (!(v instanceof TPBlockArrivalVertex))
+      if (!(v instanceof TPOfflineBlockArrivalVertex))
         continue;
 
-      TPBlockArrivalVertex bav = (TPBlockArrivalVertex) v;
+      TPOfflineBlockArrivalVertex bav = (TPOfflineBlockArrivalVertex) v;
       StopEntry stop = bav.getStop();
       arrivalsByStop.get(stop).add(bav);
     }
 
-    for (Map.Entry<StopEntry, List<TPBlockArrivalVertex>> entry : arrivalsByStop.entrySet()) {
+    for (Map.Entry<StopEntry, List<TPOfflineBlockArrivalVertex>> entry : arrivalsByStop.entrySet()) {
       processArrivalsForStop(entry.getKey(), entry.getValue(), originStop, spt,
           pattern, parentsBySPTVertex);
     }
   }
 
   private void processArrivalsForStop(StopEntry arrivalStop,
-      List<TPBlockArrivalVertex> arrivals, StopEntry originStop,
+      List<TPOfflineBlockArrivalVertex> arrivals, StopEntry originStop,
       MultiShortestPathTree spt, MutableTransferPattern pattern,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
 
@@ -322,7 +323,7 @@ public class TransferPatternFromHubsTask implements Runnable {
 
     long startTime = 0;
 
-    for (TPBlockArrivalVertex arrival : arrivals) {
+    for (TPOfflineBlockArrivalVertex arrival : arrivals) {
 
       Collection<SPTVertex> sptVertices = pruneSptVertices(spt.getSPTVerticesForVertex(arrival));
 
@@ -439,7 +440,7 @@ public class TransferPatternFromHubsTask implements Runnable {
   }
 
   private List<Pair<StopEntry>> constructTransferPattern(StopEntry originStop,
-      TPBlockArrivalVertex arrival, SPTVertex sptVertex,
+      TPOfflineBlockArrivalVertex arrival, SPTVertex sptVertex,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
 
     List<StopEntry> path = computeParentsForSPTVertex(sptVertex, originStop,
@@ -475,10 +476,10 @@ public class TransferPatternFromHubsTask implements Runnable {
 
       Edge payload = sptEdge.payload;
 
-      if (payload instanceof TPArrivalAndTransferEdge) {
+      if (payload instanceof TPOfflineArrivalAndTransferEdge) {
 
-        TPBlockArrivalVertex fromV = (TPBlockArrivalVertex) sptEdge.narrative.getFromVertex();
-        TPTransferVertex toV = (TPTransferVertex) sptEdge.narrative.getToVertex();
+        TPOfflineBlockArrivalVertex fromV = (TPOfflineBlockArrivalVertex) sptEdge.narrative.getFromVertex();
+        TPOfflineTransferVertex toV = (TPOfflineTransferVertex) sptEdge.narrative.getToVertex();
 
         List<StopEntry> incomingPattern = computeParentsForSPTVertex(
             sptEdge.fromv, originStop, parentsBySPTVertex);
@@ -528,8 +529,8 @@ public class TransferPatternFromHubsTask implements Runnable {
       /**
        * We prune any arrivals that loop back to the origin stop
        */
-      if (current instanceof TPBlockArrivalVertex) {
-        TPBlockArrivalVertex bav = (TPBlockArrivalVertex) current;
+      if (current instanceof TPOfflineBlockArrivalVertex) {
+        TPOfflineBlockArrivalVertex bav = (TPOfflineBlockArrivalVertex) current;
         StopTimeInstance instance = bav.getInstance();
         if (instance.getStop() == _originStop)
           return true;

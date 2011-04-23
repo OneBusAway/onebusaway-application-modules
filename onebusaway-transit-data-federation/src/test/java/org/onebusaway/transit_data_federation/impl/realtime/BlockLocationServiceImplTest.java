@@ -84,8 +84,8 @@ public class BlockLocationServiceImplTest {
 
     double epsilon = 0.001;
 
-    TargetTime target = new TargetTime(System.currentTimeMillis(), t(
-        serviceDate, 0, 0));
+    TargetTime target = new TargetTime(t(
+        serviceDate, 0, 0), System.currentTimeMillis());
 
     BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
     BlockLocation location = _service.getLocationForBlockInstance(
@@ -105,7 +105,7 @@ public class BlockLocationServiceImplTest {
         _blockLocationService.getScheduledBlockLocationFromScheduledTime(
             blockConfig, 1800)).thenReturn(p);
 
-    target = new TargetTime(System.currentTimeMillis(), t(serviceDate, 0, 30));
+    target = new TargetTime(t(serviceDate, 0, 30), System.currentTimeMillis());
 
     location = _service.getLocationForBlockInstance(blockInstance, target);
 

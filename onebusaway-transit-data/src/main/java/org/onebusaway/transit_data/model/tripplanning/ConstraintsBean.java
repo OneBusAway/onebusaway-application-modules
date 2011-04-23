@@ -38,6 +38,12 @@ public class ConstraintsBean implements Serializable {
 
   private long maxComputationTime = -1;
 
+  /**
+   * Why do we include an alternate definition of the current time? It's useful
+   * when attempting to run simulated queries in the past
+   */
+  private long currentTime = -1;
+
   private ItineraryBean includeItinerary = null;
 
   public ConstraintsBean() {
@@ -186,6 +192,14 @@ public class ConstraintsBean implements Serializable {
 
   public void setMaxComputationTime(long maxComputationTime) {
     this.maxComputationTime = maxComputationTime;
+  }
+
+  public long getCurrentTime() {
+    return currentTime;
+  }
+
+  public void setCurrentTime(long currentTime) {
+    this.currentTime = currentTime;
   }
 
   public ItineraryBean getIncludeItinerary() {

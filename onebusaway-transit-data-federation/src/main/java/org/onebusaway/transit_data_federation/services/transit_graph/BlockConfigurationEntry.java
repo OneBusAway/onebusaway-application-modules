@@ -2,13 +2,15 @@ package org.onebusaway.transit_data_federation.services.transit_graph;
 
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.services.blocks.HasIndexedBlockStopTimes;
+
 /**
  * A block configuration i
  * 
  * @author bdferris
  * 
  */
-public interface BlockConfigurationEntry extends HasBlockStopTimes {
+public interface BlockConfigurationEntry extends HasIndexedBlockStopTimes {
 
   public BlockEntry getBlock();
 
@@ -22,10 +24,6 @@ public interface BlockConfigurationEntry extends HasBlockStopTimes {
    * @return distance, in meters
    */
   public double getTotalBlockDistance();
-
-  public int getArrivalTimeForIndex(int index);
-
-  public int getDepartureTimeForIndex(int index);
 
   public double getDistanceAlongBlockForIndex(int blockSequence);
 }

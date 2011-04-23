@@ -8,11 +8,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.collections.FactoryMap;
-import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.model.ServiceDateSummary;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.StopScheduleService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;

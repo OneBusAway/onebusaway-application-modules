@@ -6,7 +6,6 @@ import java.util.List;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
-import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
@@ -15,7 +14,7 @@ import org.opentripplanner.routing.spt.GraphPath;
 public interface ItinerariesService {
 
   public List<GraphPath> getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, TargetTime targetTime, OBATraverseOptions options);
+      TransitLocationBean to, long targetTime, OBATraverseOptions options);
 
   public GraphPath getWalkingItineraryBetweenStops(StopEntry fromStop,
       StopEntry toStop, Date time, TraverseOptions options);

@@ -78,6 +78,25 @@ public interface ArrivalAndDepartureService {
   public ArrivalAndDepartureInstance getNextTransferStopArrivalAndDeparture(
       ArrivalAndDepartureInstance instance);
 
-  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesAndArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, long fromTime, long toTime);
+  /**
+   * 
+   * @param fromStop
+   * @param toStop
+   * @param targetTime
+   * @param window in seconds
+   * @return
+   */
+  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window);
+  
+  /**
+   * 
+   * @param toStop
+   * @param fromStop
+   * @param targetTime
+   * @param window positive, in seconds
+   * @return
+   */
+  public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window);
 }

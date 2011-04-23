@@ -28,4 +28,7 @@ public interface ExtendedCalendarService {
 
   public List<Date> getNextServiceDatesForDepartureInterval(
       ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time);
+  
+  public List<Date> getPreviousServiceDatesForArrivalInterval(
+      ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time);
 }

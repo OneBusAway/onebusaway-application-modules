@@ -1,12 +1,12 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
-import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferTree;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
-import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPPathVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPDepartureVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -92,31 +92,33 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   private TraverseResult traverseTransferPatterns(State s0,
       TraverseOptions options) {
 
+    if (_isReverseEdge) {
+      throw new UnsupportedOperationException();
+    }
+
     TransferPatternService tpService = _context.getTransferPatternService();
 
     TPQueryData queryData = options.getExtension(TPQueryData.class);
 
-    Set<StopEntry> destStops = queryData.getDestStops2();
+    Set<StopEntry> destStops = queryData.getDestStops();
 
     TraverseResult results = null;
 
-    for (StopEntry toStop : destStops) {
+    Collection<TransferTree> transfers = tpService.getTransferPatternForStops(
+        _stop, destStops);
 
-      List<List<Pair<StopEntry>>> paths = tpService.getTransferPatternForStops(
-          _stop, toStop);
+    for (TransferTree tree : transfers) {
 
-      for (List<Pair<StopEntry>> path : paths) {
+      TPState pathState = TPState.start(queryData, tree);
 
-        TPState pathState = TPState.start(queryData, path);
+      Vertex fromVertex = new WalkToStopVertex(_context, _stop);
+      Vertex toVertex = new TPDepartureVertex(_context, pathState);
+      EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
-        Vertex fromVertex = new WalkToStopVertex(_context, _stop);
-        Vertex toVertex = new TPPathVertex(_context, pathState);
-        EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
-
-        TraverseResult r = new TraverseResult(0, s0, narrative);
-        results = r.addToExistingResultChain(results);
-      }
+      TraverseResult r = new TraverseResult(0, s0, narrative);
+      results = r.addToExistingResultChain(results);
     }
+
     return results;
   }
 }

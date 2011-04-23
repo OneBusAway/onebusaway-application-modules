@@ -140,7 +140,7 @@ class StopTimeServiceImpl implements StopTimeService {
         int relativeFrom = effectiveTime(serviceDate.getTime(), time);
 
         int fromIndex = GenericBinarySearch.search(index, index.size(),
-            relativeFrom, IndexAdapters.BLOCK_STOP_SEQUENCE_DEPARTURE_INSTANCE);
+            relativeFrom, IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
 
         if (fromIndex < index.size()) {
           BlockStopTimeEntry blockStopTime = index.getBlockStopTimeForIndex(fromIndex);
@@ -160,12 +160,16 @@ class StopTimeServiceImpl implements StopTimeService {
       StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
       Date toDepartureTime) {
 
+    /**
+     * First find indices shared between the two stops
+     */
     List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
         fromStop, toStop);
 
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
 
     for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+
       BlockStopSequenceIndex fromStopIndex = pair.getFirst();
       BlockStopSequenceIndex toStopIndex = pair.getSecond();
 
@@ -174,18 +178,88 @@ class StopTimeServiceImpl implements StopTimeService {
       ServiceIdActivation serviceIds = fromStopIndex.getServiceIds();
       ServiceInterval interval = fromStopIndex.getServiceInterval();
 
+      /**
+       * Find applicable service dates for the departure stop and index
+       */
       Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
           serviceIds, interval, fromDepartureTime, toDepartureTime);
 
       for (Date serviceDate : serviceDates) {
+
         List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
-        int fromIndex = getStopTimesForStopAndServiceDateAndTimeRange(
+
+        /**
+         * Find departures within the specified range on the specified service
+         * date
+         */
+        int indexOffset = getStopTimesForStopAndServiceDateAndTimeRange(
             fromStopIndex, serviceDate, fromDepartureTime, toDepartureTime,
             instances);
+
+        /**
+         * For each departure, we need to find the corresponding arrival
+         */
         for (int i = 0; i < instances.size(); i++) {
           StopTimeInstance stiFrom = instances.get(i);
-          BlockStopTimeEntry stopTimeTo = toStopTimes.get(fromIndex + i);
+          BlockStopTimeEntry stopTimeTo = toStopTimes.get(indexOffset + i);
           StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          results.add(stiPair);
+        }
+      }
+    }
+
+    return results;
+  }
+
+  @Override
+  public List<Pair<StopTimeInstance>> getArrivalsBetweenStopPairInTimeRange(
+      StopEntry fromStop, StopEntry toStop, Date fromArrivalTime,
+      Date toArrivalTime) {
+
+    /**
+     * First find indices shared between the two stops
+     */
+    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
+        fromStop, toStop);
+
+    List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
+
+    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+
+      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
+      BlockStopSequenceIndex toStopIndex = pair.getSecond();
+
+      List<BlockStopTimeEntry> fromStopTimes = fromStopIndex.getStopTimes();
+
+      ServiceIdActivation serviceIds = toStopIndex.getServiceIds();
+      ServiceInterval interval = toStopIndex.getServiceInterval();
+
+      /**
+       * Find applicable service dates for the arrival stop and index
+       */
+      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
+          serviceIds, interval, fromArrivalTime, toArrivalTime);
+
+      for (Date serviceDate : serviceDates) {
+
+        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
+
+        /**
+         * Find arrivals within the specified range on the specified service
+         * date
+         */
+        int toIndex = getStopTimesForStopAndServiceDateAndTimeRange(
+            toStopIndex, serviceDate, fromArrivalTime, toArrivalTime, instances);
+
+        /**
+         * For each arrival, we need to find the corresponding departure
+         */
+        for (int i = 0; i < instances.size(); i++) {
+          StopTimeInstance stiTo = instances.get(i);
+          BlockStopTimeEntry stopTimeFrom = fromStopTimes.get(toIndex + i);
+          StopTimeInstance stiFrom = new StopTimeInstance(stopTimeFrom,
+              serviceDate);
           Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
           results.add(stiPair);
         }
@@ -224,7 +298,7 @@ class StopTimeServiceImpl implements StopTimeService {
 
         int fromIndex = GenericBinarySearch.search(fromStopIndex,
             fromStopIndex.size(), relativeFrom,
-            IndexAdapters.BLOCK_STOP_SEQUENCE_DEPARTURE_INSTANCE);
+            IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
 
         if (fromIndex < fromStopIndex.size()) {
           BlockStopTimeEntry blockStopTime = fromStopIndex.getBlockStopTimeForIndex(fromIndex);
@@ -237,6 +311,63 @@ class StopTimeServiceImpl implements StopTimeService {
             results.add(stiPair);
           else
             min.add(stiFrom.getDepartureTime(), stiPair);
+        }
+      }
+    }
+
+    if (includeAllSequences)
+      return results;
+    else
+      return min.getMinElements();
+  }
+
+  @Override
+  public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
+      StopEntry fromStop, StopEntry toStop, Date toTime,
+      boolean includeAllSequences) {
+
+    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
+        fromStop, toStop);
+
+    List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
+    Min<Pair<StopTimeInstance>> min = new Min<Pair<StopTimeInstance>>();
+
+    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+
+      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
+      BlockStopSequenceIndex toStopIndex = pair.getSecond();
+
+      List<BlockStopTimeEntry> fromStopTimes = fromStopIndex.getStopTimes();
+
+      List<Date> serviceDates = _calendarService.getPreviousServiceDatesForArrivalInterval(
+          toStopIndex.getServiceIds(), toStopIndex.getServiceInterval(),
+          toTime.getTime());
+
+      for (Date serviceDate : serviceDates) {
+
+        int relativeTo = effectiveTime(serviceDate.getTime(), toTime.getTime());
+
+        int toIndex = GenericBinarySearch.search(fromStopIndex,
+            toStopIndex.size(), relativeTo,
+            IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE);
+
+        if (0 <= toIndex) {
+          BlockStopTimeEntry blockStopTime = toStopIndex.getBlockStopTimeForIndex(toIndex);
+          StopTimeInstance stiTo = new StopTimeInstance(blockStopTime,
+              serviceDate);
+          BlockStopTimeEntry stopTimeFrom = fromStopTimes.get(toIndex);
+          StopTimeInstance stiFrom = new StopTimeInstance(stopTimeFrom,
+              serviceDate);
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          if (includeAllSequences) {
+            results.add(stiPair);
+          } else {
+            /**
+             * Note that we use the negative arrival time here because we
+             * actually want the arrival with the max arrival time
+             */
+            min.add(-stiTo.getArrivalTime(), stiPair);
+          }
         }
       }
     }

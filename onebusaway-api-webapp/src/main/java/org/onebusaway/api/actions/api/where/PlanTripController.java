@@ -46,8 +46,6 @@ public class PlanTripController extends ApiActionSupport {
 
   private long _time;
 
-  private long _currentTime;
-
   private String _includeSpecificItinerary;
 
   private ConstraintsBean _constraints = new ConstraintsBean();
@@ -100,11 +98,6 @@ public class PlanTripController extends ApiActionSupport {
     setTime(time);
   }
 
-  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
-  public void setCurrentTime(Date time) {
-    _currentTime = time.getTime();
-  }
-
   public void setIncludeSpecificItinerary(String includeSpecificItinerary) {
     _includeSpecificItinerary = includeSpecificItinerary;
   }
@@ -133,8 +126,8 @@ public class PlanTripController extends ApiActionSupport {
 
     if (_time == 0)
       _time = System.currentTimeMillis();
-    if (_currentTime == 0)
-      _currentTime = System.currentTimeMillis();
+    if( _constraints.getCurrentTime() == -1)
+      _constraints.setCurrentTime(System.currentTimeMillis());
 
     BeanFactoryV2 factory = getBeanFactoryV2();
     ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(
@@ -143,7 +136,7 @@ public class PlanTripController extends ApiActionSupport {
     parseAdditionalItinerary(itineraryFactory);
 
     ItinerariesBean itineraries = _transitDataService.getItinerariesBetween(
-        _from, _to, _time, _currentTime, _constraints);
+        _from, _to, _time, _constraints);
 
     ItinerariesV2Bean bean = itineraryFactory.getItineraries(itineraries);
     return setOkResponse(factory.entry(bean));

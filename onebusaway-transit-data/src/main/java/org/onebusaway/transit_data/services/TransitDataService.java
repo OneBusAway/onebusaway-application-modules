@@ -330,7 +330,6 @@ public interface TransitDataService extends FederatedService {
    * @param from
    * @param to
    * @param targetTime
-   * @param currentTime TODO
    * @param constraints
    * @return a list of trip plans computed between the two locations with the
    *         specified constraints
@@ -338,8 +337,7 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByCoordinatePointsMethod(arguments = {0, 1},propertyExpressions={"location","location"})
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, long currentTime,
-      ConstraintsBean constraints) throws ServiceException;
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints) throws ServiceException;
 
   @FederatedByBoundsMethod
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,

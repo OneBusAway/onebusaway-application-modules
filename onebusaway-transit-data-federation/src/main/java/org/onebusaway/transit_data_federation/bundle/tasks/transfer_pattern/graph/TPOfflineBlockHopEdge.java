@@ -14,7 +14,7 @@ import org.opentripplanner.routing.core.Vertex;
  * next. This version represents a set of such journeys specified by a
  * TripPattern.
  */
-public class TPBlockHopEdge extends AbstractEdge {
+public class TPOfflineBlockHopEdge extends AbstractEdge {
 
   private static final long serialVersionUID = 1L;
 
@@ -22,7 +22,7 @@ public class TPBlockHopEdge extends AbstractEdge {
 
   private final StopTimeInstance _to;
 
-  public TPBlockHopEdge(GraphContext context, StopTimeInstance from,
+  public TPOfflineBlockHopEdge(GraphContext context, StopTimeInstance from,
       StopTimeInstance to) {
     super(context);
 
@@ -69,8 +69,8 @@ public class TPBlockHopEdge extends AbstractEdge {
   }
 
   private EdgeNarrativeImpl createNarrative() {
-    Vertex fromVertex = new TPBlockDepartureVertex(_context, _from);
-    Vertex toVertex = new TPBlockArrivalVertex(_context, _to);
+    Vertex fromVertex = new TPOfflineBlockDepartureVertex(_context, _from);
+    Vertex toVertex = new TPOfflineBlockArrivalVertex(_context, _to);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 }

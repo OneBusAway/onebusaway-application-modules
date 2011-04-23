@@ -2,6 +2,8 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.collections.tuple.Pair;
-import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.csv_entities.CSVLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -62,38 +63,59 @@ public class MutableTransferPattern implements TransferPattern {
    * {@link TransferPattern} Interface
    ****/
 
+  @Override
   public StopEntry getOriginStop() {
     return _root.stop;
   }
 
+  @Override
   public Set<StopEntry> getStops() {
     return _stops.keySet();
   }
 
-  public List<List<Pair<StopEntry>>> getPathsForStop(StopEntry stop) {
+  @Override
+  public Collection<TransferTreeNode> getTransfersForStop(StopEntry stop,
+      TransferTreeNode root) {
 
-    List<List<Pair<StopEntry>>> paths = new ArrayList<List<Pair<StopEntry>>>();
-    Set<Entry> nodes = _stops.get(stop);
+    List<TransferTreeNode> paths = new ArrayList<TransferTreeNode>();
+    Set<Entry> entries = _stops.get(stop);
 
-    for (Entry node : nodes) {
-      List<Pair<StopEntry>> path = new ArrayList<Pair<StopEntry>>();
-      paths.add(path);
-      while (node != null) {
-        Entry b = node;
-        Entry a = node.parent;
-        if (a == null)
-          throw new IllegalStateException();
-        node = a.parent;
-        path.add(0, Tuples.pair(a.stop, b.stop));
-      }
-    }
+    for (Entry entry : entries)
+      paths.add(getTransferForEntryx(entry, root));
 
     return paths;
+  }
+
+  @Override
+  public Set<StopEntry> getHubStops() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Collection<TransferTreeNode> getTransfersForHubStop(StopEntry stop,
+      TransferTreeNode root) {
+    return Collections.emptyList();
   }
 
   /****
    * Private Methods
    *****/
+
+  private TransferTreeNode getTransferForEntryx(Entry node,
+      TransferTreeNode root) {
+
+    if (node == null)
+      return root;
+
+    Entry b = node;
+    Entry a = node.parent;
+    if (a == null)
+      throw new IllegalStateException();
+    node = a.parent;
+
+    TransferTreeNode parent = getTransferForEntryx(node, root);
+    return parent.extendTree(a.stop, b.stop);
+  }
 
   private long writeEntryToPrintWriter(Entry entry, PrintWriter out,
       long index, long parentIndex) {
@@ -101,7 +123,8 @@ public class MutableTransferPattern implements TransferPattern {
     String line = null;
     String stopId = AgencyAndIdLibrary.convertToString(entry.stop.getId());
     Set<Entry> endpoints = _stops.get(entry.stop);
-    String endpoint = (endpoints != null && endpoints.contains(entry)) ? "1" : "0";
+    String endpoint = (endpoints != null && endpoints.contains(entry)) ? "1"
+        : "0";
 
     if (entry.parent != null)
       line = CSVLibrary.getAsCSV(index, stopId, endpoint, parentIndex);

@@ -5,6 +5,8 @@ import org.opentripplanner.routing.core.TraverseOptions;
 public class OBATraverseOptions extends TraverseOptions {
 
   private static final long serialVersionUID = 1L;
+  
+  public long currentTime = -1;
 
   public boolean useRealtime = false;
 

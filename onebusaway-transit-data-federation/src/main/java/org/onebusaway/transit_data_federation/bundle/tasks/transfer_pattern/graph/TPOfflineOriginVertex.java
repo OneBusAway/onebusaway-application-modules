@@ -20,11 +20,11 @@ import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
 
-public class OriginVertex extends AbstractStopVertex implements HasEdges {
+public class TPOfflineOriginVertex extends AbstractStopVertex implements HasEdges {
 
   private List<StopTimeInstance> _instances;
 
-  public OriginVertex(GraphContext context, StopEntry stop,
+  public TPOfflineOriginVertex(GraphContext context, StopEntry stop,
       List<StopTimeInstance> instances) {
     super(context, stop);
     _instances = instances;
@@ -66,8 +66,8 @@ public class OriginVertex extends AbstractStopVertex implements HasEdges {
 
         State state = new State(instance.getDepartureTime(), new OBAStateData());
 
-        TPTransferVertex vTransfer = new TPTransferVertex(_context, instance);
-        EdgeNarrative nTransfer = new EdgeNarrativeImpl(OriginVertex.this,
+        TPOfflineTransferVertex vTransfer = new TPOfflineTransferVertex(_context, instance);
+        EdgeNarrative nTransfer = new EdgeNarrativeImpl(TPOfflineOriginVertex.this,
             vTransfer);
         TraverseResult rTransfer = new TraverseResult(0, state, nTransfer);
         results = rTransfer.addToExistingResultChain(results);

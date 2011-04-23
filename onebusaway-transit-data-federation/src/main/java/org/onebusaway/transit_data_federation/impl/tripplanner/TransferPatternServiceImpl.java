@@ -2,18 +2,21 @@ package org.onebusaway.transit_data_federation.impl.tripplanner;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.CompactedTransferPatternFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPattern;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferTree;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferTreeNode;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -67,14 +70,49 @@ class TransferPatternServiceImpl implements TransferPatternService {
   }
 
   @Override
-  public List<List<Pair<StopEntry>>> getTransferPatternForStops(
+  public Collection<TransferTree> getTransferPatternForStops(
       StopEntry stopFrom, StopEntry stopTo) {
+    return getTransferPatternForStops(stopFrom, Arrays.asList(stopTo));
+  }
+
+  @Override
+  public Collection<TransferTree> getTransferPatternForStops(
+      StopEntry stopFrom, Iterable<StopEntry> stopsTo) {
 
     TransferPattern pattern = _transferPatternsByStop.get(stopFrom);
     if (pattern == null)
       return Collections.emptyList();
 
-    return pattern.getPathsForStop(stopTo);
+    TransferTreeNode root = new TransferTreeNode();
+
+    for (StopEntry stopTo : stopsTo) {
+
+      pattern.getTransfersForStop(stopTo, root);
+
+      Set<StopEntry> hubStops = pattern.getHubStops();
+
+      if (!hubStops.isEmpty()) {
+
+        for (StopEntry hubStop : hubStops) {
+
+          TransferPattern hubPattern = _transferPatternsByStop.get(hubStop);
+          if (hubPattern == null)
+            continue;
+
+          TransferTreeNode hubRoot = new TransferTreeNode();
+          hubPattern.getTransfersForStop(stopTo, hubRoot);
+
+          Collection<TransferTreeNode> hubNodes = pattern.getTransfersForHubStop(
+              hubStop, root);
+
+          for (TransferTreeNode hubNode : hubNodes) {
+            hubNode.extendTree(hubRoot);
+          }
+        }
+      }
+    }
+
+    return root.getTransfers();
   }
 
 }

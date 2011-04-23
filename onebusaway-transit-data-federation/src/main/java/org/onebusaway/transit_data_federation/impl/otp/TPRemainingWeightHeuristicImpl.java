@@ -1,12 +1,12 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import java.util.List;
+import java.util.Collection;
 
-import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferTree;
 import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
-import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPPathVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.tp.HasPathStateVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.algorithm.RemainingWeightHeuristic;
@@ -34,6 +34,9 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
   @Override
   public double computeInitialWeight(Vertex from, Vertex to,
       TraverseOptions traverseOptions) {
+
+    if (traverseOptions.isArriveBy())
+      throw new IllegalStateException();
 
     _options = traverseOptions;
     _useTransit = traverseOptions.getModes().getTransit();
@@ -70,35 +73,15 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
   private double computeWeight(TraverseResult traverseResult, Vertex target,
       Vertex v) {
 
-    if (v instanceof TPPathVertex) {
-      TPPathVertex tpV = (TPPathVertex) v;
+    if (v instanceof HasPathStateVertex) {
+      HasPathStateVertex tpV = (HasPathStateVertex) v;
+
       TPState pathState = tpV.getPathState();
-      List<Pair<StopEntry>> path = pathState.getPath();
-      int index = pathState.getPathIndex();
+      boolean isDeparture = tpV.isDeparture();
 
-      double transitDistance = 0.0;
-      double walkDistance = 0.0;
+      TransferTree tree = pathState.getTree();
 
-      for (int i = index; i < path.size(); i++) {
-        Pair<StopEntry> pair = path.get(i);
-        StopEntry fromStop = pair.getFirst();
-        StopEntry toStop = pair.getSecond();
-        transitDistance += SphericalGeometryLibrary.distance(
-            fromStop.getStopLat(), fromStop.getStopLon(), toStop.getStopLat(),
-            toStop.getStopLon());
-
-        CoordinatePoint dest = null;
-        if (i + 1 < path.size()) {
-          dest = path.get(i + 1).getFirst().getStopLocation();
-        } else {
-          dest = new CoordinatePoint(target.getY(), target.getX());
-        }
-
-        walkDistance += SphericalGeometryLibrary.distance(
-            toStop.getStopLocation(), dest);
-      }
-
-      return transitDistance / _maxTransitSpeed + walkDistance / _options.speed;
+      return getWeightForTree(null, tree, isDeparture, target);
     }
 
     double distanceEstimate = distance(v, target);
@@ -106,6 +89,60 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
     double maxSpeed = getMaxSpeedForCurrentState(traverseResult, v);
 
     return distanceEstimate / maxSpeed;
+  }
+
+  private double getWeightForTree(TransferTree parentTree, TransferTree tree,
+      boolean isDeparture, Vertex target) {
+
+    double w = 0;
+
+    if (parentTree != null && isDeparture) {
+
+      StopEntry fromStop = parentTree.getToStop();
+      StopEntry toStop = tree.getFromStop();
+      double walkDistance = SphericalGeometryLibrary.distance(
+          fromStop.getStopLocation(), toStop.getStopLocation());
+      int walkTime = (int) (walkDistance / _options.speed);
+      double transferWeight = ItineraryWeightingLibrary.computeTransferWeight(
+          walkTime, _options);
+      w += transferWeight;
+    }
+
+    if (isDeparture) {
+
+      StopEntry fromStop = tree.getFromStop();
+      StopEntry toStop = tree.getToStop();
+
+      double transitDistance = SphericalGeometryLibrary.distance(
+          fromStop.getStopLat(), fromStop.getStopLon(), toStop.getStopLat(),
+          toStop.getStopLon());
+      int transitTime = (int) (transitDistance / _maxTransitSpeed);
+      w += transitTime;
+    }
+
+    Collection<TransferTree> transfers = tree.getTransfers();
+    if (transfers.isEmpty()) {
+
+      StopEntry toStop = tree.getToStop();
+      CoordinatePoint dest = new CoordinatePoint(target.getY(), target.getX());
+
+      double walkDistance = SphericalGeometryLibrary.distance(
+          toStop.getStopLocation(), dest);
+      int walkTime = (int) (walkDistance / _options.speed);
+      double transferWeight = ItineraryWeightingLibrary.computeTransferWeight(
+          walkTime, _options);
+      w += transferWeight;
+    } else {
+      double min = Double.POSITIVE_INFINITY;
+      for (TransferTree subTree : transfers) {
+        double subWeight = getWeightForTree(tree, subTree, true, target);
+        min = Math.min(subWeight, min);
+      }
+
+      w += min;
+    }
+
+    return w;
   }
 
   private double getMaxSpeed() {

@@ -1,15 +1,10 @@
 package org.onebusaway.transit_data_federation.impl.tripplanner;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.exceptions.ServiceException;
@@ -23,17 +18,16 @@ import org.onebusaway.transit_data_federation.impl.otp.TPRemainingWeightHeuristi
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
-import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
-import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.algorithm.AStar;
+import org.opentripplanner.routing.algorithm.strategies.SkipVertexStrategy;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
+import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.core.TraverseOptions;
@@ -106,13 +100,13 @@ class ItinerariesServiceImpl implements ItinerariesService {
    ****/
 
   public List<GraphPath> getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, TargetTime targetTime, OBATraverseOptions options)
+      TransitLocationBean to, long targetTime, OBATraverseOptions options)
       throws ServiceException {
 
     Vertex fromVertex = getTransitLocationAsVertex(from, options);
     Vertex toVertex = getTransitLocationAsVertex(to, options);
 
-    Date t = new Date(targetTime.getTargetTime());
+    Date t = new Date(targetTime);
 
     if (_transferPathService.isEnabled()) {
       return getTransferPatternStops(fromVertex, toVertex, t, options);
@@ -181,26 +175,32 @@ class ItinerariesServiceImpl implements ItinerariesService {
   private List<GraphPath> getTransferPatternStops(Vertex fromVertex,
       Vertex toVertex, Date time, OBATraverseOptions options) {
 
-    /*
-     * Map<StopEntry, GraphPath> stopsNearbyFromVertex = getNearbyStops(
-     * fromVertex, options, time, true);
-     */
+    Set<StopEntry> sourceStops = Collections.emptySet();
+    Set<StopEntry> destStops = Collections.emptySet();
 
-    List<StopEntry> stops = getNearbyStops(toVertex, options, time, false);
+    if (options.isArriveBy()) {
+      List<StopEntry> stops = getNearbyStops(fromVertex, options, time, true);
+      sourceStops = new HashSet<StopEntry>(stops);
+    } else {
+      List<StopEntry> stops = getNearbyStops(toVertex, options, time, false);
+      destStops = new HashSet<StopEntry>(stops);
+    }
 
-    if (stops.isEmpty())
+    if (destStops.isEmpty())
       return Collections.emptyList();
 
-    TPQueryData queryData = new TPQueryData(new HashSet<StopEntry>(stops));
+    TPQueryData queryData = new TPQueryData(sourceStops, destStops);
     options.putExtension(TPQueryData.class, queryData);
 
     Graph graph = _graphService.getGraph();
     State init = new State(time.getTime(), new OBAStateData());
     options.remainingWeightHeuristic = new TPRemainingWeightHeuristicImpl();
-    ShortestPathTree spt = AStar.getShortestPathTree(graph, fromVertex,
+    AStar search = new AStar();
+    search.setSkipVertexStrategy(new SkipVertexImpl());
+    ShortestPathTree spt = search.getShortestPathTree(graph, fromVertex,
         toVertex, init, options);
 
-    return spt.getPaths(toVertex, false);
+    return spt.getPaths(toVertex, true);
   }
 
   public List<StopEntry> getNearbyStops(Vertex v, TraverseOptions options,
@@ -210,11 +210,6 @@ class ItinerariesServiceImpl implements ItinerariesService {
         options.maxWalkDistance);
 
     CoordinatePoint location = new CoordinatePoint(v.getY(), v.getX());
-
-    /**
-     * These are stops which don't have walking paths
-     */
-    Set<StopEntry> stopsWithoutPath = new HashSet<StopEntry>();
 
     for (double radius = initialRadius; radius < _walkSearchMaxRadius; radius += _walkSearchStep) {
 
@@ -233,70 +228,6 @@ class ItinerariesServiceImpl implements ItinerariesService {
     return Collections.emptyList();
   }
 
-  private Map<StopEntry, GraphPath> computeWalkPathsToStops(Vertex v,
-      TraverseOptions options, Date time, boolean isOrigin,
-      List<StopEntry> stops, Set<StopEntry> stopsWithoutPath) {
-
-    Map<StopEntry, GraphPath> results = new HashMap<StopEntry, GraphPath>();
-
-    for (StopEntry stop : stops) {
-
-      Vertex stopVertex = isOrigin ? getWalkToStopVertexForStop(stop)
-          : getWalkFromStopVertexForStop(stop);
-
-      Vertex fromVertex = isOrigin ? v : stopVertex;
-      Vertex toVertex = isOrigin ? stopVertex : v;
-
-      if (stopsWithoutPath.contains(stop))
-        continue;
-
-      GraphPath path = getWalkingItineraryBetweenVertices(fromVertex, toVertex,
-          time, options);
-
-      if (path == null) {
-        stopsWithoutPath.add(stop);
-        continue;
-      }
-
-      results.put(stop, path);
-    }
-    return results;
-  }
-
-  /**
-   * We want to reduce the set of stops we have to try planning itineraries
-   * from. The idea here is that we only care about a stop if it gives us access
-   * to a {@link BlockSequenceIndex} that we haven't already seen at a closer
-   * stop. We order the stops by their path length, and then iterate over the
-   * stops in increasing path length, ignoring a stop if it doesn't have any
-   * {@link BlockSequenceIndex} indices that we haven't seen before.
-   * 
-   */
-  private Map<StopEntry, GraphPath> pruneResults(
-      Map<StopEntry, GraphPath> results) {
-
-    List<StopEntry> stops = new ArrayList<StopEntry>(results.keySet());
-    Collections.sort(stops, new GraphPathComparator<StopEntry>(results));
-
-    Map<StopEntry, GraphPath> toKeep = new HashMap<StopEntry, GraphPath>();
-    Set<BlockSequenceIndex> indicesWeHaveSeen = new HashSet<BlockSequenceIndex>();
-
-    for (Map.Entry<StopEntry, GraphPath> entry : results.entrySet()) {
-      StopEntry stop = entry.getKey();
-      GraphPath path = entry.getValue();
-      List<BlockStopSequenceIndex> indices = _blockIndexService.getStopSequenceIndicesForStop(stop);
-      boolean keep = false;
-      for (BlockStopSequenceIndex index : indices) {
-        if (indicesWeHaveSeen.add(index.getIndex()))
-          keep = true;
-      }
-      if (keep)
-        toKeep.put(stop, path);
-    }
-
-    return toKeep;
-  }
-
   private WalkFromStopVertex getWalkFromStopVertexForStop(StopEntry stop) {
     Graph graph = _graphService.getGraph();
     String label = WalkFromStopVertex.getVertexLabelForStop(stop);
@@ -309,36 +240,19 @@ class ItinerariesServiceImpl implements ItinerariesService {
     return (WalkToStopVertex) graph.getVertex(label);
   }
 
-  /****
-   * 
-   ****/
-
-  private static class GraphPathComparator<T> implements Comparator<T> {
-
-    private final Map<T, GraphPath> _paths;
-
-    public GraphPathComparator(Map<T, GraphPath> paths) {
-      _paths = paths;
-    }
+  private static class SkipVertexImpl implements SkipVertexStrategy {
 
     @Override
-    public int compare(T o1, T o2) {
-      GraphPath p1 = _paths.get(o1);
-      GraphPath p2 = _paths.get(o2);
+    public boolean shouldSkipVertex(Vertex origin, Vertex target,
+        SPTVertex parent, Vertex current, State state, ShortestPathTree spt,
+        TraverseOptions options) {
 
-      double d1 = getDurationOfPath(p1);
-      double d2 = getDurationOfPath(p2);
+      StateData data = state.getData();
+      if (options.maxWalkDistance > 0
+          && data.getWalkDistance() > options.maxWalkDistance)
+        return true;
 
-      return Double.compare(d1, d2);
-    }
-
-    private double getDurationOfPath(GraphPath path) {
-      Vector<SPTVertex> vertices = path.vertices;
-      if (vertices.isEmpty())
-        return 0;
-      long t1 = vertices.get(0).state.getTime();
-      long t2 = vertices.get(vertices.size() - 1).state.getTime();
-      return Math.abs(t2 - t1);
+      return false;
     }
   }
 }

@@ -64,7 +64,23 @@ public interface StopTimeService {
       StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
       Date toDepartureTime);
 
+  /**
+   * 
+   * @param fromStop
+   * @param toStop
+   * @param fromArrivalTime
+   * @param toArrivalTime
+   * @return
+   */
+  public List<Pair<StopTimeInstance>> getArrivalsBetweenStopPairInTimeRange(
+      StopEntry fromStop, StopEntry toStop, Date fromArrivalTime,
+      Date toArrivalTime);
+
   public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
       StopEntry fromStop, StopEntry toStop, Date fromTime,
+      boolean includeAllSequences);
+
+  public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
+      StopEntry fromStop, StopEntry toStop, Date toTime,
       boolean includeAllSequences);
 }

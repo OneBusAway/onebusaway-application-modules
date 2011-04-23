@@ -62,8 +62,7 @@ public class BlockHopEdge extends AbstractEdge {
   private int computeRunningTime() {
     long departure = _from.getBestDepartureTime();
     long arrival = _to.getBestArrivalTime();
-    int runningTime = (int) ((arrival - departure) / 1000);
-    return runningTime;
+    return (int) ((arrival - departure) / 1000);
   }
 
   private EdgeNarrativeImpl createNarrative() {

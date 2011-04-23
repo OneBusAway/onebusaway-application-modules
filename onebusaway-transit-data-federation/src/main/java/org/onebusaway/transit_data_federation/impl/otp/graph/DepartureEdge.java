@@ -123,7 +123,7 @@ public class DepartureEdge extends AbstractEdge {
        * TODO : If we want to simulate real-time trip planning with the system
        * in some past state, we'll need a way to adjust NOW here
        */
-      TargetTime time = new TargetTime(System.currentTimeMillis(), s0.getTime());
+      TargetTime time = new TargetTime(s0.getTime(), System.currentTimeMillis());
       return service.getArrivalsAndDeparturesForStopInTimeRange(_stop, time,
           fromTime, toTime);
     } else {
