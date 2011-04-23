@@ -138,6 +138,8 @@ public class TransferPatternFromHubsTask implements Runnable {
   @Override
   public void run() {
 
+    long tIn = System.currentTimeMillis();
+
     List<StopEntry> stops = loadHubStops();
 
     Graph graph = _graphService.getGraph();
@@ -178,11 +180,13 @@ public class TransferPatternFromHubsTask implements Runnable {
         options.priorityQueueFactory = PriorityQueueImpl.FACTORY;
         options.waitAtBeginningFactor = 1.0;
         options.extraSpecialMode = true;
+        options.maxTransfers = Integer.MAX_VALUE;
 
         GenericDijkstra dijkstra = new GenericDijkstra(graph, options);
         dijkstra.setSkipVertexStrategy(new SkipVertexImpl(stop, tFrom));
 
-        TPOfflineOriginVertex origin = new TPOfflineOriginVertex(context, stop, instances);
+        TPOfflineOriginVertex origin = new TPOfflineOriginVertex(context, stop,
+            instances);
         State state = new State(tFrom, new OBAStateData());
 
         MultiShortestPathTree spt = (MultiShortestPathTree) dijkstra.getShortestPathTree(
@@ -197,6 +201,10 @@ public class TransferPatternFromHubsTask implements Runnable {
     }
 
     writeData(patternsByStopId);
+
+    long tOut = System.currentTimeMillis();
+    int duration = (int) ((tOut - tIn) / 1000);
+    System.out.println("duration=" + duration);
   }
 
   private void writeData(

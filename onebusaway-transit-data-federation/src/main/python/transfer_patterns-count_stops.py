@@ -16,6 +16,7 @@ def main():
 
         if fi.isfirstline():
             isSegmentStart = newSegmentStartMapping()
+            print >> sys.stderr, fi.filename()
 
         for row in csv.reader([line]):
 
