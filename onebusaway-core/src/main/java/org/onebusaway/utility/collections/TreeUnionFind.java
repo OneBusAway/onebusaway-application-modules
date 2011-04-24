@@ -125,6 +125,8 @@ public class TreeUnionFind<T> {
   public boolean isSameSet(T a, T b) {
     if (a.equals(b))
       return true;
+    if( ! (contains(a) && contains(b)))
+        return false;
     Sentry sa = find(a);
     Sentry sb = find(b);
     return sa != null && sb != null && sa.equals(sb);

@@ -2,11 +2,9 @@ package org.onebusaway.transit_data_federation.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,6 +16,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyFactory;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.utility.IOLibrary;
 
 /**
  * Given a stop-consolidation list, verifies that the specified stops still
@@ -51,7 +50,7 @@ public class GtfsStopReplacementVerificationMain {
 
     Set<AgencyAndId> ids = handler.getIds();
 
-    InputStream in = getSourceAsInputStream(args[0]);
+    InputStream in = IOLibrary.getPathAsInputStream(args[0]);
     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
     
     String line = null;
@@ -66,16 +65,6 @@ public class GtfsStopReplacementVerificationMain {
         System.out.println(id + " <- " + line);
     }
 
-  }
-
-  private static InputStream getSourceAsInputStream(String path)
-      throws IOException {
-    if (path.startsWith("http")) {
-      URL url = new URL(path);
-      return url.openStream();
-    } else {
-      return new FileInputStream(new File(path));
-    }
   }
 
   private static class EntityHandlerImpl implements EntityHandler {

@@ -1,12 +1,9 @@
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +12,7 @@ import java.util.Map;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.utility.IOLibrary;
 
 /**
  * Factory for constructing {@link EntityReplacementStrategy} instances from
@@ -62,7 +60,7 @@ public class EntityReplacementStrategyFactory {
     for (Map.Entry<Class<?>, String> entry : _mappings.entrySet()) {
 
       Class<?> entityClass = entry.getKey();
-      InputStream in = getMappingAsInputStream(entry.getValue());
+      InputStream in = IOLibrary.getPathAsInputStream(entry.getValue());
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(in));
       String line = null;
@@ -81,14 +79,5 @@ public class EntityReplacementStrategyFactory {
       }
     }
     return impl;
-  }
-
-  private InputStream getMappingAsInputStream(String path) throws IOException {
-    if (path.startsWith("http")) {
-      URL url = new URL(path);
-      return url.openStream();
-    } else {
-      return new FileInputStream(new File(path));
-    }
   }
 }
