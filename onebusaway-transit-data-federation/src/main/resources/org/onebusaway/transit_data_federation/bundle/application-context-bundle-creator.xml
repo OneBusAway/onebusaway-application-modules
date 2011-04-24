@@ -182,41 +182,30 @@
   <!-- Hub Stops -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="hubs" />
+    <property name="taskName" value="hub_stops" />
     <property name="afterTaskName" value="stop_transfers" />
-    <property name="task" ref="hubTask" />
+    <property name="task" ref="hubStopsTask" />
   </bean>
 
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="hubs_incremental" />
-    <property name="afterTaskName" value="stop_transfers" />
-    <property name="enabled" value="false" />
-    <property name="task" ref="hubIncrementalTask" />
-  </bean>
-
-  <bean id="hubTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubTask" />
-  <bean id="hubIncrementalTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubIncrementalTask" />
+  <bean id="hubStopsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubStopsTask" />
   
   <!-- Transfer Patterns -->
   
+  <!-- This is not enabled by default, as it should really be run on a cluster -->
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="transfer_patterns_for_hubs" />
-    <property name="afterTaskNames">
-      <list>
-        <value>hubs</value>
-        <value>hubs_incremental</value>
-      </list>
-    </property>
-    <property name="task" ref="transferPatternFromHubsTask" />
+    <property name="taskName" value="transfer_patterns" />
+    <property name="afterTaskNames" value="hub_stops"/>
+    <property name="task" ref="transferPatternsTask" />
+    <property name="enabled" value="false"/>
   </bean>
 
-  <bean id="transferPatternFromHubsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternFromHubsTask" />
+  <bean id="transferPatternsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsTask" />
 
   <!-- Block Location History -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="block_location_history" />
-    <property name="afterTaskName" value="transfer_patterns_for_hubs" />
+    <property name="afterTaskName" value="transfer_patterns" />
     <property name="task" ref="blockLocationHistoryTask" />
   </bean>
 

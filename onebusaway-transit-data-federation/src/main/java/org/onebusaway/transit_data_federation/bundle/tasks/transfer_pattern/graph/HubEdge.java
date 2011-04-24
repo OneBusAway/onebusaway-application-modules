@@ -21,10 +21,12 @@ import org.opentripplanner.routing.core.Vertex;
 public class HubEdge extends AbstractEdge {
 
   private final StopEntry _stop;
+  private final boolean _isTransfer;
 
-  public HubEdge(GraphContext context, StopEntry stop) {
+  public HubEdge(GraphContext context, StopEntry stop, boolean isTransfer) {
     super(context);
     _stop = stop;
+    _isTransfer = isTransfer;
   }
 
   @Override
@@ -43,27 +45,32 @@ public class HubEdge extends AbstractEdge {
       int travelTime = hop.getMinTravelTime();
       State s1 = s0.incrementTimeInSeconds(travelTime);
 
-      EdgeNarrative narrative = getEdgeNarrative(_stop, hop.getStop());
+      EdgeNarrative narrative = getEdgeNarrative(_stop, hop.getStop(), false);
 
       TraverseResult tr = new TraverseResult(travelTime, s1, narrative);
       result = tr.addToExistingResultChain(result);
     }
 
-    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
-        _stop.getStopLat(), _stop.getStopLon(), 1000);
-    List<StopEntry> stops = transitGraphDao.getStopsByLocation(bounds);
+    /**
+     * We can only transfer if we're not already coming from a transfer
+     */
+    if (!_isTransfer) {
+      CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
+          _stop.getStopLat(), _stop.getStopLon(), 1000);
+      List<StopEntry> stops = transitGraphDao.getStopsByLocation(bounds);
 
-    for (StopEntry stop : stops) {
+      for (StopEntry stop : stops) {
 
-      double d = SphericalGeometryLibrary.distance(_stop.getStopLat(),
-          _stop.getStopLon(), stop.getStopLat(), stop.getStopLon());
-      int travelTime = (int) (d / options.speed);
-      State s1 = s0.incrementTimeInSeconds(travelTime);
+        double d = SphericalGeometryLibrary.distance(_stop.getStopLat(),
+            _stop.getStopLon(), stop.getStopLat(), stop.getStopLon());
+        int travelTime = (int) (d / options.speed);
+        State s1 = s0.incrementTimeInSeconds(travelTime);
 
-      EdgeNarrative narrative = getEdgeNarrative(_stop, stop);
+        EdgeNarrative narrative = getEdgeNarrative(_stop, stop, true);
 
-      TraverseResult tr = new TraverseResult(travelTime, s1, narrative);
-      result = tr.addToExistingResultChain(result);
+        TraverseResult tr = new TraverseResult(travelTime, s1, narrative);
+        result = tr.addToExistingResultChain(result);
+      }
     }
 
     return result;
@@ -76,9 +83,10 @@ public class HubEdge extends AbstractEdge {
     throw new UnsupportedOperationException();
   }
 
-  private EdgeNarrative getEdgeNarrative(StopEntry from, StopEntry to) {
-    Vertex fromVertex = new HubVertex(_context, from);
-    Vertex toVertex = new HubVertex(_context, to);
+  private EdgeNarrative getEdgeNarrative(StopEntry from, StopEntry to,
+      boolean isTransfer) {
+    Vertex fromVertex = new HubVertex(_context, from, _isTransfer);
+    Vertex toVertex = new HubVertex(_context, to, isTransfer);
     return new EdgeNarrativeImpl(fromVertex, toVertex);
   }
 }

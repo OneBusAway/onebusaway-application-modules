@@ -85,8 +85,12 @@ public class FederatedTransitDataBundle {
     return new File(_path, "StopTransfers.obj");
   }
 
-  public File getHubStopsPath() {
+  public File getHubStopsPath(boolean keyed) {
     return new File(_path, keyed("HubStops.txt"));
+  }
+
+  public File getTransferPatternSourceStopsPath() {
+    return new File(_path, keyed("TransferPatternSourceStops.txt"));
   }
 
   public File getTransferPatternsPath() {
@@ -102,7 +106,11 @@ public class FederatedTransitDataBundle {
   }
 
   private String keyed(String value) {
-    if (_key != null) {
+    return keyed(value, true);
+  }
+
+  private String keyed(String value, boolean applyKey) {
+    if (_key != null && applyKey) {
       int index = value.lastIndexOf('.');
       if (index == -1)
         return value + "-" + _key;

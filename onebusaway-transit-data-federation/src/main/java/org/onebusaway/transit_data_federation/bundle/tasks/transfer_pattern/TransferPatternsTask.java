@@ -66,7 +66,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import cern.colt.list.DoubleArrayList;
 import cern.jet.stat.Descriptive;
 
-public class TransferPatternFromHubsTask implements Runnable {
+public class TransferPatternsTask implements Runnable {
 
   private static SPTVertexDurationComparator _sptVertexDurationComparator = new SPTVertexDurationComparator();
 
@@ -140,7 +140,8 @@ public class TransferPatternFromHubsTask implements Runnable {
 
     long tIn = System.currentTimeMillis();
 
-    List<StopEntry> stops = loadHubStops();
+    List<StopEntry> stops = loadSourceStops();
+    Set<StopEntry> hubStops = loadHubStops();
 
     Graph graph = _graphService.getGraph();
     GraphContext context = _otpConfigurationService.createGraphContext();
@@ -149,7 +150,8 @@ public class TransferPatternFromHubsTask implements Runnable {
 
     for (StopEntry stop : stops) {
 
-      System.out.println("stop=" + stop.getId());
+      boolean isHubStop = hubStops.contains(stop);
+      System.out.println("stop=" + stop.getId() + " hub=" + isHubStop);
 
       MutableTransferPattern pattern = new MutableTransferPattern(stop);
 
@@ -180,7 +182,10 @@ public class TransferPatternFromHubsTask implements Runnable {
         options.priorityQueueFactory = PriorityQueueImpl.FACTORY;
         options.waitAtBeginningFactor = 1.0;
         options.extraSpecialMode = true;
-        options.maxTransfers = Integer.MAX_VALUE;
+        if (isHubStop)
+          options.maxTransfers = Integer.MAX_VALUE;
+        else
+          options.maxTransfers = 2;
 
         GenericDijkstra dijkstra = new GenericDijkstra(graph, options);
         dijkstra.setSkipVertexStrategy(new SkipVertexImpl(stop, tFrom));
@@ -251,11 +256,11 @@ public class TransferPatternFromHubsTask implements Runnable {
     System.out.println("   max=" + Descriptive.max(values));
   }
 
-  private List<StopEntry> loadHubStops() {
+  private List<StopEntry> loadSourceStops() {
 
     List<StopEntry> stops = new ArrayList<StopEntry>();
 
-    File path = _bundle.getHubStopsPath();
+    File path = _bundle.getTransferPatternSourceStopsPath();
 
     try {
       BufferedReader reader = new BufferedReader(new FileReader(path));
@@ -270,6 +275,31 @@ public class TransferPatternFromHubsTask implements Runnable {
     }
 
     return stops;
+  }
+
+  private Set<StopEntry> loadHubStops() {
+
+    Set<StopEntry> hubStops = new HashSet<StopEntry>();
+    File path = _bundle.getHubStopsPath(false);
+
+    if (path.exists()) {
+      try {
+        BufferedReader reader = new BufferedReader(new FileReader(path));
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+          int index = line.indexOf('\t');
+          if (index != -1)
+            line = line.substring(index + 1);
+          AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(line);
+          StopEntry stop = _transitGraphDao.getStopEntryForId(stopId, true);
+          hubStops.add(stop);
+        }
+      } catch (IOException ex) {
+        throw new IllegalStateException("error loading HubStops file: " + path,
+            ex);
+      }
+    }
+    return hubStops;
   }
 
   private List<ServiceDate> computeServiceDates(StopEntry stop) {

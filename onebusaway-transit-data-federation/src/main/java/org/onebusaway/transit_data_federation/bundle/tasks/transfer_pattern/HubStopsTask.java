@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class AbstractHubTask implements Runnable {
+public class HubStopsTask implements Runnable {
 
-  private static Logger _log = LoggerFactory.getLogger(AbstractHubTask.class);
+  private static Logger _log = LoggerFactory.getLogger(HubStopsTask.class);
 
   protected TransitGraphDao _transitGraphDao;
 
@@ -66,9 +66,16 @@ public abstract class AbstractHubTask implements Runnable {
   public void setStopSubsetCount(int stopSubsetCount) {
     _stopSubsetCount = stopSubsetCount;
   }
-  
+
   public void setMaxWeight(int maxWeight) {
     _maxWeight = maxWeight;
+  }
+
+  @Override
+  public void run() {
+    Counter<StopEntry> counts = countStops();
+    File path = _bundle.getHubStopsPath(true);
+    writeCountsToPath(counts, path);
   }
 
   protected Counter<StopEntry> countStops() {
@@ -93,20 +100,23 @@ public abstract class AbstractHubTask implements Runnable {
       _log.info("index=" + index + "/" + sampled.size());
       index++;
 
-      HubVertex v = new HubVertex(context, stop);
+      HubVertex v = new HubVertex(context, stop, true);
 
       GenericDijkstra d = new GenericDijkstra(graph, options);
       d.setSearchTerminationStrategy(new WeightLimitSearchTerminationStrategy(
           _maxWeight));
 
-      BasicShortestPathTree spt = (BasicShortestPathTree) d.getShortestPathTree(v, new State());
+      BasicShortestPathTree spt = (BasicShortestPathTree) d.getShortestPathTree(
+          v, new State());
 
       for (SPTVertex sptVertex : spt.getVertices()) {
         while (sptVertex != null) {
           Vertex vertex = sptVertex.mirror;
           HubVertex hubVertex = (HubVertex) vertex;
-          StopEntry vStop = hubVertex.getStop();
-          counts.increment(vStop);
+          if (hubVertex.isTransfer()) {
+            StopEntry vStop = hubVertex.getStop();
+            counts.increment(vStop);
+          }
           SPTEdge edge = sptVertex.incoming;
           if (edge != null)
             sptVertex = edge.fromv;

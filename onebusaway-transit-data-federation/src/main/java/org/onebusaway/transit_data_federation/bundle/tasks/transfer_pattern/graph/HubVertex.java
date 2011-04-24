@@ -11,8 +11,15 @@ import org.opentripplanner.routing.core.HasEdges;
 
 public class HubVertex extends AbstractStopVertex implements HasEdges {
 
-  public HubVertex(GraphContext context, StopEntry stop) {
+  private final boolean _isTransfer;
+
+  public HubVertex(GraphContext context, StopEntry stop, boolean isTransfer) {
     super(context, stop);
+    _isTransfer = isTransfer;
+  }
+
+  public boolean isTransfer() {
+    return _isTransfer;
   }
 
   @Override
@@ -27,12 +34,12 @@ public class HubVertex extends AbstractStopVertex implements HasEdges {
 
   @Override
   public Collection<Edge> getIncoming() {
-    return Arrays.asList((Edge) new HubEdge(_context, _stop));
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public Collection<Edge> getOutgoing() {
-    return Arrays.asList((Edge) new HubEdge(_context, _stop));
+    return Arrays.asList((Edge) new HubEdge(_context, _stop, _isTransfer));
   }
 
   @Override
