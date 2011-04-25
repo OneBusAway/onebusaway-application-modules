@@ -248,13 +248,15 @@ public class BlockStopTimeIndicesFactory {
 
     for (int i = 0; i < n; i++) {
       FrequencyBlockStopTimeEntry frequencyBlockStopTime = group.get(i);
+      FrequencyEntry frequency = frequencyBlockStopTime.getFrequency();
+      frequencies.add(frequency);
       BlockStopTimeEntry blockStopTime = frequencyBlockStopTime.getStopTime();
-      StopTimeEntry stopTime = blockStopTime.getStopTime();
-      frequencies.add(frequencyBlockStopTime.getFrequency());
       blockConfigs.add(blockStopTime.getTrip().getBlockConfiguration());
       stopIndices[i] = blockStopTime.getBlockSequence();
-      interval = ServiceInterval.extend(interval, stopTime.getArrivalTime(),
-          stopTime.getDepartureTime());
+      interval = ServiceInterval.extend(interval, frequency.getStartTime(),
+          frequency.getStartTime());
+      interval = ServiceInterval.extend(interval, frequency.getEndTime(),
+          frequency.getEndTime());
     }
 
     return new FrequencyBlockStopTimeIndex(frequencies, blockConfigs,

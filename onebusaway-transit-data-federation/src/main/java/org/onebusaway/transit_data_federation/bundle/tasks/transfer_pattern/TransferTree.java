@@ -6,11 +6,13 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 public class TransferTree extends TransferTreeNode {
 
   private final Pair<StopEntry> stops;
+  
+  private boolean _exitAllowed;
 
   public TransferTree(Pair<StopEntry> stops) {
     this.stops = stops;
   }
-  
+
   public Pair<StopEntry> getStops() {
     return stops;
   }
@@ -21,6 +23,14 @@ public class TransferTree extends TransferTreeNode {
 
   public StopEntry getToStop() {
     return stops.getSecond();
+  }
+
+  public void setExitAllowed(boolean exitAllowed) {
+    _exitAllowed = exitAllowed;
+  }
+  
+  public boolean isExitAllowed() {
+    return _exitAllowed;
   }
 
   @Override

@@ -16,25 +16,35 @@ public class StopTimeInstance {
   private static final DateFormat TIME_FORMAT = DateFormat.getDateTimeInstance(
       DateFormat.SHORT, DateFormat.SHORT);
 
+  private static final int UNSPECIFIED_FREQUENCY_OFFSET = Integer.MIN_VALUE;
+
   private final BlockStopTimeEntry _stopTime;
 
   private final long _serviceDate;
 
   private final FrequencyEntry _frequency;
 
+  private final int _frequencyOffset;
+
   public StopTimeInstance(BlockStopTimeEntry stopTime, Date serviceDate) {
     this(stopTime, serviceDate.getTime());
   }
 
   public StopTimeInstance(BlockStopTimeEntry stopTime, long serviceDate) {
-    this(stopTime, serviceDate, null);
+    this(stopTime, serviceDate, null, UNSPECIFIED_FREQUENCY_OFFSET);
   }
 
   public StopTimeInstance(BlockStopTimeEntry stopTime, long serviceDate,
       FrequencyEntry frequency) {
+    this(stopTime, serviceDate, frequency, UNSPECIFIED_FREQUENCY_OFFSET);
+  }
+
+  public StopTimeInstance(BlockStopTimeEntry stopTime, long serviceDate,
+      FrequencyEntry frequency, int frequencyOffset) {
     _stopTime = stopTime;
     _serviceDate = serviceDate;
     _frequency = frequency;
+    _frequencyOffset = frequencyOffset;
   }
 
   public BlockStopTimeEntry getStopTime() {
@@ -47,6 +57,14 @@ public class StopTimeInstance {
 
   public FrequencyEntry getFrequency() {
     return _frequency;
+  }
+
+  public boolean isFrequencyOffsetSpecified() {
+    return _frequencyOffset != UNSPECIFIED_FREQUENCY_OFFSET;
+  }
+
+  public int getFrequencyOffset() {
+    return _frequencyOffset;
   }
 
   public BlockInstance getBlockInstance() {
@@ -67,32 +85,95 @@ public class StopTimeInstance {
   }
 
   public long getArrivalTime() {
-    return _serviceDate + _stopTime.getStopTime().getArrivalTime() * 1000;
+    int offset = isFrequencyOffsetSpecified() ? _frequencyOffset : 0;
+    return _serviceDate + (_stopTime.getStopTime().getArrivalTime() + offset)
+        * 1000;
   }
 
   public long getDepartureTime() {
-    return _serviceDate + _stopTime.getStopTime().getDepartureTime() * 1000;
+    int offset = isFrequencyOffsetSpecified() ? _frequencyOffset : 0;
+    return _serviceDate + (_stopTime.getStopTime().getDepartureTime() + offset)
+        * 1000;
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null || !(obj instanceof StopTimeInstance))
-      return false;
-    StopTimeInstance other = (StopTimeInstance) obj;
-    return _stopTime.equals(other._stopTime)
-        && _serviceDate == other._serviceDate;
+  public StopTimeInstance getNextStopTimeInstance() {
+    if (!_stopTime.hasNextStop())
+      return null;
+    /**
+     * TODO: Check for frequency offset overflow?
+     */
+    return new StopTimeInstance(_stopTime.getNextStop(), _serviceDate,
+        _frequency, _frequencyOffset);
   }
 
   @Override
   public int hashCode() {
-    return _stopTime.hashCode() + new Long(_serviceDate).hashCode();
+    final int prime = 31;
+    int result = 1;
+    result = prime * result
+        + ((_frequency == null) ? 0 : _frequency.hashCode());
+    result = prime * result + _frequencyOffset;
+    result = prime * result + (int) (_serviceDate ^ (_serviceDate >>> 32));
+    result = prime * result + _stopTime.hashCode();
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    StopTimeInstance other = (StopTimeInstance) obj;
+    if (_frequency == null) {
+      if (other._frequency != null)
+        return false;
+    } else if (!_frequency.equals(other._frequency))
+      return false;
+    if (_frequencyOffset != other._frequencyOffset)
+      return false;
+    if (_serviceDate != other._serviceDate)
+      return false;
+    if (!_stopTime.equals(other._stopTime))
+      return false;
+    return true;
   }
 
   @Override
   public String toString() {
-    return "StopTimeInstance(stop=" + _stopTime.getStopTime().getStop().getId()
-        + " trip=" + getTrip() + " service=" + DAY_FORMAT.format(_serviceDate)
-        + " arrival=" + TIME_FORMAT.format(getArrivalTime()) + " departure="
-        + TIME_FORMAT.format(getDepartureTime()) + ")";
+
+    if (_frequency != null) {
+
+      long start = _serviceDate + _frequency.getStartTime() * 1000;
+      long end = _serviceDate + _frequency.getEndTime() * 1000;
+      StringBuilder b = new StringBuilder();
+
+      b.append("StopTimeInstance(stop=");
+      b.append(_stopTime.getStopTime().getStop().getId());
+      b.append(" trip=");
+      b.append(getTrip());
+      b.append(" service=");
+      b.append(DAY_FORMAT.format(_serviceDate));
+      b.append(" start=");
+      b.append(TIME_FORMAT.format(start));
+      b.append(" end=");
+      b.append(TIME_FORMAT.format(end));
+      if (isFrequencyOffsetSpecified()) {
+        b.append(" arrival=");
+        b.append(TIME_FORMAT.format(getArrivalTime()));
+        b.append(" departure=");
+        b.append(TIME_FORMAT.format(getDepartureTime()));
+      }
+      b.append(")");
+      return b.toString();
+    } else {
+      return "StopTimeInstance(stop="
+          + _stopTime.getStopTime().getStop().getId() + " trip=" + getTrip()
+          + " service=" + DAY_FORMAT.format(_serviceDate) + " arrival="
+          + TIME_FORMAT.format(getArrivalTime()) + " departure="
+          + TIME_FORMAT.format(getDepartureTime()) + ")";
+    }
   }
 }

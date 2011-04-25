@@ -81,7 +81,7 @@ public class MutableTransferPattern implements TransferPattern {
     Set<Entry> entries = _stops.get(stop);
 
     for (Entry entry : entries)
-      paths.add(getTransferForEntryx(entry, root));
+      paths.add(getTransferForEntry(entry, true, root));
 
     return paths;
   }
@@ -101,7 +101,7 @@ public class MutableTransferPattern implements TransferPattern {
    * Private Methods
    *****/
 
-  private TransferTreeNode getTransferForEntryx(Entry node,
+  private TransferTreeNode getTransferForEntry(Entry node, boolean exitAllowed,
       TransferTreeNode root) {
 
     if (node == null)
@@ -113,8 +113,8 @@ public class MutableTransferPattern implements TransferPattern {
       throw new IllegalStateException();
     node = a.parent;
 
-    TransferTreeNode parent = getTransferForEntryx(node, root);
-    return parent.extendTree(a.stop, b.stop);
+    TransferTreeNode parent = getTransferForEntry(node, false, root);
+    return parent.extendTree(a.stop, b.stop, exitAllowed);
   }
 
   private long writeEntryToPrintWriter(Entry entry, PrintWriter out,

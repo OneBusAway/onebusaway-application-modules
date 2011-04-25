@@ -16,13 +16,16 @@ public class TransferTreeNode {
     return transfers.values();
   }
 
-  public TransferTree extendTree(StopEntry fromStop, StopEntry toStop) {
+  public TransferTree extendTree(StopEntry fromStop, StopEntry toStop,
+      boolean exitAllowed) {
     Pair<StopEntry> stops = Tuples.pair(fromStop, toStop);
     TransferTree tree = transfers.get(stops);
     if (tree == null) {
       tree = new TransferTree(stops);
       transfers.put(stops, tree);
     }
+    if (exitAllowed)
+      tree.setExitAllowed(exitAllowed);
     return tree;
   }
 
@@ -52,6 +55,8 @@ public class TransferTreeNode {
     b.append(tree.getFromStop().getId());
     b.append(" ");
     b.append(tree.getToStop().getId());
+    if (tree.isExitAllowed())
+      b.append(" x");
     b.append("\n");
     for (TransferTree subTree : tree.getTransfers())
       toString(subTree, prefix + "  ", b);

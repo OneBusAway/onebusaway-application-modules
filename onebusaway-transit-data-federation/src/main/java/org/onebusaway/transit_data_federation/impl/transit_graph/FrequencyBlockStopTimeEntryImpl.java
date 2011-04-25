@@ -13,6 +13,8 @@ public class FrequencyBlockStopTimeEntryImpl implements
 
   public FrequencyBlockStopTimeEntryImpl(BlockStopTimeEntry blockStopTime,
       FrequencyEntry frequency) {
+    if (blockStopTime == null || frequency == null)
+      throw new IllegalArgumentException();
     _blockStopTime = blockStopTime;
     _frequency = frequency;
   }
@@ -25,5 +27,14 @@ public class FrequencyBlockStopTimeEntryImpl implements
   @Override
   public FrequencyEntry getFrequency() {
     return _frequency;
+  }
+
+  @Override
+  public int getStopTimeOffset() {
+    int d0 = _blockStopTime.getTrip().getDepartureTimeForIndex(0);
+    int d1 = _blockStopTime.getStopTime().getDepartureTime();
+    int delta = d1 - d0;
+    int headway = _frequency.getHeadwaySecs();
+    return delta % headway;
   }
 }

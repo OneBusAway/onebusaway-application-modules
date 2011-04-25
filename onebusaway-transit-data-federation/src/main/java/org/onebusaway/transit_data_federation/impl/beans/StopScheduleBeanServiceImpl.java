@@ -446,7 +446,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
       String tripHeadsign = key.getTripHeadsign();
       group.setTripHeadsign(tripHeadsign);
-      
+
       applyGroupIdForGroupKey(stopTimesForDirection, key, groupId);
 
       groups.add(group);
@@ -460,19 +460,19 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     Counter<ContinuesAsStopTimeGroupKey> keyCounts = stopTimesForDirection.getContinuesAsKeyCounts();
     List<ContinuesAsStopTimeGroupKey> sortedKeys = keyCounts.getSortedKeys();
 
-    for( ContinuesAsStopTimeGroupKey key : sortedKeys ) {
-      
+    for (ContinuesAsStopTimeGroupKey key : sortedKeys) {
+
       AgencyAndId lineId = key.getLineId();
-      if( lineId == null)
+      if (lineId == null)
         continue;
       StopTimeGroupBean group = new StopTimeGroupBean();
 
       String groupId = Integer.toString(groups.size());
       group.setId(groupId);
-      
+
       RouteBean route = _routeBeanService.getRouteForId(lineId);
       group.setContinuesAs(route);
-      
+
       applyGroupIdForGroupKey(stopTimesForDirection, key, groupId);
 
       groups.add(group);

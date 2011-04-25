@@ -24,6 +24,7 @@ import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStop
 import org.onebusaway.transit_data_federation.services.blocks.HasIndexedBlockStopTimes;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -60,12 +61,14 @@ class StopTimeServiceImpl implements StopTimeService {
       AgencyAndId stopId, Date from, Date to) {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId, true);
-    return getStopTimeInstancesInTimeRange(stopEntry, from, to);
+    return getStopTimeInstancesInTimeRange(stopEntry, from, to,
+        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
   }
 
   @Override
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
-      StopEntry stopEntry, Date from, Date to) {
+      StopEntry stopEntry, Date from, Date to,
+      EFrequencyStopTimeBehavior frequencyBehavior) {
 
     List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 
@@ -80,11 +83,13 @@ class StopTimeServiceImpl implements StopTimeService {
       }
     }
 
-    for (FrequencyBlockStopTimeIndex index : _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry)) {
+    List<FrequencyBlockStopTimeIndex> frequencyStopTimeIndices = _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry);
+
+    for (FrequencyBlockStopTimeIndex index : frequencyStopTimeIndices) {
       Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
           index.getServiceIds(), index.getServiceInterval(), from, to);
       getFrequenciesForStopAndServiceIdsAndTimeRange(index, serviceDates, from,
-          to, stopTimeInstances);
+          to, stopTimeInstances, frequencyBehavior);
     }
 
     return stopTimeInstances;
@@ -110,16 +115,6 @@ class StopTimeServiceImpl implements StopTimeService {
       extendIntervalWithIndex(serviceDate, interval, index);
 
     return interval;
-  }
-
-  @Override
-  public StopTimeInstance getNextStopTimeInstance(StopTimeInstance instance) {
-    BlockStopTimeEntry bst = instance.getStopTime();
-    if (!bst.hasNextStop())
-      return null;
-    bst = bst.getNextStop();
-    StopTimeInstance sti = new StopTimeInstance(bst, instance.getServiceDate());
-    return sti;
   }
 
   @Override
@@ -406,7 +401,8 @@ class StopTimeServiceImpl implements StopTimeService {
 
   private void getFrequenciesForStopAndServiceIdsAndTimeRange(
       FrequencyBlockStopTimeIndex index, Collection<Date> serviceDates,
-      Date from, Date to, List<StopTimeInstance> stopTimeInstances) {
+      Date from, Date to, List<StopTimeInstance> stopTimeInstances,
+      EFrequencyStopTimeBehavior frequencyBehavior) {
 
     for (Date serviceDate : serviceDates) {
 
@@ -419,12 +415,57 @@ class StopTimeServiceImpl implements StopTimeService {
           IndexAdapters.FREQUENCY_START_TIME_INSTANCE);
 
       List<FrequencyBlockStopTimeEntry> frequencyStopTimes = index.getFrequencyStopTimes();
+
       for (int in = fromIndex; in < toIndex; in++) {
+
         FrequencyBlockStopTimeEntry entry = frequencyStopTimes.get(in);
-        stopTimeInstances.add(new StopTimeInstance(entry.getStopTime(),
-            serviceDate.getTime(), entry.getFrequency()));
+        BlockStopTimeEntry bst = entry.getStopTime();
+        FrequencyEntry frequency = entry.getFrequency();
+
+        switch (frequencyBehavior) {
+
+          case INCLUDE_UNSPECIFIED:
+            stopTimeInstances.add(new StopTimeInstance(bst,
+                serviceDate.getTime(), frequency));
+            break;
+
+          case INCLUDE_INTERPOLATED:
+
+            int stopTimeOffset = entry.getStopTimeOffset();
+
+            int tFrom = Math.max(relativeFrom, frequency.getStartTime());
+            int tTo = Math.min(relativeTo, frequency.getEndTime());
+
+            tFrom = snapToFrequencyStopTime(frequency, tFrom, stopTimeOffset,
+                true);
+            tTo = snapToFrequencyStopTime(frequency, tTo, stopTimeOffset, false);
+
+            for (int t = tFrom; t <= tTo; t += frequency.getHeadwaySecs()) {
+              int frequencyOffset = t - bst.getStopTime().getDepartureTime();
+              stopTimeInstances.add(new StopTimeInstance(bst,
+                  serviceDate.getTime(), frequency, frequencyOffset));
+            }
+            break;
+
+        }
       }
     }
+  }
+
+  private int snapToFrequencyStopTime(FrequencyEntry frequency, int timeToSnap,
+      int stopTimeOffset, boolean isLowerBound) {
+    int offset = timeToSnap - frequency.getStartTime();
+    int headway = frequency.getHeadwaySecs();
+    int snappedToHeadway = (offset / headway) * headway;
+    int snapped = snappedToHeadway + frequency.getStartTime() + stopTimeOffset;
+    if (isLowerBound) {
+      if (snapped < timeToSnap)
+        snapped += headway;
+    } else {
+      if (snapped > timeToSnap)
+        snapped -= headway;
+    }
+    return snapped;
   }
 
   private void extendIntervalWithIndex(ServiceDate serviceDate, Range interval,

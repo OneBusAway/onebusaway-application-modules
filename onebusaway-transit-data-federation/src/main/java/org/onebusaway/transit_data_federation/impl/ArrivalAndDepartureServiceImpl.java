@@ -15,6 +15,7 @@ import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.StopTimeService.EFrequencyStopTimeBehavior;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
@@ -92,7 +93,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     Date toTimeBuffered = new Date(toTime + MINUTES_AFTER_BUFFER * 60 * 1000);
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, fromTimeBuffered, toTimeBuffered);
+        stop, fromTimeBuffered, toTimeBuffered,
+        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
 
     long frequencyOffsetTime = Math.max(targetTime.getTargetTime(), fromTime);
 
@@ -161,7 +163,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       StopEntry stop, long currentTime, long fromTime, long toTime) {
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, new Date(fromTime), new Date(toTime));
+        stop, new Date(fromTime), new Date(toTime),
+        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
 
     List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
 

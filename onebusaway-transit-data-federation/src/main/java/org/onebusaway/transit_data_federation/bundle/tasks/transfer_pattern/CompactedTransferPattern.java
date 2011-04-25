@@ -63,8 +63,7 @@ public class CompactedTransferPattern implements TransferPattern {
     return getTransfersForLeafIndices(root, leafIndices);
   }
 
-  /**
-   * @return **
+  /****
    * 
    ****/
 
@@ -76,12 +75,12 @@ public class CompactedTransferPattern implements TransferPattern {
 
     List<TransferTreeNode> nodes = new ArrayList<TransferTreeNode>();
     for (int rootIndex : leafIndices)
-      nodes.add(getTransferForLeafIndex(rootIndex, root));
+      nodes.add(getTransferForLeafIndex(rootIndex, true, root));
     return nodes;
   }
 
   private TransferTreeNode getTransferForLeafIndex(int leafIndex,
-      TransferTreeNode root) {
+      boolean exitAllowed, TransferTreeNode root) {
 
     if (leafIndex < 0)
       return root;
@@ -93,7 +92,7 @@ public class CompactedTransferPattern implements TransferPattern {
     StopEntry fromStop = _stops[leafIndex];
     leafIndex = _parentIndices[leafIndex];
 
-    TransferTreeNode parent = getTransferForLeafIndex(leafIndex, root);
-    return parent.extendTree(fromStop, toStop);
+    TransferTreeNode parent = getTransferForLeafIndex(leafIndex, false, root);
+    return parent.extendTree(fromStop, toStop, exitAllowed);
   }
 }

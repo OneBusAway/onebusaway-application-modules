@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
-import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
@@ -13,7 +12,8 @@ import org.opentripplanner.routing.core.Vertex;
 
 public class TPOfflineBlockDepartureVertex extends AbstractTPOfflineBlockVertex {
 
-  public TPOfflineBlockDepartureVertex(GraphContext context, StopTimeInstance instance) {
+  public TPOfflineBlockDepartureVertex(GraphContext context,
+      StopTimeInstance instance) {
     super(context, instance);
   }
 
@@ -32,11 +32,11 @@ public class TPOfflineBlockDepartureVertex extends AbstractTPOfflineBlockVertex 
 
   @Override
   public Collection<Edge> getOutgoing() {
-    StopTimeService stopTimeService = _context.getStopTimeService();
-    StopTimeInstance next = stopTimeService.getNextStopTimeInstance(_instance);
+    StopTimeInstance next = _instance.getNextStopTimeInstance();
     if (next == null)
       return Collections.emptyList();
-    return Arrays.asList((Edge) new TPOfflineBlockHopEdge(_context, _instance, next));
+    return Arrays.asList((Edge) new TPOfflineBlockHopEdge(_context, _instance,
+        next));
   }
 
   /****

@@ -32,13 +32,22 @@ public interface StopTimeService {
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
       AgencyAndId stopId, Date from, Date to);
 
+  /**
+   * Determines the set of active stop time instances at a given stop, taking
+   * into account information like active service dates, etc
+   * 
+   * @param stopEntry
+   * @param from
+   * @param to
+   * @param frequencyBehavior how to handle frequency-based stop times
+   * @return the set of active stop time instances in the specified time range
+   */
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
-      StopEntry stopEntry, Date from, Date to);
+      StopEntry stopEntry, Date from, Date to,
+      EFrequencyStopTimeBehavior frequencyBehavior);
 
   public Range getDepartureForStopAndServiceDate(AgencyAndId stopId,
       ServiceDate serviceDate);
-
-  public StopTimeInstance getNextStopTimeInstance(StopTimeInstance instance);
 
   /**
    * Given the set of {@link BlockSequence} sequences incident on a particular
@@ -83,4 +92,25 @@ public interface StopTimeService {
   public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
       StopEntry fromStop, StopEntry toStop, Date toTime,
       boolean includeAllSequences);
+
+  /**
+   * When calculating frequency-based stop times, we have a couple different
+   * options when return results
+   */
+  public enum EFrequencyStopTimeBehavior {
+
+    /**
+     * Include a stop time with the frequency information set but no frequency
+     * offset set.
+     */
+    INCLUDE_UNSPECIFIED,
+
+    /**
+     * Interpolate out all the stop-times in a frequency interval, including
+     * both frequency information AND a frequency offset so that the stop time
+     * has an actual arrival and departure time set. An interpolated stop time
+     * that would be included in the time interval will be included.
+     */
+    INCLUDE_INTERPOLATED
+  }
 }

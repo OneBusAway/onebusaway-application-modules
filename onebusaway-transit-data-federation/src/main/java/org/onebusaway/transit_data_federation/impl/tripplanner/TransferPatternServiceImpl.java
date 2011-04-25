@@ -82,7 +82,7 @@ class TransferPatternServiceImpl implements TransferPatternService {
     TransferPattern pattern = _transferPatternsByStop.get(stopFrom);
     if (pattern == null)
       return Collections.emptyList();
-
+    
     TransferTreeNode root = new TransferTreeNode();
 
     for (StopEntry stopTo : stopsTo) {

@@ -32,9 +32,9 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.HasStopTimeInstanceTransitVertex;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineOriginVertex;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineArrivalAndTransferEdge;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineBlockArrivalVertex;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineOriginVertex;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferVertex;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
@@ -44,6 +44,7 @@ import org.onebusaway.transit_data_federation.model.ServiceDateSummary;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.StopScheduleService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.StopTimeService.EFrequencyStopTimeBehavior;
 import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -171,7 +172,8 @@ public class TransferPatternsTask implements Runnable {
         long tTo = (long) interval.getMax();
 
         List<StopTimeInstance> instances = _stopTimeService.getStopTimeInstancesInTimeRange(
-            stop, new Date(tFrom), new Date(tTo));
+            stop, new Date(tFrom), new Date(tTo),
+            EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
 
         System.out.println("      instances=" + instances.size());
 
@@ -380,6 +382,7 @@ public class TransferPatternsTask implements Runnable {
 
           m.get(state.getTime()).add(sptVertex);
           pathsByVertex.put(sptVertex, path);
+
         }
       }
     }
