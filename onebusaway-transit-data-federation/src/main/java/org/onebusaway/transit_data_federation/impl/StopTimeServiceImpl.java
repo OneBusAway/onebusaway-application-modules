@@ -146,6 +146,40 @@ class StopTimeServiceImpl implements StopTimeService {
       }
     }
 
+    List<FrequencyBlockStopTimeIndex> frequencyIndices = _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry);
+
+    for (FrequencyBlockStopTimeIndex index : frequencyIndices) {
+
+      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
+          index.getServiceIds(), index.getServiceInterval(), time);
+
+      for (Date serviceDate : serviceDates) {
+
+        int relativeFrom = effectiveTime(serviceDate.getTime(), time);
+
+        int fromIndex = GenericBinarySearch.search(index, index.size(),
+            relativeFrom, IndexAdapters.FREQUENCY_END_TIME_INSTANCE);
+
+        List<FrequencyBlockStopTimeEntry> frequencyStopTimes = index.getFrequencyStopTimes();
+        if (fromIndex < index.size()) {
+          FrequencyBlockStopTimeEntry entry = frequencyStopTimes.get(fromIndex);
+          BlockStopTimeEntry bst = entry.getStopTime();
+          FrequencyEntry frequency = entry.getFrequency();
+          int stopTimeOffset = entry.getStopTimeOffset();
+
+          int tFrom = Math.max(relativeFrom, frequency.getStartTime());
+
+          tFrom = snapToFrequencyStopTime(frequency, tFrom, stopTimeOffset,
+              true);
+
+          int frequencyOffset = tFrom - bst.getStopTime().getDepartureTime();
+          StopTimeInstance sti = new StopTimeInstance(bst,
+              serviceDate.getTime(), frequency, frequencyOffset);
+          stopTimeInstances.add(sti);
+        }
+      }
+
+    }
     return stopTimeInstances;
 
   }
