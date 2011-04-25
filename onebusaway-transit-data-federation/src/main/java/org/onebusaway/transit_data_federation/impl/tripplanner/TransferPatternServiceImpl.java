@@ -2,10 +2,12 @@ package org.onebusaway.transit_data_federation.impl.tripplanner;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,18 +73,12 @@ class TransferPatternServiceImpl implements TransferPatternService {
 
   @Override
   public Collection<TransferTree> getTransferPatternForStops(
-      StopEntry stopFrom, StopEntry stopTo) {
-    return getTransferPatternForStops(stopFrom, Arrays.asList(stopTo));
-  }
-
-  @Override
-  public Collection<TransferTree> getTransferPatternForStops(
       StopEntry stopFrom, Iterable<StopEntry> stopsTo) {
 
     TransferPattern pattern = _transferPatternsByStop.get(stopFrom);
     if (pattern == null)
       return Collections.emptyList();
-    
+
     TransferTreeNode root = new TransferTreeNode();
 
     for (StopEntry stopTo : stopsTo) {
@@ -115,4 +111,60 @@ class TransferPatternServiceImpl implements TransferPatternService {
     return root.getTransfers();
   }
 
+  @Override
+  public Collection<TransferTree> getReverseTransferPatternForStops(
+      Iterable<StopEntry> stopsFrom, StopEntry stopTo) {
+
+    List<StopEntry> stopToAsList = Arrays.asList(stopTo);
+
+    TransferTreeNode root = new TransferTreeNode();
+
+    for (StopEntry stopFrom : stopsFrom) {
+
+      Collection<TransferTree> trees = getTransferPatternForStops(stopFrom,
+          stopToAsList);
+      if (!trees.isEmpty()) {
+        for (TransferTree tree : trees)
+          reverseTree(tree, root, true);
+      }
+    }
+
+    return root.getTransfers();
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private List<TransferTreeNode> reverseTree(TransferTree tree,
+      TransferTreeNode root, boolean exitAllowed) {
+
+    if (tree == null)
+      return Arrays.asList(root);
+
+    if (tree.isExitAllowed() && !tree.getTransfers().isEmpty())
+      throw new IllegalStateException();
+
+    List<TransferTreeNode> results = new ArrayList<TransferTreeNode>();
+
+    if (tree.isExitAllowed()) {
+      List<TransferTreeNode> parents = reverseTree(null, root, false);
+      for (TransferTreeNode parent : parents) {
+        TransferTree extended = parent.extendTree(tree.getToStop(),
+            tree.getFromStop(), exitAllowed);
+        results.add(extended);
+      }
+    }
+
+    for (TransferTree subTree : tree.getTransfers()) {
+      List<TransferTreeNode> parents = reverseTree(subTree, root, false);
+      for (TransferTreeNode parent : parents) {
+        TransferTree extended = parent.extendTree(tree.getToStop(),
+            tree.getFromStop(), exitAllowed);
+        results.add(extended);
+      }
+    }
+
+    return results;
+  }
 }

@@ -123,7 +123,7 @@ public class TPTransferEdge extends AbstractEdge {
     if (from == to)
       return 0;
 
-    StopTransfer transfer = _reverse ? findReverseTransfer(from, to)
+    StopTransfer transfer = _reverse ? findForwardTransfer(to, from)
         : findForwardTransfer(from, to);
 
     /**
@@ -143,16 +143,6 @@ public class TPTransferEdge extends AbstractEdge {
     List<StopTransfer> transfers = stService.getTransfersFromStop(fromStop);
     for (StopTransfer transfer : transfers) {
       if (transfer.getStop() == toStop)
-        return transfer;
-    }
-    return null;
-  }
-
-  private StopTransfer findReverseTransfer(StopEntry fromStop, StopEntry toStop) {
-    StopTransferService stService = _context.getStopTransferService();
-    List<StopTransfer> transfers = stService.getTransfersToStop(toStop);
-    for (StopTransfer transfer : transfers) {
-      if (transfer.getStop() == fromStop)
         return transfer;
     }
     return null;

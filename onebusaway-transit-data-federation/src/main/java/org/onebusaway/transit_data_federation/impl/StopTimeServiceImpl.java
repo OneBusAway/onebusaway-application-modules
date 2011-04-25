@@ -297,10 +297,12 @@ class StopTimeServiceImpl implements StopTimeService {
 
         int relativeTo = effectiveTime(serviceDate.getTime(), toTime.getTime());
 
-        int toIndex = GenericBinarySearch.search(fromStopIndex,
+        int toIndex = GenericBinarySearch.search(toStopIndex,
             toStopIndex.size(), relativeTo,
             IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE);
 
+        toIndex--;
+        
         if (0 <= toIndex) {
           BlockStopTimeEntry blockStopTime = toStopIndex.getBlockStopTimeForIndex(toIndex);
           StopTimeInstance stiTo = new StopTimeInstance(blockStopTime,

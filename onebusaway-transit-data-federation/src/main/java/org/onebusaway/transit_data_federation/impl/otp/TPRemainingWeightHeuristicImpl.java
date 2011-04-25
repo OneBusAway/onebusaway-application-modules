@@ -35,9 +35,6 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
   public double computeInitialWeight(Vertex from, Vertex to,
       TraverseOptions traverseOptions) {
 
-    if (traverseOptions.isArriveBy())
-      throw new IllegalStateException();
-
     _options = traverseOptions;
     _useTransit = traverseOptions.getModes().getTransit();
 
@@ -77,11 +74,11 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
       HasPathStateVertex tpV = (HasPathStateVertex) v;
 
       TPState pathState = tpV.getPathState();
-      boolean isDeparture = tpV.isDeparture();
-
       TransferTree tree = pathState.getTree();
 
-      return getWeightForTree(null, tree, isDeparture, target);
+      boolean isFromSourceStop = tpV.isDeparture() ^ pathState.isReverse();
+
+      return getWeightForTree(null, tree, isFromSourceStop, target);
     }
 
     double distanceEstimate = distance(v, target);
@@ -92,11 +89,11 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
   }
 
   private double getWeightForTree(TransferTree parentTree, TransferTree tree,
-      boolean isDeparture, Vertex target) {
+      boolean isFromSourceStop, Vertex target) {
 
     double w = 0;
 
-    if (parentTree != null && isDeparture) {
+    if (parentTree != null && isFromSourceStop) {
 
       StopEntry fromStop = parentTree.getToStop();
       StopEntry toStop = tree.getFromStop();
@@ -108,7 +105,7 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
       w += transferWeight;
     }
 
-    if (isDeparture) {
+    if (isFromSourceStop) {
 
       StopEntry fromStop = tree.getFromStop();
       StopEntry toStop = tree.getToStop();
@@ -120,8 +117,15 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
       w += transitTime;
     }
 
-    Collection<TransferTree> transfers = tree.getTransfers();
-    if (transfers.isEmpty()) {
+    /**
+     * What's our best option?
+     */
+    double minOption = Double.POSITIVE_INFINITY;
+
+    /**
+     * We could exit if we're allowed, walking to our destination
+     */
+    if (tree.isExitAllowed()) {
 
       StopEntry toStop = tree.getToStop();
       CoordinatePoint dest = new CoordinatePoint(target.getY(), target.getX());
@@ -131,16 +135,19 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
       int walkTime = (int) (walkDistance / _options.speed);
       double transferWeight = ItineraryWeightingLibrary.computeTransferWeight(
           walkTime, _options);
-      w += transferWeight;
-    } else {
-      double min = Double.POSITIVE_INFINITY;
-      for (TransferTree subTree : transfers) {
-        double subWeight = getWeightForTree(tree, subTree, true, target);
-        min = Math.min(subWeight, min);
-      }
-
-      w += min;
+      minOption = Math.min(transferWeight, minOption);
     }
+
+    /**
+     * Of we could transfer to another transfer pattern
+     */
+    Collection<TransferTree> transfers = tree.getTransfers();
+    for (TransferTree subTree : transfers) {
+      double subWeight = getWeightForTree(tree, subTree, true, target);
+      minOption = Math.min(subWeight, minOption);
+    }
+
+    w += minOption;
 
     return w;
   }

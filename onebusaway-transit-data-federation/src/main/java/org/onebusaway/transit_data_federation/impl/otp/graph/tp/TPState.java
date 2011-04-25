@@ -12,18 +12,21 @@ public class TPState {
   private final TPQueryData queryData;
 
   private final TransferTree tree;
+  
+  private final boolean isReverse;
 
   public static TPState start(TPQueryData queryData, TransferTree tree) {
-    return new TPState(queryData, tree);
+    return new TPState(queryData, tree, false);
   }
 
   public static TPState end(TPQueryData queryData, TransferTree tree) {
-    return new TPState(queryData, tree);
+    return new TPState(queryData, tree, true);
   }
 
-  private TPState(TPQueryData queryData, TransferTree tree) {
+  private TPState(TPQueryData queryData, TransferTree tree, boolean isReverse) {
     this.queryData = queryData;
     this.tree = tree;
+    this.isReverse = isReverse;
   }
 
   public TPQueryData getQueryData() {
@@ -32,6 +35,10 @@ public class TPState {
 
   public TransferTree getTree() {
     return tree;
+  }
+  
+  public boolean isReverse() {
+    return isReverse;
   }
 
   public Pair<StopEntry> getStops() {
@@ -49,7 +56,7 @@ public class TPState {
   public List<TPState> getTransferStates() {
     List<TPState> next = new ArrayList<TPState>();
     for( TransferTree nextTree : tree.getTransfers() )
-      next.add(new TPState(queryData, nextTree));
+      next.add(new TPState(queryData, nextTree, isReverse));
     return next;
   }
 

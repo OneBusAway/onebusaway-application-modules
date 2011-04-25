@@ -93,7 +93,8 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
       TraverseOptions options) {
 
     if (_isReverseEdge) {
-      throw new UnsupportedOperationException();
+      EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
+      return new TraverseResult(0, s0, narrative);
     }
 
     TransferPatternService tpService = _context.getTransferPatternService();

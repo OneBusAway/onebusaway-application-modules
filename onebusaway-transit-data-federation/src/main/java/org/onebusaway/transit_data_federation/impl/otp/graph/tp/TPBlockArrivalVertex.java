@@ -36,6 +36,7 @@ public class TPBlockArrivalVertex extends AbstractTPPathStateVertex {
 
   @Override
   public Collection<Edge> getOutgoing() {
+    
     List<Edge> edges = new ArrayList<Edge>();
 
     if (_pathState.hasTransfers()) {
@@ -54,7 +55,6 @@ public class TPBlockArrivalVertex extends AbstractTPPathStateVertex {
     }
 
     return edges;
-
   }
 
   @Override

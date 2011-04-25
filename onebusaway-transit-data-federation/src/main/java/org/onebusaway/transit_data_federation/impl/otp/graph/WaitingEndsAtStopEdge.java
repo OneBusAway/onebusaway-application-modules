@@ -102,24 +102,22 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
 
     TraverseResult results = null;
 
-    for (StopEntry fromStop : sourceStops) {
+    Collection<TransferTree> trees = tpService.getReverseTransferPatternForStops(
+        sourceStops, _stop);
 
-      Collection<TransferTree> trees = tpService.getTransferPatternForStops(
-          fromStop, _stop);
+    for (TransferTree tree : trees) {
 
-      for (TransferTree tree : trees) {
+      TPState pathState = TPState.end(queryData, tree);
 
-        TPState pathState = TPState.start(queryData, tree);
+      Vertex fromVertex = new TPArrivalVertex(_context, pathState);
+      Vertex toVertex = new WalkFromStopVertex(_context, _stop);
 
-        Vertex fromVertex = new TPArrivalVertex(_context, pathState);
-        Vertex toVertex = new WalkFromStopVertex(_context, _stop);
+      EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
-        EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
-
-        TraverseResult r = new TraverseResult(0, s0, narrative);
-        results = r.addToExistingResultChain(results);
-      }
+      TraverseResult r = new TraverseResult(0, s0, narrative);
+      results = r.addToExistingResultChain(results);
     }
+
     return results;
   }
 }

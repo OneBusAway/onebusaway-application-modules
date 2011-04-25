@@ -13,9 +13,9 @@ public interface TransferPatternService {
    */
   public boolean isEnabled();
 
-  public Collection<TransferTree> getTransferPatternForStops(StopEntry stopFrom,
-      StopEntry stopTo);
-  
-  public Collection<TransferTree> getTransferPatternForStops(StopEntry stopFrom,
-      Iterable<StopEntry> stopsTo);
+  public Collection<TransferTree> getTransferPatternForStops(
+      StopEntry stopFrom, Iterable<StopEntry> stopsTo);
+
+  public Collection<TransferTree> getReverseTransferPatternForStops(
+      Iterable<StopEntry> stopsFrom, StopEntry stopTo);
 }

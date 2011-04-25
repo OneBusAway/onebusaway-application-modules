@@ -18,7 +18,6 @@ import org.onebusaway.transit_data_federation.impl.otp.TPRemainingWeightHeuristi
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
-import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
@@ -60,8 +59,6 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
   private StreetVertexIndexService _streetVertexIndexService;
 
-  private BlockIndexService _blockIndexService;
-
   private TransferPatternService _transferPathService;
 
   @Autowired
@@ -83,11 +80,6 @@ class ItinerariesServiceImpl implements ItinerariesService {
   public void setStreetVertexIndexService(
       StreetVertexIndexService streetVertexIndexService) {
     _streetVertexIndexService = streetVertexIndexService;
-  }
-
-  @Autowired
-  public void setBlockIndexService(BlockIndexService blockIndexService) {
-    _blockIndexService = blockIndexService;
   }
 
   @Autowired
@@ -181,13 +173,14 @@ class ItinerariesServiceImpl implements ItinerariesService {
     if (options.isArriveBy()) {
       List<StopEntry> stops = getNearbyStops(fromVertex, options, time, true);
       sourceStops = new HashSet<StopEntry>(stops);
+      if (sourceStops.isEmpty())
+        return Collections.emptyList();
     } else {
       List<StopEntry> stops = getNearbyStops(toVertex, options, time, false);
       destStops = new HashSet<StopEntry>(stops);
+      if (destStops.isEmpty())
+        return Collections.emptyList();
     }
-
-    if (destStops.isEmpty())
-      return Collections.emptyList();
 
     TPQueryData queryData = new TPQueryData(sourceStops, destStops);
     options.putExtension(TPQueryData.class, queryData);
@@ -197,10 +190,19 @@ class ItinerariesServiceImpl implements ItinerariesService {
     options.remainingWeightHeuristic = new TPRemainingWeightHeuristicImpl();
     AStar search = new AStar();
     search.setSkipVertexStrategy(new SkipVertexImpl());
-    ShortestPathTree spt = search.getShortestPathTree(graph, fromVertex,
-        toVertex, init, options);
 
-    return spt.getPaths(toVertex, true);
+    if (options.isArriveBy()) {
+      ShortestPathTree spt = search.getShortestPathTree(graph, toVertex,
+          fromVertex, init, options);
+      List<GraphPath> paths = spt.getPaths(fromVertex, true);
+      for (GraphPath path : paths)
+        path.reverse();
+      return paths;
+    } else {
+      ShortestPathTree spt = search.getShortestPathTree(graph, fromVertex,
+          toVertex, init, options);
+      return spt.getPaths(toVertex, true);
+    }
   }
 
   public List<StopEntry> getNearbyStops(Vertex v, TraverseOptions options,

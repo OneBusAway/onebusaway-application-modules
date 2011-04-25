@@ -38,19 +38,25 @@ public class TPBlockDepartureVertex extends AbstractTPPathStateVertex {
 
   @Override
   public Collection<Edge> getIncoming() {
+
+    List<Edge> edges = new ArrayList<Edge>();
+
     if (_pathState.hasTransfers()) {
-      List<Edge> edges = new ArrayList<Edge>();
-      for (TPState prevState : _pathState.getTransferStates()) {
-        Edge edge = new TPTransferEdge(_context, prevState, _pathState,
-            _departure, _arrival, false);
+      List<TPState> transferStates = _pathState.getTransferStates();
+      for (TPState nextState : transferStates) {
+        Edge edge = new TPTransferEdge(_context, _pathState, nextState,
+            _departure, _arrival, true);
         edges.add(edge);
       }
-      return edges;
-    } else {
+    }
+
+    if (_pathState.isExitAllowed()) {
       TPDepartureVertex from = new TPDepartureVertex(_context, _pathState);
       Edge edge = new FreeEdge(from, this);
       return Arrays.asList(edge);
     }
+
+    return edges;
   }
 
   @Override

@@ -50,6 +50,7 @@ abstract class AbstractTPPathStateVertex extends AbstractVertexWithEdges
   @Override
   public StopEntry getStop() {
     Pair<StopEntry> pair = _pathState.getStops();
-    return _isDeparture ? pair.getFirst() : pair.getSecond();
+    boolean pickFirstStop = _isDeparture ^ _pathState.isReverse();
+    return pickFirstStop ? pair.getFirst() : pair.getSecond();
   }
 }

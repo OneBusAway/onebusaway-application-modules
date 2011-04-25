@@ -62,8 +62,11 @@ public class TPArrivalReverseEdge extends AbstractEdge {
 
     long minScheduledDeparture = s0.getTime() - offset * 1000;
 
+    /**
+     * Recall that the stopPair is in reverse order (toStop => fromStop)
+     */
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getPreviousArrivalsForStopPair(
-        stopPair.getFirst(), stopPair.getSecond(), targetTime, offset);
+        stopPair.getSecond(), stopPair.getFirst(), targetTime, offset);
 
     TraverseResult results = null;
 
