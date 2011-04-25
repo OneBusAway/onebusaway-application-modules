@@ -134,7 +134,7 @@ public class SiriUtils {
     StopBean nextStop = status.getNextStop();
     if (nextStop != null && !deviated) {
       monitoredVehicleJourney.MonitoredCall = new MonitoredCall();
-      monitoredVehicleJourney.MonitoredCall.StopPointRef = nextStop.getId();
+      monitoredVehicleJourney.MonitoredCall.StopPointRef = getIdWithoutAgency(nextStop.getId());
       monitoredVehicleJourney.MonitoredCall.StopPointName = nextStop.getName();
       monitoredVehicleJourney.MonitoredCall.VisitNumber = 1; // FIXME: this is
                                                              // theoretically
