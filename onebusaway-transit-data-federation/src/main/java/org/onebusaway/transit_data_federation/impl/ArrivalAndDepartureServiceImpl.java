@@ -826,7 +826,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     BlockStopTimeEntry blockStopTime = sti.getStopTime();
 
     return createArrivalAndDeparture(blockInstance, blockStopTime,
-        frequencyOffsetTime);
+        frequencyOffsetTime, sti.getFrequencyOffset());
   }
 
   private ArrivalAndDepartureInstance createArrivalAndDeparture(
@@ -848,15 +848,15 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         stopSequence, timeOfServiceDate);
 
     return createArrivalAndDeparture(blockInstance, blockStopTime,
-        frequencyOffsetTime);
+        frequencyOffsetTime, StopTimeInstance.UNSPECIFIED_FREQUENCY_OFFSET);
   }
 
   private ArrivalAndDepartureInstance createArrivalAndDeparture(
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
-      long frequencyOffsetTime) {
+      long frequencyOffsetTime, int frequencyOffset) {
 
     ArrivalAndDepartureTime scheduledTime = getScheduledTime(blockInstance,
-        blockStopTime, frequencyOffsetTime);
+        blockStopTime, frequencyOffsetTime, frequencyOffset);
 
     return new ArrivalAndDepartureInstance(blockInstance, blockStopTime,
         scheduledTime);
@@ -938,13 +938,21 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   private ArrivalAndDepartureTime getScheduledTime(BlockInstance blockInstance,
-      BlockStopTimeEntry blockStopTime, long frequencyOffsetTime) {
+      BlockStopTimeEntry blockStopTime, long frequencyOffsetTime,
+      int frequencyOffset) {
 
     FrequencyEntry frequency = blockInstance.getFrequency();
 
     if (frequency == null) {
+
       return ArrivalAndDepartureTime.getScheduledTime(blockInstance,
           blockStopTime);
+
+    } else if (StopTimeInstance.isFrequencyOffsetSpecified(frequencyOffset)) {
+
+      return ArrivalAndDepartureTime.getScheduledTime(blockInstance,
+          blockStopTime, frequencyOffset);
+
     } else {
 
       long departureTime = frequencyOffsetTime + frequency.getHeadwaySecs()

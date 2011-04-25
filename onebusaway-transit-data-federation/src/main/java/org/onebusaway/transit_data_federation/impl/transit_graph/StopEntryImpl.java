@@ -14,6 +14,7 @@ import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyStopTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class StopEntryImpl implements StopEntry, Serializable {
@@ -31,6 +32,8 @@ public class StopEntryImpl implements StopEntry, Serializable {
   private transient List<FrequencyBlockStopTimeIndex> _frequencyStopTimeIndices = null;
 
   private transient List<BlockStopSequenceIndex> _stopTripIndices = null;
+
+  private transient List<FrequencyStopTripIndex> _frequencyStopTripIndices = null;
 
   private transient StopTransfers _transfers = null;
 
@@ -79,6 +82,18 @@ public class StopEntryImpl implements StopEntry, Serializable {
     if (_stopTripIndices == null)
       return Collections.emptyList();
     return _stopTripIndices;
+  }
+
+  public void addFrequencyStopTripIndex(FrequencyStopTripIndex index) {
+    if (_frequencyStopTripIndices == null)
+      _frequencyStopTripIndices = new ArrayList<FrequencyStopTripIndex>();
+    _frequencyStopTripIndices.add(index);
+  }
+
+  public List<FrequencyStopTripIndex> getFrequencyStopTripIndices() {
+    if (_frequencyStopTripIndices == null)
+      return Collections.emptyList();
+    return _frequencyStopTripIndices;
   }
 
   public StopTransfers getTransfers() {

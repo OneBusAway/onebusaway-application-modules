@@ -21,6 +21,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyStopTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.HasIndexedBlockStopTimes;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
@@ -83,13 +84,15 @@ class StopTimeServiceImpl implements StopTimeService {
       }
     }
 
-    List<FrequencyBlockStopTimeIndex> frequencyStopTimeIndices = _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry);
+    List<FrequencyStopTripIndex> frequencyStopTripIndices = _blockIndexService.getFrequencyStopTripIndicesForStop(stopEntry);
 
-    for (FrequencyBlockStopTimeIndex index : frequencyStopTimeIndices) {
+    for (FrequencyStopTripIndex index : frequencyStopTripIndices) {
       Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
           index.getServiceIds(), index.getServiceInterval(), from, to);
-      getFrequenciesForStopAndServiceIdsAndTimeRange(index, serviceDates, from,
-          to, stopTimeInstances, frequencyBehavior);
+      for (Date serviceDate : serviceDates) {
+        getFrequenciesForStopAndServiceIdsAndTimeRange(index, serviceDate,
+            from, to, stopTimeInstances, frequencyBehavior);
+      }
     }
 
     return stopTimeInstances;
@@ -188,55 +191,14 @@ class StopTimeServiceImpl implements StopTimeService {
   public List<Pair<StopTimeInstance>> getDeparturesBetweenStopPairInTimeRange(
       StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
       Date toDepartureTime) {
-
-    /**
-     * First find indices shared between the two stops
-     */
-    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
-        fromStop, toStop);
-
+    
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
 
-    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+    getDeparturesBetweenStopPairInTimeRange(fromStop, toStop,
+        fromDepartureTime, toDepartureTime, results);
 
-      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
-      BlockStopSequenceIndex toStopIndex = pair.getSecond();
-
-      List<BlockStopTimeEntry> toStopTimes = toStopIndex.getStopTimes();
-
-      ServiceIdActivation serviceIds = fromStopIndex.getServiceIds();
-      ServiceInterval interval = fromStopIndex.getServiceInterval();
-
-      /**
-       * Find applicable service dates for the departure stop and index
-       */
-      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
-          serviceIds, interval, fromDepartureTime, toDepartureTime);
-
-      for (Date serviceDate : serviceDates) {
-
-        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
-
-        /**
-         * Find departures within the specified range on the specified service
-         * date
-         */
-        int indexOffset = getStopTimesForStopAndServiceDateAndTimeRange(
-            fromStopIndex, serviceDate, fromDepartureTime, toDepartureTime,
-            instances);
-
-        /**
-         * For each departure, we need to find the corresponding arrival
-         */
-        for (int i = 0; i < instances.size(); i++) {
-          StopTimeInstance stiFrom = instances.get(i);
-          BlockStopTimeEntry stopTimeTo = toStopTimes.get(indexOffset + i);
-          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          results.add(stiPair);
-        }
-      }
-    }
+    getFrequencyDeparturesBetweenStopPairInTimeRange(fromStop, toStop,
+        fromDepartureTime, toDepartureTime, results);
 
     return results;
   }
@@ -246,54 +208,13 @@ class StopTimeServiceImpl implements StopTimeService {
       StopEntry fromStop, StopEntry toStop, Date fromArrivalTime,
       Date toArrivalTime) {
 
-    /**
-     * First find indices shared between the two stops
-     */
-    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
-        fromStop, toStop);
-
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
 
-    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+    getArrivalsBetweenStopPairInTimeRange(fromStop, toStop, fromArrivalTime,
+        toArrivalTime, results);
 
-      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
-      BlockStopSequenceIndex toStopIndex = pair.getSecond();
-
-      List<BlockStopTimeEntry> fromStopTimes = fromStopIndex.getStopTimes();
-
-      ServiceIdActivation serviceIds = toStopIndex.getServiceIds();
-      ServiceInterval interval = toStopIndex.getServiceInterval();
-
-      /**
-       * Find applicable service dates for the arrival stop and index
-       */
-      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
-          serviceIds, interval, fromArrivalTime, toArrivalTime);
-
-      for (Date serviceDate : serviceDates) {
-
-        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
-
-        /**
-         * Find arrivals within the specified range on the specified service
-         * date
-         */
-        int toIndex = getStopTimesForStopAndServiceDateAndTimeRange(
-            toStopIndex, serviceDate, fromArrivalTime, toArrivalTime, instances);
-
-        /**
-         * For each arrival, we need to find the corresponding departure
-         */
-        for (int i = 0; i < instances.size(); i++) {
-          StopTimeInstance stiTo = instances.get(i);
-          BlockStopTimeEntry stopTimeFrom = fromStopTimes.get(toIndex + i);
-          StopTimeInstance stiFrom = new StopTimeInstance(stopTimeFrom,
-              serviceDate);
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          results.add(stiPair);
-        }
-      }
-    }
+    getFrequencyArrivalsBetweenStopPairInTimeRange(fromStop, toStop,
+        fromArrivalTime, toArrivalTime, results);
 
     return results;
   }
@@ -411,6 +332,220 @@ class StopTimeServiceImpl implements StopTimeService {
    * Private Methods
    ****/
 
+  private void getDeparturesBetweenStopPairInTimeRange(StopEntry fromStop,
+      StopEntry toStop, Date fromDepartureTime, Date toDepartureTime,
+      List<Pair<StopTimeInstance>> results) {
+
+    /**
+     * First find indices shared between the two stops
+     */
+    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
+        fromStop, toStop);
+
+    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+
+      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
+      BlockStopSequenceIndex toStopIndex = pair.getSecond();
+
+      List<BlockStopTimeEntry> toStopTimes = toStopIndex.getStopTimes();
+
+      ServiceIdActivation serviceIds = fromStopIndex.getServiceIds();
+      ServiceInterval interval = fromStopIndex.getServiceInterval();
+
+      /**
+       * Find applicable service dates for the departure stop and index
+       */
+      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
+          serviceIds, interval, fromDepartureTime, toDepartureTime);
+
+      for (Date serviceDate : serviceDates) {
+
+        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
+
+        /**
+         * Find departures within the specified range on the specified service
+         * date
+         */
+        int indexOffset = getStopTimesForStopAndServiceDateAndTimeRange(
+            fromStopIndex, serviceDate, fromDepartureTime, toDepartureTime,
+            instances);
+
+        /**
+         * For each departure, we need to find the corresponding arrival
+         */
+        for (int i = 0; i < instances.size(); i++) {
+          StopTimeInstance stiFrom = instances.get(i);
+          BlockStopTimeEntry stopTimeTo = toStopTimes.get(indexOffset + i);
+          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          results.add(stiPair);
+        }
+      }
+    }
+  }
+
+  private void getFrequencyDeparturesBetweenStopPairInTimeRange(
+      StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
+      Date toDepartureTime, List<Pair<StopTimeInstance>> results) {
+
+    /**
+     * First find indices shared between the two stops
+     */
+    List<Pair<FrequencyStopTripIndex>> indexPairs = _blockIndexService.getFrequencyIndicesBetweenStops(
+        fromStop, toStop);
+
+    for (Pair<FrequencyStopTripIndex> pair : indexPairs) {
+
+      FrequencyStopTripIndex fromStopIndex = pair.getFirst();
+      FrequencyStopTripIndex toStopIndex = pair.getSecond();
+
+      ServiceIdActivation serviceIds = fromStopIndex.getServiceIds();
+      ServiceInterval interval = fromStopIndex.getServiceInterval();
+
+      List<FrequencyBlockStopTimeEntry> toStopTimes = toStopIndex.getFrequencyStopTimes();
+
+      /**
+       * Find applicable service dates for the departure stop and index
+       */
+      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
+          serviceIds, interval, fromDepartureTime, toDepartureTime);
+
+      for (Date serviceDate : serviceDates) {
+
+        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
+
+        /**
+         * Find departures within the specified range on the specified service
+         * date
+         */
+        List<Integer> offsets = getFrequenciesForStopAndServiceIdsAndTimeRange(
+            fromStopIndex, serviceDate, fromDepartureTime, toDepartureTime,
+            instances, EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
+
+        /**
+         * For each departure, we need to find the corresponding arrival
+         */
+        for (int i = 0; i < instances.size(); i++) {
+          StopTimeInstance stiFrom = instances.get(i);
+          int offset = offsets.get(i);
+          FrequencyBlockStopTimeEntry stopTimeTo = toStopTimes.get(offset);
+          StopTimeInstance stiTo = new StopTimeInstance(
+              stopTimeTo.getStopTime(), serviceDate.getTime(),
+              stiFrom.getFrequency(), stiFrom.getFrequencyOffset());
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          results.add(stiPair);
+        }
+      }
+    }
+  }
+
+  private void getArrivalsBetweenStopPairInTimeRange(StopEntry fromStop,
+      StopEntry toStop, Date fromArrivalTime, Date toArrivalTime,
+      List<Pair<StopTimeInstance>> results) {
+
+    /**
+     * First find indices shared between the two stops
+     */
+    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
+        fromStop, toStop);
+
+    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+
+      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
+      BlockStopSequenceIndex toStopIndex = pair.getSecond();
+
+      List<BlockStopTimeEntry> fromStopTimes = fromStopIndex.getStopTimes();
+
+      ServiceIdActivation serviceIds = toStopIndex.getServiceIds();
+      ServiceInterval interval = toStopIndex.getServiceInterval();
+
+      /**
+       * Find applicable service dates for the arrival stop and index
+       */
+      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
+          serviceIds, interval, fromArrivalTime, toArrivalTime);
+
+      for (Date serviceDate : serviceDates) {
+
+        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
+
+        /**
+         * Find arrivals within the specified range on the specified service
+         * date
+         */
+        int toIndex = getStopTimesForStopAndServiceDateAndTimeRange(
+            toStopIndex, serviceDate, fromArrivalTime, toArrivalTime, instances);
+
+        /**
+         * For each arrival, we need to find the corresponding departure
+         */
+        for (int i = 0; i < instances.size(); i++) {
+          StopTimeInstance stiTo = instances.get(i);
+          BlockStopTimeEntry stopTimeFrom = fromStopTimes.get(toIndex + i);
+          StopTimeInstance stiFrom = new StopTimeInstance(stopTimeFrom,
+              serviceDate);
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          results.add(stiPair);
+        }
+      }
+    }
+  }
+
+  private void getFrequencyArrivalsBetweenStopPairInTimeRange(
+      StopEntry fromStop, StopEntry toStop, Date fromArrivalTime,
+      Date toArrivalTime, List<Pair<StopTimeInstance>> results) {
+
+    /**
+     * First find indices shared between the two stops
+     */
+    List<Pair<FrequencyStopTripIndex>> indexPairs = _blockIndexService.getFrequencyIndicesBetweenStops(
+        fromStop, toStop);
+
+    for (Pair<FrequencyStopTripIndex> pair : indexPairs) {
+
+      FrequencyStopTripIndex fromStopIndex = pair.getFirst();
+      FrequencyStopTripIndex toStopIndex = pair.getSecond();
+
+      List<FrequencyBlockStopTimeEntry> fromStopTimes = fromStopIndex.getFrequencyStopTimes();
+
+      ServiceIdActivation serviceIds = toStopIndex.getServiceIds();
+      ServiceInterval interval = toStopIndex.getServiceInterval();
+
+      /**
+       * Find applicable service dates for the arrival stop and index
+       */
+      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
+          serviceIds, interval, fromArrivalTime, toArrivalTime);
+
+      for (Date serviceDate : serviceDates) {
+
+        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
+
+        /**
+         * Find arrivals within the specified range on the specified service
+         * date
+         */
+        List<Integer> offsets = getFrequenciesForStopAndServiceIdsAndTimeRange(
+            toStopIndex, serviceDate, fromArrivalTime, toArrivalTime,
+            instances, EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
+
+        /**
+         * For each arrival, we need to find the corresponding departure
+         */
+        for (int i = 0; i < instances.size(); i++) {
+          StopTimeInstance stiTo = instances.get(i);
+          int offset = offsets.get(i);
+          FrequencyBlockStopTimeEntry stopTimeFrom = fromStopTimes.get(offset);
+          StopTimeInstance stiFrom = new StopTimeInstance(
+              stopTimeFrom.getStopTime(), serviceDate.getTime(),
+              stiTo.getFrequency(), stiTo.getFrequencyOffset());
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          results.add(stiPair);
+        }
+      }
+    }
+  }
+
   private int getStopTimesForStopAndServiceDateAndTimeRange(
       HasIndexedBlockStopTimes index, Date serviceDate, Date from, Date to,
       List<StopTimeInstance> instances) {
@@ -433,57 +568,59 @@ class StopTimeServiceImpl implements StopTimeService {
     return fromIndex;
   }
 
-  private void getFrequenciesForStopAndServiceIdsAndTimeRange(
-      FrequencyBlockStopTimeIndex index, Collection<Date> serviceDates,
-      Date from, Date to, List<StopTimeInstance> stopTimeInstances,
+  private List<Integer> getFrequenciesForStopAndServiceIdsAndTimeRange(
+      FrequencyStopTripIndex index, Date serviceDate, Date from, Date to,
+      List<StopTimeInstance> stopTimeInstances,
       EFrequencyStopTimeBehavior frequencyBehavior) {
 
-    for (Date serviceDate : serviceDates) {
+    int relativeFrom = effectiveTime(serviceDate, from);
+    int relativeTo = effectiveTime(serviceDate, to);
 
-      int relativeFrom = effectiveTime(serviceDate, from);
-      int relativeTo = effectiveTime(serviceDate, to);
+    int fromIndex = GenericBinarySearch.search(index, index.size(),
+        relativeFrom, IndexAdapters.FREQUENCY_END_TIME_INSTANCE);
+    int toIndex = GenericBinarySearch.search(index, index.size(), relativeTo,
+        IndexAdapters.FREQUENCY_START_TIME_INSTANCE);
 
-      int fromIndex = GenericBinarySearch.search(index, index.size(),
-          relativeFrom, IndexAdapters.FREQUENCY_END_TIME_INSTANCE);
-      int toIndex = GenericBinarySearch.search(index, index.size(), relativeTo,
-          IndexAdapters.FREQUENCY_START_TIME_INSTANCE);
+    List<FrequencyBlockStopTimeEntry> frequencyStopTimes = index.getFrequencyStopTimes();
 
-      List<FrequencyBlockStopTimeEntry> frequencyStopTimes = index.getFrequencyStopTimes();
+    List<Integer> offsetsIntoIndex = new ArrayList<Integer>();
 
-      for (int in = fromIndex; in < toIndex; in++) {
+    for (int in = fromIndex; in < toIndex; in++) {
 
-        FrequencyBlockStopTimeEntry entry = frequencyStopTimes.get(in);
-        BlockStopTimeEntry bst = entry.getStopTime();
-        FrequencyEntry frequency = entry.getFrequency();
+      FrequencyBlockStopTimeEntry entry = frequencyStopTimes.get(in);
+      BlockStopTimeEntry bst = entry.getStopTime();
+      FrequencyEntry frequency = entry.getFrequency();
 
-        switch (frequencyBehavior) {
+      switch (frequencyBehavior) {
 
-          case INCLUDE_UNSPECIFIED:
+        case INCLUDE_UNSPECIFIED:
+          stopTimeInstances.add(new StopTimeInstance(bst,
+              serviceDate.getTime(), frequency));
+          offsetsIntoIndex.add(in);
+          break;
+
+        case INCLUDE_INTERPOLATED:
+
+          int stopTimeOffset = entry.getStopTimeOffset();
+
+          int tFrom = Math.max(relativeFrom, frequency.getStartTime());
+          int tTo = Math.min(relativeTo, frequency.getEndTime());
+
+          tFrom = snapToFrequencyStopTime(frequency, tFrom, stopTimeOffset,
+              true);
+          tTo = snapToFrequencyStopTime(frequency, tTo, stopTimeOffset, false);
+
+          for (int t = tFrom; t <= tTo; t += frequency.getHeadwaySecs()) {
+            int frequencyOffset = t - bst.getStopTime().getDepartureTime();
             stopTimeInstances.add(new StopTimeInstance(bst,
-                serviceDate.getTime(), frequency));
-            break;
-
-          case INCLUDE_INTERPOLATED:
-
-            int stopTimeOffset = entry.getStopTimeOffset();
-
-            int tFrom = Math.max(relativeFrom, frequency.getStartTime());
-            int tTo = Math.min(relativeTo, frequency.getEndTime());
-
-            tFrom = snapToFrequencyStopTime(frequency, tFrom, stopTimeOffset,
-                true);
-            tTo = snapToFrequencyStopTime(frequency, tTo, stopTimeOffset, false);
-
-            for (int t = tFrom; t <= tTo; t += frequency.getHeadwaySecs()) {
-              int frequencyOffset = t - bst.getStopTime().getDepartureTime();
-              stopTimeInstances.add(new StopTimeInstance(bst,
-                  serviceDate.getTime(), frequency, frequencyOffset));
-            }
-            break;
-
-        }
+                serviceDate.getTime(), frequency, frequencyOffset));
+            offsetsIntoIndex.add(in);
+          }
+          break;
       }
     }
+
+    return offsetsIntoIndex;
   }
 
   private int snapToFrequencyStopTime(FrequencyEntry frequency, int timeToSnap,

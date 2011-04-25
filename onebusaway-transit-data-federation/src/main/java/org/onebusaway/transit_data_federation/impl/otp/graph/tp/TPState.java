@@ -42,6 +42,10 @@ public class TPState {
     return ! tree.getTransfers().isEmpty();
   }
   
+  public boolean isExitAllowed() {
+    return tree.isExitAllowed();
+  }
+  
   public List<TPState> getTransferStates() {
     List<TPState> next = new ArrayList<TPState>();
     for( TransferTree nextTree : tree.getTransfers() )

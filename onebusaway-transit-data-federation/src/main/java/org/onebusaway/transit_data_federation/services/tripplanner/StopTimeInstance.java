@@ -16,7 +16,7 @@ public class StopTimeInstance {
   private static final DateFormat TIME_FORMAT = DateFormat.getDateTimeInstance(
       DateFormat.SHORT, DateFormat.SHORT);
 
-  private static final int UNSPECIFIED_FREQUENCY_OFFSET = Integer.MIN_VALUE;
+  public static final int UNSPECIFIED_FREQUENCY_OFFSET = Integer.MIN_VALUE;
 
   private final BlockStopTimeEntry _stopTime;
 
@@ -60,7 +60,7 @@ public class StopTimeInstance {
   }
 
   public boolean isFrequencyOffsetSpecified() {
-    return _frequencyOffset != UNSPECIFIED_FREQUENCY_OFFSET;
+    return isFrequencyOffsetSpecified(_frequencyOffset);
   }
 
   public int getFrequencyOffset() {
@@ -175,5 +175,9 @@ public class StopTimeInstance {
           + TIME_FORMAT.format(getArrivalTime()) + " departure="
           + TIME_FORMAT.format(getDepartureTime()) + ")";
     }
+  }
+
+  public static boolean isFrequencyOffsetSpecified(int frequencyOffset) {
+    return frequencyOffset != UNSPECIFIED_FREQUENCY_OFFSET;
   }
 }

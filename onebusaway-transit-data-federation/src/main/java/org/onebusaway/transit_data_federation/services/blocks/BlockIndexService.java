@@ -55,6 +55,11 @@ public interface BlockIndexService {
 
   public List<FrequencyBlockStopTimeIndex> getFrequencyStopTimeIndicesForStop(
       StopEntry stopEntry);
+  
+  public List<FrequencyStopTripIndex> getFrequencyStopTripIndicesForStop(StopEntry stop);
+
+  public List<Pair<FrequencyStopTripIndex>> getFrequencyIndicesBetweenStops(
+      StopEntry fromStop, StopEntry toStop);
 
   /****
    * Block Sequence Indices

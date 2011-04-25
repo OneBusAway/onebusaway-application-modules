@@ -33,13 +33,18 @@ public class ArrivalAndDepartureTime {
 
   public static ArrivalAndDepartureTime getScheduledTime(
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime) {
+    return getScheduledTime(blockInstance, blockStopTime, 0);
+  }
+
+  public static ArrivalAndDepartureTime getScheduledTime(
+      BlockInstance blockInstance, BlockStopTimeEntry blockStopTime, int offset) {
 
     StopTimeEntry stopTime = blockStopTime.getStopTime();
 
     long arrivalTime = blockInstance.getServiceDate()
-        + stopTime.getArrivalTime() * 1000;
+        + (stopTime.getArrivalTime() + offset) * 1000;
     long departureTime = blockInstance.getServiceDate()
-        + stopTime.getDepartureTime() * 1000;
+        + (stopTime.getDepartureTime() + offset) * 1000;
 
     return new ArrivalAndDepartureTime(arrivalTime, departureTime);
   }
