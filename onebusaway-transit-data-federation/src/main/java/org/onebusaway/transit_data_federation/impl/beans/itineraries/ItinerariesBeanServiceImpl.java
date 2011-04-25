@@ -2,6 +2,8 @@ package org.onebusaway.transit_data_federation.impl.beans.itineraries;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -215,7 +217,12 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     ensureAdditionalItineraryIsIncluded(from, to, targetTime, itineraries,
         constraints.getIncludeItinerary(), options);
-
+    
+    if( options.isArriveBy() )
+      Collections.sort(itineraries.getItineraries(), new SortByArrival());
+    else
+      Collections.sort(itineraries.getItineraries(), new SortByDeparture());
+    
     return itineraries;
   }
 
@@ -1278,5 +1285,25 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     }
     return new MinTravelTimeToStopsBean(agencyId, stopIds, lats, lons, times,
         walkingVelocity);
+  }
+  
+  private static class SortByDeparture implements Comparator<ItineraryBean> {
+
+    @Override
+    public int compare(ItineraryBean o1, ItineraryBean o2) {
+      long t1 = o1.getStartTime();
+      long t2 = o2.getStartTime();
+      return t1 == t2 ? 0 : (t1 < t2 ? -1 : 1);
+    }    
+  }
+  
+  private static class SortByArrival implements Comparator<ItineraryBean> {
+
+    @Override
+    public int compare(ItineraryBean o1, ItineraryBean o2) {
+      long t1 = o1.getEndTime();
+      long t2 = o2.getEndTime();
+      return t1 == t2 ? 0 : (t1 > t2 ? -1 : 1);
+    }    
   }
 }

@@ -6,6 +6,7 @@ import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
+import org.onebusaway.transit_data_federation.impl.otp.OBAStateData.OBAEditor;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
 import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.model.TargetTime;
@@ -80,8 +81,9 @@ public class TPArrivalReverseEdge extends AbstractEdge {
       double w = ItineraryWeightingLibrary.computeWeightForWait(options,
           dwellTime, s0);
 
-      Editor s1 = s0.edit();
+      OBAEditor s1 = (OBAEditor) s0.edit();
       s1.incrementTimeInSeconds(-dwellTime);
+      s1.appendTripSequence(pair.getSecond().getBlockTrip());
 
       EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
       TraverseResult r = new TraverseResult(w, s1.createState(), narrative);
