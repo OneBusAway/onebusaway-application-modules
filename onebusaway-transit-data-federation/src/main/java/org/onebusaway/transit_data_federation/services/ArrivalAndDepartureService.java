@@ -84,19 +84,22 @@ public interface ArrivalAndDepartureService {
    * @param toStop
    * @param targetTime
    * @param window in seconds
+   * @param applyRealTime TODO
    * @return
    */
   public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window);
-  
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window,
+      boolean applyRealTime);
+
   /**
    * 
-   * @param toStop
    * @param fromStop
+   * @param toStop
    * @param targetTime
    * @param window positive, in seconds
+   * @param applyRealTime TODO
    * @return
    */
   public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window);
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window, boolean applyRealTime);
 }

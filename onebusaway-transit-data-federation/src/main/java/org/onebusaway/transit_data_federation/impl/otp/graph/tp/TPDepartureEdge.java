@@ -34,7 +34,7 @@ public class TPDepartureEdge extends AbstractEdge {
   public TraverseResult traverse(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    OBATraverseOptions obaOtps = (OBATraverseOptions) options;
+    OBATraverseOptions obaOpts = (OBATraverseOptions) options;
 
     ArrivalAndDepartureService adService = _context.getArrivalAndDepartureService();
 
@@ -43,12 +43,12 @@ public class TPDepartureEdge extends AbstractEdge {
     Pair<StopEntry> stopPair = _pathState.getStops();
 
     int offset = 20 * 60;
-    TargetTime targetTime = new TargetTime(s0.getTime(), obaOtps.currentTime);
+    TargetTime targetTime = new TargetTime(s0.getTime(), obaOpts.currentTime);
 
     long maxScheduledDeparture = s0.getTime() + offset * 1000;
 
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getNextDeparturesForStopPair(
-        stopPair.getFirst(), stopPair.getSecond(), targetTime, offset);
+        stopPair.getFirst(), stopPair.getSecond(), targetTime, offset, obaOpts.useRealtime);
 
     TraverseResult results = null;
 

@@ -28,6 +28,8 @@ public class CompactedTransferPatternFactory {
   private final Map<StopEntry, TransferPattern> _patternsByOriginStop = new HashMap<StopEntry, TransferPattern>();
 
   private final TransitGraphDao _dao;
+  
+  private long _lines = 0;
 
   public CompactedTransferPatternFactory(TransitGraphDao dao) {
     _dao = dao;
@@ -52,6 +54,9 @@ public class CompactedTransferPatternFactory {
     Map<Long, Integer> indicesByKey = new HashMap<Long, Integer>();
 
     while ((line = reader.readLine()) != null) {
+      
+      if( _lines % 10000 == 0)
+        _log.info("lines=" + _lines);
 
       List<String> tokens = CSVLibrary.parse(line);
 
@@ -88,12 +93,18 @@ public class CompactedTransferPatternFactory {
       } else {
         hubLeafIndices.get(stop).add(parentIndex);
       }
+      
+      _lines++;
     }
 
     if (!stops.isEmpty())
       compact(stops, parentIndices, leafIndices, hubLeafIndices);
 
     reader.close();
+  }
+  
+  public long getLines() {
+    return _lines;
   }
 
   /****

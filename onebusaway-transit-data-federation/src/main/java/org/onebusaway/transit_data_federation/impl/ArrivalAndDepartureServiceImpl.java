@@ -430,7 +430,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   @Override
   public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window) {
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window, boolean applyRealTime) {
 
     Date dFrom = new Date(targetTime.getTargetTime());
     Date dTo = new Date(targetTime.getTargetTime() + window * 1000);
@@ -446,7 +446,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   @Override
   public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window) {
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window, boolean applyRealTime) {
 
     Date dFrom = new Date(targetTime.getTargetTime() - window * 1000);
     Date dTo = new Date(targetTime.getTargetTime());

@@ -91,6 +91,10 @@ public class TransferPatternsTask implements Runnable {
 
   private double _transferPatternWeightImprovement = 0.66;
 
+  private int _maxPathCountForLocalStop = 4;
+
+  private int _maxPathCountForHubStop = 8;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -136,6 +140,14 @@ public class TransferPatternsTask implements Runnable {
     _transferPatternFrequencySlack = transferPatternFrequencySlack;
   }
 
+  public void setMaxPathCountForLocalStop(int maxPathCountForLocalStop) {
+    _maxPathCountForLocalStop = maxPathCountForLocalStop;
+  }
+
+  public void setMaxPathCountForHubStop(int maxPathCountForHubStop) {
+    _maxPathCountForHubStop = maxPathCountForHubStop;
+  }
+
   @Override
   public void run() {
 
@@ -149,12 +161,13 @@ public class TransferPatternsTask implements Runnable {
 
     Map<AgencyAndId, MutableTransferPattern> patternsByStopId = new HashMap<AgencyAndId, MutableTransferPattern>();
 
+    Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop = new FactoryMap<StopEntry, Counter<List<Pair<StopEntry>>>>(
+        new Counter<List<Pair<StopEntry>>>());
+
     for (StopEntry stop : stops) {
 
       boolean isHubStop = hubStops.contains(stop);
       System.out.println("stop=" + stop.getId() + " hub=" + isHubStop);
-
-      MutableTransferPattern pattern = new MutableTransferPattern(stop);
 
       List<ServiceDate> serviceDates = computeServiceDates(stop);
 
@@ -199,7 +212,26 @@ public class TransferPatternsTask implements Runnable {
         MultiShortestPathTree spt = (MultiShortestPathTree) dijkstra.getShortestPathTree(
             origin, state);
 
-        processTree(spt, pattern, stop);
+        processTree(spt, stop, pathCountsByStop);
+      }
+
+      MutableTransferPattern pattern = new MutableTransferPattern(stop);
+
+      for (Map.Entry<StopEntry, Counter<List<Pair<StopEntry>>>> entry : pathCountsByStop.entrySet()) {
+        StopEntry arrivalStop = entry.getKey();
+        boolean verbose = arrivalStop.getId().toString().equals("40_SeaSB");
+        Counter<List<Pair<StopEntry>>> pathCounts = entry.getValue();
+        List<List<Pair<StopEntry>>> keys = pathCounts.getSortedKeys();
+        int maxCount = isHubStop ? _maxPathCountForHubStop
+            : _maxPathCountForLocalStop;
+        if (verbose) {
+          for (List<Pair<StopEntry>> path : keys)
+            System.out.println(pathCounts.getCount(path) + "\t" + path);
+        }
+        while (keys.size() > maxCount)
+          keys.remove(0);
+        for (List<Pair<StopEntry>> path : keys)
+          pattern.addPath(path);
       }
 
       avgPaths(pattern, stop);
@@ -322,8 +354,8 @@ public class TransferPatternsTask implements Runnable {
     return serviceDates;
   }
 
-  private void processTree(MultiShortestPathTree spt,
-      MutableTransferPattern pattern, StopEntry originStop) {
+  private void processTree(MultiShortestPathTree spt, StopEntry originStop,
+      Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop) {
 
     Map<SPTVertex, List<StopEntry>> parentsBySPTVertex = new HashMap<SPTVertex, List<StopEntry>>();
 
@@ -341,14 +373,15 @@ public class TransferPatternsTask implements Runnable {
 
     for (Map.Entry<StopEntry, List<TPOfflineBlockArrivalVertex>> entry : arrivalsByStop.entrySet()) {
       processArrivalsForStop(entry.getKey(), entry.getValue(), originStop, spt,
-          pattern, parentsBySPTVertex);
+          parentsBySPTVertex, pathCountsByStop);
     }
   }
 
   private void processArrivalsForStop(StopEntry arrivalStop,
       List<TPOfflineBlockArrivalVertex> arrivals, StopEntry originStop,
-      MultiShortestPathTree spt, MutableTransferPattern pattern,
-      Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
+      MultiShortestPathTree spt,
+      Map<SPTVertex, List<StopEntry>> parentsBySPTVertex,
+      Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop) {
 
     Collections.sort(arrivals);
 
@@ -427,8 +460,10 @@ public class TransferPatternsTask implements Runnable {
 
     }
 
-    for (List<Pair<StopEntry>> path : toKeep)
-      pattern.addPath(path);
+    Counter<List<Pair<StopEntry>>> counts = pathCountsByStop.get(arrivalStop);
+    for (List<Pair<StopEntry>> path : toKeep) {
+      counts.increment(path, pathCounts.getCount(path));
+    }
   }
 
   private Collection<SPTVertex> pruneSptVertices(

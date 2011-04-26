@@ -23,11 +23,15 @@ import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 class TransferPatternServiceImpl implements TransferPatternService {
+  
+  private static Logger _log = LoggerFactory.getLogger(TransferPatternServiceImpl.class);
 
   private Map<StopEntry, TransferPattern> _transferPatternsByStop = new HashMap<StopEntry, TransferPattern>();
 
@@ -59,11 +63,14 @@ class TransferPatternServiceImpl implements TransferPatternService {
     CompactedTransferPatternFactory factory = new CompactedTransferPatternFactory(
         _transitGraphDao);
 
+    _log.info("loading transfer patterns");
+    
     factory.readPatternsFromFile(filePath);
+    
+    _log.info("transfer patterns: loaded segments=" + factory.getLines());
 
     Map<StopEntry, TransferPattern> patterns = factory.getPatternsByOriginStop();
     _transferPatternsByStop.putAll(patterns);
-
   }
 
   @Override

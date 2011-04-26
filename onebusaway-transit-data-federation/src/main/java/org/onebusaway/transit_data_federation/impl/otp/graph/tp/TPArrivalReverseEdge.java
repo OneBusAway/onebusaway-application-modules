@@ -50,7 +50,7 @@ public class TPArrivalReverseEdge extends AbstractEdge {
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
-    OBATraverseOptions obaOtps = (OBATraverseOptions) options;
+    OBATraverseOptions obaOpts = (OBATraverseOptions) options;
 
     ArrivalAndDepartureService adService = _context.getArrivalAndDepartureService();
 
@@ -59,7 +59,7 @@ public class TPArrivalReverseEdge extends AbstractEdge {
     Pair<StopEntry> stopPair = _pathState.getStops();
 
     int offset = 20 * 60;
-    TargetTime targetTime = new TargetTime(s0.getTime(), obaOtps.currentTime);
+    TargetTime targetTime = new TargetTime(s0.getTime(), obaOpts.currentTime);
 
     long minScheduledDeparture = s0.getTime() - offset * 1000;
 
@@ -67,7 +67,7 @@ public class TPArrivalReverseEdge extends AbstractEdge {
      * Recall that the stopPair is in reverse order (toStop => fromStop)
      */
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getPreviousArrivalsForStopPair(
-        stopPair.getSecond(), stopPair.getFirst(), targetTime, offset);
+        stopPair.getSecond(), stopPair.getFirst(), targetTime, offset, obaOpts.useRealtime);
 
     TraverseResult results = null;
 
