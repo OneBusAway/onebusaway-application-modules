@@ -33,16 +33,12 @@ def main():
         else:
             assert False, "unhandled option"
 
-    if hubStopsFile == None:
-        print "You must specify a HubStops.txt file"
-        usage()
-        sys.exit()
-
     hubStops = {}
 
-    for line in fileinput.input(hubStopsFile):
-        line = line.rstrip()
-        hubStops[line] = True
+    if hubStopsFile != None:
+        for line in fileinput.input(hubStopsFile):
+            line = line.rstrip()
+            hubStops[line] = True
 
     totalLineCount = 0
     idMapping = {}
@@ -51,6 +47,8 @@ def main():
     pruneFromParent = {}
     skipTree = False
 
+    originStopsWeHaveSeen = {}
+
     out = csv.writer(sys.stdout,lineterminator='\n')
 
     fi = fileinput.FileInput(args, openhook=fileinput.hook_compressed)
@@ -58,7 +56,7 @@ def main():
     for line in fi:
 
         if fi.isfirstline():
-            print >> sys.stderr, fi.filename()
+            print >> sys.stderr, "# " + fi.filename()
 
         for row in csv.reader([line]):
 
@@ -70,6 +68,12 @@ def main():
                 skipTree = False
                 if len(stopsToRetain) > 0:
                     skipTree = originStop not in stopsToRetain
+                if originStop not in originStopsWeHaveSeen:
+                    print >> sys.stderr, "#   Origin stop: %s" % (originStop)
+                    originStopsWeHaveSeen[originStop] = True
+                else:
+                    print >> sys.stderr, "# Skip duplicate origin stop %s" % (originStop)
+                    skipTree = True
                 
             if skipTree:
                 continue
