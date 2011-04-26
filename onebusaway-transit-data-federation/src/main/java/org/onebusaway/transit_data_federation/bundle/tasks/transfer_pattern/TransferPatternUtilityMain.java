@@ -38,7 +38,7 @@ public class TransferPatternUtilityMain {
       System.exit(-1);
     }
 
-    Set<String> hubStops = loadHubStops(cli);
+    Map<String, Integer> hubStops = loadHubStops(cli);
     Set<String> originStopsWeHaveSeen = new HashSet<String>();
 
     Map<String, String> idMapping = new HashMap<String, String>();
@@ -49,10 +49,12 @@ public class TransferPatternUtilityMain {
 
     for (String arg : args) {
 
+      System.err.println("# " + arg);
+
       BufferedReader reader = new BufferedReader(IOLibrary.getPathAsReader(arg));
       String line = null;
 
-      boolean originStopIsHub = false;
+      int originHubDepth = Integer.MAX_VALUE;
       boolean skipTree = false;
 
       while ((line = reader.readLine()) != null) {
@@ -67,7 +69,7 @@ public class TransferPatternUtilityMain {
 
         if (tokens.size() == 3) {
 
-          originStopIsHub = hubStops.contains(stopId);
+          originHubDepth = hubDepth(hubStops, stopId);
 
           idMapping.clear();
           pruneFromParent.clear();
@@ -88,7 +90,7 @@ public class TransferPatternUtilityMain {
         if (skipTree)
           continue;
 
-        String newIndex = Long.toString(currentIndex++);
+        String newIndex = Long.toString(currentIndex);
         idMapping.put(index, newIndex);
         tokens.set(0, newIndex);
 
@@ -105,17 +107,27 @@ public class TransferPatternUtilityMain {
           depths.put(index, depth);
         }
 
-        if (!originStopIsHub && (depth % 2) == 0 && hubStops.contains(stopId)) {
+        int hubDepth = hubDepth(hubStops, stopId);
+        if ((depth % 2) == 0 && hubDepth < originHubDepth) {
           pruneFromParent.add(index);
           tokens.set(2, "2");
         }
 
         line = CSVLibrary.getIterableAsCSV(tokens);
         System.out.println(line);
+
+        currentIndex++;
       }
 
       reader.close();
     }
+  }
+
+  private int hubDepth(Map<String, Integer> hubStops, String stopId) {
+    int hubDepth = Integer.MAX_VALUE;
+    if (hubStops.containsKey(stopId))
+      hubDepth = hubStops.get(stopId);
+    return hubDepth;
   }
 
   private Options createOptions() {
@@ -128,18 +140,23 @@ public class TransferPatternUtilityMain {
     System.err.println("usage: [-hubStops HubStops.txt] trace [trace ...]");
   }
 
-  private Set<String> loadHubStops(CommandLine cli) throws IOException {
+  private Map<String, Integer> loadHubStops(CommandLine cli) throws IOException {
 
     if (!cli.hasOption(ARG_HUB_STOPS))
-      return Collections.emptySet();
+      return Collections.emptyMap();
 
-    Set<String> hubStops = new HashSet<String>();
+    Map<String, Integer> hubStops = new HashMap<String, Integer>();
     BufferedReader reader = new BufferedReader(new FileReader(
         cli.getOptionValue(ARG_HUB_STOPS)));
     String line = null;
 
     while ((line = reader.readLine()) != null) {
-      hubStops.add(line);
+      List<String> tokens = CSVLibrary.parse(line);
+      String stopId = tokens.get(0);
+      int depth = 0;
+      if (tokens.size() > 1)
+        depth = Integer.parseInt(tokens.get(1));
+      hubStops.put(stopId, depth);
     }
 
     reader.close();
