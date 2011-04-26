@@ -43,6 +43,7 @@ public class TransferPatternUtilityMain {
 
     Map<String, String> idMapping = new HashMap<String, String>();
     Set<String> pruneFromParent = new HashSet<String>();
+    Map<String, Integer> depths = new HashMap<String, Integer>();
 
     long currentIndex = 0;
 
@@ -51,7 +52,6 @@ public class TransferPatternUtilityMain {
       BufferedReader reader = new BufferedReader(IOLibrary.getPathAsReader(arg));
       String line = null;
 
-      boolean isFirstLine = false;
       boolean originStopIsHub = false;
       boolean skipTree = false;
 
@@ -63,16 +63,20 @@ public class TransferPatternUtilityMain {
         List<String> tokens = CSVLibrary.parse(line);
         String index = tokens.get(0);
         String stopId = tokens.get(1);
+        int depth = 0;
 
-        if (isFirstLine || tokens.size() == 3) {
-          isFirstLine = false;
+        if (tokens.size() == 3) {
 
           originStopIsHub = hubStops.contains(stopId);
 
           idMapping.clear();
           pruneFromParent.clear();
+          depths.clear();
+
+          depths.put(index, 0);
 
           skipTree = false;
+
           if (originStopsWeHaveSeen.add(stopId)) {
             System.err.println("#   Origin Stop: " + stopId);
           } else {
@@ -88,11 +92,6 @@ public class TransferPatternUtilityMain {
         idMapping.put(index, newIndex);
         tokens.set(0, newIndex);
 
-        if (!originStopIsHub && hubStops.contains(stopId)) {
-          pruneFromParent.add(index);
-          tokens.set(2, "2");
-        }
-
         if (tokens.size() == 4) {
           String parentIndex = tokens.get(3);
           if (pruneFromParent.contains(parentIndex)) {
@@ -101,6 +100,14 @@ public class TransferPatternUtilityMain {
           }
           String newParentIndex = idMapping.get(parentIndex);
           tokens.set(3, newParentIndex);
+
+          depth = depths.get(parentIndex) + 1;
+          depths.put(index, depth);
+        }
+
+        if (!originStopIsHub && (depth % 2) == 0 && hubStops.contains(stopId)) {
+          pruneFromParent.add(index);
+          tokens.set(2, "2");
         }
 
         line = CSVLibrary.getIterableAsCSV(tokens);
@@ -109,7 +116,6 @@ public class TransferPatternUtilityMain {
 
       reader.close();
     }
-
   }
 
   private Options createOptions() {
