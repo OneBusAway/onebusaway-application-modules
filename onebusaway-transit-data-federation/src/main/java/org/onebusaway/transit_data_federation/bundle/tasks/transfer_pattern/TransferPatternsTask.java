@@ -161,15 +161,15 @@ public class TransferPatternsTask implements Runnable {
 
     Map<AgencyAndId, MutableTransferPattern> patternsByStopId = new HashMap<AgencyAndId, MutableTransferPattern>();
 
-    Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop = new FactoryMap<StopEntry, Counter<List<Pair<StopEntry>>>>(
-        new Counter<List<Pair<StopEntry>>>());
-
     for (StopEntry stop : stops) {
 
       boolean isHubStop = hubStops.contains(stop);
       System.out.println("stop=" + stop.getId() + " hub=" + isHubStop);
 
       List<ServiceDate> serviceDates = computeServiceDates(stop);
+      
+      Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop = new FactoryMap<StopEntry, Counter<List<Pair<StopEntry>>>>(
+          new Counter<List<Pair<StopEntry>>>());
 
       for (ServiceDate serviceDate : serviceDates) {
 
