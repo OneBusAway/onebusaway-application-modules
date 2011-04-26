@@ -91,9 +91,9 @@ public class TransferPatternsTask implements Runnable {
 
   private double _transferPatternWeightImprovement = 0.66;
 
-  private int _maxPathCountForLocalStop = 4;
+  private int _maxPathCountForLocalStop = 3;
 
-  private int _maxPathCountForHubStop = 8;
+  private int _maxPathCountForHubStop = 5;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
