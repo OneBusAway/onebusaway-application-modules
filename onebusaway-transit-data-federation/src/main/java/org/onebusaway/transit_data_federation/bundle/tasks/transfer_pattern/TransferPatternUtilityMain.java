@@ -156,7 +156,8 @@ public class TransferPatternUtilityMain {
       int depth = 0;
       if (tokens.size() > 1)
         depth = Integer.parseInt(tokens.get(1));
-      hubStops.put(stopId, depth);
+      if (!hubStops.containsKey(stopId))
+        hubStops.put(stopId, depth);
     }
 
     reader.close();
