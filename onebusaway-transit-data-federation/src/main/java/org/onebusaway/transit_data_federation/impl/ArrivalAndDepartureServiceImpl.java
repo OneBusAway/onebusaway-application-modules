@@ -2,8 +2,11 @@ package org.onebusaway.transit_data_federation.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
@@ -112,46 +115,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
       for (StopTimeInstance sti : stisForBlock) {
 
-        for (BlockLocation location : locations) {
-
-          ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
-              sti, frequencyOffsetTime);
-          applyBlockLocationToInstance(instance, location,
-              targetTime.getTargetTime());
-
-          if (isArrivalAndDepartureBeanInRange(instance, fromTime, toTime))
-            instances.add(instance);
-        }
-
-        if (locations.isEmpty()) {
-
-          ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
-              sti, frequencyOffsetTime);
-
-          if (sti.getFrequency() == null) {
-
-            /**
-             * We don't need to get the scheduled location of a vehicle unless
-             * its in our arrival window
-             */
-            if (isArrivalAndDepartureBeanInRange(instance, fromTime, toTime)) {
-
-              BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
-                  blockInstance, targetTime.getTargetTime());
-
-              if (scheduledLocation != null)
-                applyBlockLocationToInstance(instance, scheduledLocation,
-                    targetTime.getTargetTime());
-
-              instances.add(instance);
-            }
-
-          } else {
-            if (isFrequencyBasedArrivalInRange(blockInstance, fromTime, toTime)) {
-              instances.add(instance);
-            }
-          }
-        }
+        applyRealTimeToStopTimeInstance(sti, targetTime, fromTime, toTime,
+            frequencyOffsetTime, blockInstance, locations, instances);
       }
     }
 
@@ -429,65 +394,114 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   @Override
-  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window, boolean applyRealTime) {
+  public List<Pair<ArrivalAndDepartureInstance>> getDeparturesForStopPair(
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window,
+      boolean applyRealTime) {
 
-    Date dFrom = new Date(targetTime.getTargetTime());
-    Date dTo = new Date(targetTime.getTargetTime() + window * 1000);
+    Date tFrom = new Date(targetTime.getTargetTime());
+    Date tTo = new Date(targetTime.getTargetTime() + window * 1000);
+
+    Date tFromExpanded = tFrom;
+    Date tToExpanded = tTo;
+
+    if (applyRealTime) {
+      tFromExpanded = new Date(tFrom.getTime() - MINUTES_BEFORE_BUFFER * 60
+          * 1000);
+      tToExpanded = new Date(tTo.getTime() + MINUTES_AFTER_BUFFER * 60 * 1000);
+    }
 
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getDeparturesBetweenStopPairInTimeRange(
-        fromStop, toStop, dFrom, dTo);
-    if (pairs.isEmpty())
-      pairs = _stopTimeService.getNextDeparturesBetweenStopPair(fromStop,
-          toStop, dFrom, false);
+        fromStop, toStop, tFromExpanded, tToExpanded);
 
-    return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs);
+    return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs,
+        tFrom, tTo, applyRealTime);
   }
 
   @Override
-  public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window, boolean applyRealTime) {
+  public List<Pair<ArrivalAndDepartureInstance>> getArrivalsForStopPair(
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window,
+      boolean applyRealTime) {
 
-    Date dFrom = new Date(targetTime.getTargetTime() - window * 1000);
-    Date dTo = new Date(targetTime.getTargetTime());
+    Date tFrom = new Date(targetTime.getTargetTime() - window * 1000);
+    Date tTo = new Date(targetTime.getTargetTime());
+
+    Date tFromExpanded = tFrom;
+    Date tToExpanded = tTo;
+
+    if (applyRealTime) {
+      tFromExpanded = new Date(tFrom.getTime() - MINUTES_BEFORE_BUFFER * 60
+          * 1000);
+      tToExpanded = new Date(tTo.getTime() + MINUTES_AFTER_BUFFER * 60 * 1000);
+    }
 
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getArrivalsBetweenStopPairInTimeRange(
-        fromStop, toStop, dFrom, dTo);
-    if (pairs.isEmpty())
-      pairs = _stopTimeService.getPreviousArrivalsBetweenStopPair(fromStop,
-          toStop, dFrom, false);
+        fromStop, toStop, tFromExpanded, tToExpanded);
 
-    return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs);
+    return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs,
+        tFrom, tTo, applyRealTime);
   }
 
+  /****
+   * Private Methods
+   ****/
+
   private List<Pair<ArrivalAndDepartureInstance>> getArrivalsAndDeparturesFromStopTimeInstancePairs(
-      TargetTime targetTime, List<Pair<StopTimeInstance>> pairs) {
+      TargetTime targetTime, List<Pair<StopTimeInstance>> pairs, Date tFrom,
+      Date tTo, boolean applyRealTime) {
 
     long frequencyOffsetTime = Math.max(targetTime.getTargetTime(),
         targetTime.getCurrentTime());
 
     List<Pair<ArrivalAndDepartureInstance>> results = new ArrayList<Pair<ArrivalAndDepartureInstance>>();
 
+    Set<BlockInstance> blockInstances = new HashSet<BlockInstance>();
+    for (Pair<StopTimeInstance> pair : pairs)
+      blockInstances.add(pair.getFirst().getBlockInstance());
+
+    Map<BlockInstance, List<BlockLocation>> blockLocationsByBlockInstance = new HashMap<BlockInstance, List<BlockLocation>>();
+
+    for (BlockInstance blockInstance : blockInstances) {
+      List<BlockLocation> locations = _blockLocationService.getLocationsForBlockInstance(
+          blockInstance, targetTime);
+      blockLocationsByBlockInstance.put(blockInstance, locations);
+    }
+
     for (Pair<StopTimeInstance> pair : pairs) {
+
       StopTimeInstance stiFrom = pair.getFirst();
       StopTimeInstance stiTo = pair.getSecond();
 
-      ArrivalAndDepartureInstance instanceFrom = createArrivalAndDepartureForStopTimeInstance(
-          stiFrom, frequencyOffsetTime);
-      ArrivalAndDepartureInstance instanceTo = createArrivalAndDepartureForStopTimeInstance(
-          stiTo, frequencyOffsetTime);
+      if (applyRealTime) {
 
-      Pair<ArrivalAndDepartureInstance> instancePair = Tuples.pair(
-          instanceFrom, instanceTo);
-      results.add(instancePair);
+        BlockInstance blockInstance = stiFrom.getBlockInstance();
+        List<BlockLocation> locations = blockLocationsByBlockInstance.get(blockInstance);
+
+        List<ArrivalAndDepartureInstance> fromInstances = new ArrayList<ArrivalAndDepartureInstance>();
+        List<ArrivalAndDepartureInstance> toInstances = new ArrayList<ArrivalAndDepartureInstance>();
+
+        applyRealTimeToStopTimeInstance(stiFrom, targetTime, tFrom.getTime(),
+            tTo.getTime(), frequencyOffsetTime, blockInstance, locations,
+            fromInstances);
+
+        applyRealTimeToStopTimeInstance(stiFrom, targetTime, tFrom.getTime(),
+            tTo.getTime(), frequencyOffsetTime, blockInstance, locations,
+            toInstances);
+
+      } else {
+
+        ArrivalAndDepartureInstance instanceFrom = createArrivalAndDepartureForStopTimeInstance(
+            stiFrom, frequencyOffsetTime);
+        ArrivalAndDepartureInstance instanceTo = createArrivalAndDepartureForStopTimeInstance(
+            stiTo, frequencyOffsetTime);
+
+        Pair<ArrivalAndDepartureInstance> instancePair = Tuples.pair(
+            instanceFrom, instanceTo);
+        results.add(instancePair);
+      }
     }
 
     return results;
   }
-
-  /****
-   * Private Methods
-   ****/
 
   private Map<BlockInstance, List<StopTimeInstance>> getStopTimeInstancesByBlockInstance(
       List<StopTimeInstance> stopTimes) {
@@ -506,6 +520,53 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     }
 
     return r;
+  }
+
+  private void applyRealTimeToStopTimeInstance(StopTimeInstance sti,
+      TargetTime targetTime, long fromTime, long toTime,
+      long frequencyOffsetTime, BlockInstance blockInstance,
+      List<BlockLocation> locations, List<ArrivalAndDepartureInstance> results) {
+
+    for (BlockLocation location : locations) {
+
+      ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
+          sti, frequencyOffsetTime);
+      applyBlockLocationToInstance(instance, location,
+          targetTime.getTargetTime());
+
+      if (isArrivalAndDepartureBeanInRange(instance, fromTime, toTime))
+        results.add(instance);
+    }
+
+    if (locations.isEmpty()) {
+
+      ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
+          sti, frequencyOffsetTime);
+
+      if (sti.getFrequency() == null) {
+
+        /**
+         * We don't need to get the scheduled location of a vehicle unless its
+         * in our arrival window
+         */
+        if (isArrivalAndDepartureBeanInRange(instance, fromTime, toTime)) {
+
+          BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
+              blockInstance, targetTime.getTargetTime());
+
+          if (scheduledLocation != null)
+            applyBlockLocationToInstance(instance, scheduledLocation,
+                targetTime.getTargetTime());
+
+          results.add(instance);
+        }
+
+      } else {
+        if (isFrequencyBasedArrivalInRange(blockInstance, fromTime, toTime)) {
+          results.add(instance);
+        }
+      }
+    }
   }
 
   private void applyBlockLocationToInstance(

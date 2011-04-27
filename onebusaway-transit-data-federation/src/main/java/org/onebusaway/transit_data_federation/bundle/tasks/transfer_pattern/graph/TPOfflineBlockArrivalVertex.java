@@ -13,8 +13,8 @@ import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.Vertex;
 
-public class TPOfflineBlockArrivalVertex extends AbstractTPOfflineBlockVertex implements
-    Comparable<TPOfflineBlockArrivalVertex> {
+public class TPOfflineBlockArrivalVertex extends AbstractTPOfflineBlockVertex
+    implements Comparable<TPOfflineBlockArrivalVertex> {
 
   public TPOfflineBlockArrivalVertex(GraphContext graphContext,
       StopTimeInstance instance) {
@@ -59,7 +59,7 @@ public class TPOfflineBlockArrivalVertex extends AbstractTPOfflineBlockVertex im
     List<StopTransfer> transfers = stopTransferService.getTransfersFromStop(stop);
 
     for (StopTransfer transfer : transfers)
-      edges.add(new TPOfflineArrivalAndTransferEdge(_context, _instance, transfer));
+      edges.add(new TPOfflineTransferEdge(_context, this, transfer));
 
     return edges;
   }

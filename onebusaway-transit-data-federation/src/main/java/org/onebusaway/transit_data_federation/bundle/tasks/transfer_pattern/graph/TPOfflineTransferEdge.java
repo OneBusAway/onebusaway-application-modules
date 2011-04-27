@@ -15,17 +15,18 @@ import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.TraverseResult;
+import org.opentripplanner.routing.core.Vertex;
 
-public class TPOfflineArrivalAndTransferEdge extends AbstractEdge {
+public class TPOfflineTransferEdge extends AbstractEdge {
 
-  private StopTimeInstance _instance;
+  private final Vertex _fromVertex;
 
-  private StopTransfer _transfer;
+  private final StopTransfer _transfer;
 
-  public TPOfflineArrivalAndTransferEdge(GraphContext context,
-      StopTimeInstance instance, StopTransfer transfer) {
+  public TPOfflineTransferEdge(GraphContext context, Vertex fromVertex,
+      StopTransfer transfer) {
     super(context);
-    _instance = instance;
+    _fromVertex = fromVertex;
     _transfer = transfer;
   }
 
@@ -37,7 +38,7 @@ public class TPOfflineArrivalAndTransferEdge extends AbstractEdge {
      * Check if we've reached our transfer limit
      */
     StateData data = s0.getData();
-    if (data.getNumBoardings() >= options.maxTransfers)
+    if (data.getNumBoardings() > options.maxTransfers)
       return null;
 
     int transferTime = computeTransferTime(options);
@@ -48,7 +49,10 @@ public class TPOfflineArrivalAndTransferEdge extends AbstractEdge {
      * We're using options.boardCost as a transfer penalty
      */
     double transferWeight = transferTime * options.walkReluctance
-        + options.boardCost + options.minTransferTime * options.waitReluctance;
+        + options.minTransferTime * options.waitReluctance;
+
+    if (data.getNumBoardings() > 0)
+      transferWeight += options.boardCost;
 
     StopTimeService stopTimeService = _context.getStopTimeService();
 
@@ -102,15 +106,12 @@ public class TPOfflineArrivalAndTransferEdge extends AbstractEdge {
 
     long departureTime = instance.getDepartureTime();
 
-    TPOfflineBlockArrivalVertex fromVertex = new TPOfflineBlockArrivalVertex(_context,
-        _instance);
-    TPOfflineTransferVertex toVertex = new TPOfflineTransferVertex(_context, instance);
-    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+    TPOfflineTransferVertex toVertex = new TPOfflineTransferVertex(_context,
+        instance);
+    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(_fromVertex, toVertex);
 
     OBAEditor edit = (OBAEditor) s0.edit();
     edit.setTime(departureTime);
-    edit.incrementNumBoardings();
-    edit.setEverBoarded(true);
 
     int dwellTime = (int) ((departureTime - time) / 1000);
     double w = transferWeight

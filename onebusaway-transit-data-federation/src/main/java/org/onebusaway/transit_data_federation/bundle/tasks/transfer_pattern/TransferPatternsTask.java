@@ -28,11 +28,14 @@ import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Range;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.HasStopTimeInstanceTransitVertex;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineArrivalAndTransferEdge;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineNearbyStopsVertex;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferEdge;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineBlockArrivalVertex;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineOriginVertex;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferVertex;
@@ -48,6 +51,7 @@ import org.onebusaway.transit_data_federation.services.StopTimeService.EFrequenc
 import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.algorithm.GenericDijkstra;
 import org.opentripplanner.routing.algorithm.strategies.SkipVertexStrategy;
@@ -58,6 +62,7 @@ import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.pqueue.PriorityQueueImpl;
 import org.opentripplanner.routing.services.GraphService;
+import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.routing.spt.MultiShortestPathTree;
 import org.opentripplanner.routing.spt.SPTEdge;
 import org.opentripplanner.routing.spt.SPTVertex;
@@ -83,6 +88,8 @@ public class TransferPatternsTask implements Runnable {
 
   private StopTimeService _stopTimeService;
 
+  private ItinerariesService _itinerariesService;
+
   private int _serviceDateCount = 4;
 
   private double _transferPatternFrequencyCutoff = 0.1;
@@ -94,6 +101,8 @@ public class TransferPatternsTask implements Runnable {
   private int _maxPathCountForLocalStop = 3;
 
   private int _maxPathCountForHubStop = 5;
+
+  private double _nearbyStopsRadius = 100;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
@@ -124,6 +133,11 @@ public class TransferPatternsTask implements Runnable {
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
     _stopTimeService = stopTimeService;
+  }
+
+  @Autowired
+  public void setItinerariesService(ItinerariesService itinerariesService) {
+    _itinerariesService = itinerariesService;
   }
 
   public void setServiceDateCount(int serviceDateCount) {
@@ -163,11 +177,13 @@ public class TransferPatternsTask implements Runnable {
 
     for (StopEntry stop : stops) {
 
+      Map<StopEntry, Integer> nearbyStopsAndWalkTimes = getNearbyStopsAndWalkTimes(stop);
+
       boolean isHubStop = hubStops.contains(stop);
       System.out.println("stop=" + stop.getId() + " hub=" + isHubStop);
 
       List<ServiceDate> serviceDates = computeServiceDates(stop);
-      
+
       Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop = new FactoryMap<StopEntry, Counter<List<Pair<StopEntry>>>>(
           new Counter<List<Pair<StopEntry>>>());
 
@@ -175,20 +191,18 @@ public class TransferPatternsTask implements Runnable {
 
         System.out.println("  serviceDate=" + serviceDate);
 
-        Range interval = _stopTimeService.getDepartureForStopAndServiceDate(
-            stop.getId(), serviceDate);
+        List<StopTimeInstance> instances = getStopTimeInstancesForStopAndServiceDate(
+            stop, serviceDate);
+        System.out.println("      instances=" + instances.size());
 
-        if (interval.isEmpty())
+        if (instances.isEmpty())
           continue;
 
-        long tFrom = (long) interval.getMin();
-        long tTo = (long) interval.getMax();
+        StopTimeInstance first = instances.get(0);
+        long tFrom = first.getDepartureTime();
 
-        List<StopTimeInstance> instances = _stopTimeService.getStopTimeInstancesInTimeRange(
-            stop, new Date(tFrom), new Date(tTo),
-            EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
-
-        System.out.println("      instances=" + instances.size());
+        Map<StopEntry, List<StopTimeInstance>> nearbyStopTimeInstances = getNearbyStopTimeInstances(
+            nearbyStopsAndWalkTimes.keySet(), serviceDate);
 
         OBATraverseOptions options = _otpConfigurationService.createTraverseOptions();
 
@@ -206,7 +220,7 @@ public class TransferPatternsTask implements Runnable {
         dijkstra.setSkipVertexStrategy(new SkipVertexImpl(stop, tFrom));
 
         TPOfflineOriginVertex origin = new TPOfflineOriginVertex(context, stop,
-            instances);
+            instances, nearbyStopsAndWalkTimes, nearbyStopTimeInstances);
         State state = new State(tFrom, new OBAStateData());
 
         MultiShortestPathTree spt = (MultiShortestPathTree) dijkstra.getShortestPathTree(
@@ -217,9 +231,10 @@ public class TransferPatternsTask implements Runnable {
 
       MutableTransferPattern pattern = new MutableTransferPattern(stop);
 
+      System.out.println("arrivalStops=" + pathCountsByStop.size());
+
       for (Map.Entry<StopEntry, Counter<List<Pair<StopEntry>>>> entry : pathCountsByStop.entrySet()) {
-        StopEntry arrivalStop = entry.getKey();
-        boolean verbose = arrivalStop.getId().toString().equals("40_SeaSB");
+        boolean verbose = false;
         Counter<List<Pair<StopEntry>>> pathCounts = entry.getValue();
         List<List<Pair<StopEntry>>> keys = pathCounts.getSortedKeys();
         int maxCount = isHubStop ? _maxPathCountForHubStop
@@ -275,7 +290,7 @@ public class TransferPatternsTask implements Runnable {
   private void avgPaths(MutableTransferPattern pattern, StopEntry origin) {
     DoubleArrayList values = new DoubleArrayList();
     for (StopEntry stop : pattern.getStops()) {
-      TransferTreeNode root = new TransferTreeNode();
+      TransferParent root = new TransferParent();
       pattern.getTransfersForStop(stop, root);
       values.add(root.size());
     }
@@ -336,6 +351,45 @@ public class TransferPatternsTask implements Runnable {
     return hubStops;
   }
 
+  private Map<StopEntry, Integer> getNearbyStopsAndWalkTimes(StopEntry stop) {
+
+    CoordinateBounds bounds = SphericalGeometryLibrary.bounds(
+        stop.getStopLocation(), _nearbyStopsRadius);
+
+    Map<StopEntry, Integer> nearbyStopsAndWalkTimes = new HashMap<StopEntry, Integer>();
+
+    OBATraverseOptions opts = _otpConfigurationService.createTraverseOptions();
+    Date now = new Date();
+
+    List<StopEntry> stops = _transitGraphDao.getStopsByLocation(bounds);
+    for (StopEntry nearbyStop : stops) {
+
+      if (nearbyStop == stop)
+        continue;
+
+      GraphPath path = _itinerariesService.getWalkingItineraryBetweenStops(
+          stop, nearbyStop, now, opts);
+      if (path == null)
+        continue;
+
+      int duration = (int) (path.getDuration() / 1000);
+      nearbyStopsAndWalkTimes.put(nearbyStop, duration);
+    }
+
+    return nearbyStopsAndWalkTimes;
+  }
+
+  private Map<StopEntry, List<StopTimeInstance>> getNearbyStopTimeInstances(
+      Iterable<StopEntry> nearbyStops, ServiceDate serviceDate) {
+    Map<StopEntry, List<StopTimeInstance>> nearbyStopTimeInstances = new HashMap<StopEntry, List<StopTimeInstance>>();
+    for (StopEntry nearbyStop : nearbyStops) {
+      List<StopTimeInstance> nearbyInstances = getStopTimeInstancesForStopAndServiceDate(
+          nearbyStop, serviceDate);
+      nearbyStopTimeInstances.put(nearbyStop, nearbyInstances);
+    }
+    return nearbyStopTimeInstances;
+  }
+
   private List<ServiceDate> computeServiceDates(StopEntry stop) {
 
     List<ServiceDateSummary> summaries = _stopScheduleService.getServiceDateSummariesForStop(stop.getId());
@@ -354,10 +408,27 @@ public class TransferPatternsTask implements Runnable {
     return serviceDates;
   }
 
+  private List<StopTimeInstance> getStopTimeInstancesForStopAndServiceDate(
+      StopEntry stop, ServiceDate serviceDate) {
+
+    Range interval = _stopTimeService.getDepartureForStopAndServiceDate(
+        stop.getId(), serviceDate);
+
+    if (interval.isEmpty())
+      return Collections.emptyList();
+
+    long tFrom = (long) interval.getMin();
+    long tTo = (long) interval.getMax();
+
+    return _stopTimeService.getStopTimeInstancesInTimeRange(stop, new Date(
+        tFrom), new Date(tTo), EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
+  }
+
   private void processTree(MultiShortestPathTree spt, StopEntry originStop,
       Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop) {
 
     Map<SPTVertex, List<StopEntry>> parentsBySPTVertex = new HashMap<SPTVertex, List<StopEntry>>();
+    Map<SPTVertex, Boolean> hasProperOrigins = new HashMap<SPTVertex, Boolean>();
 
     Map<StopEntry, List<TPOfflineBlockArrivalVertex>> arrivalsByStop = new FactoryMap<StopEntry, List<TPOfflineBlockArrivalVertex>>(
         new ArrayList<TPOfflineBlockArrivalVertex>());
@@ -373,13 +444,13 @@ public class TransferPatternsTask implements Runnable {
 
     for (Map.Entry<StopEntry, List<TPOfflineBlockArrivalVertex>> entry : arrivalsByStop.entrySet()) {
       processArrivalsForStop(entry.getKey(), entry.getValue(), originStop, spt,
-          parentsBySPTVertex, pathCountsByStop);
+          hasProperOrigins, parentsBySPTVertex, pathCountsByStop);
     }
   }
 
   private void processArrivalsForStop(StopEntry arrivalStop,
       List<TPOfflineBlockArrivalVertex> arrivals, StopEntry originStop,
-      MultiShortestPathTree spt,
+      MultiShortestPathTree spt, Map<SPTVertex, Boolean> what,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex,
       Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop) {
 
@@ -394,34 +465,69 @@ public class TransferPatternsTask implements Runnable {
 
     Map<SPTVertex, List<Pair<StopEntry>>> pathsByVertex = new HashMap<SPTVertex, List<Pair<StopEntry>>>();
 
+    boolean verbose = false;
+    if (verbose)
+      System.out.println("here!");
+
     long startTime = 0;
+    int totalPathCount = 0;
+
+    boolean atLeastOneArrivalWithProperOrigins = false;
 
     for (TPOfflineBlockArrivalVertex arrival : arrivals) {
+
+      if (verbose)
+        System.out.println(arrival);
 
       Collection<SPTVertex> sptVertices = pruneSptVertices(spt.getSPTVerticesForVertex(arrival));
 
       for (SPTVertex sptVertex : sptVertices) {
 
-        List<Pair<StopEntry>> path = constructTransferPattern(originStop,
-            arrival, sptVertex, parentsBySPTVertex);
+        if (verbose)
+          System.out.println("  " + sptVertex);
+
+        boolean properOrigins = hasProperOrigins(sptVertex, what);
+
+        if (verbose)
+          System.out.println("  origins=" + properOrigins);
 
         State state = sptVertex.state;
         boolean cut = state.getStartTime() <= startTime;
 
         if (!cut) {
+
+          if (properOrigins)
+            atLeastOneArrivalWithProperOrigins = true;
+
           startTime = state.getStartTime();
-          pathCounts.increment(path);
-          paths.get(path).add(sptVertex);
+          totalPathCount++;
 
-          m.get(state.getTime()).add(sptVertex);
-          pathsByVertex.put(sptVertex, path);
+          if (properOrigins) {
 
+            List<Pair<StopEntry>> path = constructTransferPattern(originStop,
+                arrival, sptVertex, parentsBySPTVertex);
+
+            pathCounts.increment(path);
+            paths.get(path).add(sptVertex);
+
+            m.get(state.getTime()).add(sptVertex);
+            pathsByVertex.put(sptVertex, path);
+
+            if (verbose)
+              System.out.println("  path=" + path);
+          }
         }
       }
     }
 
+    if (!atLeastOneArrivalWithProperOrigins)
+      return;
+
     List<Pair<StopEntry>> max = pathCounts.getMax();
     int maxCount = pathCounts.getCount(max);
+
+    if (maxCount < totalPathCount * _transferPatternFrequencyCutoff)
+      return;
 
     List<List<Pair<StopEntry>>> toKeep = new ArrayList<List<Pair<StopEntry>>>();
 
@@ -515,6 +621,25 @@ public class TransferPatternsTask implements Runnable {
     return null;
   }
 
+  private boolean hasProperOrigins(SPTVertex sptVertex,
+      Map<SPTVertex, Boolean> hasProperOrigins) {
+
+    Boolean proper = hasProperOrigins.get(sptVertex);
+    if (proper == null) {
+      Vertex v = sptVertex.mirror;
+      if (v instanceof TPOfflineNearbyStopsVertex) {
+        proper = false;
+      } else if (v instanceof TPOfflineOriginVertex) {
+        proper = true;
+      } else {
+        proper = hasProperOrigins(sptVertex.incoming.fromv, hasProperOrigins);
+      }
+      hasProperOrigins.put(sptVertex, proper);
+    }
+
+    return proper;
+  }
+
   private List<Pair<StopEntry>> constructTransferPattern(StopEntry originStop,
       TPOfflineBlockArrivalVertex arrival, SPTVertex sptVertex,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
@@ -552,7 +677,7 @@ public class TransferPatternsTask implements Runnable {
 
       Edge payload = sptEdge.payload;
 
-      if (payload instanceof TPOfflineArrivalAndTransferEdge) {
+      if (payload instanceof TPOfflineTransferEdge) {
 
         TPOfflineBlockArrivalVertex fromV = (TPOfflineBlockArrivalVertex) sptEdge.narrative.getFromVertex();
         TPOfflineTransferVertex toV = (TPOfflineTransferVertex) sptEdge.narrative.getToVertex();

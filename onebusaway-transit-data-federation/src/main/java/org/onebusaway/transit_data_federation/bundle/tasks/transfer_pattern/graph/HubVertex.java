@@ -4,12 +4,11 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
-import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertexWithEdges;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.Edge;
-import org.opentripplanner.routing.core.HasEdges;
 
-public class HubVertex extends AbstractStopVertex implements HasEdges {
+public class HubVertex extends AbstractStopVertexWithEdges {
 
   private final boolean _isTransfer;
 
@@ -20,21 +19,6 @@ public class HubVertex extends AbstractStopVertex implements HasEdges {
 
   public boolean isTransfer() {
     return _isTransfer;
-  }
-
-  @Override
-  public int getDegreeIn() {
-    return getIncoming().size();
-  }
-
-  @Override
-  public int getDegreeOut() {
-    return getOutgoing().size();
-  }
-
-  @Override
-  public Collection<Edge> getIncoming() {
-    throw new UnsupportedOperationException();
   }
 
   @Override

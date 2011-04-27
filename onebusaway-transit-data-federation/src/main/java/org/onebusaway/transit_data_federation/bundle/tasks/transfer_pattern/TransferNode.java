@@ -3,13 +3,13 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
-public class TransferTree extends TransferTreeNode {
+public class TransferNode extends TransferParent {
 
   private final Pair<StopEntry> stops;
-  
+
   private boolean _exitAllowed;
 
-  public TransferTree(Pair<StopEntry> stops) {
+  public TransferNode(Pair<StopEntry> stops) {
     this.stops = stops;
   }
 
@@ -28,7 +28,7 @@ public class TransferTree extends TransferTreeNode {
   public void setExitAllowed(boolean exitAllowed) {
     _exitAllowed = exitAllowed;
   }
-  
+
   public boolean isExitAllowed() {
     return _exitAllowed;
   }

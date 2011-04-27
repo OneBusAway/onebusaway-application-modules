@@ -2,7 +2,8 @@ package org.onebusaway.transit_data_federation.services.tripplanner;
 
 import java.util.Collection;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferTree;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public interface TransferPatternService {
@@ -13,9 +14,11 @@ public interface TransferPatternService {
    */
   public boolean isEnabled();
 
-  public Collection<TransferTree> getTransferPatternForStops(
+  public Collection<TransferNode> getTransferPatternForStops(
       StopEntry stopFrom, Iterable<StopEntry> stopsTo);
 
-  public Collection<TransferTree> getReverseTransferPatternForStops(
+  public Collection<TransferNode> getReverseTransferPatternForStops(
       Iterable<StopEntry> stopsFrom, StopEntry stopTo);
+
+  public Collection<TransferNode> expandNode(HubNode node);
 }

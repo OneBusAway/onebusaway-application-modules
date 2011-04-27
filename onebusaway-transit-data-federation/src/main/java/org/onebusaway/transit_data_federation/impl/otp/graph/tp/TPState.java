@@ -4,28 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.collections.tuple.Pair;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferTree;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 
 public class TPState {
 
   private final TPQueryData queryData;
 
-  private final TransferTree tree;
-  
+  private final TransferNode node;
+
   private final boolean isReverse;
 
-  public static TPState start(TPQueryData queryData, TransferTree tree) {
-    return new TPState(queryData, tree, false);
+  public static TPState start(TPQueryData queryData, TransferNode node) {
+    return new TPState(queryData, node, false);
   }
 
-  public static TPState end(TPQueryData queryData, TransferTree tree) {
-    return new TPState(queryData, tree, true);
+  public static TPState end(TPQueryData queryData, TransferNode node) {
+    return new TPState(queryData, node, true);
   }
 
-  private TPState(TPQueryData queryData, TransferTree tree, boolean isReverse) {
+  private TPState(TPQueryData queryData, TransferNode node, boolean isReverse) {
     this.queryData = queryData;
-    this.tree = tree;
+    this.node = node;
     this.isReverse = isReverse;
   }
 
@@ -33,35 +35,44 @@ public class TPState {
     return queryData;
   }
 
-  public TransferTree getTree() {
-    return tree;
+  public TransferNode getNode() {
+    return node;
   }
-  
+
   public boolean isReverse() {
     return isReverse;
   }
 
   public Pair<StopEntry> getStops() {
-    return tree.getStops();
+    return node.getStops();
   }
 
   public boolean hasTransfers() {
-    return ! tree.getTransfers().isEmpty();
+    return !(node.getTransfers().isEmpty() && node.getHubs().isEmpty());
   }
-  
+
   public boolean isExitAllowed() {
-    return tree.isExitAllowed();
+    return node.isExitAllowed();
   }
-  
-  public List<TPState> getTransferStates() {
+
+  public List<TPState> getTransferStates(
+      TransferPatternService transferPatternService) {
+
     List<TPState> next = new ArrayList<TPState>();
-    for( TransferTree nextTree : tree.getTransfers() )
-      next.add(new TPState(queryData, nextTree, isReverse));
+
+    for (TransferNode nextTransfer : node.getTransfers())
+      next.add(new TPState(queryData, nextTransfer, isReverse));
+
+    for (HubNode hubNode : node.getHubs()) {
+      for (TransferNode nextTransfer : transferPatternService.expandNode(hubNode))
+        next.add(new TPState(queryData, nextTransfer, isReverse));
+    }
+
     return next;
   }
 
   @Override
   public String toString() {
-    return tree.getFromStop().getId() + " " + tree.getToStop().getId();
+    return node.getFromStop().getId() + " " + node.getToStop().getId();
   }
 }

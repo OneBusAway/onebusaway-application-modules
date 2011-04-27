@@ -11,11 +11,11 @@ public interface TransferPattern {
 
   public Set<StopEntry> getStops();
 
-  public Collection<TransferTreeNode> getTransfersForStop(StopEntry stop,
-      TransferTreeNode root);
+  public Collection<TransferParent> getTransfersForStop(StopEntry stop,
+      TransferParent root);
 
   public Set<StopEntry> getHubStops();
 
-  public Collection<TransferTreeNode> getTransfersForHubStop(StopEntry stop,
-      TransferTreeNode root);
+  public Collection<TransferParent> getTransfersForHubStop(StopEntry stop,
+      TransferParent root);
 }

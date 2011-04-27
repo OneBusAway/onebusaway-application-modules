@@ -3,7 +3,7 @@ package org.onebusaway.transit_data_federation.impl.otp.graph;
 import java.util.Collection;
 import java.util.Set;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferTree;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPArrivalVertex;
@@ -102,10 +102,10 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
 
     TraverseResult results = null;
 
-    Collection<TransferTree> trees = tpService.getReverseTransferPatternForStops(
+    Collection<TransferNode> trees = tpService.getReverseTransferPatternForStops(
         sourceStops, _stop);
 
-    for (TransferTree tree : trees) {
+    for (TransferNode tree : trees) {
 
       TPState pathState = TPState.end(queryData, tree);
 

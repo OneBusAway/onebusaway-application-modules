@@ -67,6 +67,8 @@ public class StopTransferServiceImpl implements StopTransferService {
       stopIds.addAll(reversedStopTransfersByStopId.keySet());
 
       _log.info("stop transfers=" + stopTransferDataByStopId.size());
+      _log.info("reverse stop transfers="
+          + reversedStopTransfersByStopId.size());
 
       for (AgencyAndId stopId : stopIds) {
 

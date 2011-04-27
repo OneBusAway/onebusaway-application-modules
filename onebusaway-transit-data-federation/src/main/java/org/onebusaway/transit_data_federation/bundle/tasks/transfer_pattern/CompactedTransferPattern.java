@@ -11,7 +11,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class CompactedTransferPattern implements TransferPattern {
 
-  private final StopEntry[] _stops;
+  private final short[] _stopIndices;
 
   private final int[] _parentIndices;
 
@@ -19,13 +19,16 @@ public class CompactedTransferPattern implements TransferPattern {
 
   private final Map<StopEntry, int[]> _leafIndicesByAccessStop;
 
-  public CompactedTransferPattern(StopEntry[] stops, int[] parentIndices,
+  private final List<StopEntry> _allStops;
+
+  public CompactedTransferPattern(short[] stopIndices, int[] parentIndices,
       Map<StopEntry, int[]> leafIndicesByStop,
-      Map<StopEntry, int[]> leafIndicesByHubStop) {
-    _stops = stops;
+      Map<StopEntry, int[]> leafIndicesByHubStop, List<StopEntry> allStops) {
+    _stopIndices = stopIndices;
     _parentIndices = parentIndices;
     _leafIndicesByStop = leafIndicesByStop;
     _leafIndicesByAccessStop = leafIndicesByHubStop;
+    _allStops = allStops;
   }
 
   /****
@@ -34,7 +37,7 @@ public class CompactedTransferPattern implements TransferPattern {
 
   @Override
   public StopEntry getOriginStop() {
-    return _stops[0];
+    return _allStops.get(_stopIndices[0]);
   }
 
   @Override
@@ -43,11 +46,11 @@ public class CompactedTransferPattern implements TransferPattern {
   }
 
   @Override
-  public Collection<TransferTreeNode> getTransfersForStop(StopEntry stop,
-      TransferTreeNode root) {
+  public Collection<TransferParent> getTransfersForStop(StopEntry stop,
+      TransferParent root) {
 
     int[] leafIndices = _leafIndicesByStop.get(stop);
-    return getTransfersForLeafIndices(root, leafIndices);
+    return getTransfersForLeafIndices(root, leafIndices, true);
   }
 
   @Override
@@ -56,43 +59,43 @@ public class CompactedTransferPattern implements TransferPattern {
   }
 
   @Override
-  public Collection<TransferTreeNode> getTransfersForHubStop(StopEntry stop,
-      TransferTreeNode root) {
+  public Collection<TransferParent> getTransfersForHubStop(StopEntry stop,
+      TransferParent root) {
 
     int[] leafIndices = _leafIndicesByAccessStop.get(stop);
-    return getTransfersForLeafIndices(root, leafIndices);
+    return getTransfersForLeafIndices(root, leafIndices, false);
   }
 
   /****
    * 
    ****/
 
-  private List<TransferTreeNode> getTransfersForLeafIndices(
-      TransferTreeNode root, int[] leafIndices) {
+  private List<TransferParent> getTransfersForLeafIndices(TransferParent root,
+      int[] leafIndices, boolean exitAllowed) {
 
     if (leafIndices == null)
       return Collections.emptyList();
 
-    List<TransferTreeNode> nodes = new ArrayList<TransferTreeNode>();
+    List<TransferParent> nodes = new ArrayList<TransferParent>();
     for (int rootIndex : leafIndices)
-      nodes.add(getTransferForLeafIndex(rootIndex, true, root));
+      nodes.add(getTransferForLeafIndex(rootIndex, exitAllowed, root));
     return nodes;
   }
 
-  private TransferTreeNode getTransferForLeafIndex(int leafIndex,
-      boolean exitAllowed, TransferTreeNode root) {
+  private TransferParent getTransferForLeafIndex(int leafIndex,
+      boolean exitAllowed, TransferParent root) {
 
     if (leafIndex < 0)
       return root;
 
-    StopEntry toStop = _stops[leafIndex];
+    StopEntry toStop = _allStops.get(_stopIndices[leafIndex]);
     leafIndex = _parentIndices[leafIndex];
     if (leafIndex < 0)
       throw new IllegalStateException();
-    StopEntry fromStop = _stops[leafIndex];
+    StopEntry fromStop = _allStops.get(_stopIndices[leafIndex]);
     leafIndex = _parentIndices[leafIndex];
 
-    TransferTreeNode parent = getTransferForLeafIndex(leafIndex, false, root);
+    TransferParent parent = getTransferForLeafIndex(leafIndex, false, root);
     return parent.extendTree(fromStop, toStop, exitAllowed);
   }
 }

@@ -47,7 +47,7 @@ public class TPDepartureEdge extends AbstractEdge {
 
     long maxScheduledDeparture = s0.getTime() + offset * 1000;
 
-    List<Pair<ArrivalAndDepartureInstance>> instances = adService.getNextDeparturesForStopPair(
+    List<Pair<ArrivalAndDepartureInstance>> instances = adService.getDeparturesForStopPair(
         stopPair.getFirst(), stopPair.getSecond(), targetTime, offset, obaOpts.useRealtime);
 
     TraverseResult results = null;

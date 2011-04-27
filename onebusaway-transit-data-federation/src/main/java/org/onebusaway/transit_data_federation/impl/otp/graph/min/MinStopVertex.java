@@ -7,31 +7,20 @@ import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.MinTravelTimeUsingTransitHeuristic.CustomGraphContext;
-import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertex;
+import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertexWithEdges;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopHop;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopHopService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.opentripplanner.routing.core.Edge;
-import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
 
-public class MinStopVertex extends AbstractStopVertex implements HasEdges {
+public class MinStopVertex extends AbstractStopVertexWithEdges {
 
   public MinStopVertex(GraphContext context, StopEntry stop) {
     super(context, stop);
-  }
-
-  @Override
-  public int getDegreeIn() {
-    return getIncoming().size();
-  }
-
-  @Override
-  public int getDegreeOut() {
-    return getOutgoing().size();
   }
 
   @Override

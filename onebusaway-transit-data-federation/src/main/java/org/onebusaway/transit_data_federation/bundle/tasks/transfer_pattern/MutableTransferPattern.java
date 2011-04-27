@@ -74,10 +74,10 @@ public class MutableTransferPattern implements TransferPattern {
   }
 
   @Override
-  public Collection<TransferTreeNode> getTransfersForStop(StopEntry stop,
-      TransferTreeNode root) {
+  public Collection<TransferParent> getTransfersForStop(StopEntry stop,
+      TransferParent root) {
 
-    List<TransferTreeNode> paths = new ArrayList<TransferTreeNode>();
+    List<TransferParent> paths = new ArrayList<TransferParent>();
     Set<Entry> entries = _stops.get(stop);
 
     for (Entry entry : entries)
@@ -92,8 +92,8 @@ public class MutableTransferPattern implements TransferPattern {
   }
 
   @Override
-  public Collection<TransferTreeNode> getTransfersForHubStop(StopEntry stop,
-      TransferTreeNode root) {
+  public Collection<TransferParent> getTransfersForHubStop(StopEntry stop,
+      TransferParent root) {
     return Collections.emptyList();
   }
 
@@ -101,8 +101,8 @@ public class MutableTransferPattern implements TransferPattern {
    * Private Methods
    *****/
 
-  private TransferTreeNode getTransferForEntry(Entry node, boolean exitAllowed,
-      TransferTreeNode root) {
+  private TransferParent getTransferForEntry(Entry node, boolean exitAllowed,
+      TransferParent root) {
 
     if (node == null)
       return root;
@@ -113,7 +113,7 @@ public class MutableTransferPattern implements TransferPattern {
       throw new IllegalStateException();
     node = a.parent;
 
-    TransferTreeNode parent = getTransferForEntry(node, false, root);
+    TransferParent parent = getTransferForEntry(node, false, root);
     return parent.extendTree(a.stop, b.stop, exitAllowed);
   }
 

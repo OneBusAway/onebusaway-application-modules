@@ -28,11 +28,21 @@ public class CompactedTransferPatternFactory {
   private final Map<StopEntry, TransferPattern> _patternsByOriginStop = new HashMap<StopEntry, TransferPattern>();
 
   private final TransitGraphDao _dao;
-  
+
   private long _lines = 0;
+
+  private List<StopEntry> _allStops;
+
+  private Map<StopEntry, Short> _indices = new HashMap<StopEntry, Short>();
 
   public CompactedTransferPatternFactory(TransitGraphDao dao) {
     _dao = dao;
+    _allStops = dao.getAllStops();
+    if (_allStops.size() > Short.MAX_VALUE)
+      throw new IllegalStateException("more than " + Short.MAX_VALUE
+          + " stops means our indexing trick will no long work");
+    for (short in = (short) 0; in < _allStops.size(); in++)
+      _indices.put(_allStops.get(in), in);
   }
 
   public Map<StopEntry, TransferPattern> getPatternsByOriginStop() {
@@ -54,8 +64,8 @@ public class CompactedTransferPatternFactory {
     Map<Long, Integer> indicesByKey = new HashMap<Long, Integer>();
 
     while ((line = reader.readLine()) != null) {
-      
-      if( _lines % 10000 == 0)
+
+      if (_lines % 1000000 == 0)
         _log.info("lines=" + _lines);
 
       List<String> tokens = CSVLibrary.parse(line);
@@ -93,7 +103,7 @@ public class CompactedTransferPatternFactory {
       } else {
         hubLeafIndices.get(stop).add(parentIndex);
       }
-      
+
       _lines++;
     }
 
@@ -102,7 +112,7 @@ public class CompactedTransferPatternFactory {
 
     reader.close();
   }
-  
+
   public long getLines() {
     return _lines;
   }
@@ -119,25 +129,29 @@ public class CompactedTransferPatternFactory {
   }
 
   private void compact(List<StopEntry> stops, List<Integer> parentIndices,
-      Map<StopEntry, List<Integer>> leafIndicesByStop, Map<StopEntry, List<Integer>> hubLeafIndicesByStop) {
+      Map<StopEntry, List<Integer>> leafIndicesByStop,
+      Map<StopEntry, List<Integer>> hubLeafIndicesByStop) {
 
     if (stops.isEmpty())
       return;
 
-    StopEntry[] stopArray = new StopEntry[stops.size()];
+    short[] stopIndexArray = new short[stops.size()];
     int[] parentIndicesArray = new int[stops.size()];
-    
+
     for (int i = 0; i < stops.size(); i++) {
-      stopArray[i] = stops.get(i);
+      stopIndexArray[i] = _indices.get(stops.get(i));
       parentIndicesArray[i] = parentIndices.get(i);
     }
 
     Map<StopEntry, int[]> leafIndices = compactLeafIndices(leafIndicesByStop);
     Map<StopEntry, int[]> hubLeafIndices = compactLeafIndices(hubLeafIndicesByStop);
 
-    CompactedTransferPattern pattern = new CompactedTransferPattern(stopArray,
-        parentIndicesArray, leafIndices, hubLeafIndices);
+    CompactedTransferPattern pattern = new CompactedTransferPattern(
+        stopIndexArray, parentIndicesArray, leafIndices, hubLeafIndices,
+        _allStops);
     
+    //System.out.println(leafIndices.size() + " " + hubLeafIndices.size());
+
     StopEntry originStop = pattern.getOriginStop();
 
     TransferPattern existing = _patternsByOriginStop.put(originStop, pattern);
@@ -147,6 +161,7 @@ public class CompactedTransferPatternFactory {
     stops.clear();
     parentIndices.clear();
     leafIndicesByStop.clear();
+    hubLeafIndicesByStop.clear();
   }
 
   private Map<StopEntry, int[]> compactLeafIndices(

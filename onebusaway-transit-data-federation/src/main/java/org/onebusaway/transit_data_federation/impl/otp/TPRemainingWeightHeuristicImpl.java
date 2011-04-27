@@ -4,7 +4,8 @@ import java.util.Collection;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferTree;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.HasPathStateVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
@@ -74,11 +75,12 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
       HasPathStateVertex tpV = (HasPathStateVertex) v;
 
       TPState pathState = tpV.getPathState();
-      TransferTree tree = pathState.getTree();
+      TransferNode node = pathState.getNode();
 
       boolean isFromSourceStop = tpV.isDeparture() ^ pathState.isReverse();
 
-      return getWeightForTree(null, tree, isFromSourceStop, target);
+      CoordinatePoint dest = new CoordinatePoint(target.getY(), target.getX());
+      return getWeightForTransferNode(null, node, isFromSourceStop, dest);
     }
 
     double distanceEstimate = distance(v, target);
@@ -88,33 +90,27 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
     return distanceEstimate / maxSpeed;
   }
 
-  private double getWeightForTree(TransferTree parentTree, TransferTree tree,
-      boolean isFromSourceStop, Vertex target) {
+  private double getWeightForTransferNode(TransferNode parentNode,
+      TransferNode node, boolean isFromSourceStop, CoordinatePoint target) {
 
     double w = 0;
 
-    if (parentTree != null && isFromSourceStop) {
-
-      StopEntry fromStop = parentTree.getToStop();
-      StopEntry toStop = tree.getFromStop();
-      double walkDistance = SphericalGeometryLibrary.distance(
-          fromStop.getStopLocation(), toStop.getStopLocation());
-      int walkTime = (int) (walkDistance / _options.speed);
-      double transferWeight = ItineraryWeightingLibrary.computeTransferWeight(
-          walkTime, _options);
-      w += transferWeight;
-    }
-
     if (isFromSourceStop) {
 
-      StopEntry fromStop = tree.getFromStop();
-      StopEntry toStop = tree.getToStop();
+      if (parentNode != null) {
+        StopEntry fromStop = parentNode.getToStop();
+        StopEntry toStop = node.getFromStop();
+        double transferWeight = computeTransferWeight(
+            fromStop.getStopLocation(), toStop.getStopLocation());
+        w += transferWeight;
+      }
 
-      double transitDistance = SphericalGeometryLibrary.distance(
-          fromStop.getStopLat(), fromStop.getStopLon(), toStop.getStopLat(),
-          toStop.getStopLon());
-      int transitTime = (int) (transitDistance / _maxTransitSpeed);
-      w += transitTime;
+      StopEntry fromStop = node.getFromStop();
+      StopEntry toStop = node.getToStop();
+
+      int transitWeight = computeTransitWeight(fromStop.getStopLocation(),
+          toStop.getStopLocation());
+      w += transitWeight;
     }
 
     /**
@@ -125,25 +121,31 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
     /**
      * We could exit if we're allowed, walking to our destination
      */
-    if (tree.isExitAllowed()) {
+    if (node.isExitAllowed()) {
 
-      StopEntry toStop = tree.getToStop();
-      CoordinatePoint dest = new CoordinatePoint(target.getY(), target.getX());
+      StopEntry toStop = node.getToStop();
 
-      double walkDistance = SphericalGeometryLibrary.distance(
-          toStop.getStopLocation(), dest);
-      int walkTime = (int) (walkDistance / _options.speed);
-      double transferWeight = ItineraryWeightingLibrary.computeTransferWeight(
-          walkTime, _options);
+      double transferWeight = computeTransferWeight(toStop.getStopLocation(),
+          target);
       minOption = Math.min(transferWeight, minOption);
     }
 
     /**
-     * Of we could transfer to another transfer pattern
+     * Or we could transfer to another transfer pattern
      */
-    Collection<TransferTree> transfers = tree.getTransfers();
-    for (TransferTree subTree : transfers) {
-      double subWeight = getWeightForTree(tree, subTree, true, target);
+    Collection<TransferNode> transfers = node.getTransfers();
+    for (TransferNode subTree : transfers) {
+      double subWeight = getWeightForTransferNode(node, subTree, true, target);
+      minOption = Math.min(subWeight, minOption);
+    }
+    Collection<HubNode> hubs = node.getHubs();
+    for (HubNode hubNode : hubs) {
+      StopEntry hubStop = hubNode.getHubStop();
+      CoordinatePoint hubLocation = hubStop.getStopLocation();
+      double transferWeight = computeTransferWeight(
+          node.getToStop().getStopLocation(), hubLocation);
+      double transitWeight = computeTransitWeight(hubLocation, target);
+      double subWeight = transferWeight + transitWeight;
       minOption = Math.min(subWeight, minOption);
     }
 
@@ -181,6 +183,18 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
       return _options.speed;
 
     return _maxTransitSpeed;
+  }
+
+  private int computeTransitWeight(CoordinatePoint from, CoordinatePoint to) {
+    double transitDistance = SphericalGeometryLibrary.distance(from, to);
+    return (int) (transitDistance / _maxTransitSpeed);
+  }
+
+  private double computeTransferWeight(CoordinatePoint source,
+      CoordinatePoint dest) {
+    double walkDistance = SphericalGeometryLibrary.distance(source, dest);
+    int walkTime = (int) (walkDistance / _options.speed);
+    return ItineraryWeightingLibrary.computeTransferWeight(walkTime, _options);
   }
 
   private double distance(Vertex a, Vertex b) {

@@ -10,22 +10,16 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertexW
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.opentripplanner.routing.core.Edge;
-import org.opentripplanner.routing.edgetype.FreeEdge;
 
-public class TPOfflineOriginVertex extends AbstractStopVertexWithEdges {
-
-  private final List<StopTimeInstance> _instances;
+public class TPOfflineNearbyStopsVertex extends AbstractStopVertexWithEdges {
 
   private final Map<StopEntry, Integer> _nearbyStopsAndWalkTimes;
-
   private final Map<StopEntry, List<StopTimeInstance>> _nearbyStopTimeInstances;
 
-  public TPOfflineOriginVertex(GraphContext context, StopEntry stop,
-      List<StopTimeInstance> instances,
+  public TPOfflineNearbyStopsVertex(GraphContext context, StopEntry stop,
       Map<StopEntry, Integer> nearbyStopsAndWalkTimes,
       Map<StopEntry, List<StopTimeInstance>> nearbyStopTimeInstances) {
     super(context, stop);
-    _instances = instances;
     _nearbyStopsAndWalkTimes = nearbyStopsAndWalkTimes;
     _nearbyStopTimeInstances = nearbyStopTimeInstances;
   }
@@ -34,16 +28,27 @@ public class TPOfflineOriginVertex extends AbstractStopVertexWithEdges {
   public Collection<Edge> getOutgoing() {
 
     List<Edge> edges = new ArrayList<Edge>();
-    edges.add(new TPOfflineStopTimeInstancesEdge(_context, this, _instances, 0));
 
-    /**
-     * We can't ignore the fact that it might be faster to just walk to a
-     * different stop (like across the street)
-     */
-    TPOfflineNearbyStopsVertex vNearby = new TPOfflineNearbyStopsVertex(
-        _context, _stop, _nearbyStopsAndWalkTimes, _nearbyStopTimeInstances);
-    edges.add(new FreeEdge(this, vNearby));
+    for (Map.Entry<StopEntry, Integer> entry : _nearbyStopsAndWalkTimes.entrySet()) {
+
+      StopEntry nearbyStop = entry.getKey();
+      int walkTime = entry.getValue();
+
+      List<StopTimeInstance> instances = _nearbyStopTimeInstances.get(nearbyStop);
+
+      if (instances.isEmpty())
+        continue;
+
+      edges.add(new TPOfflineStopTimeInstancesEdge(_context, this, instances,
+          walkTime));
+    }
 
     return edges;
   }
+
+  @Override
+  public String toString() {
+    return "TPOfflineNearbyStopsVertex()";
+  }
+
 }

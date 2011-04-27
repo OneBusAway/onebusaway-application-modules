@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 import org.opentripplanner.routing.edgetype.FreeEdge;
@@ -42,7 +43,8 @@ public class TPBlockDepartureVertex extends AbstractTPPathStateVertex {
     List<Edge> edges = new ArrayList<Edge>();
 
     if (_pathState.hasTransfers()) {
-      List<TPState> transferStates = _pathState.getTransferStates();
+      TransferPatternService tpService = _context.getTransferPatternService();
+      List<TPState> transferStates = _pathState.getTransferStates(tpService);
       for (TPState nextState : transferStates) {
         Edge edge = new TPTransferEdge(_context, _pathState, nextState,
             _departure, _arrival, true);
