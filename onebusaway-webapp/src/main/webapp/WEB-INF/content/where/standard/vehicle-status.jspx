@@ -34,7 +34,7 @@
     <s:push value="result">
         <ul>
             <li>Vehicle ID: <s:property value="vehicleId" /></li>
-            <li>Last update: <oba:date format="hh:mm:ss aa"
+            <li>Last update: <oba:date format="EEE, MMM d yyyy h:mm:ss aa"
                 value="lastUpdateTime" /></li>
             <s:if test="tripStatus != null">
                 <s:push value="tripStatus">
