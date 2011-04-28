@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
-import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.csv_entities.CSVLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -54,14 +54,9 @@ public class CompactedTransferPatternFactory {
     BufferedReader reader = openFile(path);
     String line = null;
 
-    List<StopEntry> stops = new ArrayList<StopEntry>();
-    List<Integer> parentIndices = new ArrayList<Integer>();
-    Map<StopEntry, List<Integer>> leafIndices = new FactoryMap<StopEntry, List<Integer>>(
-        new ArrayList<Integer>());
-    Map<StopEntry, List<Integer>> hubLeafIndices = new FactoryMap<StopEntry, List<Integer>>(
-        new ArrayList<Integer>());
+    List<Record> records = new ArrayList<Record>();
 
-    Map<Long, Integer> indicesByKey = new HashMap<Long, Integer>();
+    StopEntry originStop = null;
 
     while ((line = reader.readLine()) != null) {
 
@@ -70,47 +65,42 @@ public class CompactedTransferPatternFactory {
 
       List<String> tokens = CSVLibrary.parse(line);
 
-      if (tokens.size() == 3) {
-        compact(stops, parentIndices, leafIndices, hubLeafIndices);
-        indicesByKey.clear();
-      }
-
-      int index = stops.size();
-
-      long key = Long.parseLong(tokens.get(0));
-
       AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(tokens.get(1));
       StopEntry stop = _dao.getStopEntryForId(stopId, true);
+      short stopIndex = _indices.get(stop);
 
-      boolean endpoint = tokens.get(2).equals("1");
-      boolean hub = tokens.get(2).equals("2");
-
-      int parentIndex = -1;
-      if (tokens.size() == 4) {
-        long parentKey = Long.parseLong(tokens.get(3));
-        parentIndex = indicesByKey.get(parentKey);
+      if (tokens.size() == 3) {
+        compact(originStop, records);
+        originStop = stop;        
       }
 
-      if (!hub) {
+      String key = tokens.get(0);
+      ERecordType type = getRecordTypeForValue(tokens.get(2));
 
-        stops.add(stop);
-        indicesByKey.put(key, index);
+      String parentKey = null;
+      if (tokens.size() == 4)
+        parentKey = tokens.get(3);
 
-        if (endpoint)
-          leafIndices.get(stop).add(index);
-
-        parentIndices.add(parentIndex);
-      } else {
-        hubLeafIndices.get(stop).add(parentIndex);
-      }
+      Record record = new Record(key, stopIndex, parentKey, type);
+      records.add(record);
 
       _lines++;
     }
 
-    if (!stops.isEmpty())
-      compact(stops, parentIndices, leafIndices, hubLeafIndices);
+    if (!records.isEmpty())
+      compact(originStop, records);
 
     reader.close();
+  }
+
+  private ERecordType getRecordTypeForValue(String v) {
+    if (v.equals("0"))
+      return ERecordType.NODE;
+    if (v.equals("1"))
+      return ERecordType.EXIT_ALLOWED;
+    if (v.equals("2"))
+      return ERecordType.HUB;
+    throw new IllegalStateException("uknown record type");
   }
 
   public long getLines() {
@@ -128,53 +118,80 @@ public class CompactedTransferPatternFactory {
     return new BufferedReader(new InputStreamReader(in));
   }
 
-  private void compact(List<StopEntry> stops, List<Integer> parentIndices,
-      Map<StopEntry, List<Integer>> leafIndicesByStop,
-      Map<StopEntry, List<Integer>> hubLeafIndicesByStop) {
+  private void compact(StopEntry originStop, List<Record> records) {
 
-    if (stops.isEmpty())
+    if (records.isEmpty())
       return;
 
-    short[] stopIndexArray = new short[stops.size()];
-    int[] parentIndicesArray = new int[stops.size()];
+    Collections.sort(records);
 
-    for (int i = 0; i < stops.size(); i++) {
-      stopIndexArray[i] = _indices.get(stops.get(i));
-      parentIndicesArray[i] = parentIndices.get(i);
+    Map<String, Integer> offsets = new HashMap<String, Integer>();
+    for (Record record : records)
+      offsets.put(record.key, offsets.size());
+
+    short[] stopIndexArray = new short[records.size()];
+    int[] parentIndicesArray = new int[records.size()];
+
+    int exitAllowedOffset = records.size();
+    int hubOffset = records.size();;
+
+    for (int i = 0; i < records.size(); i++) {
+      Record record = records.get(i);
+      stopIndexArray[i] = record.stopIndex;
+      int offset = -1;
+      if (record.parentKey != null)
+        offset = offsets.get(record.parentKey);
+      parentIndicesArray[i] = offset;
+      switch (record.type) {
+        case NODE:
+          exitAllowedOffset = i + 1;
+          hubOffset = i + 1;
+          break;
+        case EXIT_ALLOWED:
+          hubOffset = i + 1;
+          break;
+      }
     }
 
-    Map<StopEntry, int[]> leafIndices = compactLeafIndices(leafIndicesByStop);
-    Map<StopEntry, int[]> hubLeafIndices = compactLeafIndices(hubLeafIndicesByStop);
+    if (exitAllowedOffset == -1 || hubOffset == -1)
+      throw new IllegalStateException();
 
     CompactedTransferPattern pattern = new CompactedTransferPattern(
-        stopIndexArray, parentIndicesArray, leafIndices, hubLeafIndices,
+        stopIndexArray, parentIndicesArray, exitAllowedOffset, hubOffset,
         _allStops);
-    
-    //System.out.println(leafIndices.size() + " " + hubLeafIndices.size());
-
-    StopEntry originStop = pattern.getOriginStop();
 
     TransferPattern existing = _patternsByOriginStop.put(originStop, pattern);
     if (existing != null)
       _log.warn("overriding pattern for stop " + originStop.getId());
 
-    stops.clear();
-    parentIndices.clear();
-    leafIndicesByStop.clear();
-    hubLeafIndicesByStop.clear();
+    records.clear();
   }
 
-  private Map<StopEntry, int[]> compactLeafIndices(
-      Map<StopEntry, List<Integer>> leafIndicesByStop) {
-    Map<StopEntry, int[]> leafIndices = new HashMap<StopEntry, int[]>();
-    for (Map.Entry<StopEntry, List<Integer>> entry : leafIndicesByStop.entrySet()) {
-      StopEntry stop = entry.getKey();
-      List<Integer> indices = entry.getValue();
-      int[] array = new int[indices.size()];
-      for (int i = 0; i < indices.size(); i++)
-        array[i] = indices.get(i);
-      leafIndices.put(stop, array);
+  private enum ERecordType {
+    NODE, EXIT_ALLOWED, HUB
+  }
+
+  private static class Record implements Comparable<Record> {
+    private final String key;
+    private final short stopIndex;
+    private final String parentKey;
+    private final ERecordType type;
+
+    public Record(String key, short stopIndex, String parentKey,
+        ERecordType type) {
+      this.key = key;
+      this.stopIndex = stopIndex;
+      this.parentKey = parentKey;
+      this.type = type;
     }
-    return leafIndices;
+
+    @Override
+    public int compareTo(Record o) {
+      int c = this.type.compareTo(o.type);
+      if (c != 0)
+        return c;
+
+      return (this.stopIndex - o.stopIndex);
+    }
   }
 }

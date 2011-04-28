@@ -1,5 +1,6 @@
 package org.onebusaway.utility;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,6 +11,11 @@ import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
 public class IOLibrary {
+
+  public static BufferedReader getPathAsBufferedReader(String path)
+      throws IOException {
+    return new BufferedReader(getPathAsReader(path));
+  }
 
   public static Reader getPathAsReader(String path) throws IOException {
     return new InputStreamReader(getPathAsInputStream(path));

@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -17,9 +16,9 @@ import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.CompactedTransferPatternFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPattern;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferParent;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPattern;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -81,7 +80,7 @@ class TransferPatternServiceImpl implements TransferPatternService {
 
   @Override
   public Collection<TransferNode> getTransferPatternForStops(
-      StopEntry stopFrom, Iterable<StopEntry> stopsTo) {
+      StopEntry stopFrom, List<StopEntry> stopsTo) {
 
     TransferParent root = new TransferParent();
 
@@ -89,25 +88,25 @@ class TransferPatternServiceImpl implements TransferPatternService {
     if (pattern == null)
       return Collections.emptyList();
 
-    for (StopEntry stopTo : stopsTo)
-      pattern.getTransfersForStop(stopTo, root);
+    pattern.getTransfersForStops(root, stopsTo);
 
-    Set<StopEntry> hubStops = pattern.getHubStops();
+    Map<StopEntry, List<TransferParent>> hubParentsByStop = pattern.getTransfersForHubStops(root);
 
-    if (!hubStops.isEmpty()) {
+    for (Map.Entry<StopEntry, List<TransferParent>> entry : hubParentsByStop.entrySet()) {
 
-      for (StopEntry hubStop : hubStops) {
+      StopEntry hubStop = entry.getKey();
+      List<TransferParent> parents = entry.getValue();
 
-        Collection<TransferParent> hubNodes = pattern.getTransfersForHubStop(
-            hubStop, root);
+      Collection<TransferNode> nodes = getTransferPatternForStops(hubStop,
+          stopsTo);
 
-        for (TransferParent hubNode : hubNodes)
-          hubNode.extendHub(hubStop, stopsTo);
+      for (TransferParent parent : parents) {
+        for (TransferNode node : nodes) {
+          parent.extendTransferNode(node);
+        }
       }
-    }
 
-    if (!root.getHubs().isEmpty())
-      throw new IllegalStateException("There shouldn't be any hubs here");
+    }
 
     return root.getTransfers();
   }
@@ -135,7 +134,8 @@ class TransferPatternServiceImpl implements TransferPatternService {
 
   @Override
   public Collection<TransferNode> expandNode(HubNode node) {
-    return getTransferPatternForStops(node.getHubStop(), node.getStopsTo());
+    throw new IllegalStateException();
+    //return getTransferPatternForStops(node.getHubStop(), node.getStopsTo());
   }
 
   /****

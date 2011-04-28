@@ -69,32 +69,40 @@ public class MutableTransferPattern implements TransferPattern {
   }
 
   @Override
-  public Set<StopEntry> getStops() {
-    return _stops.keySet();
-  }
-
-  @Override
-  public Collection<TransferParent> getTransfersForStop(StopEntry stop,
-      TransferParent root) {
+  public Collection<TransferParent> getTransfersForStops(TransferParent root,
+      List<StopEntry> stops) {
 
     List<TransferParent> paths = new ArrayList<TransferParent>();
-    Set<Entry> entries = _stops.get(stop);
 
-    for (Entry entry : entries)
-      paths.add(getTransferForEntry(entry, true, root));
+    for (StopEntry stop : stops) {
+      Set<Entry> entries = _stops.get(stop);
+
+      if (entries != null) {
+        for (Entry entry : entries)
+          paths.add(getTransferForEntry(entry, true, root));
+      }
+    }
 
     return paths;
   }
 
   @Override
-  public Set<StopEntry> getHubStops() {
-    return Collections.emptySet();
+  public Collection<TransferParent> getTransfersForAllStops(TransferParent root) {
+
+    List<TransferParent> paths = new ArrayList<TransferParent>();
+
+    for (Set<Entry> entries : _stops.values()) {
+      for (Entry entry : entries)
+        paths.add(getTransferForEntry(entry, true, root));
+    }
+
+    return paths;
   }
 
   @Override
-  public Collection<TransferParent> getTransfersForHubStop(StopEntry stop,
+  public Map<StopEntry, List<TransferParent>> getTransfersForHubStops(
       TransferParent root) {
-    return Collections.emptyList();
+    return Collections.emptyMap();
   }
 
   /****
@@ -173,5 +181,4 @@ public class MutableTransferPattern implements TransferPattern {
       return stop.getId() + " " + transfer;
     }
   }
-
 }

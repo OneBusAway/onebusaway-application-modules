@@ -1,12 +1,12 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class CompactedTransferPattern implements TransferPattern {
@@ -15,19 +15,18 @@ public class CompactedTransferPattern implements TransferPattern {
 
   private final int[] _parentIndices;
 
-  private final Map<StopEntry, int[]> _leafIndicesByStop;
+  private final int _exitAllowedOffset;
 
-  private final Map<StopEntry, int[]> _leafIndicesByAccessStop;
+  private final int _hubOffset;
 
   private final List<StopEntry> _allStops;
 
   public CompactedTransferPattern(short[] stopIndices, int[] parentIndices,
-      Map<StopEntry, int[]> leafIndicesByStop,
-      Map<StopEntry, int[]> leafIndicesByHubStop, List<StopEntry> allStops) {
+      int exitAllowedOffset, int hubOffset, List<StopEntry> allStops) {
     _stopIndices = stopIndices;
     _parentIndices = parentIndices;
-    _leafIndicesByStop = leafIndicesByStop;
-    _leafIndicesByAccessStop = leafIndicesByHubStop;
+    _exitAllowedOffset = exitAllowedOffset;
+    _hubOffset = hubOffset;
     _allStops = allStops;
   }
 
@@ -41,45 +40,106 @@ public class CompactedTransferPattern implements TransferPattern {
   }
 
   @Override
-  public Set<StopEntry> getStops() {
-    return _leafIndicesByStop.keySet();
+  public Collection<TransferParent> getTransfersForStops(TransferParent root,
+      List<StopEntry> stops) {
+    
+    /**
+     * The assumption here is that the stops are in order by increasing stop.getIndex()
+     */
+
+    List<TransferParent> nodes = new ArrayList<TransferParent>();
+
+    List<Integer> leafIndices = findLeafIndicesForStops(stops);
+    for (int leafIndex : leafIndices) {
+      nodes.add(getTransferForLeafIndex(leafIndex, true, root));
+    }
+
+    return nodes;
   }
 
   @Override
-  public Collection<TransferParent> getTransfersForStop(StopEntry stop,
+  public Collection<TransferParent> getTransfersForAllStops(TransferParent root) {
+    List<TransferParent> nodes = new ArrayList<TransferParent>();
+    for (int leafIndex = _exitAllowedOffset; leafIndex < _hubOffset; leafIndex++) {
+      nodes.add(getTransferForLeafIndex(leafIndex, true, root));
+    }
+    return nodes;
+  }
+
+  @Override
+  public Map<StopEntry, List<TransferParent>> getTransfersForHubStops(
       TransferParent root) {
 
-    int[] leafIndices = _leafIndicesByStop.get(stop);
-    return getTransfersForLeafIndices(root, leafIndices, true);
+    Map<StopEntry, List<TransferParent>> parentsByHubStop = new FactoryMap<StopEntry, List<TransferParent>>(
+        new ArrayList<TransferParent>());
+
+    for (int index = _hubOffset; index < _stopIndices.length; index++) {
+      StopEntry hubStop = _allStops.get(_stopIndices[index]);
+      int leafIndex = _parentIndices[index];
+      TransferParent parent = getTransferForLeafIndex(leafIndex, false, root);
+      parentsByHubStop.get(hubStop).add(parent);
+    }
+
+    return parentsByHubStop;
   }
 
-  @Override
-  public Set<StopEntry> getHubStops() {
-    return _leafIndicesByAccessStop.keySet();
-  }
-
-  @Override
-  public Collection<TransferParent> getTransfersForHubStop(StopEntry stop,
-      TransferParent root) {
-
-    int[] leafIndices = _leafIndicesByAccessStop.get(stop);
-    return getTransfersForLeafIndices(root, leafIndices, false);
-  }
-
-  /****
+  /**
+   * @return **
    * 
    ****/
 
-  private List<TransferParent> getTransfersForLeafIndices(TransferParent root,
-      int[] leafIndices, boolean exitAllowed) {
+  private List<Integer> findLeafIndicesForStops(List<StopEntry> stops) {
+    List<Integer> indices = new ArrayList<Integer>();
+    divideAndConquer(_exitAllowedOffset, _hubOffset, stops, 0, stops.size(),
+        indices);
+    return indices;
+  }
 
-    if (leafIndices == null)
-      return Collections.emptyList();
+  private void divideAndConquer(int stopArrayIndexFrom, int stopArrayIndexTo,
+      List<StopEntry> stops, int stopsFrom, int stopsTo, List<Integer> results) {
+    
+    if( stopsFrom == stopsTo)
+      return;
 
-    List<TransferParent> nodes = new ArrayList<TransferParent>();
-    for (int rootIndex : leafIndices)
-      nodes.add(getTransferForLeafIndex(rootIndex, exitAllowed, root));
-    return nodes;
+    int mid = (stopsFrom + stopsTo) / 2;
+    StopEntry stop = stops.get(mid);
+    short stopIndex = (short) stop.getIndex();
+    int index = Arrays.binarySearch(_stopIndices, stopArrayIndexFrom,
+        stopArrayIndexTo, stopIndex);
+
+    int indexLower = -1;
+    int indexUpper = -1;
+
+    if (index >= 0) {
+      indexLower = getLowerIndex(index, stopIndex);
+      indexUpper = getUpperIndex(index, stopIndex);
+      for (int i = indexLower; i < indexUpper; i++)
+        results.add(i);
+    } else {
+      index = -(index + 1);
+      indexLower = index;
+      indexUpper = index;
+    }
+    
+    if( stopsFrom + 1 >= stopsTo)
+      return;
+
+    divideAndConquer(stopArrayIndexFrom, indexLower, stops, stopsFrom, mid,
+        results);
+    divideAndConquer(indexUpper, stopArrayIndexTo, stops, mid + 1, stopsTo,
+        results);
+  }
+
+  private int getLowerIndex(int index, short stopIndex) {
+    while (index > 0 & _stopIndices[index - 1] == stopIndex)
+      index--;
+    return index;
+  }
+
+  private int getUpperIndex(int index, short stopIndex) {
+    while (index < _stopIndices.length && _stopIndices[index] == stopIndex)
+      index++;
+    return index;
   }
 
   private TransferParent getTransferForLeafIndex(int leafIndex,

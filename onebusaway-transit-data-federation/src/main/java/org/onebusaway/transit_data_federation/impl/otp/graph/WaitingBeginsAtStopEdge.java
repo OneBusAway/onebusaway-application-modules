@@ -1,7 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
@@ -101,7 +101,7 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
 
     TPQueryData queryData = options.getExtension(TPQueryData.class);
 
-    Set<StopEntry> destStops = queryData.getDestStops();
+    List<StopEntry> destStops = queryData.getDestStops();
 
     TraverseResult results = null;
 

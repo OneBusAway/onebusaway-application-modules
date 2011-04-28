@@ -105,8 +105,8 @@
   </bean>
 
   <bean id="calendarServiceTask" class="org.onebusaway.transit_data_federation.bundle.tasks.CalendarServiceDataTask" />
-  
-  <!--  OTP Graph -->
+
+  <!-- OTP Graph -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="otp_graph" />
@@ -188,24 +188,46 @@
   </bean>
 
   <bean id="hubStopsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubStopsTask" />
-  
+
   <!-- Transfer Patterns -->
-  
+
   <!-- This is not enabled by default, as it should really be run on a cluster -->
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="transfer_patterns" />
-    <property name="afterTaskNames" value="hub_stops"/>
+    <property name="afterTaskNames" value="hub_stops" />
     <property name="task" ref="transferPatternsTask" />
-    <property name="enabled" value="false"/>
+    <property name="enabled" value="false" />
   </bean>
 
   <bean id="transferPatternsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsTask" />
+
+  <!-- -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="transfer_patterns_analysis" />
+    <property name="afterTaskNames" value="transfer_patterns" />
+    <property name="task" ref="transferPatternsAnalysisTask" />
+    <property name="enabled" value="false" />
+  </bean>
+
+  <bean id="transferPatternsAnalysisTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsAnalysisTask" />
+
+  <!-- -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="transfer_patterns_compression" />
+    <property name="afterTaskNames" value="transfer_patterns_analysis" />
+    <property name="task" ref="transferPatternsCompressionTask" />
+    <property name="enabled" value="false" />
+  </bean>
+
+  <bean id="transferPatternsCompressionTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsCompressionTask" />
 
   <!-- Block Location History -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="block_location_history" />
-    <property name="afterTaskName" value="transfer_patterns" />
+    <property name="afterTaskName" value="transfer_patterns_compression" />
     <property name="task" ref="blockLocationHistoryTask" />
   </bean>
 

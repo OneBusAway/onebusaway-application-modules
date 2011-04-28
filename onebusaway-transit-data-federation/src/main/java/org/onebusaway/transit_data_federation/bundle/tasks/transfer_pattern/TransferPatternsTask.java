@@ -288,6 +288,7 @@ public class TransferPatternsTask implements Runnable {
   }
 
   private void avgPaths(MutableTransferPattern pattern, StopEntry origin) {
+    /*
     DoubleArrayList values = new DoubleArrayList();
     for (StopEntry stop : pattern.getStops()) {
       TransferParent root = new TransferParent();
@@ -303,6 +304,7 @@ public class TransferPatternsTask implements Runnable {
     System.out.println("    mu=" + Descriptive.mean(values));
     System.out.println("median=" + Descriptive.median(values));
     System.out.println("   max=" + Descriptive.max(values));
+    */
   }
 
   private List<StopEntry> loadSourceStops() {

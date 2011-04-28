@@ -27,6 +27,8 @@ public class StopEntryImpl implements StopEntry, Serializable {
 
   private final double _lon;
 
+  private transient int _index;
+
   private transient List<BlockStopTimeIndex> _stopTimeIndices = null;
 
   private transient List<FrequencyBlockStopTimeIndex> _frequencyStopTimeIndices = null;
@@ -45,6 +47,10 @@ public class StopEntryImpl implements StopEntry, Serializable {
     _id = id;
     _lat = lat;
     _lon = lon;
+  }
+
+  public void setIndex(int index) {
+    _index = index;
   }
 
   public void addStopTimeIndex(BlockStopTimeIndex stopTimeIndex) {
@@ -136,6 +142,11 @@ public class StopEntryImpl implements StopEntry, Serializable {
     return new CoordinatePoint(_lat, _lon);
   }
 
+  @Override
+  public int getIndex() {
+    return _index;
+  }
+
   /****
    * {@link Object} Interface
    ****/
@@ -156,6 +167,15 @@ public class StopEntryImpl implements StopEntry, Serializable {
   @Override
   public String toString() {
     return "StopEntry(id=" + _id + ")";
+  }
+
+  /****
+   * {@link Comparable} Interface
+   ****/
+
+  @Override
+  public int compareTo(StopEntry o) {
+    return this.getIndex() - o.getIndex();
   }
 
   /*****************************************************************************

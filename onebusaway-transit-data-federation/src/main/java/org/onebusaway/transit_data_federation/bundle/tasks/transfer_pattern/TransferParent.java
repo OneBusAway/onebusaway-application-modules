@@ -35,6 +35,10 @@ public class TransferParent {
     return tree;
   }
 
+  public void extendTransferNode(TransferNode node) {
+    transfers.put(node.getStops(), node);
+  }
+
   public void extendHub(StopEntry hubStop, Iterable<StopEntry> stopsTo) {
     HubNode hubNode = hubs.get(hubStop);
     if (hubNode == null) {
@@ -43,7 +47,7 @@ public class TransferParent {
     }
   }
 
-  public double size() {
+  public int size() {
     if (transfers.isEmpty())
       return 1;
     int size = 0;
@@ -57,7 +61,7 @@ public class TransferParent {
     StringBuilder b = new StringBuilder();
     for (TransferNode tree : transfers.values())
       toString(tree, "", b);
-    for( HubNode hub : hubs.values()) {
+    for (HubNode hub : hubs.values()) {
       b.append(hub.getHubStop().getId());
       b.append(" h\n");
     }
@@ -74,7 +78,7 @@ public class TransferParent {
     b.append("\n");
     for (TransferNode subTree : tree.getTransfers())
       toString(subTree, prefix + "  ", b);
-    for( HubNode hub : tree.getHubs()) {
+    for (HubNode hub : tree.getHubs()) {
       b.append(prefix);
       b.append("  ");
       b.append(hub.getHubStop().getId());

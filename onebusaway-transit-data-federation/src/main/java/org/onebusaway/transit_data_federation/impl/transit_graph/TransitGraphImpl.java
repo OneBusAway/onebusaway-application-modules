@@ -95,6 +95,10 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
 
     if (_stopEntriesById == null || _stopEntriesById.size() < _stops.size())
       refreshStopMapping();
+
+    int i = 0;
+    for (StopEntryImpl stop : _stops)
+      stop.setIndex(i++);
   }
 
   public void initializeFromExistinGraph(TransitGraphImpl graph) {

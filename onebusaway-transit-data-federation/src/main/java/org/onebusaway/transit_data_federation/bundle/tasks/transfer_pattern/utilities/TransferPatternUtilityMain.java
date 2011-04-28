@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
+package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.utilities;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -22,10 +22,16 @@ public class TransferPatternUtilityMain {
 
   private static final String ARG_HUB_STOPS = "hubStops";
 
+  private static final String ARG_PRUNE_DIRECT_TRANSFERS = "pruneDirectTransfers";
+
   public static void main(String[] args) throws Exception {
     TransferPatternUtilityMain m = new TransferPatternUtilityMain();
     m.run(args);
   }
+
+  private long _currentIndex = 0;
+
+  private Map<String, String> _idMapping = new HashMap<String, String>();
 
   public void run(String[] args) throws ParseException, IOException {
     Options options = createOptions();
@@ -38,14 +44,15 @@ public class TransferPatternUtilityMain {
       System.exit(-1);
     }
 
+    boolean pruneDirectTransfers = cli.hasOption(ARG_PRUNE_DIRECT_TRANSFERS);
+
     Map<String, Integer> hubStops = loadHubStops(cli);
     Set<String> originStopsWeHaveSeen = new HashSet<String>();
 
-    Map<String, String> idMapping = new HashMap<String, String>();
     Set<String> pruneFromParent = new HashSet<String>();
     Map<String, Integer> depths = new HashMap<String, Integer>();
 
-    long currentIndex = 0;
+    Map<String, String> directTransfers = new HashMap<String, String>();
 
     for (String arg : args) {
 
@@ -55,6 +62,7 @@ public class TransferPatternUtilityMain {
       String line = null;
 
       int originHubDepth = Integer.MAX_VALUE;
+      String originIndex = null;
       boolean skipTree = false;
 
       while ((line = reader.readLine()) != null) {
@@ -65,15 +73,24 @@ public class TransferPatternUtilityMain {
         List<String> tokens = CSVLibrary.parse(line);
         String index = tokens.get(0);
         String stopId = tokens.get(1);
+        String type = tokens.get(2);
+        String parentIndex = null;
+        if (tokens.size() > 3)
+          parentIndex = tokens.get(3);
+
         int depth = 0;
+        boolean isOrigin = false;
 
-        if (tokens.size() == 3) {
+        if (parentIndex == null) {
 
+          isOrigin = true;
           originHubDepth = hubDepth(hubStops, stopId);
 
-          idMapping.clear();
+          _idMapping.clear();
           pruneFromParent.clear();
           depths.clear();
+          
+          directTransfers.clear();
 
           depths.put(index, 0);
 
@@ -90,37 +107,60 @@ public class TransferPatternUtilityMain {
         if (skipTree)
           continue;
 
-        String newIndex = Long.toString(currentIndex);
-        idMapping.put(index, newIndex);
-        tokens.set(0, newIndex);
-
-        if (tokens.size() == 4) {
-          String parentIndex = tokens.get(3);
+        if (parentIndex != null) {
           if (pruneFromParent.contains(parentIndex)) {
             pruneFromParent.add(index);
             continue;
           }
-          String newParentIndex = idMapping.get(parentIndex);
-          tokens.set(3, newParentIndex);
+
+          /**
+           * If we had an uncommited parent, commit it
+           */
+          String parentStopId = directTransfers.remove(parentIndex);
+          if (parentStopId != null)
+            commitLine(parentIndex, parentStopId, "0", originIndex);
 
           depth = depths.get(parentIndex) + 1;
           depths.put(index, depth);
+
+          String newParentIndex = _idMapping.get(parentIndex);
+          tokens.set(3, newParentIndex);
+          parentIndex = newParentIndex;
         }
 
         int hubDepth = hubDepth(hubStops, stopId);
         if ((depth % 2) == 0 && hubDepth < originHubDepth) {
           pruneFromParent.add(index);
-          tokens.set(2, "2");
+          type = "2";
         }
 
-        line = CSVLibrary.getIterableAsCSV(tokens);
-        System.out.println(line);
+        if (pruneDirectTransfers && depth == 1) {
+          directTransfers.put(index, stopId);
+        } else {
+          String newIndex = commitLine(index, stopId, type, parentIndex);
 
-        currentIndex++;
+          if (isOrigin)
+            originIndex = newIndex;
+        }
       }
 
       reader.close();
     }
+    
+    
+  }
+
+  private String commitLine(String index, String stopId, String type,
+      String parentIndex) {
+    String newIndex = Long.toString(_currentIndex);
+    _idMapping.put(index, newIndex);
+
+    String newLine = parentIndex == null ? CSVLibrary.getAsCSV(newIndex,
+        stopId, type)
+        : CSVLibrary.getAsCSV(newIndex, stopId, type, parentIndex);
+    System.out.println(newLine);
+    _currentIndex++;
+    return newIndex;
   }
 
   private int hubDepth(Map<String, Integer> hubStops, String stopId) {
@@ -133,11 +173,12 @@ public class TransferPatternUtilityMain {
   private Options createOptions() {
     Options options = new Options();
     options.addOption(ARG_HUB_STOPS, true, "");
+    options.addOption(ARG_PRUNE_DIRECT_TRANSFERS, false, "");
     return options;
   }
 
   private void usage() {
-    System.err.println("usage: [-hubStops HubStops.txt] trace [trace ...]");
+    System.err.println("usage: [-hubStops HubStops.txt] [-pruneDirectTransfers] trace [trace ...]");
   }
 
   private Map<String, Integer> loadHubStops(CommandLine cli) throws IOException {

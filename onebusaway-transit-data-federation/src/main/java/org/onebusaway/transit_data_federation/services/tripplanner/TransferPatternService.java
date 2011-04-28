@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.services.tripplanner;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
@@ -15,7 +16,7 @@ public interface TransferPatternService {
   public boolean isEnabled();
 
   public Collection<TransferNode> getTransferPatternForStops(
-      StopEntry stopFrom, Iterable<StopEntry> stopsTo);
+      StopEntry stopFrom, List<StopEntry> stopsTo);
 
   public Collection<TransferNode> getReverseTransferPatternForStops(
       Iterable<StopEntry> stopsFrom, StopEntry stopTo);

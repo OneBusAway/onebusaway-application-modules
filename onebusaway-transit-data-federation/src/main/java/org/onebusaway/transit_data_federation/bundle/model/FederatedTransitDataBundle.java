@@ -1,6 +1,7 @@
 package org.onebusaway.transit_data_federation.bundle.model;
 
 import java.io.File;
+import java.io.FilenameFilter;
 
 import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreator;
 
@@ -95,6 +96,19 @@ public class FederatedTransitDataBundle {
 
   public File getTransferPatternsPath() {
     return new File(_path, keyed("TransferPatterns.gz"));
+  }
+
+  public File[] getAllTransferPatternsPaths() {
+    return _path.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.matches("^TransferPatterns(-\\d+){0,1}\\.gz$");
+      }
+    });
+  }
+
+  public File getTransferPatternsSegmentCountsPath() {
+    return new File(_path, "TransferPatternsSegmentCounts.csv");
   }
 
   public File getServiceAlertsPath() {
