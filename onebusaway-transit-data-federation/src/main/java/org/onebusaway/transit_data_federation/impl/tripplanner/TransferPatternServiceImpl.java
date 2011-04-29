@@ -107,6 +107,9 @@ class TransferPatternServiceImpl implements TransferPatternService {
       }
 
     }
+    
+    // We have to reset the weights
+    transferPatternData.clearMinRemainingWeights();
 
     return root;
   }

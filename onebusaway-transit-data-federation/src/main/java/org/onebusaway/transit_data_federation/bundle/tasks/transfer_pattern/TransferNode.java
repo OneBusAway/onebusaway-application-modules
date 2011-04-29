@@ -10,6 +10,8 @@ public class TransferNode extends TransferParent {
   private final Pair<StopEntry> stops;
 
   private boolean _exitAllowed;
+  
+  private double _minRemainingWeight = -1;
 
   public TransferNode(TransferPatternData data, Pair<StopEntry> stops) {
     super(data);
@@ -36,6 +38,14 @@ public class TransferNode extends TransferParent {
     return _exitAllowed;
   }
 
+  public double getMinRemainingWeight() {
+    return _minRemainingWeight;
+  }
+  
+  public void setMinRemainingWeight(double minRemainingWeight) {
+    _minRemainingWeight = minRemainingWeight;
+  }
+  
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder();

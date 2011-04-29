@@ -42,4 +42,9 @@ public class TransferPatternData {
       hubs.put(hubStop, hubNode);
     }
   }
+
+  public void clearMinRemainingWeights() {
+    for (TransferNode node : transfers.values())
+      node.setMinRemainingWeight(-1);
+  }
 }
