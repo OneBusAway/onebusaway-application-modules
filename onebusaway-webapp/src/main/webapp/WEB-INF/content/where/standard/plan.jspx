@@ -67,6 +67,9 @@
   
     <div id="advancedSearchOptions" style="display: none">
       <div>
+        <span>Result Count:</span> <input id="resultCount" type="text" />
+      </div>
+      <div>
         <span>Use Real-Time:</span> <input id="useRealtime" type="checkbox" />
       </div>      
       <div>
@@ -95,6 +98,9 @@
       </div>
       <div>
         <span>Max Transfers:</span> <input id="maxTransfers" type="text" />
+      </div>
+      <div>
+        <span>Max Computation Time:</span> <input id="maxComputationTime" type="text" />
       </div>
     </div>
   </div>
