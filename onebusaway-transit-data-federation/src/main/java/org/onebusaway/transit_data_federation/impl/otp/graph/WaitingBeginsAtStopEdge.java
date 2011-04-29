@@ -105,7 +105,7 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
 
     TraverseResult results = null;
 
-    TransferParent transfers = tpService.getTransferPatternForStops(
+    TransferParent transfers = tpService.getTransferPatternsForStops(
         queryData.getTransferPatternData(), _stop, destStops);
 
     for (TransferNode tree : transfers.getTransfers()) {

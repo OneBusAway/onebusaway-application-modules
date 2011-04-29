@@ -17,10 +17,10 @@ public interface TransferPatternService {
    */
   public boolean isEnabled();
 
-  public TransferParent getTransferPatternForStops(
+  public TransferParent getTransferPatternsForStops(
       TransferPatternData transferData, StopEntry stopFrom, List<StopEntry> stopsTo);
 
-  public Collection<TransferNode> getReverseTransferPatternForStops(
+  public Collection<TransferNode> getReverseTransferPatternsForStops(
       TransferPatternData transferData, Iterable<StopEntry> stopsFrom, StopEntry stopTo);
 
   public Collection<TransferNode> expandNode(HubNode node);

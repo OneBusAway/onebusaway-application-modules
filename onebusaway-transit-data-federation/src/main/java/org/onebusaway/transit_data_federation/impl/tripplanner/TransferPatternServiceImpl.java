@@ -79,43 +79,16 @@ class TransferPatternServiceImpl implements TransferPatternService {
   }
 
   @Override
-  public TransferParent getTransferPatternForStops(
+  public TransferParent getTransferPatternsForStops(
       TransferPatternData transferPatternData, StopEntry stopFrom, List<StopEntry> stopsTo) {
-
-    TransferParent root = new TransferParent(transferPatternData);
-
-    TransferPattern pattern = _transferPatternsByStop.get(stopFrom);
-    if (pattern == null)
-      return root;
-
-    pattern.getTransfersForStops(root, stopsTo);
-
-    Map<StopEntry, List<TransferParent>> hubParentsByStop = pattern.getTransfersForHubStops(root);
-
-    for (Map.Entry<StopEntry, List<TransferParent>> entry : hubParentsByStop.entrySet()) {
-
-      StopEntry hubStop = entry.getKey();
-      List<TransferParent> parents = entry.getValue();
-
-      TransferParent nodes = getTransferPatternForStops(transferPatternData,
-          hubStop, stopsTo);
-
-      for (TransferParent parent : parents) {
-        for (TransferNode node : nodes.getTransfers()) {
-          parent.addTransferNode(node);
-        }
-      }
-
-    }
     
-    // We have to reset the weights
-    transferPatternData.clearMinRemainingWeights();
-
+    TransferParent root = getTransferPatternsForStopsInternal(transferPatternData, stopFrom, stopsTo);
+    transferPatternData.clearMinRemainingWeights();    
     return root;
   }
 
   @Override
-  public Collection<TransferNode> getReverseTransferPatternForStops(
+  public Collection<TransferNode> getReverseTransferPatternsForStops(
       TransferPatternData transferPatternData, Iterable<StopEntry> stopsFrom, StopEntry stopTo) {
 
     List<StopEntry> stopToAsList = Arrays.asList(stopTo);
@@ -124,7 +97,7 @@ class TransferPatternServiceImpl implements TransferPatternService {
 
     for (StopEntry stopFrom : stopsFrom) {
 
-      TransferParent trees = getTransferPatternForStops(transferPatternData,
+      TransferParent trees = getTransferPatternsForStopsInternal(transferPatternData,
           stopFrom, stopToAsList);      
         for (TransferNode tree : trees.getTransfers())
           reverseTree(tree, root, true);
@@ -142,6 +115,38 @@ class TransferPatternServiceImpl implements TransferPatternService {
   /****
    * Private Methods
    ****/
+  
+  private TransferParent getTransferPatternsForStopsInternal(
+      TransferPatternData transferPatternData, StopEntry stopFrom, List<StopEntry> stopsTo) {
+
+    TransferParent root = new TransferParent(transferPatternData);
+
+    TransferPattern pattern = _transferPatternsByStop.get(stopFrom);
+    if (pattern == null)
+      return root;
+
+    pattern.getTransfersForStops(root, stopsTo);
+
+    Map<StopEntry, List<TransferParent>> hubParentsByStop = pattern.getTransfersForHubStops(root);
+
+    for (Map.Entry<StopEntry, List<TransferParent>> entry : hubParentsByStop.entrySet()) {
+
+      StopEntry hubStop = entry.getKey();
+      List<TransferParent> parents = entry.getValue();
+
+      TransferParent nodes = getTransferPatternsForStopsInternal(transferPatternData,
+          hubStop, stopsTo);
+
+      for (TransferParent parent : parents) {
+        for (TransferNode node : nodes.getTransfers()) {
+          parent.addTransferNode(node);
+        }
+      }
+    }
+    
+    return root;
+  }
+
 
   private List<TransferParent> reverseTree(TransferNode tree,
       TransferParent root, boolean exitAllowed) {
