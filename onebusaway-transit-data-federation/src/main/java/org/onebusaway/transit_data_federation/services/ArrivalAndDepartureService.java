@@ -83,12 +83,12 @@ public interface ArrivalAndDepartureService {
    * @param fromStop
    * @param toStop
    * @param targetTime
-   * @param window in seconds
+   * @param resultCount the number of next departures to include per block-sequence
    * @param applyRealTime TODO
    * @return
    */
-  public List<Pair<ArrivalAndDepartureInstance>> getDeparturesForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window,
+  public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int resultCount,
       boolean applyRealTime);
 
   /**

@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.collections.Max;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
@@ -62,6 +63,34 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
     }
 
     SPTVertex existing = map.get(tripSequence);
+
+    /**
+     * We only keep the N-best itineraries. If adding this itinerary will push
+     * us over the limit, figure out which one we should prune.
+     */
+    if (existing == null && map.size() == options.numItineraries) {
+      Max<TripSequence> m = new Max<TripSequence>();
+      for (Map.Entry<TripSequence, SPTVertex> entry : map.entrySet()) {
+        TripSequence key = entry.getKey();
+        SPTVertex v = entry.getValue();
+        m.add(v.weightSum, key);
+      }
+      
+      
+      /**
+       * If the current max value is LESS than the new vertex, we don't add the new vertex
+       */
+      double v = m.getMaxValue();
+      if (v < weightSum)
+        return null;
+      
+      /**
+       * If the current max value is MORE than the new vertex, we kill the max
+       * trip sequence in preparation for adding the new, better-scoring one
+       */
+      TripSequence key = m.getMaxElement();
+      map.remove(key);
+    }
 
     if (existing == null || weightSum < existing.weightSum) {
       SPTVertex ret = new SPTVertex(vertex, state, weightSum, options);

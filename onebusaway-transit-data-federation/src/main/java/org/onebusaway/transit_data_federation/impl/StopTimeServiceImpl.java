@@ -2,8 +2,11 @@ package org.onebusaway.transit_data_federation.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.PriorityQueue;
 
 import org.onebusaway.collections.Min;
 import org.onebusaway.collections.Range;
@@ -191,7 +194,7 @@ class StopTimeServiceImpl implements StopTimeService {
   public List<Pair<StopTimeInstance>> getDeparturesBetweenStopPairInTimeRange(
       StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
       Date toDepartureTime) {
-    
+
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
 
     getDeparturesBetweenStopPairInTimeRange(fromStop, toStop,
@@ -221,14 +224,19 @@ class StopTimeServiceImpl implements StopTimeService {
 
   @Override
   public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date fromTime,
-      boolean includeAllSequences) {
+      StopEntry fromStop, StopEntry toStop, Date fromTime, int lookBehind,
+      int lookAhead, int resultCount) {
+
+    if (resultCount == 0)
+      return Collections.emptyList();
 
     List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
         fromStop, toStop);
 
-    List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
-    Min<Pair<StopTimeInstance>> min = new Min<Pair<StopTimeInstance>>();
+    long targetTime = fromTime.getTime() - lookBehind * 1000;
+
+    PriorityQueue<Pair<StopTimeInstance>> queue = new PriorityQueue<Pair<StopTimeInstance>>(
+        resultCount, new WorstArrivalTimeComparator());
 
     for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
 
@@ -239,9 +247,15 @@ class StopTimeServiceImpl implements StopTimeService {
 
       List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
           fromStopIndex.getServiceIds(), fromStopIndex.getServiceInterval(),
-          fromTime.getTime());
+          targetTime);
 
       for (Date serviceDate : serviceDates) {
+
+        if (queue.size() == resultCount) {
+          Pair<StopTimeInstance> stiPair = queue.peek();
+          if (stiPair.getSecond().getArrivalTime() < serviceDate.getTime())
+            break;
+        }
 
         int relativeFrom = effectiveTime(serviceDate.getTime(),
             fromTime.getTime());
@@ -250,25 +264,36 @@ class StopTimeServiceImpl implements StopTimeService {
             fromStopIndex.size(), relativeFrom,
             IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
 
-        if (fromIndex < fromStopIndex.size()) {
+        int hits = 0;
+
+        while (fromIndex < fromStopIndex.size() && hits < resultCount) {
           BlockStopTimeEntry blockStopTime = fromStopIndex.getBlockStopTimeForIndex(fromIndex);
           StopTimeInstance stiFrom = new StopTimeInstance(blockStopTime,
               serviceDate);
           BlockStopTimeEntry stopTimeTo = toStopTimes.get(fromIndex);
           StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
+          
+          if (queue.size() == resultCount) {
+            Pair<StopTimeInstance> stiPair = queue.peek();
+            if (stiPair.getSecond().getArrivalTime() < stiTo.getArrivalTime())
+              break;
+          }
+          
           Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          if (includeAllSequences)
-            results.add(stiPair);
-          else
-            min.add(stiFrom.getDepartureTime(), stiPair);
+          queue.add(stiPair);
+          
+          while (queue.size() > resultCount)
+            queue.poll();
+          
+          fromIndex++;
         }
       }
     }
 
-    if (includeAllSequences)
-      return results;
-    else
-      return min.getMinElements();
+    List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
+    results.addAll(queue);
+
+    return results;
   }
 
   @Override
@@ -302,7 +327,7 @@ class StopTimeServiceImpl implements StopTimeService {
             IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE);
 
         toIndex--;
-        
+
         if (0 <= toIndex) {
           BlockStopTimeEntry blockStopTime = toStopIndex.getBlockStopTimeForIndex(toIndex);
           StopTimeInstance stiTo = new StopTimeInstance(blockStopTime,
@@ -662,4 +687,14 @@ class StopTimeServiceImpl implements StopTimeService {
     return (int) ((targetTime - serviceDate) / 1000);
   }
 
+  private static class WorstArrivalTimeComparator implements
+      Comparator<Pair<StopTimeInstance>> {
+
+    @Override
+    public int compare(Pair<StopTimeInstance> o1, Pair<StopTimeInstance> o2) {
+      long t1 = o1.getSecond().getArrivalTime();
+      long t2 = o2.getSecond().getArrivalTime();
+      return t1 == t2 ? 0 : (t1 < t2 ? 1 : -1);
+    }
+  }
 }

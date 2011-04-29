@@ -186,19 +186,23 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
   }
 
   private int computeTransitWeight(CoordinatePoint from, CoordinatePoint to) {
-    double transitDistance = SphericalGeometryLibrary.distance(from, to);
+    double transitDistance = distance(from.getLat(),from.getLon(), to.getLat(),to.getLon());
     return (int) (transitDistance / _maxTransitSpeed);
   }
 
   private double computeTransferWeight(CoordinatePoint source,
       CoordinatePoint dest) {
-    double walkDistance = SphericalGeometryLibrary.distance(source, dest);
+    double walkDistance = distance(source.getLat(),source.getLon(), dest.getLat(),dest.getLon());
     int walkTime = (int) (walkDistance / _options.speed);
     return ItineraryWeightingLibrary.computeTransferWeight(walkTime, _options);
   }
 
   private double distance(Vertex a, Vertex b) {
-    return SphericalGeometryLibrary.distance(a.getY(), a.getX(), b.getY(),
-        b.getX());
+    return distance(a.getY(), a.getX(), b.getY(), b.getX());
+  }
+
+  private static final double distance(double lat1, double lon1, double lat2,
+      double lon2) {
+    return SphericalGeometryLibrary.distanceFaster(lat1, lon2, lat2, lon2);
   }
 }

@@ -17,9 +17,18 @@ public class TransitLocationBean implements Serializable {
   private long serviceDate;
 
   private String vehicleId;
-  
+
+  public TransitLocationBean() {
+
+  }
+
+  public TransitLocationBean(CoordinatePoint point) {
+    this.lat = point.getLat();
+    this.lon = point.getLon();
+  }
+
   public CoordinatePoint getLocation() {
-    return new CoordinatePoint(lat,lon);
+    return new CoordinatePoint(lat, lon);
   }
 
   public double getLat() {

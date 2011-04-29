@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.CompactedTransferPatternFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternData;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferParent;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPattern;
@@ -79,14 +79,14 @@ class TransferPatternServiceImpl implements TransferPatternService {
   }
 
   @Override
-  public Collection<TransferNode> getTransferPatternForStops(
-      StopEntry stopFrom, List<StopEntry> stopsTo) {
+  public TransferParent getTransferPatternForStops(
+      TransferPatternData transferPatternData, StopEntry stopFrom, List<StopEntry> stopsTo) {
 
-    TransferParent root = new TransferParent();
+    TransferParent root = new TransferParent(transferPatternData);
 
     TransferPattern pattern = _transferPatternsByStop.get(stopFrom);
     if (pattern == null)
-      return Collections.emptyList();
+      return root;
 
     pattern.getTransfersForStops(root, stopsTo);
 
@@ -97,36 +97,34 @@ class TransferPatternServiceImpl implements TransferPatternService {
       StopEntry hubStop = entry.getKey();
       List<TransferParent> parents = entry.getValue();
 
-      Collection<TransferNode> nodes = getTransferPatternForStops(hubStop,
-          stopsTo);
+      TransferParent nodes = getTransferPatternForStops(transferPatternData,
+          hubStop, stopsTo);
 
       for (TransferParent parent : parents) {
-        for (TransferNode node : nodes) {
-          parent.extendTransferNode(node);
+        for (TransferNode node : nodes.getTransfers()) {
+          parent.addTransferNode(node);
         }
       }
 
     }
 
-    return root.getTransfers();
+    return root;
   }
 
   @Override
   public Collection<TransferNode> getReverseTransferPatternForStops(
-      Iterable<StopEntry> stopsFrom, StopEntry stopTo) {
+      TransferPatternData transferPatternData, Iterable<StopEntry> stopsFrom, StopEntry stopTo) {
 
     List<StopEntry> stopToAsList = Arrays.asList(stopTo);
 
-    TransferParent root = new TransferParent();
+    TransferParent root = new TransferParent(transferPatternData);
 
     for (StopEntry stopFrom : stopsFrom) {
 
-      Collection<TransferNode> trees = getTransferPatternForStops(stopFrom,
-          stopToAsList);
-      if (!trees.isEmpty()) {
-        for (TransferNode tree : trees)
+      TransferParent trees = getTransferPatternForStops(transferPatternData,
+          stopFrom, stopToAsList);      
+        for (TransferNode tree : trees.getTransfers())
           reverseTree(tree, root, true);
-      }
     }
 
     return root.getTransfers();

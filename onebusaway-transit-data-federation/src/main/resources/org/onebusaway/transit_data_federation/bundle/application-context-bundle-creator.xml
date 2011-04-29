@@ -233,6 +233,16 @@
 
   <bean id="blockLocationHistoryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.history.BlockLocationHistoryTask" />
 
+  <!-- Trip Planner Test Task -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="trip_planner_test_task" />
+    <property name="afterTaskName" value="transfer_patterns_compression" />
+    <property name="task" ref="tripPlannerTestTask" />
+  </bean>
+
+  <bean id="tripPlannerTestTask" class="org.onebusaway.transit_data_federation.bundle.tasks.TripPlannerTestTask" />
+
   <!-- Pre Cache -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">

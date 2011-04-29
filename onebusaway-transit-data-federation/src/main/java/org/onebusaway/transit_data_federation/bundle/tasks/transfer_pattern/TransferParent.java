@@ -2,17 +2,24 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.onebusaway.collections.tuple.Pair;
-import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class TransferParent {
 
+  private final TransferPatternData _data;
+
   private final Map<Pair<StopEntry>, TransferNode> transfers = new HashMap<Pair<StopEntry>, TransferNode>();
 
   private final Map<StopEntry, HubNode> hubs = new HashMap<StopEntry, HubNode>();
+
+  public TransferParent(TransferPatternData data) {
+    _data = data;
+  }
 
   public Collection<TransferNode> getTransfers() {
     return transfers.values();
@@ -24,27 +31,17 @@ public class TransferParent {
 
   public TransferNode extendTree(StopEntry fromStop, StopEntry toStop,
       boolean exitAllowed) {
-    Pair<StopEntry> stops = Tuples.pair(fromStop, toStop);
-    TransferNode tree = transfers.get(stops);
-    if (tree == null) {
-      tree = new TransferNode(stops);
-      transfers.put(stops, tree);
-    }
-    if (exitAllowed)
-      tree.setExitAllowed(exitAllowed);
-    return tree;
-  }
-
-  public void extendTransferNode(TransferNode node) {
+    TransferNode node = _data.extendTree(fromStop, toStop, exitAllowed);
     transfers.put(node.getStops(), node);
+    return node;
   }
 
   public void extendHub(StopEntry hubStop, Iterable<StopEntry> stopsTo) {
-    HubNode hubNode = hubs.get(hubStop);
-    if (hubNode == null) {
-      hubNode = new HubNode(hubStop, stopsTo);
-      hubs.put(hubStop, hubNode);
-    }
+    _data.extendHub(hubStop, stopsTo);
+  }
+
+  public void addTransferNode(TransferNode node) {
+    transfers.put(node.getStops(), node);
   }
 
   public int size() {
@@ -60,7 +57,7 @@ public class TransferParent {
   public String toString() {
     StringBuilder b = new StringBuilder();
     for (TransferNode tree : transfers.values())
-      toString(tree, "", b);
+      toString(tree, new HashSet<Pair<StopEntry>>(), "", b);
     for (HubNode hub : hubs.values()) {
       b.append(hub.getHubStop().getId());
       b.append(" h\n");
@@ -68,16 +65,24 @@ public class TransferParent {
     return b.toString();
   }
 
-  protected void toString(TransferNode tree, String prefix, StringBuilder b) {
+  protected void toString(TransferNode tree, Set<Pair<StopEntry>> visited,
+      String prefix, StringBuilder b) {
+    
+    boolean firstVisit = visited.add(tree.getStops());
+    
     b.append(prefix);
     b.append(tree.getFromStop().getId());
     b.append(" ");
     b.append(tree.getToStop().getId());
     if (tree.isExitAllowed())
       b.append(" x");
+    if (!firstVisit)
+      b.append(" ...");
     b.append("\n");
+    if (!firstVisit)
+      return;
     for (TransferNode subTree : tree.getTransfers())
-      toString(subTree, prefix + "  ", b);
+      toString(subTree, visited, prefix + "  ", b);
     for (HubNode hub : tree.getHubs()) {
       b.append(prefix);
       b.append("  ");

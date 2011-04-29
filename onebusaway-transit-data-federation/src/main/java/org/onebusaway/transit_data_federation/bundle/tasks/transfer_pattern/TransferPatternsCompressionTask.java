@@ -67,7 +67,7 @@ public class TransferPatternsCompressionTask implements Runnable {
 
         StopEntry originStop = pattern.getOriginStop();
 
-        TransferParent root = new TransferParent();
+        TransferParent root = new TransferParent(new TransferPatternData());
         pattern.getTransfersForAllStops(root);
 
         Set<StopEntry> activeHubs = new HashSet<StopEntry>();

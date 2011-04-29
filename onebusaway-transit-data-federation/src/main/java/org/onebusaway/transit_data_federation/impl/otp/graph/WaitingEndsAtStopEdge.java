@@ -103,7 +103,7 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
     TraverseResult results = null;
 
     Collection<TransferNode> trees = tpService.getReverseTransferPatternForStops(
-        sourceStops, _stop);
+        queryData.getTransferPatternData(), sourceStops, _stop);
 
     for (TransferNode tree : trees) {
 

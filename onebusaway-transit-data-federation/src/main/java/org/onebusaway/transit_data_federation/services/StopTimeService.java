@@ -87,7 +87,7 @@ public interface StopTimeService {
 
   public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
       StopEntry fromStop, StopEntry toStop, Date fromTime,
-      boolean includeAllSequences);
+      int lookBehind, int lookAhead, int resultCount);
 
   public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
       StopEntry fromStop, StopEntry toStop, Date toTime,

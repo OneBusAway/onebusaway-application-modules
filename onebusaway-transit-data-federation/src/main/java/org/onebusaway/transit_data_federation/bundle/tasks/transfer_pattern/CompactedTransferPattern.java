@@ -149,13 +149,20 @@ public class CompactedTransferPattern implements TransferPattern {
       return root;
 
     StopEntry toStop = _allStops.get(_stopIndices[leafIndex]);
-    leafIndex = _parentIndices[leafIndex];
-    if (leafIndex < 0)
+    int leafIndexB = _parentIndices[leafIndex];
+    if (leafIndexB < 0)
       throw new IllegalStateException();
-    StopEntry fromStop = _allStops.get(_stopIndices[leafIndex]);
-    leafIndex = _parentIndices[leafIndex];
+    StopEntry fromStop = _allStops.get(_stopIndices[leafIndexB]);
+    int leafIndexC = _parentIndices[leafIndexB];
 
-    TransferParent parent = getTransferForLeafIndex(leafIndex, false, root);
+    TransferParent parent = getTransferForLeafIndex(leafIndexC, false, root);
+    
+    /**
+     * This really shouldn't happen... but it does, so we short circuit the transfer pattern
+     */
+    if( fromStop == toStop )
+      return parent;
+    
     return parent.extendTree(fromStop, toStop, exitAllowed);
   }
 }

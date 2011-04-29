@@ -49,7 +49,7 @@ public class TransferPatternsAnalysisTask implements Runnable {
       Map<StopEntry, TransferPattern> patterns = readPatternsForFile(file);
 
       for (TransferPattern pattern : patterns.values()) {
-        TransferParent root = new TransferParent();
+        TransferParent root = new TransferParent(new TransferPatternData());
         pattern.getTransfersForAllStops(root);
         for (TransferNode transfer : root.getTransfers())
           countTransferPairs(transfer, counts);
