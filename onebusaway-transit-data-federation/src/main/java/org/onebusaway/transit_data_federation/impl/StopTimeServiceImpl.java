@@ -230,65 +230,14 @@ class StopTimeServiceImpl implements StopTimeService {
     if (resultCount == 0)
       return Collections.emptyList();
 
-    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
-        fromStop, toStop);
-
-    long targetTime = fromTime.getTime() - lookBehind * 1000;
-
     PriorityQueue<Pair<StopTimeInstance>> queue = new PriorityQueue<Pair<StopTimeInstance>>(
         resultCount, new WorstArrivalTimeComparator());
 
-    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+    getNextDeparturesBetweenStopPair(fromStop, toStop, fromTime, lookBehind,
+        resultCount, queue);
 
-      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
-      BlockStopSequenceIndex toStopIndex = pair.getSecond();
-
-      List<BlockStopTimeEntry> toStopTimes = toStopIndex.getStopTimes();
-
-      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
-          fromStopIndex.getServiceIds(), fromStopIndex.getServiceInterval(),
-          targetTime);
-
-      for (Date serviceDate : serviceDates) {
-
-        if (queue.size() == resultCount) {
-          Pair<StopTimeInstance> stiPair = queue.peek();
-          if (stiPair.getSecond().getArrivalTime() < serviceDate.getTime())
-            break;
-        }
-
-        int relativeFrom = effectiveTime(serviceDate.getTime(),
-            fromTime.getTime());
-
-        int fromIndex = GenericBinarySearch.search(fromStopIndex,
-            fromStopIndex.size(), relativeFrom,
-            IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
-
-        int hits = 0;
-
-        while (fromIndex < fromStopIndex.size() && hits < resultCount) {
-          BlockStopTimeEntry blockStopTime = fromStopIndex.getBlockStopTimeForIndex(fromIndex);
-          StopTimeInstance stiFrom = new StopTimeInstance(blockStopTime,
-              serviceDate);
-          BlockStopTimeEntry stopTimeTo = toStopTimes.get(fromIndex);
-          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
-          
-          if (queue.size() == resultCount) {
-            Pair<StopTimeInstance> stiPair = queue.peek();
-            if (stiPair.getSecond().getArrivalTime() < stiTo.getArrivalTime())
-              break;
-          }
-          
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          queue.add(stiPair);
-          
-          while (queue.size() > resultCount)
-            queue.poll();
-          
-          fromIndex++;
-        }
-      }
-    }
+    getNextFrequencyDeparturesBetweenStopPair(fromStop, toStop, fromTime,
+        lookBehind, resultCount, queue);
 
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
     results.addAll(queue);
@@ -461,6 +410,137 @@ class StopTimeServiceImpl implements StopTimeService {
               stiFrom.getFrequency(), stiFrom.getFrequencyOffset());
           Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
           results.add(stiPair);
+        }
+      }
+    }
+  }
+
+  private void getNextDeparturesBetweenStopPair(StopEntry fromStop,
+      StopEntry toStop, Date fromTime, int lookBehind, int resultCount,
+      PriorityQueue<Pair<StopTimeInstance>> queue) {
+    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
+        fromStop, toStop);
+
+    long targetTime = fromTime.getTime() - lookBehind * 1000;
+
+    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+
+      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
+      BlockStopSequenceIndex toStopIndex = pair.getSecond();
+
+      List<BlockStopTimeEntry> toStopTimes = toStopIndex.getStopTimes();
+
+      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
+          fromStopIndex.getServiceIds(), fromStopIndex.getServiceInterval(),
+          targetTime);
+
+      for (Date serviceDate : serviceDates) {
+
+        if (queue.size() == resultCount) {
+          Pair<StopTimeInstance> stiPair = queue.peek();
+          if (stiPair.getSecond().getArrivalTime() < serviceDate.getTime())
+            break;
+        }
+
+        int relativeFrom = effectiveTime(serviceDate.getTime(),
+            fromTime.getTime());
+
+        int fromIndex = GenericBinarySearch.search(fromStopIndex,
+            fromStopIndex.size(), relativeFrom,
+            IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
+
+        while (fromIndex < fromStopIndex.size()) {
+          BlockStopTimeEntry blockStopTime = fromStopIndex.getBlockStopTimeForIndex(fromIndex);
+          StopTimeInstance stiFrom = new StopTimeInstance(blockStopTime,
+              serviceDate);
+          BlockStopTimeEntry stopTimeTo = toStopTimes.get(fromIndex);
+          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
+
+          if (queue.size() == resultCount) {
+            Pair<StopTimeInstance> stiPair = queue.peek();
+            if (stiPair.getSecond().getArrivalTime() < stiTo.getArrivalTime())
+              break;
+          }
+
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          queue.add(stiPair);
+
+          while (queue.size() > resultCount)
+            queue.poll();
+
+          fromIndex++;
+        }
+      }
+    }
+  }
+
+  private void getNextFrequencyDeparturesBetweenStopPair(StopEntry fromStop,
+      StopEntry toStop, Date fromTime, int lookBehind, int resultCount,
+      PriorityQueue<Pair<StopTimeInstance>> queue) {
+
+    List<Pair<FrequencyStopTripIndex>> indexPairs = _blockIndexService.getFrequencyIndicesBetweenStops(
+        fromStop, toStop);
+
+    long targetTime = fromTime.getTime() - lookBehind * 1000;
+
+    for (Pair<FrequencyStopTripIndex> pair : indexPairs) {
+
+      FrequencyStopTripIndex fromStopIndex = pair.getFirst();
+      FrequencyStopTripIndex toStopIndex = pair.getSecond();
+
+      List<FrequencyBlockStopTimeEntry> fromStopTimes = fromStopIndex.getFrequencyStopTimes();
+      List<FrequencyBlockStopTimeEntry> toStopTimes = toStopIndex.getFrequencyStopTimes();
+
+      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
+          fromStopIndex.getServiceIds(), fromStopIndex.getServiceInterval(),
+          targetTime);
+
+      for (Date serviceDate : serviceDates) {
+
+        if (queue.size() == resultCount) {
+          Pair<StopTimeInstance> stiPair = queue.peek();
+          if (stiPair.getSecond().getArrivalTime() < serviceDate.getTime())
+            break;
+        }
+
+        int relativeFrom = effectiveTime(serviceDate.getTime(),
+            fromTime.getTime());
+
+        int fromIndex = GenericBinarySearch.search(fromStopIndex,
+            fromStopIndex.size(), relativeFrom,
+            IndexAdapters.FREQUENCY_END_TIME_INSTANCE);
+
+        if (fromIndex < fromStopIndex.size()) {
+
+          FrequencyBlockStopTimeEntry fromEntry = fromStopTimes.get(fromIndex);
+          BlockStopTimeEntry bst = fromEntry.getStopTime();
+          FrequencyEntry frequency = fromEntry.getFrequency();
+          int stopTimeOffset = fromEntry.getStopTimeOffset();
+
+          int tFrom = Math.max(relativeFrom, frequency.getStartTime());
+          tFrom = snapToFrequencyStopTime(frequency, tFrom, stopTimeOffset,
+              true);
+
+          int frequencyOffset = tFrom - bst.getStopTime().getDepartureTime();
+          StopTimeInstance stiFrom = new StopTimeInstance(bst,
+              serviceDate.getTime(), frequency, frequencyOffset);
+
+          FrequencyBlockStopTimeEntry toEntry = toStopTimes.get(fromIndex);
+          BlockStopTimeEntry stopTimeTo = toEntry.getStopTime();
+          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo,
+              serviceDate.getTime(), frequency, frequencyOffset);
+
+          if (queue.size() == resultCount) {
+            Pair<StopTimeInstance> stiPair = queue.peek();
+            if (stiPair.getSecond().getArrivalTime() < stiTo.getArrivalTime())
+              break;
+          }
+
+          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          queue.add(stiPair);
+
+          while (queue.size() > resultCount)
+            queue.poll();
         }
       }
     }
