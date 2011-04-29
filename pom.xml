@@ -19,7 +19,7 @@
     <gwt-version>2.1.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
     <gtfs-version>1.1.9</gtfs-version>
-    <onebusaway-siri-version>0.0.3-SNAPSHOT</onebusaway-siri-version>
+    <onebusaway-siri-version>0.0.3</onebusaway-siri-version>
   </properties>
 
   <repositories>
@@ -69,10 +69,9 @@
   </pluginRepositories>
 
   <scm>
-    <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.1</connection>
-    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.1
-        </developerConnection>
-    <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/tags/onebusaway-application-modules-0.0.1</url>
+    <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/branches/onebusaway-application-modules-0.0.x</connection>
+    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/branches/onebusaway-application-modules-0.0.x</developerConnection>
+    <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/branches/onebusaway-application-modules-0.0.x</url>
   </scm>
 
   <modules>
