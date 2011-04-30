@@ -25,6 +25,8 @@ public class CompactedTransferPatternFactory {
 
   private static Logger _log = LoggerFactory.getLogger(CompactedTransferPatternFactory.class);
 
+  private final List<CompactedTransferPatternFactoryListener> _listeners = new ArrayList<CompactedTransferPatternFactoryListener>();
+
   private final Map<StopEntry, TransferPattern> _patternsByOriginStop = new HashMap<StopEntry, TransferPattern>();
 
   private final TransitGraphDao _dao;
@@ -45,8 +47,16 @@ public class CompactedTransferPatternFactory {
       _indices.put(_allStops.get(in), in);
   }
 
+  public void addListener(CompactedTransferPatternFactoryListener listener) {
+    _listeners.add(listener);
+  }
+
   public Map<StopEntry, TransferPattern> getPatternsByOriginStop() {
     return _patternsByOriginStop;
+  }
+
+  public void clear() {
+    _patternsByOriginStop.clear();
   }
 
   public void readPatternsFromFile(File path) throws IOException {
@@ -71,7 +81,7 @@ public class CompactedTransferPatternFactory {
 
       if (tokens.size() == 3) {
         compact(originStop, records);
-        originStop = stop;        
+        originStop = stop;
       }
 
       String key = tokens.get(0);
@@ -157,12 +167,15 @@ public class CompactedTransferPatternFactory {
       throw new IllegalStateException();
 
     CompactedTransferPattern pattern = new CompactedTransferPattern(
-        stopIndexArray, parentIndicesArray, exitAllowedOffset, hubOffset,
-        _allStops);
+        stopIndexArray, parentIndicesArray, exitAllowedOffset, hubOffset);
+    pattern.setAllStops(_allStops);
 
     TransferPattern existing = _patternsByOriginStop.put(originStop, pattern);
     if (existing != null)
       _log.warn("overriding pattern for stop " + originStop.getId());
+
+    for (CompactedTransferPatternFactoryListener listener : _listeners)
+      listener.patternProcessed(this, originStop, pattern);
 
     records.clear();
   }

@@ -14,8 +14,9 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.container.refresh.Refreshable;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.CompactedTransferPatternFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.CompactedTransferPattern;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferParent;
@@ -25,6 +26,7 @@ import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
+import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,22 +59,22 @@ class TransferPatternServiceImpl implements TransferPatternService {
 
     _transferPatternsByStop.clear();
 
-    File filePath = _bundle.getTransferPatternsPath();
+    File path = _bundle.getSerializedTransferPatternsPath();
 
-    if (!filePath.exists())
+    if (!path.exists())
       return;
 
-    CompactedTransferPatternFactory factory = new CompactedTransferPatternFactory(
-        _transitGraphDao);
+    _log.info("loading transfer patterns...");
+    Map<AgencyAndId, CompactedTransferPattern> patternsByStopId = ObjectSerializationLibrary.readObject(path);
+    _log.info("transfer patterns loaded");
 
-    _log.info("loading transfer patterns");
-
-    factory.readPatternsFromFile(filePath);
-
-    _log.info("transfer patterns: loaded segments=" + factory.getLines());
-
-    Map<StopEntry, TransferPattern> patterns = factory.getPatternsByOriginStop();
-    _transferPatternsByStop.putAll(patterns);
+    for (Map.Entry<AgencyAndId, CompactedTransferPattern> entry : patternsByStopId.entrySet()) {
+      AgencyAndId stopId = entry.getKey();
+      StopEntry stop = _transitGraphDao.getStopEntryForId(stopId, true);
+      CompactedTransferPattern pattern = entry.getValue();
+      pattern.setAllStops(_transitGraphDao.getAllStops());
+      _transferPatternsByStop.put(stop, pattern);
+    }
   }
 
   @Override
@@ -161,7 +163,7 @@ class TransferPatternServiceImpl implements TransferPatternService {
   /**
    * We want to reverse the transfer pattern tree. Given a starting node, we
    * search down the tree until we reach an end-point and then construct tree
-   * back up.  Since there can be cycles in the tree
+   * back up. Since there can be cycles in the tree
    * 
    * @param node
    * @param root
@@ -192,7 +194,7 @@ class TransferPatternServiceImpl implements TransferPatternService {
         continue;
 
       List<TransferParent> parents = reverseTree(subNode, root, false, visited);
-      
+
       for (TransferParent parent : parents) {
         TransferNode extended = parent.extendTree(node.getToStop(),
             node.getFromStop(), exitAllowed);

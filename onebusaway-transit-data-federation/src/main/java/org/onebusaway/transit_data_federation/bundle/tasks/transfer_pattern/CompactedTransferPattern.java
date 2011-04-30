@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,7 +10,9 @@ import java.util.Map;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
-public class CompactedTransferPattern implements TransferPattern {
+public class CompactedTransferPattern implements TransferPattern, Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   private final short[] _stopIndices;
 
@@ -19,14 +22,17 @@ public class CompactedTransferPattern implements TransferPattern {
 
   private final int _hubOffset;
 
-  private final List<StopEntry> _allStops;
+  private transient List<StopEntry> _allStops;
 
   public CompactedTransferPattern(short[] stopIndices, int[] parentIndices,
-      int exitAllowedOffset, int hubOffset, List<StopEntry> allStops) {
+      int exitAllowedOffset, int hubOffset) {
     _stopIndices = stopIndices;
     _parentIndices = parentIndices;
     _exitAllowedOffset = exitAllowedOffset;
     _hubOffset = hubOffset;
+  }
+
+  public void setAllStops(List<StopEntry> allStops) {
     _allStops = allStops;
   }
 
@@ -42,9 +48,10 @@ public class CompactedTransferPattern implements TransferPattern {
   @Override
   public Collection<TransferParent> getTransfersForStops(TransferParent root,
       List<StopEntry> stops) {
-    
+
     /**
-     * The assumption here is that the stops are in order by increasing stop.getIndex()
+     * The assumption here is that the stops are in order by increasing
+     * stop.getIndex()
      */
 
     List<TransferParent> nodes = new ArrayList<TransferParent>();
@@ -97,8 +104,8 @@ public class CompactedTransferPattern implements TransferPattern {
 
   private void divideAndConquer(int stopArrayIndexFrom, int stopArrayIndexTo,
       List<StopEntry> stops, int stopsFrom, int stopsTo, List<Integer> results) {
-    
-    if( stopsFrom == stopsTo)
+
+    if (stopsFrom == stopsTo)
       return;
 
     int mid = (stopsFrom + stopsTo) / 2;
@@ -120,8 +127,8 @@ public class CompactedTransferPattern implements TransferPattern {
       indexLower = index;
       indexUpper = index;
     }
-    
-    if( stopsFrom + 1 >= stopsTo)
+
+    if (stopsFrom + 1 >= stopsTo)
       return;
 
     divideAndConquer(stopArrayIndexFrom, indexLower, stops, stopsFrom, mid,
@@ -156,13 +163,14 @@ public class CompactedTransferPattern implements TransferPattern {
     int leafIndexC = _parentIndices[leafIndexB];
 
     TransferParent parent = getTransferForLeafIndex(leafIndexC, false, root);
-    
+
     /**
-     * This really shouldn't happen... but it does, so we short circuit the transfer pattern
+     * This really shouldn't happen... but it does, so we short circuit the
+     * transfer pattern
      */
-    if( fromStop == toStop )
+    if (fromStop == toStop)
       return parent;
-    
+
     return parent.extendTree(fromStop, toStop, exitAllowed);
   }
 }

@@ -18,11 +18,12 @@ package org.onebusaway.utility;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 
 /**
@@ -48,8 +49,8 @@ public class ObjectSerializationLibrary {
    */
   public static ObjectOutputStream getFileAsObjectOutputStream(File file)
       throws IOException {
-    return new ObjectOutputStream(new BufferedOutputStream(
-        new FileOutputStream(file)));
+    OutputStream out = IOLibrary.getFileAsOutputStream(file);
+    return new ObjectOutputStream(new BufferedOutputStream(out));
   }
 
   /**
@@ -61,8 +62,8 @@ public class ObjectSerializationLibrary {
    */
   public static ObjectInputStream getFileAsObjectInputStream(File file)
       throws IOException {
-    return new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-        file)));
+    InputStream in = IOLibrary.getFileAsInputStream(file);
+    return new ObjectInputStream(new BufferedInputStream(in));
   }
 
   /**

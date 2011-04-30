@@ -215,33 +215,33 @@
   <!-- -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="transfer_patterns_compression" />
+    <property name="taskName" value="serialized_transfer_patterns" />
     <property name="afterTaskNames" value="transfer_patterns_analysis" />
-    <property name="task" ref="transferPatternsCompressionTask" />
+    <property name="task" ref="serializedTransferPatternsTask" />
     <property name="enabled" value="false" />
   </bean>
 
-  <bean id="transferPatternsCompressionTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsCompressionTask" />
+  <bean id="serializedTransferPatternsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.SerializedTransferPatternsTask" />
+  
+  <!-- Trip Planner Test Task -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="trip_planner_test_task" />
+    <property name="afterTaskName" value="serialized_transfer_patterns" />
+    <property name="task" ref="tripPlannerTestTask" />
+  </bean>
+
+  <bean id="tripPlannerTestTask" class="org.onebusaway.transit_data_federation.bundle.tasks.TripPlannerTestTask" />
 
   <!-- Block Location History -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="block_location_history" />
-    <property name="afterTaskName" value="transfer_patterns_compression" />
+    <property name="afterTaskName" value="trip_planner_test_task" />
     <property name="task" ref="blockLocationHistoryTask" />
   </bean>
 
   <bean id="blockLocationHistoryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.history.BlockLocationHistoryTask" />
-
-  <!-- Trip Planner Test Task -->
-
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="trip_planner_test_task" />
-    <property name="afterTaskName" value="transfer_patterns_compression" />
-    <property name="task" ref="tripPlannerTestTask" />
-  </bean>
-
-  <bean id="tripPlannerTestTask" class="org.onebusaway.transit_data_federation.bundle.tasks.TripPlannerTestTask" />
 
   <!-- Pre Cache -->
 
