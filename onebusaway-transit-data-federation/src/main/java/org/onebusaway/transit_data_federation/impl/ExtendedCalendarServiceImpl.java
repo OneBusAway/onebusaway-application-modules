@@ -207,6 +207,18 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
   }
 
   @Override
+  public List<Date> getServiceDatesForInterval(ServiceIdActivation serviceIds,
+      ServiceInterval serviceInterval, long time, boolean findDepartures) {
+
+    if (findDepartures)
+      return getNextServiceDatesForDepartureInterval(serviceIds,
+          serviceInterval, time);
+    else
+      return getPreviousServiceDatesForArrivalInterval(serviceIds,
+          serviceInterval, time);
+  }
+
+  @Override
   public List<Date> getNextServiceDatesForDepartureInterval(
       ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time) {
 
@@ -252,11 +264,11 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
     return serviceDatesToReturn;
   }
-  
+
   @Override
   public List<Date> getPreviousServiceDatesForArrivalInterval(
       ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time) {
-    
+
     List<Date> serviceDates = _serviceDatesByServiceIds.get(serviceIds);
 
     if (CollectionsLibrary.isEmpty(serviceDates))
@@ -268,7 +280,7 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
     if (endIndex < 0)
       endIndex = -(endIndex + 1);
-    endIndex = Math.min(serviceDates.size()-1, endIndex + 1);
+    endIndex = Math.min(serviceDates.size() - 1, endIndex + 1);
 
     List<Date> serviceDatesToReturn = new ArrayList<Date>();
     boolean directHit = false;

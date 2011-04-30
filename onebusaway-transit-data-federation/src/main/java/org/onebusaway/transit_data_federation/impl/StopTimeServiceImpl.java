@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import org.onebusaway.collections.Min;
 import org.onebusaway.collections.Range;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
@@ -17,6 +16,7 @@ import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data_federation.impl.blocks.IndexAdapters;
 import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
+import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch.IndexAdapter;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.blocks.AbstractBlockStopTimeIndex;
@@ -26,6 +26,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyStopTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.HasIndexedBlockStopTimes;
+import org.onebusaway.transit_data_federation.services.blocks.HasIndexedFrequencyBlockTrips;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -38,6 +39,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 class StopTimeServiceImpl implements StopTimeService {
+
+  private static final FirstDepartureTimeComparator _firstDepartureComparator = new FirstDepartureTimeComparator();
+
+  private static final LastArrivalTimeComparator _lastArrivalComparator = new LastArrivalTimeComparator();
 
   private TransitGraphDao _graph;
 
@@ -173,12 +178,8 @@ class StopTimeServiceImpl implements StopTimeService {
           FrequencyEntry frequency = entry.getFrequency();
           int stopTimeOffset = entry.getStopTimeOffset();
 
-          int tFrom = Math.max(relativeFrom, frequency.getStartTime());
-
-          tFrom = snapToFrequencyStopTime(frequency, tFrom, stopTimeOffset,
-              true);
-
-          int frequencyOffset = tFrom - bst.getStopTime().getDepartureTime();
+          int frequencyOffset = computeFrequencyOffset(relativeFrom, bst,
+              frequency, stopTimeOffset, true);
           StopTimeInstance sti = new StopTimeInstance(bst,
               serviceDate.getTime(), frequency, frequencyOffset);
           stopTimeInstances.add(sti);
@@ -191,38 +192,6 @@ class StopTimeServiceImpl implements StopTimeService {
   }
 
   @Override
-  public List<Pair<StopTimeInstance>> getDeparturesBetweenStopPairInTimeRange(
-      StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
-      Date toDepartureTime) {
-
-    List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
-
-    getDeparturesBetweenStopPairInTimeRange(fromStop, toStop,
-        fromDepartureTime, toDepartureTime, results);
-
-    getFrequencyDeparturesBetweenStopPairInTimeRange(fromStop, toStop,
-        fromDepartureTime, toDepartureTime, results);
-
-    return results;
-  }
-
-  @Override
-  public List<Pair<StopTimeInstance>> getArrivalsBetweenStopPairInTimeRange(
-      StopEntry fromStop, StopEntry toStop, Date fromArrivalTime,
-      Date toArrivalTime) {
-
-    List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
-
-    getArrivalsBetweenStopPairInTimeRange(fromStop, toStop, fromArrivalTime,
-        toArrivalTime, results);
-
-    getFrequencyArrivalsBetweenStopPairInTimeRange(fromStop, toStop,
-        fromArrivalTime, toArrivalTime, results);
-
-    return results;
-  }
-
-  @Override
   public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
       StopEntry fromStop, StopEntry toStop, Date fromTime, int lookBehind,
       int lookAhead, int resultCount) {
@@ -231,252 +200,139 @@ class StopTimeServiceImpl implements StopTimeService {
       return Collections.emptyList();
 
     PriorityQueue<Pair<StopTimeInstance>> queue = new PriorityQueue<Pair<StopTimeInstance>>(
-        resultCount, new WorstArrivalTimeComparator());
+        resultCount, _lastArrivalComparator);
 
-    getNextDeparturesBetweenStopPair(fromStop, toStop, fromTime, lookBehind,
-        resultCount, queue);
+    getDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, fromTime,
+        lookBehind, lookAhead, resultCount, queue, true);
 
-    getNextFrequencyDeparturesBetweenStopPair(fromStop, toStop, fromTime,
-        lookBehind, resultCount, queue);
+    getFrequencyDeparturesAndArrivalsBetweenStopPair(fromStop, toStop,
+        fromTime, lookBehind, lookAhead, resultCount, queue, true);
 
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
     results.addAll(queue);
-
+    Collections.sort(results, _firstDepartureComparator);
     return results;
   }
 
   @Override
   public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date toTime,
-      boolean includeAllSequences) {
+      StopEntry fromStop, StopEntry toStop, Date toTime, int lookBehind,
+      int lookAhead, int resultCount) {
 
-    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
-        fromStop, toStop);
+    if (resultCount == 0)
+      return Collections.emptyList();
+
+    PriorityQueue<Pair<StopTimeInstance>> queue = new PriorityQueue<Pair<StopTimeInstance>>(
+        resultCount, _firstDepartureComparator);
+
+    getDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, toTime,
+        lookBehind, lookAhead, resultCount, queue, false);
+
+    getFrequencyDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, toTime,
+        lookBehind, lookAhead, resultCount, queue, false);
 
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
-    Min<Pair<StopTimeInstance>> min = new Min<Pair<StopTimeInstance>>();
-
-    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
-
-      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
-      BlockStopSequenceIndex toStopIndex = pair.getSecond();
-
-      List<BlockStopTimeEntry> fromStopTimes = fromStopIndex.getStopTimes();
-
-      List<Date> serviceDates = _calendarService.getPreviousServiceDatesForArrivalInterval(
-          toStopIndex.getServiceIds(), toStopIndex.getServiceInterval(),
-          toTime.getTime());
-
-      for (Date serviceDate : serviceDates) {
-
-        int relativeTo = effectiveTime(serviceDate.getTime(), toTime.getTime());
-
-        int toIndex = GenericBinarySearch.search(toStopIndex,
-            toStopIndex.size(), relativeTo,
-            IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE);
-
-        toIndex--;
-
-        if (0 <= toIndex) {
-          BlockStopTimeEntry blockStopTime = toStopIndex.getBlockStopTimeForIndex(toIndex);
-          StopTimeInstance stiTo = new StopTimeInstance(blockStopTime,
-              serviceDate);
-          BlockStopTimeEntry stopTimeFrom = fromStopTimes.get(toIndex);
-          StopTimeInstance stiFrom = new StopTimeInstance(stopTimeFrom,
-              serviceDate);
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          if (includeAllSequences) {
-            results.add(stiPair);
-          } else {
-            /**
-             * Note that we use the negative arrival time here because we
-             * actually want the arrival with the max arrival time
-             */
-            min.add(-stiTo.getArrivalTime(), stiPair);
-          }
-        }
-      }
-    }
-
-    if (includeAllSequences)
-      return results;
-    else
-      return min.getMinElements();
+    results.addAll(queue);
+    Collections.sort(results, _lastArrivalComparator);
+    return results;
   }
 
   /****
    * Private Methods
    ****/
 
-  private void getDeparturesBetweenStopPairInTimeRange(StopEntry fromStop,
-      StopEntry toStop, Date fromDepartureTime, Date toDepartureTime,
-      List<Pair<StopTimeInstance>> results) {
+  private void getDeparturesAndArrivalsBetweenStopPair(StopEntry fromStop,
+      StopEntry toStop, Date tTime, int lookBehind, int lookAhead,
+      int resultCount, PriorityQueue<Pair<StopTimeInstance>> queue,
+      boolean findDepartures) {
 
-    /**
-     * First find indices shared between the two stops
-     */
     List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
         fromStop, toStop);
 
-    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+    long targetTime = tTime.getTime();
 
-      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
-      BlockStopSequenceIndex toStopIndex = pair.getSecond();
-
-      List<BlockStopTimeEntry> toStopTimes = toStopIndex.getStopTimes();
-
-      ServiceIdActivation serviceIds = fromStopIndex.getServiceIds();
-      ServiceInterval interval = fromStopIndex.getServiceInterval();
-
-      /**
-       * Find applicable service dates for the departure stop and index
-       */
-      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
-          serviceIds, interval, fromDepartureTime, toDepartureTime);
-
-      for (Date serviceDate : serviceDates) {
-
-        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
-
-        /**
-         * Find departures within the specified range on the specified service
-         * date
-         */
-        int indexOffset = getStopTimesForStopAndServiceDateAndTimeRange(
-            fromStopIndex, serviceDate, fromDepartureTime, toDepartureTime,
-            instances);
-
-        /**
-         * For each departure, we need to find the corresponding arrival
-         */
-        for (int i = 0; i < instances.size(); i++) {
-          StopTimeInstance stiFrom = instances.get(i);
-          BlockStopTimeEntry stopTimeTo = toStopTimes.get(indexOffset + i);
-          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          results.add(stiPair);
-        }
-      }
-    }
-  }
-
-  private void getFrequencyDeparturesBetweenStopPairInTimeRange(
-      StopEntry fromStop, StopEntry toStop, Date fromDepartureTime,
-      Date toDepartureTime, List<Pair<StopTimeInstance>> results) {
-
-    /**
-     * First find indices shared between the two stops
-     */
-    List<Pair<FrequencyStopTripIndex>> indexPairs = _blockIndexService.getFrequencyIndicesBetweenStops(
-        fromStop, toStop);
-
-    for (Pair<FrequencyStopTripIndex> pair : indexPairs) {
-
-      FrequencyStopTripIndex fromStopIndex = pair.getFirst();
-      FrequencyStopTripIndex toStopIndex = pair.getSecond();
-
-      ServiceIdActivation serviceIds = fromStopIndex.getServiceIds();
-      ServiceInterval interval = fromStopIndex.getServiceInterval();
-
-      List<FrequencyBlockStopTimeEntry> toStopTimes = toStopIndex.getFrequencyStopTimes();
-
-      /**
-       * Find applicable service dates for the departure stop and index
-       */
-      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
-          serviceIds, interval, fromDepartureTime, toDepartureTime);
-
-      for (Date serviceDate : serviceDates) {
-
-        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
-
-        /**
-         * Find departures within the specified range on the specified service
-         * date
-         */
-        List<Integer> offsets = getFrequenciesForStopAndServiceIdsAndTimeRange(
-            fromStopIndex, serviceDate, fromDepartureTime, toDepartureTime,
-            instances, EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
-
-        /**
-         * For each departure, we need to find the corresponding arrival
-         */
-        for (int i = 0; i < instances.size(); i++) {
-          StopTimeInstance stiFrom = instances.get(i);
-          int offset = offsets.get(i);
-          FrequencyBlockStopTimeEntry stopTimeTo = toStopTimes.get(offset);
-          StopTimeInstance stiTo = new StopTimeInstance(
-              stopTimeTo.getStopTime(), serviceDate.getTime(),
-              stiFrom.getFrequency(), stiFrom.getFrequencyOffset());
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          results.add(stiPair);
-        }
-      }
-    }
-  }
-
-  private void getNextDeparturesBetweenStopPair(StopEntry fromStop,
-      StopEntry toStop, Date fromTime, int lookBehind, int resultCount,
-      PriorityQueue<Pair<StopTimeInstance>> queue) {
-    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
-        fromStop, toStop);
-
-    long targetTime = fromTime.getTime() - lookBehind * 1000;
+    if (findDepartures)
+      targetTime -= lookBehind * 1000;
+    else
+      targetTime += lookAhead * 1000;
 
     for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
 
-      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
-      BlockStopSequenceIndex toStopIndex = pair.getSecond();
+      BlockStopSequenceIndex sourceStopIndex = findDepartures ? pair.getFirst()
+          : pair.getSecond();
+      BlockStopSequenceIndex destStopIndex = findDepartures ? pair.getSecond()
+          : pair.getFirst();
 
-      List<BlockStopTimeEntry> toStopTimes = toStopIndex.getStopTimes();
+      List<BlockStopTimeEntry> destStopTimes = destStopIndex.getStopTimes();
 
-      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
-          fromStopIndex.getServiceIds(), fromStopIndex.getServiceInterval(),
-          targetTime);
+      List<Date> serviceDates = _calendarService.getServiceDatesForInterval(
+          sourceStopIndex.getServiceIds(),
+          sourceStopIndex.getServiceInterval(), targetTime, findDepartures);
 
       for (Date serviceDate : serviceDates) {
 
-        if (queue.size() == resultCount) {
-          Pair<StopTimeInstance> stiPair = queue.peek();
-          if (stiPair.getSecond().getArrivalTime() < serviceDate.getTime())
-            break;
+        ServiceInterval destServiceInterval = destStopIndex.getServiceInterval();
+
+        if (serviceDateIsBeyondRangeOfQueue(queue, serviceDate,
+            destServiceInterval, resultCount, findDepartures)) {
+
+          /**
+           * The service date is beyond our worst departure-arrival, so we break
+           */
+          break;
         }
 
-        int relativeFrom = effectiveTime(serviceDate.getTime(),
-            fromTime.getTime());
+        int relativeTime = effectiveTime(serviceDate.getTime(), tTime.getTime());
 
-        int fromIndex = GenericBinarySearch.search(fromStopIndex,
-            fromStopIndex.size(), relativeFrom,
-            IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
+        IndexAdapter<HasIndexedBlockStopTimes> adapter = findDepartures
+            ? IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE
+            : IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE;
 
-        while (fromIndex < fromStopIndex.size()) {
-          BlockStopTimeEntry blockStopTime = fromStopIndex.getBlockStopTimeForIndex(fromIndex);
-          StopTimeInstance stiFrom = new StopTimeInstance(blockStopTime,
+        int sourceIndex = GenericBinarySearch.search(sourceStopIndex,
+            sourceStopIndex.size(), relativeTime, adapter);
+
+        /**
+         * When searching for arrival times, the index is an upper bound, so we
+         * have to decrement to find the first good stop index
+         */
+        if (!findDepartures)
+          sourceIndex--;
+
+        while (0 <= sourceIndex && sourceIndex < sourceStopIndex.size()) {
+
+          BlockStopTimeEntry stopTimeSource = sourceStopIndex.getBlockStopTimeForIndex(sourceIndex);
+          StopTimeInstance stiSource = new StopTimeInstance(stopTimeSource,
               serviceDate);
-          BlockStopTimeEntry stopTimeTo = toStopTimes.get(fromIndex);
-          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo, serviceDate);
+          BlockStopTimeEntry stopTimeDest = destStopTimes.get(sourceIndex);
+          StopTimeInstance stiDest = new StopTimeInstance(stopTimeDest,
+              serviceDate);
 
-          if (queue.size() == resultCount) {
-            Pair<StopTimeInstance> stiPair = queue.peek();
-            if (stiPair.getSecond().getArrivalTime() < stiTo.getArrivalTime())
-              break;
+          if (stopTimeIsBeyondRangeOfQueue(queue, stiDest, resultCount,
+              findDepartures)) {
+            break;
           }
 
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          Pair<StopTimeInstance> stiPair = findDepartures ? Tuples.pair(
+              stiSource, stiDest) : Tuples.pair(stiDest, stiSource);
+
           queue.add(stiPair);
 
           while (queue.size() > resultCount)
             queue.poll();
 
-          fromIndex++;
+          if (findDepartures)
+            sourceIndex++;
+          else
+            sourceIndex--;
         }
       }
     }
   }
 
-  private void getNextFrequencyDeparturesBetweenStopPair(StopEntry fromStop,
-      StopEntry toStop, Date fromTime, int lookBehind, int resultCount,
-      PriorityQueue<Pair<StopTimeInstance>> queue) {
+  private void getFrequencyDeparturesAndArrivalsBetweenStopPair(
+      StopEntry fromStop, StopEntry toStop, Date fromTime, int lookBehind,
+      int lookAhead, int resultCount,
+      PriorityQueue<Pair<StopTimeInstance>> queue, boolean findDepartures) {
 
     List<Pair<FrequencyStopTripIndex>> indexPairs = _blockIndexService.getFrequencyIndicesBetweenStops(
         fromStop, toStop);
@@ -485,58 +341,72 @@ class StopTimeServiceImpl implements StopTimeService {
 
     for (Pair<FrequencyStopTripIndex> pair : indexPairs) {
 
-      FrequencyStopTripIndex fromStopIndex = pair.getFirst();
-      FrequencyStopTripIndex toStopIndex = pair.getSecond();
+      FrequencyStopTripIndex sourceStopIndex = findDepartures ? pair.getFirst()
+          : pair.getSecond();
+      FrequencyStopTripIndex destStopIndex = findDepartures ? pair.getSecond()
+          : pair.getFirst();
 
-      List<FrequencyBlockStopTimeEntry> fromStopTimes = fromStopIndex.getFrequencyStopTimes();
-      List<FrequencyBlockStopTimeEntry> toStopTimes = toStopIndex.getFrequencyStopTimes();
+      List<FrequencyBlockStopTimeEntry> sourceStopTimes = sourceStopIndex.getFrequencyStopTimes();
+      List<FrequencyBlockStopTimeEntry> destStopTimes = destStopIndex.getFrequencyStopTimes();
 
-      List<Date> serviceDates = _calendarService.getNextServiceDatesForDepartureInterval(
-          fromStopIndex.getServiceIds(), fromStopIndex.getServiceInterval(),
-          targetTime);
+      List<Date> serviceDates = _calendarService.getServiceDatesForInterval(
+          sourceStopIndex.getServiceIds(),
+          sourceStopIndex.getServiceInterval(), targetTime, findDepartures);
 
       for (Date serviceDate : serviceDates) {
 
-        if (queue.size() == resultCount) {
-          Pair<StopTimeInstance> stiPair = queue.peek();
-          if (stiPair.getSecond().getArrivalTime() < serviceDate.getTime())
-            break;
+        ServiceInterval destServiceInterval = destStopIndex.getServiceInterval();
+
+        if (serviceDateIsBeyondRangeOfQueue(queue, serviceDate,
+            destServiceInterval, resultCount, findDepartures)) {
+
+          /**
+           * The service date is beyond our worst departure-arrival, so we break
+           */
+          break;
         }
 
-        int relativeFrom = effectiveTime(serviceDate.getTime(),
+        int relativeTime = effectiveTime(serviceDate.getTime(),
             fromTime.getTime());
 
-        int fromIndex = GenericBinarySearch.search(fromStopIndex,
-            fromStopIndex.size(), relativeFrom,
-            IndexAdapters.FREQUENCY_END_TIME_INSTANCE);
+        IndexAdapter<HasIndexedFrequencyBlockTrips> adapter = findDepartures
+            ? IndexAdapters.FREQUENCY_END_TIME_INSTANCE
+            : IndexAdapters.FREQUENCY_START_TIME_INSTANCE;
 
-        if (fromIndex < fromStopIndex.size()) {
+        int sourceIndex = GenericBinarySearch.search(sourceStopIndex,
+            sourceStopIndex.size(), relativeTime, adapter);
 
-          FrequencyBlockStopTimeEntry fromEntry = fromStopTimes.get(fromIndex);
-          BlockStopTimeEntry bst = fromEntry.getStopTime();
-          FrequencyEntry frequency = fromEntry.getFrequency();
-          int stopTimeOffset = fromEntry.getStopTimeOffset();
+        /**
+         * When searching for arrival times, the index is an upper bound, so we
+         * have to decrement to find the first good stop index
+         */
+        if (!findDepartures)
+          sourceIndex--;
 
-          int tFrom = Math.max(relativeFrom, frequency.getStartTime());
-          tFrom = snapToFrequencyStopTime(frequency, tFrom, stopTimeOffset,
-              true);
+        if (0 <= sourceIndex && sourceIndex < sourceStopIndex.size()) {
 
-          int frequencyOffset = tFrom - bst.getStopTime().getDepartureTime();
-          StopTimeInstance stiFrom = new StopTimeInstance(bst,
+          FrequencyBlockStopTimeEntry sourceEntry = sourceStopTimes.get(sourceIndex);
+          BlockStopTimeEntry sourceBst = sourceEntry.getStopTime();
+          FrequencyEntry frequency = sourceEntry.getFrequency();
+          int stopTimeOffset = sourceEntry.getStopTimeOffset();
+
+          int frequencyOffset = computeFrequencyOffset(relativeTime, sourceBst,
+              frequency, stopTimeOffset, findDepartures);
+
+          StopTimeInstance stiSource = new StopTimeInstance(sourceBst,
               serviceDate.getTime(), frequency, frequencyOffset);
 
-          FrequencyBlockStopTimeEntry toEntry = toStopTimes.get(fromIndex);
+          FrequencyBlockStopTimeEntry toEntry = destStopTimes.get(sourceIndex);
           BlockStopTimeEntry stopTimeTo = toEntry.getStopTime();
-          StopTimeInstance stiTo = new StopTimeInstance(stopTimeTo,
+          StopTimeInstance stiDest = new StopTimeInstance(stopTimeTo,
               serviceDate.getTime(), frequency, frequencyOffset);
 
-          if (queue.size() == resultCount) {
-            Pair<StopTimeInstance> stiPair = queue.peek();
-            if (stiPair.getSecond().getArrivalTime() < stiTo.getArrivalTime())
-              break;
-          }
+          if (stopTimeIsBeyondRangeOfQueue(queue, stiDest, resultCount,
+              findDepartures))
+            break;
 
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
+          Pair<StopTimeInstance> stiPair = findDepartures ? Tuples.pair(
+              stiSource, stiDest) : Tuples.pair(stiDest, stiSource);
           queue.add(stiPair);
 
           while (queue.size() > resultCount)
@@ -546,110 +416,67 @@ class StopTimeServiceImpl implements StopTimeService {
     }
   }
 
-  private void getArrivalsBetweenStopPairInTimeRange(StopEntry fromStop,
-      StopEntry toStop, Date fromArrivalTime, Date toArrivalTime,
-      List<Pair<StopTimeInstance>> results) {
+  private int computeFrequencyOffset(int relativeTime,
+      BlockStopTimeEntry sourceBst, FrequencyEntry frequency,
+      int stopTimeOffset, boolean findDepartures) {
 
-    /**
-     * First find indices shared between the two stops
-     */
-    List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
-        fromStop, toStop);
+    int t = Math.max(relativeTime, frequency.getStartTime());
+    t = Math.min(t, frequency.getEndTime());
+    t = snapToFrequencyStopTime(frequency, t, stopTimeOffset, findDepartures);
+    return t - sourceBst.getStopTime().getDepartureTime();
+  }
 
-    for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
+  private boolean serviceDateIsBeyondRangeOfQueue(
+      PriorityQueue<Pair<StopTimeInstance>> queue, Date serviceDate,
+      ServiceInterval interval, int resultCount, boolean findDepartures) {
 
-      BlockStopSequenceIndex fromStopIndex = pair.getFirst();
-      BlockStopSequenceIndex toStopIndex = pair.getSecond();
+    if (queue.size() != resultCount)
+      return false;
 
-      List<BlockStopTimeEntry> fromStopTimes = fromStopIndex.getStopTimes();
+    Pair<StopTimeInstance> stiPair = queue.peek();
 
-      ServiceIdActivation serviceIds = toStopIndex.getServiceIds();
-      ServiceInterval interval = toStopIndex.getServiceInterval();
-
+    if (findDepartures) {
       /**
-       * Find applicable service dates for the arrival stop and index
+       * If we're looking for departures, then our queue is sorted by arrival
+       * time at the toStop. Thus, if the latest arrival time in the queue is
+       * less than the serviceDate, we return true.
        */
-      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
-          serviceIds, interval, fromArrivalTime, toArrivalTime);
-
-      for (Date serviceDate : serviceDates) {
-
-        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
-
-        /**
-         * Find arrivals within the specified range on the specified service
-         * date
-         */
-        int toIndex = getStopTimesForStopAndServiceDateAndTimeRange(
-            toStopIndex, serviceDate, fromArrivalTime, toArrivalTime, instances);
-
-        /**
-         * For each arrival, we need to find the corresponding departure
-         */
-        for (int i = 0; i < instances.size(); i++) {
-          StopTimeInstance stiTo = instances.get(i);
-          BlockStopTimeEntry stopTimeFrom = fromStopTimes.get(toIndex + i);
-          StopTimeInstance stiFrom = new StopTimeInstance(stopTimeFrom,
-              serviceDate);
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          results.add(stiPair);
-        }
-      }
+      return stiPair.getSecond().getArrivalTime() < serviceDate.getTime()
+          + interval.getMinArrival() * 1000;
+    } else {
+      /**
+       * If we're looking for arrivals, then our queue is sorted by departure
+       * time at the fromStop. Thus, if the earliest departure time in the queue
+       * is more than the serviceDate, we return true.
+       */
+      return stiPair.getFirst().getDepartureTime() > serviceDate.getTime()
+          + interval.getMaxDeparture() * 1000;
     }
   }
 
-  private void getFrequencyArrivalsBetweenStopPairInTimeRange(
-      StopEntry fromStop, StopEntry toStop, Date fromArrivalTime,
-      Date toArrivalTime, List<Pair<StopTimeInstance>> results) {
+  private boolean stopTimeIsBeyondRangeOfQueue(
+      PriorityQueue<Pair<StopTimeInstance>> queue, StopTimeInstance sti,
+      int resultCount, boolean findDepartures) {
 
-    /**
-     * First find indices shared between the two stops
-     */
-    List<Pair<FrequencyStopTripIndex>> indexPairs = _blockIndexService.getFrequencyIndicesBetweenStops(
-        fromStop, toStop);
+    if (queue.size() != resultCount)
+      return false;
 
-    for (Pair<FrequencyStopTripIndex> pair : indexPairs) {
+    Pair<StopTimeInstance> stiPair = queue.peek();
 
-      FrequencyStopTripIndex fromStopIndex = pair.getFirst();
-      FrequencyStopTripIndex toStopIndex = pair.getSecond();
-
-      List<FrequencyBlockStopTimeEntry> fromStopTimes = fromStopIndex.getFrequencyStopTimes();
-
-      ServiceIdActivation serviceIds = toStopIndex.getServiceIds();
-      ServiceInterval interval = toStopIndex.getServiceInterval();
-
+    if (findDepartures) {
       /**
-       * Find applicable service dates for the arrival stop and index
+       * If we're looking for departures, then our queue is sorted by arrival
+       * time at the toStop. Thus, if the latest arrival time in the queue is
+       * less than the sti arrival time, we return true.
        */
-      Collection<Date> serviceDates = _calendarService.getServiceDatesWithinRange(
-          serviceIds, interval, fromArrivalTime, toArrivalTime);
-
-      for (Date serviceDate : serviceDates) {
-
-        List<StopTimeInstance> instances = new ArrayList<StopTimeInstance>();
-
-        /**
-         * Find arrivals within the specified range on the specified service
-         * date
-         */
-        List<Integer> offsets = getFrequenciesForStopAndServiceIdsAndTimeRange(
-            toStopIndex, serviceDate, fromArrivalTime, toArrivalTime,
-            instances, EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
-
-        /**
-         * For each arrival, we need to find the corresponding departure
-         */
-        for (int i = 0; i < instances.size(); i++) {
-          StopTimeInstance stiTo = instances.get(i);
-          int offset = offsets.get(i);
-          FrequencyBlockStopTimeEntry stopTimeFrom = fromStopTimes.get(offset);
-          StopTimeInstance stiFrom = new StopTimeInstance(
-              stopTimeFrom.getStopTime(), serviceDate.getTime(),
-              stiTo.getFrequency(), stiTo.getFrequencyOffset());
-          Pair<StopTimeInstance> stiPair = Tuples.pair(stiFrom, stiTo);
-          results.add(stiPair);
-        }
-      }
+      return stiPair.getSecond().getArrivalTime() < sti.getArrivalTime();
+    } else {
+      /**
+       * If we're looking for arrivals, then our queue is sorted by departure
+       * time at the fromStop. Thus, if the earliest departure time in the queue
+       * is more than the sti departure time, we return true.
+       */
+      return stiPair.getFirst().getDepartureTime() > sti.getDepartureTime();
     }
   }
 
@@ -767,7 +594,18 @@ class StopTimeServiceImpl implements StopTimeService {
     return (int) ((targetTime - serviceDate) / 1000);
   }
 
-  private static class WorstArrivalTimeComparator implements
+  private static class FirstDepartureTimeComparator implements
+      Comparator<Pair<StopTimeInstance>> {
+
+    @Override
+    public int compare(Pair<StopTimeInstance> o1, Pair<StopTimeInstance> o2) {
+      long t1 = o1.getFirst().getDepartureTime();
+      long t2 = o2.getFirst().getDepartureTime();
+      return t1 == t2 ? 0 : (t1 < t2 ? -1 : 1);
+    }
+  }
+
+  private static class LastArrivalTimeComparator implements
       Comparator<Pair<StopTimeInstance>> {
 
     @Override

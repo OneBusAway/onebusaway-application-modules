@@ -25,6 +25,9 @@ public interface ExtendedCalendarService {
 
   public boolean areServiceIdsActiveOnServiceDate(
       ServiceIdActivation serviceIds, Date serviceDate);
+  
+  public List<Date> getServiceDatesForInterval(
+      ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time, boolean findDepartures);
 
   public List<Date> getNextServiceDatesForDepartureInterval(
       ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time);

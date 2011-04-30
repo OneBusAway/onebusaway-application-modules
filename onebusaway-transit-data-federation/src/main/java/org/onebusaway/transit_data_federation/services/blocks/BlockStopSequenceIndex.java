@@ -56,16 +56,27 @@ public class BlockStopSequenceIndex implements HasIndexedBlockStopTimes {
     return _stopTimes;
   }
 
+  @Override
   public int getArrivalTimeForIndex(int index) {
     List<BlockSequence> sequences = _index.getSequences();
     BlockSequence sequence = sequences.get(index);
     return sequence.getArrivalTimeForIndex(_offset);
   }
 
+  @Override
   public int getDepartureTimeForIndex(int index) {
     List<BlockSequence> sequences = _index.getSequences();
     BlockSequence sequence = sequences.get(index);
     return sequence.getDepartureTimeForIndex(_offset);
+  }
+
+  @Override
+  public String toString() {
+    List<BlockSequence> sequences = _index.getSequences();
+    BlockSequence sequence = sequences.get(0);
+    List<BlockStopTimeEntry> stopTimes = sequence.getStopTimes();
+    BlockStopTimeEntry bst = stopTimes.get(_offset);
+    return bst.toString();
   }
 
   /****

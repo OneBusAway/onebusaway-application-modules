@@ -1,7 +1,6 @@
 package org.onebusaway.transit_data_federation.impl;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -403,7 +402,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     int lookBehind = applyRealTime ? MINUTES_BEFORE_BUFFER * 60 : 0;
     int lookAhead = applyRealTime ? MINUTES_AFTER_BUFFER * 60 : 0;
-    
+
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getNextDeparturesBetweenStopPair(
         fromStop, toStop, tFrom, lookBehind, lookAhead, resultCount);
 
@@ -412,27 +411,20 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   }
 
   @Override
-  public List<Pair<ArrivalAndDepartureInstance>> getArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int window,
-      boolean applyRealTime) {
+  public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
+      int resultCount, boolean applyRealTime) {
 
-    Date tFrom = new Date(targetTime.getTargetTime() - window * 1000);
     Date tTo = new Date(targetTime.getTargetTime());
 
-    Date tFromExpanded = tFrom;
-    Date tToExpanded = tTo;
+    int lookBehind = applyRealTime ? MINUTES_BEFORE_BUFFER * 60 : 0;
+    int lookAhead = applyRealTime ? MINUTES_AFTER_BUFFER * 60 : 0;
 
-    if (applyRealTime) {
-      tFromExpanded = new Date(tFrom.getTime() - MINUTES_BEFORE_BUFFER * 60
-          * 1000);
-      tToExpanded = new Date(tTo.getTime() + MINUTES_AFTER_BUFFER * 60 * 1000);
-    }
-
-    List<Pair<StopTimeInstance>> pairs = _stopTimeService.getArrivalsBetweenStopPairInTimeRange(
-        fromStop, toStop, tFromExpanded, tToExpanded);
+    List<Pair<StopTimeInstance>> pairs = _stopTimeService.getPreviousArrivalsBetweenStopPair(
+        fromStop, toStop, tTo, lookBehind, lookAhead, resultCount);
 
     return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs,
-        tFrom, tTo, applyRealTime);
+        null, tTo, applyRealTime);
   }
 
   /****
@@ -1035,30 +1027,4 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       return new ArrivalAndDepartureTime(arrivalTime, departureTime);
     }
   }
-
-  private static class StopTimeInstancePairComparator implements
-      Comparator<Pair<StopTimeInstance>> {
-
-    private boolean _compareArrivals;
-
-    public StopTimeInstancePairComparator(boolean compareArrivals) {
-      _compareArrivals = compareArrivals;
-    }
-
-    @Override
-    public int compare(Pair<StopTimeInstance> o1, Pair<StopTimeInstance> o2) {
-
-      if (_compareArrivals) {
-        long t1 = o1.getSecond().getArrivalTime();
-        long t2 = o2.getSecond().getArrivalTime();
-        return t1 == t2 ? 0 : (t1 < t2 ? -1 : 1);
-      } else {
-        long t1 = o1.getFirst().getDepartureTime();
-        long t2 = o2.getFirst().getDepartureTime();
-        return t1 == t2 ? 0 : (t1 < t2 ? 1 : -1);
-      }
-    }
-
-  }
-
 }

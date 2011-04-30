@@ -335,7 +335,9 @@ public class BlockIndexFactory {
       List<FrequencyTripGroup> groupedTrips = ensureFrequencyTripGroups(tripsWithSameSequence);
 
       for (FrequencyTripGroup group : groupedTrips) {
-        FrequencyBlockTripIndex index = createFrequencyIndexForGroupOfBlockTrips(group);
+        group.trimToSize();
+        FrequencyBlockTripIndex index = createFrequencyIndexForTrips(
+            group.getTrips(), group.getFrequencies());
         allIndices.add(index);
       }
     }
@@ -414,12 +416,11 @@ public class BlockIndexFactory {
     return new BlockLayoverIndex(trips, layoverIntervalBlock);
   }
 
-  public FrequencyBlockTripIndex createFrequencyIndexForGroupOfBlockTrips(
-      FrequencyTripGroup group) {
-    FrequencyServiceIntervalBlock serviceIntervalBlock = getBlockTripssAsFrequencyBlockInterval(group);
-    group.trimToSize();
-    return new FrequencyBlockTripIndex(group.getTrips(),
-        group.getFrequencies(), serviceIntervalBlock);
+  public FrequencyBlockTripIndex createFrequencyIndexForTrips(
+      List<BlockTripEntry> trips, List<FrequencyEntry> frequencies) {
+    FrequencyServiceIntervalBlock serviceIntervalBlock = getBlockTripsAsFrequencyBlockInterval(
+        trips, frequencies);
+    return new FrequencyBlockTripIndex(trips, frequencies, serviceIntervalBlock);
   }
 
   public BlockSequenceIndex createSequenceIndexForGroupOfBlockSequences(
@@ -608,11 +609,8 @@ public class BlockIndexFactory {
     return new LayoverIntervalBlock(startTimes, endTimes);
   }
 
-  private FrequencyServiceIntervalBlock getBlockTripssAsFrequencyBlockInterval(
-      FrequencyTripGroup group) {
-
-    List<BlockTripEntry> trips = group.getTrips();
-    List<FrequencyEntry> frequencies = group.getFrequencies();
+  private FrequencyServiceIntervalBlock getBlockTripsAsFrequencyBlockInterval(
+      List<BlockTripEntry> trips, List<FrequencyEntry> frequencies) {
 
     int n = trips.size();
 
@@ -720,22 +718,25 @@ public class BlockIndexFactory {
     if (lineIdA.equals(lineIdB)
         && (directionA == null || !directionA.equals(directionB)))
       return false;
-    
+
     double prevOrientation = computeDirectionOfTravel(prevStopTimes);
     double nextOrientation = computeDirectionOfTravel(nextStopTimes);
-    double delta = GeometryLibrary.getAngleDifference(prevOrientation, nextOrientation);
+    double delta = GeometryLibrary.getAngleDifference(prevOrientation,
+        nextOrientation);
 
-//    System.out.println(delta + " " + prevTrip.getId() + " " + nextTrip.getId());
-    
+    // System.out.println(delta + " " + prevTrip.getId() + " " +
+    // nextTrip.getId());
+
     return true;
   }
-  
+
   private double computeDirectionOfTravel(List<BlockStopTimeEntry> bsts) {
     BlockStopTimeEntry fromBst = bsts.get(0);
-    BlockStopTimeEntry toBst = bsts.get(bsts.size()-1);
+    BlockStopTimeEntry toBst = bsts.get(bsts.size() - 1);
     StopEntry fromStop = fromBst.getStopTime().getStop();
     StopEntry toStop = toBst.getStopTime().getStop();
-    return SphericalGeometryLibrary.getOrientation(fromStop.getStopLat(), fromStop.getStopLon(), toStop.getStopLat(), toStop.getStopLon());
+    return SphericalGeometryLibrary.getOrientation(fromStop.getStopLat(),
+        fromStop.getStopLon(), toStop.getStopLat(), toStop.getStopLon());
   }
 
   private ServiceInterval extend(ServiceInterval interval,
