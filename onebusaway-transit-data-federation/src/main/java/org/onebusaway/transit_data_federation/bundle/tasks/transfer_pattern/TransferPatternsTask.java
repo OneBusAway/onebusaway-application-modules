@@ -2,11 +2,8 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.zip.GZIPOutputStream;
 
 import org.onebusaway.collections.Counter;
 import org.onebusaway.collections.FactoryMap;
@@ -34,10 +30,10 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.HasStopTimeInstanceTransitVertex;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineNearbyStopsVertex;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferEdge;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineBlockArrivalVertex;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineNearbyStopsVertex;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineOriginVertex;
+import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferEdge;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferVertex;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
@@ -53,6 +49,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.onebusaway.utility.IOLibrary;
 import org.opentripplanner.routing.algorithm.GenericDijkstra;
 import org.opentripplanner.routing.algorithm.strategies.SkipVertexStrategy;
 import org.opentripplanner.routing.core.Edge;
@@ -68,9 +65,6 @@ import org.opentripplanner.routing.spt.SPTEdge;
 import org.opentripplanner.routing.spt.SPTVertex;
 import org.opentripplanner.routing.spt.ShortestPathTree;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import cern.colt.list.DoubleArrayList;
-import cern.jet.stat.Descriptive;
 
 public class TransferPatternsTask implements Runnable {
 
@@ -268,7 +262,7 @@ public class TransferPatternsTask implements Runnable {
 
     try {
 
-      PrintWriter out = openOutput(path);
+      PrintWriter out = new PrintWriter(IOLibrary.getFileAsWriter(path));
 
       long index = 0;
       for (MutableTransferPattern pattern : patternsByStopId.values()) {
@@ -280,31 +274,20 @@ public class TransferPatternsTask implements Runnable {
     }
   }
 
-  private PrintWriter openOutput(File path) throws IOException {
-    OutputStream out = new FileOutputStream(path);
-    if (path.getName().endsWith(".gz"))
-      out = new GZIPOutputStream(out);
-    return new PrintWriter(new OutputStreamWriter(out));
-  }
-
   private void avgPaths(MutableTransferPattern pattern, StopEntry origin) {
     /*
-    DoubleArrayList values = new DoubleArrayList();
-    for (StopEntry stop : pattern.getStops()) {
-      TransferParent root = new TransferParent();
-      pattern.getTransfersForStop(stop, root);
-      values.add(root.size());
-    }
-
-    if (values.isEmpty())
-      return;
-
-    values.sort();
-
-    System.out.println("    mu=" + Descriptive.mean(values));
-    System.out.println("median=" + Descriptive.median(values));
-    System.out.println("   max=" + Descriptive.max(values));
-    */
+     * DoubleArrayList values = new DoubleArrayList(); for (StopEntry stop :
+     * pattern.getStops()) { TransferParent root = new TransferParent();
+     * pattern.getTransfersForStop(stop, root); values.add(root.size()); }
+     * 
+     * if (values.isEmpty()) return;
+     * 
+     * values.sort();
+     * 
+     * System.out.println("    mu=" + Descriptive.mean(values));
+     * System.out.println("median=" + Descriptive.median(values));
+     * System.out.println("   max=" + Descriptive.max(values));
+     */
   }
 
   private List<StopEntry> loadSourceStops() {
@@ -430,7 +413,7 @@ public class TransferPatternsTask implements Runnable {
       Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop) {
 
     Map<SPTVertex, List<StopEntry>> parentsBySPTVertex = new HashMap<SPTVertex, List<StopEntry>>();
-    Map<SPTVertex, Boolean> hasProperOrigins = new HashMap<SPTVertex, Boolean>();
+    Map<SPTVertex, StopEntry> actualOriginStops = new HashMap<SPTVertex, StopEntry>();
 
     Map<StopEntry, List<TPOfflineBlockArrivalVertex>> arrivalsByStop = new FactoryMap<StopEntry, List<TPOfflineBlockArrivalVertex>>(
         new ArrayList<TPOfflineBlockArrivalVertex>());
@@ -446,13 +429,13 @@ public class TransferPatternsTask implements Runnable {
 
     for (Map.Entry<StopEntry, List<TPOfflineBlockArrivalVertex>> entry : arrivalsByStop.entrySet()) {
       processArrivalsForStop(entry.getKey(), entry.getValue(), originStop, spt,
-          hasProperOrigins, parentsBySPTVertex, pathCountsByStop);
+          actualOriginStops, parentsBySPTVertex, pathCountsByStop);
     }
   }
 
   private void processArrivalsForStop(StopEntry arrivalStop,
       List<TPOfflineBlockArrivalVertex> arrivals, StopEntry originStop,
-      MultiShortestPathTree spt, Map<SPTVertex, Boolean> what,
+      MultiShortestPathTree spt, Map<SPTVertex, StopEntry> actualOriginStops,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex,
       Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop) {
 
@@ -467,7 +450,7 @@ public class TransferPatternsTask implements Runnable {
 
     Map<SPTVertex, List<Pair<StopEntry>>> pathsByVertex = new HashMap<SPTVertex, List<Pair<StopEntry>>>();
 
-    boolean verbose = false;
+    boolean verbose = false;// arrivalStop.getId().toString().equals("1_18740");
     if (verbose)
       System.out.println("here!");
 
@@ -488,7 +471,9 @@ public class TransferPatternsTask implements Runnable {
         if (verbose)
           System.out.println("  " + sptVertex);
 
-        boolean properOrigins = hasProperOrigins(sptVertex, what);
+        StopEntry actualOriginStop = getActualOriginStop(sptVertex,
+            actualOriginStops);
+        boolean properOrigins = originStop == actualOriginStop;
 
         if (verbose)
           System.out.println("  origins=" + properOrigins);
@@ -504,20 +489,17 @@ public class TransferPatternsTask implements Runnable {
           startTime = state.getStartTime();
           totalPathCount++;
 
-          if (properOrigins) {
+          List<Pair<StopEntry>> path = constructTransferPattern(arrival,
+              sptVertex, parentsBySPTVertex);
 
-            List<Pair<StopEntry>> path = constructTransferPattern(originStop,
-                arrival, sptVertex, parentsBySPTVertex);
+          pathCounts.increment(path);
+          paths.get(path).add(sptVertex);
 
-            pathCounts.increment(path);
-            paths.get(path).add(sptVertex);
+          m.get(state.getTime()).add(sptVertex);
+          pathsByVertex.put(sptVertex, path);
 
-            m.get(state.getTime()).add(sptVertex);
-            pathsByVertex.put(sptVertex, path);
-
-            if (verbose)
-              System.out.println("  path=" + path);
-          }
+          if (verbose)
+            System.out.println("  path=" + path);
         }
       }
     }
@@ -527,9 +509,6 @@ public class TransferPatternsTask implements Runnable {
 
     List<Pair<StopEntry>> max = pathCounts.getMax();
     int maxCount = pathCounts.getCount(max);
-
-    if (maxCount < totalPathCount * _transferPatternFrequencyCutoff)
-      return;
 
     List<List<Pair<StopEntry>>> toKeep = new ArrayList<List<Pair<StopEntry>>>();
 
@@ -564,13 +543,16 @@ public class TransferPatternsTask implements Runnable {
           continue;
       }
 
-      toKeep.add(path);
-
+      if (path.get(0).getFirst() == originStop)
+        toKeep.add(path);
     }
 
     Counter<List<Pair<StopEntry>>> counts = pathCountsByStop.get(arrivalStop);
     for (List<Pair<StopEntry>> path : toKeep) {
-      counts.increment(path, pathCounts.getCount(path));
+      int count = pathCounts.getCount(path);
+      counts.increment(path, count);
+      if (verbose)
+        System.out.println(count + "\t" + path);
     }
   }
 
@@ -623,30 +605,33 @@ public class TransferPatternsTask implements Runnable {
     return null;
   }
 
-  private boolean hasProperOrigins(SPTVertex sptVertex,
-      Map<SPTVertex, Boolean> hasProperOrigins) {
+  private StopEntry getActualOriginStop(SPTVertex sptVertex,
+      Map<SPTVertex, StopEntry> actualOriginStops) {
 
-    Boolean proper = hasProperOrigins.get(sptVertex);
-    if (proper == null) {
+    StopEntry actual = actualOriginStops.get(sptVertex);
+    if (actual == null) {
       Vertex v = sptVertex.mirror;
       if (v instanceof TPOfflineNearbyStopsVertex) {
-        proper = false;
+        TPOfflineNearbyStopsVertex nsv = (TPOfflineNearbyStopsVertex) v;
+        actual = nsv.getStop();
       } else if (v instanceof TPOfflineOriginVertex) {
-        proper = true;
+        TPOfflineOriginVertex originVertex = (TPOfflineOriginVertex) v;
+        actual = originVertex.getStop();
       } else {
-        proper = hasProperOrigins(sptVertex.incoming.fromv, hasProperOrigins);
+        actual = getActualOriginStop(sptVertex.incoming.fromv,
+            actualOriginStops);
       }
-      hasProperOrigins.put(sptVertex, proper);
+      actualOriginStops.put(sptVertex, actual);
     }
 
-    return proper;
+    return actual;
   }
 
-  private List<Pair<StopEntry>> constructTransferPattern(StopEntry originStop,
+  private List<Pair<StopEntry>> constructTransferPattern(
       TPOfflineBlockArrivalVertex arrival, SPTVertex sptVertex,
       Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
 
-    List<StopEntry> path = computeParentsForSPTVertex(sptVertex, originStop,
+    List<StopEntry> path = computeParentsForSPTVertex(sptVertex,
         parentsBySPTVertex);
 
     path = new ArrayList<StopEntry>(path);
@@ -664,44 +649,46 @@ public class TransferPatternsTask implements Runnable {
   }
 
   private List<StopEntry> computeParentsForSPTVertex(SPTVertex sptVertex,
-      StopEntry originStop, Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
+      Map<SPTVertex, List<StopEntry>> parentsBySPTVertex2) {
 
-    List<StopEntry> parent = parentsBySPTVertex.get(sptVertex);
+    List<StopEntry> parent = parentsBySPTVertex2.get(sptVertex);
 
     if (parent != null)
       return parent;
 
-    SPTEdge sptEdge = sptVertex.incoming;
+    Vertex v = sptVertex.mirror;
 
-    if (sptEdge == null) {
-      parent = Arrays.asList(originStop);
-    } else {
-
-      Edge payload = sptEdge.payload;
-
-      if (payload instanceof TPOfflineTransferEdge) {
-
-        TPOfflineBlockArrivalVertex fromV = (TPOfflineBlockArrivalVertex) sptEdge.narrative.getFromVertex();
-        TPOfflineTransferVertex toV = (TPOfflineTransferVertex) sptEdge.narrative.getToVertex();
-
-        List<StopEntry> incomingPattern = computeParentsForSPTVertex(
-            sptEdge.fromv, originStop, parentsBySPTVertex);
-        ArrayList<StopEntry> extendedPattern = new ArrayList<StopEntry>(
-            incomingPattern);
-
-        extendedPattern.add(fromV.getStop());
-        extendedPattern.add(toV.getStop());
-
-        parent = extendedPattern;
-
-      } else {
-
-        parent = computeParentsForSPTVertex(sptEdge.fromv, originStop,
-            parentsBySPTVertex);
-      }
+    if (v instanceof TPOfflineNearbyStopsVertex) {
+      TPOfflineNearbyStopsVertex nsv = (TPOfflineNearbyStopsVertex) v;
+      return Arrays.asList(nsv.getStop());
+    } else if (v instanceof TPOfflineOriginVertex) {
+      TPOfflineOriginVertex originVertex = (TPOfflineOriginVertex) v;
+      return Arrays.asList(originVertex.getStop());
     }
 
-    parentsBySPTVertex.put(sptVertex, parent);
+    SPTEdge sptEdge = sptVertex.incoming;
+    Edge payload = sptEdge.payload;
+
+    if (payload instanceof TPOfflineTransferEdge) {
+
+      TPOfflineBlockArrivalVertex fromV = (TPOfflineBlockArrivalVertex) sptEdge.narrative.getFromVertex();
+      TPOfflineTransferVertex toV = (TPOfflineTransferVertex) sptEdge.narrative.getToVertex();
+
+      List<StopEntry> incomingPattern = computeParentsForSPTVertex(
+          sptEdge.fromv, parentsBySPTVertex2);
+      ArrayList<StopEntry> extendedPattern = new ArrayList<StopEntry>(
+          incomingPattern);
+
+      extendedPattern.add(fromV.getStop());
+      extendedPattern.add(toV.getStop());
+
+      parent = extendedPattern;
+
+    } else {
+      parent = computeParentsForSPTVertex(sptEdge.fromv, parentsBySPTVertex2);
+    }
+
+    parentsBySPTVertex2.put(sptVertex, parent);
 
     return parent;
   }

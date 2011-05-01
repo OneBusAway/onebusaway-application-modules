@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -47,5 +49,10 @@ public class IOLibrary {
     if (file.getName().endsWith(".gz"))
       out = new GZIPOutputStream(out);
     return out;
+  }
+  
+  public static Writer getFileAsWriter(File file) throws IOException {
+    OutputStream out = getFileAsOutputStream(file);
+    return new OutputStreamWriter(out);
   }
 }

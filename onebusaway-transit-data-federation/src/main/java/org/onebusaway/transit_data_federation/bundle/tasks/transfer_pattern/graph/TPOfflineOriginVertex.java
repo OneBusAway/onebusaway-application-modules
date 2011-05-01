@@ -40,9 +40,21 @@ public class TPOfflineOriginVertex extends AbstractStopVertexWithEdges {
      * We can't ignore the fact that it might be faster to just walk to a
      * different stop (like across the street)
      */
-    TPOfflineNearbyStopsVertex vNearby = new TPOfflineNearbyStopsVertex(
-        _context, _stop, _nearbyStopsAndWalkTimes, _nearbyStopTimeInstances);
-    edges.add(new FreeEdge(this, vNearby));
+    for (Map.Entry<StopEntry, Integer> entry : _nearbyStopsAndWalkTimes.entrySet()) {
+
+      StopEntry nearbyStop = entry.getKey();
+      int walkTime = entry.getValue();
+
+      List<StopTimeInstance> instances = _nearbyStopTimeInstances.get(nearbyStop);
+
+      if (instances.isEmpty())
+        continue;
+
+      TPOfflineNearbyStopsVertex vNearby = new TPOfflineNearbyStopsVertex(
+          _context, nearbyStop, walkTime, instances);
+
+      edges.add(new FreeEdge(this, vNearby));
+    }
 
     return edges;
   }

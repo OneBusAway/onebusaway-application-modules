@@ -95,7 +95,10 @@ public class FederatedTransitDataBundle {
   }
 
   public File getTransferPatternsPath() {
-    return new File(_path, keyed("TransferPatterns"));
+    File parent = new File(_path, "TransferPatterns");
+    if (!parent.exists())
+      parent.mkdirs();
+    return new File(parent, keyed("TransferPatterns"));
   }
 
   public File[] getAllTransferPatternsPaths() {
