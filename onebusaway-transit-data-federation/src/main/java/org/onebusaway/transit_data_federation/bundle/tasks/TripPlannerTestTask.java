@@ -88,7 +88,7 @@ public class TripPlannerTestTask implements Runnable {
         double mu = tTotal / (double) index;
         System.out.println(index + " " + tDiff + " "
             + result.isComputationTimeLimitReached() + " " + mu);
-        if( index == 500)
+        if( index == 1000)
           break;
       }
     } catch (Exception ex) {

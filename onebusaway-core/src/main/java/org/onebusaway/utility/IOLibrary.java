@@ -26,13 +26,6 @@ public class IOLibrary {
     return new InputStreamReader(getPathAsInputStream(path));
   }
 
-  public static InputStream getFileAsInputStream(File path) throws IOException {
-    InputStream is = new FileInputStream(path);
-    if (path.getName().endsWith(".gz"))
-      is = new GZIPInputStream(is);
-    return is;
-  }
-
   public static InputStream getPathAsInputStream(String path)
       throws IOException {
     if (path.startsWith("http")) {
@@ -43,6 +36,22 @@ public class IOLibrary {
     }
   }
 
+  public static BufferedReader getFileAsBufferedReader(File path)
+      throws IOException {
+    return new BufferedReader(getFileAsReader(path));
+  }
+
+  public static Reader getFileAsReader(File path) throws IOException {
+    return new InputStreamReader(getFileAsInputStream(path));
+  }
+
+  public static InputStream getFileAsInputStream(File path) throws IOException {
+    InputStream is = new FileInputStream(path);
+    if (path.getName().endsWith(".gz"))
+      is = new GZIPInputStream(is);
+    return is;
+  }
+
   public static OutputStream getFileAsOutputStream(File file)
       throws IOException {
     OutputStream out = new FileOutputStream(file);
@@ -50,7 +59,7 @@ public class IOLibrary {
       out = new GZIPOutputStream(out);
     return out;
   }
-  
+
   public static Writer getFileAsWriter(File file) throws IOException {
     OutputStream out = getFileAsOutputStream(file);
     return new OutputStreamWriter(out);

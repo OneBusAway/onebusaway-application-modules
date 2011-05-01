@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -42,7 +43,7 @@ public class SerializedTransferPatternsTask implements Runnable {
      */
     deleteExistingFile();
 
-    File[] paths = _bundle.getAllTransferPatternsPaths();
+    List<File> paths = _bundle.getAllTransferPatternsPaths();
     int pathIndex = 0;
 
     CompactedTransferPatternFactory factory = new CompactedTransferPatternFactory(
@@ -52,7 +53,7 @@ public class SerializedTransferPatternsTask implements Runnable {
     for (File path : paths) {
       if (pathIndex % 10 == 0)
         _log.info("transfer pattern files processed: " + pathIndex + "/"
-            + paths.length);
+            + paths.size());
       pathIndex++;
 
       try {

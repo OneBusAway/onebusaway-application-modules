@@ -1,7 +1,8 @@
 package org.onebusaway.transit_data_federation.bundle.model;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreator;
 
@@ -93,28 +94,28 @@ public class FederatedTransitDataBundle {
   public File getTransferPatternSourceStopsPath() {
     return new File(_path, keyed("TransferPatternSourceStops.txt"));
   }
-
-  public File getTransferPatternsPath() {
+  
+  public File getTransferPatternsParentPath() {
     File parent = new File(_path, "TransferPatterns");
     if (!parent.exists())
       parent.mkdirs();
+    return parent;
+  }
+
+  public File getTransferPatternsPath() {
+    File parent = getTransferPatternsParentPath();
     return new File(parent, keyed("TransferPatterns"));
   }
 
-  public File[] getAllTransferPatternsPaths() {
-    File path = getTransferPatternsPath();
-    if (!path.exists())
-      return new File[0];
-    return path.listFiles(new FilenameFilter() {
-      @Override
-      public boolean accept(File dir, String name) {
-        return name.matches("^TransferPatterns(-\\d+){0,1}\\.gz$");
-      }
-    });
+  public List<File> getAllTransferPatternsPaths() {
+    File path = getTransferPatternsParentPath();
+    List<File> paths = new ArrayList<File>();
+    getAllTransferPatternsPaths(path, paths);
+    return paths;
   }
 
-  public File getTransferPatternsSegmentCountsPath() {
-    return new File(_path, "TransferPatternsSegmentCounts.csv");
+  public File getTransferPatternsTransferPointCountsPath() {
+    return new File(_path, "TransferPatternsTransferPointCounts.txt");
   }
 
   public File getSerializedTransferPatternsPath() {
@@ -142,5 +143,14 @@ public class FederatedTransitDataBundle {
         return value.substring(0, index) + "-" + _key + value.substring(index);
     }
     return value;
+  }
+
+  private void getAllTransferPatternsPaths(File path, List<File> paths) {
+    if (path.isDirectory()) {
+      for (File subPath : path.listFiles())
+        getAllTransferPatternsPaths(subPath, paths);
+    } else if (path.getName().matches("^TransferPatterns(-\\d+){0,1}\\.gz$")) {
+      paths.add(path);
+    }
   }
 }

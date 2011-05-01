@@ -67,7 +67,6 @@ public class TransferPatternCounterMain {
         List<String> tokens = CSVLibrary.parse(line);
         String index = tokens.get(0);
         String stopId = tokens.get(1);
-        String type = tokens.get(2);
         String parentIndex = null;
         if (tokens.size() > 3)
           parentIndex = tokens.get(3);

@@ -204,19 +204,19 @@
   <!-- -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="transfer_patterns_analysis" />
+    <property name="taskName" value="transfer_patterns_hub_analysis" />
     <property name="afterTaskNames" value="transfer_patterns" />
-    <property name="task" ref="transferPatternsAnalysisTask" />
+    <property name="task" ref="transferPatternsHubAnalysisTask" />
     <property name="enabled" value="false" />
   </bean>
 
-  <bean id="transferPatternsAnalysisTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsAnalysisTask" />
+  <bean id="transferPatternsHubAnalysisTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsHubAnalysisTask" />
 
   <!-- -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="serialized_transfer_patterns" />
-    <property name="afterTaskNames" value="transfer_patterns_analysis" />
+    <property name="afterTaskNames" value="transfer_patterns_hub_analysis" />
     <property name="task" ref="serializedTransferPatternsTask" />
     <property name="enabled" value="false" />
   </bean>
