@@ -193,46 +193,54 @@ class StopTimeServiceImpl implements StopTimeService {
 
   @Override
   public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date fromTime, int lookBehind,
-      int lookAhead, int resultCount) {
+      StopEntry fromStop, StopEntry toStop, Date fromTime,
+      int runningEarlySlack, int runningLateSlack, int resultCount) {
 
     if (resultCount == 0)
       return Collections.emptyList();
 
-    PriorityQueue<Pair<StopTimeInstance>> queue = new PriorityQueue<Pair<StopTimeInstance>>(
+    PriorityQueue<Pair<StopTimeInstance>> nBestQueue = new PriorityQueue<Pair<StopTimeInstance>>(
+        resultCount, _lastArrivalComparator);
+    PriorityQueue<Pair<StopTimeInstance>> resultQueue = new PriorityQueue<Pair<StopTimeInstance>>(
         resultCount, _lastArrivalComparator);
 
     getDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, fromTime,
-        lookBehind, lookAhead, resultCount, queue, true);
+        runningEarlySlack, runningLateSlack, resultCount, nBestQueue,
+        resultQueue, true);
 
     getFrequencyDeparturesAndArrivalsBetweenStopPair(fromStop, toStop,
-        fromTime, lookBehind, lookAhead, resultCount, queue, true);
+        fromTime, runningEarlySlack, runningLateSlack, resultCount, nBestQueue,
+        resultQueue, true);
 
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
-    results.addAll(queue);
+    results.addAll(resultQueue);
     Collections.sort(results, _firstDepartureComparator);
     return results;
   }
 
   @Override
   public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date toTime, int lookBehind,
-      int lookAhead, int resultCount) {
+      StopEntry fromStop, StopEntry toStop, Date toTime, int runningEarlySlack,
+      int runningLateSlack, int resultCount) {
 
     if (resultCount == 0)
       return Collections.emptyList();
 
-    PriorityQueue<Pair<StopTimeInstance>> queue = new PriorityQueue<Pair<StopTimeInstance>>(
+    PriorityQueue<Pair<StopTimeInstance>> nBestQueue = new PriorityQueue<Pair<StopTimeInstance>>(
+        resultCount, _firstDepartureComparator);
+    PriorityQueue<Pair<StopTimeInstance>> resultQueue = new PriorityQueue<Pair<StopTimeInstance>>(
         resultCount, _firstDepartureComparator);
 
     getDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, toTime,
-        lookBehind, lookAhead, resultCount, queue, false);
+        runningEarlySlack, runningLateSlack, resultCount, nBestQueue,
+        resultQueue, false);
 
     getFrequencyDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, toTime,
-        lookBehind, lookAhead, resultCount, queue, false);
+        runningEarlySlack, runningLateSlack, resultCount, nBestQueue,
+        resultQueue, false);
 
     List<Pair<StopTimeInstance>> results = new ArrayList<Pair<StopTimeInstance>>();
-    results.addAll(queue);
+    results.addAll(resultQueue);
     Collections.sort(results, _lastArrivalComparator);
     return results;
   }
@@ -242,19 +250,23 @@ class StopTimeServiceImpl implements StopTimeService {
    ****/
 
   private void getDeparturesAndArrivalsBetweenStopPair(StopEntry fromStop,
-      StopEntry toStop, Date tTime, int lookBehind, int lookAhead,
-      int resultCount, PriorityQueue<Pair<StopTimeInstance>> queue,
-      boolean findDepartures) {
+      StopEntry toStop, Date tTime, int runningEarlySlack,
+      int runningLateSlack, int resultCount,
+      PriorityQueue<Pair<StopTimeInstance>> nBestQueue,
+      PriorityQueue<Pair<StopTimeInstance>> resultQueue, boolean findDepartures) {
 
     List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
         fromStop, toStop);
 
     long targetTime = tTime.getTime();
+    long slackAdjustedTime = targetTime;
 
     if (findDepartures)
-      targetTime -= lookBehind * 1000;
+      slackAdjustedTime -= runningLateSlack * 1000;
     else
-      targetTime += lookAhead * 1000;
+      slackAdjustedTime += runningEarlySlack * 1000;
+
+    long slack = (runningLateSlack + runningEarlySlack) * 1000;
 
     for (Pair<BlockStopSequenceIndex> pair : indexPairs) {
 
@@ -267,14 +279,15 @@ class StopTimeServiceImpl implements StopTimeService {
 
       List<Date> serviceDates = _calendarService.getServiceDatesForInterval(
           sourceStopIndex.getServiceIds(),
-          sourceStopIndex.getServiceInterval(), targetTime, findDepartures);
+          sourceStopIndex.getServiceInterval(), slackAdjustedTime,
+          findDepartures);
 
       for (Date serviceDate : serviceDates) {
 
         ServiceInterval destServiceInterval = destStopIndex.getServiceInterval();
 
-        if (serviceDateIsBeyondRangeOfQueue(queue, serviceDate,
-            destServiceInterval, resultCount, findDepartures)) {
+        if (serviceDateIsBeyondRangeOfQueue(nBestQueue, serviceDate,
+            destServiceInterval, resultCount, findDepartures, slack)) {
 
           /**
            * The service date is beyond our worst departure-arrival, so we break
@@ -282,7 +295,8 @@ class StopTimeServiceImpl implements StopTimeService {
           break;
         }
 
-        int relativeTime = effectiveTime(serviceDate.getTime(), tTime.getTime());
+        int relativeTime = effectiveTime(serviceDate.getTime(),
+            slackAdjustedTime);
 
         IndexAdapter<HasIndexedBlockStopTimes> adapter = findDepartures
             ? IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE
@@ -307,18 +321,41 @@ class StopTimeServiceImpl implements StopTimeService {
           StopTimeInstance stiDest = new StopTimeInstance(stopTimeDest,
               serviceDate);
 
-          if (stopTimeIsBeyondRangeOfQueue(queue, stiDest, resultCount,
-              findDepartures)) {
+          if (stopTimeIsBeyondRangeOfQueue(nBestQueue, stiDest, resultCount,
+              findDepartures, slack)) {
             break;
           }
 
           Pair<StopTimeInstance> stiPair = findDepartures ? Tuples.pair(
               stiSource, stiDest) : Tuples.pair(stiDest, stiSource);
 
-          queue.add(stiPair);
+          /**
+           * We only add to the n-best queue if the arrival-departure is beyond
+           * the target time, as opposed to time adjusted by slack
+           */
+          if (isStopTimeInstanceBeyondTargetTime(stiSource, targetTime,
+              findDepartures)) {
+            nBestQueue.add(stiPair);
+          }
 
-          while (queue.size() > resultCount)
-            queue.poll();
+          while (nBestQueue.size() > resultCount)
+            nBestQueue.poll();
+
+          /**
+           * We always add to the result queue
+           */
+          resultQueue.add(stiPair);
+
+          while (!resultQueue.isEmpty()) {
+            Pair<StopTimeInstance> r = resultQueue.peek();
+            StopTimeInstance sti = findDepartures ? r.getSecond()
+                : r.getFirst();
+            if (stopTimeIsBeyondRangeOfQueue(nBestQueue, sti, resultCount,
+                findDepartures, slack))
+              resultQueue.poll();
+            else
+              break;
+          }
 
           if (findDepartures)
             sourceIndex++;
@@ -330,14 +367,23 @@ class StopTimeServiceImpl implements StopTimeService {
   }
 
   private void getFrequencyDeparturesAndArrivalsBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date fromTime, int lookBehind,
-      int lookAhead, int resultCount,
-      PriorityQueue<Pair<StopTimeInstance>> queue, boolean findDepartures) {
+      StopEntry fromStop, StopEntry toStop, Date tTime, int runningEarlySlack,
+      int runningLateSlack, int resultCount,
+      PriorityQueue<Pair<StopTimeInstance>> nBestQueue,
+      PriorityQueue<Pair<StopTimeInstance>> resultQueue, boolean findDepartures) {
 
     List<Pair<FrequencyStopTripIndex>> indexPairs = _blockIndexService.getFrequencyIndicesBetweenStops(
         fromStop, toStop);
 
-    long targetTime = fromTime.getTime() - lookBehind * 1000;
+    long targetTime = tTime.getTime();
+    long slackAdjustedTime = targetTime;
+
+    if (findDepartures)
+      slackAdjustedTime -= runningEarlySlack * 1000;
+    else
+      slackAdjustedTime += runningLateSlack * 1000;
+
+    long slack = (runningLateSlack + runningEarlySlack) * 1000;
 
     for (Pair<FrequencyStopTripIndex> pair : indexPairs) {
 
@@ -351,14 +397,15 @@ class StopTimeServiceImpl implements StopTimeService {
 
       List<Date> serviceDates = _calendarService.getServiceDatesForInterval(
           sourceStopIndex.getServiceIds(),
-          sourceStopIndex.getServiceInterval(), targetTime, findDepartures);
+          sourceStopIndex.getServiceInterval(), slackAdjustedTime,
+          findDepartures);
 
       for (Date serviceDate : serviceDates) {
 
         ServiceInterval destServiceInterval = destStopIndex.getServiceInterval();
 
-        if (serviceDateIsBeyondRangeOfQueue(queue, serviceDate,
-            destServiceInterval, resultCount, findDepartures)) {
+        if (serviceDateIsBeyondRangeOfQueue(nBestQueue, serviceDate,
+            destServiceInterval, resultCount, findDepartures, slack)) {
 
           /**
            * The service date is beyond our worst departure-arrival, so we break
@@ -367,7 +414,7 @@ class StopTimeServiceImpl implements StopTimeService {
         }
 
         int relativeTime = effectiveTime(serviceDate.getTime(),
-            fromTime.getTime());
+            slackAdjustedTime);
 
         IndexAdapter<HasIndexedFrequencyBlockTrips> adapter = findDepartures
             ? IndexAdapters.FREQUENCY_END_TIME_INSTANCE
@@ -401,16 +448,51 @@ class StopTimeServiceImpl implements StopTimeService {
           StopTimeInstance stiDest = new StopTimeInstance(stopTimeTo,
               serviceDate.getTime(), frequency, frequencyOffset);
 
-          if (stopTimeIsBeyondRangeOfQueue(queue, stiDest, resultCount,
-              findDepartures))
+          /**
+           * There's a chance the frequency-based departure+arrival pair could
+           * extend out the front of the frequency range, at which point we
+           * discard it.
+           */
+          if (!findDepartures
+              && stiDest.getDepartureTime() < serviceDate.getTime()
+                  + frequency.getStartTime() * 1000) {
+            break;
+          }
+
+          if (stopTimeIsBeyondRangeOfQueue(nBestQueue, stiDest, resultCount,
+              findDepartures, slack))
             break;
 
           Pair<StopTimeInstance> stiPair = findDepartures ? Tuples.pair(
               stiSource, stiDest) : Tuples.pair(stiDest, stiSource);
-          queue.add(stiPair);
 
-          while (queue.size() > resultCount)
-            queue.poll();
+          /**
+           * We only add to the n-best queue if the arrival-departure is beyond
+           * the target time, as opposed to time adjusted by slack
+           */
+          if (isStopTimeInstanceBeyondTargetTime(stiSource, targetTime,
+              findDepartures)) {
+            nBestQueue.add(stiPair);
+          }
+
+          while (nBestQueue.size() > resultCount)
+            nBestQueue.poll();
+
+          /**
+           * We always add to the result queue
+           */
+          resultQueue.add(stiPair);
+
+          while (!resultQueue.isEmpty()) {
+            Pair<StopTimeInstance> r = resultQueue.peek();
+            StopTimeInstance sti = findDepartures ? r.getSecond()
+                : r.getFirst();
+            if (stopTimeIsBeyondRangeOfQueue(nBestQueue, sti, resultCount,
+                findDepartures, slack))
+              resultQueue.poll();
+            else
+              break;
+          }
         }
       }
     }
@@ -428,7 +510,8 @@ class StopTimeServiceImpl implements StopTimeService {
 
   private boolean serviceDateIsBeyondRangeOfQueue(
       PriorityQueue<Pair<StopTimeInstance>> queue, Date serviceDate,
-      ServiceInterval interval, int resultCount, boolean findDepartures) {
+      ServiceInterval interval, int resultCount, boolean findDepartures,
+      long slack) {
 
     if (queue.size() != resultCount)
       return false;
@@ -441,7 +524,7 @@ class StopTimeServiceImpl implements StopTimeService {
        * time at the toStop. Thus, if the latest arrival time in the queue is
        * less than the serviceDate, we return true.
        */
-      return stiPair.getSecond().getArrivalTime() < serviceDate.getTime()
+      return stiPair.getSecond().getArrivalTime() + slack < serviceDate.getTime()
           + interval.getMinArrival() * 1000;
     } else {
       /**
@@ -449,14 +532,14 @@ class StopTimeServiceImpl implements StopTimeService {
        * time at the fromStop. Thus, if the earliest departure time in the queue
        * is more than the serviceDate, we return true.
        */
-      return stiPair.getFirst().getDepartureTime() > serviceDate.getTime()
+      return stiPair.getFirst().getDepartureTime() - slack > serviceDate.getTime()
           + interval.getMaxDeparture() * 1000;
     }
   }
 
   private boolean stopTimeIsBeyondRangeOfQueue(
       PriorityQueue<Pair<StopTimeInstance>> queue, StopTimeInstance sti,
-      int resultCount, boolean findDepartures) {
+      int resultCount, boolean findDepartures, long slack) {
 
     if (queue.size() != resultCount)
       return false;
@@ -469,15 +552,23 @@ class StopTimeServiceImpl implements StopTimeService {
        * time at the toStop. Thus, if the latest arrival time in the queue is
        * less than the sti arrival time, we return true.
        */
-      return stiPair.getSecond().getArrivalTime() < sti.getArrivalTime();
+      return stiPair.getSecond().getArrivalTime() + slack < sti.getArrivalTime();
     } else {
       /**
        * If we're looking for arrivals, then our queue is sorted by departure
        * time at the fromStop. Thus, if the earliest departure time in the queue
        * is more than the sti departure time, we return true.
        */
-      return stiPair.getFirst().getDepartureTime() > sti.getDepartureTime();
+      return stiPair.getFirst().getDepartureTime() - slack > sti.getDepartureTime();
     }
+  }
+
+  private boolean isStopTimeInstanceBeyondTargetTime(
+      StopTimeInstance stiSource, long targetTime, boolean findDepartures) {
+    if (findDepartures)
+      return targetTime <= stiSource.getDepartureTime();
+    else
+      return targetTime >= stiSource.getArrivalTime();
   }
 
   private int getStopTimesForStopAndServiceDateAndTimeRange(

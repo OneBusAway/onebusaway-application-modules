@@ -532,6 +532,37 @@ public class StopTimeServiceImplTest {
     pair = instances.get(2);
     assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    /****
+     * 
+     ****/
+    
+    time = date("2009-09-01 08:00");
+
+    instances = _service.getNextDeparturesBetweenStopPair(
+        fromStop, toStop, time, 10 * 60, 0, 3);
+
+    assertEquals(5, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    pair = instances.get(3);
+    assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    pair = instances.get(4);
+    assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
 
     /****
      * 
@@ -555,6 +586,51 @@ public class StopTimeServiceImplTest {
     pair = instances.get(2);
     assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-01 10:06");
+
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 10*60, 5*60, 3);
+
+    assertEquals(8, instances.size());
+    
+    pair = instances.get(0);
+    assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    pair = instances.get(1);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(3);
+    assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    pair = instances.get(4);
+    assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    pair = instances.get(5);
+    assertEquals(b2C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2C.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    pair = instances.get(6);
+    assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
+    assertEquals(dateAsLong("2009-09-01 10:30"),pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-01 10:35"),pair.getSecond().getDepartureTime());
+    
+    pair = instances.get(7);
+    assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1D.getStopTimes().get(1), pair.getSecond().getStopTime());
 
     /****
      * 
@@ -726,6 +802,37 @@ public class StopTimeServiceImplTest {
     assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
 
     pair = instances.get(1);
+    assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-01 10:28");
+
+    instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
+        time, 5*60, 5*60, 3);
+
+    assertEquals(5, instances.size());
+    
+    pair = instances.get(0);
+    assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    pair = instances.get(1);
+    assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+    
+    pair = instances.get(2);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(3);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(4);
     assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
     

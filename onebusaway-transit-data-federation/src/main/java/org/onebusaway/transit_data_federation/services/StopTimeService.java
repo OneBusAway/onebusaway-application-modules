@@ -62,12 +62,12 @@ public interface StopTimeService {
       StopEntry stop, long time);
 
   public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date fromTime, int lookBehind,
-      int lookAhead, int resultCount);
+      StopEntry fromStop, StopEntry toStop, Date fromTime, int runningEarlySlack,
+      int runningLateSlack, int resultCount);
 
   public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date toTime, int lookBehind,
-      int lookAhead, int resultCount);
+      StopEntry fromStop, StopEntry toStop, Date toTime, int runningEarlySlack,
+      int runningLateSlack, int resultCount);
 
   /**
    * When calculating frequency-based stop times, we have a couple different
