@@ -9,8 +9,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.onebusaway.csv_entities.CSVLibrary;
@@ -37,6 +39,12 @@ public class CompactedTransferPatternFactory {
 
   private Map<StopEntry, Short> _indices = new HashMap<StopEntry, Short>();
 
+  private Set<StopEntry> _hubStops = Collections.emptySet();
+
+  private Set<String> _pruneFromParent = new HashSet<String>();
+
+  private Map<String, Integer> _depths = new HashMap<String, Integer>();
+
   public CompactedTransferPatternFactory(TransitGraphDao dao) {
     _dao = dao;
     _allStops = dao.getAllStops();
@@ -49,6 +57,10 @@ public class CompactedTransferPatternFactory {
 
   public void addListener(CompactedTransferPatternFactoryListener listener) {
     _listeners.add(listener);
+  }
+
+  public void setHubStops(Set<StopEntry> hubStops) {
+    _hubStops = hubStops;
   }
 
   public Map<StopEntry, TransferPattern> getPatternsByOriginStop() {
@@ -67,11 +79,15 @@ public class CompactedTransferPatternFactory {
     List<Record> records = new ArrayList<Record>();
 
     StopEntry originStop = null;
+    boolean isOriginHubStop = false;
 
     while ((line = reader.readLine()) != null) {
 
       if (_lines % 1000000 == 0)
         _log.info("lines=" + _lines);
+
+      if (line.length() == 0)
+        continue;
 
       List<String> tokens = CSVLibrary.parse(line);
 
@@ -79,17 +95,39 @@ public class CompactedTransferPatternFactory {
       StopEntry stop = _dao.getStopEntryForId(stopId, true);
       short stopIndex = _indices.get(stop);
 
-      if (tokens.size() == 3) {
-        compact(originStop, records);
-        originStop = stop;
-      }
-
       String key = tokens.get(0);
       ERecordType type = getRecordTypeForValue(tokens.get(2));
 
+      int depth = 0;
+
+      if (tokens.size() == 3) {
+        compact(originStop, records);
+        originStop = stop;
+        isOriginHubStop = _hubStops.contains(originStop);
+        _pruneFromParent.clear();
+        _depths.clear();
+        _depths.put(key, 0);
+      }
+
       String parentKey = null;
-      if (tokens.size() == 4)
+      if (tokens.size() == 4) {
+
         parentKey = tokens.get(3);
+
+        if (_pruneFromParent.contains(parentKey)) {
+          _pruneFromParent.add(parentKey);
+          continue;
+        }
+
+        depth = _depths.get(parentKey) + 1;
+        _depths.put(key, depth);
+      }
+
+      if (!isOriginHubStop && _hubStops.contains(stop) && depth > 0
+          && (depth % 2) == 0) {
+        _pruneFromParent.add(key);
+        type = ERecordType.HUB;
+      }
 
       Record record = new Record(key, stopIndex, parentKey, type);
       records.add(record);
