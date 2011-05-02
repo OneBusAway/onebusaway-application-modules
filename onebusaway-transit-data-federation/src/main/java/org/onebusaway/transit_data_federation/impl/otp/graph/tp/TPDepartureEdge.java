@@ -49,9 +49,6 @@ public class TPDepartureEdge extends AbstractEdge {
 
     TraverseResult results = null;
 
-    System.out.println("state=" + s0);
-    System.out.println("stops=" + stopPair);
-
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
 
       /**
@@ -61,9 +58,6 @@ public class TPDepartureEdge extends AbstractEdge {
       ArrivalAndDepartureInstance departure = pair.getFirst();
       if (departure.getBestDepartureTime() < s0.getTime())
         continue;
-
-      System.out.println("  " + pair.getFirst());
-      System.out.println("    " + pair.getSecond());
 
       Vertex toV = new TPBlockDepartureVertex(_context, _pathState,
           pair.getFirst(), pair.getSecond());
