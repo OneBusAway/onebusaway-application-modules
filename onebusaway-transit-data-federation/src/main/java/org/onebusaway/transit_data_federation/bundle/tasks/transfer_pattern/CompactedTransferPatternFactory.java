@@ -115,10 +115,13 @@ public class CompactedTransferPatternFactory {
         parentKey = tokens.get(3);
 
         if (_pruneFromParent.contains(parentKey)) {
-          _pruneFromParent.add(parentKey);
+          _pruneFromParent.add(key);
           continue;
         }
 
+        if( ! _depths.containsKey(parentKey))
+          System.out.println("here");
+        
         depth = _depths.get(parentKey) + 1;
         _depths.put(key, depth);
       }

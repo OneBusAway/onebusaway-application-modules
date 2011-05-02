@@ -60,9 +60,7 @@ public class SerializedTransferPatternsTask implements Runnable {
     factory.setHubStops(hubStops);
 
     for (File path : paths) {
-      if (pathIndex % 10 == 0)
-        _log.info("transfer pattern files processed: " + pathIndex + "/"
-            + paths.size());
+      _log.info(path.getName() + " " + pathIndex + "/" + paths.size());
       pathIndex++;
 
       try {
