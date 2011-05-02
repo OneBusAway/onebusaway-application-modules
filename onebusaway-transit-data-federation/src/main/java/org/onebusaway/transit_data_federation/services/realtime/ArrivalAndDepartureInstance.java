@@ -15,6 +15,9 @@
  */
 package org.onebusaway.transit_data_federation.services.realtime;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -25,6 +28,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 public class ArrivalAndDepartureInstance {
 
   private static final long serialVersionUID = 3L;
+
+  private static DateFormat _format = DateFormat.getTimeInstance(DateFormat.SHORT);
 
   private final BlockInstance blockInstance;
 
@@ -170,6 +175,16 @@ public class ArrivalAndDepartureInstance {
 
   @Override
   public String toString() {
-    return "ArrivalAndDepartureInstance(" + blockStopTime + ")";
+    StringBuilder b = new StringBuilder();
+    b.append("ArrivalAndDepartureInstance(");
+    b.append("stop=");
+    b.append(blockStopTime.getStopTime().getStop().getId());
+    b.append(",arrival=");
+    b.append(_format.format(new Date(getBestArrivalTime())));
+    b.append(",departure=");
+    b.append(_format.format(new Date(getBestDepartureTime())));
+    b.append(",block=" + blockInstance.getBlock().getBlock().getId());
+    b.append(")");
+    return b.toString();
   }
 }

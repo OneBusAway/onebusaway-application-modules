@@ -44,15 +44,30 @@ public class TPDepartureEdge extends AbstractEdge {
     TargetTime targetTime = new TargetTime(s0.getTime(), obaOpts.currentTime);
 
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getNextDeparturesForStopPair(
-        stopPair.getFirst(), stopPair.getSecond(), targetTime, options.numItineraries, obaOpts.useRealtime);
+        stopPair.getFirst(), stopPair.getSecond(), targetTime,
+        options.numItineraries, obaOpts.useRealtime);
 
     TraverseResult results = null;
 
+    System.out.println("state=" + s0);
+    System.out.println("stops=" + stopPair);
+
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
+
+      /**
+       * For now, we skip real-time departures that might have been included
+       * that are beyond our range (ex. vehicle running early)
+       */
+      ArrivalAndDepartureInstance departure = pair.getFirst();
+      if (departure.getBestDepartureTime() < s0.getTime())
+        continue;
+
+      System.out.println("  " + pair.getFirst());
+      System.out.println("    " + pair.getSecond());
 
       Vertex toV = new TPBlockDepartureVertex(_context, _pathState,
           pair.getFirst(), pair.getSecond());
-      
+
       int dwellTime = computeWaitTime(s0, pair);
 
       double w = ItineraryWeightingLibrary.computeWeightForWait(options,
@@ -61,6 +76,9 @@ public class TPDepartureEdge extends AbstractEdge {
       OBAEditor s1 = (OBAEditor) s0.edit();
       s1.incrementTimeInSeconds(dwellTime);
       s1.appendTripSequence(pair.getFirst().getBlockTrip());
+
+      if (w < 0)
+        System.out.println("here");
 
       EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
       TraverseResult r = new TraverseResult(w, s1.createState(), narrative);

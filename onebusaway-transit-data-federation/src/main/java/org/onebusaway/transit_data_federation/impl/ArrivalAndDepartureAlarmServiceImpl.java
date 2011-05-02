@@ -121,6 +121,8 @@ class ArrivalAndDepartureAlarmServiceImpl implements
 
   @Override
   public void handleBlockLocation(BlockLocation blockLocation) {
+    if( blockLocation == null)
+      return;
     BlockInstance blockInstance = blockLocation.getBlockInstance();
     AlarmsForBlockInstance alarms = _alarmsByBlockInstance.get(blockInstance);
     if (alarms != null)

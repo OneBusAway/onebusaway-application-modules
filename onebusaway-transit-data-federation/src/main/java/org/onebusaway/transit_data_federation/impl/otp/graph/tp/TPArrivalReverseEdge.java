@@ -69,6 +69,14 @@ public class TPArrivalReverseEdge extends AbstractEdge {
     TraverseResult results = null;
 
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
+      
+      /**
+       * For now, we skip real-time arrival that might have been included
+       * that are beyond our range (ex. vehicle running late)
+       */
+      ArrivalAndDepartureInstance arrival = pair.getSecond();
+      if( arrival.getBestArrivalTime() > s0.getTime())
+        break;
 
       Vertex fromV = new TPBlockArrivalVertex(_context, _pathState,
           pair.getFirst(), pair.getSecond());
