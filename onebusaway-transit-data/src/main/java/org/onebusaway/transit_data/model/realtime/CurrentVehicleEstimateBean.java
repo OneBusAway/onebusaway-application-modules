@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
-public class CurrentVehicleEstimateBean implements Serializable {
+public class CurrentVehicleEstimateBean implements Serializable, Comparable<CurrentVehicleEstimateBean> {
 
   private static final long serialVersionUID = 1L;
 
@@ -36,5 +36,12 @@ public class CurrentVehicleEstimateBean implements Serializable {
 
   public void setDebug(String debug) {
     this.debug = debug;
+  }
+
+  @Override
+  public int compareTo(CurrentVehicleEstimateBean o) {
+    double p1 = this.probability;
+    double p2 = o.probability;
+    return Double.compare(p2,p1);
   }
 }

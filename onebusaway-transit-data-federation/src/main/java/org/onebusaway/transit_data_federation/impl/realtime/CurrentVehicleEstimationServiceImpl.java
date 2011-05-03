@@ -99,9 +99,19 @@ class CurrentVehicleEstimationServiceImpl implements
   private DeviationModel _scheduleOnlyLocationDeviationModel = new DeviationModel(
       500);
 
-  private DeviationModel _scheduleDeviationModel = new DeviationModel(15 * 60);
+  private DeviationModel _scheduleDeviationLateModel = new DeviationModel(
+      15 * 60);
+
+  private DeviationModel _scheduleDeviationEarlyModel = new DeviationModel(
+      4 * 60);
 
   private int _maxTravelBackwardsTime = 2 * 60;
+
+  /**
+   * For every minute between two location updates, the amount of backwards
+   * travel time is reduced by this much
+   */
+  private double _maxTravelBackwardsDecayFactor = 0.4;
 
   private double _shortCutProbability = 0.5;
 
@@ -148,6 +158,7 @@ class CurrentVehicleEstimationServiceImpl implements
       }
     }
 
+    Collections.sort(beans);
     return new ListBean<CurrentVehicleEstimateBean>(beans, false);
   }
 
@@ -160,6 +171,10 @@ class CurrentVehicleEstimationServiceImpl implements
     if (realTimeLocations.isEmpty()) {
 
       System.out.println(blockInstance.getBlock().getBlock().getId());
+
+      if (blockInstance.getBlock().getBlock().getId().toString().equals(
+          "1_2535404"))
+        System.out.println("  here");
 
       computeCumulativeProbabilityForScheduledBlockLocations(records,
           blockInstance, minProbabilityForConsideration, beans);
@@ -343,11 +358,13 @@ class CurrentVehicleEstimationServiceImpl implements
       List<CurrentVehicleEstimateBean> beans) {
 
     DoubleArrayList ps = new DoubleArrayList();
+    List<ScheduledBlockLocation> blockLocations = new ArrayList<ScheduledBlockLocation>();
 
     Record firstRecord = records.get(0);
     ScheduledBlockLocation firstLocation = _blockGeospatialService.getBestScheduledBlockLocationForLocation(
         blockInstance, firstRecord.getLocation(), firstRecord.getTimestamp(),
         0, Double.POSITIVE_INFINITY);
+    blockLocations.add(firstLocation);
 
     ps.add(updateScheduledBlockLocationProbability(blockInstance, firstRecord,
         firstLocation));
@@ -366,8 +383,11 @@ class CurrentVehicleEstimationServiceImpl implements
     /**
      * If the vehicle is traveling backwards in time, we kill the prediction
      */
+    int maxTravelBackwardsTime = computeMaxTravelBackwardsTime(lastRecord.getTimestamp()
+        - firstRecord.getTimestamp());
+
     if (lastLocation.getScheduledTime() < firstLocation.getScheduledTime()
-        - _maxTravelBackwardsTime)
+        - maxTravelBackwardsTime)
       return;
 
     double minDistanceAlongBlock = Math.min(
@@ -383,6 +403,7 @@ class CurrentVehicleEstimationServiceImpl implements
       ScheduledBlockLocation location = _blockGeospatialService.getBestScheduledBlockLocationForLocation(
           blockInstance, record.getLocation(), record.getTimestamp(),
           minDistanceAlongBlock, maxDistanceAlongBlock);
+      blockLocations.add(location);
 
       ps.add(updateScheduledBlockLocationProbability(blockInstance, record,
           location));
@@ -390,6 +411,9 @@ class CurrentVehicleEstimationServiceImpl implements
       if (Descriptive.mean(ps) < minProbabilityForConsideration)
         return;
     }
+
+    blockLocations.add(lastLocation);
+    updateProbabilitiesWithScheduleDeviations(records, blockLocations, ps);
 
     BlockLocation location = _blockLocationService.getLocationForBlockInstanceAndScheduledBlockLocation(
         blockInstance, lastLocation, lastRecord.getTimestamp());
@@ -408,9 +432,49 @@ class CurrentVehicleEstimationServiceImpl implements
 
     long serviceDate = blockInstance.getServiceDate();
     int timeDelta = (int) ((record.getTimestamp() - serviceDate) / 1000 - location.getScheduledTime());
-    double scheduleP = _scheduleDeviationModel.probability(timeDelta);
+    double scheduleP = 0.0;
+    if (timeDelta < 0) {
+      scheduleP = _scheduleDeviationEarlyModel.probability(-timeDelta);
+    } else {
+      scheduleP = _scheduleDeviationLateModel.probability(timeDelta);
+    }
 
     return locationP * scheduleP;
+  }
+
+  private void updateProbabilitiesWithScheduleDeviations(List<Record> records,
+      List<ScheduledBlockLocation> blockLocations, DoubleArrayList ps) {
+
+    if (records.size() != blockLocations.size())
+      throw new IllegalStateException();
+    if (records.size() != ps.size())
+      throw new IllegalStateException();
+
+    for (int i = 1; i < records.size(); i++) {
+
+      Record prevRecord = records.get(i - 1);
+      Record nextRecord = records.get(i);
+      long recordDeltaT = (nextRecord.getTimestamp() - prevRecord.getTimestamp());
+
+      if (recordDeltaT <= 0)
+        continue;
+
+      int maxTravelBackwardsTime = computeMaxTravelBackwardsTime(recordDeltaT);
+
+      ScheduledBlockLocation prevLocation = blockLocations.get(i - 1);
+      ScheduledBlockLocation nextLocation = blockLocations.get(i);
+      int locationDeltaT = nextLocation.getScheduledTime()
+          - prevLocation.getScheduledTime();
+
+      if (locationDeltaT < 0
+          && Math.abs(locationDeltaT) > maxTravelBackwardsTime)
+        ps.set(i, 0.0);
+    }
+  }
+
+  private int computeMaxTravelBackwardsTime(long t) {
+    return (int) Math.max(0, _maxTravelBackwardsTime
+        - _maxTravelBackwardsDecayFactor * t / 1000);
   }
 
   private String asString(DoubleArrayList values) {
