@@ -10,7 +10,6 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
-import org.opentripplanner.routing.edgetype.FreeEdge;
 
 public class TPBlockDepartureVertex extends AbstractTPPathStateVertex {
 
@@ -54,7 +53,7 @@ public class TPBlockDepartureVertex extends AbstractTPPathStateVertex {
 
     if (_pathState.isExitAllowed()) {
       TPDepartureVertex from = new TPDepartureVertex(_context, _pathState);
-      Edge edge = new FreeEdge(from, this);
+      Edge edge = new TPFreeEdge(_context, from, this);
       return Arrays.asList(edge);
     }
 

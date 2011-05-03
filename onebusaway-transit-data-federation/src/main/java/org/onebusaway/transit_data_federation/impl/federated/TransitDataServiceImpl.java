@@ -50,6 +50,8 @@ import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
+import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
@@ -87,6 +89,7 @@ import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
 import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
+import org.onebusaway.transit_data_federation.services.realtime.CurrentVehicleEstimationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -153,6 +156,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private UserReportingService _userReportingService;
+
+  @Autowired
+  private CurrentVehicleEstimationService _currentVehicleEstimateService;
 
   @Autowired
   private VehicleStatusBeanService _vehicleStatusBeanService;
@@ -402,8 +408,15 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
+  public ListBean<CurrentVehicleEstimateBean> getCurrentVehicleEstimates(
+      CurrentVehicleEstimateQueryBean query) {
+    return _currentVehicleEstimateService.getCurrentVehicleEstimates(query);
+  }
+
+  @Override
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints) throws ServiceException {
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints)
+      throws ServiceException {
     return _itinerariesBeanService.getItinerariesBetween(from, to, targetTime,
         constraints);
   }

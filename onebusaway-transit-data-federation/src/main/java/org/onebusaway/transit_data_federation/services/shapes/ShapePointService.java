@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.services;
+package org.onebusaway.transit_data_federation.services.shapes;
 
 import java.util.List;
 

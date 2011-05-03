@@ -11,6 +11,8 @@ public class ItineraryV2Bean {
 
   private double probability;
 
+  private boolean selected;
+
   private List<LegV2Bean> legs = new ArrayList<LegV2Bean>();
 
   public long getStartTime() {
@@ -35,6 +37,14 @@ public class ItineraryV2Bean {
 
   public void setProbability(double probability) {
     this.probability = probability;
+  }
+
+  public boolean isSelected() {
+    return selected;
+  }
+
+  public void setSelected(boolean selected) {
+    this.selected = selected;
   }
 
   public List<LegV2Bean> getLegs() {

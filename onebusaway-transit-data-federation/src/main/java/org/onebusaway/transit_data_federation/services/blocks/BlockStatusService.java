@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,15 @@ public interface BlockStatusService {
    * @return the list of active blocks matching the route query criteria
    */
   public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time);
+
+  /**
+   * 
+   * @param index
+   * @param timetamps
+   * @return
+   */
+  public Map<BlockInstance,List<List<BlockLocation>>> getBlocksForIndex(BlockSequenceIndex index,
+      List<Date> timetamps);
 
   /**
    * @param query

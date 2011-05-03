@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<jsp:directive.page contentType="text/xml" />
+<c:forEach var="record" items="${query.records}">
+<c:out value="${record.timestamp}"/>,<c:out value="${record.location.lat}"/>,<c:out value="${record.location.lon}"/>,<c:out value="${record.accuracy}"/>|
+</c:forEach>
+</result>

@@ -32,6 +32,7 @@ import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockTripV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockV2Bean;
+import org.onebusaway.api.model.transit.realtime.CurrentVehicleEstimateV2Bean;
 import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedAgencyV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedApplicationV2Bean;
@@ -149,6 +150,8 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("graphResult", GraphResultV2Bean.class);
     xstream.alias("vertex", VertexV2Bean.class);
     xstream.alias("edge", EdgeV2Bean.class);
+    
+    xstream.alias("currentVehicleEstimate", CurrentVehicleEstimateV2Bean.class);
 
     xstream.processAnnotations(VehicleMonitoringRequest.class);
     xstream.processAnnotations(VehicleMonitoringDetailLevel.class);

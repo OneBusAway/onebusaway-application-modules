@@ -22,6 +22,8 @@ public interface BlockIndexService {
   public List<BlockStopSequenceIndex> getStopSequenceIndicesForStop(
       StopEntry stopEntry);
 
+  public List<BlockSequenceIndex> getAllBlockSequenceIndices();
+  
   public List<Pair<BlockStopSequenceIndex>> getBlockSequenceIndicesBetweenStops(
       StopEntry fromStop, StopEntry toStop);
 

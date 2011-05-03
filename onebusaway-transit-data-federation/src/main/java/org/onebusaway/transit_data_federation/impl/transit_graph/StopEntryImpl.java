@@ -151,6 +151,7 @@ public class StopEntryImpl implements StopEntry, Serializable {
    * {@link Object} Interface
    ****/
 
+  /*
   @Override
   public boolean equals(Object obj) {
     if (obj == null || !(obj instanceof StopEntryImpl))
@@ -158,11 +159,14 @@ public class StopEntryImpl implements StopEntry, Serializable {
     StopEntryImpl stop = (StopEntryImpl) obj;
     return _id.equals(stop.getId());
   }
+  */
 
+  /*
   @Override
   public int hashCode() {
     return _id.hashCode();
   }
+  */
 
   @Override
   public String toString() {

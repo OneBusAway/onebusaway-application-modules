@@ -1,8 +1,10 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
+import java.util.Set;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 
 public interface BlockGeospatialService {
 
@@ -20,4 +22,11 @@ public interface BlockGeospatialService {
    */
   public List<BlockInstance> getActiveScheduledBlocksPassingThroughBounds(
       CoordinateBounds bounds, long timeFrom, long timeTo);
+
+  public Set<BlockSequenceIndex> getBlockSequenceIndexPassingThroughBounds(
+      CoordinateBounds bounds);
+
+  public ScheduledBlockLocation getBestScheduledBlockLocationForLocation(
+      BlockInstance blockInstance, CoordinatePoint location, long timestamp,
+      double blockDistanceFrom, double blockDistanceTo);
 }

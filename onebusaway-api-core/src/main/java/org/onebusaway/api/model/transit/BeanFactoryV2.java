@@ -9,6 +9,7 @@ import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockTripV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockV2Bean;
+import org.onebusaway.api.model.transit.realtime.CurrentVehicleEstimateV2Bean;
 import org.onebusaway.api.model.transit.schedule.StopTimeV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.NaturalLanguageStringV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedAgencyV2Bean;
@@ -52,6 +53,7 @@ import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
+import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
@@ -552,6 +554,32 @@ public class BeanFactoryV2 {
     return bean;
   }
 
+  public ListWithReferencesBean<CurrentVehicleEstimateV2Bean> getCurrentVehicleEstimates(
+      ListBean<CurrentVehicleEstimateBean> estimates) {
+
+    if( estimates == null || estimates.getList() == null)
+      return list(new ArrayList<CurrentVehicleEstimateV2Bean>(), false);
+    
+    List<CurrentVehicleEstimateV2Bean> beans = new ArrayList<CurrentVehicleEstimateV2Bean>();
+    for (CurrentVehicleEstimateBean estimate : estimates.getList())
+      beans.add(getCurrentVehicleEstimate(estimate));
+
+    return list(beans, estimates.isLimitExceeded());
+  }
+
+  public CurrentVehicleEstimateV2Bean getCurrentVehicleEstimate(
+      CurrentVehicleEstimateBean estimate) {
+
+    if (estimate == null)
+      return null;
+
+    CurrentVehicleEstimateV2Bean bean = new CurrentVehicleEstimateV2Bean();
+    bean.setProbability(estimate.getProbability());
+    bean.setTripStatus(getTripStatus(estimate.getTripStatus()));
+    bean.setDebug(estimate.getDebug());
+    return bean;
+  }
+
   public VehicleStatusV2Bean getVehicleStatus(VehicleStatusBean vehicleStatus) {
 
     VehicleStatusV2Bean bean = new VehicleStatusV2Bean();
@@ -1043,18 +1071,18 @@ public class BeanFactoryV2 {
     bean.setTo(range.getTo());
     return bean;
   }
-  
+
   public CoordinatePointV2Bean getPoint(CoordinatePoint point) {
-    if( point == null)
+    if (point == null)
       return null;
     CoordinatePointV2Bean bean = new CoordinatePointV2Bean();
     bean.setLat(point.getLat());
     bean.setLon(point.getLon());
     return bean;
   }
-  
+
   public CoordinatePoint reversePoint(CoordinatePointV2Bean bean) {
-    if( bean == null)
+    if (bean == null)
       return null;
     return new CoordinatePoint(bean.getLat(), bean.getLon());
   }
@@ -1120,9 +1148,9 @@ public class BeanFactoryV2 {
   }
 
   public boolean isStringSet(String value) {
-    return value != null && ! value.isEmpty();
+    return value != null && !value.isEmpty();
   }
-  
+
   private <T> List<T> filter(List<T> beans) {
     if (_maxCount == null)
       return beans;
@@ -1145,5 +1173,4 @@ public class BeanFactoryV2 {
 
     return true;
   }
-
 }

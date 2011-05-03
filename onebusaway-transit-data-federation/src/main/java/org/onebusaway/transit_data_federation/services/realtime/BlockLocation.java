@@ -14,6 +14,11 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEn
  */
 public class BlockLocation {
 
+  /**
+   * The time for which the block location was generated
+   */
+  private long time;
+
   /****
    * These are fields that we can supply from schedule data
    ****/
@@ -75,6 +80,18 @@ public class BlockLocation {
   private ScheduleDeviationSamples scheduleDeviations = null;
 
   private AgencyAndId vehicleId;
+
+  public BlockLocation() {
+
+  }
+
+  public long getTime() {
+    return time;
+  }
+
+  public void setTime(long time) {
+    this.time = time;
+  }
 
   public BlockInstance getBlockInstance() {
     return blockInstance;

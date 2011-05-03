@@ -3,6 +3,7 @@ package org.onebusaway.transit_data_federation.impl.realtime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
@@ -257,7 +258,14 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       record = records.get(0);
 
     // TODO : find a better way to pick?
-    return getBlockLocation(blockInstance, record, time.getTargetTime());
+    return getBlockLocation(blockInstance, record, null, time.getTargetTime());
+  }
+
+  @Override
+  public BlockLocation getLocationForBlockInstanceAndScheduledBlockLocation(
+      BlockInstance blockInstance, ScheduledBlockLocation scheduledLocation,
+      long targetTime) {
+    return getBlockLocation(blockInstance, null, scheduledLocation, targetTime);
   }
 
   @Override
@@ -270,7 +278,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     List<BlockLocation> locations = new ArrayList<BlockLocation>();
     for (VehicleLocationCacheRecord cacheRecord : records) {
       BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
-          time.getTargetTime());
+          null, time.getTargetTime());
       if (location != null)
         locations.add(location);
     }
@@ -279,9 +287,32 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   @Override
+  public Map<AgencyAndId, List<BlockLocation>> getLocationsForBlockInstance(
+      BlockInstance blockInstance, List<Date> times, long currentTime) {
+
+    Map<AgencyAndId, List<BlockLocation>> locationsByVehicleId = new FactoryMap<AgencyAndId, List<BlockLocation>>(
+        new ArrayList<BlockLocation>());
+
+    for (Date time : times) {
+      TargetTime tt = new TargetTime(time.getTime(), currentTime);
+      List<VehicleLocationCacheRecord> records = getBlockLocationRecordCollectionForBlock(
+          blockInstance, tt);
+      for (VehicleLocationCacheRecord cacheRecord : records) {
+        BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
+            null, time.getTime());
+        if (location != null) {
+          locationsByVehicleId.get(location.getVehicleId()).add(location);
+        }
+      }
+    }
+
+    return locationsByVehicleId;
+  }
+
+  @Override
   public BlockLocation getScheduledLocationForBlockInstance(
       BlockInstance blockInstance, long targetTime) {
-    return getBlockLocation(blockInstance, null, targetTime);
+    return getBlockLocation(blockInstance, null, null, targetTime);
   }
 
   @Override
@@ -296,7 +327,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (VehicleLocationCacheRecord cacheRecord : cacheRecords) {
       BlockInstance blockInstance = cacheRecord.getBlockInstance();
       BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
-          targetTime.getTargetTime());
+          null, targetTime.getTargetTime());
       if (location != null)
         return location;
     }
@@ -404,25 +435,27 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   /**
    * 
    * @param blockInstance
-   * @param record
+   * @param scheduledBlockLocation TODO
    * @param targetTime
+   * @param record
    * @return null if the effective scheduled block location cannot be determined
    */
   private BlockLocation getBlockLocation(BlockInstance blockInstance,
-      VehicleLocationCacheRecord cacheRecord, long targetTime) {
+      VehicleLocationCacheRecord cacheRecord,
+      ScheduledBlockLocation scheduledLocation, long targetTime) {
 
     BlockLocation location = new BlockLocation();
+    location.setTime(targetTime);
 
     location.setBlockInstance(blockInstance);
-
-    ScheduledBlockLocation scheduledLocation = null;
 
     if (cacheRecord != null) {
 
       VehicleLocationRecord record = cacheRecord.getRecord();
 
-      scheduledLocation = getScheduledBlockLocationForVehicleLocationCacheRecord(
-          cacheRecord, targetTime);
+      if (scheduledLocation == null)
+        scheduledLocation = getScheduledBlockLocationForVehicleLocationCacheRecord(
+            cacheRecord, targetTime);
 
       if (scheduledLocation != null) {
         location.setEffectiveScheduleTime(scheduledLocation.getScheduledTime());
@@ -487,8 +520,9 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       }
 
     } else {
-      scheduledLocation = getScheduledBlockLocationForBlockInstance(
-          blockInstance, targetTime);
+      if (scheduledLocation == null)
+        scheduledLocation = getScheduledBlockLocationForBlockInstance(
+            blockInstance, targetTime);
     }
 
     /**

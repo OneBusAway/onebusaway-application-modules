@@ -138,6 +138,11 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   }
 
   @Override
+  public List<BlockSequenceIndex> getAllBlockSequenceIndices() {
+    return _blockSequenceIndices;
+  }
+
+  @Override
   public List<BlockStopSequenceIndex> getStopSequenceIndicesForStop(
       StopEntry stopEntry) {
     return ((StopEntryImpl) stopEntry).getStopTripIndices();
@@ -535,4 +540,5 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
     return m;
   }
+
 }

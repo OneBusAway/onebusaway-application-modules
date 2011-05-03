@@ -16,6 +16,8 @@ public class ItineraryBean implements Serializable {
 
   private List<LegBean> legs = new ArrayList<LegBean>();
 
+  private boolean selected = false;
+
   public long getStartTime() {
     return startTime;
   }
@@ -46,5 +48,13 @@ public class ItineraryBean implements Serializable {
 
   public void setLegs(List<LegBean> legs) {
     this.legs = legs;
+  }
+
+  public boolean isSelected() {
+    return selected;
+  }
+
+  public void setSelected(boolean selected) {
+    this.selected = selected;
   }
 }

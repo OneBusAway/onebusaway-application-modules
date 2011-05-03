@@ -2,7 +2,9 @@ package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +12,15 @@ import java.util.Map;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
+import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -41,6 +47,8 @@ public class BlockStatusServiceImpl implements BlockStatusService {
 
   private BlockGeospatialService _blockGeospatialService;
 
+  private ExtendedCalendarService _extendedCalendarService;
+
   @Autowired
   public void setActive(BlockCalendarService activeCalendarService) {
     _blockCalendarService = activeCalendarService;
@@ -55,6 +63,12 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   public void setBlockGeospatialService(
       BlockGeospatialService blockGeospatialService) {
     _blockGeospatialService = blockGeospatialService;
+  }
+
+  @Autowired
+  public void setExtendedCalendarService(
+      ExtendedCalendarService extendedCalendarSerivce) {
+    _extendedCalendarService = extendedCalendarSerivce;
   }
 
   /****
@@ -122,6 +136,22 @@ public class BlockStatusServiceImpl implements BlockStatusService {
     }
 
     return inRange;
+  }
+
+  @Override
+  public Map<BlockInstance, List<List<BlockLocation>>> getBlocksForIndex(
+      BlockSequenceIndex index, List<Date> timestamps) {
+
+    List<BlockInstance> instances = getBlockInstancesForIndexAndTimestamps(
+        index, timestamps);
+
+    Map<BlockInstance, List<List<BlockLocation>>> results = new HashMap<BlockInstance, List<List<BlockLocation>>>();
+
+    for (BlockInstance instance : instances) {
+      getBlockLocationsForInstanceAndTimestamps(instance, timestamps, results);
+    }
+
+    return results;
   }
 
   /****
@@ -206,6 +236,64 @@ public class BlockStatusServiceImpl implements BlockStatusService {
         if (location != null && location.isInService())
           results.add(location);
       }
+    }
+  }
+
+  private List<BlockInstance> getBlockInstancesForIndexAndTimestamps(
+      BlockSequenceIndex index, List<Date> timestamps) {
+
+    Date tFrom = timestamps.get(0);
+    Date tTo = timestamps.get(timestamps.size() - 1);
+
+    ServiceIntervalBlock serviceIntervalBlock = index.getServiceIntervalBlock();
+    List<BlockSequence> sequences = index.getSequences();
+
+    Collection<Date> serviceDates = _extendedCalendarService.getServiceDatesWithinRange(
+        index.getServiceIds(), serviceIntervalBlock.getRange(), tFrom, tTo);
+
+    List<BlockInstance> instances = new ArrayList<BlockInstance>();
+
+    for (Date serviceDate : serviceDates) {
+
+      int effectiveFromTime = (int) ((tFrom.getTime() - serviceDate.getTime()) / 1000);
+      int effectiveToTime = (int) ((tTo.getTime() - serviceDate.getTime()) / 1000);
+
+      int indexFrom = Arrays.binarySearch(
+          serviceIntervalBlock.getMaxArrivals(), effectiveFromTime);
+      int indexTo = Arrays.binarySearch(
+          serviceIntervalBlock.getMinDepartures(), effectiveToTime);
+      
+      if( indexFrom < 0)
+        indexFrom = -(indexFrom+1);
+      if( indexTo < 0)
+        indexTo = -(indexTo+1);
+
+      for (int i = indexFrom; i < indexTo; i++) {
+
+        BlockSequence sequence = sequences.get(i);
+        BlockConfigurationEntry blockConfig = sequence.getBlockConfig();
+        BlockInstance instance = new BlockInstance(blockConfig,
+            serviceDate.getTime());
+        instances.add(instance);
+      }
+    }
+    return instances;
+  }
+
+  private void getBlockLocationsForInstanceAndTimestamps(
+      BlockInstance instance, List<Date> timestamps,
+      Map<BlockInstance, List<List<BlockLocation>>> results) {
+
+    Map<AgencyAndId, List<BlockLocation>> locations = _blockLocationService.getLocationsForBlockInstance(
+        instance, timestamps, System.currentTimeMillis());
+
+    if (locations.isEmpty()) {
+      List<List<BlockLocation>> empty = Collections.emptyList();
+      results.put(instance, empty);
+    } else {
+      List<List<BlockLocation>> asList = new ArrayList<List<BlockLocation>>(
+          locations.values());
+      results.put(instance, asList);
     }
   }
 }

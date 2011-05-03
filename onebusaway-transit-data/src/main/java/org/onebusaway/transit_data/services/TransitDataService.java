@@ -46,13 +46,15 @@ import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
+import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -323,6 +325,10 @@ public interface TransitDataService extends FederatedService {
   @FederatedByEntityIdMethod
   public EncodedPolylineBean getShapeForId(String shapeId);
 
+  @FederatedByCoordinatePointsMethod(propertyExpressions = "mostRecentLocation")
+  public ListBean<CurrentVehicleEstimateBean> getCurrentVehicleEstimates(
+      CurrentVehicleEstimateQueryBean query);
+
   /**
    * Plan a trip between two locations at a particular time, with the specified
    * constraints.
@@ -335,9 +341,11 @@ public interface TransitDataService extends FederatedService {
    *         specified constraints
    * @throws ServiceException
    */
-  @FederatedByCoordinatePointsMethod(arguments = {0, 1},propertyExpressions={"location","location"})
+  @FederatedByCoordinatePointsMethod(arguments = {0, 1}, propertyExpressions = {
+      "location", "location"})
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints) throws ServiceException;
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints)
+      throws ServiceException;
 
   @FederatedByBoundsMethod
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
@@ -473,5 +481,4 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByAggregateMethod
   public List<String> getAllTripProblemReportLabels();
-
 }

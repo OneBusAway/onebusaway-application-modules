@@ -1,10 +1,13 @@
 package org.onebusaway.transit_data_federation.services.realtime;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 
 /**
  * Service methods for accessing/interpolating the position of a transit vehicle
@@ -22,10 +25,18 @@ public interface BlockLocationService {
    * 
    * @param blockInstance the block instance to query
    * @param time the target time (Unix-time)
-   * @return the block location, or null if the block instance is not active at the specified time
+   * @return the block location, or null if the block instance is not active at
+   *         the specified time
    */
   public BlockLocation getLocationForBlockInstance(BlockInstance blockInstance,
       TargetTime time);
+
+  public Map<AgencyAndId, List<BlockLocation>> getLocationsForBlockInstance(
+      BlockInstance blockInstance, List<Date> times, long currentTime);
+
+  public BlockLocation getLocationForBlockInstanceAndScheduledBlockLocation(
+      BlockInstance blockInstance, ScheduledBlockLocation scheduledLocation,
+      long targetTime);
 
   /**
    * Given a block instance and a target time, determine the vehicle locations
@@ -33,7 +44,8 @@ public interface BlockLocationService {
    * 
    * @param blockInstance the trip instance to query
    * @param time TODO
-   * @return the block locations, or empty if no block locations are active at the specified time 
+   * @return the block locations, or empty if no block locations are active at
+   *         the specified time
    */
   public List<BlockLocation> getLocationsForBlockInstance(
       BlockInstance blockInstance, TargetTime time);
@@ -44,7 +56,8 @@ public interface BlockLocationService {
    * 
    * @param blockInstance
    * @param targetTime
-   * @return the scheduled location of a particular block instance, or null if not active at the specified time
+   * @return the scheduled location of a particular block instance, or null if
+   *         not active at the specified time
    */
   public BlockLocation getScheduledLocationForBlockInstance(
       BlockInstance blockInstance, long targetTime);

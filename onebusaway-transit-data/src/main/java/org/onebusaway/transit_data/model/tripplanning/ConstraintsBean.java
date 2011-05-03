@@ -44,7 +44,7 @@ public class ConstraintsBean implements Serializable {
    */
   private long currentTime = -1;
 
-  private ItineraryBean includeItinerary = null;
+  private ItineraryBean selectedItinerary = null;
 
   public ConstraintsBean() {
 
@@ -202,11 +202,11 @@ public class ConstraintsBean implements Serializable {
     this.currentTime = currentTime;
   }
 
-  public ItineraryBean getIncludeItinerary() {
-    return includeItinerary;
+  public ItineraryBean getSelectedItinerary() {
+    return selectedItinerary;
   }
 
-  public void setIncludeItinerary(ItineraryBean includeItinerary) {
-    this.includeItinerary = includeItinerary;
+  public void setSelectedItinerary(ItineraryBean selectedItinerary) {
+    this.selectedItinerary = selectedItinerary;
   }
 }

@@ -93,6 +93,10 @@ public final class CoordinateBounds implements Serializable {
     addPoint(bounds.getMinLat(), bounds.getMinLon());
     addPoint(bounds.getMaxLat(), bounds.getMaxLon());
   }
+  
+  public void clear() {
+    _empty = true;
+  }
 
   public boolean contains(double lat, double lon) {
     return _minLat <= lat && lat <= _maxLat && _minLon <= lon && lon <= _maxLon;

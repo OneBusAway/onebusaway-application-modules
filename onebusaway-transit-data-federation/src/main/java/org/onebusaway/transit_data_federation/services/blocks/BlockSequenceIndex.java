@@ -24,15 +24,18 @@ public class BlockSequenceIndex extends AbstractBlockSequenceIndex {
 
   @Override
   public String toString() {
-    
+
     BlockSequence first = _sequences.get(0);
     BlockConfigurationEntry blockConfig = first.getBlockConfig();
     BlockEntry block = blockConfig.getBlock();
     List<BlockStopTimeEntry> bsts = first.getStopTimes();
     BlockStopTimeEntry firstBst = bsts.get(0);
-    BlockStopTimeEntry lastBst = bsts.get(bsts.size()-1);
+    BlockStopTimeEntry lastBst = bsts.get(bsts.size() - 1);
     StopEntry fromStop = firstBst.getStopTime().getStop();
     StopEntry toStop = lastBst.getStopTime().getStop();
-    return "BlockSequenceIndex [ex: block=" + block.getId() + " fromStop=" + fromStop.getId() + " toStop=" + toStop.getId() + " serviceIds=" + getServiceIds() + "]";
+    return "BlockSequenceIndex [ex: block=" + block.getId() + " fromStop="
+        + fromStop.getId() + " toStop=" + toStop.getId() + " serviceIds="
+        + getServiceIds() + "]";
   }
+
 }

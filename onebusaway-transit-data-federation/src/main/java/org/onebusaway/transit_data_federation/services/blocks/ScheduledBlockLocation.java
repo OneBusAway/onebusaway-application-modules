@@ -1,7 +1,6 @@
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 

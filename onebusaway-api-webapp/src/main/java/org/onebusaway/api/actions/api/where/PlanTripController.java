@@ -46,7 +46,7 @@ public class PlanTripController extends ApiActionSupport {
 
   private long _time;
 
-  private String _includeSpecificItinerary;
+  private String _includeSelectedItinerary;
 
   private ConstraintsBean _constraints = new ConstraintsBean();
 
@@ -98,12 +98,12 @@ public class PlanTripController extends ApiActionSupport {
     setTime(time);
   }
 
-  public void setIncludeSpecificItinerary(String includeSpecificItinerary) {
-    _includeSpecificItinerary = includeSpecificItinerary;
+  public void setIncludeSelectedItinerary(String includeSelectedItinerary) {
+    _includeSelectedItinerary = includeSelectedItinerary;
   }
 
-  public String getIncludeSpecificItinerary() {
-    return _includeSpecificItinerary;
+  public String getIncludeSelectedItinerary() {
+    return _includeSelectedItinerary;
   }
 
   public void setConstraints(ConstraintsBean constraints) {
@@ -133,7 +133,7 @@ public class PlanTripController extends ApiActionSupport {
     ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(
         factory);
 
-    parseAdditionalItinerary(itineraryFactory);
+    parseSelectedItinerary(itineraryFactory);
 
     ItinerariesBean itineraries = _transitDataService.getItinerariesBetween(
         _from, _to, _time, _constraints);
@@ -142,14 +142,14 @@ public class PlanTripController extends ApiActionSupport {
     return setOkResponse(factory.entry(bean));
   }
 
-  private void parseAdditionalItinerary(ItineraryV2BeanFactory itineraryFactory) {
+  private void parseSelectedItinerary(ItineraryV2BeanFactory itineraryFactory) {
 
-    if (_includeSpecificItinerary == null
-        || _includeSpecificItinerary.isEmpty())
+    if (_includeSelectedItinerary == null
+        || _includeSelectedItinerary.isEmpty())
       return;
 
     ItineraryV2Bean bean = new ItineraryV2Bean();
-    JSONObject jsonObject = JSONObject.fromObject(_includeSpecificItinerary);
+    JSONObject jsonObject = JSONObject.fromObject(_includeSelectedItinerary);
 
     JsonConfig config = new JsonConfig();
 
@@ -162,6 +162,6 @@ public class PlanTripController extends ApiActionSupport {
     JSONObject.toBean(jsonObject, bean, config);
 
     ItineraryBean itinerary = itineraryFactory.reverseItinerary(bean);
-    _constraints.setIncludeItinerary(itinerary);
+    _constraints.setSelectedItinerary(itinerary);
   }
 }

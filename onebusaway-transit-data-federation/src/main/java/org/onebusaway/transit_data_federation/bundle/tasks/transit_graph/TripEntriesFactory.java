@@ -17,8 +17,8 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImp
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
+import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

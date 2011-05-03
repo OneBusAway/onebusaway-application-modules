@@ -79,6 +79,7 @@ public class ItineraryV2BeanFactory {
     bean.setStartTime(itinerary.getStartTime());
     bean.setEndTime(itinerary.getEndTime());
     bean.setProbability(itinerary.getProbability());
+    bean.setSelected(itinerary.isSelected());
 
     List<LegBean> legs = itinerary.getLegs();
     if (!CollectionsLibrary.isEmpty(legs)) {
@@ -151,7 +152,7 @@ public class ItineraryV2BeanFactory {
     leg.setFrom(_factory.reversePoint(bean.getFrom()));
     leg.setTo(_factory.reversePoint(bean.getTo()));
     leg.setDistance(bean.getDistance());
-    if(_factory.isStringSet(bean.getMode()))
+    if (_factory.isStringSet(bean.getMode()))
       leg.setMode(bean.getMode());
 
     TransitLegV2Bean transitLegBean = bean.getTransitLeg();
@@ -239,14 +240,14 @@ public class ItineraryV2BeanFactory {
     TransitLegBean bean = new TransitLegBean();
 
     String tripId = leg.getTripId();
-    if (tripId != null && ! tripId.isEmpty()) {
+    if (tripId != null && !tripId.isEmpty()) {
       TripBean trip = new TripBean();
       trip.setId(tripId);
       bean.setTrip(trip);
     }
 
     bean.setServiceDate(leg.getServiceDate());
-    if( _factory.isStringSet(leg.getVehicleId()) )
+    if (_factory.isStringSet(leg.getVehicleId()))
       bean.setVehicleId(leg.getVehicleId());
 
     FrequencyV2Bean frequency = leg.getFrequency();
@@ -294,10 +295,10 @@ public class ItineraryV2BeanFactory {
 
     StreetLegBean bean = new StreetLegBean();
 
-    if( _factory.isStringSet(leg.getStreetName()))
+    if (_factory.isStringSet(leg.getStreetName()))
       bean.setStreetName(leg.getStreetName());
 
-    if( _factory.isStringSet(leg.getPath()))
+    if (_factory.isStringSet(leg.getPath()))
       bean.setPath(leg.getPath());
     bean.setDistance(leg.getDistance());
 

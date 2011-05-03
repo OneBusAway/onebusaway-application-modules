@@ -54,7 +54,6 @@ import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
-import org.onebusaway.transit_data_federation.services.ShapePointService;
 import org.onebusaway.transit_data_federation.services.beans.ItinerariesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
@@ -64,6 +63,7 @@ import org.onebusaway.transit_data_federation.services.narrative.NarrativeServic
 import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.otp.TransitShedPathService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -215,14 +215,14 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     ItinerariesBean itineraries = getPathsAsItineraries(paths, fromBean,
         toBean, options);
 
-    ensureAdditionalItineraryIsIncluded(from, to, targetTime, itineraries,
-        constraints.getIncludeItinerary(), options);
-    
-    if( options.isArriveBy() )
+    ensureSelectedItineraryIsIncluded(from, to, targetTime, itineraries,
+        constraints.getSelectedItinerary(), options);
+
+    if (options.isArriveBy())
       Collections.sort(itineraries.getItineraries(), new SortByArrival());
     else
       Collections.sort(itineraries.getItineraries(), new SortByDeparture());
-    
+
     return itineraries;
   }
 
@@ -540,7 +540,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     ArrivalAndDepartureInstance to = vFrom.getArrival();
 
     builder = extendTransitLegWithDepartureAndArrival(legs, builder, from, to);
-    
+
     return getTransitLegBuilderAsLeg(builder, legs);
   }
 
@@ -983,24 +983,27 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return (long) ((t - tStartOrig) * ratio + tStartNew);
   }
 
-  private void ensureAdditionalItineraryIsIncluded(TransitLocationBean from,
+  private void ensureSelectedItineraryIsIncluded(TransitLocationBean from,
       TransitLocationBean to, long targetTime, ItinerariesBean itineraries,
-      ItineraryBean toInclude, OBATraverseOptions options) {
+      ItineraryBean selected, OBATraverseOptions options) {
 
-    if (toInclude == null)
+    if (selected == null)
       return;
 
-    if (!isItinerarySufficientlySpecified(toInclude))
+    if (!isItinerarySufficientlySpecified(selected))
       return;
 
     for (ItineraryBean itinerary : itineraries.getItineraries()) {
-      if (isItineraryMatch(itinerary, toInclude))
+      if (isItineraryMatch(itinerary, selected)) {
+        itinerary.setSelected(true);
         return;
+      }
     }
 
-    updateItinerary(toInclude, from, to, targetTime, options);
+    updateItinerary(selected, from, to, targetTime, options);
+    selected.setSelected(true);
 
-    itineraries.getItineraries().add(toInclude);
+    itineraries.getItineraries().add(selected);
   }
 
   private boolean isItinerarySufficientlySpecified(ItineraryBean itinerary) {
@@ -1286,7 +1289,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return new MinTravelTimeToStopsBean(agencyId, stopIds, lats, lons, times,
         walkingVelocity);
   }
-  
+
   private static class SortByDeparture implements Comparator<ItineraryBean> {
 
     @Override
@@ -1294,9 +1297,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       long t1 = o1.getStartTime();
       long t2 = o2.getStartTime();
       return t1 == t2 ? 0 : (t1 < t2 ? -1 : 1);
-    }    
+    }
   }
-  
+
   private static class SortByArrival implements Comparator<ItineraryBean> {
 
     @Override
@@ -1304,6 +1307,6 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       long t1 = o1.getEndTime();
       long t2 = o2.getEndTime();
       return t1 == t2 ? 0 : (t1 > t2 ? -1 : 1);
-    }    
+    }
   }
 }
