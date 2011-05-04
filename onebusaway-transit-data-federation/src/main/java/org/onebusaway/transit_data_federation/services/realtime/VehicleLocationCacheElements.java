@@ -8,8 +8,12 @@ import java.util.List;
 import org.onebusaway.collections.Range;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class VehicleLocationCacheElements {
+
+  private static Logger _log = LoggerFactory.getLogger(VehicleLocationCacheElements.class);
 
   private final BlockInstance _blockInstance;
 
@@ -33,6 +37,16 @@ public class VehicleLocationCacheElements {
   }
 
   public VehicleLocationCacheElements extend(VehicleLocationCacheElement element) {
+    
+    if (!_elements.isEmpty()) {
+      VehicleLocationCacheElement lastElement = _elements.get(_elements.size() - 1);
+      if (lastElement.getRecord().getTimeOfRecord() > element.getRecord().getTimeOfRecord()) {
+        _log.warn("ignoring vehicle location record with decreasing timestamp: "
+            + lastElement.getRecord() + " => " + element.getRecord());
+        return this;
+      }
+    }
+
     List<VehicleLocationCacheElement> elements = new ArrayList<VehicleLocationCacheElement>(
         _elements.size() + 1);
     elements.addAll(_elements);
@@ -73,7 +87,7 @@ public class VehicleLocationCacheElements {
     return new Range(first.getRecord().getTimeOfRecord(),
         last.getRecord().getTimeOfRecord());
   }
-  
+
   public List<VehicleLocationCacheElement> getElements() {
     return Collections.unmodifiableList(_elements);
   }
