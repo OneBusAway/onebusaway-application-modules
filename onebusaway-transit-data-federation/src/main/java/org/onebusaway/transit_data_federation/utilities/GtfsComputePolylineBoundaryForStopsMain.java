@@ -1,6 +1,5 @@
 package org.onebusaway.transit_data_federation.utilities;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -14,7 +13,6 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
-import org.onebusaway.container.ContainerLibrary;
 import org.onebusaway.csv_entities.EntityHandler;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
@@ -23,8 +21,6 @@ import org.onebusaway.geospatial.services.UTMProjection;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
-import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
-import org.springframework.context.ConfigurableApplicationContext;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -42,7 +38,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * @author bdferris
  * 
  */
-public class ComputePolylineBoundaryForGtfsStopsMain {
+public class GtfsComputePolylineBoundaryForStopsMain {
 
   private static final String ARG_FORMAT = "format";
 
@@ -53,7 +49,7 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
   public static void main(String[] args) throws IOException,
       ClassNotFoundException {
 
-    ComputePolylineBoundaryForGtfsStopsMain main = new ComputePolylineBoundaryForGtfsStopsMain();
+    GtfsComputePolylineBoundaryForStopsMain main = new GtfsComputePolylineBoundaryForStopsMain();
     main.run(args);
   }
 
@@ -143,28 +139,11 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
   }
 
   private List<GtfsBundle> getGtfsBundlesFromCommandLine(String[] args) {
-
-    List<GtfsBundle> allBundles = new ArrayList<GtfsBundle>();
-    List<String> contextPaths = new ArrayList<String>();
-
+    List<String> subList = new ArrayList<String>();
     for (int i = 0; i < args.length - 1; i++) {
-      if (args[i].endsWith(".xml"))
-        contextPaths.add("file:" + args[i]);
-      else {
-        GtfsBundle bundle = new GtfsBundle();
-        bundle.setPath(new File(args[i]));
-        bundle.setDefaultAgencyId(Integer.toString(i));
-        allBundles.add(bundle);
-      }
+      subList.add(args[i]);
     }
-
-    if (!contextPaths.isEmpty()) {
-      ConfigurableApplicationContext context = ContainerLibrary.createContext(contextPaths);
-      GtfsBundles bundles = (GtfsBundles) context.getBean("gtfs-bundles");
-      allBundles.addAll(bundles.getBundles());
-    }
-
-    return allBundles;
+    return UtilityLibrary.getGtfsBundlesForArguments(subList);
   }
 
   private void printGeometry(PrintWriter out, Geometry geometry,
@@ -263,7 +242,6 @@ public class ComputePolylineBoundaryForGtfsStopsMain {
         _projection = new UTMProjection(zone);
       }
 
-      
       XYPoint point = _projection.forward(new CoordinatePoint(stop.getLat(),
           stop.getLon()));
 

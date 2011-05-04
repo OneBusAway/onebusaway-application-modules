@@ -1,12 +1,14 @@
 package org.onebusaway.transit_data_federation.utilities;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.csv_entities.EntityHandler;
@@ -14,6 +16,7 @@ import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
+import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyFactory;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.utility.IOLibrary;
@@ -31,17 +34,26 @@ public class GtfsStopReplacementVerificationMain {
   public static void main(String[] args) throws IOException {
 
     if (args.length == 0) {
-      System.err.println("usage: stop-consolidation-file gtfs_path agencyId [gtfs_path agencyId ...]");
+      System.err.println("usage: stop-consolidation-file gtfs_path [gtfs_path:defaultAgencyId data-sources.xml ...]");
       System.exit(-1);
     }
 
     EntityHandlerImpl handler = new EntityHandlerImpl();
 
-    for (int i = 1; i < args.length; i += 2) {
+    List<String> paths = new ArrayList<String>();
+    for (int i = 1; i < args.length; i++) {
+      paths.add(args[i]);
+    }
+
+    List<GtfsBundle> bundles = UtilityLibrary.getGtfsBundlesForArguments(paths);
+
+    for (GtfsBundle bundle : bundles) {
 
       GtfsReader reader = new GtfsReader();
-      reader.setDefaultAgencyId(args[i + 1]);
-      reader.setInputLocation(new File(args[i]));
+      reader.setDefaultAgencyId(bundle.getDefaultAgencyId());
+      reader.setInputLocation(bundle.getPath());
+      for (Map.Entry<String, String> entry : bundle.getAgencyIdMappings().entrySet())
+        reader.addAgencyIdMapping(entry.getKey(), entry.getValue());
       reader.getEntityClasses().retainAll(
           Arrays.asList(Agency.class, Stop.class));
       reader.addEntityHandler(handler);
@@ -52,7 +64,7 @@ public class GtfsStopReplacementVerificationMain {
 
     InputStream in = IOLibrary.getPathAsInputStream(args[0]);
     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-    
+
     String line = null;
 
     while ((line = reader.readLine()) != null) {
