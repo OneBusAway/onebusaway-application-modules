@@ -118,7 +118,7 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
   }
 
   @Override
-  public void addRecord(BlockInstance blockInstance,
+  public VehicleLocationCacheRecord addRecord(BlockInstance blockInstance,
       VehicleLocationRecord record,
       ScheduledBlockLocation scheduledBlockLocation,
       ScheduleDeviationSamples samples) {
@@ -140,6 +140,8 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
     // Ensure the block => vehicle mapping is set
     ConcurrentCollectionsLibrary.addToMapValueSet(_vehicleIdsByBlockInstance,
         blockInstance, vehicleId);
+    
+    return cacheRecord;
   }
 
   @Override

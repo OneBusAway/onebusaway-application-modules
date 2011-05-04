@@ -223,6 +223,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
+
     BlockInstance instance = getVehicleLocationRecordAsBlockInstance(record);
 
     if (instance != null) {
@@ -416,12 +417,21 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       ScheduleDeviationSamples samples) {
 
     // Cache the result
-    _cache.addRecord(blockInstance, record, scheduledBlockLocation, samples);
+    VehicleLocationCacheRecord cacheRecord = _cache.addRecord(blockInstance,
+        record, scheduledBlockLocation, samples);
 
     if (!CollectionsLibrary.isEmpty(_blockLocationListeners)) {
-      BlockLocation location = null;
-      for (BlockLocationListener listener : _blockLocationListeners) {
-        listener.handleBlockLocation(location);
+
+      /**
+       * We only fill in the block location if we have listeners
+       */
+      BlockLocation location = getBlockLocation(blockInstance, cacheRecord,
+          scheduledBlockLocation, record.getTimeOfRecord());
+
+      if (location != null) {
+        for (BlockLocationListener listener : _blockLocationListeners) {
+          listener.handleBlockLocation(location);
+        }
       }
     }
 

@@ -84,7 +84,6 @@ public class RegisterAlarmForArrivalAndDepartureAtStopController extends
     
     if( details != null) { 
       _alarmService.registerAlarm(alarmId, details);
-      _alarmService.fireAlarm(alarmId);
     }
 
     if (isVersion(V2)) {

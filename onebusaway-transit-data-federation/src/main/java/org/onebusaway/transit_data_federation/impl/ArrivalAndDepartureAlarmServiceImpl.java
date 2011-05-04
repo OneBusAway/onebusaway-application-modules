@@ -91,13 +91,26 @@ class ArrivalAndDepartureAlarmServiceImpl implements
     if (instance == null)
       throw new ServiceException("no arrival-departure found");
 
+    /**
+     * We group alarms by block instance
+     */
     BlockInstance blockInstance = instance.getBlockInstance();
 
+    /**
+     * Retrieve the alarms for the block instance
+     */
     AlarmsForBlockInstance alarms = getAlarmsForBlockInstance(blockInstance);
 
+    /**
+     * The effective schedule time is the point in the transit vehicle's
+     * schedule run time when the alarm should be fired
+     */
     int effectiveScheduleTime = computeEffectiveScheduleTimeForAlarm(alarmBean,
         instance);
 
+    /**
+     * Create and register the alarm
+     */
     AlarmAction action = new AlarmAction();
     action.setUrl(alarmBean.getUrl());
 
@@ -106,11 +119,14 @@ class ArrivalAndDepartureAlarmServiceImpl implements
 
     _alarmsById.put(alarm.getId(), alarm);
 
+    _log.debug("alarm created: {}", alarm.getId());
+
     return alarm.getId();
   }
 
   @Override
   public void cancelAlarmForArrivalAndDepartureAtStop(AgencyAndId alarmId) {
+    _log.debug("cancelling alarm: {}", alarmId);
     AlarmForBlockInstance alarm = _alarmsById.get(alarmId);
     if (alarm != null)
       alarm.setCanceled();
@@ -122,8 +138,14 @@ class ArrivalAndDepartureAlarmServiceImpl implements
 
   @Override
   public void handleBlockLocation(BlockLocation blockLocation) {
+
     if (blockLocation == null)
       return;
+
+    /**
+     * If we have new real-time info for a block, we need to update the alarms
+     * attached to the block instance
+     */
     BlockInstance blockInstance = blockLocation.getBlockInstance();
     AlarmsForBlockInstance alarms = _alarmsByBlockInstance.get(blockInstance);
     if (alarms != null)
@@ -134,6 +156,11 @@ class ArrivalAndDepartureAlarmServiceImpl implements
    * Private Methods
    ****/
 
+  /**
+   * The effective schedule time is the point in the transit vehicle's schedule
+   * run time when the alarm should be fired. It's determined by the scheduled
+   * departure or arrival time, adjusted by the alarm offset time
+   */
   private int computeEffectiveScheduleTimeForAlarm(
       RegisterAlarmQueryBean alarmBean, ArrivalAndDepartureInstance instance) {
 
@@ -146,6 +173,20 @@ class ArrivalAndDepartureAlarmServiceImpl implements
     return effectiveScheduleTime - alarmBean.getAlarmTimeOffset();
   }
 
+  /**
+   * We group the alarms by their block instance, storing the alarms in a
+   * ConcurrentMap keyed off the block instance. When all alarms for a block
+   * instance have been fired, we'd like to be able to clean and remove the
+   * alarms object. However, there is a possibility for a race condition when
+   * attempting to remove the AlarmsForBlockInstance object from the concurrent
+   * map when another alarm is being registered at the same time. We get around
+   * this by marking an alarms object as "canceled", indicating that no new
+   * alarms can be registered. Thus, we loop while until we get an active alarm
+   * instance.
+   * 
+   * @param blockInstance
+   * @return
+   */
   private AlarmsForBlockInstance getAlarmsForBlockInstance(
       BlockInstance blockInstance) {
 
@@ -179,12 +220,31 @@ class ArrivalAndDepartureAlarmServiceImpl implements
 
     private final BlockInstance _blockInstance;
 
+    /**
+     * Queue of alarms where no real-time data is available. If real-time
+     * becomes available, we'll upgrade the alarm to the first real-time-equiped
+     * vehicle.
+     */
     private PriorityQueue<AlarmForBlockInstance> _noVehicleIdQueue = new PriorityQueue<AlarmForBlockInstance>();
 
+    /**
+     * Queues of alarms grouped by vehicle id. Remember that multiple vehicles
+     * can be servicing the same block instance.
+     */
     private Map<AgencyAndId, VehicleInfo> _vehicleInfoByVehicleId = new HashMap<AgencyAndId, VehicleInfo>();
 
+    /**
+     * The actual task that will run to check and fire alarms in the future. We
+     * reschedule this task to reflect the next upcoming alarm.
+     */
     private Future<?> _alarmTask = null;
 
+    /**
+     * Indicates that this alarms instance has been canceled and no new alarms
+     * should be registered. An alarm instance is canceled when it contains no
+     * new alarms. The "canceled" flag helps avoid a race condition where
+     * additional alarms are added while we are in the process of cleanup.
+     */
     private boolean _canceled = false;
 
     public AlarmsForBlockInstance(BlockInstance blockInstance) {
@@ -206,10 +266,19 @@ class ArrivalAndDepartureAlarmServiceImpl implements
       AlarmForBlockInstance alarm = new AlarmForBlockInstance(alarmId, action,
           effectiveScheduleTime);
 
+      /**
+       * We put the alarm in the schedule-only vs real-time queue as appropriate
+       */
       BlockLocation blockLocation = instance.getBlockLocation();
-      if( blockLocation == null || blockLocation.getVehicleId() == null) {
+
+      if (blockLocation == null || blockLocation.getVehicleId() == null) {
+
+        _log.debug("schedule only for alarm: {}", instance);
         _noVehicleIdQueue.add(alarm);
+
       } else {
+
+        _log.debug("real-time for alarm: {}", instance);
         AgencyAndId vehicleId = blockLocation.getVehicleId();
         VehicleInfo vehicleInfo = getVehicleInfoForVehicleId(vehicleId, true);
         if (blockLocation.isScheduleDeviationSet())
@@ -238,6 +307,9 @@ class ArrivalAndDepartureAlarmServiceImpl implements
         _log.warn("expected schedule deviation with block location"
             + blockLocation);
       }
+
+      _log.debug("updating block location for vehicle: {}",
+          blockLocation.getVehicleId());
 
       /**
        * We've create the vehicle info queue if it means we can move alarms out
@@ -323,12 +395,15 @@ class ArrivalAndDepartureAlarmServiceImpl implements
       }
 
       if (allQueuesAreEmpty) {
-
+        _log.debug("all alarm queues are empty, cleaning up: {}",
+            _blockInstance);
         _vehicleInfoByVehicleId.clear();
         _canceled = true;
         _alarmsByBlockInstance.remove(_blockInstance);
 
       } else {
+        _log.debug("scheduling next alarm check in {} secs for {}",
+            minNextAlarmTime, _blockInstance);
         /**
          * Schedule the next alarm
          */

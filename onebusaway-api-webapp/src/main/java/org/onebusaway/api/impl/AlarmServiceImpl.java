@@ -61,9 +61,7 @@ class AlarmServiceImpl implements AlarmService {
       if (_applePushNotificationService == null)
         _log.warn("apple push notification alarm set but not ApplePushNotificationService was configured");
 
-      String payload = getDataAsApnsPayload(data);
-
-      return new ApnsAlarmDetails(deviceId, payload);
+      return new ApnsAlarmDetails(deviceId, data);
     }
 
     return null;
@@ -95,8 +93,10 @@ class AlarmServiceImpl implements AlarmService {
         return;
       }
 
+      String payload = getDataAsApnsPayload(alarmId, apnsDetails.getData());
+
       _applePushNotificationService.pushNotification(
-          apnsDetails.getDeviceToken(), apnsDetails.getPayload());
+          apnsDetails.getDeviceToken(), payload);
     }
   }
 
@@ -109,9 +109,11 @@ class AlarmServiceImpl implements AlarmService {
    * Private Methods
    ****/
 
-  private String getDataAsApnsPayload(String data) {
+  private String getDataAsApnsPayload(String alarmId, String data) {
 
     PayloadBuilder b = PayloadBuilder.newPayload();
+
+    b.customField("alarmId", alarmId);
 
     if (data == null)
       return b.build();
@@ -137,19 +139,19 @@ class AlarmServiceImpl implements AlarmService {
 
     private final String _deviceToken;
 
-    private final String _payload;
+    private final String _data;
 
-    public ApnsAlarmDetails(String deviceToken, String payload) {
+    public ApnsAlarmDetails(String deviceToken, String data) {
       _deviceToken = deviceToken;
-      _payload = payload;
+      _data = data;
     }
 
     public String getDeviceToken() {
       return _deviceToken;
     }
 
-    public String getPayload() {
-      return _payload;
+    public String getData() {
+      return _data;
     }
   }
 }
