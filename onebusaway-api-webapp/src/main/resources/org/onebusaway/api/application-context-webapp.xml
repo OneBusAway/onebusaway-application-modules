@@ -20,4 +20,6 @@
   <!-- -->
   <aop:aspectj-autoproxy />
 
+  <context:component-scan base-package="org.onebusaway.api.impl" />
+  
 </beans>

@@ -2,6 +2,8 @@ package org.onebusaway.api.actions.api.where;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.services.AlarmDetails;
+import org.onebusaway.api.services.AlarmService;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.presentation.impl.StackInterceptor.AddToStack;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureForStopQueryBean;
@@ -22,9 +24,14 @@ public class RegisterAlarmForArrivalAndDepartureAtStopController extends
   @Autowired
   private TransitDataService _service;
 
+  @Autowired
+  private AlarmService _alarmService;
+
   private ArrivalAndDepartureForStopQueryBean _query = new ArrivalAndDepartureForStopQueryBean();
 
   private RegisterAlarmQueryBean _alarm = new RegisterAlarmQueryBean();
+
+  private String _data;
 
   public RegisterAlarmForArrivalAndDepartureAtStopController() {
     super(V2);
@@ -54,6 +61,10 @@ public class RegisterAlarmForArrivalAndDepartureAtStopController extends
   public void setAlarm(RegisterAlarmQueryBean alarm) {
     _alarm = alarm;
   }
+  
+  public void setData(String data) {
+    _data = data;
+  }
 
   public DefaultHttpHeaders show() throws ServiceException {
 
@@ -62,12 +73,19 @@ public class RegisterAlarmForArrivalAndDepartureAtStopController extends
 
     if (_query.getTime() == 0)
       _query.setTime(System.currentTimeMillis());
+    
+    AlarmDetails details = _alarmService.alterAlarmQuery(_alarm, _data);
 
     String alarmId = _service.registerAlarmForArrivalAndDepartureAtStop(_query,
         _alarm);
 
     if (alarmId == null)
       return setResourceNotFoundResponse();
+    
+    if( details != null) { 
+      _alarmService.registerAlarm(alarmId, details);
+      _alarmService.fireAlarm(alarmId);
+    }
 
     if (isVersion(V2)) {
       return setOkResponse(alarmId);

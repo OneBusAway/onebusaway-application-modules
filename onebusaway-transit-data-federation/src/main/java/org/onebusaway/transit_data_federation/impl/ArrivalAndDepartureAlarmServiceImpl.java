@@ -20,6 +20,7 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.RegisterAlarmQueryBean;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AlarmAction;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureAlarmService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
@@ -121,7 +122,7 @@ class ArrivalAndDepartureAlarmServiceImpl implements
 
   @Override
   public void handleBlockLocation(BlockLocation blockLocation) {
-    if( blockLocation == null)
+    if (blockLocation == null)
       return;
     BlockInstance blockInstance = blockLocation.getBlockInstance();
     AlarmsForBlockInstance alarms = _alarmsByBlockInstance.get(blockInstance);
@@ -167,7 +168,7 @@ class ArrivalAndDepartureAlarmServiceImpl implements
   }
 
   private void fireAlarm(AlarmForBlockInstance alarm) {
-    _executor.submit(new FireAlarmTask(alarm.action));
+    _executor.submit(new FireAlarmTask(alarm.getId(), alarm.action));
   }
 
   /****
@@ -206,11 +207,10 @@ class ArrivalAndDepartureAlarmServiceImpl implements
           effectiveScheduleTime);
 
       BlockLocation blockLocation = instance.getBlockLocation();
-      AgencyAndId vehicleId = blockLocation.getVehicleId();
-
-      if (vehicleId == null) {
+      if( blockLocation == null || blockLocation.getVehicleId() == null) {
         _noVehicleIdQueue.add(alarm);
       } else {
+        AgencyAndId vehicleId = blockLocation.getVehicleId();
         VehicleInfo vehicleInfo = getVehicleInfoForVehicleId(vehicleId, true);
         if (blockLocation.isScheduleDeviationSet())
           vehicleInfo.setScheduleDeviation((int) blockLocation.getScheduleDeviation());
@@ -437,16 +437,22 @@ class ArrivalAndDepartureAlarmServiceImpl implements
    */
   private static class FireAlarmTask implements Runnable {
 
+    private final AgencyAndId alarmId;
+
     private final AlarmAction action;
 
-    public FireAlarmTask(AlarmAction action) {
+    public FireAlarmTask(AgencyAndId alarmId, AlarmAction action) {
+      this.alarmId = alarmId;
       this.action = action;
     }
 
     @Override
     public void run() {
       try {
-        URL url = new URL(action.getUrl());
+        String rawUrl = action.getUrl();
+        String rawAlarmId = AgencyAndIdLibrary.convertToString(alarmId);
+        rawUrl = rawUrl.replace("#ALARM_ID#", rawAlarmId);
+        URL url = new URL(rawUrl);
         URLConnection connection = url.openConnection();
         InputStream in = connection.getInputStream();
         in.close();
