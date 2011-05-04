@@ -83,7 +83,7 @@ public class VehicleLocationCacheElements {
     if (_elements.isEmpty())
       return null;
 
-    for (int i = _elements.size() - 1; i > 0; i++) {
+    for (int i = _elements.size() - 1; i > 0; i--) {
       VehicleLocationCacheElement element = _elements.get(i);
       VehicleLocationRecord record = element.getRecord();
       if (record.getTimeOfRecord() <= targetTime)
