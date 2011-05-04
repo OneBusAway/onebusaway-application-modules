@@ -1,8 +1,10 @@
 package org.onebusaway.transit_data.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
+import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
@@ -25,6 +27,8 @@ public final class VehicleStatusBean implements Serializable {
   private TripBean trip;
 
   private TripStatusBean tripStatus;
+
+  private List<VehicleLocationRecordBean> allRecords;
 
   public String getVehicleId() {
     return vehicleId;
@@ -88,5 +92,13 @@ public final class VehicleStatusBean implements Serializable {
 
   public void setTripStatus(TripStatusBean tripStatus) {
     this.tripStatus = tripStatus;
+  }
+
+  public List<VehicleLocationRecordBean> getAllRecords() {
+    return allRecords;
+  }
+
+  public void setAllRecords(List<VehicleLocationRecordBean> allRecords) {
+    this.allRecords = allRecords;
   }
 }

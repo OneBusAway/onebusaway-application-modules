@@ -56,6 +56,15 @@
                     <s:if test="nextStop != null">
                         <li>Next Stop: <s:a action="stop"><s:param name="id" value="nextStop.id"/><s:property value="nextStop.name" /></s:a></li>
                     </s:if>
+                    <s:if test="allRecords != null">
+                        <li><h4>All Records:</h4>
+                        <ul>
+                            <s:iterator value="allRecords">
+                                <li><oba:date format="EEE, MMM d yyyy h:mm:ss aa" value="timeOfRecord" /> - scheduleDeviation=<s:property value="scheduleDeviation"/> secs</li>
+                            </s:iterator>
+                        </ul>
+                        </li>
+                    </s:if>
                     <s:if test="lastKnownLocation != null">
                         <script type="text/javascript">
 

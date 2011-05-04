@@ -9,12 +9,12 @@ import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLoca
 
 public interface VehicleLocationRecordCache {
 
-  public VehicleLocationCacheRecord getRecordForVehicleId(AgencyAndId vehicleId);
+  public VehicleLocationCacheElements getRecordForVehicleId(AgencyAndId vehicleId);
 
-  public List<VehicleLocationCacheRecord> getRecordsForBlockInstance(
+  public List<VehicleLocationCacheElements> getRecordsForBlockInstance(
       BlockInstance blockInstance);
 
-  public VehicleLocationCacheRecord addRecord(BlockInstance blockInstance, VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation, ScheduleDeviationSamples samples);
+  public VehicleLocationCacheElements addRecord(BlockInstance blockInstance, VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation, ScheduleDeviationSamples samples);
 
   public void clearRecordsForVehicleId(AgencyAndId vehicleId);
 }

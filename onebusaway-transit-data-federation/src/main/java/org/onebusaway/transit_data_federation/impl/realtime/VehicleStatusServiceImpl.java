@@ -8,6 +8,10 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElement;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationRecordCache;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -25,6 +29,8 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
 
   private BlockVehicleLocationListener _blockVehicleLocationService;
 
+  private VehicleLocationRecordCache _vehicleLocationRecordCache;
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -34,6 +40,12 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
   public void setBlockVehicleLocationService(
       BlockVehicleLocationListener service) {
     _blockVehicleLocationService = service;
+  }
+
+  @Autowired
+  public void setVehicleLocationRecordCache(
+      VehicleLocationRecordCache vehicleLocationRecordCache) {
+    _vehicleLocationRecordCache = vehicleLocationRecordCache;
   }
 
   /****
@@ -82,13 +94,34 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
    ****/
 
   @Override
-  public VehicleLocationRecord getVehicleLocationRecordForId(
-      AgencyAndId vehicleId) {
-    return _vehicleRecordsById.get(vehicleId);
+  public VehicleStatus getVehicleStatusForId(AgencyAndId vehicleId) {
+
+    VehicleLocationRecord record = _vehicleRecordsById.get(vehicleId);
+    if (record == null)
+      return null;
+
+    List<VehicleLocationRecord> records = new ArrayList<VehicleLocationRecord>();
+    VehicleLocationCacheElements elements = _vehicleLocationRecordCache.getRecordForVehicleId(vehicleId);
+    if (elements != null) {
+      for (VehicleLocationCacheElement element : elements.getElements())
+        records.add(element.getRecord());
+    }
+
+    VehicleStatus status = new VehicleStatus();
+    status.setRecord(record);
+    status.setAllRecords(records);
+
+    return status;
   }
 
   @Override
-  public List<VehicleLocationRecord> getAllVehicleLocationRecords() {
-    return new ArrayList<VehicleLocationRecord>(_vehicleRecordsById.values());
+  public List<VehicleStatus> getAllVehicleStatuses() {
+    ArrayList<VehicleStatus> statuses = new ArrayList<VehicleStatus>();
+    for (VehicleLocationRecord record : _vehicleRecordsById.values()) {
+      VehicleStatus status = new VehicleStatus();
+      status.setRecord(record);
+      statuses.add(status);
+    }
+    return statuses;
   }
 }
