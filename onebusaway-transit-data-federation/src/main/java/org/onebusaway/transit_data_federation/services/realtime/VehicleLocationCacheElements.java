@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.onebusaway.collections.Range;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
@@ -81,7 +82,7 @@ public class VehicleLocationCacheElements {
 
   public Range getTimeRange() {
     if (_elements.isEmpty())
-      throw new IllegalStateException("empty");
+      throw new NoSuchElementException();
     VehicleLocationCacheElement first = _elements.get(0);
     VehicleLocationCacheElement last = _elements.get(_elements.size() - 1);
     return new Range(first.getRecord().getTimeOfRecord(),
@@ -105,5 +106,11 @@ public class VehicleLocationCacheElements {
     }
 
     return _elements.get(0);
+  }
+  
+  public VehicleLocationCacheElement getLastElement() {
+    if( _elements.isEmpty() )
+      throw new NoSuchElementException();
+    return _elements.get(_elements.size() - 1);
   }
 }
