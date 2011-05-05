@@ -184,7 +184,7 @@
   <!-- This is not enabled by default, as it should really be run on a cluster -->
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="transfer_patterns" />
-    <property name="afterTaskNames" value="hub_stops" />
+    <property name="afterTaskNames" value="stop_transfers" />
     <property name="task" ref="transferPatternsTask" />
     <property name="enabled" value="false" />
   </bean>
