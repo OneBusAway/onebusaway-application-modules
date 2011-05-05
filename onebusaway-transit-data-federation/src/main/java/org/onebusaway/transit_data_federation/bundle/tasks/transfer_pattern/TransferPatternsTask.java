@@ -294,6 +294,26 @@ public class TransferPatternsTask implements Runnable {
 
     List<StopEntry> stops = new ArrayList<StopEntry>();
 
+    String key = _bundle.getKey();
+    String totalTaskCountValue = System.getProperty("totalTaskCount");
+
+    if (key != null && totalTaskCountValue != null) {
+      int taskIndex = Integer.parseInt(key);
+      int totalTaskCount = Integer.parseInt(totalTaskCountValue);
+
+      List<StopEntry> allStops = _transitGraphDao.getAllStops();
+
+      double stopsPerTask = (double) allStops.size() / totalTaskCount;
+      int from = (int) (taskIndex * stopsPerTask);
+      int to = (int) ((taskIndex + 1) * stopsPerTask);
+
+      for (int i = from; i < to; i++) {
+        stops.add(allStops.get(i));
+      }
+
+      return stops;
+    }
+
     File path = _bundle.getTransferPatternSourceStopsPath();
 
     try {

@@ -104,7 +104,7 @@ public class FederatedTransitDataBundle {
 
   public File getTransferPatternsPath() {
     File parent = getTransferPatternsParentPath();
-    return new File(parent, keyed("TransferPatterns"));
+    return new File(parent, keyed("TransferPatterns.gz"));
   }
 
   public List<File> getAllTransferPatternsPaths() {

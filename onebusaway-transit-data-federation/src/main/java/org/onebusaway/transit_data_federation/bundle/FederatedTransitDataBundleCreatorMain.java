@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -40,7 +41,7 @@ public class FederatedTransitDataBundleCreatorMain {
   private static final String ARG_INCLUDE = "include";
 
   private static final String ARG_ONLY_IF_DNE = "onlyIfDoesNotExist";
-  
+
   private static final String ARG_BUNDLE_KEY = "bundleKey";
 
   private static final String ARG_RANDOMIZE_CACHE_DIR = "randomizeCacheDir";
@@ -103,10 +104,24 @@ public class FederatedTransitDataBundleCreatorMain {
 
       if (commandLine.hasOption(ARG_RANDOMIZE_CACHE_DIR))
         creator.setRandomizeCacheDir(true);
-      
-      if( commandLine.hasOption(ARG_BUNDLE_KEY)) {
+
+      if (commandLine.hasOption(ARG_BUNDLE_KEY)) {
         String key = commandLine.getOptionValue(ARG_BUNDLE_KEY);
         creator.setBundleKey(key);
+      }
+
+      /**
+       * Optionally override any system properties (ok this duplicates existing
+       * functionality, yes, but it allows for -D arguments after the main
+       * class)
+       */
+      if (commandLine.hasOption("D")) {
+        Properties props = commandLine.getOptionProperties("D");
+        for (Object key : props.keySet()) {
+          String propName = (String) key;
+          String propValue = props.getProperty(propName);
+          System.setProperty(propName, propValue);
+        }
       }
 
       creator.setOutputPath(outputPath);
@@ -149,7 +164,7 @@ public class FederatedTransitDataBundleCreatorMain {
     property.setArgName("property=value");
     property.setArgs(2);
     property.setValueSeparator('=');
-    
+    options.addOption(property);
   }
 
   protected void printUsage() {
