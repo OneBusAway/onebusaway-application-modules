@@ -14,10 +14,10 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.min.MinStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.min.MinTravelEdge;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.opentripplanner.routing.algorithm.AStar;
 import org.opentripplanner.routing.algorithm.EmptyExtraEdgesStrategy;
-import org.opentripplanner.routing.algorithm.ExtraEdgesStrategy;
-import org.opentripplanner.routing.algorithm.RemainingWeightHeuristic;
+import org.opentripplanner.routing.algorithm.GenericAStar;
+import org.opentripplanner.routing.algorithm.strategies.ExtraEdgesStrategy;
+import org.opentripplanner.routing.algorithm.strategies.RemainingWeightHeuristic;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
@@ -82,7 +82,7 @@ public class MinTravelTimeUsingTransitHeuristic {
 
     MinStopVertex from = new MinStopVertex(_context, stop);
 
-    AStar search = new AStar();
+    GenericAStar search = new GenericAStar();
     ShortestPathTree sptTree = search.getShortestPathTree(graph, from, _target,
         init, options);
 

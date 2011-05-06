@@ -390,7 +390,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     if (!CollectionsLibrary.isEmpty(paths)) {
       for (GraphPath path : paths) {
-        computationTimeLimitReached |= path.isComputationTimeLimitReached();
+
         ItineraryBean itinerary = getPathAsItinerary(path, options);
         beans.add(itinerary);
       }

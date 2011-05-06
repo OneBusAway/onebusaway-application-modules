@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.transit_data_federation.services.otp.TransitShedPathService;
-import org.opentripplanner.routing.algorithm.ExtraEdgesStrategy;
 import org.opentripplanner.routing.algorithm.GraphLibrary;
 import org.opentripplanner.routing.algorithm.NegativeWeightException;
-import org.opentripplanner.routing.contraction.ContractionHierarchySet;
+import org.opentripplanner.routing.algorithm.strategies.ExtraEdgesStrategy;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.Graph;

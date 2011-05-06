@@ -12,7 +12,7 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.HasPathStateVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.opentripplanner.routing.algorithm.RemainingWeightHeuristic;
+import org.opentripplanner.routing.algorithm.strategies.RemainingWeightHeuristic;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
@@ -126,9 +126,9 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
     double minOption = node.getMinRemainingWeight();
 
     if (minOption < 0) {
-      
+
       minOption = Double.POSITIVE_INFINITY;
-      
+
       /**
        * We could exit if we're allowed, walking to our destination
        */
@@ -162,7 +162,7 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
         double subWeight = transferWeight + transitWeight;
         minOption = Math.min(subWeight, minOption);
       }
-      
+
       node.setMinRemainingWeight(minOption);
     }
 

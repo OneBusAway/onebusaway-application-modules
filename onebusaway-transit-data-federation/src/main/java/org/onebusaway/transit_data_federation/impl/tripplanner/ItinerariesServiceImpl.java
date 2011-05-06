@@ -22,7 +22,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
-import org.opentripplanner.routing.algorithm.AStar;
+import org.opentripplanner.routing.algorithm.GenericAStar;
 import org.opentripplanner.routing.algorithm.strategies.SkipVertexStrategy;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
@@ -98,12 +98,13 @@ class ItinerariesServiceImpl implements ItinerariesService {
     Vertex fromVertex = getTransitLocationAsVertex(from, options);
     Vertex toVertex = getTransitLocationAsVertex(to, options);
 
-    Date t = new Date(targetTime);
+    State state = new State(targetTime, new OBAStateData());
 
     if (_transferPathService.isEnabled()) {
-      return getTransferPatternStops(fromVertex, toVertex, t, options);
+      return getTransferPatternStops(fromVertex, toVertex,
+          new Date(targetTime), options);
     } else {
-      return _pathService.plan(fromVertex, toVertex, t, options, 1);
+      return _pathService.plan(fromVertex, toVertex, state, options, 1);
     }
   }
 
@@ -146,7 +147,9 @@ class ItinerariesServiceImpl implements ItinerariesService {
     TraverseModeSet modes = new TraverseModeSet(TraverseMode.WALK);
     options.setModes(modes);
 
-    List<GraphPath> paths = _pathService.plan(from, to, time, options, 1);
+    State state = new State(time.getTime(), new OBAStateData());
+
+    List<GraphPath> paths = _pathService.plan(from, to, state, options, 1);
 
     if (CollectionsLibrary.isEmpty(paths))
       return null;
@@ -188,7 +191,7 @@ class ItinerariesServiceImpl implements ItinerariesService {
     Graph graph = _graphService.getGraph();
     State init = new State(time.getTime(), new OBAStateData());
     options.remainingWeightHeuristic = new TPRemainingWeightHeuristicImpl();
-    AStar search = new AStar();
+    GenericAStar search = new GenericAStar();
     search.setSkipVertexStrategy(new SkipVertexImpl());
 
     if (options.isArriveBy()) {
