@@ -1,5 +1,7 @@
 package org.onebusaway.transit_data_federation.impl.blocks;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,21 +14,21 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.collections.CollectionsLibrary;
-import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
 import org.onebusaway.collections.tuple.T2;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
 import org.onebusaway.transit_data_federation.impl.ProjectedPointFactory;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointsLibrary;
 import org.onebusaway.transit_data_federation.model.ProjectedPoint;
-import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
@@ -38,13 +40,13 @@ import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTrip
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.shapes.ProjectedShapePointService;
-import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,8 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
 
   private static Logger _log = LoggerFactory.getLogger(BlockGeospatialServiceImpl.class);
 
+  private FederatedTransitDataBundle _bundle;
+
   private TransitGraphDao _transitGraphDao;
 
   private BlockCalendarService _blockCalendarService;
@@ -68,15 +72,16 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
 
   private STRtree _tree = new STRtree();
 
-  private ShapePointService _shapePointService;
-
-  private double _gridSize = 500;
-
   private ProjectedShapePointService _projectedShapePointService;
 
   private ShapePointsLibrary _shapePointsLibrary;
 
   private ScheduledBlockLocationService _scheduledBlockLocationService;
+
+  @Autowired
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
+  }
 
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -91,11 +96,6 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
   @Autowired
   public void setBlockIndexService(BlockIndexService blockIndexService) {
     _blockIndexService = blockIndexService;
-  }
-
-  @Autowired
-  public void set(ShapePointService shapePointService) {
-    _shapePointService = shapePointService;
   }
 
   @Autowired
@@ -115,7 +115,10 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
   }
 
   @PostConstruct
-  public void setup() {
+  @Refreshable(dependsOn = {
+      RefreshableResources.SHAPE_GEOSPATIAL_INDEX,
+      RefreshableResources.BLOCK_INDEX_SERVICE})
+  public void setup() throws IOException, ClassNotFoundException {
     groupBlockSequenceIndicesByShapeIds();
     buildShapeSpatialIndex();
   }
@@ -279,68 +282,37 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
     }
   }
 
-  private void buildShapeSpatialIndex() {
+  private void buildShapeSpatialIndex() throws IOException,
+      ClassNotFoundException {
 
-    CoordinateBounds fullBounds = new CoordinateBounds();
-    for (StopEntry stop : _transitGraphDao.getAllStops())
-      fullBounds.addPoint(stop.getStopLat(), stop.getStopLon());
+    File path = _bundle.getShapeGeospatialIndexDataPath();
 
-    if (fullBounds.isEmpty()) {
+    if (!path.exists()) {
       _tree = null;
       return;
     }
 
-    double centerLat = (fullBounds.getMinLat() + fullBounds.getMaxLat()) / 2;
-    double centerLon = (fullBounds.getMinLon() + fullBounds.getMaxLon()) / 2;
-    CoordinateBounds gridCellExample = SphericalGeometryLibrary.bounds(
-        centerLat, centerLon, _gridSize / 2);
+    _log.info("loading shape point geospatial index...");
 
-    double latStep = gridCellExample.getMaxLat() - gridCellExample.getMinLat();
-    double lonStep = gridCellExample.getMaxLon() - gridCellExample.getMinLon();
+    Map<CoordinateBounds, List<AgencyAndId>> shapeIdsByGridCell = ObjectSerializationLibrary.readObject(path);
 
-    Map<CoordinatePoint, Set<AgencyAndId>> shapeIdsByGridCellCorner = new FactoryMap<CoordinatePoint, Set<AgencyAndId>>(
-        new HashSet<AgencyAndId>());
+    _log.info("block shape geospatial nodes: " + shapeIdsByGridCell.size());
 
-    _log.info("generating shape point geospatial index...");
-
-    for (AgencyAndId shapeId : _blockSequenceIndicesByShapeId.keySet()) {
-
-      ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(shapeId);
-
-      for (int i = 0; i < shapePoints.getSize(); i++) {
-
-        double lat = shapePoints.getLatForIndex(i);
-        double lon = shapePoints.getLonForIndex(i);
-
-        CoordinatePoint gridCellCorner = getGridCellCornerForPoint(lat, lon,
-            latStep, lonStep);
-
-        shapeIdsByGridCellCorner.get(gridCellCorner).add(shapeId);
-      }
+    if (shapeIdsByGridCell.isEmpty()) {
+      _tree = null;
+      return;
     }
 
-    _log.info("block shape geospatial nodes: "
-        + shapeIdsByGridCellCorner.size());
+    _tree = new STRtree(shapeIdsByGridCell.size());
 
-    _tree = new STRtree(shapeIdsByGridCellCorner.size());
-
-    for (Map.Entry<CoordinatePoint, Set<AgencyAndId>> entry : shapeIdsByGridCellCorner.entrySet()) {
-      CoordinatePoint p = entry.getKey();
-      Envelope env = new Envelope(p.getLon(), p.getLon() + lonStep, p.getLat(),
-          p.getLat() + latStep);
-      List<AgencyAndId> shapeIds = new ArrayList<AgencyAndId>(entry.getValue());
+    for (Map.Entry<CoordinateBounds, List<AgencyAndId>> entry : shapeIdsByGridCell.entrySet()) {
+      CoordinateBounds b = entry.getKey();
+      Envelope env = new Envelope(b.getMinLon(), b.getMaxLon(), b.getMinLat(),
+          b.getMaxLat());
+      List<AgencyAndId> shapeIds = entry.getValue();
       _tree.insert(env, shapeIds);
     }
 
     _tree.build();
-
-  }
-
-  private CoordinatePoint getGridCellCornerForPoint(double lat, double lon,
-      double latStep, double lonStep) {
-
-    double latCorner = Math.floor(lat / latStep) * latStep;
-    double lonCorner = Math.floor(lon / lonStep) * lonStep;
-    return new CoordinatePoint(latCorner, lonCorner);
   }
 }

@@ -87,6 +87,10 @@ public class FederatedTransitDataBundle {
     return new File(_path, "StopTransfers.obj");
   }
 
+  public File getShapeGeospatialIndexDataPath() {
+    return new File(_path, "ShapeGeospatialIndexData.obj.gz");
+  }
+
   public File getHubStopsPath(boolean keyed) {
     return new File(_path, keyed("HubStops.txt", keyed));
   }
