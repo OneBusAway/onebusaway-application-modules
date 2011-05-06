@@ -123,6 +123,16 @@ public class FederatedTransitDataBundleCreatorMain {
           System.setProperty(propName, propValue);
         }
       }
+      
+      /**
+       * Optionally override any system properties (ok this duplicates existing
+       * functionality, yes, but it allows for -D arguments after the main
+       * class)
+       */
+      if (commandLine.hasOption("P")) {
+        Properties props = commandLine.getOptionProperties("P");
+        creator.setAdditionalBeanPropertyOverrides(props);
+      }
 
       creator.setOutputPath(outputPath);
 
@@ -160,11 +170,17 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_RANDOMIZE_CACHE_DIR, false, "");
     options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
 
-    Option property = new Option("D", "use value for given property");
-    property.setArgName("property=value");
-    property.setArgs(2);
-    property.setValueSeparator('=');
-    options.addOption(property);
+    Option dOption = new Option("D", "use value for given property");
+    dOption.setArgName("property=value");
+    dOption.setArgs(2);
+    dOption.setValueSeparator('=');
+    options.addOption(dOption);
+    
+    Option pOption = new Option("P", "use value for given property");
+    pOption.setArgName("beanName.beanProperty=value");
+    pOption.setArgs(2);
+    pOption.setValueSeparator('=');
+    options.addOption(pOption);
   }
 
   protected void printUsage() {

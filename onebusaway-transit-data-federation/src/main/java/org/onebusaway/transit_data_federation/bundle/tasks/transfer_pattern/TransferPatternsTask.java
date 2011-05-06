@@ -98,6 +98,8 @@ public class TransferPatternsTask implements Runnable {
 
   private double _nearbyStopsRadius = 100;
 
+  private boolean _useHubStopsAsSourceStops = false;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -155,14 +157,20 @@ public class TransferPatternsTask implements Runnable {
   public void setMaxPathCountForHubStop(int maxPathCountForHubStop) {
     _maxPathCountForHubStop = maxPathCountForHubStop;
   }
+  
+  public void setUseHubStopsAsSourceStops(boolean useHubStopsAsSourceStops) {
+    _useHubStopsAsSourceStops = useHubStopsAsSourceStops;
+  }
 
   @Override
   public void run() {
 
     long tIn = System.currentTimeMillis();
 
-    List<StopEntry> stops = loadSourceStops();
-    Set<StopEntry> hubStops = loadHubStops();
+    List<StopEntry> hubStops = loadHubStops();
+    List<StopEntry> stops = loadSourceStops(hubStops);
+    
+    Set<StopEntry> hubStopsAsSet = new HashSet<StopEntry>(hubStops);
 
     Graph graph = _graphService.getGraph();
     GraphContext context = _otpConfigurationService.createGraphContext();
@@ -173,7 +181,7 @@ public class TransferPatternsTask implements Runnable {
 
       Map<StopEntry, Integer> nearbyStopsAndWalkTimes = getNearbyStopsAndWalkTimes(stop);
 
-      boolean isHubStop = hubStops.contains(stop);
+      boolean isHubStop = hubStopsAsSet.contains(stop);
       System.out.println("stop=" + stop.getId() + " hub=" + isHubStop);
 
       List<ServiceDate> serviceDates = computeServiceDates(stop);
@@ -290,7 +298,7 @@ public class TransferPatternsTask implements Runnable {
      */
   }
 
-  private List<StopEntry> loadSourceStops() {
+  private List<StopEntry> loadSourceStops(List<StopEntry> hubStops) {
 
     List<StopEntry> stops = new ArrayList<StopEntry>();
 
@@ -302,6 +310,8 @@ public class TransferPatternsTask implements Runnable {
       int totalTaskCount = Integer.parseInt(totalTaskCountValue);
 
       List<StopEntry> allStops = _transitGraphDao.getAllStops();
+      if( _useHubStopsAsSourceStops )
+        allStops = hubStops;
 
       double stopsPerTask = (double) allStops.size() / totalTaskCount;
       int from = (int) (taskIndex * stopsPerTask);
@@ -331,9 +341,9 @@ public class TransferPatternsTask implements Runnable {
     return stops;
   }
 
-  private Set<StopEntry> loadHubStops() {
+  private List<StopEntry> loadHubStops() {
 
-    Set<StopEntry> hubStops = new HashSet<StopEntry>();
+    List<StopEntry> hubStops = new ArrayList<StopEntry>();
     File path = _bundle.getHubStopsPath(false);
 
     if (path.exists()) {

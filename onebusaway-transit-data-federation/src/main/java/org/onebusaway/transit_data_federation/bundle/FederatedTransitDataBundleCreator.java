@@ -69,6 +69,8 @@ public class FederatedTransitDataBundleCreator {
 
   private String _bundleKey;
 
+  private Properties _additionalBeanPropertyOverrides;
+
   /**
    * Additional context paths that will be added when constructing the Spring
    * container that controls the build process. See
@@ -115,6 +117,12 @@ public class FederatedTransitDataBundleCreator {
   public void setRandomizeCacheDir(boolean randomizeCacheDir) {
     _randomizeCacheDir = randomizeCacheDir;
   }
+  
+
+  public void setAdditionalBeanPropertyOverrides(Properties props) {
+    _additionalBeanPropertyOverrides = props;
+  }
+
 
   /**
    * Build the bundle!
@@ -224,6 +232,9 @@ public class FederatedTransitDataBundleCreator {
     if (_bundleKey != null) {
       p.setProperty("bundle.key", _bundleKey);
     }
+    
+    if( _additionalBeanPropertyOverrides != null)
+      p.putAll(_additionalBeanPropertyOverrides);
 
     BeanDefinitionBuilder propertyOverrides = BeanDefinitionBuilder.genericBeanDefinition(PropertyOverrideConfigurer.class);
     propertyOverrides.addPropertyValue("properties", p);
@@ -355,5 +366,4 @@ public class FederatedTransitDataBundleCreator {
     return _onlyTasks.contains(taskDef.getTaskName())
         || _includeTasks.contains(taskDef.getTaskName()) || taskDef.isEnabled();
   }
-
 }
