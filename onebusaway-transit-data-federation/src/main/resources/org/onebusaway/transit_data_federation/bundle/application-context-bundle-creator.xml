@@ -240,6 +240,7 @@
     <property name="taskName" value="block_location_history" />
     <property name="afterTaskName" value="trip_planner_test_task" />
     <property name="task" ref="blockLocationHistoryTask" />
+    <property name="enabled" value="false" />
   </bean>
 
   <bean id="blockLocationHistoryTask" class="org.onebusaway.transit_data_federation.bundle.tasks.history.BlockLocationHistoryTask" />
