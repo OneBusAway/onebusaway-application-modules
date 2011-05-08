@@ -95,8 +95,8 @@ public class FederatedTransitDataBundle {
     return new File(_path, keyed("HubStops.txt", keyed));
   }
 
-  public File getTransferPatternSourceStopsPath() {
-    return new File(_path, keyed("TransferPatternSourceStops.txt"));
+  public File getTransferPatternsSourceStopsPath() {
+    return new File(_path, keyed("TransferPatternsSourceStops.txt"));
   }
 
   public File getTransferPatternsParentPath() {

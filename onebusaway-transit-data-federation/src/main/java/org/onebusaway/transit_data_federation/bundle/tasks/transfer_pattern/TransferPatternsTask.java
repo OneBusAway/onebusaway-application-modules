@@ -157,7 +157,7 @@ public class TransferPatternsTask implements Runnable {
   public void setMaxPathCountForHubStop(int maxPathCountForHubStop) {
     _maxPathCountForHubStop = maxPathCountForHubStop;
   }
-  
+
   public void setUseHubStopsAsSourceStops(boolean useHubStopsAsSourceStops) {
     _useHubStopsAsSourceStops = useHubStopsAsSourceStops;
   }
@@ -169,7 +169,7 @@ public class TransferPatternsTask implements Runnable {
 
     List<StopEntry> hubStops = loadHubStops();
     List<StopEntry> stops = loadSourceStops(hubStops);
-    
+
     Set<StopEntry> hubStopsAsSet = new HashSet<StopEntry>(hubStops);
 
     Graph graph = _graphService.getGraph();
@@ -310,7 +310,7 @@ public class TransferPatternsTask implements Runnable {
       int totalTaskCount = Integer.parseInt(totalTaskCountValue);
 
       List<StopEntry> allStops = _transitGraphDao.getAllStops();
-      if( _useHubStopsAsSourceStops )
+      if (_useHubStopsAsSourceStops)
         allStops = hubStops;
 
       double stopsPerTask = (double) allStops.size() / totalTaskCount;
@@ -324,7 +324,7 @@ public class TransferPatternsTask implements Runnable {
       return stops;
     }
 
-    File path = _bundle.getTransferPatternSourceStopsPath();
+    File path = _bundle.getTransferPatternsSourceStopsPath();
 
     try {
       BufferedReader reader = new BufferedReader(new FileReader(path));
@@ -774,6 +774,8 @@ public class TransferPatternsTask implements Runnable {
         StopEntry stop = v.getStop();
         if (_stops.add(stop) && _stops.size() % 100 == 0) {
           System.out.println("stops=" + _stops.size());
+          if (_stops.size() == 13900)
+            System.out.println("here");
         }
       }
 
