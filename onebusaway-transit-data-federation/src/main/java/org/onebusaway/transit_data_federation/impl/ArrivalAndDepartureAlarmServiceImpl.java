@@ -455,7 +455,7 @@ class ArrivalAndDepartureAlarmServiceImpl implements
     }
 
     public void setScheduleDeviation(int scheduleDeviation) {
-
+      _scheduleDeviation = scheduleDeviation;
     }
 
     public PriorityQueue<AlarmForBlockInstance> getQueue() {
