@@ -236,7 +236,7 @@ public class TransferPatternsTask implements Runnable {
       System.out.println("arrivalStops=" + pathCountsByStop.size());
 
       for (Map.Entry<StopEntry, Counter<List<Pair<StopEntry>>>> entry : pathCountsByStop.entrySet()) {
-        boolean verbose = false;
+        boolean verbose = false;//entry.getKey().getId().toString().equals("1_29430");
         Counter<List<Pair<StopEntry>>> pathCounts = entry.getValue();
         List<List<Pair<StopEntry>>> keys = pathCounts.getSortedKeys();
         int maxCount = isHubStop ? _maxPathCountForHubStop
@@ -480,7 +480,7 @@ public class TransferPatternsTask implements Runnable {
 
     Map<SPTVertex, List<Pair<StopEntry>>> pathsByVertex = new HashMap<SPTVertex, List<Pair<StopEntry>>>();
 
-    boolean verbose = false;// arrivalStop.getId().toString().equals("1_18740");
+    boolean verbose = false;//arrivalStop.getId().toString().equals("1_29430");
     if (verbose)
       System.out.println("here!");
 

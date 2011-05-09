@@ -6,16 +6,19 @@ import java.util.Collection;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
+import org.onebusaway.transit_data_federation.impl.otp.graph.SearchLocal;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 
-public class TPBlockDepartureVertex extends AbstractTPPathStateVertex {
+public class TPBlockDepartureVertex extends AbstractTPPathStateVertex implements SearchLocal {
 
   private final ArrivalAndDepartureInstance _departure;
 
   private final ArrivalAndDepartureInstance _arrival;
+  
+  private Object _searchLocalValue = null;
 
   public TPBlockDepartureVertex(GraphContext context, TPState pathState,
       ArrivalAndDepartureInstance departure, ArrivalAndDepartureInstance arrival) {
@@ -69,5 +72,20 @@ public class TPBlockDepartureVertex extends AbstractTPPathStateVertex {
   @Override
   public String toString() {
     return "TPBlockDepartureVertex(" + _pathState.toString() + ")";
+  }
+  
+  /****
+   * Search Local
+   ****/
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T getSearchLocalValue() {
+    return (T) _searchLocalValue;
+  }
+
+  @Override
+  public <T> void setSearchLocalValue(T value) {
+    _searchLocalValue = value;
   }
 }

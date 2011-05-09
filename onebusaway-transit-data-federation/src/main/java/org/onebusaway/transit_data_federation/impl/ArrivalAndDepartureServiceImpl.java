@@ -409,7 +409,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         resultCount);
 
     return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs,
-        tFrom, null, applyRealTime, true);
+        tFrom, null, applyRealTime, true, false);
   }
 
   @Override
@@ -426,7 +426,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
         fromStop, toStop, tTo, runningEarlySlack, runningLateSlack, resultCount);
 
     return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs,
-        null, tTo, applyRealTime, false);
+        null, tTo, applyRealTime, false, false);
   }
 
   /****
@@ -437,7 +437,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   private List<Pair<ArrivalAndDepartureInstance>> getArrivalsAndDeparturesFromStopTimeInstancePairs(
       TargetTime targetTime, List<Pair<StopTimeInstance>> pairs, Date tFrom,
-      Date tTo, boolean applyRealTime, boolean findDepartures) {
+      Date tTo, boolean applyRealTime, boolean findDepartures, boolean fillBlockLocations) {
 
     long frequencyOffsetTime = Math.max(targetTime.getTargetTime(),
         targetTime.getCurrentTime());
@@ -457,7 +457,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
       applyRealTimeToStopTimeInstancePair(stiFrom, stiTo, targetTime, tFrom,
           tTo, frequencyOffsetTime, blockInstance, locations, results,
-          findDepartures);
+          findDepartures, fillBlockLocations);
     }
 
     return results;
@@ -554,7 +554,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       StopTimeInstance stiTo, TargetTime targetTime, Date fromTime,
       Date toTime, long frequencyOffsetTime, BlockInstance blockInstance,
       List<BlockLocation> locations,
-      List<Pair<ArrivalAndDepartureInstance>> results, boolean findDepartures) {
+      List<Pair<ArrivalAndDepartureInstance>> results, boolean findDepartures,
+      boolean fillBlockLocations) {
 
     if (CollectionsLibrary.isEmpty(locations)) {
 
@@ -570,14 +571,16 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       if (isArrivalAndDeparturePairInRange(instanceFrom, instanceTo, fromTime,
           toTime, findDepartures)) {
 
-        BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
-            blockInstance, targetTime.getTargetTime());
+        if (fillBlockLocations) {
+          BlockLocation scheduledLocation = _blockLocationService.getScheduledLocationForBlockInstance(
+              blockInstance, targetTime.getTargetTime());
 
-        if (scheduledLocation != null) {
-          applyBlockLocationToInstance(instanceFrom, scheduledLocation,
-              targetTime.getTargetTime());
-          applyBlockLocationToInstance(instanceTo, scheduledLocation,
-              targetTime.getTargetTime());
+          if (scheduledLocation != null) {
+            applyBlockLocationToInstance(instanceFrom, scheduledLocation,
+                targetTime.getTargetTime());
+            applyBlockLocationToInstance(instanceTo, scheduledLocation,
+                targetTime.getTargetTime());
+          }
         }
 
         results.add(Tuples.pair(instanceFrom, instanceTo));

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.collections.Max;
+import org.onebusaway.transit_data_federation.impl.otp.graph.SearchLocal;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
@@ -55,12 +56,7 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
     OBAStateData data = (OBAStateData) state.getData();
     TripSequence tripSequence = data.getTripSequence();
 
-    Map<TripSequence, SPTVertex> map = sptVerticesByTripSequence.get(vertex);
-
-    if (map == null) {
-      map = new HashMap<TripSequence, SPTVertex>();
-      sptVerticesByTripSequence.put(vertex, map);
-    }
+    Map<TripSequence, SPTVertex> map = getTripSequenceAndSptVerticesForVertex(vertex);
 
     SPTVertex existing = map.get(tripSequence);
 
@@ -75,15 +71,15 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
         SPTVertex v = entry.getValue();
         m.add(v.weightSum, key);
       }
-      
-      
+
       /**
-       * If the current max value is LESS than the new vertex, we don't add the new vertex
+       * If the current max value is LESS than the new vertex, we don't add the
+       * new vertex
        */
       double v = m.getMaxValue();
       if (v < weightSum)
         return null;
-      
+
       /**
        * If the current max value is MORE than the new vertex, we kill the max
        * trip sequence in preparation for adding the new, better-scoring one
@@ -142,6 +138,32 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
 
   public String toString() {
     return "SPT " + this.sptVerticesByTripSequence.toString();
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private Map<TripSequence, SPTVertex> getTripSequenceAndSptVerticesForVertex(
+      Vertex vertex) {
+
+    if (vertex instanceof SearchLocal) {
+      SearchLocal local = (SearchLocal) vertex;
+      Map<TripSequence, SPTVertex> map = local.getSearchLocalValue();
+      if (map == null) {
+        map = new HashMap<TripSequence, SPTVertex>();
+        local.setSearchLocalValue(map);
+      }
+      return map;
+    }
+
+    Map<TripSequence, SPTVertex> map = sptVerticesByTripSequence.get(vertex);
+
+    if (map == null) {
+      map = new HashMap<TripSequence, SPTVertex>();
+      sptVerticesByTripSequence.put(vertex, map);
+    }
+    return map;
   }
 
   private static final class FactoryImpl implements ShortestPathTreeFactory {
