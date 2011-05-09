@@ -104,7 +104,7 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
     options.maxTransfers = 2;
     options.minTransferTime = 60;
 
-    options.maxWalkDistance = 1000;
+    options.maxWalkDistance = 1500;
 
     /**
      * Ten seconds max
