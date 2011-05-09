@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.bundle.model;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreator;
@@ -115,6 +116,7 @@ public class FederatedTransitDataBundle {
     File path = getTransferPatternsParentPath();
     List<File> paths = new ArrayList<File>();
     getAllTransferPatternsPaths(path, paths);
+    Collections.sort(paths);
     return paths;
   }
 
