@@ -128,7 +128,8 @@ public class SerializedTransferPatternsTask implements Runnable {
     @Override
     public void patternProcessed(CompactedTransferPatternFactory factory,
         StopEntry originStop, CompactedTransferPattern pattern) {
-      _patternsByStopId.put(originStop.getId(), pattern);
+      if (!_patternsByStopId.containsKey(originStop.getId()))
+        _patternsByStopId.put(originStop.getId(), pattern);
       factory.clear();
     }
   }
