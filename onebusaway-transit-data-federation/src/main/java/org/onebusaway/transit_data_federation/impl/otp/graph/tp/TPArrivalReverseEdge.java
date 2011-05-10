@@ -69,13 +69,13 @@ public class TPArrivalReverseEdge extends AbstractEdge {
     TraverseResult results = null;
 
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
-      
+
       /**
-       * For now, we skip real-time arrival that might have been included
-       * that are beyond our range (ex. vehicle running late)
+       * For now, we skip real-time arrival that might have been included that
+       * are beyond our range (ex. vehicle running late)
        */
       ArrivalAndDepartureInstance arrival = pair.getSecond();
-      if( arrival.getBestArrivalTime() > s0.getTime())
+      if (arrival.getBestArrivalTime() > s0.getTime())
         break;
 
       Vertex fromV = new TPBlockArrivalVertex(_context, _pathState,
@@ -88,7 +88,11 @@ public class TPArrivalReverseEdge extends AbstractEdge {
 
       OBAEditor s1 = (OBAEditor) s0.edit();
       s1.incrementTimeInSeconds(-dwellTime);
-      s1.appendTripSequence(pair.getSecond().getBlockTrip());
+
+      if (arrival.getBlockSequence() != null)
+        s1.appendTripSequence(arrival.getBlockSequence());
+      else
+        s1.appendTripSequence(arrival.getBlockTrip());
 
       EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
       TraverseResult r = new TraverseResult(w, s1.createState(), narrative);

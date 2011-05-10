@@ -317,9 +317,12 @@ class StopTimeServiceImpl implements StopTimeService {
           BlockStopTimeEntry stopTimeSource = sourceStopIndex.getBlockStopTimeForIndex(sourceIndex);
           StopTimeInstance stiSource = new StopTimeInstance(stopTimeSource,
               serviceDate);
+          stiSource.setBlockSequence(sourceStopIndex.getBlockSequenceForIndex(sourceIndex));
+          
           BlockStopTimeEntry stopTimeDest = destStopTimes.get(sourceIndex);
           StopTimeInstance stiDest = new StopTimeInstance(stopTimeDest,
               serviceDate);
+          stiDest.setBlockSequence(destStopIndex.getBlockSequenceForIndex(sourceIndex));
 
           if (stopTimeIsBeyondRangeOfQueue(nBestQueue, stiDest, resultCount,
               findDepartures, slack)) {

@@ -952,8 +952,12 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     BlockInstance blockInstance = sti.getBlockInstance();
     BlockStopTimeEntry blockStopTime = sti.getStopTime();
 
-    return createArrivalAndDeparture(blockInstance, blockStopTime,
+    ArrivalAndDepartureInstance instance = createArrivalAndDeparture(blockInstance, blockStopTime,
         frequencyOffsetTime, sti.getFrequencyOffset());
+    
+    instance.setBlockSequence(sti.getBlockSequence());
+    
+    return instance;
   }
 
   private ArrivalAndDepartureInstance createArrivalAndDeparture(

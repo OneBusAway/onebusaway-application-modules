@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.StateData;
@@ -75,7 +76,7 @@ public class OBAStateData extends StateData {
       this.initialWaitTime += time;
     }
 
-    public void appendTripSequence(BlockTripEntry blockTrip) {
+    public void appendTripSequence(Object blockTrip) {
       if (tripSequence == null)
         tripSequence = new TripSequence(blockTrip);
       else

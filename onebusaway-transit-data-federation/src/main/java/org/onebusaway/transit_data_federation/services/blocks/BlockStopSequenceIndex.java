@@ -61,6 +61,10 @@ public class BlockStopSequenceIndex implements HasIndexedBlockStopTimes {
   public BlockStopTimeEntry getBlockStopTimeForIndex(int index) {
     return _stopTimes.get(index);
   }
+  
+  public BlockSequence getBlockSequenceForIndex(int index) {
+    return _index.getSequences().get(index);
+  }
 
   /****
    * {@link HasIndexedBlockStopTimes} Interface

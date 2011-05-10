@@ -51,16 +51,12 @@ public class TPDepartureEdge extends AbstractEdge {
 
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
 
-      /**
-       * For now, we skip real-time departures that might have been included
-       * that are beyond our range (ex. vehicle running early)
-       */
       ArrivalAndDepartureInstance departure = pair.getFirst();
       if (departure.getBestDepartureTime() < s0.getTime())
         continue;
 
       Vertex toV = new TPBlockDepartureVertex(_context, _pathState,
-          pair.getFirst(), pair.getSecond());
+          departure, pair.getSecond());
 
       int dwellTime = computeWaitTime(s0, pair);
 
@@ -69,7 +65,11 @@ public class TPDepartureEdge extends AbstractEdge {
 
       OBAEditor s1 = (OBAEditor) s0.edit();
       s1.incrementTimeInSeconds(dwellTime);
-      s1.appendTripSequence(pair.getFirst().getBlockTrip());
+      
+      if( departure.getBlockSequence() != null)
+        s1.appendTripSequence(departure.getBlockSequence());
+      else
+        s1.appendTripSequence(departure.getBlockTrip());
 
       if (w < 0)
         System.out.println("here");
