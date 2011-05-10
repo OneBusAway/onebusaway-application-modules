@@ -406,6 +406,11 @@ class TransitDataServiceImpl implements TransitDataService {
     AgencyAndId id = convertAgencyAndId(shapeId);
     return _shapeBeanService.getPolylineForShapeId(id);
   }
+  
+  @Override
+  public ListBean<String> getShapeIdsForAgencyId(String agencyId) {
+    return _shapeBeanService.getShapeIdsForAgencyId(agencyId);
+  }
 
   @Override
   public ListBean<CurrentVehicleEstimateBean> getCurrentVehicleEstimates(

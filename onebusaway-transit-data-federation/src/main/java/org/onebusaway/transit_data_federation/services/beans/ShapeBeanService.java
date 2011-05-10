@@ -6,6 +6,7 @@ import java.util.List;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.ShapePoint;
+import org.onebusaway.transit_data.model.ListBean;
 
 /**
  * Retrieve {@list ShapePoint} points as {@link EncodedPolylineBean} polyline
@@ -35,4 +36,12 @@ public interface ShapeBeanService {
    */
   public List<EncodedPolylineBean> getMergedPolylinesForShapeIds(
       Collection<AgencyAndId> shapeIds);
+
+  /**
+   * Return the list of all shape ids associated with the specified agency.
+   * 
+   * @param agencyId
+   * @return the list of all shape ids
+   */
+  public ListBean<String> getShapeIdsForAgencyId(String agencyId);
 }

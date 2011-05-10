@@ -2,6 +2,7 @@ package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,9 +12,13 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +31,16 @@ class ShapeBeanServiceImpl implements ShapeBeanService {
 
   private ShapePointService _shapePointService;
 
+  private TransitGraphDao _transitGraphDao;
+
   @Autowired
   public void setShapePointService(ShapePointService shapePointService) {
     _shapePointService = shapePointService;
+  }
+
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
   }
 
   @Cacheable
@@ -90,6 +102,27 @@ class ShapeBeanServiceImpl implements ShapeBeanService {
     }
 
     return polylines;
+  }
+
+  @Override
+  public ListBean<String> getShapeIdsForAgencyId(String agencyId) {
+    Set<AgencyAndId> shapeIds = new HashSet<AgencyAndId>();
+    for (TripEntry trip : _transitGraphDao.getAllTrips()) {
+      AgencyAndId shapeId = trip.getShapeId();
+      if (shapeId == null || !shapeId.hasValues())
+        continue;
+      if (!shapeId.getAgencyId().equals(agencyId))
+        continue;
+      shapeIds.add(shapeId);
+    }
+    List<String> ids = new ArrayList<String>();
+    for (AgencyAndId shapeId : shapeIds) {
+      String id = AgencyAndIdLibrary.convertToString(shapeId);
+      ids.add(id);
+    }
+
+    Collections.sort(ids);
+    return new ListBean<String>(ids, false);
   }
 
   /****

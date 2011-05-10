@@ -324,6 +324,14 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdMethod
   public EncodedPolylineBean getShapeForId(String shapeId);
+  
+  /**
+   * @param agencyId
+   * @return the list of all shape ids associated with the specified agency
+   */
+  @FederatedByAgencyIdMethod
+  public ListBean<String> getShapeIdsForAgencyId(String agencyId);
+
 
   @FederatedByCoordinatePointsMethod(propertyExpressions = "mostRecentLocation")
   public ListBean<CurrentVehicleEstimateBean> getCurrentVehicleEstimates(
