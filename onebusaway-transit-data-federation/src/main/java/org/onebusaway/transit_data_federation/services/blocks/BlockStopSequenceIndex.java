@@ -9,6 +9,21 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
+/**
+ * A {@link BlockStopSequenceIndex} is a pointer into a
+ * {@link BlockSequenceIndex} for a particular stop in the sequence. Given that
+ * the underlying {@link BlockSequenceIndex} is an ordered index of
+ * {@link BlockSequence} objects where each sequence covers a list of stops, the
+ * block stop sequence index is a slice of the underlying index for just one
+ * stop. It allows for quick lookup of {@link BlockStopTimeEntry} entries at
+ * that stop for the underlying block sequences.
+ * 
+ * @author bdferris
+ * 
+ * @see BlockSequence
+ * @see BlockSequenceIndex
+ * @see BlockIndexService
+ */
 public class BlockStopSequenceIndex implements HasIndexedBlockStopTimes {
 
   private final BlockSequenceIndex _index;

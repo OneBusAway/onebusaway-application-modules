@@ -12,9 +12,9 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 /**
  * A {@link BlockSequenceIndex} is an ordered collection of
- * {@linkplain BlockConfigurationEntry blocks}, where each block visits the same
- * sequence of stops and the arrival-departure times for each stop increase
- * between each block. All blocks are guaranteed to have the same
+ * {@linkplain BlockSequence block sequences}, where each block sequence visits
+ * the same sequence of stops and the arrival-departure times for each stop
+ * increase between each block. All blocks are guaranteed to have the same
  * {@link ServiceIdActivation}. This ordered index allows for fast look-up and
  * search operations within the various blocks that make up the index.
  * 
@@ -24,6 +24,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
  * layover. See {@link BlockIndexFactory} for more details.
  * 
  * @author bdferris
+ * 
+ * @see BlockSequence
  * @see BlockIndexFactory
  * @see BlockStopSequenceIndex
  * @see BlockIndexService

@@ -6,6 +6,11 @@ import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
+/**
+ * The {@link BlockIndexService}
+ * @author bdferris
+ *
+ */
 public interface BlockIndexService {
 
   public List<BlockTripIndex> getBlockTripIndices();
