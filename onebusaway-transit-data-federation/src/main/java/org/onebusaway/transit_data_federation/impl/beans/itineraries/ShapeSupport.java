@@ -9,10 +9,24 @@ import org.onebusaway.utility.InterpolationLibrary;
 
 public class ShapeSupport {
 
-  public static String getFullPath(ShapePoints shapePoints) {
-    EncodedPolylineBean bean = PolylineEncoder.createEncodings(
-        shapePoints.getLats(), shapePoints.getLons());
-    return bean.getPoints();
+  public static String getFullPath(ShapePoints shapePoints,
+      CoordinatePoint nextPoint) {
+
+    if (nextPoint == null) {
+      EncodedPolylineBean bean = PolylineEncoder.createEncodings(
+          shapePoints.getLats(), shapePoints.getLons());
+      return bean.getPoints();
+    } else {
+      int n = shapePoints.getSize() + 1;
+      double[] lats = new double[n];
+      double[] lons = new double[n];
+      System.arraycopy(shapePoints.getLats(), 0, lats, 0, n - 1);
+      System.arraycopy(shapePoints.getLons(), 0, lons, 0, n - 1);
+      lats[n - 1] = nextPoint.getLat();
+      lons[n - 1] = nextPoint.getLon();
+      EncodedPolylineBean bean = PolylineEncoder.createEncodings(lats, lons);
+      return bean.getPoints();
+    }
   }
 
   public static String getPartialPathToStop(ShapePoints shapePoints,
@@ -35,14 +49,17 @@ public class ShapeSupport {
   }
 
   public static String getPartialPathFromStop(ShapePoints shapePoints,
-      StopTimeEntry fromStop) {
-    
+      StopTimeEntry fromStop, CoordinatePoint nextPoint) {
+
     int indexFrom = fromStop.getShapePointIndex();
     int indexTo = shapePoints.getSize();
     int size = indexTo - indexFrom;
+    int sizeExtended = size;
+    if (nextPoint != null)
+      sizeExtended++;
 
-    double[] lats = new double[size];
-    double[] lons = new double[size];
+    double[] lats = new double[sizeExtended];
+    double[] lons = new double[sizeExtended];
 
     System.arraycopy(shapePoints.getLats(), indexFrom + 1, lats, 1, size - 1);
     System.arraycopy(shapePoints.getLons(), indexFrom + 1, lons, 1, size - 1);
@@ -50,6 +67,11 @@ public class ShapeSupport {
     CoordinatePoint from = interpolate(shapePoints, fromStop);
     lats[0] = from.getLat();
     lons[0] = from.getLon();
+
+    if (nextPoint != null) {
+      lats[sizeExtended - 1] = nextPoint.getLat();
+      lons[sizeExtended - 1] = nextPoint.getLon();
+    }
 
     EncodedPolylineBean bean = PolylineEncoder.createEncodings(lats, lons);
     return bean.getPoints();

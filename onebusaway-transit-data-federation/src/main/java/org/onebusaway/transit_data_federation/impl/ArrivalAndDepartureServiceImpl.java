@@ -431,13 +431,12 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   /****
    * Private Methods
-   * 
-   * @param findDepartures TODO
    ****/
 
   private List<Pair<ArrivalAndDepartureInstance>> getArrivalsAndDeparturesFromStopTimeInstancePairs(
       TargetTime targetTime, List<Pair<StopTimeInstance>> pairs, Date tFrom,
-      Date tTo, boolean applyRealTime, boolean findDepartures, boolean fillBlockLocations) {
+      Date tTo, boolean applyRealTime, boolean findDepartures,
+      boolean fillBlockLocations) {
 
     long frequencyOffsetTime = Math.max(targetTime.getTargetTime(),
         targetTime.getCurrentTime());

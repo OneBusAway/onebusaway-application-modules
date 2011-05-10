@@ -1,5 +1,6 @@
 package org.onebusaway.transit_data_federation.model;
 
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.ShapePoint;
@@ -75,6 +76,10 @@ public class ShapePoints implements Serializable {
 
   public double getDistTraveledForIndex(int index) {
     return distTraveled[index];
+  }
+  
+  public CoordinatePoint getPointForIndex(int index) {
+    return new CoordinatePoint(lats[index],lons[index]);
   }
 
   public void ensureDistTraveled() {

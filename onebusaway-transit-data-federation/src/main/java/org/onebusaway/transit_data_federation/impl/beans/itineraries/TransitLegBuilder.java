@@ -18,6 +18,8 @@ class TransitLegBuilder {
 
   private ArrivalAndDepartureInstance fromStop;
   private ArrivalAndDepartureInstance toStop;
+  
+  private BlockTripEntry nextTrip = null;
 
   public BlockInstance getBlockInstance() {
     return blockInstance;
@@ -81,6 +83,14 @@ class TransitLegBuilder {
 
   public void setToStop(ArrivalAndDepartureInstance toStop) {
     this.toStop = toStop;
+  }
+
+  public BlockTripEntry getNextTrip() {
+    return nextTrip;
+  }
+
+  public void setNextTrip(BlockTripEntry nextTrip) {
+    this.nextTrip = nextTrip;
   }
 
   public long getBestDepartureTime() {

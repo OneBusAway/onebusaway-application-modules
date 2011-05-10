@@ -63,6 +63,7 @@ import org.onebusaway.transit_data_federation.services.narrative.NarrativeServic
 import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.otp.TransitShedPathService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -578,6 +579,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       builder.setScheduledArrivalTime(scheduledTransitionTime);
       builder.setPredictedArrivalTime(predictedTransitionTime);
       builder.setToStop(null);
+      builder.setNextTrip(tripTo);
 
       getTransitLegBuilderAsLeg(builder, legs);
 
@@ -753,8 +755,20 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     if (builder.getToStop() != null)
       toStop = builder.getToStop().getBlockStopTime();
 
+    CoordinatePoint nextPoint = null;
+
+    BlockTripEntry nextBlockTrip = builder.getNextTrip();
+    if (nextBlockTrip != null) {
+      TripEntry nextTrip = nextBlockTrip.getTrip();
+      AgencyAndId nextShapeId = nextTrip.getShapeId();
+      if (nextShapeId != null) {
+        ShapePoints nextShapePoints = _shapePointService.getShapePointsForShapeId(nextShapeId);
+        nextPoint = nextShapePoints.getPointForIndex(0);
+      }
+    }
+
     if (fromStop == null && toStop == null) {
-      return ShapeSupport.getFullPath(shapePoints);
+      return ShapeSupport.getFullPath(shapePoints, nextPoint);
     }
 
     if (fromStop == null && toStop != null) {
@@ -764,7 +778,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     if (fromStop != null && toStop == null) {
       return ShapeSupport.getPartialPathFromStop(shapePoints,
-          fromStop.getStopTime());
+          fromStop.getStopTime(), nextPoint);
     }
 
     return ShapeSupport.getPartialPathBetweenStops(shapePoints,
@@ -793,6 +807,12 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     transitLeg.setFromStopSequence(fromStopTime.getSequence());
 
     leg.setFrom(fromStop.getStopLocation());
+
+    BlockLocation blockLocation = fromStopTimeInstance.getBlockLocation();
+    if (blockLocation != null) {
+      AgencyAndId vehicleId = blockLocation.getVehicleId();
+      transitLeg.setVehicleId(AgencyAndIdLibrary.convertToString(vehicleId));
+    }
   }
 
   private void applyToStopDetailsForTransitLeg(TransitLegBuilder builder,
@@ -812,6 +832,12 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     transitLeg.setToStopSequence(stopTime.getSequence());
 
     leg.setTo(toStop.getStopLocation());
+
+    BlockLocation blockLocation = toStopTimeInstance.getBlockLocation();
+    if (blockLocation != null) {
+      AgencyAndId vehicleId = blockLocation.getVehicleId();
+      transitLeg.setVehicleId(AgencyAndIdLibrary.convertToString(vehicleId));
+    }
   }
 
   private int extendStreetLeg(List<SPTEdge> edges, int currentIndex,

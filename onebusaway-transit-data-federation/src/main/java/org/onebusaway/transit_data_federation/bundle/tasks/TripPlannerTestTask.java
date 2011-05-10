@@ -74,7 +74,8 @@ public class TripPlannerTestTask implements Runnable {
       ConstraintsBean constraints = new ConstraintsBean();
       constraints.setMaxComputationTime(20000);
       constraints.setResultCount(3);
-
+      constraints.setUseRealTime(true);
+      
       for (Pair<CoordinatePoint> pair : points) {
         TransitLocationBean from = new TransitLocationBean(pair.getFirst());
         TransitLocationBean to = new TransitLocationBean(pair.getSecond());
