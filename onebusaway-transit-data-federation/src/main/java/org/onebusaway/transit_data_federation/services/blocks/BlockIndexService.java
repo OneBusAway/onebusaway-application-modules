@@ -23,7 +23,22 @@ public interface BlockIndexService {
       StopEntry stopEntry);
 
   public List<BlockSequenceIndex> getAllBlockSequenceIndices();
-  
+
+  /**
+   * For the specified stop pair, find all the {@link BlockSequenceIndex} that
+   * travel between the two stops. We will actually return a list of
+   * {@linkplain Pair pairs} of {@link BlockStopSequenceIndex}, where each block
+   * stop sequence index is a pointer into the underlying
+   * {@link BlockSequenceIndex} for the two stops.
+   * 
+   * Effectively, this method tells you all the blocks that travel between the
+   * two stops directly.
+   * 
+   * @param fromStop the source stop
+   * @param toStop the destination stop
+   * @return the list of all {@link BlockStopSequenceIndex} that link the two
+   *         stops directly
+   */
   public List<Pair<BlockStopSequenceIndex>> getBlockSequenceIndicesBetweenStops(
       StopEntry fromStop, StopEntry toStop);
 
@@ -57,8 +72,9 @@ public interface BlockIndexService {
 
   public List<FrequencyBlockStopTimeIndex> getFrequencyStopTimeIndicesForStop(
       StopEntry stopEntry);
-  
-  public List<FrequencyStopTripIndex> getFrequencyStopTripIndicesForStop(StopEntry stop);
+
+  public List<FrequencyStopTripIndex> getFrequencyStopTripIndicesForStop(
+      StopEntry stop);
 
   public List<Pair<FrequencyStopTripIndex>> getFrequencyIndicesBetweenStops(
       StopEntry fromStop, StopEntry toStop);
