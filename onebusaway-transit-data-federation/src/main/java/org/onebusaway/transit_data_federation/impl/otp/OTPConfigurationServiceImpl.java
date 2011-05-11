@@ -102,7 +102,7 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
 
     options.boardCost = 14 * 60;
     options.maxTransfers = 2;
-    options.minTransferTime = 60;
+    options.minTransferTime = 120;
 
     options.maxWalkDistance = 1500;
 

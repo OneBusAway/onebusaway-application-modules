@@ -51,7 +51,7 @@ class ApplePushNotificationServiceImpl implements ApplePushNotificationService {
   public void setKeystorePassword(String keystorePassword) {
     _keystorePassword = keystorePassword;
   }
-
+  
   public void setProduction(boolean production) {
     _production = production;
   }
@@ -97,6 +97,12 @@ class ApplePushNotificationServiceImpl implements ApplePushNotificationService {
    * {@link ApplePushNotificationService} Interface
    ****/
 
+  @Override
+  public boolean isProduction() {
+    return _production;
+  }
+
+  @Override
   public void pushNotification(String deviceToken, String payload) {
 
     if (_inactiveDevices.containsKey(deviceToken)) {

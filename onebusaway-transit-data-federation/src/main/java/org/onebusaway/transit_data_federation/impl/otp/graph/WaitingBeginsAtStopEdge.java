@@ -68,8 +68,11 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   public TraverseResult traverseBack(State s0, TraverseOptions options)
       throws NegativeWeightException {
 
+    State s1 = s0.incrementTimeInSeconds(-options.minTransferTime);
+    double w = options.minTransferTime * options.waitAtBeginningFactor;
+    
     EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-    return new TraverseResult(0, s0, narrative);
+    return new TraverseResult(w, s1, narrative);
   }
 
   @Override
@@ -107,7 +110,10 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
 
     TransferParent transfers = tpService.getTransferPatternsForStops(
         queryData.getTransferPatternData(), _stop, destStops);
-
+    
+    State s1 = s0.incrementTimeInSeconds(options.minTransferTime);
+    double w = options.minTransferTime * options.waitAtBeginningFactor;
+    
     for (TransferNode tree : transfers.getTransfers()) {
 
       TPState pathState = TPState.start(queryData, tree);
@@ -116,7 +122,7 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
       Vertex toVertex = new TPDepartureVertex(_context, pathState);
       EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
 
-      TraverseResult r = new TraverseResult(0, s0, narrative);
+      TraverseResult r = new TraverseResult(w, s1, narrative);
       results = r.addToExistingResultChain(results);
     }
 

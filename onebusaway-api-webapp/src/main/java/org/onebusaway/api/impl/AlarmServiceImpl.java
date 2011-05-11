@@ -1,5 +1,7 @@
 package org.onebusaway.api.impl;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -26,13 +28,14 @@ class AlarmServiceImpl implements AlarmService {
 
   private ConcurrentMap<String, AlarmDetails> _alarmsById = new ConcurrentHashMap<String, AlarmDetails>();
 
-  private ApplePushNotificationService _applePushNotificationService;
+  private List<ApplePushNotificationService> _applePushNotificationServices = Collections.emptyList();
 
   private String _callbackUrl;
 
-  @Autowired(required = false)
-  public void setApns(ApplePushNotificationService applePushNotificationService) {
-    _applePushNotificationService = applePushNotificationService;
+  @Autowired
+  public void setApplePushNotificationServices(
+      List<ApplePushNotificationService> applePushNotificationServices) {
+    _applePushNotificationServices = applePushNotificationServices;
   }
 
   public String getCallbackUrl() {
@@ -58,7 +61,7 @@ class AlarmServiceImpl implements AlarmService {
       String callbackUrl = getCallbackUrl();
       alarm.setUrl(callbackUrl);
 
-      if (_applePushNotificationService == null)
+      if (_applePushNotificationServices.isEmpty())
         _log.warn("apple push notification alarm set but not ApplePushNotificationService was configured");
 
       return new ApnsAlarmDetails(deviceId, data);
@@ -88,15 +91,20 @@ class AlarmServiceImpl implements AlarmService {
 
       ApnsAlarmDetails apnsDetails = (ApnsAlarmDetails) details;
 
-      if (_applePushNotificationService == null) {
-        _log.warn("apple push notification alarm fired but not ApplePushNotificationService was configured");
-        return;
+      JSONObject data = getDataAsJson(apnsDetails.getData());
+
+      String payload = getDataAsApnsPayload(alarmId, data);
+      boolean isProduction = isProduction(data);
+
+      for (ApplePushNotificationService service : _applePushNotificationServices) {
+        if (service.isProduction() == isProduction) {
+          service.pushNotification(apnsDetails.getDeviceToken(), payload);
+          return;
+        }
       }
 
-      String payload = getDataAsApnsPayload(alarmId, apnsDetails.getData());
-
-      _applePushNotificationService.pushNotification(
-          apnsDetails.getDeviceToken(), payload);
+      _log.warn("no appropriate ApplePushNotificationService found for alarm: production="
+          + isProduction);
     }
   }
 
@@ -109,30 +117,46 @@ class AlarmServiceImpl implements AlarmService {
    * Private Methods
    ****/
 
-  private String getDataAsApnsPayload(String alarmId, String data) {
+  private JSONObject getDataAsJson(String data) {
+    if (data == null)
+      return new JSONObject();
+    try {
+      return new JSONObject(data);
+    } catch (JSONException e) {
+      throw new InvalidArgumentServiceException("data", e.getMessage());
+    }
+  }
+
+  private String getDataAsApnsPayload(String alarmId, JSONObject data) {
 
     PayloadBuilder b = PayloadBuilder.newPayload();
 
     b.customField("alarmId", alarmId);
 
-    if (data == null)
-      return b.build();
-
     try {
-      JSONObject json = new JSONObject(data);
-      if (json.has("actionKey"))
-        b.actionKey(json.getString("actionKey"));
-      if (json.has("alertBody"))
-        b.alertBody(json.getString("alertBody"));
-      if (json.has("badge"))
-        b.badge(json.getInt("badge"));
-      if (json.has("sound"))
-        b.sound(json.getString("sound"));
+      if (data.has("actionKey"))
+        b.actionKey(data.getString("actionKey"));
+      if (data.has("alertBody"))
+        b.alertBody(data.getString("alertBody"));
+      if (data.has("badge"))
+        b.badge(data.getInt("badge"));
+      if (data.has("sound"))
+        b.sound(data.getString("sound"));
     } catch (JSONException e) {
       throw new InvalidArgumentServiceException("data", e.getMessage());
     }
 
     return b.build();
+  }
+
+  private boolean isProduction(JSONObject data) {
+    try {
+      if (data.has("production"))
+        return data.getBoolean("production");
+      return false;
+    } catch (JSONException e) {
+      throw new InvalidArgumentServiceException("data", e.getMessage());
+    }
   }
 
   private static class ApnsAlarmDetails implements AlarmDetails {
