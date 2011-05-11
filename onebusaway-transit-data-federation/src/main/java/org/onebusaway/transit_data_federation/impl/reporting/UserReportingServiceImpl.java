@@ -10,12 +10,15 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
+import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
+import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
+import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
@@ -33,6 +36,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -325,6 +330,13 @@ class UserReportingServiceImpl implements UserReportingService {
     return _userReportingDao.getAllTripProblemReportLabels();
   }
 
+  @Override
+  public void reportProblemWithPlannedTrip(TransitLocationBean from,
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints,
+      PlannedTripProblemReportBean report) {
+
+  }
+
   /****
    * Private Methods
    ****/
@@ -426,9 +438,8 @@ class UserReportingServiceImpl implements UserReportingService {
         query.setServiceDate(record.getServiceDate());
         query.setVehicleId(vehicleId);
         query.setTime(record.getTime());
-        
-        ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(
-            query);
+
+        ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
         if (instance != null) {
           StopTimeInstance sti = new StopTimeInstance(

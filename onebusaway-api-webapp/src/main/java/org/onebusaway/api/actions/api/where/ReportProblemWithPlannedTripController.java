@@ -4,35 +4,25 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-
-import net.sf.json.JSONObject;
-import net.sf.json.JsonConfig;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.api.model.transit.ItineraryV2BeanFactory;
-import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.ItineraryV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.LegV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.StreetLegV2Bean;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.presentation.impl.StackInterceptor.AddToStack;
+import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
-import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
-import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
-@AddToStack("constraints")
-public class PlanTripController extends ApiActionSupport {
+@AddToStack({"constraints", "problemReport"})
+public class ReportProblemWithPlannedTripController extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
 
@@ -50,7 +40,9 @@ public class PlanTripController extends ApiActionSupport {
 
   private ConstraintsBean _constraints = new ConstraintsBean();
 
-  public PlanTripController() {
+  private PlannedTripProblemReportBean _problemReport = new PlannedTripProblemReportBean();
+
+  public ReportProblemWithPlannedTripController() {
     super(V2);
   }
 
@@ -118,6 +110,14 @@ public class PlanTripController extends ApiActionSupport {
     _constraints.setModes(new HashSet<String>(modes));
   }
 
+  public PlannedTripProblemReportBean getProblemReport() {
+    return _problemReport;
+  }
+
+  public void setProblemReport(PlannedTripProblemReportBean problemReport) {
+    _problemReport = problemReport;
+  }
+
   public DefaultHttpHeaders create() throws IOException, ServiceException {
     return index();
   }
@@ -133,36 +133,12 @@ public class PlanTripController extends ApiActionSupport {
     ItineraryV2BeanFactory itineraryFactory = new ItineraryV2BeanFactory(
         factory);
 
-    parseSelectedItinerary(itineraryFactory, _includeSelectedItinerary,
-        _constraints);
+    PlanTripController.parseSelectedItinerary(itineraryFactory,
+        _includeSelectedItinerary, _constraints);
 
-    ItinerariesBean itineraries = _transitDataService.getItinerariesBetween(
-        _from, _to, _time, _constraints);
+    _transitDataService.reportProblemWithPlannedTrip(_from, _to, _time,
+        _constraints, _problemReport);
 
-    ItinerariesV2Bean bean = itineraryFactory.getItineraries(itineraries);
-    return setOkResponse(factory.entry(bean));
-  }
-
-  static void parseSelectedItinerary(ItineraryV2BeanFactory itineraryFactory,
-      String includeSelectedItinerary, ConstraintsBean constraints) {
-
-    if (includeSelectedItinerary == null || includeSelectedItinerary.isEmpty())
-      return;
-
-    ItineraryV2Bean bean = new ItineraryV2Bean();
-    JSONObject jsonObject = JSONObject.fromObject(includeSelectedItinerary);
-
-    JsonConfig config = new JsonConfig();
-
-    Map<Object, Object> classMap = new HashMap<Object, Object>();
-    classMap.put("legs", LegV2Bean.class);
-    classMap.put("streetLegs", StreetLegV2Bean.class);
-    classMap.put("situationIds", String.class);
-    config.setClassMap(classMap);
-
-    JSONObject.toBean(jsonObject, bean, config);
-
-    ItineraryBean itinerary = itineraryFactory.reverseItinerary(bean);
-    constraints.setSelectedItinerary(itinerary);
+    return setOkResponse(new Object());
   }
 }

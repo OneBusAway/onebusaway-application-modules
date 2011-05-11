@@ -40,6 +40,7 @@ import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
@@ -324,14 +325,13 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByEntityIdMethod
   public EncodedPolylineBean getShapeForId(String shapeId);
-  
+
   /**
    * @param agencyId
    * @return the list of all shape ids associated with the specified agency
    */
   @FederatedByAgencyIdMethod
   public ListBean<String> getShapeIdsForAgencyId(String agencyId);
-
 
   @FederatedByCoordinatePointsMethod(propertyExpressions = "mostRecentLocation")
   public ListBean<CurrentVehicleEstimateBean> getCurrentVehicleEstimates(
@@ -354,6 +354,11 @@ public interface TransitDataService extends FederatedService {
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
       TransitLocationBean to, long targetTime, ConstraintsBean constraints)
       throws ServiceException;
+
+  @FederatedByCoordinatePointsMethod(arguments = {0, 1}, propertyExpressions = {
+      "location", "location"})
+  public void reportProblemWithPlannedTrip(TransitLocationBean from,
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints, PlannedTripProblemReportBean report);
 
   @FederatedByBoundsMethod
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,

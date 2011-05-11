@@ -44,6 +44,7 @@ import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
@@ -406,7 +407,7 @@ class TransitDataServiceImpl implements TransitDataService {
     AgencyAndId id = convertAgencyAndId(shapeId);
     return _shapeBeanService.getPolylineForShapeId(id);
   }
-  
+
   @Override
   public ListBean<String> getShapeIdsForAgencyId(String agencyId) {
     return _shapeBeanService.getShapeIdsForAgencyId(agencyId);
@@ -424,6 +425,14 @@ class TransitDataServiceImpl implements TransitDataService {
       throws ServiceException {
     return _itinerariesBeanService.getItinerariesBetween(from, to, targetTime,
         constraints);
+  }
+
+  @Override
+  public void reportProblemWithPlannedTrip(TransitLocationBean from,
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints,
+      PlannedTripProblemReportBean report) {
+    _userReportingService.reportProblemWithPlannedTrip(from, to, targetTime,
+        constraints, report);
   }
 
   @Override
