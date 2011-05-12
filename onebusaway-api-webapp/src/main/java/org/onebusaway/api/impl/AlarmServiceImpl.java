@@ -32,7 +32,7 @@ class AlarmServiceImpl implements AlarmService {
 
   private String _callbackUrl;
 
-  @Autowired
+  @Autowired(required=false)
   public void setApplePushNotificationServices(
       List<ApplePushNotificationService> applePushNotificationServices) {
     _applePushNotificationServices = applePushNotificationServices;
