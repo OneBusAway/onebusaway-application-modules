@@ -89,7 +89,6 @@ import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
-import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
 import org.onebusaway.transit_data_federation.services.realtime.CurrentVehicleEstimationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -145,9 +144,6 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private ItinerariesBeanService _itinerariesBeanService;
-
-  @Autowired
-  private OneBusAwayService _oneBusAwayService;
 
   @Autowired
   private ShapeBeanService _shapeBeanService;
@@ -454,7 +450,7 @@ class TransitDataServiceImpl implements TransitDataService {
       ConstraintsBean constraints,
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException {
-    return _oneBusAwayService.getLocalPaths(constraints, minTravelTimeToStops,
+    return _itinerariesBeanService.getLocalPaths(constraints, minTravelTimeToStops,
         localResults);
   }
 
