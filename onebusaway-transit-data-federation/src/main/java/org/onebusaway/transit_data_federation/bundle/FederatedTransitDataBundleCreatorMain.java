@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +18,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
+import org.opentripplanner.graph_builder.impl.osm.FileBasedOpenStreetMapProviderImpl;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
@@ -48,6 +48,8 @@ public class FederatedTransitDataBundleCreatorMain {
 
   private static final String ARG_ADDITIONAL_RESOURCES_DIRECTORY = "additionalResourcesDirectory";
 
+  private static final String ARG_OSM = "osm";
+
   public static void main(String[] args) throws IOException,
       ClassNotFoundException {
     FederatedTransitDataBundleCreatorMain main = new FederatedTransitDataBundleCreatorMain();
@@ -73,26 +75,36 @@ public class FederatedTransitDataBundleCreatorMain {
 
       FederatedTransitDataBundleCreator creator = new FederatedTransitDataBundleCreator();
 
-      File firstPath = new File(remainingArgs[0]);
+      Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
+      creator.setContextBeans(beans);
 
-      if (remainingArgs.length == 2
-          && (firstPath.isDirectory() || firstPath.getName().endsWith(".zip"))) {
+      List<GtfsBundle> gtfsBundles = new ArrayList<GtfsBundle>();
+      List<File> contextPaths = new ArrayList<File>();
 
-        GtfsBundle gtfsBundle = new GtfsBundle();
-        gtfsBundle.setPath(firstPath);
+      for (int i = 0; i < remainingArgs.length - 1; i++) {
+        File path = new File(remainingArgs[i]);
+        if (path.isDirectory() || path.getName().endsWith(".zip")) {
+          GtfsBundle gtfsBundle = new GtfsBundle();
+          gtfsBundle.setPath(path);
+          gtfsBundles.add(gtfsBundle);
+        } else {
+          contextPaths.add(path);
+        }
+      }
 
-        BeanDefinitionBuilder gtfsBundles = BeanDefinitionBuilder.genericBeanDefinition(GtfsBundles.class);
-        gtfsBundles.addPropertyValue("bundles", Arrays.asList(gtfsBundle));
+      if (!gtfsBundles.isEmpty()) {
+        BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(GtfsBundles.class);
+        bean.addPropertyValue("bundles", gtfsBundles);
+        beans.put("gtfs-bundles", bean.getBeanDefinition());
+      }
 
-        Map<String, BeanDefinition> beans = new HashMap<String, BeanDefinition>();
-        beans.put("gtfs-bundles", gtfsBundles.getBeanDefinition());
-        creator.setContextBeans(beans);
+      creator.setContextPaths(contextPaths);
 
-      } else {
-        List<File> contextPaths = new ArrayList<File>();
-        for (int i = 0; i < remainingArgs.length - 1; i++)
-          contextPaths.add(new File(remainingArgs[i]));
-        creator.setContextPaths(contextPaths);
+      if (commandLine.hasOption(ARG_OSM)) {
+        File osmPath = new File(commandLine.getOptionValue(ARG_OSM));
+        BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(FileBasedOpenStreetMapProviderImpl.class);
+        bean.addPropertyValue("path", osmPath);
+        beans.put("osmProvider", bean.getBeanDefinition());
       }
 
       File outputPath = new File(remainingArgs[remainingArgs.length - 1]);
@@ -123,7 +135,7 @@ public class FederatedTransitDataBundleCreatorMain {
           System.setProperty(propName, propValue);
         }
       }
-      
+
       /**
        * Optionally override any system properties (ok this duplicates existing
        * functionality, yes, but it allows for -D arguments after the main
@@ -169,13 +181,14 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_BUNDLE_KEY, true, "");
     options.addOption(ARG_RANDOMIZE_CACHE_DIR, false, "");
     options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
+    options.addOption(ARG_OSM, true, "");
 
     Option dOption = new Option("D", "use value for given property");
     dOption.setArgName("property=value");
     dOption.setArgs(2);
     dOption.setValueSeparator('=');
     options.addOption(dOption);
-    
+
     Option pOption = new Option("P", "use value for given property");
     pOption.setArgName("beanName.beanProperty=value");
     pOption.setArgs(2);
