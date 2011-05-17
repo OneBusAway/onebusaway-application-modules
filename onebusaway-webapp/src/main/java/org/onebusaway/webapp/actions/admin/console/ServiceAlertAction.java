@@ -24,9 +24,9 @@ import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.thoughtworks.xstream.XStream;
 
@@ -36,7 +36,7 @@ import com.thoughtworks.xstream.XStream;
     @Result(type = "redirectAction", name = "deleteSuccess", params = {
         "actionName", "service-alerts!agency", "agencyId", "${agencyId}",
         "parse", "true"})})
-public class ServiceAlertAction extends ActionSupport implements
+public class ServiceAlertAction extends OneBusAwayActionSupport implements
     ModelDriven<SituationBean> {
 
   private static final long serialVersionUID = 1L;
@@ -100,7 +100,7 @@ public class ServiceAlertAction extends ActionSupport implements
     _model.setPersonnelReason(string(_model.getPersonnelReason()));
     _model.setMiscellaneousReason(string(_model.getMiscellaneousReason()));
     _model.setUndefinedReason(string(_model.getUndefinedReason()));
-    
+
     if (_raw != null && !_raw.trim().isEmpty()) {
       SituationBean rawSituation = getStringAsRawSituation(_raw);
       _model.setAffects(rawSituation.getAffects());
@@ -188,7 +188,7 @@ public class ServiceAlertAction extends ActionSupport implements
     xstream.alias("stop", SituationAffectedStopBean.class);
     xstream.alias("vehicleJourney", SituationAffectedVehicleJourneyBean.class);
     xstream.alias("call", SituationAffectedCallBean.class);
-    xstream.alias("application",SituationAffectedApplicationBean.class);
+    xstream.alias("application", SituationAffectedApplicationBean.class);
     xstream.alias("consequence", SituationConsequenceBean.class);
     xstream.alias("conditionDetails", SituationConditionDetailsBean.class);
     xstream.alias("encodedPolyline", EncodedPolylineBean.class);

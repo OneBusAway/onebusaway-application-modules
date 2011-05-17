@@ -24,12 +24,12 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
-public class BlockAction extends ActionSupport {
+public class BlockAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

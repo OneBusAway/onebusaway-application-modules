@@ -7,16 +7,16 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.providers.encoding.PasswordEncoder;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
 @Results( {@Result(type = "redirectAction", name = "userCreated", params = {
     "actionName", "user-for-id", "id", "${userId}", "parse", "true"})})
-public class CreateLoginAction extends ActionSupport {
+public class CreateLoginAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

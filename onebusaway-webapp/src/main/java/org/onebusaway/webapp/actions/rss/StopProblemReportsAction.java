@@ -18,9 +18,9 @@ import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndContentImpl;
@@ -30,7 +30,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
 
 @Results({@Result(type = "rome")})
-public class StopProblemReportsAction extends ActionSupport {
+public class StopProblemReportsAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

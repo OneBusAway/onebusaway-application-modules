@@ -11,15 +11,14 @@ import org.apache.struts2.util.ServletContextAware;
 import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.CurrentUserService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
-
 @Results(value = {@Result(type = "stream", params = {
     "contentType", "contentType"})})
-public class TccStudyRegistrationAction extends ActionSupport implements
+public class TccStudyRegistrationAction extends OneBusAwayActionSupport implements
     ServletContextAware {
 
   private static Logger _log = LoggerFactory.getLogger(TccStudyRegistrationAction.class);

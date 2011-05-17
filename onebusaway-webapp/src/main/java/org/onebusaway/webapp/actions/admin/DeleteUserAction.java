@@ -6,12 +6,11 @@ import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.services.CurrentUserService;
 import org.onebusaway.users.services.UserService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
-
 @Results( {@Result(type = "redirectAction", params = {"actionName", "index"})})
-public class DeleteUserAction extends ActionSupport {
+public class DeleteUserAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

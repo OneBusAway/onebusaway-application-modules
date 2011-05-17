@@ -1,18 +1,17 @@
 package org.onebusaway.api.actions.api;
 
+import java.util.ArrayList;
+
+import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.ResponseCodes;
+import org.onebusaway.api.actions.OneBusAwayApiActionSupport;
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 
-import org.apache.struts2.rest.DefaultHttpHeaders;
-
-import java.util.ArrayList;
-
-public class ApiActionSupport extends ActionSupport implements
+public class ApiActionSupport extends OneBusAwayApiActionSupport implements
     ModelDriven<ResponseBean> {
 
   private static final long serialVersionUID = 1L;

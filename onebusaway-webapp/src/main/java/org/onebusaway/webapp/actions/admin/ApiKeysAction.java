@@ -19,9 +19,9 @@ import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserPropertiesService;
 import org.onebusaway.users.services.UserService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
@@ -32,7 +32,7 @@ import com.opensymphony.xwork2.validator.annotations.Validations;
         "true"}),
     @Result(type = "redirectAction", name = "list", params = {
         "actionName", "api-keys"})})
-public class ApiKeysAction extends ActionSupport implements
+public class ApiKeysAction extends OneBusAwayActionSupport implements
     ModelDriven<ApiKeyModel> {
 
   private static final long serialVersionUID = 1L;

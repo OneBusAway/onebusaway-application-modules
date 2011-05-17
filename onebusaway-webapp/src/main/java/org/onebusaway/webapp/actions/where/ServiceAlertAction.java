@@ -10,12 +10,12 @@ import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBea
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.services.CurrentUserService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 
-public class ServiceAlertAction extends ActionSupport {
+public class ServiceAlertAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

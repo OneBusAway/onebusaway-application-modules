@@ -4,13 +4,12 @@ import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.services.UserService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.ActionSupport;
 
 @Results( {@Result(type = "redirectAction", params = {
     "actionName", "user-for-id", "id", "${userId}", "parse", "true"})})
-public class SetAdminRoleAction extends ActionSupport {
+public class SetAdminRoleAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

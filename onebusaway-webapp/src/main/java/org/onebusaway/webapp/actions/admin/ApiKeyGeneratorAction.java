@@ -1,19 +1,18 @@
 package org.onebusaway.webapp.actions.admin;
 
+import java.util.UUID;
+
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserPropertiesService;
 import org.onebusaway.users.services.UserService;
-
-import com.opensymphony.xwork2.ActionSupport;
-import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
-
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.UUID;
+import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
-public class ApiKeyGeneratorAction extends ActionSupport {
+public class ApiKeyGeneratorAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

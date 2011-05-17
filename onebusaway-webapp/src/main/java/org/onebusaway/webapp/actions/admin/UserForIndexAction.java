@@ -7,9 +7,9 @@ import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 
 @Results({
@@ -18,7 +18,7 @@ import com.opensymphony.xwork2.ModelDriven;
     @Result(name = "changePasswordSubmit", type = "redirectAction", params = {
         "actionName", "user-for-index", "type", "${type}", "id", "${id}",
         "parse", "true"})})
-public class UserForIndexAction extends ActionSupport implements
+public class UserForIndexAction extends OneBusAwayActionSupport implements
     ModelDriven<UserBean> {
 
   private static final long serialVersionUID = 1L;

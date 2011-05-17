@@ -7,16 +7,16 @@ import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
-import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
+import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
-public class StopProblemReportSummariesAction extends ActionSupport {
+public class StopProblemReportSummariesAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

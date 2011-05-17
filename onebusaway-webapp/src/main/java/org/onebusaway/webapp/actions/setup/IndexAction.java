@@ -1,5 +1,8 @@
 package org.onebusaway.webapp.actions.setup;
 
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.onebusaway.presentation.impl.users.SetupAction;
 import org.onebusaway.presentation.services.InitialSetupService;
 import org.onebusaway.users.model.User;
@@ -7,21 +10,17 @@ import org.onebusaway.users.model.UserIndex;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserService;
-
-import com.opensymphony.xwork2.ActionSupport;
-import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
-import com.opensymphony.xwork2.validator.annotations.Validations;
-
-import org.apache.struts2.convention.annotation.Result;
-import org.apache.struts2.convention.annotation.Results;
-import org.apache.struts2.interceptor.validation.SkipValidation;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.providers.encoding.PasswordEncoder;
+
+import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
+import com.opensymphony.xwork2.validator.annotations.Validations;
 
 @SetupAction(onlyAllowIfNotSetup=true)
 @Results( {@Result(type = "redirectAction", name = "redirect", params = {
     "namespace", "/admin", "actionName", "index"})})
-public class IndexAction extends ActionSupport {
+public class IndexAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 

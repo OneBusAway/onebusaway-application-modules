@@ -20,14 +20,14 @@ import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.utility.DateLibrary;
+import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.conversion.annotations.Conversion;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
 @Conversion
-public class ScheduleAction extends ActionSupport {
+public class ScheduleAction extends OneBusAwayActionSupport {
 
   private static final long serialVersionUID = 1L;
 
