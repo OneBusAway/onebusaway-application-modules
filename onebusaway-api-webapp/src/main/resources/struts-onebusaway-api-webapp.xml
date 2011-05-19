@@ -23,7 +23,7 @@
     <constant name="struts.rest.handlerOverride.json" value="myJson" />
     <constant name="struts.rest.handlerOverride.csv" value="myCsv" />
     
-    <package name="rest-custom" extends="rest-default" namespace="api">
+    <package name="rest-custom" extends="rest-default">
 
         <result-types>
             <result-type name="xml" class="org.onebusaway.api.impl.XmlResult" />
