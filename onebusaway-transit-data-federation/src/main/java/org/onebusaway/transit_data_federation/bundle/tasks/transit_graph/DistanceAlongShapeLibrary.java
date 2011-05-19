@@ -262,20 +262,36 @@ public class DistanceAlongShapeLibrary {
 
     StringBuilder b = new StringBuilder();
     int index = 0;
+    
+    b.append("# potential assignments:\n");
+    b.append("# index stopId stopLat stopLon\n");
+    b.append("#   distanceAlongShapeA locationOnShapeLatA locationOnShapeLonA shapePointIndexA\n");
+    b.append("#   ...\n");
     for (List<PointAndIndex> possible : possibleAssignments) {
+      StopTimeEntryImpl stopTime = stopTimes.get(index);
+      StopEntryImpl stop = stopTime.getStop();
       b.append(index);
+      b.append(' ');
+      b.append(stop.getId());
+      b.append(' ');
+      b.append(stop.getStopLat());
+      b.append(' ');
+      b.append(stop.getStopLon());
+      b.append('\n');
+      
       for (PointAndIndex pindex : possible) {
-        b.append(' ');
+        b.append("  ");
         b.append(pindex.distanceAlongShape);
         b.append(' ');
         b.append(projection.reverse(pindex.point));
         b.append(' ');
         b.append(pindex.index);
+        b.append("\n");
       }
-      b.append("\n");
+      
       index++;
     }
-    _log.error("potential assignments:\n" + b.toString());
+    _log.error(b.toString());
 
     b = new StringBuilder();
     index = 0;
