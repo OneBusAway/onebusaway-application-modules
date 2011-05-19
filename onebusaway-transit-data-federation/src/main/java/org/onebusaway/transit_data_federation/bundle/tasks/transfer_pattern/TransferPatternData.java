@@ -13,6 +13,8 @@ public class TransferPatternData {
   private final Map<Pair<StopEntry>, TransferNode> transfers = new HashMap<Pair<StopEntry>, TransferNode>();
 
   private final Map<StopEntry, HubNode> hubs = new HashMap<StopEntry, HubNode>();
+  
+  private final Map<StopEntry, TransferParent> hubNodes = new HashMap<StopEntry, TransferParent>();
 
   public Collection<TransferNode> getTransfers() {
     return transfers.values();
@@ -46,5 +48,13 @@ public class TransferPatternData {
   public void clearMinRemainingWeights() {
     for (TransferNode node : transfers.values())
       node.setMinRemainingWeight(-1);
+  }
+
+  public TransferParent getNodesForHubStop(StopEntry hubStop) {
+    return hubNodes.get(hubStop);
+  }
+
+  public void setNodesForHubStop(StopEntry hubStop, TransferParent nodes) {
+    hubNodes.put(hubStop,nodes);
   }
 }

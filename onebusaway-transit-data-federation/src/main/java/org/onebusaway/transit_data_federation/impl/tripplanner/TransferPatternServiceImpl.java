@@ -147,8 +147,13 @@ class TransferPatternServiceImpl implements TransferPatternService {
       StopEntry hubStop = entry.getKey();
       List<TransferParent> parents = entry.getValue();
 
-      TransferParent nodes = getTransferPatternsForStopsInternal(
-          transferPatternData, hubStop, stopsTo);
+      TransferParent nodes = transferPatternData.getNodesForHubStop(hubStop);
+
+      if (nodes == null) {
+        nodes = getTransferPatternsForStopsInternal(transferPatternData,
+            hubStop, stopsTo);
+        transferPatternData.setNodesForHubStop(hubStop, nodes);
+      }
 
       for (TransferParent parent : parents) {
         for (TransferNode node : nodes.getTransfers()) {
