@@ -22,7 +22,7 @@ public class OneBusAwayActionSupport extends ActionSupport {
     _configurationService = configurationService;
   }
 
-  public void setRefreshConfigurat(boolean refreshConfiguration) {
+  public void setRefreshConfiguration(boolean refreshConfiguration) {
     _refreshConfiguration = refreshConfiguration;
   }
 
