@@ -25,9 +25,10 @@ import com.opensymphony.xwork2.ActionProxy;
     @Result(location = "/WEB-INF/content/p/index.jspx"),
     @Result(name = "notFound", location = "/WEB-INF/content/p/index-notFound.jspx"),
     @Result(name = "raw", type = "stream", params = {
-        "contentType", "contentType"})})
+        "contentType", "contentType"}),
+    @Result(name = "404", type = "httpheader", params = {
+        "error", "404", "errorMessage", "resource not found"})})
 @Namespace("/p/*")
-
 public class IndexAction extends AbstractAction {
 
   private static final long serialVersionUID = 1L;
@@ -105,7 +106,7 @@ public class IndexAction extends AbstractAction {
   }
 
   public String attachment() throws Exception {
-    
+
     ActionContext context = ActionContext.getContext();
     ActionInvocation invocation = context.getActionInvocation();
     ActionProxy proxy = invocation.getProxy();
@@ -113,27 +114,27 @@ public class IndexAction extends AbstractAction {
     String namespace = "Main";
     String name = proxy.getActionName();
     int index = name.indexOf('@');
-    if( index == -1)
+    if (index == -1)
       return INPUT;
-    String pageName = name.substring(0,index);
-    name = name.substring(index+1);
+    String pageName = name.substring(0, index);
+    name = name.substring(index + 1);
 
-    WikiAttachmentContent content = _wikiDocumentService.getWikiAttachmentContent(namespace, pageName, name, getLocale(), _forceRefresh);
+    WikiAttachmentContent content = _wikiDocumentService.getWikiAttachmentContent(
+        namespace, pageName, name, getLocale(), _forceRefresh);
 
-    if( content != null) {
-      _inputStream = content.getContent();
-      _contentType = content.getContentType();
-      return "raw";
-    }
-    
-    return INPUT;
+    if (content == null)
+      return "404";
+
+    _inputStream = content.getContent();
+    _contentType = content.getContentType();
+    return "raw";
   }
-  
-  @CacheControl(lastModifiedMethod = "getLastModified", maxAge=60*60)
+
+  @CacheControl(lastModifiedMethod = "getLastModified", maxAge = 60 * 60)
   public String raw() throws Exception {
 
     ensureWikiPage();
-    
+
     String content = "";
 
     if (_page != null)
@@ -148,7 +149,7 @@ public class IndexAction extends AbstractAction {
   public String execute() throws Exception {
 
     ensureWikiPage();
-    
+
     System.out.println("wiki=" + (_page == null ? "" : _page.getName()));
 
     if (_page == null) {
@@ -186,7 +187,8 @@ public class IndexAction extends AbstractAction {
     String namespace = "Main";
     String name = proxy.getActionName();
 
-    _page = _wikiDocumentService.getWikiPage(namespace, name, getLocale(), _forceRefresh);
+    _page = _wikiDocumentService.getWikiPage(namespace, name, getLocale(),
+        _forceRefresh);
   }
 
 }
