@@ -43,6 +43,8 @@ class TransferPatternServiceImpl implements TransferPatternService {
 
   private TransitGraphDao _transitGraphDao;
 
+  private boolean _enabled = true;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -52,12 +54,19 @@ class TransferPatternServiceImpl implements TransferPatternService {
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
   }
+  
+  public void setEnabled(boolean enabled) {
+    _enabled = enabled;
+  }
 
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.TRANSFER_PATTERNS)
   public void setup() throws IOException, ClassNotFoundException {
 
     _transferPatternsByStop.clear();
+    
+    if( ! _enabled )
+      return;
 
     File path = _bundle.getSerializedTransferPatternsPath();
 
