@@ -112,7 +112,7 @@ public class IndexAction extends AbstractAction {
 
     String namespace = "Main";
     String name = proxy.getActionName();
-    int index = name.indexOf('-');
+    int index = name.indexOf('@');
     if( index == -1)
       return INPUT;
     String pageName = name.substring(0,index);
