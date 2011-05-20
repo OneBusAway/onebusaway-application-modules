@@ -10,6 +10,7 @@ import org.onebusaway.presentation.impl.AgencyWithCoverageBeanComparator;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
 
@@ -22,6 +23,7 @@ public class AgenciesAction extends OneBusAwayActionSupport implements
 
   private List<AgencyWithCoverageBean> _model;
 
+  @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
   }

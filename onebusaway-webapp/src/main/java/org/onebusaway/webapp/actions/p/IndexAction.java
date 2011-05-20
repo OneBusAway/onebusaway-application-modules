@@ -150,8 +150,6 @@ public class IndexAction extends AbstractAction {
 
     ensureWikiPage();
 
-    System.out.println("wiki=" + (_page == null ? "" : _page.getName()));
-
     if (_page == null) {
 
       ActionContext context = ActionContext.getContext();
