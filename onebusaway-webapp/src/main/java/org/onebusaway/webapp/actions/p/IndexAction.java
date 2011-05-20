@@ -9,6 +9,7 @@ import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.presentation.services.cachecontrol.CacheControl;
 import org.onebusaway.webapp.actions.AbstractAction;
+import org.onebusaway.wiki.api.WikiAttachmentContent;
 import org.onebusaway.wiki.api.WikiDocumentService;
 import org.onebusaway.wiki.api.WikiException;
 import org.onebusaway.wiki.api.WikiPage;
@@ -103,13 +104,36 @@ public class IndexAction extends AbstractAction {
     return _page.getLastModified();
   }
 
+  public String attachment() throws Exception {
+    
+    ActionContext context = ActionContext.getContext();
+    ActionInvocation invocation = context.getActionInvocation();
+    ActionProxy proxy = invocation.getProxy();
+
+    String namespace = "Main";
+    String name = proxy.getActionName();
+    int index = name.indexOf('-');
+    if( index == -1)
+      return INPUT;
+    String pageName = name.substring(0,index);
+    name = name.substring(index+1);
+
+    WikiAttachmentContent content = _wikiDocumentService.getWikiAttachmentContent(namespace, pageName, name, getLocale(), _forceRefresh);
+
+    if( content != null) {
+      _inputStream = content.getContent();
+      _contentType = content.getContentType();
+      return "raw";
+    }
+    
+    return INPUT;
+  }
+  
   @CacheControl(lastModifiedMethod = "getLastModified", maxAge=60*60)
   public String raw() throws Exception {
 
     ensureWikiPage();
     
-    System.out.println("raw=" + (_page == null ? "" : _page.getName()));
-
     String content = "";
 
     if (_page != null)
