@@ -15,7 +15,7 @@
   the License.
 -->
 <html xmlns:jsp="http://java.sun.com/JSP/Page"
-    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags" xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
 
 <jsp:output doctype-root-element="html"
     doctype-public="-//W3C//DTD XHTML 1.1 Transitional//EN"
@@ -23,8 +23,13 @@
     
 <jsp:directive.page contentType="text/html" />
 
-<jsp:include page="/WEB-INF/content/snippets/wrapper-header-standard.jspx">
-	<jsp:param name="selectedNavLink" value="home" />
-</jsp:include>
+<s:set var="template_override" value="configuration['webapp_template_override']"/>
+<s:if test="#template_override != null">
+    <c:set var="template_override"><s:property value="#template_override"/></c:set>
+    <jsp:include page="${template_override}"/>
+</s:if>
+<s:else>
+  <jsp:include page="/WEB-INF/content/snippets/wrapper-header-standard.jspx"/>
+</s:else>
     
 </html>

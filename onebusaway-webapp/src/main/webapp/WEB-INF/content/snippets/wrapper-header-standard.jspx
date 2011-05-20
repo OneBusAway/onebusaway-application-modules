@@ -17,6 +17,7 @@
 <jsp:root version="1.2"
 	xmlns:jsp="http://java.sun.com/JSP/Page"
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:s="/struts-tags"
 	xmlns:oba="/oba-tags"
 	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
 <jsp:directive.page contentType="text/html" />
@@ -38,37 +39,40 @@
 
 <ul id="mainNav" class="tabs">
 
+<s:set var="uri">${pageContext.request.requestURI}</s:set>
+<s:set var="contextPath">${pageContext.request.contextPath}</s:set>
+
 <jsp:element name="li">
   <jsp:attribute name="class">
-    <c:if test="${param.selectedNavLink == 'home'}">current</c:if>
+    <s:if test="#uri.startsWith(#contextPath + '/index') or #uri == #contextPath + '/'">current</s:if>
   </jsp:attribute>
   <a href="${pageContext.request.contextPath}/">Home</a>
 </jsp:element>
 
 <jsp:element name="li">
   <jsp:attribute name="class">
-    <c:if test="${param.selectedNavLink == 'tools'}">current</c:if>
+    <s:if test="#uri.startsWith(#contextPath + '/p/Tools')">current</s:if>
   </jsp:attribute>
   <a href="${pageContext.request.contextPath}/p/Tools.action">Tools</a>
 </jsp:element>
 
 <jsp:element name="li">
   <jsp:attribute name="class">
-    <c:if test="${param.selectedNavLink == 'research'}">current</c:if>
+    <s:if test="#uri.startsWith(#contextPath + '/p/Research')">current</s:if>
   </jsp:attribute>
   <a href="${pageContext.request.contextPath}/p/Research.action">Research</a>
 </jsp:element>
 
 <jsp:element name="li">
   <jsp:attribute name="class">
-    <c:if test="${param.selectedNavLink == 'contact'}">current</c:if>
+    <s:if test="#uri.startsWith(#contextPath + '/p/ContactUs')">current</s:if>
   </jsp:attribute>
   <a href="${pageContext.request.contextPath}/p/ContactUs.action">Contact Us</a>
 </jsp:element>
 
 <jsp:element name="li">
   <jsp:attribute name="class">
-    <c:if test="${param.selectedNavLink == 'user'}">current</c:if>
+    <s:if test="#uri.startsWith(#contextPath + '/user')">current</s:if>
   </jsp:attribute>
   <a href="${pageContext.request.contextPath}/user/index.action">Settings</a>
 </jsp:element>
