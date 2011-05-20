@@ -20,6 +20,8 @@ public class ConstraintsBean implements Serializable {
 
   private int maxTripDuration = -1;
 
+  private String optimizeFor;
+
   private double walkSpeed = -1;
 
   private double walkReluctance = -1;
@@ -60,6 +62,7 @@ public class ConstraintsBean implements Serializable {
     this.minTransferTime = c.minTransferTime;
     if (c.modes != null)
       this.modes = new HashSet<String>(c.modes);
+    this.optimizeFor = c.optimizeFor;
     this.resultCount = c.resultCount;
     this.transferCost = c.transferCost;
     this.useRealTime = c.useRealTime;
@@ -120,6 +123,14 @@ public class ConstraintsBean implements Serializable {
    */
   public void setMaxTripDuration(int maxTripDuration) {
     this.maxTripDuration = maxTripDuration;
+  }
+
+  public String getOptimizeFor() {
+    return optimizeFor;
+  }
+
+  public void setOptimizeFor(String optimizeFor) {
+    this.optimizeFor = optimizeFor;
   }
 
   public double getWalkSpeed() {

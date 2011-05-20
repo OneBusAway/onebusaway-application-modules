@@ -47,19 +47,20 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
       ArrivalAndDepartureService realTimeArrivalAndDepartureService) {
     _arrivalAndDepartureService = realTimeArrivalAndDepartureService;
   }
-  
+
   @Autowired
   public void setStopTimeService(StopTimeService stopTimeService) {
     _stopTimeService = stopTimeService;
   }
-  
+
   @Autowired
   public void setItinerariesService(ItinerariesService itinerariesService) {
     _itinerariesService = itinerariesService;
   }
-  
+
   @Autowired
-  public void setTransferPatternService(TransferPatternService transferPatternService) {
+  public void setTransferPatternService(
+      TransferPatternService transferPatternService) {
     _transferPatternService = transferPatternService;
   }
 
@@ -69,13 +70,13 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
     GraphContext context = new GraphContext();
     context.setArrivalAndDepartureService(_arrivalAndDepartureService);
     context.setItinerariesService(_itinerariesService);
-    
+
     context.setStopTimeService(_stopTimeService);
     context.setStopHopService(_stopHopService);
     context.setStopTransferService(_stopTransferService);
     context.setTransferPatternService(_transferPatternService);
     context.setTransitGraphDao(_transitGraphDao);
-    
+
     return context;
   }
 
@@ -100,7 +101,7 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
     options.waitAtBeginningFactor = 0.1;
     options.waitReluctance = 2.5;
 
-    options.boardCost = 14 * 60;
+    options.boardCost = 5 * 60;
     options.maxTransfers = 2;
     options.minTransferTime = 120;
 
@@ -114,9 +115,9 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
     options.useServiceDays = false;
 
     options.stateFactory = OBAStateData.STATE_FACTORY;
-    
+
     options.currentTime = System.currentTimeMillis();
-    
+
     return options;
   }
 
@@ -137,6 +138,24 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
       if (modes.contains(Modes.TRANSIT))
         ms.setTransit(true);
       options.setModes(ms);
+    }
+
+    /**
+     * Preset optimization types
+     */
+    String optimizeFor = constraints.getOptimizeFor();
+
+    if (optimizeFor != null) {
+      optimizeFor = optimizeFor.toLowerCase();
+      if (optimizeFor.equals("min_time")) {
+        options.boardCost = 0;
+        options.waitReluctance = 1.0;
+        options.waitReluctance = 1.0;
+      } else if (optimizeFor.equals("min_transfers")) {
+        options.boardCost = 20 * 60;
+      } else if (optimizeFor.equals("min_walking")) {
+        options.walkReluctance = 5.0;
+      }
     }
 
     /**
@@ -176,8 +195,8 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
 
     if (constraints.getMaxTripDuration() != -1)
       options.maxTripDuration = constraints.getMaxTripDuration() * 1000;
-    
-    if( constraints.getCurrentTime() != -1)
+
+    if (constraints.getCurrentTime() != -1)
       options.currentTime = constraints.getCurrentTime();
   }
 }
