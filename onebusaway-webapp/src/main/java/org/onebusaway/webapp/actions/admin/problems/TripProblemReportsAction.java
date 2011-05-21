@@ -15,10 +15,10 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.onebusaway.webapp.actions.bundles.ProblemReportStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
@@ -31,7 +31,7 @@ import com.opensymphony.xwork2.validator.annotations.Validations;
     @Result(type = "redirectAction", name = "update", params = {
         "actionName", "trip-problem-reports!edit", "tripId", "${model.tripId}",
         "id", "${model.id}", "parse", "true"})})
-public class TripProblemReportsAction extends OneBusAwayActionSupport implements
+public class TripProblemReportsAction extends ActionSupport implements
     ModelDriven<TripProblemReportBean> {
 
   private static final long serialVersionUID = 1L;

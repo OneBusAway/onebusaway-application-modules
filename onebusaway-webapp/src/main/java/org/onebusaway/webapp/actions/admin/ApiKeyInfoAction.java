@@ -3,12 +3,12 @@ package org.onebusaway.webapp.actions.admin;
 import java.util.Map;
 
 import org.onebusaway.users.services.validation.KeyValidationService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
-public class ApiKeyInfoAction extends OneBusAwayActionSupport {
+public class ApiKeyInfoAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 

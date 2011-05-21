@@ -5,16 +5,16 @@ import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
 @Results({@Result(type = "redirectAction", name = "submitSuccess", params = {
     "actionName", "vehicle-location-record"})})
-public class VehicleLocationRecordAction extends OneBusAwayActionSupport implements
+public class VehicleLocationRecordAction extends ActionSupport implements
     ModelDriven<VehicleLocationRecordBean> {
 
   private static final long serialVersionUID = 1L;

@@ -1,11 +1,11 @@
 package org.onebusaway.webapp.actions.where.standard;
 
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
+import com.opensymphony.xwork2.ActionSupport;
 
-public class PlanAction extends OneBusAwayActionSupport {
+public class PlanAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
-  
+
   @Override
   public String execute() {
     return SUCCESS;

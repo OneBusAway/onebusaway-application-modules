@@ -24,9 +24,9 @@ import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.thoughtworks.xstream.XStream;
 
@@ -36,7 +36,7 @@ import com.thoughtworks.xstream.XStream;
     @Result(type = "redirectAction", name = "deleteSuccess", params = {
         "actionName", "service-alerts!agency", "agencyId", "${agencyId}",
         "parse", "true"})})
-public class ServiceAlertAction extends OneBusAwayActionSupport implements
+public class ServiceAlertAction extends ActionSupport implements
     ModelDriven<SituationBean> {
 
   private static final long serialVersionUID = 1L;

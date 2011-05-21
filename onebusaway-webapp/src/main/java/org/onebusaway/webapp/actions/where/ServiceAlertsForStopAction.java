@@ -8,12 +8,12 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 
-public class ServiceAlertsForStopAction extends OneBusAwayActionSupport {
+public class ServiceAlertsForStopAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 

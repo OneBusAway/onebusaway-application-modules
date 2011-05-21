@@ -2,10 +2,11 @@ package org.onebusaway.webapp.actions.admin;
 
 import org.onebusaway.users.services.UserPropertiesMigrationStatus;
 import org.onebusaway.users.services.UserService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class UserPropertiesMigrationAction extends OneBusAwayActionSupport {
+import com.opensymphony.xwork2.ActionSupport;
+
+public class UserPropertiesMigrationAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 

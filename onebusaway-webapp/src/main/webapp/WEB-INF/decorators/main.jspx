@@ -23,7 +23,7 @@
     
 <jsp:directive.page contentType="text/html" />
 
-<s:set var="template_override" value="configuration['webapp_template_override']"/>
+<s:set var="template_override" value="#configuration['webapp_template_override']"/>
 <s:if test="#template_override != null">
     <c:set var="template_override"><s:property value="#template_override"/></c:set>
     <jsp:include page="${template_override}"/>

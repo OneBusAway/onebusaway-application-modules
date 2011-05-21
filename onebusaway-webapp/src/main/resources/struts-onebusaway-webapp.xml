@@ -26,13 +26,15 @@
         
         <interceptors>
             <interceptor name="cache-control" class="org.onebusaway.presentation.services.cachecontrol.CacheControlInterceptor" />
+            <interceptor name="configuration" class="org.onebusaway.presentation.impl.configuration.ConfigurationInterceptor" />
             <interceptor name="is-setup" class="org.onebusaway.presentation.impl.users.IsSetupInterceptor" />
-            <interceptor name="current-user" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />
+            <interceptor name="current-user" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />            
             <interceptor-stack name="onebusaway-webapp-stack">
                 <interceptor-ref name="cache-control"/>
                 <interceptor-ref name="defaultStack">
                     <param name="modelDriven.refreshModelBeforeResult">true</param>
                 </interceptor-ref>
+                <interceptor-ref name="configuration"/>
                 <interceptor-ref name="is-setup" />
                 <interceptor-ref name="current-user" />
             </interceptor-stack>

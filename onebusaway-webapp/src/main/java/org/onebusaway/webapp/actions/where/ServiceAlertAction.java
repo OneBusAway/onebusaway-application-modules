@@ -10,12 +10,12 @@ import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBea
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.services.CurrentUserService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 
-public class ServiceAlertAction extends OneBusAwayActionSupport {
+public class ServiceAlertAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
@@ -56,13 +56,13 @@ public class ServiceAlertAction extends OneBusAwayActionSupport {
       @Action(value = "/where/iphone/service-alert"),
       @Action(value = "/where/text/service-alert")})
   public String execute() {
-    
+
     _situation = _transitDataService.getServiceAlertForId(_id);
     if (_situation == null)
       throw new NoSuchElementException();
-    
+
     NaturalLanguageStringBean desc = _situation.getDescription();
-    
+
     if (desc != null && desc.getValue() != null) {
       String value = desc.getValue();
       value = htmlify(value);
@@ -87,7 +87,7 @@ public class ServiceAlertAction extends OneBusAwayActionSupport {
     m.appendTail(sb);
 
     content = sb.toString();
-    
+
     content = content.replaceAll("\r\n", "<br/>");
     content = content.replaceAll("\n", "<br/>");
 

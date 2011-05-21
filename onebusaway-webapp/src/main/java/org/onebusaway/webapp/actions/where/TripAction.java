@@ -29,12 +29,12 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
-public class TripAction extends OneBusAwayActionSupport {
+public class TripAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
@@ -54,7 +54,7 @@ public class TripAction extends OneBusAwayActionSupport {
   private long _actualServiceDate;
 
   private String _vehicleId;
-  
+
   private String _stopId;
 
   private boolean _showArrivals = false;
@@ -62,7 +62,7 @@ public class TripAction extends OneBusAwayActionSupport {
   public void setId(String id) {
     _id = id;
   }
-  
+
   public String getId() {
     return _id;
   }
@@ -71,7 +71,7 @@ public class TripAction extends OneBusAwayActionSupport {
   public void setServiceDate(Date serviceDate) {
     _serviceDate = serviceDate;
   }
-  
+
   public Date getServiceDate() {
     return _serviceDate;
   }
@@ -80,7 +80,7 @@ public class TripAction extends OneBusAwayActionSupport {
   public void setTime(Date time) {
     _time = time;
   }
-  
+
   public Date getTime() {
     return _time;
   }
@@ -88,7 +88,7 @@ public class TripAction extends OneBusAwayActionSupport {
   public void setVehicleId(String vehicleId) {
     _vehicleId = vehicleId;
   }
-  
+
   public String getVehicleId() {
     return _vehicleId;
   }
@@ -96,7 +96,7 @@ public class TripAction extends OneBusAwayActionSupport {
   public void setStopId(String stopId) {
     _stopId = stopId;
   }
-  
+
   public String getStopId() {
     return _stopId;
   }

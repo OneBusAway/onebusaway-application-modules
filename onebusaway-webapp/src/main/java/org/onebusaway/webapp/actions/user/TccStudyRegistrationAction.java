@@ -11,14 +11,15 @@ import org.apache.struts2.util.ServletContextAware;
 import org.onebusaway.users.model.IndexedUserDetails;
 import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.CurrentUserService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
+
 @Results(value = {@Result(type = "stream", params = {
     "contentType", "contentType"})})
-public class TccStudyRegistrationAction extends OneBusAwayActionSupport implements
+public class TccStudyRegistrationAction extends ActionSupport implements
     ServletContextAware {
 
   private static Logger _log = LoggerFactory.getLogger(TccStudyRegistrationAction.class);
@@ -60,10 +61,9 @@ public class TccStudyRegistrationAction extends OneBusAwayActionSupport implemen
     try {
       IndexedUserDetails details = _currentUserService.getCurrentUserDetails();
       String id = null;
-      if( details == null) {
+      if (details == null) {
         id = UUID.randomUUID().toString();
-      }
-      else {
+      } else {
         UserIndexKey key = details.getUserIndexKey();
         id = key.getType() + "|" + key.getValue();
       }
@@ -72,9 +72,9 @@ public class TccStudyRegistrationAction extends OneBusAwayActionSupport implemen
     } catch (Exception ex) {
       _log.warn("error registering tcc study id", ex);
     }
-    
+
     _inputStream = _context.getResourceAsStream("/WEB-INF/images/transparent.png");
-    
+
     return SUCCESS;
   }
 

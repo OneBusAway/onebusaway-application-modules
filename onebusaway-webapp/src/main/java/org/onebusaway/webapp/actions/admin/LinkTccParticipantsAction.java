@@ -5,12 +5,13 @@ import java.io.IOException;
 
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.onebusaway.webapp.services.TccParticipantRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
+
 @Results( {@Result(type = "redirectAction", name="redirect", params = {"actionName", "index"})})
-public class LinkTccParticipantsAction extends OneBusAwayActionSupport {
+public class LinkTccParticipantsAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 

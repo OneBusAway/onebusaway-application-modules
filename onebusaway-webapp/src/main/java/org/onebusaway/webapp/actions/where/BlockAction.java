@@ -24,12 +24,12 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 
-public class BlockAction extends OneBusAwayActionSupport {
+public class BlockAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
@@ -56,7 +56,7 @@ public class BlockAction extends OneBusAwayActionSupport {
   public BlockInstanceBean getBlockInstance() {
     return _blockInstance;
   }
-  
+
   public TimeZone getTimeZone() {
     return _timeZone;
   }
@@ -72,10 +72,10 @@ public class BlockAction extends OneBusAwayActionSupport {
       return INPUT;
 
     _blockInstance = _service.getBlockInstance(_id, _serviceDate.getTime());
-    
-    if( _blockInstance == null)
+
+    if (_blockInstance == null)
       return ERROR;
-        
+
     BlockConfigurationBean blockConfig = _blockInstance.getBlockConfiguration();
     _timeZone = TimeZone.getTimeZone(blockConfig.getTimeZone());
 

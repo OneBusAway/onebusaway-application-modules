@@ -6,9 +6,9 @@ import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
@@ -17,7 +17,7 @@ import com.opensymphony.xwork2.validator.annotations.Validations;
 @Results({@Result(type = "redirectAction", name = "list", params = {
     "actionName", "stop-problem-reports", "stopId", "${model.stopId}", "parse",
     "true"})})
-public class StopProblemReportsAction extends OneBusAwayActionSupport implements
+public class StopProblemReportsAction extends ActionSupport implements
     ModelDriven<StopProblemReportBean> {
 
   private static final long serialVersionUID = 1L;

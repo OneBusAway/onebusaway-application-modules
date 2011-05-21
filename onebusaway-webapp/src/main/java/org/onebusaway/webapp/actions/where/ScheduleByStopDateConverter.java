@@ -31,7 +31,7 @@ public class ScheduleByStopDateConverter extends StrutsTypeConverter {
 
   private static SimpleDateFormat _format = new SimpleDateFormat("yyyy-MM-dd");
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   public Object convertFromString(Map context, String[] values, Class toClass) {
 
     if (values != null && values.length > 0 && values[0] != null
@@ -46,7 +46,7 @@ public class ScheduleByStopDateConverter extends StrutsTypeConverter {
     return null;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   public String convertToString(Map context, Object o) {
     if (o instanceof Date)
       return _format.format((Date) o);

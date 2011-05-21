@@ -19,20 +19,20 @@ import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.onebusaway.users.services.UserPropertiesService;
 import org.onebusaway.users.services.UserService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
-@Results( {
+@Results({
     @Result(type = "redirectAction", name = "edit", params = {
         "actionName", "api-keys!edit", "apiKey", "${model.apiKey}", "parse",
         "true"}),
     @Result(type = "redirectAction", name = "list", params = {
         "actionName", "api-keys"})})
-public class ApiKeysAction extends OneBusAwayActionSupport implements
+public class ApiKeysAction extends ActionSupport implements
     ModelDriven<ApiKeyModel> {
 
   private static final long serialVersionUID = 1L;
@@ -139,14 +139,14 @@ public class ApiKeysAction extends OneBusAwayActionSupport implements
 
     return "list";
   }
-  
+
   @SkipValidation
   public String generate() {
     _model.setApiKey(UUID.randomUUID().toString());
     _model.setMinApiRequestInterval(100L);
     return saveOrUpdate();
   }
-  
+
   /****
    * Private Methods
    ****/

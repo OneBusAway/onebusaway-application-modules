@@ -4,11 +4,12 @@ import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.users.services.UserPropertiesMigrationStatus;
 import org.onebusaway.users.services.UserService;
-import org.onebusaway.webapp.actions.OneBusAwayActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.ActionSupport;
+
 @Results( {@Result(type = "redirectAction", params = {"actionName", "user-properties-migration"})})
-public class StartUserPropertiesMigrationAction extends OneBusAwayActionSupport {
+public class StartUserPropertiesMigrationAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
