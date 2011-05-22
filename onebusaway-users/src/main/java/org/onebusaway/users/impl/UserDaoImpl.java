@@ -2,6 +2,7 @@ package org.onebusaway.users.impl;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.HibernateException;
@@ -48,11 +49,11 @@ class UserDaoImpl implements UserDao {
     return _template.find("SELECT user.id FROM User user");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public List<Integer> getAllUserIdsInRange(final int firstResult,
       final int maxResults) {
     return _template.execute(new HibernateCallback<List<Integer>>() {
+      @SuppressWarnings("unchecked")
       @Override
       public List<Integer> doInHibernate(Session session)
           throws HibernateException, SQLException {
@@ -62,6 +63,22 @@ class UserDaoImpl implements UserDao {
         return query.list();
       }
     });
+  }
+  
+  @Override
+  public List<Integer> getStaleUserIdsInRange(final Date lastAccessTime, final int firstResult, final int maxResults) {
+    return _template.execute(new HibernateCallback<List<Integer>>() {
+      @SuppressWarnings("unchecked")
+      @Override
+      public List<Integer> doInHibernate(Session session)
+          throws HibernateException, SQLException {
+        Query query = session.createQuery("SELECT user.id FROM User user WHERE lastAccessTime < :lastAccessTime");
+        query.setFirstResult(firstResult);
+        query.setMaxResults(maxResults);
+        query.setTimestamp("lastAccessTime", lastAccessTime);
+        return query.list();
+      }
+    });  
   }
 
   @Override

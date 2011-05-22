@@ -1,5 +1,6 @@
 package org.onebusaway.users.services;
 
+import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.users.model.User;
@@ -14,6 +15,8 @@ public interface UserDao {
   public List<Integer> getAllUserIds();
 
   public List<Integer> getAllUserIdsInRange(int offset, int limit);
+  
+  public List<Integer> getStaleUserIdsInRange(Date lastAccessTime, int offset, int limit);
 
   public User getUserForId(int id);
 

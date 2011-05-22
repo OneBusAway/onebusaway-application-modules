@@ -262,4 +262,10 @@ public interface UserService {
    *         or null for a key with no permission to access the API
    */
   public Long getMinApiRequestIntervalForKey(String key, boolean forceRefresh);
+
+  /**
+   * Deletes stale users from the system. Stale users have a last access time of
+   * more than a month ago.
+   */
+  public void deleteStaleUsers();
 }
