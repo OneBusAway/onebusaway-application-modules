@@ -472,7 +472,7 @@ public class UserServiceImpl implements UserService {
   private boolean deleteStaleUsers(Date lastAccessTime) {
 
     List<Integer> userIds = _userDao.getStaleUserIdsInRange(lastAccessTime, 0,
-        2);
+        100);
 
     for (int userId : userIds) {
       User user = _userDao.getUserForId(userId);
