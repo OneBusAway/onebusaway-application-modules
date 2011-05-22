@@ -25,7 +25,7 @@
 <head>
   <title><decorator:title default="OneBusAway" /></title>
   <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard.css')}"/>
-   <link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath}/p/Stylesheet!raw.action"/> 
+  <link rel="stylesheet" type="text/css" media="all" href="${pageContext.request.contextPath}/p/Stylesheet!raw.action"/> 
   <link rel="icon" type="image/png" href="${oba:resource('/images/Bus.png')}"/>
   <decorator:head />
 </head>
