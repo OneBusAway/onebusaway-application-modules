@@ -13,6 +13,8 @@
     <pattern>/styles/*</pattern>
     <pattern>/images/*</pattern>
     <pattern>/setup/*</pattern>
+    <pattern>*!attachment.action</pattern>
+    <pattern>*!raw.action</pattern>
     <patterns>/where/mobile/*</patterns>
     <pattern>*.cache.html</pattern>
     <pattern>*-snippet.jspx</pattern>
