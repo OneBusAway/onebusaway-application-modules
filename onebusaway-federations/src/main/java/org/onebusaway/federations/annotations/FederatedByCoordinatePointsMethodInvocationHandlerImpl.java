@@ -2,12 +2,13 @@ package org.onebusaway.federations.annotations;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.onebusaway.collections.PropertyPathExpression;
 import org.onebusaway.exceptions.ServiceAreaServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.FederatedServiceCollection;
-import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 
 /**
@@ -56,7 +57,7 @@ class FederatedByCoordinatePointsMethodInvocationHandlerImpl implements
       IllegalArgumentException, IllegalAccessException,
       InvocationTargetException {
 
-    CoordinateBounds bounds = new CoordinateBounds();
+    List<CoordinatePoint> points = new ArrayList<CoordinatePoint>();
 
     for (int i = 0; i < _argumentIndices.length; i++) {
       Object value = args[_argumentIndices[i]];
@@ -64,10 +65,10 @@ class FederatedByCoordinatePointsMethodInvocationHandlerImpl implements
       if (expression != null)
         value = expression.invoke(value);
       CoordinatePoint point = (CoordinatePoint) value;
-      bounds.addPoint(point.getLat(), point.getLon());
+      points.add(point);
     }
 
-    FederatedService service = collection.getServiceForBounds(bounds);
+    FederatedService service = collection.getServiceForLocations(points);
     return method.invoke(service, args);
   }
 }

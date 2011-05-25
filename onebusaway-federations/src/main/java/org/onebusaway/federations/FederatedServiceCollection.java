@@ -1,11 +1,13 @@
 package org.onebusaway.federations;
 
+import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceAreaServiceException;
 import org.onebusaway.federations.impl.DynamicFederatedServiceCollectionImpl;
 import org.onebusaway.federations.impl.FederatedServiceCollectionImpl;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 
 /**
  * A collection of {@link FederatedService} instances. Provides interface for
@@ -42,4 +44,6 @@ public interface FederatedServiceCollection {
   public abstract FederatedService getServiceForLocation(double lat, double lon)
       throws ServiceAreaServiceException;
 
+  public abstract FederatedService getServiceForLocations(
+      List<CoordinatePoint> points) throws ServiceAreaServiceException;
 }

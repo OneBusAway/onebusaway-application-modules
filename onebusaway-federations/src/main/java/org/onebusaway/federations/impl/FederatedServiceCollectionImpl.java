@@ -14,6 +14,7 @@ import org.onebusaway.exceptions.ServiceAreaServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.FederatedServiceCollection;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
@@ -127,6 +128,30 @@ public class FederatedServiceCollectionImpl implements
   public FederatedService getServiceForLocation(double lat, double lon)
       throws ServiceAreaServiceException {
     return getServiceForBounds(lat, lon, lat, lon);
+  }
+
+  @Override
+  public FederatedService getServiceForLocations(List<CoordinatePoint> points)
+      throws ServiceAreaServiceException {
+
+    FederatedService service = null;
+
+    for (CoordinatePoint point : points) {
+
+      FederatedService provider = getServiceForLocation(point.getLat(),
+          point.getLon());
+
+      if (service == null) {
+        service = provider;
+      } else if (service != provider) {
+        throw new MultipleServiceAreasServiceException();
+      }
+    }
+
+    if (service == null)
+      throw new OutOfServiceAreaServiceException();
+
+    return service;
   }
 
   /****

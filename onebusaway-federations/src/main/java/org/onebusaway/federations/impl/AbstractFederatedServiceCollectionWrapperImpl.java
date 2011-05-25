@@ -1,11 +1,13 @@
 package org.onebusaway.federations.impl;
 
+import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceAreaServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.FederatedServiceCollection;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 
 /**
  * {@link FederatedServiceCollection} wrapper class that allows one to pass
@@ -49,6 +51,12 @@ public abstract class AbstractFederatedServiceCollectionWrapperImpl implements
   public FederatedService getServiceForLocation(double lat, double lon)
       throws ServiceAreaServiceException {
     return getCollection().getServiceForLocation(lat, lon);
+  }
+
+  @Override
+  public FederatedService getServiceForLocations(List<CoordinatePoint> points)
+      throws ServiceAreaServiceException {
+    return getCollection().getServiceForLocations(points);
   }
 
   /****
