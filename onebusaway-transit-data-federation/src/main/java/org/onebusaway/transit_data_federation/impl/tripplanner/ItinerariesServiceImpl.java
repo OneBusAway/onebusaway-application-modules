@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.collections.CollectionsLibrary;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -97,6 +98,9 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
     Vertex fromVertex = getTransitLocationAsVertex(from, options);
     Vertex toVertex = getTransitLocationAsVertex(to, options);
+    
+    if( fromVertex == null || toVertex == null)
+      throw new OutOfServiceAreaServiceException();
 
     State state = new State(targetTime, new OBAStateData());
 
