@@ -9,7 +9,8 @@ public class PointAndIndex implements Comparable<PointAndIndex> {
   public final double distanceFromTarget;
   public final double distanceAlongShape;
 
-  public PointAndIndex(XYPoint point, int index, double distanceFromTarget, double distanceAlongShape) {
+  public PointAndIndex(XYPoint point, int index, double distanceFromTarget,
+      double distanceAlongShape) {
     this.point = point;
     this.index = index;
     this.distanceFromTarget = distanceFromTarget;
@@ -21,5 +22,12 @@ public class PointAndIndex implements Comparable<PointAndIndex> {
     if (distanceAlongShape == o.distanceAlongShape)
       return 0;
     return distanceAlongShape < o.distanceAlongShape ? -1 : 1;
+  }
+
+  @Override
+  public String toString() {
+    return "xy=" + point.toString() + " index=" + index
+        + " distanceFromTarget=" + distanceFromTarget + " distanceAlongShape="
+        + distanceAlongShape;
   }
 }
