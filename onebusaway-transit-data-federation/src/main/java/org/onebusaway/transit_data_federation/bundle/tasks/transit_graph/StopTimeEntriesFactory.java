@@ -21,6 +21,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,13 +116,16 @@ public class StopTimeEntriesFactory {
         distanceTraveledSet = true;
       } catch (StopIsTooFarFromShapeException ex) {
         StopTimeEntry stopTime = ex.getStopTime();
+        TripEntry trip = stopTime.getTrip();
         StopEntry stop = stopTime.getStop();
+        AgencyAndId shapeId = trip.getShapeId();
         CoordinatePoint point = ex.getPoint();
         PointAndIndex pindex = ex.getPointAndIndex();
 
-        _log.warn("Stop is too far from shape: stop=" + stop.getId()
-            + " stopLat=" + stop.getStopLat() + " stopLon=" + stop.getStopLon()
-            + " shapePoint=" + point + " index=" + pindex.index + " distance="
+        _log.warn("Stop is too far from shape: trip=" + trip.getId() + " stop="
+            + stop.getId() + " stopLat=" + stop.getStopLat() + " stopLon="
+            + stop.getStopLon() + " shapeId=" + shapeId + " shapePoint="
+            + point + " index=" + pindex.index + " distance="
             + pindex.distanceFromTarget);
       }
     }
