@@ -51,11 +51,13 @@ import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesSe
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.utility.IOLibrary;
 import org.opentripplanner.routing.algorithm.GenericDijkstra;
-import org.opentripplanner.routing.algorithm.strategies.SkipVertexStrategy;
+import org.opentripplanner.routing.algorithm.strategies.SkipTraverseResultStrategy;
 import org.opentripplanner.routing.core.Edge;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
+import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.pqueue.PriorityQueueImpl;
 import org.opentripplanner.routing.services.GraphService;
@@ -209,8 +211,6 @@ public class TransferPatternsTask implements Runnable {
         OBATraverseOptions options = _otpConfigurationService.createTraverseOptions();
 
         options.maxComputationTime = -1;
-        options.shortestPathTreeFactory = MultiShortestPathTree.FACTORY;
-        options.priorityQueueFactory = PriorityQueueImpl.FACTORY;
         options.waitAtBeginningFactor = 1.0;
         options.extraSpecialMode = true;
         if (isHubStop)
@@ -219,7 +219,9 @@ public class TransferPatternsTask implements Runnable {
           options.maxTransfers = 2;
 
         GenericDijkstra dijkstra = new GenericDijkstra(graph, options);
-        dijkstra.setSkipVertexStrategy(new SkipVertexImpl(stop, tFrom));
+        dijkstra.setSkipTraverseResultStrategy(new SkipVertexImpl(stop, tFrom));
+        dijkstra.setShortestPathTreeFactory(MultiShortestPathTree.FACTORY);
+        dijkstra.setPriorityQueueFactory(PriorityQueueImpl.FACTORY);
 
         TPOfflineOriginVertex origin = new TPOfflineOriginVertex(context, stop,
             instances, nearbyStopsAndWalkTimes, nearbyStopTimeInstances);
@@ -728,7 +730,7 @@ public class TransferPatternsTask implements Runnable {
     return (int) (Math.abs(state.getTime() - state.getStartTime()) / 1000);
   }
 
-  private static class SkipVertexImpl implements SkipVertexStrategy {
+  private static class SkipVertexImpl implements SkipTraverseResultStrategy {
 
     private final Set<StopEntry> _stops = new HashSet<StopEntry>();
 
@@ -740,17 +742,21 @@ public class TransferPatternsTask implements Runnable {
       _originStop = originStop;
       _serviceDate = serviceDate;
     }
+    
 
     @Override
-    public boolean shouldSkipVertex(Vertex origin, Vertex target,
-        SPTVertex parent, Vertex current, State state, ShortestPathTree spt,
+    public boolean shouldSkipTraversalResult(Vertex origin, Vertex target,
+        SPTVertex parent, TraverseResult traverseResult, ShortestPathTree spt,
         TraverseOptions traverseOptions) {
+      
+      EdgeNarrative narrative = traverseResult.getEdgeNarrative();
+      Vertex vertex = narrative.getToVertex();
 
       /**
        * We prune any arrivals that loop back to the origin stop
        */
-      if (current instanceof TPOfflineBlockArrivalVertex) {
-        TPOfflineBlockArrivalVertex bav = (TPOfflineBlockArrivalVertex) current;
+      if (vertex instanceof TPOfflineBlockArrivalVertex) {
+        TPOfflineBlockArrivalVertex bav = (TPOfflineBlockArrivalVertex) vertex;
         StopTimeInstance instance = bav.getInstance();
         if (instance.getStop() == _originStop)
           return true;
@@ -759,8 +765,8 @@ public class TransferPatternsTask implements Runnable {
       /**
        * Skip a vertex that has moved on to the next service date
        */
-      if (current instanceof HasStopTimeInstanceTransitVertex) {
-        HasStopTimeInstanceTransitVertex v = (HasStopTimeInstanceTransitVertex) current;
+      if (vertex instanceof HasStopTimeInstanceTransitVertex) {
+        HasStopTimeInstanceTransitVertex v = (HasStopTimeInstanceTransitVertex) vertex;
         StopTimeInstance instance = v.getInstance();
         if (instance.getServiceDate() > _serviceDate + 12 * 60 * 60 * 1000)
           return true;
@@ -769,8 +775,8 @@ public class TransferPatternsTask implements Runnable {
       /**
        * Print the visited stop count as a show of progress
        */
-      if (current instanceof HasStopTransitVertex) {
-        HasStopTransitVertex v = (HasStopTransitVertex) current;
+      if (vertex instanceof HasStopTransitVertex) {
+        HasStopTransitVertex v = (HasStopTransitVertex) vertex;
         StopEntry stop = v.getStop();
         if (_stops.add(stop) && _stops.size() % 100 == 0) {
           System.out.println("stops=" + _stops.size());
@@ -781,6 +787,7 @@ public class TransferPatternsTask implements Runnable {
 
       return false;
     }
+
   }
 
   private static class SPTVertexDurationComparator implements

@@ -19,4 +19,6 @@ public class OBATraverseOptions extends TraverseOptions {
   public long maxInitialWaitTime = -1;
   
   public boolean extraSpecialMode = false;
+  
+  public int numItineraries = 1;
 }

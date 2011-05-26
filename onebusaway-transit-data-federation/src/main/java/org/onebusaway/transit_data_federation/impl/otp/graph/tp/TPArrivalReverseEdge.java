@@ -64,7 +64,7 @@ public class TPArrivalReverseEdge extends AbstractEdge {
      */
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getPreviousArrivalsForStopPair(
         stopPair.getSecond(), stopPair.getFirst(), targetTime,
-        options.numItineraries, obaOpts.useRealtime);
+        obaOpts.numItineraries, obaOpts.useRealtime);
 
     TraverseResult results = null;
 

@@ -53,6 +53,7 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
   public SPTVertex addVertex(Vertex vertex, State state, double weightSum,
       TraverseOptions options) {
 
+    OBATraverseOptions opts = (OBATraverseOptions) options;
     OBAStateData data = (OBAStateData) state.getData();
     TripSequence tripSequence = data.getTripSequence();
 
@@ -64,7 +65,7 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
      * We only keep the N-best itineraries. If adding this itinerary will push
      * us over the limit, figure out which one we should prune.
      */
-    if (existing == null && map.size() == options.numItineraries) {
+    if (existing == null && map.size() == opts.numItineraries) {
       Max<TripSequence> m = new Max<TripSequence>();
       for (Map.Entry<TripSequence, SPTVertex> entry : map.entrySet()) {
         TripSequence key = entry.getKey();

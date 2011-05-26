@@ -114,8 +114,6 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
 
     options.useServiceDays = false;
 
-    options.stateFactory = OBAStateData.STATE_FACTORY;
-
     options.currentTime = System.currentTimeMillis();
 
     return options;

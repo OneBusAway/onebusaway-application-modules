@@ -13,6 +13,8 @@ public class SearchTerminationStrategyImpl implements SearchTerminationStrategy 
   @Override
   public boolean shouldSearchContinue(Vertex origin, Vertex target,
       SPTVertex current, ShortestPathTree spt, TraverseOptions traverseOptions) {
+    
+    OBATraverseOptions opts = (OBATraverseOptions) traverseOptions;
 
     Vertex currentVertex = current.mirror;
 
@@ -26,7 +28,7 @@ public class SearchTerminationStrategyImpl implements SearchTerminationStrategy 
       if (byTripSequence.isEmpty())
         throw new IllegalStateException("expected at least on result");
 
-      if (byTripSequence.size() >= traverseOptions.numItineraries)
+      if (byTripSequence.size() >= opts.numItineraries)
         return false;
 
       SPTVertex minVertex = getMinVertex(byTripSequence.values());

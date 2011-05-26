@@ -45,7 +45,7 @@ public class TPDepartureEdge extends AbstractEdge {
 
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getNextDeparturesForStopPair(
         stopPair.getFirst(), stopPair.getSecond(), targetTime,
-        options.numItineraries, obaOpts.useRealtime);
+        obaOpts.numItineraries, obaOpts.useRealtime);
 
     TraverseResult results = null;
 

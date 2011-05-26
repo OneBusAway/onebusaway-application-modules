@@ -77,6 +77,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
+import org.opentripplanner.routing.algorithm.GenericAStar;
+import org.opentripplanner.routing.algorithm.strategies.GenericAStarFactory;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.Graph;
@@ -454,9 +456,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     OBATraverseOptions options = _otpConfigurationService.createTraverseOptions();
 
     options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
-    options.searchTerminationStrategy = new SearchTerminationStrategyImpl();
-    options.shortestPathTreeFactory = TripSequenceShortestPathTree.FACTORY;
-
+    options.aStarSearchFactory = new GenericAStarFactoryImpl();
+    
     return options;
   }
 
@@ -1467,5 +1468,16 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       return _minTransitTimeToPlace == o._minTransitTimeToPlace ? 0
           : (_minTransitTimeToPlace < o._minTransitTimeToPlace ? -1 : 1);
     }
+  }
+  
+  private static class GenericAStarFactoryImpl implements GenericAStarFactory {
+
+    @Override
+    public GenericAStar createAStarInstance() {
+      GenericAStar instance = new GenericAStar();
+      instance.setSearchTerminationStrategy(new SearchTerminationStrategyImpl());
+      instance.setShortestPathTreeFactory(TripSequenceShortestPathTree.FACTORY);
+      return instance;
+    }    
   }
 }

@@ -1,7 +1,5 @@
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.StateFactory;

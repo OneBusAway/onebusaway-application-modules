@@ -15,7 +15,9 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
+import org.onebusaway.transit_data_federation.impl.otp.SearchTerminationStrategyImpl;
 import org.onebusaway.transit_data_federation.impl.otp.TPRemainingWeightHeuristicImpl;
+import org.onebusaway.transit_data_federation.impl.otp.TripSequenceShortestPathTree;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkFromStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WalkToStopVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
@@ -24,13 +26,14 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.algorithm.GenericAStar;
-import org.opentripplanner.routing.algorithm.strategies.SkipVertexStrategy;
+import org.opentripplanner.routing.algorithm.strategies.SkipTraverseResultStrategy;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.core.TraverseOptions;
+import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.services.GraphService;
 import org.opentripplanner.routing.services.PathService;
@@ -98,8 +101,8 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
     Vertex fromVertex = getTransitLocationAsVertex(from, options);
     Vertex toVertex = getTransitLocationAsVertex(to, options);
-    
-    if( fromVertex == null || toVertex == null)
+
+    if (fromVertex == null || toVertex == null)
       throw new OutOfServiceAreaServiceException();
 
     State state = new State(targetTime, new OBAStateData());
@@ -196,7 +199,9 @@ class ItinerariesServiceImpl implements ItinerariesService {
     State init = new State(time.getTime(), new OBAStateData());
     options.remainingWeightHeuristic = new TPRemainingWeightHeuristicImpl();
     GenericAStar search = new GenericAStar();
-    search.setSkipVertexStrategy(new SkipVertexImpl());
+    search.setSkipTraverseResultStrategy(new SkipVertexImpl());
+    search.setSearchTerminationStrategy(new SearchTerminationStrategyImpl());
+    search.setShortestPathTreeFactory(TripSequenceShortestPathTree.FACTORY);
 
     if (options.isArriveBy()) {
       ShortestPathTree spt = search.getShortestPathTree(graph, toVertex,
@@ -249,16 +254,17 @@ class ItinerariesServiceImpl implements ItinerariesService {
     return (WalkToStopVertex) graph.getVertex(label);
   }
 
-  private static class SkipVertexImpl implements SkipVertexStrategy {
+  private static class SkipVertexImpl implements SkipTraverseResultStrategy {
 
     @Override
-    public boolean shouldSkipVertex(Vertex origin, Vertex target,
-        SPTVertex parent, Vertex current, State state, ShortestPathTree spt,
-        TraverseOptions options) {
+    public boolean shouldSkipTraversalResult(Vertex origin, Vertex target,
+        SPTVertex parent, TraverseResult traverseResult, ShortestPathTree spt,
+        TraverseOptions traverseOptions) {
 
+      State state = traverseResult.state;
       StateData data = state.getData();
-      if (options.maxWalkDistance > 0
-          && data.getWalkDistance() > options.maxWalkDistance)
+      if (traverseOptions.maxWalkDistance > 0
+          && data.getWalkDistance() > traverseOptions.maxWalkDistance)
         return true;
 
       return false;
