@@ -14,6 +14,7 @@ import org.opentripplanner.routing.core.OptimizeType;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.core.TraverseOptions;
+import org.opentripplanner.routing.error.VertexNotFoundException;
 import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.routing.spt.SPTVertex;
@@ -63,11 +64,15 @@ class StopWalkPlanCache {
       options.setModes(new TraverseModeSet(TraverseMode.WALK));
       options.useServiceDays = false;
 
-      List<GraphPath> paths = _pathService.plan(fromPlace, toPlace, targetTime,
-          options, 1);
+      try {
+        List<GraphPath> paths = _pathService.plan(fromPlace, toPlace,
+            targetTime, options, 1);
 
-      Double distance = getPathsAsDistance(paths);
-      _cache.put(pair, distance);
+        Double distance = getPathsAsDistance(paths);
+        _cache.put(pair, distance);
+      } catch (VertexNotFoundException ex) {
+        throw new IllegalStateException("stops=" + pair, ex);
+      }
 
     } else {
       _cacheHits++;
