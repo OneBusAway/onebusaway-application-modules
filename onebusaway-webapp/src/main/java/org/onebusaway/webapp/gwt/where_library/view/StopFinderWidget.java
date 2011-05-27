@@ -1,6 +1,8 @@
 package org.onebusaway.webapp.gwt.where_library.view;
 
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.webapp.gwt.where_library.OBAConfig;
 import org.onebusaway.webapp.gwt.where_library.view.events.StopClickedEvent;
 import org.onebusaway.webapp.gwt.where_library.view.events.StopClickedHandler;
 import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
@@ -14,6 +16,7 @@ import com.google.gwt.maps.client.control.LargeMapControl;
 import com.google.gwt.maps.client.control.MapTypeControl;
 import com.google.gwt.maps.client.control.ScaleControl;
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiFactory;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,16 +27,18 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 
 public class StopFinderWidget extends Composite {
 
   private static MyUiBinder _uiBinder = GWT.create(MyUiBinder.class);
+  
+  private static OBAConfig _config = OBAConfig.getConfig();
 
-  private static LatLng _center = LatLng.newInstance(47.601533, -122.32933);
+  private static LatLng _center = LatLng.newInstance(_config.getCenterLat(), _config.getCenterLon());
 
   private static int _zoom = 11;
 
@@ -82,11 +87,21 @@ public class StopFinderWidget extends Composite {
     _map.addControl(new MapTypeControl());
     _map.addControl(new ScaleControl());
     _map.setScrollWheelZoomEnabled(true);
+    
 
     // We delay initialization of the map
     DeferredCommand.addCommand(new Command() {
       public void execute() {
         _map.checkResizeAndCenter();
+        
+        CoordinateBounds b = _config.getBounds();
+        
+        LatLng from = LatLng.newInstance(b.getMinLat(), b.getMinLon());
+        LatLng to = LatLng.newInstance(b.getMaxLat(), b.getMaxLon());
+        LatLngBounds bounds = LatLngBounds.newInstance(from, to);
+        
+        int zoom = _map.getBoundsZoomLevel(bounds);
+        _map.setZoomLevel(zoom);
       }
     });
 
