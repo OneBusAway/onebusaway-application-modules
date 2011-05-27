@@ -201,8 +201,10 @@ public class VehicleMonitoringController implements ModelDriven<Object>,
           tripDetails, new Date(tripStatus.getServiceDate()),
           vehicleStatus.getVehicleId());
 
-      if (onwardCalls) {
+      boolean deviated = tripStatus.getStatus().toLowerCase().equals("deviated");
 
+      if (onwardCalls && !deviated) {
+    	  
         List<TripStopTimeBean> stopTimes = tripDetails.getSchedule().getStopTimes();
 
         long serviceDateMillis = tripStatus.getServiceDate();
