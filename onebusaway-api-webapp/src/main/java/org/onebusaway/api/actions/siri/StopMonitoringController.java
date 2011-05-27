@@ -169,9 +169,15 @@ public class StopMonitoringController implements ModelDriven<Object>,
         continue;
       }
 
-      String status = adbean.getStatus();
-      if (status.toLowerCase().equals("deviated")) {
-        continue;
+      TripStatusBean tripStatus = adbean.getTripStatus();
+      String status = null;
+      
+      if(tripStatus != null) {
+    	  status = tripStatus.getStatus();
+    	 
+    	  if (status.toLowerCase().equals("deviated")) {
+    		  continue;
+    	  }
       }
 
       /* gather data about trip, route, and stops */
