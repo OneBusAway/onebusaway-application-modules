@@ -31,11 +31,6 @@
         <property name="postalCode" value="98105" />
     </bean>
 
-    <!--
-        Allows configuration of a default service area for searches when the user hasn't already specified a search area
-    -->
-    <bean id="serviceArea" class="org.onebusaway.presentation.impl.DefaultServiceAreaServiceImpl" />
-
     <bean id="wikiDocumentService" class="org.onebusaway.wiki.xwiki.impl.XWikiDocumentServiceImpl">
         <property name="xwikiUrl" value="http://wiki.onebusaway.org" />
     </bean>

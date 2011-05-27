@@ -99,7 +99,7 @@ public class StopFinderWidget extends Composite {
         LatLng from = LatLng.newInstance(b.getMinLat(), b.getMinLon());
         LatLng to = LatLng.newInstance(b.getMaxLat(), b.getMaxLon());
         LatLngBounds bounds = LatLngBounds.newInstance(from, to);
-        
+        System.out.println(bounds);
         int zoom = _map.getBoundsZoomLevel(bounds);
         _map.setZoomLevel(zoom);
       }

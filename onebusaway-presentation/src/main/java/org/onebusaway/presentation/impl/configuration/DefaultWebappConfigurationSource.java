@@ -8,6 +8,7 @@ import javax.servlet.ServletContext;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.presentation.impl.ServletLibrary;
+import org.onebusaway.presentation.services.ServiceAreaService;
 import org.onebusaway.presentation.services.configuration.ConfigurationSource;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -21,6 +22,8 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
 
   private ServletContext _servletContext;
 
+  private ServiceAreaService _serviceAreaService;
+
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
     _transitDataService = transitDataService;
@@ -29,6 +32,11 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
   @Autowired
   public void setServletContext(ServletContext servletContext) {
     _servletContext = servletContext;
+  }
+  
+  @Autowired
+  public void setServiceAreaService(ServiceAreaService serviceAreaService) {
+    _serviceAreaService = serviceAreaService;
   }
 
   @Override
@@ -67,6 +75,8 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
       config.put("spanLat", bounds.getMaxLat() - bounds.getMinLat());
       config.put("spanLon", bounds.getMaxLon() - bounds.getMinLon());
     }
+    
+    config.put("hasDefaultServiceArea",_serviceAreaService.hasDefaultServiceArea());
 
     return config;
   }

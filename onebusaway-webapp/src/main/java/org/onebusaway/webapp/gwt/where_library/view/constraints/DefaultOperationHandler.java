@@ -1,6 +1,7 @@
 package org.onebusaway.webapp.gwt.where_library.view.constraints;
 
 import org.onebusaway.users.client.model.UserBean;
+import org.onebusaway.webapp.gwt.where_library.OBAConfig;
 import org.onebusaway.webapp.gwt.where_library.UserContext;
 import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
 
@@ -19,7 +20,7 @@ public class DefaultOperationHandler implements OperationHandler {
 
     TransitMapManager manager = context.getTransitMapManager();
     manager.showStopsInCurrentView();
-    
+
     Panel panel = context.getPanel();
     DefaultOperationWidget widget = new DefaultOperationWidget();
     panel.add(widget);
@@ -46,7 +47,10 @@ public class DefaultOperationHandler implements OperationHandler {
 
     public void onSuccess(UserBean user, boolean askForDefaultSearchLocation) {
 
-      if (!user.hasDefaultLocation() || user.getDefaultLocationName() == null) {
+      OBAConfig config = OBAConfig.getConfig();
+
+      if (!config.hasDefaultServiceArea()
+          && (!user.hasDefaultLocation() || user.getDefaultLocationName() == null)) {
 
         if (user.isRememberPreferencesEnabled() && askForDefaultSearchLocation) {
 

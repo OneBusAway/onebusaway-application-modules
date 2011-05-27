@@ -5,12 +5,20 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import com.google.gwt.core.client.JavaScriptObject;
 
 public class OBAConfig extends JavaScriptObject {
-  
-  public static native OBAConfig getConfig() /*-{ return $wnd.OBA.Config }-*/;
-  
+
+  private static native OBAConfig getInternalConfig() /*-{ return $wnd.OBA.Config }-*/;
+
+  private static OBAConfig _instance = getInternalConfig();
+
+  public static OBAConfig getConfig() {
+    return _instance;
+  }
+
   protected OBAConfig() {
 
   }
+
+  public final native boolean hasDefaultServiceArea() /*-{ return this.hasDefaultServiceArea; }-*/;
 
   public final native double getCenterLat() /*-{ return this.centerLat; }-*/;
 

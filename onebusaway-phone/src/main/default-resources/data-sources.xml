@@ -26,17 +26,6 @@
         <property name="password" value="" />
     </bean>
 
-    <bean id="serviceArea" class="org.onebusaway.presentation.impl.DefaultServiceAreaServiceImpl">
-        <property name="defaultBounds">
-            <bean class="org.onebusaway.geospatial.model.CoordinateBounds">
-                <constructor-arg value="47.19271717" index="0" />
-                <constructor-arg value="-122.439962896" index="1" />
-                <constructor-arg value="47.979333" index="2" />
-                <constructor-arg value="-122.1854" index="3" />
-            </bean>
-        </property>
-    </bean>
-
     <bean id="pronunciationFactory" class="org.onebusaway.presentation.impl.text.XmlTextModificationsFactory">
         <property name="resource" value="classpath:pronunciations.xml" />
     </bean>
