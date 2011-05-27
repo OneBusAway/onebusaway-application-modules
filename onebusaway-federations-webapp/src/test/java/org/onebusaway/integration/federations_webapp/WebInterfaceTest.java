@@ -1,17 +1,22 @@
 package org.onebusaway.integration.federations_webapp;
 
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import com.thoughtworks.selenium.SeleneseTestCase;
+import com.thoughtworks.selenium.DefaultSelenium;
 
-public class WebInterfaceTest extends SeleneseTestCase {
+public class WebInterfaceTest {
+
+  private DefaultSelenium selenium;
 
   @Before
   public void setUp() throws Exception {
-    String port = System.getProperty("org.onebusaway.federations_webapp.port", "8080");
+    int port = Integer.parseInt(System.getProperty(
+        "org.onebusaway.federations_webapp.port", "8080"));
     System.out.println("port=" + port);
-    setUp("http://localhost:" + port + "/", "*firefox");
+    selenium = new DefaultSelenium("localhost", port, "*firefox", "/");
   }
 
   @Test
@@ -21,15 +26,15 @@ public class WebInterfaceTest extends SeleneseTestCase {
     selenium.type("serviceClass", "org.onebusaway.TransitData");
     selenium.click("submit");
     selenium.waitForPageToLoad("30000");
-    verifyEquals("org.onebusaway.TransitData",
+    assertEquals("org.onebusaway.TransitData",
         selenium.getText("//tr[2]/td[1]"));
-    verifyEquals("http://onebusaway.org/", selenium.getText("//tr[2]/td[2]/a"));
-    verifyEquals("true", selenium.getText("//tr[2]/td[3]"));
+    assertEquals("http://onebusaway.org/", selenium.getText("//tr[2]/td[2]/a"));
+    assertEquals("true", selenium.getText("//tr[2]/td[3]"));
     selenium.click("//tr[2]/td[5]/a");
     selenium.waitForPageToLoad("30000");
-    verifyEquals("false", selenium.getText("//tr[2]/td[3]"));
+    assertEquals("false", selenium.getText("//tr[2]/td[3]"));
     selenium.click("//tr[2]/td[6]/a");
     selenium.waitForPageToLoad("30000");
-    verifyFalse(selenium.isTextPresent("org.onebusaway.TransitData"));
+    assertFalse(selenium.isTextPresent("org.onebusaway.TransitData"));
   }
 }
