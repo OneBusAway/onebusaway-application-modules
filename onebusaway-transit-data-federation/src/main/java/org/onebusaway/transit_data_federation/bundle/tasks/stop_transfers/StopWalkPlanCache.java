@@ -18,8 +18,12 @@ import org.opentripplanner.routing.error.VertexNotFoundException;
 import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.routing.spt.SPTVertex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class StopWalkPlanCache {
+
+  private static final Logger _log = LoggerFactory.getLogger(StopWalkPlanCache.class);
 
   private PathService _pathService;
 
@@ -71,7 +75,8 @@ class StopWalkPlanCache {
         Double distance = getPathsAsDistance(paths);
         _cache.put(pair, distance);
       } catch (VertexNotFoundException ex) {
-        throw new IllegalStateException("stops=" + pair, ex);
+        _log.warn("walk path error between stops=" + pair, ex);
+        _cache.put(pair, null);
       }
 
     } else {
