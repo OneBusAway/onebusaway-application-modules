@@ -49,27 +49,28 @@ public class DefaultOperationHandler implements OperationHandler {
 
       OBAConfig config = OBAConfig.getConfig();
 
-      if (!config.hasDefaultServiceArea()
-          && (!user.hasDefaultLocation() || user.getDefaultLocationName() == null)) {
+      boolean noDefaultServiceAera = !config.hasDefaultServiceArea();
+      boolean noUserLocation = !user.hasDefaultLocation()
+          || user.getDefaultLocationName() == null;
+      boolean ask = user.isRememberPreferencesEnabled()
+          && askForDefaultSearchLocation;
 
-        if (user.isRememberPreferencesEnabled() && askForDefaultSearchLocation) {
+      if (noDefaultServiceAera && noUserLocation && ask) {
 
-          final SetInitialSearchLocationPopupPanel popup = new SetInitialSearchLocationPopupPanel();
-          popup.addCloseHandler(new CloseHandler<PopupPanel>() {
+        final SetInitialSearchLocationPopupPanel popup = new SetInitialSearchLocationPopupPanel();
+        popup.addCloseHandler(new CloseHandler<PopupPanel>() {
 
-            @Override
-            public void onClose(CloseEvent<PopupPanel> arg0) {
-              UserBean updatedUser = popup.getUser();
-              if (updatedUser != null)
-                onSuccess(updatedUser, false);
-            }
-          });
+          @Override
+          public void onClose(CloseEvent<PopupPanel> arg0) {
+            UserBean updatedUser = popup.getUser();
+            if (updatedUser != null)
+              onSuccess(updatedUser, false);
+          }
+        });
 
-          popup.show();
+        popup.show();
 
-        }
-
-      } else {
+      } else if (!noUserLocation) {
 
         if (!_context.isLocationSet()) {
           LatLng center = LatLng.newInstance(user.getDefaultLocationLat(),
