@@ -16,7 +16,7 @@ public class WebInterfaceTest {
     int port = Integer.parseInt(System.getProperty(
         "org.onebusaway.federations_webapp.port", "8080"));
     System.out.println("port=" + port);
-    selenium = new DefaultSelenium("localhost", port, "*firefox", "/");
+    selenium = new DefaultSelenium("localhost", port, "*firefox", "/onebusaway-federations-webapp");
   }
 
   @Test
