@@ -1,0 +1,60 @@
+  While OneBusAway can work with just static schedule data, all the most interesting features require real-time transit information.
+
+Vehicle Location Services
+
+* SIRI VM
+
+* ASC Orbital - Orbcad
+
+* !MyBus
+
+* Custom Implementation
+
+
+Service Alert Services =
+
+* SIRI SX
+
+Logging
+
+  By default, we don't log real-time vehicle tracking information to a database, but we do offer support for this feature.  You might wish to log incoming vehicle tracking information for later analysis, for example.  To enable logging of real-time vehicle tracking information, add the following to your <<<data-sources.xml>>> config file for your <<<onebusaway-transit-data-federation-webapp>>>:
+
++---+
+<bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+    <property name="properties">
+        <props>
+            <prop key="blockLocationServiceImpl.persistBlockLocationRecords">true</prop>
+        </props>
+    </property>
+</bean>
++---+
+
+Location records will be logged to the following table:
+
++---+
+transit_data_block_location_records
++---+
+
+The table has the following columns:
+
+  * id - int(11)      
+  * block_agencyId - varchar(50)  
+  * block_id - varchar(255) 
+  * distanceAlongTrip - double       
+  * distanceAlongBlock - double       
+  * locationLat - double       
+  * locationLon - double       
+  * orientation - double       
+  * phase - varchar(50)  
+  * scheduleDeviation - double       
+  * serviceDate - bigint(20)   
+  * status - varchar(255) 
+  * time - bigint(20)   
+  * timepoint_agencyId - varchar(50)  
+  * timepoint_id - varchar(255) 
+  * timepointPredictedTime - bigint(20)   
+  * timepointScheduledTime - bigint(20)   
+  * trip_agencyId - varchar(50)  
+  * trip_id - varchar(255) 
+  * vehicle_agencyId - varchar(50)  
+  * vehicle_id - varchar(255) 

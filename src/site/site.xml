@@ -13,6 +13,13 @@
             <item name="Release Notes" href="/release-notes.html"/>
             <item name="API Javadoc" href="/apidocs/index.html"/>
         </menu>
+        <menu name="Guides">
+            <item name="Installation Guide" href="/installation-guide.html"/>
+            <item name="Transit Data Bundle" href="/transit-data-bundle.html"/>
+            <item name="Realtime Configuration Guide" href="/realtime-configuration-guide.html"/>
+            <item name="Webapp Installation Guide" href="/webapp-installation-guide.html"/>
+            <item name="Troubleshooting Guide" href="/troubleshooting-guide.html"/>
+        </menu>
         <menu ref="reports" />
     </body>
 </project>
