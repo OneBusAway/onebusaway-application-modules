@@ -72,7 +72,7 @@
                 <s:param name="id" value="trip.id" />
                 <s:param name="stop" value="stopId" />
             </s:url> <s:a href="%{tripUrl}">
-                <s:property value="trip.tripHeadsign" />
+                <s:property value="arrivalsAndDeparturesPresentation.getTripHeadsign(top)" />
             </s:a></div>            
             <div class="arrivalsTimePanel">
                   <s:if test="frequency == null">

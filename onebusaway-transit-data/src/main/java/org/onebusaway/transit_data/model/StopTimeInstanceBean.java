@@ -8,8 +8,12 @@ public class StopTimeInstanceBean implements Serializable {
   private static final long serialVersionUID = 3L;
 
   private long serviceDate;
+  
+  private boolean arrivalEnabled;
 
   private long arrivalTime;
+  
+  private boolean departureEnabled;
 
   private long departureTime;
 
@@ -28,6 +32,14 @@ public class StopTimeInstanceBean implements Serializable {
   public void setServiceDate(long serviceDate) {
     this.serviceDate = serviceDate;
   }
+  
+  public boolean isArrivalEnabled() {
+    return arrivalEnabled;
+  }
+
+  public void setArrivalEnabled(boolean arrivalEnabled) {
+    this.arrivalEnabled = arrivalEnabled;
+  }
 
   public long getArrivalTime() {
     return arrivalTime;
@@ -35,6 +47,14 @@ public class StopTimeInstanceBean implements Serializable {
 
   public void setArrivalTime(long arrivalTime) {
     this.arrivalTime = arrivalTime;
+  }
+
+  public boolean isDepartureEnabled() {
+    return departureEnabled;
+  }
+
+  public void setDepartureEnabled(boolean departureEnabled) {
+    this.departureEnabled = departureEnabled;
   }
 
   public long getDepartureTime() {

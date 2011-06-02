@@ -15,6 +15,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -46,7 +47,8 @@ public class DistanceAlongShapeLibrary {
   }
 
   public PointAndIndex[] getDistancesAlongShape(ShapePoints shapePoints,
-      List<StopTimeEntryImpl> stopTimes) throws StopIsTooFarFromShapeException {
+      List<StopTimeEntryImpl> stopTimes)
+      throws InvalidStopToShapeMappingException, StopIsTooFarFromShapeException {
 
     PointAndIndex[] stopTimePoints = new PointAndIndex[stopTimes.size()];
 
@@ -128,7 +130,8 @@ public class DistanceAlongShapeLibrary {
   private List<PointAndIndex> computeBestAssignment(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes,
       List<List<PointAndIndex>> possibleAssignments, UTMProjection projection,
-      List<XYPoint> projectedShapePoints) {
+      List<XYPoint> projectedShapePoints)
+      throws InvalidStopToShapeMappingException {
 
     checkFirstAndLastStop(stopTimes, possibleAssignments, shapePoints,
         projection, projectedShapePoints);
@@ -289,7 +292,9 @@ public class DistanceAlongShapeLibrary {
 
   private void constructError(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes,
-      List<List<PointAndIndex>> possibleAssignments, UTMProjection projection) {
+      List<List<PointAndIndex>> possibleAssignments, UTMProjection projection)
+      throws InvalidStopToShapeMappingException {
+
     StopTimeEntryImpl first = stopTimes.get(0);
     StopTimeEntryImpl last = stopTimes.get(stopTimes.size() - 1);
 
@@ -345,7 +350,7 @@ public class DistanceAlongShapeLibrary {
 
     _log.error("shape points:\n" + b.toString());
 
-    throw new IllegalStateException();
+    throw new InvalidStopToShapeMappingException(first.getTrip());
   }
 
   private static class Assignment implements Comparable<Assignment> {
@@ -363,7 +368,17 @@ public class DistanceAlongShapeLibrary {
     }
   }
 
-  public static class StopIsTooFarFromShapeException extends Exception {
+  public static class DistanceAlongShapeException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public DistanceAlongShapeException(String message) {
+      super(message);
+    }
+  }
+
+  public static class StopIsTooFarFromShapeException extends
+      DistanceAlongShapeException {
 
     private static final long serialVersionUID = 1L;
     private final StopTimeEntry _stopTime;
@@ -389,6 +404,23 @@ public class DistanceAlongShapeLibrary {
 
     public CoordinatePoint getPoint() {
       return _point;
+    }
+  }
+
+  public static class InvalidStopToShapeMappingException extends
+      DistanceAlongShapeException {
+
+    private static final long serialVersionUID = 1L;
+
+    private final TripEntry _trip;
+
+    public InvalidStopToShapeMappingException(TripEntry trip) {
+      super("trip=" + trip.getId());
+      _trip = trip;
+    }
+
+    public TripEntry getTrip() {
+      return _trip;
     }
   }
 }

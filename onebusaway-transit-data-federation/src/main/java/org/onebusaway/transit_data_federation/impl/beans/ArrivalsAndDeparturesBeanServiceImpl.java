@@ -33,6 +33,7 @@ import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepart
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.RealTimeHistoryService;
 import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationHistogram;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -234,6 +235,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     BlockStopTimeEntry blockStopTime = instance.getBlockStopTime();
     BlockTripEntry blockTrip = blockStopTime.getTrip();
+    BlockConfigurationEntry blockConfig = blockTrip.getBlockConfiguration();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
     StopEntry stop = stopTime.getStop();
     TripEntry trip = stopTime.getTrip();
@@ -241,6 +243,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     TripBean tripBean = _tripBeanService.getTripForId(trip.getId());
     pab.setTrip(tripBean);
     pab.setBlockTripSequence(blockTrip.getSequence());
+    
+    pab.setArrivalEnabled(blockStopTime.getBlockSequence() > 0);
+    pab.setDepartureEnabled(blockStopTime.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
 
     StopTimeNarrative stopTimeNarrative = _narrativeService.getStopTimeForEntry(stopTime);
     pab.setRouteShortName(stopTimeNarrative.getRouteShortName());

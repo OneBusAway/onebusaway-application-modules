@@ -813,6 +813,9 @@ public class BeanFactoryV2 {
 
     bean.setTripHeadsign(trip.getTripHeadsign());
 
+    bean.setArrivalEnabled(ad.isArrivalEnabled());
+    bean.setDepartureEnabled(ad.isDepartureEnabled());
+    
     bean.setScheduledArrivalTime(ad.getScheduledArrivalTime());
     bean.setScheduledDepartureTime(ad.getScheduledDepartureTime());
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());

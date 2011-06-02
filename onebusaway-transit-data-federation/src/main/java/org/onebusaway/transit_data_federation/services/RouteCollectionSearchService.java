@@ -19,7 +19,7 @@ public interface RouteCollectionSearchService {
 
   /**
    * 
-   * @param shortNameQuery the route short name query
+   * @param nameQuery the route short name query
    * @param maxResultCount maximum number of results to keep
    * @param minScoreToKeep score tuning metric to prune result (implementation
    *          dependent)
@@ -28,8 +28,7 @@ public interface RouteCollectionSearchService {
    * @throws IOException
    * @throws ParseException
    */
-  public SearchResult<AgencyAndId> searchForRoutesByShortName(
-      String shortNameQuery, int maxResultCount, double minScoreToKeep)
+  public SearchResult<AgencyAndId> searchForRoutesByName(
+      String nameQuery, int maxResultCount, double minScoreToKeep)
       throws IOException, ParseException;
-
 }

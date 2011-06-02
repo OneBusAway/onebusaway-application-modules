@@ -167,7 +167,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
       throws ServiceException, InvalidArgumentServiceException {
 
     try {
-      return _searchService.searchForRoutesByShortName(query.getQuery(),
+      return _searchService.searchForRoutesByName(query.getQuery(),
           query.getMaxCount() + 1, MIN_SEARCH_SCORE);
     } catch (IOException e) {
       throw new ServiceException();

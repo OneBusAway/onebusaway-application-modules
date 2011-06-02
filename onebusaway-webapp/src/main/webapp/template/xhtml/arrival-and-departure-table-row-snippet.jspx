@@ -49,11 +49,11 @@
                 <s:param name="stopId" value="stop.id" />
               </s:url>
               <s:if test="#excludeTripLinks">
-                <s:property value="trip.tripHeadsign" />
+                <s:property value="#presentation.getTripHeadsign(top)" />
               </s:if>
               <s:else>
                 <s:a href="%{tripUrl}">
-                  <s:property value="trip.tripHeadsign" />
+                  <s:property value="#presentation.getTripHeadsign(top)" />
                 </s:a>
               </s:else>
             </div>

@@ -82,7 +82,7 @@ bound</s:if></div><s:if test="!#stopsIter.last"><small>and</small></s:if>
 
                 <td>
                 <div>
-                <div class="arrivalsDestinationEntry"><s:property value="trip.tripHeadsign" /></div>
+                <div class="arrivalsDestinationEntry"><s:property value="arrivalsAndDeparturesPresentation.getTripHeadsign(top)" /></div>
                 <div class="arrivalsTimePanel">
                   <s:if test="frequency == null">
                     <span class="arrivalsTimeEntry">

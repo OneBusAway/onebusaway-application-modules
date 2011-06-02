@@ -27,6 +27,7 @@ Quick Config
   By default, the builder accepts two command line options:
 
   * path/to/your/gtfs.zip - path to your GTFS feed
+  
   * bundle_output_path - the output directory where bundle artifacts will be written
 
   This quick start mode can be used to quickly build a transit data bundle for a single transit agency, but without out much configuration flexibility.  If you need more flexibility, see Advanced Config below.
@@ -36,13 +37,17 @@ Advanced Config
   The bundle also accepts an xml file command line argument for more advanced configuration options:
 
   * bundle.xml - path to your bundle config xml file
+  
   * bundle_output_path - the output directory where bundle artifacts will be written
 
   The configuration details for the bundle are captured in an xml file.  The <<<bundle.xml>>> xml config file gives you a lot of control of how your bundle is built:
 
   * change the target install database - see {{{./database-setup-and-configuration.html}Database Setup and Configuration}} for more details
+  
   * combine multiple GTFS feeds
+  
   * override and remap GTFS agency ids
+  
   * add additional build phases
 
   Let's look at a quick example:
@@ -144,23 +149,35 @@ Advanced Config
 
 Customizing the Build Phase
 
-The transit data bundle building process is broken up into a number of phases.  The default build phases are:
+  The transit data bundle building process is broken up into a number of phases.  The default build phases are:
 
   * <<<start>>> - the first phase, responsible for cleaning up the db if run
+  
   * <<<gtfs>>> - load the GTFS into the database
+  
   * <<<route_collections>>> - compute aggregate route collections and load them into the database
+  
   * <<<route_search_index>>> - compute the route name search index
+  
   * <<<stop_search_index>>> - compute the stop name search index
+  
   * <<<calendar_service>>> - compute service calendar information
+  
   * <<<otp_graph>>> - compute the OTP street graph
+  
   * <<<transit_graph>>> - compute the transit network graph
+  
   * <<<block_indices>>> - compute block indices for fast time-based indexing
+  
   * <<<narratives>>> - compute various narrative objects
+  
   * <<<stop_transfers>>> - compute an optimized set of stop transfers
+  
   * <<<shape_geospatial_index>>> - create a geospatial index from route shape information
+  
   * <<<pre_cache>>> - prime the cache by requesting a number of common data structures
   
-There are also a number of optional tasks not enabled by default:
+  There are also a number of optional tasks not enabled by default:
 
   * <<<transfer_patterns>>> - transfer pattern calculation for advanced trip planning functionality
   * <<<transfer_patterns_hub_analysis>>> - identify hub stops from local transfer patterns
@@ -172,8 +189,11 @@ There are also a number of optional tasks not enabled by default:
   The bundle builder accepts a number of command-line options that can control the build process, allowing you to control which phases of the build are run.
 
   * <<<-skip phase_name>>> - skips the specified build phase.  Can be repeated.
+  
   * <<<-only phase_name>>> - only runs the specified build phase.  Can be repeated.
+  
   * <<<-skipTo phase_name>>> - jump ahead to the specified build phase.  Only specify once.
+  
   * <<<-include phase_name>>> - include the specified build phase, useful when the phase is not enabled by default.  Can be repeated.
 
 * Adding a Custom Build Phase

@@ -27,11 +27,6 @@ var oba_where_standard_trip = function(data) {
         	var endIconUrl = OBA.Resources.Map['RouteEnd.png'];
         	new google.maps.Marker({position: endPoint, map: map, icon: endIconUrl, clickable: false});
         }
-		
-		var bounds = OBA.Maps.getPointsAsBounds(path);
-        
-		if( ! bounds.isEmpty() )
-			map.fitBounds(bounds);
 	};
 	
 	/**
@@ -82,9 +77,15 @@ var oba_where_standard_trip = function(data) {
 		var schedule = tripDetails.schedule;
 		var stopTimes = schedule.stopTimes;
 		
+		var bounds = new google.maps.LatLngBounds();
+		
 		jQuery.each(stopTimes, function(index) {
 			stopHandler(this.stop, index);
+			bounds.extend(new google.maps.LatLng(this.stop.lat,this.stop.lon));
 		});
+		
+		if( ! bounds.isEmpty() )
+			map.fitBounds(bounds);
 	};
 	
 	/****

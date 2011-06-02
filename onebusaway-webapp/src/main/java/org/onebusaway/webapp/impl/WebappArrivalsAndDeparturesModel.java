@@ -45,6 +45,7 @@ public class WebappArrivalsAndDeparturesModel extends
   }
 
   public void setShowArrivals(boolean showArrivals) {
+    super.setShowArrivals(showArrivals);
     _arrivalsAndDeparturesPresentation.setShowArrivals(showArrivals);
   }
 

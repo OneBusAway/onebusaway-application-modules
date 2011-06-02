@@ -12,6 +12,7 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.InvalidStopToShapeMappingException;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.StopIsTooFarFromShapeException;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -35,10 +36,16 @@ public class StopTimeEntriesFactory {
 
   private DistanceAlongShapeLibrary _distanceAlongShapeLibrary;
 
+  private long _invalidStopToShapeMappingExceptionCount;
+
   @Autowired
   public void setDistanceAlongShapeLibrary(
       DistanceAlongShapeLibrary distanceAlongShapeLibrary) {
     _distanceAlongShapeLibrary = distanceAlongShapeLibrary;
+  }
+
+  public long getInvalidStopToShapeMappingExceptionCount() {
+    return _invalidStopToShapeMappingExceptionCount;
   }
 
   public List<StopTimeEntryImpl> processStopTimes(TransitGraphImpl graph,
@@ -127,6 +134,8 @@ public class StopTimeEntriesFactory {
             + stop.getStopLon() + " shapeId=" + shapeId + " shapePoint="
             + point + " index=" + pindex.index + " distance="
             + pindex.distanceFromTarget);
+      } catch (InvalidStopToShapeMappingException ex) {
+        _invalidStopToShapeMappingExceptionCount++;
       }
     }
 

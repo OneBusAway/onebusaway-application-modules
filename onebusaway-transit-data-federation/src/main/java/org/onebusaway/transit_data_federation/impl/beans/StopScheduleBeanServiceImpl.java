@@ -37,6 +37,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
@@ -192,7 +193,9 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
       for (StopTimeInstance sti : stopTimesForRoute) {
 
+        BlockStopTimeEntry bst = sti.getStopTime();
         BlockTripEntry blockTrip = sti.getTrip();
+        BlockConfigurationEntry blockConfig = blockTrip.getBlockConfiguration();
         TripEntry trip = blockTrip.getTrip();
 
         AgencyAndId tripId = trip.getId();
@@ -206,6 +209,9 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         stiBean.setArrivalTime(sti.getArrivalTime());
         stiBean.setDepartureTime(sti.getDepartureTime());
         stiBean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
+        
+        stiBean.setArrivalEnabled(bst.getBlockSequence() > 0);
+        stiBean.setDepartureEnabled(bst.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
 
         String directionId = trip.getDirectionId();
         if (directionId == null)

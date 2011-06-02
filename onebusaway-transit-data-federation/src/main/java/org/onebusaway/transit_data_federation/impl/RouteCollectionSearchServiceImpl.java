@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -64,7 +66,7 @@ public class RouteCollectionSearchServiceImpl implements
     }
   }
 
-  public SearchResult<AgencyAndId> searchForRoutesByShortName(String value,
+  public SearchResult<AgencyAndId> searchForRoutesByName(String value,
       int maxResultCount, double minScoreToKeep) throws IOException,
       ParseException {
 
@@ -97,10 +99,16 @@ public class RouteCollectionSearchServiceImpl implements
       String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
       AgencyAndId id = new AgencyAndId(agencyId, routeShortName);
       
-      String lowerCaseRouteShortName = routeShortName.toLowerCase();
+      Set<String> tokens = new HashSet<String>();
+      if( routeShortName != null) {
+        for( String token : routeShortName.toLowerCase().split("\\b") ) {
+          if( ! token.isEmpty())
+            tokens.add(token);
+        }
+      }
       
       // Result must have a minimum score to qualify
-      if (sd.score < minScoreToKeep && !lowerCaseRouteShortName.equals(lowerCaseQueryValue))
+      if (sd.score < minScoreToKeep && !tokens.contains(lowerCaseQueryValue))
         continue;
 
       // Keep the best score for a particular id

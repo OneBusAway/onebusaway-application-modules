@@ -19,6 +19,8 @@ import org.apache.commons.cli.Parser;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
 import org.opentripplanner.graph_builder.impl.osm.FileBasedOpenStreetMapProviderImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
@@ -31,6 +33,8 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
  * @see FederatedTransitDataBundleCreator
  */
 public class FederatedTransitDataBundleCreatorMain {
+  
+  private static final Logger _log = LoggerFactory.getLogger(FederatedTransitDataBundleCreatorMain.class);
 
   private static final String ARG_SKIP_TO = "skipTo";
 
@@ -160,7 +164,7 @@ public class FederatedTransitDataBundleCreatorMain {
 
         creator.run();
       } catch (Exception ex) {
-        ex.printStackTrace();
+        _log.error("error building transit data bundle",ex);
         System.exit(-1);
       }
     } catch (ParseException ex) {

@@ -40,6 +40,8 @@ public class TripEntriesFactory {
 
   private ShapePointService _shapePointsService;
 
+  private boolean _throwExceptionOnInvalidStopToShapeMappingException = true;
+
   @Autowired
   public void setUniqueService(UniqueService uniqueService) {
     _uniqueService = uniqueService;
@@ -64,6 +66,11 @@ public class TripEntriesFactory {
   public void setStopTimeEntriesFactory(
       StopTimeEntriesFactory stopTimeEntriesFactory) {
     _stopTimeEntriesFactory = stopTimeEntriesFactory;
+  }
+
+  public void setThrowExceptionOnInvalidStopToShapeMappingException(
+      boolean throwExceptionOnInvalidStopToShapeMappingException) {
+    _throwExceptionOnInvalidStopToShapeMappingException = throwExceptionOnInvalidStopToShapeMappingException;
   }
 
   public void processTrips(TransitGraphImpl graph) {
@@ -91,6 +98,13 @@ public class TripEntriesFactory {
         if (tripEntry != null)
           tripEntry.setRouteCollectionId(unique(routeCollection.getId()));
       }
+    }
+
+    if (_stopTimeEntriesFactory.getInvalidStopToShapeMappingExceptionCount() > 0
+        && _throwExceptionOnInvalidStopToShapeMappingException) {
+      throw new IllegalStateException(
+          "Multiple instances of InvalidStopToShapeMappingException thrown: count="
+              + _stopTimeEntriesFactory.getInvalidStopToShapeMappingExceptionCount());
     }
 
     graph.refreshTripMapping();

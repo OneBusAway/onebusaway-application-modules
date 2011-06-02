@@ -64,7 +64,9 @@ public class ArrivalsAndDeparturesModel {
   protected UserBean _user;
 
   private boolean _onlyNext = false;
-  
+
+  private boolean _showArrivals = false;
+
   private int _refresh = 60;
 
   @Autowired
@@ -134,11 +136,15 @@ public class ArrivalsAndDeparturesModel {
   public void setOnlyNext(boolean onlyNext) {
     _onlyNext = onlyNext;
   }
-  
+
+  public void setShowArrivals(boolean showArrivals) {
+    _showArrivals = showArrivals;
+  }
+
   public void setRefresh(int refresh) {
     _refresh = refresh;
   }
-  
+
   public int getRefresh() {
     return _refresh;
   }
@@ -201,6 +207,7 @@ public class ArrivalsAndDeparturesModel {
   private void filterResults() {
 
     applyRouteFilter();
+    applyArrivalsVsDeparturesFilter();
     applyOnlyNextFilter();
   }
 
@@ -219,39 +226,53 @@ public class ArrivalsAndDeparturesModel {
     _result.setArrivalsAndDepartures(filtered);
   }
 
-  private void applyOnlyNextFilter() {
-    
-    if( ! _onlyNext)
-      return;
-    
-    List<ArrivalAndDepartureBean> current = _result.getArrivalsAndDepartures();
-    Collections.sort( current,SORT_BY_TIME);
-    
-    Map<String,ArrivalAndDepartureBean> keepers = new HashMap<String, ArrivalAndDepartureBean>();
-    for( ArrivalAndDepartureBean bean : current) {
-      String key = getRouteKeyForArrivalAndDeparture(bean);
-      if( ! keepers.containsKey(key))
-        keepers.put(key,bean);
+  private void applyArrivalsVsDeparturesFilter() {
+
+    List<ArrivalAndDepartureBean> filtered = new ArrayList<ArrivalAndDepartureBean>();
+
+    for (ArrivalAndDepartureBean bean : _result.getArrivalsAndDepartures()) {
+      if ((_showArrivals && bean.isArrivalEnabled())
+          || (!_showArrivals && bean.isDepartureEnabled()))
+        filtered.add(bean);
     }
-    
-    List<ArrivalAndDepartureBean> filtered = new ArrayList<ArrivalAndDepartureBean>(keepers.values());
-    OrderConstraint c = _order == null ? SORT_BY_TIME : _order;
-    Collections.sort(filtered,c);
 
     _result.setArrivalsAndDepartures(filtered);
   }
-  
+
+  private void applyOnlyNextFilter() {
+
+    if (!_onlyNext)
+      return;
+
+    List<ArrivalAndDepartureBean> current = _result.getArrivalsAndDepartures();
+    Collections.sort(current, SORT_BY_TIME);
+
+    Map<String, ArrivalAndDepartureBean> keepers = new HashMap<String, ArrivalAndDepartureBean>();
+    for (ArrivalAndDepartureBean bean : current) {
+      String key = getRouteKeyForArrivalAndDeparture(bean);
+      if (!keepers.containsKey(key))
+        keepers.put(key, bean);
+    }
+
+    List<ArrivalAndDepartureBean> filtered = new ArrayList<ArrivalAndDepartureBean>(
+        keepers.values());
+    OrderConstraint c = _order == null ? SORT_BY_TIME : _order;
+    Collections.sort(filtered, c);
+
+    _result.setArrivalsAndDepartures(filtered);
+  }
+
   private String getRouteKeyForArrivalAndDeparture(ArrivalAndDepartureBean bean) {
     String name = bean.getRouteShortName();
-    if( name != null)
+    if (name != null)
       return name;
     TripBean trip = bean.getTrip();
     name = trip.getRouteShortName();
-    if( name != null)
+    if (name != null)
       return name;
     RouteBean route = trip.getRoute();
     name = route.getShortName();
-    if( name != null)
+    if (name != null)
       return name;
     return route.getId();
   }
@@ -302,8 +323,10 @@ public class ArrivalsAndDeparturesModel {
 
   private static class SortByDestination implements OrderConstraint {
     public int compare(ArrivalAndDepartureBean o1, ArrivalAndDepartureBean o2) {
-      String a = StringLibrary.getBestName(o1.getTripHeadsign(), o1.getTrip().getTripHeadsign(),"");
-      String b = StringLibrary.getBestName(o2.getTripHeadsign(), o2.getTrip().getTripHeadsign(),"");
+      String a = StringLibrary.getBestName(o1.getTripHeadsign(),
+          o1.getTrip().getTripHeadsign(), "");
+      String b = StringLibrary.getBestName(o2.getTripHeadsign(),
+          o2.getTrip().getTripHeadsign(), "");
       int i = a.compareTo(b);
       if (i == 0)
         return SORT_BY_TIME.compare(o1, o2);

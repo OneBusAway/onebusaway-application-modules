@@ -41,6 +41,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   private String routeLongName;
 
   private String tripHeadsign;
+  
+  private boolean departureEnabled;
 
   private long scheduledDepartureTime;
 
@@ -49,6 +51,8 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   private long predictedDepartureTime;
 
   private TimeIntervalV2 predictedDepartureInterval;
+  
+  private boolean arrivalEnabled;
 
   private long scheduledArrivalTime;
 
@@ -154,6 +158,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
     this.blockTripSequence = blockTripSequence;
   }
 
+  public boolean isArrivalEnabled() {
+    return arrivalEnabled;
+  }
+
+  public void setArrivalEnabled(boolean arrivalEnabled) {
+    this.arrivalEnabled = arrivalEnabled;
+  }
+
   public long getScheduledArrivalTime() {
     return scheduledArrivalTime;
   }
@@ -169,6 +181,14 @@ public class ArrivalAndDepartureV2Bean implements Serializable {
   public void setScheduledArrivalInterval(
       TimeIntervalV2 scheduledArrivalInterval) {
     this.scheduledArrivalInterval = scheduledArrivalInterval;
+  }
+
+  public boolean isDepartureEnabled() {
+    return departureEnabled;
+  }
+
+  public void setDepartureEnabled(boolean departureEnabled) {
+    this.departureEnabled = departureEnabled;
   }
 
   public long getScheduledDepartureTime() {

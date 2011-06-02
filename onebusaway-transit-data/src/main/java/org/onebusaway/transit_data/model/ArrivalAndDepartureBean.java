@@ -39,6 +39,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private int blockTripSequence;
 
+  private boolean arrivalEnabled;
+
   private long scheduledArrivalTime;
 
   private TimeIntervalBean scheduledArrivalInterval;
@@ -46,6 +48,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   private long predictedArrivalTime;
 
   private TimeIntervalBean predictedArrivalInterval;
+
+  private boolean departureEnabled;
 
   private long scheduledDepartureTime;
 
@@ -125,6 +129,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.blockTripSequence = blockTripSequence;
   }
 
+  public boolean isArrivalEnabled() {
+    return arrivalEnabled;
+  }
+
+  public void setArrivalEnabled(boolean arrivalEnabled) {
+    this.arrivalEnabled = arrivalEnabled;
+  }
+
   public long getScheduledArrivalTime() {
     return scheduledArrivalTime;
   }
@@ -157,6 +169,14 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   public void setPredictedArrivalInterval(
       TimeIntervalBean predictedArrivalInterval) {
     this.predictedArrivalInterval = predictedArrivalInterval;
+  }
+
+  public boolean isDepartureEnabled() {
+    return departureEnabled;
+  }
+
+  public void setDepartureEnabled(boolean departureEnabled) {
+    this.departureEnabled = departureEnabled;
   }
 
   public long getScheduledDepartureTime() {

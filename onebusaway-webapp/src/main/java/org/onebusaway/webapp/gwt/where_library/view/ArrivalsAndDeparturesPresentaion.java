@@ -4,6 +4,7 @@ import org.onebusaway.presentation.client.RoutePresenter;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages;
 
 import com.google.gwt.core.client.GWT;
@@ -42,6 +43,16 @@ public class ArrivalsAndDeparturesPresentaion {
 
   public boolean isShowArrivals() {
     return _showArrivals;
+  }
+  
+  public String getTripHeadsign(ArrivalAndDepartureBean bean) {
+    if( bean.getTripHeadsign() != null)
+      return bean.getTripHeadsign();
+    TripBean trip = bean.getTrip();
+    if( trip.getTripHeadsign() != null)
+      return trip.getTripHeadsign();
+    RouteBean route = trip.getRoute();
+    return RoutePresenter.getDescriptionForRoute(route);
   }
 
   /**

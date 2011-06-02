@@ -1,6 +1,6 @@
-onebusaway-application-modules
+OneBusAway Application Suite
 
-  This is the parent module for all the modules the make up the primary {{{http://onebusaway.org}OneBusAway}} website
+  This is the primary documentation for all the modules the make up the {{{http://onebusaway.org}OneBusAway}} website
 and application framework. 
   
   <<Latest Version:>> ${currentVersion}
@@ -9,9 +9,9 @@ and application framework.
   
 * Functionality  
   
-  The applications provides some key functionality:
+  The applications provide some key functionality:
   
-  * TODO
+  * SIRI
   
   []
 

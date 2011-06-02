@@ -15,6 +15,8 @@ import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.transit_data.model.StopCalendarDayBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
+import org.onebusaway.transit_data.model.StopRouteDirectionScheduleBean;
+import org.onebusaway.transit_data.model.StopRouteScheduleBean;
 import org.onebusaway.transit_data.model.StopScheduleBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyInstanceBean;
@@ -31,9 +33,9 @@ public class ScheduleAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
-  private static final StopTimeAdapter _stopTimeAdapter = new StopTimeAdapter();
-
   private static final StopCalendarDayAdapter _stopCalendarDayAdapter = new StopCalendarDayAdapter();
+
+  private final StopTimeAdapter _stopTimeAdapter = new StopTimeAdapter();
 
   @Autowired
   private TransitDataService _service;
@@ -93,6 +95,8 @@ public class ScheduleAction extends ActionSupport {
     _timeZone = TimeZone.getTimeZone(tzName);
     if (_timeZone == null)
       _timeZone = TimeZone.getDefault();
+
+    filterResults();
 
     return SUCCESS;
   }
@@ -176,6 +180,41 @@ public class ScheduleAction extends ActionSupport {
    * 
    ****/
 
+  private void filterResults() {
+    
+    List<StopRouteScheduleBean> routes = _result.getRoutes();
+    List<StopRouteScheduleBean> filteredRoutes = new ArrayList<StopRouteScheduleBean>(routes.size());
+    
+    for( StopRouteScheduleBean route : routes) {
+      
+      List<StopRouteDirectionScheduleBean> directions = route.getDirections();
+      List<StopRouteDirectionScheduleBean> filteredDirections = new ArrayList<StopRouteDirectionScheduleBean>(directions.size());
+      
+      for( StopRouteDirectionScheduleBean direction : directions ) {
+        
+        List<StopTimeInstanceBean> stopTimes = direction.getStopTimes();
+        List<StopTimeInstanceBean> filteredStopTimes = new ArrayList<StopTimeInstanceBean>(stopTimes.size());
+        
+        for( StopTimeInstanceBean stopTime : stopTimes) {
+          if((_showArrivals && stopTime.isArrivalEnabled()) || (!_showArrivals && stopTime.isDepartureEnabled()))
+            filteredStopTimes.add(stopTime);
+        }
+        
+        if( ! filteredStopTimes.isEmpty()) {
+          direction.setStopTimes(stopTimes);
+          filteredDirections.add(direction);
+        }
+      }
+      
+      if( ! filteredDirections.isEmpty()) {
+        route.setDirections(filteredDirections);
+        filteredRoutes.add(route);
+      }
+    }
+    
+    _result.setRoutes(filteredRoutes);
+  }
+
   public Date getShiftedDate(Date date) {
     return getShiftedDateStatic(date);
   }
@@ -244,10 +283,10 @@ public class ScheduleAction extends ActionSupport {
     return tuples;
   }
 
-  private static class StopTimeAdapter implements
-      IAdapter<StopTimeInstanceBean, Date> {
+  private class StopTimeAdapter implements IAdapter<StopTimeInstanceBean, Date> {
     public Date adapt(StopTimeInstanceBean source) {
-      return new Date(source.getDepartureTime());
+      return new Date(_showArrivals ? source.getArrivalTime()
+          : source.getDepartureTime());
     }
   }
 
