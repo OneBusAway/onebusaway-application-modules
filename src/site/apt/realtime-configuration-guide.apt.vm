@@ -29,32 +29,54 @@ Logging
 </bean>
 +---+
 
-Location records will be logged to the following table:
+  Location records will be logged to the following table:
 
 +---+
 transit_data_block_location_records
 +---+
 
-The table has the following columns:
+  The table has the following columns:
 
   * id - int(11)      
+  
   * block_agencyId - varchar(50)  
+  
   * block_id - varchar(255) 
+  
   * distanceAlongTrip - double       
+  
   * distanceAlongBlock - double       
+  
   * locationLat - double       
+  
   * locationLon - double       
+  
   * orientation - double       
+  
   * phase - varchar(50)  
+  
   * scheduleDeviation - double       
+  
   * serviceDate - bigint(20)   
+  
   * status - varchar(255) 
+  
   * time - bigint(20)   
+  
   * timepoint_agencyId - varchar(50)  
+  
   * timepoint_id - varchar(255) 
+  
   * timepointPredictedTime - bigint(20)   
+  
   * timepointScheduledTime - bigint(20)   
+  
   * trip_agencyId - varchar(50)  
+  
   * trip_id - varchar(255) 
+  
   * vehicle_agencyId - varchar(50)  
-  * vehicle_id - varchar(255) 
+  
+  * vehicle_id - varchar(255)
+  
+  [] 

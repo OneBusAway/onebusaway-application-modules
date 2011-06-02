@@ -74,9 +74,13 @@ Custom Hibernate Configuration
   Notes:
   
   * <<DO>>: Do make sure you've copied the JAR file for your JDBC provider into your webapp classpath.  We only include HSQLDB out of the box.
+  
   * <<DO>>: Do make sure you've already created the database where appropriate and that the credentials you've supplied work correctly
+  
   * <<DON'T>>: Don't worry about creating the initial tables in the database.  Hibernate should automatically take care of that the first time the application is run.
 
+  []
+  
 * Adding additional Hibernate entity classes
 
   There are a couple of ways to add additional entity classes to the list supported by the Hibernate SessionFactory.  This typically only needs to be done when you are working inside one of the !OneBusAway application modules and need to extend the set of classes that can be serialized to a database or manage the set of stored queries that can operate on those entity classes.
@@ -174,20 +178,24 @@ Where Databases Get Used
   The `onebusaway-users` module uses a database to manage user account information.  This module is included by three of the major UI modules:
 
   * onebusaway-sms-webapp
+  
   * onebusaway-phone-webapp
+  
   * onebusaway-webapp
+  
+  []
 
   As such, each of the three application modules typically need a `data-sources.xml` resource with the appropriate `dataSource` definition pointing to your user database.
 
 * onebusaway-transit-data-federation
 
-The <<<onebusaway-transit-data-federation>>> stores all its transit data in a back-end database as well.  Typically, a separate database than the user database mentioned above is used for storing transit data so that transit data can be more easily versioned and updated without interfering with more permanent user database.
+  The <<<onebusaway-transit-data-federation>>> stores all its transit data in a back-end database as well.  Typically, a separate database than the user database mentioned above is used for storing transit data so that transit data can be more easily versioned and updated without interfering with more permanent user database.
 
-The main transit data federation application container, <<<onebusaway-transit-data-federation-webapp>>> needs a <<<data-sources.xml>>> resource with the appropriate <<<dataSource>>> definition pointing to your transit data database.  This is typically the same data source you specified when {{{./transit-data-bundle.html} creating your transit data bundle}}.
+  The main transit data federation application container, <<<onebusaway-transit-data-federation-webapp>>> needs a <<<data-sources.xml>>> resource with the appropriate <<<dataSource>>> definition pointing to your transit data database.  This is typically the same data source you specified when {{{./transit-data-bundle.html} creating your transit data bundle}}.
 
-In addition to the normal <<<dataSource>>>, the <<<onebusaway-transit-data-federation>>> also expects a secondary <<<mutableDataSource>>> definition.  Since most of the transit data in the transit data bundle is pretty much constant after initial import, we specify an additional data source for non-constant data, such as real-time data records.  Again, this more easily allows us to version the constant transit database from the non-constant transit database.
+  In addition to the normal <<<dataSource>>>, the <<<onebusaway-transit-data-federation>>> also expects a secondary <<<mutableDataSource>>> definition.  Since most of the transit data in the transit data bundle is pretty much constant after initial import, we specify an additional data source for non-constant data, such as real-time data records.  Again, this more easily allows us to version the constant transit database from the non-constant transit database.
 
-For more details, see:
+  For more details, see:
 
 +---+
 onebusaway-transit-data-federation/src/main/resources/org/onebusaway/transit_data_federation/application-context-hibernate-mutable.xml

@@ -11,17 +11,26 @@ Getting Help
   * IRC: #onebusaway on Freenode 
   
   * Direct email: {{{mailto:contact@onebusaway.org}contact@onebusaway.org}}
+  
+  []
 
 Downloading the Software
 
   The individual webapps that make up the OneBusAway application suite can each be downloaded below:
 
   * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation&c=withAllDependencies&e=jar&v=${currentVersion}}onebusaway-transit-data-federation-${currentVersion}.jar}} - build your transit data bundle
+  
   * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation-webapp&e=war&v=${currentVersion}}onebusaway-transit-data-federation-webapp-${currentVersion}.war}} - service your transit data bundle
+  
   * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-webapp&e=war&v=${currentVersion}}onebusaway-webapp-${currentVersion}.war}} - web interface
+  
   * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-api-webapp&e=war&v=${currentVersion}}onebusaway-api-webapp-${currentVersion}.war}} - api interface
+  
   * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-sms-webapp&e=war&v=${currentVersion}}onebusaway-sms-webapp-${currentVersion}.war}} - sms interface
+  
   * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-phone-webapp&e=war&v=${currentVersion}}onebusaway-phone-webapp-${currentVersion}.war}} - phone (IVR) interface
+  
+  []
 
   At minimum you need to download <<<onebusaway-transit-data-federation.jar>>> to build your transit data bundle, <<<onebusaway-transit-data-federation-webapp.war>>> to serve your transit data bundle, and then at least one of the user interface webapps.
 
@@ -32,19 +41,28 @@ Building a Bundle
   You will use the downloaded <<<onebusaway-transit-data-federation.jar>>> to build the bundle, but the instructions are complex enough to deserve there own page:
 
   * {{{./transit-data-bundle.html}Guide to Building a Transit Data Bundle}}}
+  
+  []
 
 Running the Webapps
 
   OneBusAway is composed of a series of webapps that are designed to be run in a standard Java webapp container.  You can choose whichever container you like, but we use Apache Tomcat by default.  You can download it here:
 
   * {{{http://tomcat.apache.org/download-55.cgi}Download Apache Tomcat 5.5}}
+  
+  []
 
   Which webapps will you be running?  No matter which user-interface modules you choose (web,api,sms,phone), you will need an instance of <<<onebusaway-transit-data-federation-webapp.war>>> running to expose the transit data bundle you built previously and to power the various user interfaces.  From there, pick the webapp for the user interface module you want to use:
 
   * onebusaway-webapp - standard web interface
+  
   * onebusaway-api-webapp - REST and SIRI api interfaces
+  
   * onebusaway-sms-webapp - SMS interface
+  
   * onebusaway-phone-webapp - phone (IVR) interface
+  
+  []
 
   There is plenty of documentation on the web for installing webapps in your container of choice, so we will focus on specific configuration details here along with some tips for making things work with Apache Tomcat.
 
@@ -73,11 +91,17 @@ data-sources.xml
   It's important to note that when you override contextConfigLocation in this way, you'll need to additional import the <<<application-context-webapp.xml>>> for the webapp you are attempting to configure (it's normally included in the 'contextConfigLocation' entry in web.xml for the webapp, but we lose it when we override).  The location of the webapp is dependent on the webapp:
 
   * onebusaway-api-webapp: classpath:org/onebusaway/api/application-context-webapp.xml
+  
   * onebusaway-phone-webapp: classpath:org/onebusaway/phone/application-context-webapp.xml
+  
   * onebusaway-sms-webapp: classpath:org/onebusaway/sms/application-context-webapp.xml
+  
   * onebusaway-webapp: classpath:org/onebusaway/webapp/application-context-webapp.xml
+  
   * onebusaway-transit-data-federation-webapp: classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml 
-
+  
+  []
+  
   For more info, see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html
 
 * Configuring onebusaway-transit-data-federation-webapp
@@ -125,7 +149,7 @@ data-sources.xml
 
   While each user interface webapp has specific configuration details, they share a lot of configuration in common.  Specifically, we need to configure where they will find the <<<onebusaway-transit-data-federation-webapp>>> and where they will find the user database.  For more details, see AdminTransitDataServiceConfiguration and {{{./database-setup-and-configuration.html}Database Setup and Configuration}}.
 
-Each user interface webapp `data-sources.xml` should include these common entries:
+  Each user interface webapp `data-sources.xml` should include these common entries:
 
 +---+
 <?xml version="1.0" encoding="UTF-8"?>
@@ -158,3 +182,5 @@ Each user interface webapp `data-sources.xml` should include these common entrie
   For specific installation and configuration details for each of the webapps, see the specific installation guides:
 
   * {{{./webapp-installation-guide.html}onebusaway-webapp installation guide}}
+  
+  []
