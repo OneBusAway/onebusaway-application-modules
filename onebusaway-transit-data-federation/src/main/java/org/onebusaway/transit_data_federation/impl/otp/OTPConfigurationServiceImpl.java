@@ -196,5 +196,7 @@ class OTPConfigurationServiceImpl implements OTPConfigurationService {
 
     if (constraints.getCurrentTime() != -1)
       options.currentTime = constraints.getCurrentTime();
+    
+    options.lookaheadTime = constraints.getLookaheadTime();
   }
 }

@@ -21,4 +21,6 @@ public class OBATraverseOptions extends TraverseOptions {
   public boolean extraSpecialMode = false;
   
   public int numItineraries = 1;
+  
+  public int lookaheadTime = 0;
 }

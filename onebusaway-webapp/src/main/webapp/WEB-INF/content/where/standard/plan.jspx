@@ -70,6 +70,9 @@
         <span>Result Count:</span> <input id="resultCount" type="text" />
       </div>
       <div>
+        <span>Lookahead Time:</span> <input id="lookaheadTime" type="text" />
+      </div>
+      <div>
         <span>Use Real-Time:</span> <input id="useRealtime" type="checkbox" />
       </div>      
       <div>

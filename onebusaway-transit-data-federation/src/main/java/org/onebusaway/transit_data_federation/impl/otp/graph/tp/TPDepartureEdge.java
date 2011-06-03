@@ -42,21 +42,25 @@ public class TPDepartureEdge extends AbstractEdge {
     Pair<StopEntry> stopPair = _pathState.getStops();
 
     TargetTime targetTime = new TargetTime(s0.getTime(), obaOpts.currentTime);
+    int lookaheadTime = 0;
+    if (s0.getData().getNumBoardings() == 0)
+      lookaheadTime = obaOpts.lookaheadTime;
 
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getNextDeparturesForStopPair(
         stopPair.getFirst(), stopPair.getSecond(), targetTime,
-        obaOpts.numItineraries, obaOpts.useRealtime);
+        obaOpts.numItineraries, obaOpts.useRealtime, lookaheadTime);
 
     TraverseResult results = null;
 
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
 
       ArrivalAndDepartureInstance departure = pair.getFirst();
-      if (departure.getBestDepartureTime() < s0.getTime())
+      if (departure.getBestDepartureTime() < s0.getTime() - lookaheadTime
+          * 1000)
         continue;
 
-      Vertex toV = new TPBlockDepartureVertex(_context, _pathState,
-          departure, pair.getSecond());
+      Vertex toV = new TPBlockDepartureVertex(_context, _pathState, departure,
+          pair.getSecond());
 
       int dwellTime = computeWaitTime(s0, pair);
 
@@ -64,9 +68,17 @@ public class TPDepartureEdge extends AbstractEdge {
           dwellTime, s0);
 
       OBAEditor s1 = (OBAEditor) s0.edit();
-      s1.incrementTimeInSeconds(dwellTime);
-      
-      if( departure.getBlockSequence() != null)
+      s1.setTime(departure.getBestDepartureTime());
+
+      /**
+       * If the departure time is less than the starting state time, it must
+       * mean the departure was included as determined by the lookahead
+       * parameter. Thus, we indicate that we have a lookahead itinerary.
+       */
+      if (departure.getBestDepartureTime() < s0.getTime())
+        s1.setLookaheadItinerary();
+
+      if (departure.getBlockSequence() != null)
         s1.appendTripSequence(departure.getBlockSequence());
       else
         s1.appendTripSequence(departure.getBlockTrip());
@@ -98,6 +110,8 @@ public class TPDepartureEdge extends AbstractEdge {
    ****/
 
   private int computeWaitTime(State s0, Pair<ArrivalAndDepartureInstance> pair) {
-    return (int) ((pair.getFirst().getBestDepartureTime() - s0.getTime()) / 1000);
+    int waitTime = (int) ((pair.getFirst().getBestDepartureTime() - s0.getTime()) / 1000);
+    // If we have a lookahead departure, the wait time will actually be zero
+    return Math.max(waitTime, 0);
   }
 }

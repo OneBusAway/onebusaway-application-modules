@@ -36,13 +36,10 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
 
   public static final ShortestPathTreeFactory FACTORY = new FactoryImpl();
 
-  private Map<Vertex, Map<TripSequence, SPTVertex>> sptVerticesByTripSequence = new HashMap<Vertex, Map<TripSequence, SPTVertex>>();
+  private Map<Vertex, ResultCollection> sptVerticesByTripSequence = new HashMap<Vertex, ResultCollection>();
 
-  public Map<TripSequence, SPTVertex> getVerticesByTripSequence(Vertex vertex) {
-    Map<TripSequence, SPTVertex> map = sptVerticesByTripSequence.get(vertex);
-    if (map == null)
-      return Collections.emptyMap();
-    return map;
+  public ResultCollection getVerticesByTripSequence(Vertex vertex) {
+    return sptVerticesByTripSequence.get(vertex);
   }
 
   /****
@@ -57,20 +54,32 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
     OBAStateData data = (OBAStateData) state.getData();
     TripSequence tripSequence = data.getTripSequence();
 
-    Map<TripSequence, SPTVertex> map = getTripSequenceAndSptVerticesForVertex(vertex);
+    ResultCollection collection = getCollectionForVertex(vertex);
+
+    Map<TripSequence, SPTVertex> map = collection.vertices;
 
     SPTVertex existing = map.get(tripSequence);
-
+    
     /**
-     * We only keep the N-best itineraries. If adding this itinerary will push
-     * us over the limit, figure out which one we should prune.
+     * We only keep the N-best non-lookahead itineraries. If adding this
+     * itinerary will push us over the limit, figure out which one we should
+     * prune. If the itinerary to add is a lookahead, it won't affect the count,
+     * so we don't have to check in that case.
      */
-    if (existing == null && map.size() == opts.numItineraries) {
+    if (existing == null && collection.itineraryCount == opts.numItineraries
+        && !data.isLookaheadItinerary()) {
+
       Max<TripSequence> m = new Max<TripSequence>();
+
       for (Map.Entry<TripSequence, SPTVertex> entry : map.entrySet()) {
         TripSequence key = entry.getKey();
         SPTVertex v = entry.getValue();
-        m.add(v.weightSum, key);
+        OBAStateData vData = (OBAStateData) v.state.getData();
+        /**
+         * Only check against non-lookahead itineraries
+         */
+        if (!vData.isLookaheadItinerary())
+          m.add(v.weightSum, key);
       }
 
       /**
@@ -87,11 +96,30 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
        */
       TripSequence key = m.getMaxElement();
       map.remove(key);
+      collection.itineraryCount++;
     }
 
     if (existing == null || weightSum < existing.weightSum) {
+
+      /**
+       * If the existing itinerary is a non-lookahead, we need to adjust the
+       * count.
+       */
+      if (existing != null) {
+        OBAStateData vData = (OBAStateData) existing.state.getData();
+        if (!vData.isLookaheadItinerary())
+          collection.itineraryCount--;
+      }
+
       SPTVertex ret = new SPTVertex(vertex, state, weightSum, options);
       map.put(tripSequence, ret);
+
+      /**
+       * If the new itinerary is a non-lookahead, we need to adjust the count.
+       */
+      if (!data.isLookaheadItinerary())
+        collection.itineraryCount++;
+
       return ret;
     }
 
@@ -106,11 +134,11 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
   @Override
   public GraphPath getPath(Vertex dest, boolean optimize) {
     SPTVertex end = null;
-    Map<TripSequence, SPTVertex> map = sptVerticesByTripSequence.get(dest);
-    if (map == null)
+    ResultCollection collection = sptVerticesByTripSequence.get(dest);
+    if (collection == null)
       return null;
 
-    for (SPTVertex v : map.values()) {
+    for (SPTVertex v : collection.vertices.values()) {
       if (end == null || v.weightSum < end.weightSum) {
         end = v;
       }
@@ -121,11 +149,11 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
 
   @Override
   public List<GraphPath> getPaths(Vertex dest, boolean optimize) {
-    Map<TripSequence, SPTVertex> map = sptVerticesByTripSequence.get(dest);
-    if (map == null)
+    ResultCollection collection = sptVerticesByTripSequence.get(dest);
+    if (collection == null)
       return Collections.emptyList();
     List<GraphPath> paths = new ArrayList<GraphPath>();
-    for (SPTVertex vertex : map.values()) {
+    for (SPTVertex vertex : collection.vertices.values()) {
       GraphPath path = createPathForVertex(vertex, optimize);
       paths.add(path);
     }
@@ -145,26 +173,25 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
    * Private Methods
    ****/
 
-  private Map<TripSequence, SPTVertex> getTripSequenceAndSptVerticesForVertex(
-      Vertex vertex) {
+  private ResultCollection getCollectionForVertex(Vertex vertex) {
 
     if (vertex instanceof SearchLocal) {
       SearchLocal local = (SearchLocal) vertex;
-      Map<TripSequence, SPTVertex> map = local.getSearchLocalValue();
-      if (map == null) {
-        map = new HashMap<TripSequence, SPTVertex>();
-        local.setSearchLocalValue(map);
+      ResultCollection collection = local.getSearchLocalValue();
+      if (collection == null) {
+        collection = new ResultCollection();
+        local.setSearchLocalValue(collection);
       }
-      return map;
+      return collection;
     }
 
-    Map<TripSequence, SPTVertex> map = sptVerticesByTripSequence.get(vertex);
+    ResultCollection collection = sptVerticesByTripSequence.get(vertex);
 
-    if (map == null) {
-      map = new HashMap<TripSequence, SPTVertex>();
-      sptVerticesByTripSequence.put(vertex, map);
+    if (collection == null) {
+      collection = new ResultCollection();
+      sptVerticesByTripSequence.put(vertex, collection);
     }
-    return map;
+    return collection;
   }
 
   private static final class FactoryImpl implements ShortestPathTreeFactory {
@@ -172,6 +199,21 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
     @Override
     public ShortestPathTree create() {
       return new TripSequenceShortestPathTree();
+    }
+  }
+
+  public static class ResultCollection {
+
+    private Map<TripSequence, SPTVertex> vertices = new HashMap<TripSequence, SPTVertex>();
+
+    private int itineraryCount;
+    
+    public Map<TripSequence, SPTVertex> getVertices() {
+      return vertices;
+    }
+    
+    public int getItineraryCount() {
+      return itineraryCount;
     }
   }
 }

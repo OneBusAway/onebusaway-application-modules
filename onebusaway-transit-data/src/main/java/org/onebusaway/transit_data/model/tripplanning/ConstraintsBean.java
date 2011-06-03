@@ -46,6 +46,21 @@ public class ConstraintsBean implements Serializable {
    */
   private long currentTime = -1;
 
+  /**
+   * When you've specified a departure time, the {@link #lookaheadTime}
+   * parameter specifies a time value, in seconds, that will shift the departure
+   * time forward to include trips that start after the lookahead-adjusted start
+   * time. Why not just modify the departure time yourself? Trips that start
+   * between the lookahead departure time and the original departure time are
+   * not counted against {@link #resultCount}. This parameter is designed to
+   * allow you to include trips that JUST left in the result set while still
+   * including the trips that depart as normal.
+   * 
+   * For arriveBy trips, the semantics are reversed aka the arrival time is
+   * shifted to be later by the {@link #lookaheadTime} parameter.
+   */
+  private int lookaheadTime = 0;
+
   private ItineraryBean selectedItinerary = null;
 
   public ConstraintsBean() {
@@ -211,6 +226,29 @@ public class ConstraintsBean implements Serializable {
 
   public void setCurrentTime(long currentTime) {
     this.currentTime = currentTime;
+  }
+
+  /**
+   * When you've specified a departure time, the {@link #lookaheadTime}
+   * parameter specifies a time value, in seconds, that will shift the departure
+   * time forward to include trips that start after the lookahead-adjusted start
+   * time. Why not just modify the departure time yourself? Trips that start
+   * between the lookahead departure time and the original departure time are
+   * not counted against {@link #resultCount}. This parameter is designed to
+   * allow you to include trips that JUST left in the result set while still
+   * including the trips that depart as normal.
+   * 
+   * For arriveBy trips, the semantics are reversed aka the arrival time is
+   * shifted to be later by the {@link #lookaheadTime} parameter.
+   * 
+   * @return time, in seconds
+   */
+  public int getLookaheadTime() {
+    return lookaheadTime;
+  }
+
+  public void setLookaheadTime(int lookaheadTime) {
+    this.lookaheadTime = lookaheadTime;
   }
 
   public ItineraryBean getSelectedItinerary() {

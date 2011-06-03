@@ -397,19 +397,21 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   @Override
   public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
       StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
-      int resultCount, boolean applyRealTime) {
+      int resultCount, boolean applyRealTime, int lookaheadTime) {
 
     Date tFrom = new Date(targetTime.getTargetTime());
 
     int runningEarlySlack = applyRealTime ? MINUTES_EARLY_BUFFER * 60 : 0;
-    int runningLateSlack = applyRealTime ? MINUTES_LATE_BUFFER * 60 : 0;
+    int runningLateSlack = (applyRealTime ? MINUTES_LATE_BUFFER * 60 : 0) + lookaheadTime;
 
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getNextDeparturesBetweenStopPair(
         fromStop, toStop, tFrom, runningEarlySlack, runningLateSlack,
         resultCount);
+    
+    Date tShifted = new Date(targetTime.getTargetTime() - lookaheadTime * 1000);
 
     return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs,
-        tFrom, null, applyRealTime, true, false);
+        tShifted, null, applyRealTime, true, false);
   }
 
   @Override

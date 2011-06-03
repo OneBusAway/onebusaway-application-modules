@@ -10,7 +10,7 @@ var oba_where_standard_plan = function(data) {
 
 	var boolParams = [ 'useRealTime' ];
 
-	var floatParams = [ 'resultCount', 'walkSpeed', 'walkReluctance', 'maxWalkingDistance',
+	var floatParams = [ 'resultCount', 'lookaheadTime', 'walkSpeed', 'walkReluctance', 'maxWalkingDistance',
 			'initialWaitReluctance', 'waitReluctance', 'minTransferTime',
 			'transferCost', 'maxTransfers', 'maxComputationTime' ];
 

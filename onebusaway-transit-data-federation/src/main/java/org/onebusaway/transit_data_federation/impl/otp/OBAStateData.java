@@ -13,6 +13,8 @@ public class OBAStateData extends StateData {
   private final long initialWaitTime;
 
   private final TripSequence tripSequence;
+  
+  private final boolean lookaheadItinerary;
 
   public OBAStateData() {
     this(new OBAEditor());
@@ -23,6 +25,7 @@ public class OBAStateData extends StateData {
     this.maxBlockSequence = editor.maxBlockSequence;
     this.initialWaitTime = editor.initialWaitTime;
     this.tripSequence = editor.tripSequence;
+    this.lookaheadItinerary = editor.lookaheadItinerary;
   }
 
   public int getMaxBlockSequence() {
@@ -35,6 +38,10 @@ public class OBAStateData extends StateData {
 
   public TripSequence getTripSequence() {
     return tripSequence;
+  }
+  
+  public boolean isLookaheadItinerary() {
+    return lookaheadItinerary;
   }
 
   @Override
@@ -49,6 +56,8 @@ public class OBAStateData extends StateData {
     private long initialWaitTime = 0;
 
     private TripSequence tripSequence = TripSequence.EMPTY;
+    
+    private boolean lookaheadItinerary = false;
 
     protected OBAEditor() {
 
@@ -59,6 +68,7 @@ public class OBAStateData extends StateData {
       this.maxBlockSequence = state.maxBlockSequence;
       this.initialWaitTime = state.initialWaitTime;
       this.tripSequence = state.tripSequence;
+      this.lookaheadItinerary = state.lookaheadItinerary;
     }
 
     @Override
@@ -79,6 +89,10 @@ public class OBAStateData extends StateData {
         tripSequence = new TripSequence(blockTrip);
       else
         tripSequence = tripSequence.extend(blockTrip);
+    }
+    
+    public void setLookaheadItinerary() {
+      this.lookaheadItinerary = true;
     }
   }
 
