@@ -15,6 +15,7 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
 import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
+import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.SearchTerminationStrategyImpl;
 import org.onebusaway.transit_data_federation.impl.otp.TPRemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.TripSequenceShortestPathTree;
@@ -26,6 +27,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TransitGrap
 import org.onebusaway.transit_data_federation.services.tripplanner.ItinerariesService;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.algorithm.GenericAStar;
+import org.opentripplanner.routing.algorithm.strategies.GenericAStarFactory;
 import org.opentripplanner.routing.algorithm.strategies.SkipTraverseResultStrategy;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
@@ -111,6 +113,10 @@ class ItinerariesServiceImpl implements ItinerariesService {
       return getTransferPatternStops(fromVertex, toVertex,
           new Date(targetTime), options);
     } else {
+
+      options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
+      options.aStarSearchFactory = new GenericAStarFactoryImpl();
+
       return _pathService.plan(fromVertex, toVertex, state, options, 1);
     }
   }
@@ -147,7 +153,7 @@ class ItinerariesServiceImpl implements ItinerariesService {
       Date time, TraverseOptions options) {
 
     options = options.clone();
-
+    
     /**
      * Set walk only
      */
@@ -269,5 +275,17 @@ class ItinerariesServiceImpl implements ItinerariesService {
 
       return false;
     }
+  }
+  
+  
+  private static class GenericAStarFactoryImpl implements GenericAStarFactory {
+
+    @Override
+    public GenericAStar createAStarInstance() {
+      GenericAStar instance = new GenericAStar();
+      instance.setSearchTerminationStrategy(new SearchTerminationStrategyImpl());
+      instance.setShortestPathTreeFactory(TripSequenceShortestPathTree.FACTORY);
+      return instance;
+    }    
   }
 }
