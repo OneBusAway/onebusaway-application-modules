@@ -1204,8 +1204,24 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
         Date time = new Date(targetTime);
 
+        CoordinatePoint walkFrom = leg.getFrom();
+        CoordinatePoint walkTo = leg.getTo();
+
+        /**
+         * Adjust the start and end locations for walk-legs to match the query
+         * points. This is a hack, since it allows the client to pass in the
+         * original unmodified itinerary from a previous to call, but also
+         * slightly change their start or end point (aka user walks some
+         * distance) without having to understand how to update the itinerary
+         * object itself.
+         */
+        if (i == 0)
+          walkFrom = from.getLocation();
+        if (i + 1 == legs.size())
+          walkTo = to.getLocation();
+
         GraphPath path = _itinerariesService.getWalkingItineraryBetweenPoints(
-            leg.getFrom(), leg.getTo(), time, options);
+            walkFrom, walkTo, time, options);
 
         if (path == null) {
           throw new IllegalStateException("expected walking path to exist");
