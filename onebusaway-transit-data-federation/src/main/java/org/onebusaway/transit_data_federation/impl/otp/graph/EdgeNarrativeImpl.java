@@ -76,4 +76,9 @@ public class EdgeNarrativeImpl implements EdgeNarrative, MutableEdgeNarrative {
   public boolean isRoundabout() {
     return false;
   }
+
+  @Override
+  public String getNote() {
+    return null;
+  }
 }
