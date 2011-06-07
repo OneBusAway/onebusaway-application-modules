@@ -302,8 +302,10 @@ class StopTimeServiceImpl implements StopTimeService {
             ? IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE
             : IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE;
 
+        int sourceStopIndexSize = sourceStopIndex.size();
+        
         int sourceIndex = GenericBinarySearch.search(sourceStopIndex,
-            sourceStopIndex.size(), relativeTime, adapter);
+            sourceStopIndexSize, relativeTime, adapter);
 
         /**
          * When searching for arrival times, the index is an upper bound, so we
@@ -312,7 +314,7 @@ class StopTimeServiceImpl implements StopTimeService {
         if (!findDepartures)
           sourceIndex--;
 
-        while (0 <= sourceIndex && sourceIndex < sourceStopIndex.size()) {
+        while (0 <= sourceIndex && sourceIndex < sourceStopIndexSize) {
 
           BlockStopTimeEntry stopTimeSource = sourceStopIndex.getBlockStopTimeForIndex(sourceIndex);
           StopTimeInstance stiSource = new StopTimeInstance(stopTimeSource,

@@ -9,6 +9,8 @@ public abstract class AbstractBlockSequenceIndex {
 
   protected final List<BlockSequence> _sequences;
 
+  protected final ServiceIdActivation _serviceIds;
+
   public AbstractBlockSequenceIndex(List<BlockSequence> sequences) {
     if (sequences == null)
       throw new IllegalArgumentException("sequences is null");
@@ -18,6 +20,7 @@ public abstract class AbstractBlockSequenceIndex {
     checkSequencesHaveSameServiceids(sequences);
 
     _sequences = sequences;
+    _serviceIds = _sequences.get(0).getBlockConfig().getServiceIds();
   }
 
   public List<BlockSequence> getSequences() {
@@ -25,7 +28,7 @@ public abstract class AbstractBlockSequenceIndex {
   }
 
   public ServiceIdActivation getServiceIds() {
-    return _sequences.get(0).getBlockConfig().getServiceIds();
+    return _serviceIds;
   }
 
   public int size() {

@@ -110,7 +110,7 @@ class ItinerariesServiceImpl implements ItinerariesService {
     State state = new State(targetTime, new OBAStateData());
 
     if (_transferPathService.isEnabled()) {
-      return getTransferPatternStops(fromVertex, toVertex,
+      return getTransferPatternItinerariesBetween(fromVertex, toVertex,
           new Date(targetTime), options);
     } else {
 
@@ -180,7 +180,7 @@ class ItinerariesServiceImpl implements ItinerariesService {
     return _streetVertexIndexService.getClosestVertex(c, options);
   }
 
-  private List<GraphPath> getTransferPatternStops(Vertex fromVertex,
+  private List<GraphPath> getTransferPatternItinerariesBetween(Vertex fromVertex,
       Vertex toVertex, Date time, OBATraverseOptions options) {
 
     Set<StopEntry> sourceStops = Collections.emptySet();
