@@ -10,6 +10,7 @@ import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
 import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDeparturePairQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -42,21 +43,24 @@ public class TPDepartureEdge extends AbstractEdge {
     Pair<StopEntry> stopPair = _pathState.getStops();
 
     TargetTime targetTime = new TargetTime(s0.getTime(), obaOpts.currentTime);
-    int lookaheadTime = 0;
+
+    ArrivalAndDeparturePairQuery query = new ArrivalAndDeparturePairQuery();
+    query.setResultCount(obaOpts.numItineraries);
+    query.setApplyRealTime(obaOpts.useRealtime);
+    query.setIncludePrivateService(false);
     if (s0.getData().getNumBoardings() == 0)
-      lookaheadTime = obaOpts.lookaheadTime;
+      query.setLookaheadTime(obaOpts.lookaheadTime);
 
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getNextDeparturesForStopPair(
-        stopPair.getFirst(), stopPair.getSecond(), targetTime,
-        obaOpts.numItineraries, obaOpts.useRealtime, lookaheadTime);
+        stopPair.getFirst(), stopPair.getSecond(), targetTime, query);
 
     TraverseResult results = null;
 
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
 
       ArrivalAndDepartureInstance departure = pair.getFirst();
-      if (departure.getBestDepartureTime() < s0.getTime() - lookaheadTime
-          * 1000)
+      if (departure.getBestDepartureTime() < s0.getTime()
+          - query.getLookaheadTime() * 1000)
         continue;
 
       Vertex toV = new TPBlockDepartureVertex(_context, _pathState, departure,

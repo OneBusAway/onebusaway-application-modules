@@ -17,6 +17,7 @@ import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDeparturePairQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
@@ -172,10 +173,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
   @Override
   public List<ArrivalAndDepartureInstance> getNextScheduledBlockTripDeparturesForStop(
-      StopEntry stop, long time) {
+      StopEntry stop, long time, boolean includePrivateService) {
 
     List<StopTimeInstance> stopTimes = _stopTimeService.getNextBlockSequenceDeparturesForStop(
-        stop, time);
+        stop, time, includePrivateService);
 
     List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
 
@@ -397,17 +398,22 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   @Override
   public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
       StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
-      int resultCount, boolean applyRealTime, int lookaheadTime) {
+      ArrivalAndDeparturePairQuery query) {
 
     Date tFrom = new Date(targetTime.getTargetTime());
+    boolean applyRealTime = query.isApplyRealTime();
+    int lookaheadTime = query.getLookaheadTime();
+    int resultCount = query.getLookaheadTime();
+    boolean includePrivateService = query.isIncludePrivateService();
 
     int runningEarlySlack = applyRealTime ? MINUTES_EARLY_BUFFER * 60 : 0;
-    int runningLateSlack = (applyRealTime ? MINUTES_LATE_BUFFER * 60 : 0) + lookaheadTime;
+    int runningLateSlack = (applyRealTime ? MINUTES_LATE_BUFFER * 60 : 0)
+        + lookaheadTime;
 
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getNextDeparturesBetweenStopPair(
         fromStop, toStop, tFrom, runningEarlySlack, runningLateSlack,
-        resultCount);
-    
+        resultCount, includePrivateService);
+
     Date tShifted = new Date(targetTime.getTargetTime() - lookaheadTime * 1000);
 
     return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs,
@@ -417,15 +423,19 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   @Override
   public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
       StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
-      int resultCount, boolean applyRealTime) {
+      ArrivalAndDeparturePairQuery query) {
 
     Date tTo = new Date(targetTime.getTargetTime());
+    boolean applyRealTime = query.isApplyRealTime();
+    int resultCount = query.getLookaheadTime();
+    boolean includePrivateService = query.isIncludePrivateService();
 
     int runningEarlySlack = applyRealTime ? MINUTES_EARLY_BUFFER * 60 : 0;
     int runningLateSlack = applyRealTime ? MINUTES_LATE_BUFFER * 60 : 0;
 
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getPreviousArrivalsBetweenStopPair(
-        fromStop, toStop, tTo, runningEarlySlack, runningLateSlack, resultCount);
+        fromStop, toStop, tTo, runningEarlySlack, runningLateSlack,
+        resultCount, includePrivateService);
 
     return getArrivalsAndDeparturesFromStopTimeInstancePairs(targetTime, pairs,
         null, tTo, applyRealTime, false, false);
@@ -954,11 +964,12 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     BlockInstance blockInstance = sti.getBlockInstance();
     BlockStopTimeEntry blockStopTime = sti.getStopTime();
 
-    ArrivalAndDepartureInstance instance = createArrivalAndDeparture(blockInstance, blockStopTime,
-        frequencyOffsetTime, sti.getFrequencyOffset());
-    
+    ArrivalAndDepartureInstance instance = createArrivalAndDeparture(
+        blockInstance, blockStopTime, frequencyOffsetTime,
+        sti.getFrequencyOffset());
+
     instance.setBlockSequence(sti.getBlockSequence());
-    
+
     return instance;
   }
 

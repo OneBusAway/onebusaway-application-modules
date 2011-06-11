@@ -3,7 +3,7 @@ package org.onebusaway.transit_data.model;
 import java.io.Serializable;
 
 public class AgencyBean implements Serializable {
-  
+
   private static final long serialVersionUID = 1L;
 
   private String id;
@@ -17,8 +17,10 @@ public class AgencyBean implements Serializable {
   private String lang;
 
   private String phone;
-  
+
   private String disclaimer;
+
+  private boolean privateService;
 
   public String getId() {
     return id;
@@ -67,12 +69,24 @@ public class AgencyBean implements Serializable {
   public void setPhone(String phone) {
     this.phone = phone;
   }
-  
+
   public String getDisclaimer() {
     return disclaimer;
   }
-  
+
   public void setDisclaimer(String disclaimer) {
     this.disclaimer = disclaimer;
+  }
+
+  /**
+   * @return if true, indicates the agency provides private service that is not
+   *         available to the general public.
+   */
+  public boolean isPrivateService() {
+    return privateService;
+  }
+
+  public void setPrivateService(boolean privateService) {
+    this.privateService = privateService;
   }
 }

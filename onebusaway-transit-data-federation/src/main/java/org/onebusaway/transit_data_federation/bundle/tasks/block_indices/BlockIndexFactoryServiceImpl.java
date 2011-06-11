@@ -3,15 +3,22 @@ package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.geospatial.services.GeometryLibrary;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
+import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.FrequencyComparator;
+import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
@@ -30,10 +37,13 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class BlockIndexFactory {
+@Component
+public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
 
-  private static Logger _log = LoggerFactory.getLogger(BlockIndexFactory.class);
+  private static Logger _log = LoggerFactory.getLogger(BlockIndexFactoryServiceImpl.class);
 
   private static final Comparator<BlockTripEntry> _blockTripLooseComparator = new BlockStopTimeLooseComparator<BlockTripEntry>();
 
@@ -47,6 +57,10 @@ public class BlockIndexFactory {
 
   private static final Comparator<BlockSequence> _blockSequenceStrictComparator = new BlockTripStrictComparator<BlockSequence>();
 
+  private AgencyService _agencyService;
+
+  private AgencyBeanService _agencyBeanService;
+
   private boolean _verbose = false;
 
   /**
@@ -55,6 +69,18 @@ public class BlockIndexFactory {
   private int _maxSlackBetweenConsecutiveTrips = 5 * 60;
 
   private int _maxScheduledTimeBetweenConsecutiveTrips = 15 * 60;
+
+  private Set<String> _privateAgencyIds = new HashSet<String>();
+
+  @Autowired
+  public void setAgencyService(AgencyService agencyService) {
+    _agencyService = agencyService;
+  }
+
+  @Autowired
+  public void setAgencyBeanService(AgencyBeanService agencyBeanService) {
+    _agencyBeanService = agencyBeanService;
+  }
 
   public void setVerbose(boolean verbose) {
     _verbose = verbose;
@@ -74,12 +100,21 @@ public class BlockIndexFactory {
     _maxScheduledTimeBetweenConsecutiveTrips = maxScheduledTimeBetweenConsecutiveTrips;
   }
 
-  public BlockIndexFactory() {
+  public BlockIndexFactoryServiceImpl() {
 
   }
 
-  public BlockIndexFactory(boolean verbose) {
+  public BlockIndexFactoryServiceImpl(boolean verbose) {
     _verbose = verbose;
+  }
+
+  @PostConstruct
+  public void setup() {
+    for (String agencyId : _agencyService.getAllAgencyIds()) {
+      AgencyBean bean = _agencyBeanService.getAgencyForId(agencyId);
+      if (bean.isPrivateService())
+        _privateAgencyIds.add(agencyId);
+    }
   }
 
   /****
@@ -426,7 +461,10 @@ public class BlockIndexFactory {
   public BlockSequenceIndex createSequenceIndexForGroupOfBlockSequences(
       List<BlockSequence> sequences) {
     ServiceIntervalBlock serviceIntervalBlock = getBlockStopTimesAsBlockInterval(sequences);
-    return new BlockSequenceIndex(sequences, serviceIntervalBlock);
+    String agencyId = sequences.get(0).getBlockConfig().getBlock().getId().getAgencyId();
+    boolean privateService = _privateAgencyIds.contains(agencyId);
+    return new BlockSequenceIndex(sequences, serviceIntervalBlock,
+        privateService);
   }
 
   private BlockSequenceKey getBlockTripAsTripSequenceKey(

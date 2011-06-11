@@ -11,7 +11,10 @@ public abstract class AbstractBlockSequenceIndex {
 
   protected final ServiceIdActivation _serviceIds;
 
-  public AbstractBlockSequenceIndex(List<BlockSequence> sequences) {
+  protected final boolean _privateService;
+
+  public AbstractBlockSequenceIndex(List<BlockSequence> sequences,
+      boolean privateService) {
     if (sequences == null)
       throw new IllegalArgumentException("sequences is null");
     if (sequences.isEmpty())
@@ -21,6 +24,7 @@ public abstract class AbstractBlockSequenceIndex {
 
     _sequences = sequences;
     _serviceIds = _sequences.get(0).getBlockConfig().getServiceIds();
+    _privateService = privateService;
   }
 
   public List<BlockSequence> getSequences() {
@@ -29,6 +33,10 @@ public abstract class AbstractBlockSequenceIndex {
 
   public ServiceIdActivation getServiceIds() {
     return _serviceIds;
+  }
+
+  public boolean isPrivateService() {
+    return _privateService;
   }
 
   public int size() {

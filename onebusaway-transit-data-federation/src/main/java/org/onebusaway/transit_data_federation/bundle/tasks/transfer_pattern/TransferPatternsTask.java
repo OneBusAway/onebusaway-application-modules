@@ -102,6 +102,8 @@ public class TransferPatternsTask implements Runnable {
 
   private boolean _useHubStopsAsSourceStops = false;
 
+  private boolean _useAllStopsAsSourceStops = false;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -162,6 +164,10 @@ public class TransferPatternsTask implements Runnable {
 
   public void setUseHubStopsAsSourceStops(boolean useHubStopsAsSourceStops) {
     _useHubStopsAsSourceStops = useHubStopsAsSourceStops;
+  }
+
+  public void setUseAllStopsAsSourceStops(boolean useAllStopsAsSourceStops) {
+    _useAllStopsAsSourceStops = useAllStopsAsSourceStops;
   }
 
   @Override
@@ -238,7 +244,7 @@ public class TransferPatternsTask implements Runnable {
       System.out.println("arrivalStops=" + pathCountsByStop.size());
 
       for (Map.Entry<StopEntry, Counter<List<Pair<StopEntry>>>> entry : pathCountsByStop.entrySet()) {
-        boolean verbose = false;//entry.getKey().getId().toString().equals("1_29430");
+        boolean verbose = false;// entry.getKey().getId().toString().equals("1_29430");
         Counter<List<Pair<StopEntry>>> pathCounts = entry.getValue();
         List<List<Pair<StopEntry>>> keys = pathCounts.getSortedKeys();
         int maxCount = isHubStop ? _maxPathCountForHubStop
@@ -326,6 +332,12 @@ public class TransferPatternsTask implements Runnable {
       return stops;
     }
 
+    if (_useAllStopsAsSourceStops)
+      return _transitGraphDao.getAllStops();
+
+    if (_useHubStopsAsSourceStops)
+      return hubStops;
+
     File path = _bundle.getTransferPatternsSourceStopsPath();
 
     try {
@@ -409,7 +421,8 @@ public class TransferPatternsTask implements Runnable {
 
   private List<ServiceDate> computeServiceDates(StopEntry stop) {
 
-    List<ServiceDateSummary> summaries = _stopScheduleService.getServiceDateSummariesForStop(stop.getId());
+    List<ServiceDateSummary> summaries = _stopScheduleService.getServiceDateSummariesForStop(
+        stop.getId(), false);
     Collections.sort(summaries);
 
     List<ServiceDate> serviceDates = new ArrayList<ServiceDate>();
@@ -482,7 +495,7 @@ public class TransferPatternsTask implements Runnable {
 
     Map<SPTVertex, List<Pair<StopEntry>>> pathsByVertex = new HashMap<SPTVertex, List<Pair<StopEntry>>>();
 
-    boolean verbose = false;//arrivalStop.getId().toString().equals("1_29430");
+    boolean verbose = false;// arrivalStop.getId().toString().equals("1_29430");
     if (verbose)
       System.out.println("here!");
 
@@ -742,13 +755,12 @@ public class TransferPatternsTask implements Runnable {
       _originStop = originStop;
       _serviceDate = serviceDate;
     }
-    
 
     @Override
     public boolean shouldSkipTraversalResult(Vertex origin, Vertex target,
         SPTVertex parent, TraverseResult traverseResult, ShortestPathTree spt,
         TraverseOptions traverseOptions) {
-      
+
       EdgeNarrative narrative = traverseResult.getEdgeNarrative();
       Vertex vertex = narrative.getToVertex();
 

@@ -34,12 +34,12 @@ import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEn
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
-public class BlockIndexFactoryTest {
+public class BlockIndexFactoryServiceImplTest {
 
   @Test
   public void test() {
 
-    BlockIndexFactory factory = new BlockIndexFactory();
+    BlockIndexFactoryServiceImpl factory = new BlockIndexFactoryServiceImpl();
 
     StopEntryImpl stopA = stop("a", 47.0, -122.0);
     StopEntryImpl stopB = stop("b", 47.1, -122.1);
@@ -373,7 +373,7 @@ public class BlockIndexFactoryTest {
   @Test
   public void testFrequencies() {
 
-    BlockIndexFactory factory = new BlockIndexFactory();
+    BlockIndexFactoryServiceImpl factory = new BlockIndexFactoryServiceImpl();
 
     StopEntryImpl stopA = stop("a", 47.0, -122.0);
     StopEntryImpl stopB = stop("b", 47.1, -122.1);
@@ -448,7 +448,7 @@ public class BlockIndexFactoryTest {
   @Test
   public void testOverlappingFrequencies() {
 
-    BlockIndexFactory factory = new BlockIndexFactory();
+    BlockIndexFactoryServiceImpl factory = new BlockIndexFactoryServiceImpl();
 
     StopEntryImpl stopA = stop("a", 47.0, -122.0);
     StopEntryImpl stopB = stop("b", 47.1, -122.1);

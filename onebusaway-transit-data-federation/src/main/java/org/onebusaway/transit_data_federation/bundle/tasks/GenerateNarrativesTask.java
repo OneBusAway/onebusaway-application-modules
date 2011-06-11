@@ -127,10 +127,20 @@ public class GenerateNarrativesTask implements Runnable {
   private void generateAgencyNarratives(NarrativeProviderImpl provider) {
 
     for (Agency agency : _dao.getAllAgencies()) {
+
       String disclaimer = _modifications.getModificationForTypeAndId(
           AgencyNarrative.class, agency.getId(), "disclaimer");
+      Boolean privateService = _modifications.getModificationForTypeAndId(
+          AgencyNarrative.class, agency.getId(), "privatService");
+
       AgencyNarrative.Builder narrative = AgencyNarrative.builder();
-      narrative.setDisclaimer(disclaimer);
+
+      if (disclaimer != null)
+        narrative.setDisclaimer(disclaimer);
+
+      if (privateService != null)
+        narrative.setPrivateService(privateService);
+
       provider.setNarrativeForAgency(agency.getId(), narrative.create());
     }
   }
@@ -249,9 +259,9 @@ public class GenerateNarrativesTask implements Runnable {
   }
 
   private double normalizeDelta(double delta) {
-    while( delta < -Math.PI)
+    while (delta < -Math.PI)
       delta += 2 * Math.PI;
-    while( delta >= Math.PI)
+    while (delta >= Math.PI)
       delta -= 2 * Math.PI;
     return delta;
   }
@@ -330,7 +340,7 @@ public class GenerateNarrativesTask implements Runnable {
 
           ShapePointIndex shapePointIndexMethod = new DistanceTraveledShapePointIndex(
               stopTime.getShapeDistTraveled(), indexFrom, indexTo);
-          
+
           orientation = shapePointIndexMethod.getPointAndOrientation(shapePoints);
 
           if (orientation == null)
@@ -338,7 +348,7 @@ public class GenerateNarrativesTask implements Runnable {
 
           orientationsByKey.put(key, orientation);
         }
-        
+
         pos.add(orientation);
       }
     }

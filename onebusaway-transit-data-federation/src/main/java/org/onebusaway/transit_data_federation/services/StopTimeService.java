@@ -56,18 +56,20 @@ public interface StopTimeService {
    * 
    * @param stop
    * @param time
+   * @param includePrivateSerivce TODO
    * @return
    */
   public List<StopTimeInstance> getNextBlockSequenceDeparturesForStop(
-      StopEntry stop, long time);
+      StopEntry stop, long time, boolean includePrivateSerivce);
 
   public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date fromTime, int runningEarlySlack,
-      int runningLateSlack, int resultCount);
+      StopEntry fromStop, StopEntry toStop, Date fromTime,
+      int runningEarlySlack, int runningLateSlack, int resultCount,
+      boolean includePrivateService);
 
   public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
       StopEntry fromStop, StopEntry toStop, Date toTime, int runningEarlySlack,
-      int runningLateSlack, int resultCount);
+      int runningLateSlack, int resultCount, boolean includePrivateService);
 
   /**
    * When calculating frequency-based stop times, we have a couple different

@@ -7,5 +7,5 @@ import org.onebusaway.transit_data_federation.model.ServiceDateSummary;
 
 public interface StopScheduleService {
   public List<ServiceDateSummary> getServiceDateSummariesForStop(
-      AgencyAndId stopId);
+      AgencyAndId stopId, boolean includePrivateService);
 }

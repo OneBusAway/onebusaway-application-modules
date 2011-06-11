@@ -19,7 +19,7 @@ import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactoryService;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockLayoverIndexData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockStopTimeIndicesFactory;
@@ -58,7 +58,7 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
   private TransitGraphDao _graphDao;
 
-  private BlockIndexFactory _factory = new BlockIndexFactory();
+  private BlockIndexFactoryService _factory;
 
   private List<BlockTripIndex> _blockTripIndices;
 
@@ -89,6 +89,12 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
+  }
+
+  @Autowired
+  public void setBlockIndexFactoryService(
+      BlockIndexFactoryService blockIndexFactoryService) {
+    _factory = blockIndexFactoryService;
   }
 
   @Autowired

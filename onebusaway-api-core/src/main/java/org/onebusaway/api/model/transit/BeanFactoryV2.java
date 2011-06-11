@@ -264,6 +264,7 @@ public class BeanFactoryV2 {
     bean.setLang(agency.getLang());
     bean.setName(agency.getName());
     bean.setPhone(agency.getPhone());
+    bean.setPrivateService(agency.isPrivateService());    
     bean.setTimezone(agency.getTimezone());
     bean.setUrl(agency.getUrl());
     return bean;

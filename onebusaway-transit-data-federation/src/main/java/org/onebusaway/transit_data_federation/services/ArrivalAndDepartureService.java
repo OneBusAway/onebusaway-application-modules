@@ -37,10 +37,11 @@ public interface ArrivalAndDepartureService {
    * 
    * @param stop
    * @param time
+   * @param includePrivateService TODO
    * @return
    */
   public List<ArrivalAndDepartureInstance> getNextScheduledBlockTripDeparturesForStop(
-      StopEntry stop, long time);
+      StopEntry stop, long time, boolean includePrivateService);
 
   public ArrivalAndDepartureInstance getArrivalAndDepartureForStop(
       ArrivalAndDepartureQuery query);
@@ -83,25 +84,22 @@ public interface ArrivalAndDepartureService {
    * @param fromStop
    * @param toStop
    * @param targetTime
-   * @param resultCount the number of next departures to include per block-sequence
-   * @param applyRealTime TODO
-   * @param lookaheadTime TODO
+   * @param query query parameters
    * @return
    */
   public List<Pair<ArrivalAndDepartureInstance>> getNextDeparturesForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int resultCount,
-      boolean applyRealTime, int lookaheadTime);
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
+      ArrivalAndDeparturePairQuery query);
 
   /**
    * 
    * @param fromStop
    * @param toStop
    * @param targetTime
-   * @param resultCount
-   * @param applyRealTime TODO
+   * @param query query parameters
    * @return
    */
   public List<Pair<ArrivalAndDepartureInstance>> getPreviousArrivalsForStopPair(
-      StopEntry fromStop, StopEntry toStop, TargetTime targetTime, int resultCount,
-      boolean applyRealTime);
+      StopEntry fromStop, StopEntry toStop, TargetTime targetTime,
+      ArrivalAndDeparturePairQuery query);
 }

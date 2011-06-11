@@ -31,7 +31,7 @@ import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
 import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -53,7 +53,7 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInsta
 
 public class StopTimeServiceImplTest {
 
-  private static final BlockIndexFactory _factory = new BlockIndexFactory();
+  private BlockIndexFactoryServiceImpl _factory;
 
   private StopTimeServiceImpl _service;
 
@@ -67,8 +67,12 @@ public class StopTimeServiceImplTest {
 
   private TransitGraphDao _transitGraphDao;
 
+  private boolean includePrivateService = false;
+
   @Before
   public void setup() {
+
+    _factory = new BlockIndexFactoryServiceImpl();
 
     _stop = stop("stopId", 47.0, -122.0);
     _stopId = _stop.getId();
@@ -513,7 +517,7 @@ public class StopTimeServiceImplTest {
     Date time = date("2009-09-01 08:00");
 
     List<Pair<StopTimeInstance>> instances = _service.getNextDeparturesBetweenStopPair(
-        fromStop, toStop, time, 0, 0, 3);
+        fromStop, toStop, time, 0, 0, 3, includePrivateService);
 
     assertEquals(3, instances.size());
 
@@ -532,15 +536,15 @@ public class StopTimeServiceImplTest {
     pair = instances.get(2);
     assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     /****
      * 
      ****/
-    
+
     time = date("2009-09-01 08:00");
 
-    instances = _service.getNextDeparturesBetweenStopPair(
-        fromStop, toStop, time, 10 * 60, 0, 3);
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 10 * 60, 0, 3, includePrivateService);
 
     assertEquals(5, instances.size());
 
@@ -555,11 +559,11 @@ public class StopTimeServiceImplTest {
     pair = instances.get(2);
     assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(3);
     assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(4);
     assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
@@ -571,7 +575,7 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-01 10:06");
 
     instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(3, instances.size());
 
@@ -586,7 +590,7 @@ public class StopTimeServiceImplTest {
     pair = instances.get(2);
     assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     /****
      * 
      ****/
@@ -594,14 +598,14 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-01 10:06");
 
     instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
-        time, 10*60, 5*60, 3);
+        time, 10 * 60, 5 * 60, 3, includePrivateService);
 
     assertEquals(8, instances.size());
-    
+
     pair = instances.get(0);
     assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(1);
     assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
@@ -613,21 +617,23 @@ public class StopTimeServiceImplTest {
     pair = instances.get(3);
     assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(4);
     assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(5);
     assertEquals(b2C.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b2C.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(6);
     assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
-    assertEquals(dateAsLong("2009-09-01 10:30"),pair.getFirst().getDepartureTime());
-    assertEquals(dateAsLong("2009-09-01 10:35"),pair.getSecond().getDepartureTime());
-    
+    assertEquals(dateAsLong("2009-09-01 10:30"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-01 10:35"),
+        pair.getSecond().getDepartureTime());
+
     pair = instances.get(7);
     assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1D.getStopTimes().get(1), pair.getSecond().getStopTime());
@@ -639,7 +645,7 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-02 10:06");
 
     instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(3, instances.size());
 
@@ -665,15 +671,17 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-02 10:29");
 
     instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(3, instances.size());
 
     pair = instances.get(0);
     assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
-    assertEquals(dateAsLong("2009-09-02 10:30"),pair.getFirst().getDepartureTime());
-    assertEquals(dateAsLong("2009-09-02 10:35"),pair.getSecond().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:30"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:35"),
+        pair.getSecond().getDepartureTime());
 
     pair = instances.get(1);
     assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
@@ -690,15 +698,17 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-02 10:40");
 
     instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(1, instances.size());
 
     pair = instances.get(0);
     assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
-    assertEquals(dateAsLong("2009-09-02 10:40"),pair.getFirst().getDepartureTime());
-    assertEquals(dateAsLong("2009-09-02 10:45"),pair.getSecond().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:40"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:45"),
+        pair.getSecond().getDepartureTime());
 
     /****
      * 
@@ -707,7 +717,7 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-02 11:40");
 
     instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(0, instances.size());
 
@@ -718,19 +728,21 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-02 10:50");
 
     instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(3, instances.size());
 
     pair = instances.get(0);
     assertEquals(b2D.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b2D.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(1);
     assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
-    assertEquals(dateAsLong("2009-09-02 10:40"),pair.getFirst().getDepartureTime());
-    assertEquals(dateAsLong("2009-09-02 10:45"),pair.getSecond().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:40"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:45"),
+        pair.getSecond().getDepartureTime());
 
     pair = instances.get(2);
     assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
@@ -743,15 +755,17 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-02 10:46");
 
     instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(3, instances.size());
-    
+
     pair = instances.get(0);
     assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
-    assertEquals(dateAsLong("2009-09-02 10:40"),pair.getFirst().getDepartureTime());
-    assertEquals(dateAsLong("2009-09-02 10:45"),pair.getSecond().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:40"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:45"),
+        pair.getSecond().getDepartureTime());
 
     pair = instances.get(1);
     assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
@@ -768,7 +782,7 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-02 10:40");
 
     instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(3, instances.size());
 
@@ -779,8 +793,10 @@ public class StopTimeServiceImplTest {
     pair = instances.get(1);
     assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
-    assertEquals(dateAsLong("2009-09-02 10:30"),pair.getFirst().getDepartureTime());
-    assertEquals(dateAsLong("2009-09-02 10:35"),pair.getSecond().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:30"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:35"),
+        pair.getSecond().getDepartureTime());
 
     pair = instances.get(2);
     assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
@@ -793,7 +809,7 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-01 10:18");
 
     instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(2, instances.size());
 
@@ -804,7 +820,7 @@ public class StopTimeServiceImplTest {
     pair = instances.get(1);
     assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     /****
      * 
      ****/
@@ -812,18 +828,18 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-01 10:28");
 
     instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
-        time, 5*60, 5*60, 3);
+        time, 5 * 60, 5 * 60, 3, includePrivateService);
 
     assertEquals(5, instances.size());
-    
+
     pair = instances.get(0);
     assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(1);
     assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     pair = instances.get(2);
     assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
@@ -835,7 +851,7 @@ public class StopTimeServiceImplTest {
     pair = instances.get(4);
     assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
     assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
-    
+
     /****
      * 
      ****/
@@ -843,7 +859,7 @@ public class StopTimeServiceImplTest {
     time = date("2009-09-01 09:00");
 
     instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
-        time, 0, 0, 3);
+        time, 0, 0, 3, includePrivateService);
 
     assertEquals(0, instances.size());
   }
@@ -860,8 +876,7 @@ public class StopTimeServiceImplTest {
       trips.add(blockConfig.getTrips().get(0));
     }
 
-    BlockIndexFactory factory = new BlockIndexFactory();
-    BlockTripIndex blockIndex = factory.createTripIndexForGroupOfBlockTrips(trips);
+    BlockTripIndex blockIndex = _factory.createTripIndexForGroupOfBlockTrips(trips);
     BlockStopTimeIndex index = BlockStopTimeIndex.create(blockIndex, 0);
     _stop.addStopTimeIndex(index);
 

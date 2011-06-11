@@ -19,7 +19,8 @@ import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactory;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactoryService;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
@@ -128,7 +129,7 @@ public class UnitTestingSupport {
     if (existing != null && existing.getTransfersFromStop() != null)
       transfers.addAll(existing.getTransfersFromStop());
     transfers.add(transfer);
-    existing = new StopTransfers(transfers,null);
+    existing = new StopTransfers(transfers, null);
     from.setTransfers(existing);
   }
 
@@ -240,7 +241,7 @@ public class UnitTestingSupport {
     List<BlockEntry> list = new ArrayList<BlockEntry>();
     for (BlockEntryImpl block : blocks)
       list.add(block);
-    BlockIndexFactory factory = new BlockIndexFactory();
+    BlockIndexFactoryService factory = new BlockIndexFactoryServiceImpl();
     return factory.createTripIndices(list);
   }
 
@@ -253,7 +254,7 @@ public class UnitTestingSupport {
       stopTimes = new ArrayList<StopTimeEntry>();
       trip.setStopTimes(stopTimes);
     }
-    
+
     int sequence = stopTimes.size();
 
     if (!stopTimes.isEmpty()) {
@@ -308,15 +309,15 @@ public class UnitTestingSupport {
     builder.setTrips(Arrays.asList(trips));
     builder.setTripGapDistances(new double[trips.length]);
     BlockConfigurationEntry blockConfig = builder.create();
-    
+
     BlockEntryImpl blockImpl = (BlockEntryImpl) block;
     List<BlockConfigurationEntry> configs = block.getConfigurations();
-    if( configs == null) {
+    if (configs == null) {
       configs = new ArrayList<BlockConfigurationEntry>();
       blockImpl.setConfigurations(configs);
     }
     configs.add(blockConfig);
-    
+
     return blockConfig;
   }
 

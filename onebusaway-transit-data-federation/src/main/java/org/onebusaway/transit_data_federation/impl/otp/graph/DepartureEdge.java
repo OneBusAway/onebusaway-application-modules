@@ -167,7 +167,7 @@ public class DepartureEdge extends AbstractEdge {
     ArrivalAndDepartureService arrivalAndDepartureService = _context.getArrivalAndDepartureService();
 
     List<ArrivalAndDepartureInstance> instances = arrivalAndDepartureService.getNextScheduledBlockTripDeparturesForStop(
-        _stop, s0.getTime());
+        _stop, s0.getTime(), false);
 
     TraverseResult results = null;
 

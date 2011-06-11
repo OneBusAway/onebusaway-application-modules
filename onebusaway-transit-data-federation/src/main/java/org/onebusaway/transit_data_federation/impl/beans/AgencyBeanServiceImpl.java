@@ -47,6 +47,7 @@ class AgencyBeanServiceImpl implements AgencyBeanService {
 
     if (narrative != null) {
       bean.setDisclaimer(narrative.getDisclaimer());
+      bean.setPrivateService(narrative.isPrivateService());
     }
 
     return bean;

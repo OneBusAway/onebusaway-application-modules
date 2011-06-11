@@ -62,6 +62,14 @@ public class Situation implements Serializable {
     this.creationTime = creationTime;
   }
 
+  public TimeRange getPublicationWindow() {
+    return publicationWindow;
+  }
+
+  public void setPublicationWindow(TimeRange publicationWindow) {
+    this.publicationWindow = publicationWindow;
+  }
+
   public String getMiscellaneousReason() {
     return miscellaneousReason;
   }

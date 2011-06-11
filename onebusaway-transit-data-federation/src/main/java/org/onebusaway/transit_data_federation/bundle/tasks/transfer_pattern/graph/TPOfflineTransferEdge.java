@@ -57,7 +57,7 @@ public class TPOfflineTransferEdge extends AbstractEdge {
     StopTimeService stopTimeService = _context.getStopTimeService();
 
     List<StopTimeInstance> instances = stopTimeService.getNextBlockSequenceDeparturesForStop(
-        _transfer.getStop(), s1.getTime());
+        _transfer.getStop(), s1.getTime(), false);
 
     TraverseResult results = null;
 

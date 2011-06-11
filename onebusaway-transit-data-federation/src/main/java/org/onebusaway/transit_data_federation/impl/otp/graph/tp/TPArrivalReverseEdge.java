@@ -10,6 +10,7 @@ import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
 import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.model.TargetTime;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDeparturePairQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -59,12 +60,16 @@ public class TPArrivalReverseEdge extends AbstractEdge {
 
     TargetTime targetTime = new TargetTime(s0.getTime(), obaOpts.currentTime);
 
+    ArrivalAndDeparturePairQuery query = new ArrivalAndDeparturePairQuery();
+    query.setResultCount(obaOpts.numItineraries);
+    query.setApplyRealTime(obaOpts.useRealtime);
+    query.setIncludePrivateService(false);
+
     /**
      * Recall that the stopPair is in reverse order (toStop => fromStop)
      */
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getPreviousArrivalsForStopPair(
-        stopPair.getSecond(), stopPair.getFirst(), targetTime,
-        obaOpts.numItineraries, obaOpts.useRealtime);
+        stopPair.getSecond(), stopPair.getFirst(), targetTime, query);
 
     TraverseResult results = null;
 

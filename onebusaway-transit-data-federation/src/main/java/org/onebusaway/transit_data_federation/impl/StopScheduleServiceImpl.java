@@ -3,16 +3,20 @@ package org.onebusaway.transit_data_federation.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data_federation.model.ServiceDateSummary;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.StopScheduleService;
+import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
@@ -31,6 +35,8 @@ class StopScheduleServiceImpl implements StopScheduleService {
 
   private ExtendedCalendarService _calendarService;
 
+  private AgencyBeanService _agencyBeanService;
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
@@ -46,13 +52,19 @@ class StopScheduleServiceImpl implements StopScheduleService {
     _calendarService = calendarService;
   }
 
+  @Autowired
+  public void setAgencyBeanService(AgencyBeanService agencyBeanService) {
+    _agencyBeanService = agencyBeanService;
+  }
+
   @Override
   public List<ServiceDateSummary> getServiceDateSummariesForStop(
-      AgencyAndId stopId) {
+      AgencyAndId stopId, boolean includePrivateService) {
 
     StopEntry stop = _transitGraphDao.getStopEntryForId(stopId, true);
 
-    Set<ServiceIdActivation> allServiceIds = getAllServiceIdsForStop(stop);
+    Set<ServiceIdActivation> allServiceIds = getAllServiceIdsForStop(stop,
+        includePrivateService);
 
     Map<ServiceDate, Set<ServiceIdActivation>> serviceIdsByDate = new FactoryMap<ServiceDate, Set<ServiceIdActivation>>(
         new HashSet<ServiceIdActivation>());
@@ -86,7 +98,8 @@ class StopScheduleServiceImpl implements StopScheduleService {
     return summaries;
   }
 
-  private Set<ServiceIdActivation> getAllServiceIdsForStop(StopEntry stop) {
+  private Set<ServiceIdActivation> getAllServiceIdsForStop(StopEntry stop,
+      boolean includePrivateService) {
 
     Set<ServiceIdActivation> allServiceIds = new HashSet<ServiceIdActivation>();
 
@@ -97,6 +110,15 @@ class StopScheduleServiceImpl implements StopScheduleService {
     List<FrequencyBlockStopTimeIndex> frequencyIndices = _blockIndexService.getFrequencyStopTimeIndicesForStop(stop);
     for (FrequencyBlockStopTimeIndex index : frequencyIndices)
       allServiceIds.add(index.getServiceIds());
+
+    for (Iterator<ServiceIdActivation> it = allServiceIds.iterator(); it.hasNext();) {
+      ServiceIdActivation activation = it.next();
+      LocalizedServiceId lsid = activation.getActiveServiceIds().get(0);
+      String agencyId = lsid.getId().getAgencyId();
+      AgencyBean bean = _agencyBeanService.getAgencyForId(agencyId);
+      if (bean.isPrivateService() && !includePrivateService)
+        it.remove();
+    }
 
     return allServiceIds;
   }

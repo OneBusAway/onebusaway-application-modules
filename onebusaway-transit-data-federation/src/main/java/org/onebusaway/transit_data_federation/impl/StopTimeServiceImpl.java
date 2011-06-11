@@ -130,7 +130,7 @@ class StopTimeServiceImpl implements StopTimeService {
 
   @Override
   public List<StopTimeInstance> getNextBlockSequenceDeparturesForStop(
-      StopEntry stopEntry, long time) {
+      StopEntry stopEntry, long time, boolean includePrivateSerivce) {
 
     List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 
@@ -194,7 +194,8 @@ class StopTimeServiceImpl implements StopTimeService {
   @Override
   public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
       StopEntry fromStop, StopEntry toStop, Date fromTime,
-      int runningEarlySlack, int runningLateSlack, int resultCount) {
+      int runningEarlySlack, int runningLateSlack, int resultCount,
+      boolean includePrivateService) {
 
     if (resultCount == 0)
       return Collections.emptyList();
@@ -206,7 +207,7 @@ class StopTimeServiceImpl implements StopTimeService {
 
     getDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, fromTime,
         runningEarlySlack, runningLateSlack, resultCount, nBestQueue,
-        resultQueue, true);
+        resultQueue, true, includePrivateService);
 
     getFrequencyDeparturesAndArrivalsBetweenStopPair(fromStop, toStop,
         fromTime, runningEarlySlack, runningLateSlack, resultCount, nBestQueue,
@@ -221,7 +222,7 @@ class StopTimeServiceImpl implements StopTimeService {
   @Override
   public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
       StopEntry fromStop, StopEntry toStop, Date toTime, int runningEarlySlack,
-      int runningLateSlack, int resultCount) {
+      int runningLateSlack, int resultCount, boolean includePrivateService) {
 
     if (resultCount == 0)
       return Collections.emptyList();
@@ -233,7 +234,7 @@ class StopTimeServiceImpl implements StopTimeService {
 
     getDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, toTime,
         runningEarlySlack, runningLateSlack, resultCount, nBestQueue,
-        resultQueue, false);
+        resultQueue, false, includePrivateService);
 
     getFrequencyDeparturesAndArrivalsBetweenStopPair(fromStop, toStop, toTime,
         runningEarlySlack, runningLateSlack, resultCount, nBestQueue,
@@ -247,13 +248,16 @@ class StopTimeServiceImpl implements StopTimeService {
 
   /****
    * Private Methods
+   * 
+   * @param includePrivateService TODO
    ****/
 
   private void getDeparturesAndArrivalsBetweenStopPair(StopEntry fromStop,
       StopEntry toStop, Date tTime, int runningEarlySlack,
       int runningLateSlack, int resultCount,
       PriorityQueue<Pair<StopTimeInstance>> nBestQueue,
-      PriorityQueue<Pair<StopTimeInstance>> resultQueue, boolean findDepartures) {
+      PriorityQueue<Pair<StopTimeInstance>> resultQueue,
+      boolean findDepartures, boolean includePrivateService) {
 
     List<Pair<BlockStopSequenceIndex>> indexPairs = _blockIndexService.getBlockSequenceIndicesBetweenStops(
         fromStop, toStop);
@@ -274,6 +278,10 @@ class StopTimeServiceImpl implements StopTimeService {
           : pair.getSecond();
       BlockStopSequenceIndex destStopIndex = findDepartures ? pair.getSecond()
           : pair.getFirst();
+
+      if (!includePrivateService
+          && sourceStopIndex.getIndex().isPrivateService())
+        continue;
 
       List<BlockStopTimeEntry> destStopTimes = destStopIndex.getStopTimes();
 
@@ -303,7 +311,7 @@ class StopTimeServiceImpl implements StopTimeService {
             : IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE;
 
         int sourceStopIndexSize = sourceStopIndex.size();
-        
+
         int sourceIndex = GenericBinarySearch.search(sourceStopIndex,
             sourceStopIndexSize, relativeTime, adapter);
 
@@ -320,7 +328,7 @@ class StopTimeServiceImpl implements StopTimeService {
           StopTimeInstance stiSource = new StopTimeInstance(stopTimeSource,
               serviceDate);
           stiSource.setBlockSequence(sourceStopIndex.getBlockSequenceForIndex(sourceIndex));
-          
+
           BlockStopTimeEntry stopTimeDest = destStopTimes.get(sourceIndex);
           StopTimeInstance stiDest = new StopTimeInstance(stopTimeDest,
               serviceDate);

@@ -14,6 +14,7 @@ public class BlockIndicesTask implements Runnable {
 
   private FederatedTransitDataBundle _bundle;
   private TransitGraphDao _transitGraphDao;
+  private BlockIndexFactoryService _blockIndexFactoryService;
   private RefreshService _refreshService;
 
   @Autowired
@@ -27,6 +28,12 @@ public class BlockIndicesTask implements Runnable {
   }
 
   @Autowired
+  public void setBlockIndexFactoryService(
+      BlockIndexFactoryService blockIndexFactoryService) {
+    _blockIndexFactoryService = blockIndexFactoryService;
+  }
+
+  @Autowired
   public void setRefreshService(RefreshService refreshService) {
     _refreshService = refreshService;
   }
@@ -36,14 +43,11 @@ public class BlockIndicesTask implements Runnable {
 
     try {
 
-      BlockIndexFactory factory = new BlockIndexFactory();
-      factory.setVerbose(true);
-
       Iterable<BlockEntry> blocks = _transitGraphDao.getAllBlocks();
 
-      List<BlockTripIndexData> tripData = factory.createTripData(blocks);
-      List<BlockLayoverIndexData> layoverData = factory.createLayoverData(blocks);
-      List<FrequencyBlockTripIndexData> frequencyTripData = factory.createFrequencyTripData(blocks);
+      List<BlockTripIndexData> tripData = _blockIndexFactoryService.createTripData(blocks);
+      List<BlockLayoverIndexData> layoverData = _blockIndexFactoryService.createLayoverData(blocks);
+      List<FrequencyBlockTripIndexData> frequencyTripData = _blockIndexFactoryService.createFrequencyTripData(blocks);
 
       ObjectSerializationLibrary.writeObject(_bundle.getBlockTripIndicesPath(),
           tripData);
@@ -53,7 +57,6 @@ public class BlockIndicesTask implements Runnable {
           _bundle.getFrequencyBlockTripIndicesPath(), frequencyTripData);
 
       BlockStopTimeIndicesFactory stopFactory = new BlockStopTimeIndicesFactory();
-      factory.setVerbose(true);
       stopFactory.createIndices(blocks);
 
       _refreshService.refresh(RefreshableResources.BLOCK_INDEX_DATA);

@@ -3,7 +3,7 @@ package org.onebusaway.api.model.transit;
 import java.io.Serializable;
 
 public class AgencyV2Bean implements Serializable, HasId {
-  
+
   private static final long serialVersionUID = 1L;
 
   private String id;
@@ -17,8 +17,10 @@ public class AgencyV2Bean implements Serializable, HasId {
   private String lang;
 
   private String phone;
-  
+
   private String disclaimer;
+
+  private boolean privateService;
 
   public String getId() {
     return id;
@@ -67,12 +69,20 @@ public class AgencyV2Bean implements Serializable, HasId {
   public void setPhone(String phone) {
     this.phone = phone;
   }
-  
+
   public String getDisclaimer() {
     return disclaimer;
   }
-  
+
   public void setDisclaimer(String disclaimer) {
     this.disclaimer = disclaimer;
+  }
+
+  public boolean isPrivateService() {
+    return privateService;
+  }
+
+  public void setPrivateService(boolean privateService) {
+    this.privateService = privateService;
   }
 }
