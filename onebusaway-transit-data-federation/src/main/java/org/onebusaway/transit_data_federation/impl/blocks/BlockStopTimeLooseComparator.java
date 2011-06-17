@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.Comparator;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.HasBlockStopTimes;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
-public class BlockStopTimeLooseComparator<T extends HasBlockStopTimes>
+class BlockStopTimeLooseComparator<T extends HasBlockStopTimes>
     implements Comparator<T> {
 
   @Override

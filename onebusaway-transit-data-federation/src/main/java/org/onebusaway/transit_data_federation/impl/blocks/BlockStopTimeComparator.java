@@ -1,10 +1,10 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.Comparator;
 
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 
-public class BlockStopTimeComparator implements Comparator<BlockStopTimeEntry> {
+class BlockStopTimeComparator implements Comparator<BlockStopTimeEntry> {
 
   @Override
   public int compare(BlockStopTimeEntry o1, BlockStopTimeEntry o2) {

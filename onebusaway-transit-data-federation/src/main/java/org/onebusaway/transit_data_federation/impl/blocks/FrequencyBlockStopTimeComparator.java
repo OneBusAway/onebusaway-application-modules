@@ -1,11 +1,11 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.Comparator;
 
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 
-public class FrequencyBlockStopTimeStrictComparator implements
+class FrequencyBlockStopTimeComparator implements
     Comparator<FrequencyBlockStopTimeEntry> {
 
   @Override
@@ -15,14 +15,11 @@ public class FrequencyBlockStopTimeStrictComparator implements
     FrequencyEntry f1 = o1.getFrequency();
     FrequencyEntry f2 = o2.getFrequency();
 
-    if (f1.getStartTime() == f2.getStartTime()
-        && f1.getEndTime() == f2.getEndTime()) {
-      return 0;
-    } else if (f1.getStartTime() < f2.getStartTime()
-        && f1.getEndTime() < f2.getEndTime()) {
-      return -1;
-    } else {
-      return 1;
-    }
+    int c = f1.getStartTime() - f2.getStartTime();
+
+    if (c != 0)
+      return c;
+
+    return f1.getEndTime() - f2.getEndTime();
   }
 }

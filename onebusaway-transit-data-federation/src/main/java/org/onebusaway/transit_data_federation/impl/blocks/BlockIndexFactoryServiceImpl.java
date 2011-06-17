@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,9 +16,15 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
 import org.onebusaway.transit_data.model.AgencyBean;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockLayoverIndexData;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockTripIndexData;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockTripReference;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.FrequencyBlockTripIndexData;
+import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.ReferencesLibrary;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.FrequencyComparator;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexFactoryService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;

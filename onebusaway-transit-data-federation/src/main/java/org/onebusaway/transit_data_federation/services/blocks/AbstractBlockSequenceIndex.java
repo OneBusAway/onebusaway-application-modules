@@ -2,7 +2,7 @@ package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockSequence;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
 public abstract class AbstractBlockSequenceIndex {

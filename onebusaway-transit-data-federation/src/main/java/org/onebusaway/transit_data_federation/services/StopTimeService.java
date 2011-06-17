@@ -7,7 +7,7 @@ import org.onebusaway.collections.Range;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockSequence;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 

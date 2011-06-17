@@ -1,17 +1,18 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
-class BlockStopTimeKey {
+class BlockLayoverSequenceKey {
 
   private final ServiceIdActivation _serviceIds;
 
-  private final AgencyAndId _stopId;
+  private final AgencyAndId _firstStopId;
 
-  public BlockStopTimeKey(ServiceIdActivation serviceIds, AgencyAndId stopId) {
+  public BlockLayoverSequenceKey(ServiceIdActivation serviceIds,
+      AgencyAndId firstStopId) {
     _serviceIds = serviceIds;
-    _stopId = stopId;
+    _firstStopId = firstStopId;
   }
 
   @Override
@@ -19,7 +20,7 @@ class BlockStopTimeKey {
     final int prime = 31;
     int result = 1;
     result = prime * result + _serviceIds.hashCode();
-    result = prime * result + _stopId.hashCode();
+    result = prime * result + _firstStopId.hashCode();
     return result;
   }
 
@@ -31,8 +32,8 @@ class BlockStopTimeKey {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BlockStopTimeKey other = (BlockStopTimeKey) obj;
+    BlockLayoverSequenceKey other = (BlockLayoverSequenceKey) obj;
     return _serviceIds.equals(other._serviceIds)
-        && _stopId.equals(other._stopId);
+        && _firstStopId.equals(other._firstStopId);
   }
 }

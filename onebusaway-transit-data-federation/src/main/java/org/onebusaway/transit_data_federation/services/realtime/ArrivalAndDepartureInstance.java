@@ -19,7 +19,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import org.onebusaway.transit_data.model.TimeIntervalBean;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockSequence;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockSequence;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;

@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
 import java.util.List;
