@@ -22,7 +22,7 @@ public final class AgencyNarrative implements Serializable {
    * If true, indicates the agency provides private service that is not
    * available to the general public.
    */
-  private final boolean privateSerivce;
+  private final boolean privateService;
 
   public static Builder builder() {
     return new Builder();
@@ -30,7 +30,7 @@ public final class AgencyNarrative implements Serializable {
 
   private AgencyNarrative(Builder builder) {
     this.disclaimer = builder.disclaimer;
-    this.privateSerivce = builder.privateService;
+    this.privateService = builder.privateService;
   }
 
   public String getDisclaimer() {
@@ -42,7 +42,7 @@ public final class AgencyNarrative implements Serializable {
    * available to the general public.
    */
   public boolean isPrivateService() {
-    return privateSerivce;
+    return privateService;
   }
 
   public static class Builder {
