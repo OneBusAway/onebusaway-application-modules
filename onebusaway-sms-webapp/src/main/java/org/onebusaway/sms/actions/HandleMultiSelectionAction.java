@@ -16,11 +16,19 @@ public class HandleMultiSelectionAction extends AbstractTextmarksAction {
     if (_text == null || _text.length() == 0)
       return INPUT;
 
+    if (_text.startsWith("#")) {
+      clearNextActions();
+      return "command";
+    }
+
     try {
       _selectedIndex = Integer.parseInt(_text) - 1;
     } catch (NumberFormatException ex) {
       return INPUT;
     }
+
+    if (_selectedIndex == -1)
+      return "cancel";
 
     return getNextActionOrSuccess();
   }

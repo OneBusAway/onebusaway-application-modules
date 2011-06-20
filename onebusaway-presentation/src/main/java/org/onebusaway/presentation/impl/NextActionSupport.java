@@ -33,7 +33,6 @@ public abstract class NextActionSupport extends ActionSupport implements
     if( stack != null)
       stack.clear();
     stack = getNextActionStack(false);
-    System.out.println(stack);
   }
 
   protected String getNextActionOrSuccess() {

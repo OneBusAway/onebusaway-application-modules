@@ -19,14 +19,11 @@
 	xmlns:oba="/oba-tags">
 <jsp:directive.page contentType="text/html" />
 <head>
-<title>No stops found</title>
+<title>Cancel</title>
 </head>
 <body>
 
-<div>Multiple stops found:</div>
-<s:iterator value="stops" status="status">
-	<div><s:property value="#status.index + 1"/>: <s:property value="name"/></div>
-</s:iterator>
-<div>0: cancel and reset</div>
+<div>OK</div>
+
 </body>
 </html>

@@ -23,7 +23,8 @@ import com.opensymphony.xwork2.ActionProxy;
     @Result(type = "chain", name = "command", location = "command"),
     @Result(type = "chain", name = "handle-multi-selection", location = "handle-multi-selection"),
     @Result(type = "chain", name = "query-default-search-location", location = "query-default-search-location"),
-    @Result(type = "chain", name = "set-default-search-location", location = "set-default-search-location")})
+    @Result(type = "chain", name = "set-default-search-location", location = "set-default-search-location"),
+    @Result(type = "chain", name = "cancel", location = "cancel")})
 public class AbstractTextmarksAction extends NextActionSupport {
 
   private static final long serialVersionUID = 1L;

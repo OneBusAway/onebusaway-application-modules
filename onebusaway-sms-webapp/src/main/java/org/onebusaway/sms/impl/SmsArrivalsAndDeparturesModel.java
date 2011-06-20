@@ -14,10 +14,6 @@ public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
 
   private TextModification _abbreviations;
   
-  public SmsArrivalsAndDeparturesModel() {
-    System.out.println("here");
-  }
-
   @Autowired
   public void setDestinationAbbreviations(
       @Qualifier("smsDestinationAbbreviations") TextModification strategy) {

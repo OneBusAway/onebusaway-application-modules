@@ -4,51 +4,70 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-public class SessionManagerImpl {
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.onebusaway.sms.services.SessionManager;
+import org.springframework.stereotype.Component;
+
+@Component
+public class SessionManagerImpl implements SessionManager {
 
   private ConcurrentHashMap<String, ContextEntry> _contextEntriesByKey = new ConcurrentHashMap<String, ContextEntry>();
 
-  private long _sessionReaperFrequency = 60 * 1000;
+  private ScheduledExecutorService _executor;
 
-  private long _sessionTimeout = 10 * 60 * 1000;
+  private int _sessionReaperFrequency = 60;
 
-  private SessionCleanup _sessionCleanup;
+  private int _sessionTimeout = 7 * 60;
 
-  private Thread _thread;
-
-  private boolean _exit = false;
-
-  public void setSessionReapearFrequency(long sessionReaperFrequency) {
+  /**
+   * The frequency with which we'll check for stale sessions
+   * 
+   * @param sessionReaperFrequency time, in seconds
+   */
+  public void setSessionReapearFrequency(int sessionReaperFrequency) {
     _sessionReaperFrequency = sessionReaperFrequency;
   }
 
-  public void setSessionTimeout(long sessionTimeout) {
+  /**
+   * Timeout, in seconds, at which point a session will be considered stale
+   * 
+   * @param sessionTimeout time, in seconds
+   */
+  public void setSessionTimeout(int sessionTimeout) {
     _sessionTimeout = sessionTimeout;
   }
 
+  @PostConstruct
   public void start() {
-    _sessionCleanup = new SessionCleanup();
-    _thread = new Thread(_sessionCleanup);
-    _thread.start();
+    _executor = Executors.newSingleThreadScheduledExecutor();
+    _executor.scheduleAtFixedRate(new SessionCleanup(),
+        _sessionReaperFrequency, _sessionReaperFrequency, TimeUnit.SECONDS);
   }
 
+  @PreDestroy
   public void stop() {
-
-    try {
-      setExit();
-      _thread.join();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-
-    _contextEntriesByKey.clear();
+    _executor.shutdownNow();
   }
 
+  /****
+   * {@link SessionManager} Interface
+   ****/
+
+  @Override
   public Map<String, Object> getContext(String key) {
     ContextEntry entry = getOrCreateContextEntry(key);
     return entry.getContext();
   }
+
+  /****
+   * Private Method
+   ****/
 
   private ContextEntry getOrCreateContextEntry(String key) {
     while (true) {
@@ -57,13 +76,6 @@ public class SessionManagerImpl {
       entry = (existingEntry == null) ? entry : existingEntry;
       if (entry.isValidAfterTouch())
         return entry;
-    }
-  }
-
-  private void setExit() {
-    synchronized (_sessionCleanup) {
-      _exit = true;
-      _sessionCleanup.notify();
     }
   }
 
@@ -98,35 +110,15 @@ public class SessionManagerImpl {
 
     public void run() {
 
-      while (true) {
+      long minTime = System.currentTimeMillis() - _sessionTimeout * 1000;
 
-        synchronized (this) {
+      Iterator<ContextEntry> it = _contextEntriesByKey.values().iterator();
 
-          if (_exit)
-            return;
-
-          try {
-            wait(_sessionReaperFrequency);
-            if (_exit)
-              return;
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-            return;
-          }
-        }
-
-        long minTime = System.currentTimeMillis() - _sessionTimeout;
-
-        Iterator<ContextEntry> it = _contextEntriesByKey.values().iterator();
-
-        while (it.hasNext()) {
-          ContextEntry entry = it.next();
-          if (!entry.isValidAfterAccessCheck(minTime))
-            it.remove();
-        }
+      while (it.hasNext()) {
+        ContextEntry entry = it.next();
+        if (!entry.isValidAfterAccessCheck(minTime))
+          it.remove();
       }
-
     }
-
   }
 }

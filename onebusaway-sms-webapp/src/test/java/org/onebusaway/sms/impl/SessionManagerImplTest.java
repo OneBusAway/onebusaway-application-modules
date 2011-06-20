@@ -17,8 +17,8 @@ public class SessionManagerImplTest {
   @Before
   public void setup() {
     _sessionManager = new SessionManagerImpl();
-    _sessionManager.setSessionTimeout(10 * 1000);
-    _sessionManager.setSessionReapearFrequency(2 * 1000);
+    _sessionManager.setSessionTimeout(10);
+    _sessionManager.setSessionReapearFrequency(2);
     _sessionManager.start();
   }
 
