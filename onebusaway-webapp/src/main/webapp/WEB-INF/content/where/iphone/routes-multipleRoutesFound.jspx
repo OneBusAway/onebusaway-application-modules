@@ -30,7 +30,7 @@
 	</s:url>
 	<li><s:a href="%{routeUrl}"><oba:routeName/> - <oba:routeDescription/> - <s:property value="agency.name" /></s:a></li>
 </s:iterator>
-</div>
+</ul>
 
 </body>
 </html>
