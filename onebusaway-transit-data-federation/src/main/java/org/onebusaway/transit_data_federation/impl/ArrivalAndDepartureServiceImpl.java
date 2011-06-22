@@ -403,7 +403,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     Date tFrom = new Date(targetTime.getTargetTime());
     boolean applyRealTime = query.isApplyRealTime();
     int lookaheadTime = query.getLookaheadTime();
-    int resultCount = query.getLookaheadTime();
+    int resultCount = query.getResultCount();
     boolean includePrivateService = query.isIncludePrivateService();
 
     int runningEarlySlack = applyRealTime ? MINUTES_EARLY_BUFFER * 60 : 0;
@@ -427,7 +427,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     Date tTo = new Date(targetTime.getTargetTime());
     boolean applyRealTime = query.isApplyRealTime();
-    int resultCount = query.getLookaheadTime();
+    int resultCount = query.getResultCount();
     boolean includePrivateService = query.isIncludePrivateService();
 
     int runningEarlySlack = applyRealTime ? MINUTES_EARLY_BUFFER * 60 : 0;
