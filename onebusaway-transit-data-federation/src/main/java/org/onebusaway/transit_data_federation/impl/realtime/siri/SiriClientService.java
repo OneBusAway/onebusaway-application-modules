@@ -15,8 +15,8 @@ import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.siri.OneBusAwayConsequence;
+import org.onebusaway.siri.core.SiriClientRequest;
 import org.onebusaway.siri.core.SiriClient;
-import org.onebusaway.siri.core.SiriClientServiceRequest;
 import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
@@ -46,6 +46,7 @@ import uk.org.siri.siri.SensitivityEnumeration;
 import uk.org.siri.siri.ServiceDelivery;
 import uk.org.siri.siri.ServiceRequest;
 import uk.org.siri.siri.SeverityEnumeration;
+import uk.org.siri.siri.Siri;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure.Situations;
 
@@ -294,13 +295,15 @@ public class SiriClientService {
     @Override
     public void run() {
       try {
-        SiriClientServiceRequest request = new SiriClientServiceRequest();
+        SiriClientRequest request = new SiriClientRequest();
         request.setTargetUrl(_url);
-        request.setPayload(new ServiceRequest());
+        Siri siri = new Siri();
+        siri.setServiceRequest(new ServiceRequest());
+        request.setPayload(siri);
 
-        ServiceDelivery delivery = _client.handleServiceRequestWithResponse(request);
+        Siri delivery = _client.handleRequestWithResponse(request);
 
-        processDelivery(delivery);
+        processDelivery(delivery.getServiceDelivery());
         if (_connectionFailure)
           _log.info("siri connection re-establihed to" + _url);
         _connectionFailure = false;
