@@ -10,12 +10,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.collections.CollectionsLibrary;
+import org.onebusaway.siri.core.SiriClientRequest;
 import org.onebusaway.siri.core.ESiriModuleType;
 import org.onebusaway.siri.core.SiriChannelInfo;
 import org.onebusaway.siri.core.SiriClient;
-import org.onebusaway.siri.core.SiriClientSubscriptionRequest;
 import org.onebusaway.siri.core.SiriLibrary;
-import org.onebusaway.siri.core.SiriRequestFactory;
+import org.onebusaway.siri.core.SiriClientRequestFactory;
 import org.onebusaway.siri.core.handlers.SiriServiceDeliveryHandler;
 import org.onebusaway.transit_data_federation.impl.realtime.siri.SiriEndpointDetails;
 import org.onebusaway.transit_data_federation.impl.realtime.siri.SiriService;
@@ -60,12 +60,12 @@ public class SiriController extends SiriClient {
 
     if (!CollectionsLibrary.isEmpty(_endpoints)) {
 
-      SiriRequestFactory factory = new SiriRequestFactory();
+      SiriClientRequestFactory factory = new SiriClientRequestFactory();
 
       for (String endpoint : _endpoints) {
 
         Map<String, String> args = SiriLibrary.getLineAsMap(endpoint);
-        SiriClientSubscriptionRequest request = factory.createSubscriptionRequest(args);
+        SiriClientRequest request = factory.createSubscriptionRequest(args);
 
         SiriEndpointDetails context = new SiriEndpointDetails();
         String agencyId = args.get("AgencyId");
@@ -73,7 +73,7 @@ public class SiriController extends SiriClient {
 
         request.setChannelContext(context);
 
-        handleSubscriptionRequest(request);
+        handleRequest(request);
       }
     }
   }
