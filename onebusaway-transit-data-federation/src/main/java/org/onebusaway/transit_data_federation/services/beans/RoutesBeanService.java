@@ -4,6 +4,7 @@ import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
@@ -34,4 +35,6 @@ public interface RoutesBeanService {
    * @return the list of all routes for the specified agency
    */
   public ListBean<String> getRouteIdsForAgencyId(String agencyId);
+  
+  public ListBean<RouteBean> getRoutesForAgencyId(String agencyId);
 }

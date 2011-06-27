@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.apache.lucene.queryParser.ParseException;
+import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
@@ -47,7 +48,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   private static Logger _log = LoggerFactory.getLogger(RoutesBeanServiceImpl.class);
 
   private static final double MIN_SEARCH_SCORE = 1.0;
-  
+
   @Autowired
   private RouteService _routeService;
 
@@ -73,7 +74,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
   @PostConstruct
   public void setup() {
-    
+
     for (StopEntry stop : _graphDao.getAllStops()) {
       Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
       for (AgencyAndId routeId : routeIds) {
@@ -85,11 +86,11 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
         double x = stop.getStopLon();
         double y = stop.getStopLat();
         Envelope env = new Envelope(x, x, y, y);
-        tree.insert(env,routeId);
+        tree.insert(env, routeId);
       }
     }
-    
-    for( STRtree tree : _stopTreesByRouteId.values() )
+
+    for (STRtree tree : _stopTreesByRouteId.values())
       tree.build();
   }
 
@@ -102,6 +103,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
       return getRoutesWithoutRouteNameQuery(query);
   }
 
+  @Cacheable
   @Override
   public ListBean<String> getRouteIdsForAgencyId(String agencyId) {
     List<AgencyAndId> routeIds = _dao.getRouteIdsForAgencyId(agencyId);
@@ -109,6 +111,18 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
     for (AgencyAndId id : routeIds)
       ids.add(AgencyAndIdLibrary.convertToString(id));
     return new ListBean<String>(ids, false);
+  }
+
+  @Cacheable
+  @Override
+  public ListBean<RouteBean> getRoutesForAgencyId(String agencyId) {
+    List<AgencyAndId> routeIds = _dao.getRouteIdsForAgencyId(agencyId);
+    List<RouteBean> routes = new ArrayList<RouteBean>();
+    for (AgencyAndId routeId : routeIds) {
+      RouteBean route = _routeBeanService.getRouteForId(routeId);
+      routes.add(route);
+    }
+    return new ListBean<RouteBean>(routes, false);
   }
 
   /****
@@ -143,15 +157,16 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
     for (AgencyAndId id : result.getResults()) {
       STRtree tree = _stopTreesByRouteId.get(id);
-      if( tree == null) {
+      if (tree == null) {
         _log.warn("stop tree not found for routeId=" + id);
         continue;
       }
-      Envelope env = new Envelope(bounds.getMinLon(),bounds.getMaxLon(),bounds.getMinLat(),bounds.getMaxLat());
+      Envelope env = new Envelope(bounds.getMinLon(), bounds.getMaxLon(),
+          bounds.getMinLat(), bounds.getMaxLat());
       HasItemsVisitor v = new HasItemsVisitor();
       tree.query(env, v);
-      
-      if( v.hasItems() ) {
+
+      if (v.hasItems()) {
         RouteBean routeBean = _routeBeanService.getRouteForId(id);
         routeBeans.add(routeBean);
       }
@@ -159,7 +174,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
     boolean limitExceeded = BeanServiceSupport.checkLimitExceeded(routeBeans,
         query.getMaxCount());
-    
+
     return constructResult(routeBeans, limitExceeded);
   }
 
@@ -186,19 +201,19 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
     result.setLimitExceeded(limitExceeded);
     return result;
   }
-  
+
   private static class HasItemsVisitor implements ItemVisitor {
 
     private boolean _hasItems = false;
-    
+
     public boolean hasItems() {
       return _hasItems;
     }
-    
+
     @Override
     public void visitItem(Object arg0) {
       _hasItems = true;
-    }    
+    }
   }
 
 }

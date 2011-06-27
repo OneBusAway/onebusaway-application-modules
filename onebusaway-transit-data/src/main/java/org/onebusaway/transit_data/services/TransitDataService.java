@@ -131,6 +131,13 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByAgencyIdMethod
   public ListBean<String> getRouteIdsForAgencyId(String agencyId);
+  
+  /**
+   * @param agencyId
+   * @return the list of all routes for the specified agency id
+   */
+  @FederatedByAgencyIdMethod
+  public ListBean<RouteBean> getRoutesForAgencyId(String agencyId);
 
   /**
    * @param routeId

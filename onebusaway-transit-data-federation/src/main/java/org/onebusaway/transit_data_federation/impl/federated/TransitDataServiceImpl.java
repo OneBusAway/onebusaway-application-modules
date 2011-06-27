@@ -305,6 +305,11 @@ class TransitDataServiceImpl implements TransitDataService {
   public ListBean<String> getRouteIdsForAgencyId(String agencyId) {
     return _routesBeanService.getRouteIdsForAgencyId(agencyId);
   }
+  
+  @Override
+  public ListBean<RouteBean> getRoutesForAgencyId(String agencyId) {
+    return _routesBeanService.getRoutesForAgencyId(agencyId);
+  }
 
   @Override
   public StopsForRouteBean getStopsForRoute(String routeId) {
