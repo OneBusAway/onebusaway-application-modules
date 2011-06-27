@@ -144,6 +144,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     long fromTime = time - minutesBefore * 60 * 1000;
     long toTime = time + minutesAfter * 60 * 1000;
+    
+    long nonFrequencyFromTime = time - query.getMinutesBefore() * 60
+    * 1000;
+    long nonFrequencyToTime = time + query.getMinutesAfter() * 60 * 1000;
 
     long frequencyFromTime = time - query.getFrequencyMinutesBefore() * 60
         * 1000;
@@ -163,8 +167,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
       BlockInstance blockInstance = instance.getBlockInstance();
       FrequencyEntry frequency = blockInstance.getFrequency();
 
-      long from = frequency != null ? frequencyFromTime : fromTime;
-      long to = frequency != null ? frequencyToTime : toTime;
+      long from = frequency != null ? frequencyFromTime : nonFrequencyFromTime;
+      long to = frequency != null ? frequencyToTime : nonFrequencyToTime;
 
       if (!isArrivalAndDepartureInRange(instance, from, to))
         continue;
