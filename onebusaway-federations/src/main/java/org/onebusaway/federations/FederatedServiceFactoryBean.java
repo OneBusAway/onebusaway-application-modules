@@ -26,7 +26,7 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
  * @see FederatedService
  * @see FederatedServiceCollection
  */
-public class FederatedServiceFactoryBean extends AbstractFactoryBean {
+public class FederatedServiceFactoryBean extends AbstractFactoryBean<Object> {
 
   private static FederatedServiceMethodInvocationHandlerFactory _handlerFactory = new FederatedServiceMethodInvocationHandlerFactory();
 
