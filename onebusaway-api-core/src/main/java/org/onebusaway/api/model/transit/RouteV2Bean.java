@@ -17,24 +17,32 @@ package org.onebusaway.api.model.transit;
 
 import java.io.Serializable;
 
+import org.onebusaway.csv_entities.schema.annotations.CsvField;
+
 public final class RouteV2Bean implements Serializable, HasId {
 
   private static final long serialVersionUID = 2L;
 
   private String id;
 
+  @CsvField(optional = true)
   private String shortName;
 
+  @CsvField(optional = true)
   private String longName;
 
+  @CsvField(optional = true)
   private String description;
 
   private int type;
 
+  @CsvField(optional = true)
   private String url;
 
+  @CsvField(optional = true)
   private String color;
 
+  @CsvField(optional = true)
   private String textColor;
 
   private String agencyId;
