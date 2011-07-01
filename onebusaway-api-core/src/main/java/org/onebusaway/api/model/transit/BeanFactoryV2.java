@@ -806,13 +806,19 @@ public class BeanFactoryV2 {
     bean.setRouteId(route.getId());
     addToReferences(route);
 
-    if (trip.getRouteShortName() != null)
-      bean.setRouteShortName(trip.getRouteShortName());
-    else
-      bean.setRouteShortName(route.getShortName());
+    String routeShortName = ad.getRouteShortName();
+    if( routeShortName == null || routeShortName.isEmpty())
+      routeShortName = trip.getRouteShortName();
+    if( routeShortName == null || routeShortName.isEmpty())
+      routeShortName = route.getShortName();
+    bean.setRouteShortName(routeShortName);
+    
     bean.setRouteLongName(route.getLongName());
 
-    bean.setTripHeadsign(trip.getTripHeadsign());
+    String tripHeadsign = ad.getTripHeadsign();
+    if( tripHeadsign == null || tripHeadsign.isEmpty() )
+      tripHeadsign = trip.getTripHeadsign();
+    bean.setTripHeadsign(tripHeadsign);
 
     bean.setArrivalEnabled(ad.isArrivalEnabled());
     bean.setDepartureEnabled(ad.isDepartureEnabled());
