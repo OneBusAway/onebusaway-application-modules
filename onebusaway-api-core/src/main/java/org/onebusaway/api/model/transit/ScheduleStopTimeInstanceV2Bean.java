@@ -6,7 +6,11 @@ public class ScheduleStopTimeInstanceV2Bean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private boolean arrivalEnabled;
+
   private long arrivalTime;
+
+  private boolean departureEnabled;
 
   private long departureTime;
 
@@ -16,12 +20,28 @@ public class ScheduleStopTimeInstanceV2Bean implements Serializable {
 
   private String stopHeadsign;
 
+  public boolean isArrivalEnabled() {
+    return arrivalEnabled;
+  }
+
+  public void setArrivalEnabled(boolean arrivalEnabled) {
+    this.arrivalEnabled = arrivalEnabled;
+  }
+
   public long getArrivalTime() {
     return arrivalTime;
   }
 
   public void setArrivalTime(long arrivalTime) {
     this.arrivalTime = arrivalTime;
+  }
+
+  public boolean isDepartureEnabled() {
+    return departureEnabled;
+  }
+
+  public void setDepartureEnabled(boolean departureEnabled) {
+    this.departureEnabled = departureEnabled;
   }
 
   public long getDepartureTime() {

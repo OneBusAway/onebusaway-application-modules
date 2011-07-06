@@ -687,7 +687,9 @@ public class BeanFactoryV2 {
     List<ScheduleStopTimeInstanceV2Bean> stopTimes = new ArrayList<ScheduleStopTimeInstanceV2Bean>();
     for (StopTimeInstanceBean sti : direction.getStopTimes()) {
       ScheduleStopTimeInstanceV2Bean stiBean = new ScheduleStopTimeInstanceV2Bean();
+      stiBean.setArrivalEnabled(sti.isArrivalEnabled());
       stiBean.setArrivalTime(sti.getArrivalTime());
+      stiBean.setDepartureEnabled(sti.isDepartureEnabled());
       stiBean.setDepartureTime(sti.getDepartureTime());
       stiBean.setServiceId(sti.getServiceId());
       stiBean.setTripId(sti.getTripId());
