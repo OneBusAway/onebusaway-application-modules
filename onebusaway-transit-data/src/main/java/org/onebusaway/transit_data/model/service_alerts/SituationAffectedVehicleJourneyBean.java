@@ -16,6 +16,8 @@ public final class SituationAffectedVehicleJourneyBean implements Serializable {
 
   private List<SituationAffectedCallBean> calls;
 
+  private List<String> tripIds;
+
   public String getLineId() {
     return lineId;
   }
@@ -38,5 +40,13 @@ public final class SituationAffectedVehicleJourneyBean implements Serializable {
 
   public void setCalls(List<SituationAffectedCallBean> calls) {
     this.calls = calls;
+  }
+
+  public List<String> getTripIds() {
+    return tripIds;
+  }
+
+  public void setTripIds(List<String> tripIds) {
+    this.tripIds = tripIds;
   }
 }

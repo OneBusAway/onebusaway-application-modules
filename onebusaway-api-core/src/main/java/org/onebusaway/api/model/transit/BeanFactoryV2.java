@@ -264,7 +264,7 @@ public class BeanFactoryV2 {
     bean.setLang(agency.getLang());
     bean.setName(agency.getName());
     bean.setPhone(agency.getPhone());
-    bean.setPrivateService(agency.isPrivateService());    
+    bean.setPrivateService(agency.isPrivateService());
     bean.setTimezone(agency.getTimezone());
     bean.setUrl(agency.getUrl());
     return bean;
@@ -558,9 +558,9 @@ public class BeanFactoryV2 {
   public ListWithReferencesBean<CurrentVehicleEstimateV2Bean> getCurrentVehicleEstimates(
       ListBean<CurrentVehicleEstimateBean> estimates) {
 
-    if( estimates == null || estimates.getList() == null)
+    if (estimates == null || estimates.getList() == null)
       return list(new ArrayList<CurrentVehicleEstimateV2Bean>(), false);
-    
+
     List<CurrentVehicleEstimateV2Bean> beans = new ArrayList<CurrentVehicleEstimateV2Bean>();
     for (CurrentVehicleEstimateBean estimate : estimates.getList())
       beans.add(getCurrentVehicleEstimate(estimate));
@@ -807,22 +807,22 @@ public class BeanFactoryV2 {
     addToReferences(route);
 
     String routeShortName = ad.getRouteShortName();
-    if( routeShortName == null || routeShortName.isEmpty())
+    if (routeShortName == null || routeShortName.isEmpty())
       routeShortName = trip.getRouteShortName();
-    if( routeShortName == null || routeShortName.isEmpty())
+    if (routeShortName == null || routeShortName.isEmpty())
       routeShortName = route.getShortName();
     bean.setRouteShortName(routeShortName);
-    
+
     bean.setRouteLongName(route.getLongName());
 
     String tripHeadsign = ad.getTripHeadsign();
-    if( tripHeadsign == null || tripHeadsign.isEmpty() )
+    if (tripHeadsign == null || tripHeadsign.isEmpty())
       tripHeadsign = trip.getTripHeadsign();
     bean.setTripHeadsign(tripHeadsign);
 
     bean.setArrivalEnabled(ad.isArrivalEnabled());
     bean.setDepartureEnabled(ad.isDepartureEnabled());
-    
+
     bean.setScheduledArrivalTime(ad.getScheduledArrivalTime());
     bean.setScheduledDepartureTime(ad.getScheduledDepartureTime());
     bean.setPredictedArrivalTime(ad.getPredictedArrivalTime());
@@ -1002,6 +1002,10 @@ public class BeanFactoryV2 {
       }
       bean.setCalls(calls);
     }
+
+    if (!CollectionsLibrary.isEmpty(journey.getTripIds()))
+      bean.setTripIds(journey.getTripIds());
+
     return bean;
   }
 

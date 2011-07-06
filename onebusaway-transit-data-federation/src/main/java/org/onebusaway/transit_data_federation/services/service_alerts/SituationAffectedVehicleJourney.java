@@ -18,6 +18,8 @@ public final class SituationAffectedVehicleJourney implements Serializable {
 
   private List<SituationAffectedCall> calls;
 
+  private List<AgencyAndId> tripIds;
+
   public AgencyAndId getLineId() {
     return lineId;
   }
@@ -40,5 +42,13 @@ public final class SituationAffectedVehicleJourney implements Serializable {
 
   public void setCalls(List<SituationAffectedCall> calls) {
     this.calls = calls;
+  }
+
+  public List<AgencyAndId> getTripIds() {
+    return tripIds;
+  }
+
+  public void setTripIds(List<AgencyAndId> tripIds) {
+    this.tripIds = tripIds;
   }
 }

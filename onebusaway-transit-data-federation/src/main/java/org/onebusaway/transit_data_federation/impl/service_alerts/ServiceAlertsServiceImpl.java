@@ -65,6 +65,8 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private ConcurrentMap<LineDirectionAndStopCallRef, Set<AgencyAndId>> _situationIdsByLineDirectionAndStopCall = new ConcurrentHashMap<LineDirectionAndStopCallRef, Set<AgencyAndId>>();
 
+  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _situationIdsByTripId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
+
   private FederatedTransitDataBundle _bundle;
 
   private File _serviceAlertsPath;
@@ -218,6 +220,9 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
       getSituationIdsForKey(_situationIdsByLineDirectionAndStopCall,
           lineDirectionAndStopCallRef, situationIds);
     }
+
+    getSituationIdsForKey(_situationIdsByTripId, trip.getId(), situationIds);
+
     return getSituationIdsAsObjects(situationIds);
   }
 
@@ -237,6 +242,7 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     getSituationIdsForKey(_situationIdsByLineId, lineId, situationIds);
     getSituationIdsForKey(_situationIdsByLineAndDirectionId,
         lineAndDirectionRef, situationIds);
+    getSituationIdsForKey(_situationIdsByTripId, trip.getId(), situationIds);
     return getSituationIdsAsObjects(situationIds);
   }
 
@@ -278,6 +284,9 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     updateReferences(existingSituation, situation,
         _situationIdsByLineDirectionAndStopCall,
         AffectsLineDirectionAndStopCallKeyFactory.INSTANCE);
+
+    updateReferences(existingSituation, situation, _situationIdsByTripId,
+        AffectsTripKeyFactory.INSTANCE);
   }
 
   private <T> void updateReferences(Situation existingSituation,

@@ -17,6 +17,8 @@ public final class SituationAffectedVehicleJourneyV2Bean implements
 
   private List<SituationAffectedCallV2Bean> calls;
 
+  private List<String> tripIds;
+
   public String getLineId() {
     return lineId;
   }
@@ -39,5 +41,13 @@ public final class SituationAffectedVehicleJourneyV2Bean implements
 
   public void setCalls(List<SituationAffectedCallV2Bean> calls) {
     this.calls = calls;
+  }
+
+  public List<String> getTripIds() {
+    return tripIds;
+  }
+
+  public void setTripIds(List<String> tripIds) {
+    this.tripIds = tripIds;
   }
 }

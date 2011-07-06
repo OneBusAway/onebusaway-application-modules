@@ -365,6 +365,14 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
         beans.add(getAffectedCallAsBean(call));
       bean.setCalls(beans);
     }
+
+    if (!CollectionsLibrary.isEmpty(vehicleJourney.getTripIds())) {
+      List<String> tripIds = new ArrayList<String>();
+      for (AgencyAndId tripId : vehicleJourney.getTripIds())
+        tripIds.add(AgencyAndIdLibrary.convertToString(tripId));
+      bean.setTripIds(tripIds);
+    }
+
     return bean;
   }
 
@@ -382,6 +390,14 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
         calls.add(getBeanAsAffectedCall(callBean));
       vehicleJourney.setCalls(calls);
     }
+
+    if (!CollectionsLibrary.isEmpty(bean.getTripIds())) {
+      List<AgencyAndId> tripIds = new ArrayList<AgencyAndId>();
+      for (String tripId : bean.getTripIds())
+        tripIds.add(AgencyAndIdLibrary.convertFromString(tripId));
+      vehicleJourney.setTripIds(tripIds);
+    }
+
     return vehicleJourney;
   }
 

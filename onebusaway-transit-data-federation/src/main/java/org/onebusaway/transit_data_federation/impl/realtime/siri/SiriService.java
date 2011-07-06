@@ -51,6 +51,7 @@ import uk.org.siri.siri.SeverityEnumeration;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure.Situations;
 import uk.org.siri.siri.StopPointRefStructure;
+import uk.org.siri.siri.VehicleJourneyRefStructure;
 import uk.org.siri.siri.WorkflowStatusEnumeration;
 
 @Component
@@ -265,12 +266,22 @@ public class SiriService {
           }
           avj.setCalls(stopIds);
         }
+        
+        if (!CollectionsLibrary.isEmpty(vj.getVehicleJourneyRef())) {
+          List<AgencyAndId> tripIds = new ArrayList<AgencyAndId>();
+          for (VehicleJourneyRefStructure vjRef : vj.getVehicleJourneyRef()) {
+            AgencyAndId tripId = AgencyAndIdLibrary.convertFromString(vjRef.getValue());
+            tripIds.add(tripId);
+          }
+          avj.setTripIds(tripIds);
+        }
 
         avjs.add(avj);
       }
 
       situationAffects.setVehicleJourneys(avjs);
     }
+
 
     ExtensionsStructure extension = affectsStructure.getExtensions();
     if (extension != null && extension.getAny() != null) {
@@ -280,7 +291,7 @@ public class SiriService {
 
         Applications applications = obaAffects.getApplications();
         if (applications != null
-            && ! CollectionsLibrary.isEmpty(applications.getAffectedApplication())) {
+            && !CollectionsLibrary.isEmpty(applications.getAffectedApplication())) {
 
           List<SituationAffectedApplication> affectedApps = new ArrayList<SituationAffectedApplication>();
           List<AffectedApplicationStructure> apps = applications.getAffectedApplication();
