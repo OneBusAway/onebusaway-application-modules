@@ -34,8 +34,10 @@ public class TPBlockArrivalVertex extends AbstractTPPathStateVertex implements
 
   @Override
   public Collection<Edge> getIncoming() {
-    Edge edge = new TPBlockHopEdge(_context, _pathState, _departure, _arrival);
-    return Arrays.asList(edge);
+    TPBlockHopEdge edge = new TPBlockHopEdge(_context, _pathState, _departure,
+        _arrival);
+    edge.setToVertex(this);
+    return Arrays.asList((Edge) edge);
   }
 
   @Override
@@ -47,8 +49,9 @@ public class TPBlockArrivalVertex extends AbstractTPPathStateVertex implements
       TransferPatternService tpService = _context.getTransferPatternService();
       List<TPState> transferStates = _pathState.getTransferStates(tpService);
       for (TPState nextState : transferStates) {
-        Edge edge = new TPTransferEdge(_context, _pathState, nextState,
-            _departure, _arrival, false);
+        TPTransferEdge edge = new TPTransferEdge(_context, _pathState,
+            nextState, _departure, _arrival, false);
+        edge.setFromVertex(this);
         edges.add(edge);
       }
     }

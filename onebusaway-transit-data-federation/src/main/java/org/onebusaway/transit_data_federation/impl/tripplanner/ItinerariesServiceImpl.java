@@ -13,7 +13,7 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
-import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
+import org.onebusaway.transit_data_federation.impl.otp.OBAState;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.RemainingWeightHeuristicImpl;
 import org.onebusaway.transit_data_federation.impl.otp.SearchTerminationStrategyImpl;
@@ -31,17 +31,14 @@ import org.opentripplanner.routing.algorithm.strategies.GenericAStarFactory;
 import org.opentripplanner.routing.algorithm.strategies.SkipTraverseResultStrategy;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.services.GraphService;
 import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.services.StreetVertexIndexService;
 import org.opentripplanner.routing.spt.GraphPath;
-import org.opentripplanner.routing.spt.SPTVertex;
 import org.opentripplanner.routing.spt.ShortestPathTree;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -107,7 +104,10 @@ class ItinerariesServiceImpl implements ItinerariesService {
     if (fromVertex == null || toVertex == null)
       throw new OutOfServiceAreaServiceException();
 
-    State state = new State(targetTime, new OBAStateData());
+    Vertex v = options.isArriveBy() ? toVertex : fromVertex;
+    Vertex target = options.isArriveBy() ? fromVertex : toVertex;
+
+    State state = new OBAState(targetTime, v, options);
 
     if (_transferPathService.isEnabled()) {
       return getTransferPatternItinerariesBetween(fromVertex, toVertex,
@@ -117,7 +117,7 @@ class ItinerariesServiceImpl implements ItinerariesService {
       options.remainingWeightHeuristic = new RemainingWeightHeuristicImpl();
       options.aStarSearchFactory = new GenericAStarFactoryImpl();
 
-      return _pathService.plan(fromVertex, toVertex, state, options, 1);
+      return _pathService.plan(state, target, 1);
     }
   }
 
@@ -153,16 +153,18 @@ class ItinerariesServiceImpl implements ItinerariesService {
       Date time, TraverseOptions options) {
 
     options = options.clone();
-    
+
     /**
      * Set walk only
      */
     TraverseModeSet modes = new TraverseModeSet(TraverseMode.WALK);
     options.setModes(modes);
 
-    State state = new State(time.getTime(), new OBAStateData());
+    Vertex origin = options.isArriveBy() ? to : from;
+    Vertex target = options.isArriveBy() ? from : to;
+    State state = new OBAState(time.getTime(), origin, options);
 
-    List<GraphPath> paths = _pathService.plan(from, to, state, options, 1);
+    List<GraphPath> paths = _pathService.plan(state, target, 1);
 
     if (CollectionsLibrary.isEmpty(paths))
       return null;
@@ -180,8 +182,8 @@ class ItinerariesServiceImpl implements ItinerariesService {
     return _streetVertexIndexService.getClosestVertex(c, options);
   }
 
-  private List<GraphPath> getTransferPatternItinerariesBetween(Vertex fromVertex,
-      Vertex toVertex, Date time, OBATraverseOptions options) {
+  private List<GraphPath> getTransferPatternItinerariesBetween(
+      Vertex fromVertex, Vertex toVertex, Date time, OBATraverseOptions options) {
 
     Set<StopEntry> sourceStops = Collections.emptySet();
     Set<StopEntry> destStops = Collections.emptySet();
@@ -202,25 +204,17 @@ class ItinerariesServiceImpl implements ItinerariesService {
     options.putExtension(TPQueryData.class, queryData);
 
     Graph graph = _graphService.getGraph();
-    State init = new State(time.getTime(), new OBAStateData());
+    Vertex origin = options.isArriveBy() ? toVertex : fromVertex;
+    Vertex target = options.isArriveBy() ? fromVertex : toVertex;
+    State init = new OBAState(time.getTime(), origin, options);
     options.remainingWeightHeuristic = new TPRemainingWeightHeuristicImpl();
     GenericAStar search = new GenericAStar();
     search.setSkipTraverseResultStrategy(new SkipVertexImpl());
     search.setSearchTerminationStrategy(new SearchTerminationStrategyImpl());
     search.setShortestPathTreeFactory(TripSequenceShortestPathTree.FACTORY);
 
-    if (options.isArriveBy()) {
-      ShortestPathTree spt = search.getShortestPathTree(graph, toVertex,
-          fromVertex, init, options);
-      List<GraphPath> paths = spt.getPaths(fromVertex, true);
-      for (GraphPath path : paths)
-        path.reverse();
-      return paths;
-    } else {
-      ShortestPathTree spt = search.getShortestPathTree(graph, fromVertex,
-          toVertex, init, options);
-      return spt.getPaths(toVertex, true);
-    }
+    ShortestPathTree spt = search.getShortestPathTree(graph, init, target);
+    return spt.getPaths(target, true);
   }
 
   public List<StopEntry> getNearbyStops(Vertex v, TraverseOptions options,
@@ -263,21 +257,17 @@ class ItinerariesServiceImpl implements ItinerariesService {
   private static class SkipVertexImpl implements SkipTraverseResultStrategy {
 
     @Override
-    public boolean shouldSkipTraversalResult(Vertex origin, Vertex target,
-        SPTVertex parent, TraverseResult traverseResult, ShortestPathTree spt,
-        TraverseOptions traverseOptions) {
+    public boolean shouldSkipTraversalResult(Vertex origin, Vertex target, State parent,
+        State current, ShortestPathTree spt, TraverseOptions traverseOptions) {
 
-      State state = traverseResult.state;
-      StateData data = state.getData();
       if (traverseOptions.maxWalkDistance > 0
-          && data.getWalkDistance() > traverseOptions.maxWalkDistance)
+          && current.getWalkDistance() > traverseOptions.maxWalkDistance)
         return true;
 
       return false;
     }
   }
-  
-  
+
   private static class GenericAStarFactoryImpl implements GenericAStarFactory {
 
     @Override
@@ -286,6 +276,6 @@ class ItinerariesServiceImpl implements ItinerariesService {
       instance.setSearchTerminationStrategy(new SearchTerminationStrategyImpl());
       instance.setShortestPathTreeFactory(TripSequenceShortestPathTree.FACTORY);
       return instance;
-    }    
+    }
   }
 }

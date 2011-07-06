@@ -53,4 +53,34 @@ abstract class AbstractTPPathStateVertex extends AbstractVertexWithEdges
     boolean pickFirstStop = _isDeparture ^ _pathState.isReverse();
     return pickFirstStop ? pair.getFirst() : pair.getSecond();
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (_isDeparture ? 1231 : 1237);
+    result = prime * result + _pathState.hashCode();
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    AbstractTPPathStateVertex other = (AbstractTPPathStateVertex) obj;
+    if (_isDeparture != other._isDeparture)
+      return false;
+    if (!_pathState.equals(other._pathState))
+      return false;
+    return true;
+  }
+
+  /****
+   * {@link Object} Interface
+   ****/
+
 }

@@ -2,20 +2,20 @@ package org.onebusaway.transit_data_federation.impl.otp;
 
 import org.onebusaway.transit_data_federation.impl.otp.TripSequenceShortestPathTree.ResultCollection;
 import org.opentripplanner.routing.algorithm.strategies.SearchTerminationStrategy;
+import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
-import org.opentripplanner.routing.spt.SPTVertex;
 import org.opentripplanner.routing.spt.ShortestPathTree;
 
 public class SearchTerminationStrategyImpl implements SearchTerminationStrategy {
 
   @Override
   public boolean shouldSearchContinue(Vertex origin, Vertex target,
-      SPTVertex current, ShortestPathTree spt, TraverseOptions traverseOptions) {
+      State current, ShortestPathTree spt, TraverseOptions traverseOptions) {
 
     OBATraverseOptions opts = (OBATraverseOptions) traverseOptions;
 
-    Vertex currentVertex = current.mirror;
+    Vertex currentVertex = current.getVertex();
 
     if (target == currentVertex) {
 
@@ -33,27 +33,26 @@ public class SearchTerminationStrategyImpl implements SearchTerminationStrategy 
       if (byTripSequence.getItineraryCount() >= opts.numItineraries)
         return false;
 
-      SPTVertex minVertex = getMinVertex(byTripSequence.getVertices().values());
+      State minVertex = getMinVertex(byTripSequence.getStates().values());
 
-      if (current.weightSum > minVertex.weightSum * 1.5)
+      if (current.getWeight() > minVertex.getWeight() * 1.5)
         return false;
     }
 
     return true;
   }
 
-  private SPTVertex getMinVertex(Iterable<SPTVertex> vertices) {
+  private State getMinVertex(Iterable<OBAState> states) {
 
-    SPTVertex minVertex = null;
+    State minVertex = null;
     double minWeight = Double.POSITIVE_INFINITY;
 
-    for (SPTVertex vertex : vertices) {
-      OBAStateData data = (OBAStateData) vertex.state.getData();
-      if (data.isLookaheadItinerary())
+    for (OBAState state : states) {
+      if (state.isLookaheadItinerary())
         continue;
-      if (vertex.weightSum < minWeight) {
-        minVertex = vertex;
-        minWeight = vertex.weightSum;
+      if (state.getWeight() < minWeight) {
+        minVertex = state;
+        minWeight = state.getWeight();
       }
     }
 

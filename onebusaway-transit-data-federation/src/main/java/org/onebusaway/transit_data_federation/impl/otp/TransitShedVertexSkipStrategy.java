@@ -5,7 +5,6 @@ import org.onebusaway.transit_data_federation.model.tripplanner.WalkToStopState;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
-import org.opentripplanner.routing.spt.SPTVertex;
 
 /**
  * In our transit-shed calculation, we effectively don't allow you to exit the
@@ -15,7 +14,7 @@ import org.opentripplanner.routing.spt.SPTVertex;
  * 
  * @author bdferris
  */
-public class TransitShetVertexSkipStrategy implements VertexSkipStrategy {
+public class TransitShedVertexSkipStrategy implements VertexSkipStrategy {
 
   private static final long DEFAULT_MAX_TRIP_DURATION = 20 * 60 * 1000;
 
@@ -23,12 +22,12 @@ public class TransitShetVertexSkipStrategy implements VertexSkipStrategy {
 
   @Override
   public boolean isVertexSkippedInFowardSearch(Vertex origin,
-      State originState, SPTVertex vertex, TraverseOptions options) {
+      State originState, State state, TraverseOptions options) {
 
     /**
      * We aren't allowed to exit the transit network
      */
-    if (vertex.mirror instanceof WalkFromStopVertex)
+    if (state.getVertex() instanceof WalkFromStopVertex)
       return true;
 
     OBATraverseOptions config = options.getExtension(OBATraverseOptions.class);
@@ -41,11 +40,10 @@ public class TransitShetVertexSkipStrategy implements VertexSkipStrategy {
     if (config != null && config.maxInitialWaitTime != -1)
       maxInitialWaitTime = config.maxInitialWaitTime;
 
-    State currentState = vertex.state;
-    long tripDuration = currentState.getTime() - originState.getTime();
+    long tripDuration = state.getTime() - originState.getTime();
 
-    OBAStateData data = (OBAStateData) currentState.getData();
-    long initialWaitTime = data.getInitialWaitTime();
+    OBAState obaState = (OBAState) state;
+    long initialWaitTime = obaState.getInitialWaitTime();
 
     if (initialWaitTime > maxInitialWaitTime)
       return true;
@@ -60,8 +58,8 @@ public class TransitShetVertexSkipStrategy implements VertexSkipStrategy {
 
   @Override
   public boolean isVertexSkippedInReverseSearch(Vertex target,
-      State targetState, SPTVertex vertex, TraverseOptions options) {
-    return vertex.mirror instanceof WalkToStopState;
+      State targetState, State state, TraverseOptions options) {
+    return state.getVertex() instanceof WalkToStopState;
   }
 
 }

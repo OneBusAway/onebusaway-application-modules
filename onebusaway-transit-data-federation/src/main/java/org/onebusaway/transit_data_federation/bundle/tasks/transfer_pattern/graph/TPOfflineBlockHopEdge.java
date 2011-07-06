@@ -2,11 +2,10 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.gra
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
-import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
+import org.opentripplanner.routing.core.StateEditor;
 import org.opentripplanner.routing.core.Vertex;
 
 /**
@@ -36,25 +35,14 @@ public class TPOfflineBlockHopEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State state0, TraverseOptions wo) {
+  public State traverse(State s0) {
 
+    EdgeNarrative narrative = createNarrative(s0);
+    StateEditor edit = s0.edit(this, narrative);
     int runningTime = computeRunningTime();
-    State state1 = state0.incrementTimeInSeconds(runningTime);
-
-    EdgeNarrativeImpl narrative = createNarrative();
-
-    return new TraverseResult(runningTime, state1, narrative);
-  }
-
-  @Override
-  public TraverseResult traverseBack(State state0, TraverseOptions wo) {
-
-    int runningTime = computeRunningTime();
-    State state1 = state0.incrementTimeInSeconds(-runningTime);
-
-    EdgeNarrativeImpl narrative = createNarrative();
-
-    return new TraverseResult(runningTime, state1, narrative);
+    edit.incrementTimeInSeconds(runningTime);
+    edit.incrementWeight(runningTime);
+    return edit.makeState();
   }
 
   /****
@@ -68,9 +56,9 @@ public class TPOfflineBlockHopEdge extends AbstractEdge {
     return runningTime;
   }
 
-  private EdgeNarrativeImpl createNarrative() {
+  private EdgeNarrative createNarrative(State s0) {
     Vertex fromVertex = new TPOfflineBlockDepartureVertex(_context, _from);
     Vertex toVertex = new TPOfflineBlockArrivalVertex(_context, _to);
-    return new EdgeNarrativeImpl(fromVertex, toVertex);
+    return narrative(s0, fromVertex, toVertex);
   }
 }

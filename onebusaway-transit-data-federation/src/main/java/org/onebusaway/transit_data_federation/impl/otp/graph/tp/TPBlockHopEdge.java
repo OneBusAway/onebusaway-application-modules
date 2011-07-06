@@ -2,14 +2,10 @@ package org.onebusaway.transit_data_federation.impl.otp.graph.tp;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
-import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData.Editor;
-import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
+import org.opentripplanner.routing.core.StateEditor;
 import org.opentripplanner.routing.core.Vertex;
 
 public class TPBlockHopEdge extends AbstractEdge {
@@ -29,35 +25,19 @@ public class TPBlockHopEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  public State traverse(State s0) {
 
     int transitTime = computeTransitTime();
 
-    Editor s1 = s0.edit();
-    s1.incrementTimeInSeconds(transitTime);
-    s1.incrementNumBoardings();
-    s1.setEverBoarded(true);
+    EdgeNarrative narrative = createNarrative(s0);
+    StateEditor edit = s0.edit(this, narrative);
 
-    EdgeNarrative narrative = createNarrative();
+    edit.incrementTimeInSeconds(transitTime);
+    edit.incrementNumBoardings();
+    edit.setEverBoarded(true);
+    edit.incrementWeight(transitTime);
 
-    return new TraverseResult(transitTime, s1.createState(), narrative);
-  }
-
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
-
-    int transitTime = computeTransitTime();
-
-    Editor s1 = s0.edit();
-    s1.incrementTimeInSeconds(-transitTime);
-    s1.incrementNumBoardings();
-    s1.setEverBoarded(true);
-
-    EdgeNarrative narrative = createNarrative();
-
-    return new TraverseResult(transitTime, s1.createState(), narrative);
+    return edit.makeState();
   }
 
   /****
@@ -70,11 +50,11 @@ public class TPBlockHopEdge extends AbstractEdge {
     return (int) ((arrival - departure) / 1000);
   }
 
-  private EdgeNarrative createNarrative() {
+  private EdgeNarrative createNarrative(State s0) {
     Vertex fromV = new TPBlockDepartureVertex(_context, _pathState, _departure,
         _arrival);
     Vertex toV = new TPBlockArrivalVertex(_context, _pathState, _departure,
         _arrival);
-    return new EdgeNarrativeImpl(fromV, toV);
+    return narrative(s0, fromV, toV);
   }
 }

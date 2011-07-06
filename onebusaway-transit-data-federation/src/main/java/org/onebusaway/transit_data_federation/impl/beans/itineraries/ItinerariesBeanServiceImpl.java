@@ -39,7 +39,7 @@ import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.impl.beans.ApplicationBeanLibrary;
 import org.onebusaway.transit_data_federation.impl.beans.FrequencyBeanLibrary;
-import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
+import org.onebusaway.transit_data_federation.impl.otp.OBAState;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractBlockVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractStopVertex;
@@ -89,8 +89,6 @@ import org.opentripplanner.routing.services.GraphService;
 import org.opentripplanner.routing.services.StreetVertexIndexService;
 import org.opentripplanner.routing.spt.BasicShortestPathTree;
 import org.opentripplanner.routing.spt.GraphPath;
-import org.opentripplanner.routing.spt.SPTEdge;
-import org.opentripplanner.routing.spt.SPTVertex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -317,22 +315,21 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     Coordinate c = new Coordinate(location.getLon(), location.getLat());
     Vertex origin = _streetVertexIndexService.getClosestVertex(c, options);
 
-    State originState = new State(time);
+    State originState = new OBAState(time, origin, options);
     BasicShortestPathTree tree = _transitShedPathService.getTransitShed(origin,
         originState, options);
 
     Map<StopEntry, Long> results = new HashMap<StopEntry, Long>();
 
-    for (SPTVertex vertex : tree.getVertices()) {
+    for (State state : tree.getAllStates()) {
 
-      State state = vertex.state;
-      OBAStateData data = (OBAStateData) state.getData();
-      Vertex v = vertex.mirror;
+      OBAState obaState = (OBAState) state;
+      Vertex v = state.getVertex();
 
       if (v instanceof AbstractStopVertex) {
         AbstractStopVertex stopVertex = (AbstractStopVertex) v;
         StopEntry stop = stopVertex.getStop();
-        long initialWaitTime = data.getInitialWaitTime();
+        long initialWaitTime = obaState.getInitialWaitTime();
         long duration = Math.abs(state.getTime() - time) - initialWaitTime;
         if (!results.containsKey(stop) || results.get(stop) > duration)
           results.put(stop, duration);
@@ -340,7 +337,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         AbstractBlockVertex blockVertex = (AbstractBlockVertex) v;
         ArrivalAndDepartureInstance instance = blockVertex.getInstance();
         StopEntry stop = instance.getStop();
-        long initialWaitTime = data.getInitialWaitTime();
+        long initialWaitTime = obaState.getInitialWaitTime();
         long duration = Math.abs(state.getTime() - time) - initialWaitTime;
         if (!results.containsKey(stop) || results.get(stop) > duration)
           results.put(stop, duration);
@@ -494,10 +491,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     ItineraryBean itinerary = new ItineraryBean();
 
-    SPTVertex startVertex = path.vertices.firstElement();
-    State startState = startVertex.state;
-    SPTVertex endVertex = path.vertices.lastElement();
-    State endState = endVertex.state;
+    State startState = path.states.getFirst();
+    State endState = path.states.getLast();
 
     itinerary.setStartTime(startState.getTime());
     itinerary.setEndTime(endState.getTime());
@@ -505,36 +500,40 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     List<LegBean> legs = new ArrayList<LegBean>();
     itinerary.setLegs(legs);
 
-    List<SPTEdge> edges = path.edges;
-    int currentIndex = 0;
+    /**
+     * We set the current state index to 1, skipping the first state, since it
+     * has no back edge
+     */
+    List<State> states = new ArrayList<State>(path.states);
+    int currentIndex = 1;
 
-    while (currentIndex < edges.size()) {
+    while (currentIndex < states.size()) {
 
-      SPTEdge sptEdge = edges.get(currentIndex);
-      EdgeNarrative edgeNarrative = sptEdge.narrative;
+      State state = states.get(currentIndex);
+      EdgeNarrative edgeNarrative = state.getBackEdgeNarrative();
 
       TraverseMode mode = edgeNarrative.getMode();
 
       if (mode.isTransit()) {
-        currentIndex = extendTransitLeg(edges, currentIndex, options, legs);
+        currentIndex = extendTransitLeg(states, currentIndex, options, legs);
       } else {
-        currentIndex = extendStreetLeg(edges, currentIndex, mode, legs);
+        currentIndex = extendStreetLeg(states, currentIndex, mode, legs);
       }
     }
 
     return itinerary;
   }
 
-  private int extendTransitLeg(List<SPTEdge> edges, int currentIndex,
+  private int extendTransitLeg(List<State> states, int currentIndex,
       OBATraverseOptions options, List<LegBean> legs) {
 
     TransitLegBuilder builder = new TransitLegBuilder();
 
-    while (currentIndex < edges.size()) {
+    while (currentIndex < states.size()) {
 
-      SPTEdge sptEdge = edges.get(currentIndex);
-      Edge edge = sptEdge.payload;
-      EdgeNarrative narrative = sptEdge.narrative;
+      State state = states.get(currentIndex);
+      Edge edge = state.getBackEdge();
+      EdgeNarrative narrative = state.getBackEdgeNarrative();
       TraverseMode mode = narrative.getMode();
 
       if (!mode.isTransit())
@@ -556,7 +555,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       } else if (vFrom instanceof BlockArrivalVertex) {
 
         builder = extendTransitLegWithArrival(legs, builder,
-            (BlockArrivalVertex) vFrom, vTo, sptEdge, options);
+            (BlockArrivalVertex) vFrom, vTo, state, options);
 
       } else if (vFrom instanceof ArrivalVertex) {
 
@@ -574,7 +573,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
           ArrivalAndDepartureInstance departureInstance = toStopVertex.getInstance();
           StopEntry toStop = departureInstance.getStop();
 
-          addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
+          addTransferLegIfNeeded(state, fromStop, toStop, options, legs);
         }
       } else if (edge instanceof TPTransferEdge) {
 
@@ -582,7 +581,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
         StopEntry fromStop = transferEdge.getFromStop();
         StopEntry toStop = transferEdge.getToStop();
 
-        addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
+        addTransferLegIfNeeded(state, fromStop, toStop, options, legs);
       }
 
       currentIndex++;
@@ -591,13 +590,13 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return currentIndex;
   }
 
-  private void addTransferLegIfNeeded(SPTEdge sptEdge, StopEntry fromStop,
+  private void addTransferLegIfNeeded(State state, StopEntry fromStop,
       StopEntry toStop, OBATraverseOptions options, List<LegBean> legs) {
 
     if (!fromStop.equals(toStop)) {
 
-      long timeFrom = sptEdge.fromv.state.getTime();
-      long timeTo = sptEdge.tov.state.getTime();
+      long timeFrom = state.getBackState().getTime();
+      long timeTo = state.getTime();
 
       GraphPath path = _itinerariesService.getWalkingItineraryBetweenStops(
           fromStop, toStop, new Date(timeFrom), options);
@@ -686,7 +685,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private TransitLegBuilder extendTransitLegWithArrival(List<LegBean> legs,
       TransitLegBuilder builder, BlockArrivalVertex arrival, Vertex vTo,
-      SPTEdge sptEdge, OBATraverseOptions options) {
+      State state, OBATraverseOptions options) {
 
     /**
      * Did we finish up a transit leg?
@@ -719,7 +718,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       DepartureVertex toStopVertex = (DepartureVertex) vTo;
       StopEntry toStop = toStopVertex.getStop();
 
-      addTransferLegIfNeeded(sptEdge, fromStop, toStop, options, legs);
+      addTransferLegIfNeeded(state, fromStop, toStop, options, legs);
     }
 
     return builder;
@@ -927,33 +926,33 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     }
   }
 
-  private int extendStreetLeg(List<SPTEdge> edges, int currentIndex,
+  private int extendStreetLeg(List<State> states, int currentIndex,
       TraverseMode mode, List<LegBean> legs) {
 
-    List<SPTEdge> streetEdges = new ArrayList<SPTEdge>();
+    List<State> streetStates = new ArrayList<State>();
 
-    while (currentIndex < edges.size()) {
+    while (currentIndex < states.size()) {
 
-      SPTEdge sptEdge = edges.get(currentIndex);
-      EdgeNarrative narrative = sptEdge.narrative;
+      State state = states.get(currentIndex);
+      EdgeNarrative narrative = state.getBackEdgeNarrative();
       TraverseMode edgeMode = narrative.getMode();
 
       if (mode != edgeMode)
         break;
 
-      streetEdges.add(sptEdge);
+      streetStates.add(state);
 
       currentIndex++;
     }
 
-    if (!streetEdges.isEmpty()) {
-      getStreetLegBuilderAsLeg(streetEdges, mode, legs);
+    if (!streetStates.isEmpty()) {
+      getStreetLegBuilderAsLeg(streetStates, mode, legs);
     }
 
     return currentIndex;
   }
 
-  private void getStreetLegBuilderAsLeg(List<SPTEdge> streetEdges,
+  private void getStreetLegBuilderAsLeg(List<State> streetStates,
       TraverseMode mode, List<LegBean> legs) {
 
     List<StreetLegBean> streetLegs = new ArrayList<StreetLegBean>();
@@ -970,9 +969,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     CoordinatePoint from = null;
     CoordinatePoint to = null;
 
-    for (SPTEdge sptEdge : streetEdges) {
+    for (State state : streetStates) {
 
-      EdgeNarrative edgeResult = sptEdge.narrative;
+      EdgeNarrative edgeResult = state.getBackEdgeNarrative();
 
       Geometry geom = edgeResult.getGeometry();
       if (geom == null) {
@@ -986,7 +985,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
         addPathToStreetLegIfApplicable(streetLeg, path, distance);
 
-        streetLeg = createStreetLeg(sptEdge);
+        streetLeg = createStreetLeg(state);
         streetLegs.add(streetLeg);
         path = new ArrayList<CoordinatePoint>();
 
@@ -1002,8 +1001,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       totalDistance += edgeResult.getDistance();
 
       if (startTime == 0)
-        startTime = sptEdge.fromv.state.getTime();
-      endTime = sptEdge.tov.state.getTime();
+        startTime = state.getBackState().getTime();
+      endTime = state.getTime();
 
       if (!path.isEmpty()) {
         if (from == null)
@@ -1058,9 +1057,10 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     }
   }
 
-  private StreetLegBean createStreetLeg(SPTEdge edge) {
+  private StreetLegBean createStreetLeg(State state) {
+
     StreetLegBean bean = new StreetLegBean();
-    bean.setStreetName(edge.getName());
+    bean.setStreetName(state.getBackEdgeNarrative().getName());
     return bean;
   }
 

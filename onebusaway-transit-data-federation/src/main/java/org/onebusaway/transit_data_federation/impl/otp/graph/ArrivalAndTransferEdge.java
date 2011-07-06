@@ -4,11 +4,10 @@ import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData;
+import org.opentripplanner.routing.core.StateEditor;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 
 public class ArrivalAndTransferEdge extends AbstractEdge {
 
@@ -24,54 +23,65 @@ public class ArrivalAndTransferEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  public State traverse(State s0) {
+    TraverseOptions options = s0.getOptions();
+    if (options.isArriveBy())
+      return traverseReverse(s0);
+    else
+      return traverseForward(s0);
+  }
+
+  private State traverseForward(State s0) {
+
+    TraverseOptions options = s0.getOptions();
 
     /**
      * Check if we've reached our transfer limit
      */
-    StateData data = s0.getData();
-    if (data.getNumBoardings() >= options.maxTransfers)
+    if (s0.getNumBoardings() >= options.maxTransfers)
       return null;
 
     int transferTime = ItineraryWeightingLibrary.computeTransferTime(_transfer,
         options);
+    int t = transferTime + options.minTransferTime;
+
+    EdgeNarrative narrative = createNarrative(s0, s0.getTime() + t * 1000);
+
+    StateEditor edit = s0.edit(this, narrative);
+    edit.incrementTimeInSeconds(t);
+
     double weight = ItineraryWeightingLibrary.computeTransferWeight(
         transferTime, options);
+    edit.incrementWeight(weight);
 
-    State s1 = s0.incrementTimeInSeconds(transferTime + options.minTransferTime);
-
-    /**
-     * We're using options.boardCost as a transfer penalty
-     */
-
-    EdgeNarrativeImpl narrative = createNarrative(s1.getTime());
-    return new TraverseResult(weight, s1, narrative);
+    return edit.makeState();
   }
 
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  private State traverseReverse(State s0) {
+
+    TraverseOptions options = s0.getOptions();
 
     int transferTime = ItineraryWeightingLibrary.computeTransferTime(_transfer,
         options);
     double weight = ItineraryWeightingLibrary.computeTransferWeight(
         transferTime, options);
 
-    State s1 = s0.setTime(_instance.getBestArrivalTime());
+    EdgeNarrative narrative = createNarrative(s0, s0.getTime());
+    StateEditor edit = s0.edit(this, narrative);
+    edit.setTime(_instance.getBestArrivalTime());
+    edit.incrementWeight(weight);
 
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-    return new TraverseResult(weight, s1, narrative);
+    return edit.makeState();
   }
 
   /****
    * Private Methods
    ****/
 
-  private EdgeNarrativeImpl createNarrative(long time) {
+  private EdgeNarrative createNarrative(State s0, long time) {
     BlockArrivalVertex fromVertex = new BlockArrivalVertex(_context, _instance);
     DepartureVertex toVertex = new DepartureVertex(_context,
         _transfer.getStop(), time);
-    return new EdgeNarrativeImpl(fromVertex, toVertex);
+    return narrative(s0, fromVertex, toVertex);
   }
 }

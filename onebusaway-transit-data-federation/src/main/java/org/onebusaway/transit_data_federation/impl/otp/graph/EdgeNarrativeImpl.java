@@ -1,5 +1,8 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.onebusaway.gtfs.model.Trip;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.MutableEdgeNarrative;
@@ -78,7 +81,15 @@ public class EdgeNarrativeImpl implements EdgeNarrative, MutableEdgeNarrative {
   }
 
   @Override
-  public String getNote() {
-    return null;
+  public Set<String> getNotes() {
+    return Collections.emptySet();
+  }
+
+  /****
+   * {@link Object} Interface
+   ****/
+
+  public String toString() {
+    return "EdgeNarrative(from=" + fromVertex + " to=" + toVertex + ")";
   }
 }

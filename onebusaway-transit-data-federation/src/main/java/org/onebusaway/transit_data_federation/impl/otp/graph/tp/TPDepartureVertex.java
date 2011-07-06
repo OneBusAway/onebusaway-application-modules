@@ -24,14 +24,17 @@ public class TPDepartureVertex extends AbstractTPPathStateVertex implements
   @Override
   public Collection<Edge> getIncoming() {
     // Return to the street network
-    Edge edge = new WaitingBeginsAtStopEdge(_context, getStop(), true);
-    return Arrays.asList(edge);
+    WaitingBeginsAtStopEdge edge = new WaitingBeginsAtStopEdge(_context,
+        getStop(), true);
+    edge.setToVertex(this);
+    return Arrays.asList((Edge) edge);
   }
 
   @Override
   public Collection<Edge> getOutgoing() {
-    Edge edge = new TPDepartureEdge(_context, _pathState);
-    return Arrays.asList(edge);
+    TPDepartureEdge edge = new TPDepartureEdge(_context, _pathState);
+    edge.setFromVertex(this);
+    return Arrays.asList((Edge) edge);
   }
 
   /****

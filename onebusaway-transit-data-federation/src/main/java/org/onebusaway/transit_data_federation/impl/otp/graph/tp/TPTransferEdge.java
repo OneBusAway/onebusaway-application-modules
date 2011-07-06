@@ -6,18 +6,15 @@ import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
-import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData.Editor;
+import org.opentripplanner.routing.core.StateEditor;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,56 +59,44 @@ public class TPTransferEdge extends AbstractEdge {
    ****/
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  public State traverse(State s0) {
+
+    TraverseOptions options = s0.getOptions();
 
     int transferTime = computeTransferTime(options);
 
-    Editor s1 = s0.edit();
-    s1.incrementTimeInSeconds(transferTime + options.minTransferTime);
+    EdgeNarrative narrative = computeNarrative(s0);
+
+    StateEditor edit = s0.edit(this, narrative);
+
+    edit.incrementTimeInSeconds(transferTime + options.minTransferTime);
+
     double w = ItineraryWeightingLibrary.computeTransferWeight(transferTime,
         options);
+    edit.incrementWeight(w);
 
-    EdgeNarrative narrative = computeNarrative();
-
-    return new TraverseResult(w, s1.createState(), narrative);
-  }
-
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
-
-    int transferTime = computeTransferTime(options);
-
-    Editor s1 = s0.edit();
-    s1.incrementTimeInSeconds(-(transferTime + options.minTransferTime));
-    double w = ItineraryWeightingLibrary.computeTransferWeight(transferTime,
-        options);
-
-    EdgeNarrative narrative = computeNarrative();
-
-    return new TraverseResult(w, s1.createState(), narrative);
+    return edit.makeState();
   }
 
   /****
    * 
    ****/
 
-  private EdgeNarrative computeNarrative() {
+  private EdgeNarrative computeNarrative(State s0) {
 
     if (_reverse) {
 
       Vertex fromV = new TPArrivalVertex(_context, _fromState);
       Vertex toV = new TPBlockDepartureVertex(_context, _toState, _departure,
           _arrival);
-      return new EdgeNarrativeImpl(fromV, toV);
+      return narrative(s0, fromV, toV);
 
     } else {
 
       Vertex fromV = new TPBlockArrivalVertex(_context, _fromState, _departure,
           _arrival);
       Vertex toV = new TPDepartureVertex(_context, _toState);
-      return new EdgeNarrativeImpl(fromV, toV);
+      return narrative(s0, fromV, toV);
     }
   }
 

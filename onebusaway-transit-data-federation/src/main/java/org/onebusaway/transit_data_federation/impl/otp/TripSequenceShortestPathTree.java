@@ -24,11 +24,8 @@ import java.util.Map;
 import org.onebusaway.collections.Max;
 import org.onebusaway.transit_data_federation.impl.otp.graph.SearchLocal;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.TraverseOptions;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.spt.AbstractShortestPathTree;
-import org.opentripplanner.routing.spt.GraphPath;
-import org.opentripplanner.routing.spt.SPTVertex;
 import org.opentripplanner.routing.spt.ShortestPathTree;
 import org.opentripplanner.routing.spt.ShortestPathTreeFactory;
 
@@ -36,10 +33,10 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
 
   public static final ShortestPathTreeFactory FACTORY = new FactoryImpl();
 
-  private Map<Vertex, ResultCollection> sptVerticesByTripSequence = new HashMap<Vertex, ResultCollection>();
+  private Map<Vertex, ResultCollection> _sptVerticesByTripSequence = new HashMap<Vertex, ResultCollection>();
 
   public ResultCollection getVerticesByTripSequence(Vertex vertex) {
-    return sptVerticesByTripSequence.get(vertex);
+    return _sptVerticesByTripSequence.get(vertex);
   }
 
   /****
@@ -47,19 +44,18 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
    ****/
 
   @Override
-  public SPTVertex addVertex(Vertex vertex, State state, double weightSum,
-      TraverseOptions options) {
+  public boolean add(State state) {
 
-    OBATraverseOptions opts = (OBATraverseOptions) options;
-    OBAStateData data = (OBAStateData) state.getData();
-    TripSequence tripSequence = data.getTripSequence();
+    OBATraverseOptions opts = (OBATraverseOptions) state.getOptions();
+    OBAState obaState = (OBAState) state;
+    TripSequence tripSequence = obaState.getTripSequence();
 
-    ResultCollection collection = getCollectionForVertex(vertex);
+    ResultCollection collection = getCollectionForVertex(state.getVertex());
 
-    Map<TripSequence, SPTVertex> map = collection.vertices;
+    Map<TripSequence, OBAState> map = collection.states;
 
-    SPTVertex existing = map.get(tripSequence);
-    
+    OBAState existing = map.get(tripSequence);
+
     /**
      * We only keep the N-best non-lookahead itineraries. If adding this
      * itinerary will push us over the limit, figure out which one we should
@@ -67,19 +63,18 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
      * so we don't have to check in that case.
      */
     if (existing == null && collection.itineraryCount == opts.numItineraries
-        && !data.isLookaheadItinerary()) {
+        && !obaState.isLookaheadItinerary()) {
 
       Max<TripSequence> m = new Max<TripSequence>();
 
-      for (Map.Entry<TripSequence, SPTVertex> entry : map.entrySet()) {
+      for (Map.Entry<TripSequence, OBAState> entry : map.entrySet()) {
         TripSequence key = entry.getKey();
-        SPTVertex v = entry.getValue();
-        OBAStateData vData = (OBAStateData) v.state.getData();
+        OBAState v = entry.getValue();
         /**
          * Only check against non-lookahead itineraries
          */
-        if (!vData.isLookaheadItinerary())
-          m.add(v.weightSum, key);
+        if (!v.isLookaheadItinerary())
+          m.add(v.getWeight(), key);
       }
 
       /**
@@ -87,8 +82,8 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
        * new vertex
        */
       double v = m.getMaxValue();
-      if (v < weightSum)
-        return null;
+      if (v < state.getWeight())
+        return false;
 
       /**
        * If the current max value is MORE than the new vertex, we kill the max
@@ -99,74 +94,59 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
       collection.itineraryCount++;
     }
 
-    if (existing == null || weightSum < existing.weightSum) {
+    if (existing == null || state.getWeight() < existing.getWeight()) {
 
       /**
        * If the existing itinerary is a non-lookahead, we need to adjust the
        * count.
        */
       if (existing != null) {
-        OBAStateData vData = (OBAStateData) existing.state.getData();
-        if (!vData.isLookaheadItinerary())
+        if (!existing.isLookaheadItinerary())
           collection.itineraryCount--;
       }
 
-      SPTVertex ret = new SPTVertex(vertex, state, weightSum, options);
-      map.put(tripSequence, ret);
+      map.put(tripSequence, obaState);
 
       /**
        * If the new itinerary is a non-lookahead, we need to adjust the count.
        */
-      if (!data.isLookaheadItinerary())
+      if (!obaState.isLookaheadItinerary())
         collection.itineraryCount++;
 
-      return ret;
+      return true;
     }
 
-    return null;
+    return false;
   }
 
   @Override
-  public GraphPath getPath(Vertex dest) {
-    return getPath(dest, true);
+  public boolean visit(State s) {
+    return true;
   }
 
   @Override
-  public GraphPath getPath(Vertex dest, boolean optimize) {
-    SPTVertex end = null;
-    ResultCollection collection = sptVerticesByTripSequence.get(dest);
-    if (collection == null)
-      return null;
+  public List<State> getStates(Vertex dest) {
+    ResultCollection rc = _sptVerticesByTripSequence.get(dest);
+    if (rc == null)
+      return Collections.emptyList();
+    return new ArrayList<State>(rc.states.values());
+  }
 
-    for (SPTVertex v : collection.vertices.values()) {
-      if (end == null || v.weightSum < end.weightSum) {
-        end = v;
+  @Override
+  public State getState(Vertex dest) {
+    List<State> states = getStates(dest);
+    State ret = null;
+    for (State s : states) {
+      if (ret == null || s.betterThan(ret)) {
+        ret = s;
       }
     }
-
-    return createPathForVertex(end, optimize);
+    return ret;
   }
 
   @Override
-  public List<GraphPath> getPaths(Vertex dest, boolean optimize) {
-    ResultCollection collection = sptVerticesByTripSequence.get(dest);
-    if (collection == null)
-      return Collections.emptyList();
-    List<GraphPath> paths = new ArrayList<GraphPath>();
-    for (SPTVertex vertex : collection.vertices.values()) {
-      GraphPath path = createPathForVertex(vertex, optimize);
-      paths.add(path);
-    }
-    return paths;
-  }
-
-  @Override
-  public void removeVertex(SPTVertex vertex) {
-    throw new UnsupportedOperationException();
-  }
-
-  public String toString() {
-    return "SPT " + this.sptVerticesByTripSequence.toString();
+  public int getVertexCount() {
+    return _sptVerticesByTripSequence.size();
   }
 
   /****
@@ -185,11 +165,11 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
       return collection;
     }
 
-    ResultCollection collection = sptVerticesByTripSequence.get(vertex);
+    ResultCollection collection = _sptVerticesByTripSequence.get(vertex);
 
     if (collection == null) {
       collection = new ResultCollection();
-      sptVerticesByTripSequence.put(vertex, collection);
+      _sptVerticesByTripSequence.put(vertex, collection);
     }
     return collection;
   }
@@ -204,16 +184,17 @@ public class TripSequenceShortestPathTree extends AbstractShortestPathTree {
 
   public static class ResultCollection {
 
-    private Map<TripSequence, SPTVertex> vertices = new HashMap<TripSequence, SPTVertex>();
+    private Map<TripSequence, OBAState> states = new HashMap<TripSequence, OBAState>();
 
     private int itineraryCount;
-    
-    public Map<TripSequence, SPTVertex> getVertices() {
-      return vertices;
+
+    public Map<TripSequence, OBAState> getStates() {
+      return states;
     }
-    
+
     public int getItineraryCount() {
       return itineraryCount;
     }
   }
+
 }

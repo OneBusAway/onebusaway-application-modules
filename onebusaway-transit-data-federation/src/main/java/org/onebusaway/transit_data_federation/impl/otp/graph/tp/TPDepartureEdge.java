@@ -5,20 +5,17 @@ import java.util.List;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
-import org.onebusaway.transit_data_federation.impl.otp.OBAStateData.OBAEditor;
+import org.onebusaway.transit_data_federation.impl.otp.OBAStateEditor;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
-import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDeparturePairQuery;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
 public class TPDepartureEdge extends AbstractEdge {
@@ -31,10 +28,17 @@ public class TPDepartureEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  public State traverse(State s0) {
+    TraverseOptions options = s0.getOptions();
+    if (options.isArriveBy())
+      return traverseReverse(s0);
+    else
+      return traverseForward(s0);
+  }
 
-    OBATraverseOptions obaOpts = (OBATraverseOptions) options;
+  private State traverseForward(State s0) {
+
+    OBATraverseOptions obaOpts = (OBATraverseOptions) s0.getOptions();
 
     ArrivalAndDepartureService adService = _context.getArrivalAndDepartureService();
 
@@ -48,13 +52,13 @@ public class TPDepartureEdge extends AbstractEdge {
     query.setResultCount(obaOpts.numItineraries);
     query.setApplyRealTime(obaOpts.useRealtime);
     query.setIncludePrivateService(false);
-    if (s0.getData().getNumBoardings() == 0)
+    if (s0.getNumBoardings() == 0)
       query.setLookaheadTime(obaOpts.lookaheadTime);
 
     List<Pair<ArrivalAndDepartureInstance>> instances = adService.getNextDeparturesForStopPair(
         stopPair.getFirst(), stopPair.getSecond(), targetTime, query);
 
-    TraverseResult results = null;
+    State results = null;
 
     for (Pair<ArrivalAndDepartureInstance> pair : instances) {
 
@@ -68,11 +72,12 @@ public class TPDepartureEdge extends AbstractEdge {
 
       int dwellTime = computeWaitTime(s0, pair);
 
-      double w = ItineraryWeightingLibrary.computeWeightForWait(options,
-          dwellTime, s0);
+      double w = ItineraryWeightingLibrary.computeWeightForWait(s0, dwellTime);
 
-      OBAEditor s1 = (OBAEditor) s0.edit();
-      s1.setTime(departure.getBestDepartureTime());
+      EdgeNarrative narrative = narrative(s0, fromV, toV);
+      OBAStateEditor edit = (OBAStateEditor) s0.edit(this, narrative);
+      edit.setTime(departure.getBestDepartureTime());
+      edit.incrementWeight(w);
 
       /**
        * If the departure time is less than the starting state time, it must
@@ -80,33 +85,27 @@ public class TPDepartureEdge extends AbstractEdge {
        * parameter. Thus, we indicate that we have a lookahead itinerary.
        */
       if (departure.getBestDepartureTime() < s0.getTime())
-        s1.setLookaheadItinerary();
+        edit.setLookaheadItinerary();
 
       if (departure.getBlockSequence() != null)
-        s1.appendTripSequence(departure.getBlockSequence());
+        edit.appendTripSequence(departure.getBlockSequence());
       else
-        s1.appendTripSequence(departure.getBlockTrip());
+        edit.appendTripSequence(departure.getBlockTrip());
 
-      if (w < 0)
-        System.out.println("here");
-
-      EdgeNarrative narrative = new EdgeNarrativeImpl(fromV, toV);
-      TraverseResult r = new TraverseResult(w, s1.createState(), narrative);
-      results = r.addToExistingResultChain(results);
+      State s1 = edit.makeState();
+      results = s1.addToExistingResultChain(results);
     }
 
     return results;
   }
 
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  private State traverseReverse(State s0) {
 
     TPDepartureVertex fromVertex = new TPDepartureVertex(_context, _pathState);
     Vertex toVertex = null;
-    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+    EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
 
-    return new TraverseResult(0, s0, narrative);
+    return s0.edit(this, narrative).makeState();
   }
 
   /****

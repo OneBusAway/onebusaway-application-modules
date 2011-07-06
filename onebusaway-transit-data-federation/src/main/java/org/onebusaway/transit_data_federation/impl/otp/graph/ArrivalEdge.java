@@ -3,10 +3,9 @@ package org.onebusaway.transit_data_federation.impl.otp.graph;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
 public class ArrivalEdge extends AbstractEdge {
@@ -19,33 +18,39 @@ public class ArrivalEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
-
-    OBATraverseOptions obaOpts = (OBATraverseOptions) options;
-    if( obaOpts.extraSpecialMode )
-      return null;
-    
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-    return new TraverseResult(0, s0, narrative);
+  public State traverse(State s0) {
+    TraverseOptions options = s0.getOptions();
+    if (options.isArriveBy())
+      return traverseReverse(s0);
+    else
+      return traverseForward(s0);
   }
 
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  private State traverseForward(State s0) {
 
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-    return new TraverseResult(0, s0, narrative);
+    OBATraverseOptions obaOpts = (OBATraverseOptions) s0.getOptions();
+    if (obaOpts.extraSpecialMode)
+      return null;
+
+    EdgeNarrative narrative = createNarrative(s0);
+    return s0.edit(this, narrative).makeState();
+  }
+
+  private State traverseReverse(State s0) {
+
+    EdgeNarrative narrative = createNarrative(s0);
+    return s0.edit(this, narrative).makeState();
   }
 
   /****
    * Private Methods
    ****/
 
-  private EdgeNarrativeImpl createNarrative(long time) {
+  private EdgeNarrative createNarrative(State s0) {
     Vertex fromVertex = new BlockArrivalVertex(_context, _instance);
-    Vertex toVertex = new ArrivalVertex(_context, _instance.getStop(), time);
-    return new EdgeNarrativeImpl(fromVertex, toVertex);
+    Vertex toVertex = new ArrivalVertex(_context, _instance.getStop(),
+        s0.getTime());
+    return narrative(s0, fromVertex, toVertex);
   }
 
 }

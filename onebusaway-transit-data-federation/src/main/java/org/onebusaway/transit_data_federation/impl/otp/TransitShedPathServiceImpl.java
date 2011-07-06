@@ -8,26 +8,23 @@ import java.util.Map;
 
 import org.onebusaway.transit_data_federation.services.otp.TransitShedPathService;
 import org.opentripplanner.routing.algorithm.GraphLibrary;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.algorithm.strategies.ExtraEdgesStrategy;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.pqueue.FibHeap;
 import org.opentripplanner.routing.services.GraphService;
 import org.opentripplanner.routing.spt.BasicShortestPathTree;
-import org.opentripplanner.routing.spt.SPTVertex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 class TransitShedPathServiceImpl implements TransitShedPathService {
 
-  private VertexSkipStrategy _vertexSkipStrategy = new TransitShetVertexSkipStrategy();
+  private VertexSkipStrategy _vertexSkipStrategy = new TransitShedVertexSkipStrategy();
 
   private GraphService _graphService;
 
@@ -44,11 +41,10 @@ class TransitShedPathServiceImpl implements TransitShedPathService {
 
     Graph graph = _graphService.getGraph();
 
-    FibHeap<SPTVertex> queue = new FibHeap<SPTVertex>(
-        graph.getVertices().size());
+    FibHeap<State> queue = new FibHeap<State>(graph.getVertices().size());
 
-    SPTVertex sptOrigin = spt.addVertex(origin, originState, 0, options);
-    queue.insert(sptOrigin, sptOrigin.weightSum);
+    spt.add(originState);
+    queue.insert(originState, originState.getWeight());
 
     HashSet<Vertex> closed = new HashSet<Vertex>();
 
@@ -61,47 +57,31 @@ class TransitShedPathServiceImpl implements TransitShedPathService {
 
     while (!queue.empty()) {
 
-      SPTVertex spt_u = queue.extract_min();
+      State state = queue.extract_min();
 
-      Vertex fromVertex = spt_u.mirror;
+      Vertex fromVertex = state.getVertex();
 
       closed.add(fromVertex);
 
       if (_vertexSkipStrategy.isVertexSkippedInFowardSearch(origin,
-          originState, spt_u, options))
+          originState, state, options))
         continue;
 
       Iterable<Edge> outgoing = GraphLibrary.getOutgoingEdges(graph,
           fromVertex, extraEdges);
 
       for (Edge edge : outgoing) {
-        State state = spt_u.state;
 
-        TraverseResult wr = edge.traverse(state, options);
+        for (State wr = edge.traverse(state); wr != null; wr = wr.getNextResult()) {
 
-        while (wr != null) {
-
-          if (wr.weight < 0) {
-            throw new NegativeWeightException(String.valueOf(wr.weight));
-          }
-
-          EdgeNarrative er = wr.getEdgeNarrative();
+          EdgeNarrative er = wr.getBackEdgeNarrative();
           Vertex toVertex = er.getToVertex();
 
           if (!closed.contains(toVertex)) {
 
-            double new_w = spt_u.weightSum + wr.weight;
-
-            SPTVertex spt_v = spt.addVertex(toVertex, wr.state, new_w, options,
-                spt_u.hops + 1);
-
-            if (spt_v != null) {
-              spt_v.setParent(spt_u, edge, er);
-              queue.insert_or_dec_key(spt_v, new_w);
-            }
+            if (spt.add(wr))
+              queue.insert(wr, wr.getWeight());
           }
-
-          wr = wr.getNextResult();
         }
       }
     }

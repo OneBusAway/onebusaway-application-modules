@@ -23,15 +23,18 @@ public class TPArrivalVertex extends AbstractTPPathStateVertex implements
 
   @Override
   public Collection<Edge> getIncoming() {
-    Edge edge = new TPArrivalReverseEdge(_context, _pathState);
-    return Arrays.asList(edge);
+    TPArrivalReverseEdge edge = new TPArrivalReverseEdge(_context, _pathState);
+    edge.setToVertex(this);
+    return Arrays.asList((Edge) edge);
   }
 
   @Override
   public Collection<Edge> getOutgoing() {
     // We stop waiting and move back to the street
-    Edge edge = new WaitingEndsAtStopEdge(_context, getStop(), false);
-    return Arrays.asList(edge);
+    WaitingEndsAtStopEdge edge = new WaitingEndsAtStopEdge(_context, getStop(),
+        false);
+    edge.setFromVertex(this);
+    return Arrays.asList((Edge) edge);
   }
 
   /****
@@ -52,7 +55,7 @@ public class TPArrivalVertex extends AbstractTPPathStateVertex implements
   /****
    * {@link Object} Interface
    ****/
-  
+
   @Override
   public int hashCode() {
     return _pathState.getNode().hashCode();
@@ -71,7 +74,6 @@ public class TPArrivalVertex extends AbstractTPPathStateVertex implements
     TransferNode b = v._pathState.getNode();
     return a.equals(b);
   }
-
 
   @Override
   public String toString() {

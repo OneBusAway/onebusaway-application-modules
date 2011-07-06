@@ -36,7 +36,7 @@ import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.grap
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferEdge;
 import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.graph.TPOfflineTransferVertex;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
-import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
+import org.onebusaway.transit_data_federation.impl.otp.OBAState;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.graph.HasStopTransitVertex;
 import org.onebusaway.transit_data_federation.model.ServiceDateSummary;
@@ -57,20 +57,17 @@ import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.Graph;
 import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.pqueue.PriorityQueueImpl;
 import org.opentripplanner.routing.services.GraphService;
 import org.opentripplanner.routing.spt.GraphPath;
 import org.opentripplanner.routing.spt.MultiShortestPathTree;
-import org.opentripplanner.routing.spt.SPTEdge;
-import org.opentripplanner.routing.spt.SPTVertex;
 import org.opentripplanner.routing.spt.ShortestPathTree;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class TransferPatternsTask implements Runnable {
 
-  private static SPTVertexDurationComparator _sptVertexDurationComparator = new SPTVertexDurationComparator();
+  private static StateDurationComparator _sptVertexDurationComparator = new StateDurationComparator();
 
   private FederatedTransitDataBundle _bundle;
 
@@ -231,10 +228,9 @@ public class TransferPatternsTask implements Runnable {
 
         TPOfflineOriginVertex origin = new TPOfflineOriginVertex(context, stop,
             instances, nearbyStopsAndWalkTimes, nearbyStopTimeInstances);
-        State state = new State(tFrom, new OBAStateData());
+        State state = new OBAState(tFrom, origin, options);
 
-        MultiShortestPathTree spt = (MultiShortestPathTree) dijkstra.getShortestPathTree(
-            origin, state);
+        MultiShortestPathTree spt = (MultiShortestPathTree) dijkstra.getShortestPathTree(state);
 
         processTree(spt, stop, pathCountsByStop);
       }
@@ -457,13 +453,13 @@ public class TransferPatternsTask implements Runnable {
   private void processTree(MultiShortestPathTree spt, StopEntry originStop,
       Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop) {
 
-    Map<SPTVertex, List<StopEntry>> parentsBySPTVertex = new HashMap<SPTVertex, List<StopEntry>>();
-    Map<SPTVertex, StopEntry> actualOriginStops = new HashMap<SPTVertex, StopEntry>();
+    Map<State, List<StopEntry>> parentsByState = new HashMap<State, List<StopEntry>>();
+    Map<State, StopEntry> actualOriginStops = new HashMap<State, StopEntry>();
 
     Map<StopEntry, List<TPOfflineBlockArrivalVertex>> arrivalsByStop = new FactoryMap<StopEntry, List<TPOfflineBlockArrivalVertex>>(
         new ArrayList<TPOfflineBlockArrivalVertex>());
 
-    for (Vertex v : spt.getVertices()) {
+    for (Vertex v : spt.getVeritces()) {
       if (!(v instanceof TPOfflineBlockArrivalVertex))
         continue;
 
@@ -474,26 +470,26 @@ public class TransferPatternsTask implements Runnable {
 
     for (Map.Entry<StopEntry, List<TPOfflineBlockArrivalVertex>> entry : arrivalsByStop.entrySet()) {
       processArrivalsForStop(entry.getKey(), entry.getValue(), originStop, spt,
-          actualOriginStops, parentsBySPTVertex, pathCountsByStop);
+          actualOriginStops, parentsByState, pathCountsByStop);
     }
   }
 
   private void processArrivalsForStop(StopEntry arrivalStop,
       List<TPOfflineBlockArrivalVertex> arrivals, StopEntry originStop,
-      MultiShortestPathTree spt, Map<SPTVertex, StopEntry> actualOriginStops,
-      Map<SPTVertex, List<StopEntry>> parentsBySPTVertex,
+      MultiShortestPathTree spt, Map<State, StopEntry> actualOriginStops,
+      Map<State, List<StopEntry>> parentsByState,
       Map<StopEntry, Counter<List<Pair<StopEntry>>>> pathCountsByStop) {
 
     Collections.sort(arrivals);
 
     Counter<List<Pair<StopEntry>>> pathCounts = new Counter<List<Pair<StopEntry>>>();
-    Map<List<Pair<StopEntry>>, List<SPTVertex>> paths = new FactoryMap<List<Pair<StopEntry>>, List<SPTVertex>>(
-        new ArrayList<SPTVertex>());
+    Map<List<Pair<StopEntry>>, List<State>> paths = new FactoryMap<List<Pair<StopEntry>>, List<State>>(
+        new ArrayList<State>());
 
-    SortedMap<Long, List<SPTVertex>> m = new TreeMap<Long, List<SPTVertex>>();
-    m = FactoryMap.createSorted(m, new ArrayList<SPTVertex>());
+    SortedMap<Long, List<State>> m = new TreeMap<Long, List<State>>();
+    m = FactoryMap.createSorted(m, new ArrayList<State>());
 
-    Map<SPTVertex, List<Pair<StopEntry>>> pathsByVertex = new HashMap<SPTVertex, List<Pair<StopEntry>>>();
+    Map<State, List<Pair<StopEntry>>> pathsByVertex = new HashMap<State, List<Pair<StopEntry>>>();
 
     boolean verbose = false;// arrivalStop.getId().toString().equals("1_29430");
     if (verbose)
@@ -509,21 +505,20 @@ public class TransferPatternsTask implements Runnable {
       if (verbose)
         System.out.println(arrival);
 
-      Collection<SPTVertex> sptVertices = pruneSptVertices(spt.getSPTVerticesForVertex(arrival));
+      Collection<State> states = pruneSptVertices(spt.getStates(arrival));
 
-      for (SPTVertex sptVertex : sptVertices) {
+      for (State state : states) {
 
         if (verbose)
-          System.out.println("  " + sptVertex);
+          System.out.println("  " + state);
 
-        StopEntry actualOriginStop = getActualOriginStop(sptVertex,
+        StopEntry actualOriginStop = getActualOriginStop(state,
             actualOriginStops);
         boolean properOrigins = originStop == actualOriginStop;
 
         if (verbose)
           System.out.println("  origins=" + properOrigins);
 
-        State state = sptVertex.state;
         boolean cut = state.getStartTime() <= startTime;
 
         if (!cut) {
@@ -534,14 +529,14 @@ public class TransferPatternsTask implements Runnable {
           startTime = state.getStartTime();
           totalPathCount++;
 
-          List<Pair<StopEntry>> path = constructTransferPattern(arrival,
-              sptVertex, parentsBySPTVertex);
+          List<Pair<StopEntry>> path = constructTransferPattern(arrival, state,
+              parentsByState);
 
           pathCounts.increment(path);
-          paths.get(path).add(sptVertex);
+          paths.get(path).add(state);
 
-          m.get(state.getTime()).add(sptVertex);
-          pathsByVertex.put(sptVertex, path);
+          m.get(state.getTime()).add(state);
+          pathsByVertex.put(state, path);
 
           if (verbose)
             System.out.println("  path=" + path);
@@ -563,19 +558,17 @@ public class TransferPatternsTask implements Runnable {
 
       if (count <= _transferPatternFrequencyCutoff * maxCount) {
 
-        List<SPTVertex> sptVertices = paths.get(path);
+        List<State> states = paths.get(path);
         boolean keep = false;
 
-        for (SPTVertex sptVertex : sptVertices) {
+        for (State state : states) {
 
-          State state = sptVertex.state;
           long t = state.getTime();
-          SPTVertex nextSptVertex = getNextVertex(m, pathsByVertex, t, path);
-          if (nextSptVertex == null) {
+          State nextState = getNextVertex(m, pathsByVertex, t, path);
+          if (nextState == null) {
             keep = true;
             break;
           }
-          State nextState = nextSptVertex.state;
           int duration = (int) (Math.abs(state.getTime() - state.getStartTime()) / 1000);
           double additional = ((nextState.getTime() - state.getTime()) / 1000);
           if (additional / duration > _transferPatternFrequencySlack) {
@@ -601,13 +594,12 @@ public class TransferPatternsTask implements Runnable {
     }
   }
 
-  private Collection<SPTVertex> pruneSptVertices(
-      Collection<SPTVertex> sptVerticesOrig) {
+  private Collection<State> pruneSptVertices(Collection<State> sptVerticesOrig) {
 
     if (sptVerticesOrig.size() == 1)
       return sptVerticesOrig;
 
-    List<SPTVertex> sptVertices = new ArrayList<SPTVertex>(sptVerticesOrig);
+    List<State> sptVertices = new ArrayList<State>(sptVerticesOrig);
 
     /**
      * This will put the spt vertices in order of increasing trip duration
@@ -617,9 +609,9 @@ public class TransferPatternsTask implements Runnable {
     double bestRatio = Double.MAX_VALUE;
 
     for (int i = 0; i < sptVertices.size(); i++) {
-      SPTVertex sptVertex = sptVertices.get(i);
-      double duration = getSPTVertexDuration(sptVertex);
-      double weight = sptVertex.weightSum;
+      State state = sptVertices.get(i);
+      double duration = getStateDuration(state);
+      double weight = state.getWeight();
       double ratio = weight / duration;
 
       if (ratio / bestRatio > _transferPatternWeightImprovement) {
@@ -633,14 +625,14 @@ public class TransferPatternsTask implements Runnable {
 
   }
 
-  private SPTVertex getNextVertex(SortedMap<Long, List<SPTVertex>> m,
-      Map<SPTVertex, List<Pair<StopEntry>>> pathsByVertex, long t,
+  private State getNextVertex(SortedMap<Long, List<State>> m,
+      Map<State, List<Pair<StopEntry>>> pathsByVertex, long t,
       List<Pair<StopEntry>> currentPath) {
 
-    SortedMap<Long, List<SPTVertex>> after = m.tailMap(t + 1);
+    SortedMap<Long, List<State>> after = m.tailMap(t + 1);
 
-    for (List<SPTVertex> sptVertices : after.values()) {
-      for (SPTVertex sptVertex : sptVertices) {
+    for (List<State> sptVertices : after.values()) {
+      for (State sptVertex : sptVertices) {
         List<Pair<StopEntry>> path = pathsByVertex.get(sptVertex);
         if (!path.equals(currentPath))
           return sptVertex;
@@ -650,12 +642,12 @@ public class TransferPatternsTask implements Runnable {
     return null;
   }
 
-  private StopEntry getActualOriginStop(SPTVertex sptVertex,
-      Map<SPTVertex, StopEntry> actualOriginStops) {
+  private StopEntry getActualOriginStop(State state,
+      Map<State, StopEntry> actualOriginStops) {
 
-    StopEntry actual = actualOriginStops.get(sptVertex);
+    StopEntry actual = actualOriginStops.get(state);
     if (actual == null) {
-      Vertex v = sptVertex.mirror;
+      Vertex v = state.getVertex();
       if (v instanceof TPOfflineNearbyStopsVertex) {
         TPOfflineNearbyStopsVertex nsv = (TPOfflineNearbyStopsVertex) v;
         actual = nsv.getStop();
@@ -663,21 +655,19 @@ public class TransferPatternsTask implements Runnable {
         TPOfflineOriginVertex originVertex = (TPOfflineOriginVertex) v;
         actual = originVertex.getStop();
       } else {
-        actual = getActualOriginStop(sptVertex.incoming.fromv,
-            actualOriginStops);
+        actual = getActualOriginStop(state.getBackState(), actualOriginStops);
       }
-      actualOriginStops.put(sptVertex, actual);
+      actualOriginStops.put(state, actual);
     }
 
     return actual;
   }
 
   private List<Pair<StopEntry>> constructTransferPattern(
-      TPOfflineBlockArrivalVertex arrival, SPTVertex sptVertex,
-      Map<SPTVertex, List<StopEntry>> parentsBySPTVertex) {
+      TPOfflineBlockArrivalVertex arrival, State sptVertex,
+      Map<State, List<StopEntry>> parentsByState) {
 
-    List<StopEntry> path = computeParentsForSPTVertex(sptVertex,
-        parentsBySPTVertex);
+    List<StopEntry> path = computeParentsForState(sptVertex, parentsByState);
 
     path = new ArrayList<StopEntry>(path);
     path.add(arrival.getStop());
@@ -693,15 +683,15 @@ public class TransferPatternsTask implements Runnable {
     return pairs;
   }
 
-  private List<StopEntry> computeParentsForSPTVertex(SPTVertex sptVertex,
-      Map<SPTVertex, List<StopEntry>> parentsBySPTVertex2) {
+  private List<StopEntry> computeParentsForState(State state,
+      Map<State, List<StopEntry>> parentsByState2) {
 
-    List<StopEntry> parent = parentsBySPTVertex2.get(sptVertex);
+    List<StopEntry> parent = parentsByState2.get(state);
 
     if (parent != null)
       return parent;
 
-    Vertex v = sptVertex.mirror;
+    Vertex v = state.getVertex();
 
     if (v instanceof TPOfflineNearbyStopsVertex) {
       TPOfflineNearbyStopsVertex nsv = (TPOfflineNearbyStopsVertex) v;
@@ -711,16 +701,16 @@ public class TransferPatternsTask implements Runnable {
       return Arrays.asList(originVertex.getStop());
     }
 
-    SPTEdge sptEdge = sptVertex.incoming;
-    Edge payload = sptEdge.payload;
+    Edge payload = state.getBackEdge();
+    EdgeNarrative narrative = state.getBackEdgeNarrative();
 
     if (payload instanceof TPOfflineTransferEdge) {
 
-      TPOfflineBlockArrivalVertex fromV = (TPOfflineBlockArrivalVertex) sptEdge.narrative.getFromVertex();
-      TPOfflineTransferVertex toV = (TPOfflineTransferVertex) sptEdge.narrative.getToVertex();
+      TPOfflineBlockArrivalVertex fromV = (TPOfflineBlockArrivalVertex) narrative.getFromVertex();
+      TPOfflineTransferVertex toV = (TPOfflineTransferVertex) narrative.getToVertex();
 
-      List<StopEntry> incomingPattern = computeParentsForSPTVertex(
-          sptEdge.fromv, parentsBySPTVertex2);
+      List<StopEntry> incomingPattern = computeParentsForState(
+          state.getBackState(), parentsByState2);
       ArrayList<StopEntry> extendedPattern = new ArrayList<StopEntry>(
           incomingPattern);
 
@@ -730,16 +720,15 @@ public class TransferPatternsTask implements Runnable {
       parent = extendedPattern;
 
     } else {
-      parent = computeParentsForSPTVertex(sptEdge.fromv, parentsBySPTVertex2);
+      parent = computeParentsForState(state.getBackState(), parentsByState2);
     }
 
-    parentsBySPTVertex2.put(sptVertex, parent);
+    parentsByState2.put(state, parent);
 
     return parent;
   }
 
-  private static int getSPTVertexDuration(SPTVertex v) {
-    State state = v.state;
+  private static int getStateDuration(State state) {
     return (int) (Math.abs(state.getTime() - state.getStartTime()) / 1000);
   }
 
@@ -758,10 +747,10 @@ public class TransferPatternsTask implements Runnable {
 
     @Override
     public boolean shouldSkipTraversalResult(Vertex origin, Vertex target,
-        SPTVertex parent, TraverseResult traverseResult, ShortestPathTree spt,
+        State parent, State current, ShortestPathTree spt,
         TraverseOptions traverseOptions) {
 
-      EdgeNarrative narrative = traverseResult.getEdgeNarrative();
+      EdgeNarrative narrative = current.getBackEdgeNarrative();
       Vertex vertex = narrative.getToVertex();
 
       /**
@@ -802,18 +791,17 @@ public class TransferPatternsTask implements Runnable {
 
   }
 
-  private static class SPTVertexDurationComparator implements
-      Comparator<SPTVertex> {
+  private static class StateDurationComparator implements Comparator<State> {
 
     @Override
-    public int compare(SPTVertex o1, SPTVertex o2) {
-      int t1 = getSPTVertexDuration(o1);
-      int t2 = getSPTVertexDuration(o2);
+    public int compare(State o1, State o2) {
+      int t1 = getStateDuration(o1);
+      int t2 = getStateDuration(o2);
       if (t1 != t2)
         return (t1 < t2 ? -1 : 1);
 
-      double w1 = o1.weightSum;
-      double w2 = o2.weightSum;
+      double w1 = o1.getWeight();
+      double w2 = o2.getWeight();
       return Double.compare(w1, w2);
     }
   }

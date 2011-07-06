@@ -11,13 +11,14 @@ import java.util.Map;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.core.OptimizeType;
+import org.opentripplanner.routing.core.State;
 import org.opentripplanner.routing.core.TraverseMode;
 import org.opentripplanner.routing.core.TraverseModeSet;
 import org.opentripplanner.routing.core.TraverseOptions;
+import org.opentripplanner.routing.core.Vertex;
 import org.opentripplanner.routing.error.VertexNotFoundException;
 import org.opentripplanner.routing.services.PathService;
 import org.opentripplanner.routing.spt.GraphPath;
-import org.opentripplanner.routing.spt.SPTVertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,14 +101,16 @@ class StopWalkPlanCache {
 
     double totalDistance = 0;
 
-    SPTVertex prev = null;
+    State prev = null;
 
-    for (SPTVertex vertex : path.vertices) {
+    for (State state : path.states) {
       if (prev != null) {
-        double d = prev.distance(vertex);
+        Vertex vFrom = prev.getVertex();
+        Vertex vTo = state.getVertex();
+        double d = vFrom.distance(vTo);
         totalDistance += d;
       }
-      prev = vertex;
+      prev = state;
     }
 
     return totalDistance;

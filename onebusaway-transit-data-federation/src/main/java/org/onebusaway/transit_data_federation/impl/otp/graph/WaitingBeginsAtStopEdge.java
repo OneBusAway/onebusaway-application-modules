@@ -11,12 +11,10 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData;
+import org.opentripplanner.routing.core.StateEditor;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
 public class WaitingBeginsAtStopEdge extends AbstractEdge {
@@ -33,8 +31,17 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  public State traverse(State s0) {
+    TraverseOptions options = s0.getOptions();
+    if (options.isArriveBy())
+      return traverseReverse(s0);
+    else
+      return traverseForward(s0);
+  }
+
+  private State traverseForward(State s0) {
+
+    TraverseOptions options = s0.getOptions();
 
     /**
      * Only allow transition to a transit stop if transit is enabled
@@ -51,28 +58,27 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
      * proceed.
      * 
      */
-    StateData data = s0.getData();
-    if (!_isReverseEdge && data.getNumBoardings() > 0)
+    if (!_isReverseEdge && s0.getNumBoardings() > 0)
       return null;
 
     TransferPatternService tpService = _context.getTransferPatternService();
     if (tpService.isEnabled())
       return traverseTransferPatterns(s0, options);
 
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-
-    return new TraverseResult(0, s0, narrative);
+    EdgeNarrative narrative = createNarrative(s0);
+    return s0.edit(this, narrative).makeState();
   }
 
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  private State traverseReverse(State s0) {
 
-    State s1 = s0.incrementTimeInSeconds(-options.minTransferTime);
+    TraverseOptions options = s0.getOptions();
+
+    EdgeNarrative narrative = createNarrative(s0);
+    StateEditor edit = s0.edit(this, narrative);
+    edit.incrementTimeInSeconds(options.minTransferTime);
     double w = options.minTransferTime * options.waitAtBeginningFactor;
-    
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-    return new TraverseResult(w, s1, narrative);
+    edit.incrementWeight(w);
+    return edit.makeState();
   }
 
   @Override
@@ -84,20 +90,20 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
    * Private Methods
    ****/
 
-  private EdgeNarrativeImpl createNarrative(long time) {
+  private EdgeNarrative createNarrative(State s0) {
 
     WalkToStopVertex fromVertex = new WalkToStopVertex(_context, _stop);
-    DepartureVertex toVertex = new DepartureVertex(_context, _stop, time);
+    DepartureVertex toVertex = new DepartureVertex(_context, _stop,
+        s0.getTime());
 
-    return new EdgeNarrativeImpl(fromVertex, toVertex);
+    return narrative(s0, fromVertex, toVertex);
   }
 
-  private TraverseResult traverseTransferPatterns(State s0,
-      TraverseOptions options) {
+  private State traverseTransferPatterns(State s0, TraverseOptions options) {
 
     if (_isReverseEdge) {
-      EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-      return new TraverseResult(0, s0, narrative);
+      EdgeNarrative narrative = createNarrative(s0);
+      return s0.edit(this, narrative).makeState();
     }
 
     TransferPatternService tpService = _context.getTransferPatternService();
@@ -106,23 +112,26 @@ public class WaitingBeginsAtStopEdge extends AbstractEdge {
 
     List<StopEntry> destStops = queryData.getDestStops();
 
-    TraverseResult results = null;
+    State results = null;
 
     TransferParent transfers = tpService.getTransferPatternsForStops(
         queryData.getTransferPatternData(), _stop, destStops);
-    
-    State s1 = s0.incrementTimeInSeconds(options.minTransferTime);
-    double w = options.minTransferTime * options.waitAtBeginningFactor;
-    
+
     for (TransferNode tree : transfers.getTransfers()) {
 
       TPState pathState = TPState.start(queryData, tree);
 
       Vertex fromVertex = new WalkToStopVertex(_context, _stop);
       Vertex toVertex = new TPDepartureVertex(_context, pathState);
-      EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+      EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
 
-      TraverseResult r = new TraverseResult(w, s1, narrative);
+      StateEditor edit = s0.edit(this, narrative);
+      edit.incrementTimeInSeconds(options.minTransferTime);
+
+      double w = options.minTransferTime * options.waitAtBeginningFactor;
+      edit.incrementWeight(w);
+
+      State r = edit.makeState();
       results = r.addToExistingResultChain(results);
     }
 

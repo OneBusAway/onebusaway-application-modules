@@ -12,12 +12,13 @@ import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatte
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 
-public class TPBlockDepartureVertex extends AbstractTPPathStateVertex implements SearchLocal {
+public class TPBlockDepartureVertex extends AbstractTPPathStateVertex implements
+    SearchLocal {
 
   private final ArrivalAndDepartureInstance _departure;
 
   private final ArrivalAndDepartureInstance _arrival;
-  
+
   private Object _searchLocalValue = null;
 
   public TPBlockDepartureVertex(GraphContext context, TPState pathState,
@@ -65,15 +66,17 @@ public class TPBlockDepartureVertex extends AbstractTPPathStateVertex implements
 
   @Override
   public Collection<Edge> getOutgoing() {
-    Edge edge = new TPBlockHopEdge(_context, _pathState, _departure, _arrival);
-    return Arrays.asList(edge);
+    TPBlockHopEdge edge = new TPBlockHopEdge(_context, _pathState, _departure,
+        _arrival);
+    edge.setFromVertex(this);
+    return Arrays.asList((Edge) edge);
   }
 
   @Override
   public String toString() {
     return "TPBlockDepartureVertex(" + _pathState.toString() + ")";
   }
-  
+
   /****
    * Search Local
    ****/

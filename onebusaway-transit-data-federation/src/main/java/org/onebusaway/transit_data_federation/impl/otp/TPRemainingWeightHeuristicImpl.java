@@ -13,14 +13,10 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.tp.HasPathStateVert
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.opentripplanner.routing.algorithm.strategies.RemainingWeightHeuristic;
-import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
-import org.opentripplanner.routing.spt.SPTVertex;
 
 public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic {
 
@@ -35,43 +31,45 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
   private double _maxTransitSpeed = 10.0;
 
   @Override
-  public double computeInitialWeight(Vertex from, Vertex to,
-      TraverseOptions traverseOptions) {
+  public void reset() {
+    _options = null;
+    _useTransit = false;
+  }
 
-    _options = traverseOptions;
-    _useTransit = traverseOptions.getModes().getTransit();
+  @Override
+  public double computeInitialWeight(State s, Vertex target) {
+
+    _options = s.getOptions();
+    _useTransit = _options.getModes().getTransit();
 
     double maxSpeed = getMaxSpeed();
 
-    return distance(from, to) / maxSpeed;
+    return distance(s.getVertex(), target) / maxSpeed;
   }
 
   @Override
-  public double computeForwardWeight(SPTVertex from, Edge edge,
-      TraverseResult traverseResult, Vertex target) {
+  public double computeForwardWeight(State s, Vertex target) {
 
-    EdgeNarrative narrative = traverseResult.getEdgeNarrative();
+    EdgeNarrative narrative = s.getBackEdgeNarrative();
     Vertex v = narrative.getToVertex();
 
-    return computeWeight(traverseResult, target, v);
+    return computeWeight(s, target, v);
   }
 
   @Override
-  public double computeReverseWeight(SPTVertex from, Edge edge,
-      TraverseResult traverseResult, Vertex target) {
+  public double computeReverseWeight(State s, Vertex target) {
 
-    EdgeNarrative narrative = traverseResult.getEdgeNarrative();
+    EdgeNarrative narrative = s.getBackEdgeNarrative();
     Vertex v = narrative.getFromVertex();
 
-    return computeWeight(traverseResult, target, v);
+    return computeWeight(s, target, v);
   }
 
   /****
    * Private Methods
    ****/
 
-  private double computeWeight(TraverseResult traverseResult, Vertex target,
-      Vertex v) {
+  private double computeWeight(State state, Vertex target, Vertex v) {
 
     if (v instanceof HasPathStateVertex) {
       HasPathStateVertex tpV = (HasPathStateVertex) v;
@@ -89,7 +87,7 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
 
     double distanceEstimate = distance(v, target);
 
-    double maxSpeed = getMaxSpeedForCurrentState(traverseResult, v);
+    double maxSpeed = getMaxSpeedForCurrentState(state, v);
 
     return distanceEstimate / maxSpeed;
   }
@@ -179,10 +177,7 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
     return _maxTransitSpeed;
   }
 
-  private double getMaxSpeedForCurrentState(TraverseResult traverseResult,
-      Vertex v) {
-
-    State state = traverseResult.state;
+  private double getMaxSpeedForCurrentState(State state, Vertex v) {
 
     /**
      * If we can't use transit at all, just use our walking speed
@@ -195,8 +190,7 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
      * guarantee that we'll never get back on transit. Thus, we can assume
      * walking speed as our max velocity.
      */
-    StateData data = state.getData();
-    if (data.isEverBoarded() && !(v instanceof TransitVertex))
+    if (state.isEverBoarded() && !(v instanceof TransitVertex))
       return _options.speed;
 
     return _maxTransitSpeed;
@@ -224,4 +218,5 @@ public class TPRemainingWeightHeuristicImpl implements RemainingWeightHeuristic 
       double lon2) {
     return SphericalGeometryLibrary.distanceFaster(lat1, lon2, lat2, lon2);
   }
+
 }

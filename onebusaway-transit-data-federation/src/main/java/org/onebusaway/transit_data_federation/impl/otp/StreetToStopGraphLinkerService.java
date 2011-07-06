@@ -79,7 +79,10 @@ public class StreetToStopGraphLinkerService implements GraphRefreshListener {
 
       if (linker.determineIncomingEdgesForVertex(walkToStopVertex, true)) {
         GraphVertex gv = graph.getGraphVertex(walkToStopVertex.getLabel());
-        gv.addOutgoing(new WaitingBeginsAtStopEdge(context, stop, false));
+        WaitingBeginsAtStopEdge edge = new WaitingBeginsAtStopEdge(context,
+            stop, false);
+        edge.setFromVertex(walkToStopVertex);
+        gv.addOutgoing(edge);
       } else {
         _log.warn("error linking stop: " + stop.getId() + " to street network");
       }
@@ -93,7 +96,10 @@ public class StreetToStopGraphLinkerService implements GraphRefreshListener {
 
       if (linker.determineOutgoingEdgesForVertex(walkFromStopVertex, true)) {
         GraphVertex gv = graph.getGraphVertex(walkFromStopVertex.getLabel());
-        gv.addIncoming(new WaitingEndsAtStopEdge(context, stop, true));
+        WaitingEndsAtStopEdge edge = new WaitingEndsAtStopEdge(context, stop,
+            true);
+        edge.setToVertex(walkFromStopVertex);
+        gv.addIncoming(edge);
       } else {
         _log.warn("error linking stop: " + stop.getId() + " to street network");
       }

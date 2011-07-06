@@ -2,10 +2,8 @@ package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
 public class DepartureReverseEdge extends AbstractEdge {
@@ -19,29 +17,20 @@ public class DepartureReverseEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
-
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-    return new TraverseResult(0, s0, narrative);
-  }
-
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
-
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-    return new TraverseResult(0, s0, narrative);
+  public State traverse(State s0) {
+    EdgeNarrative narrative = createNarrative(s0);
+    return s0.edit(this, narrative).makeState();
   }
 
   /****
    * Private Methods
    ****/
 
-  private EdgeNarrativeImpl createNarrative(long time) {
-    Vertex fromVertex = new DepartureVertex(_context, _instance.getStop(), time);
+  private EdgeNarrative createNarrative(State s0) {
+    Vertex fromVertex = new DepartureVertex(_context, _instance.getStop(),
+        s0.getTime());
     Vertex toVertex = new BlockDepartureVertex(_context, _instance);
-    return new EdgeNarrativeImpl(fromVertex, toVertex);
+    return narrative(s0, fromVertex, toVertex);
   }
 
 }

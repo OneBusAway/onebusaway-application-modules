@@ -11,12 +11,9 @@ import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
 public class WaitingEndsAtStopEdge extends AbstractEdge {
@@ -33,17 +30,22 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
-
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-
-    return new TraverseResult(0, s0, narrative);
+  public State traverse(State s0) {
+    TraverseOptions options = s0.getOptions();
+    if (options.isArriveBy())
+      return traverseReverse(s0);
+    else
+      return traverseForward(s0);
   }
 
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  private State traverseForward(State s0) {
+    EdgeNarrative narrative = createNarrative(s0);
+    return s0.edit(this, narrative).makeState();
+  }
+
+  private State traverseReverse(State s0) {
+
+    TraverseOptions options = s0.getOptions();
 
     /**
      * Only allow transition to a transit stop if transit is enabled
@@ -59,17 +61,15 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
      * boardings is greater than zero. However, we still want the traversal to
      * proceed.
      */
-    StateData data = s0.getData();
-    if (_isReverseEdge && data.getNumBoardings() > 0)
+    if (_isReverseEdge && s0.getNumBoardings() > 0)
       return null;
 
     TransferPatternService tpService = _context.getTransferPatternService();
     if (tpService.isEnabled())
       return traverseBackTransferPatterns(s0, options);
 
-    EdgeNarrativeImpl narrative = createNarrative(s0.getTime());
-
-    return new TraverseResult(0, s0, narrative);
+    EdgeNarrative narrative = createNarrative(s0);
+    return s0.edit(this, narrative).makeState();
   }
 
   @Override
@@ -77,21 +77,20 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
     return "WaitingEndsAtStopEdge(stop=" + _stop.getId() + ")";
   }
 
-  private EdgeNarrativeImpl createNarrative(long time) {
+  private EdgeNarrative createNarrative(State s0) {
 
-    ArrivalVertex fromVertex = new ArrivalVertex(_context, _stop, time);
+    ArrivalVertex fromVertex = new ArrivalVertex(_context, _stop, s0.getTime());
     WalkFromStopVertex toVertex = new WalkFromStopVertex(_context, _stop);
-    return new EdgeNarrativeImpl(fromVertex, toVertex);
+    return narrative(s0, fromVertex, toVertex);
   }
 
-  private TraverseResult traverseBackTransferPatterns(State s0,
-      TraverseOptions options) {
+  private State traverseBackTransferPatterns(State s0, TraverseOptions options) {
 
     if (!_isReverseEdge) {
       Vertex fromVertex = null;
       Vertex toVertex = new WalkFromStopVertex(_context, _stop);
-      EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
-      return new TraverseResult(0, s0, narrative);
+      EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
+      return s0.edit(this, narrative).makeState();
     }
 
     TransferPatternService tpService = _context.getTransferPatternService();
@@ -100,7 +99,7 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
 
     List<StopEntry> sourceStops = queryData.getSourceStops();
 
-    TraverseResult results = null;
+    State results = null;
 
     Collection<TransferNode> trees = tpService.getReverseTransferPatternsForStops(
         queryData.getTransferPatternData(), sourceStops, _stop);
@@ -112,9 +111,8 @@ public class WaitingEndsAtStopEdge extends AbstractEdge {
       Vertex fromVertex = new TPArrivalVertex(_context, pathState);
       Vertex toVertex = new WalkFromStopVertex(_context, _stop);
 
-      EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
-
-      TraverseResult r = new TraverseResult(0, s0, narrative);
+      EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
+      State r = s0.edit(this, narrative).makeState();
       results = r.addToExistingResultChain(results);
     }
 

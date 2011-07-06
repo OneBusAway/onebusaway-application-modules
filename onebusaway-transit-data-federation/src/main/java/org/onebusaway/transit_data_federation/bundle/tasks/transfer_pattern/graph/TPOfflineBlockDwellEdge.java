@@ -2,14 +2,12 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.gra
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
-import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
+import org.opentripplanner.routing.core.StateEditor;
 
 public class TPOfflineBlockDwellEdge extends AbstractEdge {
 
@@ -21,39 +19,24 @@ public class TPOfflineBlockDwellEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  public State traverse(State s0) {
 
     BlockStopTimeEntry bst = _instance.getStopTime();
     StopTimeEntry stopTime = bst.getStopTime();
     int dwellTime = stopTime.getSlackTime();
 
-    State state1 = s0.incrementTimeInSeconds(dwellTime);
-
-    EdgeNarrativeImpl narrative = createNarrative();
-
-    return new TraverseResult(dwellTime, state1, narrative);
+    EdgeNarrative narrative = createNarrative(s0);
+    StateEditor edit = s0.edit(this, narrative);
+    edit.incrementTimeInSeconds(dwellTime);
+    edit.incrementWeight(dwellTime);
+    return edit.makeState();
   }
 
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
-
-    BlockStopTimeEntry bst = _instance.getStopTime();
-    StopTimeEntry stopTime = bst.getStopTime();
-    int dwellTime = stopTime.getSlackTime();
-
-    State state1 = s0.incrementTimeInSeconds(-dwellTime);
-
-    EdgeNarrativeImpl narrative = createNarrative();
-
-    return new TraverseResult(dwellTime, state1, narrative);
-  }
-
-  private EdgeNarrativeImpl createNarrative() {
-    TPOfflineBlockArrivalVertex fromVertex = new TPOfflineBlockArrivalVertex(_context, _instance);
-    TPOfflineBlockDepartureVertex toVertex = new TPOfflineBlockDepartureVertex(_context,
-        _instance);
-    return new EdgeNarrativeImpl(fromVertex, toVertex);
+  private EdgeNarrative createNarrative(State s0) {
+    TPOfflineBlockArrivalVertex fromVertex = new TPOfflineBlockArrivalVertex(
+        _context, _instance);
+    TPOfflineBlockDepartureVertex toVertex = new TPOfflineBlockDepartureVertex(
+        _context, _instance);
+    return narrative(s0, fromVertex, toVertex);
   }
 }

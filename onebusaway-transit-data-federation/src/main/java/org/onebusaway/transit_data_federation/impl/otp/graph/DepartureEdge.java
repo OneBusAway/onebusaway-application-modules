@@ -4,18 +4,16 @@ import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
-import org.onebusaway.transit_data_federation.impl.otp.OBAStateData.OBAEditor;
+import org.onebusaway.transit_data_federation.impl.otp.OBAStateEditor;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
 public class DepartureEdge extends AbstractEdge {
@@ -28,17 +26,23 @@ public class DepartureEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  public State traverse(State s0) {
+    TraverseOptions options = s0.getOptions();
+    if (options.isArriveBy())
+      return traverseReverse(s0);
+    else
+      return traverseForward(s0);
+  }
 
-    OBATraverseOptions obaOpts = (OBATraverseOptions) options;
+  private State traverseForward(State s0) {
+
+    OBATraverseOptions obaOpts = (OBATraverseOptions) s0.getOptions();
     if (obaOpts.extraSpecialMode)
-      return getNextScheduledBlockDepartureResults(s0, obaOpts);
+      return getNextScheduledBlockDepartureResults(s0);
 
-    TraverseResult result = null;
+    State results = null;
 
     long time = s0.getTime();
-    StateData data = s0.getData();
 
     /**
      * Look for departures in the next X minutes
@@ -47,7 +51,7 @@ public class DepartureEdge extends AbstractEdge {
     long toTime = SupportLibrary.getNextTimeWindow(_context, time);
 
     List<ArrivalAndDepartureInstance> departures = getDeparturesInTimeRange(s0,
-        fromTime, toTime, options);
+        fromTime, toTime);
 
     for (ArrivalAndDepartureInstance instance : departures) {
 
@@ -65,43 +69,40 @@ public class DepartureEdge extends AbstractEdge {
       if (!SupportLibrary.hasNextStopTime(instance))
         continue;
 
-      TraverseResult r = getDepartureAsTraverseResult(instance, s0, options);
-      result = r.addToExistingResultChain(result);
+      State r = getDepartureAsTraverseResult(instance, s0);
+      results = r.addToExistingResultChain(results);
     }
 
     // In addition to all the departures, we can just remain waiting at the stop
-
-    OBAEditor edit = (OBAEditor) s0.edit();
-    edit.setTime(toTime);
-
     DepartureVertex fromVertex = new DepartureVertex(_context, _stop,
         s0.getTime());
     DepartureVertex toVertex = new DepartureVertex(_context, _stop, toTime);
-    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+    EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
+
+    OBAStateEditor edit = (OBAStateEditor) s0.edit(this, narrative);
+    edit.setTime(toTime);
 
     int dwellTime = (int) ((toTime - time) / 1000);
-    double w = ItineraryWeightingLibrary.computeWeightForWait(options,
-        dwellTime, s0);
+    double w = ItineraryWeightingLibrary.computeWeightForWait(s0, dwellTime);
+    edit.incrementWeight(w);
 
-    if (data.getNumBoardings() == 0)
+    if (s0.getNumBoardings() == 0)
       edit.incrementInitialWaitTime(dwellTime * 1000);
 
-    TraverseResult r = new TraverseResult(w, edit.createState(), narrative);
-    result = r.addToExistingResultChain(result);
+    State r = edit.makeState();
+    results = r.addToExistingResultChain(results);
 
-    return result;
+    return results;
   }
 
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  private State traverseReverse(State s0) {
 
     DepartureVertex fromVertex = new DepartureVertex(_context, _stop,
         s0.getTime());
     Vertex toVertex = null;
-    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+    EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
 
-    return new TraverseResult(0, s0, narrative);
+    return s0.edit(this, narrative).makeState();
   }
 
   /****
@@ -109,9 +110,10 @@ public class DepartureEdge extends AbstractEdge {
    ****/
 
   private List<ArrivalAndDepartureInstance> getDeparturesInTimeRange(State s0,
-      long fromTime, long toTime, TraverseOptions options) {
+      long fromTime, long toTime) {
 
     boolean useRealtime = false;
+    TraverseOptions options = s0.getOptions();
     OBATraverseOptions config = options.getExtension(OBATraverseOptions.class);
     if (config != null)
       useRealtime = config.useRealtime;
@@ -132,47 +134,45 @@ public class DepartureEdge extends AbstractEdge {
     }
   }
 
-  private TraverseResult getDepartureAsTraverseResult(
-      ArrivalAndDepartureInstance instance, State s0, TraverseOptions options) {
+  private State getDepartureAsTraverseResult(
+      ArrivalAndDepartureInstance instance, State s0) {
 
     long time = s0.getTime();
-    StateData data = s0.getData();
 
     long departureTime = instance.getBestDepartureTime();
 
     DepartureVertex fromVertex = new DepartureVertex(_context, _stop, time);
     BlockDepartureVertex toVertex = new BlockDepartureVertex(_context, instance);
-    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+    EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
 
-    OBAEditor edit = (OBAEditor) s0.edit();
+    OBAStateEditor edit = (OBAStateEditor) s0.edit(this, narrative);
     edit.setTime(departureTime);
     edit.incrementNumBoardings();
     edit.setEverBoarded(true);
 
     int dwellTime = (int) ((departureTime - time) / 1000);
-    double w = ItineraryWeightingLibrary.computeWeightForWait(options,
-        dwellTime, s0);
+    double w = ItineraryWeightingLibrary.computeWeightForWait(s0, dwellTime);
 
-    if (data.getNumBoardings() == 0)
+    if (s0.getNumBoardings() == 0)
       edit.incrementInitialWaitTime(dwellTime * 1000);
 
     edit.appendTripSequence(instance.getBlockTrip());
+    edit.incrementWeight(w);
 
-    return new TraverseResult(w, edit.createState(), narrative);
+    return edit.makeState();
   }
 
-  private TraverseResult getNextScheduledBlockDepartureResults(State s0,
-      TraverseOptions options) {
+  private State getNextScheduledBlockDepartureResults(State s0) {
 
     ArrivalAndDepartureService arrivalAndDepartureService = _context.getArrivalAndDepartureService();
 
     List<ArrivalAndDepartureInstance> instances = arrivalAndDepartureService.getNextScheduledBlockTripDeparturesForStop(
         _stop, s0.getTime(), false);
 
-    TraverseResult results = null;
+    State results = null;
 
     for (ArrivalAndDepartureInstance instance : instances) {
-      TraverseResult r = getDepartureAsTraverseResult(instance, s0, options);
+      State r = getDepartureAsTraverseResult(instance, s0);
       results = r.addToExistingResultChain(results);
     }
 

@@ -12,10 +12,6 @@
 
   <name>onebusaway-transit-data-federation</name>
 
-  <properties>
-    <opentripplanner-version>0.4-SNAPSHOT</opentripplanner-version>
-  </properties>
-
   <dependencies>
 
     <!-- OneBusAway Dependencies -->

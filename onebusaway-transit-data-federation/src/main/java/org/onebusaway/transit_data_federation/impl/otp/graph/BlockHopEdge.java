@@ -2,9 +2,9 @@ package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
+import org.opentripplanner.routing.core.StateEditor;
 import org.opentripplanner.routing.core.Vertex;
 
 /**
@@ -23,36 +23,27 @@ public class BlockHopEdge extends AbstractEdge {
   public BlockHopEdge(GraphContext context, ArrivalAndDepartureInstance from,
       ArrivalAndDepartureInstance to) {
     super(context);
-    
-    if( from == null)
+
+    if (from == null)
       throw new IllegalArgumentException("from cannot be null");
-    if( to == null)
+    if (to == null)
       throw new IllegalArgumentException("to cannot be null");
-      
+
     _from = from;
     _to = to;
   }
 
   @Override
-  public TraverseResult traverse(State state0, TraverseOptions wo) {
-    
+  public State traverse(State s0) {
+
+    EdgeNarrative narrative = createNarrative(s0);
+
+    StateEditor edit = s0.edit(this, narrative);
     int runningTime = computeRunningTime();
-    State state1 = state0.incrementTimeInSeconds(runningTime);
+    edit.incrementTimeInSeconds(runningTime);
+    edit.incrementWeight(runningTime);
 
-    EdgeNarrativeImpl narrative = createNarrative();
-
-    return new TraverseResult(runningTime, state1, narrative);
-  }
-
-  @Override
-  public TraverseResult traverseBack(State state0, TraverseOptions wo) {
-    
-    int runningTime = computeRunningTime();
-    State state1 = state0.incrementTimeInSeconds(-runningTime);
-
-    EdgeNarrativeImpl narrative = createNarrative();
-
-    return new TraverseResult(runningTime, state1, narrative);
+    return edit.makeState();
   }
 
   /****
@@ -65,9 +56,9 @@ public class BlockHopEdge extends AbstractEdge {
     return (int) ((arrival - departure) / 1000);
   }
 
-  private EdgeNarrativeImpl createNarrative() {
+  private EdgeNarrative createNarrative(State s0) {
     Vertex fromVertex = new BlockDepartureVertex(_context, _from);
     Vertex toVertex = new BlockArrivalVertex(_context, _to);
-    return new EdgeNarrativeImpl(fromVertex, toVertex);
+    return narrative(s0, fromVertex, toVertex);
   }
 }

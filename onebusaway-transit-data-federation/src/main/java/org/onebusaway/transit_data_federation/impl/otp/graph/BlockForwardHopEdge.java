@@ -1,15 +1,15 @@
 package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
-import org.onebusaway.transit_data_federation.impl.otp.OBAStateData;
-import org.onebusaway.transit_data_federation.impl.otp.OBAStateData.OBAEditor;
+import org.onebusaway.transit_data_federation.impl.otp.OBAState;
+import org.onebusaway.transit_data_federation.impl.otp.OBAStateEditor;
 import org.onebusaway.transit_data_federation.impl.otp.OBATraverseOptions;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
+import org.opentripplanner.routing.core.StateEditor;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
 /**
@@ -34,19 +34,27 @@ public class BlockForwardHopEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State state0, TraverseOptions wo) {
+  public State traverse(State s0) {
+    TraverseOptions options = s0.getOptions();
+    if (options.isArriveBy())
+      return traverseReverse(s0);
+    else
+      return traverseForward(s0);
+  }
 
-    OBATraverseOptions obaOpts = (OBATraverseOptions) wo;
+  private State traverseForward(State s0) {
+
+    OBATraverseOptions obaOpts = (OBATraverseOptions) s0.getOptions();
     if (obaOpts.extraSpecialMode)
-      return extraSpecialMode(state0, obaOpts);
+      return extraSpecialMode(s0, obaOpts);
 
     ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
 
-    TraverseResult r = null;
+    State results = null;
 
-    OBAStateData data = (OBAStateData) state0.getData();
+    OBAState state = (OBAState) s0;
 
-    int maxBlockSequence = data.getMaxBlockSequence();
+    int maxBlockSequence = state.getMaxBlockSequence();
 
     if (maxBlockSequence < 0) {
       ArrivalAndDepartureInstance nextTransferStop = service.getNextTransferStopArrivalAndDeparture(_from);
@@ -56,14 +64,16 @@ public class BlockForwardHopEdge extends AbstractEdge {
         long arrival = nextTransferStop.getBestArrivalTime();
         int runningTime = (int) ((arrival - departure) / 1000);
 
-        State state1 = state0.incrementTimeInSeconds(runningTime);
-
         Vertex fromVertex = new BlockDepartureVertex(_context, _from);
         Vertex toVertex = new BlockArrivalVertex(_context, nextTransferStop);
-        EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+        EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
 
-        TraverseResult tr = new TraverseResult(runningTime, state1, narrative);
-        r = tr.addToExistingResultChain(r);
+        StateEditor edit = s0.edit(this, narrative);
+        edit.incrementTimeInSeconds(runningTime);
+        edit.incrementWeight(runningTime);
+
+        State result = edit.makeState();
+        results = result.addToExistingResultChain(results);
 
         maxBlockSequence = nextTransferStop.getBlockStopTime().getBlockSequence();
       } else {
@@ -80,59 +90,57 @@ public class BlockForwardHopEdge extends AbstractEdge {
       long arrival = nextStop.getBestArrivalTime();
       int runningTime = (int) ((arrival - departure) / 1000);
 
-      State s1 = null;
-      if (data.getMaxBlockSequence() >= 0) {
-        s1 = state0.incrementTimeInSeconds(runningTime);
-      } else {
-        OBAEditor editor = (OBAEditor) state0.edit();
-        editor.incrementTimeInSeconds(runningTime);
-        editor.setMaxBlockSequence(maxBlockSequence);
-        s1 = editor.createState();
-      }
-
       Vertex fromVertex = new BlockDepartureVertex(_context, _from);
       Vertex toVertex = new BlockArrivalVertex(_context, nextStop);
-      EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+      EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
 
-      TraverseResult tr = new TraverseResult(runningTime, s1, narrative);
-      r = tr.addToExistingResultChain(r);
+      OBAStateEditor edit = (OBAStateEditor) s0.edit(this, narrative);
+      edit.incrementTimeInSeconds(runningTime);
+      edit.incrementWeight(runningTime);
+
+      if (state.getMaxBlockSequence() < 0)
+        edit.setMaxBlockSequence(maxBlockSequence);
+
+      State tr = edit.makeState();
+      results = tr.addToExistingResultChain(results);
     }
 
-    return r;
+    return results;
   }
 
-  private TraverseResult extraSpecialMode(State state0,
-      OBATraverseOptions obaOpts) {
+  private State extraSpecialMode(State s0, OBATraverseOptions obaOpts) {
 
     ArrivalAndDepartureService service = _context.getArrivalAndDepartureService();
     ArrivalAndDepartureInstance nextStop = service.getNextStopArrivalAndDeparture(_from);
-    
-    if( nextStop == null)
+
+    if (nextStop == null)
       return null;
+
+    Vertex fromVertex = new BlockDepartureVertex(_context, _from);
+    Vertex toVertex = new BlockArrivalVertex(_context, nextStop);
+    EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
+
+    StateEditor edit = s0.edit(this, narrative);
 
     long departure = _from.getBestDepartureTime();
     long arrival = nextStop.getBestArrivalTime();
     int runningTime = (int) ((arrival - departure) / 1000);
+    edit.incrementTimeInSeconds(runningTime);
+    edit.incrementWeight(runningTime);
 
-    State state1 = state0.incrementTimeInSeconds(runningTime);
-
-    Vertex fromVertex = new BlockDepartureVertex(_context, _from);
-    Vertex toVertex = new BlockArrivalVertex(_context, nextStop);
-    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
-
-    return new TraverseResult(runningTime, state1, narrative);
+    return edit.makeState();
   }
 
-  @Override
-  public TraverseResult traverseBack(State state0, TraverseOptions wo) {
-
-    int runningTime = (int) ((state0.getTime() - _from.getBestDepartureTime()) / 1000);
-    State state1 = state0.setTime(_from.getBestDepartureTime());
+  private State traverseReverse(State s0) {
 
     Vertex fromVertex = new BlockDepartureVertex(_context, _from);
     Vertex toVertex = null;
-    EdgeNarrative narrative = new EdgeNarrativeImpl(fromVertex, toVertex);
+    EdgeNarrative narrative = narrative(s0, fromVertex, toVertex);
 
-    return new TraverseResult(runningTime, state1, narrative);
+    StateEditor edit = s0.edit(this, narrative);
+    int runningTime = (int) ((s0.getTime() - _from.getBestDepartureTime()) / 1000);
+    edit.setTime(_from.getBestDepartureTime());
+    edit.incrementWeight(runningTime);
+    return edit.makeState();
   }
 }

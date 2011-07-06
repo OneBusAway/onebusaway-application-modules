@@ -4,17 +4,14 @@ import java.util.List;
 
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.ItineraryWeightingLibrary;
-import org.onebusaway.transit_data_federation.impl.otp.OBAStateData.OBAEditor;
+import org.onebusaway.transit_data_federation.impl.otp.OBAStateEditor;
 import org.onebusaway.transit_data_federation.impl.otp.graph.AbstractEdge;
-import org.onebusaway.transit_data_federation.impl.otp.graph.EdgeNarrativeImpl;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
-import org.opentripplanner.routing.algorithm.NegativeWeightException;
+import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;
-import org.opentripplanner.routing.core.StateData;
 import org.opentripplanner.routing.core.TraverseOptions;
-import org.opentripplanner.routing.core.TraverseResult;
 import org.opentripplanner.routing.core.Vertex;
 
 public class TPOfflineTransferEdge extends AbstractEdge {
@@ -31,19 +28,18 @@ public class TPOfflineTransferEdge extends AbstractEdge {
   }
 
   @Override
-  public TraverseResult traverse(State s0, TraverseOptions options)
-      throws NegativeWeightException {
+  public State traverse(State s0) {
+    TraverseOptions options = s0.getOptions();
+    if (options.isArriveBy())
+      throw new UnsupportedOperationException();
 
     /**
      * Check if we've reached our transfer limit
      */
-    StateData data = s0.getData();
-    if (data.getNumBoardings() > options.maxTransfers)
+    if (s0.getNumBoardings() > options.maxTransfers)
       return null;
 
     int transferTime = computeTransferTime(options);
-
-    State s1 = s0.incrementTimeInSeconds(transferTime + options.minTransferTime);
 
     /**
      * We're using options.boardCost as a transfer penalty
@@ -51,30 +47,24 @@ public class TPOfflineTransferEdge extends AbstractEdge {
     double transferWeight = transferTime * options.walkReluctance
         + options.minTransferTime * options.waitReluctance;
 
-    if (data.getNumBoardings() > 0)
+    if (s0.getNumBoardings() > 0)
       transferWeight += options.boardCost;
 
     StopTimeService stopTimeService = _context.getStopTimeService();
 
-    List<StopTimeInstance> instances = stopTimeService.getNextBlockSequenceDeparturesForStop(
-        _transfer.getStop(), s1.getTime(), false);
+    long time = s0.getTime() + (transferTime + options.minTransferTime) * 1000;
 
-    TraverseResult results = null;
+    List<StopTimeInstance> instances = stopTimeService.getNextBlockSequenceDeparturesForStop(
+        _transfer.getStop(), time, false);
+
+    State results = null;
 
     for (StopTimeInstance instance : instances) {
-      TraverseResult r = getDepartureAsTraverseResult(instance, s1, options,
-          transferWeight);
+      State r = getDepartureAsTraverseResult(instance, s0, transferWeight);
       results = r.addToExistingResultChain(results);
     }
 
     return results;
-  }
-
-  @Override
-  public TraverseResult traverseBack(State s0, TraverseOptions options)
-      throws NegativeWeightException {
-
-    throw new UnsupportedOperationException();
   }
 
   /****
@@ -97,31 +87,30 @@ public class TPOfflineTransferEdge extends AbstractEdge {
     return t;
   }
 
-  private TraverseResult getDepartureAsTraverseResult(
-      StopTimeInstance instance, State s0, TraverseOptions options,
-      double transferWeight) {
+  private State getDepartureAsTraverseResult(StopTimeInstance instance,
+      State s0, double transferWeight) {
 
     long time = s0.getTime();
-    StateData data = s0.getData();
 
     long departureTime = instance.getDepartureTime();
 
     TPOfflineTransferVertex toVertex = new TPOfflineTransferVertex(_context,
         instance);
-    EdgeNarrativeImpl narrative = new EdgeNarrativeImpl(_fromVertex, toVertex);
+    EdgeNarrative narrative = narrative(s0, _fromVertex, toVertex);
 
-    OBAEditor edit = (OBAEditor) s0.edit();
+    OBAStateEditor edit = (OBAStateEditor) s0.edit(this, narrative);
     edit.setTime(departureTime);
 
     int dwellTime = (int) ((departureTime - time) / 1000);
     double w = transferWeight
-        + ItineraryWeightingLibrary.computeWeightForWait(options, dwellTime, s0);
+        + ItineraryWeightingLibrary.computeWeightForWait(s0, dwellTime);
+    edit.incrementWeight(w);
 
-    if (data.getNumBoardings() == 0)
+    if (s0.getNumBoardings() == 0)
       edit.incrementInitialWaitTime(dwellTime * 1000);
 
     edit.appendTripSequence(instance.getStopTime().getTrip());
 
-    return new TraverseResult(w, edit.createState(), narrative);
+    return edit.makeState();
   }
 }
