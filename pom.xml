@@ -22,7 +22,7 @@
     <csv-entities-version>1.0.2-SNAPSHOT</csv-entities-version>
     <gtfs-version>1.2.2-SNAPSHOT</gtfs-version>
     <onebusaway-siri-version>0.1.0-SNAPSHOT</onebusaway-siri-version>
-    <opentripplanner-version>0.4.1-SNAPSHOT</opentripplanner-version>
+    <opentripplanner-version>0.4.1</opentripplanner-version>
   </properties>
 
   <repositories>
