@@ -105,7 +105,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private static final String MODE_BICYCLE = "bicycle";
 
   private static final String MODE_TRANSIT = "transit";
-
+  
   private ItinerariesService _itinerariesService;
 
   private TransitShedPathService _transitShedPathService;
@@ -129,6 +129,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private ArrivalAndDepartureService _arrivalAndDepartureService;
 
   private BlockCalendarService _blockCalendarService;
+  
+  private boolean _enabled = true;
 
   @Autowired
   public void setItinerariesService(ItinerariesService itinerariesService) {
@@ -193,6 +195,10 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
   }
+  
+  public void setEnabled(boolean enabled) {
+    _enabled = enabled;
+  }
 
   /****
    * {@link ItinerariesBeanService} Interface
@@ -202,6 +208,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
       TransitLocationBean to, long targetTime, ConstraintsBean constraints)
       throws ServiceException {
+    
+    if( ! _enabled )
+      throw new ServiceException("service disabled");
 
     OBATraverseOptions options = createTraverseOptions();
     applyConstraintsToOptions(constraints, options);
@@ -229,6 +238,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   @Override
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
       double lonFrom, double latTo, double lonTo) {
+    
+    if( ! _enabled)
+      throw new ServiceException("service disabled");
 
     double x1 = Math.min(lonFrom, lonTo);
     double x2 = Math.max(lonFrom, lonTo);
@@ -305,9 +317,13 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     return new ListBean<VertexBean>(beans, false);
   }
 
+  @Override
   public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(
       CoordinatePoint location, long time,
       TransitShedConstraintsBean constraints) {
+    
+    if( ! _enabled)
+      throw new ServiceException("service disabled");
 
     OBATraverseOptions options = createTraverseOptions();
     applyConstraintsToOptions(constraints.getConstraints(), options);
@@ -351,6 +367,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   public List<TimedPlaceBean> getLocalPaths(ConstraintsBean constraints,
       MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)
       throws ServiceException {
+    
+    if( ! _enabled)
+      throw new ServiceException("service disabled");
 
     long maxTripLength = constraints.getMaxTripDuration() * 1000;
 
