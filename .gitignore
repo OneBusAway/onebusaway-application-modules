@@ -1,0 +1,5 @@
+.project
+.classpath
+.settings
+*/src/main/resources/data-sources.xml
+*/target/*
