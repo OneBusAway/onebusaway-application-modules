@@ -75,7 +75,6 @@
   </scm>
 
   <modules>
-    <module>onebusaway-api-webapp</module>
     <module>onebusaway-cli</module>
     <module>onebusaway-container</module>
     <module>onebusaway-core</module>
