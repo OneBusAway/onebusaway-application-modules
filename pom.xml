@@ -43,6 +43,16 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>caucho</id>
+      <url>http://caucho.com/m2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <pluginRepositories>
@@ -83,17 +93,12 @@
     <module>onebusaway-geocoder</module>
     <module>onebusaway-geospatial</module>
     <module>onebusaway-gtfs-hibernate-spring</module>
-    <module>onebusaway-gwt-common</module>
-    <module>onebusaway-phone</module>
-    <module>onebusaway-phone-webapp</module>
     <module>onebusaway-presentation</module>
-    <module>onebusaway-sms-webapp</module>
     <module>onebusaway-realtime-api</module>
     <module>onebusaway-transit-data</module>
     <module>onebusaway-transit-data-federation</module>
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
-    <module>onebusaway-webapp</module>
   </modules>
 
   <!-- This is where we control the master dependency version used by all modules -->
@@ -259,7 +264,7 @@
 
       <dependency>
         <groupId>com.caucho</groupId>
-        <artifactId>hessian</artifactId>
+        <artifactId>resin-hessian</artifactId>
         <version>3.1.6</version>
       </dependency>
 

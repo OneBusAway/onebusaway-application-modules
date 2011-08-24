@@ -32,7 +32,8 @@
         <!-- RMI-like service for wiring up services between VMs -->
         <dependency>
             <groupId>com.caucho</groupId>
-            <artifactId>hessian</artifactId>
+            <artifactId>resin-hessian</artifactId>
+	    <version>3.1.6</version>
         </dependency>
 
         <dependency>
