@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransferList;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -27,12 +26,6 @@ public class StopEntryImpl implements StopEntry, Serializable {
   private transient List<BlockStopTimeIndex> _stopTimeIndices = null;
 
   private transient List<FrequencyBlockStopTimeIndex> _frequencyStopTimeIndices = null;
-
-  private transient StopTransferList _transfers = null;
-
-  private StopIdsWithValuesImpl _prevStopsWithMinTravelTime = new StopIdsWithValuesImpl();
-
-  private StopIdsWithValuesImpl _nextStopsWithMinTravelTime = new StopIdsWithValuesImpl();
 
   public StopEntryImpl(AgencyAndId id, double lat, double lon) {
     if (id == null)
@@ -66,23 +59,7 @@ public class StopEntryImpl implements StopEntry, Serializable {
       return Collections.emptyList();
     return _frequencyStopTimeIndices;
   }
-
-  public StopTransferList getTransfers() {
-    return _transfers;
-  }
-
-  public void setTransfers(StopTransferList transfers) {
-    _transfers = transfers;
-  }
-
-  public void addPreviousStopWithMinTravelTime(StopEntry stop, int travelTime) {
-    _prevStopsWithMinTravelTime.setMinValue(stop, travelTime);
-  }
-
-  public void addNextStopWithMinTravelTime(StopEntry stop, int travelTime) {
-    _nextStopsWithMinTravelTime.setMinValue(stop, travelTime);
-  }
-
+  
   /****
    * {@link StopEntry} Interface
    ****/
@@ -105,16 +82,6 @@ public class StopEntryImpl implements StopEntry, Serializable {
   @Override
   public CoordinatePoint getStopLocation() {
     return new CoordinatePoint(_lat, _lon);
-  }
-
-  @Override
-  public StopIdsWithValuesImpl getPreviousStopsWithMinTimes() {
-    return _prevStopsWithMinTravelTime;
-  }
-
-  @Override
-  public StopIdsWithValuesImpl getNextStopsWithMinTimes() {
-    return _nextStopsWithMinTravelTime;
   }
 
   /****

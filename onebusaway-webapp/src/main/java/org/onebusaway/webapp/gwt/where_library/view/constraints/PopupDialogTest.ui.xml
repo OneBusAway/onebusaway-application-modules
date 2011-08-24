@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-    <!-- RefineViewWidget.ui.xml -->
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <g:PopupPanel ui:field="_panel">
-        <g:Label>Hey</g:Label>
-    </g:PopupPanel>
-</ui:UiBinder>

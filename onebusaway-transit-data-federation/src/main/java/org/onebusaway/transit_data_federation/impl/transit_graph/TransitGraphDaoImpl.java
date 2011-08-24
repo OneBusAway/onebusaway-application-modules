@@ -2,7 +2,6 @@ package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -13,9 +12,9 @@ import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataB
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraph;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,14 +24,14 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
 
   private FederatedTransitDataBundle _bundle;
 
-  private TripPlannerGraph _graph;
+  private TransitGraph _graph;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
   }
 
-  public void setTripPlannerGraph(TripPlannerGraph graph) {
+  public void setTransitGraph(TransitGraph graph) {
     _graph = graph;
   }
 
@@ -64,7 +63,7 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   }
 
   @Override
-  public List<StopEntry> getStopsByLocation(CoordinateBounds bounds) {
+  public Iterable<StopEntry> getStopsByLocation(CoordinateBounds bounds) {
     return _graph.getStopsByLocation(bounds);
   }
 

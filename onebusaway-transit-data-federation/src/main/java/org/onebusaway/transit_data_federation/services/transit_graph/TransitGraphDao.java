@@ -1,7 +1,5 @@
 package org.onebusaway.transit_data_federation.services.transit_graph;
 
-import java.util.List;
-
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
@@ -30,7 +28,7 @@ public interface TransitGraphDao {
    * @param bounds coordinate bounds query
    * @return a list of stop entries located within in the specified bounds
    */
-  public List<StopEntry> getStopsByLocation(CoordinateBounds bounds);
+  public Iterable<StopEntry> getStopsByLocation(CoordinateBounds bounds);
 
   /**
    * @return the list of all block entries in the transit graph

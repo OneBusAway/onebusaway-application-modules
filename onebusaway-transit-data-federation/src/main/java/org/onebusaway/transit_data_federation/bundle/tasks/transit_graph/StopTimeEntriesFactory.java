@@ -162,8 +162,8 @@ public class StopTimeEntriesFactory {
         StopEntryImpl fromStopEntry = prevStopTimeEntry.getStop();
         StopEntryImpl toStopEntry = stopTimeEntry.getStop();
 
-        fromStopEntry.addNextStopWithMinTravelTime(toStopEntry, duration);
-        toStopEntry.addPreviousStopWithMinTravelTime(fromStopEntry, duration);
+//        fromStopEntry.addNextStopWithMinTravelTime(toStopEntry, duration);
+//        toStopEntry.addPreviousStopWithMinTravelTime(fromStopEntry, duration);
       }
       prevStopTimeEntry = stopTimeEntry;
 

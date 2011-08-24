@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-    <!-- RefineViewWidget.ui.xml -->
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <g:HTMLPanel>
-        <span ui:field="label"/> <g:Anchor ui:field="removeStopAnchor">remove</g:Anchor> 
-    </g:HTMLPanel>
-</ui:UiBinder>

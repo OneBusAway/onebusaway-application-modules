@@ -48,7 +48,7 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
   public List<BlockInstance> getActiveScheduledBlocksPassingThroughBounds(
       CoordinateBounds bounds, long timeFrom, long timeTo) {
 
-    List<StopEntry> stops = _transitGraphDao.getStopsByLocation(bounds);
+    Iterable<StopEntry> stops = _transitGraphDao.getStopsByLocation(bounds);
 
     Set<BlockTripIndex> blockIndices = new HashSet<BlockTripIndex>();
 

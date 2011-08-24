@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -37,22 +36,10 @@ import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
-import org.onebusaway.transit_data.model.oba.LocalSearchResult;
-import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
-import org.onebusaway.transit_data.model.oba.OneBusAwayConstraintsBean;
-import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
-import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
-import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
-import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
-import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
-import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
-import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlanBean;
-import org.onebusaway.transit_data.model.tripplanner.TripPlannerConstraintsBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
@@ -76,10 +63,7 @@ import org.onebusaway.transit_data_federation.services.beans.StopWithArrivalsAnd
 import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
-import org.onebusaway.transit_data_federation.services.beans.TripPlannerBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
-import org.onebusaway.transit_data_federation.services.oba.OneBusAwayService;
-import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -123,19 +107,10 @@ class TransitDataServiceImpl implements TransitDataService {
   private BlockBeanService _blockBeanService;
 
   @Autowired
-  private TripPlannerBeanService _tripPlannerBeanService;
-
-  @Autowired
-  private OneBusAwayService _oneBusAwayService;
-
-  @Autowired
   private ShapeBeanService _shapeBeanService;
 
   @Autowired
   private ServiceAlertsBeanService _serviceAlertsBeanService;
-
-  @Autowired
-  private UserReportingService _userReportingService;
 
   @Autowired
   private VehicleStatusBeanService _vehicleStatusBeanService;
@@ -364,29 +339,6 @@ class TransitDataServiceImpl implements TransitDataService {
     return _shapeBeanService.getPolylineForShapeId(id);
   }
 
-  public List<TripPlanBean> getTripsBetween(double latFrom, double lonFrom,
-      double latTo, double lonTo, TripPlannerConstraintsBean constraints)
-      throws ServiceException {
-    return _tripPlannerBeanService.getTripsBetween(latFrom, lonFrom, latTo,
-        lonTo, constraints);
-  }
-
-  public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(double lat,
-      double lon, OneBusAwayConstraintsBean constraints)
-      throws ServiceException {
-
-    return _tripPlannerBeanService.getMinTravelTimeToStopsFrom(lat, lon,
-        constraints);
-  }
-
-  public List<TimedPlaceBean> getLocalPaths(String agencyId,
-      OneBusAwayConstraintsBean constraints,
-      MinTravelTimeToStopsBean minTravelTimeToStops,
-      List<LocalSearchResult> localResults) throws ServiceException {
-    return _oneBusAwayService.getLocalPaths(constraints, minTravelTimeToStops,
-        localResults);
-  }
-
   /****
    * 
    ****/
@@ -446,85 +398,6 @@ class TransitDataServiceImpl implements TransitDataService {
     return new ListBean<SituationBean>(situations, false);
   }
 
-  @Override
-  public void reportProblemWithStop(StopProblemReportBean problem) {
-    _userReportingService.reportProblemWithStop(problem);
-  }
-
-  @Override
-  public void reportProblemWithTrip(TripProblemReportBean problem) {
-    _userReportingService.reportProblemWithTrip(problem);
-  }
-
-  @Override
-  public ListBean<StopProblemReportSummaryBean> getStopProblemReportSummaries(
-      StopProblemReportQueryBean query) {
-    return _userReportingService.getStopProblemReportSummaries(query);
-  }
-
-  @Override
-  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
-      TripProblemReportQueryBean query) {
-    return _userReportingService.getTripProblemReportSummaries(query);
-  }
-
-  @Override
-  @FederatedByAgencyIdMethod()
-  public ListBean<StopProblemReportBean> getStopProblemReports(
-      StopProblemReportQueryBean query) {
-    return _userReportingService.getStopProblemReports(query);
-  }
-
-  @Override
-  public ListBean<TripProblemReportBean> getTripProblemReports(
-      TripProblemReportQueryBean query) {
-    return _userReportingService.getTripProblemReports(query);
-  }
-
-  @Override
-  public List<StopProblemReportBean> getAllStopProblemReportsForStopId(
-      String stopId) {
-    return _userReportingService.getAllStopProblemReportsForStopId(convertAgencyAndId(stopId));
-  }
-
-  @Override
-  public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
-      String tripId) {
-    return _userReportingService.getAllTripProblemReportsForTripId(convertAgencyAndId(tripId));
-  }
-
-  @Override
-  public StopProblemReportBean getStopProblemReportForStopIdAndId(
-      String stopId, long id) {
-    return _userReportingService.getStopProblemReportForId(id);
-  }
-
-  @Override
-  public TripProblemReportBean getTripProblemReportForTripIdAndId(
-      String tripId, long id) {
-    return _userReportingService.getTripProblemReportForId(id);
-  }
-
-  @Override
-  public void deleteStopProblemReportForStopIdAndId(String stopId, long id) {
-    _userReportingService.deleteStopProblemReportForId(id);
-  }
-  
-  @Override
-  public void updateTripProblemReport(TripProblemReportBean tripProblemReport) {
-    _userReportingService.updateTripProblemReport(tripProblemReport);
-  }
-
-  @Override
-  public void deleteTripProblemReportForTripIdAndId(String tripId, long id) {
-    _userReportingService.deleteTripProblemReportForId(id);
-  }
-  
-  @Override
-  public List<String> getAllTripProblemReportLabels() {
-    return _userReportingService.getAllTripProblemReportLabels();
-  }
-
   /****
    * Private Methods
    ****/
@@ -539,5 +412,4 @@ class TransitDataServiceImpl implements TransitDataService {
       converted.add(convertAgencyAndId(id));
     return converted;
   }
-
 }

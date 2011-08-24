@@ -5,7 +5,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfig
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripInstance;
 
 /**
  * A block instance is the combination of a {@link BlockEntry} and a service
