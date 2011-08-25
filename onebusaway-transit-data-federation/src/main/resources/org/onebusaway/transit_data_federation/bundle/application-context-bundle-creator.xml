@@ -39,7 +39,7 @@
     <context:component-scan base-package="org.onebusaway.transit_data_federation.bundle.tasks" />
 
     <!-- Task Definitions -->
-    
+  
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="start" />
         <property name="task" ref="startTask" />
@@ -107,24 +107,6 @@
 
     <bean id="narrativesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateNarrativesTask" />
 
-    <!-- Walk Graph -->
-
-
-    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="walk_graph" />
-        <property name="afterTaskName" value="narratives" />
-        <property name="task" ref="walkGraphTask" />
-    </bean>
-
-
-    <bean id="walkGraphTask" class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.WalkPlannerGraphTask" />
-
-    <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
-        <property name="regionsSource">
-            <bean class="org.onebusaway.transit_data_federation.impl.walkplanner.offline.GtfsStopRegionsSourceImpl" />
-        </property>
-    </bean>
-
     <!-- Trip Graph -->
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
@@ -143,21 +125,11 @@
 
     <bean id="blockIndicesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesTask" />
 
-    <!-- -->
-
-    <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-        <property name="taskName" value="stop_transfers" />
-        <property name="afterTaskName" value="block_indices" />
-        <property name="task" ref="stopTransfersTask" />
-    </bean>
-
-    <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.bundle.tasks.stop_transfers.StopTransfersTask" />
-
     <!-- Pre Cache -->
 
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
         <property name="taskName" value="pre_cache" />
-        <property name="afterTaskName" value="stop_transfers" />
+        <property name="afterTaskName" value="transit_graph" />
         <property name="task" ref="preCacheTask" />
     </bean>
 

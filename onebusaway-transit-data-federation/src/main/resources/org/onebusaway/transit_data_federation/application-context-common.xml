@@ -22,10 +22,6 @@
     <bean id="bundle" class="org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle">
         <property name="path" value="${bundlePath}" />
     </bean>
-    
-    <bean id="otpGraphBundle" class="org.opentripplanner.model.GraphBundle">
-        <property name="path" value="${bundlePath}" />
-    </bean>
 
     <!-- Override the default ehcache diskstore path -->
     <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">

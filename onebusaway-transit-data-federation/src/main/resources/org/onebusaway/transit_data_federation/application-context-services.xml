@@ -23,9 +23,7 @@
     <bean id="blockLocationServiceImpl" class="org.onebusaway.transit_data_federation.impl.realtime.BlockLocationServiceImpl">
         <property name="persistBlockLocationRecords" value="true" />
     </bean>
-
-    <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
-
+    
     <bean id="extendedCalendarServiceServiceDateRangeCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName"

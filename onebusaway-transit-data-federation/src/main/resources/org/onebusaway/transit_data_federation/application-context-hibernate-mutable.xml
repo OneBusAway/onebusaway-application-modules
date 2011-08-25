@@ -58,8 +58,6 @@
         <property name="sourceList">
             <list>
                 <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
-                <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
-                <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
             </list>
         </property>
     </bean>
@@ -72,7 +70,6 @@
         <property name="sourceList">
             <list>
                 <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/BlockLocationRecordDaoImpl.hibernate.xml</value>
-                <value>classpath:org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml</value>
             </list>
         </property>
     </bean>
