@@ -106,7 +106,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     ListBean<TripDetailsBean> listBean = getTripsForId(query);
     List<TripDetailsBean> trips = listBean.getList();
 
-    if (trips.isEmpty()) {
+    if (trips == null || trips.isEmpty()) {
       return null;
     } else if (trips.size() == 1) {
       return trips.get(0);
