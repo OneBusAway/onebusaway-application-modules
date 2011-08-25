@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.onebusaway.collections.Counter;
 import org.onebusaway.csv_entities.EntityHandler;
+import org.onebusaway.gtfs.impl.GenericMutableDaoWrapper;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.IdentityBean;
 import org.onebusaway.gtfs.model.ShapePoint;
@@ -95,7 +96,7 @@ public class GtfsMultiReaderImpl implements Runnable {
           reader.readEntities(entityClass);
 
           if (entityClass.equals(Agency.class))
-            agencies.addAll(reader.getAgencies());
+            agencies = new ArrayList<Agency>(reader.getAgencies());
 
           store.flush();
         }
@@ -111,7 +112,7 @@ public class GtfsMultiReaderImpl implements Runnable {
   /****
    * Private Methods
    ****/
-
+  
   /**
    * Custom {@link GenericMutableDao} instance that intercepts methods so that
    * the entity replacement strategy can be applied.
