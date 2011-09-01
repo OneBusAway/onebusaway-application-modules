@@ -30,10 +30,11 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- This is the original SIRI API implementation that we hope to eventually move away from -->
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-siri-api</artifactId>
-      <version>${onebusaway-siri-version}</version>
+      <version>1.0.0</version>
     </dependency>
 
     <!-- RMI-like service for wiring up services between VMs -->
