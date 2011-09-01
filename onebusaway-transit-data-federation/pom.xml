@@ -37,7 +37,21 @@
             <artifactId>onebusaway-siri-core</artifactId>
             <version>${onebusaway-siri-version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.opentripplanner</groupId>
+            <artifactId>opentripplanner-graph-builder</artifactId>
+            <version>0.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>colt</groupId>
             <artifactId>colt</artifactId>
