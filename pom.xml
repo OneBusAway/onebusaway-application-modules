@@ -20,8 +20,8 @@
     <gwt-version>2.1.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
     <csv-entities-version>1.0.2-SNAPSHOT</csv-entities-version>
-    <gtfs-version>1.2.2-SNAPSHOT</gtfs-version>
-    <onebusaway-siri-version>0.1.0-SNAPSHOT</onebusaway-siri-version>
+    <gtfs-version>1.2.4-SNAPSHOT</gtfs-version>
+    <onebusaway-siri-version>1.0.1</onebusaway-siri-version>
     <opentripplanner-version>0.4.1</opentripplanner-version>
   </properties>
 
