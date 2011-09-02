@@ -20,6 +20,8 @@ public interface ServiceAlertsService {
   public void removeServiceAlerts(List<AgencyAndId> situationIds);
 
   public Situation getServiceAlertForId(AgencyAndId situationId);
+  
+  public List<Situation> getAllSituations();
 
   public List<Situation> getAllSituationsForAgencyId(String agencyId);
 

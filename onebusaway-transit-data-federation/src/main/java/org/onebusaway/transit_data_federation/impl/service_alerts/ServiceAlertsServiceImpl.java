@@ -156,6 +156,11 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   @Override
+  public List<Situation> getAllSituations() {
+    return new ArrayList<Situation>(_situations.values());
+  }
+
+  @Override
   public List<Situation> getAllSituationsForAgencyId(String agencyId) {
     Set<AgencyAndId> situationIds = _situationIdsBySituationAgencyId.get(agencyId);
     return getSituationIdsAsObjects(situationIds);

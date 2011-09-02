@@ -50,6 +50,8 @@ public interface BlockIndexService {
   /****
    * Layover Indices
    ****/
+  
+  public List<BlockLayoverIndex> getBlockLayoverIndices();
 
   public List<BlockLayoverIndex> getBlockLayoverIndicesForAgencyId(
       String agencyId);

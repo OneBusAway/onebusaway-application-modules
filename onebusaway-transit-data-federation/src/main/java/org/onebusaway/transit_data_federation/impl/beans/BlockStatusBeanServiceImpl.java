@@ -57,7 +57,7 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
 
   @Override
   public ListBean<BlockStatusBean> getBlocksForAgency(String agencyId, long time) {
-    return beans(_blockStatusService.getBlocksForAgency(agencyId, time));
+    return beans(_blockStatusService.getActiveBlocksForAgency(agencyId, time));
   }
 
   @Override

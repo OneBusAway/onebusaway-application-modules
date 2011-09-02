@@ -58,7 +58,8 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
     if (record.getTimeOfRecord() == 0)
       throw new IllegalArgumentException("you must specify a record time");
 
-    _vehicleRecordsById.put(record.getVehicleId(), record);
+    if( record.getVehicleId() != null)
+      _vehicleRecordsById.put(record.getVehicleId(), record);
 
     AgencyAndId blockId = record.getBlockId();
 
@@ -73,6 +74,7 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
       }
     }
 
+    // TODO : Maybe not require service date?
     if (blockId != null && record.getServiceDate() != 0)
       _blockVehicleLocationService.handleVehicleLocationRecord(record);
   }

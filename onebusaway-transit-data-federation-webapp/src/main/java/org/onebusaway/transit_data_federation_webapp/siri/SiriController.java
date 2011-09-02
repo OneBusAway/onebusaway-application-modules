@@ -18,6 +18,7 @@ import org.onebusaway.siri.core.SiriClientRequest;
 import org.onebusaway.siri.core.SiriClientRequestFactory;
 import org.onebusaway.siri.core.SiriCoreModule;
 import org.onebusaway.siri.core.SiriLibrary;
+import org.onebusaway.siri.core.SiriCommon.ELogRawXmlType;
 import org.onebusaway.siri.core.guice.LifecycleService;
 import org.onebusaway.siri.core.handlers.SiriServiceDeliveryHandler;
 import org.onebusaway.transit_data_federation.impl.realtime.siri.SiriEndpointDetails;
@@ -50,6 +51,10 @@ public class SiriController {
 
   private LifecycleService _lifecycleService;
 
+  private String _clientUrl;
+  
+  private ELogRawXmlType _logRawXmlType;
+
   @Autowired
   public void setSiriService(SiriService siriService) {
     _siriService = siriService;
@@ -63,17 +68,30 @@ public class SiriController {
     _endpoints = endpoints;
   }
 
+  public void setClientUrl(String clientUrl) {
+    _clientUrl = clientUrl;
+  }
+
+  public void setLogRawXmlType(ELogRawXmlType logRawXmlType) {
+    _logRawXmlType = logRawXmlType;
+  }
+
   @PostConstruct
   public void start() {
 
     List<Module> modules = new ArrayList<Module>();
     modules.addAll(SiriCoreModule.getModules());
     Injector injector = Guice.createInjector(modules);
-
+    
     _client = injector.getInstance(SiriClient.class);
     _lifecycleService = injector.getInstance(LifecycleService.class);
 
     _client.addServiceDeliveryHandler(_handler);
+
+    if( _clientUrl != null)
+      _client.setUrl(_clientUrl);
+    if (_logRawXmlType != null)
+      _client.setLogRawXmlType(_logRawXmlType);
 
     _lifecycleService.start();
 
@@ -87,8 +105,16 @@ public class SiriController {
         SiriClientRequest request = factory.createSubscriptionRequest(args);
 
         SiriEndpointDetails context = new SiriEndpointDetails();
+
         String agencyId = args.get("AgencyId");
-        context.setAgencyId(agencyId);
+        if (agencyId != null)
+          context.getDefaultAgencyIds().add(agencyId);
+
+        String agencyIds = args.get("AgencyIds");
+        if (agencyIds != null) {
+          for (String id : agencyIds.split(","))
+            context.getDefaultAgencyIds().add(id);
+        }
 
         request.setChannelContext(context);
 

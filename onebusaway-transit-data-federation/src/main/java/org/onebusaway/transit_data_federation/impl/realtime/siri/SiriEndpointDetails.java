@@ -1,15 +1,17 @@
 package org.onebusaway.transit_data_federation.impl.realtime.siri;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SiriEndpointDetails {
 
-  private String defaultAgencyId;
+  private List<String> defaultAgencyIds = new ArrayList<String>();
 
-  public String getAgencyId() {
-    return defaultAgencyId;
+  public List<String> getDefaultAgencyIds() {
+    return defaultAgencyIds;
   }
 
-  public void setAgencyId(String agencyId) {
-    this.defaultAgencyId = agencyId;
+  public void setDefaultAgencyIds(List<String> defaultAgencyIds) {
+    this.defaultAgencyIds = defaultAgencyIds;
   }
-
 }

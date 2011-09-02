@@ -99,7 +99,14 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   }
 
   @Override
-  public List<BlockLocation> getBlocksForAgency(String agencyId, long time) {
+  public List<BlockLocation> getAllActiveBlocks(long time) {
+    List<BlockInstance> instances = _blockCalendarService.getActiveBlocksInTimeRange(
+        time, time);
+    return getAsLocations(instances, time);
+  }
+
+  @Override
+  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long time) {
 
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForAgencyInTimeRange(
         agencyId, time, time);
@@ -261,11 +268,11 @@ public class BlockStatusServiceImpl implements BlockStatusService {
           serviceIntervalBlock.getMaxArrivals(), effectiveFromTime);
       int indexTo = Arrays.binarySearch(
           serviceIntervalBlock.getMinDepartures(), effectiveToTime);
-      
-      if( indexFrom < 0)
-        indexFrom = -(indexFrom+1);
-      if( indexTo < 0)
-        indexTo = -(indexTo+1);
+
+      if (indexFrom < 0)
+        indexFrom = -(indexFrom + 1);
+      if (indexTo < 0)
+        indexTo = -(indexTo + 1);
 
       for (int i = indexFrom; i < indexTo; i++) {
 

@@ -41,15 +41,29 @@ public interface BlockStatusService {
   public BlockLocation getBlockForVehicle(AgencyAndId vehicleId, long time);
 
   /**
+   * Returns all active blocks, both with and without real-time information.
    * 
-   * @param query
-   * @return the list of active blocks matching agency query criteria
+   * @param time only blocks active at the specified time will be returned
+   * @return the list of active blocks at the specified time
    */
-  public List<BlockLocation> getBlocksForAgency(String agencyId, long time);
+  public List<BlockLocation> getAllActiveBlocks(long time);
 
   /**
+   * Returns all active blocks for the specified agency, both with and without
+   * real-time information.
    * 
-   * @param query
+   * @param agencyId only blocks with the specified agency id will be returned
+   * @param time only blocks active at the specified time will be returned
+   * @return the list of active blocks matching agency query criteria
+   */
+  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long time);
+
+  /**
+   * Returns all active blocks for the specified route, both with and without
+   * real-time information.
+   * 
+   * @param routeId only blocks with the specified route id will be returned
+   * @param time only blocks active at the specified time will be returned
    * @return the list of active blocks matching the route query criteria
    */
   public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time);
@@ -60,8 +74,8 @@ public interface BlockStatusService {
    * @param timetamps
    * @return
    */
-  public Map<BlockInstance,List<List<BlockLocation>>> getBlocksForIndex(BlockSequenceIndex index,
-      List<Date> timetamps);
+  public Map<BlockInstance, List<List<BlockLocation>>> getBlocksForIndex(
+      BlockSequenceIndex index, List<Date> timetamps);
 
   /**
    * @param query

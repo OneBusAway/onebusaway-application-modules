@@ -76,6 +76,12 @@
       <classifier>ftp</classifier>
     </dependency>
 
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-gtfs-realtime-api</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
     <!-- Library for accessing MyBus Data Stream -->
     <dependency>
       <groupId>edu.washington.its</groupId>

@@ -185,6 +185,11 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
     return results;
   }
+  
+  @Override
+  public List<BlockLayoverIndex> getBlockLayoverIndices() {
+    return _blockLayoverIndices;
+  }
 
   @Override
   public List<BlockLayoverIndex> getBlockLayoverIndicesForAgencyId(

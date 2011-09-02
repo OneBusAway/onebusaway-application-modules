@@ -1,11 +1,16 @@
 package org.onebusaway.transit_data_federation.impl.realtime.siri;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import javax.xml.datatype.Duration;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.siri.AffectedApplicationStructure;
 import org.onebusaway.siri.OneBusAwayAffects;
 import org.onebusaway.siri.OneBusAwayAffectsStructure.Applications;
@@ -15,6 +20,8 @@ import org.onebusaway.transit_data.model.service_alerts.ESensitivity;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
@@ -25,6 +32,9 @@ import org.onebusaway.transit_data_federation.services.service_alerts.SituationA
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffects;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationConditionDetails;
 import org.onebusaway.transit_data_federation.services.service_alerts.SituationConsequence;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,9 +48,12 @@ import uk.org.siri.siri.AffectsScopeStructure;
 import uk.org.siri.siri.AffectsScopeStructure.Operators;
 import uk.org.siri.siri.AffectsScopeStructure.StopPoints;
 import uk.org.siri.siri.AffectsScopeStructure.VehicleJourneys;
+import uk.org.siri.siri.BlockRefStructure;
 import uk.org.siri.siri.DefaultedTextStructure;
 import uk.org.siri.siri.EntryQualifierStructure;
 import uk.org.siri.siri.ExtensionsStructure;
+import uk.org.siri.siri.FramedVehicleJourneyRefStructure;
+import uk.org.siri.siri.LocationStructure;
 import uk.org.siri.siri.OperatorRefStructure;
 import uk.org.siri.siri.PtConsequenceStructure;
 import uk.org.siri.siri.PtConsequencesStructure;
@@ -51,17 +64,54 @@ import uk.org.siri.siri.SeverityEnumeration;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure;
 import uk.org.siri.siri.SituationExchangeDeliveryStructure.Situations;
 import uk.org.siri.siri.StopPointRefStructure;
+import uk.org.siri.siri.VehicleActivityStructure;
+import uk.org.siri.siri.VehicleActivityStructure.MonitoredVehicleJourney;
 import uk.org.siri.siri.VehicleJourneyRefStructure;
+import uk.org.siri.siri.VehicleMonitoringDeliveryStructure;
+import uk.org.siri.siri.VehicleRefStructure;
 import uk.org.siri.siri.WorkflowStatusEnumeration;
 
 @Component
 public class SiriService {
 
+  private TransitGraphDao _transitGraphDao;
+
   private ServiceAlertsService _serviceAlertsService;
+
+  private VehicleLocationListener _vehicleLocationListener;
+
+  private BlockCalendarService _blockCalendarService;
+
+  /**
+   * Time, in minutes,
+   */
+  private int _blockInstanceSearchWindow = 30;
+
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
+    _blockCalendarService = blockCalendarService;
+  }
 
   @Autowired
   public void setServiceAlertService(ServiceAlertsService serviceAlertsService) {
     _serviceAlertsService = serviceAlertsService;
+  }
+
+  @Autowired
+  public void set(VehicleLocationListener vehicleLocationListener) {
+    _vehicleLocationListener = vehicleLocationListener;
+  }
+
+  /**
+   * @param blockInstanceSearchWindow time, in minutes
+   */
+  public void setBlockInstanceSearchWindow(int blockInstanceSearchWindow) {
+    _blockInstanceSearchWindow = blockInstanceSearchWindow;
   }
 
   public synchronized void handleServiceDelivery(
@@ -70,6 +120,11 @@ public class SiriService {
       ESiriModuleType moduleType, SiriEndpointDetails endpointDetails) {
 
     switch (moduleType) {
+      case VEHICLE_MONITORING:
+        handleVehicleMonitoring(serviceDelivery,
+            (VehicleMonitoringDeliveryStructure) deliveryForModule,
+            endpointDetails);
+        break;
       case SITUATION_EXCHANGE:
         handleSituationExchange(serviceDelivery,
             (SituationExchangeDeliveryStructure) deliveryForModule,
@@ -82,6 +137,127 @@ public class SiriService {
   /****
    * Private Methods
    ****/
+
+  private void handleVehicleMonitoring(ServiceDelivery serviceDelivery,
+      VehicleMonitoringDeliveryStructure deliveryForModule,
+      SiriEndpointDetails endpointDetails) {
+
+    List<VehicleLocationRecord> records = new ArrayList<VehicleLocationRecord>();
+
+    Date now = new Date();
+    long timeFrom = now.getTime() - _blockInstanceSearchWindow * 60 * 1000;
+    long timeTo = now.getTime() + _blockInstanceSearchWindow * 60 * 1000;
+
+    for (VehicleActivityStructure vehicleActivity : deliveryForModule.getVehicleActivity()) {
+
+      Date time = vehicleActivity.getRecordedAtTime();
+      if (time == null)
+        time = now;
+      
+
+      MonitoredVehicleJourney mvj = vehicleActivity.getMonitoredVehicleJourney();
+
+      Duration delay = mvj.getDelay();
+      if (delay == null)
+        continue;
+
+      VehicleRefStructure vehicleRef = mvj.getVehicleRef();
+      if (vehicleRef == null || vehicleRef.getValue() == null)
+        continue;
+
+      BlockEntry block = getBlockForMonitoredVehicleJourney(mvj,
+          endpointDetails);
+      if (block == null) {
+        TripEntry trip = getTripForMonitoredVehicleJourney(mvj, endpointDetails);
+        if (trip != null)
+          block = trip.getBlock();
+      }
+
+      if (block == null)
+        continue;
+
+      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+          block.getId(), timeFrom, timeTo);
+
+      // TODO : We currently assume that a block won't overlap with itself
+      if (instances.size() != 1)
+        continue;
+
+      BlockInstance instance = instances.get(0);
+      
+      VehicleLocationRecord r = new VehicleLocationRecord();
+      r.setTimeOfRecord(time.getTime());
+      r.setServiceDate(instance.getServiceDate());
+      r.setBlockId(block.getId());
+
+      String agencyId = block.getId().getAgencyId();
+      r.setVehicleId(new AgencyAndId(agencyId, vehicleRef.getValue()));
+
+      r.setScheduleDeviation(delay.getTimeInMillis(now) / 1000);
+
+      LocationStructure location = mvj.getVehicleLocation();
+      if (location != null) {
+        r.setCurrentLocationLat(location.getLatitude().doubleValue());
+        r.setCurrentLocationLon(location.getLongitude().doubleValue());
+      }
+
+      records.add(r);
+    }
+
+    if (!records.isEmpty())
+      _vehicleLocationListener.handleVehicleLocationRecords(records);
+  }
+
+  private BlockEntry getBlockForMonitoredVehicleJourney(
+      MonitoredVehicleJourney mvj, SiriEndpointDetails endpointDetails) {
+
+    BlockRefStructure blockRef = mvj.getBlockRef();
+    if (blockRef == null || blockRef.getValue() == null)
+      return null;
+
+    for (String agencyId : endpointDetails.getDefaultAgencyIds()) {
+      AgencyAndId blockId = new AgencyAndId(agencyId, blockRef.getValue());
+      BlockEntry blockEntry = _transitGraphDao.getBlockEntryForId(blockId);
+      if (blockEntry != null)
+        return blockEntry;
+    }
+
+    /**
+     * Try parsing the id itself
+     */
+    try {
+      AgencyAndId blockId = AgencyAndId.convertFromString(blockRef.getValue());
+      return _transitGraphDao.getBlockEntryForId(blockId);
+    } catch (IllegalArgumentException ex) {
+      return null;
+    }
+  }
+
+  private TripEntry getTripForMonitoredVehicleJourney(
+      MonitoredVehicleJourney mvj, SiriEndpointDetails endpointDetails) {
+
+    FramedVehicleJourneyRefStructure fvjRef = mvj.getFramedVehicleJourneyRef();
+    if (fvjRef == null || fvjRef.getDatedVehicleJourneyRef() == null)
+      return null;
+
+    for (String agencyId : endpointDetails.getDefaultAgencyIds()) {
+      AgencyAndId tripId = new AgencyAndId(agencyId,
+          fvjRef.getDatedVehicleJourneyRef());
+      TripEntry tripEntry = _transitGraphDao.getTripEntryForId(tripId);
+      if (tripEntry != null)
+        return tripEntry;
+    }
+
+    /**
+     * Try parsing the id itself
+     */
+    try {
+      AgencyAndId tripId = AgencyAndId.convertFromString(fvjRef.getDatedVehicleJourneyRef());
+      return _transitGraphDao.getTripEntryForId(tripId);
+    } catch (IllegalArgumentException ex) {
+      return null;
+    }
+  }
 
   private void handleSituationExchange(ServiceDelivery serviceDelivery,
       SituationExchangeDeliveryStructure sxDelivery,
@@ -124,9 +300,9 @@ public class SiriService {
     EntryQualifierStructure situationNumber = ptSituation.getSituationNumber();
     String situationId = situationNumber.getValue();
 
-    if (endpointDetails.getAgencyId() != null) {
-      situation.setId(new AgencyAndId(endpointDetails.getAgencyId(),
-          situationId));
+    if (!endpointDetails.getDefaultAgencyIds().isEmpty()) {
+      String agencyId = endpointDetails.getDefaultAgencyIds().get(0);
+      situation.setId(new AgencyAndId(agencyId, situationId));
     } else {
       situation.setId(AgencyAndIdLibrary.convertFromString(situationId));
     }
@@ -266,7 +442,7 @@ public class SiriService {
           }
           avj.setCalls(stopIds);
         }
-        
+
         if (!CollectionsLibrary.isEmpty(vj.getVehicleJourneyRef())) {
           List<AgencyAndId> tripIds = new ArrayList<AgencyAndId>();
           for (VehicleJourneyRefStructure vjRef : vj.getVehicleJourneyRef()) {
@@ -281,7 +457,6 @@ public class SiriService {
 
       situationAffects.setVehicleJourneys(avjs);
     }
-
 
     ExtensionsStructure extension = affectsStructure.getExtensions();
     if (extension != null && extension.getAny() != null) {

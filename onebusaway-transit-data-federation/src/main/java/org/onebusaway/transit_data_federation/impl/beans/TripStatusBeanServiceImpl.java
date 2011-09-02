@@ -199,7 +199,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Override
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query) {
-    List<BlockLocation> locations = _blockStatusService.getBlocksForAgency(
+    List<BlockLocation> locations = _blockStatusService.getActiveBlocksForAgency(
         query.getAgencyId(), query.getTime());
     return getBlockLocationsAsTripDetails(locations, query.getInclusion(),
         query.getTime());
