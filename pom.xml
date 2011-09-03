@@ -439,11 +439,11 @@
             <exclude>**/data-sources.xml</exclude>
             <exclude>**/*.action</exclude>
             <exclude>**/*.ai</exclude>
-	    <exclude>**/*.tagx</exclude>
-	    <exclude>**/*.swf</exclude>
-	    <exclude>**/*.mp3</exclude>
+            <exclude>**/*.tagx</exclude>
+            <exclude>**/*.swf</exclude>
+            <exclude>**/*.mp3</exclude>
             <exclude>**/*.wav</exclude>
-            <exclude>onebusaway-transit-data-federation/src/test/resources/**</exclude>
+            <exclude>src/test/resources/**</exclude>
             <!-- JQuery Excludes -->
             <exclude>**/jquery*.js</exclude>
             <exclude>**/jquery*.css</exclude>
