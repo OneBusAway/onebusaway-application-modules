@@ -444,6 +444,7 @@
             <exclude>**/*.mp3</exclude>
             <exclude>**/*.wav</exclude>
             <exclude>src/test/resources/**</exclude>
+            <exclude>onebusaway-transit-data-federation/src/test/resources/**</exclude>
             <!-- JQuery Excludes -->
             <exclude>**/jquery*.js</exclude>
             <exclude>**/jquery*.css</exclude>
