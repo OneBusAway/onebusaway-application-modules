@@ -425,6 +425,51 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <version>1.10.b1</version>
+        <configuration>
+          <header>src/license/header.txt</header>
+          <excludes>
+            <exclude>src/site/**</exclude>
+            <exclude>LICENSE.txt</exclude>
+            <exclude>**/usage.txt</exclude>
+            <exclude>**/log4j.properties</exclude>
+            <exclude>**/data-sources.xml</exclude>
+            <exclude>**/*.action</exclude>
+            <exclude>**/*.ai</exclude>
+	    <exclude>**/*.tagx</exclude>
+	    <exclude>**/*.swf</exclude>
+	    <exclude>**/*.mp3</exclude>
+            <exclude>**/*.wav</exclude>
+            <exclude>onebusaway-transit-data-federation/src/test/resources/**</exclude>
+            <!-- JQuery Excludes -->
+            <exclude>**/jquery*.js</exclude>
+            <exclude>**/jquery*.css</exclude>
+            <!-- GWT Excludes -->
+            <exclude>**/*.gwt.rpc</exclude>
+            <exclude>**.nocache.js</exclude>
+            <exclude>**/hosted.html</exclude>
+          </excludes>
+          <strictCheck>true</strictCheck>
+          <aggregate>true</aggregate>
+          <headerSections>
+            <headerSection>
+              <key>COPYRIGHT_SECTION</key>
+              <defaultValue>Copyright (C) 2011 Brian Ferris &lt;bdferris@onebusaway.org&gt;</defaultValue>
+              <ensureMatch>Copyright \(C\) \d{4} .+</ensureMatch>
+            </headerSection>
+          </headerSections>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 

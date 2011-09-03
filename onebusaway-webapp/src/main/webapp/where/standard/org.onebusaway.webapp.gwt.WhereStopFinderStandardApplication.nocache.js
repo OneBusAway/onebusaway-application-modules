@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 function org_onebusaway_webapp_gwt_WhereStopFinderStandardApplication(){var Q='',wb='" for "gwt:onLoadErrorFn"',ub='" for "gwt:onPropertyErrorFn"',db='"><\/script>',fb='#',Vb='.cache.html',hb='/',Ob='05786C619C689A398ECA56880E40A801',Pb='263FEF32239694CB962D184821B2D57C',Qb='3BF0702C2C927AEEA6632E9D459E2DB3',Ub=':',ob='::',bc='<script defer="defer">org_onebusaway_webapp_gwt_WhereStopFinderStandardApplication.onInjectionDone(\'org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication\')<\/script>',cb='<script id="',rb='=',gb='?',Rb='A91F9BD28E9847BF7A2DD2D17ABA649D',Sb='B4A8B5E4E4615FC9499CEDB88E781581',tb='Bad handler "',ac='DOMContentLoaded',Tb='F48460969AB29620FBF347E9A5E7C105',eb='SCRIPT',bb='__gwt_marker_org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication',ib='base',$='baseUrl',U='begin',T='bootstrap',kb='clear.cache.gif',qb='content',Z='end',Ib='gecko',Jb='gecko1_8',V='gwt.codesvr=',W='gwt.hosted=',X='gwt.hybrid',vb='gwt:onLoadErrorFn',sb='gwt:onPropertyErrorFn',pb='gwt:property',_b='head',Mb='hosted.html?org_onebusaway_webapp_gwt_WhereStopFinderStandardApplication',$b='href',Wb='http://www.google.com/uds/css/gsearch.css',Hb='ie6',Gb='ie8',xb='iframe',jb='img',yb="javascript:''",Xb='link',Lb='loadExternalRefs',lb='meta',Ab='moduleRequested',Y='moduleStartup',Fb='msie',mb='name',Cb='opera',R='org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication',ab='org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication.nocache.js',nb='org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication::',zb='position:absolute;width:0;height:0;border:none',Yb='rel',Eb='safari',_='script',Nb='selectingPermutation',S='startup',Zb='stylesheet',Kb='unknown',Bb='user.agent',Db='webkit';var m=window,n=document,o=m.__gwtStatsEvent?function(a){return m.__gwtStatsEvent(a)}:null,p=m.__gwtStatsSessionId?m.__gwtStatsSessionId:null,q,r,s,t=Q,u={},v=[],w=[],x=[],y=0,z,A;o&&o({moduleName:R,sessionId:p,subSystem:S,evtGroup:T,millis:(new Date).getTime(),type:U});if(!m.__gwt_stylesLoaded){m.__gwt_stylesLoaded={}}if(!m.__gwt_scriptsLoaded){m.__gwt_scriptsLoaded={}}function B(){var b=false;try{var c=m.location.search;return (c.indexOf(V)!=-1||(c.indexOf(W)!=-1||m.external&&m.external.gwtOnLoad))&&c.indexOf(X)==-1}catch(a){}B=function(){return b};return b}
 function C(){if(q&&r){var b=n.getElementById(R);var c=b.contentWindow;if(B()){c.__gwt_getProperty=function(a){return I(a)}}org_onebusaway_webapp_gwt_WhereStopFinderStandardApplication=null;c.gwtOnLoad(z,R,t,y);o&&o({moduleName:R,sessionId:p,subSystem:S,evtGroup:Y,millis:(new Date).getTime(),type:Z})}}
 function D(){if(u[$]){t=u[$];return t}var e;var f=n.getElementsByTagName(_);for(var g=0;g<f.length;++g){if(f[g].src.indexOf(ab)!=-1){e=f[g]}}if(!e){var h=bb;var i;n.write(cb+h+db);i=n.getElementById(h);e=i&&i.previousSibling;while(e&&e.tagName!=eb){e=e.previousSibling}}function j(a){var b=a.lastIndexOf(fb);if(b==-1){b=a.length}var c=a.indexOf(gb);if(c==-1){c=a.length}var d=a.lastIndexOf(hb,Math.min(c,b));return d>=0?a.substring(0,d+1):Q}

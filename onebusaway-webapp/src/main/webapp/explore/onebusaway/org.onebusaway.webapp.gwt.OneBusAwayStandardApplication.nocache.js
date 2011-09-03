@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 function org_onebusaway_webapp_gwt_OneBusAwayStandardApplication(){var Q='',wb='" for "gwt:onLoadErrorFn"',ub='" for "gwt:onPropertyErrorFn"',db='"><\/script>',fb='#',Vb='.cache.html',hb='/',Ob='1997062A126540C71A973899CDD3EB2B',Pb='5BFCE56C74DE22938416CB4078888517',Qb='78C5BB0018475DEB6B03CDEB662C6496',Rb='89117C3AEEA16CFD28BCED9BACB879B6',Ub=':',ob='::',bc='<script defer="defer">org_onebusaway_webapp_gwt_OneBusAwayStandardApplication.onInjectionDone(\'org.onebusaway.webapp.gwt.OneBusAwayStandardApplication\')<\/script>',cb='<script id="',rb='=',gb='?',Sb='A6DE89D0D5714FF8A85B39E4E7A4C084',Tb='AD1BA8B4A24729E333B61D764F4B8B17',tb='Bad handler "',ac='DOMContentLoaded',eb='SCRIPT',bb='__gwt_marker_org.onebusaway.webapp.gwt.OneBusAwayStandardApplication',ib='base',$='baseUrl',U='begin',T='bootstrap',kb='clear.cache.gif',qb='content',Z='end',Ib='gecko',Jb='gecko1_8',V='gwt.codesvr=',W='gwt.hosted=',X='gwt.hybrid',vb='gwt:onLoadErrorFn',sb='gwt:onPropertyErrorFn',pb='gwt:property',_b='head',Mb='hosted.html?org_onebusaway_webapp_gwt_OneBusAwayStandardApplication',$b='href',Wb='http://www.google.com/uds/css/gsearch.css',Hb='ie6',Gb='ie8',xb='iframe',jb='img',yb="javascript:''",Xb='link',Lb='loadExternalRefs',lb='meta',Ab='moduleRequested',Y='moduleStartup',Fb='msie',mb='name',Cb='opera',R='org.onebusaway.webapp.gwt.OneBusAwayStandardApplication',ab='org.onebusaway.webapp.gwt.OneBusAwayStandardApplication.nocache.js',nb='org.onebusaway.webapp.gwt.OneBusAwayStandardApplication::',zb='position:absolute;width:0;height:0;border:none',Yb='rel',Eb='safari',_='script',Nb='selectingPermutation',S='startup',Zb='stylesheet',Kb='unknown',Bb='user.agent',Db='webkit';var m=window,n=document,o=m.__gwtStatsEvent?function(a){return m.__gwtStatsEvent(a)}:null,p=m.__gwtStatsSessionId?m.__gwtStatsSessionId:null,q,r,s,t=Q,u={},v=[],w=[],x=[],y=0,z,A;o&&o({moduleName:R,sessionId:p,subSystem:S,evtGroup:T,millis:(new Date).getTime(),type:U});if(!m.__gwt_stylesLoaded){m.__gwt_stylesLoaded={}}if(!m.__gwt_scriptsLoaded){m.__gwt_scriptsLoaded={}}function B(){var b=false;try{var c=m.location.search;return (c.indexOf(V)!=-1||(c.indexOf(W)!=-1||m.external&&m.external.gwtOnLoad))&&c.indexOf(X)==-1}catch(a){}B=function(){return b};return b}
 function C(){if(q&&r){var b=n.getElementById(R);var c=b.contentWindow;if(B()){c.__gwt_getProperty=function(a){return I(a)}}org_onebusaway_webapp_gwt_OneBusAwayStandardApplication=null;c.gwtOnLoad(z,R,t,y);o&&o({moduleName:R,sessionId:p,subSystem:S,evtGroup:Y,millis:(new Date).getTime(),type:Z})}}
 function D(){if(u[$]){t=u[$];return t}var e;var f=n.getElementsByTagName(_);for(var g=0;g<f.length;++g){if(f[g].src.indexOf(ab)!=-1){e=f[g]}}if(!e){var h=bb;var i;n.write(cb+h+db);i=n.getElementById(h);e=i&&i.previousSibling;while(e&&e.tagName!=eb){e=e.previousSibling}}function j(a){var b=a.lastIndexOf(fb);if(b==-1){b=a.length}var c=a.indexOf(gb);if(c==-1){c=a.length}var d=a.lastIndexOf(hb,Math.min(c,b));return d>=0?a.substring(0,d+1):Q}

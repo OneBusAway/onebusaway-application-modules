@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 function org_onebusaway_webapp_gwt_WhereStopFinderRefineViewApplication(){var L='',mb='" for "gwt:onLoadErrorFn"',kb='" for "gwt:onPropertyErrorFn"',X='"><\/script>',Z='#',Fb='.cache.html',_='/',Nb='<script defer="defer">org_onebusaway_webapp_gwt_WhereStopFinderRefineViewApplication.onInjectionDone(\'org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication\')<\/script>',W='<script id="',hb='=',$='?',jb='Bad handler "',Mb='DOMContentLoaded',Eb="GWT module 'org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication' needs to be (re)compiled, please run a compile or use the Compile/Browse button in hosted mode",Y='SCRIPT',V='__gwt_marker_org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication',ab='base',P='begin',O='bootstrap',cb='clear.cache.gif',gb='content',U='end',yb='gecko',zb='gecko1_8',Q='gwt.codesvr=',R='gwt.hosted=',S='gwt.hybrid',lb='gwt:onLoadErrorFn',ib='gwt:onPropertyErrorFn',fb='gwt:property',Lb='head',Cb='hosted.html?org_onebusaway_webapp_gwt_WhereStopFinderRefineViewApplication',Kb='href',Gb='http://www.google.com/uds/css/gsearch.css',xb='ie6',wb='ie8',nb='iframe',bb='img',ob="javascript:''",Hb='link',Bb='loadExternalRefs',db='meta',qb='moduleRequested',T='moduleStartup',vb='msie',eb='name',sb='opera',M='org.onebusaway.webapp.gwt.WhereStopFinderRefineViewApplication',pb='position:absolute;width:0;height:0;border:none',Ib='rel',ub='safari',Db='selectingPermutation',N='startup',Jb='stylesheet',Ab='unknown',rb='user.agent',tb='webkit';var k=window,l=document,m=k.__gwtStatsEvent?function(a){return k.__gwtStatsEvent(a)}:null,n,o,p,q=L,r={},s=[],t=[],u=[],v,w;m&&m({moduleName:M,subSystem:N,evtGroup:O,millis:(new Date).getTime(),type:P});if(!k.__gwt_stylesLoaded){k.__gwt_stylesLoaded={}}if(!k.__gwt_scriptsLoaded){k.__gwt_scriptsLoaded={}}function x(){var b=false;try{var c=k.location.search;return (c.indexOf(Q)!=-1||(c.indexOf(R)!=-1||k.external&&k.external.gwtOnLoad))&&c.indexOf(S)==-1}catch(a){}x=function(){return b};return b}
 function y(){if(n&&o){var b=l.getElementById(M);var c=b.contentWindow;if(x()){c.__gwt_getProperty=function(a){return E(a)}}org_onebusaway_webapp_gwt_WhereStopFinderRefineViewApplication=null;c.gwtOnLoad(v,M,q);m&&m({moduleName:M,subSystem:N,evtGroup:T,millis:(new Date).getTime(),type:U})}}
 function z(){var e,f=V,g;l.write(W+f+X);g=l.getElementById(f);e=g&&g.previousSibling;while(e&&e.tagName!=Y){e=e.previousSibling}function h(a){var b=a.lastIndexOf(Z);if(b==-1){b=a.length}var c=a.indexOf($);if(c==-1){c=a.length}var d=a.lastIndexOf(_,Math.min(c,b));return d>=0?a.substring(0,d+1):L}
