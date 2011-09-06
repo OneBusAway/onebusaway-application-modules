@@ -20,7 +20,6 @@ public class FederatedTransitDataBundle {
   }
 
   public FederatedTransitDataBundle() {
-
   }
 
   public void setPath(File path) {
@@ -29,6 +28,18 @@ public class FederatedTransitDataBundle {
 
   public File getPath() {
     return _path;
+  }
+
+  public File getNotInServiceDSCs() {
+	return new File(_path, "NotInServiceDSCs.obj");
+  }
+
+  public File getTripsForDSCIndex() {
+	return new File(_path, "TripsForDSCIndices.obj");
+  }
+
+  public File getDSCForTripIndex() {
+	return new File(_path, "DSCForTripIndices.obj");
   }
 
   public File getCalendarServiceDataPath() {
@@ -75,6 +86,14 @@ public class FederatedTransitDataBundle {
     return new File(_path, "ServiceAlerts.xml");
   }
 
+  public File getBaseLocationsPath() {
+    return new File(_path, "BaseLocations.txt");
+  }
+  
+  public File getTerminalLocationsPath() {
+    return new File(_path, "TerminalLocations.txt");
+  }
+  
   public File getCachePath() {
     return new File(_path, "cache");
   }

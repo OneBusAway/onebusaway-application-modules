@@ -1,0 +1,2 @@
+agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color,route_id
+MTA NYCT,M14AD,M14 A-C-D 14TH STREET,,3,,,,M14AD
