@@ -12,7 +12,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.serialization.GtfsEntitySchemaFactory;
 import org.onebusaway.gtfs.serialization.GtfsWriter;
-import org.onebusaway.transit_data_federation.bundle.tasks.GtfsReadingSupport;
+import org.onebusaway.transit_data_federation.bundle.tasks.load_gtfs.GtfsReadingSupport;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**

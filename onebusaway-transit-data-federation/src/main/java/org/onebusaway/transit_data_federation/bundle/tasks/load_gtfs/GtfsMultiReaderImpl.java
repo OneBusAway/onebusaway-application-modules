@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.bundle.tasks;
+package org.onebusaway.transit_data_federation.bundle.tasks.load_gtfs;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +16,7 @@ import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.gtfs.services.GenericMutableDao;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
+import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.bundle.tasks;
+package org.onebusaway.transit_data_federation.bundle.tasks.load_gtfs;
 
 import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs.impl.HibernateGtfsRelationalDaoImpl;

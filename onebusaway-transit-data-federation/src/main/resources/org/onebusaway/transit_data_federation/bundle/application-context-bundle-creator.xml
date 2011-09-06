@@ -55,7 +55,7 @@
         <property name="task" ref="loadGtfsTask" />
     </bean>
 
-    <bean id="loadGtfsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.LoadGtfsTask" />
+    <bean id="loadGtfsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.load_gtfs.LoadGtfsTask" />
 
     <!-- Route Collections -->
 
