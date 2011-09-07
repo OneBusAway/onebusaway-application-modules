@@ -40,4 +40,7 @@
         <property name="serviceDateRangeCache" ref="extendedCalendarServiceServiceDateRangeCache" />
     </bean>
 
+  	<bean id="shapePointsLibrary" class="org.onebusaway.transit_data_federation.impl.shapes.ShapePointsLibrary">
+    	<property name="localMinimumThreshold" value="125" />
+  	</bean>
 </beans>
