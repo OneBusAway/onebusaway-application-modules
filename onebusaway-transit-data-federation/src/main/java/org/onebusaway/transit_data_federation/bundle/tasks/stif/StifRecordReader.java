@@ -79,8 +79,15 @@ public class StifRecordReader {
 				// we need to move the stuff at the end of the buffer to the
 				// beginning and refill
 				ByteBuffer bbuffer = ByteBuffer.wrap(buffer);
-				bbuffer.put(buffer, start, BUFFER_SIZE - start);
-				bufferEnd = bufferEnd - start;
+				if (start < BUFFER_SIZE) {
+	        bbuffer.put(buffer, start, BUFFER_SIZE - start);
+	        bufferEnd = bufferEnd - start;
+				} else {
+				  //skip extra bytes (newlines) at the beginning of a block
+          bufferEnd = 0;
+				  inputStream.read(buffer, bufferEnd, start - BUFFER_SIZE);
+				}
+
 				int bytesRead = inputStream.read(buffer, bufferEnd, BUFFER_SIZE - bufferEnd);
 				if (bytesRead == -1) {
 					//eof
