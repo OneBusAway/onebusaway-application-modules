@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl;
+package org.onebusaway.transit_data_federation.impl.refresh;
 
 public final class RefreshableResources {
 

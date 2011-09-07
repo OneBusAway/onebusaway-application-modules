@@ -2,7 +2,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.refresh.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.springframework.beans.factory.annotation.Autowired;

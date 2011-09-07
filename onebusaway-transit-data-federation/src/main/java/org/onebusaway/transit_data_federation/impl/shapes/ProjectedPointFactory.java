@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl;
+package org.onebusaway.transit_data_federation.impl.shapes;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;

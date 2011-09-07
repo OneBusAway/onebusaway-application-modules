@@ -13,7 +13,7 @@ import org.onebusaway.container.ContainerLibrary;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.TaskDefinition;
-import org.onebusaway.transit_data_federation.impl.DirectedGraph;
+import org.onebusaway.transit_data_federation.impl.beans.DirectedGraph;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;

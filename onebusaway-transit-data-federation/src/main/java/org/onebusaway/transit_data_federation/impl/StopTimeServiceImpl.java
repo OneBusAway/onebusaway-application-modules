@@ -10,7 +10,7 @@ import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeArrivalTi
 import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeDepartureTimeIndexAdapter;
 import org.onebusaway.transit_data_federation.impl.blocks.FrequencyEndTimeIndexAdapter;
 import org.onebusaway.transit_data_federation.impl.blocks.FrequencyStartTimeIndexAdapter;
-import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
+import org.onebusaway.transit_data_federation.impl.blocks.GenericBinarySearch;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;

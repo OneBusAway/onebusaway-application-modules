@@ -20,7 +20,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data_federation.bundle.tasks.UniqueServiceImpl;
-import org.onebusaway.transit_data_federation.impl.ShapePointServiceImpl;
+import org.onebusaway.transit_data_federation.impl.shapes.ShapePointServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;

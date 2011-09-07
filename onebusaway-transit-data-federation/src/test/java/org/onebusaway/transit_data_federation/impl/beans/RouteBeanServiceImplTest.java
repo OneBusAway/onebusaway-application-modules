@@ -35,7 +35,6 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative.Builder;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
@@ -44,6 +43,7 @@ import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.library.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 
 public class RouteBeanServiceImplTest {

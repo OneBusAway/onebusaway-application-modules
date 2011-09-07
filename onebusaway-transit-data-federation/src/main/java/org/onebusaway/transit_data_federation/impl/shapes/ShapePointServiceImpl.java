@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl;
+package org.onebusaway.transit_data_federation.impl.shapes;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -6,7 +6,7 @@ import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
-import org.onebusaway.transit_data_federation.services.ShapePointService;
+import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

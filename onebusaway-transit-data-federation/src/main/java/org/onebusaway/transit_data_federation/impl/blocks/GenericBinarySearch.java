@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl.time;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.List;
 

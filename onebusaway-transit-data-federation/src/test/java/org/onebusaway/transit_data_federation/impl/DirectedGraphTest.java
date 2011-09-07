@@ -11,6 +11,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.collections.tuple.Tuples;
+import org.onebusaway.transit_data_federation.impl.beans.DirectedGraph;
 
 public class DirectedGraphTest {
 

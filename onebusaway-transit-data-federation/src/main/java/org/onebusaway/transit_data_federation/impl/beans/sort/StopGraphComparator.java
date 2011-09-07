@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.onebusaway.transit_data_federation.impl;
+package org.onebusaway.transit_data_federation.impl.beans.sort;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
+import org.onebusaway.transit_data_federation.impl.beans.DirectedGraph;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class StopGraphComparator implements Comparator<StopEntry> {

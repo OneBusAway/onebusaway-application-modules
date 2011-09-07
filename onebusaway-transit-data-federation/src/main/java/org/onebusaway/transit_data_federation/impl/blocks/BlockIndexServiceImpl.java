@@ -22,7 +22,7 @@ import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockLa
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockStopTimeIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockTripIndexData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.FrequencyBlockTripIndexData;
-import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.refresh.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;

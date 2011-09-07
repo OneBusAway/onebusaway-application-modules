@@ -1,4 +1,4 @@
-package org.onebusaway.transit_data_federation.impl;
+package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
 import java.util.Collections;
