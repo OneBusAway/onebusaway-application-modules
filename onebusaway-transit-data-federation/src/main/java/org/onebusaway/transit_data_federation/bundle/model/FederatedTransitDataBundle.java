@@ -97,4 +97,8 @@ public class FederatedTransitDataBundle {
   public File getCachePath() {
     return new File(_path, "cache");
   }
+
+  public File getTripRunDataPath() {
+	return new File(_path, "TripRunData.obj");
+  }
 }

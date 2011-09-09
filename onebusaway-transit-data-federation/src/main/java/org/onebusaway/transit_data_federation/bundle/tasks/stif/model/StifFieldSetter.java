@@ -33,7 +33,16 @@ public abstract class StifFieldSetter<T extends StifRecord> {
 	public int getInteger() {
 		return Integer.parseInt(getStringData());
 	}
-
+	
+  public int getIntegerSafe() {
+    String data = getStringData();
+    try {
+      return Integer.parseInt(data);
+    } catch (NumberFormatException e) {
+      return -1;
+    }
+  }
+  
 	public int getTimeFromCentiminutes() {
 		int centiminutes = getInteger();
 		return (centiminutes * 60) / 100;

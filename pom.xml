@@ -422,11 +422,6 @@
           <artifactId>selenium-maven-plugin</artifactId>
           <version>1.0.1</version>
         </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>gwt-maven-plugin</artifactId>
-          <version>2.1.0-1</version>
-        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -456,7 +451,7 @@
       </plugin>
       <!-- By default, we use the gwt-maven-plugin to detect any GWT modules and copy the .java source files as resources 
         into the compiled output -->
-      <plugin>
+      <!--plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <executions>
@@ -466,7 +461,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin-->
     </plugins>
     <extensions>
       <extension>

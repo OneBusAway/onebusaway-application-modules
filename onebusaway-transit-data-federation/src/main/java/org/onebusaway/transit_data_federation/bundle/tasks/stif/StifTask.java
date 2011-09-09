@@ -27,9 +27,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.model.RunData;
 import org.onebusaway.utility.ObjectSerializationLibrary;
+import org.opentripplanner.graph_builder.services.DisjointSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,9 +93,29 @@ public class StifTask implements Runnable {
     StifTripLoader loader = new StifTripLoader();
     loader.setGtfsDao(_gtfsMutableRelationalDao);
 
-    for (File path : _stifPaths)
+    for (File path : _stifPaths) {
       loadStif(path, loader);
+    }
+    Map<Trip, BlockAndRuns> BlockAndRunsByTrip = loader.getBlockAndRunsByTrip();
+    DisjointSet<String> tripGroups = loader.getTripGroups();
+    for (Map.Entry<Trip, BlockAndRuns> entry : BlockAndRunsByTrip.entrySet()) {
+      Trip trip = entry.getKey();
+      BlockAndRuns data = entry.getValue();
 
+      String newBlockId = data.getBlockId() + "_group_"
+          + tripGroups.find(data.getRun1());
+      trip.setBlockId(newBlockId);
+      _gtfsMutableRelationalDao.updateEntity(trip);
+    }
+
+    Map<AgencyAndId, RunData> runsForTrip = loader.getRunsForTrip();
+    try {
+      ObjectSerializationLibrary.writeObject(_bundle.getTripRunDataPath(),
+          runsForTrip);
+    } catch (IOException e) {
+          throw new IllegalStateException(e);
+    }
+        
     Map<String, List<AgencyAndId>> dscToTripMap = loader.getTripMapping();
     Map<AgencyAndId, String> tripToDscMap = new HashMap<AgencyAndId, String>();
     		

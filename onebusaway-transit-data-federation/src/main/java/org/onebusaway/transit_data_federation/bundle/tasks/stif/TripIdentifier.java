@@ -28,7 +28,7 @@ public class TripIdentifier {
 
   @Override
   public String toString() {
-    return "TripIdentifier(" + startTime + "," + routeName + "," + startStop
+    return "TripIdentifier(" + routeName + "," + startTime + "," + startStop
         + ")";
   }
 

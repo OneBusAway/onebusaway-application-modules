@@ -24,6 +24,10 @@ public class TripRecord implements StifRecord {
   private int destinationTime;
   private String originLocation;
   private String signCodeRoute;
+  private String reliefRun;
+  private String run;
+  private String previousRun;
+  private int reliefTime;
 
   public void setSignCode(String signCode) {
     this.signCode = signCode;
@@ -87,5 +91,43 @@ public class TripRecord implements StifRecord {
 
   public void setSignCodeRoute(String signCodeRoute) {
     this.signCodeRoute = signCodeRoute;
+  }
+
+  public String getReliefRun() {
+    if (reliefRun == null) {
+      return run;
+    }
+    return reliefRun;
+  }
+
+  public void setReliefRun(String run) {
+    this.reliefRun = run;
+  }
+
+  public String getRun() {
+    return run;
+  }
+
+  public void setRun(String run) {
+    this.run = run;
+  }
+
+  public String getPreviousRun() {
+    if (previousRun == null) {
+      return run;
+    }
+    return previousRun;
+  }
+
+  public void setPreviousRun(String previousRun) {
+    this.previousRun = previousRun;
+  }
+
+  public void setReliefTime(int reliefTime) {
+    this.reliefTime = reliefTime;
+  }
+  
+  public int getReliefTime() {
+    return reliefTime;
   }
 }

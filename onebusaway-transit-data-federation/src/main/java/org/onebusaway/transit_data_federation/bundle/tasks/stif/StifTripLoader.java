@@ -33,6 +33,8 @@ import org.onebusaway.transit_data_federation.bundle.tasks.stif.model.ServiceCod
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.model.StifRecord;
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.model.TimetableRecord;
 import org.onebusaway.transit_data_federation.bundle.tasks.stif.model.TripRecord;
+import org.onebusaway.transit_data_federation.model.RunData;
+import org.opentripplanner.graph_builder.services.DisjointSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,12 @@ public class StifTripLoader {
 
   private int _tripsWithoutMatchCount = 0;
 
+  private Map<AgencyAndId, RunData> runsForTrip = new HashMap<AgencyAndId, RunData>();
+
+  private Map<Trip, BlockAndRuns> blockAndRunsByTrip = new HashMap<Trip, BlockAndRuns>();
+
+  private DisjointSet<String> tripGroups = new DisjointSet<String>();
+  
   @Autowired
   public void setGtfsDao(GtfsMutableRelationalDao dao) {
     support.setGtfsDao(dao);
@@ -151,7 +159,7 @@ public class StifTripLoader {
             String serviceId = trip.getServiceId().getId();
             char dayCode1 = serviceId.charAt(serviceId.length() - 2);
             char dayCode2 = serviceId.charAt(serviceId.length() - 1);
-
+            
             // schedule runs on on days where a dayCode1 is followed by a
             // dayCode2;
             // contains all trips from dayCode1, and pre-midnight trips for
@@ -159,13 +167,28 @@ public class StifTripLoader {
 
             if (tripRecord.getOriginTime() < 0) {
               /* possible trip records are those containing the previous day */
-              if (StifTripLoaderSupport.scheduleIdForGtfsDayCode(dayCode2) == serviceCode) {
-                filtered.add(trip);
+              if (StifTripLoaderSupport.scheduleIdForGtfsDayCode(dayCode2) != serviceCode) {
+                trip = null;
               }
             } else {
-              if (StifTripLoaderSupport.scheduleIdForGtfsDayCode(dayCode1) == serviceCode) {
-                filtered.add(trip);
+              if (StifTripLoaderSupport.scheduleIdForGtfsDayCode(dayCode1) != serviceCode) {
+                trip = null;
               }
+            }
+            if (trip != null) {
+
+              String blockId = tripRecord.getBlockNumber();
+              String run0 = tripRecord.getPreviousRun();
+              String run1 = tripRecord.getRun();
+              String run2 = tripRecord.getReliefRun();
+              int reliefTime = tripRecord.getReliefTime();
+              BlockAndRuns blockAndRuns = new BlockAndRuns(blockId, run1, run2);
+              
+              filtered.add(trip);
+              blockAndRunsByTrip.put(trip, blockAndRuns);
+              runsForTrip.put(trip.getId(), new RunData(run1, run2, reliefTime));
+              tripGroups.union(run0, run1);
+              tripGroups.union(run1, run2);
             }
           }
 
@@ -182,5 +205,17 @@ public class StifTripLoader {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public Map<Trip, BlockAndRuns> getBlockAndRunsByTrip() {
+    return blockAndRunsByTrip;
+  }
+  
+  public DisjointSet<String> getTripGroups() {
+    return tripGroups;
+  }
+
+  public Map<AgencyAndId, RunData> getRunsForTrip() {
+    return runsForTrip;
   }
 }

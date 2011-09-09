@@ -28,6 +28,7 @@ import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.serialization.GtfsReader;
+import org.opentripplanner.graph_builder.services.DisjointSet;
 
 public class TestStifTripLoader {
   @Test
@@ -52,5 +53,15 @@ public class TestStifTripLoader {
     assertEquals(new AgencyAndId("MTA NYCT",
         "20100627DA_003000_M14AD_0001_M14AD_1"), trip.getId());
 
+    
+    Map<Trip, BlockAndRuns> blockAndRunsByTrip = loader.getBlockAndRunsByTrip();
+    BlockAndRuns blockAndRuns = blockAndRunsByTrip.get(trip);
+    
+    /* All runs in this STIF file must be part of the same group */
+    DisjointSet<String> groups = loader.getTripGroups();
+    int runGroup = groups.find(blockAndRuns.getRun1());
+    for (BlockAndRuns tripData : blockAndRunsByTrip.values()) {
+      assertEquals(runGroup, groups.find(tripData.getRun1()));      
+    }    
   }
 }

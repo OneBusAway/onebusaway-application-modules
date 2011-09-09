@@ -51,16 +51,28 @@ public class TripRecordFactory extends StifRecordFactory<TripRecord> {
         }
       }),
       new FieldDef(35 - 31, "pick code", null),
-      new FieldDef(41 - 35, "primary run number", null),
+      new FieldDef(41 - 35, "primary run number", new TripFieldSetter() {
+          public void setField(TripRecord record) {
+              record.setRun(getStringData());
+            }
+          }),
       new FieldDef(53 - 41, "path code", null),
       new FieldDef(59 - 53, "primary run route", new TripFieldSetter() {
         public void setField(TripRecord record) {
           record.setRoute(getStringData());
         }
       }),
-      new FieldDef(65 - 59, "relief run number", null),
+      new FieldDef(65 - 59, "relief run number", new TripFieldSetter() {
+          public void setField(TripRecord record) {
+              record.setReliefRun(getStringData());
+            }
+          }),
       new FieldDef(71 - 65, "relief run route", null),
-      new FieldDef(79 - 71, "relief time", null),
+      new FieldDef(79 - 71, "relief time", new TripFieldSetter() {
+        public void setField(TripRecord record) {
+          record.setReliefTime(getIntegerSafe());
+        }
+      }),
       new FieldDef(83 - 79, "relief location", null),
       new FieldDef(84 - 83, "bus type code", null),
       new FieldDef(88 - 84, "sign code", new TripFieldSetter() {
@@ -101,7 +113,11 @@ public class TripRecordFactory extends StifRecordFactory<TripRecord> {
               record.setSignCodeRoute(getStringData());
             }
           }), new FieldDef(162 - 161, "empty", null),
-      new FieldDef(168 - 162, "previous trip operator run number", null),
+      new FieldDef(168 - 162, "previous trip operator run number", new TripFieldSetter() {
+        public void setField(TripRecord record) {
+          record.setPreviousRun(getStringData());
+        }
+      }),
       new FieldDef(169 - 168, "empty", null),
       new FieldDef(175 - 169, "previous trip operator route", null),
       new FieldDef(176 - 175, "empty", null),
