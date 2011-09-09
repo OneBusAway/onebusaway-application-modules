@@ -59,10 +59,9 @@ public class StifTripLoaderSupport {
     switch (dayCode) {
       case 'A':
         return ServiceCode.SATURDAY;
-      case 'B':
+      case 'C':
         return ServiceCode.WEEKDAY_SCHOOL_CLOSED;
       case 'E':
-      case 'C':
         return ServiceCode.WEEKDAY_SCHOOL_OPEN;
       case 'D':
         return ServiceCode.SUNDAY;
