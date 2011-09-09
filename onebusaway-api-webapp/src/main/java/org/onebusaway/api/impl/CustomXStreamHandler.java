@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +55,7 @@ import org.onebusaway.api.model.transit.service_alerts.SituationAffectedApplicat
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetailsV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.EdgeV2Bean;
@@ -83,7 +85,6 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopCalendarDaysBean;
 import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -147,7 +148,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("call", SituationAffectedCallV2Bean.class);
     xstream.alias("application", SituationAffectedApplicationV2Bean.class);
     xstream.alias("consequence", SituationConsequenceV2Bean.class);
-    xstream.alias("conditionDetails", SituationConditionDetailsBean.class);
+    xstream.alias("conditionDetails", SituationConditionDetailsV2Bean.class);
 
     xstream.alias("VehicleLocation", VehicleLocation.class);
 

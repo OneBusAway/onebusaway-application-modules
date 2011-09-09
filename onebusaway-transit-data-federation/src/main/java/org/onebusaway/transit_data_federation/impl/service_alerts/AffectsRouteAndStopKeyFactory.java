@@ -23,27 +23,28 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 
-class AffectsStopCallKeyFactory implements
-    AffectsKeyFactory<TripAndStopCallRef> {
+class AffectsRouteAndStopKeyFactory implements
+    AffectsKeyFactory<RouteAndStopCallRef> {
 
-  public static final AffectsStopCallKeyFactory INSTANCE = new AffectsStopCallKeyFactory();
+  public static final AffectsRouteAndStopKeyFactory INSTANCE = new AffectsRouteAndStopKeyFactory();
 
   @Override
-  public Set<TripAndStopCallRef> getKeysForAffects(ServiceAlert serviceAlert) {
+  public Set<RouteAndStopCallRef> getKeysForAffects(ServiceAlert serviceAlert) {
 
-    Set<TripAndStopCallRef> refs = new HashSet<TripAndStopCallRef>();
+    Set<RouteAndStopCallRef> keys = new HashSet<RouteAndStopCallRef>();
 
     for (Affects affects : serviceAlert.getAffectsList()) {
-      if (affects.hasTripId()
+      if (affects.hasRouteId()
           && affects.hasStopId()
-          && !(affects.hasTripId() || affects.hasDirectionId() || affects.hasRouteId())) {
-        AgencyAndId tripId = ServiceAlertLibrary.agencyAndId(affects.getTripId());
+          && !(affects.hasAgencyId() || affects.hasDirectionId() || affects.hasTripId())) {
+        AgencyAndId routeId = ServiceAlertLibrary.agencyAndId(affects.getRouteId());
         AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getStopId());
-        TripAndStopCallRef ref = new TripAndStopCallRef(tripId, stopId);
-        refs.add(ref);
+
+        RouteAndStopCallRef ref = new RouteAndStopCallRef(routeId, stopId);
+        keys.add(ref);
       }
     }
 
-    return refs;
+    return keys;
   }
 }

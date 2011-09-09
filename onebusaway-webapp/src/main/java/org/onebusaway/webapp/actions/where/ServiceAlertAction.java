@@ -21,8 +21,9 @@ import java.util.regex.Pattern;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.services.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class ServiceAlertAction extends ActionSupport {
 
   private String _id;
 
-  private SituationBean _situation;
+  private ServiceAlertBean _situation;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -61,7 +62,7 @@ public class ServiceAlertAction extends ActionSupport {
     return _id;
   }
 
-  public SituationBean getSituation() {
+  public ServiceAlertBean getSituation() {
     return _situation;
   }
 
@@ -76,12 +77,14 @@ public class ServiceAlertAction extends ActionSupport {
     if (_situation == null)
       throw new NoSuchElementException();
 
-    NaturalLanguageStringBean desc = _situation.getDescription();
-
-    if (desc != null && desc.getValue() != null) {
-      String value = desc.getValue();
-      value = htmlify(value);
-      desc.setValue(value);
+    if (!CollectionsLibrary.isEmpty(_situation.getDescriptions())) {
+      for (NaturalLanguageStringBean desc : _situation.getDescriptions()) {
+        if (desc.getValue() != null) {
+          String value = desc.getValue();
+          value = htmlify(value);
+          desc.setValue(value);
+        }
+      }
     }
 
     _currentUserService.markServiceAlertAsRead(_situation.getId(),

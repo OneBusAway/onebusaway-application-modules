@@ -23,7 +23,7 @@ import org.apache.struts2.convention.annotation.Results;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class ServiceAlertsAction extends ActionSupport {
 
   private List<AgencyWithCoverageBean> _agencies;
 
-  private List<SituationBean> _situations;
+  private List<ServiceAlertBean> _situations;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -72,7 +72,7 @@ public class ServiceAlertsAction extends ActionSupport {
     return _agencies;
   }
 
-  public List<SituationBean> getSituations() {
+  public List<ServiceAlertBean> getSituations() {
     return _situations;
   }
 
@@ -90,7 +90,7 @@ public class ServiceAlertsAction extends ActionSupport {
     query.setAgencyId(_agencyId);
     query.setTime(_time.getTime());
 
-    ListBean<SituationBean> result = _transitDataService.getServiceAlerts(query);
+    ListBean<ServiceAlertBean> result = _transitDataService.getServiceAlerts(query);
 
     _situations = result.getList();
 

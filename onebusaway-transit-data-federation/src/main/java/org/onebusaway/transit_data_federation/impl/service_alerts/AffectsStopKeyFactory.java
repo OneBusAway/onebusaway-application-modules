@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,34 +16,31 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffects;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 
-public class AffectsStopKeyFactory implements AffectsKeyFactory<AgencyAndId> {
+class AffectsStopKeyFactory implements AffectsKeyFactory<AgencyAndId> {
 
   public static final AffectsStopKeyFactory INSTANCE = new AffectsStopKeyFactory();
 
   @Override
-  public Set<AgencyAndId> getKeysForAffects(Situation situation,
-      SituationAffects affects) {
-
-    List<SituationAffectedStop> stops = affects.getStops();
-
-    if (CollectionsLibrary.isEmpty(stops))
-      return Collections.emptySet();
+  public Set<AgencyAndId> getKeysForAffects(ServiceAlert serviceAlert) {
 
     Set<AgencyAndId> stopIds = new HashSet<AgencyAndId>();
 
-    for (SituationAffectedStop stop : stops)
-      stopIds.add(stop.getStopId());
+    for (Affects affects : serviceAlert.getAffectsList()) {
+      if (affects.hasStopId()
+          && !(affects.hasAgencyId() || affects.hasDirectionId()
+              || affects.hasRouteId() || affects.hasTripId())) {
+        AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getStopId());
+        stopIds.add(stopId);
+      }
+    }
+
     return stopIds;
   }
 }

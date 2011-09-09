@@ -23,10 +23,10 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 
-class AffectsStopCallKeyFactory implements
+class AffectsTripAndStopKeyFactory implements
     AffectsKeyFactory<TripAndStopCallRef> {
 
-  public static final AffectsStopCallKeyFactory INSTANCE = new AffectsStopCallKeyFactory();
+  public static final AffectsTripAndStopKeyFactory INSTANCE = new AffectsTripAndStopKeyFactory();
 
   @Override
   public Set<TripAndStopCallRef> getKeysForAffects(ServiceAlert serviceAlert) {
@@ -36,7 +36,7 @@ class AffectsStopCallKeyFactory implements
     for (Affects affects : serviceAlert.getAffectsList()) {
       if (affects.hasTripId()
           && affects.hasStopId()
-          && !(affects.hasTripId() || affects.hasDirectionId() || affects.hasRouteId())) {
+          && !(affects.hasAgencyId() || affects.hasDirectionId() || affects.hasRouteId())) {
         AgencyAndId tripId = ServiceAlertLibrary.agencyAndId(affects.getTripId());
         AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getStopId());
         TripAndStopCallRef ref = new TripAndStopCallRef(tripId, stopId);

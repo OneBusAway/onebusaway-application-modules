@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,27 +23,31 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 
-class AffectsStopCallKeyFactory implements
-    AffectsKeyFactory<TripAndStopCallRef> {
+class AffectsRouteDirectionAndStopCallKeyFactory implements
+    AffectsKeyFactory<RouteDirectionAndStopCallRef> {
 
-  public static final AffectsStopCallKeyFactory INSTANCE = new AffectsStopCallKeyFactory();
+  public static final AffectsRouteDirectionAndStopCallKeyFactory INSTANCE = new AffectsRouteDirectionAndStopCallKeyFactory();
 
   @Override
-  public Set<TripAndStopCallRef> getKeysForAffects(ServiceAlert serviceAlert) {
+  public Set<RouteDirectionAndStopCallRef> getKeysForAffects(
+      ServiceAlert serviceAlert) {
 
-    Set<TripAndStopCallRef> refs = new HashSet<TripAndStopCallRef>();
+    Set<RouteDirectionAndStopCallRef> keys = new HashSet<RouteDirectionAndStopCallRef>();
 
     for (Affects affects : serviceAlert.getAffectsList()) {
-      if (affects.hasTripId()
+      if (affects.hasRouteId() && affects.hasDirectionId()
           && affects.hasStopId()
-          && !(affects.hasTripId() || affects.hasDirectionId() || affects.hasRouteId())) {
-        AgencyAndId tripId = ServiceAlertLibrary.agencyAndId(affects.getTripId());
+          && !(affects.hasAgencyId() || affects.hasTripId())) {
+
+        AgencyAndId routeId = ServiceAlertLibrary.agencyAndId(affects.getRouteId());
+        String directionId = affects.getDirectionId();
         AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getStopId());
-        TripAndStopCallRef ref = new TripAndStopCallRef(tripId, stopId);
-        refs.add(ref);
+        RouteDirectionAndStopCallRef ref = new RouteDirectionAndStopCallRef(
+            routeId, directionId, stopId);
+        keys.add(ref);
       }
     }
 
-    return refs;
+    return keys;
   }
 }

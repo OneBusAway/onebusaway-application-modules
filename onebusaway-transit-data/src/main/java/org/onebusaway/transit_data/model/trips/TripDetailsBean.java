@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 
 public final class TripDetailsBean implements Serializable {
 
@@ -38,7 +38,7 @@ public final class TripDetailsBean implements Serializable {
 
   private TripStatusBean status;
 
-  private List<SituationBean> situations;
+  private List<ServiceAlertBean> situations;
 
   public String getTripId() {
     return tripId;
@@ -88,11 +88,11 @@ public final class TripDetailsBean implements Serializable {
     this.status = status;
   }
 
-  public List<SituationBean> getSituations() {
+  public List<ServiceAlertBean> getSituations() {
     return situations;
   }
 
-  public void setSituations(List<SituationBean> situations) {
+  public void setSituations(List<ServiceAlertBean> situations) {
     this.situations = situations;
   }
 }

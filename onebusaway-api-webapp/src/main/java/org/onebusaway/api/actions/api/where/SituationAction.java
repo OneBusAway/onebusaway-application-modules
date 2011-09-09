@@ -19,7 +19,7 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -54,7 +54,7 @@ public class SituationAction extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    SituationBean situation = _service.getServiceAlertForId(_id);
+    ServiceAlertBean situation = _service.getServiceAlertForId(_id);
 
     if (situation == null)
       return setResourceNotFoundResponse();

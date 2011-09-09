@@ -31,7 +31,7 @@ import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.NearbyStopsBeanService;
@@ -77,7 +77,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     for (AgencyAndId nearbyStopId : nearbyStopIds)
       nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId));
 
-    List<SituationBean> situations = _serviceAlertsBeanService.getSituationsForStopId(
+    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopId(
         query.getTime(), id);
 
     return new StopWithArrivalsAndDeparturesBean(stop, arrivalsAndDepartures,
@@ -91,7 +91,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     List<StopBean> stops = new ArrayList<StopBean>();
     List<ArrivalAndDepartureBean> allArrivalsAndDepartures = new ArrayList<ArrivalAndDepartureBean>();
     Set<AgencyAndId> allNearbyStopIds = new HashSet<AgencyAndId>();
-    Map<String, SituationBean> situationsById = new HashMap<String, SituationBean>();
+    Map<String, ServiceAlertBean> situationsById = new HashMap<String, ServiceAlertBean>();
     Counter<TimeZone> timeZones = new Counter<TimeZone>();
 
     for (AgencyAndId id : ids) {
@@ -110,9 +110,9 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       TimeZone timeZone = _agencyService.getTimeZoneForAgencyId(id.getAgencyId());
       timeZones.increment(timeZone);
 
-      List<SituationBean> situations = _serviceAlertsBeanService.getSituationsForStopId(
+      List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopId(
           query.getTime(), id);
-      for (SituationBean situation : situations)
+      for (ServiceAlertBean situation : situations)
         situationsById.put(situation.getId(), situation);
     }
 
@@ -132,7 +132,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     result.setStops(stops);
     result.setArrivalsAndDepartures(allArrivalsAndDepartures);
     result.setNearbyStops(nearbyStops);
-    result.setSituations(new ArrayList<SituationBean>(situationsById.values()));
+    result.setSituations(new ArrayList<ServiceAlertBean>(situationsById.values()));
     result.setTimeZone(timeZone.getID());
     return result;
   }

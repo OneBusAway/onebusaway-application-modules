@@ -15,42 +15,34 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
+import java.io.Serializable;
+
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-public class LineDirectionAndStopCallRef {
+class RouteAndStopCallRef implements Serializable {
 
-  private final AgencyAndId _lineId;
+  private static final long serialVersionUID = 1L;
 
-  private final String _direction;
+  private final AgencyAndId _routeId;
 
   private final AgencyAndId _stopId;
 
-  public LineDirectionAndStopCallRef(AgencyAndId lineId, String direction,
-      AgencyAndId stopId) {
-    if (lineId == null)
-      throw new IllegalStateException("lineId is null");
-    if (direction == null)
-      throw new IllegalStateException("direction is null");
-    if (stopId == null)
-      throw new IllegalStateException("stopId is null");
-    _lineId = lineId;
-    _direction = direction;
+  public RouteAndStopCallRef(AgencyAndId routeId, AgencyAndId stopId) {
+    _routeId = routeId;
     _stopId = stopId;
   }
 
   @Override
   public String toString() {
-    return "(lineId=" + _lineId + " direction=" + _direction + " stopId="
-        + _stopId + ")";
+    return "(routeId=" + _routeId + ", stopId=" + _stopId + ")";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + _direction.hashCode();
-    result = prime * result + _lineId.hashCode();
-    result = prime * result + _stopId.hashCode();
+    result = prime * result + ((_routeId == null) ? 0 : _routeId.hashCode());
+    result = prime * result + ((_stopId == null) ? 0 : _stopId.hashCode());
     return result;
   }
 
@@ -62,14 +54,17 @@ public class LineDirectionAndStopCallRef {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    LineDirectionAndStopCallRef other = (LineDirectionAndStopCallRef) obj;
-    if (!_direction.equals(other._direction))
+    RouteAndStopCallRef other = (RouteAndStopCallRef) obj;
+    if (_routeId == null) {
+      if (other._routeId != null)
+        return false;
+    } else if (!_routeId.equals(other._routeId))
       return false;
-    if (!_lineId.equals(other._lineId))
-      return false;
-    if (!_stopId.equals(other._stopId))
+    if (_stopId == null) {
+      if (other._stopId != null)
+        return false;
+    } else if (!_stopId.equals(other._stopId))
       return false;
     return true;
   }
-
 }

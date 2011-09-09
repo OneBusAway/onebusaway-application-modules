@@ -32,7 +32,7 @@ import org.onebusaway.api.model.transit.tripplanning.VertexV2Bean;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.tripplanning.EdgeNarrativeBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.ItineraryBean;
@@ -237,10 +237,10 @@ public class ItineraryV2BeanFactory {
     bean.setTripHeadsign(leg.getTripHeadsign());
     bean.setPath(leg.getPath());
 
-    List<SituationBean> situations = leg.getSituations();
+    List<ServiceAlertBean> situations = leg.getSituations();
     if (!CollectionsLibrary.isEmpty(situations)) {
       List<String> situationIds = new ArrayList<String>(situations.size());
-      for (SituationBean situation : situations) {
+      for (ServiceAlertBean situation : situations) {
         situationIds.add(situation.getId());
         _factory.addToReferences(situation);
       }

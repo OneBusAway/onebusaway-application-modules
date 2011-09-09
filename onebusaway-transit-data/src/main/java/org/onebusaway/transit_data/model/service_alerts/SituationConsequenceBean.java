@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +17,39 @@
 package org.onebusaway.transit_data.model.service_alerts;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class SituationConsequenceBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private TimeRangeBean period;
+  private EEffect effect;
 
-  private String condition;
+  private String detourPath;
 
-  private SituationConditionDetailsBean conditionDetails;
+  private List<String> detourStopIds;
 
-  public TimeRangeBean getPeriod() {
-    return period;
+  public EEffect getEffect() {
+    return effect;
   }
 
-  public void setPeriod(TimeRangeBean period) {
-    this.period = period;
+  public void setEffect(EEffect effect) {
+    this.effect = effect;
   }
 
-  public String getCondition() {
-    return condition;
+  public String getDetourPath() {
+    return detourPath;
   }
 
-  public void setCondition(String condition) {
-    this.condition = condition;
+  public void setDetourPath(String detourPath) {
+    this.detourPath = detourPath;
   }
 
-  public SituationConditionDetailsBean getConditionDetails() {
-    return conditionDetails;
+  public List<String> getDetourStopIds() {
+    return detourStopIds;
   }
 
-  public void setConditionDetails(SituationConditionDetailsBean conditionDetails) {
-    this.conditionDetails = conditionDetails;
+  public void setDetourStopIds(List<String> detourStopIds) {
+    this.detourStopIds = detourStopIds;
   }
-
 }

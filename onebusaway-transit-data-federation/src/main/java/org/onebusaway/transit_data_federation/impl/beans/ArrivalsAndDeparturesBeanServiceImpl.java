@@ -29,7 +29,7 @@ import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.model.TargetTime;
@@ -362,7 +362,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     if (blockLocation != null)
       vehicleId = blockLocation.getVehicleId();
 
-    List<SituationBean> situations = _serviceAlertsBeanService.getSituationsForStopCall(
+    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopCall(
         time, blockInstance, instance.getBlockStopTime(), vehicleId);
 
     if (!situations.isEmpty())

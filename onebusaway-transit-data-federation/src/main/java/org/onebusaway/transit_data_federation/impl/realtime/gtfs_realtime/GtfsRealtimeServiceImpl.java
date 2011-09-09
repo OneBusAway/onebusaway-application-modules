@@ -15,27 +15,21 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
-import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
-import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffects;
-import org.onebusaway.transit_data_federation.services.service_alerts.TimeRange;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -196,76 +190,52 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
   @Override
   public FeedMessage getAlerts() {
     FeedMessage.Builder feedMessage = createFeedWithDefaultHeader();
-    List<Situation> situations = _serviceAlertsService.getAllSituations();
-    for (Situation situation : situations) {
+    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getAllServiceAlerts();
+    for (ServiceAlert serviceAlert : serviceAlerts) {
 
       Alert.Builder alert = Alert.newBuilder();
 
-      if (situation.getSummary() != null) {
-        NaturalLanguageStringBean nls = situation.getSummary();
-        TranslatedString.Builder translated = getNLSAsTranslatedString(nls);
+      if (serviceAlert.hasSummary()) {
+        TranslatedString translated = convertTranslatedString(serviceAlert.getSummary());
         alert.setHeaderText(translated);
       }
 
-      if (situation.getDescription() != null) {
-        NaturalLanguageStringBean nls = situation.getDescription();
-        TranslatedString.Builder translated = getNLSAsTranslatedString(nls);
+      if (serviceAlert.hasDescription()) {
+        TranslatedString translated = convertTranslatedString(serviceAlert.getDescription());
         alert.setDescriptionText(translated);
       }
 
-      TimeRange range = situation.getPublicationWindow();
-      if (range != null) {
+      for (TimeRange range : serviceAlert.getActiveWindowList()) {
         com.google.transit.realtime.GtfsRealtime.TimeRange.Builder timeRange = com.google.transit.realtime.GtfsRealtime.TimeRange.newBuilder();
-        if (range.getFrom() != 0)
-          timeRange.setStart(range.getFrom());
-        if (range.getTo() != 0)
-          timeRange.setEnd(range.getTo());
+        if (range.hasStart())
+          timeRange.setStart(range.getStart());
+        if (range.hasEnd())
+          timeRange.setEnd(range.getEnd());
         alert.addActivePeriod(timeRange);
       }
 
       /**
        * What does this situation affect?
        */
-      SituationAffects affects = situation.getAffects();
-
-      for (SituationAffectedAgency agency : list(affects.getAgencies())) {
+      for (Affects affects : serviceAlert.getAffectsList()) {
         EntitySelector.Builder entitySelector = EntitySelector.newBuilder();
-        entitySelector.setAgencyId(agency.getAgencyId());
-        alert.addInformedEntity(entitySelector);
-      }
-
-      for (SituationAffectedVehicleJourney vehicleJourney : list(affects.getVehicleJourneys())) {
-        AgencyAndId lineId = vehicleJourney.getLineId();
-        for (AgencyAndId tripId : atLeastOneList(vehicleJourney.getTripIds(),
-            null)) {
-          for (SituationAffectedCall call : atLeastOneList(
-              vehicleJourney.getCalls(), null)) {
-            if (lineId == null && tripId == null && call == null)
-              continue;
-            EntitySelector.Builder entitySelector = EntitySelector.newBuilder();
-            if (lineId != null)
-              entitySelector.setRouteId(AgencyAndId.convertToString(lineId));
-            if (tripId != null) {
-              TripDescriptor.Builder tripDescriptor = TripDescriptor.newBuilder();
-              tripDescriptor.setTripId(AgencyAndId.convertToString(tripId));
-              entitySelector.setTrip(tripDescriptor);
-            }
-            if (call != null)
-              entitySelector.setStopId(AgencyAndId.convertToString(call.getStopId()));
-            alert.addInformedEntity(entitySelector);
-          }
+        if (affects.hasAgencyId())
+          entitySelector.setAgencyId(affects.getAgencyId());
+        if (affects.hasRouteId())
+          entitySelector.setRouteId(id(affects.getRouteId()));
+        if (affects.hasTripId()) {
+          TripDescriptor.Builder trip = TripDescriptor.newBuilder();
+          trip.setTripId(id(affects.getTripId()));
+          entitySelector.setTrip(trip);
         }
-      }
-
-      for (SituationAffectedStop stop : list(affects.getStops())) {
-        EntitySelector.Builder entitySelector = EntitySelector.newBuilder();
-        entitySelector.setStopId(AgencyAndId.convertToString(stop.getStopId()));
+        if (affects.hasStopId())
+          entitySelector.setStopId(id(affects.getStopId()));
         alert.addInformedEntity(entitySelector);
       }
 
       FeedEntity.Builder feedEntity = FeedEntity.newBuilder();
       feedEntity.setAlert(alert);
-      feedEntity.setId(AgencyAndId.convertToString(situation.getId()));
+      feedEntity.setId(id(serviceAlert.getId()));
       feedMessage.addEntity(feedEntity);
     }
     return feedMessage.build();
@@ -285,27 +255,22 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
     return feedMessage;
   }
 
-  private TranslatedString.Builder getNLSAsTranslatedString(
-      NaturalLanguageStringBean nls) {
+  private TranslatedString convertTranslatedString(
+      org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString ts) {
     TranslatedString.Builder translated = TranslatedString.newBuilder();
-    Translation.Builder translation = Translation.newBuilder();
-    if (nls.getLang() != null)
-      translation.setLanguage(nls.getLang());
-    translation.setText(nls.getValue());
-    translated.addTranslation(translation);
-    return translated;
+
+    for (org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation translation : ts.getTranslationList()) {
+      Translation.Builder builder = Translation.newBuilder();
+      builder.setText(translation.getText());
+      if (translation.hasLanguage())
+        builder.setLanguage(translation.getLanguage());
+      translated.addTranslation(builder);
+    }
+    return translated.build();
   }
 
-  private static final <T> List<T> list(List<T> values) {
-    if (values == null)
-      return Collections.emptyList();
-    return values;
-  }
-
-  @SuppressWarnings("unchecked")
-  private static final <T> List<T> atLeastOneList(List<T> values, T defaultValue) {
-    if (values == null || values.isEmpty())
-      return Arrays.asList(defaultValue);
-    return values;
+  private String id(Id id) {
+    return AgencyAndId.convertToString(new AgencyAndId(id.getAgencyId(),
+        id.getId()));
   }
 }

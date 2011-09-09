@@ -20,7 +20,7 @@ import java.util.List;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class ServiceAlertsForStopAction extends ActionSupport {
 
   private List<String> _stopIds;
 
-  private List<SituationBean> _situations;
+  private List<ServiceAlertBean> _situations;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -48,7 +48,7 @@ public class ServiceAlertsForStopAction extends ActionSupport {
     _stopIds = stopIds;
   }
 
-  public List<SituationBean> getSituations() {
+  public List<ServiceAlertBean> getSituations() {
     return _situations;
   }
 
@@ -60,7 +60,7 @@ public class ServiceAlertsForStopAction extends ActionSupport {
   public String execute() {
     SituationQueryBean query = new SituationQueryBean();
     query.setStopIds(_stopIds);
-    ListBean<SituationBean> list = _transitDataService.getServiceAlerts(query);
+    ListBean<ServiceAlertBean> list = _transitDataService.getServiceAlerts(query);
     _situations = list.getList();
     return SUCCESS;
   }

@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- *
+ * Copyright (C) 2011 Google, Inc.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,51 +17,68 @@
 package org.onebusaway.api.model.transit.service_alerts;
 
 import java.io.Serializable;
-import java.util.List;
 
 public final class SituationAffectsV2Bean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private List<SituationAffectedAgencyV2Bean> agencies;
+  private String agencyId;
 
-  private List<SituationAffectedStopV2Bean> stops;
+  private String routeId;
 
-  private List<SituationAffectedVehicleJourneyV2Bean> vehicleJourneys;
+  private String directionId;
 
-  private List<SituationAffectedApplicationV2Bean> applications;
+  private String tripId;
 
-  public List<SituationAffectedAgencyV2Bean> getAgencies() {
-    return agencies;
+  private String stopId;
+
+  private String applicationId;
+
+  public String getAgencyId() {
+    return agencyId;
   }
 
-  public void setAgencies(List<SituationAffectedAgencyV2Bean> agencies) {
-    this.agencies = agencies;
+  public void setAgencyId(String agencyId) {
+    this.agencyId = agencyId;
   }
 
-  public List<SituationAffectedStopV2Bean> getStops() {
-    return stops;
+  public String getRouteId() {
+    return routeId;
   }
 
-  public void setStops(List<SituationAffectedStopV2Bean> stops) {
-    this.stops = stops;
+  public void setRouteId(String routeId) {
+    this.routeId = routeId;
   }
 
-  public List<SituationAffectedVehicleJourneyV2Bean> getVehicleJourneys() {
-    return vehicleJourneys;
+  public String getDirectionId() {
+    return directionId;
   }
 
-  public void setVehicleJourneys(
-      List<SituationAffectedVehicleJourneyV2Bean> vehicleJourneys) {
-    this.vehicleJourneys = vehicleJourneys;
+  public void setDirectionId(String directionId) {
+    this.directionId = directionId;
   }
 
-  public List<SituationAffectedApplicationV2Bean> getApplications() {
-    return applications;
+  public String getTripId() {
+    return tripId;
   }
 
-  public void setApplications(
-      List<SituationAffectedApplicationV2Bean> applications) {
-    this.applications = applications;
+  public void setTripId(String tripId) {
+    this.tripId = tripId;
+  }
+
+  public String getStopId() {
+    return stopId;
+  }
+
+  public void setStopId(String stopId) {
+    this.stopId = stopId;
+  }
+
+  public String getApplicationId() {
+    return applicationId;
+  }
+
+  public void setApplicationId(String applicationId) {
+    this.applicationId = applicationId;
   }
 }

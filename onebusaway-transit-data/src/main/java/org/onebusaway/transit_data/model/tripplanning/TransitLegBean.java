@@ -21,7 +21,7 @@ import java.util.List;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 
 public class TransitLegBean implements Serializable {
@@ -67,7 +67,7 @@ public class TransitLegBean implements Serializable {
   private long predictedArrivalTime;
 
   private TimeIntervalBean predictedArrivalInterval;
-  private List<SituationBean> situations;
+  private List<ServiceAlertBean> situations;
 
   public TripBean getTrip() {
     return trip;
@@ -233,11 +233,11 @@ public class TransitLegBean implements Serializable {
     this.predictedArrivalInterval = predictedArrivalInterval;
   }
 
-  public List<SituationBean> getSituations() {
+  public List<ServiceAlertBean> getSituations() {
     return situations;
   }
 
-  public void setSituations(List<SituationBean> situations) {
+  public void setSituations(List<ServiceAlertBean> situations) {
     this.situations = situations;
   }
 }

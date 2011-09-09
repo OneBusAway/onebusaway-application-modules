@@ -14,14 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.api.model.transit.service_alerts;
+package org.onebusaway.transit_data.model.service_alerts;
 
 import java.io.Serializable;
 import java.util.List;
 
-import org.onebusaway.api.model.transit.HasId;
-
-public class SituationV2Bean implements HasId, Serializable {
+public class ServiceAlertBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -29,21 +27,21 @@ public class SituationV2Bean implements HasId, Serializable {
 
   private long creationTime;
 
-  private List<TimeRangeV2Bean> activeWindows;
+  private List<TimeRangeBean> activeWindows;
 
-  private List<TimeRangeV2Bean> publicationWindows;
+  private List<TimeRangeBean> publicationWindows;
 
   private String reason;
 
-  private NaturalLanguageStringV2Bean summary;
+  private List<NaturalLanguageStringBean> summaries;
 
-  private NaturalLanguageStringV2Bean description;
+  private List<NaturalLanguageStringBean> descriptions;
 
-  private List<SituationAffectsV2Bean> affects;
+  private List<SituationAffectsBean> allAffects;
 
-  private List<SituationConsequenceV2Bean> consequences;
+  private List<SituationConsequenceBean> consequences;
 
-  private String severity;
+  private ESeverity severity;
 
   public String getId() {
     return id;
@@ -61,19 +59,19 @@ public class SituationV2Bean implements HasId, Serializable {
     this.creationTime = creationTime;
   }
 
-  public List<TimeRangeV2Bean> getActiveWindows() {
+  public List<TimeRangeBean> getActiveWindows() {
     return activeWindows;
   }
 
-  public void setActiveWindows(List<TimeRangeV2Bean> activeWindows) {
+  public void setActiveWindows(List<TimeRangeBean> activeWindows) {
     this.activeWindows = activeWindows;
   }
 
-  public List<TimeRangeV2Bean> getPublicationWindows() {
+  public List<TimeRangeBean> getPublicationWindows() {
     return publicationWindows;
   }
 
-  public void setPublicationWindows(List<TimeRangeV2Bean> publicationWindows) {
+  public void setPublicationWindows(List<TimeRangeBean> publicationWindows) {
     this.publicationWindows = publicationWindows;
   }
 
@@ -85,43 +83,43 @@ public class SituationV2Bean implements HasId, Serializable {
     this.reason = reason;
   }
 
-  public NaturalLanguageStringV2Bean getSummary() {
-    return summary;
+  public List<NaturalLanguageStringBean> getSummaries() {
+    return summaries;
   }
 
-  public void setSummary(NaturalLanguageStringV2Bean summary) {
-    this.summary = summary;
+  public void setSummaries(List<NaturalLanguageStringBean> summaries) {
+    this.summaries = summaries;
   }
 
-  public NaturalLanguageStringV2Bean getDescription() {
-    return description;
+  public List<NaturalLanguageStringBean> getDescriptions() {
+    return descriptions;
   }
 
-  public void setDescription(NaturalLanguageStringV2Bean description) {
-    this.description = description;
+  public void setDescriptions(List<NaturalLanguageStringBean> descriptions) {
+    this.descriptions = descriptions;
   }
 
-  public List<SituationAffectsV2Bean> getAffects() {
-    return affects;
+  public List<SituationAffectsBean> getAllAffects() {
+    return allAffects;
   }
 
-  public void setAffects(List<SituationAffectsV2Bean> affects) {
-    this.affects = affects;
+  public void setAllAffects(List<SituationAffectsBean> allAffects) {
+    this.allAffects = allAffects;
   }
 
-  public List<SituationConsequenceV2Bean> getConsequences() {
+  public List<SituationConsequenceBean> getConsequences() {
     return consequences;
   }
 
-  public void setConsequences(List<SituationConsequenceV2Bean> consequences) {
+  public void setConsequences(List<SituationConsequenceBean> consequences) {
     this.consequences = consequences;
   }
 
-  public String getSeverity() {
+  public ESeverity getSeverity() {
     return severity;
   }
 
-  public void setSeverity(String severity) {
+  public void setSeverity(ESeverity severity) {
     this.severity = severity;
   }
 }

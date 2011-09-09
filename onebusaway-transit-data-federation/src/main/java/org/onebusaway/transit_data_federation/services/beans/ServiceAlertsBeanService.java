@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,35 +19,35 @@ package org.onebusaway.transit_data_federation.services.beans;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 public interface ServiceAlertsBeanService {
 
-  public SituationBean createServiceAlert(String agencyId,
-      SituationBean situation);
+  public ServiceAlertBean createServiceAlert(String agencyId,
+      ServiceAlertBean serviceAlert);
 
-  public void updateServiceAlert(SituationBean situation);
+  public void updateServiceAlert(ServiceAlertBean serviceAlert);
 
-  public void removeServiceAlert(AgencyAndId situationId);
+  public void removeServiceAlert(AgencyAndId serviceAlertId);
 
-  public SituationBean getServiceAlertForId(AgencyAndId situationId);
+  public ServiceAlertBean getServiceAlertForId(AgencyAndId serviceAlertId);
 
-  public List<SituationBean> getAllSituationsForAgencyId(String agencyId);
+  public List<ServiceAlertBean> getServiceAlertsForFederatedAgencyId(
+      String agencyId);
 
-  public void removeAllSituationsForAgencyId(String agencyId);
+  public void removeAllServiceAlertsForFederatedAgencyId(String agencyId);
 
-  public List<SituationBean> getSituationsForStopId(long time,
+  public List<ServiceAlertBean> getServiceAlertsForStopId(long time,
       AgencyAndId stopId);
 
-  public List<SituationBean> getSituationsForStopCall(long time,
+  public List<ServiceAlertBean> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId);
 
-  public List<SituationBean> getSituationsForVehicleJourney(long time,
+  public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
       BlockInstance blockInstance, BlockTripEntry blockTrip,
       AgencyAndId vehicleId);
-
 }

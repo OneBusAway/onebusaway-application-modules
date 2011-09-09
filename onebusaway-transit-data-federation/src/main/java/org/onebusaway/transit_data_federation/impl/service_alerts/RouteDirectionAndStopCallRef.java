@@ -15,35 +15,42 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
-import java.io.Serializable;
-
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-public class LineAndDirectionRef implements Serializable {
+class RouteDirectionAndStopCallRef {
 
-  private static final long serialVersionUID = 1L;
+  private final AgencyAndId _routeId;
 
-  private final AgencyAndId _lineId;
+  private final String _direction;
 
-  private final String _directionId;
+  private final AgencyAndId _stopId;
 
-  public LineAndDirectionRef(AgencyAndId lineId, String directionId) {
-    _lineId = lineId;
-    _directionId = directionId;
+  public RouteDirectionAndStopCallRef(AgencyAndId routeId, String direction,
+      AgencyAndId stopId) {
+    if (routeId == null)
+      throw new IllegalStateException("routeId is null");
+    if (direction == null)
+      throw new IllegalStateException("direction is null");
+    if (stopId == null)
+      throw new IllegalStateException("stopId is null");
+    _routeId = routeId;
+    _direction = direction;
+    _stopId = stopId;
   }
 
   @Override
   public String toString() {
-    return "(lineId=" + _lineId + ", directionId=" + _directionId + ")";
+    return "(routeId=" + _routeId + " direction=" + _direction + " stopId="
+        + _stopId + ")";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result
-        + ((_directionId == null) ? 0 : _directionId.hashCode());
-    result = prime * result + ((_lineId == null) ? 0 : _lineId.hashCode());
+    result = prime * result + _direction.hashCode();
+    result = prime * result + _routeId.hashCode();
+    result = prime * result + _stopId.hashCode();
     return result;
   }
 
@@ -55,16 +62,12 @@ public class LineAndDirectionRef implements Serializable {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    LineAndDirectionRef other = (LineAndDirectionRef) obj;
-    if (_directionId == null) {
-      if (other._directionId != null)
-        return false;
-    } else if (!_directionId.equals(other._directionId))
+    RouteDirectionAndStopCallRef other = (RouteDirectionAndStopCallRef) obj;
+    if (!_direction.equals(other._direction))
       return false;
-    if (_lineId == null) {
-      if (other._lineId != null)
-        return false;
-    } else if (!_lineId.equals(other._lineId))
+    if (!_routeId.equals(other._routeId))
+      return false;
+    if (!_stopId.equals(other._stopId))
       return false;
     return true;
   }

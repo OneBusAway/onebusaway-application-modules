@@ -70,7 +70,7 @@ import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
@@ -499,18 +499,18 @@ class TransitDataServiceImpl implements TransitDataService {
    ****/
 
   @Override
-  public SituationBean createServiceAlert(String agencyId,
-      SituationBean situation) {
+  public ServiceAlertBean createServiceAlert(String agencyId,
+      ServiceAlertBean situation) {
     return _serviceAlertsBeanService.createServiceAlert(agencyId, situation);
   }
 
   @Override
-  public void updateServiceAlert(SituationBean situation) {
+  public void updateServiceAlert(ServiceAlertBean situation) {
     _serviceAlertsBeanService.updateServiceAlert(situation);
   }
 
   @Override
-  public SituationBean getServiceAlertForId(String situationId) {
+  public ServiceAlertBean getServiceAlertForId(String situationId) {
     AgencyAndId id = AgencyAndIdLibrary.convertFromString(situationId);
     return _serviceAlertsBeanService.getServiceAlertForId(id);
   }
@@ -522,20 +522,20 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public ListBean<SituationBean> getAllServiceAlertsForAgencyId(String agencyId) {
-    List<SituationBean> situations = _serviceAlertsBeanService.getAllSituationsForAgencyId(agencyId);
-    return new ListBean<SituationBean>(situations, false);
+  public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(String agencyId) {
+    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(agencyId);
+    return new ListBean<ServiceAlertBean>(situations, false);
   }
 
   @Override
   public void removeAllServiceAlertsForAgencyId(String agencyId) {
-    _serviceAlertsBeanService.removeAllSituationsForAgencyId(agencyId);
+    _serviceAlertsBeanService.removeAllServiceAlertsForFederatedAgencyId(agencyId);
   }
 
   @Override
-  public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query) {
-    List<SituationBean> situations = _serviceAlertsBeanService.getAllSituationsForAgencyId(query.getAgencyId());
-    return new ListBean<SituationBean>(situations, false);
+  public ListBean<ServiceAlertBean> getServiceAlerts(SituationQueryBean query) {
+    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(query.getAgencyId());
+    return new ListBean<ServiceAlertBean>(situations, false);
   }
 
   @Override

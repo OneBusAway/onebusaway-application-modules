@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +18,16 @@ package org.onebusaway.presentation.impl.service_alerts;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectedApplicationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.users.client.model.UserBean;
 
@@ -34,7 +35,7 @@ public class SituationsPresentation {
 
   private static RecentSituationComparator _comparator = new RecentSituationComparator();
 
-  private List<SituationBean> _situations;
+  private List<ServiceAlertBean> _situations;
 
   private UserBean _user;
 
@@ -52,7 +53,7 @@ public class SituationsPresentation {
     return _apiKey;
   }
 
-  public void setSituations(List<SituationBean> situations) {
+  public void setSituations(List<ServiceAlertBean> situations) {
     _situations = determineApplicationSituations(situations);
   }
 
@@ -73,7 +74,7 @@ public class SituationsPresentation {
 
     int unreadServiceAlertCount = 0;
     Map<String, Long> readServiceAlerts = _user.getReadServiceAlerts();
-    for (SituationBean situation : _situations) {
+    for (ServiceAlertBean situation : _situations) {
 
       if (isSituationUnread(readServiceAlerts, situation))
         unreadServiceAlertCount++;
@@ -88,10 +89,10 @@ public class SituationsPresentation {
     return "unreadServiceAlertsNormalSeverity";
   }
 
-  public List<SituationBean> getUnreadSituations() {
-    List<SituationBean> situations = new ArrayList<SituationBean>();
+  public List<ServiceAlertBean> getUnreadSituations() {
+    List<ServiceAlertBean> situations = new ArrayList<ServiceAlertBean>();
     Map<String, Long> readServiceAlerts = _user.getReadServiceAlerts();
-    for (SituationBean situation : _situations) {
+    for (ServiceAlertBean situation : _situations) {
       if (isSituationUnread(readServiceAlerts, situation))
         situations.add(situation);
     }
@@ -99,10 +100,10 @@ public class SituationsPresentation {
     return situations;
   }
 
-  public List<SituationBean> getReadSituations() {
-    List<SituationBean> situations = new ArrayList<SituationBean>();
+  public List<ServiceAlertBean> getReadSituations() {
+    List<ServiceAlertBean> situations = new ArrayList<ServiceAlertBean>();
     Map<String, Long> readServiceAlerts = _user.getReadServiceAlerts();
-    for (SituationBean situation : _situations) {
+    for (ServiceAlertBean situation : _situations) {
       if (readServiceAlerts.containsKey(situation.getId()))
         situations.add(situation);
     }
@@ -110,11 +111,14 @@ public class SituationsPresentation {
     return situations;
   }
 
-  public String getTitle(SituationBean situation) {
-    if (isSet(situation.getSummary()))
-      return getValue(situation.getSummary());
-    if (isSet(situation.getDescription()))
-      return getValue(situation.getDescription());
+  public String getTitle(ServiceAlertBean situation) {
+    /**
+     * TODO: Better handling around language selection
+     */
+    if (!CollectionsLibrary.isEmpty(situation.getSummaries()))
+      return getValue(situation.getSummaries().get(0));
+    if (!CollectionsLibrary.isEmpty(situation.getDescriptions()))
+      return getValue(situation.getDescriptions().get(0));
     return null;
   }
 
@@ -133,7 +137,7 @@ public class SituationsPresentation {
   }
 
   private boolean isSituationUnread(Map<String, Long> readServiceAlerts,
-      SituationBean situation) {
+      ServiceAlertBean situation) {
 
     if (!isSituationInActivePublicationWindow(situation))
       return false;
@@ -156,20 +160,24 @@ public class SituationsPresentation {
     return false;
   }
 
-  private boolean isSituationInActivePublicationWindow(SituationBean situation) {
-    TimeRangeBean window = situation.getPublicationWindow();
-    return isTimeRangeActive(window, _time, true);
+  private boolean isSituationInActivePublicationWindow(ServiceAlertBean situation) {
+    if (CollectionsLibrary.isEmpty(situation.getPublicationWindows()))
+      return true;
+    for (TimeRangeBean window : situation.getPublicationWindows()) {
+      if (isTimeRangeActive(window, _time, true))
+        return true;
+    }
+    return false;
   }
 
-  private boolean isSituationActiveAtTime(SituationBean situation, long time) {
-    if (situation.getConsequences() == null)
+  private boolean isSituationActiveAtTime(ServiceAlertBean situation, long time) {
+    if (CollectionsLibrary.isEmpty(situation.getActiveWindows()))
       return true;
-    for (SituationConsequenceBean consequences : situation.getConsequences()) {
-      TimeRangeBean period = consequences.getPeriod();
-      if (isTimeRangeActive(period, time, false))
-        return false;
+    for (TimeRangeBean window : situation.getActiveWindows()) {
+      if (isTimeRangeActive(window, _time, true))
+        return true;
     }
-    return true;
+    return false;
   }
 
   private boolean isTimeRangeActive(TimeRangeBean window, long time,
@@ -205,7 +213,7 @@ public class SituationsPresentation {
     ESeverity maxSeverity = null;
 
     Map<String, Long> readServiceAlerts = _user.getReadServiceAlerts();
-    for (SituationBean situation : _situations) {
+    for (ServiceAlertBean situation : _situations) {
 
       if (isSituationUnread(readServiceAlerts, situation)) {
         ESeverity s = situation.getSeverity();
@@ -219,29 +227,26 @@ public class SituationsPresentation {
     return maxSeverity;
   }
 
-  private List<SituationBean> determineApplicationSituations(
-      List<SituationBean> situations) {
-    List<SituationBean> applicable = new ArrayList<SituationBean>();
-    for (SituationBean situation : situations) {
+  private List<ServiceAlertBean> determineApplicationSituations(
+      List<ServiceAlertBean> situations) {
+    List<ServiceAlertBean> applicable = new ArrayList<ServiceAlertBean>();
+    for (ServiceAlertBean situation : situations) {
       if (isSituationApplicable(situation))
         applicable.add(situation);
     }
     return applicable;
   }
 
-  private boolean isSituationApplicable(SituationBean situation) {
-    SituationAffectsBean affects = situation.getAffects();
-    if (affects == null)
-      return true;
-    List<SituationAffectedApplicationBean> applications = affects.getApplications();
-    if (CollectionsLibrary.isEmpty(applications))
+  private boolean isSituationApplicable(ServiceAlertBean situation) {
+    Set<String> applicationIds = new HashSet<String>();
+    for (SituationAffectsBean affects : situation.getAllAffects()) {
+      if (affects.getApplicationId() != null)
+        applicationIds.add(affects.getApplicationId());
+    }
+    if (CollectionsLibrary.isEmpty(applicationIds))
       return true;
     if (_apiKey == null)
       return false;
-    for (SituationAffectedApplicationBean application : applications) {
-      if (_apiKey.equals(application.getApiKey()))
-        return true;
-    }
-    return false;
+    return applicationIds.contains(_apiKey);
   }
 }

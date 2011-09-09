@@ -66,7 +66,7 @@ import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateQueryBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
@@ -427,26 +427,26 @@ public interface TransitDataService extends FederatedService {
    ****/
 
   @FederatedByAgencyIdMethod
-  public SituationBean createServiceAlert(String agencyId,
-      SituationBean situation);
+  public ServiceAlertBean createServiceAlert(String agencyId,
+      ServiceAlertBean situation);
 
   @FederatedByEntityIdMethod(propertyExpression = "id")
-  public void updateServiceAlert(SituationBean situation);
+  public void updateServiceAlert(ServiceAlertBean situation);
 
   @FederatedByEntityIdMethod
   public void removeServiceAlert(String situationId);
 
   @FederatedByEntityIdMethod
-  public SituationBean getServiceAlertForId(String situationId);
+  public ServiceAlertBean getServiceAlertForId(String situationId);
 
   @FederatedByAgencyIdMethod()
-  public ListBean<SituationBean> getAllServiceAlertsForAgencyId(String agencyId);
+  public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(String agencyId);
 
   @FederatedByAgencyIdMethod()
   public void removeAllServiceAlertsForAgencyId(String agencyId);
 
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
-  public ListBean<SituationBean> getServiceAlerts(SituationQueryBean query);
+  public ListBean<ServiceAlertBean> getServiceAlerts(SituationQueryBean query);
 
   /****
    * These methods are going to pile up. How do we handle this gracefully in the

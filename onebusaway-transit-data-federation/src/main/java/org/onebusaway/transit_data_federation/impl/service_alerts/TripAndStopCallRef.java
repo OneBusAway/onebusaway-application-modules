@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,29 @@ import java.io.Serializable;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-public class LineAndStopCallRef implements Serializable {
+class TripAndStopCallRef implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private final AgencyAndId _lineId;
+  private final AgencyAndId _tripId;
 
   private final AgencyAndId _stopId;
 
-  public LineAndStopCallRef(AgencyAndId lineId, AgencyAndId stopId) {
-    _lineId = lineId;
+  public TripAndStopCallRef(AgencyAndId tripId, AgencyAndId stopId) {
+    _tripId = tripId;
     _stopId = stopId;
   }
 
   @Override
   public String toString() {
-    return "(lineId=" + _lineId + ", stopId=" + _stopId + ")";
+    return "(tripId=" + _tripId + ", stopId=" + _stopId + ")";
   }
 
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((_lineId == null) ? 0 : _lineId.hashCode());
+    result = prime * result + ((_tripId == null) ? 0 : _tripId.hashCode());
     result = prime * result + ((_stopId == null) ? 0 : _stopId.hashCode());
     return result;
   }
@@ -54,11 +54,11 @@ public class LineAndStopCallRef implements Serializable {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    LineAndStopCallRef other = (LineAndStopCallRef) obj;
-    if (_lineId == null) {
-      if (other._lineId != null)
+    TripAndStopCallRef other = (TripAndStopCallRef) obj;
+    if (_tripId == null) {
+      if (other._tripId != null)
         return false;
-    } else if (!_lineId.equals(other._lineId))
+    } else if (!_tripId.equals(other._tripId))
       return false;
     if (_stopId == null) {
       if (other._stopId != null)

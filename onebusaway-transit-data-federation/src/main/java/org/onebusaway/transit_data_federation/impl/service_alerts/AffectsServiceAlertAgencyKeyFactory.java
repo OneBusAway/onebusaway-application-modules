@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +19,18 @@ package org.onebusaway.transit_data_federation.impl.service_alerts;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffects;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 
-public class AffectsSituationAgencyKeyFactory implements AffectsKeyFactory<String> {
+class AffectsServiceAlertAgencyKeyFactory implements AffectsKeyFactory<String> {
 
-  public static final AffectsSituationAgencyKeyFactory INSTANCE = new AffectsSituationAgencyKeyFactory();
+  public static final AffectsServiceAlertAgencyKeyFactory INSTANCE = new AffectsServiceAlertAgencyKeyFactory();
 
   @Override
-  public Set<String> getKeysForAffects(Situation situation,
-      SituationAffects affects) {
+  public Set<String> getKeysForAffects(ServiceAlert serviceAlert) {
 
     Set<String> v = new HashSet<String>();
-    if( situation != null)
-      v.add(situation.getId().getAgencyId());
+    if( serviceAlert != null)
+      v.add(serviceAlert.getId().getAgencyId());
     return v;
   }
 

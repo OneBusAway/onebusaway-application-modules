@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +16,14 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,28 +31,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.onebusaway.collections.ConcurrentCollectionsLibrary;
-import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
-import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedApplication;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffects;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationConditionDetails;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationConsequence;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationsContainer;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -57,30 +56,38 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.thoughtworks.xstream.XStream;
-
 @Component
-public class ServiceAlertsServiceImpl implements ServiceAlertsService {
+class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsServiceImpl.class);
 
-  private ConcurrentMap<AgencyAndId, Situation> _situations = new ConcurrentHashMap<AgencyAndId, Situation>();
+  private ConcurrentMap<AgencyAndId, ServiceAlert> _serviceAlerts = new ConcurrentHashMap<AgencyAndId, ServiceAlert>();
 
-  private ConcurrentMap<String, Set<AgencyAndId>> _situationIdsBySituationAgencyId = new ConcurrentHashMap<String, Set<AgencyAndId>>();
+  /**
+   * This map groups service alert ids by the agency id in their
+   * {@link ServiceAlert#getId()} id.
+   */
+  private ConcurrentMap<String, Set<AgencyAndId>> _serviceAlertIdsByServiceAlertAgencyId = new ConcurrentHashMap<String, Set<AgencyAndId>>();
 
-  private ConcurrentMap<String, Set<AgencyAndId>> _situationIdsByAgencyId = new ConcurrentHashMap<String, Set<AgencyAndId>>();
+  /**
+   * This map groups service alert ids by any agency id mentioned in
+   * {@link Affects#getAgencyId()}.
+   */
+  private ConcurrentMap<String, Set<AgencyAndId>> _serviceAlertIdsByAgencyId = new ConcurrentHashMap<String, Set<AgencyAndId>>();
 
-  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _situationIdsByStopId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
+  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _serviceAlertIdsByStopId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
 
-  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _situationIdsByLineId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
+  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _serviceAlertIdsByRouteId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
 
-  private ConcurrentMap<LineAndDirectionRef, Set<AgencyAndId>> _situationIdsByLineAndDirectionId = new ConcurrentHashMap<LineAndDirectionRef, Set<AgencyAndId>>();
+  private ConcurrentMap<RouteAndDirectionRef, Set<AgencyAndId>> _serviceAlertIdsByRouteAndDirectionId = new ConcurrentHashMap<RouteAndDirectionRef, Set<AgencyAndId>>();
 
-  private ConcurrentMap<LineAndStopCallRef, Set<AgencyAndId>> _situationIdsByLineAndStopCall = new ConcurrentHashMap<LineAndStopCallRef, Set<AgencyAndId>>();
+  private ConcurrentMap<RouteAndStopCallRef, Set<AgencyAndId>> _serviceAlertIdsByRouteAndStop = new ConcurrentHashMap<RouteAndStopCallRef, Set<AgencyAndId>>();
 
-  private ConcurrentMap<LineDirectionAndStopCallRef, Set<AgencyAndId>> _situationIdsByLineDirectionAndStopCall = new ConcurrentHashMap<LineDirectionAndStopCallRef, Set<AgencyAndId>>();
+  private ConcurrentMap<RouteDirectionAndStopCallRef, Set<AgencyAndId>> _serviceAlertIdsByRouteDirectionAndStopCall = new ConcurrentHashMap<RouteDirectionAndStopCallRef, Set<AgencyAndId>>();
 
-  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _situationIdsByTripId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
+  private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _serviceAlertIdsByTripId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
+
+  private ConcurrentMap<TripAndStopCallRef, Set<AgencyAndId>> _serviceAlertIdsByTripAndStopId = new ConcurrentHashMap<TripAndStopCallRef, Set<AgencyAndId>>();
 
   private FederatedTransitDataBundle _bundle;
 
@@ -110,55 +117,53 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
    ****/
 
   @Override
-  public Situation createServiceAlert(String agencyId, Situation situation) {
+  public ServiceAlert createServiceAlert(String agencyId,
+      ServiceAlert.Builder builder) {
 
-    AgencyAndId id = new AgencyAndId(agencyId,
-        Long.toString(System.currentTimeMillis()));
-    situation.setId(id);
+    UUID uuid = UUID.randomUUID();
+    Id id = ServiceAlertLibrary.id(agencyId, uuid.toString());
+    builder.setId(id);
 
-    if (situation.getCreationTime() == 0)
-      situation.setCreationTime(System.currentTimeMillis());
+    builder.setCreationTime(System.currentTimeMillis());
+    builder.setModifiedTime(System.currentTimeMillis());
 
-    updateReferences(situation);
+    ServiceAlert serviceAlert = builder.build();
+
+    updateReferences(serviceAlert);
     saveServiceAlerts();
 
-    return situation;
+    return serviceAlert;
   }
 
   @Override
-  public void updateServiceAlert(Situation situation) {
-    updateServiceAlerts(Arrays.asList(situation));
+  public void updateServiceAlert(ServiceAlert serviceAlert) {
+    updateServiceAlerts(Arrays.asList(serviceAlert));
   }
 
   @Override
-  public void updateServiceAlerts(List<Situation> situations) {
-    for (Situation situation : situations) {
-      AgencyAndId id = situation.getId();
-      Situation existingSituation = _situations.put(id, situation);
-
-      if (existingSituation != null) {
-        situation.setCreationTime(existingSituation.getCreationTime());
-      }
-
-      updateReferences(existingSituation, situation);
+  public void updateServiceAlerts(List<ServiceAlert> serviceAlerts) {
+    for (ServiceAlert serviceAlert : serviceAlerts) {
+      AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
+      ServiceAlert existingServiceAlert = _serviceAlerts.put(id, serviceAlert);
+      updateReferences(existingServiceAlert, serviceAlert);
     }
     saveServiceAlerts();
   }
 
   @Override
-  public void removeServiceAlert(AgencyAndId situationId) {
-    removeServiceAlerts(Arrays.asList(situationId));
+  public void removeServiceAlert(AgencyAndId serviceAlertId) {
+    removeServiceAlerts(Arrays.asList(serviceAlertId));
   }
 
   @Override
-  public void removeServiceAlerts(List<AgencyAndId> situationIds) {
+  public void removeServiceAlerts(List<AgencyAndId> serviceAlertIds) {
 
-    for (AgencyAndId situationId : situationIds) {
+    for (AgencyAndId serviceAlertId : serviceAlertIds) {
 
-      Situation existingSituation = _situations.remove(situationId);
+      ServiceAlert existingServiceAlert = _serviceAlerts.remove(serviceAlertId);
 
-      if (existingSituation != null) {
-        updateReferences(existingSituation, null);
+      if (existingServiceAlert != null) {
+        updateReferences(existingServiceAlert, null);
       }
     }
 
@@ -166,203 +171,222 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   @Override
-  public Situation getServiceAlertForId(AgencyAndId situationId) {
-    return _situations.get(situationId);
+  public ServiceAlert getServiceAlertForId(AgencyAndId serviceAlertId) {
+    return _serviceAlerts.get(serviceAlertId);
   }
 
   @Override
-  public List<Situation> getAllSituations() {
-    return new ArrayList<Situation>(_situations.values());
+  public List<ServiceAlert> getAllServiceAlerts() {
+    return new ArrayList<ServiceAlert>(_serviceAlerts.values());
   }
 
   @Override
-  public List<Situation> getAllSituationsForAgencyId(String agencyId) {
-    Set<AgencyAndId> situationIds = _situationIdsBySituationAgencyId.get(agencyId);
-    return getSituationIdsAsObjects(situationIds);
+  public List<ServiceAlert> getServiceAlertsForFederatedAgencyId(String agencyId) {
+    Set<AgencyAndId> serviceAlertIds = _serviceAlertIdsByServiceAlertAgencyId.get(agencyId);
+    return getServiceAlertIdsAsObjects(serviceAlertIds);
   }
 
   @Override
-  public void removeAllSituationsForAgencyId(String agencyId) {
-    Set<AgencyAndId> ids = _situationIdsBySituationAgencyId.get(agencyId);
+  public void removeAllServiceAlertsForFederatedAgencyId(String agencyId) {
+    Set<AgencyAndId> ids = _serviceAlertIdsByServiceAlertAgencyId.get(agencyId);
     if (ids != null)
       removeServiceAlerts(new ArrayList<AgencyAndId>(ids));
   }
 
   @Override
-  public List<Situation> getSituationsForStopId(long time, AgencyAndId stopId) {
-
-    Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
-    getSituationIdsForKey(_situationIdsByAgencyId, stopId.getAgencyId(),
-        situationIds);
-    getSituationIdsForKey(_situationIdsByStopId, stopId, situationIds);
-    return getSituationIdsAsObjects(situationIds);
+  public List<ServiceAlert> getServiceAlertsForAgencyId(long time,
+      String agencyId) {
+    Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
+    getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, agencyId,
+        serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds);
   }
 
   @Override
-  public List<Situation> getSituationsForStopCall(long time,
+  public List<ServiceAlert> getServiceAlertsForStopId(long time,
+      AgencyAndId stopId) {
+
+    Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
+    getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, stopId.getAgencyId(),
+        serviceAlertIds);
+    getServiceAlertIdsForKey(_serviceAlertIdsByStopId, stopId, serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds);
+  }
+
+  @Override
+  public List<ServiceAlert> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId) {
 
     BlockTripEntry blockTrip = blockStopTime.getTrip();
     TripEntry trip = blockTrip.getTrip();
+    AgencyAndId tripId = trip.getId();
     AgencyAndId lineId = trip.getRouteCollectionId();
     String directionId = trip.getDirectionId();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
     StopEntry stop = stopTime.getStop();
     AgencyAndId stopId = stop.getId();
 
-    LineAndStopCallRef lineAndStopCallRef = new LineAndStopCallRef(lineId,
-        stopId);
-
-    Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
+    Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
     /*
      * TODO: Temporarily disable
      */
     /*
-     * getSituationIdsForKey(_situationIdsByAgencyId, lineId.getAgencyId(),
-     * situationIds);
+     * getServiceAlertIdsForKey(_serviceAlertsIdsByAgencyId,
+     * lineId.getAgencyId(), serviceAlertIds);
      */
-    getSituationIdsForKey(_situationIdsByLineId, lineId, situationIds);
-    getSituationIdsForKey(_situationIdsByLineAndStopCall, lineAndStopCallRef,
-        situationIds);
+    getServiceAlertIdsForKey(_serviceAlertIdsByRouteId, lineId, serviceAlertIds);
+    RouteAndStopCallRef routeAndStopCallRef = new RouteAndStopCallRef(lineId,
+        stopId);
+    getServiceAlertIdsForKey(_serviceAlertIdsByRouteAndStop,
+        routeAndStopCallRef, serviceAlertIds);
 
     /**
      * Remember that direction is optional
      */
     if (directionId != null) {
-      LineAndDirectionRef lineAndDirectionRef = new LineAndDirectionRef(lineId,
-          directionId);
-      LineDirectionAndStopCallRef lineDirectionAndStopCallRef = new LineDirectionAndStopCallRef(
+      RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(
+          lineId, directionId);
+      RouteDirectionAndStopCallRef lineDirectionAndStopCallRef = new RouteDirectionAndStopCallRef(
           lineId, directionId, stopId);
 
-      getSituationIdsForKey(_situationIdsByLineAndDirectionId,
-          lineAndDirectionRef, situationIds);
-      getSituationIdsForKey(_situationIdsByLineDirectionAndStopCall,
-          lineDirectionAndStopCallRef, situationIds);
+      getServiceAlertIdsForKey(_serviceAlertIdsByRouteAndDirectionId,
+          lineAndDirectionRef, serviceAlertIds);
+      getServiceAlertIdsForKey(_serviceAlertIdsByRouteDirectionAndStopCall,
+          lineDirectionAndStopCallRef, serviceAlertIds);
     }
 
-    getSituationIdsForKey(_situationIdsByTripId, trip.getId(), situationIds);
+    getServiceAlertIdsForKey(_serviceAlertIdsByTripId, trip.getId(),
+        serviceAlertIds);
+    TripAndStopCallRef tripAndStopCallRef = new TripAndStopCallRef(tripId,
+        stopId);
+    getServiceAlertIdsForKey(_serviceAlertIdsByTripAndStopId,
+        tripAndStopCallRef, serviceAlertIds);
 
-    return getSituationIdsAsObjects(situationIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds);
   }
 
   @Override
-  public List<Situation> getSituationsForVehicleJourney(long time,
+  public List<ServiceAlert> getServiceAlertsForVehicleJourney(long time,
       BlockInstance blockInstance, BlockTripEntry blockTrip,
       AgencyAndId vehicleId) {
 
     TripEntry trip = blockTrip.getTrip();
     AgencyAndId lineId = trip.getRouteCollectionId();
-    LineAndDirectionRef lineAndDirectionRef = new LineAndDirectionRef(lineId,
+    RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(lineId,
         trip.getDirectionId());
 
-    Set<AgencyAndId> situationIds = new HashSet<AgencyAndId>();
-    getSituationIdsForKey(_situationIdsByAgencyId, lineId.getAgencyId(),
-        situationIds);
-    getSituationIdsForKey(_situationIdsByLineId, lineId, situationIds);
-    getSituationIdsForKey(_situationIdsByLineAndDirectionId,
-        lineAndDirectionRef, situationIds);
-    getSituationIdsForKey(_situationIdsByTripId, trip.getId(), situationIds);
-    return getSituationIdsAsObjects(situationIds);
+    Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
+    getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, lineId.getAgencyId(),
+        serviceAlertIds);
+    getServiceAlertIdsForKey(_serviceAlertIdsByRouteId, lineId, serviceAlertIds);
+    getServiceAlertIdsForKey(_serviceAlertIdsByRouteAndDirectionId,
+        lineAndDirectionRef, serviceAlertIds);
+    getServiceAlertIdsForKey(_serviceAlertIdsByTripId, trip.getId(),
+        serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds);
   }
 
   /****
    * Private Methods
    ****/
 
-  private void updateReferences(Situation situation) {
-
-    AgencyAndId id = situation.getId();
-    Situation existingSituation = _situations.put(id, situation);
-
-    updateReferences(existingSituation, situation);
+  private synchronized void updateReferences(ServiceAlert serviceAlert) {
+    AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
+    ServiceAlert existingServiceAlert = _serviceAlerts.put(id, serviceAlert);
+    updateReferences(existingServiceAlert, serviceAlert);
   }
 
-  private void updateReferences(Situation existingSituation, Situation situation) {
+  private void updateReferences(ServiceAlert existingServiceAlert,
+      ServiceAlert serviceAlert) {
 
-    updateReferences(existingSituation, situation,
-        _situationIdsBySituationAgencyId,
-        AffectsSituationAgencyKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByServiceAlertAgencyId,
+        AffectsServiceAlertAgencyKeyFactory.INSTANCE);
 
-    updateReferences(existingSituation, situation, _situationIdsByAgencyId,
-        AffectsAgencyKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByAgencyId, AffectsAgencyKeyFactory.INSTANCE);
 
-    updateReferences(existingSituation, situation, _situationIdsByStopId,
-        AffectsStopKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByStopId, AffectsStopKeyFactory.INSTANCE);
 
-    updateReferences(existingSituation, situation, _situationIdsByLineId,
-        AffectsLineKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByRouteId, AffectsRouteKeyFactory.INSTANCE);
 
-    updateReferences(existingSituation, situation,
-        _situationIdsByLineAndDirectionId,
-        AffectsLineAndDirectionKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByRouteAndDirectionId,
+        AffectsRouteAndDirectionKeyFactory.INSTANCE);
 
-    updateReferences(existingSituation, situation,
-        _situationIdsByLineAndStopCall,
-        AffectsLineAndStopCallKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByRouteAndStop, AffectsRouteAndStopKeyFactory.INSTANCE);
 
-    updateReferences(existingSituation, situation,
-        _situationIdsByLineDirectionAndStopCall,
-        AffectsLineDirectionAndStopCallKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByRouteDirectionAndStopCall,
+        AffectsRouteDirectionAndStopCallKeyFactory.INSTANCE);
 
-    updateReferences(existingSituation, situation, _situationIdsByTripId,
-        AffectsTripKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByTripId, AffectsTripKeyFactory.INSTANCE);
+    updateReferences(existingServiceAlert, serviceAlert,
+        _serviceAlertIdsByTripAndStopId, AffectsTripAndStopKeyFactory.INSTANCE);
   }
 
-  private <T> void updateReferences(Situation existingSituation,
-      Situation situation, ConcurrentMap<T, Set<AgencyAndId>> map,
+  private <T> void updateReferences(ServiceAlert existingServiceAlert,
+      ServiceAlert serviceAlert, ConcurrentMap<T, Set<AgencyAndId>> map,
       AffectsKeyFactory<T> affectsKeyFactory) {
 
     Set<T> existingEffects = Collections.emptySet();
-    if (existingSituation != null) {
-      SituationAffects affects = existingSituation.getAffects();
-      if (affects == null)
-        affects = new SituationAffects();
-      existingEffects = affectsKeyFactory.getKeysForAffects(situation, affects);
+    if (existingServiceAlert != null) {
+      existingEffects = affectsKeyFactory.getKeysForAffects(existingServiceAlert);
     }
 
     Set<T> newEffects = Collections.emptySet();
-    if (situation != null) {
-      SituationAffects affects = situation.getAffects();
-      if (affects == null)
-        affects = new SituationAffects();
-      newEffects = affectsKeyFactory.getKeysForAffects(situation, affects);
+    if (serviceAlert != null) {
+      newEffects = affectsKeyFactory.getKeysForAffects(serviceAlert);
     }
 
     for (T existingEffect : existingEffects) {
       if (newEffects.contains(existingEffect))
         continue;
-      ConcurrentCollectionsLibrary.removeFromMapValueSet(map, existingEffect,
-          existingSituation.getId());
+      AgencyAndId id = ServiceAlertLibrary.agencyAndId(existingServiceAlert.getId());
+      Set<AgencyAndId> ids = map.get(existingEffect);
+      ids.remove(id);
+      if (ids.isEmpty())
+        map.remove(existingEffect);
     }
 
     for (T newEffect : newEffects) {
       if (existingEffects.contains(newEffect))
         continue;
-      ConcurrentCollectionsLibrary.addToMapValueSet(map, newEffect,
-          situation.getId());
+      AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
+      Set<AgencyAndId> ids = map.get(newEffect);
+      if (ids == null) {
+        ids = new HashSet<AgencyAndId>();
+        map.put(newEffect, ids);
+      }
+      ids.add(id);
     }
   }
 
-  private <T> void getSituationIdsForKey(
-      ConcurrentMap<T, Set<AgencyAndId>> situationIdsByKey, T key,
+  private <T> void getServiceAlertIdsForKey(
+      ConcurrentMap<T, Set<AgencyAndId>> serviceAlertIdsByKey, T key,
       Collection<AgencyAndId> matches) {
-    Set<AgencyAndId> ids = situationIdsByKey.get(key);
+    Set<AgencyAndId> ids = serviceAlertIdsByKey.get(key);
     if (ids != null)
       matches.addAll(ids);
   }
 
-  private List<Situation> getSituationIdsAsObjects(
-      Collection<AgencyAndId> situationIds) {
-    if (situationIds == null || situationIds.isEmpty())
+  private List<ServiceAlert> getServiceAlertIdsAsObjects(
+      Collection<AgencyAndId> serviceAlertIds) {
+    if (serviceAlertIds == null || serviceAlertIds.isEmpty())
       return Collections.emptyList();
-    List<Situation> situations = new ArrayList<Situation>(situationIds.size());
-    for (AgencyAndId situationId : situationIds) {
-      Situation situation = _situations.get(situationId);
-      if (situation != null)
-        situations.add(situation);
+    List<ServiceAlert> serviceAlerts = new ArrayList<ServiceAlert>(
+        serviceAlertIds.size());
+    for (AgencyAndId serviceAlertId : serviceAlertIds) {
+      ServiceAlert serviceAlert = _serviceAlerts.get(serviceAlertId);
+      if (serviceAlert != null)
+        serviceAlerts.add(serviceAlert);
     }
-    return situations;
+    return serviceAlerts;
   }
 
   /****
@@ -376,18 +400,25 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     if (path == null || !path.exists())
       return;
 
+    InputStream in = null;
+
     try {
 
-      XStream xstream = createXStream();
-      FileReader in = new FileReader(path);
-      SituationsContainer container = (SituationsContainer) xstream.fromXML(in);
-      in.close();
-      List<Situation> situations = container.getSituations();
-      for (Situation situation : situations)
-        updateReferences(situation);
+      in = new BufferedInputStream(new FileInputStream(path));
+      ServiceAlertsCollection collection = ServiceAlertsCollection.parseFrom(in);
+      for (ServiceAlert serviceAlert : collection.getServiceAlertsList())
+        updateReferences(serviceAlert);
 
     } catch (Exception ex) {
       _log.error("error loading service alerts from path " + path, ex);
+    } finally {
+      if (in != null) {
+        try {
+          in.close();
+        } catch (IOException ex) {
+          _log.error("error closing service alerts path " + path, ex);
+        }
+      }
     }
   }
 
@@ -398,20 +429,25 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     if (path == null)
       return;
 
+    ServiceAlertsCollection.Builder builder = ServiceAlertsCollection.newBuilder();
+    builder.addAllServiceAlerts(_serviceAlerts.values());
+    ServiceAlertsCollection collection = builder.build();
+
+    OutputStream out = null;
     try {
-
-      List<Situation> situations = new ArrayList<Situation>(
-          _situations.values());
-      SituationsContainer container = new SituationsContainer();
-      container.setSituations(situations);
-
-      XStream xstream = createXStream();
-
-      FileWriter out = new FileWriter(path);
-      xstream.toXML(container, out);
+      out = new BufferedOutputStream(new FileOutputStream(path));
+      collection.writeTo(out);
       out.close();
     } catch (Exception ex) {
       _log.error("error saving service alerts to path " + path, ex);
+    } finally {
+      if (out != null) {
+        try {
+          out.close();
+        } catch (IOException ex) {
+          _log.error("error closing service output to path " + path, ex);
+        }
+      }
     }
   }
 
@@ -421,23 +457,4 @@ public class ServiceAlertsServiceImpl implements ServiceAlertsService {
     return _bundle.getServiceAlertsPath();
   }
 
-  private XStream createXStream() {
-
-    XStream xstream = new XStream();
-
-    xstream.alias("situationContainer", SituationsContainer.class);
-    xstream.alias("situation", Situation.class);
-    xstream.alias("affects", SituationAffects.class);
-    xstream.alias("agency", SituationAffectedAgency.class);
-    xstream.alias("stop", SituationAffectedStop.class);
-    xstream.alias("vehicleJourney", SituationAffectedVehicleJourney.class);
-    xstream.alias("call", SituationAffectedCall.class);
-    xstream.alias("application", SituationAffectedApplication.class);
-    xstream.alias("consequence", SituationConsequence.class);
-    xstream.alias("conditionDetails", SituationConditionDetails.class);
-    xstream.alias("agencyAndId", AgencyAndId.class);
-    xstream.alias("encodedPolyline", EncodedPolylineBean.class);
-
-    return xstream;
-  }
 }

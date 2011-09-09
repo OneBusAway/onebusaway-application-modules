@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +17,42 @@
 package org.onebusaway.presentation.impl.service_alerts;
 
 import java.util.Comparator;
+import java.util.List;
 
 import org.onebusaway.collections.CollectionsLibrary;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 
-public class RecentSituationComparator implements Comparator<SituationBean> {
+public class RecentSituationComparator implements Comparator<ServiceAlertBean> {
 
   @Override
-  public int compare(SituationBean o1, SituationBean o2) {
+  public int compare(ServiceAlertBean o1, ServiceAlertBean o2) {
     long t1 = getTimeForSituation(o1);
     long t2 = getTimeForSituation(o2);
     return Double.compare(t1, t2);
   }
 
-  private long getTimeForSituation(SituationBean bean) {
+  private long getTimeForSituation(ServiceAlertBean bean) {
 
-    TimeRangeBean window = bean.getPublicationWindow();
-    if (window != null && window.getFrom() != 0)
-      return window.getFrom();
+    long t = getFirstTime(bean.getPublicationWindows());
+    if (t != Long.MAX_VALUE)
+      return t;
 
-    if (! CollectionsLibrary.isEmpty(bean.getConsequences())) {
-      long t = Long.MAX_VALUE;
-      for (SituationConsequenceBean consequence : bean.getConsequences()) {
-        TimeRangeBean period = consequence.getPeriod();
-        if (period != null && period.getFrom() != 0)
-          t = Math.min(t, period.getFrom());
-      }
-
-      if (t != Long.MAX_VALUE)
-        return t;
-    }
+    t = getFirstTime(bean.getActiveWindows());
+    if (t != Long.MAX_VALUE)
+      return t;
 
     return bean.getCreationTime();
+  }
+
+  private long getFirstTime(List<TimeRangeBean> windows) {
+    long min = Long.MAX_VALUE;
+    if (!CollectionsLibrary.isEmpty(windows)) {
+      for (TimeRangeBean window : windows) {
+        if (window.getFrom() != 0)
+          min = Math.min(min, window.getFrom());
+      }
+    }
+    return min;
   }
 }

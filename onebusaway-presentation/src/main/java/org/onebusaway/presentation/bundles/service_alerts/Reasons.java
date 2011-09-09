@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data.model.service_alerts;
+package org.onebusaway.presentation.bundles.service_alerts;
 
-import java.io.Serializable;
+public class Reasons {
 
-public class SituationAffectedAgencyBean implements Serializable {
-
-  private static final long serialVersionUID = 1L;
-
-  private String agencyId;
-
-  public String getAgencyId() {
-    return agencyId;
-  }
-
-  public void setAgencyId(String agencyId) {
-    this.agencyId = agencyId;
-  }  
 }

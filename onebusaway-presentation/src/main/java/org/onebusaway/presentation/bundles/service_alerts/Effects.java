@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.services.service_alerts;
+package org.onebusaway.presentation.bundles.service_alerts;
 
-import java.io.Serializable;
+public class Effects {
 
-public class TimeRange implements Serializable {
-
-  private static final long serialVersionUID = 1L;
-
-  private long from;
-
-  private long to;
-
-  public long getFrom() {
-    return from;
-  }
-
-  public void setFrom(long from) {
-    this.from = from;
-  }
-
-  public long getTo() {
-    return to;
-  }
-
-  public void setTo(long to) {
-    this.to = to;
-  }
 }

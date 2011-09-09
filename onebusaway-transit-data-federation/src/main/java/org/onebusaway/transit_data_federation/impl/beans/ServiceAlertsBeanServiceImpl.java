@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +17,37 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectedApplicationBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
+import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
+import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
-import org.onebusaway.transit_data_federation.services.service_alerts.Situation;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedAgency;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedApplication;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedCall;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedStop;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffectedVehicleJourney;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationAffects;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationConditionDetails;
-import org.onebusaway.transit_data_federation.services.service_alerts.SituationConsequence;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
+class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
   private ServiceAlertsService _serviceAlertsService;
 
@@ -58,17 +57,19 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   }
 
   @Override
-  public SituationBean createServiceAlert(String agencyId,
-      SituationBean situationBean) {
-    Situation situation = getBeanAsSituation(situationBean);
-    situation = _serviceAlertsService.createServiceAlert(agencyId, situation);
-    return getSituationAsBean(situation);
+  public ServiceAlertBean createServiceAlert(String agencyId,
+      ServiceAlertBean situationBean) {
+    ServiceAlert.Builder serviceAlertBuilder = getBeanAsServiceAlertBuilder(situationBean);
+    ServiceAlert serviceAlert = _serviceAlertsService.createServiceAlert(
+        agencyId, serviceAlertBuilder);
+    return getServiceAlertAsBean(serviceAlert);
   }
 
   @Override
-  public void updateServiceAlert(SituationBean situationBean) {
-    Situation situation = getBeanAsSituation(situationBean);
-    _serviceAlertsService.updateServiceAlert(situation);
+  public void updateServiceAlert(ServiceAlertBean situationBean) {
+    ServiceAlert.Builder serviceAlertBuilder = getBeanAsServiceAlertBuilder(situationBean);
+    ServiceAlert serviceAlert = serviceAlertBuilder.build();
+    _serviceAlertsService.updateServiceAlert(serviceAlert);
   }
 
   @Override
@@ -77,148 +78,126 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   }
 
   @Override
-  public SituationBean getServiceAlertForId(AgencyAndId situationId) {
-    Situation situation = _serviceAlertsService.getServiceAlertForId(situationId);
-    if (situation == null)
+  public ServiceAlertBean getServiceAlertForId(AgencyAndId situationId) {
+    ServiceAlert serviceAlert = _serviceAlertsService.getServiceAlertForId(situationId);
+    if (serviceAlert == null)
       return null;
-    return getSituationAsBean(situation);
+    return getServiceAlertAsBean(serviceAlert);
   }
 
   @Override
-  public List<SituationBean> getAllSituationsForAgencyId(String agencyId) {
-
-    List<Situation> situations = _serviceAlertsService.getAllSituationsForAgencyId(agencyId);
-
-    return list(situations);
+  public List<ServiceAlertBean> getServiceAlertsForFederatedAgencyId(
+      String agencyId) {
+    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForFederatedAgencyId(agencyId);
+    return list(serviceAlerts);
   }
 
   @Override
-  public void removeAllSituationsForAgencyId(String agencyId) {
-    _serviceAlertsService.removeAllSituationsForAgencyId(agencyId);
+  public void removeAllServiceAlertsForFederatedAgencyId(String agencyId) {
+    _serviceAlertsService.removeAllServiceAlertsForFederatedAgencyId(agencyId);
   }
 
   @Override
-  public List<SituationBean> getSituationsForStopId(long time,
+  public List<ServiceAlertBean> getServiceAlertsForStopId(long time,
       AgencyAndId stopId) {
-
-    List<Situation> situations = _serviceAlertsService.getSituationsForStopId(
+    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForStopId(
         time, stopId);
-
-    return list(situations);
+    return list(serviceAlerts);
   }
 
   @Override
-  public List<SituationBean> getSituationsForStopCall(long time,
+  public List<ServiceAlertBean> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId) {
 
-    List<Situation> situations = _serviceAlertsService.getSituationsForStopCall(
+    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForStopCall(
         time, blockInstance, blockStopTime, vehicleId);
 
-    return list(situations);
+    return list(serviceAlerts);
   }
 
   @Override
-  public List<SituationBean> getSituationsForVehicleJourney(long time,
+  public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
       BlockInstance blockInstance, BlockTripEntry blockTrip,
       AgencyAndId vehicleId) {
 
-    List<Situation> situations = _serviceAlertsService.getSituationsForVehicleJourney(
+    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForVehicleJourney(
         time, blockInstance, blockTrip, vehicleId);
 
-    return list(situations);
+    return list(serviceAlerts);
   }
 
   /****
    * Private Methods
    ****/
 
-  private List<SituationBean> list(List<Situation> situations) {
-    List<SituationBean> beans = new ArrayList<SituationBean>();
-    for (Situation situation : situations)
-      beans.add(getSituationAsBean(situation));
+  private List<ServiceAlertBean> list(List<ServiceAlert> serviceAlerts) {
+    List<ServiceAlertBean> beans = new ArrayList<ServiceAlertBean>();
+    for (ServiceAlert serviceAlert : serviceAlerts)
+      beans.add(getServiceAlertAsBean(serviceAlert));
     return beans;
   }
 
-  private SituationBean getSituationAsBean(Situation situation) {
+  private ServiceAlertBean getServiceAlertAsBean(ServiceAlert serviceAlert) {
 
-    SituationBean bean = new SituationBean();
+    ServiceAlertBean bean = new ServiceAlertBean();
 
-    bean.setId(AgencyAndIdLibrary.convertToString(situation.getId()));
-    bean.setCreationTime(situation.getCreationTime());
+    AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
+    bean.setId(AgencyAndIdLibrary.convertToString(id));
+    bean.setCreationTime(serviceAlert.getCreationTime());
+
+    bean.setActiveWindows(getRangesAsBeans(serviceAlert.getActiveWindowList()));
+    bean.setPublicationWindows(getRangesAsBeans(serviceAlert.getPublicationWindowList()));
 
     /**
      * Reasons
      */
-    bean.setEnvironmentReason(situation.getEnvironmentReason());
-    bean.setEquipmentReason(situation.getEquipmentReason());
-    bean.setMiscellaneousReason(situation.getMiscellaneousReason());
-    bean.setPersonnelReason(situation.getPersonnelReason());
+    if (serviceAlert.hasCause())
+      bean.setReason(getCauseAsReason(serviceAlert.getCause()));
 
     /**
      * Text descriptions
      */
-    bean.setSummary(situation.getSummary());
-    bean.setDescription(situation.getDescription());
-    bean.setAdvice(situation.getAdvice());
-    bean.setDetail(situation.getDetail());
-    bean.setInternal(situation.getInternal());
+    bean.setSummaries(getTranslatedStringsAsNLSBeans(serviceAlert.getSummary()));
+    bean.setDescriptions(getTranslatedStringsAsNLSBeans(serviceAlert.getDescription()));
 
-    bean.setSeverity(situation.getSeverity());
-    bean.setSensitivity(situation.getSensitivity());
+    if (serviceAlert.hasSeverity())
+      bean.setSeverity(ServiceAlertLibrary.convertSeverity(serviceAlert.getSeverity()));
 
-    if (situation.getAffects() != null)
-      bean.setAffects(getSituationAffectsAsBean(situation.getAffects()));
-
-    if (!CollectionsLibrary.isEmpty(situation.getConsequences())) {
-      List<SituationConsequenceBean> consequences = new ArrayList<SituationConsequenceBean>();
-      for (SituationConsequence consequence : situation.getConsequences()) {
-        SituationConsequenceBean consequenceBean = getConsequenceAsBean(consequence);
-        consequences.add(consequenceBean);
-      }
-      bean.setConsequences(consequences);
-    }
+    bean.setAllAffects(getAffectsAsBeans(serviceAlert));
+    bean.setConsequences(getConsequencesAsBeans(serviceAlert));
 
     return bean;
   }
 
-  private Situation getBeanAsSituation(SituationBean bean) {
-    Situation situation = new Situation();
+  private ServiceAlert.Builder getBeanAsServiceAlertBuilder(
+      ServiceAlertBean bean) {
 
-    situation.setId(AgencyAndIdLibrary.convertFromString(bean.getId()));
+    ServiceAlert.Builder situation = ServiceAlert.newBuilder();
+
+    AgencyAndId id = AgencyAndIdLibrary.convertFromString(bean.getId());
+    situation.setId(ServiceAlertLibrary.id(id));
     situation.setCreationTime(bean.getCreationTime());
+
+    situation.addAllActiveWindow(getBeansAsRanges(bean.getActiveWindows()));
+    situation.addAllPublicationWindow(getBeansAsRanges(bean.getPublicationWindows()));
 
     /**
      * Reasons
      */
-    situation.setEnvironmentReason(bean.getEnvironmentReason());
-    situation.setEquipmentReason(bean.getEquipmentReason());
-    situation.setMiscellaneousReason(bean.getMiscellaneousReason());
-    situation.setPersonnelReason(bean.getPersonnelReason());
+    situation.setCause(getReasonAsCause(bean.getReason()));
 
     /**
      * Text descriptions
      */
-    situation.setSummary(bean.getSummary());
-    situation.setDescription(bean.getDescription());
-    situation.setAdvice(bean.getAdvice());
-    situation.setDetail(bean.getDetail());
-    situation.setInternal(bean.getInternal());
+    situation.setSummary(getNLSBeansAsTranslatedString(bean.getSummaries()));
+    situation.setDescription(getNLSBeansAsTranslatedString(bean.getDescriptions()));
 
-    situation.setSeverity(bean.getSeverity());
-    situation.setSensitivity(bean.getSensitivity());
+    if (bean.getSeverity() != null)
+      situation.setSeverity(ServiceAlertLibrary.convertSeverity(bean.getSeverity()));
 
-    if (bean.getAffects() != null)
-      situation.setAffects(getBeanAsSituationAffects(bean.getAffects()));
-
-    if (!CollectionsLibrary.isEmpty(bean.getConsequences())) {
-      List<SituationConsequence> consequences = new ArrayList<SituationConsequence>();
-      for (SituationConsequenceBean consequenceBean : bean.getConsequences()) {
-        SituationConsequence consequence = getBeanAsConsequence(consequenceBean);
-        consequences.add(consequence);
-      }
-      situation.setConsequences(consequences);
-    }
+    situation.addAllAffects(getBeanAsAffects(bean));
+    situation.addAllConsequence(getBeanAsConsequences(bean));
 
     return situation;
   }
@@ -227,300 +206,205 @@ public class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
    * Situations Affects
    ****/
 
-  private SituationAffectsBean getSituationAffectsAsBean(
-      SituationAffects affects) {
+  private List<SituationAffectsBean> getAffectsAsBeans(ServiceAlert serviceAlert) {
 
-    SituationAffectsBean bean = new SituationAffectsBean();
+    if (serviceAlert.getAffectsCount() == 0)
+      return null;
 
-    List<SituationAffectedAgency> agencies = affects.getAgencies();
-    if (!CollectionsLibrary.isEmpty(agencies)) {
-      List<SituationAffectedAgencyBean> beans = new ArrayList<SituationAffectedAgencyBean>();
-      for (SituationAffectedAgency agency : agencies) {
-        SituationAffectedAgencyBean agencyBean = getAffectedAgencyAsBean(agency);
-        beans.add(agencyBean);
+    List<SituationAffectsBean> beans = new ArrayList<SituationAffectsBean>();
+
+    for (Affects affects : serviceAlert.getAffectsList()) {
+      SituationAffectsBean bean = new SituationAffectsBean();
+      if (affects.hasAgencyId())
+        bean.setAgencyId(affects.getAgencyId());
+      if (affects.hasApplicationId())
+        bean.setApplicationId(affects.getApplicationId());
+      if (affects.hasRouteId()) {
+        AgencyAndId routeId = ServiceAlertLibrary.agencyAndId(affects.getRouteId());
+        bean.setRouteId(AgencyAndId.convertToString(routeId));
       }
-      bean.setAgencies(beans);
-    }
-
-    List<SituationAffectedStop> stops = affects.getStops();
-    if (!CollectionsLibrary.isEmpty(stops)) {
-      List<SituationAffectedStopBean> beans = new ArrayList<SituationAffectedStopBean>();
-      for (SituationAffectedStop stop : stops) {
-        SituationAffectedStopBean stopBean = getAffectedStopAsBean(stop);
-        beans.add(stopBean);
+      if (affects.hasDirectionId())
+        bean.setDirectionId(affects.getDirectionId());
+      if (affects.hasTripId()) {
+        AgencyAndId tripId = ServiceAlertLibrary.agencyAndId(affects.getTripId());
+        bean.setTripId(AgencyAndId.convertToString(tripId));
       }
-      bean.setStops(beans);
-    }
-
-    List<SituationAffectedVehicleJourney> vehicleJourneys = affects.getVehicleJourneys();
-    if (!CollectionsLibrary.isEmpty(vehicleJourneys)) {
-      List<SituationAffectedVehicleJourneyBean> beans = new ArrayList<SituationAffectedVehicleJourneyBean>();
-      for (SituationAffectedVehicleJourney vehicleJourney : vehicleJourneys) {
-        SituationAffectedVehicleJourneyBean vjBean = getAffectedVehicleJourneyAsBean(vehicleJourney);
-        beans.add(vjBean);
+      if (affects.hasStopId()) {
+        AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getStopId());
+        bean.setStopId(AgencyAndId.convertToString(stopId));
       }
-      bean.setVehicleJourneys(beans);
+      if (affects.hasApplicationId())
+        bean.setApplicationId(affects.getApplicationId());
+      beans.add(bean);
     }
-
-    List<SituationAffectedApplication> apps = affects.getApplications();
-    if (!CollectionsLibrary.isEmpty(apps)) {
-      List<SituationAffectedApplicationBean> appBeans = new ArrayList<SituationAffectedApplicationBean>();
-      for (SituationAffectedApplication app : apps) {
-        SituationAffectedApplicationBean appBean = getSituationAffectedApplicationAsBean(app);
-        appBeans.add(appBean);
-      }
-      bean.setApplications(appBeans);
-    }
-
-    return bean;
+    return beans;
   }
 
-  private SituationAffects getBeanAsSituationAffects(SituationAffectsBean bean) {
+  private List<Affects> getBeanAsAffects(ServiceAlertBean bean) {
 
-    SituationAffects affects = new SituationAffects();
+    List<Affects> affects = new ArrayList<ServiceAlerts.Affects>();
 
-    List<SituationAffectedAgencyBean> agencyBeans = bean.getAgencies();
-    if (!CollectionsLibrary.isEmpty(agencyBeans)) {
-      List<SituationAffectedAgency> agencies = new ArrayList<SituationAffectedAgency>();
-      for (SituationAffectedAgencyBean agencyBean : agencyBeans) {
-        SituationAffectedAgency agency = getBeanAsAffectedAgency(agencyBean);
-        agencies.add(agency);
+    if (!CollectionsLibrary.isEmpty(bean.getAllAffects())) {
+      for (SituationAffectsBean affectsBean : bean.getAllAffects()) {
+        Affects.Builder builder = Affects.newBuilder();
+        if (affectsBean.getAgencyId() != null)
+          builder.setAgencyId(affectsBean.getAgencyId());
+        if (affectsBean.getApplicationId() != null)
+          builder.setApplicationId(affectsBean.getApplicationId());
+        if (affectsBean.getRouteId() != null) {
+          AgencyAndId routeId = AgencyAndId.convertFromString(affectsBean.getRouteId());
+          builder.setRouteId(ServiceAlertLibrary.id(routeId));
+        }
+        if (affectsBean.getDirectionId() != null)
+          builder.setDirectionId(affectsBean.getDirectionId());
+        if (affectsBean.getTripId() != null) {
+          AgencyAndId tripId = AgencyAndId.convertFromString(affectsBean.getTripId());
+          builder.setTripId(ServiceAlertLibrary.id(tripId));
+        }
+        if (affectsBean.getStopId() != null) {
+          AgencyAndId stopId = AgencyAndId.convertFromString(affectsBean.getStopId());
+          builder.setStopId(ServiceAlertLibrary.id(stopId));
+        }
+        affects.add(builder.build());
       }
-      affects.setAgencies(agencies);
-    }
-
-    List<SituationAffectedStopBean> stopBeans = bean.getStops();
-    if (!CollectionsLibrary.isEmpty(stopBeans)) {
-      List<SituationAffectedStop> stops = new ArrayList<SituationAffectedStop>();
-      for (SituationAffectedStopBean stopBean : stopBeans) {
-        SituationAffectedStop stop = getBeanAsAffectedStop(stopBean);
-        stops.add(stop);
-      }
-      affects.setStops(stops);
-    }
-
-    List<SituationAffectedVehicleJourneyBean> vjBeans = bean.getVehicleJourneys();
-    if (!CollectionsLibrary.isEmpty(vjBeans)) {
-      List<SituationAffectedVehicleJourney> vehicleJourneys = new ArrayList<SituationAffectedVehicleJourney>();
-      for (SituationAffectedVehicleJourneyBean vjBean : vjBeans) {
-        SituationAffectedVehicleJourney vj = getBeanAsSituationAffectedVehicleJourney(vjBean);
-        vehicleJourneys.add(vj);
-      }
-      affects.setVehicleJourneys(vehicleJourneys);
-    }
-
-    List<SituationAffectedApplicationBean> appBeans = bean.getApplications();
-    if (!CollectionsLibrary.isEmpty(appBeans)) {
-      List<SituationAffectedApplication> apps = new ArrayList<SituationAffectedApplication>();
-      for (SituationAffectedApplicationBean appBean : appBeans) {
-        SituationAffectedApplication app = getBeanAsSituationAffectedApplication(appBean);
-        apps.add(app);
-      }
-      affects.setApplications(apps);
     }
 
     return affects;
   }
 
   /****
-   * Affected Agency
-   ****/
-
-  private SituationAffectedAgencyBean getAffectedAgencyAsBean(
-      SituationAffectedAgency agency) {
-
-    SituationAffectedAgencyBean bean = new SituationAffectedAgencyBean();
-    bean.setAgencyId(agency.getAgencyId());
-    return bean;
-  }
-
-  private SituationAffectedAgency getBeanAsAffectedAgency(
-      SituationAffectedAgencyBean agencyBean) {
-
-    SituationAffectedAgency agency = new SituationAffectedAgency();
-    agency.setAgencyId(agencyBean.getAgencyId());
-    return agency;
-  }
-
-  /****
-   * Affected Stop
-   ****/
-
-  private SituationAffectedStopBean getAffectedStopAsBean(
-      SituationAffectedStop stop) {
-
-    SituationAffectedStopBean bean = new SituationAffectedStopBean();
-    bean.setStopId(AgencyAndIdLibrary.convertToString(stop.getStopId()));
-    return bean;
-  }
-
-  private SituationAffectedStop getBeanAsAffectedStop(
-      SituationAffectedStopBean stopBean) {
-
-    SituationAffectedStop stop = new SituationAffectedStop();
-    stop.setStopId(AgencyAndIdLibrary.convertFromString(stopBean.getStopId()));
-    return stop;
-  }
-
-  /****
-   * Affected Vehicle Journey
-   ****/
-
-  private SituationAffectedVehicleJourneyBean getAffectedVehicleJourneyAsBean(
-      SituationAffectedVehicleJourney vehicleJourney) {
-
-    SituationAffectedVehicleJourneyBean bean = new SituationAffectedVehicleJourneyBean();
-    bean.setLineId(AgencyAndIdLibrary.convertToString(vehicleJourney.getLineId()));
-    bean.setDirection(vehicleJourney.getDirectionId());
-
-    List<SituationAffectedCall> calls = vehicleJourney.getCalls();
-    if (!CollectionsLibrary.isEmpty(calls)) {
-      List<SituationAffectedCallBean> beans = new ArrayList<SituationAffectedCallBean>();
-      for (SituationAffectedCall call : calls)
-        beans.add(getAffectedCallAsBean(call));
-      bean.setCalls(beans);
-    }
-
-    if (!CollectionsLibrary.isEmpty(vehicleJourney.getTripIds())) {
-      List<String> tripIds = new ArrayList<String>();
-      for (AgencyAndId tripId : vehicleJourney.getTripIds())
-        tripIds.add(AgencyAndIdLibrary.convertToString(tripId));
-      bean.setTripIds(tripIds);
-    }
-
-    return bean;
-  }
-
-  private SituationAffectedVehicleJourney getBeanAsSituationAffectedVehicleJourney(
-      SituationAffectedVehicleJourneyBean bean) {
-
-    SituationAffectedVehicleJourney vehicleJourney = new SituationAffectedVehicleJourney();
-    vehicleJourney.setLineId(AgencyAndIdLibrary.convertFromString(bean.getLineId()));
-    vehicleJourney.setDirectionId(bean.getDirection());
-
-    List<SituationAffectedCallBean> beans = bean.getCalls();
-    if (!CollectionsLibrary.isEmpty(beans)) {
-      List<SituationAffectedCall> calls = new ArrayList<SituationAffectedCall>();
-      for (SituationAffectedCallBean callBean : beans)
-        calls.add(getBeanAsAffectedCall(callBean));
-      vehicleJourney.setCalls(calls);
-    }
-
-    if (!CollectionsLibrary.isEmpty(bean.getTripIds())) {
-      List<AgencyAndId> tripIds = new ArrayList<AgencyAndId>();
-      for (String tripId : bean.getTripIds())
-        tripIds.add(AgencyAndIdLibrary.convertFromString(tripId));
-      vehicleJourney.setTripIds(tripIds);
-    }
-
-    return vehicleJourney;
-  }
-
-  private SituationAffectedApplicationBean getSituationAffectedApplicationAsBean(
-      SituationAffectedApplication app) {
-
-    SituationAffectedApplicationBean bean = new SituationAffectedApplicationBean();
-    bean.setApiKey(app.getApiKey());
-    return bean;
-  }
-
-  private SituationAffectedApplication getBeanAsSituationAffectedApplication(
-      SituationAffectedApplicationBean bean) {
-
-    SituationAffectedApplication app = new SituationAffectedApplication();
-    app.setApiKey(bean.getApiKey());
-    return app;
-  }
-
-  /****
-   * Affected Call
-   ****/
-
-  private SituationAffectedCallBean getAffectedCallAsBean(
-      SituationAffectedCall affectedCall) {
-    SituationAffectedCallBean bean = new SituationAffectedCallBean();
-    bean.setStopId(AgencyAndIdLibrary.convertToString(affectedCall.getStopId()));
-    return bean;
-  }
-
-  private SituationAffectedCall getBeanAsAffectedCall(
-      SituationAffectedCallBean bean) {
-    SituationAffectedCall call = new SituationAffectedCall();
-    call.setStopId(AgencyAndIdLibrary.convertFromString(bean.getStopId()));
-    return call;
-  }
-
-  /****
    * Consequence
    ****/
 
-  private SituationConsequenceBean getConsequenceAsBean(
-      SituationConsequence consequence) {
-
-    SituationConsequenceBean bean = new SituationConsequenceBean();
-
-    bean.setCondition(consequence.getCondition());
-
-    SituationConditionDetails conditionDetails = consequence.getConditionDetails();
-    if (conditionDetails != null)
-      bean.setConditionDetails(getConditionDetailsAsBean(conditionDetails));
-
-    return bean;
+  private List<SituationConsequenceBean> getConsequencesAsBeans(
+      ServiceAlert serviceAlert) {
+    if (serviceAlert.getConsequenceCount() == 0)
+      return null;
+    List<SituationConsequenceBean> beans = new ArrayList<SituationConsequenceBean>();
+    for (Consequence consequence : serviceAlert.getConsequenceList()) {
+      SituationConsequenceBean bean = new SituationConsequenceBean();
+      if (consequence.hasEffect())
+        bean.setEffect(ServiceAlertLibrary.convertEffect(consequence.getEffect()));
+      if (consequence.hasDetourPath())
+        bean.setDetourPath(consequence.getDetourPath());
+      if (consequence.getDetourStopIdsCount() != 0) {
+        List<String> stopIds = new ArrayList<String>();
+        for (Id stopId : consequence.getDetourStopIdsList()) {
+          AgencyAndId id = ServiceAlertLibrary.agencyAndId(stopId);
+          stopIds.add(AgencyAndId.convertToString(id));
+        }
+        bean.setDetourStopIds(stopIds);
+      }
+      beans.add(bean);
+    }
+    return beans;
   }
 
-  private SituationConsequence getBeanAsConsequence(
-      SituationConsequenceBean consequenceBean) {
+  private List<Consequence> getBeanAsConsequences(ServiceAlertBean bean) {
 
-    SituationConsequence consequence = new SituationConsequence();
+    List<Consequence> consequences = new ArrayList<Consequence>();
 
-    consequence.setCondition(consequenceBean.getCondition());
+    if (!CollectionsLibrary.isEmpty(bean.getConsequences())) {
+      for (SituationConsequenceBean consequence : bean.getConsequences()) {
+        Consequence.Builder builder = Consequence.newBuilder();
+        if (consequence.getEffect() != null)
+          builder.setEffect(ServiceAlertLibrary.convertEffect(consequence.getEffect()));
+        if (consequence.getDetourPath() != null)
+          builder.setDetourPath(consequence.getDetourPath());
+        if (!CollectionsLibrary.isEmpty(consequence.getDetourStopIds())) {
+          List<Id> detourStopIds = new ArrayList<Id>();
+          for (String detourStopId : consequence.getDetourStopIds()) {
+            Id id = ServiceAlertLibrary.id(AgencyAndId.convertFromString(detourStopId));
+            detourStopIds.add(id);
+          }
+          builder.addAllDetourStopIds(detourStopIds);
+        }
+        consequences.add(builder.build());
+      }
+    }
 
-    SituationConditionDetailsBean conditionDetails = consequenceBean.getConditionDetails();
-    if (conditionDetails != null)
-      consequence.setConditionDetails(getBeanAsConditionDetails(conditionDetails));
-
-    return consequence;
+    return consequences;
   }
 
   /****
-   * Condition Details
+   * 
    ****/
 
-  public SituationConditionDetailsBean getConditionDetailsAsBean(
-      SituationConditionDetails details) {
-
-    SituationConditionDetailsBean bean = new SituationConditionDetailsBean();
-
-    bean.setDiversionPath(details.getDiversionPath());
-
-    List<AgencyAndId> diversionStops = details.getDiversionStops();
-
-    if (!CollectionsLibrary.isEmpty(diversionStops)) {
-
-      List<String> stopIds = new ArrayList<String>();
-      for (AgencyAndId stopId : diversionStops)
-        stopIds.add(AgencyAndIdLibrary.convertToString(stopId));
-      bean.setDiversionStopIds(stopIds);
-    }
-
-    return bean;
+  private Cause getReasonAsCause(String reason) {
+    if (reason == null)
+      return Cause.UNKNOWN_CAUSE;
+    return Cause.valueOf(reason);
   }
 
-  private SituationConditionDetails getBeanAsConditionDetails(
-      SituationConditionDetailsBean bean) {
+  private String getCauseAsReason(Cause cause) {
+    return cause.toString();
+  }
 
-    SituationConditionDetails details = new SituationConditionDetails();
+  /****
+   * 
+   ****/
 
-    details.setDiversionPath(bean.getDiversionPath());
+  private List<TimeRangeBean> getRangesAsBeans(List<TimeRange> ranges) {
+    if (ranges == null || ranges.isEmpty())
+      return null;
+    List<TimeRangeBean> beans = new ArrayList<TimeRangeBean>();
+    for (TimeRange range : ranges) {
+      TimeRangeBean bean = new TimeRangeBean();
+      if (range.hasStart())
+        bean.setFrom(range.getStart());
+      if (range.hasEnd())
+        bean.setTo(range.getEnd());
+      beans.add(bean);
+    }
+    return beans;
+  }
 
-    List<String> stopIds = bean.getDiversionStopIds();
-    if (!CollectionsLibrary.isEmpty(stopIds)) {
-      List<AgencyAndId> diversionStops = new ArrayList<AgencyAndId>();
-      for (String stopId : stopIds)
-        diversionStops.add(AgencyAndIdLibrary.convertFromString(stopId));
-      details.setDiversionStops(diversionStops);
+  private List<TimeRange> getBeansAsRanges(List<TimeRangeBean> beans) {
+    if (beans == null)
+      return Collections.emptyList();
+    List<TimeRange> ranges = new ArrayList<TimeRange>();
+    for (TimeRangeBean bean : beans) {
+      TimeRange.Builder range = TimeRange.newBuilder();
+      if (bean.getFrom() > 0)
+        range.setStart(bean.getFrom());
+      if (bean.getTo() > 0)
+        range.setEnd(bean.getTo());
+      if (range.hasStart() || range.hasEnd())
+        ranges.add(range.build());
+    }
+    return ranges;
+  }
+
+  private TranslatedString getNLSBeansAsTranslatedString(
+      List<NaturalLanguageStringBean> nlsBeans) {
+    TranslatedString.Builder builder = TranslatedString.newBuilder();
+    if (!CollectionsLibrary.isEmpty(nlsBeans)) {
+      for (NaturalLanguageStringBean nlsBean : nlsBeans) {
+        if (nlsBean.getValue() == null)
+          continue;
+        Translation.Builder translation = Translation.newBuilder();
+        translation.setText(nlsBean.getValue());
+        translation.setLanguage(nlsBean.getLang());
+        builder.addTranslation(translation);
+      }
+    }
+    return builder.build();
+  }
+
+  private List<NaturalLanguageStringBean> getTranslatedStringsAsNLSBeans(
+      TranslatedString strings) {
+
+    if (strings == null || strings.getTranslationCount() == 0)
+      return null;
+
+    List<NaturalLanguageStringBean> nlsBeans = new ArrayList<NaturalLanguageStringBean>();
+    for (Translation translation : strings.getTranslationList()) {
+      NaturalLanguageStringBean nls = new NaturalLanguageStringBean();
+      nls.setValue(translation.getText());
+      nls.setLang(translation.getLanguage());
+      nlsBeans.add(nls);
     }
 
-    return details;
+    return nlsBeans;
   }
 }

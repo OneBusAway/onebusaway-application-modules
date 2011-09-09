@@ -25,7 +25,7 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -312,7 +312,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
 
     if (activeBlockTrip != null) {
-      List<SituationBean> situations = _serviceAlertBeanService.getSituationsForVehicleJourney(
+      List<ServiceAlertBean> situations = _serviceAlertBeanService.getServiceAlertsForVehicleJourney(
           time, blockInstance, activeBlockTrip, blockLocation.getVehicleId());
       if (!situations.isEmpty())
         bean.setSituations(situations);
@@ -390,7 +390,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());
     }
 
-    List<SituationBean> situations = _serviceAlertBeanService.getSituationsForVehicleJourney(
+    List<ServiceAlertBean> situations = _serviceAlertBeanService.getServiceAlertsForVehicleJourney(
         time, blockInstance, blockTripEntry, vehicleId);
 
     if (missing)

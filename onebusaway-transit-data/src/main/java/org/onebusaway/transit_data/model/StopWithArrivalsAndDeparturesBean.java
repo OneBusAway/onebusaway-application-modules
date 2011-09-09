@@ -17,7 +17,7 @@ package org.onebusaway.transit_data.model;
 
 import java.util.List;
 
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 
 public class StopWithArrivalsAndDeparturesBean extends ApplicationBean {
 
@@ -29,7 +29,7 @@ public class StopWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   private List<StopBean> nearbyStops;
 
-  private List<SituationBean> situations;
+  private List<ServiceAlertBean> situations;
 
   public StopWithArrivalsAndDeparturesBean() {
 
@@ -37,7 +37,7 @@ public class StopWithArrivalsAndDeparturesBean extends ApplicationBean {
 
   public StopWithArrivalsAndDeparturesBean(StopBean stop,
       List<ArrivalAndDepartureBean> arrivalsAndDepartures,
-      List<StopBean> nearbyStops, List<SituationBean> situations) {
+      List<StopBean> nearbyStops, List<ServiceAlertBean> situations) {
     this.stop = stop;
     this.arrivalsAndDepartures = arrivalsAndDepartures;
     this.nearbyStops = nearbyStops;
@@ -56,7 +56,7 @@ public class StopWithArrivalsAndDeparturesBean extends ApplicationBean {
     return nearbyStops;
   }
 
-  public List<SituationBean> getSituations() {
+  public List<ServiceAlertBean> getSituations() {
     return situations;
   }
 }

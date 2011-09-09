@@ -23,19 +23,14 @@ import org.apache.struts2.convention.annotation.Results;
 import org.json.JSONException;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.presentation.bundles.ResourceBundleSupport;
-import org.onebusaway.presentation.bundles.service_alerts.EnvironmentReasons;
-import org.onebusaway.presentation.bundles.service_alerts.EquipmentReasons;
-import org.onebusaway.presentation.bundles.service_alerts.MiscellaneousReasons;
-import org.onebusaway.presentation.bundles.service_alerts.PersonnelReasons;
-import org.onebusaway.presentation.bundles.service_alerts.Sensitivity;
-import org.onebusaway.presentation.bundles.service_alerts.Severity;
+import org.onebusaway.presentation.bundles.service_alerts.Reasons;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedAgencyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedApplicationBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedCallBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedStopBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectedVehicleJourneyBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConditionDetailsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -52,13 +47,13 @@ import com.thoughtworks.xstream.XStream;
         "actionName", "service-alerts!agency", "agencyId", "${agencyId}",
         "parse", "true"})})
 public class ServiceAlertAction extends ActionSupport implements
-    ModelDriven<SituationBean> {
+    ModelDriven<ServiceAlertBean> {
 
   private static final long serialVersionUID = 1L;
 
   private TransitDataService _transitDataService;
 
-  private SituationBean _model = new SituationBean();
+  private ServiceAlertBean _model = new ServiceAlertBean();
 
   private String _agencyId;
 
@@ -70,7 +65,7 @@ public class ServiceAlertAction extends ActionSupport implements
   }
 
   @Override
-  public SituationBean getModel() {
+  public ServiceAlertBean getModel() {
     return _model;
   }
 
@@ -110,15 +105,11 @@ public class ServiceAlertAction extends ActionSupport implements
 
   public String submit() throws IOException, JSONException {
 
-    _model.setEnvironmentReason(string(_model.getEnvironmentReason()));
-    _model.setEquipmentReason(string(_model.getEquipmentReason()));
-    _model.setPersonnelReason(string(_model.getPersonnelReason()));
-    _model.setMiscellaneousReason(string(_model.getMiscellaneousReason()));
-    _model.setUndefinedReason(string(_model.getUndefinedReason()));
+    _model.setReason(string(_model.getReason()));
 
     if (_raw != null && !_raw.trim().isEmpty()) {
-      SituationBean rawSituation = getStringAsRawSituation(_raw);
-      _model.setAffects(rawSituation.getAffects());
+      ServiceAlertBean rawSituation = getStringAsRawSituation(_raw);
+      _model.setAllAffects(rawSituation.getAllAffects());
       _model.setConsequences(rawSituation.getConsequences());
     }
 
@@ -143,28 +134,8 @@ public class ServiceAlertAction extends ActionSupport implements
    * 
    ****/
 
-  public Map<String, String> getEnvironmentReasonValues() {
-    return ResourceBundleSupport.getLocaleMap(this, EnvironmentReasons.class);
-  }
-
-  public Map<String, String> getEquipmentReasonValues() {
-    return ResourceBundleSupport.getLocaleMap(this, EquipmentReasons.class);
-  }
-
-  public Map<String, String> getMiscellaneousReasonValues() {
-    return ResourceBundleSupport.getLocaleMap(this, MiscellaneousReasons.class);
-  }
-
-  public Map<String, String> getPersonnelReasonValues() {
-    return ResourceBundleSupport.getLocaleMap(this, PersonnelReasons.class);
-  }
-
-  public Map<String, String> getSeverityValues() {
-    return ResourceBundleSupport.getLocaleMap(this, Severity.class);
-  }
-
-  public Map<String, String> getSensitivityValues() {
-    return ResourceBundleSupport.getLocaleMap(this, Sensitivity.class);
+  public Map<String, String> getReasonValues() {
+    return ResourceBundleSupport.getLocaleMap(this, Reasons.class);
   }
 
   /****
@@ -183,30 +154,23 @@ public class ServiceAlertAction extends ActionSupport implements
     return xstream.toXML(_model);
   }
 
-  private SituationBean getStringAsRawSituation(String value)
+  private ServiceAlertBean getStringAsRawSituation(String value)
       throws IOException, JSONException {
 
     if (value == null || value.trim().isEmpty())
-      return new SituationBean();
+      return new ServiceAlertBean();
 
     XStream xstream = createXStream();
-    return (SituationBean) xstream.fromXML(value);
+    return (ServiceAlertBean) xstream.fromXML(value);
   }
 
   private XStream createXStream() {
 
     XStream xstream = new XStream();
 
-    xstream.alias("situation", SituationBean.class);
+    xstream.alias("serviceAlert", ServiceAlertBean.class);
     xstream.alias("affects", SituationAffectsBean.class);
-    xstream.alias("agency", SituationAffectedAgencyBean.class);
-    xstream.alias("stop", SituationAffectedStopBean.class);
-    xstream.alias("vehicleJourney", SituationAffectedVehicleJourneyBean.class);
-    xstream.alias("call", SituationAffectedCallBean.class);
-    xstream.alias("application", SituationAffectedApplicationBean.class);
     xstream.alias("consequence", SituationConsequenceBean.class);
-    xstream.alias("conditionDetails", SituationConditionDetailsBean.class);
-    xstream.alias("encodedPolyline", EncodedPolylineBean.class);
 
     return xstream;
   }
