@@ -764,8 +764,8 @@ public class BlockIndexFactoryServiceImpl implements BlockIndexFactoryService {
     TripEntry prevTrip = prevBlockTrip.getTrip();
     TripEntry nextTrip = nextBlockTrip.getTrip();
 
-    AgencyAndId lineIdA = prevTrip.getRouteCollectionId();
-    AgencyAndId lineIdB = nextTrip.getRouteCollectionId();
+    AgencyAndId lineIdA = prevTrip.getRouteCollection().getId();
+    AgencyAndId lineIdB = nextTrip.getRouteCollection().getId();
 
     String directionA = prevTrip.getDirectionId();
     String directionB = nextTrip.getDirectionId();

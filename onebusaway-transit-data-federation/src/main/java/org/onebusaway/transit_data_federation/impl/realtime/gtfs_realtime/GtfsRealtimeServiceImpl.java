@@ -120,7 +120,7 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
       stopTimeEvent.setDelay((int) activeBlock.getScheduleDeviation());
       stopTimeUpdate.setDeparture(stopTimeEvent);
 
-      AgencyAndId routeId = activeTrip.getRouteCollectionId();
+      AgencyAndId routeId = activeTrip.getRouteCollection().getId();
       AgencyAndId tripId = activeTrip.getId();
       BlockInstance blockInstance = activeBlock.getBlockInstance();
       String startDate = String.format("%1$ty%1$tm%1$td", new Date(

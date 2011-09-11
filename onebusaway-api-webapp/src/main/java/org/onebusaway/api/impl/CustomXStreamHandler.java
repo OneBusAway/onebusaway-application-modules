@@ -55,9 +55,11 @@ import org.onebusaway.api.model.transit.service_alerts.SituationAffectedApplicat
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedCallV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedStopV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationAffectedVehicleJourneyV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.SituationAffectsV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetailsV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
+import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.EdgeV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.GraphResultV2Bean;
 import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
@@ -142,6 +144,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("vehicleStatus", VehicleStatusV2Bean.class);
 
     xstream.alias("situation", SituationV2Bean.class);
+    xstream.alias("affects", SituationAffectsV2Bean.class);
     xstream.alias("agency", SituationAffectedAgencyV2Bean.class);
     xstream.alias("stop", SituationAffectedStopV2Bean.class);
     xstream.alias("vehicleJourney", SituationAffectedVehicleJourneyV2Bean.class);
@@ -149,6 +152,8 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("application", SituationAffectedApplicationV2Bean.class);
     xstream.alias("consequence", SituationConsequenceV2Bean.class);
     xstream.alias("conditionDetails", SituationConditionDetailsV2Bean.class);
+
+    xstream.alias("timeRange", TimeRangeV2Bean.class);
 
     xstream.alias("VehicleLocation", VehicleLocation.class);
 
@@ -166,7 +171,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("graphResult", GraphResultV2Bean.class);
     xstream.alias("vertex", VertexV2Bean.class);
     xstream.alias("edge", EdgeV2Bean.class);
-    
+
     xstream.alias("currentVehicleEstimate", CurrentVehicleEstimateV2Bean.class);
 
     xstream.processAnnotations(VehicleMonitoringRequest.class);

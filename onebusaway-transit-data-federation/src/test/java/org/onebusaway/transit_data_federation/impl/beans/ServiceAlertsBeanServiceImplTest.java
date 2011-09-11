@@ -88,6 +88,8 @@ public class ServiceAlertsBeanServiceImplTest {
     bean.setSeverity(ESeverity.VERY_SEVERE);
     bean.setSummaries(Arrays.asList(new NaturalLanguageStringBean("summary",
         "en")));
+    bean.setUrls(Arrays.asList(new NaturalLanguageStringBean(
+        "http://somewhere", "en")));
 
     /**
      * Construct the ServiceAlert.Builder that we'll return from the
@@ -132,16 +134,22 @@ public class ServiceAlertsBeanServiceImplTest {
     tBuilder.setText("summaryB");
     tsBuilder.addTranslation(tBuilder);
     builder.setSummary(tsBuilder);
+    tsBuilder = TranslatedString.newBuilder();
+    tBuilder = Translation.newBuilder();
+    tBuilder.setLanguage("fr");
+    tBuilder.setText("http://somewhere/else/");
+    tsBuilder.addTranslation(tBuilder);
+    builder.setUrl(tsBuilder);
 
     ArgumentCaptor<ServiceAlert.Builder> captor = ArgumentCaptor.forClass(ServiceAlert.Builder.class);
     Mockito.when(
-        _serviceAlertService.createServiceAlert(Mockito.eq("1"),
-            captor.capture())).thenReturn(builder.build());
+        _serviceAlertService.createOrUpdateServiceAlert(captor.capture(),
+            Mockito.eq("1"))).thenReturn(builder.build());
 
     ServiceAlertBean updated = _service.createServiceAlert("1", bean);
 
-    Mockito.verify(_serviceAlertService).createServiceAlert(Mockito.eq("1"),
-        Mockito.any(ServiceAlert.Builder.class));
+    Mockito.verify(_serviceAlertService).createOrUpdateServiceAlert(
+        Mockito.any(ServiceAlert.Builder.class), Mockito.eq("1"));
 
     assertNotSame(updated, bean);
 
@@ -187,6 +195,11 @@ public class ServiceAlertsBeanServiceImplTest {
     Translation summary = summaries.getTranslation(0);
     assertEquals("en", summary.getLanguage());
     assertEquals("summary", summary.getText());
+    TranslatedString urls = builder.getUrl();
+    assertEquals(1, urls.getTranslationCount());
+    Translation url = urls.getTranslation(0);
+    assertEquals("en", url.getLanguage());
+    assertEquals("http://somewhere", url.getText());
 
     /**
      * Verify that the conversion from the ServiceAlert to ServiceAlertBean
@@ -227,5 +240,9 @@ public class ServiceAlertsBeanServiceImplTest {
     nls = updated.getSummaries().get(0);
     assertEquals("fr", nls.getLang());
     assertEquals("summaryB", nls.getValue());
+    assertEquals(1, updated.getUrls().size());
+    nls = updated.getUrls().get(0);
+    assertEquals("fr", nls.getLang());
+    assertEquals("http://somewhere/else/", nls.getValue());
   }
 }

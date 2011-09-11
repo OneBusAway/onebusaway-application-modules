@@ -38,20 +38,27 @@ public interface ServiceAlertsService {
    * also determines the agency id used in the service alerts id (
    * {@link ServiceAlert#getId()}).
    * 
-   * @param agencyId the agency to assign the service alert to
    * @param builder the filled-in service alert builder
+   * @param defaultAgencyId the agency to assign the service alert to
+   * 
    * @return the built service alert
    */
-  public ServiceAlert createServiceAlert(String agencyId,
-      ServiceAlert.Builder builder);
 
-  public void updateServiceAlert(ServiceAlert serviceAlert);
-
-  public void updateServiceAlerts(List<ServiceAlert> serviceAlerts);
+  public ServiceAlert createOrUpdateServiceAlert(ServiceAlert.Builder builder,
+      String defaultAgencyId);
 
   public void removeServiceAlert(AgencyAndId serviceAlertId);
 
   public void removeServiceAlerts(List<AgencyAndId> serviceAlertIds);
+
+  /**
+   * Remove all service alerts with the specified agency id. This would remove
+   * all the service alerts returned by a call to
+   * {@link #getServiceAlertsForFederatedAgencyId(String)}.
+   * 
+   * @param agencyId
+   */
+  public void removeAllServiceAlertsForFederatedAgencyId(String agencyId);
 
   public ServiceAlert getServiceAlertForId(AgencyAndId serviceAlertId);
 
@@ -68,15 +75,6 @@ public interface ServiceAlertsService {
    * @return
    */
   public List<ServiceAlert> getServiceAlertsForFederatedAgencyId(String agencyId);
-
-  /**
-   * Remove all service alerts with the specified agency id. This would remove
-   * all the service alerts returned by a call to
-   * {@link #getServiceAlertsForFederatedAgencyId(String)}.
-   * 
-   * @param agencyId
-   */
-  public void removeAllServiceAlertsForFederatedAgencyId(String agencyId);
 
   /**
    * This returns the set of service alerts affecting a particular agency, as
@@ -99,4 +97,5 @@ public interface ServiceAlertsService {
   public List<ServiceAlert> getServiceAlertsForVehicleJourney(long time,
       BlockInstance blockInstance, BlockTripEntry blockTrip,
       AgencyAndId vehicleId);
+
 }

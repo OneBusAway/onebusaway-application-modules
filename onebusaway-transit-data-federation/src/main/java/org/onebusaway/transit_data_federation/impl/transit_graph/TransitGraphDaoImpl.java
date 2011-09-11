@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +29,10 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -69,6 +73,16 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   /****
    * {@link TransitGraphDao} Interface
    ****/
+
+  @Override
+  public List<AgencyEntry> getAllAgencies() {
+    return _graph.getAllAgencies();
+  }
+
+  @Override
+  public AgencyEntry getAgencyForId(String id) {
+    return _graph.getAgencyForId(id);
+  }
 
   @Override
   public List<StopEntry> getAllStops() {
@@ -113,5 +127,25 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   @Override
   public TripEntry getTripEntryForId(AgencyAndId id) {
     return _graph.getTripEntryForId(id);
+  }
+
+  @Override
+  public List<RouteCollectionEntry> getAllRouteCollections() {
+    return _graph.getAllRouteCollections();
+  }
+
+  @Override
+  public RouteCollectionEntry getRouteCollectionForId(AgencyAndId id) {
+    return _graph.getRouteCollectionForId(id);
+  }
+
+  @Override
+  public List<RouteEntry> getAllRoutes() {
+    return _graph.getAllRoutes();
+  }
+
+  @Override
+  public RouteEntry getRouteForId(AgencyAndId id) {
+    return _graph.getRouteForId(id);
   }
 }

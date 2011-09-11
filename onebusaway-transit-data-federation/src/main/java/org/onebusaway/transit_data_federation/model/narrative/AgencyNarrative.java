@@ -31,6 +31,16 @@ public final class AgencyNarrative implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private final String name;
+
+  private final String url;
+
+  private final String timezone;
+
+  private final String lang;
+
+  private final String phone;
+
   private final String disclaimer;
 
   /**
@@ -44,8 +54,33 @@ public final class AgencyNarrative implements Serializable {
   }
 
   private AgencyNarrative(Builder builder) {
+    this.name = builder.name;
+    this.url = builder.url;
+    this.timezone = builder.timezone;
+    this.lang = builder.lang;
+    this.phone = builder.phone;
     this.disclaimer = builder.disclaimer;
     this.privateService = builder.privateService;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public String getTimezone() {
+    return timezone;
+  }
+
+  public String getLang() {
+    return lang;
+  }
+
+  public String getPhone() {
+    return phone;
   }
 
   public String getDisclaimer() {
@@ -62,12 +97,42 @@ public final class AgencyNarrative implements Serializable {
 
   public static class Builder {
 
+    private String name;
+
+    private String url;
+
+    private String timezone;
+
+    private String lang;
+
+    private String phone;
+
     private String disclaimer;
 
     private boolean privateService;
 
     public AgencyNarrative create() {
       return new AgencyNarrative(this);
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
+
+    public void setUrl(String url) {
+      this.url = url;
+    }
+
+    public void setTimezone(String timezone) {
+      this.timezone = timezone;
+    }
+
+    public void setLang(String lang) {
+      this.lang = lang;
+    }
+
+    public void setPhone(String phone) {
+      this.phone = phone;
     }
 
     public void setDisclaimer(String disclaimer) {

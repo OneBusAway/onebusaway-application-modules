@@ -421,7 +421,7 @@ public class BlockIndexServiceImpl implements BlockIndexService {
     for (T index : indices) {
       Set<AgencyAndId> routeIds = new HashSet<AgencyAndId>();
       for (BlockTripEntry blockTrip : index.getTrips())
-        routeIds.add(blockTrip.getTrip().getRouteCollectionId());
+        routeIds.add(blockTrip.getTrip().getRouteCollection().getId());
       for (AgencyAndId routeId : routeIds)
         blocksByRouteId.get(routeId).add(index);
     }

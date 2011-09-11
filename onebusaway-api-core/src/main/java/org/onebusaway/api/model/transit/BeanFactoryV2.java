@@ -935,7 +935,7 @@ public class BeanFactoryV2 {
       List<SituationAffectsV2Bean> affects = new ArrayList<SituationAffectsV2Bean>();
       for (SituationAffectsBean affect : situation.getAllAffects())
         affects.add(getSituationAffects(affect));
-      bean.setAffects(affects);
+      bean.setAllAffects(affects);
     }
 
     if (!CollectionsLibrary.isEmpty(situation.getConsequences())) {
@@ -951,6 +951,7 @@ public class BeanFactoryV2 {
 
     bean.setSummary(getBestString(situation.getSummaries()));
     bean.setDescription(getBestString(situation.getDescriptions()));
+    bean.setUrl(getBestString(situation.getUrls()));
 
     ESeverity severity = situation.getSeverity();
     if (severity != null) {

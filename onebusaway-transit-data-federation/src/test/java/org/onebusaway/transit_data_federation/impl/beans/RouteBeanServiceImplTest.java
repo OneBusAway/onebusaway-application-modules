@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +28,15 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.NameBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -45,29 +47,29 @@ import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data_federation.impl.StopSequenceCollectionServiceImpl;
 import org.onebusaway.transit_data_federation.impl.StopSequencesServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.RouteCollectionEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
-import org.onebusaway.transit_data_federation.model.RouteCollection;
+import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.TripNarrative.Builder;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.RouteService;
-import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public class RouteBeanServiceImplTest {
 
   private RouteBeanServiceImpl _service;
 
-  private ExtendedGtfsRelationalDao _gtfsDao;
-
-  private TransitDataFederationDao _transitDataFederationDao;
+  private TransitGraphDao _transitGraphDao;
 
   private AgencyBeanService _agencyBeanService;
 
@@ -89,11 +91,8 @@ public class RouteBeanServiceImplTest {
   public void setup() {
     _service = new RouteBeanServiceImpl();
 
-    _gtfsDao = Mockito.mock(ExtendedGtfsRelationalDao.class);
-    _service.setGtfsDao(_gtfsDao);
-
-    _transitDataFederationDao = Mockito.mock(TransitDataFederationDao.class);
-    _service.setTransitDataFederationDao(_transitDataFederationDao);
+    _transitGraphDao = Mockito.mock(TransitGraphDao.class);
+    _service.setTransitGraphDao(_transitGraphDao);
 
     _agencyBeanService = Mockito.mock(AgencyBeanService.class);
     _service.setAgencyBeanService(_agencyBeanService);
@@ -114,6 +113,7 @@ public class RouteBeanServiceImplTest {
     _service.setStopSequencesBlocksService(_stopSequenceBlocksService);
 
     _narrativeService = Mockito.mock(NarrativeService.class);
+    _service.setNarrativeService(_narrativeService);
     _stopSequenceBlocksService.setNarrativeService(_narrativeService);
 
     _blockIndexService = Mockito.mock(BlockIndexService.class);
@@ -125,22 +125,21 @@ public class RouteBeanServiceImplTest {
 
     AgencyAndId routeId = new AgencyAndId("1", "route");
 
-    RouteCollection route = new RouteCollection();
-    route.setColor("blue");
-    route.setDescription("route desc");
-    route.setId(routeId);
-    route.setLongName("route long name");
-    route.setShortName("route short name");
-    route.setTextColor("red");
-    route.setType(3);
-    route.setUrl("http://wwww.route.com");
+    RouteCollectionNarrative.Builder routeBuilder = RouteCollectionNarrative.builder();
+    routeBuilder.setColor("blue");
+    routeBuilder.setDescription("route desc");
+    routeBuilder.setLongName("route long name");
+    routeBuilder.setShortName("route short name");
+    routeBuilder.setTextColor("red");
+    routeBuilder.setType(3);
+    routeBuilder.setUrl("http://wwww.route.com");
+    RouteCollectionNarrative route = routeBuilder.create();
 
     AgencyBean agency = new AgencyBean();
     Mockito.when(_agencyBeanService.getAgencyForId("1")).thenReturn(agency);
 
-    Mockito.when(_transitDataFederationDao.getRouteCollectionForId(routeId)).thenReturn(
+    Mockito.when(_narrativeService.getRouteCollectionForId(routeId)).thenReturn(
         route);
-
     RouteBean bean = _service.getRouteForId(routeId);
 
     assertEquals(route.getColor(), bean.getColor());
@@ -158,16 +157,21 @@ public class RouteBeanServiceImplTest {
 
     AgencyAndId routeId = new AgencyAndId("1", "route");
 
-    Route route = new Route();
+    RouteEntryImpl route = new RouteEntryImpl();
     route.setId(new AgencyAndId("1", "raw_route"));
-    List<Route> routes = Arrays.asList(route);
+    List<RouteEntry> routes = Arrays.asList((RouteEntry) route);
 
-    RouteCollection routeCollection = new RouteCollection();
+    RouteCollectionEntryImpl routeCollection = new RouteCollectionEntryImpl();
     routeCollection.setId(routeId);
-    routeCollection.setRoutes(routes);
+    routeCollection.setChildren(routes);
+    route.setParent(routeCollection);
 
-    Mockito.when(_transitDataFederationDao.getRouteCollectionForId(routeId)).thenReturn(
+    Mockito.when(_transitGraphDao.getRouteCollectionForId(routeId)).thenReturn(
         routeCollection);
+
+    RouteCollectionNarrative.Builder rcNarrative = RouteCollectionNarrative.builder();
+    Mockito.when(_narrativeService.getRouteCollectionForId(routeId)).thenReturn(
+        rcNarrative.create());
 
     StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
     StopEntryImpl stopB = stop("stopB", 47.1, -122.1);
@@ -177,17 +181,19 @@ public class RouteBeanServiceImplTest {
     TripEntryImpl tripA = trip("tripA", "sidA");
     TripEntryImpl tripB = trip("tripB", "sidA");
 
-    tripA.setRouteCollectionId(routeId);
+    tripA.setRoute(route);
     tripA.setDirectionId("0");
-    tripB.setRouteCollectionId(routeId);
+    tripB.setRoute(route);
     tripB.setDirectionId("1");
-    
-    Builder tnA = TripNarrative.builder();
+
+    route.setTrips(Arrays.asList((TripEntry) tripA, tripB));
+
+    TripNarrative.Builder tnA = TripNarrative.builder();
     tnA.setTripHeadsign("Destination A");
     Mockito.when(_narrativeService.getTripForId(tripA.getId())).thenReturn(
         tnA.create());
 
-    Builder tnB = TripNarrative.builder();
+    TripNarrative.Builder tnB = TripNarrative.builder();
     tnB.setTripHeadsign("Destination B");
     Mockito.when(_narrativeService.getTripForId(tripB.getId())).thenReturn(
         tnB.create());
@@ -223,29 +229,13 @@ public class RouteBeanServiceImplTest {
 
     AgencyAndId shapeId = new AgencyAndId("1", "shapeId");
 
-    List<AgencyAndId> shapeIds = Arrays.asList(shapeId);
-    Mockito.when(_gtfsDao.getShapePointIdsForRoutes(routes)).thenReturn(
-        shapeIds);
+    Set<AgencyAndId> shapeIds = new HashSet<AgencyAndId>();
+    shapeIds.add(shapeId);
+    tripA.setShapeId(shapeId);
 
     EncodedPolylineBean polyline = new EncodedPolylineBean();
     Mockito.when(_shapeBeanService.getMergedPolylinesForShapeIds(shapeIds)).thenReturn(
         Arrays.asList(polyline));
-
-    /*
-     * Trip tripA = new Trip(); tripA.setId(new AgencyAndId("1", "tripA"));
-     * tripA.setTripHeadsign("Destination A"); tripA.setDirectionId("0");
-     * List<StopTime> stopTimesA = getStopTimesForStops(stopA, stopB, stopC);
-     * 
-     * Trip tripB = new Trip(); tripB.setId(new AgencyAndId("1", "tripB"));
-     * tripB.setTripHeadsign("Destination B"); tripB.setDirectionId("1");
-     * List<StopTime> stopTimesB = getStopTimesForStops(stopC, stopA);
-     * 
-     * List<Trip> trips = Arrays.asList(tripA, tripB);
-     * 
-     * Mockito.when(_gtfsDao.getTripsForRoute(route)).thenReturn(trips);
-     * Mockito.when(_gtfsDao.getStopTimesForTrip(tripA)).thenReturn(stopTimesA);
-     * Mockito.when(_gtfsDao.getStopTimesForTrip(tripB)).thenReturn(stopTimesB);
-     */
 
     // Setup complete
 

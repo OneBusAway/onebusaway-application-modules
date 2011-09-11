@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +62,7 @@ public class TripBeanServiceImpl implements TripBeanService {
     if (tripEntry == null)
       return null;
 
-    AgencyAndId routeId = tripEntry.getRouteCollectionId();
+    AgencyAndId routeId = tripEntry.getRouteCollection().getId();
     RouteBean routeBean = _routeBeanService.getRouteForId(routeId);
 
     TripNarrative tripNarrative = _narrativeService.getTripForId(tripId);

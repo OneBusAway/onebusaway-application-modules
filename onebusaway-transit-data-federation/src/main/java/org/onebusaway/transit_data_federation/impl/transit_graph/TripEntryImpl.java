@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +23,19 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 public class TripEntryImpl implements TripEntry, Serializable {
 
-  private static final long serialVersionUID = 5L;
+  private static final long serialVersionUID = 6L;
 
   private AgencyAndId _id;
 
-  private AgencyAndId _routeId;
+  private RouteEntryImpl _route;
 
-  private AgencyAndId _routeCollectionId;
-  
   private String _directionId;
 
   private BlockEntryImpl _block;
@@ -51,14 +52,10 @@ public class TripEntryImpl implements TripEntry, Serializable {
     _id = id;
   }
 
-  public void setRouteId(AgencyAndId routeId) {
-    _routeId = routeId;
+  public void setRoute(RouteEntryImpl route) {
+    _route = route;
   }
 
-  public void setRouteCollectionId(AgencyAndId routeCollectionId) {
-    _routeCollectionId = routeCollectionId;
-  }
-  
   public void setDirectionId(String directionId) {
     _directionId = directionId;
   }
@@ -93,13 +90,13 @@ public class TripEntryImpl implements TripEntry, Serializable {
   }
 
   @Override
-  public AgencyAndId getRouteId() {
-    return _routeId;
+  public RouteEntry getRoute() {
+    return _route;
   }
 
   @Override
-  public AgencyAndId getRouteCollectionId() {
-    return _routeCollectionId;
+  public RouteCollectionEntry getRouteCollection() {
+    return _route.getParent();
   }
   
   @Override

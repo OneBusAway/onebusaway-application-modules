@@ -15,18 +15,18 @@
  */
 package org.onebusaway.transit_data_federation.services.transit_graph;
 
+import java.util.List;
+
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
-
-import java.util.List;
 
 public interface TripEntry {
 
   public AgencyAndId getId();
 
-  public AgencyAndId getRouteId();
+  public RouteEntry getRoute();
 
-  public AgencyAndId getRouteCollectionId();
+  public RouteCollectionEntry getRouteCollection();
   
   public String getDirectionId();
 

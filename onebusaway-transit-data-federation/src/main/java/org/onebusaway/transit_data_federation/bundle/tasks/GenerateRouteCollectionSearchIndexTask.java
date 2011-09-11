@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +17,6 @@
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -26,13 +25,14 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryParser.ParseException;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.RouteCollectionSearchServiceImpl;
-import org.onebusaway.transit_data_federation.model.RouteCollection;
+import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
-import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,11 +51,7 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
 
   public static final String FIELD_ROUTE_COLLECTION_AGENCY_ID = "routeCollectionAgencyId";
 
-  public static final String FIELD_ROUTE_COLLECTION_ID = "routeCollectionShortName";
-
-  public static final String FIELD_AGENCY_ID = "agencyId";
-
-  public static final String FIELD_ROUTE_ID = "routeId";
+  public static final String FIELD_ROUTE_COLLECTION_ID = "routeCollectionId";
 
   public static final String FIELD_ROUTE_SHORT_NAME = "shortName";
 
@@ -63,24 +59,31 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
 
   public static final String FIELD_ROUTE_DESCRIPTION = "description";
 
-  private TransitDataFederationDao _whereDao;
+  private TransitGraphDao _transitGraphDao;
+
+  private NarrativeService _narrativeService;
 
   private FederatedTransitDataBundle _bundle;
 
   private RefreshService _refreshService;
 
   @Autowired
-  public void setWhereDao(TransitDataFederationDao dao) {
-    _whereDao = dao;
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setNarrativeService(NarrativeService narrativeService) {
+    _narrativeService = narrativeService;
   }
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
   }
-  
+
   @Autowired
-  public void setRefresService(RefreshService refreshService) {
+  public void setRefreshService(RefreshService refreshService) {
     _refreshService = refreshService;
   }
 
@@ -96,54 +99,42 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
   private void buildIndex() throws IOException, ParseException {
     IndexWriter writer = new IndexWriter(_bundle.getRouteSearchIndexPath(),
         new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.LIMITED);
-    for (RouteCollection routeCollection : _whereDao.getAllRouteCollections()) {
-      List<Document> documents = getRouteCollectionAsDocuments(routeCollection);
-      for (Document document : documents)
-        writer.addDocument(document);
+    for (RouteCollectionEntry routeCollection : _transitGraphDao.getAllRouteCollections()) {
+      RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeCollection.getId());
+      Document document = getRouteCollectionAsDocument(routeCollection,
+          narrative);
+      writer.addDocument(document);
     }
     writer.optimize();
     writer.close();
-    
+
     _refreshService.refresh(RefreshableResources.ROUTE_COLLECTION_SEARCH_DATA);
   }
 
-  private List<Document> getRouteCollectionAsDocuments(
-      RouteCollection routeCollection) {
-
-    List<Document> documents = new ArrayList<Document>();
+  private Document getRouteCollectionAsDocument(
+      RouteCollectionEntry routeCollection, RouteCollectionNarrative narrative) {
 
     AgencyAndId routeCollectionId = routeCollection.getId();
 
-    for (Route route : routeCollection.getRoutes()) {
-      Document document = new Document();
+    Document document = new Document();
 
-      // Route Collection
-      document.add(new Field(FIELD_ROUTE_COLLECTION_AGENCY_ID,
-          routeCollectionId.getAgencyId(), Field.Store.YES, Field.Index.NO));
-      document.add(new Field(FIELD_ROUTE_COLLECTION_ID,
-          routeCollectionId.getId(), Field.Store.YES, Field.Index.NO));
+    // Route Collection
+    document.add(new Field(FIELD_ROUTE_COLLECTION_AGENCY_ID,
+        routeCollectionId.getAgencyId(), Field.Store.YES, Field.Index.NO));
+    document.add(new Field(FIELD_ROUTE_COLLECTION_ID,
+        routeCollectionId.getId(), Field.Store.YES, Field.Index.NO));
 
-      // Id
-      AgencyAndId id = route.getId();
-      document.add(new Field(FIELD_AGENCY_ID, id.getAgencyId(),
-          Field.Store.YES, Field.Index.NO));
-      document.add(new Field(FIELD_ROUTE_ID, id.getId(), Field.Store.YES,
-          Field.Index.ANALYZED));
+    if (isValue(narrative.getShortName()))
+      document.add(new Field(FIELD_ROUTE_SHORT_NAME, narrative.getShortName(),
+          Field.Store.YES, Field.Index.ANALYZED));
+    if (isValue(narrative.getLongName()))
+      document.add(new Field(FIELD_ROUTE_LONG_NAME, narrative.getLongName(),
+          Field.Store.NO, Field.Index.ANALYZED));
+    if (isValue(narrative.getDescription()))
+      document.add(new Field(FIELD_ROUTE_DESCRIPTION,
+          narrative.getDescription(), Field.Store.NO, Field.Index.ANALYZED));
 
-      if (isValue(route.getShortName()))
-        document.add(new Field(FIELD_ROUTE_SHORT_NAME, route.getShortName(),
-            Field.Store.NO, Field.Index.ANALYZED));
-      if (isValue(route.getLongName()))
-        document.add(new Field(FIELD_ROUTE_LONG_NAME, route.getLongName(),
-            Field.Store.NO, Field.Index.ANALYZED));
-      if (isValue(route.getDesc()))
-        document.add(new Field(FIELD_ROUTE_DESCRIPTION, route.getDesc(),
-            Field.Store.NO, Field.Index.ANALYZED));
-
-      documents.add(document);
-    }
-
-    return documents;
+    return document;
   }
 
   private static boolean isValue(String value) {

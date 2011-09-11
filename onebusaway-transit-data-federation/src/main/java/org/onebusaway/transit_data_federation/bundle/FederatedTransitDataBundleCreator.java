@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +67,7 @@ public class FederatedTransitDataBundleCreator {
 
   private static final String BUNDLE_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-bundle-creator.xml";
 
-  private List<File> _contextPaths = new ArrayList<File>();
+  private List<String> _contextPaths = new ArrayList<String>();
 
   private Map<String, BeanDefinition> _contextBeans = new HashMap<String, BeanDefinition>();
 
@@ -93,7 +94,7 @@ public class FederatedTransitDataBundleCreator {
    * 
    * @param contextPaths additional Spring context paths to add to the container
    */
-  public void setContextPaths(List<File> paths) {
+  public void setContextPaths(List<String> paths) {
     _contextPaths = paths;
   }
 
@@ -234,8 +235,8 @@ public class FederatedTransitDataBundleCreator {
   private List<String> getPrimaryApplicatonContextPaths() {
     List<String> paths = new ArrayList<String>();
     paths.add(BUNDLE_RESOURCE);
-    for (File contextPath : _contextPaths)
-      paths.add("file:" + contextPath);
+    for (String contextPath : _contextPaths)
+      paths.add(contextPath);
     return paths;
   }
 

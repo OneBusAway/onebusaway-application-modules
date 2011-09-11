@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,33 +16,30 @@
  */
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
-import org.hibernate.SessionFactory;
-import org.onebusaway.gtfs.impl.HibernateGtfsRelationalDaoImpl;
+import org.onebusaway.gtfs.services.GenericMutableDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 public class LoadGtfsTask implements Runnable {
 
   private ApplicationContext _applicationContext;
-
-  private SessionFactory _sessionFactory;
+  
+  private GenericMutableDao _dao;
 
   @Autowired
   public void setApplicationContext(ApplicationContext applicationContext) {
     _applicationContext = applicationContext;
   }
-
+  
   @Autowired
-  public void setSessionFactory(SessionFactory sessionFactory) {
-    _sessionFactory = sessionFactory;
+  public void setDao(GenericMutableDao dao) {
+    _dao = dao;
   }
 
   @Override
   public void run() {
     try {
-      HibernateGtfsRelationalDaoImpl store = new HibernateGtfsRelationalDaoImpl();
-      store.setSessionFactory(_sessionFactory);
-      GtfsReadingSupport.readGtfsIntoStore(_applicationContext, store);
+      GtfsReadingSupport.readGtfsIntoStore(_applicationContext, _dao);
     } catch (Throwable ex) {
       throw new IllegalStateException("error loading gtfs", ex);
     }

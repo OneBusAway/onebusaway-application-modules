@@ -22,12 +22,12 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
-import org.onebusaway.transit_data_federation.model.RouteCollection;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 
 /**
  * Service methods for retrieving lists of routes, usually with a search query.
  * Note that like {@like RouteService}, the underlying representation of a route
- * in a transit data federation bundle is a {@link RouteCollection}, not a
+ * in a transit data federation bundle is a {@link RouteCollectionEntry}, not a
  * {@link Route}.
  * 
  * @author bdferris
@@ -50,6 +50,6 @@ public interface RoutesBeanService {
    * @return the list of all routes for the specified agency
    */
   public ListBean<String> getRouteIdsForAgencyId(String agencyId);
-  
+
   public ListBean<RouteBean> getRoutesForAgencyId(String agencyId);
 }

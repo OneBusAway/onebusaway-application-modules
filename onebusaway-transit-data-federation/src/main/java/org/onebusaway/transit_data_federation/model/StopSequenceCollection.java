@@ -25,10 +25,10 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * A stop sequence collection contains a list of {@link StopSequence} sequences
  * that are headed in the same direction for a particular
- * {@link RouteCollection}, along with a general description of the destinations
- * for those stop sequences and general start and stop locations for the
- * sequences. Typically a stop sequence collection will be generated for each
- * direction of travel for a particular route.
+ * {@link RouteCollectionEntry}, along with a general description of the
+ * destinations for those stop sequences and general start and stop locations
+ * for the sequences. Typically a stop sequence collection will be generated for
+ * each direction of travel for a particular route.
  * 
  * @author bdferris
  * @see StopSequence

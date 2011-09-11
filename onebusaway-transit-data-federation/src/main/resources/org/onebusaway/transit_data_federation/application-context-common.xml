@@ -29,9 +29,8 @@
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
-
-  <import resource="classpath:org/onebusaway/gtfs/application-context.xml" />
-
+           
+  <import resource="classpath:org/onebusaway/container/application-context.xml" />
 
   <bean id="bundle" class="org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle">
     <property name="path" value="${bundlePath}" />
@@ -51,36 +50,7 @@
     <property name="order" value="0" />
   </bean>
 
-  <bean id="transitDataFederationHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
-    <property name="target" value="hibernateAnnotatedClasses" />
-    <property name="values">
-      <list>
-        <value>org.onebusaway.transit_data_federation.model.RouteCollection</value>
-        <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
-      </list>
-    </property>
-  </bean>
-
-  <bean id="transitDataFederationHibernateMappingLocations" class="org.onebusaway.container.spring.ListBeanPostProcessor">
-    <property name="target" value="hibernateMappingLocations" />
-    <property name="values">
-      <list>
-        <value>classpath:org/onebusaway/transit_data_federation/impl/ExtendedGtfsRelationalDaoImpl.hibernate.xml
-                </value>
-        <value>classpath:org/onebusaway/transit_data_federation/impl/TransitDataFederationDaoImpl.hibernate.xml
-                </value>
-      </list>
-    </property>
-  </bean>
-
   <!-- Common Services -->
-
-  <bean id="transitDataFederationDaoImpl" class="org.onebusaway.transit_data_federation.impl.TransitDataFederationDaoImpl"
-    primary="true" />
-  <bean id="transitDataFederationMutableDaoImpl" class="org.onebusaway.transit_data_federation.impl.TransitDataFederationMutableDaoImpl" />
-  <bean id="extendedGtfsRelationalDaoImpl" class="org.onebusaway.transit_data_federation.impl.ExtendedGtfsRelationalDaoImpl"
-    primary="true" />
-
   <bean id="shapePointsLibrary" class="org.onebusaway.transit_data_federation.impl.shapes.ShapePointsLibrary" />
 
 </beans>

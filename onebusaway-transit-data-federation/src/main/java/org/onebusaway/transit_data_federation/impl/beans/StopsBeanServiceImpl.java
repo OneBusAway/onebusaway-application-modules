@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +24,7 @@ import java.util.List;
 import org.apache.lucene.queryParser.ParseException;
 import org.onebusaway.collections.Min;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
+import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -34,11 +36,13 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.StopSearchService;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
+import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +65,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
   private GeospatialBeanService _geospatialBeanService;
 
   @Autowired
-  private ExtendedGtfsRelationalDao _dao;
+  private TransitGraphDao _transitGraphDao;
 
   @Override
   public StopsBean getStops(SearchQueryBean queryBean) throws ServiceException {
@@ -145,10 +149,14 @@ class StopsBeanServiceImpl implements StopsBeanService {
 
   @Override
   public ListBean<String> getStopsIdsForAgencyId(String agencyId) {
-    List<AgencyAndId> stopIds = _dao.getStopIdsForAgencyId(agencyId);
+    AgencyEntry agency = _transitGraphDao.getAgencyForId(agencyId);
+    if (agency == null)
+      throw new NoSuchAgencyServiceException(agencyId);
     List<String> ids = new ArrayList<String>();
-    for (AgencyAndId id : stopIds)
+    for (StopEntry stop : agency.getStops()) {
+      AgencyAndId id = stop.getId();
       ids.add(AgencyAndIdLibrary.convertToString(id));
+    }
     return new ListBean<String>(ids, false);
   }
 

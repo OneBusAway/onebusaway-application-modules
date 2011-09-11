@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +24,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
@@ -46,17 +48,17 @@ public class AgencyServiceImpl implements AgencyService {
   private static Logger _log = LoggerFactory.getLogger(AgencyServiceImpl.class);
 
   @Autowired
-  private GtfsRelationalDao _dao;
+  private TransitGraphDao _graph;
 
   @Autowired
-  private TransitGraphDao _graph;
+  private NarrativeService _narrativeService;
 
   @Cacheable
   public TimeZone getTimeZoneForAgencyId(String agencyId) {
-    Agency agency = _dao.getAgencyForId(agencyId);
-    if (agency == null)
+    AgencyNarrative narrative = _narrativeService.getAgencyForId(agencyId);
+    if (narrative == null)
       throw new NoSuchAgencyServiceException(agencyId);
-    return TimeZone.getTimeZone(agency.getTimezone());
+    return TimeZone.getTimeZone(narrative.getTimezone());
   }
 
   @Cacheable
@@ -77,40 +79,23 @@ public class AgencyServiceImpl implements AgencyService {
   @Cacheable
   public Map<String, CoordinatePoint> getAgencyIdsAndCenterPoints() {
 
-    Map<String, StopsCenterOfMass> stopsByAgencyId = new HashMap<String, StopsCenterOfMass>();
-
-    for (TripEntry trip : _graph.getAllTrips()) {
-
-      AgencyAndId id = trip.getId();
-      String agencyId = id.getAgencyId();
-
-      StopsCenterOfMass stops = stopsByAgencyId.get(agencyId);
-
-      if (stops == null) {
-        stops = new StopsCenterOfMass();
-        stopsByAgencyId.put(agencyId, stops);
-      }
-
-      for (StopTimeEntry stopTime : trip.getStopTimes()) {
-        StopEntry stop = stopTime.getStop();
-        stops.lats += stop.getStopLat();
-        stops.lons += stop.getStopLon();
-        stops.count++;
-      }
-    }
-
     Map<String, CoordinatePoint> centersByAgencyId = new HashMap<String, CoordinatePoint>();
 
-    for (Agency agency : _dao.getAllAgencies()) {
+    for (AgencyEntry agency : _graph.getAllAgencies()) {
 
-      StopsCenterOfMass stops = stopsByAgencyId.get(agency.getId());
+      List<StopEntry> stops = agency.getStops();
 
-      if (stops == null || stops.count == 0) {
+      if (CollectionsLibrary.isEmpty(stops)) {
         _log.warn("Agency has no service: " + agency);
-
       } else {
-        double lat = stops.lats / stops.count;
-        double lon = stops.lons / stops.count;
+        StopsCenterOfMass centerOfMass = new StopsCenterOfMass();
+        for (StopEntry stop : stops) {
+          centerOfMass.lats += stop.getStopLat();
+          centerOfMass.lons += stop.getStopLon();
+          centerOfMass.count++;
+        }
+        double lat = centerOfMass.lats / centerOfMass.count;
+        double lon = centerOfMass.lons / centerOfMass.count;
         centersByAgencyId.put(agency.getId(), new CoordinatePoint(lat, lon));
       }
     }
@@ -123,30 +108,14 @@ public class AgencyServiceImpl implements AgencyService {
 
     Map<String, CoordinateBounds> boundsByAgencyId = new HashMap<String, CoordinateBounds>();
 
-    for (TripEntry trip : _graph.getAllTrips()) {
+    for (AgencyEntry agency : _graph.getAllAgencies()) {
 
-      AgencyAndId id = trip.getId();
-      String agencyId = id.getAgencyId();
+      CoordinateBounds bounds = new CoordinateBounds();
+      List<StopEntry> stops = agency.getStops();
 
-      CoordinateBounds bounds = boundsByAgencyId.get(agencyId);
-
-      if (bounds == null) {
-        bounds = new CoordinateBounds();
-        boundsByAgencyId.put(agencyId, bounds);
-      }
-
-      for (StopTimeEntry stopTime : trip.getStopTimes()) {
-        StopEntry stop = stopTime.getStop();
+      for (StopEntry stop : stops)
         bounds.addPoint(stop.getStopLat(), stop.getStopLon());
-      }
-    }
-
-    for (Agency agency : _dao.getAllAgencies()) {
-
-      CoordinateBounds bounds = boundsByAgencyId.get(agency.getId());
-      
-      if( bounds == null)
-        boundsByAgencyId.put(agency.getId(),new CoordinateBounds());
+      boundsByAgencyId.put(agency.getId(), bounds);
     }
 
     return boundsByAgencyId;

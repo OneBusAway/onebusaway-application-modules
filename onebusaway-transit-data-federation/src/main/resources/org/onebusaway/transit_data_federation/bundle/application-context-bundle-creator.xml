@@ -2,6 +2,7 @@
 <!--
 
     Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+    Copyright (C) 2011 Google, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,11 +17,6 @@
     limitations under the License.
 
 -->
-<!-- Copyright 2008 Brian Ferris Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file 
-  except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
-  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS 
-  IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language 
-  governing permissions and limitations under the License. -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
   xmlns:tx="http://www.springframework.org/schema/tx"
@@ -83,84 +79,21 @@
 
   <bean id="loadGtfsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.LoadGtfsTask" />
 
-  <!-- Route Collections -->
-
-  <bean id="task_route_collections" class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="route_collections" />
-    <property name="afterTaskName" value="gtfs" />
-    <property name="task" ref="routeCollectionsTask" />
-  </bean>
-
-  <bean id="routeCollectionsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionsTask" />
-
-  <!-- Route Search -->
-
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="route_search_index" />
-    <property name="afterTaskName" value="route_collections" />
-    <property name="task" ref="routeCollectionsSearchIndexTask" />
-  </bean>
-
-  <bean id="routeCollectionsSearchIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionSearchIndexTask" />
-
-  <!-- Stop Search -->
-
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="stop_search_index" />
-    <property name="afterTaskName" value="route_search_index" />
-    <property name="task" ref="stopSearchIndexTask" />
-  </bean>
-
-  <bean id="stopSearchIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateStopSearchIndexTask" />
-
   <!-- Calendar Data -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="calendar_service" />
-    <property name="afterTaskName" value="stop_search_index" />
+    <property name="afterTaskName" value="gtfs" />
     <property name="task" ref="calendarServiceTask" />
   </bean>
 
   <bean id="calendarServiceTask" class="org.onebusaway.transit_data_federation.bundle.tasks.CalendarServiceDataTask" />
 
-  <!-- OTP Graph -->
-
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="otp_graph" />
-    <property name="afterTaskName" value="calendar_service" />
-    <property name="taskBeanName">
-      <idref bean="otpGraphBuidlerTask" />
-    </property>
-  </bean>
-
-  <bean id="otpGraphBuidlerTask" class="org.opentripplanner.graph_builder.GraphBuilderTask">
-    <property name="graphBundle" ref="otpGraphBundle" />
-    <property name="graphBuilders">
-      <list>
-        <ref bean="osmBuilder" />
-      </list>
-    </property>
-    <property name="alwaysRebuild" value="true" />
-  </bean>
-
-  <bean id="osmBuilder" class="org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl">
-    <property name="provider" ref="osmProvider" />
-    <property name="defaultAccessPermissionsSource">
-      <bean class="org.opentripplanner.graph_builder.impl.osm.DefaultOSMStreetTraversalPermissionsSource" />
-    </property>
-  </bean>
-
-  <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
-    <property name="regionsSource">
-      <bean class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsStopRegionsSourceImpl" />
-    </property>
-  </bean>
-
-  <!-- Trip Graph -->
+  <!-- Transit Graph -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="transit_graph" />
-    <property name="afterTaskName" value="otp_graph" />
+    <property name="afterTaskName" value="calendar_service" />
     <property name="task" ref="tripGraphTask" />
   </bean>
 
@@ -186,32 +119,89 @@
 
   <bean id="narrativesTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateNarrativesTask" />
 
-  <!-- -->
+  <!-- Route Search -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="stop_transfers" />
+    <property name="taskName" value="route_search_index" />
     <property name="afterTaskName" value="narratives" />
-    <property name="task" ref="stopTransfersTask" />
+    <property name="task" ref="routeCollectionsSearchIndexTask" />
   </bean>
 
-  <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.bundle.tasks.stop_transfers.StopTransfersTask" />
+  <bean id="routeCollectionsSearchIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionSearchIndexTask" />
 
-  <!-- -->
+  <!-- Stop Search -->
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="stop_search_index" />
+    <property name="afterTaskName" value="route_search_index" />
+    <property name="task" ref="stopSearchIndexTask" />
+  </bean>
+
+  <bean id="stopSearchIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.GenerateStopSearchIndexTask" />
+
+  <!-- Shape Geospatial Index -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="shape_geospatial_index" />
-    <property name="afterTaskName" value="stop_transfers" />
+    <property name="afterTaskName" value="stop_search_index" />
     <property name="task" ref="shapeGeospatialIndexTask" />
   </bean>
 
   <bean id="shapeGeospatialIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.ShapeGeospatialIndexTask" />
+
+  <!-- OTP Graph -->
+
+  <!-- This is not enabled by default, only enable if you want trip planning support -->
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="otp_graph" />
+    <property name="afterTaskName" value="shape_geospatial_index" />
+    <property name="taskBeanName">
+      <idref bean="otpGraphBuidlerTask" />
+    </property>
+    <property name="enabled" value="false" />
+  </bean>
+
+  <bean id="otpGraphBuidlerTask" class="org.opentripplanner.graph_builder.GraphBuilderTask">
+    <property name="graphBundle" ref="otpGraphBundle" />
+    <property name="graphBuilders">
+      <list>
+        <ref bean="osmBuilder" />
+      </list>
+    </property>
+    <property name="alwaysRebuild" value="true" />
+  </bean>
+
+  <bean id="osmBuilder" class="org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl">
+    <property name="provider" ref="osmProvider" />
+    <property name="defaultAccessPermissionsSource">
+      <bean class="org.opentripplanner.graph_builder.impl.osm.DefaultOSMStreetTraversalPermissionsSource" />
+    </property>
+  </bean>
+
+  <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
+    <property name="regionsSource">
+      <bean class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsStopRegionsSourceImpl" />
+    </property>
+  </bean>
+
+  <!-- Stop Transfers -->
+
+  <!-- This is not enabled by default, only enable if you want trip planning support -->
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="stop_transfers" />
+    <property name="afterTaskName" value="otp_graph" />
+    <property name="task" ref="stopTransfersTask" />
+    <property name="enabled" value="false" />
+  </bean>
+
+  <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.bundle.tasks.stop_transfers.StopTransfersTask" />
 
   <!-- Transfer Patterns -->
 
   <!-- This is not enabled by default, as it should really be run on a cluster -->
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="transfer_patterns" />
-    <property name="afterTaskNames" value="shape_geospatial_index" />
+    <property name="afterTaskNames" value="stop_transfers" />
     <property name="task" ref="transferPatternsTask" />
     <property name="enabled" value="false" />
   </bean>
@@ -239,7 +229,7 @@
   </bean>
 
   <bean id="serializedTransferPatternsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.SerializedTransferPatternsTask" />
-  
+
   <!-- Trip Planner Test Task -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">

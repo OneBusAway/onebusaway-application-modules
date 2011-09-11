@@ -19,10 +19,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.route;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.routeCollection;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
@@ -38,6 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -64,7 +66,8 @@ public class ServiceAlertsServiceImplTest {
   @Test
   public void testCreateServiceAlert() {
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert = _service.createServiceAlert("1", builder);
+    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
+        "1");
 
     assertTrue(serviceAlert.hasCreationTime());
     assertTrue(serviceAlert.hasId());
@@ -74,7 +77,8 @@ public class ServiceAlertsServiceImplTest {
   @Test
   public void testSerialization() throws IOException {
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert = _service.createServiceAlert("1", builder);
+    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
+        "1");
 
     FileInputStream in = new FileInputStream(_serviceAlertsPath);
     ServiceAlertsCollection collection = ServiceAlertsCollection.parseFrom(in);
@@ -90,10 +94,12 @@ public class ServiceAlertsServiceImplTest {
   @Test
   public void testGetAllServiceAlerts() {
     ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert1 = _service.createServiceAlert("1", builder1);
+    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
+        "1");
 
     ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert2 = _service.createServiceAlert("1", builder2);
+    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
+        "1");
 
     List<ServiceAlert> alerts = _service.getAllServiceAlerts();
     assertEquals(2, alerts.size());
@@ -107,7 +113,8 @@ public class ServiceAlertsServiceImplTest {
     Affects.Builder affects = Affects.newBuilder();
     affects.setAgencyId("2");
     builder.addAffects(affects);
-    ServiceAlert serviceAlert = _service.createServiceAlert("1", builder);
+    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
+        "1");
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForFederatedAgencyId("1");
     assertEquals(1, alerts.size());
@@ -120,10 +127,12 @@ public class ServiceAlertsServiceImplTest {
   @Test
   public void testGetServiceAlertForId() {
     ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert1 = _service.createServiceAlert("1", builder1);
+    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
+        "1");
 
     ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert2 = _service.createServiceAlert("1", builder2);
+    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
+        "1");
 
     ServiceAlert alert = _service.getServiceAlertForId(ServiceAlertLibrary.agencyAndId(serviceAlert1.getId()));
     assertSame(serviceAlert1, alert);
@@ -141,7 +150,8 @@ public class ServiceAlertsServiceImplTest {
     Affects.Builder affects = Affects.newBuilder();
     affects.setAgencyId("2");
     builder.addAffects(affects);
-    ServiceAlert serviceAlert = _service.createServiceAlert("1", builder);
+    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
+        "1");
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForAgencyId(
         System.currentTimeMillis(), "1");
@@ -164,26 +174,30 @@ public class ServiceAlertsServiceImplTest {
     affects1.setStopId(ServiceAlertLibrary.id("1", "10020"));
     affects1.setTripId(ServiceAlertLibrary.id("1", "TripA"));
     builder1.addAffects(affects1);
-    ServiceAlert serviceAlert1 = _service.createServiceAlert("1", builder1);
+    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
+        "1");
 
     ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
     Affects.Builder affects2 = Affects.newBuilder();
     affects2.setTripId(ServiceAlertLibrary.id("1", "TripA"));
     builder2.addAffects(affects2);
-    ServiceAlert serviceAlert2 = _service.createServiceAlert("1", builder2);
+    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
+        "1");
 
     ServiceAlert.Builder builder3 = ServiceAlert.newBuilder();
     Affects.Builder affects3 = Affects.newBuilder();
     affects3.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
     builder3.addAffects(affects3);
-    ServiceAlert serviceAlert3 = _service.createServiceAlert("1", builder3);
+    ServiceAlert serviceAlert3 = _service.createOrUpdateServiceAlert(builder3,
+        "1");
 
     ServiceAlert.Builder builder4 = ServiceAlert.newBuilder();
     Affects.Builder affects4 = Affects.newBuilder();
     affects4.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
     affects4.setDirectionId("1");
     builder4.addAffects(affects4);
-    ServiceAlert serviceAlert4 = _service.createServiceAlert("1", builder4);
+    ServiceAlert serviceAlert4 = _service.createOrUpdateServiceAlert(builder4,
+        "1");
 
     /**
      * These alerts shouldn't match
@@ -193,37 +207,39 @@ public class ServiceAlertsServiceImplTest {
     affects5.setStopId(ServiceAlertLibrary.id("1", "10021"));
     affects5.setTripId(ServiceAlertLibrary.id("1", "TripA"));
     builder5.addAffects(affects5);
-    _service.createServiceAlert("1", builder5);
+    _service.createOrUpdateServiceAlert(builder5, "1");
 
     ServiceAlert.Builder builder6 = ServiceAlert.newBuilder();
     Affects.Builder affects6 = Affects.newBuilder();
     affects6.setStopId(ServiceAlertLibrary.id("1", "10020"));
     affects6.setTripId(ServiceAlertLibrary.id("1", "TripB"));
     builder6.addAffects(affects6);
-    _service.createServiceAlert("1", builder6);
+    _service.createOrUpdateServiceAlert(builder6, "1");
 
     ServiceAlert.Builder builder7 = ServiceAlert.newBuilder();
     Affects.Builder affects7 = Affects.newBuilder();
     affects7.setTripId(ServiceAlertLibrary.id("1", "TripB"));
     builder7.addAffects(affects7);
-    _service.createServiceAlert("1", builder7);
+    _service.createOrUpdateServiceAlert(builder7, "1");
 
     ServiceAlert.Builder builder8 = ServiceAlert.newBuilder();
     Affects.Builder affects8 = Affects.newBuilder();
     affects8.setRouteId(ServiceAlertLibrary.id("1", "RouteY"));
     builder8.addAffects(affects8);
-    _service.createServiceAlert("1", builder8);
+    _service.createOrUpdateServiceAlert(builder8, "1");
 
     ServiceAlert.Builder builder9 = ServiceAlert.newBuilder();
     Affects.Builder affects9 = Affects.newBuilder();
     affects9.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
     affects9.setDirectionId("0");
     builder9.addAffects(affects9);
-    _service.createServiceAlert("1", builder9);
+    _service.createOrUpdateServiceAlert(builder9, "1");
 
+    RouteEntryImpl route = route("RouteX");
+    routeCollection("RouteX", route);
     StopEntryImpl stop = stop("10020", 47.0, -122.0);
     TripEntryImpl trip = trip("TripA");
-    trip.setRouteCollectionId(aid("RouteX"));
+    trip.setRoute(route);
     trip.setDirectionId("1");
     stopTime(0, stop, trip, time(8, 53), 0);
     BlockEntryImpl block = block("block");
@@ -248,7 +264,8 @@ public class ServiceAlertsServiceImplTest {
     Affects.Builder affects = Affects.newBuilder();
     affects.setStopId(ServiceAlertLibrary.id("1", "10020"));
     builder.addAffects(affects);
-    ServiceAlert serviceAlert = _service.createServiceAlert("1", builder);
+    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
+        "1");
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForStopId(
         System.currentTimeMillis(), new AgencyAndId("1", "10020"));
@@ -270,20 +287,23 @@ public class ServiceAlertsServiceImplTest {
     Affects.Builder affects2 = Affects.newBuilder();
     affects2.setTripId(ServiceAlertLibrary.id("1", "TripA"));
     builder2.addAffects(affects2);
-    ServiceAlert serviceAlert2 = _service.createServiceAlert("1", builder2);
+    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
+        "1");
 
     ServiceAlert.Builder builder3 = ServiceAlert.newBuilder();
     Affects.Builder affects3 = Affects.newBuilder();
     affects3.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
     builder3.addAffects(affects3);
-    ServiceAlert serviceAlert3 = _service.createServiceAlert("1", builder3);
+    ServiceAlert serviceAlert3 = _service.createOrUpdateServiceAlert(builder3,
+        "1");
 
     ServiceAlert.Builder builder4 = ServiceAlert.newBuilder();
     Affects.Builder affects4 = Affects.newBuilder();
     affects4.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
     affects4.setDirectionId("1");
     builder4.addAffects(affects4);
-    ServiceAlert serviceAlert4 = _service.createServiceAlert("1", builder4);
+    ServiceAlert serviceAlert4 = _service.createOrUpdateServiceAlert(builder4,
+        "1");
 
     /**
      * These alerts shouldn't match
@@ -293,30 +313,32 @@ public class ServiceAlertsServiceImplTest {
     affects1.setStopId(ServiceAlertLibrary.id("1", "10020"));
     affects1.setTripId(ServiceAlertLibrary.id("1", "TripA"));
     builder1.addAffects(affects1);
-    _service.createServiceAlert("1", builder1);
+    _service.createOrUpdateServiceAlert(builder1, "1");
 
     ServiceAlert.Builder builder7 = ServiceAlert.newBuilder();
     Affects.Builder affects7 = Affects.newBuilder();
     affects7.setTripId(ServiceAlertLibrary.id("1", "TripB"));
     builder7.addAffects(affects7);
-    _service.createServiceAlert("1", builder7);
+    _service.createOrUpdateServiceAlert(builder7, "1");
 
     ServiceAlert.Builder builder8 = ServiceAlert.newBuilder();
     Affects.Builder affects8 = Affects.newBuilder();
     affects8.setRouteId(ServiceAlertLibrary.id("1", "RouteY"));
     builder8.addAffects(affects8);
-    _service.createServiceAlert("1", builder8);
+    _service.createOrUpdateServiceAlert(builder8, "1");
 
     ServiceAlert.Builder builder9 = ServiceAlert.newBuilder();
     Affects.Builder affects9 = Affects.newBuilder();
     affects9.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
     affects9.setDirectionId("0");
     builder9.addAffects(affects9);
-    _service.createServiceAlert("1", builder9);
+    _service.createOrUpdateServiceAlert(builder9, "1");
 
+    RouteEntryImpl route = route("RouteX");
+    routeCollection("RouteX", route);
     StopEntryImpl stop = stop("10020", 47.0, -122.0);
     TripEntryImpl trip = trip("TripA");
-    trip.setRouteCollectionId(aid("RouteX"));
+    trip.setRoute(route);
     trip.setDirectionId("1");
     stopTime(0, stop, trip, time(8, 53), 0);
     BlockEntryImpl block = block("block");
@@ -338,10 +360,10 @@ public class ServiceAlertsServiceImplTest {
   public void testRemoveServiceAlertsForFederatedAgencyId() {
 
     ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
-    _service.createServiceAlert("1", builder1);
+    _service.createOrUpdateServiceAlert(builder1, "1");
 
     ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
-    _service.createServiceAlert("1", builder2);
+    _service.createOrUpdateServiceAlert(builder2, "1");
 
     _service.removeAllServiceAlertsForFederatedAgencyId("2");
 
@@ -358,7 +380,8 @@ public class ServiceAlertsServiceImplTest {
   public void testRemoveServiceAlert() {
 
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    ServiceAlert serviceAlert = _service.createServiceAlert("1", builder);
+    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
+        "1");
 
     AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
     _service.removeServiceAlert(id);
@@ -373,16 +396,17 @@ public class ServiceAlertsServiceImplTest {
     Affects.Builder affects = Affects.newBuilder();
     affects.setAgencyId("2");
     builder.addAffects(affects);
-    ServiceAlert serviceAlert1 = _service.createServiceAlert("1", builder);
+    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder,
+        "1");
 
     builder = ServiceAlert.newBuilder(serviceAlert1);
     builder.clearAffects();
     affects = Affects.newBuilder();
     affects.setStopId(ServiceAlertLibrary.id("1", "10020"));
     builder.addAffects(affects);
-    ServiceAlert serviceAlert2 = builder.build();
 
-    _service.updateServiceAlert(serviceAlert2);
+    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder,
+        null);
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForAgencyId(
         System.currentTimeMillis(), "2");

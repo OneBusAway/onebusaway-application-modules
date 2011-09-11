@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +25,9 @@ import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
@@ -81,7 +84,18 @@ public class NarrativeServiceImpl implements NarrativeService {
   }
 
   @Override
+  public RouteCollectionNarrative getRouteCollectionForId(
+      AgencyAndId routeCollectionId) {
+    return _provider.getRouteCollectionNarrativeForId(routeCollectionId);
+  }
+
+  @Override
   public TripNarrative getTripForId(AgencyAndId tripId) {
     return _provider.getNarrativeForTripId(tripId);
+  }
+  
+  @Override
+  public ShapePoints getShapePointsForId(AgencyAndId id) {
+    return _provider.getShapePointsForId(id);
   }
 }

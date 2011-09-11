@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +34,6 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -50,7 +50,7 @@ class ShapeGeospatialIndexTask implements Runnable {
 
   private TransitGraphDao _transitGraphDao;
 
-  private ShapePointService _shapePointService;
+  private ShapePointHelper _shapePointHelper;
 
   private FederatedTransitDataBundle _bundle;
 
@@ -64,8 +64,8 @@ class ShapeGeospatialIndexTask implements Runnable {
   }
 
   @Autowired
-  public void setShapePointService(ShapePointService shapePointService) {
-    _shapePointService = shapePointService;
+  public void setShapePointHelper(ShapePointHelper shapePointHelper) {
+    _shapePointHelper = shapePointHelper;
   }
 
   @Autowired
@@ -139,17 +139,33 @@ class ShapeGeospatialIndexTask implements Runnable {
 
     for (AgencyAndId shapeId : allShapeIds) {
 
-      ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(shapeId);
+      ShapePoints shapePoints = _shapePointHelper.getShapePointsForShapeId(shapeId);
 
       for (int i = 0; i < shapePoints.getSize(); i++) {
 
         double lat = shapePoints.getLatForIndex(i);
         double lon = shapePoints.getLonForIndex(i);
 
-        CoordinatePoint gridCellCorner = getGridCellCornerForPoint(lat, lon,
-            latStep, lonStep);
+        addGridCellForShapePoint(shapeIdsByGridCellCorner, lat, lon, latStep,
+            lonStep, shapeId);
 
-        shapeIdsByGridCellCorner.get(gridCellCorner).add(shapeId);
+        /**
+         * If there is a particularly long stretch between shape points, we want
+         * to fill in grid cells in-between
+         */
+        if (i > 0) {
+          double prevLat = shapePoints.getLatForIndex(i - 1);
+          double prevLon = shapePoints.getLonForIndex(i - 1);
+          double totalDistance = SphericalGeometryLibrary.distance(prevLat,
+              prevLon, lat, lon);
+          for (double d = _gridSize; d < totalDistance; d += _gridSize) {
+            double r = d / totalDistance;
+            double latPart = (lat - prevLat) * r + prevLat;
+            double lonPart = (lon - prevLon) * r + prevLon;
+            addGridCellForShapePoint(shapeIdsByGridCellCorner, latPart,
+                lonPart, latStep, lonStep, shapeId);
+          }
+        }
       }
     }
 
@@ -160,14 +176,24 @@ class ShapeGeospatialIndexTask implements Runnable {
 
     for (Map.Entry<CoordinatePoint, Set<AgencyAndId>> entry : shapeIdsByGridCellCorner.entrySet()) {
       CoordinatePoint p = entry.getKey();
-      CoordinateBounds bounds = new CoordinateBounds(p.getLat(), p.getLat()
-          + latStep, p.getLon(), p.getLon() + lonStep);
+      CoordinateBounds bounds = new CoordinateBounds(p.getLat(), p.getLon(),
+          p.getLat() + latStep, p.getLon() + lonStep);
 
       List<AgencyAndId> shapeIds = new ArrayList<AgencyAndId>(entry.getValue());
       shapeIdsByGridCell.put(bounds, shapeIds);
     }
 
     return shapeIdsByGridCell;
+  }
+
+  private void addGridCellForShapePoint(
+      Map<CoordinatePoint, Set<AgencyAndId>> shapeIdsByGridCellCorner,
+      double lat, double lon, double latStep, double lonStep,
+      AgencyAndId shapeId) {
+
+    CoordinatePoint gridCellCorner = getGridCellCornerForPoint(lat, lon,
+        latStep, lonStep);
+    shapeIdsByGridCellCorner.get(gridCellCorner).add(shapeId);
   }
 
   private CoordinatePoint getGridCellCornerForPoint(double lat, double lon,

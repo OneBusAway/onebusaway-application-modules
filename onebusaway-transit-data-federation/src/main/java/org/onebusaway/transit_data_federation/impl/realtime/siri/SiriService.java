@@ -286,13 +286,13 @@ public class SiriService {
     if (situations == null)
       return;
 
-    List<ServiceAlert> serviceAlertsToUpdate = new ArrayList<ServiceAlert>();
+    List<ServiceAlert.Builder> serviceAlertsToUpdate = new ArrayList<ServiceAlert.Builder>();
     List<AgencyAndId> serviceAlertIdsToRemove = new ArrayList<AgencyAndId>();
 
     for (PtSituationElementStructure ptSituation : situations.getPtSituationElement()) {
 
-      ServiceAlert serviceAlert = getPtSituationAsServiceAlert(ptSituation,
-          endpointDetails);
+      ServiceAlert.Builder serviceAlert = getPtSituationAsServiceAlert(
+          ptSituation, endpointDetails);
 
       WorkflowStatusEnumeration progress = ptSituation.getProgress();
       boolean remove = (progress != null && (progress == WorkflowStatusEnumeration.CLOSING || progress == WorkflowStatusEnumeration.CLOSED));
@@ -305,11 +305,17 @@ public class SiriService {
       }
     }
 
-    _serviceAlertsService.updateServiceAlerts(serviceAlertsToUpdate);
+    String defaultAgencyId = null;
+    if (!CollectionsLibrary.isEmpty(endpointDetails.getDefaultAgencyIds()))
+      defaultAgencyId = endpointDetails.getDefaultAgencyIds().get(0);
+
+    for (ServiceAlert.Builder serviceAlert : serviceAlertsToUpdate)
+      _serviceAlertsService.createOrUpdateServiceAlert(serviceAlert,
+          defaultAgencyId);
     _serviceAlertsService.removeServiceAlerts(serviceAlertIdsToRemove);
   }
 
-  private ServiceAlert getPtSituationAsServiceAlert(
+  private ServiceAlert.Builder getPtSituationAsServiceAlert(
       PtSituationElementStructure ptSituation,
       SiriEndpointDetails endpointDetails) {
 
@@ -331,7 +337,7 @@ public class SiriService {
     handleAffects(ptSituation, serviceAlert);
     handleConsequences(ptSituation, serviceAlert);
 
-    return serviceAlert.build();
+    return serviceAlert;
   }
 
   private void handleDescriptions(PtSituationElementStructure ptSituation,

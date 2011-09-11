@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- *
+ * Copyright (C) 2011 Google, Inc.
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,14 +28,14 @@ import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.services.UniqueService;
+import org.onebusaway.transit_data_federation.bundle.tasks.ShapePointHelper;
+import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
-import org.onebusaway.transit_data_federation.model.RouteCollection;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
-import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,13 +48,11 @@ public class TripEntriesFactory {
 
   private UniqueService _uniqueService;
 
-  private TransitDataFederationDao _whereDao;
-
   private GtfsRelationalDao _gtfsDao;
 
   private StopTimeEntriesFactory _stopTimeEntriesFactory;
 
-  private ShapePointService _shapePointsService;
+  private ShapePointHelper _shapePointsHelper;
 
   private boolean _throwExceptionOnInvalidStopToShapeMappingException = true;
 
@@ -63,13 +62,8 @@ public class TripEntriesFactory {
   }
 
   @Autowired
-  public void setWhereDao(TransitDataFederationDao whereDao) {
-    _whereDao = whereDao;
-  }
-
-  @Autowired
-  public void setShapePointService(ShapePointService shapePointsService) {
-    _shapePointsService = shapePointsService;
+  public void setShapePointHelper(ShapePointHelper shapePointsHelper) {
+    _shapePointsHelper = shapePointsHelper;
   }
 
   @Autowired
@@ -102,7 +96,8 @@ public class TripEntriesFactory {
 
       _log.info("trips to process: " + tripsForRoute.size());
       int tripIndex = 0;
-      RouteCollection routeCollection = _whereDao.getRouteCollectionForRoute(route);
+      RouteEntryImpl routeEntry = graph.getRouteForId(route.getId());
+      ArrayList<TripEntry> tripEntries = new ArrayList<TripEntry>();
 
       for (Trip trip : tripsForRoute) {
         if (tripIndex % 50 == 0)
@@ -110,9 +105,14 @@ public class TripEntriesFactory {
               + tripsForRoute.size());
         tripIndex++;
         TripEntryImpl tripEntry = processTrip(graph, trip);
-        if (tripEntry != null)
-          tripEntry.setRouteCollectionId(unique(routeCollection.getId()));
+        if (tripEntry != null) {
+          tripEntry.setRoute(routeEntry);
+          tripEntries.add(tripEntry);
+        }
       }
+
+      tripEntries.trimToSize();
+      routeEntry.setTrips(tripEntries);
     }
 
     if (_stopTimeEntriesFactory.getInvalidStopToShapeMappingExceptionCount() > 0
@@ -136,7 +136,7 @@ public class TripEntriesFactory {
     ShapePoints shapePoints = null;
 
     if (trip.getShapeId() != null)
-      shapePoints = _shapePointsService.getShapePointsForShapeId(trip.getShapeId());
+      shapePoints = _shapePointsHelper.getShapePointsForShapeId(trip.getShapeId());
 
     Agency agency = trip.getRoute().getAgency();
     TimeZone tz = TimeZone.getTimeZone(agency.getTimezone());
@@ -145,7 +145,6 @@ public class TripEntriesFactory {
     TripEntryImpl tripEntry = new TripEntryImpl();
 
     tripEntry.setId(trip.getId());
-    tripEntry.setRouteId(unique(trip.getRoute().getId()));
     tripEntry.setDirectionId(unique(trip.getDirectionId()));
     tripEntry.setServiceId(unique(lsid));
 

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.collections.Counter;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.Agency;
@@ -43,15 +45,16 @@ import org.onebusaway.transit_data_federation.model.ProjectedPoint;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.modifications.Modifications;
 import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
-import org.onebusaway.transit_data_federation.model.narrative.StopNarrative.Builder;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
-import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -78,22 +81,17 @@ public class GenerateNarrativesTask implements Runnable {
 
   private Logger _log = LoggerFactory.getLogger(GenerateNarrativesTask.class);
 
-  @Autowired
   private FederatedTransitDataBundle _bundle;
 
-  @Autowired
-  private GtfsRelationalDao _dao;
+  private GtfsRelationalDao _gtfsDao;
 
-  @Autowired
-  private TransitGraphDao _graphDao;
+  private TransitGraphDao _transitGraphDao;
 
-  @Autowired
   private BlockIndexService _blockIndexService;
 
-  @Autowired
   private Modifications _modifications;
 
-  private ShapePointService _shapePointService;
+  private ShapePointHelper _shapePointsHelper;
 
   private UniqueService _uniqueService;
 
@@ -102,8 +100,33 @@ public class GenerateNarrativesTask implements Runnable {
   private double _stopDirectionStandardDeviationThreshold = 0.7;
 
   @Autowired
-  public void setShapePointService(ShapePointService shapePointService) {
-    _shapePointService = shapePointService;
+  public void setBundle(FederatedTransitDataBundle bundle) {
+    _bundle = bundle;
+  }
+
+  @Autowired
+  public void setGtfsDao(GtfsRelationalDao gtfsDao) {
+    _gtfsDao = gtfsDao;
+  }
+
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setBlockIndexService(BlockIndexService blockIndexService) {
+    _blockIndexService = blockIndexService;
+  }
+
+  @Autowired
+  public void setModifications(Modifications modifications) {
+    _modifications = modifications;
+  }
+
+  @Autowired
+  public void setShapePointHelper(ShapePointHelper shapePointHelper) {
+    _shapePointsHelper = shapePointHelper;
   }
 
   @Autowired
@@ -127,8 +150,10 @@ public class GenerateNarrativesTask implements Runnable {
     NarrativeProviderImpl provider = new NarrativeProviderImpl();
 
     generateAgencyNarratives(provider);
+    generateRouteNarratives(provider);
+    generateShapePointNarratives(provider);
     generateStopNarratives(provider);
-    generateNarrativesForTrips(provider);
+    generateTripNarratives(provider);
 
     try {
       ObjectSerializationLibrary.writeObject(
@@ -139,20 +164,24 @@ public class GenerateNarrativesTask implements Runnable {
     }
   }
 
-  private void generateAgencyNarratives(NarrativeProviderImpl provider) {
+  public void generateAgencyNarratives(NarrativeProviderImpl provider) {
 
-    for (Agency agency : _dao.getAllAgencies()) {
-
-      String disclaimer = _modifications.getModificationForTypeAndId(
-          AgencyNarrative.class, agency.getId(), "disclaimer");
-      Boolean privateService = _modifications.getModificationForTypeAndId(
-          AgencyNarrative.class, agency.getId(), "privatService");
+    for (Agency agency : _gtfsDao.getAllAgencies()) {
 
       AgencyNarrative.Builder narrative = AgencyNarrative.builder();
-
+      narrative.setLang(deduplicate(agency.getLang()));
+      narrative.setName(deduplicate(agency.getName()));
+      narrative.setPhone(deduplicate(agency.getPhone()));
+      narrative.setTimezone(deduplicate(agency.getTimezone()));
+      narrative.setUrl(deduplicate(agency.getUrl()));
+      
+      String disclaimer = _modifications.getModificationForTypeAndId(
+          AgencyNarrative.class, agency.getId(), "disclaimer");
       if (disclaimer != null)
         narrative.setDisclaimer(disclaimer);
 
+      Boolean privateService = _modifications.getModificationForTypeAndId(
+          AgencyNarrative.class, agency.getId(), "privatService");
       if (privateService != null)
         narrative.setPrivateService(privateService);
 
@@ -160,21 +189,50 @@ public class GenerateNarrativesTask implements Runnable {
     }
   }
 
-  private void generateStopNarratives(NarrativeProviderImpl provider) {
+  public void generateRouteNarratives(NarrativeProviderImpl provider) {
+
+    for (RouteCollectionEntry routeCollectionEntry : _transitGraphDao.getAllRouteCollections()) {
+      List<Route> routes = new ArrayList<Route>();
+      Counter<Route> tripCounts = new Counter<Route>();
+      for (RouteEntry routeEntry : routeCollectionEntry.getChildren()) {
+        Route route = _gtfsDao.getRouteForId(routeEntry.getId());
+        routes.add(route);
+        int tripCount = routeEntry.getTrips().size();
+        tripCounts.increment(route, tripCount);
+      }
+
+      RouteCollectionNarrative.Builder builder = RouteCollectionNarrative.builder();
+      setPropertiesOfRouteCollectionFromRoutes(routes, tripCounts, builder);
+      provider.setNarrativeForRouteCollectionId(routeCollectionEntry.getId(),
+          builder.create());
+    }
+  }
+
+  public void generateShapePointNarratives(NarrativeProviderImpl provider) {
+
+    List<AgencyAndId> shapeIds = _gtfsDao.getAllShapeIds();
+    _log.info("shapes to process=" + shapeIds.size());
+    int index = 0;
+
+    for (AgencyAndId shapeId : shapeIds) {
+      if (index % 10 == 0)
+        _log.info("shapes=" + index);
+      index++;
+      ShapePoints shapePoints = _shapePointsHelper.getShapePointsForShapeId(shapeId);
+      provider.setShapePointsForId(shapeId, shapePoints);
+    }
+  }
+
+  public void generateStopNarratives(NarrativeProviderImpl provider) {
 
     Map<AgencyAndId, List<ProjectedPoint>> shapePointCache = new HashMap<AgencyAndId, List<ProjectedPoint>>();
-    Map<String, StopNarrative> narratives = new HashMap<String, StopNarrative>();
-
-    Builder stopNarrativeBuilder = StopNarrative.builder();
-    stopNarrativeBuilder.setDirection(null);
-    StopNarrative defaultNarrative = stopNarrativeBuilder.create();
 
     int index = 0;
 
-    Collection<Stop> allStops = _dao.getAllStops();
+    Collection<Stop> allStops = _gtfsDao.getAllStops();
     Map<AgencyAndId, Stop> stopsById = MappingLibrary.mapToValue(allStops, "id");
 
-    for (StopEntry stopEntry : _graphDao.getAllStops()) {
+    for (StopEntry stopEntry : _transitGraphDao.getAllStops()) {
 
       if (index % 10 == 0)
         _log.info("stops=" + index);
@@ -182,39 +240,116 @@ public class GenerateNarrativesTask implements Runnable {
 
       Stop stop = stopsById.get(stopEntry.getId());
 
-      StopNarrative narrative = defaultNarrative;
+      StopNarrative.Builder narrative = StopNarrative.builder();
+      narrative.setCode(deduplicate(stop.getCode()));
+      narrative.setDescription(deduplicate(stop.getDesc()));
+      narrative.setName(deduplicate(stop.getName()));
+      narrative.setUrl(deduplicate(stop.getUrl()));
 
-      String direction = computeStopDirection(shapePointCache, narratives,
-          defaultNarrative, stop, stopEntry);
+      String direction = computeStopDirection(provider, shapePointCache, stop,
+          stopEntry);
+      narrative.setDirection(deduplicate(direction));
 
-      if (direction != null) {
-
-        narrative = narratives.get(direction);
-
-        if (narrative == null) {
-          Builder b = StopNarrative.builder();
-          b.setDirection(direction);
-          narrative = b.create();
-          narratives.put(direction, narrative);
-        }
-      }
-
-      provider.setNarrativeForStop(stopEntry.getId(), narrative);
+      provider.setNarrativeForStop(stopEntry.getId(), narrative.create());
     }
-
   }
 
-  private String computeStopDirection(
-      Map<AgencyAndId, List<ProjectedPoint>> shapePointCache,
-      Map<String, StopNarrative> narratives, StopNarrative defaultNarrative,
-      Stop stop, StopEntry stopEntry) {
+  public void generateTripNarratives(NarrativeProviderImpl provider) {
+    int total = 0;
+
+    int tripIndex = 0;
+    Collection<Trip> trips = _gtfsDao.getAllTrips();
+
+    for (Trip trip : trips) {
+
+      if (tripIndex % 200 == 0) {
+        _log.info("trips=" + tripIndex + " of " + trips.size());
+      }
+
+      tripIndex++;
+
+      TripNarrative tripNarrative = getTripNarrative(trip);
+      provider.setNarrativeForTripId(trip.getId(), tripNarrative);
+
+      List<StopTime> stopTimes = _gtfsDao.getStopTimesForTrip(trip);
+      int stopTimeIndex = 0;
+      for (StopTime stopTime : stopTimes) {
+        StopTimeNarrative stopTimeNarrative = getStopTimeNarrative(stopTime);
+        provider.setNarrativeForStopTimeEntry(trip.getId(), stopTimeIndex++,
+            stopTimeNarrative);
+        total++;
+      }
+    }
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private void setPropertiesOfRouteCollectionFromRoutes(List<Route> routes,
+      Counter<Route> tripCounts, RouteCollectionNarrative.Builder target) {
+
+    Counter<String> shortNames = new Counter<String>();
+    Counter<String> longNames = new Counter<String>();
+    Counter<String> descriptions = new Counter<String>();
+    Counter<String> colors = new Counter<String>();
+    Counter<String> textColors = new Counter<String>();
+    Counter<String> urls = new Counter<String>();
+    Counter<Integer> types = new Counter<Integer>();
+
+    for (Route route : routes) {
+
+      int count = tripCounts.getCount(route);
+
+      addValueToCounterIfValid(route.getShortName(), shortNames, count);
+      addValueToCounterIfValid(route.getLongName(), longNames, count);
+      addValueToCounterIfValid(route.getDesc(), descriptions, count);
+      addValueToCounterIfValid(route.getColor(), colors, count);
+      addValueToCounterIfValid(route.getTextColor(), textColors, count);
+      addValueToCounterIfValid(route.getUrl(), urls, count);
+
+      types.increment(route.getType(), count);
+    }
+
+    if (shortNames.size() > 0)
+      target.setShortName(deduplicate(shortNames.getMax()));
+
+    if (longNames.size() > 0)
+      target.setLongName(deduplicate(longNames.getMax()));
+
+    if (descriptions.size() > 0)
+      target.setDescription(deduplicate(descriptions.getMax()));
+
+    if (colors.size() > 0)
+      target.setColor(deduplicate(colors.getMax()));
+
+    if (textColors.size() > 0)
+      target.setTextColor(deduplicate(textColors.getMax()));
+
+    if (urls.size() > 0)
+      target.setUrl(deduplicate(urls.getMax()));
+
+    target.setType(deduplicate(types.getMax()));
+  }
+
+  private <T> void addValueToCounterIfValid(String value,
+      Counter<String> counts, int count) {
+    value = trim(value);
+    if (value != null && value.length() > 0)
+      counts.increment(value, count);
+  }
+
+  private String computeStopDirection(NarrativeProviderImpl provider,
+      Map<AgencyAndId, List<ProjectedPoint>> shapePointCache, Stop stop,
+      StopEntry stopEntry) {
 
     String direction = translateGtfsDirection(stop.getDirection());
 
     if (direction != null)
       return direction;
 
-    Collection<PointAndOrientation> orientations = getAllOrientationsForStop(stopEntry);
+    Collection<PointAndOrientation> orientations = getAllOrientationsForStop(
+        provider, stopEntry);
 
     DoubleArrayList ys = new DoubleArrayList();
     DoubleArrayList xs = new DoubleArrayList();
@@ -317,7 +452,7 @@ public class GenerateNarrativesTask implements Runnable {
   }
 
   private Collection<PointAndOrientation> getAllOrientationsForStop(
-      StopEntry stop) {
+      NarrativeProviderImpl provider, StopEntry stop) {
     List<BlockStopTimeIndex> stopTimeIndices = _blockIndexService.getStopTimeIndicesForStop(stop);
 
     List<PointAndOrientation> pos = new ArrayList<PointAndOrientation>();
@@ -333,7 +468,7 @@ public class GenerateNarrativesTask implements Runnable {
         if (shapeId == null)
           continue;
 
-        ShapePoints shapePoints = _shapePointService.getShapePointsForShapeId(shapeId);
+        ShapePoints shapePoints = provider.getShapePointsForId(shapeId);
 
         if (shapePoints == null)
           continue;
@@ -369,34 +504,6 @@ public class GenerateNarrativesTask implements Runnable {
     }
 
     return orientationsByKey.values();
-  }
-
-  private void generateNarrativesForTrips(NarrativeProviderImpl provider) {
-    int total = 0;
-
-    int tripIndex = 0;
-    Collection<Trip> trips = _dao.getAllTrips();
-
-    for (Trip trip : trips) {
-
-      if (tripIndex % 200 == 0) {
-        _log.info("trips=" + tripIndex + " of " + trips.size());
-      }
-
-      tripIndex++;
-
-      TripNarrative tripNarrative = getTripNarrative(trip);
-      provider.setNarrativeForTripId(trip.getId(), tripNarrative);
-
-      List<StopTime> stopTimes = _dao.getStopTimesForTrip(trip);
-      int stopTimeIndex = 0;
-      for (StopTime stopTime : stopTimes) {
-        StopTimeNarrative stopTimeNarrative = getStopTimeNarrative(stopTime);
-        provider.setNarrativeForStopTimeEntry(trip.getId(), stopTimeIndex++,
-            stopTimeNarrative);
-        total++;
-      }
-    }
   }
 
   private StopTimeNarrative getStopTimeNarrative(StopTime stopTime) {
@@ -451,7 +558,15 @@ public class GenerateNarrativesTask implements Runnable {
     }
   }
 
+  private String trim(String value) {
+    if (value == null)
+      return value;
+    return value.trim();
+  }
+
   private <T> T deduplicate(T object) {
+    if (object == null)
+      return null;
     return _uniqueService.unique(object);
   }
 

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +18,17 @@ package org.onebusaway.transit_data_federation.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
 public class WhereGeospatialServiceImplTest {
 
@@ -35,14 +36,14 @@ public class WhereGeospatialServiceImplTest {
   public void test() {
     WhereGeospatialServiceImpl service = new WhereGeospatialServiceImpl();
 
-    GtfsRelationalDao dao = Mockito.mock(GtfsRelationalDao.class);
-    service.setGtfsRelationalDao(dao);
+    TransitGraphDao dao = Mockito.mock(TransitGraphDao.class);
+    service.setTransitGraphDao(dao);
 
-    Stop stopA = stop("a", -0.5, -0.5);
-    Stop stopB = stop("b", -0.5, 0.5);
-    Stop stopC = stop("c", 0.5, -0.5);
-    Stop stopD = stop("d", 0.5, 0.5);
-    Collection<Stop> allStops = Arrays.asList(stopA, stopB, stopC, stopD);
+    StopEntry stopA = stop("a", -0.5, -0.5);
+    StopEntry stopB = stop("b", -0.5, 0.5);
+    StopEntry stopC = stop("c", 0.5, -0.5);
+    StopEntry stopD = stop("d", 0.5, 0.5);
+    List<StopEntry> allStops = Arrays.asList(stopA, stopB, stopC, stopD);
 
     Mockito.when(dao.getAllStops()).thenReturn(allStops);
 
@@ -71,17 +72,5 @@ public class WhereGeospatialServiceImplTest {
 
     stops = service.getStopsByBounds(new CoordinateBounds(0.8, 0.8, 1, 1));
     assertEquals(0, stops.size());
-  }
-
-  private Stop stop(String id, double lat, double lon) {
-    Stop stop = new Stop();
-    stop.setId(id(id));
-    stop.setLat(lat);
-    stop.setLon(lon);
-    return stop;
-  }
-
-  private AgencyAndId id(String id) {
-    return new AgencyAndId("agency", id);
   }
 }

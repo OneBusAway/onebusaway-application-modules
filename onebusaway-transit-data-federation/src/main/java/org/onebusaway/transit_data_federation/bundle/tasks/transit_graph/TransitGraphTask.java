@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +28,13 @@ public class TransitGraphTask implements Runnable {
 
   private FederatedTransitDataBundle _bundle;
 
+  private AgencyEntriesFactory _agencyEntriesFactory;
+
   private StopEntriesFactory _stopEntriesFactory;
+
+  private RouteEntriesFactory _routeEntriesFactory;
+
+  private RouteCollectionEntriesFactory _routeCollectionEntriesFactory;
 
   private TripEntriesFactory _tripEntriesFactory;
 
@@ -41,8 +48,24 @@ public class TransitGraphTask implements Runnable {
   }
 
   @Autowired
+  public void setAgencyEntriesFactory(AgencyEntriesFactory agencyEntiesFactory) {
+    _agencyEntriesFactory = agencyEntiesFactory;
+  }
+
+  @Autowired
   public void setStopEntriesFactory(StopEntriesFactory stopEntriesFactory) {
     _stopEntriesFactory = stopEntriesFactory;
+  }
+
+  @Autowired
+  public void setRouteEntriesFactory(RouteEntriesFactory routeEntriesFactory) {
+    _routeEntriesFactory = routeEntriesFactory;
+  }
+
+  @Autowired
+  public void setRouteCollectionEntriesFactroy(
+      RouteCollectionEntriesFactory routeCollectionEntriesFactory) {
+    _routeCollectionEntriesFactory = routeCollectionEntriesFactory;
   }
 
   @Autowired
@@ -65,7 +88,10 @@ public class TransitGraphTask implements Runnable {
 
     TransitGraphImpl graph = new TransitGraphImpl();
 
+    _agencyEntriesFactory.processAgencies(graph);
     _stopEntriesFactory.processStops(graph);
+    _routeEntriesFactory.processRoutes(graph);
+    _routeCollectionEntriesFactory.processRouteCollections(graph);
     _tripEntriesFactory.processTrips(graph);
     _blockEntriesFactory.processBlocks(graph);
 
@@ -84,7 +110,7 @@ public class TransitGraphTask implements Runnable {
       throw new IllegalStateException("error writing graph to file", ex);
     }
 
+    _refreshService.refresh(RefreshableResources.ROUTE_COLLECTIONS_DATA);
     _refreshService.refresh(RefreshableResources.TRANSIT_GRAPH);
-
   }
 }

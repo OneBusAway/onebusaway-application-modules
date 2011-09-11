@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +30,7 @@ import javax.annotation.PostConstruct;
 import org.apache.lucene.queryParser.ParseException;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
+import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -39,13 +41,14 @@ import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
-import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RoutesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
+import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
@@ -78,9 +81,6 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
   @Autowired
   private StopBeanService _stopService;
-
-  @Autowired
-  private ExtendedGtfsRelationalDao _dao;
 
   @Autowired
   private TransitGraphDao _graphDao;
@@ -121,19 +121,26 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   @Cacheable
   @Override
   public ListBean<String> getRouteIdsForAgencyId(String agencyId) {
-    List<AgencyAndId> routeIds = _dao.getRouteIdsForAgencyId(agencyId);
+    AgencyEntry agency = _graphDao.getAgencyForId(agencyId);
+    if (agency == null)
+      throw new NoSuchAgencyServiceException(agencyId);
     List<String> ids = new ArrayList<String>();
-    for (AgencyAndId id : routeIds)
+    for (RouteCollectionEntry routeCollection : agency.getRouteCollections()) {
+      AgencyAndId id = routeCollection.getId();
       ids.add(AgencyAndIdLibrary.convertToString(id));
+    }
     return new ListBean<String>(ids, false);
   }
 
   @Cacheable
   @Override
   public ListBean<RouteBean> getRoutesForAgencyId(String agencyId) {
-    List<AgencyAndId> routeIds = _dao.getRouteIdsForAgencyId(agencyId);
+    AgencyEntry agency = _graphDao.getAgencyForId(agencyId);
+    if (agency == null)
+      throw new NoSuchAgencyServiceException(agencyId);
     List<RouteBean> routes = new ArrayList<RouteBean>();
-    for (AgencyAndId routeId : routeIds) {
+    for (RouteCollectionEntry routeCollection : agency.getRouteCollections()) {
+      AgencyAndId routeId = routeCollection.getId();
       RouteBean route = _routeBeanService.getRouteForId(routeId);
       routes.add(route);
     }

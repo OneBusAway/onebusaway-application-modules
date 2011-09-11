@@ -37,6 +37,8 @@ public class ServiceAlertBean implements Serializable {
 
   private List<NaturalLanguageStringBean> descriptions;
 
+  private List<NaturalLanguageStringBean> urls;
+
   private List<SituationAffectsBean> allAffects;
 
   private List<SituationConsequenceBean> consequences;
@@ -97,6 +99,14 @@ public class ServiceAlertBean implements Serializable {
 
   public void setDescriptions(List<NaturalLanguageStringBean> descriptions) {
     this.descriptions = descriptions;
+  }
+
+  public List<NaturalLanguageStringBean> getUrls() {
+    return urls;
+  }
+
+  public void setUrls(List<NaturalLanguageStringBean> urls) {
+    this.urls = urls;
   }
 
   public List<SituationAffectsBean> getAllAffects() {

@@ -39,7 +39,9 @@ public class SituationV2Bean implements HasId, Serializable {
 
   private NaturalLanguageStringV2Bean description;
 
-  private List<SituationAffectsV2Bean> affects;
+  private NaturalLanguageStringV2Bean url;
+
+  private List<SituationAffectsV2Bean> allAffects;
 
   private List<SituationConsequenceV2Bean> consequences;
 
@@ -101,12 +103,20 @@ public class SituationV2Bean implements HasId, Serializable {
     this.description = description;
   }
 
-  public List<SituationAffectsV2Bean> getAffects() {
-    return affects;
+  public NaturalLanguageStringV2Bean getUrl() {
+    return url;
   }
 
-  public void setAffects(List<SituationAffectsV2Bean> affects) {
-    this.affects = affects;
+  public void setUrl(NaturalLanguageStringV2Bean url) {
+    this.url = url;
+  }
+
+  public List<SituationAffectsV2Bean> getAllAffects() {
+    return allAffects;
+  }
+
+  public void setAllAffects(List<SituationAffectsV2Bean> affects) {
+    this.allAffects = affects;
   }
 
   public List<SituationConsequenceV2Bean> getConsequences() {

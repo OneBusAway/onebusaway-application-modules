@@ -117,46 +117,32 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
    ****/
 
   @Override
-  public ServiceAlert createServiceAlert(String agencyId,
-      ServiceAlert.Builder builder) {
+  public synchronized ServiceAlert createOrUpdateServiceAlert(
+      ServiceAlert.Builder builder, String defaultAgencyId) {
 
-    UUID uuid = UUID.randomUUID();
-    Id id = ServiceAlertLibrary.id(agencyId, uuid.toString());
-    builder.setId(id);
+    if (!builder.hasId()) {
+      UUID uuid = UUID.randomUUID();
+      Id id = ServiceAlertLibrary.id(defaultAgencyId, uuid.toString());
+      builder.setId(id);
+    }
 
-    builder.setCreationTime(System.currentTimeMillis());
+    if (!builder.hasCreationTime())
+      builder.setCreationTime(System.currentTimeMillis());
     builder.setModifiedTime(System.currentTimeMillis());
 
     ServiceAlert serviceAlert = builder.build();
-
     updateReferences(serviceAlert);
     saveServiceAlerts();
-
     return serviceAlert;
   }
-
+  
   @Override
-  public void updateServiceAlert(ServiceAlert serviceAlert) {
-    updateServiceAlerts(Arrays.asList(serviceAlert));
-  }
-
-  @Override
-  public void updateServiceAlerts(List<ServiceAlert> serviceAlerts) {
-    for (ServiceAlert serviceAlert : serviceAlerts) {
-      AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
-      ServiceAlert existingServiceAlert = _serviceAlerts.put(id, serviceAlert);
-      updateReferences(existingServiceAlert, serviceAlert);
-    }
-    saveServiceAlerts();
-  }
-
-  @Override
-  public void removeServiceAlert(AgencyAndId serviceAlertId) {
+  public synchronized void removeServiceAlert(AgencyAndId serviceAlertId) {
     removeServiceAlerts(Arrays.asList(serviceAlertId));
   }
 
   @Override
-  public void removeServiceAlerts(List<AgencyAndId> serviceAlertIds) {
+  public synchronized void removeServiceAlerts(List<AgencyAndId> serviceAlertIds) {
 
     for (AgencyAndId serviceAlertId : serviceAlertIds) {
 
@@ -168,6 +154,14 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     }
 
     saveServiceAlerts();
+  }
+
+  @Override
+  public synchronized void removeAllServiceAlertsForFederatedAgencyId(
+      String agencyId) {
+    Set<AgencyAndId> ids = _serviceAlertIdsByServiceAlertAgencyId.get(agencyId);
+    if (ids != null)
+      removeServiceAlerts(new ArrayList<AgencyAndId>(ids));
   }
 
   @Override
@@ -184,13 +178,6 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   public List<ServiceAlert> getServiceAlertsForFederatedAgencyId(String agencyId) {
     Set<AgencyAndId> serviceAlertIds = _serviceAlertIdsByServiceAlertAgencyId.get(agencyId);
     return getServiceAlertIdsAsObjects(serviceAlertIds);
-  }
-
-  @Override
-  public void removeAllServiceAlertsForFederatedAgencyId(String agencyId) {
-    Set<AgencyAndId> ids = _serviceAlertIdsByServiceAlertAgencyId.get(agencyId);
-    if (ids != null)
-      removeServiceAlerts(new ArrayList<AgencyAndId>(ids));
   }
 
   @Override
@@ -221,7 +208,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     BlockTripEntry blockTrip = blockStopTime.getTrip();
     TripEntry trip = blockTrip.getTrip();
     AgencyAndId tripId = trip.getId();
-    AgencyAndId lineId = trip.getRouteCollectionId();
+    AgencyAndId lineId = trip.getRouteCollection().getId();
     String directionId = trip.getDirectionId();
     StopTimeEntry stopTime = blockStopTime.getStopTime();
     StopEntry stop = stopTime.getStop();
@@ -272,7 +259,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
       AgencyAndId vehicleId) {
 
     TripEntry trip = blockTrip.getTrip();
-    AgencyAndId lineId = trip.getRouteCollectionId();
+    AgencyAndId lineId = trip.getRouteCollection().getId();
     RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(lineId,
         trip.getDirectionId());
 
@@ -291,7 +278,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
    * Private Methods
    ****/
 
-  private synchronized void updateReferences(ServiceAlert serviceAlert) {
+  private void updateReferences(ServiceAlert serviceAlert) {
     AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
     ServiceAlert existingServiceAlert = _serviceAlerts.put(id, serviceAlert);
     updateReferences(existingServiceAlert, serviceAlert);

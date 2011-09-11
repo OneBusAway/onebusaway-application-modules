@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -370,7 +371,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
         BlockTripEntry blockTrip = stopTime.getTrip();
         TripEntry trip = blockTrip.getTrip();
-        AgencyAndId routeCollectionId = trip.getRouteCollectionId();
+        AgencyAndId routeCollectionId = trip.getRouteCollection().getId();
 
         StopTimeInstance sti = new StopTimeInstance(stopTime, serviceDate);
 
@@ -403,7 +404,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
         BlockTripEntry blockTrip = stopTime.getTrip();
         TripEntry trip = blockTrip.getTrip();
-        AgencyAndId routeCollectionId = trip.getRouteCollectionId();
+        AgencyAndId routeCollectionId = trip.getRouteCollection().getId();
 
         StopTimeInstance sti = new StopTimeInstance(stopTime,
             serviceDate.getTime(), entry.getFrequency());
@@ -430,8 +431,8 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
       return null;
 
     TripEntry prevTrip = blockTrip.getTrip();
-    AgencyAndId prevLineId = prevTrip.getRouteCollectionId();
-    AgencyAndId nextLineId = nextTrip.getTrip().getRouteCollectionId();
+    AgencyAndId prevLineId = prevTrip.getRouteCollection().getId();
+    AgencyAndId nextLineId = nextTrip.getTrip().getRouteCollection().getId();
     if (prevLineId.equals(nextLineId))
       return null;
 

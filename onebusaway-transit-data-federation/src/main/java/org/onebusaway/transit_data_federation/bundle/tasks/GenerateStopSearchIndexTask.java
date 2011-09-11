@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +25,14 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryParser.ParseException;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl;
+import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.services.StopSearchService;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,15 +55,22 @@ public class GenerateStopSearchIndexTask implements Runnable {
 
   public static final String FIELD_STOP_CODE = "code";
 
-  private GtfsRelationalDao _dao;
+  private TransitGraphDao _transitGraphDao;
+
+  private NarrativeService _narrativeService;
 
   private FederatedTransitDataBundle _bundle;
 
   private RefreshService _refreshService;
 
   @Autowired
-  public void setGtfsDao(GtfsRelationalDao dao) {
-    _dao = dao;
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setNarrativeService(NarrativeService narrativeService) {
+    _narrativeService = narrativeService;
   }
 
   @Autowired
@@ -84,8 +94,9 @@ public class GenerateStopSearchIndexTask implements Runnable {
   private void buildIndex() throws IOException, ParseException {
     IndexWriter writer = new IndexWriter(_bundle.getStopSearchIndexPath(),
         new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.LIMITED);
-    for (Stop stop : _dao.getAllStops()) {
-      Document document = getStopAsDocument(stop);
+    for (StopEntry stopEntry : _transitGraphDao.getAllStops()) {
+      StopNarrative narrative = _narrativeService.getStopForId(stopEntry.getId());
+      Document document = getStopAsDocument(stopEntry, narrative);
       writer.addDocument(document);
     }
     writer.optimize();
@@ -93,28 +104,29 @@ public class GenerateStopSearchIndexTask implements Runnable {
     _refreshService.refresh(RefreshableResources.STOP_SEARCH_DATA);
   }
 
-  private Document getStopAsDocument(Stop stop) {
+  private Document getStopAsDocument(StopEntry stopEntry,
+      StopNarrative narrative) {
 
     Document document = new Document();
 
     // Id
-    AgencyAndId id = stop.getId();
+    AgencyAndId id = stopEntry.getId();
     document.add(new Field(FIELD_AGENCY_ID, id.getAgencyId(), Field.Store.YES,
         Field.Index.NO));
     document.add(new Field(FIELD_STOP_ID, id.getId(), Field.Store.YES,
         Field.Index.ANALYZED));
 
     // Code
-    if (stop.getCode() != null && stop.getCode().length() > 0)
-      document.add(new Field(FIELD_STOP_CODE, stop.getCode(), Field.Store.NO,
-          Field.Index.ANALYZED));
+    if (narrative.getCode() != null && narrative.getCode().length() > 0)
+      document.add(new Field(FIELD_STOP_CODE, narrative.getCode(),
+          Field.Store.NO, Field.Index.ANALYZED));
     else
-      document.add(new Field(FIELD_STOP_CODE, stop.getId().getId(),
+      document.add(new Field(FIELD_STOP_CODE, stopEntry.getId().getId(),
           Field.Store.NO, Field.Index.ANALYZED));
 
-    if (stop.getName() != null && stop.getName().length() > 0)
-      document.add(new Field(FIELD_STOP_NAME, stop.getName(), Field.Store.YES,
-          Field.Index.ANALYZED));
+    if (narrative.getName() != null && narrative.getName().length() > 0)
+      document.add(new Field(FIELD_STOP_NAME, narrative.getName(),
+          Field.Store.YES, Field.Index.ANALYZED));
 
     return document;
   }

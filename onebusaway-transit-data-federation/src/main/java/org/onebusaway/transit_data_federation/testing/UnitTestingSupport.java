@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +38,15 @@ import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl.Builder;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockStopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockTripEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.RouteCollectionEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
@@ -54,6 +58,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfig
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -128,6 +133,29 @@ public class UnitTestingSupport {
   /****
    * Entity Factory Methods
    ****/
+
+  public static AgencyEntryImpl agency(String id) {
+    AgencyEntryImpl agency = new AgencyEntryImpl();
+    agency.setId(id);
+    return agency;
+  }
+  
+  public static RouteEntryImpl route(String id) {
+    RouteEntryImpl route = new RouteEntryImpl();
+    route.setId(aid(id));
+    return route;
+  }
+
+  public static RouteCollectionEntryImpl routeCollection(String id,
+      RouteEntry... routes) {
+    RouteCollectionEntryImpl route = new RouteCollectionEntryImpl();
+    route.setId(aid(id));
+    route.setChildren(Arrays.asList(routes));
+    for (RouteEntry routeEntry : routes) {
+      ((RouteEntryImpl) routeEntry).setParent(route);
+    }
+    return route;
+  }
 
   public static StopEntryImpl stop(String id, double lat, double lon) {
     return new StopEntryImpl(aid(id), lat, lon);

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +16,17 @@
  */
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
+import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +54,8 @@ public class StopEntriesFactory {
     int stopIndex = 0;
 
     Collection<Stop> stops = _gtfsDao.getAllStops();
+    Map<String, ArrayList<StopEntry>> stopEntriesByAgencyId = new FactoryMap<String, ArrayList<StopEntry>>(
+        new ArrayList<StopEntry>());
 
     for (Stop stop : stops) {
 
@@ -58,6 +66,15 @@ public class StopEntriesFactory {
       StopEntryImpl stopEntry = new StopEntryImpl(stop.getId(), stop.getLat(),
           stop.getLon());
       graph.putStopEntry(stopEntry);
+      stopEntriesByAgencyId.get(stop.getId().getAgencyId()).add(stopEntry);
+    }
+
+    for (Map.Entry<String, ArrayList<StopEntry>> entry : stopEntriesByAgencyId.entrySet()) {
+      String agencyId = entry.getKey();
+      ArrayList<StopEntry> stopEntries = entry.getValue();
+      stopEntries.trimToSize();
+      AgencyEntryImpl agency = graph.getAgencyForId(agencyId);
+      agency.setStops(stopEntries);
     }
 
     graph.refreshStopMapping();

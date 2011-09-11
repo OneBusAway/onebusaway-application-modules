@@ -70,6 +70,8 @@ message ServiceAlert {
     VERY_SEVERE = 7;
   }
   optional Severity severity = 11;
+  
+  optional TranslatedString url = 12;
 }
 
 

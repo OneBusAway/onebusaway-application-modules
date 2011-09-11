@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +18,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,25 +26,29 @@ import java.util.Arrays;
 
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.queryParser.ParseException;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.model.SearchResult;
+import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
 public class GenerateStopSearchIndexTaskTest {
 
   private static final double MIN_SCORE = 1.0;
 
-  private GtfsRelationalDao _gtfsDao;
-
   private GenerateStopSearchIndexTask _task;
+
+  private TransitGraphDao _transitGraphDao;
+
+  private NarrativeService _narrativeService;
 
   private FederatedTransitDataBundle _bundle;
 
@@ -53,46 +59,53 @@ public class GenerateStopSearchIndexTaskTest {
 
     _task = new GenerateStopSearchIndexTask();
 
+    _bundle = Mockito.mock(FederatedTransitDataBundle.class);
+    _task.setBundle(_bundle);
+
     File path = File.createTempFile(
         GenerateStopSearchIndexTask.class.getName(), ".tmp");
     path.delete();
-    path.mkdirs();
+    path.deleteOnExit();
+    Mockito.when(_bundle.getStopSearchIndexPath()).thenReturn(path);
 
-    _bundle = new FederatedTransitDataBundle(path);
-    _task.setBundle(_bundle);
+    _transitGraphDao = Mockito.mock(TransitGraphDao.class);
+    _task.setTransitGraphDao(_transitGraphDao);
 
-    _gtfsDao = Mockito.mock(GtfsRelationalDao.class);
-    _task.setGtfsDao(_gtfsDao);
-    
+    _narrativeService = Mockito.mock(NarrativeService.class);
+    _task.setNarrativeService(_narrativeService);
+
     _refreshService = Mockito.mock(RefreshService.class);
     _task.setRefreshService(_refreshService);
-  }
-
-  @After
-  public void teardown() {
-    deleteFile(_bundle.getPath());
   }
 
   @Test
   public void testGenerateStopSearchIndex() throws CorruptIndexException,
       IOException, ParseException {
 
-    Stop stopA = new Stop();
-    stopA.setCode("111");
-    stopA.setId(new AgencyAndId("1", "111"));
-    stopA.setName("AAA Station");
+    StopEntryImpl stopA = stop("111", 0, 0);
+    StopEntryImpl stopB = stop("222", 0, 0);
+    StopEntryImpl stopC = stop("333", 0, 0);
 
-    Stop stopB = new Stop();
-    stopB.setId(new AgencyAndId("1", "222"));
-    stopB.setName("BBB Station");
+    StopNarrative.Builder stopNarrativeA = StopNarrative.builder();
+    stopNarrativeA.setCode("111");
+    stopNarrativeA.setName("AAA Station");
 
-    Stop stopC = new Stop();
-    stopC.setCode("444");
-    stopC.setId(new AgencyAndId("1", "333"));
-    stopC.setName("CCC Station");
+    StopNarrative.Builder stopNarrativeB = StopNarrative.builder();
+    stopNarrativeB.setName("BBB Station");
 
-    Mockito.when(_gtfsDao.getAllStops()).thenReturn(
-        Arrays.asList(stopA, stopB, stopC));
+    StopNarrative.Builder stopNarrativeC = StopNarrative.builder();
+    stopNarrativeC.setCode("444");
+    stopNarrativeC.setName("CCC Station");
+
+    Mockito.when(_transitGraphDao.getAllStops()).thenReturn(
+        Arrays.asList((StopEntry) stopA, stopB, stopC));
+
+    Mockito.when(_narrativeService.getStopForId(stopA.getId())).thenReturn(
+        stopNarrativeA.create());
+    Mockito.when(_narrativeService.getStopForId(stopB.getId())).thenReturn(
+        stopNarrativeB.create());
+    Mockito.when(_narrativeService.getStopForId(stopC.getId())).thenReturn(
+        stopNarrativeC.create());
 
     _task.run();
 
@@ -114,18 +127,5 @@ public class GenerateStopSearchIndexTaskTest {
     ids = searchService.searchForStopsByCode("444", 10, MIN_SCORE);
     assertEquals(1, ids.size());
     assertTrue(ids.getResults().contains(new AgencyAndId("1", "333")));
-  }
-
-  private void deleteFile(File file) {
-    if (!file.exists())
-      return;
-    if (file.isDirectory()) {
-      File[] children = file.listFiles();
-      if (children != null) {
-        for (File child : children)
-          deleteFile(child);
-      }
-    }
-    file.delete();
   }
 }

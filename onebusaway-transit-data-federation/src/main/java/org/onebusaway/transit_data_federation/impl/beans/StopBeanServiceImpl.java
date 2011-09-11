@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +25,6 @@ import java.util.Set;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
@@ -34,6 +33,8 @@ import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.utility.text.NaturalStringOrder;
 import org.onebusaway.utility.text.StringLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,7 @@ class StopBeanServiceImpl implements StopBeanService {
 
   private static RouteBeanComparator _routeBeanComparator = new RouteBeanComparator();
 
-  private GtfsRelationalDao _gtfsDao;
+  private TransitGraphDao _transitGraphDao;
 
   private RouteService _routeService;
 
@@ -53,8 +54,8 @@ class StopBeanServiceImpl implements StopBeanService {
   private NarrativeService _narrativeService;
 
   @Autowired
-  public void setGtfsDao(GtfsRelationalDao gtfsDao) {
-    _gtfsDao = gtfsDao;
+  public void setTranstiGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
   }
 
   @Autowired
@@ -75,19 +76,20 @@ class StopBeanServiceImpl implements StopBeanService {
   @Cacheable
   public StopBean getStopForId(AgencyAndId id) {
 
-    Stop stop = _gtfsDao.getStopForId(id);
+    StopEntry stop = _transitGraphDao.getStopEntryForId(id);
+    StopNarrative narrative = _narrativeService.getStopForId(id);
 
     if (stop == null)
       throw new NoSuchStopServiceException(
           AgencyAndIdLibrary.convertToString(id));
 
     StopBean sb = new StopBean();
-    fillStopBean(stop, sb);
+    fillStopBean(stop, narrative, sb);
     fillRoutesForStopBean(stop, sb);
     return sb;
   }
 
-  private void fillRoutesForStopBean(Stop stop, StopBean sb) {
+  private void fillRoutesForStopBean(StopEntry stop, StopBean sb) {
 
     Set<AgencyAndId> routeCollectionIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
 
@@ -104,21 +106,17 @@ class StopBeanServiceImpl implements StopBeanService {
     sb.setRoutes(routeBeans);
   }
 
-  private StopBean fillStopBean(Stop stop, StopBean bean) {
+  private void fillStopBean(StopEntry stop, StopNarrative narrative,
+      StopBean bean) {
 
     bean.setId(ApplicationBeanLibrary.getId(stop.getId()));
-    bean.setLat(stop.getLat());
-    bean.setLon(stop.getLon());
-
-    StopNarrative stopNarrative = _narrativeService.getStopForId(stop.getId());
-    if (stopNarrative != null)
-      bean.setDirection(stopNarrative.getDireciton());
-
-    bean.setName(stop.getName());
-    bean.setCode(StringLibrary.getBestName(stop.getCode(), stop.getId().getId()));
-    bean.setLocationType(stop.getLocationType());
-
-    return bean;
+    bean.setLat(stop.getStopLat());
+    bean.setLon(stop.getStopLon());
+    bean.setName(narrative.getName());
+    bean.setCode(StringLibrary.getBestName(narrative.getCode(),
+        stop.getId().getId()));
+    bean.setLocationType(narrative.getLocationType());
+    bean.setDirection(narrative.getDirection());
   }
 
   private static String getRouteBeanName(RouteBean bean) {

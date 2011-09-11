@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +21,13 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
+import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
+import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.TripNarrative;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 
 /**
@@ -36,22 +40,27 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
  * the user.
  * 
  * The narrative service has methods for querying narrative objects for various
- * low-level objects, such as {@link Agency}, {@link Stop}, {@link Trip}, and
- * {@link StopTime}.
+ * low-level objects, such as {@link Agency}, {@link Stop},
+ * {@link RouteCollectionEntry}, {@link Trip}, and {@link StopTime}.
  * 
  * @author bdferris
  * @see AgencyNarrative
  * @see StopNarrative
+ * @see RouteCollectionNarrative
  * @see TripNarrative
  * @see StopTimeNarrative
  */
 public interface NarrativeService {
-  
+
   public AgencyNarrative getAgencyForId(String agencyId);
+
+  public RouteCollectionNarrative getRouteCollectionForId(AgencyAndId routeCollectionId);
 
   public StopNarrative getStopForId(AgencyAndId stopId);
 
   public TripNarrative getTripForId(AgencyAndId tripId);
 
   public StopTimeNarrative getStopTimeForEntry(StopTimeEntry entry);
+  
+  public ShapePoints getShapePointsForId(AgencyAndId id);
 }

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +69,5 @@ public class GtfsStopRegionsSourceImplTest {
     assertEquals(47.66931784410792, envB.centre().y,0.0001);
     assertEquals(0.04496600971673814, envB.getHeight(),0.0001);
     assertEquals(0.066767981533431, envB.getWidth(),0.0001);
-
   }
 }

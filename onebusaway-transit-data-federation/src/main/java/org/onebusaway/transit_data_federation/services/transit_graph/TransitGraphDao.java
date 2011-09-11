@@ -31,17 +31,29 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 public interface TransitGraphDao {
 
   /**
+   * @return the list of all agency entries in the transit graph
+   */
+  public List<AgencyEntry> getAllAgencies();
+
+  /**
+   * @param id a agency id to query
+   * @return the agency entry with the specified id, or null if not found
+   */
+  public AgencyEntry getAgencyForId(String id);
+
+  /**
    * @return the list of all stop entries in the transit graph
    */
   public List<StopEntry> getAllStops();
-  
+
   /**
    * @param id a stop id to query
    * @return the stop entry with the specified id, or null if not found
    */
   public StopEntry getStopEntryForId(AgencyAndId id);
-  
-  public StopEntry getStopEntryForId(AgencyAndId id, boolean throwExceptionIfNotFound);
+
+  public StopEntry getStopEntryForId(AgencyAndId id,
+      boolean throwExceptionIfNotFound);
 
   /**
    * @param bounds coordinate bounds query
@@ -70,4 +82,27 @@ public interface TransitGraphDao {
    * @return the trip entry with the specified id, or null if not found
    */
   public TripEntry getTripEntryForId(AgencyAndId id);
+
+  /**
+   * @return the list of all route collections in the transit graph
+   */
+  public List<RouteCollectionEntry> getAllRouteCollections();
+
+  /**
+   * @param id a route collection id to query
+   * @return the route collection entry with the specified id, or null if not
+   *         found
+   */
+  public RouteCollectionEntry getRouteCollectionForId(AgencyAndId id);
+
+  /**
+   * @return the list of all routes in the transit graph
+   */
+  public List<RouteEntry> getAllRoutes();
+
+  /**
+   * @param id a route id to query
+   * @return the route entry with the specified id, or null if not found
+   */
+  public RouteEntry getRouteForId(AgencyAndId id);
 }

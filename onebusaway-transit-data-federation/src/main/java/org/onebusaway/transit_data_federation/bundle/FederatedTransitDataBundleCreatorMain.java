@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +32,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
+import org.onebusaway.gtfs.impl.GtfsRelationalDaoImpl;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.GtfsBundles;
 import org.opentripplanner.graph_builder.impl.osm.FileBasedOpenStreetMapProviderImpl;
@@ -38,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 /**
  * Command line tool for federated transit data bundle creator. Allows
@@ -48,7 +51,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
  * @see FederatedTransitDataBundleCreator
  */
 public class FederatedTransitDataBundleCreatorMain {
-  
+
   private static final Logger _log = LoggerFactory.getLogger(FederatedTransitDataBundleCreatorMain.class);
 
   private static final String ARG_SKIP_TO = "skipTo";
@@ -60,6 +63,16 @@ public class FederatedTransitDataBundleCreatorMain {
   private static final String ARG_INCLUDE = "include";
 
   private static final String ARG_ONLY_IF_DNE = "onlyIfDoesNotExist";
+
+  private static final String ARG_USE_DATABASE_FOR_GTFS = "useDatabaseForGtfs";
+
+  private static final String ARG_DATASOURCE_DRIVER_CLASS_NAME = "dataSourceDriverClassName";
+
+  private static final String ARG_DATASOURCE_URL = "dataSourceUrl";
+
+  private static final String ARG_DATASOURCE_USERNAME = "dataSourceUsername";
+
+  private static final String ARG_DATASOURCE_PASSWORD = "dataSourcePassword";
 
   private static final String ARG_BUNDLE_KEY = "bundleKey";
 
@@ -98,7 +111,7 @@ public class FederatedTransitDataBundleCreatorMain {
       creator.setContextBeans(beans);
 
       List<GtfsBundle> gtfsBundles = new ArrayList<GtfsBundle>();
-      List<File> contextPaths = new ArrayList<File>();
+      List<String> contextPaths = new ArrayList<String>();
 
       for (int i = 0; i < remainingArgs.length - 1; i++) {
         File path = new File(remainingArgs[i]);
@@ -107,7 +120,7 @@ public class FederatedTransitDataBundleCreatorMain {
           gtfsBundle.setPath(path);
           gtfsBundles.add(gtfsBundle);
         } else {
-          contextPaths.add(path);
+          contextPaths.add("file:" + path);
         }
       }
 
@@ -117,7 +130,30 @@ public class FederatedTransitDataBundleCreatorMain {
         beans.put("gtfs-bundles", bean.getBeanDefinition());
       }
 
-      creator.setContextPaths(contextPaths);
+      if (commandLine.hasOption(ARG_USE_DATABASE_FOR_GTFS)) {
+        contextPaths.add("classpath:org/onebusaway/gtfs/application-context.xml");
+        // HibernateGtfsRelationalDaoImpl store = new HibernateGtfsRelationalDaoImpl();
+        // store.setSessionFactory(_sessionFactory);        
+      } else {
+        BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(GtfsRelationalDaoImpl.class);
+        beans.put("gtfsRelationalDaoImpl",bean.getBeanDefinition());
+      }
+
+      if (commandLine.hasOption(ARG_DATASOURCE_URL)) {
+        String dataSourceUrl = commandLine.getOptionValue(ARG_DATASOURCE_URL);
+        BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(DriverManagerDataSource.class);
+        bean.addPropertyValue("url", dataSourceUrl);
+        if (commandLine.hasOption(ARG_DATASOURCE_DRIVER_CLASS_NAME))
+          bean.addPropertyValue("driverClassName",
+              commandLine.getOptionValue(ARG_DATASOURCE_DRIVER_CLASS_NAME));
+        if (commandLine.hasOption(ARG_DATASOURCE_USERNAME))
+          bean.addPropertyValue("username",
+              commandLine.getOptionValue(ARG_DATASOURCE_USERNAME));
+        if (commandLine.hasOption(ARG_DATASOURCE_PASSWORD))
+          bean.addPropertyValue("password",
+              commandLine.getOptionValue(ARG_DATASOURCE_PASSWORD));
+        beans.put("dataSource", bean.getBeanDefinition());
+      }
 
       if (commandLine.hasOption(ARG_OSM)) {
         File osmPath = new File(commandLine.getOptionValue(ARG_OSM));
@@ -165,9 +201,10 @@ public class FederatedTransitDataBundleCreatorMain {
         creator.setAdditionalBeanPropertyOverrides(props);
       }
 
-      creator.setOutputPath(outputPath);
-
       setStagesToSkip(commandLine, creator);
+
+      creator.setOutputPath(outputPath);
+      creator.setContextPaths(contextPaths);
 
       try {
 
@@ -179,7 +216,7 @@ public class FederatedTransitDataBundleCreatorMain {
 
         creator.run();
       } catch (Exception ex) {
-        _log.error("error building transit data bundle",ex);
+        _log.error("error building transit data bundle", ex);
         System.exit(-1);
       }
     } catch (ParseException ex) {
@@ -197,6 +234,10 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_SKIP, true, "");
     options.addOption(ARG_INCLUDE, true, "");
     options.addOption(ARG_ONLY_IF_DNE, false, "");
+    options.addOption(ARG_DATASOURCE_DRIVER_CLASS_NAME, true, "");
+    options.addOption(ARG_DATASOURCE_URL, true, "");
+    options.addOption(ARG_DATASOURCE_USERNAME, true, "");
+    options.addOption(ARG_DATASOURCE_PASSWORD, true, "");
     options.addOption(ARG_BUNDLE_KEY, true, "");
     options.addOption(ARG_RANDOMIZE_CACHE_DIR, false, "");
     options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");

@@ -60,16 +60,15 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   public ServiceAlertBean createServiceAlert(String agencyId,
       ServiceAlertBean situationBean) {
     ServiceAlert.Builder serviceAlertBuilder = getBeanAsServiceAlertBuilder(situationBean);
-    ServiceAlert serviceAlert = _serviceAlertsService.createServiceAlert(
-        agencyId, serviceAlertBuilder);
+    ServiceAlert serviceAlert = _serviceAlertsService.createOrUpdateServiceAlert(
+        serviceAlertBuilder, agencyId);
     return getServiceAlertAsBean(serviceAlert);
   }
 
   @Override
   public void updateServiceAlert(ServiceAlertBean situationBean) {
     ServiceAlert.Builder serviceAlertBuilder = getBeanAsServiceAlertBuilder(situationBean);
-    ServiceAlert serviceAlert = serviceAlertBuilder.build();
-    _serviceAlertsService.updateServiceAlert(serviceAlert);
+    _serviceAlertsService.createOrUpdateServiceAlert(serviceAlertBuilder, null);
   }
 
   @Override
@@ -160,6 +159,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
      */
     bean.setSummaries(getTranslatedStringsAsNLSBeans(serviceAlert.getSummary()));
     bean.setDescriptions(getTranslatedStringsAsNLSBeans(serviceAlert.getDescription()));
+    bean.setUrls(getTranslatedStringsAsNLSBeans(serviceAlert.getUrl()));
 
     if (serviceAlert.hasSeverity())
       bean.setSeverity(ServiceAlertLibrary.convertSeverity(serviceAlert.getSeverity()));
@@ -192,6 +192,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
      */
     situation.setSummary(getNLSBeansAsTranslatedString(bean.getSummaries()));
     situation.setDescription(getNLSBeansAsTranslatedString(bean.getDescriptions()));
+    situation.setUrl(getNLSBeansAsTranslatedString(bean.getUrls()));
 
     if (bean.getSeverity() != null)
       situation.setSeverity(ServiceAlertLibrary.convertSeverity(bean.getSeverity()));

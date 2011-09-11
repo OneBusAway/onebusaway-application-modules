@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,9 +111,7 @@ public class RouteCollectionSearchServiceImpl implements
     for (ScoreDoc sd : top.scoreDocs) {
       Document document = _searcher.doc(sd.doc);
 
-      String agencyId = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_AGENCY_ID);
-      String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
-      AgencyAndId id = new AgencyAndId(agencyId, routeShortName);
+      String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_SHORT_NAME);
       
       Set<String> tokens = new HashSet<String>();
       if( routeShortName != null) {
@@ -127,9 +126,12 @@ public class RouteCollectionSearchServiceImpl implements
         continue;
 
       // Keep the best score for a particular id
-      Float score = topScores.get(id);
+      String agencyId = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_AGENCY_ID);
+      String id = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
+      AgencyAndId routeId = new AgencyAndId(agencyId, id);
+      Float score = topScores.get(routeId);
       if (score == null || score < sd.score)
-        topScores.put(id, sd.score);
+        topScores.put(routeId, sd.score);
     }
 
     List<AgencyAndId> ids = new ArrayList<AgencyAndId>(topScores.size());
