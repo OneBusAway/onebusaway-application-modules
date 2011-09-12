@@ -30,14 +30,19 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.VehicleLocationListener;
+import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -54,6 +59,8 @@ import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtimeConstants;
 
 public class GtfsRealtimeSource {
@@ -63,6 +70,10 @@ public class GtfsRealtimeSource {
   private AgencyService _agencyService;
 
   private TransitGraphDao _transitGraphDao;
+
+  private BlockCalendarService _blockCalendarService;
+
+  private VehicleLocationListener _vehicleLocationListener;
 
   private ServiceAlertsService _serviceAlertService;
 
@@ -95,6 +106,17 @@ public class GtfsRealtimeSource {
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
+    _blockCalendarService = blockCalendarService;
+  }
+
+  @Autowired
+  public void setVehicleLocationListener(
+      VehicleLocationListener vehicleLocationListener) {
+    _vehicleLocationListener = vehicleLocationListener;
   }
 
   @Autowired
@@ -164,23 +186,88 @@ public class GtfsRealtimeSource {
   private synchronized void handeUpdates(FeedMessage tripUpdates,
       FeedMessage vehiclePositions, FeedMessage alerts) {
 
-    for (FeedEntity feedEntity : tripUpdates.getEntityList()) {
-      TripUpdate tripUpdate = feedEntity.getTripUpdate();
+    handleTripUpdates(tripUpdates);
+    handleAlerts(alerts);
+  }
+
+  private void handleTripUpdates(FeedMessage tripUpdates) {
+
+    long t = System.currentTimeMillis();
+    long timeFrom = t - 30 * 60 * 1000;
+    long timeTo = t + 30 * 60 * 1000;
+
+    for (FeedEntity entity : tripUpdates.getEntityList()) {
+
+      TripUpdate tripUpdate = entity.getTripUpdate();
       if (tripUpdate == null) {
-        // TODO : Should we warn here?
+        _log.warn("epxected a FeedEntity with a TripUpdate");
         continue;
       }
-      //TripDescriptor trip = tripUpdate.getTrip();
-    }
+      TripDescriptor tripDescriptor = tripUpdate.getTrip();
+      if (!tripDescriptor.hasTripId()) {
+        continue;
+      }
 
-    handleAlerts(alerts);
+      if (tripUpdate.getStopTimeUpdateCount() == 0)
+        continue;
+
+      StopTimeUpdate stopTimeUpdate = tripUpdate.getStopTimeUpdate(0);
+      if (!(stopTimeUpdate.hasArrival() || stopTimeUpdate.hasDeparture()))
+        continue;
+
+      int delay = 0;
+      boolean hasDelay = false;
+
+      if (stopTimeUpdate.hasDeparture()) {
+        StopTimeEvent departure = stopTimeUpdate.getDeparture();
+        if (departure.hasDelay()) {
+          delay = departure.getDelay();
+          hasDelay = true;
+        }
+      }
+      if (stopTimeUpdate.hasArrival()) {
+        StopTimeEvent arrival = stopTimeUpdate.getArrival();
+        if (arrival.hasDelay()) {
+          delay = arrival.getDelay();
+          hasDelay = true;
+        }
+      }
+
+      if (!hasDelay)
+        continue;
+
+      TripEntry trip = getTrip(tripDescriptor.getTripId());
+      if (trip == null) {
+        _log.warn("no trip found with id=" + tripDescriptor.getTripId());
+      }
+
+      BlockEntry block = trip.getBlock();
+
+      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+          block.getId(), timeFrom, timeTo);
+      if (instances.isEmpty()) {
+        _log.warn("could not find any active schedules instance for the specified trip="
+            + trip.getId());
+        continue;
+      }
+
+      BlockInstance instance = instances.get(0);
+      VehicleLocationRecord record = new VehicleLocationRecord();
+      record.setBlockId(block.getId());
+      record.setScheduleDeviation(delay);
+      record.setServiceDate(instance.getServiceDate());
+      record.setTimeOfRecord(System.currentTimeMillis());
+      // HACK - we assume we have access to a vehicle id to uniquely identify records.  But what if we don't?
+      record.setVehicleId(block.getId());
+      _vehicleLocationListener.handleVehicleLocationRecord(record);
+    }
   }
 
   private void handleAlerts(FeedMessage alerts) {
     for (FeedEntity entity : alerts.getEntityList()) {
       Alert alert = entity.getAlert();
       if (alert == null) {
-        // TODO : Should we warn here?
+        _log.warn("epxected a FeedEntity with an Alert");
         continue;
       }
 
@@ -285,26 +372,34 @@ public class GtfsRealtimeSource {
 
   private Id getTripId(String tripId) {
 
+    TripEntry trip = getTrip(tripId);
+    if (trip != null)
+      return ServiceAlertLibrary.id(trip.getId());
+
+    _log.warn("trip not found with id \"{}\"", tripId);
+
+    AgencyAndId id = new AgencyAndId(_agencyIds.get(0), tripId);
+    return ServiceAlertLibrary.id(id);
+  }
+
+  private TripEntry getTrip(String tripId) {
+
     for (String agencyId : _agencyIds) {
       AgencyAndId id = new AgencyAndId(agencyId, tripId);
       TripEntry trip = _transitGraphDao.getTripEntryForId(id);
       if (trip != null)
-        return ServiceAlertLibrary.id(id);
+        return trip;
     }
 
     try {
       AgencyAndId id = AgencyAndId.convertFromString(tripId);
       TripEntry trip = _transitGraphDao.getTripEntryForId(id);
       if (trip != null)
-        return ServiceAlertLibrary.id(id);
+        return trip;
     } catch (IllegalArgumentException ex) {
 
     }
-
-    _log.warn("trip not found with id \"{}\"", tripId);
-
-    AgencyAndId id = new AgencyAndId(_agencyIds.get(0), tripId);
-    return ServiceAlertLibrary.id(id);
+    return null;
   }
 
   private Id getStopId(String stopId) {
