@@ -19,7 +19,7 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
-import org.onebusaway.transit_data_federation.services.library.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.utility.collections.TreeUnionFind;
 
 public class GtfsStopsForMergingMain {

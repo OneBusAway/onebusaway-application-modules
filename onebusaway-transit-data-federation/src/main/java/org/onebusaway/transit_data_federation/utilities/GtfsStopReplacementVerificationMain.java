@@ -14,7 +14,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.transit_data_federation.bundle.tasks.EntityReplacementStrategyFactory;
-import org.onebusaway.transit_data_federation.services.library.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 /**
  * Given a stop-consolidation list, verifies that the specified stops still

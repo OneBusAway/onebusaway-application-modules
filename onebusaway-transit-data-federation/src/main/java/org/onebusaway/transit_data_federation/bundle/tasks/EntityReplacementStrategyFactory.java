@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.services.EntityReplacementStrategy;
-import org.onebusaway.transit_data_federation.services.library.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 
 /**
  * Factory for constructing {@link EntityReplacementStrategy} instances from

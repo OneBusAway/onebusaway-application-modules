@@ -13,8 +13,8 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
-import org.onebusaway.transit_data_federation.services.library.AgencyAndIdLibrary;
 
 public class NearbyStopsBeanServiceImplTest {
 
