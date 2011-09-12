@@ -93,10 +93,13 @@ feed by adding the following bean to your <<<data-sources.xml>>> file:
 
 * Custom Implementation
 
-  Interested in adapting your own real-time system to OneBusAway?  One option is create an adapter between your system
+  Interested in adapting your own real-time system to OneBusAway?  The best option is to create an adapter between your system
 and an existing specification like {{{http://code.google.com/transit/realtime/}GTFS-realtime}} or {{{http://siri.org.uk/}SIRI}}
-and then use OneBusAway's native support for those formats.  However, if that's not going to cut it, you can create
-your own custom real-time data-source plugin to OneBusAway.
+and then use OneBusAway's native support for those formats.
+
+  However, if that's not going to cut it, you can create your own custom real-time data-source plugin to OneBusAway.  This
+might be a good solution if you need direct access to OneBusAway data-structures and service interfaces to process your
+real-time data.
 
   Creating a custom implementation typically involves the following steps:
   
