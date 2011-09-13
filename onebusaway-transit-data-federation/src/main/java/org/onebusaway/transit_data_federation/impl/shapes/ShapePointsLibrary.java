@@ -71,12 +71,20 @@ public class ShapePointsLibrary {
    * 
    * The trick is that there may be multiple good assignments, especially for a
    * shape that loops back on itself. In this case, we look for assignments
-   * within our _localMinimumThreshold distance. There will typically be ranges
-   * of assignments that apply and we take the local min within each range. We
-   * then return each of these local mins as a potential assignment.
+   * within our {@link #_localMinimumThreshold} distance. There will typically
+   * be ranges of assignments that apply and we take the local min within each
+   * range. We then return each of these local mins as a potential assignment.
    * 
-   * If no assignments are found within the _localMinimumThreshold distance, we
-   * just return the global min.
+   * There is an additional wrinkle when the section of the shape that loops
+   * back occurs where all the shape points are within
+   * {@link #_localMinimumThreshold} of the target point. In this case, we no
+   * longer consider the local min for the section, but the individual local
+   * mins within the section. That is to say, if we find a local min and then
+   * the shape moves away and comes back, we'll consider the second local min as
+   * a new potential assignment.
+   * 
+   * If no assignments are found within the {@link #_localMinimumThreshold}
+   * distance, we just return the global min.
    * 
    * @param projectedShapePoints
    * @param shapePointDistance
@@ -101,8 +109,18 @@ public class ShapePointsLibrary {
 
     List<PointAndIndex> localMins = new ArrayList<PointAndIndex>();
 
-    boolean previouslyIncreasing = false;
-    double previousDistance = Double.POSITIVE_INFINITY;
+    /**
+     * For our multi-local min within the _localMinimumThreshold detection, we
+     * keep track of whether the endpoint of the previous segment was further
+     * away from the target point than the snapped point, indicating the shape
+     * is moving away from the target point. We also keep track of the distance
+     * of the target point from the endpoint of the previous segment. If the
+     * snapped point of the next section is closer to the target point than the
+     * previous endpoint AND the shape was moving away from the target point in
+     * the previous section, we establish a new local min.
+     */
+    boolean previousEndpointDistanceGreaterThanSnappedDistance = false;
+    double previousEndpointDistance = Double.POSITIVE_INFINITY;
 
     for (int i = fromIndex; i < toIndex - 1; i++) {
       XYPoint from = projectedShapePoints.get(i);
@@ -113,24 +131,24 @@ public class ShapePointsLibrary {
       double d = location.getDistance(targetPoint);
       double distanceAlongShape = shapePointDistance[i]
           + location.getDistance(from);
-      PointAndIndex pindex = new PointAndIndex(location, i, d, distanceAlongShape);
+      PointAndIndex pindex = new PointAndIndex(location, i, d,
+          distanceAlongShape);
       min.add(d, pindex);
 
-      boolean decreasing = d < previousDistance;
-
       if (d <= _localMinimumThreshold) {
-        if (previouslyIncreasing && decreasing && !localMin.isEmpty()) {
+        if (previousEndpointDistanceGreaterThanSnappedDistance
+            && d < previousEndpointDistance && !localMin.isEmpty()) {
           localMins.add(localMin.getMinElement());
           localMin = new Min<PointAndIndex>();
         }
         localMin.add(d, pindex);
-      } else if (d > _localMinimumThreshold && !localMin.isEmpty()) {
+      } else if (!localMin.isEmpty()) {
         localMins.add(localMin.getMinElement());
         localMin = new Min<PointAndIndex>();
       }
 
-      previouslyIncreasing = d > previousDistance;
-      previousDistance = d;
+      previousEndpointDistance = to.getDistance(targetPoint);
+      previousEndpointDistanceGreaterThanSnappedDistance = previousEndpointDistance > d;
     }
 
     /**

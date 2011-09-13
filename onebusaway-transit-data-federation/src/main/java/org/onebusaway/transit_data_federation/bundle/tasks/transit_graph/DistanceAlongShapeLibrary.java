@@ -326,6 +326,9 @@ public class DistanceAlongShapeLibrary {
     b.append("# index stopId stopLat stopLon\n");
     b.append("#   distanceAlongShapeA locationOnShapeLatA locationOnShapeLonA shapePointIndexA\n");
     b.append("#   ...\n");
+    
+    double prevMaxDistanceAlongShape = Double.NEGATIVE_INFINITY;
+    
     for (List<PointAndIndex> possible : possibleAssignments) {
       StopTimeEntryImpl stopTime = stopTimes.get(index);
       StopEntryImpl stop = stopTime.getStop();
@@ -338,6 +341,9 @@ public class DistanceAlongShapeLibrary {
       b.append(stop.getStopLon());
       b.append('\n');
 
+      double maxDistanceAlongShape = Double.NEGATIVE_INFINITY;
+      double minDistanceAlongShape = Double.POSITIVE_INFINITY;
+      
       for (PointAndIndex pindex : possible) {
         b.append("  ");
         b.append(pindex.distanceAlongShape);
@@ -346,7 +352,15 @@ public class DistanceAlongShapeLibrary {
         b.append(' ');
         b.append(pindex.index);
         b.append("\n");
+        maxDistanceAlongShape = Math.max(maxDistanceAlongShape, pindex.distanceAlongShape);
+        minDistanceAlongShape = Math.min(minDistanceAlongShape, pindex.distanceAlongShape);
       }
+      
+      if( minDistanceAlongShape < prevMaxDistanceAlongShape ) {
+        b.append("    ^ potential problem here ^\n");
+      }
+      
+      prevMaxDistanceAlongShape = maxDistanceAlongShape;
 
       index++;
     }
