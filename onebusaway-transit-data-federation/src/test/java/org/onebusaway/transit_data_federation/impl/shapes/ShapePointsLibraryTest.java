@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +63,7 @@ public class ShapePointsLibraryTest {
     assertEquals(2.0, pi.point.getX(), 0.0);
     assertEquals(0.0, pi.point.getY(), 0.0);
   }
-  
+
   @Test
   public void test02() {
 
@@ -87,12 +88,12 @@ public class ShapePointsLibraryTest {
     PointAndIndex pi = result.get(0);
     assertEquals(1.0, pi.point.getX(), 0.0);
     assertEquals(0.0, pi.point.getY(), 0.0);
-    
+
     pi = result.get(1);
     assertEquals(1.0, pi.point.getX(), 0.0);
     assertEquals(1.0, pi.point.getY(), 0.0);
   }
-  
+
   @Test
   public void test03() {
 
@@ -112,13 +113,17 @@ public class ShapePointsLibraryTest {
     List<PointAndIndex> result = spl.computePotentialAssignments(points,
         shapePointDistances, target, 0, points.size());
 
-    assertEquals(2, result.size());
+    assertEquals(3, result.size());
 
     PointAndIndex pi = result.get(0);
     assertEquals(1.0, pi.point.getX(), 0.0);
     assertEquals(0.0, pi.point.getY(), 0.0);
-    
+
     pi = result.get(1);
+    assertEquals(10.0, pi.point.getX(), 0.0);
+    assertEquals(0.5, pi.point.getY(), 0.0);
+
+    pi = result.get(2);
     assertEquals(1.0, pi.point.getX(), 0.0);
     assertEquals(1.0, pi.point.getY(), 0.0);
   }
@@ -129,12 +134,12 @@ public class ShapePointsLibraryTest {
 
   private double[] shapePointDistances(List<XYPoint> points) {
     double[] distances = new double[points.size()];
-    double d = 0;
+    double accumulatedDistance = 0;
     for (int i = 0; i < points.size(); i++) {
       XYPoint point = points.get(i);
-      distances[i] = d;
       if (i > 0)
-        d += point.getDistance(points.get(i - 1));
+        accumulatedDistance += point.getDistance(points.get(i - 1));
+      distances[i] = accumulatedDistance;
     }
     return distances;
   }
