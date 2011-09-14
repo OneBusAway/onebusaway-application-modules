@@ -18,10 +18,8 @@ package org.onebusaway.transit_data_federation.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 
 import org.onebusaway.collections.CollectionsLibrary;
@@ -29,14 +27,12 @@ import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +61,10 @@ public class AgencyServiceImpl implements AgencyService {
   @Override
   public List<String> getAllAgencyIds() {
 
-    Set<String> agencyIds = new HashSet<String>();
+    List<String> agencyIds = new ArrayList<String>();
 
-    for (TripEntry trip : _graph.getAllTrips()) {
-      AgencyAndId id = trip.getId();
-      String agencyId = id.getAgencyId();
-      agencyIds.add(agencyId);
+    for (AgencyEntry agency : _graph.getAllAgencies()) {
+      agencyIds.add(agency.getId());
     }
 
     return new ArrayList<String>(agencyIds);

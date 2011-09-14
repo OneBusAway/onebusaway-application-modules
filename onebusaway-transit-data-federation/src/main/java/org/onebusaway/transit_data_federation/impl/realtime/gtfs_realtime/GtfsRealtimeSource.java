@@ -157,9 +157,14 @@ public class GtfsRealtimeSource {
   @PostConstruct
   public void start() {
     if (_agencyIds.isEmpty()) {
+      _log.info("no agency ids specified for GtfsRealtimeSource, so defaulting to full agency id set");
       List<String> agencyIds = _agencyService.getAllAgencyIds();
-      if (!agencyIds.isEmpty())
-        _agencyIds.add(agencyIds.get(0));
+      _agencyIds.addAll(agencyIds);
+      if (_agencyIds.size() > 3) {
+        _log.warn("The default agency id set is quite large (n="
+            + _agencyIds.size()
+            + ").  You might consider specifying the applicable agencies for your GtfsRealtimeSource.");
+      }
     }
     _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
         new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
@@ -239,6 +244,7 @@ public class GtfsRealtimeSource {
       TripEntry trip = getTrip(tripDescriptor.getTripId());
       if (trip == null) {
         _log.warn("no trip found with id=" + tripDescriptor.getTripId());
+        continue;
       }
 
       BlockEntry block = trip.getBlock();
@@ -257,7 +263,8 @@ public class GtfsRealtimeSource {
       record.setScheduleDeviation(delay);
       record.setServiceDate(instance.getServiceDate());
       record.setTimeOfRecord(System.currentTimeMillis());
-      // HACK - we assume we have access to a vehicle id to uniquely identify records.  But what if we don't?
+      // HACK - we assume we have access to a vehicle id to uniquely identify
+      // records. But what if we don't?
       record.setVehicleId(block.getId());
       _vehicleLocationListener.handleVehicleLocationRecord(record);
     }
