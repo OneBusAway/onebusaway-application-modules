@@ -230,22 +230,7 @@ public class DistanceAlongShapeLibrary {
      * There is no satisfying assignment for this search tree, so we return
      */
     if (validAssignments.isEmpty()) {
-    	/*
-    	 * Make one last ditch effort: if we can't find a valid assignment using the last distance along shape, search 
-    	 * up to 10 m backwards to see if we can find a match. Sometimes GTFS shape data has small "overlaps" where two
-    	 * route lines butt up to each other, etc. that this 10m backwards search can help fix. 
-    	 * 
-    	 * The NY MTA bus data has such things, e.g. on the X22 at 6th Ave and 34th Street in Manhattan.
-    	 */
-        for(int z = 0; z < possibleAssignmentsForIndex.size(); z++) {
-        	PointAndIndex possibleAssignmentForIndex = possibleAssignmentsForIndex.get(z);
-        	if (possibleAssignmentForIndex.distanceAlongShape >= lastDistanceAlongShape - 10)
-        		validAssignments.add(possibleAssignmentForIndex);
-        }
-
-        if (validAssignments.isEmpty()) {       	
-        	return;
-        }
+    	return;
     }
 
     /**

@@ -71,76 +71,86 @@ public class ShapePointsLibrary {
    * @return
    */
   public List<PointAndIndex> computePotentialAssignments(
-      List<XYPoint> projectedShapePoints, double[] shapePointDistance,
-      XYPoint targetPoint, int fromIndex, int toIndex) {
+		  List<XYPoint> projectedShapePoints, double[] shapePointDistance,
+		  XYPoint targetPoint, int fromIndex, int toIndex) {
 
-    /**
-     * The absolute closest assignment
-     */
-    Min<PointAndIndex> min = new Min<PointAndIndex>();
+	  /**
+	   * The absolute closest assignment
+	   */
+	  Min<PointAndIndex> min = new Min<PointAndIndex>();
 
-    /**
-     * 
-     */
-    Min<PointAndIndex> localMin = new Min<PointAndIndex>();
+	  /**
+	   * 
+	   */
+	  Min<PointAndIndex> localMin = new Min<PointAndIndex>();
 
-    List<PointAndIndex> localMins = new ArrayList<PointAndIndex>();
+	  List<PointAndIndex> localMins = new ArrayList<PointAndIndex>();
 
-    boolean previouslyIncreasing = false;
-    double previousDistance = Double.POSITIVE_INFINITY;
+	  /**
+	   * For our multi-local min within the _localMinimumThreshold detection, we
+	   * keep track of whether the endpoint of the previous segment was further
+	   * away from the target point than the snapped point, indicating the shape
+	   * is moving away from the target point. We also keep track of the distance
+	   * of the target point from the endpoint of the previous segment. If the
+	   * snapped point of the next section is closer to the target point than the
+	   * previous endpoint AND the shape was moving away from the target point in
+	   * the previous section, we establish a new local min.
+	   */
+	  boolean previousEndpointDistanceGreaterThanSnappedDistance = false;
+	  double previousEndpointDistance = Double.POSITIVE_INFINITY;
 
-    for (int i = fromIndex; i < toIndex - 1; i++) {
-      XYPoint from = projectedShapePoints.get(i);
-      XYPoint to = projectedShapePoints.get(i + 1);
+	  for (int i = fromIndex; i < toIndex - 1; i++) {
+		  XYPoint from = projectedShapePoints.get(i);
+		  XYPoint to = projectedShapePoints.get(i + 1);
 
-      XYPoint location = GeometryLibrary.projectPointToSegment(targetPoint,
-          from, to);
-      double d = location.getDistance(targetPoint);
-      double distanceAlongShape = shapePointDistance[i]
-          + location.getDistance(from);
-      PointAndIndex pindex = new PointAndIndex(location, i, d, distanceAlongShape);
-      min.add(d, pindex);
+		  XYPoint location = GeometryLibrary.projectPointToSegment(targetPoint,
+				  from, to);
+		  double d = location.getDistance(targetPoint);
+		  double distanceAlongShape = shapePointDistance[i]
+				  + location.getDistance(from);
+		  PointAndIndex pindex = new PointAndIndex(location, i, d,
+				  distanceAlongShape);
+		  min.add(d, pindex);
 
-      boolean decreasing = d < previousDistance;
+		  if (d <= _localMinimumThreshold) {
+			  if (previousEndpointDistanceGreaterThanSnappedDistance
+					  && d < previousEndpointDistance && !localMin.isEmpty()) {
+				  localMins.add(localMin.getMinElement());
+				  localMin = new Min<PointAndIndex>();
+			  }
+			  localMin.add(d, pindex);
+		  } else if (!localMin.isEmpty()) {
+			  localMins.add(localMin.getMinElement());
+			  localMin = new Min<PointAndIndex>();
+		  }
 
-      if (d <= _localMinimumThreshold) {
-        if (previouslyIncreasing && decreasing && !localMin.isEmpty()) {
-          localMins.add(localMin.getMinElement());
-          localMin = new Min<PointAndIndex>();
-        }
-        localMin.add(d, pindex);
-      } else if (d > _localMinimumThreshold && !localMin.isEmpty()) {
-        localMins.add(localMin.getMinElement());
-        localMin = new Min<PointAndIndex>();
-      }
+		  previousEndpointDistance = to.getDistance(targetPoint);
+		  previousEndpointDistanceGreaterThanSnappedDistance = previousEndpointDistance > d;
+	  }
 
-      previouslyIncreasing = d > previousDistance;
-      previousDistance = d;
-    }
+	  /**
+	   * If don't have ANY potential assignments, return an empty list
+	   */
+	   if (min.isEmpty())
+		   return Collections.emptyList();
 
-    /**
-     * If don't have ANY potential assignments, return an empty list
-     */
-    if (min.isEmpty())
-      return Collections.emptyList();
+	   /**
+	    * Check to see if we have a localMin element that needs to be added to our
+	    * collection of local mins
+	    */
+	   if (!localMin.isEmpty())
+		   localMins.add(localMin.getMinElement());
 
-    /**
-     * Check to see if we have a localMin element that needs to be added to our
-     * collection of local mins
-     */
-    if (!localMin.isEmpty())
-      localMins.add(localMin.getMinElement());
+	   /**
+	    * If we don't have ANY local mins (aka assignments that were within our
+	    * _localMinimumThreshold), we just use the best assigment(s) from the
+	    * global min
+	    */
+	   if (localMins.isEmpty())
+		   localMins.addAll(min.getMinElements());
 
-    /**
-     * If we don't have ANY local mins (aka assignments that were within our
-     * _localMinimumThreshold), we just use the best assigment(s) from the
-     * global min
-     */
-    if (localMins.isEmpty())
-      localMins.addAll(min.getMinElements());
+	   Collections.sort(localMins);
 
-    Collections.sort(localMins);
-
-    return localMins;
+	   return localMins;
   }
 }
