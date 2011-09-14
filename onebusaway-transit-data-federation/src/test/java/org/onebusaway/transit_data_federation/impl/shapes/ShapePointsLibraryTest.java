@@ -97,15 +97,15 @@ public class ShapePointsLibraryTest {
     List<PointAndIndex> result = spl.computePotentialAssignments(points,
         shapePointDistances, target, 0, points.size());
 
-    assertEquals(2, result.size());
+    assertEquals(3, result.size());
 
     PointAndIndex pi = result.get(0);
-    assertEquals(1.0, pi.point.getX(), 0.0);
-    assertEquals(0.0, pi.point.getY(), 0.0);
+    assertEquals(10.0, pi.point.getX(), 0.0);
+    assertEquals(0.5, pi.point.getY(), 0.0);
     
     pi = result.get(1);
     assertEquals(1.0, pi.point.getX(), 0.0);
-    assertEquals(1.0, pi.point.getY(), 0.0);
+    assertEquals(0.0, pi.point.getY(), 0.0);
   }
 
   private XYPoint p(double x, double y) {
