@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +79,7 @@ public class DistanceAlongShapeLibrary {
     List<List<PointAndIndex>> possibleAssignments = computePotentialAssignments(
         projection, projectedShapePoints, shapePointsDistTraveled, stopTimes);
 
+    pruneUnnecessaryAssignments(possibleAssignments);
     assignmentSanityCheck(shapePoints, stopTimes, possibleAssignments);
 
     double maxDistanceTraveled = shapePointsDistTraveled[shapePointsDistTraveled.length - 1];
@@ -98,6 +100,60 @@ public class DistanceAlongShapeLibrary {
       stopTimePoints[i] = pindex;
     }
     return stopTimePoints;
+  }
+
+  /**
+   * The {@link ShapePointsLibrary} returns a number of potential assignments
+   * for a stop's position along a shape. While some of those potential
+   * assignments can help us correctly deal with cases where a shape loops back
+   * on itself or other weird configurations, many of the potential assignments
+   * are just local minimas that won't ultimately have much affect on the final
+   * assignment if they don't overlap with the previous or next stop. To help
+   * reduce the set of possible assingments that we'll have to explore, we just
+   * pick the best assignment and toss out the rest when the set of assignments
+   * for a stop don't overlap with the assignments of the previous or next stop.
+   * 
+   * @param possibleAssignments
+   */
+  private void pruneUnnecessaryAssignments(
+      List<List<PointAndIndex>> possibleAssignments) {
+
+    double[] mins = new double[possibleAssignments.size()];
+    double[] maxs = new double[possibleAssignments.size()];
+
+    for (int i = 0; i < possibleAssignments.size(); ++i) {
+      double minScore = Double.POSITIVE_INFINITY;
+      double maxScore = Double.NEGATIVE_INFINITY;
+      for (PointAndIndex pi : possibleAssignments.get(i)) {
+        minScore = Math.min(minScore, pi.distanceAlongShape);
+        maxScore = Math.max(maxScore, pi.distanceAlongShape);
+      }
+      mins[i] = minScore;
+      maxs[i] = maxScore;
+    }
+
+    for (int i = 0; i < possibleAssignments.size(); i++) {
+      List<PointAndIndex> points = possibleAssignments.get(i);
+      // If there is only one possible assignment, there is nothing to prune
+      if (points.size() == 1)
+        continue;
+      double currentMin = mins[i];
+      double currentMax = maxs[i];
+      if (i > 0) {
+        double prevMax = maxs[i - 1];
+        if (currentMin < prevMax)
+          continue;
+      }
+      if (i + 1 < possibleAssignments.size()) {
+        double nextMin = mins[i + 1];
+        if (currentMax > nextMin)
+          continue;
+      }
+
+      Collections.sort(points);
+      while (points.size() > 1)
+        points.remove(points.size() - 1);
+    }
   }
 
   private void assignmentSanityCheck(ShapePoints shapePoints,
@@ -326,9 +382,9 @@ public class DistanceAlongShapeLibrary {
     b.append("# index stopId stopLat stopLon\n");
     b.append("#   distanceAlongShapeA locationOnShapeLatA locationOnShapeLonA shapePointIndexA\n");
     b.append("#   ...\n");
-    
+
     double prevMaxDistanceAlongShape = Double.NEGATIVE_INFINITY;
-    
+
     for (List<PointAndIndex> possible : possibleAssignments) {
       StopTimeEntryImpl stopTime = stopTimes.get(index);
       StopEntryImpl stop = stopTime.getStop();
@@ -343,7 +399,7 @@ public class DistanceAlongShapeLibrary {
 
       double maxDistanceAlongShape = Double.NEGATIVE_INFINITY;
       double minDistanceAlongShape = Double.POSITIVE_INFINITY;
-      
+
       for (PointAndIndex pindex : possible) {
         b.append("  ");
         b.append(pindex.distanceAlongShape);
@@ -352,14 +408,16 @@ public class DistanceAlongShapeLibrary {
         b.append(' ');
         b.append(pindex.index);
         b.append("\n");
-        maxDistanceAlongShape = Math.max(maxDistanceAlongShape, pindex.distanceAlongShape);
-        minDistanceAlongShape = Math.min(minDistanceAlongShape, pindex.distanceAlongShape);
+        maxDistanceAlongShape = Math.max(maxDistanceAlongShape,
+            pindex.distanceAlongShape);
+        minDistanceAlongShape = Math.min(minDistanceAlongShape,
+            pindex.distanceAlongShape);
       }
-      
-      if( minDistanceAlongShape < prevMaxDistanceAlongShape ) {
+
+      if (minDistanceAlongShape < prevMaxDistanceAlongShape) {
         b.append("    ^ potential problem here ^\n");
       }
-      
+
       prevMaxDistanceAlongShape = maxDistanceAlongShape;
 
       index++;

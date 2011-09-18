@@ -79,6 +79,8 @@ public class StopTimeEntriesFactory {
 
     ensureStopTimesHaveShapeDistanceTraveledSet(stopTimeEntries, shapePoints);
     ensureStopTimesHaveTimesSet(stopTimes, stopTimeEntries);
+    
+    
 
     return stopTimeEntries;
   }
@@ -86,7 +88,7 @@ public class StopTimeEntriesFactory {
   private List<StopTimeEntryImpl> createInitialStopTimeEntries(
       TransitGraphImpl graph, List<StopTime> stopTimes) {
 
-    List<StopTimeEntryImpl> stopTimeEntries = new ArrayList<StopTimeEntryImpl>();
+    List<StopTimeEntryImpl> stopTimeEntries = new ArrayList<StopTimeEntryImpl>(stopTimes.size());
     int sequence = 0;
 
     for (StopTime stopTime : stopTimes) {
