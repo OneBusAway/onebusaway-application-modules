@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <!-- Specify our transit data source -->
+    <bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
+        <property name="serviceUrl" value="http://soak-transit-data.onebusaway.org/puget_sound/remoting/transit-data-service" />
+        <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
+    </bean>
+
+    <!-- Database Connection Configuration -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+        <property name="url" value="jdbc:hsqldb:file:/tmp/org_onebusaway_database" />
+        <property name="username" value="sa" />
+        <property name="password" value="" />
+    </bean>
+
+    <!--
+        The Geocoder is used in the SMS interface for determining your default search location. The DefaultGeocoderImpl
+        doesn't actually do much geocoding... it's just there for testing
+    -->
+    <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.impl.FixedGeocoderImpl">
+        <property name="lat" value="47.65475043477393" />
+        <property name="lon" value="-122.3078727722168" />
+        <property name="city" value="Seattle" />
+        <property name="state" value="WA" />
+        <property name="postalCode" value="98105" />
+    </bean>
+
+    <bean id="wikiDocumentService" class="org.onebusaway.wiki.xwiki.impl.XWikiDocumentServiceImpl">
+        <property name="xwikiUrl" value="http://wiki.onebusaway.org" />
+    </bean>
+
+    <bean id="wikiRenderingService" class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl">
+        <property name="wikiDocumentViewUrl" value="/onebusaway-webapp/p/%{documentName}.action" />
+        <property name="wikiDocumentEditUrl" value="http://wiki.onebusaway.org/bin/edit/Main/%{documentName}" />
+        <property name="wikiAttachmentUrl" value="http://wiki.onebusaway.org/bin/download/Main/%{documentName}/%{attachmentName}" />
+    </bean>
+</beans>

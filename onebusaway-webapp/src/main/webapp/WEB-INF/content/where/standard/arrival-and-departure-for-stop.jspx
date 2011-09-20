@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	  xmlns:c="http://java.sun.com/jsp/jstl/core"
+	  xmlns:oba="/oba-tags"
+	  xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<s:set name="now" value="getNow()" />
+<head>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-stop.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-stop.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-arrival-and-departure-for-stop.css')}"/>
+<script type="text/javascript" src="${oba:url('/config.action')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/jquery-jplayer-min.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/oba-where-standard-arrival-and-departure-for-stop.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('messages:ArrivalAndDepartureMessages=org.onebusaway.webapp.actions.bundles.ArrivalAndDepartureMessages')}"><jsp:text></jsp:text></script>
+<script type="text/javascript">
+  (function() {
+    
+    var data = {};
+    data.tripId = '<s:property escapeJavaScript="true" value="tripId" />';
+    data.serviceDate = <s:property escapeJavaScript="true" value="serviceDate" />;
+    data.stopId = '<s:property escapeJavaScript="true" value="stopId" />';    
+    data.stopSequence = <s:property escapeJavaScript="true" value="stopSequence" />;
+<s:if test="vehicleId != null">
+    data.vehicleId = '<s:property escapeJavaScript="true" value="vehicleId" />';
+</s:if>
+    data.notificationSoundUrl = '${oba:url("/where/standard/OneBusAwayNotificationSound.mp3")}';
+    jQuery(document).ready(function() {
+      oba_where_standard_arrival_and_departure_for_stop(data);
+    });
+  }());
+</script>
+<title>
+  <s:component template="stops-title-head-snippet.jspx">
+    <s:param name="stops" value="result.stop"/>
+  </s:component>
+</title>
+</head>
+<body>
+
+<div id="container">
+<div class="panel">
+
+<!-- The Arrivals Title Header -->
+<s:component template="stops-title-snippet.jspx">
+    <s:param name="stops" value="result.stop"/>
+</s:component>
+
+<p class="showAllArrivals">
+    <s:url var="url" action="stop">
+        <s:param name="id" value="result.stop.id"/>
+    </s:url>
+    <s:a href="%{url}"><s:text name="arrivalAndDepartureForStop.Show_all_arrivals_for_this_stop"/></s:a>
+</p>
+
+<s:component template="service-alerts-header-snippet.jspx">
+    <s:param name="situations" value="situations"/>
+</s:component>
+
+<s:component template="arrivals-and-departures-table-snippet.jspx">
+    <s:param name="arrivalsAndDepartures" value="result"/>
+    <s:param name="excludeOrderLinks" value="true"/>
+    <s:param name="presentation" value="presentation" />    
+</s:component>
+
+<s:component template="service-alerts-footer-snippet.jspx">
+    <s:param name="situations" value="situations"/>
+</s:component>
+
+<div id="notificationPanel">
+<h4><s:text name="Notifications"/>:</h4>
+<ul>
+<li>
+  <s:text name="arrivalAndDepartureForStop.Notify_me_minutes_before_arrival">
+    <s:param><input id="notification_time_input" type="text" value="5" /></s:param>
+  </s:text>
+</li>
+<li><input id="notification_sound_input" type="checkbox" checked="checked" value="true"/> <s:text name="arrivalAndDepartureForStop.Play_a_sound"/></li>
+<li><input id="notification_alert_input" type="checkbox" checked="checked" value="true"/> <s:text name="arrivalAndDepartureForStop.Popup_an_alert"/></li>
+</ul>
+</div>
+
+<div class="stop_links">
+<h4>Historical Real-Time Stats:</h4>
+<s:if test="result.scheduleDeviationHistogram == null">
+<p>No historical real-time data is available for this trip + stop.</p>
+</s:if>
+<s:else>
+<s:push value="result.scheduleDeviationHistogram">
+<s:url var="url" value="http://chart.apis.google.com/chart">
+  <s:param name="cht">bvg</s:param>
+  <s:param name="chs">300x225</s:param>
+  <s:param name="chco">A2C180</s:param>
+  <s:param name="chbh">a</s:param>
+  <s:param name="chxr">1,0,<s:property value="maxCount"/>,5</s:param>
+  <s:param name="chds">0,<s:property value="maxCount"/></s:param>
+  <s:param name="chtt">Schedule Adherence History</s:param>
+  <!-- Specify an extra X axis title -->
+  <s:param name="chxt">x,y,x,y</s:param>
+  <!-- Specify the extra X axis title value -->
+  <s:param name="chxl">0:<s:iterator value="labels">|<s:property /></s:iterator>|2:|Schedule Deviation (mins)||3:|Count|</s:param>
+  <!-- Position the X axis label at the middle (50%) -->
+  <s:param name="chxp">2,50|3,50</s:param>
+  <!--  Style the X-Axis Labe -->
+  <s:param name="chxs">2,,16|3,,16</s:param>
+  <!-- Data! -->
+  <s:param name="chd">t:<s:iterator value="counts" status="it"><s:if test="!#it.first">,</s:if><s:property /></s:iterator></s:param>
+  <!-- ?chxr=0,6,12 -->
+</s:url>
+<jsp:element name="img">
+  <jsp:attribute name="src"><s:property value="%{url}" escape="false"/></jsp:attribute>
+</jsp:element>
+</s:push>
+</s:else>
+</div>
+
+<!--  Attachment point for playing audio -->
+<div id="jquery_jplayer"><jsp:text></jsp:text></div>
+
+</div>
+</div>
+
+</body>
+</html>

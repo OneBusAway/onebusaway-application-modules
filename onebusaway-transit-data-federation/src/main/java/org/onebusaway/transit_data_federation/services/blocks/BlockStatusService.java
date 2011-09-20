@@ -1,5 +1,21 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.services.blocks;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -40,18 +56,41 @@ public interface BlockStatusService {
   public BlockLocation getBlockForVehicle(AgencyAndId vehicleId, long time);
 
   /**
+   * Returns all active blocks, both with and without real-time information.
    * 
-   * @param query
-   * @return the list of active blocks matching agency query criteria
+   * @param time only blocks active at the specified time will be returned
+   * @return the list of active blocks at the specified time
    */
-  public List<BlockLocation> getBlocksForAgency(String agencyId, long time);
+  public List<BlockLocation> getAllActiveBlocks(long time);
 
   /**
+   * Returns all active blocks for the specified agency, both with and without
+   * real-time information.
    * 
-   * @param query
+   * @param agencyId only blocks with the specified agency id will be returned
+   * @param time only blocks active at the specified time will be returned
+   * @return the list of active blocks matching agency query criteria
+   */
+  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long time);
+
+  /**
+   * Returns all active blocks for the specified route, both with and without
+   * real-time information.
+   * 
+   * @param routeId only blocks with the specified route id will be returned
+   * @param time only blocks active at the specified time will be returned
    * @return the list of active blocks matching the route query criteria
    */
   public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time);
+
+  /**
+   * 
+   * @param index
+   * @param timetamps
+   * @return
+   */
+  public Map<BlockInstance, List<List<BlockLocation>>> getBlocksForIndex(
+      BlockSequenceIndex index, List<Date> timetamps);
 
   /**
    * @param query

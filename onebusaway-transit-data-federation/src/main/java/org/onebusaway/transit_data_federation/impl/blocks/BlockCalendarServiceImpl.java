@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.ArrayList;
@@ -28,6 +43,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -89,6 +105,19 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
   }
 
   @Override
+  public BlockTripEntry getTargetBlockTrip(BlockInstance blockInstance,
+      TripEntry trip) {
+
+    BlockConfigurationEntry blockConfig = blockInstance.getBlock();
+
+    for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
+      if (blockTrip.getTrip().equals(trip))
+        return blockTrip;
+    }
+    return null;
+  }
+
+  @Override
   public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
       long timeFrom, long timeTo) {
 
@@ -130,6 +159,16 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     }
 
     return m.getMinElements();
+  }
+  
+  @Override
+  public List<BlockInstance> getActiveBlocksInTimeRange(long timeFrom,
+      long timeTo) {
+    List<BlockTripIndex> indices = _blockIndexService.getBlockTripIndices();
+    List<BlockLayoverIndex> layoverIndices = _blockIndexService.getBlockLayoverIndices();
+    List<FrequencyBlockTripIndex> frequencyIndices = _blockIndexService.getFrequencyBlockTripIndices();
+    return getActiveBlocksInTimeRange(indices, layoverIndices,
+        frequencyIndices, timeFrom, timeTo);
   }
 
   @Override

@@ -1,7 +1,23 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockTripEntryImpl;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
@@ -18,6 +34,10 @@ public abstract class AbstractBlockTripIndex implements HasBlockTrips {
     checkTripsHaveSameServiceids(trips);
 
     _trips = trips;
+    for( BlockTripEntry trip : trips) {
+      BlockTripEntryImpl tripImpl = (BlockTripEntryImpl) trip;
+      tripImpl.setPattern(this);
+    }
   }
 
   public List<BlockTripEntry> getTrips() {
@@ -26,6 +46,10 @@ public abstract class AbstractBlockTripIndex implements HasBlockTrips {
 
   public ServiceIdActivation getServiceIds() {
     return _trips.get(0).getBlockConfiguration().getServiceIds();
+  }
+  
+  public int size() {
+    return _trips.size();
   }
 
   private static void checkTripsHaveSameServiceids(List<BlockTripEntry> trips) {

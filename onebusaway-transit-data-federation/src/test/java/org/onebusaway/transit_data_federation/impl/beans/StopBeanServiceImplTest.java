@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import static org.junit.Assert.assertEquals;
@@ -12,21 +28,21 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.gtfs.model.Stop;
-import org.onebusaway.gtfs.services.GtfsRelationalDao;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
 public class StopBeanServiceImplTest {
 
   private StopBeanServiceImpl _service;
 
-  private GtfsRelationalDao _dao;
+  private TransitGraphDao _transitGraphDao;
 
   private NarrativeService _narrativeService;
 
@@ -38,8 +54,8 @@ public class StopBeanServiceImplTest {
   public void setup() {
     _service = new StopBeanServiceImpl();
 
-    _dao = Mockito.mock(GtfsRelationalDao.class);
-    _service.setGtfsDao(_dao);
+    _transitGraphDao = Mockito.mock(TransitGraphDao.class);
+    _service.setTranstiGraphDao(_transitGraphDao);
 
     _narrativeService = Mockito.mock(NarrativeService.class);
     _service.setNarrativeService(_narrativeService);
@@ -56,27 +72,21 @@ public class StopBeanServiceImplTest {
 
     AgencyAndId stopId = new AgencyAndId("29", "1109");
 
-    Stop stop = new Stop();
-    stop.setCode("1109-b");
-    stop.setDesc("stop description");
+    StopEntryImpl stopEntry = new StopEntryImpl(stopId, 47.1, -122.1);
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopId)).thenReturn(
+        stopEntry);
 
-    stop.setId(stopId);
-    stop.setLat(47.1);
-    stop.setLocationType(0);
-    stop.setLon(-122.1);
-    stop.setName("stop name");
-    stop.setParentStation(null);
-    stop.setUrl("http://some/url");
-    stop.setWheelchairBoarding(0);
-    stop.setZoneId("stop zone");
+    StopNarrative.Builder builder = StopNarrative.builder();
+    builder.setCode("1109-b");
+    builder.setDescription("stop description");
+    builder.setLocationType(0);
+    builder.setName("stop name");
+    builder.setUrl("http://some/url");
+    builder.setDirection("N");
 
-    Mockito.when(_dao.getStopForId(stopId)).thenReturn(stop);
+    StopNarrative stop = builder.create();
 
-    StopNarrative.Builder narrative = StopNarrative.builder();
-    narrative.setDirection("N");
-
-    Mockito.when(_narrativeService.getStopForId(stopId)).thenReturn(
-        narrative.create());
+    Mockito.when(_narrativeService.getStopForId(stopId)).thenReturn(stop);
 
     AgencyAndId routeId = new AgencyAndId("1", "route");
 
@@ -91,13 +101,13 @@ public class StopBeanServiceImplTest {
     RouteBean route = routeBuilder.create();
     Mockito.when(_routeBeanService.getRouteForId(routeId)).thenReturn(route);
 
-    
     StopBean stopBean = _service.getStopForId(stopId);
 
     assertNotNull(stopBean);
+    assertEquals(stopId.toString(), stopBean.getId());
     assertEquals(stop.getName(), stopBean.getName());
-    assertEquals(stop.getLat(), stopBean.getLat(), 0.0);
-    assertEquals(stop.getLon(), stopBean.getLon(), 0.0);
+    assertEquals(stopEntry.getStopLat(), stopBean.getLat(), 0.0);
+    assertEquals(stopEntry.getStopLon(), stopBean.getLon(), 0.0);
     assertEquals(stop.getCode(), stopBean.getCode());
     assertEquals(stop.getLocationType(), stopBean.getLocationType());
 

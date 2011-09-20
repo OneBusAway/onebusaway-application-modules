@@ -3,7 +3,7 @@
     <parent>
         <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>2.0.5-SNAPSHOT</version>
+        <version>0.2.0-SNAPSHOT</version>
     </parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-federations-webapp</artifactId>
@@ -150,30 +150,6 @@
                         <phase>post-integration-test</phase>
                         <goals>
                             <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>selenium-maven-plugin</artifactId>
-                <version>1.1</version>
-                <executions>
-                    <execution>
-                        <id>selenium-start-server</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start-server</goal>
-                        </goals>
-                        <configuration>
-                            <background>true</background>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>selenium-stop-server</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop-server</goal>
                         </goals>
                     </execution>
                 </executions>

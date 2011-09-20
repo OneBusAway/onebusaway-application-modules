@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.io.File;
@@ -14,26 +29,32 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.collections.FactoryMap;
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockLayoverIndexData;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockStopTimeIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockTripIndexData;
 import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.FrequencyBlockTripIndexData;
-import org.onebusaway.transit_data_federation.impl.refresh.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexFactoryService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyStopTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.HasBlockTrips;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;
@@ -49,6 +70,8 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   private FederatedTransitDataBundle _bundle;
 
   private TransitGraphDao _graphDao;
+
+  private BlockIndexFactoryService _factory;
 
   private List<BlockTripIndex> _blockTripIndices;
 
@@ -74,9 +97,17 @@ public class BlockIndexServiceImpl implements BlockIndexService {
 
   private Map<AgencyAndId, List<FrequencyBlockTripIndex>> _frequencyBlockTripIndicesByBlockId;
 
+  private List<BlockSequenceIndex> _blockSequenceIndices = Collections.emptyList();
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
+  }
+
+  @Autowired
+  public void setBlockIndexFactoryService(
+      BlockIndexFactoryService blockIndexFactoryService) {
+    _factory = blockIndexFactoryService;
   }
 
   @Autowired
@@ -93,7 +124,10 @@ public class BlockIndexServiceImpl implements BlockIndexService {
     loadFrequencyBlockTripIndices();
     loadBlockTripIndicesByBlockId();
 
+    loadBlockSequenceIndices();
+
     loadStopTimeIndices();
+    loadStopTripIndices();
   }
 
   @Override
@@ -120,6 +154,56 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   @Override
   public List<BlockStopTimeIndex> getStopTimeIndicesForStop(StopEntry stopEntry) {
     return ((StopEntryImpl) stopEntry).getStopTimeIndices();
+  }
+
+  @Override
+  public List<BlockSequenceIndex> getAllBlockSequenceIndices() {
+    return _blockSequenceIndices;
+  }
+
+  @Override
+  public List<BlockStopSequenceIndex> getStopSequenceIndicesForStop(
+      StopEntry stopEntry) {
+    return ((StopEntryImpl) stopEntry).getStopTripIndices();
+  }
+
+  @Override
+  public List<Pair<BlockStopSequenceIndex>> getBlockSequenceIndicesBetweenStops(
+      StopEntry fromStop, StopEntry toStop) {
+
+    List<BlockStopSequenceIndex> fromIndices = ((StopEntryImpl) fromStop).getStopTripIndices();
+    List<BlockStopSequenceIndex> toIndices = ((StopEntryImpl) toStop).getStopTripIndices();
+
+    Map<BlockSequenceIndex, BlockStopSequenceIndex> fromIndicesBySequence = getBlockStopSequenceIndicesBySequence(fromIndices);
+    Map<BlockSequenceIndex, BlockStopSequenceIndex> toIndicesBySequence = getBlockStopSequenceIndicesBySequence(toIndices);
+
+    fromIndicesBySequence.keySet().retainAll(toIndicesBySequence.keySet());
+
+    List<Pair<BlockStopSequenceIndex>> results = new ArrayList<Pair<BlockStopSequenceIndex>>();
+
+    for (Map.Entry<BlockSequenceIndex, BlockStopSequenceIndex> entry : fromIndicesBySequence.entrySet()) {
+      BlockSequenceIndex index = entry.getKey();
+      BlockStopSequenceIndex fromStopIndex = entry.getValue();
+      BlockStopSequenceIndex toStopIndex = toIndicesBySequence.get(index);
+
+      /**
+       * If the stops aren't in the requested order, then we don't include the
+       * sequence indices in the results
+       */
+      if (fromStopIndex.getOffset() > toStopIndex.getOffset())
+        continue;
+
+      Pair<BlockStopSequenceIndex> pair = Tuples.pair(fromStopIndex,
+          toStopIndex);
+      results.add(pair);
+    }
+
+    return results;
+  }
+  
+  @Override
+  public List<BlockLayoverIndex> getBlockLayoverIndices() {
+    return _blockLayoverIndices;
   }
 
   @Override
@@ -167,6 +251,46 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   public List<FrequencyBlockStopTimeIndex> getFrequencyStopTimeIndicesForStop(
       StopEntry stopEntry) {
     return ((StopEntryImpl) stopEntry).getFrequencyStopTimeIndices();
+  }
+
+  @Override
+  public List<FrequencyStopTripIndex> getFrequencyStopTripIndicesForStop(
+      StopEntry stop) {
+    return ((StopEntryImpl) stop).getFrequencyStopTripIndices();
+  }
+
+  @Override
+  public List<Pair<FrequencyStopTripIndex>> getFrequencyIndicesBetweenStops(
+      StopEntry fromStop, StopEntry toStop) {
+
+    List<FrequencyStopTripIndex> fromIndices = getFrequencyStopTripIndicesForStop(fromStop);
+    List<FrequencyStopTripIndex> toIndices = getFrequencyStopTripIndicesForStop(toStop);
+
+    Map<FrequencyBlockTripIndex, FrequencyStopTripIndex> fromIndicesBySequence = getFrequencyStopTripIndicesBySequence(fromIndices);
+    Map<FrequencyBlockTripIndex, FrequencyStopTripIndex> toIndicesBySequence = getFrequencyStopTripIndicesBySequence(toIndices);
+
+    fromIndicesBySequence.keySet().retainAll(toIndicesBySequence.keySet());
+
+    List<Pair<FrequencyStopTripIndex>> results = new ArrayList<Pair<FrequencyStopTripIndex>>();
+
+    for (Map.Entry<FrequencyBlockTripIndex, FrequencyStopTripIndex> entry : fromIndicesBySequence.entrySet()) {
+      FrequencyBlockTripIndex index = entry.getKey();
+      FrequencyStopTripIndex fromStopIndex = entry.getValue();
+      FrequencyStopTripIndex toStopIndex = toIndicesBySequence.get(index);
+
+      /**
+       * If the stops aren't in the requested order, then we don't include the
+       * sequence indices in the results
+       */
+      if (fromStopIndex.getOffset() > toStopIndex.getOffset())
+        continue;
+
+      Pair<FrequencyStopTripIndex> pair = Tuples.pair(fromStopIndex,
+          toStopIndex);
+      results.add(pair);
+    }
+
+    return results;
   }
 
   /****
@@ -297,7 +421,7 @@ public class BlockIndexServiceImpl implements BlockIndexService {
     for (T index : indices) {
       Set<AgencyAndId> routeIds = new HashSet<AgencyAndId>();
       for (BlockTripEntry blockTrip : index.getTrips())
-        routeIds.add(blockTrip.getTrip().getRouteCollectionId());
+        routeIds.add(blockTrip.getTrip().getRouteCollection().getId());
       for (AgencyAndId routeId : routeIds)
         blocksByRouteId.get(routeId).add(index);
     }
@@ -318,11 +442,10 @@ public class BlockIndexServiceImpl implements BlockIndexService {
     _frequencyBlockTripIndicesByBlockId = new HashMap<AgencyAndId, List<FrequencyBlockTripIndex>>();
 
     for (BlockEntry block : _graphDao.getAllBlocks()) {
-      BlockIndicesFactory factory = new BlockIndicesFactory();
       List<BlockEntry> list = Arrays.asList(block);
-      List<BlockTripIndex> indices = factory.createTripIndices(list);
-      List<BlockLayoverIndex> layoverIndices = factory.createLayoverIndices(list);
-      List<FrequencyBlockTripIndex> frequencyIndices = factory.createFrequencyTripIndices(list);
+      List<BlockTripIndex> indices = _factory.createTripIndices(list);
+      List<BlockLayoverIndex> layoverIndices = _factory.createLayoverIndices(list);
+      List<FrequencyBlockTripIndex> frequencyIndices = _factory.createFrequencyTripIndices(list);
 
       if (!indices.isEmpty())
         _blockTripIndicesByBlockId.put(block.getId(), indices);
@@ -340,6 +463,12 @@ public class BlockIndexServiceImpl implements BlockIndexService {
   /****
    * 
    ****/
+
+  private void loadBlockSequenceIndices() throws IOException,
+      ClassNotFoundException {
+
+    _blockSequenceIndices = _factory.createSequenceIndices(_graphDao.getAllBlocks());
+  }
 
   private void loadStopTimeIndices() {
 
@@ -366,4 +495,74 @@ public class BlockIndexServiceImpl implements BlockIndexService {
       stop.addFrequencyStopTimeIndex(index);
     }
   }
+
+  private void loadStopTripIndices() {
+
+    // Clear any existing indices
+    for (StopEntry stop : _graphDao.getAllStops()) {
+      StopEntryImpl stopImpl = (StopEntryImpl) stop;
+      stopImpl.getStopTripIndices().clear();
+      stopImpl.getFrequencyStopTripIndices().clear();
+    }
+
+    for (BlockSequenceIndex index : _blockSequenceIndices) {
+
+      BlockSequence sequence = index.getSequences().get(0);
+
+      int offset = 0;
+
+      for (BlockStopTimeEntry bst : sequence.getStopTimes()) {
+
+        StopTimeEntry stopTime = bst.getStopTime();
+        StopEntryImpl stop = (StopEntryImpl) stopTime.getStop();
+
+        BlockStopSequenceIndex blockStopTripIndex = new BlockStopSequenceIndex(
+            index, offset);
+
+        stop.addBlockStopTripIndex(blockStopTripIndex);
+        offset++;
+      }
+    }
+
+    for (FrequencyBlockTripIndex index : _frequencyBlockTripIndices) {
+
+      BlockTripEntry trip = index.getTrips().get(0);
+
+      int offset = 0;
+
+      for (BlockStopTimeEntry bst : trip.getStopTimes()) {
+
+        StopTimeEntry stopTime = bst.getStopTime();
+        StopEntryImpl stop = (StopEntryImpl) stopTime.getStop();
+
+        FrequencyStopTripIndex stopTripIndex = new FrequencyStopTripIndex(
+            index, offset);
+        stop.addFrequencyStopTripIndex(stopTripIndex);
+        offset++;
+      }
+    }
+  }
+
+  private Map<BlockSequenceIndex, BlockStopSequenceIndex> getBlockStopSequenceIndicesBySequence(
+      List<BlockStopSequenceIndex> indices) {
+
+    Map<BlockSequenceIndex, BlockStopSequenceIndex> m = new HashMap<BlockSequenceIndex, BlockStopSequenceIndex>();
+
+    for (BlockStopSequenceIndex index : indices)
+      m.put(index.getIndex(), index);
+
+    return m;
+  }
+
+  private Map<FrequencyBlockTripIndex, FrequencyStopTripIndex> getFrequencyStopTripIndicesBySequence(
+      List<FrequencyStopTripIndex> indices) {
+
+    Map<FrequencyBlockTripIndex, FrequencyStopTripIndex> m = new HashMap<FrequencyBlockTripIndex, FrequencyStopTripIndex>();
+
+    for (FrequencyStopTripIndex index : indices)
+      m.put(index.getIndex(), index);
+
+    return m;
+  }
+
 }

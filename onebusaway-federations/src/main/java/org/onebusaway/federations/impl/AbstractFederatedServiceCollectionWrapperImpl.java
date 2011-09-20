@@ -1,11 +1,28 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.federations.impl;
 
+import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.exceptions.ServiceAreaServiceException;
 import org.onebusaway.federations.FederatedService;
 import org.onebusaway.federations.FederatedServiceCollection;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 
 /**
  * {@link FederatedServiceCollection} wrapper class that allows one to pass
@@ -49,6 +66,12 @@ public abstract class AbstractFederatedServiceCollectionWrapperImpl implements
   public FederatedService getServiceForLocation(double lat, double lon)
       throws ServiceAreaServiceException {
     return getCollection().getServiceForLocation(lat, lon);
+  }
+
+  @Override
+  public FederatedService getServiceForLocations(List<CoordinatePoint> points)
+      throws ServiceAreaServiceException {
+    return getCollection().getServiceForLocations(points);
   }
 
   /****

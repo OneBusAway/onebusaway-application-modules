@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
@@ -10,7 +25,7 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -25,10 +40,10 @@ import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -47,6 +62,8 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
   private TransitGraphDao _transitGraphDao;
 
+  private BlockCalendarService _blockCalendarService;
+
   private BlockStatusService _blockStatusService;
 
   private TripBeanService _tripBeanService;
@@ -60,6 +77,11 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
+  }
+
+  @Autowired
+  public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
+    _blockCalendarService = blockCalendarService;
   }
 
   @Autowired
@@ -99,7 +121,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     ListBean<TripDetailsBean> listBean = getTripsForId(query);
     List<TripDetailsBean> trips = listBean.getList();
 
-    if (trips.isEmpty()) {
+    if (trips == null || trips.isEmpty()) {
       return null;
     } else if (trips.size() == 1) {
       return trips.get(0);
@@ -131,8 +153,12 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       BlockInstance blockInstance = entry.getKey();
       List<BlockLocation> locations = entry.getValue();
 
-      BlockTripEntry targeBlockTripEntry = getTargetBlockTrip(tripEntry,
-          blockInstance);
+      BlockTripEntry targeBlockTripEntry = _blockCalendarService.getTargetBlockTrip(
+          blockInstance, tripEntry);
+
+      if (targeBlockTripEntry == null)
+        throw new IllegalStateException("expected blockTrip for trip="
+            + tripEntry + " and block=" + blockInstance);
 
       /**
        * If we have no locations for the specified block instance, it means the
@@ -188,7 +214,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Override
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query) {
-    List<BlockLocation> locations = _blockStatusService.getBlocksForAgency(
+    List<BlockLocation> locations = _blockStatusService.getActiveBlocksForAgency(
         query.getAgencyId(), query.getTime());
     return getBlockLocationsAsTripDetails(locations, query.getInclusion(),
         query.getTime());
@@ -286,7 +312,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
 
     if (activeBlockTrip != null) {
-      List<SituationBean> situations = _serviceAlertBeanService.getSituationsForVehicleJourney(
+      List<ServiceAlertBean> situations = _serviceAlertBeanService.getServiceAlertsForVehicleJourney(
           time, blockInstance, activeBlockTrip, blockLocation.getVehicleId());
       if (!situations.isEmpty())
         bean.setSituations(situations);
@@ -364,7 +390,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         vehicleId = AgencyAndIdLibrary.convertFromString(status.getVehicleId());
     }
 
-    List<SituationBean> situations = _serviceAlertBeanService.getSituationsForVehicleJourney(
+    List<ServiceAlertBean> situations = _serviceAlertBeanService.getServiceAlertsForVehicleJourney(
         time, blockInstance, blockTripEntry, vehicleId);
 
     if (missing)
@@ -381,17 +407,5 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     bean.setStatus(status);
     bean.setSituations(situations);
     return bean;
-  }
-
-  private BlockTripEntry getTargetBlockTrip(TripEntry targetTrip,
-      BlockInstance blockInstance) {
-
-    BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-    for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
-      if (blockTrip.getTrip().equals(targetTrip))
-        return blockTrip;
-    }
-    throw new IllegalStateException("expected blockTrip for trip=" + targetTrip
-        + " and block=" + blockInstance);
   }
 }

@@ -1,24 +1,25 @@
-/*
- * Copyright 2008 Brian Ferris
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.onebusaway.transit_data.model;
 
 import java.util.List;
 
+import org.onebusaway.transit_data.model.realtime.HistogramBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
@@ -38,13 +39,25 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private int blockTripSequence;
 
-  private long predictedArrivalTime;
+  private boolean arrivalEnabled;
 
   private long scheduledArrivalTime;
 
-  private long predictedDepartureTime;
+  private TimeIntervalBean scheduledArrivalInterval;
+
+  private long predictedArrivalTime;
+
+  private TimeIntervalBean predictedArrivalInterval;
+
+  private boolean departureEnabled;
 
   private long scheduledDepartureTime;
+
+  private TimeIntervalBean scheduledDepartureInterval;
+
+  private long predictedDepartureTime;
+
+  private TimeIntervalBean predictedDepartureInterval;
 
   private FrequencyBean frequency;
 
@@ -64,7 +77,9 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   private TripStatusBean tripStatus;
 
-  private List<SituationBean> situations;
+  private List<ServiceAlertBean> situations;
+
+  private HistogramBean scheduleDeviationHistogram;
 
   public TripBean getTrip() {
     return trip;
@@ -114,12 +129,12 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.blockTripSequence = blockTripSequence;
   }
 
-  public long getPredictedArrivalTime() {
-    return predictedArrivalTime;
+  public boolean isArrivalEnabled() {
+    return arrivalEnabled;
   }
 
-  public void setPredictedArrivalTime(long predictedArrivalTime) {
-    this.predictedArrivalTime = predictedArrivalTime;
+  public void setArrivalEnabled(boolean arrivalEnabled) {
+    this.arrivalEnabled = arrivalEnabled;
   }
 
   public long getScheduledArrivalTime() {
@@ -130,12 +145,38 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.scheduledArrivalTime = scheduledArrivalTime;
   }
 
-  public long getPredictedDepartureTime() {
-    return predictedDepartureTime;
+  public TimeIntervalBean getScheduledArrivalInterval() {
+    return scheduledArrivalInterval;
   }
 
-  public void setPredictedDepartureTime(long predictedDepartureTime) {
-    this.predictedDepartureTime = predictedDepartureTime;
+  public void setScheduledArrivalInterval(
+      TimeIntervalBean scheduledArrivalInterval) {
+    this.scheduledArrivalInterval = scheduledArrivalInterval;
+  }
+
+  public long getPredictedArrivalTime() {
+    return predictedArrivalTime;
+  }
+
+  public void setPredictedArrivalTime(long predictedArrivalTime) {
+    this.predictedArrivalTime = predictedArrivalTime;
+  }
+
+  public TimeIntervalBean getPredictedArrivalInterval() {
+    return predictedArrivalInterval;
+  }
+
+  public void setPredictedArrivalInterval(
+      TimeIntervalBean predictedArrivalInterval) {
+    this.predictedArrivalInterval = predictedArrivalInterval;
+  }
+
+  public boolean isDepartureEnabled() {
+    return departureEnabled;
+  }
+
+  public void setDepartureEnabled(boolean departureEnabled) {
+    this.departureEnabled = departureEnabled;
   }
 
   public long getScheduledDepartureTime() {
@@ -144,6 +185,32 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
 
   public void setScheduledDepartureTime(long scheduledDepartureTime) {
     this.scheduledDepartureTime = scheduledDepartureTime;
+  }
+
+  public TimeIntervalBean getScheduledDepartureInterval() {
+    return scheduledDepartureInterval;
+  }
+
+  public void setScheduledDepartureInterval(
+      TimeIntervalBean scheduledDepartureInterval) {
+    this.scheduledDepartureInterval = scheduledDepartureInterval;
+  }
+
+  public long getPredictedDepartureTime() {
+    return predictedDepartureTime;
+  }
+
+  public void setPredictedDepartureTime(long predictedDepartureTime) {
+    this.predictedDepartureTime = predictedDepartureTime;
+  }
+
+  public TimeIntervalBean getPredictedDepartureInterval() {
+    return predictedDepartureInterval;
+  }
+
+  public void setPredictedDepartureInterval(
+      TimeIntervalBean predictedDepartureInterval) {
+    this.predictedDepartureInterval = predictedDepartureInterval;
   }
 
   public FrequencyBean getFrequency() {
@@ -222,12 +289,21 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.tripStatus = tripStatus;
   }
 
-  public List<SituationBean> getSituations() {
+  public List<ServiceAlertBean> getSituations() {
     return situations;
   }
 
-  public void setSituations(List<SituationBean> situations) {
+  public void setSituations(List<ServiceAlertBean> situations) {
     this.situations = situations;
+  }
+
+  public HistogramBean getScheduleDeviationHistogram() {
+    return scheduleDeviationHistogram;
+  }
+
+  public void setScheduleDeviationHistogram(
+      HistogramBean scheduleDeviationHistogram) {
+    this.scheduleDeviationHistogram = scheduleDeviationHistogram;
   }
 
   public boolean hasPredictedArrivalTime() {

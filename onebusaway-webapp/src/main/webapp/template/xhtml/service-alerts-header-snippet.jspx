@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<jsp:root version="1.2"
+	xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:s="/struts-tags"
+	xmlns:oba="/oba-tags">
+
+<jsp:directive.page contentType="text/html" />
+
+<s:set var="situations" value="parameters.situations"/>
+
+<s:if test="#situations.unreadCount &gt; 0">
+<jsp:element name="div">
+  <jsp:attribute name="class">unreadServiceAlerts <s:property value="#situations.unreadServiceAlertsClass"/></jsp:attribute>
+  <ul>
+    <s:iterator value="#situations.unreadSituations">
+      <li>
+        <s:a action="service-alert" cssClass="unreadServiceAlert">
+          <s:param name="id" value="id"/>
+          <s:property value="#situations.getTitle(top)" />
+        </s:a>
+      </li>
+    </s:iterator>
+  </ul>
+</jsp:element>
+</s:if>
+
+</jsp:root>

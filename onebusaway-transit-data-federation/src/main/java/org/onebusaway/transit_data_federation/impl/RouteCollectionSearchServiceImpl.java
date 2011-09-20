@@ -1,11 +1,29 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -26,7 +44,6 @@ import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionSearchIndexTask;
-import org.onebusaway.transit_data_federation.impl.refresh.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +82,7 @@ public class RouteCollectionSearchServiceImpl implements
     }
   }
 
-  public SearchResult<AgencyAndId> searchForRoutesByShortName(String value,
+  public SearchResult<AgencyAndId> searchForRoutesByName(String value,
       int maxResultCount, double minScoreToKeep) throws IOException,
       ParseException {
 
@@ -94,20 +111,27 @@ public class RouteCollectionSearchServiceImpl implements
     for (ScoreDoc sd : top.scoreDocs) {
       Document document = _searcher.doc(sd.doc);
 
-      String agencyId = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_AGENCY_ID);
-      String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
-      AgencyAndId id = new AgencyAndId(agencyId, routeShortName);
+      String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_SHORT_NAME);
       
-      String lowerCaseRouteShortName = routeShortName.toLowerCase();
+      Set<String> tokens = new HashSet<String>();
+      if( routeShortName != null) {
+        for( String token : routeShortName.toLowerCase().split("\\b") ) {
+          if( ! token.isEmpty())
+            tokens.add(token);
+        }
+      }
       
       // Result must have a minimum score to qualify
-      if (sd.score < minScoreToKeep && !lowerCaseRouteShortName.equals(lowerCaseQueryValue))
+      if (sd.score < minScoreToKeep && !tokens.contains(lowerCaseQueryValue))
         continue;
 
       // Keep the best score for a particular id
-      Float score = topScores.get(id);
+      String agencyId = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_AGENCY_ID);
+      String id = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
+      AgencyAndId routeId = new AgencyAndId(agencyId, id);
+      Float score = topScores.get(routeId);
       if (score == null || score < sd.score)
-        topScores.put(id, sd.score);
+        topScores.put(routeId, sd.score);
     }
 
     List<AgencyAndId> ids = new ArrayList<AgencyAndId>(topScores.size());

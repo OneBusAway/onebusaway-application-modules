@@ -1,11 +1,31 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.date;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.dateAsLong;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.getTimeAsDay;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsid;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
@@ -21,38 +41,59 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.onebusaway.collections.tuple.Pair;
+import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
-import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexServiceImpl;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockSequence;
+import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyStopTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 public class StopTimeServiceImplTest {
+
+  private BlockIndexFactoryServiceImpl _factory;
 
   private StopTimeServiceImpl _service;
 
   private ExtendedCalendarServiceImpl _calendarService;
 
+  private BlockIndexService _blockIndexService;
+
   private AgencyAndId _stopId;
 
   private StopEntryImpl _stop;
 
+  private TransitGraphDao _transitGraphDao;
+
+  private boolean includePrivateService = false;
+
   @Before
   public void setup() {
+
+    _factory = new BlockIndexFactoryServiceImpl();
 
     _stop = stop("stopId", 47.0, -122.0);
     _stopId = _stop.getId();
 
     TransitGraphDao graph = Mockito.mock(TransitGraphDao.class);
-    Mockito.when(graph.getStopEntryForId(_stop.getId())).thenReturn(_stop);
+    Mockito.when(graph.getStopEntryForId(_stop.getId(), true)).thenReturn(_stop);
 
     CalendarServiceData data = new CalendarServiceData();
     data.putDatesForLocalizedServiceId(lsid("sA"),
@@ -66,10 +107,24 @@ public class StopTimeServiceImplTest {
     _calendarService = new ExtendedCalendarServiceImpl();
     _calendarService.setCalendarService(calendarService);
 
+    _blockIndexService = Mockito.mock(BlockIndexService.class);
+
     _service = new StopTimeServiceImpl();
     _service.setTransitGraphDao(graph);
     _service.setCalendarService(_calendarService);
-    _service.setBlockIndexService(new BlockIndexServiceImpl());
+    _service.setBlockIndexService(_blockIndexService);
+
+    BlockConfigurationEntry bcA = blockConfiguration(block("bA"),
+        serviceIds(lsids("sA"), lsids()));
+    BlockConfigurationEntry bcB = blockConfiguration(block("bB"),
+        serviceIds(lsids("sB"), lsids()));
+
+    _transitGraphDao = Mockito.mock(TransitGraphDao.class);
+    Mockito.when(_transitGraphDao.getAllBlocks()).thenReturn(
+        Arrays.asList(bcA.getBlock(), bcB.getBlock()));
+    _calendarService.setTransitGraphDao(_transitGraphDao);
+
+    _calendarService.start();
   }
 
   @Test
@@ -376,6 +431,454 @@ public class StopTimeServiceImplTest {
     assertEquals(date("2009-09-04 01:30").getTime(), sti.getDepartureTime());
   }
 
+  @Test
+  public void test04() {
+
+    StopEntryImpl fromStop = stop("stopA", 47.0, -122.0);
+    StopEntryImpl toStop = stop("stopB", 47.0, -122.0);
+
+    TripEntryImpl trip1A = trip("1A", "sA");
+    TripEntryImpl trip1B = trip("1B", "sA");
+    TripEntryImpl trip1C = trip("1C", "sA");
+    TripEntryImpl trip1D = trip("1D", "sA");
+
+    stopTime(0, fromStop, trip1A, time(10, 00), time(10, 05), 0.0);
+    stopTime(1, fromStop, trip1B, time(10, 10), time(10, 15), 0.0);
+    stopTime(2, fromStop, trip1C, time(10, 20), time(10, 25), 0.0);
+    stopTime(3, fromStop, trip1D, time(10, 30), time(10, 35), 0.0);
+
+    stopTime(4, toStop, trip1A, time(10, 10), time(10, 15), 0.0);
+    stopTime(5, toStop, trip1B, time(10, 20), time(10, 25), 0.0);
+    stopTime(6, toStop, trip1C, time(10, 30), time(10, 35), 0.0);
+    stopTime(7, toStop, trip1D, time(10, 40), time(10, 45), 0.0);
+
+    BlockConfigurationEntry b1A = linkBlockTrips("b1A", trip1A);
+    BlockConfigurationEntry b1B = linkBlockTrips("b1B", trip1B);
+    BlockConfigurationEntry b1C = linkBlockTrips("b1C", trip1C);
+    BlockConfigurationEntry b1D = linkBlockTrips("b1D", trip1D);
+
+    BlockSequenceIndex index1 = createBlockSequenceIndex(b1A, b1B, b1C, b1D);
+    BlockStopSequenceIndex fromIndex1 = new BlockStopSequenceIndex(index1, 0);
+    BlockStopSequenceIndex toIndex1 = new BlockStopSequenceIndex(index1, 1);
+
+    Pair<BlockStopSequenceIndex> indexPair1 = Tuples.pair(fromIndex1, toIndex1);
+
+    TripEntryImpl trip2A = trip("2A", "sA");
+    TripEntryImpl trip2B = trip("2B", "sA");
+    TripEntryImpl trip2C = trip("2C", "sA");
+    TripEntryImpl trip2D = trip("2D", "sA");
+
+    stopTime(0, fromStop, trip2A, time(10, 07), time(10, 07), 0.0);
+    stopTime(1, fromStop, trip2B, time(10, 17), time(10, 17), 0.0);
+    stopTime(2, fromStop, trip2C, time(10, 27), time(10, 27), 0.0);
+    stopTime(3, fromStop, trip2D, time(10, 37), time(10, 37), 0.0);
+
+    stopTime(4, toStop, trip2A, time(10, 17), time(10, 17), 0.0);
+    stopTime(5, toStop, trip2B, time(10, 27), time(10, 27), 0.0);
+    stopTime(6, toStop, trip2C, time(10, 37), time(10, 37), 0.0);
+    stopTime(7, toStop, trip2D, time(10, 47), time(10, 47), 0.0);
+
+    BlockConfigurationEntry b2A = linkBlockTrips("bA", trip2A);
+    BlockConfigurationEntry b2B = linkBlockTrips("bB", trip2B);
+    BlockConfigurationEntry b2C = linkBlockTrips("bC", trip2C);
+    BlockConfigurationEntry b2D = linkBlockTrips("bD", trip2D);
+
+    BlockSequenceIndex index2 = createBlockSequenceIndex(b2A, b2B, b2C, b2D);
+    BlockStopSequenceIndex fromIndex2 = new BlockStopSequenceIndex(index2, 0);
+    BlockStopSequenceIndex toIndex2 = new BlockStopSequenceIndex(index2, 1);
+
+    Pair<BlockStopSequenceIndex> indexPair2 = Tuples.pair(fromIndex2, toIndex2);
+
+    List<Pair<BlockStopSequenceIndex>> indices = new ArrayList<Pair<BlockStopSequenceIndex>>();
+    indices.add(indexPair1);
+    indices.add(indexPair2);
+
+    Mockito.when(
+        _blockIndexService.getBlockSequenceIndicesBetweenStops(fromStop, toStop)).thenReturn(
+        indices);
+
+    TripEntryImpl tripF = trip("freq", "sA");
+
+    stopTime(0, fromStop, tripF, time(10, 00), time(10, 00), 0.0);
+    stopTime(4, toStop, tripF, time(10, 05), time(10, 05), 0.0);
+
+    FrequencyEntry frequency = new FrequencyEntryImpl(time(10, 30),
+        time(11, 30), 10 * 60);
+    List<FrequencyEntry> frequencies = Arrays.asList(frequency);
+
+    BlockConfigurationEntry bcFreq = linkBlockTrips(block("bFreq"),
+        frequencies, tripF);
+
+    FrequencyBlockTripIndex freqIndex = _factory.createFrequencyIndexForTrips(
+        bcFreq.getTrips(), frequencies);
+    FrequencyStopTripIndex freqFromIndex = new FrequencyStopTripIndex(
+        freqIndex, 0);
+    FrequencyStopTripIndex freqToIndex = new FrequencyStopTripIndex(freqIndex,
+        1);
+    Pair<FrequencyStopTripIndex> freqIndexPair = Tuples.pair(freqFromIndex,
+        freqToIndex);
+
+    List<Pair<FrequencyStopTripIndex>> frequencyIndices = new ArrayList<Pair<FrequencyStopTripIndex>>();
+    frequencyIndices.add(freqIndexPair);
+
+    Mockito.when(
+        _blockIndexService.getFrequencyIndicesBetweenStops(fromStop, toStop)).thenReturn(
+        frequencyIndices);
+
+    /****
+     * 
+     ****/
+
+    Date time = date("2009-09-01 08:00");
+
+    List<Pair<StopTimeInstance>> instances = _service.getNextDeparturesBetweenStopPair(
+        fromStop, toStop, time, 0, 0, 3, includePrivateService);
+
+    assertEquals(3, instances.size());
+
+    Pair<StopTimeInstance> pair = instances.get(0);
+    assertSame(fromStop, pair.getFirst().getStop());
+    assertSame(toStop, pair.getSecond().getStop());
+    assertEquals(dateAsLong("2009-09-01 00:00"),
+        pair.getFirst().getServiceDate());
+    assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-01 08:00");
+
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 10 * 60, 0, 3, includePrivateService);
+
+    assertEquals(5, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(3);
+    assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(4);
+    assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-01 10:06");
+
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(3, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-01 10:06");
+
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 10 * 60, 5 * 60, 3, includePrivateService);
+
+    assertEquals(8, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(3);
+    assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(4);
+    assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(5);
+    assertEquals(b2C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2C.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(6);
+    assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
+    assertEquals(dateAsLong("2009-09-01 10:30"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-01 10:35"),
+        pair.getSecond().getDepartureTime());
+
+    pair = instances.get(7);
+    assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1D.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-02 10:06");
+
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(3, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(dateAsLong("2009-09-02 00:00"),
+        pair.getFirst().getServiceDate());
+
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-02 10:29");
+
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(3, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
+    assertEquals(dateAsLong("2009-09-02 10:30"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:35"),
+        pair.getSecond().getDepartureTime());
+
+    pair = instances.get(1);
+    assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1D.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b2D.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2D.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-02 10:40");
+
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(1, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
+    assertEquals(dateAsLong("2009-09-02 10:40"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:45"),
+        pair.getSecond().getDepartureTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-02 11:40");
+
+    instances = _service.getNextDeparturesBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(0, instances.size());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-02 10:50");
+
+    instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(3, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(b2D.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2D.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
+    assertEquals(dateAsLong("2009-09-02 10:40"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:45"),
+        pair.getSecond().getDepartureTime());
+
+    pair = instances.get(2);
+    assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1D.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-02 10:46");
+
+    instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(3, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
+    assertEquals(dateAsLong("2009-09-02 10:40"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:45"),
+        pair.getSecond().getDepartureTime());
+
+    pair = instances.get(1);
+    assertEquals(b1D.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1D.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b2C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2C.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-02 10:40");
+
+    instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(3, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(b2C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2C.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(bcFreq.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(bcFreq.getStopTimes().get(1), pair.getSecond().getStopTime());
+    assertEquals(dateAsLong("2009-09-02 10:30"),
+        pair.getFirst().getDepartureTime());
+    assertEquals(dateAsLong("2009-09-02 10:35"),
+        pair.getSecond().getDepartureTime());
+
+    pair = instances.get(2);
+    assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-01 10:18");
+
+    instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(2, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-01 10:28");
+
+    instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
+        time, 5 * 60, 5 * 60, 3, includePrivateService);
+
+    assertEquals(5, instances.size());
+
+    pair = instances.get(0);
+    assertEquals(b1C.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1C.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(1);
+    assertEquals(b2B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(2);
+    assertEquals(b1B.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1B.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(3);
+    assertEquals(b2A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b2A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    pair = instances.get(4);
+    assertEquals(b1A.getStopTimes().get(0), pair.getFirst().getStopTime());
+    assertEquals(b1A.getStopTimes().get(1), pair.getSecond().getStopTime());
+
+    /****
+     * 
+     ****/
+
+    time = date("2009-09-01 09:00");
+
+    instances = _service.getPreviousArrivalsBetweenStopPair(fromStop, toStop,
+        time, 0, 0, 3, includePrivateService);
+
+    assertEquals(0, instances.size());
+  }
+
   /****
    * Private Methods
    ****/
@@ -388,10 +891,26 @@ public class StopTimeServiceImplTest {
       trips.add(blockConfig.getTrips().get(0));
     }
 
-    BlockIndicesFactory factory = new BlockIndicesFactory();
-    BlockTripIndex blockIndex = factory.createTripIndexForGroupOfBlockTrips(trips);
+    BlockTripIndex blockIndex = _factory.createTripIndexForGroupOfBlockTrips(trips);
+    BlockStopTimeIndex index = BlockStopTimeIndex.create(blockIndex, 0);
+    _stop.addStopTimeIndex(index);
 
-    _stop.addStopTimeIndex(BlockStopTimeIndex.create(blockIndex, 0));
+    Mockito.when(_blockIndexService.getStopTimeIndicesForStop(_stop)).thenReturn(
+        _stop.getStopTimeIndices());
+  }
+
+  private BlockSequenceIndex createBlockSequenceIndex(
+      BlockConfigurationEntry... blocks) {
+
+    List<BlockStopTimeEntry> stopTimes = blocks[0].getStopTimes();
+    List<BlockSequence> sequences = new ArrayList<BlockSequence>();
+    for (BlockConfigurationEntry blockConfig : blocks) {
+      BlockSequence sequence = new BlockSequence(blockConfig, 0,
+          stopTimes.size());
+      sequences.add(sequence);
+    }
+
+    return _factory.createSequenceIndexForGroupOfBlockSequences(sequences);
   }
 
   private void sort(List<StopTimeInstance> stopTimes) {

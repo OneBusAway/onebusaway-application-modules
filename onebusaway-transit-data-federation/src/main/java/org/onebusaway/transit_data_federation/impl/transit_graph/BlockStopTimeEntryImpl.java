@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -6,14 +21,16 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 
 public class BlockStopTimeEntryImpl implements BlockStopTimeEntry {
 
-  private StopTimeEntry stopTime;
+  private final StopTimeEntry stopTime;
 
-  private BlockTripEntry trip;
+  private final BlockTripEntry trip;
 
-  private int blockSequence;
+  private final int blockSequence;
+
+  private final boolean hasNextStop;
 
   public BlockStopTimeEntryImpl(StopTimeEntry stopTime, int blockSequence,
-      BlockTripEntry trip) {
+      BlockTripEntry trip, boolean hasNextStop) {
 
     if (stopTime == null)
       throw new IllegalArgumentException("stopTime is null");
@@ -23,6 +40,7 @@ public class BlockStopTimeEntryImpl implements BlockStopTimeEntry {
     this.stopTime = stopTime;
     this.trip = trip;
     this.blockSequence = blockSequence;
+    this.hasNextStop = hasNextStop;
   }
 
   @Override
@@ -48,6 +66,21 @@ public class BlockStopTimeEntryImpl implements BlockStopTimeEntry {
   @Override
   public int getAccumulatedSlackTime() {
     return trip.getAccumulatedSlackTime() + stopTime.getAccumulatedSlackTime();
+  }
+
+  @Override
+  public boolean hasPreviousStop() {
+    return blockSequence > 0;
+  }
+
+  @Override
+  public boolean hasNextStop() {
+    return hasNextStop;
+  }
+
+  @Override
+  public BlockStopTimeEntry getNextStop() {
+    return trip.getBlockConfiguration().getStopTimes().get(blockSequence + 1);
   }
 
   @Override

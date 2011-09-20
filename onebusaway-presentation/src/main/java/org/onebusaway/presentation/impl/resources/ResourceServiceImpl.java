@@ -1,17 +1,17 @@
-/*
- * Copyright 2008 Brian Ferris
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.onebusaway.presentation.impl.resources;
 
@@ -26,7 +26,9 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.text.DateFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +68,13 @@ public class ResourceServiceImpl implements ResourceService {
 
   private static final String PREFIX_COLLECTION = "collection:";
 
+  private static final String PREFIX_COLLECTION_ENTRY = "collection-entry:";
+
   private static final String PREFIX_MESSAGES = "messages:";
+
+  private static final String PREFIX_MESSAGES_DATE_LIBRARY = "DateLibrary";
+
+  private static final String PREFIX_FILE = "file:";
 
   private static final Pattern _resourcePattern = Pattern.compile("^(.*)-\\w+\\.cache(\\.\\w+){0,1}$");
 
@@ -287,9 +295,13 @@ public class ResourceServiceImpl implements ResourceService {
 
     if (resourceName.startsWith(PREFIX_MESSAGES)) {
       resourceName = resourceName.substring(PREFIX_MESSAGES.length());
-      return getMessagesResourceAsSourceUrl(resourceName, localeProvider);
+      if (PREFIX_MESSAGES_DATE_LIBRARY.equals(resourceName)) {
+        return getDateLibraryMessagesResourceAsSourceUrl(localeProvider);
+      } else {
+        return getMessagesResourceAsSourceUrl(resourceName, localeProvider);
+      }
     }
-
+    
     if (resourceName.startsWith(PREFIX_CLASSPATH)) {
       resourceName = resourceName.substring(PREFIX_CLASSPATH.length());
       ClassLoader loader = getClass().getClassLoader();
@@ -297,6 +309,17 @@ public class ResourceServiceImpl implements ResourceService {
       if (resource == null)
         _log.warn("unknown classpath resource: name=" + resourceName);
       return resource;
+    }
+
+    if (resourceName.startsWith(PREFIX_FILE)) {
+      resourceName = resourceName.substring(PREFIX_FILE.length());
+      File file = new File(resourceName);
+      try {
+        return file.toURI().toURL();
+      } catch (MalformedURLException e) {
+        throw new IllegalStateException("error requesting file url: "
+            + resourceName);
+      }
     }
 
     try {
@@ -336,6 +359,10 @@ public class ResourceServiceImpl implements ResourceService {
           if (sepIndex != -1)
             path = path.substring(sepIndex + 1);
           resourceMapping.put(path, r.getExternalUrl());
+
+          String alternateId = PREFIX_COLLECTION_ENTRY + collectionPrefix + ":"
+              + path;
+          _resourceEntriesByResourcePath.put(alternateId, r);
         }
       }
 
@@ -403,7 +430,40 @@ public class ResourceServiceImpl implements ResourceService {
     } catch (IOException ex) {
       throw new IllegalStateException("error loading resources", ex);
     }
+  }
 
+  private URL getDateLibraryMessagesResourceAsSourceUrl(
+      LocaleProvider localeProvider) {
+
+    String messagesPrefix = PREFIX_MESSAGES_DATE_LIBRARY;
+    
+    DateFormatSymbols symbols = DateFormatSymbols.getInstance(localeProvider.getLocale());
+
+    Map<String, Object> resourceMapping = new HashMap<String, Object>();
+    
+    resourceMapping.put("amPm", Arrays.asList(symbols.getAmPmStrings()));
+    resourceMapping.put("eras", Arrays.asList(symbols.getEras()));
+    resourceMapping.put("months", Arrays.asList(symbols.getMonths()));
+    resourceMapping.put("shortMonths", Arrays.asList(symbols.getShortMonths()));
+    resourceMapping.put("weekdays", Arrays.asList(symbols.getWeekdays()));
+    resourceMapping.put("shortWeekdays", Arrays.asList(symbols.getShortWeekdays()));
+
+    try {
+
+      File file = getOutputFile(PREFIX_MESSAGES + messagesPrefix + ".js");
+      PrintWriter out = new PrintWriter(file);
+      JSONObject obj = new JSONObject(resourceMapping);
+      out.println("var OBA = window.OBA || {};");
+      out.println("if(!OBA.Resources) { OBA.Resources = {}; }");
+      out.println("OBA.Resources." + messagesPrefix + " = " + obj.toString()
+          + ";");
+      out.close();
+
+      return getFileAsUrl(file);
+
+    } catch (IOException ex) {
+      throw new IllegalStateException("error loading resources", ex);
+    }
   }
 
   private File getBundleResourceAsLocalFile(String resourcePath, URL resourceUrl) {

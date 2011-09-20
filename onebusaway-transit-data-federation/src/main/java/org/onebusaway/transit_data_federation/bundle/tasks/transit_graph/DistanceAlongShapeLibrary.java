@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import java.util.ArrayList;
@@ -5,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.onebusaway.collections.Min;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
 import org.onebusaway.geospatial.services.UTMLibrary;
 import org.onebusaway.geospatial.services.UTMProjection;
@@ -13,6 +30,8 @@ import org.onebusaway.transit_data_federation.impl.shapes.ShapePointsLibrary;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,12 +43,28 @@ public class DistanceAlongShapeLibrary {
 
   private ShapePointsLibrary _shapePointsLibrary = new ShapePointsLibrary();
 
+  private double _maxDistanceFromStopToShapePoint = 1000;
+
   public void setLocalMinimumThreshold(double localMinimumThreshold) {
     _shapePointsLibrary.setLocalMinimumThreshold(localMinimumThreshold);
   }
 
+  /**
+   * If the closest distance from a stop to a shape is more than
+   * maxDistanceFromStopToShapePoint in the
+   * {@link #getDistancesAlongShape(ShapePoints, List)}, then a
+   * {@link StopIsTooFarFromShapeException} will be thrown.
+   * 
+   * @param maxDistanceFromStopToShapePoint distance in meters
+   */
+  public void setMaxDistanceFromStopToShapePoint(
+      double maxDistanceFromStopToShapePoint) {
+    _maxDistanceFromStopToShapePoint = maxDistanceFromStopToShapePoint;
+  }
+
   public PointAndIndex[] getDistancesAlongShape(ShapePoints shapePoints,
-      List<StopTimeEntryImpl> stopTimes) {
+      List<StopTimeEntryImpl> stopTimes)
+      throws InvalidStopToShapeMappingException, StopIsTooFarFromShapeException {
 
     PointAndIndex[] stopTimePoints = new PointAndIndex[stopTimes.size()];
 
@@ -43,6 +78,9 @@ public class DistanceAlongShapeLibrary {
 
     List<List<PointAndIndex>> possibleAssignments = computePotentialAssignments(
         projection, projectedShapePoints, shapePointsDistTraveled, stopTimes);
+
+    pruneUnnecessaryAssignments(possibleAssignments);
+    assignmentSanityCheck(shapePoints, stopTimes, possibleAssignments);
 
     double maxDistanceTraveled = shapePointsDistTraveled[shapePointsDistTraveled.length - 1];
 
@@ -62,6 +100,80 @@ public class DistanceAlongShapeLibrary {
       stopTimePoints[i] = pindex;
     }
     return stopTimePoints;
+  }
+
+  /**
+   * The {@link ShapePointsLibrary} returns a number of potential assignments
+   * for a stop's position along a shape. While some of those potential
+   * assignments can help us correctly deal with cases where a shape loops back
+   * on itself or other weird configurations, many of the potential assignments
+   * are just local minimas that won't ultimately have much affect on the final
+   * assignment if they don't overlap with the previous or next stop. To help
+   * reduce the set of possible assingments that we'll have to explore, we just
+   * pick the best assignment and toss out the rest when the set of assignments
+   * for a stop don't overlap with the assignments of the previous or next stop.
+   * 
+   * @param possibleAssignments
+   */
+  private void pruneUnnecessaryAssignments(
+      List<List<PointAndIndex>> possibleAssignments) {
+
+    double[] mins = new double[possibleAssignments.size()];
+    double[] maxs = new double[possibleAssignments.size()];
+
+    for (int i = 0; i < possibleAssignments.size(); ++i) {
+      double minScore = Double.POSITIVE_INFINITY;
+      double maxScore = Double.NEGATIVE_INFINITY;
+      for (PointAndIndex pi : possibleAssignments.get(i)) {
+        minScore = Math.min(minScore, pi.distanceAlongShape);
+        maxScore = Math.max(maxScore, pi.distanceAlongShape);
+      }
+      mins[i] = minScore;
+      maxs[i] = maxScore;
+    }
+
+    for (int i = 0; i < possibleAssignments.size(); i++) {
+      List<PointAndIndex> points = possibleAssignments.get(i);
+      // If there is only one possible assignment, there is nothing to prune
+      if (points.size() == 1)
+        continue;
+      double currentMin = mins[i];
+      double currentMax = maxs[i];
+      if (i > 0) {
+        double prevMax = maxs[i - 1];
+        if (currentMin < prevMax)
+          continue;
+      }
+      if (i + 1 < possibleAssignments.size()) {
+        double nextMin = mins[i + 1];
+        if (currentMax > nextMin)
+          continue;
+      }
+
+      Collections.sort(points);
+      while (points.size() > 1)
+        points.remove(points.size() - 1);
+    }
+  }
+
+  private void assignmentSanityCheck(ShapePoints shapePoints,
+      List<StopTimeEntryImpl> stopTimes,
+      List<List<PointAndIndex>> possibleAssignments)
+      throws StopIsTooFarFromShapeException {
+
+    int stIndex = 0;
+    for (List<PointAndIndex> assignments : possibleAssignments) {
+      Min<PointAndIndex> m = new Min<PointAndIndex>();
+      for (PointAndIndex pindex : assignments)
+        m.add(pindex.distanceFromTarget, pindex);
+      if (m.getMinValue() > _maxDistanceFromStopToShapePoint) {
+        StopTimeEntry stopTime = stopTimes.get(stIndex);
+        PointAndIndex pindex = m.getMinElement();
+        CoordinatePoint point = shapePoints.getPointForIndex(pindex.index);
+        throw new StopIsTooFarFromShapeException(stopTime, pindex, point);
+      }
+      stIndex++;
+    }
   }
 
   private List<List<PointAndIndex>> computePotentialAssignments(
@@ -89,7 +201,8 @@ public class DistanceAlongShapeLibrary {
   private List<PointAndIndex> computeBestAssignment(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes,
       List<List<PointAndIndex>> possibleAssignments, UTMProjection projection,
-      List<XYPoint> projectedShapePoints) {
+      List<XYPoint> projectedShapePoints)
+      throws InvalidStopToShapeMappingException {
 
     checkFirstAndLastStop(stopTimes, possibleAssignments, shapePoints,
         projection, projectedShapePoints);
@@ -223,14 +336,14 @@ public class DistanceAlongShapeLibrary {
 
     for (PointAndIndex possibleAssignmentForIndex : possibleAssignmentsForIndex) {
       if (possibleAssignmentForIndex.distanceAlongShape >= lastDistanceAlongShape)
-    	 validAssignments.add(possibleAssignmentForIndex);
+        validAssignments.add(possibleAssignmentForIndex);
     }
 
     /**
      * There is no satisfying assignment for this search tree, so we return
      */
     if (validAssignments.isEmpty()) {
-    	return;
+      return;
     }
 
     /**
@@ -250,7 +363,9 @@ public class DistanceAlongShapeLibrary {
 
   private void constructError(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes,
-      List<List<PointAndIndex>> possibleAssignments, UTMProjection projection) {
+      List<List<PointAndIndex>> possibleAssignments, UTMProjection projection)
+      throws InvalidStopToShapeMappingException {
+
     StopTimeEntryImpl first = stopTimes.get(0);
     StopTimeEntryImpl last = stopTimes.get(stopTimes.size() - 1);
 
@@ -262,20 +377,52 @@ public class DistanceAlongShapeLibrary {
 
     StringBuilder b = new StringBuilder();
     int index = 0;
+
+    b.append("# potential assignments:\n");
+    b.append("# index stopId stopLat stopLon\n");
+    b.append("#   distanceAlongShapeA locationOnShapeLatA locationOnShapeLonA shapePointIndexA\n");
+    b.append("#   ...\n");
+
+    double prevMaxDistanceAlongShape = Double.NEGATIVE_INFINITY;
+
     for (List<PointAndIndex> possible : possibleAssignments) {
+      StopTimeEntryImpl stopTime = stopTimes.get(index);
+      StopEntryImpl stop = stopTime.getStop();
       b.append(index);
+      b.append(' ');
+      b.append(stop.getId());
+      b.append(' ');
+      b.append(stop.getStopLat());
+      b.append(' ');
+      b.append(stop.getStopLon());
+      b.append('\n');
+
+      double maxDistanceAlongShape = Double.NEGATIVE_INFINITY;
+      double minDistanceAlongShape = Double.POSITIVE_INFINITY;
+
       for (PointAndIndex pindex : possible) {
-        b.append(' ');
+        b.append("  ");
         b.append(pindex.distanceAlongShape);
         b.append(' ');
         b.append(projection.reverse(pindex.point));
         b.append(' ');
         b.append(pindex.index);
+        b.append("\n");
+        maxDistanceAlongShape = Math.max(maxDistanceAlongShape,
+            pindex.distanceAlongShape);
+        minDistanceAlongShape = Math.min(minDistanceAlongShape,
+            pindex.distanceAlongShape);
       }
-      b.append("\n");
+
+      if (minDistanceAlongShape < prevMaxDistanceAlongShape) {
+        b.append("    ^ potential problem here ^\n");
+      }
+
+      prevMaxDistanceAlongShape = maxDistanceAlongShape;
+
       index++;
     }
-    _log.error("potential assignments:\n" + b.toString());
+    _log.error(b.toString());
 
     b = new StringBuilder();
     index = 0;
@@ -290,7 +437,7 @@ public class DistanceAlongShapeLibrary {
 
     _log.error("shape points:\n" + b.toString());
 
-    throw new IllegalStateException();
+    throw new InvalidStopToShapeMappingException(first.getTrip());
   }
 
   private static class Assignment implements Comparable<Assignment> {
@@ -305,6 +452,62 @@ public class DistanceAlongShapeLibrary {
     @Override
     public int compareTo(Assignment o) {
       return Double.compare(score, o.score);
+    }
+  }
+
+  public static class DistanceAlongShapeException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public DistanceAlongShapeException(String message) {
+      super(message);
+    }
+  }
+
+  public static class StopIsTooFarFromShapeException extends
+      DistanceAlongShapeException {
+
+    private static final long serialVersionUID = 1L;
+    private final StopTimeEntry _stopTime;
+    private final PointAndIndex _pointAndIndex;
+    private final CoordinatePoint _point;
+
+    public StopIsTooFarFromShapeException(StopTimeEntry stopTime,
+        PointAndIndex pointAndIndex, CoordinatePoint point) {
+      super("stopTime=" + stopTime + " pointAndIndex=" + pointAndIndex
+          + " point=" + point);
+      _stopTime = stopTime;
+      _pointAndIndex = pointAndIndex;
+      _point = point;
+    }
+
+    public StopTimeEntry getStopTime() {
+      return _stopTime;
+    }
+
+    public PointAndIndex getPointAndIndex() {
+      return _pointAndIndex;
+    }
+
+    public CoordinatePoint getPoint() {
+      return _point;
+    }
+  }
+
+  public static class InvalidStopToShapeMappingException extends
+      DistanceAlongShapeException {
+
+    private static final long serialVersionUID = 1L;
+
+    private final TripEntry _trip;
+
+    public InvalidStopToShapeMappingException(TripEntry trip) {
+      super("trip=" + trip.getId());
+      _trip = trip;
+    }
+
+    public TripEntry getTrip() {
+      return _trip;
     }
   }
 }

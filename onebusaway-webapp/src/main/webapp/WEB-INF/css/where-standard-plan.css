@@ -1,0 +1,177 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+html, body {
+	height: 100%;
+}
+
+#wrapper {
+	position: absolute;
+	top: 0;	
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+div#container {
+	position: relative;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#leftPanel {
+	position: absolute;
+	top: 60px;    
+    bottom: 0;
+    left: 0;
+	width: 368px;
+	padding-left: 16px;
+	padding-right: 16px;
+	overflow: auto;
+}
+
+#mapPanel {
+    position: absolute;
+    top: 60px;    
+    bottom: 0px;    
+    left: 400px;
+    right: 0px;
+}
+
+#map {
+	width: 100%;
+	height: 100%;	
+}
+
+#searchPanel div span {
+	display: block;
+	float: left;
+	width: 60px;
+	margin-right: 10px;
+	text-align: right;
+	font-weight: bold;
+}
+
+#searchPanel input[type=text] {
+	width: 20em;
+}
+
+#optionsToggle {
+	font-size: 0.8em;
+	padding-left: 70px;	
+}
+
+#basicSearchOptions input[type=text] {
+	width: 7em;
+	margin-left: 1em;
+}
+
+#directionsButton {
+	margin-left: 70px;	
+}
+
+#advancedSearchOptions div {
+	clear: both;
+}
+
+#advancedSearchOptions div span {
+	display: block;
+	float: left;
+	width: 80px;
+	margin-right: 10px;
+	text-align: right;
+	font-weight: bold;
+	font-size: 0.6em;
+}
+
+#advancedSearchOptions input[type=text] {
+	width: 7em;
+}
+
+
+#feedback {
+	display: none
+}
+
+#resultsPanel {
+	padding-top: 1em;	
+}
+
+.linkToThisSearchPanel {
+	font-size: 0.8em;
+	margin-bottom: 1em;
+}
+
+.itinerarySummary {
+	padding: 2px 5px 2px 1.6em;
+}
+
+.itinerarySummary > .itinerarySummary-index {
+	font-weight: bold;
+    left: 5px;
+    position: absolute;
+}
+
+.itinerarySummary > .itinerarySummary-timeLength {
+    clear: right;
+    float: right;
+    margin-left: 7px;
+    font-weight: bold;
+}
+
+.leg {
+	margin-bottom: 1em;
+}
+
+.stopNameEmphasized {
+	font-weight: bold;
+}
+
+.stopLink {
+	font-size: 0.8em;	
+}
+
+.routeShortName {
+	font-weight: bold;
+}
+
+.legTimes {
+	font-size: 0.8em;
+}
+
+.statusEarly {
+	color: red;
+}
+
+.statusOnTime {
+	color: green;
+}
+
+.statusDelayed {
+	color: blue;
+}
+
+.elapsedTime {
+	color: grey;
+}
+
+.walkFromLocation {
+	font-weight: bold;
+}
+
+.walkToTime {
+	color: grey;
+}

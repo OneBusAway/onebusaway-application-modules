@@ -1,0 +1,117 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.onebusaway</groupId>
+    <artifactId>onebusaway-application-modules</artifactId>
+    <version>0.2.0-SNAPSHOT</version>
+  </parent>
+  <groupId>org.onebusaway</groupId>
+  <artifactId>onebusaway-api-webapp</artifactId>
+  <packaging>war</packaging>
+
+  <name>onebusaway-api-webapp</name>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-api-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-transit-data</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-presentation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- This is the original SIRI API implementation that we hope to eventually move away from -->
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-siri-api</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
+    <!-- RMI-like service for wiring up services between VMs -->
+    <dependency>
+      <groupId>com.caucho</groupId>
+      <artifactId>hessian</artifactId>
+    </dependency>
+
+    <!-- Struts 2 -->
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-spring-plugin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-convention-plugin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.struts</groupId>
+      <artifactId>struts2-rest-plugin</artifactId>
+    </dependency>
+
+    <!-- We use HttpServletRequest in XmlResult -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jsp-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- For iPhone app notifications -->
+    <dependency>
+      <groupId>com.notnoop.apns</groupId>
+      <artifactId>apns</artifactId>
+      <version>0.1.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>onebusaway-api-webapp</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/src/main/resources</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/default-resources</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

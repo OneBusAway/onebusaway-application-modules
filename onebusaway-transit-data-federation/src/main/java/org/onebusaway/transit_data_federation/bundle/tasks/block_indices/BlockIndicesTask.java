@@ -1,10 +1,27 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
 
 import java.util.List;
 
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.impl.refresh.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndicesFactory;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexFactoryService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.utility.ObjectSerializationLibrary;
@@ -14,6 +31,7 @@ public class BlockIndicesTask implements Runnable {
 
   private FederatedTransitDataBundle _bundle;
   private TransitGraphDao _transitGraphDao;
+  private BlockIndexFactoryService _blockIndexFactoryService;
   private RefreshService _refreshService;
 
   @Autowired
@@ -27,6 +45,12 @@ public class BlockIndicesTask implements Runnable {
   }
 
   @Autowired
+  public void setBlockIndexFactoryService(
+      BlockIndexFactoryService blockIndexFactoryService) {
+    _blockIndexFactoryService = blockIndexFactoryService;
+  }
+
+  @Autowired
   public void setRefreshService(RefreshService refreshService) {
     _refreshService = refreshService;
   }
@@ -36,14 +60,11 @@ public class BlockIndicesTask implements Runnable {
 
     try {
 
-      BlockIndicesFactory factory = new BlockIndicesFactory();
-      factory.setVerbose(true);
-
       Iterable<BlockEntry> blocks = _transitGraphDao.getAllBlocks();
 
-      List<BlockTripIndexData> tripData = factory.createTripData(blocks);
-      List<BlockLayoverIndexData> layoverData = factory.createLayoverData(blocks);
-      List<FrequencyBlockTripIndexData> frequencyTripData = factory.createFrequencyTripData(blocks);
+      List<BlockTripIndexData> tripData = _blockIndexFactoryService.createTripData(blocks);
+      List<BlockLayoverIndexData> layoverData = _blockIndexFactoryService.createLayoverData(blocks);
+      List<FrequencyBlockTripIndexData> frequencyTripData = _blockIndexFactoryService.createFrequencyTripData(blocks);
 
       ObjectSerializationLibrary.writeObject(_bundle.getBlockTripIndicesPath(),
           tripData);
@@ -51,9 +72,8 @@ public class BlockIndicesTask implements Runnable {
           _bundle.getBlockLayoverIndicesPath(), layoverData);
       ObjectSerializationLibrary.writeObject(
           _bundle.getFrequencyBlockTripIndicesPath(), frequencyTripData);
-      
+
       BlockStopTimeIndicesFactory stopFactory = new BlockStopTimeIndicesFactory();
-      factory.setVerbose(true);
       stopFactory.createIndices(blocks);
 
       _refreshService.refresh(RefreshableResources.BLOCK_INDEX_DATA);

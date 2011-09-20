@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import static org.junit.Assert.assertEquals;
@@ -25,12 +41,12 @@ import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.transit_data_federation.bundle.tasks.ShapePointHelper;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
-import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -69,7 +85,7 @@ public class BlockConfigurationEntriesFactoryTest {
      * ShapePointsService
      ****/
 
-    ShapePointService shapePointService = Mockito.mock(ShapePointService.class);
+    ShapePointHelper shapePointService = Mockito.mock(ShapePointHelper.class);
 
     ShapePointsFactory shapePointsFactory = new ShapePointsFactory();
     shapePointsFactory.addPoint(0, 0);
@@ -84,7 +100,7 @@ public class BlockConfigurationEntriesFactoryTest {
 
     _factory = new BlockConfigurationEntriesFactory();
     _factory.setServiceIdOverlapCache(serviceIdOverlapCache);
-    _factory.setShapePointService(shapePointService);
+    _factory.setShapePointHelper(shapePointService);
   }
 
   @Test

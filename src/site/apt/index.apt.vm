@@ -1,0 +1,66 @@
+OneBusAway Application Suite
+
+  This is the primary documentation for all the modules the make up the {{{http://onebusaway.org}OneBusAway}} website
+and application framework. 
+  
+  <<Latest Version:>> ${currentVersion}
+
+  Details on all releases can be found in the {{{./release-notes.html}Release Notes}}.
+  
+* Functionality  
+  
+  The applications provide some key functionality:
+  
+  * SIRI
+  
+  []
+
+* Modules
+  
+  The library is broken up into a few key modules:
+
+  * <<<onebusaway-api-core>>> - 
+
+  * <<<onebusaway-api-webapp>>> - 
+
+  * <<<onebusaway-cli>>> - 
+
+  * <<<onebusaway-container>>> - 
+
+  * <<<onebusaway-core>>> - 
+
+  * <<<onebusaway-federations>>> - 
+
+  * <<<onebusaway-federations-webapp>>> - 
+
+  * <<<onebusaway-geocoder>>> - 
+
+  * <<<onebusaway-geospatial>>> - 
+
+  * <<<onebusaway-gtfs-hibernate-spring>>> - 
+
+  * <<<onebusaway-gwt-common>>> - 
+
+  * <<<onebusaway-phone>>> - 
+
+  * <<<onebusaway-phone-webapp>>> - 
+
+  * <<<onebusaway-presentation>>> - 
+
+  * <<<onebusaway-sms-webapp>>> - 
+
+  * <<<onebusaway-realtime-api>>> - 
+
+  * <<<onebusaway-transit-data>>> - 
+
+  * <<<onebusaway-transit-data-federation>>> - 
+
+  * <<<onebusaway-transit-data-federation-webapp>>> - 
+
+  * <<<onebusaway-users>>> - 
+
+  * <<<onebusaway-webapp>>> - 
+  
+Documentation
+
+  You can access the {{{./apidocs/index.html}latest Javadoc for the library}}.  Also, see example source code below.

@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.transit_graph;
 
 import java.io.IOException;
@@ -9,8 +24,12 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopHops;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyStopTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
 public class StopEntryImpl implements StopEntry, Serializable {
@@ -23,9 +42,19 @@ public class StopEntryImpl implements StopEntry, Serializable {
 
   private final double _lon;
 
+  private transient int _index;
+
   private transient List<BlockStopTimeIndex> _stopTimeIndices = null;
 
   private transient List<FrequencyBlockStopTimeIndex> _frequencyStopTimeIndices = null;
+
+  private transient List<BlockStopSequenceIndex> _stopTripIndices = null;
+
+  private transient List<FrequencyStopTripIndex> _frequencyStopTripIndices = null;
+
+  private transient StopTransfers _transfers = null;
+
+  private transient StopHops _hops = null;
 
   public StopEntryImpl(AgencyAndId id, double lat, double lon) {
     if (id == null)
@@ -33,6 +62,10 @@ public class StopEntryImpl implements StopEntry, Serializable {
     _id = id;
     _lat = lat;
     _lon = lon;
+  }
+
+  public void setIndex(int index) {
+    _index = index;
   }
 
   public void addStopTimeIndex(BlockStopTimeIndex stopTimeIndex) {
@@ -59,7 +92,47 @@ public class StopEntryImpl implements StopEntry, Serializable {
       return Collections.emptyList();
     return _frequencyStopTimeIndices;
   }
-  
+
+  public void addBlockStopTripIndex(BlockStopSequenceIndex index) {
+    if (_stopTripIndices == null)
+      _stopTripIndices = new ArrayList<BlockStopSequenceIndex>();
+    _stopTripIndices.add(index);
+  }
+
+  public List<BlockStopSequenceIndex> getStopTripIndices() {
+    if (_stopTripIndices == null)
+      return Collections.emptyList();
+    return _stopTripIndices;
+  }
+
+  public void addFrequencyStopTripIndex(FrequencyStopTripIndex index) {
+    if (_frequencyStopTripIndices == null)
+      _frequencyStopTripIndices = new ArrayList<FrequencyStopTripIndex>();
+    _frequencyStopTripIndices.add(index);
+  }
+
+  public List<FrequencyStopTripIndex> getFrequencyStopTripIndices() {
+    if (_frequencyStopTripIndices == null)
+      return Collections.emptyList();
+    return _frequencyStopTripIndices;
+  }
+
+  public StopTransfers getTransfers() {
+    return _transfers;
+  }
+
+  public void setTransfers(StopTransfers transfers) {
+    _transfers = transfers;
+  }
+
+  public StopHops getHops() {
+    return _hops;
+  }
+
+  public void setHops(StopHops hops) {
+    _hops = hops;
+  }
+
   /****
    * {@link StopEntry} Interface
    ****/
@@ -84,10 +157,16 @@ public class StopEntryImpl implements StopEntry, Serializable {
     return new CoordinatePoint(_lat, _lon);
   }
 
+  @Override
+  public int getIndex() {
+    return _index;
+  }
+
   /****
    * {@link Object} Interface
    ****/
 
+  /*
   @Override
   public boolean equals(Object obj) {
     if (obj == null || !(obj instanceof StopEntryImpl))
@@ -95,15 +174,27 @@ public class StopEntryImpl implements StopEntry, Serializable {
     StopEntryImpl stop = (StopEntryImpl) obj;
     return _id.equals(stop.getId());
   }
+  */
 
+  /*
   @Override
   public int hashCode() {
     return _id.hashCode();
   }
+  */
 
   @Override
   public String toString() {
     return "StopEntry(id=" + _id + ")";
+  }
+
+  /****
+   * {@link Comparable} Interface
+   ****/
+
+  @Override
+  public int compareTo(StopEntry o) {
+    return this.getIndex() - o.getIndex();
   }
 
   /*****************************************************************************

@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import java.util.ArrayList;
@@ -11,11 +27,11 @@ import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.transit_data_federation.bundle.tasks.ShapePointHelper;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
@@ -37,7 +53,7 @@ public class BlockConfigurationEntriesFactory {
 
   private ServiceIdOverlapCache _serviceIdOverlapCache;
 
-  private ShapePointService _shapePointService;
+  private ShapePointHelper _shapePointHelper;
 
   @Autowired
   public void setServiceIdOverlapCache(
@@ -46,8 +62,8 @@ public class BlockConfigurationEntriesFactory {
   }
 
   @Autowired
-  public void setShapePointService(ShapePointService shapePointService) {
-    _shapePointService = shapePointService;
+  public void setShapePointHelper(ShapePointHelper shapePointHelper) {
+    _shapePointHelper = shapePointHelper;
   }
 
   public void processBlockConfigurations(BlockEntryImpl block,
@@ -87,7 +103,8 @@ public class BlockConfigurationEntriesFactory {
     configurations.trimToSize();
 
     if (configurations.isEmpty())
-      _log.warn("no active block configurations found for block: " + block.getId());
+      _log.warn("no active block configurations found for block: "
+          + block.getId());
 
     block.setConfigurations(configurations);
 
@@ -176,7 +193,7 @@ public class BlockConfigurationEntriesFactory {
 
     double[] tripGapDistances = new double[trips.size()];
 
-    if (_shapePointService == null)
+    if (_shapePointHelper == null)
       return tripGapDistances;
 
     for (int index = 0; index < trips.size() - 1; index++) {
@@ -186,8 +203,8 @@ public class BlockConfigurationEntriesFactory {
 
       double d = 0;
 
-      ShapePoints shapeFrom = _shapePointService.getShapePointsForShapeId(tripA.getShapeId());
-      ShapePoints shapeTo = _shapePointService.getShapePointsForShapeId(tripB.getShapeId());
+      ShapePoints shapeFrom = _shapePointHelper.getShapePointsForShapeId(tripA.getShapeId());
+      ShapePoints shapeTo = _shapePointHelper.getShapePointsForShapeId(tripB.getShapeId());
 
       if (shapeFrom != null && shapeTo != null && !shapeFrom.isEmpty()
           && !shapeTo.isEmpty()) {

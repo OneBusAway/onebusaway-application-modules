@@ -1,0 +1,13 @@
+Release Notes
+
+* ${currentVersion}
+
+  * Initial Site Documentation
+  
+  * Bump to require Maven 3
+
+  * Full Documentation: {{${site_base_url}/onebusaway-application-modules/${currentVersion}/}}
+
+* 0.0.1
+
+  * Initial release

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags" xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>User Info</title>
+  <script type="text/javascript"                                  
+          src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g"><jsp:text></jsp:text></script>
+  <script type="text/javascript"
+          src="org.onebusaway.webapp.gwt.SearchLocationLibrary.nocache.js"><jsp:text></jsp:text></script>
+
+</head>
+<body>
+
+<s:push value="user">
+<h2>User Info</h2>
+
+<div>
+	<s:if test="! anonymous">
+	  <h4>You are currently logged in</h4>
+	  <p><s:a namespace="/" action="logout">Click here to logout</s:a></p>
+	</s:if>
+	<s:else>
+      <s:url var="targetUrl" namespace="/user" action="index"/>
+      <s:url var="loginUrl" namespace="/" action="login">
+        <s:param name="target" value="%{targetUrl}"/>
+      </s:url>
+	  <p>You can <s:a href="%{loginUrl}">login</s:a> to an existing account</p>
+	</s:else>
+
+    <div class="section">
+	<h4>Privacy Settings</h4>
+	<p>In order to make using OneBusAway more convenient, we can remember various preferences,
+	such as your default search area and your bookmarked stops. We understand that some users
+	would rather OneBusAway not remember any of these preferences due to privacy concerns.  You
+	can control your privacy settings here.</p>
+	
+	<p><span class="label">Current Settings:</span>
+	  <s:if test="rememberPreferencesEnabled">Preferences <span class="bold">ARE</span> saved</s:if>
+	  <s:else>Prefenences <span class="bold">ARE NOT</span> saved</s:else>
+	</p>
+	
+	<p>
+	  <s:url var="url" action="set-remember-preferences">
+		<s:param name="enabled" value="! rememberPreferencesEnabled"/>
+	  </s:url>
+	  <s:a href="%{url}">
+	  	<s:if test="rememberPreferencesEnabled">I DON'T want my preferences to be saved</s:if>
+	  	<s:else>I DO want my preferences to be saved</s:else>  
+	  </s:a>
+	</p>
+    </div>
+	
+	<div class="section">
+	<h4>Default Search Location</h4>
+	<p>We use your default search location to give you transit information appropriate to your area.</p>
+	<p><span class="label">Your Default Search Location:</span>
+	  <s:if test="hasDefaultLocation()">
+	  	<s:url var="url" value="/where/standard/index.html#m(location)lat(%{defaultLocationLat})lon(%{defaultLocationLon})accuracy(5)"/>
+		<s:a href="%{url}"><s:property value="defaultLocationName"/></s:a> 
+	  </s:if>
+	  <s:else>Not Set</s:else>
+	</p>
+	
+	<p id="changeSearchLocation"><jsp:text> </jsp:text></p>
+	
+	<s:if test="hasDefaultLocation()">
+	<p><s:a action="clear-default-search-location">Clear your default search location</s:a></p>
+	</s:if>
+	</div>
+	
+	<s:if test="! anonymous">
+	  <s:if test="rememberPreferencesEnabled">
+	    <div class="section">	
+		  <h4>Bookmarks</h4>
+	 	  <p><a href="../where/standard/bookmarks.action">Check out your bookmarks</a></p>
+	 	</div>
+	  </s:if>
+	  
+	  <div class="section">
+	  
+	  <h4>Phone Numbers</h4>
+	  <s:if test="phoneIndices.empty">
+	    <p>You have no registered phone numbers.</p>
+	  </s:if>
+	  <s:else>
+	  	<p>Your registered phone numbers:</p>
+	  	<ul>
+	  		<s:iterator value="phoneIndices">
+	  		    <s:url var="removePhoneNumberUrl" action="remove-phone-number">
+	  		    	<s:param name="phoneNumber" value="value"/>
+	  		    </s:url>
+	  			<li><oba:phoneNumber value="value"/> - <s:a href="%{removePhoneNumberUrl}">delete</s:a></li>
+	  		</s:iterator>
+	  	</ul>
+	  </s:else>
+	  <p>Register a phone number:</p>
+	  <form method="POST" action="phone-number-registration.action">
+	    <input type="text" name="phoneNumber"/> <input type="submit" value="Submit"/>
+	  </form>
+	  
+	  </div>
+	  
+	</s:if>
+	<s:else>
+	  <div class="section">	
+        <h4>Register Your Account</h4>
+        <s:url var="registrationUrl" namespace="/" action="login">
+          <s:param name="mode">registration</s:param>
+        </s:url>
+        <p>You can <s:a href="%{registrationUrl}">register your account</s:a>, or <s:a namespace="/" action="login">login to an existing account</s:a>.  Why get a registered account?  You can:</p>
+        <ul>
+          <li>Manage your stop bookmarks on the web and then access them on your phone</li>
+          <li>Save and access your preferences across multiple computers</li>
+          <li>More features to come</li>
+        </ul>
+      </div>
+	</s:else>
+
+	<s:if test="admin">
+		<div class="section">	
+		<h4>Admin</h4>
+	 	<p>You are an admin.  Use <s:a namespace="/admin" action="index">your powers</s:a> wisely.</p>
+	 	</div>
+	</s:if>
+	
+	<div class="section">
+		<h4>Details</h4>
+		<ul>
+		  <li><span class="label">User #:</span> <s:property value="userId"/></li>
+		  <li><span class="label">User Indices:</span>
+		    <ul>
+		      <s:iterator value="indices">
+		        <li><span class="label"><s:property value="type"/>:</span> <s:property value="value"/></li>
+		      </s:iterator>
+		    </ul>
+		  </li>
+		</ul>
+	</div>
+	
+</div>
+
+</s:push>
+
+</body>
+</html>

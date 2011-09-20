@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="onebusaway-application-modules">
+    <bannerLeft>
+        <name>OneBusAway</name>
+        <src>OneBusAway.png</src>
+        <href>http://code.google.com/p/onebusaway/</href>
+    </bannerLeft>
+    <publishDate position="right"/>
+    <version position="right"/>
+    <body>
+        <menu name="Home">
+            <item name="About" href="/index.html" />
+            <item name="Release Notes" href="/release-notes.html"/>
+            <item name="API Javadoc" href="/apidocs/index.html"/>
+        </menu>
+        <menu name="Guides">
+            <item name="Installation Guide" href="/installation-guide.html"/>
+            <item name="Transit Data Bundle" href="/transit-data-bundle.html"/>
+            <item name="Realtime Configuration" href="/realtime-configuration-guide.html"/>
+            <item name="Webapp Installation" href="/webapp-installation-guide.html"/>
+            <item name="Troubleshooting" href="/troubleshooting-guide.html"/>
+        </menu>
+        <menu ref="reports" />
+    </body>
+</project>

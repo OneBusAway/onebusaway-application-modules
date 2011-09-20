@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
@@ -6,7 +21,7 @@ import java.util.List;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 
 public final class TripStatusBean implements Serializable {
 
@@ -73,7 +88,7 @@ public final class TripStatusBean implements Serializable {
 
   private String vehicleId;
 
-  private List<SituationBean> situations;
+  private List<ServiceAlertBean> situations;
 
   public TripBean getActiveTrip() {
     return activeTrip;
@@ -339,11 +354,11 @@ public final class TripStatusBean implements Serializable {
     this.vehicleId = vehicleId;
   }
 
-  public List<SituationBean> getSituations() {
+  public List<ServiceAlertBean> getSituations() {
     return situations;
   }
 
-  public void setSituations(List<SituationBean> situations) {
+  public void setSituations(List<ServiceAlertBean> situations) {
     this.situations = situations;
   }
 }

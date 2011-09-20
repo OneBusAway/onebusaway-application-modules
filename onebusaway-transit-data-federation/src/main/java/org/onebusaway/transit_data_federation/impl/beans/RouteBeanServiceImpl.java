@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
@@ -20,34 +36,36 @@ import org.onebusaway.transit_data.model.StopGroupBean;
 import org.onebusaway.transit_data.model.StopGroupingBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.TransitDataConstants;
-import org.onebusaway.transit_data_federation.impl.beans.sort.StopGraphComparator;
-import org.onebusaway.transit_data_federation.model.RouteCollection;
+import org.onebusaway.transit_data_federation.impl.DirectedGraph;
+import org.onebusaway.transit_data_federation.impl.StopGraphComparator;
 import org.onebusaway.transit_data_federation.model.StopSequence;
 import org.onebusaway.transit_data_federation.model.StopSequenceCollection;
-import org.onebusaway.transit_data_federation.services.ExtendedGtfsRelationalDao;
+import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
 import org.onebusaway.transit_data_federation.services.RouteService;
 import org.onebusaway.transit_data_federation.services.StopSequenceCollectionService;
 import org.onebusaway.transit_data_federation.services.StopSequencesService;
-import org.onebusaway.transit_data_federation.services.TransitDataFederationDao;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 class RouteBeanServiceImpl implements RouteBeanService {
 
-  private ExtendedGtfsRelationalDao _gtfsDao;
+  private TransitGraphDao _transitGraphDao;
 
-  private TransitDataFederationDao _transitDataFederationDao;
+  private NarrativeService _narrativeService;
 
   private AgencyBeanService _agencyBeanService;
 
@@ -64,14 +82,13 @@ class RouteBeanServiceImpl implements RouteBeanService {
   private BlockIndexService _blockIndexService;
 
   @Autowired
-  public void setGtfsDao(ExtendedGtfsRelationalDao gtfsDao) {
-    _gtfsDao = gtfsDao;
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
   }
 
   @Autowired
-  public void setTransitDataFederationDao(
-      TransitDataFederationDao transitDataFederationDao) {
-    _transitDataFederationDao = transitDataFederationDao;
+  public void setNarrativeService(NarrativeService narrativeService) {
+    _narrativeService = narrativeService;
   }
 
   @Autowired
@@ -112,11 +129,27 @@ class RouteBeanServiceImpl implements RouteBeanService {
 
   @Cacheable
   public RouteBean getRouteForId(AgencyAndId id) {
-
-    RouteCollection rc = _transitDataFederationDao.getRouteCollectionForId(id);
-
+    RouteCollectionNarrative rc = _narrativeService.getRouteCollectionForId(id);
     if (rc == null)
       return null;
+    return getRouteBeanForRouteCollection(id, rc);
+  }
+
+  @Cacheable
+  public StopsForRouteBean getStopsForRoute(AgencyAndId routeId) {
+    RouteCollectionEntry routeCollectionEntry = _transitGraphDao.getRouteCollectionForId(routeId);
+    RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
+    if (routeCollectionEntry == null || narrative == null)
+      return null;
+    return go(routeCollectionEntry, narrative);
+  }
+
+  /****
+   * Private Methods
+   ****/
+
+  private RouteBean getRouteBeanForRouteCollection(AgencyAndId id,
+      RouteCollectionNarrative rc) {
 
     RouteBean.Builder bean = RouteBean.builder();
     bean.setId(ApplicationBeanLibrary.getId(id));
@@ -134,22 +167,6 @@ class RouteBeanServiceImpl implements RouteBeanService {
     return bean.create();
   }
 
-  @Cacheable
-  @Transactional
-  public StopsForRouteBean getStopsForRoute(AgencyAndId routeId) {
-
-    RouteCollection routeCollection = _transitDataFederationDao.getRouteCollectionForId(routeId);
-
-    if (routeCollection == null)
-      return null;
-
-    return go(routeCollection);
-  }
-
-  /****
-   * Private Methods
-   ****/
-
   private List<StopBean> getStopBeansForRoute(AgencyAndId routeId) {
 
     Collection<AgencyAndId> stopIds = _routeService.getStopsForRouteCollection(routeId);
@@ -163,18 +180,13 @@ class RouteBeanServiceImpl implements RouteBeanService {
     return stops;
   }
 
-  private List<EncodedPolylineBean> getEncodedPolylinesForRoute(
-      RouteCollection routeCollection) {
-
-    List<AgencyAndId> shapeIds = _gtfsDao.getShapePointIdsForRoutes(routeCollection.getRoutes());
-    return _shapeBeanService.getMergedPolylinesForShapeIds(shapeIds);
-  }
-
-  private StopsForRouteBean go(RouteCollection routeCollection) {
+  private StopsForRouteBean go(RouteCollectionEntry routeCollection,
+      RouteCollectionNarrative narrative) {
 
     StopsForRouteBean result = new StopsForRouteBean();
 
     AgencyAndId routeCollectionId = routeCollection.getId();
+    result.setRoute(getRouteBeanForRouteCollection(routeCollectionId, narrative));
     result.setStops(getStopBeansForRoute(routeCollectionId));
 
     result.setPolylines(getEncodedPolylinesForRoute(routeCollection));
@@ -195,7 +207,7 @@ class RouteBeanServiceImpl implements RouteBeanService {
       // Do we really need to do all of them?
       for (BlockTripEntry blockTrip : blockIndex.getTrips()) {
         TripEntry trip = blockTrip.getTrip();
-        AgencyAndId rcId = trip.getRouteCollectionId();
+        AgencyAndId rcId = trip.getRouteCollection().getId();
         if (!rcId.equals(routeCollectionId))
           continue;
         blockTrips.add(blockTrip);
@@ -230,6 +242,20 @@ class RouteBeanServiceImpl implements RouteBeanService {
     sortResult(result);
 
     return result;
+  }
+
+  private List<EncodedPolylineBean> getEncodedPolylinesForRoute(
+      RouteCollectionEntry routeCollection) {
+
+    Set<AgencyAndId> shapeIds = new HashSet<AgencyAndId>();
+    for (RouteEntry route : routeCollection.getChildren()) {
+      for (TripEntry trip : route.getTrips()) {
+        if (trip.getShapeId() != null)
+          shapeIds.add(trip.getShapeId());
+      }
+    }
+
+    return _shapeBeanService.getMergedPolylinesForShapeIds(shapeIds);
   }
 
   private List<StopEntry> getStopsInOrder(StopSequenceCollection block) {

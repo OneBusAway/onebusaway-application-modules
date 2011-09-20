@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE xwork PUBLIC "-//OpenSymphony Group//XWork 2.0//EN" "http://www.opensymphony.com/xwork/xwork-2.0.dtd">
+<xwork>
+
+    <include file="org/onebusaway/probablecalls/xwork.xml" />
+
+    <package name="bus" extends="probable-calls">
+
+        <result-types>
+            <result-type name="message" class="org.onebusaway.phone.impl.MessageTemplateDispatcher">
+                <param name="target">/message_and_back</param>
+            </result-type>
+        </result-types>
+
+
+        <interceptors>
+            <interceptor name="integrationTesting" class="org.onebusaway.phone.impl.IntegrationTestingInterceptor" />
+            <interceptor name="callerIdLogin" class="org.onebusaway.presentation.impl.users.PhoneNumberLoginInterceptor">
+                <param name="phoneNumberParameterName">userId</param>
+            </interceptor>
+            <interceptor name="currentUser" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />
+
+            <interceptor-stack name="phoneCustomStack">
+                <interceptor-ref name="defaultStack" />
+                <interceptor-ref name="integrationTesting" />
+                <interceptor-ref name="callerIdLogin" />
+                <interceptor-ref name="currentUser" />
+            </interceptor-stack>
+        </interceptors>
+
+        <default-interceptor-ref name="phoneCustomStack" />
+
+        <action name="/welcome" class="org.onebusaway.phone.actions.WelcomeAction">
+            <result>/welcome</result>
+            <result name="registration" type="chain">/registration</result>
+        </action>
+
+        <action name="/index" class="org.onebusaway.phone.actions.DefaultAction">
+            <result>/index</result>
+        </action>
+
+        <action name="/find_your_stop" class="org.onebusaway.phone.actions.DefaultAction">
+            <result>/find_your_stop</result>
+        </action>
+
+        <action name="/most_recent" class="org.onebusaway.phone.actions.stops.MostRecentStopAction">
+            <result type="chain">/stop/arrivalsAndDeparturesForStopId</result>
+            <result type="message" name="input">NO_MOST_RECENT</result>
+        </action>
+
+        <action name="/registration" class="org.onebusaway.phone.actions.DefaultAction">
+            <result>/registration</result>
+            <result name="complete" type="chain">/welcome</result>
+        </action>
+
+        <action name="/handle-registration" class="org.onebusaway.phone.actions.RegistrationHandleAction">
+            <result type="message">
+                <param name="message">REGISTRATION_SUCCESSFUL</param>
+                <param name="nextAction">/welcome</param>
+            </result>
+            <result type="message" name="input">INVALID_REGISTRATION_CODE</result>
+        </action>
+
+        <action name="/cancel-registration" class="org.onebusaway.phone.actions.RegistrationCancelAction">
+            <result type="chain">/welcome</result>
+        </action>
+
+        <!--  Generic Help Message  -->
+        <action name="/help" class="org.onebusaway.phone.actions.DefaultAction">
+            <result type="message">INDEX_HELP</result>
+        </action>
+
+        <!-- Stop Actions -->
+
+        <action name="/stop/index" class="org.onebusaway.phone.actions.stops.IndexAction">
+            <result>/stop/index</result>
+            <result name="needsDefaultSearchLocation">/settings/needDefaultSearchLocation</result>
+        </action>
+
+        <action name="/stop/byCode" class="org.onebusaway.phone.actions.stops.StopForCodeAction">
+            <result type="chain">/stop/arrivalsAndDeparturesForStopId</result>
+            <result name="input" type="message">INVALID_STOP_NUMBER</result>
+            <result name="noStopsFound" type="message">NO_STOPS_WERE_FOUND</result>
+            <result name="multipleStopsFound">/stops/multipleStopsFound</result>
+            <result name="needDefaultSearchLocation">/settings/needDefaultSearchLocation</result>
+        </action>
+
+        <action name="/stop/arrivalsAndDeparturesForStopId" class="org.onebusaway.phone.actions.stops.ArrivalsAndDeparturesForStopIdAction">
+            <result>/stop/arrivalsAndDepartures</result>
+        </action>
+
+        <action name="/stop/arrivalsAndDeparturesForRoute" class="org.onebusaway.phone.actions.stops.ArrivalsAndDeparturesForRouteAction">
+            <result>/stop/arrivalsAndDepartures</result>
+        </action>
+
+        <action name="/stop/bookmark" class="org.onebusaway.phone.actions.bookmarks.BookmarkStopAction">
+            <exception-mapping exception="org.onebusaway.users.services.LocationAlreadyBookmarkedException"
+                result="already_added" />
+            <exception-mapping exception="org.onebusaway.users.services.BookmarksAtCapacityException"
+                result="at_capacity" />
+            <result name="already_added" type="message">BOOKMARK_ALREADY_ADDED</result>
+            <result name="at_capacity" type="message">BOOKMARKS_AT_CAPACITY</result>
+            <result name="preferences_disabled" type="message">BOOKMARK_NOT_ADDED_WHEN_PREFERENCES_DISABLED</result>
+            <result type="message">BOOKMARK_ADDED</result>
+        </action>
+
+        <!-- Search Actions  -->
+
+        <action name="/search/index" class="org.onebusaway.phone.actions.search.IndexAction">
+            <result>/search/index</result>
+            <result name="needsDefaultSearchLocation">/settings/needDefaultSearchLocation</result>
+        </action>
+
+        <action name="/search/route" class="org.onebusaway.phone.actions.search.RouteForNameAction">
+            <result type="chain">/search/stopsForRoute</result>
+            <result type="message" name="input">INVALID_ROUTE_NUMBER</result>
+            <result name="noRoutesFound" type="message">NO_ROUTES_WERE_FOUND</result>
+            <result name="multipleRoutesFound">/search/multipleRoutesFound</result>
+            <result name="needsDefaultSearchLocation">/settings/needDefaultSearchLocation</result>
+        </action>
+
+        <action name="/search/stopsForRoute" class="org.onebusaway.phone.actions.search.StopsForRouteAction">
+            <result>/search/navigation</result>
+            <result name="stopFound">/search/stopFound</result>
+        </action>
+
+        <action name="/search/navigate-to" class="org.onebusaway.phone.actions.search.NavigateToAction">
+            <result name="stopFound">/search/stopFound</result>
+            <result>/search/navigation</result>
+        </action>
+
+        <action name="/search/navigate-down" class="org.onebusaway.phone.actions.search.NavigateDownAction">
+            <result name="stopFound">/search/stopFound</result>
+            <result>/search/navigation</result>
+        </action>
+
+        <action name="/search/stop" class="org.onebusaway.phone.actions.search.StopAction">
+            <result>/search/stopFound</result>
+        </action>
+
+        <!-- Bookmark Actions -->
+
+        <action name="/bookmarks/index" class="org.onebusaway.phone.actions.bookmarks.GetBookmarksAction">
+            <result>/bookmarks/index</result>
+        </action>
+
+        <action name="/bookmarks/manage" class="org.onebusaway.phone.actions.bookmarks.GetBookmarksAction">
+            <result>/bookmarks/manage</result>
+        </action>
+
+        <action name="/bookmarks/deleteByIndex" class="org.onebusaway.phone.actions.bookmarks.DeleteBookmarkAction">
+            <result type="message">BOOKMARK_DELETED</result>
+        </action>
+
+        <!-- User Settings -->
+
+        <action name="/settings/index" class="org.onebusaway.phone.actions.settings.IndexAction">
+            <result>/settings/index</result>
+        </action>
+
+        <action name="/settings/askForDefaultSearchLocation" class="org.onebusaway.phone.actions.settings.AskForDefaultSearchLocationAction">
+            <result>/settings/askForDefaultSearchLocation</result>
+        </action>
+
+        <action name="/settings/setDefaultSearchLocation" class="org.onebusaway.phone.actions.settings.SetDefaultSearchLocationAction">
+            <result>/settings/setDefaultSearchLocation</result>
+        </action>
+
+        <action name="/settings/setRememberPreferences" class="org.onebusaway.phone.actions.settings.SetRememerPreferencesAction">
+            <result type="message">PREFERENCES_SET</result>
+        </action>
+    </package>
+</xwork>
+

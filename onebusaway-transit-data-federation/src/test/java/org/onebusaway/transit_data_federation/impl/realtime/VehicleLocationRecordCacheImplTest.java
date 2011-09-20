@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.realtime;
 
 import static org.junit.Assert.assertEquals;
@@ -19,7 +34,7 @@ import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheRecord;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 
 public class VehicleLocationRecordCacheImplTest {
@@ -37,33 +52,33 @@ public class VehicleLocationRecordCacheImplTest {
     VehicleLocationRecordCacheImpl cache = new VehicleLocationRecordCacheImpl();
     cache.setBlockLocationRecordCacheWindowSize(20);
 
-    List<VehicleLocationCacheRecord> records = cache.getRecordsForBlockInstance(blockInstance);
+    List<VehicleLocationCacheElements> records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(0, records.size());
 
-    VehicleLocationCacheRecord cacheRecord = cache.getRecordForVehicleId(aid("vehicleA"));
+    VehicleLocationCacheElements cacheRecord = cache.getRecordForVehicleId(aid("vehicleA"));
     assertNull(cacheRecord);
 
     cache.addRecord(blockInstance,
-        record(20, "blockA", serviceDate, "vehicleA", 10.0), null);
+        record(20, "blockA", serviceDate, "vehicleA", 10.0), null, null);
 
     records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(1, records.size());
     cacheRecord = records.get(0);
-    VehicleLocationRecord record = cacheRecord.getRecord();
+    VehicleLocationRecord record = cacheRecord.getLastElement().getRecord();
     assertEquals(20, record.getTimeOfRecord());
     assertEquals(blockInstance, cacheRecord.getBlockInstance());
     assertEquals(aid("vehicleA"), record.getVehicleId());
 
-    VehicleLocationCacheRecord cacheRecord2 = cache.getRecordForVehicleId(aid("vehicleA"));
+    VehicleLocationCacheElements cacheRecord2 = cache.getRecordForVehicleId(aid("vehicleA"));
     assertSame(cacheRecord, cacheRecord2);
 
     cache.addRecord(blockInstance,
-        record(30, "blockA", serviceDate, "vehicleA", 20.0), null);
+        record(30, "blockA", serviceDate, "vehicleA", 20.0), null, null);
 
     records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(1, records.size());
     cacheRecord = records.get(0);
-    record = cacheRecord.getRecord();
+    record = cacheRecord.getLastElement().getRecord();
     assertEquals(30, record.getTimeOfRecord());
     assertEquals(blockInstance, cacheRecord.getBlockInstance());
     assertEquals(aid("vehicleA"), record.getVehicleId());
@@ -72,19 +87,19 @@ public class VehicleLocationRecordCacheImplTest {
     assertSame(cacheRecord, cacheRecord2);
 
     cache.addRecord(blockInstance,
-        record(40, "blockA", serviceDate, "vehicleB", 5.0), null);
+        record(40, "blockA", serviceDate, "vehicleB", 5.0), null, null);
 
     records = cache.getRecordsForBlockInstance(blockInstance);
     assertEquals(2, records.size());
 
     cacheRecord = cache.getRecordForVehicleId(aid("vehicleA"));
-    record = cacheRecord.getRecord();
+    record = cacheRecord.getLastElement().getRecord();
     assertEquals(30, record.getTimeOfRecord());
     assertEquals(blockInstance, cacheRecord.getBlockInstance());
     assertEquals(aid("vehicleA"), record.getVehicleId());
 
     cacheRecord = cache.getRecordForVehicleId(aid("vehicleB"));
-    record = cacheRecord.getRecord();
+    record = cacheRecord.getLastElement().getRecord();
     assertEquals(40, record.getTimeOfRecord());
     assertEquals(blockInstance, cacheRecord.getBlockInstance());
     assertEquals(aid("vehicleB"), record.getVehicleId());
@@ -98,7 +113,8 @@ public class VehicleLocationRecordCacheImplTest {
     assertNull(cacheRecord);
 
     cacheRecord = cache.getRecordForVehicleId(aid("vehicleB"));
-    assertEquals(aid("vehicleB"), cacheRecord.getRecord().getVehicleId());
+    assertEquals(aid("vehicleB"),
+        cacheRecord.getLastElement().getRecord().getVehicleId());
   }
 
   @Test
@@ -122,38 +138,40 @@ public class VehicleLocationRecordCacheImplTest {
     cache.setBlockLocationRecordCacheWindowSize(20);
 
     cache.addRecord(instanceA,
-        record(20, "blockA", serviceDate, "vehicleA", 10.0), null);
+        record(20, "blockA", serviceDate, "vehicleA", 10.0), null, null);
 
     Thread.sleep(100);
 
     cache.addRecord(instanceB,
-        record(30, "blockB", serviceDate, "vehicleB", 20.0), null);
+        record(30, "blockB", serviceDate, "vehicleB", 20.0), null, null);
 
     Thread.sleep(100);
 
     cache.addRecord(instanceA,
-        record(40, "blockA", serviceDate, "vehicleC", 20.0), null);
+        record(40, "blockA", serviceDate, "vehicleC", 20.0), null, null);
 
     Thread.sleep(100);
 
     cache.addRecord(instanceB,
-        record(50, "blockB", serviceDate, "vehicleD", 20.0), null);
+        record(50, "blockB", serviceDate, "vehicleD", 20.0), null, null);
 
     cache.clearStaleRecords(System.currentTimeMillis() - 150);
 
-    VehicleLocationCacheRecord cacheRecord = cache.getRecordForVehicleId(aid("vehicleA"));
+    VehicleLocationCacheElements cacheRecord = cache.getRecordForVehicleId(aid("vehicleA"));
     assertNull(cacheRecord);
 
     cacheRecord = cache.getRecordForVehicleId(aid("vehicleB"));
     assertNull(cacheRecord);
 
     cacheRecord = cache.getRecordForVehicleId(aid("vehicleC"));
-    assertEquals(aid("vehicleC"), cacheRecord.getRecord().getVehicleId());
+    assertEquals(aid("vehicleC"),
+        cacheRecord.getLastElement().getRecord().getVehicleId());
 
     cacheRecord = cache.getRecordForVehicleId(aid("vehicleD"));
-    assertEquals(aid("vehicleD"), cacheRecord.getRecord().getVehicleId());
+    assertEquals(aid("vehicleD"),
+        cacheRecord.getLastElement().getRecord().getVehicleId());
 
-    List<VehicleLocationCacheRecord> records = cache.getRecordsForBlockInstance(instanceA);
+    List<VehicleLocationCacheElements> records = cache.getRecordsForBlockInstance(instanceA);
     assertEquals(1, records.size());
 
     records = cache.getRecordsForBlockInstance(instanceB);
@@ -229,14 +247,14 @@ public class VehicleLocationRecordCacheImplTest {
         r.setDistanceAlongBlock(i * 100);
         r.setTimeOfRecord(i * 1000);
 
-        _cache.addRecord(_blockInstance, r, null);
+        _cache.addRecord(_blockInstance, r, null, null);
 
-        List<VehicleLocationCacheRecord> records = _cache.getRecordsForBlockInstance(_blockInstance);
-        VehicleLocationCacheRecord cacheRecord = getCollectionForVehicleId(records);
+        List<VehicleLocationCacheElements> records = _cache.getRecordsForBlockInstance(_blockInstance);
+        VehicleLocationCacheElements cacheRecord = getCollectionForVehicleId(records);
         if (cacheRecord == null)
           fail();
 
-        VehicleLocationRecord record = cacheRecord.getRecord();
+        VehicleLocationRecord record = cacheRecord.getLastElement().getRecord();
 
         assertEquals(i * 1000L, record.getTimeOfRecord());
         assertEquals(_blockInstance, cacheRecord.getBlockInstance());
@@ -246,10 +264,10 @@ public class VehicleLocationRecordCacheImplTest {
       }
     }
 
-    private VehicleLocationCacheRecord getCollectionForVehicleId(
-        List<VehicleLocationCacheRecord> records) {
-      for (VehicleLocationCacheRecord cacheRecord : records) {
-        if (_vehicleId.equals(cacheRecord.getRecord().getVehicleId()))
+    private VehicleLocationCacheElements getCollectionForVehicleId(
+        List<VehicleLocationCacheElements> records) {
+      for (VehicleLocationCacheElements cacheRecord : records) {
+        if (_vehicleId.equals(cacheRecord.getLastElement().getRecord().getVehicleId()))
           return cacheRecord;
       }
       return null;

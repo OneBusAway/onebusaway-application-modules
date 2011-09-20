@@ -1,6 +1,19 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.services.realtime;
-
-import java.util.SortedMap;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -15,6 +28,11 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEn
  * @author bdferris
  */
 public class BlockLocation {
+
+  /**
+   * The time for which the block location was generated
+   */
+  private long time;
 
   /****
    * These are fields that we can supply from schedule data
@@ -34,6 +52,11 @@ public class BlockLocation {
    ****/
 
   private double distanceAlongBlock = Double.NaN;
+
+  /**
+   * Time, in seconds
+   */
+  private int effectiveScheduleTime;
 
   private CoordinatePoint location;
 
@@ -69,9 +92,21 @@ public class BlockLocation {
 
   private double scheduleDeviation = Double.NaN;
 
-  private SortedMap<Integer, Double> scheduleDeviations = null;
+  private ScheduleDeviationSamples scheduleDeviations = null;
 
   private AgencyAndId vehicleId;
+
+  public BlockLocation() {
+
+  }
+
+  public long getTime() {
+    return time;
+  }
+
+  public void setTime(long time) {
+    this.time = time;
+  }
 
   public BlockInstance getBlockInstance() {
     return blockInstance;
@@ -120,6 +155,22 @@ public class BlockLocation {
 
   public void setScheduledDistanceAlongBlock(double scheduledDistanceAlongBlock) {
     this.scheduledDistanceAlongBlock = scheduledDistanceAlongBlock;
+  }
+
+  /**
+   * The effective schedule time measures the progress of the transit vehicle in
+   * serving the underlying schedule.
+   * 
+   * effectiveScheduleTime = currentTime - scheduleDeviation
+   * 
+   * @return time, in seconds
+   */
+  public int getEffectiveScheduleTime() {
+    return effectiveScheduleTime;
+  }
+
+  public void setEffectiveScheduleTime(int effectiveScheduleTime) {
+    this.effectiveScheduleTime = effectiveScheduleTime;
   }
 
   /**
@@ -359,12 +410,11 @@ public class BlockLocation {
     return scheduleDeviations != null && !scheduleDeviations.isEmpty();
   }
 
-  public SortedMap<Integer, Double> getScheduleDeviations() {
+  public ScheduleDeviationSamples getScheduleDeviations() {
     return scheduleDeviations;
   }
 
-  public void setScheduleDeviations(
-      SortedMap<Integer, Double> scheduleDeviations) {
+  public void setScheduleDeviations(ScheduleDeviationSamples scheduleDeviations) {
     this.scheduleDeviations = scheduleDeviations;
   }
 
@@ -380,14 +430,15 @@ public class BlockLocation {
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("BlockLocation(");
-    b.append("block=").append(blockInstance.getBlock().getBlock().getId()).append(",");
+    b.append("block=").append(blockInstance.getBlock().getBlock().getId()).append(
+        ",");
     if (phase != null)
       b.append("phase=").append(phase).append(",");
     if (status != null)
       b.append("status=").append(status).append(",");
     if (isScheduleDeviationSet())
       b.append("scheduleDeviation=").append(scheduleDeviation).append(",");
-    if( predicted )
+    if (predicted)
       b.append("predicted=true,");
     if (isDistanceAlongBlockSet())
       b.append("distanceAlongBlock=").append(distanceAlongBlock).append(",");

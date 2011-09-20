@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.federations.impl;
 
 import java.util.ArrayList;
@@ -6,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +45,9 @@ public class FederatedServiceRegistryImpl implements FederatedServiceRegistry {
 
   private static Logger _log = LoggerFactory.getLogger(FederatedServiceRegistryImpl.class);
 
-  private Map<String, FederatedServiceEntryImpl> _servicesByUrl = new HashMap<String, FederatedServiceEntryImpl>();
+  private ConcurrentMap<String, Boolean> _persistentStatusByUrl = new ConcurrentHashMap<String, Boolean>();
+
+  private ConcurrentMap<String, FederatedServiceEntryImpl> _servicesByUrl = new ConcurrentHashMap<String, FederatedServiceEntryImpl>();
 
   private Map<String, Map<String, FederatedServiceEntryImpl>> _servicesByTypeAndUrl = new HashMap<String, Map<String, FederatedServiceEntryImpl>>();
 
@@ -93,12 +112,15 @@ public class FederatedServiceRegistryImpl implements FederatedServiceRegistry {
     boolean enabled = true;
     if (existing != null) {
       enabled = existing.isEnabled();
+    } else if (_persistentStatusByUrl.containsKey(url)) {
+      enabled = _persistentStatusByUrl.get(url);
     } else {
       String initiallyEnabledValue = properties.get(FederatedServiceRegistryConstants.KEY_INITIALLY_ENABLED);
       if (initiallyEnabledValue != null)
         enabled = Boolean.parseBoolean(initiallyEnabledValue);
     }
     entry.setEnabled(enabled);
+    _persistentStatusByUrl.put(url, enabled);
 
     _servicesByUrl.put(url, entry);
 
@@ -133,6 +155,7 @@ public class FederatedServiceRegistryImpl implements FederatedServiceRegistry {
     FederatedServiceEntryImpl entry = _servicesByUrl.get(url);
     if (entry != null)
       entry.setEnabled(enabled);
+    _persistentStatusByUrl.put(url, enabled);
   }
 
   private synchronized void pruneExpiredServices() {

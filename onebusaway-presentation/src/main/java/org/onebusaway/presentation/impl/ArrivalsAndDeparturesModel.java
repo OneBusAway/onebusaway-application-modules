@@ -1,11 +1,28 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.presentation.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -15,8 +32,10 @@ import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
+import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.users.client.model.UserBean;
 import org.onebusaway.users.services.CurrentUserService;
@@ -58,6 +77,12 @@ public class ArrivalsAndDeparturesModel {
   private boolean _filtered = false;
 
   protected UserBean _user;
+
+  private boolean _onlyNext = false;
+
+  private boolean _showArrivals = false;
+
+  private int _refresh = 60;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -123,6 +148,22 @@ public class ArrivalsAndDeparturesModel {
     _query.setFrequencyMinutesAfter(frequencyMinutesAfter);
   }
 
+  public void setOnlyNext(boolean onlyNext) {
+    _onlyNext = onlyNext;
+  }
+
+  public void setShowArrivals(boolean showArrivals) {
+    _showArrivals = showArrivals;
+  }
+
+  public void setRefresh(int refresh) {
+    _refresh = refresh;
+  }
+
+  public int getRefresh() {
+    return _refresh;
+  }
+
   public boolean isMissingData() {
     return _stopIds == null || _stopIds.isEmpty();
   }
@@ -164,7 +205,7 @@ public class ArrivalsAndDeparturesModel {
   public List<AgencyBean> getAgencies() {
     return _agencies;
   }
-  
+
   /****
    * Private Methods
    ****/
@@ -180,6 +221,12 @@ public class ArrivalsAndDeparturesModel {
 
   private void filterResults() {
 
+    applyRouteFilter();
+    applyArrivalsVsDeparturesFilter();
+    applyOnlyNextFilter();
+  }
+
+  private void applyRouteFilter() {
     if (_routeFilter == null || _routeFilter.isEmpty())
       return;
 
@@ -192,6 +239,57 @@ public class ArrivalsAndDeparturesModel {
     }
 
     _result.setArrivalsAndDepartures(filtered);
+  }
+
+  private void applyArrivalsVsDeparturesFilter() {
+
+    List<ArrivalAndDepartureBean> filtered = new ArrayList<ArrivalAndDepartureBean>();
+
+    for (ArrivalAndDepartureBean bean : _result.getArrivalsAndDepartures()) {
+      if ((_showArrivals && bean.isArrivalEnabled())
+          || (!_showArrivals && bean.isDepartureEnabled()))
+        filtered.add(bean);
+    }
+
+    _result.setArrivalsAndDepartures(filtered);
+  }
+
+  private void applyOnlyNextFilter() {
+
+    if (!_onlyNext)
+      return;
+
+    List<ArrivalAndDepartureBean> current = _result.getArrivalsAndDepartures();
+    Collections.sort(current, SORT_BY_TIME);
+
+    Map<String, ArrivalAndDepartureBean> keepers = new HashMap<String, ArrivalAndDepartureBean>();
+    for (ArrivalAndDepartureBean bean : current) {
+      String key = getRouteKeyForArrivalAndDeparture(bean);
+      if (!keepers.containsKey(key))
+        keepers.put(key, bean);
+    }
+
+    List<ArrivalAndDepartureBean> filtered = new ArrayList<ArrivalAndDepartureBean>(
+        keepers.values());
+    OrderConstraint c = _order == null ? SORT_BY_TIME : _order;
+    Collections.sort(filtered, c);
+
+    _result.setArrivalsAndDepartures(filtered);
+  }
+
+  private String getRouteKeyForArrivalAndDeparture(ArrivalAndDepartureBean bean) {
+    String name = bean.getRouteShortName();
+    if (name != null)
+      return name;
+    TripBean trip = bean.getTrip();
+    name = trip.getRouteShortName();
+    if (name != null)
+      return name;
+    RouteBean route = trip.getRoute();
+    name = route.getShortName();
+    if (name != null)
+      return name;
+    return route.getId();
   }
 
   private void orderResults() {
@@ -240,8 +338,10 @@ public class ArrivalsAndDeparturesModel {
 
   private static class SortByDestination implements OrderConstraint {
     public int compare(ArrivalAndDepartureBean o1, ArrivalAndDepartureBean o2) {
-      String a = StringLibrary.getBestName(o1.getTripHeadsign(), o1.getTrip().getTripHeadsign(),"");
-      String b = StringLibrary.getBestName(o2.getTripHeadsign(), o2.getTrip().getTripHeadsign(),"");
+      String a = StringLibrary.getBestName(o1.getTripHeadsign(),
+          o1.getTrip().getTripHeadsign(), "");
+      String b = StringLibrary.getBestName(o2.getTripHeadsign(),
+          o2.getTrip().getTripHeadsign(), "");
       int i = a.compareTo(b);
       if (i == 0)
         return SORT_BY_TIME.compare(o1, o2);

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+    <!-- RefineViewWidget.ui.xml -->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style type="org.onebusaway.webapp.gwt.stop_and_route_selection.AbstractStopAndRouteSelectionWidget.MyStyle">
+
+        .StopFinderDialog {
+            background-color: white;
+            border: 1px solid black;
+        }
+        
+        .panel {
+            line-height: 1.2em;  
+        }
+        
+        .panel>h3 {
+          margin-top: 1em;
+        }
+        
+        .linkPanel {
+           font-size: 1.2em;
+           margin-top: 1em;
+        }
+        
+        .list {
+          font-size: 1.2em;
+        }
+        
+    </ui:style>
+
+    <g:HTMLPanel addStyleNames="{style.panel}">
+
+        <h2>Stop and Route Selection</h2>
+
+        <p>Did you know that you can:</p>
+
+        <ul>
+            <li>View real-time arrival info for multiple stops at the same time?</li>
+            <li>Pick just the routes you want to see?</li>
+        </ul>
+
+        <p>This page lets you pick and choose stops and routes to create a custom view showing just the information
+            you
+            want to see.</p>
+
+        <h3>Stops</h3>
+
+        <g:FlowPanel ui:field="_stopsPanel" addStyleNames="{style.list}"/>
+
+        <p class="{style.linkPanel}"><g:Anchor ui:field="_addStopAnchor">Add a stop</g:Anchor></p>
+
+        <h3>Routes</h3>
+
+        <g:FlowPanel ui:field="_routesPanel" addStyleNames="{style.list}" />
+        
+        <h3>All set?</h3>
+        
+        <p class="{style.linkPanel}"><g:Anchor ui:field="_showCustomViewAnchor">Click to view your custom stop view</g:Anchor></p>
+
+    </g:HTMLPanel>
+
+</ui:UiBinder>

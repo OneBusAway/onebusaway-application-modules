@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.realtime;
 
 import static org.junit.Assert.assertEquals;
@@ -17,6 +32,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
@@ -83,9 +99,12 @@ public class BlockLocationServiceImplTest {
 
     double epsilon = 0.001;
 
+    TargetTime target = new TargetTime(t(
+        serviceDate, 0, 0), System.currentTimeMillis());
+
     BlockInstance blockInstance = new BlockInstance(blockConfig, serviceDate);
     BlockLocation location = _service.getLocationForBlockInstance(
-        blockInstance, t(serviceDate, 0, 0));
+        blockInstance, target);
 
     assertNull(location);
 
@@ -96,13 +115,14 @@ public class BlockLocationServiceImplTest {
     p.setDistanceAlongBlock(0);
     p.setLocation(new CoordinatePoint(stopA.getStopLat(), stopA.getStopLon()));
     p.setInService(true);
-    
+
     Mockito.when(
         _blockLocationService.getScheduledBlockLocationFromScheduledTime(
             blockConfig, 1800)).thenReturn(p);
 
-    location = _service.getLocationForBlockInstance(blockInstance,
-        t(serviceDate, 0, 30));
+    target = new TargetTime(t(serviceDate, 0, 30), System.currentTimeMillis());
+
+    location = _service.getLocationForBlockInstance(blockInstance, target);
 
     assertTrue(location.isInService());
     assertEquals(blockConfig.getStopTimes().get(0), location.getClosestStop());

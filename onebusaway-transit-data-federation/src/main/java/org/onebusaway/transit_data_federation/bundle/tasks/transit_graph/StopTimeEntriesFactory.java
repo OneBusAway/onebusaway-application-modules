@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import java.util.ArrayList;
@@ -12,12 +27,17 @@ import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
+import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.InvalidStopToShapeMappingException;
+import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.StopIsTooFarFromShapeException;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.InterpolationLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +51,16 @@ public class StopTimeEntriesFactory {
 
   private DistanceAlongShapeLibrary _distanceAlongShapeLibrary;
 
+  private long _invalidStopToShapeMappingExceptionCount;
+
   @Autowired
   public void setDistanceAlongShapeLibrary(
       DistanceAlongShapeLibrary distanceAlongShapeLibrary) {
     _distanceAlongShapeLibrary = distanceAlongShapeLibrary;
+  }
+
+  public long getInvalidStopToShapeMappingExceptionCount() {
+    return _invalidStopToShapeMappingExceptionCount;
   }
 
   public List<StopTimeEntryImpl> processStopTimes(TransitGraphImpl graph,
@@ -53,6 +79,8 @@ public class StopTimeEntriesFactory {
 
     ensureStopTimesHaveShapeDistanceTraveledSet(stopTimeEntries, shapePoints);
     ensureStopTimesHaveTimesSet(stopTimes, stopTimeEntries);
+    
+    
 
     return stopTimeEntries;
   }
@@ -60,7 +88,7 @@ public class StopTimeEntriesFactory {
   private List<StopTimeEntryImpl> createInitialStopTimeEntries(
       TransitGraphImpl graph, List<StopTime> stopTimes) {
 
-    List<StopTimeEntryImpl> stopTimeEntries = new ArrayList<StopTimeEntryImpl>();
+    List<StopTimeEntryImpl> stopTimeEntries = new ArrayList<StopTimeEntryImpl>(stopTimes.size());
     int sequence = 0;
 
     for (StopTime stopTime : stopTimes) {
@@ -94,19 +122,41 @@ public class StopTimeEntriesFactory {
   private void ensureStopTimesHaveShapeDistanceTraveledSet(
       List<StopTimeEntryImpl> stopTimes, ShapePoints shapePoints) {
 
+    boolean distanceTraveledSet = false;
+
     // Do we have shape information?
     if (shapePoints != null) {
 
-      PointAndIndex[] stopTimePoints = _distanceAlongShapeLibrary.getDistancesAlongShape(
-          shapePoints, stopTimes);
-      for (int i = 0; i < stopTimePoints.length; i++) {
-        PointAndIndex pindex = stopTimePoints[i];
-        StopTimeEntryImpl stopTime = stopTimes.get(i);
-        stopTime.setShapePointIndex(pindex.index);
-        stopTime.setShapeDistTraveled(pindex.distanceAlongShape);
-      }
+      try {
+        PointAndIndex[] stopTimePoints = _distanceAlongShapeLibrary.getDistancesAlongShape(
+            shapePoints, stopTimes);
+        for (int i = 0; i < stopTimePoints.length; i++) {
+          PointAndIndex pindex = stopTimePoints[i];
+          StopTimeEntryImpl stopTime = stopTimes.get(i);
+          stopTime.setShapePointIndex(pindex.index);
+          stopTime.setShapeDistTraveled(pindex.distanceAlongShape);
+        }
 
-    } else {
+        distanceTraveledSet = true;
+      } catch (StopIsTooFarFromShapeException ex) {
+        StopTimeEntry stopTime = ex.getStopTime();
+        TripEntry trip = stopTime.getTrip();
+        StopEntry stop = stopTime.getStop();
+        AgencyAndId shapeId = trip.getShapeId();
+        CoordinatePoint point = ex.getPoint();
+        PointAndIndex pindex = ex.getPointAndIndex();
+
+        _log.warn("Stop is too far from shape: trip=" + trip.getId() + " stop="
+            + stop.getId() + " stopLat=" + stop.getStopLat() + " stopLon="
+            + stop.getStopLon() + " shapeId=" + shapeId + " shapePoint="
+            + point + " index=" + pindex.index + " distance="
+            + pindex.distanceFromTarget);
+      } catch (InvalidStopToShapeMappingException ex) {
+        _invalidStopToShapeMappingExceptionCount++;
+      }
+    }
+
+    if (!distanceTraveledSet) {
 
       // Make do without
       double d = 0;
@@ -158,13 +208,8 @@ public class StopTimeEntriesFactory {
         if (duration < 0) {
           throw new IllegalStateException();
         }
-
-        StopEntryImpl fromStopEntry = prevStopTimeEntry.getStop();
-        StopEntryImpl toStopEntry = stopTimeEntry.getStop();
-
-//        fromStopEntry.addNextStopWithMinTravelTime(toStopEntry, duration);
-//        toStopEntry.addPreviousStopWithMinTravelTime(fromStopEntry, duration);
       }
+
       prevStopTimeEntry = stopTimeEntry;
 
       sequence++;

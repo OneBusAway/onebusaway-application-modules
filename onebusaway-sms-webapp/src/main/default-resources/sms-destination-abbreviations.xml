@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<text-modifications>
+    <replacement from="Seattle, " to="" />
+    <replacement from="Ballard - Adams" to="Ballard" />
+    <replacement from="Ballard - Loyal Heights" to="Ballard" />
+    <replacement from="Ballard - Sunset Hill" to="Ballard" />
+    <replacement from="Beacon Hill - South Beacon Hill" to="BeaconHill" />
+    <replacement from="Belltown" to="Belltown" />
+    <replacement from="Bitter Lake" to="BitterLk" />
+    <replacement from="Black Diamond" to="BlckDmnd" />
+    <replacement from="Boeing Everett" to="BoeingEvrtt" />
+    <replacement from="Capitol Hill - Broadway" to="CapitolHill" />
+    <replacement from="Capitol Hill - Madison Park" to="CapitolHill" />
+    <replacement from="Capitol Hill - Stevens" to="CapitolHill" />
+    <replacement from="Central District - Atlantic" to="CentralDst" />
+    <replacement from="Central District - Madrona" to="Madrona" />
+    <replacement from="Central District - Mann" to="CentralDst" />
+    <replacement from="Central District - Minor" to="CentralDst" />
+    <replacement from="Crown Hill" to="CrownHill" />
+    <replacement from="Delridge - Highland Park" to="Delridge" />
+    <replacement from="Delridge - Roxhill" to="Delridge" />
+    <replacement from="Downtown" to="Dwntwn" />
+    <replacement from="Fauntleroy Ferry Dock" to="FauntFerry" />
+    <replacement from="Federal Way" to="FedWay" />
+    <replacement from="First Hill" to="FirstHill" />
+    <replacement from="Fremont" to="Fremont" />
+    <replacement from="Georgetown" to="Georgetown" />
+    <replacement from="Green Lake" to="GreenLk" />
+    <replacement from="Greenwood" to="Greenwood" />
+    <replacement from="Harbor Island" to="HarborIsland" />
+    <replacement from="International District" to="IDist" />
+    <replacement from="Jackson Park" to="JacksonPrk" />
+    <replacement from="Lake City - Cedar Park" to="LkCty" />
+    <replacement from="Lake City - Olympic Hills" to="LkCty" />
+    <replacement from="Lake Forest Park" to="LkFrstPrk" />
+    <replacement from="Laurelhurst" to="Laurelhurst" />
+    <replacement from="Magnolia - Briarcliff" to="Magnolia" />
+    <replacement from="Magnolia - Lawton Park" to="Magnolia" />
+    <replacement from="Magnolia - Southeast Magnolia" to="Magnolia" />
+    <replacement from="Mercer Island" to="MercerIslnd" />
+    <replacement from="Mountlake Terrace" to="MntlkTerrace" />
+    <replacement from="North Beach/Blue Ridge" to="NBch/BlRdg" />
+    <replacement from="North Bend" to="NBend" />
+    <replacement from="Northgate - Haller Lake" to="NGate" />
+    <replacement from="Northgate - Maple Leaf" to="Northgate" />
+    <replacement from="Northgate - Pinehurst" to="Northgate" />
+    <replacement from="Pioneer Square" to="PioneerSq" />
+    <replacement from="Queen Anne" to="QueenAnne" />
+    <replacement from="Rainier Valley - Columbia City" to="RainierVal" />
+    <replacement from="Rainier Valley - Dunlap" to="RainierVal" />
+    <replacement from="Rainier Valley - Mount Baker" to="MtBaker" />
+    <replacement from="Rainier Valley - Rainier Beach" to="RainierVal" />
+    <replacement from="Rainier Valley - Rainier View" to="RainierVal" />
+    <replacement from="Ravenna" to="Ravenna" />
+    <replacement from="Roosevelt" to="Roosevelt" />
+    <replacement from="Sand Point" to="SandPt" />
+    <replacement from="Seacrest Dock" to="SeacrestDk" />
+    <replacement from="South Lake Union" to="SLU" />
+    <replacement from="South of Downtown" to="SODO" />
+    <replacement from="South of Downtown - Seacrest Dock" to="SODO" />
+    <replacement from="Star Lake" to="StarLk" />
+    <replacement from="University District" to="UDist" />
+    <replacement from="Wedgwood" to="Wedgewood" />
+    <replacement from="West Alki" to="WSeattle" />
+    <replacement from="West Arbor Heights" to="WSeattle" />
+    <replacement from="West Fairmount Park" to="WSeattle" />
+    <replacement from="West Fauntleroy" to="WSeattle" />
+    <replacement from="West Genesee" to="WSeattle" />
+    <replacement from="West North Admiral" to="WSeattle" />
+    <replacement from="White Center" to="WhiteCntr" />
+    <replacement from="Vashon Island" to="VashonIsland" />
+    <replacement from="Yesler Terrace" to="YeslerTerrace" />
+    <replacement from=" " to="" />
+</text-modifications>

@@ -1,8 +1,25 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 /**
  * Methods for determining which {@link BlockInstance} instances are active for
@@ -29,11 +46,17 @@ public interface BlockCalendarService {
    */
   public BlockInstance getBlockInstance(AgencyAndId blockId, long serviceDate);
 
+  public BlockTripEntry getTargetBlockTrip(BlockInstance blockInstance,
+      TripEntry trip);
+
   public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
       long timeFrom, long timeTo);
 
   public List<BlockInstance> getClosestActiveBlocks(AgencyAndId blockId,
       long time);
+
+  public List<BlockInstance> getActiveBlocksInTimeRange(long timeFrom,
+      long timeTo);
 
   public List<BlockInstance> getActiveBlocksForAgencyInTimeRange(
       String agencyId, long timeFrom, long timeTo);
@@ -43,6 +66,7 @@ public interface BlockCalendarService {
 
   public List<BlockInstance> getActiveBlocksInTimeRange(
       Iterable<BlockTripIndex> indices,
-      Iterable<BlockLayoverIndex> layoverIndices, Iterable<FrequencyBlockTripIndex> frequencyIndices,
-      long timeFrom, long timeTo);
+      Iterable<BlockLayoverIndex> layoverIndices,
+      Iterable<FrequencyBlockTripIndex> frequencyIndices, long timeFrom,
+      long timeTo);
 }

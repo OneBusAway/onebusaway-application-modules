@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
@@ -12,6 +27,7 @@ import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
+import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.StopTimeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -22,6 +38,8 @@ import org.onebusaway.transit_data_federation.services.beans.StopTimeBeanService
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
+import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -42,6 +60,8 @@ public class BlockBeanServiceImpl implements BlockBeanService {
   private StopTimeBeanService _stopTimeBeanService;
 
   private BlockCalendarService _blockCalendarService;
+
+  private ScheduledBlockLocationService _scheduledBlockLocationService;
 
   private AgencyService _agencyService;
 
@@ -64,7 +84,13 @@ public class BlockBeanServiceImpl implements BlockBeanService {
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
   }
-  
+
+  @Autowired
+  public void setScheduledBlockLocationService(
+      ScheduledBlockLocationService scheduledBlockLocationService) {
+    _scheduledBlockLocationService = scheduledBlockLocationService;
+  }
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
@@ -128,6 +154,25 @@ public class BlockBeanServiceImpl implements BlockBeanService {
     return getBlockInstanceAsBean(blockInstance);
   }
 
+  @Override
+  public ScheduledBlockLocationBean getScheduledBlockLocationFromScheduledTime(
+      AgencyAndId blockId, long serviceDate, int scheduledTime) {
+
+    BlockInstance blockInstance = _blockCalendarService.getBlockInstance(
+        blockId, serviceDate);
+
+    if (blockInstance == null)
+      return null;
+
+    ScheduledBlockLocation blockLocation = _scheduledBlockLocationService.getScheduledBlockLocationFromScheduledTime(
+        blockInstance.getBlock(), scheduledTime);
+
+    if (blockLocation == null)
+      return null;
+
+    return getBlockLocationAsBean(blockLocation);
+  }
+
   /****
    * Private Methods
    ****/
@@ -148,6 +193,26 @@ public class BlockBeanServiceImpl implements BlockBeanService {
           serviceDate, blockInstance.getFrequency());
       bean.setFrequency(frequency);
     }
+
+    return bean;
+  }
+
+  private ScheduledBlockLocationBean getBlockLocationAsBean(
+      ScheduledBlockLocation blockLocation) {
+
+    ScheduledBlockLocationBean bean = new ScheduledBlockLocationBean();
+
+    if (blockLocation.getActiveTrip() != null) {
+      BlockTripBean activeTrip = getBlockTripAsBean(blockLocation.getActiveTrip());
+      bean.setActiveTrip(activeTrip);
+    }
+
+    bean.setDistanceAlongBlock(blockLocation.getDistanceAlongBlock());
+
+    bean.setInService(blockLocation.isInService());
+    bean.setLocation(blockLocation.getLocation());
+    bean.setScheduledTime(blockLocation.getScheduledTime());
+    bean.setStopTimeIndex(blockLocation.getStopTimeIndex());
 
     return bean;
   }
@@ -175,7 +240,7 @@ public class BlockBeanServiceImpl implements BlockBeanService {
     for (BlockTripEntry blockTrip : blockConfiguration.getTrips())
       tripBeans.add(getBlockTripAsBean(blockTrip));
     bean.setTrips(tripBeans);
-    
+
     TimeZone tz = _agencyService.getTimeZoneForAgencyId(blockId.getAgencyId());
     bean.setTimeZone(tz.getID());
 

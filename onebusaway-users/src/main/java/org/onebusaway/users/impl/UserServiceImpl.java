@@ -1,10 +1,31 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.users.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.container.cache.CacheableArgument;
@@ -24,6 +45,8 @@ import org.onebusaway.users.services.UserPropertiesService;
 import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.providers.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -31,6 +54,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class UserServiceImpl implements UserService {
+
+  private Logger _log = LoggerFactory.getLogger(UserServiceImpl.class);
 
   private UserDao _userDao;
 
@@ -43,6 +68,8 @@ public class UserServiceImpl implements UserService {
   private UserIndexRegistrationService _userIndexRegistrationService;
 
   private PasswordEncoder _passwordEncoder;
+
+  private ExecutorService _executors;
 
   @Autowired
   public void setUserDao(UserDao dao) {
@@ -70,6 +97,16 @@ public class UserServiceImpl implements UserService {
   @Autowired
   public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
     _passwordEncoder = passwordEncoder;
+  }
+
+  @PostConstruct
+  public void start() {
+    _executors = Executors.newSingleThreadExecutor();
+  }
+
+  @PreDestroy
+  public void stop() {
+    _executors.shutdownNow();
   }
 
   /****
@@ -285,12 +322,14 @@ public class UserServiceImpl implements UserService {
   @Override
   public void setPasswordForUsernameUserIndex(UserIndex userIndex,
       String password) {
-    
+
     UserIndexKey id = userIndex.getId();
-    if( ! UserIndexTypes.USERNAME.equals(id.getType()))
-      throw new IllegalArgumentException("expected UserIndex of type " + UserIndexTypes.USERNAME);
-    
-    String credentials = _passwordEncoder.encodePassword(password, id.getValue());
+    if (!UserIndexTypes.USERNAME.equals(id.getType()))
+      throw new IllegalArgumentException("expected UserIndex of type "
+          + UserIndexTypes.USERNAME);
+
+    String credentials = _passwordEncoder.encodePassword(password,
+        id.getValue());
     setCredentialsForUserIndex(userIndex, credentials);
   }
 
@@ -402,6 +441,14 @@ public class UserServiceImpl implements UserService {
     return _userPropertiesMigration.getUserPropertiesBulkMigrationStatus();
   }
 
+  @Override
+  public void deleteStaleUsers() {
+    Calendar c = Calendar.getInstance();
+    c.add(Calendar.MONTH, -1);
+    Date lastAccessTime = c.getTime();
+    _executors.submit(new DeleteStaleUsersTask(lastAccessTime));
+  }
+
   /****
    * Private Methods
    ****/
@@ -435,5 +482,36 @@ public class UserServiceImpl implements UserService {
     User user = userIndex.getUser();
     UserBean bean = getUserAsBean(user);
     return bean.getMinApiRequestInterval();
+  }
+
+  private boolean deleteStaleUsers(Date lastAccessTime) {
+
+    List<Integer> userIds = _userDao.getStaleUserIdsInRange(lastAccessTime, 0,
+        100);
+
+    for (int userId : userIds) {
+      User user = _userDao.getUserForId(userId);
+      if (user != null)
+        _userDao.deleteUser(user);
+    }
+
+    return !userIds.isEmpty();
+  }
+
+  private class DeleteStaleUsersTask implements Runnable {
+
+    private Date _lastAccessTime;
+
+    public DeleteStaleUsersTask(Date lastAccessTime) {
+      _lastAccessTime = lastAccessTime;
+    }
+
+    @Override
+    public void run() {
+      if (deleteStaleUsers(_lastAccessTime))
+        deleteStaleUsers();
+      else
+        _log.info("no more stale users to delete");
+    }
   }
 }

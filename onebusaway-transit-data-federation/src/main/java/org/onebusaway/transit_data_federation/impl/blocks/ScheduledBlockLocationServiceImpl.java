@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.blocks;
 
 import java.util.List;
@@ -8,6 +23,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.shapes.DistanceTraveledShapePointIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndOrientation;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointIndex;
+import org.onebusaway.transit_data_federation.impl.time.GenericBinarySearch;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocationService;
@@ -49,7 +65,7 @@ class ScheduledBlockLocationServiceImpl implements
     int n = stopTimes.size();
 
     int stopTimeIndex = GenericBinarySearch.search(blockConfig, n,
-        distanceAlongBlock, BlockConfigDistanceAlongBlockIndexAdapter.INSTANCE);
+        distanceAlongBlock, IndexAdapters.BLOCK_CONFIG_DISTANCE_INSTANCE);
 
     return getScheduledBlockLocationFromDistanceAlongBlockAndStopTimeIndex(
         stopTimes, distanceAlongBlock, stopTimeIndex);
@@ -80,7 +96,7 @@ class ScheduledBlockLocationServiceImpl implements
 
     int stopTimeIndex = GenericBinarySearch.searchRange(blockConfig, indexFrom,
         indexTo, distanceAlongBlock,
-        BlockConfigDistanceAlongBlockIndexAdapter.INSTANCE);
+        IndexAdapters.BLOCK_CONFIG_DISTANCE_INSTANCE);
 
     return getScheduledBlockLocationFromDistanceAlongBlockAndStopTimeIndex(
         stopTimes, distanceAlongBlock, stopTimeIndex);
@@ -93,7 +109,7 @@ class ScheduledBlockLocationServiceImpl implements
     List<BlockStopTimeEntry> stopTimes = blockConfig.getStopTimes();
     int n = stopTimes.size();
     int index = GenericBinarySearch.search(blockConfig, n, scheduleTime,
-        BlockConfigDepartureTimeIndexAdapter.INSTANCE);
+        IndexAdapters.BLOCK_STOP_TIME_DEPARTURE_INSTANCE);
 
     return getScheduledBlockLocationFromScheduleTimeAndStopTimeIndex(stopTimes,
         scheduleTime, index);

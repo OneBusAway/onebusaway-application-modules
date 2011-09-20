@@ -1,0 +1,164 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@sprite .ViewController {
+	gwt-image: "backgroundImage";
+	height: 100%;
+	width: 100%;
+	border-collapse: collapse;
+	padding: 0;
+	margin: 0;
+	border: 0;	
+}
+
+.NavigationController {
+	
+}
+
+.NavigationControllerNavigationBar {
+	height: 30px;	
+}
+
+.TabBarController {
+	width: 100%;
+	height: 100%;
+}
+
+.TabBarControllerContent {
+	width: 100%;
+	height: 100%;
+}
+
+.TabBarControllerTabBar {
+	height: 50px;	
+}
+
+.TabBar {
+	width: 100%;
+	height: 100%;
+	background-color: #242424;
+}
+
+.TabBarItem {
+	margin-top: 5px;
+	cursor: pointer;
+	text-align: center;
+	color: white;
+}
+
+.TabBarItemNoImage {
+  width: 20px;
+  height: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  border: 1px dashed white;
+}
+
+.TabBarItemNoName {
+
+}
+
+.ListViewController { 
+
+}
+
+.ListViewSection {
+	margin: 10px 10px 10px 10px;
+}
+
+.ListViewRow {
+	padding:10px 30px 10px 10px;
+	border: 1px solid #A5A5A5;
+	background-color: #ffffff;
+	margin-bottom: -1;
+}
+
+.ListViewRowFirst {
+	\-moz-border-radius-topleft: 4px;
+	\-moz-border-radius-topright: 4px;
+	\-webkit-border-top-left-radius: 4px;
+	\-webkit-border-top-right-radius: 4px;
+}
+
+.ListViewRowLast {
+	\-moz-border-radius-bottomleft: 4px;
+	\-moz-border-radius-bottomright: 4px;
+	\-webkit-border-top-bottom-radius: 4px;
+	\-webkit-border-top-bottom-radius: 4px;	
+}
+
+.ListViewRowText {
+
+}
+
+.ListViewRowDetailText {
+	font-size: 0.8em;
+}
+
+@sprite .NavigationBar {
+	gwt-image: "NavigationBarBackgroundImage"; 
+	width: 100%;
+	height: 40px;
+}
+
+.NavigationBarLeftItem {
+	padding-left: 5px;
+	width: 20%;
+}
+
+.NavigationBarCenterItem {
+	width: 60%;
+	color: white;
+	font-weight: bold;
+	font-size: 1.2em;
+}
+
+.NavigationBarRightItem {
+	width: 20%;
+	padding-right: 5px;
+}
+
+.NavigationBarButton {	
+	border-collapse: collapse;
+}
+
+@sprite .NavigationBarButtonLeftArrow {
+	gwt-image: "NavigationBarButtonLeftArrowImage";
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+@sprite .NavigationBarButtonLeftRounded {
+	gwt-image: "NavigationBarButtonLeftRoundedImage";
+	padding-left: 0px;
+	padding-right: 0px;
+}
+  
+@sprite .NavigationBarButtonCenter {
+	gwt-image: "NavigationBarButtonBackgroundImage";
+	height: 30px;
+	text-align: center;
+	color: white;
+	padding-left: 4px;
+	padding-right: 4px;
+}
+
+@sprite .NavigationBarButtonRightRounded {
+	gwt-image: "NavigationBarButtonRightRoundedImage";
+	padding-left: 0px;
+	padding-right: 0px;
+}

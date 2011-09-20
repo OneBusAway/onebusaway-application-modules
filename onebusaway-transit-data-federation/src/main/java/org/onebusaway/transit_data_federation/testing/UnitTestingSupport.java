@@ -1,3 +1,19 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.testing;
 
 import java.text.DateFormat;
@@ -19,27 +35,34 @@ import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
-import org.onebusaway.transit_data_federation.bundle.tasks.block_indices.BlockIndicesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
+import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl.Builder;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockStopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockTripEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.RouteCollectionEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.services.blocks.BlockIndexFactoryService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 
 public class UnitTestingSupport {
 
@@ -111,8 +134,46 @@ public class UnitTestingSupport {
    * Entity Factory Methods
    ****/
 
+  public static AgencyEntryImpl agency(String id) {
+    AgencyEntryImpl agency = new AgencyEntryImpl();
+    agency.setId(id);
+    return agency;
+  }
+  
+  public static RouteEntryImpl route(String id) {
+    RouteEntryImpl route = new RouteEntryImpl();
+    route.setId(aid(id));
+    return route;
+  }
+
+  public static RouteCollectionEntryImpl routeCollection(String id,
+      RouteEntry... routes) {
+    RouteCollectionEntryImpl route = new RouteCollectionEntryImpl();
+    route.setId(aid(id));
+    route.setChildren(Arrays.asList(routes));
+    for (RouteEntry routeEntry : routes) {
+      ((RouteEntryImpl) routeEntry).setParent(route);
+    }
+    return route;
+  }
+
   public static StopEntryImpl stop(String id, double lat, double lon) {
     return new StopEntryImpl(aid(id), lat, lon);
+  }
+
+  public static void addTransfer(StopEntryImpl from, StopEntryImpl to) {
+
+    double distance = SphericalGeometryLibrary.distance(from.getStopLocation(),
+        to.getStopLocation());
+    StopTransfer transfer = new StopTransfer(to, 0, distance);
+
+    List<StopTransfer> transfers = new ArrayList<StopTransfer>();
+    StopTransfers existing = from.getTransfers();
+    if (existing != null && existing.getTransfersFromStop() != null)
+      transfers.addAll(existing.getTransfersFromStop());
+    transfers.add(transfer);
+    existing = new StopTransfers(transfers, null);
+    from.setTransfers(existing);
   }
 
   public static BlockEntryImpl block(String id) {
@@ -223,7 +284,7 @@ public class UnitTestingSupport {
     List<BlockEntry> list = new ArrayList<BlockEntry>();
     for (BlockEntryImpl block : blocks)
       list.add(block);
-    BlockIndicesFactory factory = new BlockIndicesFactory();
+    BlockIndexFactoryService factory = new BlockIndexFactoryServiceImpl();
     return factory.createTripIndices(list);
   }
 
@@ -236,7 +297,7 @@ public class UnitTestingSupport {
       stopTimes = new ArrayList<StopTimeEntry>();
       trip.setStopTimes(stopTimes);
     }
-    
+
     int sequence = stopTimes.size();
 
     if (!stopTimes.isEmpty()) {
@@ -290,7 +351,17 @@ public class UnitTestingSupport {
     builder.setServiceIds(serviceIds);
     builder.setTrips(Arrays.asList(trips));
     builder.setTripGapDistances(new double[trips.length]);
-    return builder.create();
+    BlockConfigurationEntry blockConfig = builder.create();
+
+    BlockEntryImpl blockImpl = (BlockEntryImpl) block;
+    List<BlockConfigurationEntry> configs = block.getConfigurations();
+    if (configs == null) {
+      configs = new ArrayList<BlockConfigurationEntry>();
+      blockImpl.setConfigurations(configs);
+    }
+    configs.add(blockConfig);
+
+    return blockConfig;
   }
 
   public static BlockTripEntryImpl blockTrip(
@@ -303,7 +374,7 @@ public class UnitTestingSupport {
 
   public static BlockStopTimeEntryImpl blockStopTime(StopTimeEntry stopTime,
       int blockSequence, BlockTripEntry trip) {
-    return new BlockStopTimeEntryImpl(stopTime, blockSequence, trip);
+    return new BlockStopTimeEntryImpl(stopTime, blockSequence, trip, true);
   }
 
   public static LocalizedServiceId lsid(String id) {

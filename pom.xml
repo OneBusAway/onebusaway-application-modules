@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.0.7</version>
+    <version>1.1.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.onebusaway</groupId>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>2.0.5-SNAPSHOT</version>
+  <version>0.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -16,76 +17,45 @@
   <!-- Common Software Dependency Versions -->
   <properties>
     <struts-version>2.1.8.1</struts-version>
-    <spring-version>3.0.3.RELEASE</spring-version>
     <gwt-version>2.1.0</gwt-version>
-    <gtfs-version>1.1.9</gtfs-version>
-    <onebusaway-siri-version>0.0.3</onebusaway-siri-version>
+    <spring-version>3.0.3.RELEASE</spring-version>
+    <csv-entities-version>1.0.2-SNAPSHOT</csv-entities-version>
+    <gtfs-version>1.2.4</gtfs-version>
+    <onebusaway-siri-version>1.0.2</onebusaway-siri-version>
+    <opentripplanner-version>0.4.1</opentripplanner-version>
   </properties>
 
   <repositories>
     <repository>
-      <id>releases.developer.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/maven/repository/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>snapshots.developer.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/maven/snapshot-repository/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>caucho</id>
-      <url>http://caucho.com/m2</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
+      <id>public.onebusaway.org</id>
+      <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
-      <id>releases.developer.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/maven/repository/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>snapshots.developer.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/maven/snapshot-repository/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
+      <id>public.onebusaway.org</id>
+      <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </pluginRepository>
   </pluginRepositories>
 
   <scm>
-    <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/branches/onebusaway-application-modules-0.0.x</connection>
-    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/branches/onebusaway-application-modules-0.0.x</developerConnection>
-    <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/branches/onebusaway-application-modules-0.0.x</url>
+    <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</connection>
+    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</developerConnection>
+    <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/trunk</url>
   </scm>
 
+  <distributionManagement>
+    <!-- Even though we specify this in the parent pom, we need to specify it here to have full control over the url -->
+    <site>
+      <id>${site_id}</id>
+      <url>${site_url}</url>
+    </site>
+  </distributionManagement>
+
   <modules>
-    <module>onebusaway-cli</module>
+    <module>onebusaway-api-core</module>
+    <module>onebusaway-api-webapp</module>
     <module>onebusaway-container</module>
     <module>onebusaway-core</module>
     <module>onebusaway-federations</module>
@@ -93,12 +63,17 @@
     <module>onebusaway-geocoder</module>
     <module>onebusaway-geospatial</module>
     <module>onebusaway-gtfs-hibernate-spring</module>
+    <module>onebusaway-gwt-common</module>
+    <module>onebusaway-phone</module>
+    <module>onebusaway-phone-webapp</module>
     <module>onebusaway-presentation</module>
+    <module>onebusaway-sms-webapp</module>
     <module>onebusaway-realtime-api</module>
     <module>onebusaway-transit-data</module>
     <module>onebusaway-transit-data-federation</module>
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
+    <module>onebusaway-webapp</module>
   </modules>
 
   <!-- This is where we control the master dependency version used by all modules -->
@@ -108,8 +83,15 @@
       <dependency>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-collections</artifactId>
-        <version>1.1.1</version>
+        <version>1.1.2-SNAPSHOT</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.onebusaway</groupId>
+        <artifactId>onebusaway-csv-entities</artifactId>
+        <version>${csv-entities-version}</version>
+      </dependency>
+
       <dependency>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-gtfs</artifactId>
@@ -120,22 +102,34 @@
         <artifactId>onebusaway-gtfs-hibernate</artifactId>
         <version>${gtfs-version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.onebusaway</groupId>
-        <artifactId>onebusaway-gtfs-hibernate-spring</artifactId>
-        <version>0.0.4</version>
-      </dependency>
 
       <dependency>
         <groupId>org.hsqldb</groupId>
         <artifactId>hsqldb</artifactId>
         <version>2.0.0</version>
       </dependency>
+
+      <dependency>
+        <groupId>commons-beanutils</groupId>
+        <artifactId>commons-beanutils</artifactId>
+        <version>1.8.0</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>3.2</version>
+      </dependency>
       <dependency>
         <groupId>commons-dbcp</groupId>
         <artifactId>commons-dbcp</artifactId>
         <version>1.2.2</version>
       </dependency>
+      <dependency>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.6</version>
+      </dependency>
+
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-core</artifactId>
@@ -210,6 +204,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.vividsolutions</groupId>
+        <artifactId>jts</artifactId>
+        <version>1.10</version>
+      </dependency>
+
+      <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>2.4</version>
@@ -266,7 +266,7 @@
 
       <dependency>
         <groupId>com.caucho</groupId>
-        <artifactId>resin-hessian</artifactId>
+        <artifactId>hessian</artifactId>
         <version>3.1.6</version>
       </dependency>
 
@@ -306,77 +306,6 @@
     <!-- This is where we control the master plugin version used by all modules -->
     <pluginManagement>
       <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-clean-plugin</artifactId>
-          <version>2.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.0.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.1</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.4</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-gpg-plugin</artifactId>
-          <version>1.0</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-install-plugin</artifactId>
-          <version>2.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.5</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>2.4.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-site-plugin</artifactId>
-          <version>2.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-shade-plugin</artifactId>
-          <version>1.2.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>2.0.4</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-war-plugin</artifactId>
-          <version>2.1.1</version>
-        </plugin>
-
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -422,6 +351,11 @@
           <artifactId>selenium-maven-plugin</artifactId>
           <version>1.0.1</version>
         </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>gwt-maven-plugin</artifactId>
+          <version>2.1.0-1</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -440,7 +374,6 @@
                 <requireJavaVersion>
                   <version>1.6</version>
                 </requireJavaVersion>
-                <requirePluginVersions />
                 <requireReleaseDeps>
                   <onlyWhenRelease>true</onlyWhenRelease>
                 </requireReleaseDeps>
@@ -449,9 +382,39 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <configuration>
+          <reportPlugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-project-info-reports-plugin</artifactId>
+              <version>2.3.1</version>
+              <reportSets>
+                <reportSet>
+                  <reports>
+                    <report>project-team</report>
+                    <report>mailing-list</report>
+                    <report>cim</report>
+                    <report>issue-tracking</report>
+                    <report>license</report>
+                    <report>scm</report>
+                    <report>summary</report>
+                  </reports>
+                </reportSet>
+              </reportSets>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
+          </reportPlugins>
+        </configuration>
+      </plugin>
       <!-- By default, we use the gwt-maven-plugin to detect any GWT modules and copy the .java source files as resources 
         into the compiled output -->
-      <!--plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <executions>
@@ -461,15 +424,54 @@
             </goals>
           </execution>
         </executions>
-      </plugin-->
+      </plugin>
+      <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <version>1.10.b1</version>
+        <configuration>
+          <header>src/license/header.txt</header>
+          <excludes>
+            <exclude>src/site/**</exclude>
+            <exclude>LICENSE.txt</exclude>
+            <exclude>**/usage.txt</exclude>
+            <exclude>**/log4j.properties</exclude>
+            <exclude>**/data-sources.xml</exclude>
+            <exclude>**/*.action</exclude>
+            <exclude>**/*.ai</exclude>
+            <exclude>**/*.tagx</exclude>
+            <exclude>**/*.swf</exclude>
+            <exclude>**/*.mp3</exclude>
+            <exclude>**/*.wav</exclude>
+            <exclude>src/test/resources/**</exclude>
+            <exclude>onebusaway-transit-data-federation/src/test/resources/**</exclude>
+            <!-- JQuery Excludes -->
+            <exclude>**/jquery*.js</exclude>
+            <exclude>**/jquery*.css</exclude>
+            <!-- GWT Excludes -->
+            <exclude>**/*.gwt.rpc</exclude>
+            <exclude>**.nocache.js</exclude>
+            <exclude>**/hosted.html</exclude>
+          </excludes>
+          <strictCheck>true</strictCheck>
+          <aggregate>true</aggregate>
+          <headerSections>
+            <headerSection>
+              <key>COPYRIGHT_SECTION</key>
+              <defaultValue>Copyright (C) 2011 Brian Ferris &lt;bdferris@onebusaway.org&gt;</defaultValue>
+              <ensureMatch>Copyright \(C\) \d{4} .+</ensureMatch>
+            </headerSection>
+          </headerSections>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh</artifactId>
-        <version>1.0-beta-7</version>
-      </extension>
-    </extensions>
   </build>
 
 </project>

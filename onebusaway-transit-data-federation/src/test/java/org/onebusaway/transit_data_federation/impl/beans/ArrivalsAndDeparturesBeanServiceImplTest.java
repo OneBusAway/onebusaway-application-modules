@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import static org.junit.Assert.assertEquals;
@@ -15,7 +30,6 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -30,27 +44,28 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative;
 import org.onebusaway.transit_data_federation.model.narrative.StopTimeNarrative.Builder;
-import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureService;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
+import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
-import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeInstance;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 
 public class ArrivalsAndDeparturesBeanServiceImplTest {
 
+  private TransitGraphDao _transitGraphDao;
   private ArrivalsAndDeparturesBeanServiceImpl _service;
-  private BlockLocationService _blockLocationService;
   private NarrativeService _narrativeService;
-  private StopTimeService _stopTimeService;
+  private ArrivalAndDepartureService _arrivalAndDepartureService;
   private TripBeanService _tripBeanService;
   private StopBeanService _stopBeanService;
   private TripDetailsBeanService _tripDetailsBeanService;
@@ -61,24 +76,24 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     _service = new ArrivalsAndDeparturesBeanServiceImpl();
 
-    _blockLocationService = Mockito.mock(BlockLocationService.class);
-    _service.setBlockLocationService(_blockLocationService);
+    _transitGraphDao = Mockito.mock(TransitGraphDao.class);
+    _service.setTransitGraphDao(_transitGraphDao);
+
+    _arrivalAndDepartureService = Mockito.mock(ArrivalAndDepartureService.class);
+    _service.setArrivalAndDepartureService(_arrivalAndDepartureService);
 
     _narrativeService = Mockito.mock(NarrativeService.class);
     _service.setNarrativeService(_narrativeService);
 
-    _stopTimeService = Mockito.mock(StopTimeService.class);
-    _service.setStopTimeService(_stopTimeService);
-
     _tripBeanService = Mockito.mock(TripBeanService.class);
     _service.setTripBeanService(_tripBeanService);
-    
+
     _stopBeanService = Mockito.mock(StopBeanService.class);
     _service.setStopBeanService(_stopBeanService);
 
     _tripDetailsBeanService = Mockito.mock(TripDetailsBeanService.class);
     _service.setTripDetailsBeanService(_tripDetailsBeanService);
-    
+
     _serviceAlertsBeanService = Mockito.mock(ServiceAlertsBeanService.class);
     _service.setServiceAlertsBeanService(_serviceAlertsBeanService);
   }
@@ -93,6 +108,11 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
 
     StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
     StopEntryImpl stopB = stop("stopB", 47.0, -122.0);
+
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopA.getId(),true)).thenReturn(
+        stopA);
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopB.getId(),true)).thenReturn(
+        stopB);
 
     /****
      * Block A
@@ -130,44 +150,21 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
      * 
      ****/
 
-    int expandedMinutesBefore = ArrivalsAndDeparturesBeanServiceImpl.MINUTES_BEFORE_BUFFER
-        + minutesBefore;
-    int expandedMinutesAfter = ArrivalsAndDeparturesBeanServiceImpl.MINUTES_AFTER_BUFFER
-        + minutesAfter;
-
-    Date stopTimeFrom = new Date(t - expandedMinutesBefore * 60 * 1000);
-    Date stopTimeTo = new Date(t + expandedMinutesAfter * 60 * 1000);
-
-    StopTimeInstance sti1 = new StopTimeInstance(bstAB, serviceDate);
-    StopTimeInstance sti2 = new StopTimeInstance(bstBB, serviceDate);
-
-    Mockito.when(
-        _stopTimeService.getStopTimeInstancesInTimeRange(stopB.getId(),
-            stopTimeFrom, stopTimeTo)).thenReturn(Arrays.asList(sti1, sti2));
-
-    /****
-     * 
-     ****/
-
     BlockInstance blockInstanceA = new BlockInstance(blockConfigA, serviceDate);
     long lastUpdateTime = dateAsLong("2010-10-05 16:15");
 
-    BlockLocation blockLocation = new BlockLocation();
-    blockLocation.setActiveTrip(bstAA.getTrip());
-    blockLocation.setBlockInstance(blockInstanceA);
-    blockLocation.setClosestStop(bstAA);
-    blockLocation.setDistanceAlongBlock(500);
-    blockLocation.setInService(true);
-    blockLocation.setLastUpdateTime(lastUpdateTime);
-    blockLocation.setNextStop(bstAA);
-    blockLocation.setPredicted(true);
-    blockLocation.setScheduledDistanceAlongBlock(600);
-    blockLocation.setScheduleDeviation(10 * 60);
-    blockLocation.setVehicleId(aid("vehicle"));
-
-    Mockito.when(
-        _blockLocationService.getLocationsForBlockInstance(blockInstanceA, t)).thenReturn(
-        Arrays.asList(blockLocation));
+    BlockLocation blockLocationA = new BlockLocation();
+    blockLocationA.setActiveTrip(bstAA.getTrip());
+    blockLocationA.setBlockInstance(blockInstanceA);
+    blockLocationA.setClosestStop(bstAA);
+    blockLocationA.setDistanceAlongBlock(500);
+    blockLocationA.setInService(true);
+    blockLocationA.setLastUpdateTime(lastUpdateTime);
+    blockLocationA.setNextStop(bstAA);
+    blockLocationA.setPredicted(true);
+    blockLocationA.setScheduledDistanceAlongBlock(600);
+    blockLocationA.setScheduleDeviation(10 * 60);
+    blockLocationA.setVehicleId(aid("vehicle"));
 
     /****
      * 
@@ -185,9 +182,29 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     blockLocationB.setPredicted(false);
     blockLocationB.setScheduledDistanceAlongBlock(400);
 
+    /****
+     * 
+     ****/
+
+    long stopTimeFrom = t - minutesBefore * 60 * 1000;
+    long stopTimeTo = t + minutesAfter * 60 * 1000;
+
+    ArrivalAndDepartureInstance in1 = new ArrivalAndDepartureInstance(
+        blockInstanceA, bstAB);
+    in1.setBlockLocation(blockLocationA);
+    in1.setPredictedArrivalTime((long) (in1.getScheduledArrivalTime() + 5 * 60 * 1000));
+    in1.setPredictedDepartureTime((long) (in1.getScheduledDepartureTime()));
+
+    ArrivalAndDepartureInstance in2 = new ArrivalAndDepartureInstance(
+        blockInstanceB, bstBB);
+    in2.setBlockLocation(blockLocationB);
+
+    TargetTime target = new TargetTime(t,t);
+    
     Mockito.when(
-        _blockLocationService.getLocationsForBlockInstance(blockInstanceB, t)).thenReturn(
-        Arrays.asList(blockLocationB));
+        _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
+            stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(
+        Arrays.asList(in1, in2));
 
     /****
      * 
@@ -206,15 +223,17 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     /****
      * 
      ****/
-    
+
     StopBean stopABean = new StopBean();
     stopABean.setId("1_stopA");
-    Mockito.when(_stopBeanService.getStopForId(stopA.getId())).thenReturn(stopABean);
-    
+    Mockito.when(_stopBeanService.getStopForId(stopA.getId())).thenReturn(
+        stopABean);
+
     StopBean stopBBean = new StopBean();
     stopBBean.setId("1_stopB");
-    Mockito.when(_stopBeanService.getStopForId(stopB.getId())).thenReturn(stopBBean);
-    
+    Mockito.when(_stopBeanService.getStopForId(stopB.getId())).thenReturn(
+        stopBBean);
+
     /****
      * 
      ****/
@@ -235,7 +254,7 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     TripStatusBean tripStatusBeanB = new TripStatusBean();
 
     Mockito.when(
-        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocation, t)).thenReturn(
+        _tripDetailsBeanService.getBlockLocationAsStatusBean(blockLocationA, t)).thenReturn(
         tripStatusBeanA);
 
     Mockito.when(

@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
@@ -16,8 +31,7 @@ import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationBean;
-import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.NearbyStopsBeanService;
@@ -63,7 +77,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     for (AgencyAndId nearbyStopId : nearbyStopIds)
       nearbyStops.add(_stopBeanService.getStopForId(nearbyStopId));
 
-    List<SituationBean> situations = _serviceAlertsBeanService.getSituationsForStopId(
+    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopId(
         query.getTime(), id);
 
     return new StopWithArrivalsAndDeparturesBean(stop, arrivalsAndDepartures,
@@ -77,17 +91,12 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     List<StopBean> stops = new ArrayList<StopBean>();
     List<ArrivalAndDepartureBean> allArrivalsAndDepartures = new ArrayList<ArrivalAndDepartureBean>();
     Set<AgencyAndId> allNearbyStopIds = new HashSet<AgencyAndId>();
-    Map<String, SituationBean> situationsById = new HashMap<String, SituationBean>();
+    Map<String, ServiceAlertBean> situationsById = new HashMap<String, ServiceAlertBean>();
     Counter<TimeZone> timeZones = new Counter<TimeZone>();
 
     for (AgencyAndId id : ids) {
 
       StopBean stopBean = _stopBeanService.getStopForId(id);
-
-      if (stopBean == null)
-        throw new NoSuchStopServiceException(
-            AgencyAndIdLibrary.convertToString(id));
-
       stops.add(stopBean);
 
       List<ArrivalAndDepartureBean> arrivalsAndDepartures = _arrivalsAndDeparturesBeanService.getArrivalsAndDeparturesByStopId(
@@ -101,9 +110,9 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
       TimeZone timeZone = _agencyService.getTimeZoneForAgencyId(id.getAgencyId());
       timeZones.increment(timeZone);
 
-      List<SituationBean> situations = _serviceAlertsBeanService.getSituationsForStopId(
+      List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopId(
           query.getTime(), id);
-      for (SituationBean situation : situations)
+      for (ServiceAlertBean situation : situations)
         situationsById.put(situation.getId(), situation);
     }
 
@@ -123,7 +132,7 @@ class StopWithArrivalsAndDeparturesBeanServiceImpl implements
     result.setStops(stops);
     result.setArrivalsAndDepartures(allArrivalsAndDepartures);
     result.setNearbyStops(nearbyStops);
-    result.setSituations(new ArrayList<SituationBean>(situationsById.values()));
+    result.setSituations(new ArrayList<ServiceAlertBean>(situationsById.values()));
     result.setTimeZone(timeZone.getID());
     return result;
   }

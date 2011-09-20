@@ -1,8 +1,24 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
@@ -16,11 +32,13 @@ import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord;
 import org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecordDao;
+import org.onebusaway.transit_data_federation.model.TargetTime;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -62,26 +80,26 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   }
 
   public VehicleStatusBean getVehicleForId(AgencyAndId vehicleId, long time) {
-    VehicleLocationRecord record = _vehicleStatusService.getVehicleLocationRecordForId(vehicleId);
-    if (record == null)
+    VehicleStatus status = _vehicleStatusService.getVehicleStatusForId(vehicleId);
+    if (status == null)
       return null;
-    return getRecordAsBean(record, time);
+    return getStatusAsBean(status, time);
   }
 
   @Override
   public ListBean<VehicleStatusBean> getAllVehiclesForAgency(String agencyId,
       long time) {
 
-    List<VehicleLocationRecord> records = _vehicleStatusService.getAllVehicleLocationRecords();
+    List<VehicleStatus> statuses = _vehicleStatusService.getAllVehicleStatuses();
 
     List<VehicleStatusBean> beans = new ArrayList<VehicleStatusBean>();
 
-    for (VehicleLocationRecord record : records) {
-      AgencyAndId vid = record.getVehicleId();
+    for (VehicleStatus status : statuses) {
+      AgencyAndId vid = status.getVehicleId();
       if (!vid.getAgencyId().equals(agencyId))
         continue;
 
-      VehicleStatusBean bean = getRecordAsBean(record, time);
+      VehicleStatusBean bean = getStatusAsBean(status, time);
       beans.add(bean);
     }
 
@@ -92,8 +110,10 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   public VehicleLocationRecordBean getVehicleLocationRecordForVehicleId(
       AgencyAndId vehicleId, long targetTime) {
 
+    TargetTime target = new TargetTime(targetTime, targetTime);
+
     BlockLocation blockLocation = _blockLocationService.getLocationForVehicleAndTime(
-        vehicleId, targetTime);
+        vehicleId, target);
     if (blockLocation == null)
       return null;
     return getBlockLocationAsVehicleLocationRecord(blockLocation);
@@ -163,8 +183,9 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
    * 
    ****/
 
-  private VehicleStatusBean getRecordAsBean(VehicleLocationRecord record,
-      long time) {
+  private VehicleStatusBean getStatusAsBean(VehicleStatus status, long time) {
+
+    VehicleLocationRecord record = status.getRecord();
 
     VehicleStatusBean bean = new VehicleStatusBean();
     bean.setLastUpdateTime(record.getTimeOfRecord());
@@ -190,11 +211,53 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
       bean.setTripStatus(details.getStatus());
     }
 
+    List<VehicleLocationRecord> allRecords = status.getAllRecords();
+    if (!CollectionsLibrary.isEmpty(allRecords)) {
+      List<VehicleLocationRecordBean> allRecordBeans = new ArrayList<VehicleLocationRecordBean>();
+      bean.setAllRecords(allRecordBeans);
+      for (VehicleLocationRecord r : allRecords) {
+        VehicleLocationRecordBean rBean = getVehicleLocationRecordAsBean(r);
+        allRecordBeans.add(rBean);
+      }
+    }
+
+    return bean;
+  }
+
+  private VehicleLocationRecordBean getVehicleLocationRecordAsBean(
+      VehicleLocationRecord record) {
+
+    VehicleLocationRecordBean bean = new VehicleLocationRecordBean();
+    bean.setBlockId(AgencyAndIdLibrary.convertToString(record.getBlockId()));
+
+    if (record.getPhase() != null)
+      bean.setPhase(record.getPhase().toLabel());
+
+    if (record.isCurrentLocationSet()) {
+      CoordinatePoint location = new CoordinatePoint(
+          record.getCurrentLocationLat(), record.getCurrentLocationLon());
+      bean.setCurrentLocation(location);
+    }
+    if (record.isCurrentOrientationSet())
+      bean.setCurrentOrientation(record.getCurrentOrientation());
+
+    if (record.isDistanceAlongBlockSet())
+      bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
+
+    if (record.isScheduleDeviationSet())
+      bean.setScheduleDeviation(record.getScheduleDeviation());
+
+    bean.setStatus(record.getStatus());
+    bean.setServiceDate(record.getServiceDate());
+    bean.setTimeOfRecord(record.getTimeOfRecord());
+    bean.setTripId(AgencyAndIdLibrary.convertToString(record.getTripId()));
+    bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
     return bean;
   }
 
   private VehicleLocationRecordBean getBlockLocationRecordAsVehicleLocationRecord(
       BlockLocationRecord record) {
+
     VehicleLocationRecordBean bean = new VehicleLocationRecordBean();
     bean.setBlockId(AgencyAndIdLibrary.convertToString(record.getBlockId()));
     if (record.getPhase() != null)

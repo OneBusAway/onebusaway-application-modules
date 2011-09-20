@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.transit_data_federation.impl.realtime;
 
 import java.util.ArrayList;
@@ -20,7 +35,9 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
-import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheRecord;
+import org.onebusaway.transit_data_federation.services.realtime.ScheduleDeviationSamples;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheElements;
+import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationCacheEntry;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleLocationRecordCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +56,7 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
 
   private static Logger _log = LoggerFactory.getLogger(VehicleLocationRecordCacheImpl.class);
 
-  private ConcurrentMap<AgencyAndId, VehicleLocationCacheRecord> _recordsByVehicleId = new ConcurrentHashMap<AgencyAndId, VehicleLocationCacheRecord>();
+  private ConcurrentMap<AgencyAndId, VehicleLocationCacheEntry> _entriesByVehicleId = new ConcurrentHashMap<AgencyAndId, VehicleLocationCacheEntry>();
 
   private ConcurrentMap<BlockInstance, Set<AgencyAndId>> _vehicleIdsByBlockInstance = new ConcurrentHashMap<BlockInstance, Set<AgencyAndId>>();
 
@@ -93,23 +110,27 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
    ****/
 
   @Override
-  public VehicleLocationCacheRecord getRecordForVehicleId(AgencyAndId vehicleId) {
-    return _recordsByVehicleId.get(vehicleId);
+  public VehicleLocationCacheElements getRecordForVehicleId(
+      AgencyAndId vehicleId) {
+    VehicleLocationCacheEntry entry = _entriesByVehicleId.get(vehicleId);
+    if (entry == null)
+      return null;
+    return entry.getElements();
   }
 
   @Override
-  public List<VehicleLocationCacheRecord> getRecordsForBlockInstance(
+  public List<VehicleLocationCacheElements> getRecordsForBlockInstance(
       BlockInstance blockInstance) {
 
     Set<AgencyAndId> vehicleIds = _vehicleIdsByBlockInstance.get(blockInstance);
 
-    List<VehicleLocationCacheRecord> records = new ArrayList<VehicleLocationCacheRecord>();
+    List<VehicleLocationCacheElements> records = new ArrayList<VehicleLocationCacheElements>();
     if (vehicleIds != null) {
       for (AgencyAndId vehicleId : vehicleIds) {
-        VehicleLocationCacheRecord record = _recordsByVehicleId.get(vehicleId);
+        VehicleLocationCacheEntry record = _entriesByVehicleId.get(vehicleId);
 
         if (record != null && record.getBlockInstance().equals(blockInstance))
-          records.add(record);
+          records.add(record.getElements());
       }
     }
 
@@ -117,32 +138,72 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
   }
 
   @Override
-  public void addRecord(BlockInstance blockInstance,
-      VehicleLocationRecord record, ScheduledBlockLocation scheduledBlockLocation) {
+  public VehicleLocationCacheElements addRecord(BlockInstance blockInstance,
+      VehicleLocationRecord record,
+      ScheduledBlockLocation scheduledBlockLocation,
+      ScheduleDeviationSamples samples) {
 
     AgencyAndId vehicleId = record.getVehicleId();
 
-    VehicleLocationCacheRecord cacheRecord = new VehicleLocationCacheRecord(
-        blockInstance, record, scheduledBlockLocation);
-    VehicleLocationCacheRecord existing = _recordsByVehicleId.put(vehicleId,
-        cacheRecord);
+    while (true) {
 
-    if (existing != null) {
-      BlockInstance existingBlockInstance = existing.getBlockInstance();
+      VehicleLocationCacheEntry newCacheEntry = new VehicleLocationCacheEntry(
+          blockInstance);
+
+      VehicleLocationCacheEntry cacheEntry = _entriesByVehicleId.putIfAbsent(
+          vehicleId, newCacheEntry);
+
+      if (cacheEntry == null) {
+
+        cacheEntry = newCacheEntry;
+
+        /**
+         * Since we're adding a new entry, we indicate the connection between
+         * this block instance and vehicleId
+         */
+        ConcurrentCollectionsLibrary.addToMapValueSet(
+            _vehicleIdsByBlockInstance, blockInstance, vehicleId);
+      }
+
+      /**
+       * If the block instance of a vehicle has changed mid-stream, we close off
+       * the cache entry and remove the block=>vid mapping
+       */
+      if (cacheEntry.isClosedBecauseBlockInstanceChanged(blockInstance)) {
+
+        _entriesByVehicleId.remove(vehicleId);
+
+        ConcurrentCollectionsLibrary.removeFromMapValueSet(
+            _vehicleIdsByBlockInstance, cacheEntry.getBlockInstance(),
+            vehicleId);
+
+        continue;
+      }
+
+      /**
+       * If the element failed to add because the entry is closed, we loop.
+       * Someone closed the entry while we were in the process of requesting it
+       * from the map. On the next loop, it should no longer be in the map.
+       */
+      if (!cacheEntry.addElement(record, scheduledBlockLocation, samples))
+        continue;
+
+      BlockInstance existingBlockInstance = cacheEntry.getBlockInstance();
       if (!blockInstance.equals(existingBlockInstance))
         ConcurrentCollectionsLibrary.removeFromMapValueSet(
             _vehicleIdsByBlockInstance, existingBlockInstance, vehicleId);
-    }
 
-    // Ensure the block => vehicle mapping is set
-    ConcurrentCollectionsLibrary.addToMapValueSet(_vehicleIdsByBlockInstance,
-        blockInstance, vehicleId);
+      // Ensure the block => vehicle mapping is set
+
+      return cacheEntry.getElements();
+
+    }
   }
 
   @Override
   public void clearRecordsForVehicleId(AgencyAndId vehicleId) {
 
-    VehicleLocationCacheRecord record = _recordsByVehicleId.remove(vehicleId);
+    VehicleLocationCacheEntry record = _entriesByVehicleId.remove(vehicleId);
 
     if (record != null) {
       ConcurrentCollectionsLibrary.removeFromMapValueSet(
@@ -151,18 +212,24 @@ class VehicleLocationRecordCacheImpl implements VehicleLocationRecordCache {
   }
 
   public void clearStaleRecords(long time) {
-    Iterator<Entry<AgencyAndId, VehicleLocationCacheRecord>> it = _recordsByVehicleId.entrySet().iterator();
+
+    Iterator<Entry<AgencyAndId, VehicleLocationCacheEntry>> it = _entriesByVehicleId.entrySet().iterator();
+
     while (it.hasNext()) {
-      Entry<AgencyAndId, VehicleLocationCacheRecord> entry = it.next();
+
+      Entry<AgencyAndId, VehicleLocationCacheEntry> entry = it.next();
       AgencyAndId vehicleId = entry.getKey();
-      VehicleLocationCacheRecord value = entry.getValue();
-      if (value.getMeasuredLastUpdateTime() < time) {
+      VehicleLocationCacheEntry cacheEntry = entry.getValue();
+
+      if (cacheEntry.closeIfStale(time)) {
+
         if (_log.isDebugEnabled())
           _log.debug("pruning block location record cache for vehicle="
-              + vehicleId + " block=" + value.getBlockInstance());
+              + vehicleId + " block=" + cacheEntry.getBlockInstance());
         it.remove();
         ConcurrentCollectionsLibrary.removeFromMapValueSet(
-            _vehicleIdsByBlockInstance, value.getBlockInstance(), vehicleId);
+            _vehicleIdsByBlockInstance, cacheEntry.getBlockInstance(),
+            vehicleId);
       }
     }
   }
