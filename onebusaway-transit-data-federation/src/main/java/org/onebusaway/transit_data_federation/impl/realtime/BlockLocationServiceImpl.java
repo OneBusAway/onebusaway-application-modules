@@ -411,17 +411,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   /**
-   * 
-   * @param instance
-   * @param record
-   * @param scheduledBlockLocation
-   */
-  private void history(BlockInstance instance, VehicleLocationRecord record,
-      ScheduledBlockLocation scheduledBlockLocation) {
-
-  }
-
-  /**
    * We add the {@link BlockPositionRecord} to the local cache and persist it to
    * a back-end data-store if necessary
    * 

@@ -139,7 +139,7 @@ public class UnitTestingSupport {
     agency.setId(id);
     return agency;
   }
-  
+
   public static RouteEntryImpl route(String id) {
     RouteEntryImpl route = new RouteEntryImpl();
     route.setId(aid(id));
@@ -361,6 +361,11 @@ public class UnitTestingSupport {
     }
     configs.add(blockConfig);
 
+    for (TripEntry trip : trips) {
+      if (trip.getBlock() == null)
+        ((TripEntryImpl) trip).setBlock((BlockEntryImpl) block);
+    }
+
     return blockConfig;
   }
 
@@ -386,6 +391,10 @@ public class UnitTestingSupport {
     for (String id : ids)
       serviceIds.add(lsid(id));
     return serviceIds;
+  }
+
+  public static ServiceIdActivation serviceIds(String... ids) {
+    return new ServiceIdActivation(lsids(ids), lsids());
   }
 
   public static ServiceIdActivation serviceIds(
