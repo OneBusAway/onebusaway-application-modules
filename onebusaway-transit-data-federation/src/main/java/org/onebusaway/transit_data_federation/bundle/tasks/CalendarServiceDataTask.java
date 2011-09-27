@@ -68,8 +68,9 @@ public class CalendarServiceDataTask implements Runnable {
   public void setRefreshService(RefreshService refreshService) {
     _refreshService = refreshService;
   }
-  
-  public void setExcludeFutureServiceDatesInDays(int excludeFutureServiceDatesInDays) {
+
+  public void setExcludeFutureServiceDatesInDays(
+      int excludeFutureServiceDatesInDays) {
     _excludeFutureServiceDatesInDays = excludeFutureServiceDatesInDays;
   }
 
@@ -79,12 +80,13 @@ public class CalendarServiceDataTask implements Runnable {
     factory.setGtfsDao(_dao);
     factory.setExcludeFutureServiceDatesInDays(_excludeFutureServiceDatesInDays);
     CalendarServiceData data = factory.createData();
+    data.makeReadOnly();
 
     try {
 
       ObjectSerializationLibrary.writeObject(
           _bundle.getCalendarServiceDataPath(), data);
-      
+
       _refreshService.refresh(RefreshableResources.CALENDAR_DATA);
     } catch (IOException e) {
       throw new IllegalStateException(

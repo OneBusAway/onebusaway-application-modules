@@ -49,5 +49,10 @@ public class RefreshableCalendarServiceImpl extends CalendarServiceImpl {
       setData(new CalendarServiceData());
     }
   }
+  
+  @Override
+  public CalendarServiceData getData() {
+    return super.getData();
+  }
 
 }

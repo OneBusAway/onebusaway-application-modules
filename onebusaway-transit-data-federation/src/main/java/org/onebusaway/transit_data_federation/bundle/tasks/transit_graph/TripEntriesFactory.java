@@ -100,10 +100,10 @@ public class TripEntriesFactory {
       ArrayList<TripEntry> tripEntries = new ArrayList<TripEntry>();
 
       for (Trip trip : tripsForRoute) {
-        if (tripIndex % 50 == 0)
+        tripIndex++;
+        if (tripIndex % 500 == 0)
           _log.info("trips processed: " + tripIndex + "/"
               + tripsForRoute.size());
-        tripIndex++;
         TripEntryImpl tripEntry = processTrip(graph, trip);
         if (tripEntry != null) {
           tripEntry.setRoute(routeEntry);

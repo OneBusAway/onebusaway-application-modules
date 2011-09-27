@@ -446,6 +446,8 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
     for (LocalizedServiceId lsid : serviceIds.getActiveServiceIds()) {
       List<Date> dates = _calendarService.getDatesForLocalizedServiceId(lsid);
+      if (dates == null)
+        dates = Collections.emptyList();
       if (serviceDates == null)
         serviceDates = new HashSet<Date>(dates);
       else
@@ -455,14 +457,16 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     for (LocalizedServiceId lsid : serviceIds.getInactiveServiceIds()) {
       List<Date> dates = _calendarService.getDatesForLocalizedServiceId(lsid);
       if (serviceDates != null)
-        dates.removeAll(dates);
+        serviceDates.removeAll(dates);
     }
 
     List<Date> dates = new ArrayList<Date>();
-    for (Date serviceDate : serviceDates) {
-      if ((lowerBounds == null || lowerBounds.before(serviceDate))
-          && (upperBounds == null || serviceDate.before(upperBounds)))
-        dates.add(serviceDate);
+    if (serviceDates != null) {
+      for (Date serviceDate : serviceDates) {
+        if ((lowerBounds == null || lowerBounds.before(serviceDate))
+            && (upperBounds == null || serviceDate.before(upperBounds)))
+          dates.add(serviceDate);
+      }
     }
 
     Collections.sort(dates);
