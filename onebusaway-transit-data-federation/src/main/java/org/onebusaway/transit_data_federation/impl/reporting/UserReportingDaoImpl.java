@@ -25,7 +25,6 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
 
@@ -35,8 +34,7 @@ class UserReportingDaoImpl implements UserReportingDao {
   private HibernateTemplate _template;
 
   @Autowired
-  public void setSessionFactory(
-      @Qualifier("mutable") SessionFactory sessionFactory) {
+  public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }
 

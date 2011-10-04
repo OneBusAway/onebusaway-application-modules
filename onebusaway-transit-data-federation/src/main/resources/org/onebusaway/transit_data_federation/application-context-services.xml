@@ -17,42 +17,71 @@
 
 -->
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
-    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+  xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+  xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
-    <import resource="classpath:org/onebusaway/transit_data_federation/application-context-hibernate-mutable.xml" />
-    <import resource="classpath:org/onebusaway/transit_data_federation/application-context-common.xml" />
-    <import resource="classpath:org/onebusaway/transit_data_federation/application-context-otp.xml" />
+  <import resource="classpath:org/onebusaway/transit_data_federation/application-context-common.xml" />
+  <import resource="classpath:org/onebusaway/transit_data_federation/application-context-otp.xml" />
 
-    <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
-
-    <bean id="refreshServiceImpl" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
-
-    <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
-
-    <bean id="extendedCalendarServiceServiceDateRangeCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
-        <property name="cacheManager" ref="cacheManager" />
-        <property name="cacheName"
-            value="org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl.serviceDateRangeCache" />
-        <property name="maxElementsInMemory" value="200" />
-        <property name="eternal" value="false" />
-        <property name="timeToLive" value="0" />
-        <property name="timeToIdle" value="3600" />
-        <property name="overflowToDisk" value="false" />
-        <property name="diskPersistent" value="false" />
-    </bean>
-
-    <bean id="extendedCalendarServiceImpl" class="org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl">
-        <property name="serviceDateRangeCache" ref="extendedCalendarServiceServiceDateRangeCache" />
-    </bean>
+  <context:component-scan base-package="org.onebusaway.transit_data_federation.impl" />
     
-    <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean">
-      
-    </bean>
+  <!--
+      List of Hibernate annotated classes: classes configured for Hibernate using annotations, as opposed to a
+      Hibernate xml mapping file. This list can be extended by other modules with an
+      org.onebusaway.container.spring.ListBeanPostProcessor
+  -->
+  <bean id="hibernateAnnotatedClassesTransitDataFederation" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <property name="sourceList">
+      <list>
+        <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
+      </list>
+    </property>
+  </bean>
+
+  <!--
+      List of Hibernate xml mapping files, which control the mapping of Java objects in Hibernate. This list can be
+      extended by other modules with an org.onebusaway.container.spring.ListBeanPostProcessor
+  -->
+  <bean id="hibernateMappingLocationsTransitDataFederation" class="org.springframework.beans.factory.config.ListFactoryBean">
+    <property name="sourceList">
+      <list>
+        <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/BlockLocationRecordDaoImpl.hibernate.xml
+        </value>
+        <value>classpath:org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml
+        </value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="refreshServiceImpl" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
+
+  <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
+
+  <bean id="extendedCalendarServiceServiceDateRangeCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
+    <property name="cacheManager" ref="cacheManager" />
+    <property name="cacheName"
+      value="org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl.serviceDateRangeCache" />
+    <property name="maxElementsInMemory" value="200" />
+    <property name="eternal" value="false" />
+    <property name="timeToLive" value="0" />
+    <property name="timeToIdle" value="3600" />
+    <property name="overflowToDisk" value="false" />
+    <property name="diskPersistent" value="false" />
+  </bean>
+
+  <bean id="extendedCalendarServiceImpl" class="org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl">
+    <property name="serviceDateRangeCache" ref="extendedCalendarServiceServiceDateRangeCache" />
+  </bean>
+
+  <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean">
+
+  </bean>
 
 </beans>

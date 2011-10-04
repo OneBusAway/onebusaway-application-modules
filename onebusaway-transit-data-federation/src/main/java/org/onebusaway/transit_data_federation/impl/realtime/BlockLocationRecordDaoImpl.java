@@ -27,7 +27,6 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Property;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.orm.hibernate3.HibernateCallback;
@@ -51,15 +50,8 @@ public class BlockLocationRecordDaoImpl implements BlockLocationRecordDao {
 
   private AtomicInteger _savedRecordCount = new AtomicInteger();
 
-  /**
-   * Note we are requesting the "mutable" {@link SessionFactory}, aka the one we
-   * can write to
-   * 
-   * @param sessionFactory
-   */
   @Autowired
-  public void setSessionFactory(
-      @Qualifier("mutable") SessionFactory sessionFactory) {
+  public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }
 
@@ -134,7 +126,7 @@ public class BlockLocationRecordDaoImpl implements BlockLocationRecordDao {
           c.add(Property.forName("time").le(toTime));
         if (recordLimit != 0)
           c.setFetchSize(recordLimit);
-        
+
         c.addOrder(Order.asc("time"));
 
         return c.list();

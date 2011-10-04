@@ -39,6 +39,14 @@
   <bean id="otpGraphBundle" class="org.opentripplanner.model.GraphBundle">
     <property name="path" value="${bundlePath}" />
   </bean>
+  
+  <!-- Database Connection Configuration -->
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
+    <property name="url" value="jdbc:hsqldb:file:${bundlePath}/org_onebusaway_transit_data" />
+    <property name="username" value="sa" />
+    <property name="password" value="" />
+  </bean>
 
   <!-- Override the default ehcache diskstore path -->
   <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">

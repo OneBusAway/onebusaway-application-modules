@@ -27,14 +27,6 @@
 
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context-services.xml" />
 
-  <!-- Database Connection Configuration -->
-  <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-    <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
-    <property name="url" value="jdbc:hsqldb:file:${bundlePath}/org_onebusaway_transit_data" />
-    <property name="username" value="sa" />
-    <property name="password" value="" />
-  </bean>
-
   <bean id="bundleCreatorHibernateProperties" class="org.onebusaway.container.spring.PropertiesBeanPostProcessor">
     <property name="target" value="hibernateProperties" />
     <property name="properties">
@@ -53,8 +45,6 @@
     </property>
     <property name="order" value="50" />
   </bean>
-
-  <alias name="dataSource" alias="mutableDataSource" />
 
   <bean id="modifications" class="org.onebusaway.transit_data_federation.model.modifications.Modifications" />
 
