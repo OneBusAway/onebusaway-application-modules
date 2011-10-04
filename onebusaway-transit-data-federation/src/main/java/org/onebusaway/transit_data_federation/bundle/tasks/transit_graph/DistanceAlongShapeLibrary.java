@@ -29,6 +29,7 @@ import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointsLibrary;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -371,9 +372,10 @@ public class DistanceAlongShapeLibrary {
 
     _log.error("We were attempting to compute the distance along a particular trip for each stop time of that trip by snapping them to the shape for that trip.  However, we could not find an assignment for each stop time where the distance traveled along the shape for each stop time was strictly increasing (aka a stop time seemed to travel backwards)");
 
+    TripEntryImpl trip = first.getTrip();
     _log.error("error constructing stop-time distances along shape for trip="
-        + first.getTrip().getId() + " firstStopTime=" + first.getId()
-        + " lastStopTime=" + last.getId());
+        + trip.getId() + " shape=" + trip.getShapeId() + " firstStopTime="
+        + first.getId() + " lastStopTime=" + last.getId());
 
     StringBuilder b = new StringBuilder();
     int index = 0;
