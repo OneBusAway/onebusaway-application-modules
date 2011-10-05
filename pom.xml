@@ -40,9 +40,9 @@
   </pluginRepositories>
 
   <scm>
-    <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</connection>
-    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</developerConnection>
-    <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/trunk</url>
+    <connection>scm:git:github.com/camsys/onebusaway-application-modules</connection>
+    <developerConnection>scm:git:github.com/camsys/onebusaway-application-modules</developerConnection>
+    <url>https://github.com/camsys/onebusaway-application-modules/</url>
   </scm>
 
   <distributionManagement>
