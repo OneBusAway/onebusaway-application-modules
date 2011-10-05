@@ -16,6 +16,8 @@
  */
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +43,8 @@ import org.springframework.stereotype.Component;
 public class DistanceAlongShapeLibrary {
 
   private static Logger _log = LoggerFactory.getLogger(DistanceAlongShapeLibrary.class);
+
+  private static NumberFormat _errorFormatter = new DecimalFormat("0.00");
 
   private ShapePointsLibrary _shapePointsLibrary = new ShapePointsLibrary();
 
@@ -390,13 +394,13 @@ public class DistanceAlongShapeLibrary {
     for (List<PointAndIndex> possible : possibleAssignments) {
       StopTimeEntryImpl stopTime = stopTimes.get(index);
       StopEntryImpl stop = stopTime.getStop();
-      b.append(index);
-      b.append(' ');
-      b.append(stop.getId());
-      b.append(' ');
       b.append(stop.getStopLat());
       b.append(' ');
       b.append(stop.getStopLon());
+      b.append(' ');
+      b.append(index);
+      b.append(' ');
+      b.append(stop.getId());
       b.append('\n');
 
       double maxDistanceAlongShape = Double.NEGATIVE_INFINITY;
@@ -404,9 +408,11 @@ public class DistanceAlongShapeLibrary {
 
       for (PointAndIndex pindex : possible) {
         b.append("  ");
-        b.append(pindex.distanceAlongShape);
-        b.append(' ');
         b.append(projection.reverse(pindex.point));
+        b.append(' ');
+        b.append(_errorFormatter.format(pindex.distanceAlongShape));
+        b.append(' ');
+        b.append(_errorFormatter.format(pindex.distanceFromTarget));
         b.append(' ');
         b.append(pindex.index);
         b.append("\n");
