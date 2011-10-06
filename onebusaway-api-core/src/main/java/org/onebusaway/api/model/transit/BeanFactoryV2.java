@@ -723,6 +723,8 @@ public class BeanFactoryV2 {
       freqBean.setEndTime(freq.getEndTime());
       freqBean.setHeadway(freq.getHeadwaySecs());
       freqBean.setStopHeadsign(freq.getStopHeadsign());
+      freqBean.setArrivalEnabled(freq.isArrivalEnabled());
+      freqBean.setDepartureEnabled(freq.isDepartureEnabled());
       frequencies.add(freqBean);
     }
 

@@ -196,38 +196,64 @@ public class ScheduleAction extends ActionSupport {
    ****/
 
   private void filterResults() {
-    
+
     List<StopRouteScheduleBean> routes = _result.getRoutes();
-    List<StopRouteScheduleBean> filteredRoutes = new ArrayList<StopRouteScheduleBean>(routes.size());
-    
-    for( StopRouteScheduleBean route : routes) {
-      
+    List<StopRouteScheduleBean> filteredRoutes = new ArrayList<StopRouteScheduleBean>(
+        routes.size());
+
+    for (StopRouteScheduleBean route : routes) {
+
       List<StopRouteDirectionScheduleBean> directions = route.getDirections();
-      List<StopRouteDirectionScheduleBean> filteredDirections = new ArrayList<StopRouteDirectionScheduleBean>(directions.size());
-      
-      for( StopRouteDirectionScheduleBean direction : directions ) {
-        
-        List<StopTimeInstanceBean> stopTimes = direction.getStopTimes();
-        List<StopTimeInstanceBean> filteredStopTimes = new ArrayList<StopTimeInstanceBean>(stopTimes.size());
-        
-        for( StopTimeInstanceBean stopTime : stopTimes) {
-          if((_showArrivals && stopTime.isArrivalEnabled()) || (!_showArrivals && stopTime.isDepartureEnabled()))
-            filteredStopTimes.add(stopTime);
-        }
-        
-        if( ! filteredStopTimes.isEmpty()) {
-          direction.setStopTimes(stopTimes);
+      List<StopRouteDirectionScheduleBean> filteredDirections = new ArrayList<StopRouteDirectionScheduleBean>(
+          directions.size());
+
+      for (StopRouteDirectionScheduleBean direction : directions) {
+
+        List<StopTimeInstanceBean> filteredStopTimes = getFilteredStopTimes(direction);
+        List<FrequencyInstanceBean> filteredFrequencies = getFilteredFrequencies(direction);
+
+        if (!(filteredStopTimes.isEmpty() && filteredFrequencies.isEmpty())) {
+          direction.setStopTimes(filteredStopTimes);
+          direction.setFrequencies(filteredFrequencies);
           filteredDirections.add(direction);
         }
       }
-      
-      if( ! filteredDirections.isEmpty()) {
+
+      if (!filteredDirections.isEmpty()) {
         route.setDirections(filteredDirections);
         filteredRoutes.add(route);
       }
     }
-    
+
     _result.setRoutes(filteredRoutes);
+  }
+
+  private List<StopTimeInstanceBean> getFilteredStopTimes(
+      StopRouteDirectionScheduleBean direction) {
+    List<StopTimeInstanceBean> stopTimes = direction.getStopTimes();
+    List<StopTimeInstanceBean> filteredStopTimes = new ArrayList<StopTimeInstanceBean>(
+        stopTimes.size());
+
+    for (StopTimeInstanceBean stopTime : stopTimes) {
+      if ((_showArrivals && stopTime.isArrivalEnabled())
+          || (!_showArrivals && stopTime.isDepartureEnabled()))
+        filteredStopTimes.add(stopTime);
+    }
+    return filteredStopTimes;
+  }
+
+  private List<FrequencyInstanceBean> getFilteredFrequencies(
+      StopRouteDirectionScheduleBean direction) {
+    List<FrequencyInstanceBean> frequencies = direction.getFrequencies();
+    List<FrequencyInstanceBean> filteredFrequencies = new ArrayList<FrequencyInstanceBean>(
+        frequencies.size());
+
+    for (FrequencyInstanceBean frequency : frequencies) {
+      if ((_showArrivals && frequency.isArrivalEnabled())
+          || (!_showArrivals && frequency.isDepartureEnabled()))
+        filteredFrequencies.add(frequency);
+    }
+    return filteredFrequencies;
   }
 
   public Date getShiftedDate(Date date) {

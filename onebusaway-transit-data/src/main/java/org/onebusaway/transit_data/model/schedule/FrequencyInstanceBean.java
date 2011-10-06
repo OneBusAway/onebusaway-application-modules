@@ -34,6 +34,10 @@ public final class FrequencyInstanceBean implements Serializable {
   private String tripId;
 
   private String stopHeadsign;
+  
+  private boolean arrivalEnabled;
+  
+  private boolean departureEnabled;
 
   public long getServiceDate() {
     return serviceDate;
@@ -89,5 +93,21 @@ public final class FrequencyInstanceBean implements Serializable {
 
   public void setStopHeadsign(String stopHeadsign) {
     this.stopHeadsign = stopHeadsign;
+  }
+
+  public boolean isArrivalEnabled() {
+    return arrivalEnabled;
+  }
+
+  public void setArrivalEnabled(boolean arrivalEnabled) {
+    this.arrivalEnabled = arrivalEnabled;
+  }
+
+  public boolean isDepartureEnabled() {
+    return departureEnabled;
+  }
+
+  public void setDepartureEnabled(boolean departureEnabled) {
+    this.departureEnabled = departureEnabled;
   }
 }

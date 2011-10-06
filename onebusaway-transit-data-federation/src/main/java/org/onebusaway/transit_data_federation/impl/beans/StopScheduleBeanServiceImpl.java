@@ -225,7 +225,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         stiBean.setArrivalTime(sti.getArrivalTime());
         stiBean.setDepartureTime(sti.getDepartureTime());
         stiBean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
-        
+
         stiBean.setArrivalEnabled(bst.getBlockSequence() > 0);
         stiBean.setDepartureEnabled(bst.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
 
@@ -252,6 +252,7 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         BlockStopTimeEntry blockStopTime = sti.getStopTime();
         BlockTripEntry blockTrip = blockStopTime.getTrip();
         TripEntry trip = blockTrip.getTrip();
+        BlockConfigurationEntry blockConfig = blockTrip.getBlockConfiguration();
 
         AgencyAndId tripId = trip.getId();
         AgencyAndId serviceId = trip.getServiceId().getId();
@@ -267,6 +268,8 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
             * 1000);
         bean.setHeadwaySecs(sti.getFrequency().getHeadwaySecs());
         bean.setServiceId(AgencyAndIdLibrary.convertToString(serviceId));
+        bean.setArrivalEnabled(blockStopTime.getBlockSequence() > 0);
+        bean.setDepartureEnabled(blockStopTime.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
 
         String directionId = trip.getDirectionId();
         if (directionId == null)

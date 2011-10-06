@@ -35,6 +35,10 @@ public class ScheduleFrequencyInstanceV2Bean implements Serializable {
 
   private String stopHeadsign;
 
+  private boolean arrivalEnabled;
+
+  private boolean departureEnabled;
+
   public long getServiceDate() {
     return serviceDate;
   }
@@ -89,5 +93,21 @@ public class ScheduleFrequencyInstanceV2Bean implements Serializable {
 
   public void setStopHeadsign(String stopHeadsign) {
     this.stopHeadsign = stopHeadsign;
+  }
+
+  public boolean isArrivalEnabled() {
+    return arrivalEnabled;
+  }
+
+  public void setArrivalEnabled(boolean arrivalEnabled) {
+    this.arrivalEnabled = arrivalEnabled;
+  }
+
+  public boolean isDepartureEnabled() {
+    return departureEnabled;
+  }
+
+  public void setDepartureEnabled(boolean departureEnabled) {
+    this.departureEnabled = departureEnabled;
   }
 }
