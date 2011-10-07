@@ -174,7 +174,15 @@
                 <s:iterator value="frequencies" status="rowstatus">
                   <jsp:element name="tr">                    
                     <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
-                    <td class="startTime"><oba:date timeStyle="short" value="startTime"/><br/>...</td>
+                    <td class="startTime">
+                      <oba:date timeStyle="short" value="startTime"/>
+                      <br/>
+                      ...<br/>
+                      <s:if test="#rowstatus.last">
+                        <oba:date timeStyle="short" value="endTime"/>
+                      </s:if>
+                      
+                    </td>
                     <td>
                       <oba:message key="EveryXMinutes">
                         <s:param value="headwaySecs / 60" />
