@@ -51,6 +51,7 @@
 <h1>
 <s:component template="stops-title-head-snippet.jspx">
     <s:param name="stops" value="result.stops"/>
+    <s:param name="delimiter" value="'&lt;br&gt;'"/>
 </s:component>
 </h1>
 </div>

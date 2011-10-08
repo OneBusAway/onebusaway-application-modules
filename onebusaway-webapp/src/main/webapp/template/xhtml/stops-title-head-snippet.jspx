@@ -22,9 +22,16 @@
 	xmlns:s="/struts-tags"
 	xmlns:oba="/oba-tags">
 
+<s:if test="parameters.delimiter != null">
+  <s:set var="delimiter" value="parameters.delimiter"/>
+</s:if>
+<s:else>
+  <s:set var="delimiter" value="', '"/>
+</s:else>
+
 <s:iterator value="parameters.stops" status="stopsIter">
     <s:property value="name" /><s:if test="direction != null"> - <s:property value="direction" /> bound</s:if> - Stop # <s:property value="code" />
-    <s:if test="!#stopsIter.last">, </s:if>
+    <s:if test="!#stopsIter.last"><s:property value="#delimiter" escape="false"/></s:if>
 </s:iterator>
 
 </jsp:root>
