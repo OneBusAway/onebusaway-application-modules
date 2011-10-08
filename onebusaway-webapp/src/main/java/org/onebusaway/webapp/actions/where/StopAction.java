@@ -41,6 +41,10 @@ public class StopAction extends AbstractWhereAction implements
   private Set<String> _routes;
 
   private boolean _needsRedirect = false;
+  
+  private String _title;
+  
+  private boolean _showTitle = true;
 
   private WebappArrivalsAndDeparturesModel _model;
 
@@ -126,6 +130,22 @@ public class StopAction extends AbstractWhereAction implements
   @Override
   public WebappArrivalsAndDeparturesModel getModel() {
     return _model;
+  }
+  
+  public void setTitle(String title) {
+    _title = title;
+  }
+  
+  public String getTitle() {
+    return _title;
+  }
+  
+  public void setShowTitle(boolean showTitle) {
+    _showTitle = showTitle;
+  }
+  
+  public boolean isShowTitle() {
+    return _showTitle;
   }
 
   @Override

@@ -37,9 +37,14 @@
     <jsp:attribute name="content"><s:property value="refresh"/></jsp:attribute>
 </jsp:element>
 <title>
-  <s:component template="stops-title-head-snippet.jspx">
-    <s:param name="stops" value="result.stops"/>
-  </s:component>
+  <s:if test="title != null">
+    <s:property value="title" />
+  </s:if>
+  <s:else>
+    <s:component template="stops-title-head-snippet.jspx">
+      <s:param name="stops" value="result.stops"/>
+    </s:component>
+  </s:else>
 </title>
 </head>
 <body>
@@ -47,14 +52,21 @@
 <div id="container">
 
 <!-- The Arrivals Title Header -->
-<div class="stopNameHeader">
-<h1>
-<s:component template="stops-title-head-snippet.jspx">
-    <s:param name="stops" value="result.stops"/>
-    <s:param name="delimiter" value="'&lt;br&gt;'"/>
-</s:component>
-</h1>
-</div>
+<s:if test="showTitle">
+  <div class="stopNameHeader">
+  <h1>
+    <s:if test="title != null">
+      <s:property value="title" />
+    </s:if>
+    <s:else>
+      <s:component template="stops-title-head-snippet.jspx">
+        <s:param name="stops" value="result.stops"/>
+        <s:param name="delimiter" value="'&lt;br&gt;'"/>
+      </s:component>
+    </s:else>
+  </h1>
+  </div>
+</s:if>
 
 <!--  Alerts -->
 <s:component template="service-alerts-header-snippet.jspx">
