@@ -35,10 +35,12 @@
       Hibernate xml mapping file. This list can be extended by other modules with an
       org.onebusaway.container.spring.ListBeanPostProcessor
   -->
-  <bean id="hibernateAnnotatedClassesTransitDataFederation" class="org.springframework.beans.factory.config.ListFactoryBean">
-    <property name="sourceList">
+  <bean id="transitDataFederationHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+    <property name="target" value="hibernateAnnotatedClasses" />
+    <property name="values">
       <list>
         <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
       </list>
@@ -49,13 +51,12 @@
       List of Hibernate xml mapping files, which control the mapping of Java objects in Hibernate. This list can be
       extended by other modules with an org.onebusaway.container.spring.ListBeanPostProcessor
   -->
-  <bean id="hibernateMappingLocationsTransitDataFederation" class="org.springframework.beans.factory.config.ListFactoryBean">
-    <property name="sourceList">
+  <bean id="transitDataFederationHibernateMappingLocations" class="org.onebusaway.container.spring.ListBeanPostProcessor">
+    <property name="target" value="hibernateMappingLocations" />
+    <property name="values">
       <list>
-        <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/BlockLocationRecordDaoImpl.hibernate.xml
-        </value>
-        <value>classpath:org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml
-        </value>
+        <value>classpath:org/onebusaway/transit_data_federation/impl/realtime/BlockLocationRecordDaoImpl.hibernate.xml</value>
+        <value>classpath:org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml</value>
       </list>
     </property>
   </bean>
