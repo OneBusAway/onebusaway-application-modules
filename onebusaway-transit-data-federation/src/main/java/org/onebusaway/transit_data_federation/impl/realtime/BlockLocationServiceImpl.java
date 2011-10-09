@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 <inf71391@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,6 +200,14 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     _persistBlockLocationRecords = persistBlockLocationRecords;
   }
 
+  /**
+   * @param distanceAlongBlockLocationInterpolation
+   */
+  public void setDistanceAlongBlockLocationInterpolation(
+      boolean distanceAlongBlockLocationInterpolation) {
+    _distanceAlongBlockLocationInterpolation = distanceAlongBlockLocationInterpolation;
+  }
+
   /****
    * JMX Attributes
    ****/
@@ -247,6 +256,11 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
       ScheduledBlockLocation scheduledBlockLocation = getScheduledBlockLocationForVehicleLocationRecord(
           record, instance);
+
+      if (!record.isScheduleDeviationSet()) {
+        int deviation = (int) ((record.getTimeOfRecord() - record.getServiceDate()) / 1000 - scheduledBlockLocation.getScheduledTime());
+        record.setScheduleDeviation(deviation);
+      }
 
       ScheduleDeviationSamples samples = _realTimeHistoryService.sampleScheduleDeviationsForVehicle(
           instance, record, scheduledBlockLocation);
