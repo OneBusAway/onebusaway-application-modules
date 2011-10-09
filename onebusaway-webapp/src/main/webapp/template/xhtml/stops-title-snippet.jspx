@@ -25,6 +25,12 @@
 <jsp:directive.page contentType="text/html" />
 
 <div class="arrivalsStopInfo">
+  <s:if test="parameters.title != null">
+    <div>
+        <div class="arrivalsStopAddress"><s:property value="parameters.title" /></div>
+    </div>
+  </s:if>
+  <s:else>
   <s:iterator value="parameters.stops" status="stopsIter">
 
 <s:set name="mapUrl">
@@ -38,6 +44,7 @@ index.action#p(index)m(location)lat(<s:property value="lat" />)lon(<s:property v
         <small>and</small>
     </s:if>
   </s:iterator>
+  </s:else>
 </div>
 
 </jsp:root>

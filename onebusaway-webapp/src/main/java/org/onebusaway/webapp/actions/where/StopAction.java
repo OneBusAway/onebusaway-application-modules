@@ -36,17 +36,15 @@ public class StopAction extends AbstractWhereAction implements
 
   private static final long serialVersionUID = 1L;
 
-  private List<String> _ids;
+  protected List<String> _ids;
 
   private Set<String> _routes;
 
-  private boolean _needsRedirect = false;
-  
   private String _title;
-  
+
   private boolean _showTitle = true;
 
-  private WebappArrivalsAndDeparturesModel _model;
+  protected WebappArrivalsAndDeparturesModel _model;
 
   @Autowired
   public void setModel(WebappArrivalsAndDeparturesModel model) {
@@ -57,17 +55,7 @@ public class StopAction extends AbstractWhereAction implements
    * To give more than one Stop ID, the URL must specify id= more than once.
    */
   public void setId(List<String> ids) {
-    // Stop ids needs to be something serializable across the wire
-    // XWorks can use its own list implementation for ids
-    // We also check for legacy stop ids
-    _ids = new ArrayList<String>();
-    for (String id : ids) {
-      if (!id.contains("_")) {
-        id = "1_" + id;
-        _needsRedirect = true;
-      }
-      _ids.add(id);
-    }
+    _ids = new ArrayList<String>(ids);
     _model.setStopIds(_ids);
   }
 
@@ -86,8 +74,6 @@ public class StopAction extends AbstractWhereAction implements
     for (String routes : routeLists) {
       if (!(routes.length() == 0 || routes.equals("all"))) {
         for (String token : routes.split(",")) {
-          if (!token.contains("_"))
-            _needsRedirect = true;
           _routes.add(token);
         }
       }
@@ -126,41 +112,37 @@ public class StopAction extends AbstractWhereAction implements
   public boolean isShowArrivals() {
     return _model.isShowArrivals();
   }
-  
+
   @Override
   public WebappArrivalsAndDeparturesModel getModel() {
     return _model;
   }
-  
+
   public void setTitle(String title) {
     _title = title;
   }
-  
+
   public String getTitle() {
     return _title;
   }
-  
+
   public void setShowTitle(boolean showTitle) {
     _showTitle = showTitle;
   }
-  
+
   public boolean isShowTitle() {
     return _showTitle;
   }
 
   @Override
-  @Actions( {
+  @Actions({
       @Action(value = "/where/standard/stop"),
       @Action(value = "/where/iphone/stop"),
-      @Action(value = "/where/text/stop"),
-      @Action(value = "/where/sign/stop")})
+      @Action(value = "/where/text/stop"), @Action(value = "/where/sign/stop")})
   public String execute() throws ServiceException {
 
     if (_ids == null || _ids.isEmpty())
       return INPUT;
-
-    if (_needsRedirect)
-      return "redirect";
 
     _model.process();
 

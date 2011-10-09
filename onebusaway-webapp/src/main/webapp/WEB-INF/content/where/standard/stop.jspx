@@ -27,9 +27,14 @@
 <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard-stop.css')}"/>
 <meta http-equiv="Refresh" content="60" />
 <title>
-  <s:component template="stops-title-head-snippet.jspx">
-    <s:param name="stops" value="result.stops"/>
-  </s:component>
+  <s:if test="title != null">
+    <s:property value="title"/>
+  </s:if>
+  <s:else>
+    <s:component template="stops-title-head-snippet.jspx">
+      <s:param name="stops" value="result.stops"/>
+    </s:component>
+  </s:else>
 </title>
 </head>
 <body>
@@ -40,6 +45,7 @@
 <!-- The Arrivals Title Header -->
 <s:component template="stops-title-snippet.jspx">
     <s:param name="stops" value="result.stops"/>
+    <s:param name="title" value="title"/>
 </s:component>
 
 <!--  Alerts -->
