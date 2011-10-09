@@ -15,12 +15,15 @@
  */
 package org.onebusaway.webapp.actions.where;
 
+import java.util.ArrayList;
+
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.users.client.model.BookmarkBean;
+import org.onebusaway.users.client.model.RouteFilterBean;
 import org.onebusaway.users.client.model.UserBean;
 
 @Results({@Result(location = "stop.jspx")})
@@ -45,6 +48,11 @@ public class BookmarkAction extends StopAction {
      */
     _ids = bookmark.getStopIds();
     _model.setStopIds(bookmark.getStopIds());
+
+    RouteFilterBean filter = bookmark.getRouteFilter();
+    if (filter != null) {
+      super.setRoute(new ArrayList<String>(filter.getRouteIds()));
+    }
 
     setTitle(bookmark.getName());
 
