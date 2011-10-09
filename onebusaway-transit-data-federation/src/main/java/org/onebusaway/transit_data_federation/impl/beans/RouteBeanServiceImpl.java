@@ -48,8 +48,10 @@ import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ShapeBeanService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
+import org.onebusaway.transit_data_federation.services.blocks.AbstractBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
+import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
@@ -141,7 +143,8 @@ class RouteBeanServiceImpl implements RouteBeanService {
     RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeId);
     if (routeCollectionEntry == null || narrative == null)
       return null;
-    return go(routeCollectionEntry, narrative);
+    return getStopsForRouteCollectionAndNarrative(routeCollectionEntry,
+        narrative);
   }
 
   /****
@@ -180,8 +183,8 @@ class RouteBeanServiceImpl implements RouteBeanService {
     return stops;
   }
 
-  private StopsForRouteBean go(RouteCollectionEntry routeCollection,
-      RouteCollectionNarrative narrative) {
+  private StopsForRouteBean getStopsForRouteCollectionAndNarrative(
+      RouteCollectionEntry routeCollection, RouteCollectionNarrative narrative) {
 
     StopsForRouteBean result = new StopsForRouteBean();
 
@@ -199,20 +202,14 @@ class RouteBeanServiceImpl implements RouteBeanService {
     result.addGrouping(directionGrouping);
 
     List<BlockTripIndex> blockIndices = _blockIndexService.getBlockTripIndicesForRouteCollectionId(routeCollectionId);
+    List<FrequencyBlockTripIndex> frequencyBlockIndices = _blockIndexService.getFrequencyBlockTripIndicesForRouteCollectionId(routeCollectionId);
 
     List<BlockTripEntry> blockTrips = new ArrayList<BlockTripEntry>();
 
-    for (BlockTripIndex blockIndex : blockIndices) {
-
-      // Do we really need to do all of them?
-      for (BlockTripEntry blockTrip : blockIndex.getTrips()) {
-        TripEntry trip = blockTrip.getTrip();
-        AgencyAndId rcId = trip.getRouteCollection().getId();
-        if (!rcId.equals(routeCollectionId))
-          continue;
-        blockTrips.add(blockTrip);
-      }
-    }
+    getBlockTripsForIndicesMatchingRouteCollection(blockIndices,
+        routeCollectionId, blockTrips);
+    getBlockTripsForIndicesMatchingRouteCollection(frequencyBlockIndices,
+        routeCollectionId, blockTrips);
 
     List<StopSequence> sequences = _stopSequencesService.getStopSequencesForTrips(blockTrips);
 
@@ -242,6 +239,29 @@ class RouteBeanServiceImpl implements RouteBeanService {
     sortResult(result);
 
     return result;
+  }
+
+  /**
+   * A block index potentially includes trips with different routes. We only
+   * want the trips matching our route collection.
+   * 
+   * @param <T>
+   * @param blockIndices
+   * @param routeCollectionId
+   * @param resultingTrips
+   */
+  private <T extends AbstractBlockTripIndex> void getBlockTripsForIndicesMatchingRouteCollection(
+      List<T> blockIndices, AgencyAndId routeCollectionId,
+      List<BlockTripEntry> resultingTrips) {
+    for (AbstractBlockTripIndex blockIndex : blockIndices) {
+      for (BlockTripEntry blockTrip : blockIndex.getTrips()) {
+        TripEntry trip = blockTrip.getTrip();
+        AgencyAndId rcId = trip.getRouteCollection().getId();
+        if (!rcId.equals(routeCollectionId))
+          continue;
+        resultingTrips.add(blockTrip);
+      }
+    }
   }
 
   private List<EncodedPolylineBean> getEncodedPolylinesForRoute(
