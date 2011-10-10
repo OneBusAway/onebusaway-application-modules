@@ -34,7 +34,6 @@ import net.sf.ehcache.Element;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.cache.Cacheable;
-import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
@@ -51,6 +50,10 @@ import org.springframework.stereotype.Component;
 public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
   private CalendarService _calendarService;
+
+  private TransitGraphDao _transitGraphDao;
+
+  private Map<ServiceIdActivation, List<Date>> _serviceDatesByServiceIds = new HashMap<ServiceIdActivation, List<Date>>();
 
   private double _serviceDateRangeCacheInterval = 4 * 60 * 60;
 
@@ -73,12 +76,22 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     _calendarService = calendarService;
   }
 
+  @Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
   public void setServiceDateRangeCacheInterval(int hours) {
     _serviceDateRangeCacheInterval = hours * 60 * 60;
   }
 
   public void setServiceDateRangeCache(Cache serviceDateRangeCache) {
     _serviceDateRangeCache = serviceDateRangeCache;
+  }
+
+  @PostConstruct
+  public void start() {
+    cacheServiceDatesForServiceIds();
   }
 
   @Cacheable
@@ -224,7 +237,7 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
   public List<Date> getNextServiceDatesForDepartureInterval(
       ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time) {
 
-    List<Date> serviceDates = getServiceDatesByServiceIds(serviceIds);
+    List<Date> serviceDates = _serviceDatesByServiceIds.get(serviceIds);
 
     if (CollectionsLibrary.isEmpty(serviceDates))
       return Collections.emptyList();
@@ -271,7 +284,7 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
   public List<Date> getPreviousServiceDatesForArrivalInterval(
       ServiceIdActivation serviceIds, ServiceInterval serviceInterval, long time) {
 
-    List<Date> serviceDates = getServiceDatesByServiceIds(serviceIds);
+    List<Date> serviceDates = _serviceDatesByServiceIds.get(serviceIds);
 
     if (CollectionsLibrary.isEmpty(serviceDates))
       return Collections.emptyList();
@@ -389,8 +402,9 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
     return serviceDates;
   }
 
-  @Cacheable
-  private List<Date> getServiceDatesByServiceIds(ServiceIdActivation serviceIds) {
+  private void cacheServiceDatesForServiceIds() {
+
+    Set<ServiceIdActivation> allServiceIds = determineAllServiceIds();
 
     Date lowerBounds = null;
     if (_serviceDateLowerBoundsInWeeks != -1) {
@@ -406,8 +420,24 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
       upperBounds = c.getTime();
     }
 
-    return computeServiceDatesForServiceIds(serviceIds,
-        lowerBounds, upperBounds);
+    for (ServiceIdActivation serviceIds : allServiceIds) {
+
+      List<Date> dates = computeServiceDatesForServiceIds(serviceIds,
+          lowerBounds, upperBounds);
+      _serviceDatesByServiceIds.put(serviceIds, dates);
+    }
+  }
+
+  private Set<ServiceIdActivation> determineAllServiceIds() {
+    Set<ServiceIdActivation> allServiceIds = new HashSet<ServiceIdActivation>();
+
+    for (BlockEntry block : _transitGraphDao.getAllBlocks()) {
+      for (BlockConfigurationEntry blockConfig : block.getConfigurations()) {
+        ServiceIdActivation serviceIds = blockConfig.getServiceIds();
+        allServiceIds.add(serviceIds);
+      }
+    }
+    return allServiceIds;
   }
 
   private List<Date> computeServiceDatesForServiceIds(

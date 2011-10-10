@@ -78,6 +78,7 @@ public class ExtendedCalendarServiceImplTest {
 
     _service = new ExtendedCalendarServiceImpl();
     _service.setCalendarService(_calendarService);
+    _service.setTransitGraphDao(_transitGraphDao);
   }
 
   @Test
@@ -220,6 +221,8 @@ public class ExtendedCalendarServiceImplTest {
 
     Mockito.when(_transitGraphDao.getAllBlocks()).thenReturn(blocks);
 
+    _service.start();
+
     ServiceIdActivation serviceIds = serviceIds(lsids("sA"), lsids());
     int inFrom = time(8, 00);
     int inTo = time(20, 00);
@@ -255,6 +258,8 @@ public class ExtendedCalendarServiceImplTest {
     List<BlockEntry> blocks = Arrays.asList(blockA);
 
     Mockito.when(_transitGraphDao.getAllBlocks()).thenReturn(blocks);
+
+    _service.start();
 
     ServiceIdActivation serviceIds = serviceIds(lsids("sA"), lsids());
     int inFrom = time(8, 00);
