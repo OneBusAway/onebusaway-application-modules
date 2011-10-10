@@ -133,9 +133,7 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
       RefreshableResources.SHAPE_GEOSPATIAL_INDEX,
       RefreshableResources.BLOCK_INDEX_SERVICE})
   public void setup() throws IOException, ClassNotFoundException {
-    _blockSequenceIndicesByShapeId.clear();
     groupBlockSequenceIndicesByShapeIds();
-
     buildShapeSpatialIndex();
   }
 

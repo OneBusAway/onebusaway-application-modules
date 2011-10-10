@@ -34,9 +34,7 @@ public final class RefreshableResources {
   public static final String BLOCK_INDEX_SERVICE = "blockIndexService";
 
   public static final String STOP_TRANSFER_DATA = "stopTransferData";
-
-  public static final String STOP_GEOSPATIAL_INDEX = "stopGeospatialIndex";
-
+  
   public static final String SHAPE_GEOSPATIAL_INDEX = "shapeGeospatialIndex";
   
   public static final String TRANSFER_PATTERNS = "transfer_patterns";
