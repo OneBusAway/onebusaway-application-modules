@@ -122,9 +122,6 @@ public class StopTimeServiceImplTest {
     _transitGraphDao = Mockito.mock(TransitGraphDao.class);
     Mockito.when(_transitGraphDao.getAllBlocks()).thenReturn(
         Arrays.asList(bcA.getBlock(), bcB.getBlock()));
-    _calendarService.setTransitGraphDao(_transitGraphDao);
-
-    _calendarService.start();
   }
 
   @Test
