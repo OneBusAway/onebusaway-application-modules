@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
@@ -47,7 +48,9 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
     _transitGraphDao = transitGraphDao;
   }
 
+
   @PostConstruct
+  @Refreshable(dependsOn = RefreshableResources.STOP_GEOSPATIAL_INDEX)
   public void initialize() {
 
     List<StopEntry> stops = _transitGraphDao.getAllStops();
