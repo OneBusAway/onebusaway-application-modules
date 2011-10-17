@@ -27,6 +27,7 @@ import org.onebusaway.api.model.transit.EntryWithReferencesBean;
 import org.onebusaway.api.model.transit.ListWithRangeAndReferencesBean;
 import org.onebusaway.api.model.transit.ListWithReferencesBean;
 import org.onebusaway.api.model.transit.ReferencesBean;
+import org.onebusaway.api.model.transit.RegisteredAlarmV2Bean;
 import org.onebusaway.api.model.transit.RouteV2Bean;
 import org.onebusaway.api.model.transit.ScheduleFrequencyInstanceV2Bean;
 import org.onebusaway.api.model.transit.ScheduleStopTimeInstanceV2Bean;
@@ -173,6 +174,8 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("edge", EdgeV2Bean.class);
 
     xstream.alias("currentVehicleEstimate", CurrentVehicleEstimateV2Bean.class);
+    
+    xstream.alias("registeredAlarm", RegisteredAlarmV2Bean.class);
 
     xstream.processAnnotations(VehicleMonitoringRequest.class);
     xstream.processAnnotations(VehicleMonitoringDetailLevel.class);

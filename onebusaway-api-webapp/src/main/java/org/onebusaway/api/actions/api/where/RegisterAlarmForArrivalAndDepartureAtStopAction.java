@@ -17,6 +17,8 @@ package org.onebusaway.api.actions.api.where;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.RegisteredAlarmV2Bean;
 import org.onebusaway.api.services.AlarmDetails;
 import org.onebusaway.api.services.AlarmService;
 import org.onebusaway.exceptions.ServiceException;
@@ -76,7 +78,7 @@ public class RegisterAlarmForArrivalAndDepartureAtStopAction extends
   public void setAlarm(RegisterAlarmQueryBean alarm) {
     _alarm = alarm;
   }
-  
+
   public void setData(String data) {
     _data = data;
   }
@@ -88,7 +90,7 @@ public class RegisterAlarmForArrivalAndDepartureAtStopAction extends
 
     if (_query.getTime() == 0)
       _query.setTime(System.currentTimeMillis());
-    
+
     AlarmDetails details = _alarmService.alterAlarmQuery(_alarm, _data);
 
     String alarmId = _service.registerAlarmForArrivalAndDepartureAtStop(_query,
@@ -96,13 +98,16 @@ public class RegisterAlarmForArrivalAndDepartureAtStopAction extends
 
     if (alarmId == null)
       return setResourceNotFoundResponse();
-    
-    if( details != null) { 
+
+    if (details != null) {
       _alarmService.registerAlarm(alarmId, details);
     }
 
     if (isVersion(V2)) {
-      return setOkResponse(alarmId);
+      RegisteredAlarmV2Bean bean = new RegisteredAlarmV2Bean();
+      bean.setAlarmId(alarmId);
+      BeanFactoryV2 factory = getBeanFactoryV2();
+      return setOkResponse(factory.entry(bean));
     } else {
       return setUnknownVersionResponse();
     }

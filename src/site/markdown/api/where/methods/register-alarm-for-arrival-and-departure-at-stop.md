@@ -10,13 +10,20 @@ http://api.onebusaway.org/api/where/register-alarm-for-arrival-and-departure-at-
 
 ## Sample Response
 
-    <response>
-      <version>2</version>
-      <code>200</code>
-      <text>OK</text>
-      <currentTime>1270614730908</currentTime>
-      <data>1_00859082-9b9d-4f72-a89f-c4be0e2cf01a</data>
-    </response>
+~~~~
+<response>
+  <version>2</version>
+  <code>200</code>
+  <currentTime>1318879898047</currentTime>
+  <text>OK</text>
+  <data class="entryWithReferences">
+    <references/>
+    <entry class="registeredAlarm">
+      <alarmId>1_7deee53d-9eb5-4f6b-8623-8bff398fcd5b</alarmId>
+    </entry>
+  </data>
+</response>
+~~~~
 
 ## Request Parameters
 
