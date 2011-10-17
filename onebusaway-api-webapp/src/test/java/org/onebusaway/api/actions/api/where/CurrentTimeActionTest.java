@@ -26,6 +26,7 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.junit.Test;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.TimeBean;
+import org.onebusaway.api.model.transit.EntryWithReferencesBean;
 import org.onebusaway.utility.DateLibrary;
 
 public class CurrentTimeActionTest {
@@ -42,10 +43,12 @@ public class CurrentTimeActionTest {
 
     ResponseBean response = action.getModel();
     assertEquals(200, response.getCode());
-    assertEquals(1, response.getVersion());
+    assertEquals(2, response.getVersion());
 
-    TimeBean time = (TimeBean) response.getData();
-
+    @SuppressWarnings("unchecked")
+    EntryWithReferencesBean<TimeBean> entry = (EntryWithReferencesBean<TimeBean>) response.getData();
+    TimeBean time = entry.getEntry();
+    
     assertNotNull(time);
 
     long delta = Math.abs(time.getTime() - t);
