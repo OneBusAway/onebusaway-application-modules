@@ -62,7 +62,7 @@ public class StopsForLocationAction extends ApiActionSupport {
   private String _query;
 
   public StopsForLocationAction() {
-    super(V1);
+    super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
   }
 
   public void setLat(double lat) {

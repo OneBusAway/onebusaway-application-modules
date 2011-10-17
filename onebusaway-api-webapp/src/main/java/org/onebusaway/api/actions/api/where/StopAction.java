@@ -39,7 +39,7 @@ public class StopAction extends ApiActionSupport {
   private String _id;
 
   public StopAction() {
-    super(V1);
+    super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
   }
 
   @RequiredFieldValidator

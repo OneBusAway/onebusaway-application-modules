@@ -41,7 +41,7 @@ public class StopsForRouteAction extends ApiActionSupport {
   private boolean _includePolylines = true;
 
   public StopsForRouteAction() {
-    super(V1);
+    super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
   }
 
   @RequiredFieldValidator

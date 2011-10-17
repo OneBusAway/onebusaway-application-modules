@@ -17,11 +17,12 @@ package org.onebusaway.api.actions.api.where;
 
 import java.util.Date;
 
+import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.TimeBean;
+import org.onebusaway.api.model.transit.BeanFactoryV2;
+import org.onebusaway.api.model.transit.EntryWithReferencesBean;
 import org.onebusaway.utility.DateLibrary;
-
-import org.apache.struts2.rest.DefaultHttpHeaders;
 
 public class CurrentTimeAction extends ApiActionSupport {
 
@@ -29,18 +30,26 @@ public class CurrentTimeAction extends ApiActionSupport {
 
   private static final int V1 = 1;
 
+  private static final int V2 = 2;
+
   public CurrentTimeAction() {
-    super(V1);
+    super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
   }
 
   public DefaultHttpHeaders index() {
-    
-    if( ! isVersion(V1))
-      return setUnknownVersionResponse();
-    
+
     Date date = new Date();
     String readableTime = DateLibrary.getTimeAsIso8601String(date);
-    TimeBean time = new TimeBean(date,readableTime);
-    return setOkResponse(time);
+    TimeBean bean = new TimeBean(date, readableTime);
+
+    if (isVersion(V1)) {
+      return setOkResponse(bean);
+    } else if (isVersion(V2)) {
+      BeanFactoryV2 factory = getBeanFactoryV2();
+      EntryWithReferencesBean<TimeBean> response = factory.entry(bean);
+      return setOkResponse(response);
+    } else {
+      return setUnknownVersionResponse();
+    }
   }
 }

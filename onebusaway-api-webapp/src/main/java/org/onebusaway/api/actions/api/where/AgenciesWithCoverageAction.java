@@ -41,7 +41,7 @@ public class AgenciesWithCoverageAction extends ApiActionSupport {
   private TransitDataService _service;
 
   public AgenciesWithCoverageAction() {
-    super(V1);
+    super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
   }
 
   public void setMaxCount(int maxCount) {

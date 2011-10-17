@@ -53,7 +53,7 @@ public class ArrivalsAndDeparturesForStopAction extends ApiActionSupport {
   private ArrivalsAndDeparturesQueryBean _query = new ArrivalsAndDeparturesQueryBean();
 
   public ArrivalsAndDeparturesForStopAction() {
-    super(V1);
+    super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
   }
 
   @RequiredFieldValidator(message = "whoa there")

@@ -25,6 +25,7 @@ public class ResponseBean implements Serializable {
 
   private int version;
   private int code;
+  private long currentTime = System.currentTimeMillis();
   
   @CsvField(optional = true)
   private String text;
@@ -49,6 +50,10 @@ public class ResponseBean implements Serializable {
 
   public int getVersion() {
     return version;
+  }
+  
+  public long getCurrentTime() {
+    return currentTime;
   }
 
   public Object getData() {

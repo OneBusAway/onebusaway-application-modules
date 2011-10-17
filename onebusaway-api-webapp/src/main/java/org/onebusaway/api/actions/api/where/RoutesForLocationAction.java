@@ -62,7 +62,7 @@ public class RoutesForLocationAction extends ApiActionSupport {
   private MaxCountSupport _maxCount = new MaxCountSupport(10, 50);
 
   public RoutesForLocationAction() {
-    super(V1);
+    super(LegacyV1ApiSupport.isDefaultToV1() ? V1 : V2);
   }
 
   public void setLat(double lat) {

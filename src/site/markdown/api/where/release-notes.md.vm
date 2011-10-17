@@ -1,0 +1,8 @@
+# Release Notes
+
+${currentVersion}
+-----------------
+
+* Initial Site Documentation
+
+* Full Documentation: {{${site_base_url}/onebusaway-application-modules/${currentVersion}/api/where/}}
