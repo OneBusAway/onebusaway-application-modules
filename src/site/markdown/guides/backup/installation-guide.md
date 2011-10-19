@@ -1,8 +1,8 @@
-Introduction
+# OneBusAway Installation Guide
 
-  This guide will instruct you on how to install and run an instance of OneBusAway with your transit data.  These instructions intend to be thorough.  If you are looking to get a quick demo instance of OneBusAway up-and-running with your data, check out our {{{../../onebusaway-quickstart/current/index.html}quick-start guide}}.
+This guide will instruct you on how to install and run an instance of OneBusAway with your transit data.  These instructions intend to be thorough.  If you are looking to get a quick demo instance of OneBusAway up-and-running with your data, check out our {{{../../onebusaway-quickstart/current/index.html}quick-start guide}}.
 
-Getting Help
+## Getting Help
 
   If you have trouble getting OneBusAway running, there are a couple of ways to get help.  You can ask questions in the following place:
 
@@ -14,35 +14,19 @@ Getting Help
   
   []
 
-Downloading the Software
+## Downloading the Software
 
-  The individual webapps that make up the OneBusAway application suite can each be downloaded below:
+Check out the [Downloads page](../downloads.html) for information about downloading the OneBusAway application modules.
 
-  * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation&c=withAllDependencies&e=jar&v=${currentVersion}}onebusaway-transit-data-federation-${currentVersion}.jar}} - build your transit data bundle
-  
-  * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation-webapp&e=war&v=${currentVersion}}onebusaway-transit-data-federation-webapp-${currentVersion}.war}} - service your transit data bundle
-  
-  * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-webapp&e=war&v=${currentVersion}}onebusaway-webapp-${currentVersion}.war}} - web interface
-  
-  * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-api-webapp&e=war&v=${currentVersion}}onebusaway-api-webapp-${currentVersion}.war}} - api interface
-  
-  * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-sms-webapp&e=war&v=${currentVersion}}onebusaway-sms-webapp-${currentVersion}.war}} - sms interface
-  
-  * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-phone-webapp&e=war&v=${currentVersion}}onebusaway-phone-webapp-${currentVersion}.war}} - phone (IVR) interface
-  
-  []
+At minimum you need to download `onebusaway-transit-data-federation.jar` to build your transit data bundle, `onebusaway-transit-data-federation-webapp.war to serve your transit data bundle, and then at least one of the user interface webapps.
 
-  At minimum you need to download <<<onebusaway-transit-data-federation.jar>>> to build your transit data bundle, <<<onebusaway-transit-data-federation-webapp.war>>> to serve your transit data bundle, and then at least one of the user interface webapps.
+## Building a Bundle
 
-Building a Bundle
+OneBusAway has the concept of a transit data bundle, which is a collection of all the data artifacts for a transit agency (or group of transit agencies) in the internal format needed to power OneBusAway. These transit data bundles are typically created from external data such as GTFS feeds for transit data and OpenStreetMap data for the street network.
 
-  OneBusAway has the concept of a transit data bundle, which is a collection of all the data artifacts for a transit agency (or group of transit agencies) in the internal format needed to power OneBusAway. These transit data bundles are typically created from external data such as GTFS feeds for transit data and OpenStreetMap data for the street network.
+You will use the downloaded `onebusaway-transit-data-federation.jar` to build the bundle, but the instructions are complex enough to deserve there own page:
 
-  You will use the downloaded <<<onebusaway-transit-data-federation.jar>>> to build the bundle, but the instructions are complex enough to deserve there own page:
-
-  * {{{./transit-data-bundle.html}Guide to Building a Transit Data Bundle}}}
-  
-  []
+* [Guide to Building a Transit Data Bundle](transit-data-bundle.html)
 
 Running the Webapps
 
@@ -52,7 +36,7 @@ Running the Webapps
   
   []
 
-  Which webapps will you be running?  No matter which user-interface modules you choose (web,api,sms,phone), you will need an instance of <<<onebusaway-transit-data-federation-webapp.war>>> running to expose the transit data bundle you built previously and to power the various user interfaces.  From there, pick the webapp for the user interface module you want to use:
+  Which webapps will you be running?  No matter which user-interface modules you choose (web,api,sms,phone), you will need an instance of `onebusaway-transit-data-federation-webapp.war` running to expose the transit data bundle you built previously and to power the various user interfaces.  From there, pick the webapp for the user interface module you want to use:
 
   * onebusaway-webapp - standard web interface
   
@@ -74,7 +58,7 @@ Running the Webapps
 data-sources.xml
 +---+
 
-  The webapps look for <<<data-sources.xml>>> in the `WEB-INF/classes` directory of each webapp by default.  You can add the file to the war file directly or copy it into the exploded war directory structure.
+  The webapps look for `data-sources.xml` in the `WEB-INF/classes` directory of each webapp by default.  You can add the file to the war file directly or copy it into the exploded war directory structure.
 
 * Tomcat and an external data-sources.xml
 
@@ -88,7 +72,7 @@ data-sources.xml
 </Context>
 +---+
 
-  It's important to note that when you override contextConfigLocation in this way, you'll need to additional import the <<<application-context-webapp.xml>>> for the webapp you are attempting to configure (it's normally included in the 'contextConfigLocation' entry in web.xml for the webapp, but we lose it when we override).  The location of the webapp is dependent on the webapp:
+  It's important to note that when you override contextConfigLocation in this way, you'll need to additional import the `application-context-webapp.xml` for the webapp you are attempting to configure (it's normally included in the 'contextConfigLocation' entry in web.xml for the webapp, but we lose it when we override).  The location of the webapp is dependent on the webapp:
 
   * onebusaway-api-webapp: classpath:org/onebusaway/api/application-context-webapp.xml
   
@@ -106,7 +90,7 @@ data-sources.xml
 
 * Configuring onebusaway-transit-data-federation-webapp
 
-  As described above, <<<onebusaway-transit-data-federation-webapp>>> does the heavy lifting of exposing the transit data bundle to the various user interface modules.  As such, the main job of the `data-sources.xml` configuration file for the webapp is to point to the location of the bundle and the database where you installed the bundle.  See {{{./database-setup-and-configuration.html}Database Setup and Configuration}} for more specific details about database setup and configuration.
+  As described above, `onebusaway-transit-data-federation-webapp` does the heavy lifting of exposing the transit data bundle to the various user interface modules.  As such, the main job of the `data-sources.xml` configuration file for the webapp is to point to the location of the bundle and the database where you installed the bundle.  See {{{./database-setup-and-configuration.html}Database Setup and Configuration}} for more specific details about database setup and configuration.
 
   Here is a quick example:
 
@@ -147,7 +131,7 @@ data-sources.xml
 
 * Configuring user interface webapps
 
-  While each user interface webapp has specific configuration details, they share a lot of configuration in common.  Specifically, we need to configure where they will find the <<<onebusaway-transit-data-federation-webapp>>> and where they will find the user database.  For more details, see AdminTransitDataServiceConfiguration and {{{./database-setup-and-configuration.html}Database Setup and Configuration}}.
+  While each user interface webapp has specific configuration details, they share a lot of configuration in common.  Specifically, we need to configure where they will find the `onebusaway-transit-data-federation-webapp` and where they will find the user database.  For more details, see AdminTransitDataServiceConfiguration and {{{./database-setup-and-configuration.html}Database Setup and Configuration}}.
 
   Each user interface webapp `data-sources.xml` should include these common entries:
 

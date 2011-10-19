@@ -4,7 +4,7 @@ Introduction
 
 Creating the Bundle
 
-  To create the bundle, you'll need to download the <<<onebusaway-transit-data-federation>>> module:
+  To create the bundle, you'll need to download the `onebusaway-transit-data-federation` module:
   
   * {{{http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation&c=withAllDependencies&e=jar&v=${currentVersion}}onebusaway-transit-data-federation-${currentVersion}.jar}}
 
@@ -22,7 +22,7 @@ org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreatorM
 java -jar onebusaway-transit-data-federation.jar ...
 +---+
 
-  <<Note:>> Depending on the size of your transit network, you may need to increase the amount of memory available to the Java VM with an argument like <<<java -Xmx1G -jar ...>>>.
+  <<Note:>> Depending on the size of your transit network, you may need to increase the amount of memory available to the Java VM with an argument like `java -Xmx1G -jar ...`.
 
 Quick Config
 
@@ -46,7 +46,7 @@ Advanced Config
   
   []
 
-  The configuration details for the bundle are captured in an xml file.  The <<<bundle.xml>>> xml config file gives you a lot of control of how your bundle is built:
+  The configuration details for the bundle are captured in an xml file.  The `bundle.xml` xml config file gives you a lot of control of how your bundle is built:
 
   * change the target install database - see {{{./database-setup-and-configuration.html}Database Setup and Configuration}} for more details
   
@@ -158,43 +158,43 @@ Customizing the Build Phase
 
   The transit data bundle building process is broken up into a number of phases.  The default build phases are:
 
-  * <<<start>>> - the first phase, responsible for cleaning up the db if run
+  * `start` - the first phase, responsible for cleaning up the db if run
   
-  * <<<gtfs>>> - load the GTFS into the database
+  * `gtfs` - load the GTFS into the database
   
-  * <<<route_collections>>> - compute aggregate route collections and load them into the database
+  * `route_collections` - compute aggregate route collections and load them into the database
   
-  * <<<route_search_index>>> - compute the route name search index
+  * `route_search_index` - compute the route name search index
   
-  * <<<stop_search_index>>> - compute the stop name search index
+  * `stop_search_index` - compute the stop name search index
   
-  * <<<calendar_service>>> - compute service calendar information
+  * `calendar_service` - compute service calendar information
   
-  * <<<otp_graph>>> - compute the OTP street graph
+  * `otp_graph` - compute the OTP street graph
   
-  * <<<transit_graph>>> - compute the transit network graph
+  * `transit_graph` - compute the transit network graph
   
-  * <<<block_indices>>> - compute block indices for fast time-based indexing
+  * `block_indices` - compute block indices for fast time-based indexing
   
-  * <<<narratives>>> - compute various narrative objects
+  * `narratives` - compute various narrative objects
   
-  * <<<stop_transfers>>> - compute an optimized set of stop transfers
+  * `stop_transfers` - compute an optimized set of stop transfers
   
-  * <<<shape_geospatial_index>>> - create a geospatial index from route shape information
+  * `shape_geospatial_index` - create a geospatial index from route shape information
   
-  * <<<pre_cache>>> - prime the cache by requesting a number of common data structures
+  * `pre_cache` - prime the cache by requesting a number of common data structures
   
   []
   
   There are also a number of optional tasks not enabled by default:
 
-  * <<<transfer_patterns>>> - transfer pattern calculation for advanced trip planning functionality
+  * `transfer_patterns` - transfer pattern calculation for advanced trip planning functionality
   
-  * <<<transfer_patterns_hub_analysis>>> - identify hub stops from local transfer patterns
+  * `transfer_patterns_hub_analysis` - identify hub stops from local transfer patterns
   
-  * <<<serialized_transfer_patterns>>> - construct optimized serialized transfer pattern data structure from raw patterns
+  * `serialized_transfer_patterns` - construct optimized serialized transfer pattern data structure from raw patterns
   
-  * <<<block_location_history>>> - combine historical real-time data into an optimized form
+  * `block_location_history` - combine historical real-time data into an optimized form
   
   []
 
@@ -202,19 +202,19 @@ Customizing the Build Phase
 
   The bundle builder accepts a number of command-line options that can control the build process, allowing you to control which phases of the build are run.
 
-  * <<<-skip phase_name>>> - skips the specified build phase.  Can be repeated.
+  * `-skip phase_name` - skips the specified build phase.  Can be repeated.
   
-  * <<<-only phase_name>>> - only runs the specified build phase.  Can be repeated.
+  * `-only phase_name` - only runs the specified build phase.  Can be repeated.
   
-  * <<<-skipTo phase_name>>> - jump ahead to the specified build phase.  Only specify once.
+  * `-skipTo phase_name` - jump ahead to the specified build phase.  Only specify once.
   
-  * <<<-include phase_name>>> - include the specified build phase, useful when the phase is not enabled by default.  Can be repeated.
+  * `-include phase_name` - include the specified build phase, useful when the phase is not enabled by default.  Can be repeated.
   
   []
 
 * Adding a Custom Build Phase
 
-  You can add your own custom build phases into the build process.  To do so, you specify a task definition in your <<<bundle.xml>>> config:
+  You can add your own custom build phases into the build process.  To do so, you specify a task definition in your `bundle.xml` config:
 
 +---+
     <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
@@ -233,6 +233,6 @@ Customizing the Build Phase
     <bean id="taskBeanName" class="your.task.Definition" />
 +---+
 
-  As you can see, the TaskDefinition bean allows you to define custom tasks and optionally control where they appear in the build order.  The only requirement is that your task instance implement <<<Runnable>>>.
+  As you can see, the TaskDefinition bean allows you to define custom tasks and optionally control where they appear in the build order.  The only requirement is that your task instance implement `Runnable`.
 
-  In addition to adding your task definition to your <<<bundle.xml>>>, you'll also need to add the jar or class files with your task implementation to the classpath when you run the build process.
+  In addition to adding your task definition to your `bundle.xml`, you'll also need to add the jar or class files with your task implementation to the classpath when you run the build process.

@@ -163,4 +163,4 @@ As such, each of the three application modules typically need a `data-sources.xm
 
 The `onebusaway-transit-data-federation` archives transit data in a back-end database as well.
 
-The main transit data federation application container, `onebusaway-transit-data-federation-webapp` needs a `data-sources.xml` resource with the appropriate `dataSource` definition pointing to your transit data database.  This is typically the same data source you specified when [ creating your transit data bundle](./transit-data-bundle.html).
+The main transit data federation application container, `onebusaway-transit-data-federation-webapp` needs a `data-sources.xml` resource with the appropriate `dataSource` definition pointing to your transit data database.  This is typically the same data source you specified when {{{./transit-data-bundle.html} creating your transit data bundle}}.
