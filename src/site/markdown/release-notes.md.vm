@@ -1,0 +1,13 @@
+# Release Notes
+
+#set( $H = '#' ) ## When using velocity templating (a .vm file), the ## indicates a Velocity comment, which makes Markdown section headers tricky
+
+$H$H ${currentVersion}
+
+* Initial Site Documentation
+* Bump to require Maven 3
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
+
+$H$H 0.0.1
+
+* Initial release

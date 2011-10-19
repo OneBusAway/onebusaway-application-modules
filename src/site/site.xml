@@ -19,13 +19,13 @@
       <item name="REST API" href="/api/where/index.html" />
     </menu>    
     <menu name="Guides">
-      <item name="Installation Guide" href="/guides/installation-guide.html" />
-      <item name="Transit Data Bundle" href="/guides/transit-data-bundle.html" />
+      <item name="Installation" href="/guides/installation-guide.html" />
+      <item name="Transit Data Bundle" href="/guides/transit-data-bundle-guide.html" />
       <item name="Realtime Configuration" href="/guides/realtime-configuration-guide.html" />
-      <item name="Webapp Installation" href="/guides/webapp-installation-guide.html" />
-      <item name="API Webapp Installation" href="/guides/api-webapp-installation-guide.html" />
-      <item name="Database Guide" href="/guides/database-setup-and-configuration.html" />
-      <item name="Troubleshooting" href="/troubleshooting-guide.html" />
+      <item name="API Webapp Installation" href="/guides/onebusaway-api-webapp-configuration-guide.html" />
+      <item name="Webapp Installation" href="/guides/onebusaway-webapp-configuration-guide.html" />
+      <item name="Database Configuration" href="/guides/database-configuration-guide.html" />
+      <item name="Troubleshooting" href="/guides/troubleshooting-guide.html" />
     </menu>
     <menu name="Development">
       <item name="Development Guide" href="/development/index.html" />

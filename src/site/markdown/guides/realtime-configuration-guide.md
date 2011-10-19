@@ -1,14 +1,15 @@
-Real-Time Configuration Guide  
+# Real-Time Configuration Guide  
   
-  While OneBusAway can work with just static schedule data, all the most interesting features require real-time transit information.
+While OneBusAway can work with just static schedule data, all the most interesting features require real-time transit
+information.
 
-* GTFS-realtime
+## GTFS-realtime
 
-  We support [GTFS-realtime](http://code.google.com/transit/realtime/) out of the box, including support for trip
-updates, vehicle positions, and alerts.  To add support, create a
+We support [GTFS-realtime](http://code.google.com/transit/realtime/) out of the box, including support for trip updates,
+vehicle positions, and alerts.  To add support, create a
 [GtfsRealtimeSource](./apidocs/org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/GtfsRealtimeSource.html)
-bean in your `data-sources.xml` file.  Then specify URLs for the three different types of GTFS-realtime data as properties
-of the bean.  Here is a full example: 
+bean in your `data-sources.xml` file.  Then specify URLs for the three different types of GTFS-realtime data as
+properties of the bean.  Here is a full example: 
   
 ~~~
 <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
@@ -28,14 +29,14 @@ of the bean.  Here is a full example:
 </bean>
 ~~~
 
-  You can additionally specify a `refreshInterval` that controls how often we query the URLs, in seconds.  If you
+You can additionally specify a `refreshInterval` that controls how often we query the URLs, in seconds.  If you
 are deploying a multi-agency instance of OneBusAway, you may also need to specify the `agencyId` or `agencyIds`
 of the transit agency to associate the incoming GTFS-realtime data with.  This allows you to define multiple incoming
 GTFS-realtime data-sources from different agencies in the same system.
 
-* SIRI VM
+## SIRI VM
 
-  We support [SIRI](http://siri.org.uk/) out of the box, including support for vehicle monitoring (VM) and situation
+We support [SIRI](http://siri.org.uk/) out of the box, including support for vehicle monitoring (VM) and situation
 exchange (SX).  To add support, create a [SiriController](./apidocs/org/onebusaway/transit_data_federation_webapp/siri/SiriController.html)
 bean in your `data-sources.xml` file.  Then specify
 [/onebusaway-siri/${onebusaway-siri-version}/cli-request-spec.html}SIRI endpoint requests](${site_base_url) indicating
@@ -60,10 +61,9 @@ your SIRI data-source.  Here is a full example:
 </bean>
 ~~~
 
-  
-* ASC Orbital - Orbcad
+## ASC Orbital - Orbcad
 
-  A number of agencies have ACS Orbital - Orbcad AVL systems.  Some agencies have configured the data-export option of
+A number of agencies have ACS Orbital - Orbcad AVL systems.  Some agencies have configured the data-export option of
 these systems to spit out a CSV file of vehicle locations and schedule deviations for all the vehicles in their fleet,
 which is then shared through a webserver.  OneBusAway supports data of this form.  To add support, create a
 [OrbcadRecordHttpSource](./apidocs/org/onebusaway/transit_data_federation/impl/realtime/orbcad/OrbcadRecordHttpSource.html)
@@ -81,9 +81,9 @@ bean in your `data-sources.xml` file.  Then specify the URL for your real-time d
 </bean>
 ~~~
 
-* MyBus
+## MyBus
 
-  Back in the day, OneBusAway supported just one kind of real-time data: the legacy MyBus system used by King County
+Back in the day, OneBusAway supported just one kind of real-time data: the legacy MyBus system used by King County
 Metro.  If you want to relive the glory days (and the MyBus servers are still up), you can enable the MyBus real-time
 feed by adding the following bean to your `data-sources.xml` file:
 
@@ -91,30 +91,24 @@ feed by adding the following bean to your `data-sources.xml` file:
 <bean id="king_county_metro_avl" class="org.onebusaway.transit_data_federation.impl.realtime.mybus.TimepointPredictionServiceImpl" />
 ~~~
 
-* Custom Implementation
+## Custom Implementation
 
-  Interested in adapting your own real-time system to OneBusAway?  The best option is to create an adapter between your system
+Interested in adapting your own real-time system to OneBusAway?  The best option is to create an adapter between your system
 and an existing specification like [GTFS-realtime](http://code.google.com/transit/realtime/) or [SIRI](http://siri.org.uk/)
 and then use OneBusAway's native support for those formats.
 
-  However, if that's not going to cut it, you can create your own custom real-time data-source plugin to OneBusAway.  This
+However, if that's not going to cut it, you can create your own custom real-time data-source plugin to OneBusAway.  This
 might be a good solution if you need direct access to OneBusAway data-structures and service interfaces to process your
 real-time data.
 
-  Creating a custom implementation typically involves the following steps:
+Creating a custom implementation typically involves the following steps:
   
-  * Create a Java class that implements your real-time data-source.
+* Create a Java class that implements your real-time data-source.
+* Add your class to the OneBusAway application server class path.
+* Create an instance of your class in your `data-source.xml` file.
+* Have your implementation periodically notify OneBusAway of new real-time data using the [VehicleLocationListener](./apidocs/org/onebusaway/realtime/api/VehicleLocationListener.html) interface.
   
-  * Add your class to the OneBusAway application server class path.
-  
-  * Create an instance of your class in your `data-source.xml` file.
-  
-  * Have your implementation periodically notify OneBusAway of new real-time data using the
-    [VehicleLocationListener](./apidocs/org/onebusaway/realtime/api/VehicleLocationListener.html) interface.
-  
-  []
-    
-  Here is a quick example to get you started:
+Here is a quick example to get you started:
   
 ~~~
 public MyRealTimeSource {

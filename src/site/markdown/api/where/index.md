@@ -1,8 +1,7 @@
 # The OneBusAway RESTful API
 
-## Introduction
-
-OneBusAway provides a RESTful (REpresentational State Transfer) API that allows you access to the same information that powers the OneBusAway website and mobile tools.  You can use the api to write cool new apps of your own.
+OneBusAway provides a RESTful (REpresentational State Transfer) API that allows you access to the same information that
+powers the OneBusAway website and mobile tools.  You can use the api to write cool new apps of your own.
 
 ## Release Notes
 
@@ -18,7 +17,8 @@ Example:
 
     /some/api/call.xml?key=YOUR_KEY_HERE
 
-The assigned application key is used to track usage statistics across applications.  API keys can be managed in a number of ways.      
+The assigned application key is used to track usage statistics across applications.  API keys can be managed in a number
+of ways.      
 
 ## Output Format
 
@@ -69,9 +69,12 @@ The response element carries the following fields:
 
 ## References
 
-The `<references/>` element contains a dictionary of objects referenced by the main result payload.  For elements that are often repeated in the result payload, the elements are instead included in the `<references/>` section and the payload will refer to elements by and object id that can be used to lookup the object in the `<references/>` dictionary.
+The `<references/>` element contains a dictionary of objects referenced by the main result payload.  For elements that
+are often repeated in the result payload, the elements are instead included in the `<references/>` section and the
+payload will refer to elements by and object id that can be used to lookup the object in the `<references/>` dictionary.
 
-Right now, only a few types of objects will ever appear in the references section: agencies, routes, stops, trips, and situations.
+Right now, only a few types of objects will ever appear in the references section: agencies, routes, stops, trips, and
+situations.
 
     <references>
       <agencies>
@@ -91,7 +94,9 @@ Right now, only a few types of objects will ever appear in the references sectio
       </situations>
     </references>
 
-They will always appear in that order, since stops and trips reference routes and routes reference agencies.  If you are processing the result stream in order, you should always be able to assume that an referenced entity would already have been included in the references section.
+They will always appear in that order, since stops and trips reference routes and routes reference agencies.  If you
+are processing the result stream in order, you should always be able to assume that an referenced entity would already
+have been included in the references section.
 
 ## Methods
 
