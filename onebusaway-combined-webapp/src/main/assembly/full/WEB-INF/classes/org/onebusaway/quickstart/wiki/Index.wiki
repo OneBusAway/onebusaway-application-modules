@@ -1,0 +1,95 @@
+{{html wiki="true"}}
+<div id="content" class="index_content">
+
+<div class="page-header home-header">
+<h1>Where is your bus?</h1>
+<h2>Let's find out.  We provide easy access to real-time transit<br/>information for the Puget Sound region and beyond.</h2>
+</div>
+
+<div class="column-row">
+
+<div class="one-third column">
+
+=== Our Goal ===
+
+<p>[[What is OneBusAway?  **Find out.**>>http://onebusaway.org/p/WhatIsOneBusAway.action]]</p>
+
+<p>We want to make it easier to use public transit by providing easy access to schedule and real-time arrival information for the buses and trains you ride every day.</p>
+
+<p>We provide:</p>
+
+* Real-time arrival information for your <a href="where/standard/agencies.action">transit agency</a>.
+* Easy access to information across a variety of devices.
+* Other cool transit tools.
+
+<p>Why? We're riders just like you and we don't like waiting for the bus any more than we have to.</p>
+</div>
+
+<div class="one-third column">
+
+=== Our Tools ===
+
+<p>[[Our tools>>Tools]] are available across  a number of interfaces:</p>
+
+<table id="tools">
+  <tr>
+    <td class="tool">
+      <div><a href="where/standard/">[[image:Tools@Tool-Web.png]]</a></div>
+      <div class="toolLabel"><a href="where/standard/">Web</a></div>
+    </td>
+    <td class="tool">
+      <div>[[image:Tools@Tool-Phone.png>>Tools_Phone]]</div>
+      <div class="toolLabel">[[Phone>>Tools_Phone]]</div>
+    </td>
+    <td class="tool">
+      <div>[[image:Tools@Tool-SMS.png>>Tools_SMS]]</div>
+      <div class="toolLabel">[[SMS>>Tools_SMS]]</div>
+    </td>
+  </tr>
+  <tr>
+    <td class="tool">
+      <div>[[image:Tools@Tool-iPhone.png>>Tools_IPhone]]</div>
+      <div class="toolLabel">[[iPhone>>Tools_IPhone]]</a></div>
+    </td>
+    <td class="tool">
+      <div>[[image:Tools@Tool-Android.png>>Tools_Android]]</div>
+      <div class="toolLabel">[[Android>>Tools_Android]]</div>
+    </td>
+    <td class="tool">
+      <div>[[image:Tools@Tool-WindowsPhone7.png>>Tools_WindowsPhone7]]</div>
+      <div class="toolLabel">[[WP7>>Tools_WindowsPhone7]]</div>
+    </td>
+  </tr>
+  <tr>
+    <td class="tool">
+      <div>[[image:Tools@Tool-MobileWeb.png>>Tools_MobileWeb]]</div>
+      <div class="toolLabel">[[Mobile>>Tools_MobileWeb]]</div>
+    </td>
+  </tr>
+</table>
+
+</div>
+<div class="one-third column">
+
+=== Our Research ===
+
+<p><a href="explore/onebusaway/">[[image:Explore.png]]</a></p>
+
+<p>OneBusAway was started by students at the University of Washington, and it supports research on improving the usability of public transportation, such as the <a href="explore/onebusaway/">Explore Tool</a> shown above.  Check out our [[research page>>http://onebusaway.org/p/Research.action]] for more information.</p>
+
+<p>Our work is all [[open-source software>>http://code.google.com/p/onebusaway]], so that others may reuse and build upon our efforts.</p>
+
+</div>
+
+</div>
+
+</div>
+<div id="footer">
+<div id="footer_content">
+* © University of Washington
+* [[Contact Us>>ContactUs]]
+* [[Privacy Policy>>PrivacyPolicy]]
+* [[Developer Resources>>DeveloperResources]]
+</div>
+</div>
+{{/html}}

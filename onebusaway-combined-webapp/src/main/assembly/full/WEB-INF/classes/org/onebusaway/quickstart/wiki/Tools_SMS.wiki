@@ -1,0 +1,3 @@
+The OneBusAway SMS interface is not enabled in the onebusaway-quickstart build.
+
+*TODO*: Provide more info on deploying the SMS interface.
