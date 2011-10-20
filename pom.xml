@@ -74,6 +74,7 @@
     <module>onebusaway-realtime-api</module>
     <module>onebusaway-transit-data</module>
     <module>onebusaway-transit-data-federation</module>
+    <module>onebusaway-transit-data-federation-builder</module>
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
     <module>onebusaway-webapp</module>
