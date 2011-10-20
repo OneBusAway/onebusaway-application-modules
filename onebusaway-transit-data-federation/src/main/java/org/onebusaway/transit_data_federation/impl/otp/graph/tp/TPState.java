@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.collections.tuple.Pair;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.HubNode;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferNode;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 
 public class TPState {

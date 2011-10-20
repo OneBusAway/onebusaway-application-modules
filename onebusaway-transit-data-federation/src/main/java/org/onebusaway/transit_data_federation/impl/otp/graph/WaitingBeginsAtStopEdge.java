@@ -17,14 +17,14 @@ package org.onebusaway.transit_data_federation.impl.otp.graph;
 
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferParent;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.SupportLibrary;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPDepartureVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPQueryData;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferNode;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferParent;
 import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternService;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;

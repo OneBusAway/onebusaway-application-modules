@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
+package org.onebusaway.transit_data_federation.services;
 
-import java.util.Comparator;
+public class StopSearchIndexConstants {
 
-import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
+  public static final String FIELD_AGENCY_ID = "agencyId";
+  public static final String FIELD_STOP_ID = "stopId";
+  public static final String FIELD_STOP_NAME = "name";
+  public static final String FIELD_STOP_CODE = "code";
 
-public class FrequencyComparator implements Comparator<FrequencyEntry> {
-
-  @Override
-  public int compare(FrequencyEntry entryA, FrequencyEntry entryB) {
-
-    int rc = entryA.getStartTime() - entryB.getStartTime();
-
-    if (rc != 0)
-      return rc;
-
-    rc = entryA.getEndTime() - entryB.getEndTime();
-
-    if (rc != 0)
-      return rc;
-
-    return entryA.getHeadwaySecs() - entryB.getHeadwaySecs();
-  }
 }

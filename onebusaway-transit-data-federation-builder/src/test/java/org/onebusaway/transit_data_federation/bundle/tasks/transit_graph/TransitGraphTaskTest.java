@@ -25,9 +25,9 @@ import java.io.IOException;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.onebusaway.container.refresh.RefreshService;
-import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
+import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 
 public class TransitGraphTaskTest {

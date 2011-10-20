@@ -28,6 +28,7 @@ import org.onebusaway.gtfs.model.Frequency;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.impl.blocks.FrequencyComparator;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.FrequencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;

@@ -18,10 +18,10 @@ package org.onebusaway.transit_data_federation.impl.otp.graph.tp;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.impl.otp.GraphContext;
 import org.onebusaway.transit_data_federation.impl.otp.graph.SearchLocal;
 import org.onebusaway.transit_data_federation.impl.otp.graph.WaitingEndsAtStopEdge;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferNode;
 import org.opentripplanner.routing.core.Edge;
 import org.opentripplanner.routing.core.HasEdges;
 

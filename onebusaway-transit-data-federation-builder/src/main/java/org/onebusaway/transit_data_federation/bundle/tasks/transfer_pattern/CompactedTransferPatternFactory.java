@@ -35,6 +35,8 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.CompactedTransferPattern;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferPattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

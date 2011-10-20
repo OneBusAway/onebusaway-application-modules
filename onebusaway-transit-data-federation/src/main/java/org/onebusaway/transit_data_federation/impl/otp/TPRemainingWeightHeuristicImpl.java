@@ -21,12 +21,12 @@ import java.util.Set;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.HubNode;
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferNode;
 import org.onebusaway.transit_data_federation.impl.otp.graph.TransitVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.HasPathStateVertex;
 import org.onebusaway.transit_data_federation.impl.otp.graph.tp.TPState;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.HubNode;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferNode;
 import org.opentripplanner.routing.algorithm.strategies.RemainingWeightHeuristic;
 import org.opentripplanner.routing.core.EdgeNarrative;
 import org.opentripplanner.routing.core.State;

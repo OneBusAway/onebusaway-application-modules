@@ -29,6 +29,8 @@ import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.csv_entities.CSVLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferParent;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferPattern;
 
 public class MutableTransferPattern implements TransferPattern {
 

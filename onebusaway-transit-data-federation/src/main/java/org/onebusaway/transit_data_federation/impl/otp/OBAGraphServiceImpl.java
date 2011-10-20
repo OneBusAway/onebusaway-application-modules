@@ -15,7 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.otp;
 
-import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.opentripplanner.routing.impl.GraphServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,5 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.bundle.model;
+package org.onebusaway.transit_data_federation.services.tripplanner;
 
-public class StopSearchIndexConstants {
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
-  public static final String FIELD_AGENCY_ID = "agencyId";
-  public static final String FIELD_STOP_ID = "stopId";
-  public static final String FIELD_STOP_NAME = "name";
-  public static final String FIELD_STOP_CODE = "code";
+public class HubNode {
 
+  private final StopEntry hubStop;
+
+  private final Iterable<StopEntry> stopsTo;
+
+  public HubNode(StopEntry hubStop, Iterable<StopEntry> stopsTo) {
+    this.hubStop = hubStop;
+    this.stopsTo = stopsTo;
+  }
+
+  public StopEntry getHubStop() {
+    return hubStop;
+  }
+
+  public Iterable<StopEntry> getStopsTo() {
+    return stopsTo;
+  }
+
+  @Override
+  public String toString() {
+    return "Hub(" + hubStop.getId() + ")";
+  }
 }

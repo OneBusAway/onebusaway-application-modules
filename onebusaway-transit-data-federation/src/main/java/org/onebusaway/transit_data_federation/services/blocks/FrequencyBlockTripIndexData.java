@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.services.blocks;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
-import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;

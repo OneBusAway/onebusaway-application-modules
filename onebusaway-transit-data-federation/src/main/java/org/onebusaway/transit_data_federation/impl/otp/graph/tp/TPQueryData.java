@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternData;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.TransferPatternData;
 
 public class TPQueryData {
 

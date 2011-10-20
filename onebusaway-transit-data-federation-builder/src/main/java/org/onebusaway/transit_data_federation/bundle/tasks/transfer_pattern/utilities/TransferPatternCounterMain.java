@@ -30,7 +30,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
 import org.onebusaway.collections.Counter;
 import org.onebusaway.csv_entities.CSVLibrary;
-import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.utility.IOLibrary;
 
 public class TransferPatternCounterMain {

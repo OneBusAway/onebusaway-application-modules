@@ -13,31 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
+package org.onebusaway.transit_data_federation.services.tripplanner;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 
-public class HubNode {
+public interface TransferPattern {
 
-  private final StopEntry hubStop;
+  public StopEntry getOriginStop();
 
-  private final Iterable<StopEntry> stopsTo;
+  public Collection<TransferParent> getTransfersForStops(TransferParent root,
+      List<StopEntry> stops);
+  
+  public Collection<TransferParent> getTransfersForAllStops(TransferParent root);
 
-  public HubNode(StopEntry hubStop, Iterable<StopEntry> stopsTo) {
-    this.hubStop = hubStop;
-    this.stopsTo = stopsTo;
-  }
-
-  public StopEntry getHubStop() {
-    return hubStop;
-  }
-
-  public Iterable<StopEntry> getStopsTo() {
-    return stopsTo;
-  }
-
-  @Override
-  public String toString() {
-    return "Hub(" + hubStop.getId() + ")";
-  }
+  public Map<StopEntry, List<TransferParent>> getTransfersForHubStops(
+      TransferParent root);
 }

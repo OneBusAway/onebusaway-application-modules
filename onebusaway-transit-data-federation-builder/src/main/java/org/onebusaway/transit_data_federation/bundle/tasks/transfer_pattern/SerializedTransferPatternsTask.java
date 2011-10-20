@@ -26,10 +26,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.CompactedTransferPattern;
 import org.onebusaway.utility.IOLibrary;
 import org.onebusaway.utility.ObjectSerializationLibrary;
 import org.slf4j.Logger;

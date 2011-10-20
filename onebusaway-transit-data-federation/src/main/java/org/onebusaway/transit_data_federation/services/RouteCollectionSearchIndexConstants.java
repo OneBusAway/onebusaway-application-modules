@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
+package org.onebusaway.transit_data_federation.services;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+public class RouteCollectionSearchIndexConstants {
 
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+  public static final String FIELD_ROUTE_COLLECTION_AGENCY_ID = "routeCollectionAgencyId";
 
-public interface TransferPattern {
+  public static final String FIELD_ROUTE_COLLECTION_ID = "routeCollectionId";
 
-  public StopEntry getOriginStop();
+  public static final String FIELD_ROUTE_SHORT_NAME = "shortName";
 
-  public Collection<TransferParent> getTransfersForStops(TransferParent root,
-      List<StopEntry> stops);
-  
-  public Collection<TransferParent> getTransfersForAllStops(TransferParent root);
+  public static final String FIELD_ROUTE_LONG_NAME = "longName";
 
-  public Map<StopEntry, List<TransferParent>> getTransfersForHubStops(
-      TransferParent root);
+  public static final String FIELD_ROUTE_DESCRIPTION = "description";
 }

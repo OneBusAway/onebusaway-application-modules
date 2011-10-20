@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern;
+package org.onebusaway.transit_data_federation.services.tripplanner;
 
 import java.util.Collection;
 import java.util.HashMap;
