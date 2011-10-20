@@ -32,7 +32,7 @@
            
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
 
-  <bean id="bundle" class="org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle">
+  <bean id="bundle" class="org.onebusaway.transit_data_federation.model.FederatedTransitDataBundle">
     <property name="path" value="${bundlePath}" />
   </bean>
 
