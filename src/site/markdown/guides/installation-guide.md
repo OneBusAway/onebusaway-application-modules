@@ -8,8 +8,8 @@ with your data, check out our [quick-start guide](../../onebusaway-quickstart/cu
 
 Check out the [Downloads page](../downloads.html) for information about downloading the OneBusAway application modules.
 
-At minimum you need to download `onebusaway-transit-data-federation.jar` to build your transit data bundle and one of
-the webapps to host your OneBusAway instance.
+At minimum you need to download `onebusaway-transit-data-federation-builder.jar` to build your transit data bundle and
+one of the webapps to host your OneBusAway instance.
 
 ## Building a Bundle
 
@@ -18,8 +18,8 @@ agency (or group of transit agencies) in the internal format needed to power One
 are typically created from external data such as GTFS feeds for transit data and OpenStreetMap data for the street
 network.
 
-You will use the downloaded `onebusaway-transit-data-federation.jar` to build the bundle, but the instructions are
-complex enough to deserve there own page:
+You will use the downloaded `onebusaway-transit-data-federation-builder.jar` to build the bundle, but the instructions
+are complex enough to deserve there own page:
 
 * [Guide to Building a Transit Data Bundle](transit-data-bundle-guide.html)
 

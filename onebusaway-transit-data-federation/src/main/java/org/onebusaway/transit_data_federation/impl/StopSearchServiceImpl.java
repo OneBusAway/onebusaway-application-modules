@@ -15,12 +15,14 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import org.onebusaway.container.refresh.Refreshable;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.bundle.tasks.GenerateStopSearchIndexTask;
-import org.onebusaway.transit_data_federation.model.SearchResult;
-import org.onebusaway.transit_data_federation.services.StopSearchService;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -35,26 +37,23 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.TopDocCollector;
 import org.apache.lucene.search.TopDocs;
+import org.onebusaway.container.refresh.Refreshable;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.bundle.model.StopSearchIndexConstants;
+import org.onebusaway.transit_data_federation.model.SearchResult;
+import org.onebusaway.transit_data_federation.services.StopSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
 
 @Component
 public class StopSearchServiceImpl implements StopSearchService {
 
   private static Analyzer _analyzer = new StandardAnalyzer();
 
-  private static String[] CODE_FIELDS = {GenerateStopSearchIndexTask.FIELD_STOP_CODE};
+  private static String[] CODE_FIELDS = {StopSearchIndexConstants.FIELD_STOP_CODE};
 
-  private static String[] NAME_FIELDS = {GenerateStopSearchIndexTask.FIELD_STOP_NAME};
+  private static String[] NAME_FIELDS = {StopSearchIndexConstants.FIELD_STOP_NAME};
 
   private FederatedTransitDataBundle _bundle;
 
@@ -112,8 +111,8 @@ public class StopSearchServiceImpl implements StopSearchService {
       Document document = _searcher.doc(sd.doc);
       if (sd.score < minScoreToKeep)
         continue;
-      String agencyId = document.get(GenerateStopSearchIndexTask.FIELD_AGENCY_ID);
-      String stopId = document.get(GenerateStopSearchIndexTask.FIELD_STOP_ID);
+      String agencyId = document.get(StopSearchIndexConstants.FIELD_AGENCY_ID);
+      String stopId = document.get(StopSearchIndexConstants.FIELD_STOP_ID);
       AgencyAndId id = new AgencyAndId(agencyId, stopId);
 
       Float existingScore = topScores.get(id);

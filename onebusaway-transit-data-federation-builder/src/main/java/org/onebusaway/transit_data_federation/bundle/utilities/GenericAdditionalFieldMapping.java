@@ -16,7 +16,7 @@
 /**
  * 
  */
-package org.onebusaway.transit_data_federation.utilities;
+package org.onebusaway.transit_data_federation.bundle.utilities;
 
 import java.util.HashMap;
 import java.util.Map;

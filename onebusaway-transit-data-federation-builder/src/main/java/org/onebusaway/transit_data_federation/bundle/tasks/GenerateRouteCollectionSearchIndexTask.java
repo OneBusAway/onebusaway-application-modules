@@ -26,6 +26,7 @@ import org.apache.lucene.queryParser.ParseException;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.bundle.model.RouteCollectionSearchIndexConstants;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.RouteCollectionSearchServiceImpl;
 import org.onebusaway.transit_data_federation.model.narrative.RouteCollectionNarrative;
@@ -48,16 +49,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 public class GenerateRouteCollectionSearchIndexTask implements Runnable {
-
-  public static final String FIELD_ROUTE_COLLECTION_AGENCY_ID = "routeCollectionAgencyId";
-
-  public static final String FIELD_ROUTE_COLLECTION_ID = "routeCollectionId";
-
-  public static final String FIELD_ROUTE_SHORT_NAME = "shortName";
-
-  public static final String FIELD_ROUTE_LONG_NAME = "longName";
-
-  public static final String FIELD_ROUTE_DESCRIPTION = "description";
 
   private TransitGraphDao _transitGraphDao;
 
@@ -119,19 +110,24 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
     Document document = new Document();
 
     // Route Collection
-    document.add(new Field(FIELD_ROUTE_COLLECTION_AGENCY_ID,
+    document.add(new Field(
+        RouteCollectionSearchIndexConstants.FIELD_ROUTE_COLLECTION_AGENCY_ID,
         routeCollectionId.getAgencyId(), Field.Store.YES, Field.Index.NO));
-    document.add(new Field(FIELD_ROUTE_COLLECTION_ID,
+    document.add(new Field(
+        RouteCollectionSearchIndexConstants.FIELD_ROUTE_COLLECTION_ID,
         routeCollectionId.getId(), Field.Store.YES, Field.Index.NO));
 
     if (isValue(narrative.getShortName()))
-      document.add(new Field(FIELD_ROUTE_SHORT_NAME, narrative.getShortName(),
-          Field.Store.YES, Field.Index.ANALYZED));
+      document.add(new Field(
+          RouteCollectionSearchIndexConstants.FIELD_ROUTE_SHORT_NAME,
+          narrative.getShortName(), Field.Store.YES, Field.Index.ANALYZED));
     if (isValue(narrative.getLongName()))
-      document.add(new Field(FIELD_ROUTE_LONG_NAME, narrative.getLongName(),
-          Field.Store.NO, Field.Index.ANALYZED));
+      document.add(new Field(
+          RouteCollectionSearchIndexConstants.FIELD_ROUTE_LONG_NAME,
+          narrative.getLongName(), Field.Store.NO, Field.Index.ANALYZED));
     if (isValue(narrative.getDescription()))
-      document.add(new Field(FIELD_ROUTE_DESCRIPTION,
+      document.add(new Field(
+          RouteCollectionSearchIndexConstants.FIELD_ROUTE_DESCRIPTION,
           narrative.getDescription(), Field.Store.NO, Field.Index.ANALYZED));
 
     return document;

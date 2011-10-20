@@ -26,6 +26,7 @@ import org.apache.lucene.queryParser.ParseException;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
+import org.onebusaway.transit_data_federation.bundle.model.StopSearchIndexConstants;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.impl.StopSearchServiceImpl;
 import org.onebusaway.transit_data_federation.model.narrative.StopNarrative;
@@ -46,14 +47,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class GenerateStopSearchIndexTask implements Runnable {
-
-  public static final String FIELD_AGENCY_ID = "agencyId";
-
-  public static final String FIELD_STOP_ID = "stopId";
-
-  public static final String FIELD_STOP_NAME = "name";
-
-  public static final String FIELD_STOP_CODE = "code";
 
   private TransitGraphDao _transitGraphDao;
 
@@ -111,22 +104,22 @@ public class GenerateStopSearchIndexTask implements Runnable {
 
     // Id
     AgencyAndId id = stopEntry.getId();
-    document.add(new Field(FIELD_AGENCY_ID, id.getAgencyId(), Field.Store.YES,
-        Field.Index.NO));
-    document.add(new Field(FIELD_STOP_ID, id.getId(), Field.Store.YES,
-        Field.Index.ANALYZED));
+    document.add(new Field(StopSearchIndexConstants.FIELD_AGENCY_ID,
+        id.getAgencyId(), Field.Store.YES, Field.Index.NO));
+    document.add(new Field(StopSearchIndexConstants.FIELD_STOP_ID, id.getId(),
+        Field.Store.YES, Field.Index.ANALYZED));
 
     // Code
     if (narrative.getCode() != null && narrative.getCode().length() > 0)
-      document.add(new Field(FIELD_STOP_CODE, narrative.getCode(),
-          Field.Store.NO, Field.Index.ANALYZED));
+      document.add(new Field(StopSearchIndexConstants.FIELD_STOP_CODE,
+          narrative.getCode(), Field.Store.NO, Field.Index.ANALYZED));
     else
-      document.add(new Field(FIELD_STOP_CODE, stopEntry.getId().getId(),
-          Field.Store.NO, Field.Index.ANALYZED));
+      document.add(new Field(StopSearchIndexConstants.FIELD_STOP_CODE,
+          stopEntry.getId().getId(), Field.Store.NO, Field.Index.ANALYZED));
 
     if (narrative.getName() != null && narrative.getName().length() > 0)
-      document.add(new Field(FIELD_STOP_NAME, narrative.getName(),
-          Field.Store.YES, Field.Index.ANALYZED));
+      document.add(new Field(StopSearchIndexConstants.FIELD_STOP_NAME,
+          narrative.getName(), Field.Store.YES, Field.Index.ANALYZED));
 
     return document;
   }

@@ -20,14 +20,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreator;
-
 /**
  * Captures the file structure of various file artifacts of a federated transit
  * data bundle. All artifact file paths are relative to a base path.
  * 
  * @author bdferris
- * @see FederatedTransitDataBundleCreator
  */
 public class FederatedTransitDataBundle {
 

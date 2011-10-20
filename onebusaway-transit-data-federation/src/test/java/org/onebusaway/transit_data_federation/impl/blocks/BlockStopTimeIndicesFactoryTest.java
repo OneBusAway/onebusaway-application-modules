@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.bundle.tasks.block_indices;
+package org.onebusaway.transit_data_federation.impl.blocks;
 
 import static org.junit.Assert.assertEquals;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
@@ -31,7 +31,6 @@ import java.util.List;
 
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.impl.blocks.BlockStopTimeIndicesFactory;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;

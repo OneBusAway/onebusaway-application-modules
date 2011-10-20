@@ -34,9 +34,6 @@ import org.onebusaway.gtfs.model.ShapePoint;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.gtfs.services.calendar.CalendarService;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.BlockConfigurationEntriesFactory;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.ServiceIdOverlapCache;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockIndexFactoryServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
@@ -248,22 +245,6 @@ public class UnitTestingSupport {
     configurations.add(configuration);
 
     return configuration;
-  }
-
-  public static void linkBlockTrips(CalendarService calendarService,
-      BlockEntryImpl block, TripEntryImpl... trips) {
-
-    ServiceIdOverlapCache cache = new ServiceIdOverlapCache();
-    cache.setCalendarService(calendarService);
-
-    BlockConfigurationEntriesFactory factory = new BlockConfigurationEntriesFactory();
-    factory.setServiceIdOverlapCache(cache);
-
-    List<TripEntryImpl> tripsInBlock = new ArrayList<TripEntryImpl>();
-    for (TripEntryImpl trip : trips)
-      tripsInBlock.add(trip);
-
-    factory.processBlockConfigurations(block, tripsInBlock);
   }
 
   public static BlockConfigurationEntry linkBlockTrips(String blockId,

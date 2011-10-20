@@ -448,7 +448,7 @@
             <exclude>**/*.mp3</exclude>
             <exclude>**/*.wav</exclude>
             <exclude>src/test/resources/**</exclude>
-            <exclude>onebusaway-transit-data-federation/src/test/resources/**</exclude>
+            <exclude>onebusaway-transit-data-federation-builder/src/test/resources/**</exclude>
             <!-- JQuery Excludes -->
             <exclude>**/jquery*.js</exclude>
             <exclude>**/jquery*.css</exclude>
@@ -458,7 +458,7 @@
             <exclude>**/hosted.html</exclude>
           </excludes>
           <strictCheck>true</strictCheck>
-          <aggregate>true</aggregate>
+          <aggregate>false</aggregate>
           <headerSections>
             <headerSection>
               <key>COPYRIGHT_SECTION</key>

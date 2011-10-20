@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockTripIndices;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.findBlockConfig;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.linkBlockTrips;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
@@ -27,6 +26,7 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -36,6 +36,8 @@ import org.junit.Test;
 import org.onebusaway.gtfs.impl.calendar.CalendarServiceImpl;
 import org.onebusaway.gtfs.model.calendar.CalendarServiceData;
 import org.onebusaway.transit_data_federation.impl.ExtendedCalendarServiceImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
+import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl.Builder;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
@@ -44,6 +46,8 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.testing.UnitTestingSupport;
 
 public class BlockCalendarServiceImplTest {
@@ -83,6 +87,10 @@ public class BlockCalendarServiceImplTest {
     UnitTestingSupport.addDates(_calendarData, "sidB", serviceDateB,
         serviceDateC);
 
+    ServiceIdActivation ids_A_not_B = serviceIds(lsids("sidA"), lsids("sidB"));
+    ServiceIdActivation ids_B_not_A = serviceIds(lsids("sidB"), lsids("sidA"));
+    ServiceIdActivation ids_A_and_B = serviceIds(lsids("sidA", "sidB"), lsids());
+
     StopEntryImpl stopA = stop("stopA", 0.0, 0.0);
     StopEntryImpl stopB = stop("stopB", 0.0, 0.0);
 
@@ -95,14 +103,13 @@ public class BlockCalendarServiceImplTest {
     stopTime(2, stopB, tripB, time(10, 00), time(10, 00), 200);
     stopTime(3, stopA, tripB, time(10, 30), time(10, 30), 300);
 
-    linkBlockTrips(_calendarService, blockA, tripA, tripB);
+    linkBlockTrips(ids_A_not_B, blockA, tripA);
+    linkBlockTrips(ids_A_and_B, blockA, tripA, tripB);
+    linkBlockTrips(ids_B_not_A, blockA, tripB);
 
-    BlockConfigurationEntry bcA_A_B = findBlockConfig(blockA,
-        serviceIds(lsids("sidA"), lsids("sidB")));
-    BlockConfigurationEntry bcA_B_A = findBlockConfig(blockA,
-        serviceIds(lsids("sidB"), lsids("sidA")));
-    BlockConfigurationEntry bcA_AB = findBlockConfig(blockA,
-        serviceIds(lsids("sidA", "sidB"), lsids()));
+    BlockConfigurationEntry bcA_A_B = findBlockConfig(blockA, ids_A_not_B);
+    BlockConfigurationEntry bcA_B_A = findBlockConfig(blockA, ids_B_not_A);
+    BlockConfigurationEntry bcA_AB = findBlockConfig(blockA, ids_A_and_B);
 
     BlockEntryImpl blockB = block("blockB");
     TripEntryImpl tripC = trip("tripC", "sidA");
@@ -116,14 +123,13 @@ public class BlockCalendarServiceImplTest {
     stopTime(8, stopA, tripE, time(12, 00), time(12, 00), 0);
     stopTime(9, stopB, tripE, time(12, 30), time(12, 30), 0);
 
-    linkBlockTrips(_calendarService, blockB, tripC, tripD, tripE);
+    linkBlockTrips(ids_A_not_B, blockB, tripC, tripE);
+    linkBlockTrips(ids_A_and_B, blockB, tripC, tripD, tripE);
+    linkBlockTrips(ids_B_not_A, blockB, tripD);
 
-    BlockConfigurationEntry bcB_A_B = findBlockConfig(blockB,
-        serviceIds(lsids("sidA"), lsids("sidB")));
-    BlockConfigurationEntry bcB_B_A = findBlockConfig(blockB,
-        serviceIds(lsids("sidB"), lsids("sidA")));
-    BlockConfigurationEntry bcB_AB = findBlockConfig(blockB,
-        serviceIds(lsids("sidA", "sidB"), lsids()));
+    BlockConfigurationEntry bcB_A_B = findBlockConfig(blockB, ids_A_not_B);
+    BlockConfigurationEntry bcB_B_A = findBlockConfig(blockB, ids_B_not_A);
+    BlockConfigurationEntry bcB_AB = findBlockConfig(blockB, ids_A_and_B);
 
     List<BlockTripIndex> blocks = blockTripIndices(blockA, blockB);
 
@@ -298,6 +304,28 @@ public class BlockCalendarServiceImplTest {
     instance = instances.get(0);
     assertEquals(bcB_B_A, instance.getBlock());
     assertEquals(serviceDateC.getTime(), instance.getServiceDate());
+  }
+
+  private static void linkBlockTrips(ServiceIdActivation serviceIds,
+      BlockEntryImpl block, TripEntryImpl... trips) {
+
+    List<TripEntry> tripsInBlock = new ArrayList<TripEntry>();
+    for (TripEntryImpl trip : trips)
+      tripsInBlock.add(trip);
+
+    Builder builder = BlockConfigurationEntryImpl.builder();
+    builder.setBlock(block);
+    builder.setTripGapDistances(new double[tripsInBlock.size()]);
+    builder.setServiceIds(serviceIds);
+    builder.setTrips(tripsInBlock);
+
+    BlockConfigurationEntry config = builder.create();
+    List<BlockConfigurationEntry> configs = block.getConfigurations();
+    if (configs == null) {
+      configs = new ArrayList<BlockConfigurationEntry>();
+      block.setConfigurations(configs);
+    }
+    configs.add(config);
   }
 
   private static long timeFromString(String source) {

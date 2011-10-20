@@ -2,7 +2,7 @@
 
 To build your [transit data bundle](guides/transit-data-bundle-guide.html), you will need:
 
-* [onebusaway-transit-data-federation-${currentVersion}.jar](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation&c=withAllDependencies&e=jar&v=${currentVersion}) 
+* [onebusaway-transit-data-federation-builder-${currentVersion}.jar](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation-builder&c=withAllDependencies&e=jar&v=${currentVersion}) 
 
 To run the OneBusAway combined webapp (includes web, api, sms, and phone functionality), you will need:
 

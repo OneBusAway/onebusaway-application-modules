@@ -19,7 +19,7 @@ org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreatorM
 Thus, you can simply run the builder with:
   
 ~~~
-java -jar onebusaway-transit-data-federation.jar ...
+java -jar onebusaway-transit-data-federation-builder.jar ...
 ~~~
 
 **Note:** Depending on the size of your transit network, you may need to increase the amount of memory available to the

@@ -43,7 +43,7 @@ import org.apache.lucene.search.TopDocs;
 import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
-import org.onebusaway.transit_data_federation.bundle.tasks.GenerateRouteCollectionSearchIndexTask;
+import org.onebusaway.transit_data_federation.bundle.model.RouteCollectionSearchIndexConstants;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +56,8 @@ public class RouteCollectionSearchServiceImpl implements
   private static Analyzer _analyzer = new StandardAnalyzer();
 
   private static String[] NAME_FIELDS = {
-      GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_SHORT_NAME,
-      GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_LONG_NAME};
+      RouteCollectionSearchIndexConstants.FIELD_ROUTE_SHORT_NAME,
+      RouteCollectionSearchIndexConstants.FIELD_ROUTE_LONG_NAME};
 
   private FederatedTransitDataBundle _bundle;
 
@@ -105,29 +105,29 @@ public class RouteCollectionSearchServiceImpl implements
     TopDocs top = collector.topDocs();
 
     Map<AgencyAndId, Float> topScores = new HashMap<AgencyAndId, Float>();
-    
+
     String lowerCaseQueryValue = value.toLowerCase();
 
     for (ScoreDoc sd : top.scoreDocs) {
       Document document = _searcher.doc(sd.doc);
 
-      String routeShortName = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_SHORT_NAME);
-      
+      String routeShortName = document.get(RouteCollectionSearchIndexConstants.FIELD_ROUTE_SHORT_NAME);
+
       Set<String> tokens = new HashSet<String>();
-      if( routeShortName != null) {
-        for( String token : routeShortName.toLowerCase().split("\\b") ) {
-          if( ! token.isEmpty())
+      if (routeShortName != null) {
+        for (String token : routeShortName.toLowerCase().split("\\b")) {
+          if (!token.isEmpty())
             tokens.add(token);
         }
       }
-      
+
       // Result must have a minimum score to qualify
       if (sd.score < minScoreToKeep && !tokens.contains(lowerCaseQueryValue))
         continue;
 
       // Keep the best score for a particular id
-      String agencyId = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_AGENCY_ID);
-      String id = document.get(GenerateRouteCollectionSearchIndexTask.FIELD_ROUTE_COLLECTION_ID);
+      String agencyId = document.get(RouteCollectionSearchIndexConstants.FIELD_ROUTE_COLLECTION_AGENCY_ID);
+      String id = document.get(RouteCollectionSearchIndexConstants.FIELD_ROUTE_COLLECTION_ID);
       AgencyAndId routeId = new AgencyAndId(agencyId, id);
       Float score = topScores.get(routeId);
       if (score == null || score < sd.score)
