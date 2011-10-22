@@ -135,9 +135,6 @@ public class FederatedTransitDataBundleCreatorMain {
 
       if (commandLine.hasOption(ARG_USE_DATABASE_FOR_GTFS)) {
         contextPaths.add("classpath:org/onebusaway/gtfs/application-context.xml");
-        // HibernateGtfsRelationalDaoImpl store = new
-        // HibernateGtfsRelationalDaoImpl();
-        // store.setSessionFactory(_sessionFactory);
       } else {
         BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(GtfsRelationalDaoImpl.class);
         beans.put("gtfsRelationalDaoImpl", bean.getBeanDefinition());
