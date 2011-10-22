@@ -1,0 +1,36 @@
+Usage:
+  [args] gtfs_path [gtfs_path ...] output_directory
+  [args] beans.xml output_directory
+
+  Build a transit data bundle from GTFS feeds and other inputs.  The GTFS feeds can either be specified directly on the
+  command line or in a Spring beans.xml file (or combinations of both).  The transit data bundle is written to the
+  specified output directory.
+  
+Arguments:
+
+  -skipTo=name    Skip to the specified bundle building phase.
+  -only=name      Only execute the specified bundle building phase.  Can be repeated.
+  -skip=name      Skip the specified bundle building phase.  Can be repeated.
+  -include=name   Activate the specified bundle building phase if it is disabled by default.  Can be repeated.
+
+  -onlyIfDoesNotExist                  Only run the bundle building process if the bundle output directory does not
+                                       already exist.
+  -additionalResourcesDirectory=path   Any files in the specified directory will be copied into the transit data bundle
+                                       output directory.
+                                       
+  -bundleKey=value     Specify a key that 
+  -randomizeCacheDir   Use a random directory name for the bundle cache.  Useful when multiple instances of the bundle
+                       builder are being run in parallel against the same bundle directory.
+  
+  -useDatabaseForGtfs               Load GTFS into a database as opposed to in-memory.           
+  -dataSourceDriverClassName=value  Use the specified driver class-name for a GTFS database JDBC data-source. 
+  -dataSourceUrl=value              Use the specified url for a GTFS database JDBC data-source.
+  -dataSourceUsername=value         Use the specified username for a GTFS database JDBC data-source.
+  -dataSourcePassword=value         Use the specified password for a GTFS database JDBC data-source.
+  
+  -osm=path    Load OpenStreetMap data from the specified file instead of using the OSM API.
+
+For more documentation, see:
+  
+    http://developer.onebusaway.org/modules/onebusaway-application-modules/${project.version}/guides/transit-data-bundle-guide.html
+

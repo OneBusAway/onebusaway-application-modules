@@ -17,11 +17,6 @@
     <!-- OneBusAway Dependencies -->
     <dependency>
       <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-gtfs-hibernate-spring</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-container</artifactId>
       <version>${project.version}</version>
     </dependency>

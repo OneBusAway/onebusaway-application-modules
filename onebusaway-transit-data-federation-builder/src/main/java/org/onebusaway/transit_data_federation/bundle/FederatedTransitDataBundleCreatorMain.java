@@ -16,10 +16,13 @@
  */
 package org.onebusaway.transit_data_federation.bundle;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -132,11 +135,12 @@ public class FederatedTransitDataBundleCreatorMain {
 
       if (commandLine.hasOption(ARG_USE_DATABASE_FOR_GTFS)) {
         contextPaths.add("classpath:org/onebusaway/gtfs/application-context.xml");
-        // HibernateGtfsRelationalDaoImpl store = new HibernateGtfsRelationalDaoImpl();
-        // store.setSessionFactory(_sessionFactory);        
+        // HibernateGtfsRelationalDaoImpl store = new
+        // HibernateGtfsRelationalDaoImpl();
+        // store.setSessionFactory(_sessionFactory);
       } else {
         BeanDefinitionBuilder bean = BeanDefinitionBuilder.genericBeanDefinition(GtfsRelationalDaoImpl.class);
-        beans.put("gtfsRelationalDaoImpl",bean.getBeanDefinition());
+        beans.put("gtfsRelationalDaoImpl", bean.getBeanDefinition());
       }
 
       if (commandLine.hasOption(ARG_DATASOURCE_URL)) {
@@ -257,7 +261,24 @@ public class FederatedTransitDataBundleCreatorMain {
   }
 
   protected void printUsage() {
-    System.err.println("usage: bundle-context.xml output_directory");
+    InputStream is = getClass().getResourceAsStream("usage.txt");
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    String line = null;
+    try {
+      while ((line = reader.readLine()) != null) {
+        System.err.println(line);
+      }
+    } catch (IOException ex) {
+
+    } finally {
+      if (reader != null) {
+        try {
+          reader.close();
+        } catch (IOException ex) {
+
+        }
+      }
+    }
   }
 
   protected void setStagesToSkip(CommandLine commandLine,
