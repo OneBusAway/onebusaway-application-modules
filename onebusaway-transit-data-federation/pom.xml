@@ -41,6 +41,16 @@
       <groupId>org.opentripplanner</groupId>
       <artifactId>opentripplanner-routing</artifactId>
       <version>${opentripplanner-version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>hsqldb</groupId>
+          <artifactId>hsqldb</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
