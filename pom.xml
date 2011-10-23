@@ -20,11 +20,11 @@
     <struts-version>2.1.8.1</struts-version>
     <gwt-version>2.1.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
-    <csv-entities-version>1.0.2-SNAPSHOT</csv-entities-version>
-    <gtfs-version>1.2.5-SNAPSHOT</gtfs-version>
+    <csv-entities-version>1.0.2</csv-entities-version>
+    <gtfs-version>1.2.5</gtfs-version>
     <onebusaway-siri-version>1.0.2</onebusaway-siri-version>
     <opentripplanner-version>0.4.1</opentripplanner-version>
-    <wiki_integration_version>0.1.0-SNAPSHOT</wiki_integration_version>
+    <wiki_integration_version>1.0.0</wiki_integration_version>
   </properties>
 
   <repositories>
@@ -87,7 +87,7 @@
       <dependency>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-collections</artifactId>
-        <version>1.1.2-SNAPSHOT</version>
+        <version>1.1.2</version>
       </dependency>
 
       <dependency>
