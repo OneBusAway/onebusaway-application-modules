@@ -8,6 +8,12 @@ $H$H ${currentVersion}
 * Bump to require Maven 3
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
 
+$H$H 1.0.0
+
+* Initial Site Documentation
+* Bump to require Maven 3
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.0/
+
 $H$H 0.0.1
 
 * Initial release
