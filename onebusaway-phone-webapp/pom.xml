@@ -4,7 +4,7 @@
     <parent>
         <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>0.2.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-phone-webapp</artifactId>
