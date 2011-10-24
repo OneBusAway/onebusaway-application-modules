@@ -68,24 +68,6 @@
     </dependency>
   </dependencies>
 
-  <profiles>
-    <profile>
-      <activation>
-        <property>
-          <name>sound_transit</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <dependencies>
-        <dependency>
-          <groupId>org.onebusaway</groupId>
-          <artifactId>onebusaway-sound-transit-realtime</artifactId>
-          <version>0.0.1-SNAPSHOT</version>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
-
   <build>
     <finalName>onebusaway-transit-data-federation-webapp</finalName>
   </build>
