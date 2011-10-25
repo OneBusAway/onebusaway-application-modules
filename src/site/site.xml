@@ -28,7 +28,7 @@
       <item name="Troubleshooting" href="/guides/troubleshooting-guide.html" />
     </menu>
     <menu name="Development">
-      <item name="Development Guide" href="/development/index.html" />
+      <item name="Developer Site" href="https://code.google.com/p/onebusaway/" />
     </menu>
     <menu ref="reports" />
   </body>
