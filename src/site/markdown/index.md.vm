@@ -14,7 +14,7 @@ $H$H Functionality
 The OneBusAway application suite\'s primary function is to share real-time public transit information with riders across
 a variety of interfaces:
 
-* OneBusAway Webapp - A variety of web interfaces to transit data
+* [OneBusAway Web](features/web.html) - A variety of web interfaces to transit data
     * A standard web interface to transit data, including maps and stop pages with real-time info
     * A mobile-optimized version of the web interface for mobile browsers
     * A text-only version of the web interface for more-basic mobile browsers
@@ -23,8 +23,9 @@ built on top of transit data.  This API powers:
     * The OneBusAway [iPhone application](https://code.google.com/p/onebusaway/wiki/MobileApp_iPhone)
     * The OneBusAway [Android application](https://code.google.com/p/seattle-bus-bot/)
     * The OneBusAway [Windows Phone 7 application](https://onebusawaywp7.codeplex.com) 
-* OneBusAway SMS - An SMS service for accessing real-time transit information
-* OneBusAway Phone - A Interactive Voice Response (IVR) phone application for accessing real-time transit information
+* [OneBusAway Phone](features/phone-and-sms.html) - A Interactive Voice Response (IVR) phone application for accessing real-time transit information
+* [OneBusAway SMS](features/phone-and-sms.html) - An SMS service for accessing real-time transit information
+* [OneBusAway Sign Mode](features/sign-mode.html) - A interface mode optimized for large public displays
 
 These interfaces are powered by a transit-data back-end module that combines raw transit data (GTFS, GTFS-realtime, etc)
 into an optimized data-bundle appropriate for application development.

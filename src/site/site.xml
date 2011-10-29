@@ -16,7 +16,10 @@
       <item name="API Javadoc" href="/apidocs/index.html" />
     </menu>
     <menu name="Features">
+      <item name="Web" href="/features/web.html" />
       <item name="REST API" href="/api/where/index.html" />
+      <item name="Phone and SMS" href="/features/phone-and-sms.html" />
+      <item name="Sign Mode" href="/features/sign-mode.html" />
     </menu>    
     <menu name="Guides">
       <item name="Installation" href="/guides/installation-guide.html" />
