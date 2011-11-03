@@ -126,9 +126,7 @@ public class CacheableMethodManager {
       if (cache == null) {
         cache = createCache(pjp, name);
         if (cache == null) {
-          if(!_cacheManager.cacheExists(name))
-            _cacheManager.addCache(name);
-          
+          _cacheManager.addCache(name);
           cache = _cacheManager.getCache(name);
         } else {
           _cacheManager.addCache(cache);
