@@ -27,16 +27,6 @@
 
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context-services.xml" />
 
-  <bean id="bundleCreatorHibernateProperties" class="org.onebusaway.container.spring.PropertiesBeanPostProcessor">
-    <property name="target" value="hibernateProperties" />
-    <property name="properties">
-      <props>
-        <prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
-        <prop key="hibernate.cache.use_second_level_cache">false</prop>
-      </props>
-    </property>
-  </bean>
-
   <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
     <property name="properties">
       <props>

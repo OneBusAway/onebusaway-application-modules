@@ -85,16 +85,12 @@ public class FederatedTransitDataBundleCreatorMain {
 
   private static final String ARG_OSM = "osm";
 
-  private static final String ARG_NO_EXIT_ON_COMPLETION = "noExitOnCompletion";
-
   public static void main(String[] args) throws Exception {
     FederatedTransitDataBundleCreatorMain main = new FederatedTransitDataBundleCreatorMain();
     main.run(args);
   }
 
   public void run(String[] args) throws Exception {
-
-    boolean noExitOnCompletion = false;
 
     try {
       Parser parser = new GnuParser();
@@ -104,14 +100,10 @@ public class FederatedTransitDataBundleCreatorMain {
 
       CommandLine commandLine = parser.parse(options, args);
 
-      noExitOnCompletion = commandLine.hasOption(ARG_NO_EXIT_ON_COMPLETION);
-
       String[] remainingArgs = commandLine.getArgs();
 
       if (remainingArgs.length < 2) {
         printUsage();
-        if (noExitOnCompletion)
-          throw new IllegalArgumentException("expected at least two arguments");
         System.exit(-1);
       }
 
@@ -174,8 +166,6 @@ public class FederatedTransitDataBundleCreatorMain {
 
       if (commandLine.hasOption(ARG_ONLY_IF_DNE) && outputPath.exists()) {
         System.err.println("Bundle path already exists.  Exiting...");
-        if (noExitOnCompletion)
-          return;
         System.exit(0);
       }
 
@@ -227,20 +217,14 @@ public class FederatedTransitDataBundleCreatorMain {
         creator.run();
       } catch (Exception ex) {
         _log.error("error building transit data bundle", ex);
-        if (noExitOnCompletion)
-          throw ex;
         System.exit(-1);
       }
     } catch (ParseException ex) {
       System.err.println(ex.getLocalizedMessage());
       printUsage();
-      if (noExitOnCompletion)
-        throw ex;
       System.exit(-1);
     }
 
-    if (noExitOnCompletion)
-      return;
     System.exit(0);
   }
 
@@ -258,7 +242,6 @@ public class FederatedTransitDataBundleCreatorMain {
     options.addOption(ARG_RANDOMIZE_CACHE_DIR, false, "");
     options.addOption(ARG_ADDITIONAL_RESOURCES_DIRECTORY, true, "");
     options.addOption(ARG_OSM, true, "");
-    options.addOption(ARG_NO_EXIT_ON_COMPLETION, false, "");
 
     Option dOption = new Option("D", "use value for given property");
     dOption.setArgName("property=value");

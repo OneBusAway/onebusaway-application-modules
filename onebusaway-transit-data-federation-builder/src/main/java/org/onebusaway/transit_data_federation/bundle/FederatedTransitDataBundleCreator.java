@@ -34,6 +34,7 @@ import org.onebusaway.transit_data_federation.bundle.model.GtfsBundle;
 import org.onebusaway.transit_data_federation.bundle.model.TaskDefinition;
 import org.onebusaway.transit_data_federation.impl.DirectedGraph;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ApplicationContext;
@@ -67,9 +68,13 @@ public class FederatedTransitDataBundleCreator {
 
   private static final String BUNDLE_RESOURCE = "classpath:org/onebusaway/transit_data_federation/bundle/application-context-bundle-creator.xml";
 
+  private ConfigurableApplicationContext _context;
+
   private List<String> _contextPaths = new ArrayList<String>();
 
   private Map<String, BeanDefinition> _contextBeans = new HashMap<String, BeanDefinition>();
+
+  private Properties _additionalBeanPropertyOverrides;
 
   private File _outputPath;
 
@@ -85,7 +90,14 @@ public class FederatedTransitDataBundleCreator {
 
   private String _bundleKey;
 
-  private Properties _additionalBeanPropertyOverrides;
+  /**
+   * 
+   * @param context
+   */
+  @Autowired
+  public void setContext(ConfigurableApplicationContext context) {
+    _context = context;
+  }
 
   /**
    * Additional context paths that will be added when constructing the Spring
@@ -133,12 +145,10 @@ public class FederatedTransitDataBundleCreator {
   public void setRandomizeCacheDir(boolean randomizeCacheDir) {
     _randomizeCacheDir = randomizeCacheDir;
   }
-  
 
   public void setAdditionalBeanPropertyOverrides(Properties props) {
     _additionalBeanPropertyOverrides = props;
   }
-
 
   /**
    * Build the bundle!
@@ -152,29 +162,17 @@ public class FederatedTransitDataBundleCreator {
 
     _outputPath.mkdirs();
 
-    /**
-     * Set the bundlePath system property. Will be used by "${bundle_path}"
-     * references in the Spring config
-     */
-    System.setProperty("bundlePath", _outputPath.getAbsolutePath());
+    setSystemProperties();
 
-    String cacheDir = _outputPath.getAbsolutePath() + File.separator + "cache";
-    if (_randomizeCacheDir)
-      cacheDir += "-" + UUID.randomUUID().toString();
-    System.setProperty("bundleCacheDir", cacheDir);
+    ConfigurableApplicationContext context = _context;
+    boolean closeContextOnCompletion = false;
 
-    List<String> contextPaths = getPrimaryApplicatonContextPaths();
-    Map<String, BeanDefinition> contextBeans = getPrimaryBeanDefintions();
-
-    boolean resetDatabase = isDatabaseResetNeeded();
-    if (resetDatabase) {
-      System.setProperty("hibernate.hbm2ddl.auto", "create");
-    } else {
-      System.setProperty("hibernate.hbm2ddl.auto", "update");
+    if (context == null) {
+      List<String> contextPaths = getPrimaryApplicatonContextPaths();
+      Map<String, BeanDefinition> contextBeans = getPrimaryBeanDefintions();
+      context = ContainerLibrary.createContext(contextPaths, contextBeans);
+      closeContextOnCompletion = true;
     }
-
-    ConfigurableApplicationContext context = ContainerLibrary.createContext(
-        contextPaths, contextBeans);
 
     List<TaskDefinition> taskDefinitions = getTaskList(context);
     Set<String> taskNames = getReducedTaskList(taskDefinitions);
@@ -203,19 +201,36 @@ public class FederatedTransitDataBundleCreator {
     }
 
     // We don't need this context anymore
-    context.stop();
-    context.close();
-    context = null;
+    if (closeContextOnCompletion) {
+      context.stop();
+      context.close();
+      context = null;
+    }
   }
 
-  private Runnable getTask(ApplicationContext context, Runnable task,
-      String taskBeanName) {
+  /****
+   * Private Methods
+   ****/
 
-    if (task == null && taskBeanName != null) {
-      task = context.getBean(taskBeanName, Runnable.class);
+  private void setSystemProperties() {
+
+    /**
+     * Set the bundlePath system property. Will be used by "${bundle_path}"
+     * references in the Spring config
+     */
+    System.setProperty("bundlePath", _outputPath.getAbsolutePath());
+
+    String cacheDir = _outputPath.getAbsolutePath() + File.separator + "cache";
+    if (_randomizeCacheDir)
+      cacheDir += "-" + UUID.randomUUID().toString();
+    System.setProperty("bundleCacheDir", cacheDir);
+
+    boolean resetDatabase = isDatabaseResetNeeded();
+    if (resetDatabase) {
+      System.setProperty("hibernate.hbm2ddl.auto", "create");
+    } else {
+      System.setProperty("hibernate.hbm2ddl.auto", "update");
     }
-
-    return task;
   }
 
   private boolean isDatabaseResetNeeded() {
@@ -227,10 +242,6 @@ public class FederatedTransitDataBundleCreator {
       return false;
     return true;
   }
-
-  /****
-   * Private Methods
-   ****/
 
   private List<String> getPrimaryApplicatonContextPaths() {
     List<String> paths = new ArrayList<String>();
@@ -248,8 +259,8 @@ public class FederatedTransitDataBundleCreator {
     if (_bundleKey != null) {
       p.setProperty("bundle.key", _bundleKey);
     }
-    
-    if( _additionalBeanPropertyOverrides != null)
+
+    if (_additionalBeanPropertyOverrides != null)
       p.putAll(_additionalBeanPropertyOverrides);
 
     BeanDefinitionBuilder propertyOverrides = BeanDefinitionBuilder.genericBeanDefinition(PropertyOverrideConfigurer.class);
@@ -275,6 +286,16 @@ public class FederatedTransitDataBundleCreator {
       if (file.isFile())
         file.delete();
     }
+  }
+
+  private Runnable getTask(ApplicationContext context, Runnable task,
+      String taskBeanName) {
+
+    if (task == null && taskBeanName != null) {
+      task = context.getBean(taskBeanName, Runnable.class);
+    }
+
+    return task;
   }
 
   private List<TaskDefinition> getTaskList(ApplicationContext context)
