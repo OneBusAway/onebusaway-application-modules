@@ -27,6 +27,5 @@
   <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />
   <constant name="struts.convention.action.checkImplementsAction" value="false" />
   <constant name="struts.action.excludePattern" value="/services/.*,/api/.*" />
-<!--  <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />-->
   <include file="struts-onebusaway-webapp.xml"/>
 </struts>
