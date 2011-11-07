@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.sms.actions;
+package org.onebusaway.sms.actions.sms;
 
-public class QueryDefaultSearchLocationAction extends AbstractTextmarksAction {
+public class CommandSetSearchLocationAction extends AbstractTextmarksAction {
 
   private static final long serialVersionUID = 1L;
 
   @Override
   public String execute() {
-    pushNextAction("set-default-search-location");
-    return SUCCESS;
+    pushNextAction("default-search-location-set");
+    return "query-default-search-location";
   }
 }

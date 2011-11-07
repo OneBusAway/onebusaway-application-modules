@@ -13,27 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.sms.actions;
+package org.onebusaway.sms.actions.sms;
 
-public class CommandRegisterAction extends AbstractTextmarksAction {
+import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.users.client.model.UserBean;
+import org.onebusaway.users.services.BookmarkException;
+
+import com.opensymphony.xwork2.ModelDriven;
+
+public class CommandDebugAction extends AbstractTextmarksAction implements
+    ModelDriven<UserBean> {
 
   private static final long serialVersionUID = 1L;
 
-  private String _arg;
+  private UserBean _user;
 
-  public void setArg(String arg) {
-    _arg = arg;
+  public UserBean getModel() {
+    return _user;
   }
 
   @Override
-  public String execute() {
+  public String execute() throws ServiceException, BookmarkException {
 
-    if (_arg == null || _arg.length() == 0)
-      return INPUT;
+    _user = _currentUserService.getCurrentUser();
 
-    if( _currentUserService.completePhoneNumberRegistration(_arg) )
-      return SUCCESS;
-    
-    return "invalidRegistrationCode";
+    return SUCCESS;
   }
 }

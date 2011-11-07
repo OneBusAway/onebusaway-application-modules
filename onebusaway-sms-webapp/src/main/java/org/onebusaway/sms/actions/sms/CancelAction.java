@@ -13,30 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.sms.actions;
+package org.onebusaway.sms.actions.sms;
 
-import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.users.client.model.UserBean;
-import org.onebusaway.users.services.BookmarkException;
-
-import com.opensymphony.xwork2.ModelDriven;
-
-public class CommandDebugAction extends AbstractTextmarksAction implements
-    ModelDriven<UserBean> {
+public class CancelAction extends AbstractTextmarksAction {
 
   private static final long serialVersionUID = 1L;
 
-  private UserBean _user;
+  private int _selectedIndex;
 
-  public UserBean getModel() {
-    return _user;
+  public int getSelectedIndex() {
+    return _selectedIndex;
   }
 
   @Override
-  public String execute() throws ServiceException, BookmarkException {
-
-    _user = _currentUserService.getCurrentUser();
-
+  public String execute() {
+    clearNextActions();
     return SUCCESS;
   }
 }
