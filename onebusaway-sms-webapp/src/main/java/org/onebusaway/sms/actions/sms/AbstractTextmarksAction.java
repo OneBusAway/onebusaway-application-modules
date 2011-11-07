@@ -17,8 +17,7 @@ package org.onebusaway.sms.actions.sms;
 
 import java.util.Map;
 
-import org.apache.struts2.convention.annotation.InterceptorRef;
-import org.apache.struts2.convention.annotation.InterceptorRefs;
+import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.presentation.impl.NextActionSupport;
@@ -31,7 +30,7 @@ import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.ActionProxy;
 
-@InterceptorRefs( {@InterceptorRef("onebusaway-sms-webapp-stack")})
+@ParentPackage("onebusaway-sms-webapp-default")
 @Results( {
     @Result(type = "chain", name = "stop-by-number", location = "stop-by-number"),
     @Result(type = "chain", name = "arrivals-and-departures", location = "arrivals-and-departures"),
