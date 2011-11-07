@@ -249,6 +249,9 @@ class GtfsRealtimeTripLibrary {
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
         block.getId(), timeFrom, timeTo);
     if (instances.isEmpty()) {
+      instances = _blockCalendarService.getClosestActiveBlocks(block.getId(), t);
+    }
+    if (instances.isEmpty()) {
       _log.warn("could not find any active schedules instance for the specified block="
           + block.getId() + " tripUpdates=" + tripUpdates);
       return;
