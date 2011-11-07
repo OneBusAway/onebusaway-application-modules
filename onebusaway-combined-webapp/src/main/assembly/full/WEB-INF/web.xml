@@ -25,23 +25,15 @@
     <param-name>contextConfigLocation</param-name>
     <param-value>
             classpath:data-sources.xml
+            classpath:org/onebusaway/api/application-context-webapp.xml
+            classpath:org/onebusaway/phone/application-context-webapp.xml
+            classpath:org/onebusaway/sms/application-context-webapp.xml
             classpath:org/onebusaway/webapp/application-context-webapp.xml
             classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml
         </param-value>
-        <!-- classpath:org/onebusaway/api/application-context-webapp.xml -->
   </context-param>
     
-    <!-- We set a custom Spring ApplicationContext class for loading bean definitions from the command line -->
-  <context-param>
-    <param-name>contextClass</param-name>
-    <param-value>org.onebusaway.quickstart.webapp.BootstrapWebApplicationContext</param-value>
-  </context-param>
-
-    <!-- Filters -->
-  <filter>
-    <filter-name>welcomeFilter</filter-name>
-    <filter-class>org.onebusaway.quickstart.webapp.WelcomeFilter</filter-class>
-  </filter>
+  <!-- Filters -->
   <filter>
     <filter-name>springSecurityFilterChain</filter-name>
     <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -63,10 +55,6 @@
     <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsExecuteFilter</filter-class>
   </filter>
 
-  <filter-mapping>
-    <filter-name>welcomeFilter</filter-name>
-    <url-pattern>/*</url-pattern>
-  </filter-mapping>
   <filter-mapping>
     <filter-name>springSecurityFilterChain</filter-name>
     <url-pattern>/*</url-pattern>

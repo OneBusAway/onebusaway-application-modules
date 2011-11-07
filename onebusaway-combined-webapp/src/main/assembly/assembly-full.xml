@@ -35,6 +35,8 @@
       <includes>
         <include>org.onebusaway:onebusaway-webapp:war</include>
         <include>org.onebusaway:onebusaway-api-webapp:war</include>
+        <include>org.onebusaway:onebusaway-phone-webapp:war</include>
+        <include>org.onebusaway:onebusaway-sms-webapp:war</include>
         <include>org.onebusaway:onebusaway-transit-data-federation-webapp:war</include>
       </includes>
       <outputDirectory>/</outputDirectory>
@@ -50,7 +52,7 @@
   </dependencySets>
   <fileSets>
     <fileSet>
-      <directory>src/main/assembly/webapp</directory>
+      <directory>src/main/assembly/full</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
   </fileSets>

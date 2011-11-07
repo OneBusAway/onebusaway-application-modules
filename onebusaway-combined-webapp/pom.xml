@@ -7,16 +7,11 @@
   </parent>
   <groupId>org.onebusaway</groupId>
   <artifactId>onebusaway-combined-webapp</artifactId>
+  <packaging>pom</packaging>
 
   <name>onebusaway-combined-webapp</name>
 
   <dependencies>
-    <dependency>
-      <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-webapp</artifactId>
-      <version>${project.version}</version>
-      <type>war</type>
-    </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-api-webapp</artifactId>
@@ -25,15 +20,27 @@
     </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-transit-data-federation-webapp</artifactId>
+      <artifactId>onebusaway-phone-webapp</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>    
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-sms-webapp</artifactId>
       <version>${project.version}</version>
       <type>war</type>
     </dependency>
-    <!-- We use this for onebusaway-webapp -->
     <dependency>
       <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-wiki-integration-file</artifactId>
-      <version>${wiki_integration_version}</version>
+      <artifactId>onebusaway-webapp</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>     
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-transit-data-federation-webapp</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
     </dependency>
   </dependencies>
 

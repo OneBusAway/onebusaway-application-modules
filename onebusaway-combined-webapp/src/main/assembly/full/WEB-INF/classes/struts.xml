@@ -22,12 +22,13 @@
 <struts>
 
   <include file="struts-onebusaway-api-webapp.xml" />
+  <include file="struts-onebusaway-sms-webapp.xml" />
   <include file="struts-onebusaway-webapp.xml" />
 
   <constant name="struts.convention.action.suffix" value="Action" />
   <constant name="struts.convention.action.mapAllMatches" value="true" />
 
-  <constant name="struts.convention.action.packages" value="org.onebusaway.webapp.actions,org.onebusaway.api.actions" />
+  <constant name="struts.convention.action.packages" value="org.onebusaway.webapp.actions,org.onebusaway.api.actions,org.onebusaway.sms.actions" />
   <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway" />
   <constant name="struts.convention.action.checkImplementsAction" value="false" />
   <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />

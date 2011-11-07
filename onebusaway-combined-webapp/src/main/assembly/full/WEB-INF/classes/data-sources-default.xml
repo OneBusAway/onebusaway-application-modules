@@ -21,8 +21,6 @@
     <property name="password" value="" />
   </bean>
 
-  <alias name="dataSource" alias="mutableDataSource" />
-  
   <bean class="org.onebusaway.users.impl.CreateUserAction">
     <property name="username" value="admin"/>
     <property name="password" value="password"/>
