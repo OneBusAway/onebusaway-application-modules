@@ -29,7 +29,7 @@ public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
 
   private TextModification _abbreviations;
   
-  @Autowired
+  @Autowired(required=false)
   public void setDestinationAbbreviations(
       @Qualifier("smsDestinationAbbreviations") TextModification strategy) {
     _abbreviations = strategy;
@@ -46,6 +46,8 @@ public class SmsArrivalsAndDeparturesModel extends ArrivalsAndDeparturesModel {
   }
 
   public String abbreviate(String destination) {
+    if( _abbreviations == null)
+      return destination;
     return _abbreviations.modify(destination);
   }
 }

@@ -15,8 +15,6 @@
  */
 package org.onebusaway.presentation.impl.text;
 
-import org.onebusaway.presentation.services.text.TextModification;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -24,9 +22,15 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.onebusaway.presentation.services.text.TextModification;
+
 public class DirectReplacementStrategy implements TextModification {
 
   private Map<String, String> _replacements = new HashMap<String, String>();
+
+  public void setReplacements(Map<String, String> replacements) {
+    _replacements.putAll(replacements);
+  }
 
   public void setReplacementsFromFile(File file) throws IOException {
 

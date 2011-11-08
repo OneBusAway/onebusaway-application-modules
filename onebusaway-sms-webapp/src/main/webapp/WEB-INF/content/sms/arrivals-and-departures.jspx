@@ -25,8 +25,9 @@
 <body>
 
 <s:iterator value="result.arrivalsAndDepartures">
+    <s:set var="routeName"><oba:routeName value="trip.route" /></s:set>
     <div>
-      <oba:routeName value="trip.route" /><jsp:text> </jsp:text><s:property value="abbreviate(trip.tripHeadsign)" />: <s:property value="getMinutesLabel(top)" />
+      <s:property value="abbreviate(#routeName)" /><jsp:text> </jsp:text><s:property value="abbreviate(trip.tripHeadsign)" />: <s:property value="getMinutesLabel(top)" />
     </div>            
 </s:iterator>
 
