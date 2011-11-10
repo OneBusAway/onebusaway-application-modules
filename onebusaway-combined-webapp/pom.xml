@@ -57,6 +57,7 @@
             </goals>
             <configuration>
               <descriptors>
+                <descriptor>src/main/assembly/assembly-api-only.xml</descriptor>
                 <descriptor>src/main/assembly/assembly-full.xml</descriptor>
               </descriptors>
             </configuration>

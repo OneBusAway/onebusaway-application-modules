@@ -2,6 +2,7 @@
 <!--
 
     Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+    Copyright (C) 2011 Google, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
-  <id>full</id>
+  <id>api-only</id>
   <formats>
     <format>war</format>
   </formats>
@@ -26,10 +27,7 @@
   <dependencySets>
     <dependencySet>
       <includes>
-        <include>org.onebusaway:onebusaway-webapp:war</include>
         <include>org.onebusaway:onebusaway-api-webapp:war</include>
-        <include>org.onebusaway:onebusaway-phone-webapp:war</include>
-        <include>org.onebusaway:onebusaway-sms-webapp:war</include>
         <include>org.onebusaway:onebusaway-transit-data-federation-webapp:war</include>
       </includes>
       <outputDirectory>/</outputDirectory>
@@ -38,14 +36,13 @@
         <excludes>
           <exclude>WEB-INF/web.xml</exclude>
           <exclude>WEB-INF/classes/data-sources*.xml</exclude>
-          <exclude>WEB-INF/classes/struts.xml</exclude>
         </excludes>
       </unpackOptions>
     </dependencySet>
   </dependencySets>
   <fileSets>
     <fileSet>
-      <directory>src/main/assembly/full</directory>
+      <directory>src/main/assembly/api-only</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
   </fileSets>
