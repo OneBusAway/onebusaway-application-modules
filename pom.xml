@@ -24,6 +24,11 @@
     <onebusaway-siri-version>1.0.2</onebusaway-siri-version>
     <opentripplanner-version>0.4.1</opentripplanner-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
+    <!-- We don't want to release these to the main Maven repo, so we deploy to the OBA repo by default -->
+    <distribution_id>nexus.onebusaway.org-releases</distribution_id>
+    <distribution_url>http://nexus.onebusaway.org/content/repositories/releases/</distribution_url>
+    <snapshot_distribution_id>nexus.onebusaway.org-snapshots</snapshot_distribution_id>
+    <snapshot_distribution_url>http://nexus.onebusaway.org/content/repositories/snapshots/</snapshot_distribution_url>    
   </properties>
 
   <repositories>
