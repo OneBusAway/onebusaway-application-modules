@@ -84,20 +84,26 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
   @Cacheable
   public STRtree getStopsTreeForRouteId(AgencyAndId routeId) {
-    STRtree tree = new STRtree();
+    STRtree tree = null;
+
     for (StopEntry stop : _graphDao.getAllStops()) {
        Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
 
        if(!routeIds.contains(routeId))
          continue;
 
+       if(tree == null)
+         tree = new STRtree();
+       
        double x = stop.getStopLon();
        double y = stop.getStopLat();
        Envelope env = new Envelope(x, x, y, y);
        tree.insert(env, routeId);
     }
 
-    tree.build();
+    if(tree != null)
+      tree.build();
+
     return tree;
   }
 
