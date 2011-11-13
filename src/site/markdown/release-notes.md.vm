@@ -4,21 +4,18 @@
 
 $H$H ${currentVersion}
 
-* More flexible trip matching in GTFS-realtime support
-
-* Support for running transit data bundle building as a startup phase of webapps
-
-* Expand onebusaway-combined-webapp to include SMS and phone support
-
-* Expand onebusaway-combined-webapp to generate an additional API-only webapp artifact
-
-* Move SMS actions into /sms namespace for onebusaway-sms-webapp
-
-* Make SMS abbreviations optional in onebusaway-sms-webapp
-
-* Additional documentation
-
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
+
+1.0.1
+
+* More flexible trip matching in GTFS-realtime support
+* Support for running transit data bundle building as a startup phase of webapps
+* Expand onebusaway-combined-webapp to include SMS and phone support
+* Expand onebusaway-combined-webapp to generate an additional API-only webapp artifact
+* Move SMS actions into /sms namespace for onebusaway-sms-webapp
+* Make SMS abbreviations optional in onebusaway-sms-webapp
+* Additional documentation
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.1/
 
 $H$H 1.0.0
 
