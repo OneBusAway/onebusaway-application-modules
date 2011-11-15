@@ -18,6 +18,7 @@ var oba_where_standard_trip = function(data) {
 	var map = OBA.Maps.map(data.mapElement);
 	var markerManager = OBA.Maps.markerManager(map);
 	var infoWindow = new google.maps.InfoWindow();
+	var vehicleLocationMarker = null;
 	
 	/****
 	 * Draw a shape on the map in response to an api call
@@ -99,8 +100,25 @@ var oba_where_standard_trip = function(data) {
 			bounds.extend(new google.maps.LatLng(this.stop.lat,this.stop.lon));
 		});
 		
+		if( tripDetails.status && tripDetails.status.lastKnownLocation ) {
+			var lastKnownLocation = tripDetails.status.lastKnownLocation;
+			var location = new google.maps.LatLng(lastKnownLocation.lat,lastKnownLocation.lon);
+			vehicleLocationMarker = new google.maps.Marker({position: location, map: map, clickable: false});
+		}
+		
 		if( ! bounds.isEmpty() )
 			map.fitBounds(bounds);
+	};
+	
+	var tripStatusHandler = function(tripDetails) {
+		if( vehicleLocationMarker ) {
+			vehicleLocationMarker.setMap(null);
+		}
+		if( tripDetails.status && tripDetails.status.lastKnownLocation ) {
+			var lastKnownLocation = tripDetails.status.lastKnownLocation;
+			var location = new google.maps.LatLng(lastKnownLocation.lat,lastKnownLocation.lon);
+			vehicleLocationMarker = new google.maps.Marker({position: location, map: map, clickable: false});
+		}
 	};
 	
 	/****
@@ -111,7 +129,7 @@ var oba_where_standard_trip = function(data) {
 	
 	params.tripId = data.tripId;
 	params.serviceDate = data.serviceDate;
-	params.time = data.time;
+	//params.time = data.time;
 	if( data.vehicleId )
 		params.vehicleId = data.vehicleId;
 	params.includeTrip = true;
@@ -120,6 +138,9 @@ var oba_where_standard_trip = function(data) {
 	
 	OBA.Maps.mapReady(map,function(){
 		OBA.Api.tripDetails(params, tripDetailsHandler);
+		setInterval(function() {
+			OBA.Api.tripDetails(params, tripStatusHandler);
+		},30000);
 	});
 	
 	/****

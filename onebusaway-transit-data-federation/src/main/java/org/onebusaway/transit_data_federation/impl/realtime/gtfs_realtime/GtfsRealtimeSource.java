@@ -42,15 +42,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.protobuf.ExtensionRegistry;
 import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtimeConstants;
+import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 
 public class GtfsRealtimeSource {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeSource.class);
+
+  private static final ExtensionRegistry _registry = ExtensionRegistry.newInstance();
+
+  static {
+    _registry.add(GtfsRealtimeOneBusAway.delay);
+  }
 
   private AgencyService _agencyService;
 
@@ -271,7 +279,7 @@ public class GtfsRealtimeSource {
   private FeedMessage readFeedFromUrl(URL url) throws IOException {
     InputStream in = url.openStream();
     try {
-      return FeedMessage.parseFrom(in);
+      return FeedMessage.parseFrom(in, _registry);
     } finally {
       try {
         in.close();

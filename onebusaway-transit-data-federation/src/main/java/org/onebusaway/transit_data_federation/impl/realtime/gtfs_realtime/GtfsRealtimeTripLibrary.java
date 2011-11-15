@@ -37,6 +37,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
+import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.Position;
@@ -54,7 +56,10 @@ class GtfsRealtimeTripLibrary {
 
   private BlockCalendarService _blockCalendarService;
 
-  private long _currentTime = System.currentTimeMillis();
+  /**
+   * This is primarily here to assist with unit testing.
+   */
+  private long _currentTime = 0;
 
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
@@ -90,8 +95,27 @@ class GtfsRealtimeTripLibrary {
       update.tripUpdates = entry.getValue();
 
       FeedEntity vehiclePositionEntity = vehiclePositionsByBlockDescriptor.get(update.block);
-      if (vehiclePositionEntity != null)
-        update.vehiclePosition = vehiclePositionEntity.getVehicle();
+      if (vehiclePositionEntity != null) {
+        VehiclePosition vehiclePosition = vehiclePositionEntity.getVehicle();
+        update.vehiclePosition = vehiclePosition;
+        if (vehiclePosition.hasVehicle()) {
+          VehicleDescriptor vehicle = vehiclePosition.getVehicle();
+          if (vehicle.hasId()) {
+            update.block.setVehicleId(vehicle.getId());
+          }
+        }
+      }
+
+      if (update.block.getVehicleId() == null) {
+        for (TripUpdate tripUpdate : update.tripUpdates) {
+          if (tripUpdate.hasVehicle()) {
+            VehicleDescriptor vehicle = tripUpdate.getVehicle();
+            if (vehicle.hasId()) {
+              update.block.setVehicleId(vehicle.getId());
+            }
+          }
+        }
+      }
 
       updates.add(update);
     }
@@ -163,29 +187,39 @@ class GtfsRealtimeTripLibrary {
       if (blockDescriptor == null)
         continue;
 
-      if (tripUpdate.getStopTimeUpdateCount() == 0)
+      if (!hasDelayValue(tripUpdate)) {
         continue;
-
-      StopTimeUpdate stopTimeUpdate = tripUpdate.getStopTimeUpdate(0);
-      if (!(stopTimeUpdate.hasArrival() || stopTimeUpdate.hasDeparture()))
-        continue;
-
-      boolean hasDelay = false;
-      if (stopTimeUpdate.hasDeparture()) {
-        StopTimeEvent departure = stopTimeUpdate.getDeparture();
-        hasDelay |= departure.hasDelay();
       }
-      if (stopTimeUpdate.hasArrival()) {
-        StopTimeEvent arrival = stopTimeUpdate.getArrival();
-        hasDelay |= arrival.hasDelay();
-      }
-      if (!hasDelay)
-        continue;
 
       tripUpdatesByBlockDescriptor.get(blockDescriptor).add(tripUpdate);
     }
 
     return tripUpdatesByBlockDescriptor;
+  }
+
+  private boolean hasDelayValue(TripUpdate tripUpdate) {
+
+    if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.delay)) {
+      return true;
+    }
+
+    if (tripUpdate.getStopTimeUpdateCount() == 0)
+      return false;
+
+    StopTimeUpdate stopTimeUpdate = tripUpdate.getStopTimeUpdate(0);
+    if (!(stopTimeUpdate.hasArrival() || stopTimeUpdate.hasDeparture()))
+      return false;
+
+    boolean hasDelay = false;
+    if (stopTimeUpdate.hasDeparture()) {
+      StopTimeEvent departure = stopTimeUpdate.getDeparture();
+      hasDelay |= departure.hasDelay();
+    }
+    if (stopTimeUpdate.hasArrival()) {
+      StopTimeEvent arrival = stopTimeUpdate.getArrival();
+      hasDelay |= arrival.hasDelay();
+    }
+    return hasDelay;
   }
 
   private Map<BlockDescriptor, FeedEntity> getVehiclePositionsByBlockDescriptor(
@@ -277,6 +311,17 @@ class GtfsRealtimeTripLibrary {
       List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
+
+          if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.delay)) {
+            /**
+             * TODO: Improved logic around picking the "best" schedule deviation
+             */
+            int delay = tripUpdate.getExtension(GtfsRealtimeOneBusAway.delay);
+            best.delta = 0;
+            best.isInPast = false;
+            best.scheduleDeviation = delay;
+          }
+
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
             BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(
                 tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
