@@ -40,11 +40,15 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
+
+  private static Logger _log = LoggerFactory.getLogger(VehicleStatusBeanServiceImpl.class);
 
   private VehicleStatusService _vehicleStatusService;
 
@@ -77,6 +81,12 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
+  }
+
+  @Autowired
+  public void setBlockLocationService(
+      BlockLocationService blockLocationService) {
+      _blockLocationService = blockLocationService;
   }
 
   public VehicleStatusBean getVehicleForId(AgencyAndId vehicleId, long time) {
@@ -112,6 +122,10 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
 
     TargetTime target = new TargetTime(targetTime, targetTime);
 
+    if (_blockLocationService == null) {
+	_log.error("blocklocationservice is null");
+	return null;
+    }
     BlockLocation blockLocation = _blockLocationService.getLocationForVehicleAndTime(
         vehicleId, target);
     if (blockLocation == null)
