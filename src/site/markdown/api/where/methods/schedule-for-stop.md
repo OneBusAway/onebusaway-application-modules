@@ -82,7 +82,7 @@ In addition to all the `<scheduleStopTime/>` elements, the response also contain
 In addition to all the `<scheduleStopTime/>` elements, the main entry also has the following properties:
 
 * date - the active date for the returned calendar
-* stop - the [<stop/> element](../elements/stop.html) for the request stop
+* stopId - the stop id for the requested stop, which can be used to access the [<stop/> element](../elements/stop.html) in the `<references/>` section
 * timeZone - the time-zone the stop is located in
 
 ### Proposed Additions
