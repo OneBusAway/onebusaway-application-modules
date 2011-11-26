@@ -13,10 +13,6 @@
 
     <properties>
         <tomcat-version>5.5.29</tomcat-version>
-        <!--  These properties are primarily used in configuring joint integration tests -->
-        <org.onebusaway.federations_webapp.port>9900</org.onebusaway.federations_webapp.port>
-        <org.onebusaway.federations_webapp.ajp_port>9901</org.onebusaway.federations_webapp.ajp_port>
-        <org.onebusaway.federations_webapp.rmi_port>9902</org.onebusaway.federations_webapp.rmi_port>
     </properties>
 
     <dependencies>
@@ -87,7 +83,7 @@
                         <configuration>
                             <!-- We also define some test system properties -->
                             <systemPropertyVariables>
-                                <org.onebusaway.federations_webapp.port>${org.onebusaway.federations_webapp.port}</org.onebusaway.federations_webapp.port>
+                                <org_onebusaway_test_port>${org_onebusaway_test_port}</org_onebusaway_test_port>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>
@@ -100,9 +96,9 @@
                     <configuration>
                         <home>${project.build.directory}/tomcat5x/container</home>
                         <properties>
-                            <cargo.servlet.port>${org.onebusaway.federations_webapp.port}</cargo.servlet.port>
-                            <cargo.tomcat.ajp.port>${org.onebusaway.federations_webapp.ajp_port}</cargo.tomcat.ajp.port>
-                            <cargo.rmi.port>${org.onebusaway.federations_webapp.rmi_port}</cargo.rmi.port>
+                            <cargo.servlet.port>${org_onebusaway_test_port}</cargo.servlet.port>
+                            <cargo.tomcat.ajp.port>${org_onebusaway_test_ajp_port}</cargo.tomcat.ajp.port>
+                            <cargo.rmi.port>${org_onebusaway_test_rmi_port}</cargo.rmi.port>
                         </properties>
                     </configuration>
                     <container>
@@ -140,7 +136,7 @@
                                         <properties>
                                             <context>onebusaway-federations-webapp</context>
                                         </properties>
-                                        <pingURL>http://localhost:${org.onebusaway.federations_webapp.port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
+                                        <pingURL>http://localhost:${org_onebusaway_test_port}/onebusaway-federations-webapp/remoting/index.action</pingURL>
                                     </deployable>
                                 </deployables>
                             </deployer>

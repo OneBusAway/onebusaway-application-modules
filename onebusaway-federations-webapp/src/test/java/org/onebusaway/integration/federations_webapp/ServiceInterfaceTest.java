@@ -40,7 +40,7 @@ public class ServiceInterfaceTest {
 
   @Before
   public void setup() throws MalformedURLException {
-    String port = System.getProperty("org.onebusaway.federations_webapp.port", "8080");
+    String port = System.getProperty("org_onebusaway_test_port", "8080");
     HessianProxyFactory factory = new HessianProxyFactory();
     _service = (FederatedServiceRegistry) factory.create(
         FederatedServiceRegistry.class, "http://localhost:" + port
