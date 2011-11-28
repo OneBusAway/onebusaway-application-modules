@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +16,15 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans.itineraries;
 
-import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.realtime.ArrivalAndDepartureInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 class TransitLegBuilder {
 
-  private BlockInstance blockInstance = null;
-
-  private BlockTripEntry blockTrip = null;
+  private BlockTripInstance blockTripInstanceFrom = null;
+  
+  private BlockTripInstance blockTripInstanceTo = null;
 
   private long scheduledDepartureTime;
   private long scheduledArrivalTime;
@@ -36,20 +37,20 @@ class TransitLegBuilder {
   
   private BlockTripEntry nextTrip = null;
 
-  public BlockInstance getBlockInstance() {
-    return blockInstance;
+  public BlockTripInstance getBlockTripInstanceFrom() {
+    return blockTripInstanceFrom;
   }
 
-  public void setBlockInstance(BlockInstance blockInstance) {
-    this.blockInstance = blockInstance;
+  public void setBlockTripInstanceFrom(BlockTripInstance blockTripInstanceFrom) {
+    this.blockTripInstanceFrom = blockTripInstanceFrom;
   }
 
-  public BlockTripEntry getBlockTrip() {
-    return blockTrip;
+  public BlockTripInstance getBlockTripInstanceTo() {
+    return blockTripInstanceTo;
   }
 
-  public void setBlockTrip(BlockTripEntry blockTrip) {
-    this.blockTrip = blockTrip;
+  public void setBlockTripInstanceTo(BlockTripInstance blockTripInstanceTo) {
+    this.blockTripInstanceTo = blockTripInstanceTo;
   }
 
   public long getScheduledDepartureTime() {

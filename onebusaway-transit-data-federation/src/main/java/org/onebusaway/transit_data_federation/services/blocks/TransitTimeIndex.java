@@ -1,5 +1,4 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,30 +15,18 @@
  */
 package org.onebusaway.transit_data_federation.services.blocks;
 
-import java.util.List;
-
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 
 /**
- * An interface for any object containing a list of {@link BlockTripEntry}
- * elements, all having the same {@link ServiceIdActivation}.
+ * This decorator type is used to track all classes and interfaces the provide
+ * or implement any sort of time-based index over transit data, whether it be
+ * blocks, trips or stops.
  * 
  * @author bdferris
  * 
  */
-public interface HasBlockTrips {
+@Target(value = ElementType.TYPE)
+public @interface TransitTimeIndex {
 
-  /**
-   * @return the list of {@link BlockTripEntry} elements.
-   */
-
-  public List<BlockTripEntry> getTrips();
-
-  /**
-   * @return the service calendar activation for the list of
-   *         {@link BlockTripEntry} elements.
-   */
-
-  public ServiceIdActivation getServiceIds();
 }

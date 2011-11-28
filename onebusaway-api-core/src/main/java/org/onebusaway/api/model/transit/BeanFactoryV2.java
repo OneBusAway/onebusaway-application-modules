@@ -499,8 +499,6 @@ public class BeanFactoryV2 {
     BlockInstanceV2Bean bean = new BlockInstanceV2Bean();
     bean.setBlockConfiguration(getBlockConfig(blockInstance.getBlockConfiguration()));
     bean.setBlockId(blockInstance.getBlockId());
-    if (blockInstance.getFrequency() != null)
-      bean.setFrequency(getFrequency(blockInstance.getFrequency()));
     bean.setServiceDate(blockInstance.getServiceDate());
     return bean;
   }

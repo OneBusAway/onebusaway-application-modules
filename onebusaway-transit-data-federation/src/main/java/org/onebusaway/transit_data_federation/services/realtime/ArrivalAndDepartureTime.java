@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +17,18 @@
 package org.onebusaway.transit_data_federation.services.realtime;
 
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
+/**
+ * Captures an arrival and departure time combination, as a concrete time, as
+ * opposed to a relative time.
+ * 
+ * @author bdferris
+ * 
+ */
 public class ArrivalAndDepartureTime {
 
   private long arrivalTime;
@@ -53,14 +63,32 @@ public class ArrivalAndDepartureTime {
 
   public static ArrivalAndDepartureTime getScheduledTime(
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime, int offset) {
+    return getScheduledTime(blockInstance.getServiceDate(), blockStopTime,
+        offset);
+  }
+
+  public static ArrivalAndDepartureTime getScheduledTime(
+      StopTimeInstance stopTimeInstance) {
+    return getScheduledTime(stopTimeInstance.getServiceDate(),
+        stopTimeInstance.getStopTime(), 0);
+  }
+
+  public static ArrivalAndDepartureTime getScheduledTime(InstanceState state,
+      BlockStopTimeEntry blockStopTime) {
+    return getScheduledTime(state.getServiceDate(),blockStopTime, 0);
+  }
+
+  public static ArrivalAndDepartureTime getScheduledTime(long serviceDate,
+      BlockStopTimeEntry blockStopTime, int offset) {
 
     StopTimeEntry stopTime = blockStopTime.getStopTime();
 
-    long arrivalTime = blockInstance.getServiceDate()
-        + (stopTime.getArrivalTime() + offset) * 1000;
-    long departureTime = blockInstance.getServiceDate()
-        + (stopTime.getDepartureTime() + offset) * 1000;
+    long arrivalTime = serviceDate + (stopTime.getArrivalTime() + offset)
+        * 1000;
+    long departureTime = serviceDate + (stopTime.getDepartureTime() + offset)
+        * 1000;
 
     return new ArrivalAndDepartureTime(arrivalTime, departureTime);
   }
+
 }

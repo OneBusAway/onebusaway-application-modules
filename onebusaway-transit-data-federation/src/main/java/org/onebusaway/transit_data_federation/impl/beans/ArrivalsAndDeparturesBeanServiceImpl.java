@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,9 +160,8 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     long fromTime = time - minutesBefore * 60 * 1000;
     long toTime = time + minutesAfter * 60 * 1000;
-    
-    long nonFrequencyFromTime = time - query.getMinutesBefore() * 60
-    * 1000;
+
+    long nonFrequencyFromTime = time - query.getMinutesBefore() * 60 * 1000;
     long nonFrequencyToTime = time + query.getMinutesAfter() * 60 * 1000;
 
     long frequencyFromTime = time - query.getFrequencyMinutesBefore() * 60
@@ -179,8 +179,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     for (ArrivalAndDepartureInstance instance : instances) {
 
-      BlockInstance blockInstance = instance.getBlockInstance();
-      FrequencyEntry frequency = blockInstance.getFrequency();
+      FrequencyEntry frequency = instance.getFrequency();
 
       long from = frequency != null ? frequencyFromTime : nonFrequencyFromTime;
       long to = frequency != null ? frequencyToTime : nonFrequencyToTime;
@@ -262,7 +261,7 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     TripBean tripBean = _tripBeanService.getTripForId(trip.getId());
     pab.setTrip(tripBean);
     pab.setBlockTripSequence(blockTrip.getSequence());
-    
+
     pab.setArrivalEnabled(blockStopTime.getBlockSequence() > 0);
     pab.setDepartureEnabled(blockStopTime.getBlockSequence() + 1 < blockConfig.getStopTimes().size());
 
@@ -282,13 +281,11 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
 
     pab.setStatus("default");
 
-    BlockInstance blockInstance = instance.getBlockInstance();
-    FrequencyEntry frequency = blockInstance.getFrequency();
-
     pab.setScheduledArrivalTime(instance.getScheduledArrivalTime());
     pab.setScheduledDepartureTime(instance.getScheduledDepartureTime());
-    pab.setFrequency(null);
 
+    FrequencyEntry frequency = instance.getFrequencyLabel();
+    pab.setFrequency(null);
     if (frequency != null) {
       FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(
           instance.getServiceDate(), frequency);

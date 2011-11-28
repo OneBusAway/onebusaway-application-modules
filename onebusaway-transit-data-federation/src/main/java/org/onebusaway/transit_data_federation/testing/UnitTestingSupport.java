@@ -154,6 +154,10 @@ public class UnitTestingSupport {
     return route;
   }
 
+  public static StopEntryImpl stop(String id) {
+    return stop(id, 0.0, 0.0);
+  }
+
   public static StopEntryImpl stop(String id, double lat, double lon) {
     return new StopEntryImpl(aid(id), lat, lon);
   }
@@ -292,6 +296,10 @@ public class UnitTestingSupport {
     stopTime.setSequence(sequence);
 
     return stopTime;
+  }
+
+  public static StopTimeEntryImpl stopTime() {
+    return new StopTimeEntryImpl();
   }
 
   public static StopTimeEntryImpl stopTime(int id, StopEntryImpl stop,

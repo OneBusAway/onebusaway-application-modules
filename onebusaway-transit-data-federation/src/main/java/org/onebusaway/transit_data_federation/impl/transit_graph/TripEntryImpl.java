@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
@@ -48,24 +49,29 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   private double _totalTripDistance;
 
+  private FrequencyEntry _frequencyLabel;
+
   public void setId(AgencyAndId id) {
     _id = id;
   }
 
-  public void setRoute(RouteEntryImpl route) {
+  public TripEntryImpl setRoute(RouteEntryImpl route) {
     _route = route;
+    return this;
   }
 
   public void setDirectionId(String directionId) {
     _directionId = directionId;
   }
 
-  public void setBlock(BlockEntryImpl block) {
+  public TripEntryImpl setBlock(BlockEntryImpl block) {
     _block = block;
+    return this;
   }
 
-  public void setServiceId(LocalizedServiceId serviceId) {
+  public TripEntryImpl setServiceId(LocalizedServiceId serviceId) {
     _serviceId = serviceId;
+    return this;
   }
 
   public void setShapeId(AgencyAndId shapeId) {
@@ -78,6 +84,10 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   public void setTotalTripDistance(double totalTripDistance) {
     _totalTripDistance = totalTripDistance;
+  }
+
+  public void setFrequencyLabel(FrequencyEntry frequencyLabel) {
+    _frequencyLabel = frequencyLabel;
   }
 
   /****
@@ -98,7 +108,7 @@ public class TripEntryImpl implements TripEntry, Serializable {
   public RouteCollectionEntry getRouteCollection() {
     return _route.getParent();
   }
-  
+
   @Override
   public String getDirectionId() {
     return _directionId;
@@ -127,6 +137,11 @@ public class TripEntryImpl implements TripEntry, Serializable {
   @Override
   public double getTotalTripDistance() {
     return _totalTripDistance;
+  }
+
+  @Override
+  public FrequencyEntry getFrequencyLabel() {
+    return _frequencyLabel;
   }
 
   @Override

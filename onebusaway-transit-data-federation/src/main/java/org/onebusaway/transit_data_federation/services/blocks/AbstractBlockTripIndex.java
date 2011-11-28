@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +22,14 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockTripEntryI
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 
+/**
+ * Abstract support class for building searchable indices over
+ * {@link BlockTripEntry} elements. The class has checks to ensure that each
+ * block trip has the same {@link ServiceIdActivation}.
+ * 
+ * @author bdferris
+ * 
+ */
 public abstract class AbstractBlockTripIndex implements HasBlockTrips {
 
   protected final List<BlockTripEntry> _trips;
@@ -34,7 +43,7 @@ public abstract class AbstractBlockTripIndex implements HasBlockTrips {
     checkTripsHaveSameServiceids(trips);
 
     _trips = trips;
-    for( BlockTripEntry trip : trips) {
+    for (BlockTripEntry trip : trips) {
       BlockTripEntryImpl tripImpl = (BlockTripEntryImpl) trip;
       tripImpl.setPattern(this);
     }
@@ -47,7 +56,7 @@ public abstract class AbstractBlockTripIndex implements HasBlockTrips {
   public ServiceIdActivation getServiceIds() {
     return _trips.get(0).getBlockConfiguration().getServiceIds();
   }
-  
+
   public int size() {
     return _trips.size();
   }

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +22,12 @@ import java.util.Date;
 import org.onebusaway.transit_data.model.TimeIntervalBean;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockSequence;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 public class ArrivalAndDepartureInstance {
 
@@ -32,9 +35,7 @@ public class ArrivalAndDepartureInstance {
 
   private static DateFormat _format = DateFormat.getTimeInstance(DateFormat.SHORT);
 
-  private final BlockInstance blockInstance;
-
-  private final BlockStopTimeEntry blockStopTime;
+  private final StopTimeInstance stopTimeInstance;
 
   private long scheduledArrivalTime;
 
@@ -52,30 +53,30 @@ public class ArrivalAndDepartureInstance {
 
   private TimeIntervalBean predictedDepartureInterval;
 
-  public ArrivalAndDepartureInstance(BlockInstance blockInstance,
-      BlockStopTimeEntry blockStopTime, ArrivalAndDepartureTime scheduledTime) {
-    if (blockInstance == null)
-      throw new IllegalArgumentException("blockInstance is null");
-    if (blockStopTime == null)
-      throw new IllegalArgumentException("blockStopTime is null");
-    this.blockInstance = blockInstance;
-    this.blockStopTime = blockStopTime;
+  public ArrivalAndDepartureInstance(StopTimeInstance stopTimeInstance,
+      ArrivalAndDepartureTime scheduledTime) {
+    if (stopTimeInstance == null)
+      throw new IllegalArgumentException("stopTimeInstance is null");
+    this.stopTimeInstance = stopTimeInstance;
     this.scheduledArrivalTime = scheduledTime.getArrivalTime();
     this.scheduledDepartureTime = scheduledTime.getDepartureTime();
   }
 
-  public ArrivalAndDepartureInstance(BlockInstance blockInstance,
-      BlockStopTimeEntry blockStopTime) {
-    this(blockInstance, blockStopTime,
-        ArrivalAndDepartureTime.getScheduledTime(blockInstance, blockStopTime));
+  public ArrivalAndDepartureInstance(StopTimeInstance stopTimeInstance) {
+    this(stopTimeInstance,
+        ArrivalAndDepartureTime.getScheduledTime(stopTimeInstance));
+  }
+
+  public StopTimeInstance getStopTimeInstance() {
+    return stopTimeInstance;
   }
 
   public BlockInstance getBlockInstance() {
-    return blockInstance;
+    return stopTimeInstance.getBlockInstance();
   }
 
   public BlockStopTimeEntry getBlockStopTime() {
-    return blockStopTime;
+    return stopTimeInstance.getStopTime();
   }
 
   public BlockLocation getBlockLocation() {
@@ -157,7 +158,7 @@ public class ArrivalAndDepartureInstance {
    ****/
 
   public long getServiceDate() {
-    return blockInstance.getServiceDate();
+    return stopTimeInstance.getServiceDate();
   }
 
   public long getBestArrivalTime() {
@@ -173,15 +174,24 @@ public class ArrivalAndDepartureInstance {
   }
 
   public FrequencyEntry getFrequency() {
-    return blockInstance.getFrequency();
+    return stopTimeInstance.getFrequency();
+  }
+  
+  public FrequencyEntry getFrequencyLabel() {
+    return stopTimeInstance.getFrequencyLabel();
   }
 
   public BlockTripEntry getBlockTrip() {
-    return blockStopTime.getTrip();
+    return stopTimeInstance.getTrip();
+  }
+
+  public BlockTripInstance getBlockTripInstance() {
+    return new BlockTripInstance(stopTimeInstance.getTrip(),
+        stopTimeInstance.getState());
   }
 
   public StopEntry getStop() {
-    return blockStopTime.getStopTime().getStop();
+    return stopTimeInstance.getStop();
   }
 
   @Override
@@ -189,12 +199,13 @@ public class ArrivalAndDepartureInstance {
     StringBuilder b = new StringBuilder();
     b.append("ArrivalAndDepartureInstance(");
     b.append("stop=");
-    b.append(blockStopTime.getStopTime().getStop().getId());
+    b.append(getStop().getId());
     b.append(",arrival=");
     b.append(_format.format(new Date(getBestArrivalTime())));
     b.append(",departure=");
     b.append(_format.format(new Date(getBestDepartureTime())));
-    b.append(",block=" + blockInstance.getBlock().getBlock().getId());
+    b.append(",block="
+        + getBlockTrip().getBlockConfiguration().getBlock().getId());
     b.append(")");
     return b.toString();
   }

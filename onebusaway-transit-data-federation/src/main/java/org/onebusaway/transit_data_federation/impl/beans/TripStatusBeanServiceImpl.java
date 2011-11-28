@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +41,10 @@ import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstanceLibrary;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -62,8 +64,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
   private TransitGraphDao _transitGraphDao;
 
-  private BlockCalendarService _blockCalendarService;
-
   private BlockStatusService _blockStatusService;
 
   private TripBeanService _tripBeanService;
@@ -77,11 +77,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
-  }
-
-  @Autowired
-  public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
-    _blockCalendarService = blockCalendarService;
   }
 
   @Autowired
@@ -153,10 +148,10 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       BlockInstance blockInstance = entry.getKey();
       List<BlockLocation> locations = entry.getValue();
 
-      BlockTripEntry targeBlockTripEntry = _blockCalendarService.getTargetBlockTrip(
-          blockInstance, tripEntry);
+      BlockTripInstance blockTripInstance = BlockTripInstanceLibrary.getBlockTripInstance(
+          blockInstance, tripId);
 
-      if (targeBlockTripEntry == null)
+      if (blockTripInstance == null)
         throw new IllegalStateException("expected blockTrip for trip="
             + tripEntry + " and block=" + blockInstance);
 
@@ -167,13 +162,12 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
        */
       if (locations.isEmpty()) {
         TripDetailsBean details = getTripEntryAndBlockLocationAsTripDetails(
-            targeBlockTripEntry, blockInstance, null, query.getInclusion(),
-            time);
+            blockTripInstance, null, query.getInclusion(), time);
         tripDetails.add(details);
       } else {
         for (BlockLocation location : locations) {
           TripDetailsBean details = getBlockLocationAsTripDetails(
-              targeBlockTripEntry, location, query.getInclusion(), time);
+              blockTripInstance, location, query.getInclusion(), time);
           tripDetails.add(details);
         }
       }
@@ -189,7 +183,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
         vehicleId, time);
     if (blockLocation == null)
       return null;
-    return getBlockLocationAsTripDetails(blockLocation.getActiveTrip(),
+    return getBlockLocationAsTripDetails(blockLocation.getActiveTripInstance(),
         blockLocation, inclusion, time);
   }
 
@@ -232,14 +226,6 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     bean.setServiceDate(serviceDate);
 
-    FrequencyEntry frequency = blockInstance.getFrequency();
-
-    if (frequency != null) {
-      FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(serviceDate,
-          frequency);
-      bean.setFrequency(fb);
-    }
-
     bean.setLastUpdateTime(blockLocation.getLastUpdateTime());
     bean.setLastLocationUpdateTime(blockLocation.getLastLocationUpdateTime());
 
@@ -255,9 +241,10 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     bean.setScheduleDeviation(blockLocation.getScheduleDeviation());
 
-    BlockTripEntry activeBlockTrip = blockLocation.getActiveTrip();
+    BlockTripInstance activeTripInstance = blockLocation.getActiveTripInstance();
 
-    if (activeBlockTrip != null) {
+    if (activeTripInstance != null) {
+      BlockTripEntry activeBlockTrip = activeTripInstance.getBlockTrip();
       bean.setScheduledDistanceAlongTrip(blockLocation.getScheduledDistanceAlongBlock()
           - activeBlockTrip.getDistanceAlongBlock());
       bean.setDistanceAlongTrip(blockLocation.getDistanceAlongBlock()
@@ -272,6 +259,14 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       if (blockLocation.isLastKnownDistanceAlongBlockSet()) {
         bean.setLastKnownDistanceAlongTrip(blockLocation.getLastKnownDistanceAlongBlock()
             - activeBlockTrip.getDistanceAlongBlock());
+      }
+
+      FrequencyEntry frequencyLabel = activeTripInstance.getFrequencyLabel();
+
+      if (frequencyLabel != null) {
+        FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(
+            serviceDate, frequencyLabel);
+        bean.setFrequency(fb);
       }
 
     } else {
@@ -311,9 +306,9 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     if (vid != null)
       bean.setVehicleId(ApplicationBeanLibrary.getId(vid));
 
-    if (activeBlockTrip != null) {
+    if (activeTripInstance != null) {
       List<ServiceAlertBean> situations = _serviceAlertBeanService.getServiceAlertsForVehicleJourney(
-          time, blockInstance, activeBlockTrip, blockLocation.getVehicleId());
+          time, activeTripInstance, blockLocation.getVehicleId());
       if (!situations.isEmpty())
         bean.setSituations(situations);
     }
@@ -331,29 +326,29 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     List<TripDetailsBean> tripDetails = new ArrayList<TripDetailsBean>();
     for (BlockLocation location : locations) {
       TripDetailsBean details = getBlockLocationAsTripDetails(
-          location.getActiveTrip(), location, inclusion, time);
+          location.getActiveTripInstance(), location, inclusion, time);
       tripDetails.add(details);
     }
     return new ListBean<TripDetailsBean>(tripDetails, false);
   }
 
   private TripDetailsBean getBlockLocationAsTripDetails(
-      BlockTripEntry targetBlockTrip, BlockLocation blockLocation,
+      BlockTripInstance targetBlockTrip, BlockLocation blockLocation,
       TripDetailsInclusionBean inclusion, long time) {
 
     if (targetBlockTrip == null || blockLocation == null)
       return null;
 
     return getTripEntryAndBlockLocationAsTripDetails(targetBlockTrip,
-        blockLocation.getBlockInstance(), blockLocation, inclusion, time);
+        blockLocation, inclusion, time);
   }
 
   private TripDetailsBean getTripEntryAndBlockLocationAsTripDetails(
-      BlockTripEntry blockTripEntry, BlockInstance blockInstance,
-      BlockLocation blockLocation, TripDetailsInclusionBean inclusion, long time) {
+      BlockTripInstance blockTripInstance, BlockLocation blockLocation,
+      TripDetailsInclusionBean inclusion, long time) {
 
     TripBean trip = null;
-    long serviceDate = blockInstance.getServiceDate();
+    long serviceDate = blockTripInstance.getServiceDate();
     FrequencyBean frequency = null;
     TripStopTimesBean stopTimes = null;
     TripStatusBean status = null;
@@ -361,11 +356,14 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     boolean missing = false;
 
-    if (blockInstance.getFrequency() != null)
+    FrequencyEntry frequencyLabel = blockTripInstance.getFrequencyLabel();
+    if (frequencyLabel != null) {
       frequency = FrequencyBeanLibrary.getBeanForFrequency(serviceDate,
-          blockInstance.getFrequency());
+          frequencyLabel);
+    }
 
-    TripEntry tripEntry = blockTripEntry.getTrip();
+    BlockTripEntry blockTrip = blockTripInstance.getBlockTrip();
+    TripEntry tripEntry = blockTrip.getTrip();
 
     if (inclusion.isIncludeTripBean()) {
       trip = _tripBeanService.getTripForId(tripEntry.getId());
@@ -375,8 +373,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
 
     if (inclusion.isIncludeTripSchedule()) {
 
-      stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(
-          blockInstance, blockTripEntry);
+      stopTimes = _tripStopTimesBeanService.getStopTimesForBlockTrip(blockTripInstance);
 
       if (stopTimes == null)
         missing = true;
@@ -391,7 +388,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
     }
 
     List<ServiceAlertBean> situations = _serviceAlertBeanService.getServiceAlertsForVehicleJourney(
-        time, blockInstance, blockTripEntry, vehicleId);
+        time, blockTripInstance, vehicleId);
 
     if (missing)
       return null;

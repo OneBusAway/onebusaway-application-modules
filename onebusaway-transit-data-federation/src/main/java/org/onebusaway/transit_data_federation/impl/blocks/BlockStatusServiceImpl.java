@@ -34,6 +34,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockGeospatialSer
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
+import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
@@ -289,12 +290,13 @@ public class BlockStatusServiceImpl implements BlockStatusService {
       if (indexTo < 0)
         indexTo = -(indexTo + 1);
 
+      InstanceState state = new InstanceState(serviceDate.getTime());
+
       for (int i = indexFrom; i < indexTo; i++) {
 
         BlockSequence sequence = sequences.get(i);
         BlockConfigurationEntry blockConfig = sequence.getBlockConfig();
-        BlockInstance instance = new BlockInstance(blockConfig,
-            serviceDate.getTime());
+        BlockInstance instance = new BlockInstance(blockConfig, state);
         instances.add(instance);
       }
     }

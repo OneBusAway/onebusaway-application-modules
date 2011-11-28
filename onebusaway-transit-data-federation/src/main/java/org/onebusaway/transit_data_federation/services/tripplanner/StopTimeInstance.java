@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +17,10 @@
 package org.onebusaway.transit_data_federation.services.tripplanner;
 
 import java.text.DateFormat;
-import java.util.Date;
 
 import org.onebusaway.transit_data_federation.impl.blocks.BlockSequence;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -36,32 +37,20 @@ public class StopTimeInstance {
 
   private final BlockStopTimeEntry _stopTime;
 
-  private final long _serviceDate;
-
-  private final FrequencyEntry _frequency;
+  private final InstanceState _state;
 
   private final int _frequencyOffset;
 
   private BlockSequence blockSequence;
 
-  public StopTimeInstance(BlockStopTimeEntry stopTime, Date serviceDate) {
-    this(stopTime, serviceDate.getTime());
+  public StopTimeInstance(BlockStopTimeEntry stopTime, InstanceState state) {
+    this(stopTime, state, UNSPECIFIED_FREQUENCY_OFFSET);
   }
 
-  public StopTimeInstance(BlockStopTimeEntry stopTime, long serviceDate) {
-    this(stopTime, serviceDate, null, UNSPECIFIED_FREQUENCY_OFFSET);
-  }
-
-  public StopTimeInstance(BlockStopTimeEntry stopTime, long serviceDate,
-      FrequencyEntry frequency) {
-    this(stopTime, serviceDate, frequency, UNSPECIFIED_FREQUENCY_OFFSET);
-  }
-
-  public StopTimeInstance(BlockStopTimeEntry stopTime, long serviceDate,
-      FrequencyEntry frequency, int frequencyOffset) {
+  public StopTimeInstance(BlockStopTimeEntry stopTime, InstanceState state,
+      int frequencyOffset) {
     _stopTime = stopTime;
-    _serviceDate = serviceDate;
-    _frequency = frequency;
+    _state = state;
     _frequencyOffset = frequencyOffset;
   }
 
@@ -69,12 +58,22 @@ public class StopTimeInstance {
     return _stopTime;
   }
 
+  public InstanceState getState() {
+    return _state;
+  }
+
   public long getServiceDate() {
-    return _serviceDate;
+    return _state.getServiceDate();
   }
 
   public FrequencyEntry getFrequency() {
-    return _frequency;
+    return _state.getFrequency();
+  }
+
+  public FrequencyEntry getFrequencyLabel() {
+    if (_state.getFrequency() != null)
+      return _state.getFrequency();
+    return _stopTime.getTrip().getTrip().getFrequencyLabel();
   }
 
   public boolean isFrequencyOffsetSpecified() {
@@ -87,7 +86,7 @@ public class StopTimeInstance {
 
   public BlockInstance getBlockInstance() {
     return new BlockInstance(_stopTime.getTrip().getBlockConfiguration(),
-        _serviceDate, _frequency);
+        _state);
   }
 
   public BlockTripEntry getTrip() {
@@ -104,14 +103,14 @@ public class StopTimeInstance {
 
   public long getArrivalTime() {
     int offset = isFrequencyOffsetSpecified() ? _frequencyOffset : 0;
-    return _serviceDate + (_stopTime.getStopTime().getArrivalTime() + offset)
-        * 1000;
+    return _state.getServiceDate()
+        + (_stopTime.getStopTime().getArrivalTime() + offset) * 1000;
   }
 
   public long getDepartureTime() {
     int offset = isFrequencyOffsetSpecified() ? _frequencyOffset : 0;
-    return _serviceDate + (_stopTime.getStopTime().getDepartureTime() + offset)
-        * 1000;
+    return _state.getServiceDate()
+        + (_stopTime.getStopTime().getDepartureTime() + offset) * 1000;
   }
 
   public StopTimeInstance getNextStopTimeInstance() {
@@ -120,8 +119,8 @@ public class StopTimeInstance {
     /**
      * TODO: Check for frequency offset overflow?
      */
-    return new StopTimeInstance(_stopTime.getNextStop(), _serviceDate,
-        _frequency, _frequencyOffset);
+    return new StopTimeInstance(_stopTime.getNextStop(), _state,
+        _frequencyOffset);
   }
 
   public BlockSequence getBlockSequence() {
@@ -136,10 +135,8 @@ public class StopTimeInstance {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result
-        + ((_frequency == null) ? 0 : _frequency.hashCode());
     result = prime * result + _frequencyOffset;
-    result = prime * result + (int) (_serviceDate ^ (_serviceDate >>> 32));
+    result = prime * result + _state.hashCode();
     result = prime * result + _stopTime.hashCode();
     return result;
   }
@@ -153,14 +150,9 @@ public class StopTimeInstance {
     if (getClass() != obj.getClass())
       return false;
     StopTimeInstance other = (StopTimeInstance) obj;
-    if (_frequency == null) {
-      if (other._frequency != null)
-        return false;
-    } else if (!_frequency.equals(other._frequency))
-      return false;
     if (_frequencyOffset != other._frequencyOffset)
       return false;
-    if (_serviceDate != other._serviceDate)
+    if (!_state.equals(other._state))
       return false;
     if (!_stopTime.equals(other._stopTime))
       return false;
@@ -170,10 +162,12 @@ public class StopTimeInstance {
   @Override
   public String toString() {
 
-    if (_frequency != null) {
+    long serviceDate = _state.getServiceDate();
+    FrequencyEntry frequency = _state.getFrequency();
 
-      long start = _serviceDate + _frequency.getStartTime() * 1000;
-      long end = _serviceDate + _frequency.getEndTime() * 1000;
+    if (frequency != null) {
+      long start = serviceDate + frequency.getStartTime() * 1000;
+      long end = serviceDate + frequency.getEndTime() * 1000;
       StringBuilder b = new StringBuilder();
 
       b.append("StopTimeInstance(stop=");
@@ -181,7 +175,7 @@ public class StopTimeInstance {
       b.append(" trip=");
       b.append(getTrip());
       b.append(" service=");
-      b.append(DAY_FORMAT.format(_serviceDate));
+      b.append(DAY_FORMAT.format(serviceDate));
       b.append(" start=");
       b.append(TIME_FORMAT.format(start));
       b.append(" end=");
@@ -197,7 +191,7 @@ public class StopTimeInstance {
     } else {
       return "StopTimeInstance(stop="
           + _stopTime.getStopTime().getStop().getId() + " trip=" + getTrip()
-          + " service=" + DAY_FORMAT.format(_serviceDate) + " arrival="
+          + " service=" + DAY_FORMAT.format(serviceDate) + " arrival="
           + TIME_FORMAT.format(getArrivalTime()) + " departure="
           + TIME_FORMAT.format(getDepartureTime()) + ")";
     }

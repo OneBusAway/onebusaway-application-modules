@@ -41,6 +41,7 @@ public class TransitGraphTaskTest {
     RouteEntriesFactory routeEntriesFactory = Mockito.mock(RouteEntriesFactory.class);
     StopEntriesFactory stopEntriesFactory = Mockito.mock(StopEntriesFactory.class);
     TripEntriesFactory tripEntriesFactory = Mockito.mock(TripEntriesFactory.class);
+    FrequencyEntriesFactory frequencyEntriesFactory = Mockito.mock(FrequencyEntriesFactory.class);
     RefreshService refreshService = Mockito.mock(RefreshService.class);
 
     TransitGraphTask task = new TransitGraphTask();
@@ -50,6 +51,7 @@ public class TransitGraphTaskTest {
     task.setRouteEntriesFactory(routeEntriesFactory);
     task.setStopEntriesFactory(stopEntriesFactory);
     task.setTripEntriesFactory(tripEntriesFactory);
+    task.setFrequencyEntriesFactory(frequencyEntriesFactory);
     task.setRefreshService(refreshService);
 
     File path = File.createTempFile("TemporaryBundleDirectory-", "");

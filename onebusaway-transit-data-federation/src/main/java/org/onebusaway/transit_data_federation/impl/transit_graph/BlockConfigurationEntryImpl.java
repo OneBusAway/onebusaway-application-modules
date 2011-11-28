@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +41,6 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
   private final List<BlockTripEntry> trips;
 
-  private final List<FrequencyEntry> frequencies;
-
   private final double totalBlockDistance;
 
   private final BlockStopTimeList blockStopTimes = new BlockStopTimeList();
@@ -50,7 +49,13 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
   private final int[] accumulatedStopTimeIndices;
 
-  public BlockConfigurationEntryImpl(Builder builder) {
+  /**
+   * We make this one field non-final because it makes it easier to add
+   * Frequency information after the fact.
+   */
+  private List<FrequencyEntry> frequencies;
+
+  private BlockConfigurationEntryImpl(Builder builder) {
     this.block = builder.block;
     this.serviceIds = builder.serviceIds;
     this.trips = builder.computeBlockTrips(this);
@@ -62,6 +67,10 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
 
   public static Builder builder() {
     return new Builder();
+  }
+
+  public void setFrequencies(List<FrequencyEntry> frequencies) {
+    this.frequencies = frequencies;
   }
 
   /****

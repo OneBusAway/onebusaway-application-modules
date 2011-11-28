@@ -25,7 +25,6 @@ import java.util.TimeZone;
 
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.transit_data_federation.bundle.tasks.ShapePointHelper;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockConfigurationEntryImpl;
@@ -33,7 +32,6 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -69,13 +67,6 @@ public class BlockConfigurationEntriesFactory {
   public void processBlockConfigurations(BlockEntryImpl block,
       List<TripEntryImpl> tripsInBlock) {
 
-    processFrequencyBlockConfigurations(block, tripsInBlock, null);
-  }
-
-  public void processFrequencyBlockConfigurations(BlockEntryImpl block,
-      List<TripEntryImpl> tripsInBlock,
-      Map<AgencyAndId, List<FrequencyEntry>> frequenciesAlongBlock) {
-
     Map<LocalizedServiceId, List<TripEntryImpl>> tripsByServiceId = getTripsByServiceId(
         block, tripsInBlock);
 
@@ -87,14 +78,6 @@ public class BlockConfigurationEntriesFactory {
 
       BlockConfigurationEntryImpl.Builder builder = processTripsForServiceIdConfiguration(
           block, tripsByServiceId, serviceIds);
-
-      List<TripEntry> trips = builder.getTrips();
-
-      if (frequenciesAlongBlock != null) {
-        List<FrequencyEntry> frequencies = computeBlockFrequencies(block,
-            trips, frequenciesAlongBlock);
-        builder.setFrequencies(frequencies);
-      }
 
       configurations.add(builder.create());
     }
@@ -165,29 +148,6 @@ public class BlockConfigurationEntriesFactory {
     return builder;
   }
 
-  private List<FrequencyEntry> computeBlockFrequencies(BlockEntryImpl block,
-      List<TripEntry> trips,
-      Map<AgencyAndId, List<FrequencyEntry>> frequenciesAlongBlock) {
-
-    List<FrequencyEntry> frequencies = null;
-
-    for (TripEntry trip : trips) {
-
-      List<FrequencyEntry> potentialFrequencies = frequenciesAlongBlock.get(trip.getId());
-
-      if (frequencies == null) {
-        frequencies = potentialFrequencies;
-      } else {
-        if (!frequencies.equals(potentialFrequencies)) {
-          throw new IllegalStateException(
-              "frequency-based trips in same block don't have same frequencies: blockId="
-                  + block.getId());
-        }
-      }
-    }
-
-    return frequencies;
-  }
 
   private double[] computeGapDistancesBetweenTrips(List<TripEntry> trips) {
 

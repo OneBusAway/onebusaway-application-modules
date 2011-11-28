@@ -42,6 +42,7 @@ import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStop
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyStopTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.HasIndexedBlockStopTimes;
 import org.onebusaway.transit_data_federation.services.blocks.HasIndexedFrequencyBlockTrips;
+import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
@@ -165,8 +166,8 @@ class StopTimeServiceImpl implements StopTimeService {
 
         if (fromIndex < index.size()) {
           BlockStopTimeEntry blockStopTime = index.getBlockStopTimeForIndex(fromIndex);
-          StopTimeInstance sti = new StopTimeInstance(blockStopTime,
-              serviceDate);
+          InstanceState state = new InstanceState(serviceDate.getTime());
+          StopTimeInstance sti = new StopTimeInstance(blockStopTime, state);
           stopTimeInstances.add(sti);
         }
       }
@@ -191,12 +192,13 @@ class StopTimeServiceImpl implements StopTimeService {
           FrequencyBlockStopTimeEntry entry = frequencyStopTimes.get(fromIndex);
           BlockStopTimeEntry bst = entry.getStopTime();
           FrequencyEntry frequency = entry.getFrequency();
+          InstanceState state = new InstanceState(serviceDate.getTime(),
+              frequency);
           int stopTimeOffset = entry.getStopTimeOffset();
-
           int frequencyOffset = computeFrequencyOffset(relativeFrom, bst,
               frequency, stopTimeOffset, true);
-          StopTimeInstance sti = new StopTimeInstance(bst,
-              serviceDate.getTime(), frequency, frequencyOffset);
+          StopTimeInstance sti = new StopTimeInstance(bst, state,
+              frequencyOffset);
           stopTimeInstances.add(sti);
         }
       }
@@ -337,16 +339,17 @@ class StopTimeServiceImpl implements StopTimeService {
         if (!findDepartures)
           sourceIndex--;
 
+        InstanceState state = new InstanceState(serviceDate.getTime());
+
         while (0 <= sourceIndex && sourceIndex < sourceStopIndexSize) {
 
           BlockStopTimeEntry stopTimeSource = sourceStopIndex.getBlockStopTimeForIndex(sourceIndex);
           StopTimeInstance stiSource = new StopTimeInstance(stopTimeSource,
-              serviceDate);
+              state);
           stiSource.setBlockSequence(sourceStopIndex.getBlockSequenceForIndex(sourceIndex));
 
           BlockStopTimeEntry stopTimeDest = destStopTimes.get(sourceIndex);
-          StopTimeInstance stiDest = new StopTimeInstance(stopTimeDest,
-              serviceDate);
+          StopTimeInstance stiDest = new StopTimeInstance(stopTimeDest, state);
           stiDest.setBlockSequence(destStopIndex.getBlockSequenceForIndex(sourceIndex));
 
           if (stopTimeIsBeyondRangeOfQueue(nBestQueue, stiDest, resultCount,
@@ -463,18 +466,20 @@ class StopTimeServiceImpl implements StopTimeService {
           FrequencyBlockStopTimeEntry sourceEntry = sourceStopTimes.get(sourceIndex);
           BlockStopTimeEntry sourceBst = sourceEntry.getStopTime();
           FrequencyEntry frequency = sourceEntry.getFrequency();
+          InstanceState state = new InstanceState(serviceDate.getTime(),
+              frequency);
           int stopTimeOffset = sourceEntry.getStopTimeOffset();
 
           int frequencyOffset = computeFrequencyOffset(relativeTime, sourceBst,
               frequency, stopTimeOffset, findDepartures);
 
-          StopTimeInstance stiSource = new StopTimeInstance(sourceBst,
-              serviceDate.getTime(), frequency, frequencyOffset);
+          StopTimeInstance stiSource = new StopTimeInstance(sourceBst, state,
+              frequencyOffset);
 
           FrequencyBlockStopTimeEntry toEntry = destStopTimes.get(sourceIndex);
           BlockStopTimeEntry stopTimeTo = toEntry.getStopTime();
-          StopTimeInstance stiDest = new StopTimeInstance(stopTimeTo,
-              serviceDate.getTime(), frequency, frequencyOffset);
+          StopTimeInstance stiDest = new StopTimeInstance(stopTimeTo, state,
+              frequencyOffset);
 
           /**
            * There's a chance the frequency-based departure+arrival pair could
@@ -613,9 +618,10 @@ class StopTimeServiceImpl implements StopTimeService {
     int toIndex = GenericBinarySearch.search(index, blockStopTimes.size(),
         relativeTo, IndexAdapters.BLOCK_STOP_TIME_ARRIVAL_INSTANCE);
 
+    InstanceState state = new InstanceState(serviceDate.getTime());
     for (int in = fromIndex; in < toIndex; in++) {
       BlockStopTimeEntry blockStopTime = blockStopTimes.get(in);
-      instances.add(new StopTimeInstance(blockStopTime, serviceDate));
+      instances.add(new StopTimeInstance(blockStopTime, state));
     }
 
     return fromIndex;
@@ -644,15 +650,16 @@ class StopTimeServiceImpl implements StopTimeService {
       BlockStopTimeEntry bst = entry.getStopTime();
       FrequencyEntry frequency = entry.getFrequency();
 
+      InstanceState state = new InstanceState(serviceDate.getTime(), frequency);
+
       switch (frequencyBehavior) {
 
-        case INCLUDE_UNSPECIFIED:
-          stopTimeInstances.add(new StopTimeInstance(bst,
-              serviceDate.getTime(), frequency));
+        case INCLUDE_UNSPECIFIED: {
+          stopTimeInstances.add(new StopTimeInstance(bst, state));
           offsetsIntoIndex.add(in);
           break;
-
-        case INCLUDE_INTERPOLATED:
+        }
+        case INCLUDE_INTERPOLATED: {
 
           int stopTimeOffset = entry.getStopTimeOffset();
 
@@ -665,11 +672,12 @@ class StopTimeServiceImpl implements StopTimeService {
 
           for (int t = tFrom; t <= tTo; t += frequency.getHeadwaySecs()) {
             int frequencyOffset = t - bst.getStopTime().getDepartureTime();
-            stopTimeInstances.add(new StopTimeInstance(bst,
-                serviceDate.getTime(), frequency, frequencyOffset));
+            stopTimeInstances.add(new StopTimeInstance(bst, state,
+                frequencyOffset));
             offsetsIntoIndex.add(in);
           }
           break;
+        }
       }
     }
 

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +76,8 @@ import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstanceLibrary;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.otp.TransitShedPathService;
@@ -84,6 +87,7 @@ import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -120,7 +124,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private static final String MODE_BICYCLE = "bicycle";
 
   private static final String MODE_TRANSIT = "transit";
-  
+
   private ItinerariesService _itinerariesService;
 
   private TransitShedPathService _transitShedPathService;
@@ -144,7 +148,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private ArrivalAndDepartureService _arrivalAndDepartureService;
 
   private BlockCalendarService _blockCalendarService;
-  
+
   private boolean _enabled = true;
 
   @Autowired
@@ -210,7 +214,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
   }
-  
+
   public void setEnabled(boolean enabled) {
     _enabled = enabled;
   }
@@ -223,8 +227,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   public ItinerariesBean getItinerariesBetween(TransitLocationBean from,
       TransitLocationBean to, long targetTime, ConstraintsBean constraints)
       throws ServiceException {
-    
-    if( ! _enabled )
+
+    if (!_enabled)
       throw new ServiceException("service disabled");
 
     OBATraverseOptions options = createTraverseOptions();
@@ -253,8 +257,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   @Override
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
       double lonFrom, double latTo, double lonTo) {
-    
-    if( ! _enabled)
+
+    if (!_enabled)
       throw new ServiceException("service disabled");
 
     double x1 = Math.min(lonFrom, lonTo);
@@ -336,8 +340,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   public MinTravelTimeToStopsBean getMinTravelTimeToStopsFrom(
       CoordinatePoint location, long time,
       TransitShedConstraintsBean constraints) {
-    
-    if( ! _enabled)
+
+    if (!_enabled)
       throw new ServiceException("service disabled");
 
     OBATraverseOptions options = createTraverseOptions();
@@ -382,8 +386,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   public List<TimedPlaceBean> getLocalPaths(ConstraintsBean constraints,
       MinTravelTimeToStopsBean travelTimes, List<LocalSearchResult> localResults)
       throws ServiceException {
-    
-    if( ! _enabled)
+
+    if (!_enabled)
       throw new ServiceException("service disabled");
 
     long maxTripLength = constraints.getMaxTripDuration() * 1000;
@@ -672,11 +676,10 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
     BlockTripEntry tripFrom = from.getBlockTrip();
     BlockTripEntry tripTo = to.getBlockTrip();
 
-    if (builder.getBlockInstance() == null) {
+    if (builder.getBlockTripInstanceFrom() == null) {
       builder.setScheduledDepartureTime(from.getScheduledDepartureTime());
       builder.setPredictedDepartureTime(from.getPredictedDepartureTime());
-      builder.setBlockInstance(from.getBlockInstance());
-      builder.setBlockTrip(tripFrom);
+      builder.setBlockTripInstanceFrom(from.getBlockTripInstance());
       builder.setFromStop(from);
     }
 
@@ -706,9 +709,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       builder = new TransitLegBuilder();
       builder.setScheduledDepartureTime(scheduledTransitionTime);
       builder.setPredictedDepartureTime(predictedTransitionTime);
-      builder.setBlockInstance(to.getBlockInstance());
-      builder.setBlockTrip(tripTo);
-
+      builder.setBlockTripInstanceTo(to.getBlockTripInstance());
     }
 
     builder.setToStop(to);
@@ -761,10 +762,9 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
   private TransitLegBuilder getTransitLegBuilderAsLeg(
       TransitLegBuilder builder, List<LegBean> legs) {
 
-    BlockInstance blockInstance = builder.getBlockInstance();
-    BlockTripEntry blockTrip = builder.getBlockTrip();
+    BlockTripInstance blockTripInstanceFrom = builder.getBlockTripInstanceFrom();
 
-    if (blockInstance == null || blockTrip == null)
+    if (blockTripInstanceFrom == null)
       return new TransitLegBuilder();
 
     LegBean leg = createTransitLegFromBuilder(builder);
@@ -775,8 +775,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private LegBean createTransitLegFromBuilder(TransitLegBuilder builder) {
 
-    BlockInstance blockInstance = builder.getBlockInstance();
-    BlockTripEntry blockTrip = builder.getBlockTrip();
+    BlockTripInstance blockTripInstanceFrom = builder.getBlockTripInstanceFrom();
 
     LegBean leg = new LegBean();
 
@@ -788,16 +787,17 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
     leg.setMode(MODE_TRANSIT);
 
-    TripEntry trip = blockTrip.getTrip();
+    TripEntry trip = blockTripInstanceFrom.getBlockTrip().getTrip();
 
     TransitLegBean transitLeg = new TransitLegBean();
     leg.setTransitLeg(transitLeg);
 
-    transitLeg.setServiceDate(blockInstance.getServiceDate());
+    transitLeg.setServiceDate(blockTripInstanceFrom.getServiceDate());
 
-    if (blockInstance.getFrequency() != null) {
+    FrequencyEntry frequencyLabel = blockTripInstanceFrom.getFrequencyLabel();
+    if (frequencyLabel != null) {
       FrequencyBean frequency = FrequencyBeanLibrary.getBeanForFrequency(
-          blockInstance.getServiceDate(), blockInstance.getFrequency());
+          blockTripInstanceFrom.getServiceDate(), frequencyLabel);
       transitLeg.setFrequency(frequency);
     }
 
@@ -829,7 +829,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private double getTransitLegBuilderAsDistance(TransitLegBuilder builder) {
 
-    BlockTripEntry trip = builder.getBlockTrip();
+    BlockTripInstance blockTripInstanceFrom = builder.getBlockTripInstanceFrom();
+    BlockTripEntry trip = blockTripInstanceFrom.getBlockTrip();
 
     BlockStopTimeEntry fromStop = null;
     BlockStopTimeEntry toStop = null;
@@ -856,7 +857,8 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
 
   private String getTransitLegBuilderAsPath(TransitLegBuilder builder) {
 
-    BlockTripEntry blockTrip = builder.getBlockTrip();
+    BlockTripInstance blockTripInstanceFrom = builder.getBlockTripInstanceFrom();
+    BlockTripEntry blockTrip = blockTripInstanceFrom.getBlockTrip();
     TripEntry trip = blockTrip.getTrip();
 
     AgencyAndId shapeId = trip.getShapeId();
@@ -1344,8 +1346,7 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
       b.setFromStop(instance);
-      b.setBlockInstance(instance.getBlockInstance());
-      b.setBlockTrip(instance.getBlockTrip());
+      b.setBlockTripInstanceFrom(instance.getBlockTripInstance());
       b.setScheduledDepartureTime(instance.getScheduledDepartureTime());
       b.setPredictedDepartureTime(instance.getPredictedDepartureTime());
     }
@@ -1368,23 +1369,20 @@ public class ItinerariesBeanServiceImpl implements ItinerariesBeanService {
       ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
       b.setToStop(instance);
-      b.setBlockInstance(instance.getBlockInstance());
-      b.setBlockTrip(instance.getBlockTrip());
+      b.setBlockTripInstanceTo(instance.getBlockTripInstance());
       b.setScheduledArrivalTime(instance.getScheduledArrivalTime());
       b.setPredictedArrivalTime(instance.getPredictedArrivalTime());
     }
 
-    if (b.getBlockInstance() == null) {
+    if (b.getBlockTripInstanceFrom() == null) {
 
       BlockEntry block = trip.getBlock();
 
       BlockInstance blockInstance = _blockCalendarService.getBlockInstance(
           block.getId(), serviceDate);
-      b.setBlockInstance(blockInstance);
-
-      BlockTripEntry blockTrip = _blockCalendarService.getTargetBlockTrip(
-          blockInstance, trip);
-      b.setBlockTrip(blockTrip);
+      BlockTripInstance tripInstance = BlockTripInstanceLibrary.getBlockTripInstance(
+          blockInstance, trip.getId());
+      b.setBlockTripInstanceFrom(tripInstance);
     }
 
     return createTransitLegFromBuilder(b);

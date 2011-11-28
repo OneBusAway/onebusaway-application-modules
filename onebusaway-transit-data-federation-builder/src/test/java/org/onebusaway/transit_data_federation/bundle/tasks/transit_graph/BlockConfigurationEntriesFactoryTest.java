@@ -19,9 +19,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addServiceDates;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.frequency;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
@@ -30,9 +28,7 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +46,6 @@ import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 
 public class BlockConfigurationEntriesFactoryTest {
 
@@ -373,116 +368,5 @@ public class BlockConfigurationEntriesFactoryTest {
     assertEquals(500.0, bst.getDistanceAlongBlock(), 0.0);
     assertSame(st7, bst.getStopTime());
     assertSame(trips.get(1), bst.getTrip());
-  }
-
-  @Test
-  public void testSingleTripWithFrequencies() {
-
-    StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
-    StopEntryImpl stopB = stop("stopB", 47.1, -122.1);
-
-    TripEntryImpl tripA = trip("tripA", "sA", 300.0);
-    stopTime(0, stopA, tripA, time(9, 00), time(9, 05), 100.0);
-    stopTime(1, stopB, tripA, time(9, 30), time(9, 35), 200.0);
-
-    BlockEntryImpl block = new BlockEntryImpl();
-    List<TripEntryImpl> tripsInBlock = Arrays.asList(tripA);
-
-    Map<AgencyAndId, List<FrequencyEntry>> frequnciesByTripId = new HashMap<AgencyAndId, List<FrequencyEntry>>();
-    FrequencyEntry freqA = frequency(time(8, 00), time(10, 00), 10 * 60);
-    FrequencyEntry freqB = frequency(time(10, 00), time(12, 00), 10 * 60);
-    List<FrequencyEntry> expectedFrequencies = Arrays.asList(freqA, freqB);
-    frequnciesByTripId.put(tripA.getId(), expectedFrequencies);
-
-    /****
-     * Actual Test
-     ****/
-
-    _factory.processFrequencyBlockConfigurations(block, tripsInBlock,
-        frequnciesByTripId);
-
-    List<BlockConfigurationEntry> configurations = block.getConfigurations();
-    assertEquals(1, configurations.size());
-
-    BlockConfigurationEntry entry = configurations.get(0);
-    List<FrequencyEntry> frequencies = entry.getFrequencies();
-    assertEquals(expectedFrequencies, frequencies);
-  }
-
-  @Test
-  public void testTripsWithFrequencies() {
-
-    StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
-    StopEntryImpl stopB = stop("stopB", 47.1, -122.1);
-
-    TripEntryImpl tripA = trip("tripA", "sA", 300.0);
-    stopTime(0, stopA, tripA, time(9, 00), time(9, 05), 100.0);
-    stopTime(1, stopB, tripA, time(9, 30), time(9, 35), 200.0);
-
-    TripEntryImpl tripB = trip("tripB", "sA", 300.0);
-    stopTime(2, stopB, tripB, time(10, 00), time(10, 05), 100.0);
-    stopTime(3, stopA, tripB, time(10, 30), time(10, 35), 200.0);
-
-    BlockEntryImpl block = new BlockEntryImpl();
-    List<TripEntryImpl> tripsInBlock = Arrays.asList(tripA, tripB);
-
-    Map<AgencyAndId, List<FrequencyEntry>> frequnciesByTripId = new HashMap<AgencyAndId, List<FrequencyEntry>>();
-    FrequencyEntry freqA = frequency(time(8, 00), time(10, 00), 10 * 60);
-    FrequencyEntry freqB = frequency(time(10, 00), time(12, 00), 10 * 60);
-    List<FrequencyEntry> expectedFrequencies = Arrays.asList(freqA, freqB);
-
-    frequnciesByTripId.put(tripA.getId(), expectedFrequencies);
-    frequnciesByTripId.put(tripB.getId(), expectedFrequencies);
-
-    /****
-     * Actual Test
-     ****/
-
-    _factory.processFrequencyBlockConfigurations(block, tripsInBlock,
-        frequnciesByTripId);
-
-    List<BlockConfigurationEntry> configurations = block.getConfigurations();
-    assertEquals(1, configurations.size());
-
-    BlockConfigurationEntry entry = configurations.get(0);
-    List<FrequencyEntry> frequencies = entry.getFrequencies();
-    assertEquals(expectedFrequencies, frequencies);
-  }
-
-  @Test
-  public void testTripsWithMismatchedFrequencies() {
-
-    StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
-    StopEntryImpl stopB = stop("stopB", 47.1, -122.1);
-
-    TripEntryImpl tripA = trip("tripA", "sA", 300.0);
-    stopTime(0, stopA, tripA, time(9, 00), time(9, 05), 100.0);
-    stopTime(1, stopB, tripA, time(9, 30), time(9, 35), 200.0);
-
-    TripEntryImpl tripB = trip("tripB", "sA", 300.0);
-    stopTime(2, stopB, tripB, time(10, 00), time(10, 05), 100.0);
-    stopTime(3, stopA, tripB, time(10, 30), time(10, 35), 200.0);
-
-    BlockEntryImpl block = new BlockEntryImpl();
-    List<TripEntryImpl> tripsInBlock = Arrays.asList(tripA, tripB);
-
-    Map<AgencyAndId, List<FrequencyEntry>> frequnciesByTripId = new HashMap<AgencyAndId, List<FrequencyEntry>>();
-    FrequencyEntry freqA = frequency(time(8, 00), time(10, 00), 10 * 60);
-    FrequencyEntry freqB = frequency(time(10, 00), time(12, 00), 10 * 60);
-
-    frequnciesByTripId.put(tripA.getId(), Arrays.asList(freqA, freqB));
-    frequnciesByTripId.put(tripB.getId(), Arrays.asList(freqA));
-
-    /****
-     * Actual Test
-     ****/
-
-    try {
-      _factory.processFrequencyBlockConfigurations(block, tripsInBlock,
-          frequnciesByTripId);
-      fail();
-    } catch (IllegalStateException ex) {
-
-    }
   }
 }

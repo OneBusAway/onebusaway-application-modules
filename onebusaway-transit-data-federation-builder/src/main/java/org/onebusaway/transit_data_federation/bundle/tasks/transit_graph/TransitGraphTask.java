@@ -42,6 +42,8 @@ public class TransitGraphTask implements Runnable {
 
   private RefreshService _refreshService;
 
+  private FrequencyEntriesFactory _frequencyEntriesFactory;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -79,6 +81,12 @@ public class TransitGraphTask implements Runnable {
   }
 
   @Autowired
+  public void setFrequencyEntriesFactory(
+      FrequencyEntriesFactory frequencyEntriesFactory) {
+    _frequencyEntriesFactory = frequencyEntriesFactory;
+  }
+
+  @Autowired
   public void setRefreshService(RefreshService refreshService) {
     _refreshService = refreshService;
   }
@@ -94,6 +102,7 @@ public class TransitGraphTask implements Runnable {
     _routeCollectionEntriesFactory.processRouteCollections(graph);
     _tripEntriesFactory.processTrips(graph);
     _blockEntriesFactory.processBlocks(graph);
+    _frequencyEntriesFactory.processFrequencies(graph);
 
     /**
      * Make sure the graph is initialized as result of the graph building

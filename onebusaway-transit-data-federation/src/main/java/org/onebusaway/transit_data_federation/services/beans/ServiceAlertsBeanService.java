@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.util.List;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 public interface ServiceAlertsBeanService {
 
@@ -48,6 +48,6 @@ public interface ServiceAlertsBeanService {
       AgencyAndId vehicleId);
 
   public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
-      BlockInstance blockInstance, BlockTripEntry blockTrip,
+      BlockTripInstance blockTripInstance,
       AgencyAndId vehicleId);
 }

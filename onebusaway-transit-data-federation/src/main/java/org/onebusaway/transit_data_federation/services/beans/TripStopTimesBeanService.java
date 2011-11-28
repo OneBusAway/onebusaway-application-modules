@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +20,7 @@ import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
-import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 
 /**
  * Service methods for accessing the list of stop times for a specified trip.
@@ -33,5 +33,5 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEn
  */
 public interface TripStopTimesBeanService {
 
-  public TripStopTimesBean getStopTimesForBlockTrip(BlockInstance blockInstance, BlockTripEntry tripEntry);
+  public TripStopTimesBean getStopTimesForBlockTrip(BlockTripInstance blockTripInstance);
 }

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +19,7 @@ package org.onebusaway.transit_data_federation.services.transit_graph;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.Frequency;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 
 public interface TripEntry {
@@ -27,7 +29,7 @@ public interface TripEntry {
   public RouteEntry getRoute();
 
   public RouteCollectionEntry getRouteCollection();
-  
+
   public String getDirectionId();
 
   public BlockEntry getBlock();
@@ -42,4 +44,14 @@ public interface TripEntry {
    * @return distance, in meters
    */
   public double getTotalTripDistance();
+
+  /**
+   * For trips that are operated with a fixed schedule, but marketed to riders
+   * as headway-based service (by applying a {@link Frequency#getExactTimes()}
+   * override value of 2 in their frequencies.txt GTFS), we attach the
+   * {@link FrequencyEntry} associated with this trip.
+   * 
+   * @return
+   */
+  public FrequencyEntry getFrequencyLabel();
 }

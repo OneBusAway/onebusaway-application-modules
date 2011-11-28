@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +45,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
  * @see BlockStopSequenceIndex
  * @see BlockIndexService
  */
+@TransitTimeIndex
 public class BlockSequenceIndex extends AbstractBlockSequenceIndex {
 
   private final ServiceIntervalBlock _serviceIntervalBlock;

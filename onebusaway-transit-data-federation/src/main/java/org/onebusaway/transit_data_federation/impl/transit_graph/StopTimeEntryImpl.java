@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +49,12 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   public void setDepartureTime(int departureTime) {
     _departureTime = departureTime;
   }
+  
+  public StopTimeEntryImpl setTime(int time) {
+    _arrivalTime = time;
+    _departureTime = time;
+    return this;
+  }
 
   public void setSequence(int sequence) {
     _sequence = sequence;
@@ -61,8 +68,9 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     _pickupType = pickupType;
   }
 
-  public void setStop(StopEntryImpl stop) {
+  public StopTimeEntryImpl setStop(StopEntryImpl stop) {
     _stop = stop;
+    return this;
   }
 
   public void setTrip(TripEntryImpl trip) {

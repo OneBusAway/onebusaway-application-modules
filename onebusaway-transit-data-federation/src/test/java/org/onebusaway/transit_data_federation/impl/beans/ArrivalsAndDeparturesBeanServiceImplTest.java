@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +60,7 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 
 public class ArrivalsAndDeparturesBeanServiceImplTest {
 
@@ -109,9 +111,9 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     StopEntryImpl stopA = stop("stopA", 47.0, -122.0);
     StopEntryImpl stopB = stop("stopB", 47.0, -122.0);
 
-    Mockito.when(_transitGraphDao.getStopEntryForId(stopA.getId(),true)).thenReturn(
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopA.getId(), true)).thenReturn(
         stopA);
-    Mockito.when(_transitGraphDao.getStopEntryForId(stopB.getId(),true)).thenReturn(
+    Mockito.when(_transitGraphDao.getStopEntryForId(stopB.getId(), true)).thenReturn(
         stopB);
 
     /****
@@ -189,18 +191,18 @@ public class ArrivalsAndDeparturesBeanServiceImplTest {
     long stopTimeFrom = t - minutesBefore * 60 * 1000;
     long stopTimeTo = t + minutesAfter * 60 * 1000;
 
-    ArrivalAndDepartureInstance in1 = new ArrivalAndDepartureInstance(
-        blockInstanceA, bstAB);
+    StopTimeInstance sti1 = new StopTimeInstance(bstAB,blockInstanceA.getState());
+    ArrivalAndDepartureInstance in1 = new ArrivalAndDepartureInstance(sti1);
     in1.setBlockLocation(blockLocationA);
     in1.setPredictedArrivalTime((long) (in1.getScheduledArrivalTime() + 5 * 60 * 1000));
     in1.setPredictedDepartureTime((long) (in1.getScheduledDepartureTime()));
 
-    ArrivalAndDepartureInstance in2 = new ArrivalAndDepartureInstance(
-        blockInstanceB, bstBB);
+    StopTimeInstance sti2 = new StopTimeInstance(bstBB, blockInstanceB.getState());
+    ArrivalAndDepartureInstance in2 = new ArrivalAndDepartureInstance(sti2);
     in2.setBlockLocation(blockLocationB);
 
-    TargetTime target = new TargetTime(t,t);
-    
+    TargetTime target = new TargetTime(t, t);
+
     Mockito.when(
         _arrivalAndDepartureService.getArrivalsAndDeparturesForStopInTimeRange(
             stopB, target, stopTimeFrom, stopTimeTo)).thenReturn(

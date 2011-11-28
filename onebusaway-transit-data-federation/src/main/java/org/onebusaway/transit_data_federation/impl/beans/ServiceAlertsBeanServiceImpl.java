@@ -31,6 +31,7 @@ import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLi
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence;
@@ -42,7 +43,6 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -117,11 +117,11 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
   @Override
   public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
-      BlockInstance blockInstance, BlockTripEntry blockTrip,
+      BlockTripInstance blockTripInstance,
       AgencyAndId vehicleId) {
 
     List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForVehicleJourney(
-        time, blockInstance, blockTrip, vehicleId);
+        time, blockTripInstance, vehicleId);
 
     return list(serviceAlerts);
   }

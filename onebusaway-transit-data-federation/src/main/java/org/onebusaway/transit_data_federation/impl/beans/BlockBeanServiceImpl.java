@@ -28,7 +28,6 @@ import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
-import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.schedule.StopTimeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -187,12 +186,6 @@ public class BlockBeanServiceImpl implements BlockBeanService {
 
     long serviceDate = blockInstance.getServiceDate();
     bean.setServiceDate(serviceDate);
-
-    if (blockInstance.getFrequency() != null) {
-      FrequencyBean frequency = FrequencyBeanLibrary.getBeanForFrequency(
-          serviceDate, blockInstance.getFrequency());
-      bean.setFrequency(frequency);
-    }
 
     return bean;
   }

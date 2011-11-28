@@ -43,6 +43,8 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
+import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
@@ -345,11 +347,13 @@ public class ServiceAlertsServiceImplTest {
     BlockConfigurationEntry blockConfig = blockConfiguration(block,
         serviceIds(lsids("a"), lsids()), trip);
 
-    BlockInstance blockInstance = new BlockInstance(blockConfig,
-        System.currentTimeMillis());
+    BlockTripInstance blockTripInstance = new BlockTripInstance(
+        blockConfig.getTrips().get(0), new InstanceState(
+            System.currentTimeMillis()));
+
     List<ServiceAlert> alerts = _service.getServiceAlertsForVehicleJourney(
-        System.currentTimeMillis(), blockInstance,
-        blockConfig.getTrips().get(0), new AgencyAndId("1", "1111"));
+        System.currentTimeMillis(), blockTripInstance, new AgencyAndId("1",
+            "1111"));
     assertEquals(3, alerts.size());
     assertTrue(alerts.contains(serviceAlert2));
     assertTrue(alerts.contains(serviceAlert3));

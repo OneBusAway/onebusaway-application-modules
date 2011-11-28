@@ -183,6 +183,10 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
   public void putBlockEntry(BlockEntryImpl blockEntry) {
     _blocks.add(blockEntry);
   }
+  
+  public List<BlockEntryImpl> getBlocks() {
+    return _blocks;
+  }
 
   public void putRouteEntry(RouteEntryImpl routeEntry) {
     _routes.add(routeEntry);

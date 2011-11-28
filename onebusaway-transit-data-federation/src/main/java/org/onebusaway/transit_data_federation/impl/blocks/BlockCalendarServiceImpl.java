@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +37,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyServiceIntervalBlock;
+import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.blocks.LayoverIntervalBlock;
 import org.onebusaway.transit_data_federation.services.blocks.ServiceIntervalBlock;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -43,7 +45,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -88,6 +89,7 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     int index = 0;
 
     Date date = new Date(serviceDate);
+    InstanceState state = new InstanceState(serviceDate);
 
     /**
      * See the specific contract for {@link BlockEntry#getConfigurations()}
@@ -95,25 +97,12 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
      */
     for (BlockConfigurationEntry configuration : configurations) {
       if (allServiceIdsAreActiveForServiceDate(configuration, date)) {
-        return new BlockInstance(configuration, serviceDate);
+        return new BlockInstance(configuration, state);
       }
 
       index++;
     }
 
-    return null;
-  }
-
-  @Override
-  public BlockTripEntry getTargetBlockTrip(BlockInstance blockInstance,
-      TripEntry trip) {
-
-    BlockConfigurationEntry blockConfig = blockInstance.getBlock();
-
-    for (BlockTripEntry blockTrip : blockConfig.getTrips()) {
-      if (blockTrip.getTrip().equals(trip))
-        return blockTrip;
-    }
     return null;
   }
 
@@ -160,7 +149,7 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
 
     return m.getMinElements();
   }
-  
+
   @Override
   public List<BlockInstance> getActiveBlocksInTimeRange(long timeFrom,
       long timeTo) {
@@ -267,11 +256,13 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
         scheduledTimeFrom));
     int indexTo = index(Arrays.binarySearch(intervals.getMinArrivals(),
         scheduledTimeTo));
+    
+    InstanceState state = new InstanceState(serviceDate.getTime());
 
     for (int in = indexFrom; in < indexTo; in++) {
       BlockTripEntry trip = trips.get(in);
       BlockConfigurationEntry block = trip.getBlockConfiguration();
-      BlockInstance instance = new BlockInstance(block, serviceDate.getTime());
+      BlockInstance instance = new BlockInstance(block, state);
       instances.add(instance);
     }
   }
@@ -320,11 +311,13 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
         scheduledTimeFrom));
     int indexTo = index(Arrays.binarySearch(intervals.getStartTimes(),
         scheduledTimeTo));
+    
+    InstanceState state = new InstanceState(serviceDate.getTime()); 
 
     for (int in = indexFrom; in < indexTo; in++) {
       BlockTripEntry trip = trips.get(in);
       BlockConfigurationEntry block = trip.getBlockConfiguration();
-      BlockInstance instance = new BlockInstance(block, serviceDate.getTime());
+      BlockInstance instance = new BlockInstance(block, state);
       instances.add(instance);
     }
   }
@@ -366,7 +359,7 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
   }
 
   private void findFrequencyBlockTripsInRange(
-      FrequencyServiceIntervalBlock serviceIntervalBlock, Date serviceDate,
+      FrequencyServiceIntervalBlock serviceIntervalIndex, Date serviceDate,
       Date timeFrom, Date timeTo, List<BlockTripEntry> trips,
       List<FrequencyEntry> frequencies, Collection<BlockInstance> instances) {
 
@@ -374,16 +367,16 @@ class BlockCalendarServiceImpl implements BlockCalendarService {
     int scheduledTimeTo = (int) ((timeTo.getTime() - serviceDate.getTime()) / 1000);
 
     int indexFrom = index(Arrays.binarySearch(
-        serviceIntervalBlock.getEndTimes(), scheduledTimeFrom));
+        serviceIntervalIndex.getEndTimes(), scheduledTimeFrom));
     int indexTo = index(Arrays.binarySearch(
-        serviceIntervalBlock.getStartTimes(), scheduledTimeTo));
+        serviceIntervalIndex.getStartTimes(), scheduledTimeTo));
 
     for (int in = indexFrom; in < indexTo; in++) {
       BlockTripEntry trip = trips.get(in);
       BlockConfigurationEntry block = trip.getBlockConfiguration();
       FrequencyEntry frequency = frequencies.get(in);
-      BlockInstance instance = new BlockInstance(block, serviceDate.getTime(),
-          frequency);
+      InstanceState state = new InstanceState(serviceDate.getTime(), frequency);
+      BlockInstance instance = new BlockInstance(block, state);
       instances.add(instance);
     }
   }

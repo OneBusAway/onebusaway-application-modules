@@ -41,6 +41,7 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
@@ -255,9 +256,10 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   @Override
   public List<ServiceAlert> getServiceAlertsForVehicleJourney(long time,
-      BlockInstance blockInstance, BlockTripEntry blockTrip,
+      BlockTripInstance blockTripInstance,
       AgencyAndId vehicleId) {
 
+    BlockTripEntry blockTrip = blockTripInstance.getBlockTrip();
     TripEntry trip = blockTrip.getTrip();
     AgencyAndId lineId = trip.getRouteCollection().getId();
     RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(lineId,

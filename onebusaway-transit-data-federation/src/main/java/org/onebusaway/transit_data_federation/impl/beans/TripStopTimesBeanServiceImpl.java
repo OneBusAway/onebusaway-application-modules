@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +28,7 @@ import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.beans.StopBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripStopTimesBeanService;
-import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -61,8 +62,9 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
   }
 
   @Override
-  public TripStopTimesBean getStopTimesForBlockTrip(BlockInstance blockInstance, BlockTripEntry blockTrip) {
+  public TripStopTimesBean getStopTimesForBlockTrip(BlockTripInstance blockTripInstance) {
 
+    BlockTripEntry blockTrip = blockTripInstance.getBlockTrip();
     TripStopTimesBean bean = getStopTimesForTrip(blockTrip.getTrip());
 
     if (blockTrip.getPreviousTrip() != null) {
@@ -77,11 +79,11 @@ public class TripStopTimesBeanServiceImpl implements TripStopTimesBeanService {
       bean.setNextTrip(nextTrip);
     }
     
-    FrequencyEntry frequency = blockInstance.getFrequency();
+    FrequencyEntry frequencyLabel = blockTripInstance.getFrequencyLabel();
     
-    if( frequency != null) {
-      long serviceDate = blockInstance.getServiceDate();
-      FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(serviceDate, frequency);
+    if( frequencyLabel != null) {
+      long serviceDate = blockTripInstance.getServiceDate();
+      FrequencyBean fb = FrequencyBeanLibrary.getBeanForFrequency(serviceDate, frequencyLabel);
       bean.setFrequency(fb);
     }
 

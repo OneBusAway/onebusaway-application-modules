@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +34,18 @@ public interface BlockConfigurationEntry extends HasIndexedBlockStopTimes {
 
   public List<BlockTripEntry> getTrips();
 
+  /**
+   * A block with frequency information can be one of two types:
+   * 
+   * 1) A traditional frequency-based block where the block configuration
+   * defines the trip patterns for the entire frequency range.
+   * 
+   * 2) A frequency-in-name-only block where block trips are operated on a fixed
+   * schedule, but marketed as frequency-based to riders.
+   * 
+   * @return the frequency entries associated with the trips of this block
+   *         configuration, or null if it's not a frequency-based block
+   */
   public List<FrequencyEntry> getFrequencies();
 
   /**

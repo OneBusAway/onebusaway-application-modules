@@ -21,10 +21,10 @@ import java.util.List;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 
 public interface ServiceAlertsService {
 
@@ -95,7 +95,7 @@ public interface ServiceAlertsService {
       AgencyAndId vehicleId);
 
   public List<ServiceAlert> getServiceAlertsForVehicleJourney(long time,
-      BlockInstance blockInstance, BlockTripEntry blockTrip,
+      BlockTripInstance blockTripInstance,
       AgencyAndId vehicleId);
 
 }

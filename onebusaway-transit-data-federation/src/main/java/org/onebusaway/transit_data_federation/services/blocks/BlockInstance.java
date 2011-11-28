@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,25 +39,30 @@ public class BlockInstance {
 
   private final BlockConfigurationEntry _block;
 
-  private final long _serviceDate;
-
-  private final FrequencyEntry _frequency;
+  private final InstanceState _state;
 
   public BlockInstance(BlockConfigurationEntry block, long serviceDate) {
-    this(block,serviceDate,null);
+    this(block, serviceDate, null);
   }
 
   public BlockInstance(BlockConfigurationEntry block, long serviceDate,
       FrequencyEntry frequency) {
-    if (block == null)
+    this(block, new InstanceState(serviceDate, frequency));
+  }
+
+  public BlockInstance(BlockConfigurationEntry block, InstanceState state) {
+    if (block == null || state == null)
       throw new IllegalArgumentException();
     _block = block;
-    _serviceDate = serviceDate;
-    _frequency = frequency;
+    _state = state;
   }
 
   public BlockConfigurationEntry getBlock() {
     return _block;
+  }
+  
+  public InstanceState getState() {
+    return _state;
   }
 
   /**
@@ -66,11 +72,7 @@ public class BlockInstance {
    * @return the service date on which the block is operating (Unix-time)
    */
   public long getServiceDate() {
-    return _serviceDate;
-  }
-  
-  public FrequencyEntry getFrequency() {
-    return _frequency;
+    return _state.getServiceDate();
   }
 
   @Override
@@ -78,9 +80,7 @@ public class BlockInstance {
     final int prime = 31;
     int result = 1;
     result = prime * result + _block.hashCode();
-    result = prime * result
-        + ((_frequency == null) ? 0 : _frequency.hashCode());
-    result = prime * result + (int) (_serviceDate ^ (_serviceDate >>> 32));
+    result = prime * result + _state.hashCode();
     return result;
   }
 
@@ -95,19 +95,14 @@ public class BlockInstance {
     BlockInstance other = (BlockInstance) obj;
     if (!_block.equals(other._block))
       return false;
-    if (_frequency == null) {
-      if (other._frequency != null)
-        return false;
-    } else if (!_frequency.equals(other._frequency))
-      return false;
-    if (_serviceDate != other._serviceDate)
+    if (!_state.equals(other._state))
       return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return _block.toString() + " " + _serviceDate + " " + _frequency;
+    return _block.toString() + " " + _state;
   }
 
 }

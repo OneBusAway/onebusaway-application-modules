@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +19,6 @@ package org.onebusaway.transit_data_federation.services.blocks;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 /**
  * Methods for determining which {@link BlockInstance} instances are active for
@@ -45,9 +44,6 @@ public interface BlockCalendarService {
    * @return the block instance, or null if not found
    */
   public BlockInstance getBlockInstance(AgencyAndId blockId, long serviceDate);
-
-  public BlockTripEntry getTargetBlockTrip(BlockInstance blockInstance,
-      TripEntry trip);
 
   public List<BlockInstance> getActiveBlocks(AgencyAndId blockId,
       long timeFrom, long timeTo);

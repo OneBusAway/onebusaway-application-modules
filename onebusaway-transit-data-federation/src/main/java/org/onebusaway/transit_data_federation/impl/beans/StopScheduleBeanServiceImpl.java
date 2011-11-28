@@ -52,11 +52,13 @@ import org.onebusaway.transit_data_federation.services.beans.StopScheduleBeanSer
 import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockStopTimeIndex;
+import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyBlockStopTimeEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.FrequencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.ServiceIdActivation;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -182,11 +184,16 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId);
 
-    Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId = getStopTimeInstancesByRouteCollectionId(
-        stopEntry, date);
+    Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
+        new ArrayList<StopTimeInstance>());
+    Map<AgencyAndId, List<StopTimeInstance>> frequenciesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
+        new ArrayList<StopTimeInstance>());
 
-    Map<AgencyAndId, List<StopTimeInstance>> frequenciesByRouteCollectionId = getFrequencyInstancesByRouteCollectionId(
-        stopEntry, date);
+    groupStopTimeInstancesByRouteCollectionId(stopEntry, date,
+        stopTimesByRouteCollectionId, frequenciesByRouteCollectionId);
+
+    groupFrequencyInstancesByRouteCollectionId(stopEntry, date,
+        frequenciesByRouteCollectionId);
 
     Set<AgencyAndId> routeIds = new HashSet<AgencyAndId>();
     routeIds.addAll(stopTimesByRouteCollectionId.keySet());
@@ -354,11 +361,13 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
     }
   }
 
-  private Map<AgencyAndId, List<StopTimeInstance>> getStopTimeInstancesByRouteCollectionId(
-      StopEntry stopEntry, ServiceDate date) {
+  private void groupStopTimeInstancesByRouteCollectionId(StopEntry stopEntry,
+      ServiceDate date,
+      Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId,
+      Map<AgencyAndId, List<StopTimeInstance>> frequenciesByRouteCollectionId) {
 
-    Map<AgencyAndId, List<StopTimeInstance>> stopTimesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
-        new ArrayList<StopTimeInstance>());
+    Map<AgencyAndId, Set<FrequencyEntry>> frequencyLabelsByRouteCollectionId = new FactoryMap<AgencyAndId, Set<FrequencyEntry>>(
+        new HashSet<FrequencyEntry>());
 
     for (BlockStopTimeIndex index : _blockIndexService.getStopTimeIndicesForStop(stopEntry)) {
 
@@ -376,20 +385,24 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         TripEntry trip = blockTrip.getTrip();
         AgencyAndId routeCollectionId = trip.getRouteCollection().getId();
 
-        StopTimeInstance sti = new StopTimeInstance(stopTime, serviceDate);
+        FrequencyEntry frequencyLabel = trip.getFrequencyLabel();
+        InstanceState state = new InstanceState(serviceDate.getTime(),
+            frequencyLabel);
+        StopTimeInstance sti = new StopTimeInstance(stopTime, state);
 
-        stopTimesByRouteCollectionId.get(routeCollectionId).add(sti);
+        if (frequencyLabel == null) {
+          stopTimesByRouteCollectionId.get(routeCollectionId).add(sti);
+        } else if (frequencyLabelsByRouteCollectionId.get(routeCollectionId).add(
+            frequencyLabel)) {
+          frequenciesByRouteCollectionId.get(routeCollectionId).add(sti);
+        }
       }
     }
-
-    return stopTimesByRouteCollectionId;
   }
 
-  private Map<AgencyAndId, List<StopTimeInstance>> getFrequencyInstancesByRouteCollectionId(
-      StopEntry stopEntry, ServiceDate date) {
-
-    Map<AgencyAndId, List<StopTimeInstance>> frequenciesByRouteCollectionId = new FactoryMap<AgencyAndId, List<StopTimeInstance>>(
-        new ArrayList<StopTimeInstance>());
+  private void groupFrequencyInstancesByRouteCollectionId(StopEntry stopEntry,
+      ServiceDate date,
+      Map<AgencyAndId, List<StopTimeInstance>> frequenciesByRouteCollectionId) {
 
     for (FrequencyBlockStopTimeIndex index : _blockIndexService.getFrequencyStopTimeIndicesForStop(stopEntry)) {
 
@@ -408,15 +421,14 @@ class StopScheduleBeanServiceImpl implements StopScheduleBeanService {
         BlockTripEntry blockTrip = stopTime.getTrip();
         TripEntry trip = blockTrip.getTrip();
         AgencyAndId routeCollectionId = trip.getRouteCollection().getId();
+        InstanceState state = new InstanceState(serviceDate.getTime(),
+            entry.getFrequency());
 
-        StopTimeInstance sti = new StopTimeInstance(stopTime,
-            serviceDate.getTime(), entry.getFrequency());
+        StopTimeInstance sti = new StopTimeInstance(stopTime, state);
 
         frequenciesByRouteCollectionId.get(routeCollectionId).add(sti);
       }
     }
-
-    return frequenciesByRouteCollectionId;
   }
 
   private ContinuesAsStopTimeGroupKey getContinuesAsGroupKeyForStopTimeInstance(
