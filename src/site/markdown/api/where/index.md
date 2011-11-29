@@ -98,6 +98,11 @@ They will always appear in that order, since stops and trips reference routes an
 are processing the result stream in order, you should always be able to assume that an referenced entity would already
 have been included in the references section.
 
+Every API method supports an optional `includeReferences=true|false` parameter that determines if the `<references/>`
+section is included in a response.  If you don't need the contents of the `<references/>` section, perhaps because
+you've pre-cached all the elements, then setting `includeReferences=false` can be a good way to reduce the response
+size.
+
 ## Methods
 
 The current list of supported API methods.  Methods that are subject to changed are marked <font color="red">BETA</font>.
