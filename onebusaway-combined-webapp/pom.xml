@@ -59,6 +59,7 @@
               <descriptors>
                 <descriptor>src/main/assembly/assembly-api-only.xml</descriptor>
                 <descriptor>src/main/assembly/assembly-full.xml</descriptor>
+                <descriptor>src/main/assembly/assembly-ui-only.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
