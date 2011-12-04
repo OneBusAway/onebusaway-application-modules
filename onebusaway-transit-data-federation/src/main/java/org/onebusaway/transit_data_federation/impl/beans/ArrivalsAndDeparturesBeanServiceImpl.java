@@ -206,6 +206,9 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     long time = query.getTime();
 
     ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
+    if (instance == null) {
+      return null;
+    }
 
     ArrivalAndDepartureBean bean = getStopTimeInstanceAsBean(time, instance,
         new HashMap<AgencyAndId, StopBean>());

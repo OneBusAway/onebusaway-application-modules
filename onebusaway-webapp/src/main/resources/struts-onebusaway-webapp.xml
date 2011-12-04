@@ -71,7 +71,7 @@
         </global-results>
 
         <global-exception-mappings>
-            <exception-mapping exception="org.onebusaway.exceptions.ServiceException" result="ServiceException" />
+            <!-- <exception-mapping exception="org.onebusaway.exceptions.ServiceException" result="ServiceException" /> -->
             <exception-mapping exception="org.onebusaway.exceptions.NoSuchStopServiceException"
                 result="NoSuchStopServiceException" />
             <exception-mapping exception="org.onebusaway.exceptions.NoSuchTripServiceException"
