@@ -46,9 +46,13 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 
 public class ServiceAlertsServiceImplTest {
+
+  private static final int FIVE_MINUTES = 5*60*1000;
 
   private ServiceAlertsServiceImpl _service;
 
@@ -111,12 +115,7 @@ public class ServiceAlertsServiceImplTest {
 
   @Test
   public void testGetServiceAlertsForFederatedAgencyId() {
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    Affects.Builder affects = Affects.newBuilder();
-    affects.setAgencyId("2");
-    builder.addAffects(affects);
-    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
-        "1");
+    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId();
 
     List<ServiceAlert> alerts = _service.getServiceAlertsForFederatedAgencyId("1");
     assertEquals(1, alerts.size());
@@ -148,13 +147,29 @@ public class ServiceAlertsServiceImplTest {
 
   @Test
   public void testGetServiceAlertsForAgencyId() {
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    Affects.Builder affects = Affects.newBuilder();
-    affects.setAgencyId("2");
-    builder.addAffects(affects);
-    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
-        "1");
+    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId();
+    verifyExistsServiceAlertsForAgencyAndId(serviceAlert);
+  }
 
+  @Test
+  public void testGetServiceAlertsForAgencyIdInsideOpenStart() {
+    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(System.currentTimeMillis() - FIVE_MINUTES, -1);
+    verifyExistsServiceAlertsForAgencyAndId(serviceAlert);
+  }
+
+  @Test
+  public void testGetServiceAlertsForAgencyIdInsideOpenEnd() {
+    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(-1, System.currentTimeMillis() + FIVE_MINUTES);
+    verifyExistsServiceAlertsForAgencyAndId(serviceAlert);
+  }
+
+  @Test
+  public void testGetServiceAlertsForAgencyIdInsideClosedRange() {
+    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(System.currentTimeMillis() - FIVE_MINUTES, System.currentTimeMillis() + FIVE_MINUTES);
+    verifyExistsServiceAlertsForAgencyAndId(serviceAlert);
+  }
+
+  public void verifyExistsServiceAlertsForAgencyAndId(ServiceAlert serviceAlert) {
     List<ServiceAlert> alerts = _service.getServiceAlertsForAgencyId(
         System.currentTimeMillis(), "1");
     assertEquals(0, alerts.size());
@@ -163,6 +178,56 @@ public class ServiceAlertsServiceImplTest {
         "2");
     assertEquals(1, alerts.size());
     assertTrue(alerts.contains(serviceAlert));
+  }
+
+  @Test
+  public void testGetServiceAlertsForAgencyIdOutsideOfOpenStart() {
+    createServiceAlertForAgencyAndId(System.currentTimeMillis() + FIVE_MINUTES, -1);
+    verifyNotExistsServiceAlertsForAgencyAndId();
+  }
+
+  @Test
+  public void testGetServiceAlertsForAgencyIdOutsideOfOpenEnd() {
+    createServiceAlertForAgencyAndId(-1, System.currentTimeMillis() - FIVE_MINUTES);
+    verifyNotExistsServiceAlertsForAgencyAndId();
+  }
+
+  @Test
+  public void testGetServiceAlertsForAgencyIdOutsideOfClosedRange() {
+    createServiceAlertForAgencyAndId(System.currentTimeMillis() + FIVE_MINUTES, System.currentTimeMillis() + (FIVE_MINUTES*2));
+    verifyNotExistsServiceAlertsForAgencyAndId();
+  }
+
+  public void verifyNotExistsServiceAlertsForAgencyAndId() {
+    List<ServiceAlert> alerts = _service.getServiceAlertsForAgencyId(
+        System.currentTimeMillis(), "1");
+    assertEquals(0, alerts.size());
+
+    alerts = _service.getServiceAlertsForAgencyId(System.currentTimeMillis(),
+        "2");
+    assertEquals(0, alerts.size());
+  }
+
+  public ServiceAlert createServiceAlertForAgencyAndId() {
+    return createServiceAlertForAgencyAndId(-1, -1);
+  }
+  
+  public ServiceAlert createServiceAlertForAgencyAndId(long start, long end) {
+    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
+    Affects.Builder affects = Affects.newBuilder();
+    affects.setAgencyId("2");
+    builder.addAffects(affects);
+    if (start != -1 || end != -1) {
+      Builder trBuilder = TimeRange.newBuilder();
+      if (start != -1)
+        trBuilder.setStart(start);    
+      if (end != -1)
+        trBuilder.setEnd(end);    
+      builder.addPublicationWindow(trBuilder);      
+    }
+    ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
+        "1");
+    return serviceAlert;
   }
 
   @Test
@@ -307,6 +372,17 @@ public class ServiceAlertsServiceImplTest {
     ServiceAlert serviceAlert4 = _service.createOrUpdateServiceAlert(builder4,
         "1");
 
+    ServiceAlert.Builder builder10 = ServiceAlert.newBuilder();
+    Affects.Builder affects10 = Affects.newBuilder();
+    affects10.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
+    affects10.setDirectionId("1");
+    builder10.addAffects(affects10);
+    Builder trBuilder10 = TimeRange.newBuilder();
+    trBuilder10.setStart(System.currentTimeMillis() - FIVE_MINUTES);    
+    builder10.addPublicationWindow(trBuilder10);
+    ServiceAlert serviceAlert10 = _service.createOrUpdateServiceAlert(builder10,
+        "1");
+
     /**
      * These alerts shouldn't match
      */
@@ -347,15 +423,28 @@ public class ServiceAlertsServiceImplTest {
     BlockConfigurationEntry blockConfig = blockConfiguration(block,
         serviceIds(lsids("a"), lsids()), trip);
 
+    ServiceAlert.Builder builder11 = ServiceAlert.newBuilder();
+    Affects.Builder affects11 = Affects.newBuilder();
+    affects11.setRouteId(ServiceAlertLibrary.id("1", "RouteX"));
+    affects11.setDirectionId("1");
+    builder11.addAffects(affects11);
+    Builder trBuilder11 = TimeRange.newBuilder();
+    trBuilder11.setStart(System.currentTimeMillis() + FIVE_MINUTES);    
+    builder11.addPublicationWindow(trBuilder11);
+    ServiceAlert serviceAlert11 = _service.createOrUpdateServiceAlert(builder11,
+        "1");
+
     BlockInstance blockInstance = new BlockInstance(blockConfig,
         System.currentTimeMillis());
     List<ServiceAlert> alerts = _service.getServiceAlertsForVehicleJourney(
         System.currentTimeMillis(), blockInstance,
         blockConfig.getTrips().get(0), new AgencyAndId("1", "1111"));
-    assertEquals(3, alerts.size());
+    assertEquals(4, alerts.size());
     assertTrue(alerts.contains(serviceAlert2));
     assertTrue(alerts.contains(serviceAlert3));
     assertTrue(alerts.contains(serviceAlert4));
+    assertTrue(alerts.contains(serviceAlert10));
+    assertTrue(!alerts.contains(serviceAlert11));
   }
 
   @Test
@@ -394,16 +483,11 @@ public class ServiceAlertsServiceImplTest {
   @Test
   public void testUpdateServiceAlert() {
 
-    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
-    Affects.Builder affects = Affects.newBuilder();
-    affects.setAgencyId("2");
-    builder.addAffects(affects);
-    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder,
-        "1");
+    ServiceAlert serviceAlert1 = createServiceAlertForAgencyAndId();
 
-    builder = ServiceAlert.newBuilder(serviceAlert1);
+    ServiceAlert.Builder builder = ServiceAlert.newBuilder(serviceAlert1);
     builder.clearAffects();
-    affects = Affects.newBuilder();
+    Affects.Builder affects = Affects.newBuilder();
     affects.setStopId(ServiceAlertLibrary.id("1", "10020"));
     builder.addAffects(affects);
 

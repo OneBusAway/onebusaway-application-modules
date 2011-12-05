@@ -45,6 +45,7 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -188,7 +189,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
     getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, agencyId,
         serviceAlertIds);
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds, time);
   }
 
   @Override
@@ -199,7 +200,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, stopId.getAgencyId(),
         serviceAlertIds);
     getServiceAlertIdsForKey(_serviceAlertIdsByStopId, stopId, serviceAlertIds);
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds, time);
   }
 
   @Override
@@ -252,7 +253,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     getServiceAlertIdsForKey(_serviceAlertIdsByTripAndStopId,
         tripAndStopCallRef, serviceAlertIds);
 
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds, time);
   }
 
   @Override
@@ -273,7 +274,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
         lineAndDirectionRef, serviceAlertIds);
     getServiceAlertIdsForKey(_serviceAlertIdsByTripId, trip.getId(),
         serviceAlertIds);
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds, time);
   }
 
   /****
@@ -366,16 +367,33 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private List<ServiceAlert> getServiceAlertIdsAsObjects(
       Collection<AgencyAndId> serviceAlertIds) {
+    return getServiceAlertIdsAsObjects(serviceAlertIds, -1);
+  }
+  
+  private List<ServiceAlert> getServiceAlertIdsAsObjects(
+        Collection<AgencyAndId> serviceAlertIds, long time) {
     if (serviceAlertIds == null || serviceAlertIds.isEmpty())
       return Collections.emptyList();
     List<ServiceAlert> serviceAlerts = new ArrayList<ServiceAlert>(
         serviceAlertIds.size());
     for (AgencyAndId serviceAlertId : serviceAlertIds) {
       ServiceAlert serviceAlert = _serviceAlerts.get(serviceAlertId);
-      if (serviceAlert != null)
+      if (serviceAlert != null && filterByTime(serviceAlert, time))
         serviceAlerts.add(serviceAlert);
     }
     return serviceAlerts;
+  }
+
+  private boolean filterByTime(ServiceAlert serviceAlert, long time) {
+    if (time == -1 || serviceAlert.getPublicationWindowList().size()==0)
+      return true;
+    for (TimeRange publicationWindow: serviceAlert.getPublicationWindowList()) {
+      if ((!publicationWindow.hasStart() || publicationWindow.getStart() <= time) &&
+          (!publicationWindow.hasEnd() || publicationWindow.getEnd() >= time)) {
+            return true;
+      }
+    }
+    return false;
   }
 
   /****
