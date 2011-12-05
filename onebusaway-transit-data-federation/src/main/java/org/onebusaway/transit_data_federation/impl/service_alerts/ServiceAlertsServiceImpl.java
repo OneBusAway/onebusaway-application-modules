@@ -93,6 +93,8 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private File _serviceAlertsPath;
 
+  private boolean _doPersistence = false;
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -104,7 +106,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   @PostConstruct
   public void start() {
-    loadServieAlerts();
+    loadServiceAlerts();
   }
 
   @PreDestroy
@@ -380,8 +382,13 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
    * Serialization
    ****/
 
-  private synchronized void loadServieAlerts() {
+  private synchronized void loadServiceAlerts() {
 
+    if (_doPersistence == false) {
+      _log.info("Not loading service alerts from bundle, persistence=" + _doPersistence);
+      return;
+    }
+    
     File path = getServiceAlertsPath();
 
     if (path == null || !path.exists())
@@ -411,6 +418,11 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private synchronized void saveServiceAlerts() {
 
+    if (_doPersistence == false) {
+      _log.info("Not saving service alerts to bundle, persistence=" + _doPersistence);
+      return;
+    }
+    
     File path = getServiceAlertsPath();
 
     if (path == null)
@@ -442,6 +454,11 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     if (_serviceAlertsPath != null)
       return _serviceAlertsPath;
     return _bundle.getServiceAlertsPath();
+  }
+
+  @Override
+  public void doPersistence(boolean persist) {
+    this._doPersistence  = persist;
   }
 
 }
