@@ -1,14 +1,3 @@
-package org.onebusaway.webapp.actions;
-
-import java.net.InetAddress;
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.onebusaway.presentation.services.configuration.ConfigurationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 /**
  * Copyright (C) 2011 Google, Inc.
  *
@@ -24,6 +13,17 @@ import org.springframework.beans.factory.annotation.Autowired;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.onebusaway.webapp.actions;
+
+import java.net.InetAddress;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.onebusaway.presentation.services.configuration.ConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.opensymphony.xwork2.ActionSupport;
 
 public class StatusAction extends ActionSupport {
