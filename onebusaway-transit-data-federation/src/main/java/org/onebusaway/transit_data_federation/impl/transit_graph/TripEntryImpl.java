@@ -51,8 +51,9 @@ public class TripEntryImpl implements TripEntry, Serializable {
 
   private FrequencyEntry _frequencyLabel;
 
-  public void setId(AgencyAndId id) {
+  public TripEntryImpl setId(AgencyAndId id) {
     _id = id;
+    return this;
   }
 
   public TripEntryImpl setRoute(RouteEntryImpl route) {
@@ -60,8 +61,9 @@ public class TripEntryImpl implements TripEntry, Serializable {
     return this;
   }
 
-  public void setDirectionId(String directionId) {
+  public TripEntryImpl setDirectionId(String directionId) {
     _directionId = directionId;
+    return this;
   }
 
   public TripEntryImpl setBlock(BlockEntryImpl block) {

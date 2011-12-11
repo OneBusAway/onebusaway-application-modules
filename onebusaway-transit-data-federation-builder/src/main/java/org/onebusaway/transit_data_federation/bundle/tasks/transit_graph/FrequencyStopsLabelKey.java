@@ -19,24 +19,15 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-class FrequencyLabelKey {
-
-  private final AgencyAndId routeId;
-
-  private final AgencyAndId serviceId;
+class FrequencyStopsLabelKey extends FrequencyRouteLabelKey {
 
   private final List<AgencyAndId> stopIds;
 
-  public FrequencyLabelKey(AgencyAndId routeId, AgencyAndId serviceId,
+  public FrequencyStopsLabelKey(AgencyAndId routeId, AgencyAndId serviceId,
       List<AgencyAndId> stopIds) {
-    if (routeId == null)
-      throw new IllegalArgumentException();
-    if (serviceId == null)
-      throw new IllegalArgumentException();
+    super(routeId, serviceId);
     if (stopIds == null)
       throw new IllegalArgumentException();
-    this.routeId = routeId;
-    this.serviceId = serviceId;
     this.stopIds = stopIds;
   }
 
@@ -44,8 +35,7 @@ class FrequencyLabelKey {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + routeId.hashCode();
-    result = prime * result + serviceId.hashCode();
+    result = prime * result + super.hashCode();
     result = prime * result + stopIds.hashCode();
     return result;
   }
@@ -58,21 +48,10 @@ class FrequencyLabelKey {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    FrequencyLabelKey other = (FrequencyLabelKey) obj;
-    if (routeId == null) {
-      if (other.routeId != null)
-        return false;
-    } else if (!routeId.equals(other.routeId))
+    if (!super.equals(obj))
       return false;
-    if (serviceId == null) {
-      if (other.serviceId != null)
-        return false;
-    } else if (!serviceId.equals(other.serviceId))
-      return false;
-    if (stopIds == null) {
-      if (other.stopIds != null)
-        return false;
-    } else if (!stopIds.equals(other.stopIds))
+    FrequencyStopsLabelKey other = (FrequencyStopsLabelKey) obj;
+    if (!stopIds.equals(other.stopIds))
       return false;
     return true;
   }
