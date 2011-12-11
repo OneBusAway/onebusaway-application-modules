@@ -29,7 +29,7 @@ import org.onebusaway.transit_data_federation.model.ShapePoints;
 
 public class ShapePointsLibrary {
 
-  private double _localMinimumThreshold = 30.0;
+  private double _localMinimumThreshold = 50.0;
 
   public ShapePointsLibrary() {
 
