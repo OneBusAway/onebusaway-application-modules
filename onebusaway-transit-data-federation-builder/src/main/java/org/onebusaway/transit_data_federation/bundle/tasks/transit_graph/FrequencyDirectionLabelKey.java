@@ -30,10 +30,9 @@ class FrequencyDirectionLabelKey extends FrequencyRouteLabelKey {
   @Override
   public int hashCode() {
     final int prime = 31;
-    int result = 1;
-    result = prime * result + super.hashCode();
+    int result = super.hashCode();
     result = prime * result
-        + (directionId == null ? 0 : directionId.hashCode());
+        + ((directionId == null) ? 0 : directionId.hashCode());
     return result;
   }
 
@@ -41,18 +40,16 @@ class FrequencyDirectionLabelKey extends FrequencyRouteLabelKey {
   public boolean equals(Object obj) {
     if (this == obj)
       return true;
-    if (obj == null)
+    if (!super.equals(obj))
       return false;
     if (getClass() != obj.getClass())
       return false;
-    if (!super.equals(obj))
-      return false;
     FrequencyDirectionLabelKey other = (FrequencyDirectionLabelKey) obj;
-    if (directionId == null && other.directionId != null) {
+    if (directionId == null) {
+      if (other.directionId != null)
+        return false;
+    } else if (!directionId.equals(other.directionId))
       return false;
-    } else if (!directionId.equals(other.directionId)) {
-      return false;
-    }
     return true;
   }
 }
