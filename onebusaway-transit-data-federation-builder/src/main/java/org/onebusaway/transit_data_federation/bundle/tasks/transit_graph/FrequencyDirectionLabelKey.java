@@ -24,8 +24,6 @@ class FrequencyDirectionLabelKey extends FrequencyRouteLabelKey {
   public FrequencyDirectionLabelKey(AgencyAndId routeId, AgencyAndId serviceId,
       String directionId) {
     super(routeId, serviceId);
-    if (directionId == null)
-      throw new IllegalArgumentException();
     this.directionId = directionId;
   }
 
@@ -34,7 +32,8 @@ class FrequencyDirectionLabelKey extends FrequencyRouteLabelKey {
     final int prime = 31;
     int result = 1;
     result = prime * result + super.hashCode();
-    result = prime * result + directionId.hashCode();
+    result = prime * result
+        + (directionId == null ? 0 : directionId.hashCode());
     return result;
   }
 
@@ -49,8 +48,11 @@ class FrequencyDirectionLabelKey extends FrequencyRouteLabelKey {
     if (!super.equals(obj))
       return false;
     FrequencyDirectionLabelKey other = (FrequencyDirectionLabelKey) obj;
-    if (!directionId.equals(other.directionId))
+    if (directionId == null && other.directionId != null) {
       return false;
+    } else if (!directionId.equals(other.directionId)) {
+      return false;
+    }
     return true;
   }
 }
