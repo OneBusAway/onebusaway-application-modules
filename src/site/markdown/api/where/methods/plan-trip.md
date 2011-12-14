@@ -121,7 +121,7 @@ The `<leg/>` element has a start and end time that captures its portion of the f
 
 In the case of a `walk` leg, a `<walkLegs/>` element will be present in the leg that captures the sequence of individual `<walkLeg/>` segments of a walk.  Each `<walkLeg/>` has a `streetName` that captures the name of the street, a `path` encoded-polyline of the shape of the walk segment, and a `distance` of the walk leg.
 
-In the case of a `transitLeg`, a single `<transitLeg/>` will be present in the leg that captures the transit-specific details of the leg.  The `tripId` references the [<trip/> element](../elements/trip.html) in the `<references/>` section.  The `serviceDate` captures the service date of the trip (see the [Glossary#Service_Date glossary entry]).  The `fromStopId` and `toStopId` reference the [<stop/> elements](../elements/stop.html) for the stops to board and alight from.
+In the case of a `transitLeg`, a single `<transitLeg/>` will be present in the leg that captures the transit-specific details of the leg.  The `tripId` references the [`<trip/>` element](../elements/trip.html) in the `<references/>` section.  The `serviceDate` captures the service date of the trip (see the [Glossary#Service_Date glossary entry]).  The `fromStopId` and `toStopId` reference the [`<stop/>` elements](../elements/stop.html) for the stops to board and alight from.
 
 Note that these elements may be missing in the case of an interlined-route, where the route number switches mid-operation, but the rider should just remain on-board.  In such a case, the trip will be modeled as two separate `<leg/>` elements, with the `toStopId` missing from the first leg and the `fromStopId` missing from the second leg.
 

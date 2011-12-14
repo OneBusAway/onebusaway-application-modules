@@ -37,4 +37,4 @@ If you just specify a lat,lon search location, the `routes-for-location` method 
 
 ## Response
 
-The `routes-for-location` method returns a [list result](../elements/list-result.html), so see additional documentation on controlling the number of elements returned and interpreting the results.  The list contents are [<route/> elements](../elements/route.html).
+The `routes-for-location` method returns a [list result](../elements/list-result.html), so see additional documentation on controlling the number of elements returned and interpreting the results.  The list contents are [`<route/>` elements](../elements/route.html).

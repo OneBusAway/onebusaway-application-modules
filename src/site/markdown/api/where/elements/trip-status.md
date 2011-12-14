@@ -4,47 +4,46 @@
 
 The `<tripStatus/>` element captures information about the current status of a transit vehicle serving a trip.  It is returned as a sub-element in a number of api calls.  For example:
 
-* [arrivals-and-departures-for-stop](../../methods/arrivals-and-departures-for-stop.html)
-* [trip-details](../../methods/trip-details.html)
-* [trip-for-vehicle](../../methods/trip-for-vehicle.html)
-* [trips-for-location](../../trips-for-location.html)
+* [arrivals-and-departures-for-stop](../methods/arrivals-and-departures-for-stop.html)
+* Any method that returns a [`<tripDetails/>` element](trip-details.html).
 
 ## Example
 
-    <status>
-      <activeTripId>1_15436438</activeTripId>
-      <blockTripSequence>2</blockTripSequence>
-      <serviceDate>1271401200000</serviceDate>
-      <frequency>...</frequency>
-      <scheduledDistanceAlongTrip>14689.488542526902</scheduledDistanceAlongTrip>
-      <totalDistanceAlongTrip>16801.282798624055</totalDistanceAlongTrip>
-      <position>
-        <lat>47.66166765182482</lat>
-        <lon>-122.34439975182481</lon>
-      </position>
-      <orientation>202.79602796003044</orientation>
-      <closestStop>1_29530</closestStop>
-      <closestStopTimeOffset>-10</closestStopTimeOffset>
-      <nextStop>1_1108</nextStop>
-      <nextStopTimeOffset>72</nextStopTimeOffset>
-      <phase>in_progress</phase>
-      <status>default</status>
-      <predicted>true</predicted>
-      <lastUpdateTime>1289590007894</lastUpdateTime>
-      <lastLocationUpdateTime>1289590007894</lastLocationUpdateTime>
-      <lastKnownLocation>
-        <lat>47.66166765182482</lat>
-        <lon>-122.34439975182481</lon>
-      </lastKnownLocation>
-      <lastKnownOrientation>230.30</lastKnownOrientation>  
-      <distanceAlongTrip>13756.12</distanceAlongTrip>
-      <scheduleDeviation>13</scheduleDeviation>
-      <vehicleId>1_4207</vehicleId>
-      <situationIds>
-        <string>1_1289972789869</string>
-        <string>...</string>
-      </situationIds>
-    </status>
+~~~
+<status>
+  <activeTripId>1_15436438</activeTripId>
+  <blockTripSequence>2</blockTripSequence>
+  <serviceDate>1271401200000</serviceDate>
+  <scheduledDistanceAlongTrip>14689.488542526902</scheduledDistanceAlongTrip>
+  <totalDistanceAlongTrip>16801.282798624055</totalDistanceAlongTrip>
+  <position>
+    <lat>47.66166765182482</lat>
+    <lon>-122.34439975182481</lon>
+  </position>
+  <orientation>202.79602796003044</orientation>
+  <closestStop>1_29530</closestStop>
+  <closestStopTimeOffset>-10</closestStopTimeOffset>
+  <nextStop>1_1108</nextStop>
+  <nextStopTimeOffset>72</nextStopTimeOffset>
+  <phase>in_progress</phase>
+  <status>default</status>
+  <predicted>true</predicted>
+  <lastUpdateTime>1289590007894</lastUpdateTime>
+  <lastLocationUpdateTime>1289590007894</lastLocationUpdateTime>
+  <lastKnownLocation>
+    <lat>47.66166765182482</lat>
+    <lon>-122.34439975182481</lon>
+  </lastKnownLocation>
+  <lastKnownOrientation>230.30</lastKnownOrientation>  
+  <distanceAlongTrip>13756.12</distanceAlongTrip>
+  <scheduleDeviation>13</scheduleDeviation>
+  <vehicleId>1_4207</vehicleId>
+  <situationIds>
+    <string>1_1289972789869</string>
+    <string>...</string>
+  </situationIds>
+</status>
+~~~
 
 ## Details
 

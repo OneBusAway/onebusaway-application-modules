@@ -36,4 +36,4 @@ The key here is uniquely identifying which arrival you are interested in.  Typic
 
 ## Response
 
-The method returns an [<arrivalAndDeparture/> element](../elements/arrival-and-departure.html) as its content.
+The method returns an [`<arrivalAndDeparture/>` element](../elements/arrival-and-departure.html) as its content.

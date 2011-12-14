@@ -16,6 +16,6 @@ Additionally, the list response will have a `<limitExceeded/>` element, which a 
 
 Finally, some responses will also include an `<outOfRange/>` element, which will indicate if the search request was made outside the current areas of service for OneBusAway (see [OneBusAwayRestApi_AgenciesWithCoverage agencies-with-coverage]).  The following geographic query methods currently include the `<outOfRange/>` element:
 
-* [routes-for-location](../../methods/routes-for-location.html)
-* [stops-for-location](../../methods/stops-for-location.html)
-* [trips-for-location](../../methods/trips-for-location.html)
+* [routes-for-location](../methods/routes-for-location.html)
+* [stops-for-location](../methods/stops-for-location.html)
+* [trips-for-location](../methods/trips-for-location.html)

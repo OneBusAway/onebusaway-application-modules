@@ -127,7 +127,7 @@ Here we model an adverse weather reroute.  The `<consequence/>` element specifie
 
 ## Situations in API Methods
 
-The `<situation/>` element will appear in one place: under a `<situations/>` element that is a new addition to the `<references/>` element (see [the V2 reference](../../version-2.html)).  Since a situation can potentially be referenced multiple times in an API call, we felt putting situations in the references section was the best way to keep the response concise.
+The `<situation/>` element will appear in one place: under a `<situations/>` element that is a new addition to the `<references/>` element (see [the main API reference](../index.html)).  Since a situation can potentially be referenced multiple times in an API call, we felt putting situations in the references section was the best way to keep the response concise.
 
 Situations will be referenced by id in API calls.  For now, that primarily means the [arrivals-and-departures-for-stop](../../methods/arrivals-and-departures-for-stop.html) API call.  Situations ids can appear in a number of places, depending on the context of a situation.
 

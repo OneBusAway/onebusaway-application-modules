@@ -38,4 +38,4 @@ If you just specify a lat,lon search location, the `stops-for-location` method w
 
 ## Response
 
-The `stops-for-location` method returns a [list result](../elements/list-result.html), so see additional documentation on controlling the number of elements returned and interpreting the results.  The list contents are `<stop/>` elements, so see details about the various properties of the [<stop/> element](../elements/stop.html).
+The `stops-for-location` method returns a [list result](../elements/list-result.html), so see additional documentation on controlling the number of elements returned and interpreting the results.  The list contents are `<stop/>` elements, so see details about the various properties of the [`<stop/>` element](../elements/stop.html).

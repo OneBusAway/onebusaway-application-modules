@@ -129,6 +129,7 @@ The current list of supported API methods.  Methods that are subject to changed 
 * [trip-for-vehicle](methods/trip-for-vehicle.html) - get extended trip details for current trip of a specific transit vehicle
 * [trip](methods/trip.html) - get details for a specific trip
 * [trips-for-location](methods/trips-for-location.html) - get active trips near a location
+* [trips-for-route](methods/trips-for-route.html) - get active trips for a route
 
 ## Common Elements
 
@@ -142,5 +143,6 @@ See more discussion of [OneBusAwayRestApi_Version2 Version 2] of the api and how
 * [route](elements/route.html)
 * [situation](elements/situation.html)
 * [stop](elements/stop.html)
+* [tripDetails](elements/trip-details.html)
 * [tripStatus](elements/trip-status.html)
 * [trip](elements/trip.html)
