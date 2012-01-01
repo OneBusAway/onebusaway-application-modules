@@ -20,7 +20,9 @@ import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.api.actions.api.ApiKeyAuthorization;
 
 @ApiKeyAuthorization(enabled = false)
-@Results({@Result(name = "success-xml", location = "crossdomain.xml", type = "xml")})
+@Results({
+    @Result(name = "success", location = "crossdomain.xml", type = "xml"),
+    @Result(name = "success-xml", location = "crossdomain.xml", type = "xml")})
 public class CrossdomainAction extends OneBusAwayApiActionSupport {
 
   private static final long serialVersionUID = 1L;
@@ -28,5 +30,4 @@ public class CrossdomainAction extends OneBusAwayApiActionSupport {
   public String index() {
     return SUCCESS;
   }
-
 }
