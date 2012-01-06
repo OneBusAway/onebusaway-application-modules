@@ -19,9 +19,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +63,7 @@ public class GtfsRealtimeSource {
 
   static {
     _registry.add(GtfsRealtimeOneBusAway.delay);
+    _registry.add(GtfsRealtimeOneBusAway.timestamp);
   }
 
   private AgencyService _agencyService;
@@ -83,6 +89,15 @@ public class GtfsRealtimeSource {
   private int _refreshInterval = 30;
 
   private List<String> _agencyIds = new ArrayList<String>();
+
+  /**
+   * We keep track of vehicle location updates, only pushing them to the
+   * underling {@link VehicleLocationListener} when they've been updated, since
+   * we'll often see the same trip updates and vehicle positions every time we
+   * poll the GTFS-realtime feeds. We keep track of the timestamp of last update
+   * for each vehicle id.
+   */
+  private Map<AgencyAndId, Date> _lastVehicleUpdate = new HashMap<AgencyAndId, Date>();
 
   /**
    * We keep track of alerts, only pushing them to the underlying
@@ -211,11 +226,35 @@ public class GtfsRealtimeSource {
   private void handleCombinedUpdates(
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
 
-    for (CombinedTripUpdatesAndVehiclePosition update : updates) {
+    Set<AgencyAndId> seenVehicles = new HashSet<AgencyAndId>();
 
+    for (CombinedTripUpdatesAndVehiclePosition update : updates) {
       VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(update);
-      if (record != null)
-        _vehicleLocationListener.handleVehicleLocationRecord(record);
+      if (record != null) {
+        AgencyAndId vehicleId = record.getVehicleId();
+        seenVehicles.add(vehicleId);
+        Date timestamp = new Date(record.getTimeOfRecord());
+        Date prev = _lastVehicleUpdate.get(vehicleId);
+        if (prev == null || prev.before(timestamp)) {
+          _vehicleLocationListener.handleVehicleLocationRecord(record);
+          _lastVehicleUpdate.put(vehicleId, timestamp);
+        }
+      }
+    }
+
+    Calendar c = Calendar.getInstance();
+    c.add(Calendar.MINUTE, -15);
+    Date staleRecordThreshold = c.getTime();
+
+    Iterator<Map.Entry<AgencyAndId, Date>> it = _lastVehicleUpdate.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry<AgencyAndId, Date> entry = it.next();
+      AgencyAndId vehicleId = entry.getKey();
+      Date lastUpdateTime = entry.getValue();
+      if (!seenVehicles.contains(vehicleId)
+          && lastUpdateTime.before(staleRecordThreshold)) {
+        it.remove();
+      }
     }
   }
 

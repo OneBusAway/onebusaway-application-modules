@@ -123,6 +123,13 @@ class GtfsRealtimeTripLibrary {
     return updates;
   }
 
+  /**
+   * The {@link VehicleLocationRecord} is guarnateed to have a
+   * {@link VehicleLocationRecord#getVehicleId()} value.
+   * 
+   * @param update
+   * @return
+   */
   public VehicleLocationRecord createVehicleLocationRecordForUpdate(
       CombinedTripUpdatesAndVehiclePosition update) {
 
@@ -322,6 +329,10 @@ class GtfsRealtimeTripLibrary {
             best.scheduleDeviation = delay;
           }
 
+          if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.timestamp)) {
+            best.timestamp = tripUpdate.getExtension(GtfsRealtimeOneBusAway.timestamp);
+          }
+
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
             BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(
                 tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
@@ -348,6 +359,9 @@ class GtfsRealtimeTripLibrary {
 
     record.setServiceDate(instance.getServiceDate());
     record.setScheduleDeviation(best.scheduleDeviation);
+    if (best.timestamp != 0) {
+      record.setTimeOfRecord(best.timestamp);
+    }
   }
 
   private BlockStopTimeEntry getBlockStopTimeForStopTimeUpdate(
@@ -477,5 +491,6 @@ class GtfsRealtimeTripLibrary {
     public int delta = Integer.MAX_VALUE;
     public int scheduleDeviation = 0;
     public boolean isInPast = true;
+    public long timestamp = 0;
   }
 }
