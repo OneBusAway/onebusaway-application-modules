@@ -15,9 +15,10 @@
  */
 package org.onebusaway.api.model.transit;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class StopRouteDirectionScheduleV2Bean {
+public class StopRouteDirectionScheduleV2Bean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

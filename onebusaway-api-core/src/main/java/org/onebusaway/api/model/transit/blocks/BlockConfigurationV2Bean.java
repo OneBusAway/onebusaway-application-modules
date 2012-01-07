@@ -15,9 +15,10 @@
  */
 package org.onebusaway.api.model.transit.blocks;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class BlockConfigurationV2Bean {
+public class BlockConfigurationV2Bean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
