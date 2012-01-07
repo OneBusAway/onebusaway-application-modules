@@ -224,7 +224,6 @@ public class StopMonitoringAction extends OneBusAwayApiActionSupport implements
 
         MonitoredStopVisit.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(status.getStatus());
 
-        int i = 0;
         boolean started = false;
 
         List<TripStopTimeBean> stopTimes = specificTripDetails.getSchedule().getStopTimes();
@@ -244,9 +243,6 @@ public class StopMonitoringAction extends OneBusAwayApiActionSupport implements
         for (TripStopTimeBean stopTime : stopTimes) {
           StopBean stop = stopTime.getStop();
           int visitNumber = SiriUtils.getVisitNumber(visitNumberForStop, stop);
-          if (started) {
-            i++;
-          }
 
           double distance = status.getDistanceAlongTrip();
           if (Double.isNaN(distance)) {
