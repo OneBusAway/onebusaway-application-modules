@@ -5,7 +5,6 @@
     <groupId>org.onebusaway</groupId>
     <version>1.0.2-SNAPSHOT</version>
   </parent>
-  <groupId>org.onebusaway</groupId>
   <artifactId>onebusaway-transit-data-federation-builder</artifactId>
 
   <name>onebusaway-transit-data-federation-builder</name>
@@ -100,7 +99,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.2.1</version>
         <executions>
           <execution>
             <phase>package</phase>

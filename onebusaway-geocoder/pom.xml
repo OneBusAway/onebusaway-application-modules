@@ -5,7 +5,6 @@
         <groupId>org.onebusaway</groupId>
         <version>1.0.2-SNAPSHOT</version>
     </parent>
-    <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-geocoder</artifactId>
 
     <name>onebusaway-geocoder</name>

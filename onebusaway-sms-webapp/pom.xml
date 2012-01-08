@@ -8,7 +8,6 @@
         <version>1.0.2-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-sms-webapp</artifactId>
     <packaging>war</packaging>
 
