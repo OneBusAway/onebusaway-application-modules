@@ -110,7 +110,6 @@ public class ContainerLibrary {
     return ctx;
   }
 
-  @SuppressWarnings("unchecked")
   public static <T> T getBeanOfType(ApplicationContext context,
       Class<T> beanType) {
     Map<String, T> beans = context.getBeansOfType(beanType);

@@ -23,8 +23,6 @@ import com.opensymphony.xwork2.ActionContext;
 @AgiTemplateId("/find_your_stop")
 public class FindYourStopTemplate extends AbstractAgiTemplate {
 
-    private static final long serialVersionUID = 1L;
-
     @Override
     public void buildTemplate(ActionContext context) {
 

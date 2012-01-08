@@ -25,9 +25,9 @@ import java.util.List;
  * A Spring {@link FactoryBean} for creating a {@link List} object.
  * 
  * @author bdferris
- * @see MapFactoryBean 
+ * @see MapFactoryBean
  */
-public class ListFactoryBean extends AbstractFactoryBean {
+public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 
   private List<Object> _values = new ArrayList<Object>();
 
@@ -44,7 +44,7 @@ public class ListFactoryBean extends AbstractFactoryBean {
   }
 
   @Override
-  protected Object createInstance() throws Exception {
+  protected List<Object> createInstance() throws Exception {
     List<Object> values = new ArrayList<Object>();
     if (_values != null)
       values.addAll(_values);

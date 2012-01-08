@@ -24,8 +24,6 @@ import com.opensymphony.xwork2.ActionContext;
 @AgiTemplateId("/settings/needDefaultSearchLocation")
 public class NeedDefaultSearchLocationTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-
   @Override
   public void buildTemplate(ActionContext context) {
 

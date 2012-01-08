@@ -105,8 +105,6 @@ public class ClientBundleServlet extends HttpServlet {
     URL localUrl = resource.getLocalUrl();
     InputStream in = localUrl.openStream();
 
-    int total = 0;
-
     byte[] buffer = new byte[1024];
     while (true) {
       int rc = in.read(buffer);
@@ -114,7 +112,6 @@ public class ClientBundleServlet extends HttpServlet {
       if (rc == -1)
         break;
       out.write(buffer, 0, rc);
-      total += rc;
     }
 
     in.close();

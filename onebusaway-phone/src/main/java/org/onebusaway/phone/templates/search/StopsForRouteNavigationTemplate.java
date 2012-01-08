@@ -34,8 +34,6 @@ import com.opensymphony.xwork2.util.ValueStack;
 @AgiTemplateId("/search/navigation")
 public class StopsForRouteNavigationTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-
   private TextModification _destinationPronunciation;
 
   @Autowired

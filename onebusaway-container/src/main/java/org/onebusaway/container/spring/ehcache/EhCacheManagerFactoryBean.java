@@ -40,7 +40,7 @@ import org.springframework.core.io.Resource;
  * @see EhCacheConfigurationFactoryBean
  * @see EhCacheFactoryBean
  */
-public class EhCacheManagerFactoryBean implements FactoryBean,
+public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>,
     InitializingBean, DisposableBean {
 
   protected final Log logger = LogFactory.getLog(getClass());
@@ -87,7 +87,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean,
     }
   }
 
-  public Object getObject() {
+  public CacheManager getObject() {
     return this.cacheManager;
   }
 

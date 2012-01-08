@@ -27,7 +27,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XWorkConfigurationFactoryBean implements FactoryBean {
+public class XWorkConfigurationFactoryBean implements FactoryBean<Configuration> {
 
   private ApplicationContext _context;
 
@@ -50,7 +50,7 @@ public class XWorkConfigurationFactoryBean implements FactoryBean {
     _xmlConfigurationSources.addAll(xmlConfigurationSources);
   }
 
-  public Object getObject() throws Exception {
+  public Configuration getObject() throws Exception {
 
     ConfigurationManager confManager = new ConfigurationManager();
 

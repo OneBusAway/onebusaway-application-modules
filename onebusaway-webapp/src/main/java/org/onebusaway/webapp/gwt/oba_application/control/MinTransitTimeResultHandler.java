@@ -36,6 +36,8 @@ public class MinTransitTimeResultHandler implements
   private TimedPolygonModel _timedPolygonModel;
 
   private CommonControl _control;
+  
+  private boolean _showSearchGrid = false;
 
   /*
    * public void setTimedRegionModel(TimedRegionModel model) { _timedRegionModel
@@ -64,7 +66,7 @@ public class MinTransitTimeResultHandler implements
     if (result.isComplete()) {
       _control.search(result);
 
-      if (false)
+      if (_showSearchGrid)
         showSearchGrid(result);
     }
   }

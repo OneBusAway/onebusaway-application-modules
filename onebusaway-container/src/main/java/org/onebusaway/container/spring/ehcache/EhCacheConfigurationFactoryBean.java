@@ -45,7 +45,7 @@ import org.springframework.core.io.Resource;
  * @see EhCacheFactoryBean
  * @see EhCacheManagerFactoryBean
  */
-public class EhCacheConfigurationFactoryBean implements FactoryBean,
+public class EhCacheConfigurationFactoryBean implements FactoryBean<Configuration> ,
     InitializingBean {
 
   protected final Log logger = LogFactory.getLog(getClass());
@@ -88,7 +88,7 @@ public class EhCacheConfigurationFactoryBean implements FactoryBean,
     }
   }
 
-  public Object getObject() {
+  public Configuration getObject() {
     return this.configuration;
   }
 

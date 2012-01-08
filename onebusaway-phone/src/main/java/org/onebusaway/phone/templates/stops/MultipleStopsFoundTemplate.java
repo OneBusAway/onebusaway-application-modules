@@ -33,8 +33,6 @@ import com.opensymphony.xwork2.util.ValueStack;
 @AgiTemplateId("/stops/multipleStopsFound")
 public class MultipleStopsFoundTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-  
   private TextModification _destinationPronunciation;
 
   @Autowired

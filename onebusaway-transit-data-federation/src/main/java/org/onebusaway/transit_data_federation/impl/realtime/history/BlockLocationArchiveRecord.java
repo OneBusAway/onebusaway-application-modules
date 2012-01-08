@@ -28,7 +28,9 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
+import org.onebusaway.csv_entities.schema.EnumFieldMappingFactory;
 import org.onebusaway.csv_entities.schema.annotations.CsvField;
+import org.onebusaway.csv_entities.schema.annotations.CsvFieldNameConvention;
 import org.onebusaway.csv_entities.schema.annotations.CsvFields;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.serialization.mappings.AgencyIdFieldMappingFactory;
@@ -40,13 +42,7 @@ import org.onebusaway.realtime.api.EVehiclePhase;
     "trip_agencyId", "trip_id"})})
 @org.hibernate.annotations.Entity(mutable = false)
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
-@CsvFields(filename = "block_location_records.csv", fieldOrder = {
-    "id", "block_id_agencyId", "block_id_id", "distance_along_block",
-    "location_lat", "location_lon", "orientation", "phase",
-    "schedule_deviation", "service_date", "status", "time",
-    "timepoint_agencyId", "timepoint_agencyId", "timepoint_predicted_time",
-    "timepoint_scheduled_time", "trip_id_agencyId", "trip_id_id",
-    "vehicle_id_agencyId", "vehicle_id_id", "distance_along_trip"})
+@CsvFields(filename = "block_location_records.csv", fieldNameConvention = CsvFieldNameConvention.CAMEL_CASE)
 public class BlockLocationArchiveRecord {
 
   @Id
@@ -56,35 +52,41 @@ public class BlockLocationArchiveRecord {
   @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "block_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "block_id"))})
-  @CsvField(mapping = AgencyIdFieldMappingFactory.class)
+  @CsvField(name = "block", mapping = AgencyIdFieldMappingFactory.class)
   private AgencyAndId blockId;
 
   @Embedded
   @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "trip_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "trip_id"))})
-  @CsvField(mapping = AgencyIdFieldMappingFactory.class)
+  @CsvField(name = "trip", optional = true, mapping = AgencyIdFieldMappingFactory.class)
   private AgencyAndId tripId;
 
   private long serviceDate;
 
   private long time;
 
+  @CsvField(optional = true)
   @Column(nullable = true)
   private Double scheduleDeviation;
 
+  @CsvField(optional = true)
   @Column(nullable = true)
   private Double distanceAlongBlock;
 
+  @CsvField(optional = true)
   @Column(nullable = true)
   private Double distanceAlongTrip;
 
+  @CsvField(optional = true)
   @Column(nullable = true)
   private Double locationLat;
 
+  @CsvField(optional = true)
   @Column(nullable = true)
   private Double locationLon;
 
+  @CsvField(optional = true)
   @Column(nullable = true)
   private Double orientation;
 
@@ -92,7 +94,7 @@ public class BlockLocationArchiveRecord {
   @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "timepoint_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "timepoint_id"))})
-  @CsvField(mapping = AgencyIdFieldMappingFactory.class)
+  @CsvField(name = "timepoint", optional = true, mapping = AgencyIdFieldMappingFactory.class)
   private AgencyAndId timepointId;
 
   private long timepointScheduledTime;
@@ -107,16 +109,17 @@ public class BlockLocationArchiveRecord {
    */
   @Type(type = "org.onebusaway.container.hibernate.EnumUserType", parameters = {@Parameter(name = "enumClassName", value = "org.onebusaway.realtime.api.EVehiclePhase")})
   @Column(length = 50)
-  @CsvField(mapping = AgencyIdFieldMappingFactory.class)
+  @CsvField(optional = true, mapping = EnumFieldMappingFactory.class)
   private EVehiclePhase phase;
 
+  @CsvField(optional = true)
   private String status;
 
   @Embedded
   @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "vehicle_agencyId", length = 50)),
       @AttributeOverride(name = "id", column = @Column(name = "vehicle_id"))})
-  @CsvField(mapping = AgencyIdFieldMappingFactory.class)
+  @CsvField(name = "vehicle", mapping = AgencyIdFieldMappingFactory.class)
   private AgencyAndId vehicleId;
 
   public String getId() {

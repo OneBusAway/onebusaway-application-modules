@@ -26,7 +26,7 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
  * @author bdferris
  * 
  */
-public class TimeRotationWriterFactoryBean extends AbstractFactoryBean {
+public class TimeRotationWriterFactoryBean extends AbstractFactoryBean<RotationWriter> {
 
   private String _path;
 
@@ -40,7 +40,7 @@ public class TimeRotationWriterFactoryBean extends AbstractFactoryBean {
   }
 
   @Override
-  protected Object createInstance() throws Exception {
+  protected RotationWriter createInstance() throws Exception {
     TimeRotationStrategy strategy = new TimeRotationStrategy(_path);
     return new RotationWriter(strategy);
   }

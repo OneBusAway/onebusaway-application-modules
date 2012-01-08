@@ -194,14 +194,6 @@ public class BoundaryFactory {
       _grid = grid;
     }
 
-    public boolean isEmpty() {
-      return _path.isEmpty();
-    }
-
-    public EDirection getLastDirection() {
-      return _path.getDirection(_path.size() - 1);
-    }
-
     public Grid<?> getGrid() {
       return _grid;
     }
@@ -247,14 +239,6 @@ public class BoundaryFactory {
     public BoundaryEdge(GridIndex index, EDirection direction) {
       _index = index;
       _direction = direction;
-    }
-
-    public GridIndex getIndex() {
-      return _index;
-    }
-
-    public EDirection getDirection() {
-      return _direction;
     }
 
     @Override

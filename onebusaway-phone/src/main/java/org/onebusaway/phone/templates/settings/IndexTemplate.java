@@ -29,8 +29,6 @@ import com.opensymphony.xwork2.util.ValueStack;
 @AgiTemplateId("/settings/index")
 public class IndexTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-
   private TextModification _locationPronunciation;
 
   @Autowired

@@ -51,7 +51,7 @@ import org.springframework.util.Assert;
  * @author bdferris
  * 
  */
-public class EhCacheFactoryBean implements FactoryBean, BeanNameAware,
+public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware,
     InitializingBean {
 
   protected final Log logger = LogFactory.getLog(getClass());
@@ -325,7 +325,7 @@ public class EhCacheFactoryBean implements FactoryBean, BeanNameAware,
     return cache;
   }
 
-  public Object getObject() {
+  public Ehcache getObject() {
     return this.cache;
   }
 

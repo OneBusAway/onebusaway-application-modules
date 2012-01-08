@@ -23,8 +23,6 @@ import com.opensymphony.xwork2.ActionContext;
 @AgiTemplateId("/index")
 public class IndexTemplate extends AbstractAgiTemplate {
 
-    private static final long serialVersionUID = 1L;
-
     @Override
     public void buildTemplate(ActionContext context) {
 

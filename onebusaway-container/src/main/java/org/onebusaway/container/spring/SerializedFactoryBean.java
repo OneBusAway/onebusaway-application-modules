@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
  * 
  * @author bdferris
  */
-public class SerializedFactoryBean extends AbstractFactoryBean {
+public class SerializedFactoryBean extends AbstractFactoryBean<Object> {
 
   private File _path;
 

@@ -30,8 +30,6 @@ import java.util.Set;
  */
 public class TreeUnionFind<T> {
 
-  private static final long serialVersionUID = 1L;
-
   private Map<T, SentryImpl> _elementToSentry = new HashMap<T, SentryImpl>();
 
   public interface Sentry {
@@ -53,6 +51,7 @@ public class TreeUnionFind<T> {
     return compress(s);
   }
 
+  @SuppressWarnings("unchecked")
   public Set<T> members(Sentry sentry) {
     Set<T> m = new HashSet<T>();
     addElements((SentryImpl) sentry, m);
@@ -67,6 +66,7 @@ public class TreeUnionFind<T> {
     return unionWithSentries(sentry, find(value));
   }
 
+  @SuppressWarnings("unchecked")
   public Sentry unionWithSentries(Sentry a, Sentry b) {
 
     SentryImpl sa = (SentryImpl) a;
@@ -125,8 +125,8 @@ public class TreeUnionFind<T> {
   public boolean isSameSet(T a, T b) {
     if (a.equals(b))
       return true;
-    if( ! (contains(a) && contains(b)))
-        return false;
+    if (!(contains(a) && contains(b)))
+      return false;
     Sentry sa = find(a);
     Sentry sb = find(b);
     return sa != null && sb != null && sa.equals(sb);
@@ -155,8 +155,6 @@ public class TreeUnionFind<T> {
    ******************************************************************************************************************/
 
   private class SentryImpl implements Sentry {
-
-    private static final long serialVersionUID = 1L;
 
     public SentryImpl root;
 

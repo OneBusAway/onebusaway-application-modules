@@ -33,8 +33,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 @AgiTemplateId("/search/stopFound")
 public class StopFoundTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-
   private TextModification _destinationPronunciation;
 
   private TextModification _directionPronunciation;

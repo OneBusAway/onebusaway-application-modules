@@ -24,8 +24,6 @@ import com.opensymphony.xwork2.util.ValueStack;
 @AgiTemplateId("/message_and_back")
 public class MessageAndBackTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-
   public MessageAndBackTemplate() {
     super(true);
   }

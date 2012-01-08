@@ -28,7 +28,7 @@ import org.springframework.beans.factory.config.AbstractFactoryBean;
  * @author bdferris
  * 
  */
-public class ProxyFactoryBean extends AbstractFactoryBean {
+public class ProxyFactoryBean extends AbstractFactoryBean<Object> {
 
   private Class<?> _proxyInterface;
 

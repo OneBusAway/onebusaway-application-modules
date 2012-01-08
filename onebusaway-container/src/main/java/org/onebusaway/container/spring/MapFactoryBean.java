@@ -15,12 +15,12 @@
  */
 package org.onebusaway.container.spring;
 
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.config.AbstractFactoryBean;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 /**
  * A Spring {@link FactoryBean} for creating a {@link List} object.
@@ -28,7 +28,7 @@ import java.util.Map;
  * @author bdferris
  * @see MapFactoryBean
  */
-public class MapFactoryBean extends AbstractFactoryBean {
+public class MapFactoryBean extends AbstractFactoryBean<Map<Object, Object>> {
 
   private Map<Object, Object> _values = new HashMap<Object, Object>();
 
@@ -42,7 +42,7 @@ public class MapFactoryBean extends AbstractFactoryBean {
   }
 
   @Override
-  protected Object createInstance() throws Exception {
+  protected Map<Object, Object> createInstance() throws Exception {
     return new HashMap<Object, Object>(_values);
   }
 

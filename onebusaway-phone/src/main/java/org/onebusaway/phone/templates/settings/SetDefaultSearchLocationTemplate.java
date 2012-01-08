@@ -25,8 +25,6 @@ import org.onebusaway.probablecalls.agitemplates.AgiTemplateId;
 @AgiTemplateId("/settings/setDefaultSearchLocation")
 public class SetDefaultSearchLocationTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-
   @Override
   public void buildTemplate(ActionContext context) {
     addMessage(Messages.SET_DEFAULT_LOCATION);

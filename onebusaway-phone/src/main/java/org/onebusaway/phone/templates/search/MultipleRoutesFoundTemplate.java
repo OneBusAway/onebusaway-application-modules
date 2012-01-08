@@ -32,8 +32,6 @@ import com.opensymphony.xwork2.util.ValueStack;
 @AgiTemplateId("/search/multipleRoutesFound")
 public class MultipleRoutesFoundTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-
   private TextModification _routeNumberPronunciation;
   
   @Autowired

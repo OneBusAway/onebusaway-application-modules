@@ -43,8 +43,6 @@ import com.opensymphony.xwork2.util.ValueStack;
 @AgiTemplateId("/stop/arrivalsAndDepartures")
 public class ArrivalsAndDeparturesTemplate extends AbstractAgiTemplate {
 
-  private static final long serialVersionUID = 1L;
-
   private TextModification _routeNumberPronunciation;
 
   private TextModification _destinationPronunciation;

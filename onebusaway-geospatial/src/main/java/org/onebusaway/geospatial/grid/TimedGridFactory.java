@@ -134,7 +134,6 @@ public class TimedGridFactory {
 
   private static class TimeRangeFilter implements IFilter<Object> {
 
-    private static final long serialVersionUID = 1L;
     private long _from;
     private long _to;
 

@@ -21,7 +21,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 
 public final class TripBean implements Serializable {
 
-  private static final long serialVersionUID = 2L;
+  private static final long serialVersionUID = 3L;
 
   private String id;
 
@@ -40,6 +40,8 @@ public final class TripBean implements Serializable {
   private String directionId;
 
   private String blockId;
+  
+  private double totalTripDistance;
 
   public TripBean() {
 
@@ -54,6 +56,7 @@ public final class TripBean implements Serializable {
     this.serviceId = trip.serviceId;
     this.shapeId = trip.shapeId;
     this.directionId = trip.directionId;
+    this.totalTripDistance = trip.totalTripDistance;
   }
 
   public String getId() {
@@ -126,5 +129,13 @@ public final class TripBean implements Serializable {
   
   public String getBlockId() {
     return blockId;
+  }
+
+  public double getTotalTripDistance() {
+    return totalTripDistance;
+  }
+
+  public void setTotalTripDistance(double totalTripDistance) {
+    this.totalTripDistance = totalTripDistance;
   }
 }

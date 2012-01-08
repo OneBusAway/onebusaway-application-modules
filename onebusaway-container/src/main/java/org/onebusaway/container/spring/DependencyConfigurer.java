@@ -84,12 +84,11 @@ public class DependencyConfigurer extends PropertyResourceConfigurer {
 
   private boolean _ignoreInvalidKeys = false;
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void processProperties(ConfigurableListableBeanFactory beanFactory,
       Properties props) throws BeansException {
 
-    for (Enumeration names = props.propertyNames(); names.hasMoreElements();) {
+    for (Enumeration<?> names = props.propertyNames(); names.hasMoreElements();) {
       String key = (String) names.nextElement();
       try {
         processKey(beanFactory, key, props.getProperty(key));

@@ -51,8 +51,6 @@ public class FilteredGrid<T> extends AbstractGrid<T> {
 
   private class EntryFilter implements IFilter<Grid.Entry<T>> {
 
-    private static final long serialVersionUID = 1L;
-
     public boolean isEnabled(Grid.Entry<T> entry) {
       return _filter.isEnabled(entry.getValue());
     }
