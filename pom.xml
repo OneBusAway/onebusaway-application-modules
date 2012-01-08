@@ -352,6 +352,19 @@
                     <execute />
                   </action>
                 </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <versionRange>[2.2,)</versionRange>
+                    <goals>
+                      <goal>unpack</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
@@ -485,7 +498,8 @@
           <headerSections>
             <headerSection>
               <key>COPYRIGHT_SECTION</key>
-              <defaultValue>Copyright (C) 2011 Brian Ferris &lt;bdferris@onebusaway.org&gt;</defaultValue>
+              <defaultValue>Copyright (C) 2011 Brian Ferris
+                &lt;bdferris@onebusaway.org&gt;</defaultValue>
               <ensureMatch>Copyright \(C\) \d{4} .+</ensureMatch>
             </headerSection>
           </headerSections>

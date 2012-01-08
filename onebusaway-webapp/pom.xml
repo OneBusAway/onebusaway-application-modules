@@ -159,37 +159,6 @@
     <finalName>onebusaway-webapp</finalName>
     <plugins>
       <plugin>
-          <!--
-            With the introduction of Eclipse Indigo and the formal adoption of the m2e Maven Eclipse plugin
-            as an official part of Eclipse, m2e introduced the concept of Lifecycle Mappings for Maven plugins:
-              http://wiki.eclipse.org/M2E_plugin_execution_not_covered
-            This basically means that every Maven plugin needs to have explicit behavior defined about how it
-            should be integrated integrated into the Eclipse build cycle.  Many plugins already have mappings defined
-            by defined, but some don't.  We define those lifecycle mappings below.
-          -->
-        <groupId>org.eclipse.m2e</groupId>
-        <artifactId>lifecycle-mapping</artifactId>
-        <configuration>
-          <lifecycleMappingMetadata>
-            <pluginExecutions>
-              <pluginExecution>
-                <pluginExecutionFilter>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-dependency-plugin</artifactId>
-                  <versionRange>[2.2,)</versionRange>
-                  <goals>
-                    <goal>unpack</goal>
-                  </goals>
-                </pluginExecutionFilter>
-                <action>
-                  <ignore />
-                </action>
-              </pluginExecution>
-            </pluginExecutions>
-          </lifecycleMappingMetadata>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
