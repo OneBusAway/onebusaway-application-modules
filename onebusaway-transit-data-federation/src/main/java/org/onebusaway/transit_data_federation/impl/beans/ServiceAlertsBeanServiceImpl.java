@@ -117,8 +117,7 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
   @Override
   public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
-      BlockTripInstance blockTripInstance,
-      AgencyAndId vehicleId) {
+      BlockTripInstance blockTripInstance, AgencyAndId vehicleId) {
 
     List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForVehicleJourney(
         time, blockTripInstance, vehicleId);
@@ -175,8 +174,10 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
     ServiceAlert.Builder situation = ServiceAlert.newBuilder();
 
-    AgencyAndId id = AgencyAndIdLibrary.convertFromString(bean.getId());
-    situation.setId(ServiceAlertLibrary.id(id));
+    if (bean.getId() != null && ! bean.getId().isEmpty()) {
+      AgencyAndId id = AgencyAndIdLibrary.convertFromString(bean.getId());
+      situation.setId(ServiceAlertLibrary.id(id));
+    }
     situation.setCreationTime(bean.getCreationTime());
 
     situation.addAllActiveWindow(getBeansAsRanges(bean.getActiveWindows()));
