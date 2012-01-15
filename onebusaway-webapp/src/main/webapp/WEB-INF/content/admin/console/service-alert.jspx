@@ -37,11 +37,8 @@
 </s:else>
 
 <s:form action="service-alert!submit">
-<s:textfield label="Summary" name="summary.value" value="%{summary.value}"/>
-<s:textarea label="Description" name="description.value" value="%{description.value}" cols="80" rows="5"/>
-<s:textfield label="Detail" name="detail.value" value="%{detail.value}"/>
-<s:textfield label="Advice" name="advice.value" value="%{advice.value}"/>
-<s:textfield label="Internal" name="internal.value" value="%{internal.value}"/>
+<s:textfield label="Summary" name="summary" value="%{summary}"/>
+<s:textarea label="Description" name="description" value="%{description}" cols="80" rows="5"/>
 <s:select label="Reason" name="reason" headerKey="null" headerValue="Select Reason" list="reasonValues" value="%{reason}"/>
 <!-- <s:select label="Severity" name="severity" headerKey="null" headerValue="Select Severity" list="severityValues" value="%{severity}"/> -->
 <!-- <s:select label="Sensitivity" name="sensitivity" headerKey="null" headerValue="Select Sensitivity" list="sensitivityValues" value="%{sensitivity}"/> -->
