@@ -15,6 +15,7 @@
  */
 package org.onebusaway.webapp.actions.where;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,6 +65,13 @@ public class ServiceAlertAction extends ActionSupport {
 
   public ServiceAlertBean getSituation() {
     return _situation;
+  }
+  
+  public String getNLSValue(List<NaturalLanguageStringBean> values){
+    if( values == null || values.isEmpty() ) {
+      return null;
+    }
+    return values.get(0).getValue();
   }
 
   @Override

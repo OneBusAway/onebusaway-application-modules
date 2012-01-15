@@ -31,28 +31,21 @@
 <div id="container" class="serviceAlert">
 <s:push value="situation">
 
-<h2><s:property value="summary.value"/></h2>
+<h2><s:property value="getNLSValue(summaries)"/></h2>
 
 <table class="serviceAlertTable">
 
-<s:if test="summary != null">
+<s:if test="getNLSValue(summaries) != null">
 <tr>
   <td class="label"><oba:message key="Summary"/>:</td>
-  <td><s:property value="summary.value"/></td>
+  <td><s:property value="getNLSValue(summaries)"/></td>
 </tr>
 </s:if>
 
-<s:if test="description != null">
+<s:if test="getNLSValue(descriptions) != null">
 <tr>
   <td class="label"><oba:message key="Description"/>:</td>
-  <td><s:property escape="false" value="description.value"/></td>
-</tr>
-</s:if>
-
-<s:if test="advice != null">
-<tr>
-  <td class="label"><oba:message key="Advice"/>:</td>
-  <td><s:property value="advice.value"/></td>
+  <td><s:property escape="false" value="getNLSValue(descriptions)"/></td>
 </tr>
 </s:if>
 
