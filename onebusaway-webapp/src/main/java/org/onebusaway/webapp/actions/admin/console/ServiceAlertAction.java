@@ -16,6 +16,9 @@
 package org.onebusaway.webapp.actions.admin.console;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.struts2.convention.annotation.Result;
@@ -23,6 +26,7 @@ import org.apache.struts2.convention.annotation.Results;
 import org.json.JSONException;
 import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.presentation.bundles.service_alerts.Reasons;
+import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
@@ -68,6 +72,52 @@ public class ServiceAlertAction extends ActionSupport implements
 
   public String getAgencyId() {
     return _agencyId;
+  }
+
+  public void setSummary(String summary) {
+    List<NaturalLanguageStringBean> summaries = _model.getSummaries();
+    if( summaries == null) {
+      summaries = new ArrayList<NaturalLanguageStringBean>();
+      _model.setSummaries(summaries);
+    }
+    if (summaries.isEmpty()) {
+      summaries.add(new NaturalLanguageStringBean());
+    }
+    NaturalLanguageStringBean nls = summaries.get(0);
+    nls.setValue(summary);
+    nls.setLang(Locale.getDefault().getLanguage());
+  }
+
+  public String getSummary() {
+    List<NaturalLanguageStringBean> summaries = _model.getSummaries();
+    if (summaries == null || summaries.isEmpty()) {
+      return null;
+    }
+    NaturalLanguageStringBean nls = summaries.get(0);
+    return nls.getValue();
+  }
+  
+  public void setDescription(String description) {
+    List<NaturalLanguageStringBean> descriptions = _model.getDescriptions();
+    if( descriptions == null) {
+      descriptions = new ArrayList<NaturalLanguageStringBean>();
+      _model.setDescriptions(descriptions);
+    }
+    if (descriptions.isEmpty()) {
+      descriptions.add(new NaturalLanguageStringBean());
+    }
+    NaturalLanguageStringBean nls = descriptions.get(0);
+    nls.setValue(description);
+    nls.setLang(Locale.getDefault().getLanguage());
+  }
+
+  public String getDescription() {
+    List<NaturalLanguageStringBean> descriptions = _model.getDescriptions();
+    if (descriptions == null || descriptions.isEmpty()) {
+      return null;
+    }
+    NaturalLanguageStringBean nls = descriptions.get(0);
+    return nls.getValue();
   }
 
   public void setRaw(String raw) {
@@ -164,6 +214,7 @@ public class ServiceAlertAction extends ActionSupport implements
     xstream.alias("serviceAlert", ServiceAlertBean.class);
     xstream.alias("affects", SituationAffectsBean.class);
     xstream.alias("consequence", SituationConsequenceBean.class);
+    xstream.alias("nls", NaturalLanguageStringBean.class);
 
     return xstream;
   }
