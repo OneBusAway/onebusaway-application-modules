@@ -62,8 +62,6 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
   private static Logger _log = LoggerFactory.getLogger(RoutesBeanServiceImpl.class);
 
-  private static final double MIN_SEARCH_SCORE = 1.0;
-
   @Autowired
   private RouteService _routeService;
 
@@ -203,7 +201,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
     try {
       return _searchService.searchForRoutesByName(query.getQuery(),
-          query.getMaxCount() + 1, MIN_SEARCH_SCORE);
+          query.getMaxCount() + 1, query.getMinScoreToKeep());
     } catch (IOException e) {
       throw new ServiceException();
     } catch (ParseException e) {
