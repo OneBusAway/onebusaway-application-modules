@@ -20,13 +20,16 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.onebusaway.collections.Min;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
 import org.onebusaway.geospatial.services.UTMLibrary;
 import org.onebusaway.geospatial.services.UTMProjection;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.shapes.ShapePointsLibrary;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -50,6 +53,10 @@ public class DistanceAlongShapeLibrary {
 
   private double _maxDistanceFromStopToShapePoint = 1000;
 
+  private int _maximumNumberOfPotentialAssignments = 10000;
+
+  private Set<AgencyAndId> _shapeIdsWeHavePrinted = new HashSet<AgencyAndId>();
+
   public void setLocalMinimumThreshold(double localMinimumThreshold) {
     _shapePointsLibrary.setLocalMinimumThreshold(localMinimumThreshold);
   }
@@ -65,6 +72,11 @@ public class DistanceAlongShapeLibrary {
   public void setMaxDistanceFromStopToShapePoint(
       double maxDistanceFromStopToShapePoint) {
     _maxDistanceFromStopToShapePoint = maxDistanceFromStopToShapePoint;
+  }
+
+  public void setMaximumNumberOfPotentialAssignment(
+      int maximumNumberOfPotentialAssignments) {
+    _maximumNumberOfPotentialAssignments = maximumNumberOfPotentialAssignments;
   }
 
   public PointAndIndex[] getDistancesAlongShape(ShapePoints shapePoints,
@@ -215,19 +227,21 @@ public class DistanceAlongShapeLibrary {
     List<PointAndIndex> currentAssignment = new ArrayList<PointAndIndex>(
         possibleAssignments.size());
 
-    List<Assignment> allValidAssignments = new ArrayList<Assignment>();
-
-    recursivelyConstructAssignments(possibleAssignments, currentAssignment, 0,
-        allValidAssignments);
-
-    if (allValidAssignments.isEmpty()) {
-      constructError(shapePoints, stopTimes, possibleAssignments, projection);
+    long count = 1;
+    for (List<PointAndIndex> possibleAssignment : possibleAssignments) {
+      count *= possibleAssignment.size();
+      if (count > _maximumNumberOfPotentialAssignments || count == 0) {
+        constructErrorForPotentialAssignmentCount(shapePoints, stopTimes, count);
+      }
     }
 
     Min<Assignment> bestAssignments = new Min<Assignment>();
+    recursivelyConstructAssignments(possibleAssignments, currentAssignment, 0,
+        bestAssignments);
 
-    for (Assignment validAssignment : allValidAssignments)
-      bestAssignments.add(validAssignment.score, validAssignment);
+    if (bestAssignments.isEmpty()) {
+      constructError(shapePoints, stopTimes, possibleAssignments, projection);
+    }
 
     Assignment bestAssignment = bestAssignments.getMinElement();
 
@@ -312,7 +326,7 @@ public class DistanceAlongShapeLibrary {
 
   private void recursivelyConstructAssignments(
       List<List<PointAndIndex>> possibleAssignments,
-      List<PointAndIndex> currentAssignment, int i, List<Assignment> best) {
+      List<PointAndIndex> currentAssignment, int i, Min<Assignment> best) {
 
     /**
      * If we've made it through ALL assignments, we have a valid assignment!
@@ -324,7 +338,7 @@ public class DistanceAlongShapeLibrary {
         score += p.distanceFromTarget;
       currentAssignment = new ArrayList<PointAndIndex>(currentAssignment);
       Assignment result = new Assignment(currentAssignment, score);
-      best.add(result);
+      best.add(score, result);
       return;
     }
 
@@ -364,6 +378,44 @@ public class DistanceAlongShapeLibrary {
 
       currentAssignment.remove(currentAssignment.size() - 1);
     }
+  }
+
+  private void constructErrorForPotentialAssignmentCount(
+      ShapePoints shapePoints, List<StopTimeEntryImpl> stopTimes, long count)
+      throws InvalidStopToShapeMappingException {
+
+    if (count == 0) {
+      _log.error("We were attempting to compute the distance along a particular trip for each stop time of that "
+          + "trip by snapping them to the shape for that trip.  However, we could not find an assignment for each "
+          + "stop time of the trip, which usually indicates that there is something wrong with the underlying "
+          + "shape data.");
+    } else {
+      _log.error("We were attempting to compute the distance along a particular trip for each stop time of that "
+          + "trip by snapping them to the shape for that trip.  However, we found WAY TOO MANY potential "
+          + "assignments, which usually indicates that there is something wrong with the underlying shape data.");
+    }
+
+    StopTimeEntryImpl first = stopTimes.get(0);
+    TripEntryImpl trip = first.getTrip();
+    StopTimeEntryImpl last = stopTimes.get(stopTimes.size() - 1);
+
+    _log.error("error constructing stop-time distances along shape for trip="
+        + trip.getId() + " shape=" + trip.getShapeId() + " firstStopTime="
+        + first.getId() + " lastStopTime=" + last.getId());
+
+    if (_shapeIdsWeHavePrinted.add(trip.getShapeId())) {
+      StringBuilder b = new StringBuilder();
+      for (int i = 0; i < shapePoints.getSize(); i++) {
+        b.append(shapePoints.getLatForIndex(i));
+        b.append(' ');
+        b.append(shapePoints.getLonForIndex(i));
+        b.append(' ');
+        b.append(shapePoints.getDistTraveledForIndex(i));
+        b.append('\n');
+      }
+      _log.error("shape points:\n" + b.toString());
+    }
+    throw new InvalidStopToShapeMappingException(first.getTrip());
   }
 
   private void constructError(ShapePoints shapePoints,
@@ -432,18 +484,19 @@ public class DistanceAlongShapeLibrary {
     }
     _log.error(b.toString());
 
-    b = new StringBuilder();
-    index = 0;
-    for (int i = 0; i < shapePoints.getSize(); i++) {
-      b.append(shapePoints.getLatForIndex(i));
-      b.append(' ');
-      b.append(shapePoints.getLonForIndex(i));
-      b.append(' ');
-      b.append(shapePoints.getDistTraveledForIndex(i));
-      b.append('\n');
+    if (_shapeIdsWeHavePrinted.add(trip.getShapeId())) {
+      b = new StringBuilder();
+      index = 0;
+      for (int i = 0; i < shapePoints.getSize(); i++) {
+        b.append(shapePoints.getLatForIndex(i));
+        b.append(' ');
+        b.append(shapePoints.getLonForIndex(i));
+        b.append(' ');
+        b.append(shapePoints.getDistTraveledForIndex(i));
+        b.append('\n');
+      }
+      _log.error("shape points:\n" + b.toString());
     }
-
-    _log.error("shape points:\n" + b.toString());
 
     throw new InvalidStopToShapeMappingException(first.getTrip());
   }
