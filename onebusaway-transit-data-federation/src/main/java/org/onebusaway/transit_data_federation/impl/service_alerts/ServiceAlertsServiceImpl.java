@@ -202,6 +202,20 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   @Override
+  public List<ServiceAlert> getServiceAlertsForStopIds(long time,
+      Iterable<AgencyAndId> stopIds) {
+    Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
+    for (AgencyAndId stopId : stopIds) {
+      getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId,
+          stopId.getAgencyId(), serviceAlertIds);
+      getServiceAlertIdsForKey(_serviceAlertIdsByStopId, stopId,
+          serviceAlertIds);
+    }
+    return getServiceAlertIdsAsObjects(serviceAlertIds);
+  }
+
+
+  @Override
   public List<ServiceAlert> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId) {

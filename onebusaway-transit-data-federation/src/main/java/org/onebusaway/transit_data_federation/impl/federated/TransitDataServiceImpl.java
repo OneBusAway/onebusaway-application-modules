@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
@@ -320,7 +321,7 @@ class TransitDataServiceImpl implements TransitDataService {
   public ListBean<String> getRouteIdsForAgencyId(String agencyId) {
     return _routesBeanService.getRouteIdsForAgencyId(agencyId);
   }
-  
+
   @Override
   public ListBean<RouteBean> getRoutesForAgencyId(String agencyId) {
     return _routesBeanService.getRoutesForAgencyId(agencyId);
@@ -470,8 +471,8 @@ class TransitDataServiceImpl implements TransitDataService {
       ConstraintsBean constraints,
       MinTravelTimeToStopsBean minTravelTimeToStops,
       List<LocalSearchResult> localResults) throws ServiceException {
-    return _itinerariesBeanService.getLocalPaths(constraints, minTravelTimeToStops,
-        localResults);
+    return _itinerariesBeanService.getLocalPaths(constraints,
+        minTravelTimeToStops, localResults);
   }
 
   /****
@@ -522,7 +523,8 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(String agencyId) {
+  public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(
+      String agencyId) {
     List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(agencyId);
     return new ListBean<ServiceAlertBean>(situations, false);
   }
@@ -534,7 +536,14 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public ListBean<ServiceAlertBean> getServiceAlerts(SituationQueryBean query) {
-    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(query.getAgencyId());
+    List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
+    if (!CollectionsLibrary.isEmpty(query.getStopIds())) {
+      for (String stopId : query.getStopIds()) {
+        stopIds.add(AgencyAndIdLibrary.convertFromString(stopId));
+      }
+    }
+    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopIds(
+        query.getTime(), stopIds);
     return new ListBean<ServiceAlertBean>(situations, false);
   }
 

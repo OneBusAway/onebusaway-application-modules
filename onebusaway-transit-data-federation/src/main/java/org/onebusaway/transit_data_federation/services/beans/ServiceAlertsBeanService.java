@@ -43,11 +43,13 @@ public interface ServiceAlertsBeanService {
   public List<ServiceAlertBean> getServiceAlertsForStopId(long time,
       AgencyAndId stopId);
 
+  public List<ServiceAlertBean> getServiceAlertsForStopIds(long time,
+      Iterable<AgencyAndId> stopIds);
+
   public List<ServiceAlertBean> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId);
 
   public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
-      BlockTripInstance blockTripInstance,
-      AgencyAndId vehicleId);
+      BlockTripInstance blockTripInstance, AgencyAndId vehicleId);
 }
