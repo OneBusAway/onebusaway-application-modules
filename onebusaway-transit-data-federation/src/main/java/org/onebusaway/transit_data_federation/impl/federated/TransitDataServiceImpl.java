@@ -536,15 +536,18 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public ListBean<ServiceAlertBean> getServiceAlerts(SituationQueryBean query) {
-    List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
     if (!CollectionsLibrary.isEmpty(query.getStopIds())) {
+      List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
       for (String stopId : query.getStopIds()) {
         stopIds.add(AgencyAndIdLibrary.convertFromString(stopId));
       }
+      List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopIds(
+          query.getTime(), stopIds);
+      return new ListBean<ServiceAlertBean>(situations, false);
+    } else {
+      List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(query.getAgencyId());
+      return new ListBean<ServiceAlertBean>(situations, false);
     }
-    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopIds(
-        query.getTime(), stopIds);
-    return new ListBean<ServiceAlertBean>(situations, false);
   }
 
   @Override
