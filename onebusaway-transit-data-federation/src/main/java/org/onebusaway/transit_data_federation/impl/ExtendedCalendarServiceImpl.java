@@ -406,7 +406,10 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
   private void cacheServiceDatesForServiceIds() {
 
-    _serviceDateRangeCache.removeAll();
+    if(_serviceDateRangeCache != null) {
+      _serviceDateRangeCache.removeAll();
+    }
+    
     _serviceDatesByServiceIds.clear();
     
     Set<ServiceIdActivation> allServiceIds = determineAllServiceIds();
