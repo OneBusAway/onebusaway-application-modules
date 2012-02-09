@@ -95,6 +95,24 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
 
   }
 
+  public void empty() {
+    _agencyEntriesById.clear();
+    _stopEntriesById.clear();
+    _tripEntriesById.clear();
+    _blockEntriesById.clear();
+    _routeCollectionEntriesById.clear();
+    _routeEntriesById.clear();
+    
+    _routeCollections.clear();
+    _blocks.clear();
+    _trips.clear();
+    _stops.clear();
+    _routes.clear();
+    _agencies.clear();
+
+    _stopLocationTree = null;        
+  }
+  
   public void initialize() {
     if (_stopLocationTree == null) {
       System.out.println("initializing trip planner graph...");

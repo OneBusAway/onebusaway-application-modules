@@ -61,6 +61,13 @@ public class TransitGraphDaoImpl implements TransitGraphDao {
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void setup() throws IOException, ClassNotFoundException {
     File path = _bundle.getTransitGraphPath();
+
+    if(_graph != null) {
+      TransitGraphImpl graph = (TransitGraphImpl)_graph;
+      graph.empty();
+      _graph = null;
+    }
+    
     if (path.exists()) {
       TransitGraphImpl graph = ObjectSerializationLibrary.readObject(path);
       graph.initialize();

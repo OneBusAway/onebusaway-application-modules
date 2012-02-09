@@ -406,6 +406,9 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
   private void cacheServiceDatesForServiceIds() {
 
+    _serviceDateRangeCache.removeAll();
+    _serviceDatesByServiceIds.clear();
+    
     Set<ServiceIdActivation> allServiceIds = determineAllServiceIds();
 
     Date lowerBounds = null;
