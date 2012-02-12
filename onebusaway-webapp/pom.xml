@@ -247,10 +247,10 @@
               <directory>target/gwt/org.onebusaway.webapp.gwt.BookmarkEditApplication</directory>
               <targetPath>where/standard</targetPath>
             </resource>
-            <resource>
-              <directory>${project.build.directory}/gwt/LoginWidget</directory>
-              <targetPath />
-            </resource>
+<!--             <resource> -->
+<!--               <directory>${project.build.directory}/gwt/LoginWidget</directory> -->
+<!--               <targetPath /> -->
+<!--             </resource> -->
             <resource>
               <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
               <targetPath>explore/onebusaway</targetPath>

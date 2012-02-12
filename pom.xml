@@ -17,7 +17,7 @@
   <!-- Common Software Dependency Versions -->
   <properties>
     <struts-version>2.1.8.1</struts-version>
-    <gwt-version>2.1.0</gwt-version>
+    <gwt-version>2.4.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
     <csv-entities-version>1.0.3-SNAPSHOT</csv-entities-version>
     <gtfs-version>1.2.6-SNAPSHOT</gtfs-version>
@@ -337,34 +337,47 @@
                   We include the gwt-maven-plugin in the Eclipse execute set since it copy resources that are
                   needed as part of the build process.
                 -->
+<!--                 <pluginExecution> -->
+<!--                   <pluginExecutionFilter> -->
+<!--                     <groupId>org.codehaus.mojo</groupId> -->
+<!--                     <artifactId>gwt-maven-plugin</artifactId> -->
+<!--                     <versionRange>[2.4.0,)</versionRange> -->
+<!--                     <goals> -->
+<!--                       <goal>resources</goal> -->
+<!--                       <goal>compile</goal> -->
+<!--                       <goal>i18n</goal> -->
+<!--                     </goals> -->
+<!--                   </pluginExecutionFilter> -->
+<!--                   <action> -->
+<!--                     <execute /> -->
+<!--                   </action> -->
+<!--                 </pluginExecution> -->
                 <pluginExecution>
                   <pluginExecutionFilter>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <versionRange>[2.1.0,)</versionRange>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <versionRange>[2.0,)</versionRange>
                     <goals>
-                      <goal>resources</goal>
-                      <goal>compile</goal>
-                      <goal>i18n</goal>
+                      <goal>unpack</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>
                     <execute />
                   </action>
                 </pluginExecution>
-                <pluginExecution>
-                  <pluginExecutionFilter>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <versionRange>[2.2,)</versionRange>
-                    <goals>
-                      <goal>unpack</goal>
-                    </goals>
-                  </pluginExecutionFilter>
-                  <action>
-                    <ignore />
-                  </action>
-                </pluginExecution>
+<!--                 <pluginExecution> -->
+<!--                   <pluginExecutionFilter> -->
+<!--                     <groupId>org.apache.maven.plugins</groupId> -->
+<!--                     <artifactId>maven-war-plugin</artifactId> -->
+<!--                     <versionRange>[2.1.1,)</versionRange> -->
+<!--                     <goals> -->
+<!--                       <goal>war</goal> -->
+<!--                     </goals> -->
+<!--                   </pluginExecutionFilter> -->
+<!--                   <action> -->
+<!--                     <execute /> -->
+<!--                   </action> -->
+<!--                 </pluginExecution> -->
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
@@ -417,7 +430,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>gwt-maven-plugin</artifactId>
-          <version>2.1.0-1</version>
+          <version>2.4.0-1-SNAPSHOT</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -454,17 +467,17 @@
       </plugin>
       <!-- By default, we use the gwt-maven-plugin to detect any GWT modules and copy the .java source files as resources 
         into the compiled output -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>gwt-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>resources</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+<!--       <plugin> -->
+<!--         <groupId>org.codehaus.mojo</groupId> -->
+<!--         <artifactId>gwt-maven-plugin</artifactId> -->
+<!--         <executions> -->
+<!--           <execution> -->
+<!--             <goals> -->
+<!--               <goal>resources</goal> -->
+<!--             </goals> -->
+<!--           </execution> -->
+<!--         </executions> -->
+<!--       </plugin> -->
       <plugin>
         <groupId>com.mycila.maven-license-plugin</groupId>
         <artifactId>maven-license-plugin</artifactId>
