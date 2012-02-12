@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeUri;
 
 public class DataResourceImpl extends ResourcePrototypeImpl implements
     ImageResource, ResourceWithUrl, LocalResource {
@@ -57,21 +58,8 @@ public class DataResourceImpl extends ResourcePrototypeImpl implements
     } catch (IOException ex) {
       throw new IllegalStateException(ex);
     }
-
   }
-
-  /*****************************************************************************
-   * Private Methods
-   ****************************************************************************/
-
-  private String getExtension() {
-    String path = _localUrl.getPath();
-    int index = path.lastIndexOf('.');
-    if (index != -1)
-      return path.substring(index + 1);
-    return "";
-  }
-
+  
   @Override
   public int getHeight() {
     // TODO Auto-generated method stub
@@ -107,5 +95,22 @@ public class DataResourceImpl extends ResourcePrototypeImpl implements
     return false;
   }
 
+  @Override
+  public SafeUri getSafeUri() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /*****************************************************************************
+   * Private Methods
+   ****************************************************************************/
+
+  private String getExtension() {
+    String path = _localUrl.getPath();
+    int index = path.lastIndexOf('.');
+    if (index != -1)
+      return path.substring(index + 1);
+    return "";
+  }
 }
 

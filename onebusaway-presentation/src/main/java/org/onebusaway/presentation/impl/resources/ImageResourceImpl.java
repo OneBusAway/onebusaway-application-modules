@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.shared.SafeUri;
 
 public class ImageResourceImpl extends ResourcePrototypeImpl implements
     ImageResource, ResourceWithUrl, LocalResource {
@@ -38,38 +39,6 @@ public class ImageResourceImpl extends ResourcePrototypeImpl implements
       refresh();
 
     return _url;
-  }
-
-  @Override
-  protected void refresh() {
-    super.refresh();
-
-    try {
-
-      InputStream is = _localUrl.openStream();
-      String key = ResourceSupport.getHash(is);
-      is.close();
-
-      String extension = getExtension();
-
-      _url = constructURL(key, extension, this);
-
-    } catch (IOException ex) {
-      throw new IllegalStateException(ex);
-    }
-
-  }
-
-  /*****************************************************************************
-   * Private Methods
-   ****************************************************************************/
-
-  private String getExtension() {
-    String path = _localUrl.getPath();
-    int index = path.lastIndexOf('.');
-    if (index != -1)
-      return path.substring(index + 1);
-    return "";
   }
 
   @Override
@@ -107,5 +76,41 @@ public class ImageResourceImpl extends ResourcePrototypeImpl implements
     return false;
   }
 
-}
+  @Override
+  public SafeUri getSafeUri() {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
+  @Override
+  protected void refresh() {
+    super.refresh();
+
+    try {
+
+      InputStream is = _localUrl.openStream();
+      String key = ResourceSupport.getHash(is);
+      is.close();
+
+      String extension = getExtension();
+
+      _url = constructURL(key, extension, this);
+
+    } catch (IOException ex) {
+      throw new IllegalStateException(ex);
+    }
+
+  }
+
+  /*****************************************************************************
+   * Private Methods
+   ****************************************************************************/
+
+  private String getExtension() {
+    String path = _localUrl.getPath();
+    int index = path.lastIndexOf('.');
+    if (index != -1)
+      return path.substring(index + 1);
+    return "";
+  }
+}
