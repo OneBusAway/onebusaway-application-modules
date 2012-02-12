@@ -4,8 +4,7 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.4-SNAPSHOT</version>
-    <relativePath>../onebusaway</relativePath>
+    <version>1.1.6</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
@@ -13,6 +12,8 @@
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
+  <description>The core OneBusAway application suite.</description>
+  <url>https://github.com/OneBusAway/onebusaway-application-modules/wiki/</url>
 
   <!-- Common Software Dependency Versions -->
   <properties>
@@ -24,11 +25,6 @@
     <onebusaway-siri-version>1.0.2</onebusaway-siri-version>
     <opentripplanner-version>0.4.1</opentripplanner-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
-    <!-- We don't want to release these to the main Maven repo, so we deploy to the OBA repo by default -->
-    <distribution_id>nexus.onebusaway.org-releases</distribution_id>
-    <distribution_url>http://nexus.onebusaway.org/content/repositories/releases/</distribution_url>
-    <snapshot_distribution_id>nexus.onebusaway.org-snapshots</snapshot_distribution_id>
-    <snapshot_distribution_url>http://nexus.onebusaway.org/content/repositories/snapshots/</snapshot_distribution_url>
     <!--  These properties are primarily used in configuring joint integration tests -->
     <org_onebusaway_test_port>9900</org_onebusaway_test_port>
     <org_onebusaway_test_ajp_port>9901</org_onebusaway_test_ajp_port>
@@ -50,10 +46,15 @@
   </pluginRepositories>
 
   <scm>
-    <connection>scm:svn:http://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</connection>
-    <developerConnection>scm:svn:https://onebusaway.googlecode.com/svn/onebusaway-application-modules/trunk</developerConnection>
-    <url>http://code.google.com/p/onebusaway/source/browse/#svn/onebusaway-application-modules/trunk</url>
+    <connection>scm:git:http://github.com/OneBusAway/onebusaway-application-modules.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/OneBusAway/onebusaway-application-modules.git</developerConnection>
+    <url>http://github.com/OneBusAway/onebusaway-application-modules</url>
   </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/OneBusAway/onebusaway-application-modules/issues</url>
+  </issueManagement>
 
   <distributionManagement>
     <!-- Even though we specify this in the parent pom, we need to specify it here to have full control over the url -->
