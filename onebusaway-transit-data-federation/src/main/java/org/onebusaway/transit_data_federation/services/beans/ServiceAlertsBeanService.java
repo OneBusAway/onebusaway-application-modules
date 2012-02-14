@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -50,4 +51,6 @@ public interface ServiceAlertsBeanService {
   public List<ServiceAlertBean> getServiceAlertsForVehicleJourney(long time,
       BlockInstance blockInstance, BlockTripEntry blockTrip,
       AgencyAndId vehicleId);
+
+  public List<ServiceAlertBean> getServiceAlerts(SituationQueryBean query);
 }

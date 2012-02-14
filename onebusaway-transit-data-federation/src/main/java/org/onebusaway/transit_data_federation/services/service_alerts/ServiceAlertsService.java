@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.services.service_alerts;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
@@ -97,7 +98,9 @@ public interface ServiceAlertsService {
   public List<ServiceAlert> getServiceAlertsForVehicleJourney(long time,
       BlockInstance blockInstance, BlockTripEntry blockTrip,
       AgencyAndId vehicleId);
-  
+
+  public List<ServiceAlert> getServiceAlerts(SituationQueryBean query);
+
   /**
    * Set whether the ServiceAlerts service is responsible for persisting service alerts
    * across application restarts, or whether an external service will handle that.

@@ -534,7 +534,8 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public ListBean<ServiceAlertBean> getServiceAlerts(SituationQueryBean query) {
-    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(query.getAgencyId());
+//    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(query.getAgencyId());
+    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlerts(query);
     return new ListBean<ServiceAlertBean>(situations, false);
   }
 

@@ -1,18 +1,18 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- * Copyright (C) 2011 Google, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org> Copyright (C) 2011
+ * Google, Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
@@ -38,7 +38,11 @@ import java.util.concurrent.ConcurrentMap;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.RouteIdAndDirection;
 import org.onebusaway.transit_data_federation.bundle.model.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
@@ -138,7 +142,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     saveServiceAlerts();
     return serviceAlert;
   }
-  
+
   @Override
   public synchronized void removeServiceAlert(AgencyAndId serviceAlertId) {
     removeServiceAlerts(Arrays.asList(serviceAlertId));
@@ -277,6 +281,43 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     return getServiceAlertIdsAsObjects(serviceAlertIds, time);
   }
 
+  @Override
+  public List<ServiceAlert> getServiceAlerts(SituationQueryBean query) {
+    Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
+
+    // Note we are treating the query's agency ID as that of what the service
+    // alert affects, not the alert's agency ID.
+    if (!StringUtils.isEmpty(query.getAgencyId())) {
+      getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, query.getAgencyId(),
+          serviceAlertIds);
+    }
+
+    if (!CollectionUtils.isEmpty(query.getStopIds())) {
+      for (String stopId : query.getStopIds()) {
+        AgencyAndId id = ServiceAlertLibrary.agencyAndId(ServiceAlertLibrary.id(AgencyAndId.convertFromString(stopId)));
+        getServiceAlertIdsForKey(_serviceAlertIdsByStopId, id,
+            serviceAlertIds);
+      }
+    }
+
+    if (!CollectionUtils.isEmpty(query.getRoutes())) {
+      for (RouteIdAndDirection route: query.getRoutes()) {
+        
+        if (route.direction != null) {
+          RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(
+              AgencyAndId.convertFromString(route.routeId), route.direction);
+          getServiceAlertIdsForKey(_serviceAlertIdsByRouteAndDirectionId,
+              lineAndDirectionRef, serviceAlertIds);
+        } else {
+          getServiceAlertIdsForKey(_serviceAlertIdsByRouteId, AgencyAndId.convertFromString(route.routeId),
+              serviceAlertIds);
+        }
+      }
+    }
+
+    return getServiceAlertIdsAsObjects(serviceAlertIds);
+  }
+
   /****
    * Private Methods
    ****/
@@ -318,6 +359,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
         _serviceAlertIdsByTripId, AffectsTripKeyFactory.INSTANCE);
     updateReferences(existingServiceAlert, serviceAlert,
         _serviceAlertIdsByTripAndStopId, AffectsTripAndStopKeyFactory.INSTANCE);
+
   }
 
   private <T> void updateReferences(ServiceAlert existingServiceAlert,
@@ -369,9 +411,9 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
       Collection<AgencyAndId> serviceAlertIds) {
     return getServiceAlertIdsAsObjects(serviceAlertIds, -1);
   }
-  
+
   private List<ServiceAlert> getServiceAlertIdsAsObjects(
-        Collection<AgencyAndId> serviceAlertIds, long time) {
+      Collection<AgencyAndId> serviceAlertIds, long time) {
     if (serviceAlertIds == null || serviceAlertIds.isEmpty())
       return Collections.emptyList();
     List<ServiceAlert> serviceAlerts = new ArrayList<ServiceAlert>(
@@ -385,12 +427,12 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   private boolean filterByTime(ServiceAlert serviceAlert, long time) {
-    if (time == -1 || serviceAlert.getPublicationWindowList().size()==0)
+    if (time == -1 || serviceAlert.getPublicationWindowList().size() == 0)
       return true;
-    for (TimeRange publicationWindow: serviceAlert.getPublicationWindowList()) {
-      if ((!publicationWindow.hasStart() || publicationWindow.getStart() <= time) &&
-          (!publicationWindow.hasEnd() || publicationWindow.getEnd() >= time)) {
-            return true;
+    for (TimeRange publicationWindow : serviceAlert.getPublicationWindowList()) {
+      if ((!publicationWindow.hasStart() || publicationWindow.getStart() <= time)
+          && (!publicationWindow.hasEnd() || publicationWindow.getEnd() >= time)) {
+        return true;
       }
     }
     return false;
@@ -403,10 +445,13 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   private synchronized void loadServiceAlerts() {
 
     if (_doPersistence == false) {
-      _log.info("Not loading service alerts from bundle, persistence=" + _doPersistence);
+      _log.info("Not loading service alerts from bundle, persistence="
+          + _doPersistence);
       return;
     }
-    
+
+    _log.info("Loading service alerts from bundle, persistence="
+        + _doPersistence);
     File path = getServiceAlertsPath();
 
     if (path == null || !path.exists())
@@ -437,10 +482,11 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   private synchronized void saveServiceAlerts() {
 
     if (_doPersistence == false) {
-      _log.info("Not saving service alerts to bundle, persistence=" + _doPersistence);
+      _log.info("Not saving service alerts to bundle, persistence="
+          + _doPersistence);
       return;
     }
-    
+
     File path = getServiceAlertsPath();
 
     if (path == null)
@@ -476,7 +522,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   @Override
   public void doPersistence(boolean persist) {
-    this._doPersistence  = persist;
+    this._doPersistence = persist;
   }
 
 }

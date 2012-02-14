@@ -1,17 +1,17 @@
 /**
  * Copyright (C) 2011 Google, Inc.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
@@ -33,11 +33,14 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.RouteIdAndDirection;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -52,7 +55,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfig
 
 public class ServiceAlertsServiceImplTest {
 
-  private static final int FIVE_MINUTES = 5*60*1000;
+  private static final int FIVE_MINUTES = 5 * 60 * 1000;
 
   private ServiceAlertsServiceImpl _service;
 
@@ -153,19 +156,23 @@ public class ServiceAlertsServiceImplTest {
 
   @Test
   public void testGetServiceAlertsForAgencyIdInsideOpenStart() {
-    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(System.currentTimeMillis() - FIVE_MINUTES, -1);
+    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(
+        System.currentTimeMillis() - FIVE_MINUTES, -1);
     verifyExistsServiceAlertsForAgencyAndId(serviceAlert);
   }
 
   @Test
   public void testGetServiceAlertsForAgencyIdInsideOpenEnd() {
-    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(-1, System.currentTimeMillis() + FIVE_MINUTES);
+    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(-1,
+        System.currentTimeMillis() + FIVE_MINUTES);
     verifyExistsServiceAlertsForAgencyAndId(serviceAlert);
   }
 
   @Test
   public void testGetServiceAlertsForAgencyIdInsideClosedRange() {
-    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(System.currentTimeMillis() - FIVE_MINUTES, System.currentTimeMillis() + FIVE_MINUTES);
+    ServiceAlert serviceAlert = createServiceAlertForAgencyAndId(
+        System.currentTimeMillis() - FIVE_MINUTES, System.currentTimeMillis()
+            + FIVE_MINUTES);
     verifyExistsServiceAlertsForAgencyAndId(serviceAlert);
   }
 
@@ -182,19 +189,22 @@ public class ServiceAlertsServiceImplTest {
 
   @Test
   public void testGetServiceAlertsForAgencyIdOutsideOfOpenStart() {
-    createServiceAlertForAgencyAndId(System.currentTimeMillis() + FIVE_MINUTES, -1);
+    createServiceAlertForAgencyAndId(System.currentTimeMillis() + FIVE_MINUTES,
+        -1);
     verifyNotExistsServiceAlertsForAgencyAndId();
   }
 
   @Test
   public void testGetServiceAlertsForAgencyIdOutsideOfOpenEnd() {
-    createServiceAlertForAgencyAndId(-1, System.currentTimeMillis() - FIVE_MINUTES);
+    createServiceAlertForAgencyAndId(-1, System.currentTimeMillis()
+        - FIVE_MINUTES);
     verifyNotExistsServiceAlertsForAgencyAndId();
   }
 
   @Test
   public void testGetServiceAlertsForAgencyIdOutsideOfClosedRange() {
-    createServiceAlertForAgencyAndId(System.currentTimeMillis() + FIVE_MINUTES, System.currentTimeMillis() + (FIVE_MINUTES*2));
+    createServiceAlertForAgencyAndId(System.currentTimeMillis() + FIVE_MINUTES,
+        System.currentTimeMillis() + (FIVE_MINUTES * 2));
     verifyNotExistsServiceAlertsForAgencyAndId();
   }
 
@@ -211,7 +221,7 @@ public class ServiceAlertsServiceImplTest {
   public ServiceAlert createServiceAlertForAgencyAndId() {
     return createServiceAlertForAgencyAndId(-1, -1);
   }
-  
+
   public ServiceAlert createServiceAlertForAgencyAndId(long start, long end) {
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();
     Affects.Builder affects = Affects.newBuilder();
@@ -220,10 +230,10 @@ public class ServiceAlertsServiceImplTest {
     if (start != -1 || end != -1) {
       Builder trBuilder = TimeRange.newBuilder();
       if (start != -1)
-        trBuilder.setStart(start);    
+        trBuilder.setStart(start);
       if (end != -1)
-        trBuilder.setEnd(end);    
-      builder.addPublicationWindow(trBuilder);      
+        trBuilder.setEnd(end);
+      builder.addPublicationWindow(trBuilder);
     }
     ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
         "1");
@@ -378,10 +388,10 @@ public class ServiceAlertsServiceImplTest {
     affects10.setDirectionId("1");
     builder10.addAffects(affects10);
     Builder trBuilder10 = TimeRange.newBuilder();
-    trBuilder10.setStart(System.currentTimeMillis() - FIVE_MINUTES);    
+    trBuilder10.setStart(System.currentTimeMillis() - FIVE_MINUTES);
     builder10.addPublicationWindow(trBuilder10);
-    ServiceAlert serviceAlert10 = _service.createOrUpdateServiceAlert(builder10,
-        "1");
+    ServiceAlert serviceAlert10 = _service.createOrUpdateServiceAlert(
+        builder10, "1");
 
     /**
      * These alerts shouldn't match
@@ -429,10 +439,10 @@ public class ServiceAlertsServiceImplTest {
     affects11.setDirectionId("1");
     builder11.addAffects(affects11);
     Builder trBuilder11 = TimeRange.newBuilder();
-    trBuilder11.setStart(System.currentTimeMillis() + FIVE_MINUTES);    
+    trBuilder11.setStart(System.currentTimeMillis() + FIVE_MINUTES);
     builder11.addPublicationWindow(trBuilder11);
-    ServiceAlert serviceAlert11 = _service.createOrUpdateServiceAlert(builder11,
-        "1");
+    ServiceAlert serviceAlert11 = _service.createOrUpdateServiceAlert(
+        builder11, "1");
 
     BlockInstance blockInstance = new BlockInstance(blockConfig,
         System.currentTimeMillis());
@@ -445,6 +455,126 @@ public class ServiceAlertsServiceImplTest {
     assertTrue(alerts.contains(serviceAlert4));
     assertTrue(alerts.contains(serviceAlert10));
     assertTrue(!alerts.contains(serviceAlert11));
+  }
+
+  @Test
+  public void testGetServiceAlertsByQueryBeanEmpty() {
+    SituationQueryBean query = new SituationQueryBean();
+    List<ServiceAlert> alerts = _service.getServiceAlerts(query);
+    assertEquals(0, alerts.size());
+  }
+
+  @Test
+  public void testGetServiceAlertsByQueryBeanAgency() {
+
+    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
+    Affects.Builder affects1 = Affects.newBuilder();
+    affects1.setAgencyId("1");
+    builder1.addAffects(affects1);
+    _service.createOrUpdateServiceAlert(builder1, "1");
+
+    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
+    Affects.Builder affects2 = Affects.newBuilder();
+    affects2.setAgencyId("2");
+    builder2.addAffects(affects2);
+    _service.createOrUpdateServiceAlert(builder2, "2");
+
+    List<ServiceAlert> alerts = _service.getAllServiceAlerts();
+    assertEquals(2, alerts.size());
+
+    SituationQueryBean query = new SituationQueryBean();
+    query.setAgencyId("2");
+
+    alerts = _service.getServiceAlerts(query);
+    assertEquals(1, alerts.size());
+  }
+
+  @Test
+  public void testGetServiceAlertsByQueryBeanStops() {
+
+    addAffectsStop("agency1", "stop1", "1");
+    addAffectsStop("agency2", "stop2", "2");
+    addAffectsStop("agency2", "stop3", "3");
+    addAffectsStop("agency1", "stop4", "4");
+
+    List<ServiceAlert> alerts = _service.getAllServiceAlerts();
+    assertEquals(4, alerts.size());
+
+    SituationQueryBean query = new SituationQueryBean();
+    List<String> stopIds = new ArrayList<String>();
+    stopIds.add("agency2_stop2");
+    stopIds.add("agency2_stop3");
+    query.setStopIds(stopIds);
+
+    alerts = _service.getServiceAlerts(query);
+    assertEquals(2, alerts.size());
+  }
+
+  private void addAffectsStop(String stopAgency, String stopId,
+      String serviceAlertId) {
+    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
+    Affects.Builder affects = Affects.newBuilder();
+    affects.setStopId(ServiceAlertLibrary.id(stopAgency, stopId));
+    builder.addAffects(affects);
+    _service.createOrUpdateServiceAlert(builder, serviceAlertId);
+  }
+
+  @Test
+  public void testGetServiceAlertsByQueryBeanRoutesNoDirection() {
+
+    addAffectsRoute("agency1", "route1", "1");
+    addAffectsRoute("agency2", "route2", "2");
+    addAffectsRoute("agency2", "route3", "3");
+    addAffectsRoute("agency1", "route4", "4");
+
+    List<ServiceAlert> alerts = _service.getAllServiceAlerts();
+    assertEquals(4, alerts.size());
+
+    SituationQueryBean query = new SituationQueryBean();
+    List<RouteIdAndDirection> routeIds = new ArrayList<RouteIdAndDirection>();
+    routeIds.add(query.new RouteIdAndDirection("agency2_route2", null));
+    routeIds.add(query.new RouteIdAndDirection("agency2_route3", null));
+    query.setRoutes(routeIds);
+
+    alerts = _service.getServiceAlerts(query);
+    assertEquals(2, alerts.size());
+  }
+
+  @Test
+  public void testGetServiceAlertsByQueryBeanRoutesWithDirection() {
+
+    addAffectsRoute("agency1", "route1", "1", "0");
+    addAffectsRoute("agency2", "route2", "2", "1");
+    addAffectsRoute("agency2", "route3", "3", "0");
+    addAffectsRoute("agency1", "route4", "4", "1");
+
+    List<ServiceAlert> alerts = _service.getAllServiceAlerts();
+    assertEquals(4, alerts.size());
+
+    SituationQueryBean query = new SituationQueryBean();
+    List<RouteIdAndDirection> routeIds = new ArrayList<RouteIdAndDirection>();
+    routeIds.add(query.new RouteIdAndDirection("agency2_route2", "0"));
+    routeIds.add(query.new RouteIdAndDirection("agency2_route3", "0"));
+    query.setRoutes(routeIds);
+
+    alerts = _service.getServiceAlerts(query);
+    assertEquals(1, alerts.size());
+  }
+
+  private void addAffectsRoute(String routeAgency, String routeId,
+      String serviceAlertId) {
+    addAffectsRoute(routeAgency, routeId, serviceAlertId, null);
+  }
+
+  private void addAffectsRoute(String routeAgency, String routeId,
+      String serviceAlertId, String direction) {
+    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
+    Affects.Builder affects = Affects.newBuilder();
+    affects.setRouteId(ServiceAlertLibrary.id(routeAgency, routeId));
+    if (direction != null)
+      affects.setDirectionId(direction);
+    builder.addAffects(affects);
+    _service.createOrUpdateServiceAlert(builder, serviceAlertId);
   }
 
   @Test

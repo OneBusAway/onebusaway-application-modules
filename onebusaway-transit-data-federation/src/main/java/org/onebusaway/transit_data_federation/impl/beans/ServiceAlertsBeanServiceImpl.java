@@ -26,6 +26,7 @@ import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBea
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -123,6 +124,12 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
     List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForVehicleJourney(
         time, blockInstance, blockTrip, vehicleId);
 
+    return list(serviceAlerts);
+  }
+
+  @Override
+  public List<ServiceAlertBean> getServiceAlerts(SituationQueryBean query) {
+    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlerts(query);
     return list(serviceAlerts);
   }
 
@@ -408,4 +415,5 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
     return nlsBeans;
   }
+
 }
