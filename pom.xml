@@ -4,7 +4,7 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.6</version>
+    <version>1.1.7</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
@@ -57,10 +57,9 @@
   </issueManagement>
 
   <distributionManagement>
-    <!-- Even though we specify this in the parent pom, we need to specify it here to have full control over the url -->
     <site>
       <id>${site_id}</id>
-      <url>${site_url}</url>
+      <url>${site_deployment_base}/onebusaway-application-modules/${project.version}</url>
     </site>
   </distributionManagement>
 
@@ -482,14 +481,8 @@
       <plugin>
         <groupId>com.mycila.maven-license-plugin</groupId>
         <artifactId>maven-license-plugin</artifactId>
-        <version>1.10.b1</version>
         <configuration>
-          <header>src/license/header.txt</header>
-          <excludes>
-            <exclude>src/site/**</exclude>
-            <exclude>LICENSE.txt</exclude>
-            <exclude>**/usage.txt</exclude>
-            <exclude>**/log4j.properties</exclude>
+          <excludes combine.children="append">
             <exclude>**/data-sources.xml</exclude>
             <exclude>**/*.action</exclude>
             <exclude>**/*.ai</exclude>
@@ -498,33 +491,8 @@
             <exclude>**/*.mp3</exclude>
             <exclude>**/*.wav</exclude>
             <exclude>src/test/resources/**</exclude>
-            <exclude>onebusaway-transit-data-federation-builder/src/test/resources/**</exclude>
-            <!-- JQuery Excludes -->
-            <exclude>**/jquery*.js</exclude>
-            <exclude>**/jquery*.css</exclude>
-            <!-- GWT Excludes -->
-            <exclude>**/*.gwt.rpc</exclude>
-            <exclude>**.nocache.js</exclude>
-            <exclude>**/hosted.html</exclude>
           </excludes>
-          <strictCheck>true</strictCheck>
-          <aggregate>false</aggregate>
-          <headerSections>
-            <headerSection>
-              <key>COPYRIGHT_SECTION</key>
-              <defaultValue>Copyright (C) 2011 Brian Ferris
-                &lt;bdferris@onebusaway.org&gt;</defaultValue>
-              <ensureMatch>Copyright \(C\) \d{4} .+</ensureMatch>
-            </headerSection>
-          </headerSections>
         </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

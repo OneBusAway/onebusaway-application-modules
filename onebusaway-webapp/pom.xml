@@ -188,6 +188,21 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <configuration>
+          <excludes combine.children="append">
+            <!-- JQuery Excludes -->
+            <exclude>**/jquery*.js</exclude>
+            <exclude>**/jquery*.css</exclude>
+            <!-- GWT Excludes -->
+            <exclude>**/*.gwt.rpc</exclude>
+            <exclude>**.nocache.js</exclude>
+            <exclude>**/hosted.html</exclude>
+          </excludes>
+        </configuration>
+      </plugin>      
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <configuration>
