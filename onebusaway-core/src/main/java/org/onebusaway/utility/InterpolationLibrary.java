@@ -33,7 +33,7 @@ public class InterpolationLibrary {
 
   /**
    * Same behavior as
-   * {@link #interpolate(SortedMap, Number, EOutOfRangeStrategy) but with a
+   * {@link #interpolate(SortedMap, Number, EOutOfRangeStrategy)} but with a
    * default {@link EOutOfRangeStrategy} of
    * {@link EOutOfRangeStrategy#INTERPOLATE}.
    * 
