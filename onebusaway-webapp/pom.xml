@@ -81,13 +81,11 @@
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-maps</artifactId>
-      <version>1.0.2</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-search</artifactId>
-      <version>1.0.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -167,27 +165,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>generate-resources</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/src/main/resources</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>src/main/default-resources</directory>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>com.mycila.maven-license-plugin</groupId>
         <artifactId>maven-license-plugin</artifactId>
         <configuration>
@@ -201,7 +178,43 @@
             <exclude>**/hosted.html</exclude>
           </excludes>
         </configuration>
-      </plugin>      
+      </plugin>
+      <!-- 
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>../api/src/main/java</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-resource</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>../api/src/main/resources</directory>
+                  <targetPath>resources</targetPath>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
@@ -216,6 +229,7 @@
           <gwtVersion>${gwt-version}</gwtVersion>
           <webappDirectory>${project.build.directory}/gwt</webappDirectory>
           <hostedWebapp>${project.build.directory}/gwt</hostedWebapp>
+          <detectLocalProjects>true</detectLocalProjects>
         </configuration>
         <executions>
           <execution>
