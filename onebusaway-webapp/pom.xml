@@ -229,7 +229,7 @@
           <gwtVersion>${gwt-version}</gwtVersion>
           <webappDirectory>${project.build.directory}/gwt</webappDirectory>
           <hostedWebapp>${project.build.directory}/gwt</hostedWebapp>
-          <detectLocalProjects>true</detectLocalProjects>
+          <detectLocalSourceFolders>true</detectLocalSourceFolders>
         </configuration>
         <executions>
           <execution>
