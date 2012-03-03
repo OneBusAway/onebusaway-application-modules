@@ -437,8 +437,8 @@ public class DistanceAlongShapeLibrary {
     int index = 0;
 
     b.append("# potential assignments:\n");
-    b.append("# index stopId stopLat stopLon\n");
-    b.append("#   distanceAlongShapeA locationOnShapeLatA locationOnShapeLonA shapePointIndexA\n");
+    b.append("# stopLat stopLon stopId\n");
+    b.append("#   locationOnShapeLat locationOnShapeLon distanceAlongShape distanceFromShape shapePointIndex\n");
     b.append("#   ...\n");
 
     double prevMaxDistanceAlongShape = Double.NEGATIVE_INFINITY;
