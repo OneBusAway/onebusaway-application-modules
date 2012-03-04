@@ -119,7 +119,9 @@ public class TripEntriesFactory {
         && _throwExceptionOnInvalidStopToShapeMappingException) {
       throw new IllegalStateException(
           "Multiple instances of InvalidStopToShapeMappingException thrown: count="
-              + _stopTimeEntriesFactory.getInvalidStopToShapeMappingExceptionCount());
+              + _stopTimeEntriesFactory.getInvalidStopToShapeMappingExceptionCount()
+              + ".  For more information on errors of this kind, see:\n"
+              + "  https://github.com/OneBusAway/onebusaway-application-modules/wiki/Stop-to-Shape-Matching");
     }
 
     graph.refreshTripMapping();
