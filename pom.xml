@@ -472,6 +472,20 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
+              <configuration>
+                <!--
+                  bdferris: I ran into an issue where the javadoc process crashed with the following exception:
+                  java.lang.ClassCastException:
+                    com.sun.tools.javadoc.ClassDocImpl cannot be cast to com.sun.javadoc.AnnotationTypeDoc
+                  After some debugging, this turned out to be because we had class defined in the com.google.gwt.user.client.ui
+                  package, which in turn caused that package to be included in the javadoc build, which in turn caused
+                  a GWT annotation class to be examined in the Javadoc process, which in turn caused javadoc to crash
+                  because of a bug in the javadoc application:
+                    http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6442982
+                  Thus, we exclude this package to avoid the bug.
+                   -->
+                <excludePackageNames>com.google.gwt.user.client.ui</excludePackageNames>
+              </configuration>
             </plugin>
           </reportPlugins>
         </configuration>
