@@ -4,9 +4,16 @@
 
 $H$H ${currentVersion}
 
+* Make `onebusaway-quickstart` part of the main `onebusaway-application-modules` module set.
+* Add a ui-only webapp artifact to `onebusaway-combined-webapp`.
+* Tweak support for GTFS-realtime, including support for new OBA-specific delay field.
+* Initial support for fixed-schedule trips with a headway-in-name-only frequency label, as indicated by frequencies.txt
+  label_only feature proposal.
+* Fix to make crossdomain action work whether its being called by the Struts Convention plugin OR the Rest2 plugin.
+* Migrate to GitHub.
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
 
-1.0.1
+$H$H 1.0.1
 
 * More flexible trip matching in GTFS-realtime support
 * Support for running transit data bundle building as a startup phase of webapps
