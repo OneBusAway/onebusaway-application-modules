@@ -179,42 +179,6 @@
           </excludes>
         </configuration>
       </plugin>
-      <!-- 
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>add-source</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>../api/src/main/java</source>
-              </sources>
-            </configuration>
-          </execution>
-          <execution>
-            <id>add-resource</id>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-resource</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>../api/src/main/resources</directory>
-                  <targetPath>resources</targetPath>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
@@ -276,10 +240,10 @@
               <directory>target/gwt/org.onebusaway.webapp.gwt.BookmarkEditApplication</directory>
               <targetPath>where/standard</targetPath>
             </resource>
-<!--             <resource> -->
-<!--               <directory>${project.build.directory}/gwt/LoginWidget</directory> -->
-<!--               <targetPath /> -->
-<!--             </resource> -->
+            <resource>
+              <directory>target/gwt/LoginWidget</directory>
+              <targetPath></targetPath>
+            </resource>
             <resource>
               <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
               <targetPath>explore/onebusaway</targetPath>
