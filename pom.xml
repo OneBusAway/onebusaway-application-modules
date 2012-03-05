@@ -463,9 +463,9 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-                <!--
-                  See discusson above.  We need this here as well for calls to javadoc:javadoc.
-                   -->
+          <!--
+            See discusson above.  We need this here as well for calls to javadoc:javadoc.
+          -->
           <excludePackageNames>com.google.gwt.user.client.ui</excludePackageNames>
         </configuration>
       </plugin>
