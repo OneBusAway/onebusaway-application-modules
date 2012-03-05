@@ -78,6 +78,7 @@
     <module>onebusaway-phone</module>
     <module>onebusaway-phone-webapp</module>
     <module>onebusaway-presentation</module>
+    <module>onebusaway-quickstart</module>
     <module>onebusaway-sms-webapp</module>
     <module>onebusaway-realtime-api</module>
     <module>onebusaway-transit-data</module>

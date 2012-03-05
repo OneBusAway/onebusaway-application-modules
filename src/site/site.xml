@@ -15,6 +15,7 @@
       <item name="Sign Mode" href="/features/sign-mode.html" />
     </menu>    
     <menu name="Guides">
+      <item name="Quick-Start" href="/guides/quickstart-guide.html" />
       <item name="Installation" href="/guides/installation-guide.html" />
       <item name="Transit Data Bundle" href="/guides/transit-data-bundle-guide.html" />
       <item name="Realtime Configuration" href="/guides/realtime-configuration-guide.html" />
