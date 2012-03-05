@@ -27,15 +27,15 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.collections.CollectionsLibrary;
+import org.onebusaway.guice.jsr250.LifecycleService;
 import org.onebusaway.siri.core.ESiriModuleType;
 import org.onebusaway.siri.core.SiriChannelInfo;
 import org.onebusaway.siri.core.SiriClient;
 import org.onebusaway.siri.core.SiriClientRequest;
 import org.onebusaway.siri.core.SiriClientRequestFactory;
+import org.onebusaway.siri.core.SiriCommon.ELogRawXmlType;
 import org.onebusaway.siri.core.SiriCoreModule;
 import org.onebusaway.siri.core.SiriLibrary;
-import org.onebusaway.siri.core.SiriCommon.ELogRawXmlType;
-import org.onebusaway.siri.core.guice.LifecycleService;
 import org.onebusaway.siri.core.handlers.SiriServiceDeliveryHandler;
 import org.onebusaway.transit_data_federation.impl.realtime.siri.SiriEndpointDetails;
 import org.onebusaway.transit_data_federation.impl.realtime.siri.SiriService;
