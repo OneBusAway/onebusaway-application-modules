@@ -4,6 +4,11 @@
 
 $H$H ${currentVersion}
 
+* Fix problem with quickstart bundle.
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
+
+$H$H 1.0.2
+
 * Make `onebusaway-quickstart` part of the main `onebusaway-application-modules` module set.
 * Add a ui-only webapp artifact to `onebusaway-combined-webapp`.
 * Tweak support for GTFS-realtime, including support for new OBA-specific delay field.
@@ -11,7 +16,7 @@ $H$H ${currentVersion}
   label_only feature proposal.
 * Fix to make crossdomain action work whether its being called by the Struts Convention plugin OR the Rest2 plugin.
 * Migrate to GitHub.
-* Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.2/
 
 $H$H 1.0.1
 
