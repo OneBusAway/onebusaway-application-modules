@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +25,7 @@ import java.util.List;
 
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.EAccessibility;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopHops;
 import org.onebusaway.transit_data_federation.impl.tripplanner.StopTransfers;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
@@ -41,6 +43,8 @@ public class StopEntryImpl implements StopEntry, Serializable {
   private final double _lat;
 
   private final double _lon;
+  
+  private EAccessibility _wheelchairBoarding = EAccessibility.UNKNOWN;
 
   private transient int _index;
 
@@ -62,6 +66,10 @@ public class StopEntryImpl implements StopEntry, Serializable {
     _id = id;
     _lat = lat;
     _lon = lon;
+  }
+  
+  public void setWheelchairBoarding(EAccessibility wheelchairBoarding) {
+    _wheelchairBoarding = wheelchairBoarding;
   }
 
   public void setIndex(int index) {
@@ -155,6 +163,11 @@ public class StopEntryImpl implements StopEntry, Serializable {
   @Override
   public CoordinatePoint getStopLocation() {
     return new CoordinatePoint(_lat, _lon);
+  }
+  
+  @Override
+  public EAccessibility getWheelchairBoarding() {
+    return _wheelchairBoarding;
   }
 
   @Override

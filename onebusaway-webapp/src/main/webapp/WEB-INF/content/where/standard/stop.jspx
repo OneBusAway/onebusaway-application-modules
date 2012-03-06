@@ -83,7 +83,7 @@
 </div>
 
 <div id="otherOptions" class="stop_links">
-<h4>Other options:</h4>
+<h4>Stop details:</h4>
 <ul>
   <s:iterator value="result.stops" status="stopsIter">
     <s:url var="scheduleUrl" action="schedule" includeParams="none">
@@ -107,6 +107,18 @@
   <li><s:a href="refineview.html?%{stopAndRouteIdsAsUrlParams}">See multiple stops or filter routes</s:a></li>
   <s:if test="! anonymousUser">
     <li><s:a href="%{bookmarksUrl}">Add a bookmark</s:a></li>
+  </s:if>
+  <s:if test="result.stops.size == 1">
+    <s:push value="result.stops[0]">
+      <s:if test="wheelchairBoarding != @org.onebusaway.transit_data.model.EAccessibility@UNKNOWN">
+        <s:if test="wheelchairBoarding == @org.onebusaway.transit_data.model.EAccessibility@ACCESSIBLE">
+          <li>This stop is wheelchair accessible.</li>
+        </s:if>
+        <s:elseif test="wheelchairBoarding == @org.onebusaway.transit_data.model.EAccessibility@NOT_ACCESSIBLE">
+          <li>This stop is <em>not</em> wheelchair accessible.</li>
+        </s:elseif>
+      </s:if>
+    </s:push>
   </s:if>
   <li><s:a href="index.html">Search for another stop</s:a></li>
 </ul>

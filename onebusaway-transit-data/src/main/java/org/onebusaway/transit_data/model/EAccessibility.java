@@ -1,5 +1,4 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.services.transit_graph;
+package org.onebusaway.transit_data.model;
 
-import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.EAccessibility;
+/**
+ * An enumeration of possible accessibility states for a transit feature.
+ * 
+ * @author bdferris
+ */
+public enum EAccessibility {
 
-public interface StopEntry extends Comparable<StopEntry> {
+  /**
+   * The feature is of unknown accessibility.
+   */
+  UNKNOWN,
 
-  public AgencyAndId getId();
+  /**
+   * The feature is accessible.
+   */
+  ACCESSIBLE,
 
-  public double getStopLat();
-
-  public double getStopLon();
-
-  public CoordinatePoint getStopLocation();
-
-  public EAccessibility getWheelchairBoarding();
-
-  public int getIndex();
+  /**
+   * The feature is not accessible.
+   */
+  NOT_ACCESSIBLE
 }

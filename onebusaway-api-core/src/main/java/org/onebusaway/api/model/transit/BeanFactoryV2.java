@@ -310,6 +310,7 @@ public class BeanFactoryV2 {
     bean.setLon(stop.getLon());
     bean.setLocationType(stop.getLocationType());
     bean.setName(stop.getName());
+    bean.setWheelchairBoarding(stop.getWheelchairBoarding());
 
     List<String> routeIds = new ArrayList<String>();
     for (RouteBean route : stop.getRoutes()) {

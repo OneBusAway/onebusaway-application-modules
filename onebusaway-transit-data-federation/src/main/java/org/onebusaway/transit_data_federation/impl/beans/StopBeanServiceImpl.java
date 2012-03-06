@@ -117,6 +117,7 @@ class StopBeanServiceImpl implements StopBeanService {
         stop.getId().getId()));
     bean.setLocationType(narrative.getLocationType());
     bean.setDirection(narrative.getDirection());
+    bean.setWheelchairBoarding(stop.getWheelchairBoarding());
   }
 
   private static String getRouteBeanName(RouteBean bean) {

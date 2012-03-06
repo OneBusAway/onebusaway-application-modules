@@ -18,6 +18,8 @@ package org.onebusaway.api.model.transit;
 import java.io.Serializable;
 import java.util.List;
 
+import org.onebusaway.transit_data.model.EAccessibility;
+
 public class StopV2Bean implements Serializable, HasId {
 
   private static final long serialVersionUID = 2L;
@@ -36,6 +38,8 @@ public class StopV2Bean implements Serializable, HasId {
 
   private int locationType;
 
+  private EAccessibility wheelchairBoarding;
+  
   private List<String> routeIds;
 
   public String getId() {
@@ -92,6 +96,14 @@ public class StopV2Bean implements Serializable, HasId {
 
   public void setLocationType(int locationType) {
     this.locationType = locationType;
+  }
+
+  public EAccessibility getWheelchairBoarding() {
+    return wheelchairBoarding;
+  }
+
+  public void setWheelchairBoarding(EAccessibility wheelchairBoarding) {
+    this.wheelchairBoarding = wheelchairBoarding;
   }
 
   public List<String> getRouteIds() {
