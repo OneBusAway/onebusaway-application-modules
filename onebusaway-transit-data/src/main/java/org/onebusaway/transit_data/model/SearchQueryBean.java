@@ -35,6 +35,9 @@ public class SearchQueryBean implements Serializable {
   private String query;
 
   private int maxCount;
+  
+  // default minimum lucene result score to keep
+  private double minScoreToKeep = 1.0;
 
   public EQueryType getType() {
     return type;
@@ -66,5 +69,13 @@ public class SearchQueryBean implements Serializable {
 
   public void setMaxCount(int maxCount) {
     this.maxCount = maxCount;
+  }
+
+  public double getMinScoreToKeep() {
+    return minScoreToKeep;
+  }
+
+  public void setMinScoreToKeep(double minScoreToKeep) {
+    this.minScoreToKeep = minScoreToKeep;
   }
 }

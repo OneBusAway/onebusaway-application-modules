@@ -78,6 +78,8 @@ public class ServiceAlertsServiceImplTest {
 
   @Test
   public void testSerialization() throws IOException {
+    _service.doPersistence(true);
+    
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();
     ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
         "1");
@@ -91,6 +93,8 @@ public class ServiceAlertsServiceImplTest {
     assertEquals(serviceAlert.getId().getAgencyId(), read.getId().getAgencyId());
     assertEquals(serviceAlert.getId().getId(), read.getId().getId());
     assertEquals(serviceAlert.getCreationTime(), read.getCreationTime());
+    
+    _service.doPersistence(false);
   }
 
   @Test

@@ -49,12 +49,12 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   /**
    * Catch late trips up to 30 minutes
    */
-  private static final long TIME_BEFORE_WINDOW = 30 * 60 * 1000;
+  private static final long TIME_BEFORE_WINDOW = 90 * 60 * 1000;
 
   /**
    * Catch early blocks up to 10 minutes
    */
-  private static final long TIME_AFTER_WINDOW = 10 * 60 * 1000;
+  private static final long TIME_AFTER_WINDOW = 90 * 60 * 1000;
 
   private BlockCalendarService _blockCalendarService;
 
@@ -133,8 +133,11 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   @Override
   public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time) {
 
+    long timeFrom = time - TIME_BEFORE_WINDOW;
+    long timeTo = time + TIME_AFTER_WINDOW;
+
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForRouteInTimeRange(
-        routeId, time, time);
+        routeId, timeFrom, timeTo);
 
     return getAsLocations(instances, time);
   }

@@ -545,7 +545,7 @@ class TransitDataServiceImpl implements TransitDataService {
           query.getTime(), stopIds);
       return new ListBean<ServiceAlertBean>(situations, false);
     } else {
-      List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForFederatedAgencyId(query.getAgencyId());
+      List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlerts(query);
       return new ListBean<ServiceAlertBean>(situations, false);
     }
   }

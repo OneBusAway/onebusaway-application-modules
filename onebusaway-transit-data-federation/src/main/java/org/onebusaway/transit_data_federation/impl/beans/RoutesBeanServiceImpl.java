@@ -16,18 +16,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.lucene.queryParser.ParseException;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
 import org.onebusaway.exceptions.NoSuchAgencyServiceException;
@@ -51,21 +39,28 @@ import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
+import org.apache.lucene.queryParser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Component
 class RoutesBeanServiceImpl implements RoutesBeanService {
 
   private static Logger _log = LoggerFactory.getLogger(RoutesBeanServiceImpl.class);
-
-  private static final double MIN_SEARCH_SCORE = 1.0;
 
   @Autowired
   private RouteService _routeService;
@@ -85,28 +80,29 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   @Autowired
   private TransitGraphDao _graphDao;
 
-  private Map<AgencyAndId, STRtree> _stopTreesByRouteId = new HashMap<AgencyAndId, STRtree>();
-
-  @PostConstruct
-  public void setup() {
+  @Cacheable
+  public STRtree getStopsTreeForRouteId(AgencyAndId routeId) {
+    STRtree tree = null;
 
     for (StopEntry stop : _graphDao.getAllStops()) {
-      Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
-      for (AgencyAndId routeId : routeIds) {
-        STRtree tree = _stopTreesByRouteId.get(routeId);
-        if (tree == null) {
-          tree = new STRtree();
-          _stopTreesByRouteId.put(routeId, tree);
-        }
-        double x = stop.getStopLon();
-        double y = stop.getStopLat();
-        Envelope env = new Envelope(x, x, y, y);
-        tree.insert(env, routeId);
-      }
+       Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
+
+       if(!routeIds.contains(routeId))
+         continue;
+
+       if(tree == null)
+         tree = new STRtree();
+       
+       double x = stop.getStopLon();
+       double y = stop.getStopLat();
+       Envelope env = new Envelope(x, x, y, y);
+       tree.insert(env, routeId);
     }
 
-    for (STRtree tree : _stopTreesByRouteId.values())
+    if(tree != null)
       tree.build();
+
+    return tree;
   }
 
   @Override
@@ -178,7 +174,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
     CoordinateBounds bounds = query.getBounds();
 
     for (AgencyAndId id : result.getResults()) {
-      STRtree tree = _stopTreesByRouteId.get(id);
+      STRtree tree = getStopsTreeForRouteId(id);
       if (tree == null) {
         _log.warn("stop tree not found for routeId=" + id);
         continue;
@@ -205,7 +201,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
     try {
       return _searchService.searchForRoutesByName(query.getQuery(),
-          query.getMaxCount() + 1, MIN_SEARCH_SCORE);
+          query.getMaxCount() + 1, query.getMinScoreToKeep());
     } catch (IOException e) {
       throw new ServiceException();
     } catch (ParseException e) {
