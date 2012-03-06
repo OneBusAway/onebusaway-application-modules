@@ -280,7 +280,8 @@ public class BlockConfigurationEntryImpl implements BlockConfigurationEntry,
           throw new IllegalStateException(
               "I didn't think this was possible, but the number of stop times in a particular block exceeded "
                   + Short.MAX_VALUE
-                  + " causing a wrap-around in the accumulated stop time index");
+                  + " causing a wrap-around in the accumulated stop time index: blockId="
+                  + blockConfiguration.getBlock().getId());
 
         for (StopTimeEntry stopTime : stopTimes)
           accumulatedSlackTime += stopTime.getSlackTime();
