@@ -79,8 +79,6 @@ public class StopTimeEntriesFactory {
 
     ensureStopTimesHaveShapeDistanceTraveledSet(stopTimeEntries, shapePoints);
     ensureStopTimesHaveTimesSet(stopTimes, stopTimeEntries);
-    
-    
 
     return stopTimeEntries;
   }
@@ -88,7 +86,8 @@ public class StopTimeEntriesFactory {
   private List<StopTimeEntryImpl> createInitialStopTimeEntries(
       TransitGraphImpl graph, List<StopTime> stopTimes) {
 
-    List<StopTimeEntryImpl> stopTimeEntries = new ArrayList<StopTimeEntryImpl>(stopTimes.size());
+    List<StopTimeEntryImpl> stopTimeEntries = new ArrayList<StopTimeEntryImpl>(
+        stopTimes.size());
     int sequence = 0;
 
     for (StopTime stopTime : stopTimes) {
@@ -263,13 +262,17 @@ public class StopTimeEntriesFactory {
       arrivalTimes[i] = arrivalTime;
 
       if (departureTimes[i] < arrivalTimes[i])
-        throw new IllegalStateException();
-
-      if (arrivalTime > departureTime)
-        throw new IllegalStateException();
+        throw new IllegalStateException(
+            "departure time is less than arrival time for stop time with trip_id="
+                + stopTime.getTrip().getId() + " stop_sequence="
+                + stopTime.getStopSequence());
 
       if (i > 0 && arrivalTimes[i] < departureTimes[i - 1]) {
 
+        /**
+         * The previous stop time's departure time comes AFTER this stop time's
+         * arrival time. That's bad.
+         */
         StopTime prevStopTime = stopTimes.get(i - 1);
         Stop prevStop = prevStopTime.getStop();
         Stop stop = stopTime.getStop();
@@ -287,7 +290,10 @@ public class StopTimeEntriesFactory {
             System.err.println(x + " " + st.getId() + " " + arrivalTimes[x]
                 + " " + departureTimes[x]);
           }
-          throw new IllegalStateException();
+          throw new IllegalStateException(
+              "arrival time is less than previous departure time for stop time with trip_id="
+                  + stopTime.getTrip().getId() + " stop_sequence="
+                  + stopTime.getStopSequence());
         }
       }
     }
