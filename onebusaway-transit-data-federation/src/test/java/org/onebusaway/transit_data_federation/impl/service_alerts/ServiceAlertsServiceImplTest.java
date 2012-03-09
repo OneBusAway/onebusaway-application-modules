@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,8 +79,6 @@ public class ServiceAlertsServiceImplTest {
 
   @Test
   public void testSerialization() throws IOException {
-    _service.doPersistence(true);
-    
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();
     ServiceAlert serviceAlert = _service.createOrUpdateServiceAlert(builder,
         "1");
@@ -93,8 +92,6 @@ public class ServiceAlertsServiceImplTest {
     assertEquals(serviceAlert.getId().getAgencyId(), read.getId().getAgencyId());
     assertEquals(serviceAlert.getId().getId(), read.getId().getId());
     assertEquals(serviceAlert.getCreationTime(), read.getCreationTime());
-    
-    _service.doPersistence(false);
   }
 
   @Test

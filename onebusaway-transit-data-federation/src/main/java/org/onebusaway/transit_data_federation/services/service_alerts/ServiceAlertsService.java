@@ -104,12 +104,4 @@ public interface ServiceAlertsService {
 
   public List<ServiceAlert> getServiceAlerts(SituationQueryBean query);
 
-  /**
-   * Set whether the ServiceAlerts service is responsible for persisting service alerts
-   * across application restarts, or whether an external service will handle that.
-   * 
-   * @param persist
-   */
-  public void doPersistence(boolean persist);
-
 }
