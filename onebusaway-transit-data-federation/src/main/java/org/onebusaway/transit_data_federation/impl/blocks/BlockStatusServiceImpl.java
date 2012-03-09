@@ -47,12 +47,12 @@ import org.springframework.stereotype.Component;
 public class BlockStatusServiceImpl implements BlockStatusService {
 
   /**
-   * Catch late trips up to 30 minutes
+   * Catch late trips up to 90 minutes
    */
   private static final long TIME_BEFORE_WINDOW = 90 * 60 * 1000;
 
   /**
-   * Catch early blocks up to 10 minutes
+   * Catch early blocks up to 90 minutes
    */
   private static final long TIME_AFTER_WINDOW = 90 * 60 * 1000;
 

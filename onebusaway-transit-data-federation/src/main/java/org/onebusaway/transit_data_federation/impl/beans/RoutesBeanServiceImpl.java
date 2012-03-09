@@ -17,6 +17,7 @@
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
 import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.exceptions.ServiceException;
@@ -27,6 +28,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
@@ -53,9 +55,13 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 @Component
 class RoutesBeanServiceImpl implements RoutesBeanService {
@@ -80,29 +86,32 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   @Autowired
   private TransitGraphDao _graphDao;
 
-  @Cacheable
-  public STRtree getStopsTreeForRouteId(AgencyAndId routeId) {
-    STRtree tree = null;
+  private Map<AgencyAndId, STRtree> _stopTreesByRouteId = new HashMap<AgencyAndId, STRtree>();
 
+  @Refreshable(dependsOn = { 
+      RefreshableResources.ROUTE_COLLECTIONS_DATA, 
+      RefreshableResources.TRANSIT_GRAPH })
+  @PostConstruct
+  public void setup() {
+    _stopTreesByRouteId.clear();
+    
     for (StopEntry stop : _graphDao.getAllStops()) {
-       Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
-
-       if(!routeIds.contains(routeId))
-         continue;
-
-       if(tree == null)
-         tree = new STRtree();
-       
-       double x = stop.getStopLon();
-       double y = stop.getStopLat();
-       Envelope env = new Envelope(x, x, y, y);
-       tree.insert(env, routeId);
+      Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
+      for (AgencyAndId routeId : routeIds) {
+        STRtree tree = _stopTreesByRouteId.get(routeId);
+        if (tree == null) {
+          tree = new STRtree();
+          _stopTreesByRouteId.put(routeId, tree);
+        }
+        double x = stop.getStopLon();
+        double y = stop.getStopLat();
+        Envelope env = new Envelope(x, x, y, y);
+        tree.insert(env, routeId);
+      }
     }
-
-    if(tree != null)
+    
+    for (STRtree tree : _stopTreesByRouteId.values())
       tree.build();
-
-    return tree;
   }
 
   @Override
@@ -174,7 +183,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
     CoordinateBounds bounds = query.getBounds();
 
     for (AgencyAndId id : result.getResults()) {
-      STRtree tree = getStopsTreeForRouteId(id);
+      STRtree tree = _stopTreesByRouteId.get(id);
       if (tree == null) {
         _log.warn("stop tree not found for routeId=" + id);
         continue;
