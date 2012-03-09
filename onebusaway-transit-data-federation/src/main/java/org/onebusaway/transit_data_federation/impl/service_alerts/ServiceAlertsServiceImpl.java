@@ -1,18 +1,18 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org> Copyright (C) 2011
- * Google, Inc.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- * 
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
@@ -98,8 +98,6 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   private FederatedTransitDataBundle _bundle;
 
   private File _serviceAlertsPath;
-
-  private boolean _doPersistence = false;
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
@@ -460,14 +458,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private synchronized void loadServiceAlerts() {
 
-    if (_doPersistence == false) {
-      _log.info("Not loading service alerts from bundle, persistence="
-          + _doPersistence);
-      return;
-    }
-
-    _log.info("Loading service alerts from bundle, persistence="
-        + _doPersistence);
+    _log.info("Loading service alerts from bundle");
     File path = getServiceAlertsPath();
 
     if (path == null || !path.exists())
@@ -496,12 +487,6 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   private synchronized void saveServiceAlerts() {
-
-    if (_doPersistence == false) {
-      _log.info("Not saving service alerts to bundle, persistence="
-          + _doPersistence);
-      return;
-    }
 
     File path = getServiceAlertsPath();
 
@@ -534,11 +519,6 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     if (_serviceAlertsPath != null)
       return _serviceAlertsPath;
     return _bundle.getServiceAlertsPath();
-  }
-
-  @Override
-  public void doPersistence(boolean persist) {
-    this._doPersistence = persist;
   }
 
 }
