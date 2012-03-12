@@ -14,6 +14,7 @@ The `<stop/>` element models stops in OneBusAway.  Stops are directly mapped fro
       <name>Stevens Way &amp; BENTON LANE</name>
       <code>75403</code>
       <locationType>0</locationType>
+      <wheelchairBoarding>ACCESSIBLE</wheelchairBoarding>
       <routeIds>
         <string>1_31</string>
         <string>...</string>
@@ -30,3 +31,9 @@ The following fields are optional:
 
 * direction
 * code
+
+The following values are supported for the `<wheelchairBoarding/>` element:
+
+* ACCESSIBLE
+* NOT_ACCESSIBLE
+* UNKNOWN 

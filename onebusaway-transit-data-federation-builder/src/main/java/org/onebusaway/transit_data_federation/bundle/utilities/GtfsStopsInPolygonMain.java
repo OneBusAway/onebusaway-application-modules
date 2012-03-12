@@ -38,7 +38,7 @@ import com.vividsolutions.jts.geom.Point;
  * a more complex polygon boundary
  * 
  * @author bdferris
- * @ssee GtfsStopsInRegionMain
+ * @see GtfsStopsInRegionMain
  */
 public class GtfsStopsInPolygonMain {
   

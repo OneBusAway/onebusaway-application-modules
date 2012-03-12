@@ -37,6 +37,8 @@ public class StopBean implements Serializable {
   private int locationType;
 
   private List<RouteBean> routes;
+  
+  private EAccessibility wheelchairBoarding;
 
   public String getId() {
     return id;
@@ -104,6 +106,14 @@ public class StopBean implements Serializable {
 
   public void setRoutes(List<RouteBean> routes) {
     this.routes = routes;
+  }
+
+  public EAccessibility getWheelchairBoarding() {
+    return wheelchairBoarding;
+  }
+
+  public void setWheelchairBoarding(EAccessibility wheelchairBoarding) {
+    this.wheelchairBoarding = wheelchairBoarding;
   }
 
   /***************************************************************************

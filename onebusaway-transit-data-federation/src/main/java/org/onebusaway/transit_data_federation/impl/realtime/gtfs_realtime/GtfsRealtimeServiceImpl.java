@@ -170,9 +170,9 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
       vehiclePosition.setVehicle(vehicleDescriptor);
 
       if (record.getTimeOfLocationUpdate() != 0)
-        vehiclePosition.setTimestamp(record.getTimeOfLocationUpdate());
+        vehiclePosition.setTimestamp(record.getTimeOfLocationUpdate() / 1000);
       else
-        vehiclePosition.setTimestamp(record.getTimeOfRecord());
+        vehiclePosition.setTimestamp(record.getTimeOfRecord() / 1000);
 
       /**
        * TODO: Block? Trip?

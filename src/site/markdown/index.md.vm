@@ -32,12 +32,13 @@ into an optimized data-bundle appropriate for application development.
 
 $H$H Quick-Start
 
-Want to quickly get started with OneBusAway?  Check out the [OneBusAway Quick-Start Bundles](../../onebusaway-quickstart/current/).
+Want to quickly get started with OneBusAway?  Check out the [Quick-Start Guide](guides/quickstart-guide.html).
 
 $H$H Guides
 
 There are a number of guides to help get you started with installing, configuring, and running OneBusAway:
 
+* [Quick-Start Guide](guides/quickstart-guide.html)
 * [Installation Guide](guides/installation-guide.html)
 * [Real-Time Configuration Guide](guides/realtime-configuration-guide.html)
 

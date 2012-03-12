@@ -1,0 +1,33 @@
+Usage:
+  (no args)                            Run a GUI-based wizard to configure transit data bundle and run your webapp							
+  -build [opts] gtfs.zip bundle        Build a transit data bundle, necessary to power the webapp      
+  -webapp [opts] bundle                Start the webapp, powered by the transit data bundle
+  -help                                Show this message.
+
+Running OneBusAway consists of two steps:
+
+ 1) Building a transit data bundle, combining raw transit data into optimized data structures for serving.
+ 2) Running the webapp, hosting the transit data stored in the bundle.
+
+By default, if you run the quickstart with no arguments, it starts a GUI wizard that walks you through these two steps
+with only the most basic configuration.
+
+You can also run these steps from the command-line.  In the simplest case, you need a GTFS file, and a directory to
+store your transit data bundle:
+
+ % java -Xmx1G -server -jar onebusaway-quickstart.war -build path/to/your/gtfs.zip path/to/your/bundle
+ % java -Xmx1G -server -jar onebusaway-quickstart.war -webapp path/to/your/bundle
+
+Each phase (-build, -webappp) has specific options as well.  You can see all the options with the following commands:
+
+ % java -jar onebusaway-quickstart.war -build -help
+ % java -jar onebusaway-quickstart.war -webapp -help
+
+If you aren't comfortable with the command-line, you can also run a GUI-based wizard to walk you through the various
+configuration steps and get you up and running.
+
+ % java -jar onebusaway-quickstart.war -gui
+ 
+For more details, check out the full documentation on-line at:
+
+  http://developer.onebusaway.org/modules/onebusaway-quickstart/${project.version}/index.html

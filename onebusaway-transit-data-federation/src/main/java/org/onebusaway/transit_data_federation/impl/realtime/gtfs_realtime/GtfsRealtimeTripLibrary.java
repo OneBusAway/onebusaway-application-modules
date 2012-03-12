@@ -330,7 +330,7 @@ class GtfsRealtimeTripLibrary {
           }
 
           if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.timestamp)) {
-            best.timestamp = tripUpdate.getExtension(GtfsRealtimeOneBusAway.timestamp);
+            best.timestamp = tripUpdate.getExtension(GtfsRealtimeOneBusAway.timestamp) * 1000;
           }
 
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {

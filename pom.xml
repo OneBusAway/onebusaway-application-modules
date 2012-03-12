@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
@@ -8,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.4-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -20,9 +19,9 @@
     <struts-version>2.1.8.1</struts-version>
     <gwt-version>2.4.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
-    <csv-entities-version>1.0.3-SNAPSHOT</csv-entities-version>
-    <gtfs-version>1.2.7-SNAPSHOT</gtfs-version>
-    <onebusaway-siri-version>1.0.2</onebusaway-siri-version>
+    <csv-entities-version>1.0.3</csv-entities-version>
+    <gtfs-version>1.2.6</gtfs-version>
+    <onebusaway-siri-version>1.0.4</onebusaway-siri-version>
     <opentripplanner-version>0.4.1</opentripplanner-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
     <!--  These properties are primarily used in configuring joint integration tests -->
@@ -78,6 +77,7 @@
     <module>onebusaway-phone</module>
     <module>onebusaway-phone-webapp</module>
     <module>onebusaway-presentation</module>
+    <module>onebusaway-quickstart</module>
     <module>onebusaway-sms-webapp</module>
     <module>onebusaway-realtime-api</module>
     <module>onebusaway-transit-data</module>
@@ -289,6 +289,17 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-maps</artifactId>
+        <version>1.1.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt-search</artifactId>
+        <version>1.1.0</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
         <version>1.5.6</version>
@@ -333,25 +344,6 @@
           <configuration>
             <lifecycleMappingMetadata>
               <pluginExecutions>
-                <!--
-                  We include the gwt-maven-plugin in the Eclipse execute set since it copy resources that are
-                  needed as part of the build process.
-                -->
-<!--                 <pluginExecution> -->
-<!--                   <pluginExecutionFilter> -->
-<!--                     <groupId>org.codehaus.mojo</groupId> -->
-<!--                     <artifactId>gwt-maven-plugin</artifactId> -->
-<!--                     <versionRange>[2.4.0,)</versionRange> -->
-<!--                     <goals> -->
-<!--                       <goal>resources</goal> -->
-<!--                       <goal>compile</goal> -->
-<!--                       <goal>i18n</goal> -->
-<!--                     </goals> -->
-<!--                   </pluginExecutionFilter> -->
-<!--                   <action> -->
-<!--                     <execute /> -->
-<!--                   </action> -->
-<!--                 </pluginExecution> -->
                 <pluginExecution>
                   <pluginExecutionFilter>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -365,19 +357,6 @@
                     <execute />
                   </action>
                 </pluginExecution>
-<!--                 <pluginExecution> -->
-<!--                   <pluginExecutionFilter> -->
-<!--                     <groupId>org.apache.maven.plugins</groupId> -->
-<!--                     <artifactId>maven-war-plugin</artifactId> -->
-<!--                     <versionRange>[2.1.1,)</versionRange> -->
-<!--                     <goals> -->
-<!--                       <goal>war</goal> -->
-<!--                     </goals> -->
-<!--                   </pluginExecutionFilter> -->
-<!--                   <action> -->
-<!--                     <execute /> -->
-<!--                   </action> -->
-<!--                 </pluginExecution> -->
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
@@ -430,7 +409,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>gwt-maven-plugin</artifactId>
-          <version>2.4.0</version>
+          <version>2.4.0-1-oba</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -461,23 +440,34 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-javadoc-plugin</artifactId>
+              <configuration>
+                <!--
+                  bdferris: I ran into an issue where the javadoc process crashed with the following exception:
+                  java.lang.ClassCastException:
+                    com.sun.tools.javadoc.ClassDocImpl cannot be cast to com.sun.javadoc.AnnotationTypeDoc
+                  After some debugging, this turned out to be because we had class defined in the com.google.gwt.user.client.ui
+                  package, which in turn caused that package to be included in the javadoc build, which in turn caused
+                  a GWT annotation class to be examined in the Javadoc process, which in turn caused javadoc to crash
+                  because of a bug in the javadoc application:
+                    http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6442982
+                  Thus, we exclude this package to avoid the bug.
+                   -->
+                <excludePackageNames>com.google.gwt.user.client.ui</excludePackageNames>
+              </configuration>
             </plugin>
           </reportPlugins>
         </configuration>
       </plugin>
-      <!-- By default, we use the gwt-maven-plugin to detect any GWT modules and copy the .java source files as resources 
-        into the compiled output -->
-<!--       <plugin> -->
-<!--         <groupId>org.codehaus.mojo</groupId> -->
-<!--         <artifactId>gwt-maven-plugin</artifactId> -->
-<!--         <executions> -->
-<!--           <execution> -->
-<!--             <goals> -->
-<!--               <goal>resources</goal> -->
-<!--             </goals> -->
-<!--           </execution> -->
-<!--         </executions> -->
-<!--       </plugin> -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <!--
+            See discusson above.  We need this here as well for calls to javadoc:javadoc.
+          -->
+          <excludePackageNames>com.google.gwt.user.client.ui</excludePackageNames>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>com.mycila.maven-license-plugin</groupId>
         <artifactId>maven-license-plugin</artifactId>

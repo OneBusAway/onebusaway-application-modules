@@ -388,11 +388,14 @@ public class DistanceAlongShapeLibrary {
       _log.error("We were attempting to compute the distance along a particular trip for each stop time of that "
           + "trip by snapping them to the shape for that trip.  However, we could not find an assignment for each "
           + "stop time of the trip, which usually indicates that there is something wrong with the underlying "
-          + "shape data.");
+          + "shape data.  For more information on errors of this kind, see:\n"
+          + "  https://github.com/OneBusAway/onebusaway-application-modules/wiki/Stop-to-Shape-Matching");
     } else {
       _log.error("We were attempting to compute the distance along a particular trip for each stop time of that "
           + "trip by snapping them to the shape for that trip.  However, we found WAY TOO MANY potential "
-          + "assignments, which usually indicates that there is something wrong with the underlying shape data.");
+          + "assignments, which usually indicates that there is something wrong with the underlying shape data.  "
+          + "For more information on errors of this kind, see:\n"
+          + "  https://github.com/OneBusAway/onebusaway-application-modules/wiki/Stop-to-Shape-Matching");
     }
 
     StopTimeEntryImpl first = stopTimes.get(0);
@@ -426,7 +429,11 @@ public class DistanceAlongShapeLibrary {
     StopTimeEntryImpl first = stopTimes.get(0);
     StopTimeEntryImpl last = stopTimes.get(stopTimes.size() - 1);
 
-    _log.error("We were attempting to compute the distance along a particular trip for each stop time of that trip by snapping them to the shape for that trip.  However, we could not find an assignment for each stop time where the distance traveled along the shape for each stop time was strictly increasing (aka a stop time seemed to travel backwards)");
+    _log.error("We were attempting to compute the distance along a particular trip for each stop time of that trip by "
+        + "snapping them to the shape for that trip.  However, we could not find an assignment for each stop time "
+        + "where the distance traveled along the shape for each stop time was strictly increasing (aka a stop time "
+        + "seemed to travel backwards).  For more information on errors of this kind, see:\n"
+        + "  https://github.com/OneBusAway/onebusaway-application-modules/wiki/Stop-to-Shape-Matching");
 
     TripEntryImpl trip = first.getTrip();
     _log.error("error constructing stop-time distances along shape for trip="
@@ -437,8 +444,8 @@ public class DistanceAlongShapeLibrary {
     int index = 0;
 
     b.append("# potential assignments:\n");
-    b.append("# index stopId stopLat stopLon\n");
-    b.append("#   distanceAlongShapeA locationOnShapeLatA locationOnShapeLonA shapePointIndexA\n");
+    b.append("# stopLat stopLon stopId\n");
+    b.append("#   locationOnShapeLat locationOnShapeLon distanceAlongShape distanceFromShape shapePointIndex\n");
     b.append("#   ...\n");
 
     double prevMaxDistanceAlongShape = Double.NEGATIVE_INFINITY;

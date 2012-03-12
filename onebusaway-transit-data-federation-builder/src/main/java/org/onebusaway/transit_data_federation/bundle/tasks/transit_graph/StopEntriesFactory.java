@@ -23,6 +23,7 @@ import java.util.Map;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data.model.EAccessibility;
 import org.onebusaway.transit_data_federation.impl.transit_graph.AgencyEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
@@ -65,6 +66,7 @@ public class StopEntriesFactory {
 
       StopEntryImpl stopEntry = new StopEntryImpl(stop.getId(), stop.getLat(),
           stop.getLon());
+      stopEntry.setWheelchairBoarding(getWheelchairBoardingAccessibilityForStop(stop));
       graph.putStopEntry(stopEntry);
       stopEntriesByAgencyId.get(stop.getId().getAgencyId()).add(stopEntry);
     }
@@ -78,5 +80,16 @@ public class StopEntriesFactory {
     }
 
     graph.refreshStopMapping();
+  }
+
+  private EAccessibility getWheelchairBoardingAccessibilityForStop(Stop stop) {
+    switch (stop.getWheelchairBoarding()) {
+      case 1:
+        return EAccessibility.ACCESSIBLE;
+      case 2:
+        return EAccessibility.NOT_ACCESSIBLE;
+      default:
+        return EAccessibility.UNKNOWN;
+    }
   }
 }
