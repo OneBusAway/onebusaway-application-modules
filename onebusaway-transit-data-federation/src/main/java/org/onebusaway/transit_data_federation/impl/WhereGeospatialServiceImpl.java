@@ -16,28 +16,34 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.services.beans.GeospatialBeanService;
 import org.onebusaway.transit_data_federation.services.beans.RouteBeanService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 @Component
 class WhereGeospatialServiceImpl implements GeospatialBeanService {
   
+  private static Logger _log = LoggerFactory.getLogger(WhereGeospatialServiceImpl.class);
+
   private TransitGraphDao _transitGraphDao;
 
   private STRtree _tree;
@@ -47,7 +53,9 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
     _transitGraphDao = transitGraphDao;
   }
 
+
   @PostConstruct
+  @Refreshable(dependsOn = RefreshableResources.STOP_GEOSPATIAL_INDEX)
   public void initialize() {
 
     List<StopEntry> stops = _transitGraphDao.getAllStops();
@@ -76,9 +84,11 @@ class WhereGeospatialServiceImpl implements GeospatialBeanService {
   @Override
   public List<AgencyAndId> getStopsByBounds(CoordinateBounds bounds) {
     
-    if( _tree == null)
+    if( _tree == null) {
+      _log.warn("Stop tree is empty!");
       return Collections.emptyList();
-
+    }
+    
     double xMin = bounds.getMinLon();
     double yMin = bounds.getMinLat();
     double xMax = bounds.getMaxLon();

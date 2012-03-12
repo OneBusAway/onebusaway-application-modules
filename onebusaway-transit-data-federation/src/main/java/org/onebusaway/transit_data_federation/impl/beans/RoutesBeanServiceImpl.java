@@ -16,19 +16,8 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.lucene.queryParser.ParseException;
 import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.exceptions.InvalidArgumentServiceException;
 import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.exceptions.ServiceException;
@@ -39,6 +28,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.model.SearchResult;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.RouteCollectionSearchService;
@@ -51,21 +41,32 @@ import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
+import org.apache.lucene.queryParser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+
 @Component
 class RoutesBeanServiceImpl implements RoutesBeanService {
 
   private static Logger _log = LoggerFactory.getLogger(RoutesBeanServiceImpl.class);
-
-  private static final double MIN_SEARCH_SCORE = 1.0;
 
   @Autowired
   private RouteService _routeService;
@@ -87,9 +88,13 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
   private Map<AgencyAndId, STRtree> _stopTreesByRouteId = new HashMap<AgencyAndId, STRtree>();
 
+  @Refreshable(dependsOn = { 
+      RefreshableResources.ROUTE_COLLECTIONS_DATA, 
+      RefreshableResources.TRANSIT_GRAPH })
   @PostConstruct
   public void setup() {
-
+    _stopTreesByRouteId.clear();
+    
     for (StopEntry stop : _graphDao.getAllStops()) {
       Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
       for (AgencyAndId routeId : routeIds) {
@@ -104,7 +109,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
         tree.insert(env, routeId);
       }
     }
-
+    
     for (STRtree tree : _stopTreesByRouteId.values())
       tree.build();
   }
@@ -205,7 +210,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
     try {
       return _searchService.searchForRoutesByName(query.getQuery(),
-          query.getMaxCount() + 1, MIN_SEARCH_SCORE);
+          query.getMaxCount() + 1, query.getMinScoreToKeep());
     } catch (IOException e) {
       throw new ServiceException();
     } catch (ParseException e) {

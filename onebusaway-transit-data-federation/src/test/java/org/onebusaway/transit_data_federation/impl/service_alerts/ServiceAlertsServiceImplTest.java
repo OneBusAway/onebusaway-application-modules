@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
