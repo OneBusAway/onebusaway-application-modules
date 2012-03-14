@@ -437,7 +437,7 @@ public class SiriService {
    * Affects
    ****/
 
-  private void handleAffects(PtSituationElementStructure ptSituation,
+  protected void handleAffects(PtSituationElementStructure ptSituation,
       ServiceAlert.Builder serviceAlert) {
 
     AffectsScopeStructure affectsStructure = ptSituation.getAffects();

@@ -56,6 +56,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.RouteIdAndDirection;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
 
 @Component
 class ServiceAlertsServiceImpl implements ServiceAlertsService {
@@ -105,7 +110,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   @PostConstruct
   public void start() {
-    loadServieAlerts();
+    loadServiceAlerts();
   }
 
   @PreDestroy
@@ -136,7 +141,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     saveServiceAlerts();
     return serviceAlert;
   }
-  
+
   @Override
   public synchronized void removeServiceAlert(AgencyAndId serviceAlertId) {
     removeServiceAlerts(Arrays.asList(serviceAlertId));
@@ -187,7 +192,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
     getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, agencyId,
         serviceAlertIds);
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds, time);
   }
 
   @Override
@@ -198,7 +203,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, stopId.getAgencyId(),
         serviceAlertIds);
     getServiceAlertIdsForKey(_serviceAlertIdsByStopId, stopId, serviceAlertIds);
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds, time);
   }
 
   @Override
@@ -265,7 +270,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     getServiceAlertIdsForKey(_serviceAlertIdsByTripAndStopId,
         tripAndStopCallRef, serviceAlertIds);
 
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds, time);
   }
 
   @Override
@@ -287,6 +292,43 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
         lineAndDirectionRef, serviceAlertIds);
     getServiceAlertIdsForKey(_serviceAlertIdsByTripId, trip.getId(),
         serviceAlertIds);
+    return getServiceAlertIdsAsObjects(serviceAlertIds, time);
+  }
+
+  @Override
+  public List<ServiceAlert> getServiceAlerts(SituationQueryBean query) {
+    Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
+
+    // Note we are treating the query's agency ID as that of what the service
+    // alert affects, not the alert's agency ID.
+    if (!StringUtils.isEmpty(query.getAgencyId())) {
+      getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, query.getAgencyId(),
+          serviceAlertIds);
+    }
+
+    if (!CollectionUtils.isEmpty(query.getStopIds())) {
+      for (String stopId : query.getStopIds()) {
+        AgencyAndId id = ServiceAlertLibrary.agencyAndId(ServiceAlertLibrary.id(AgencyAndId.convertFromString(stopId)));
+        getServiceAlertIdsForKey(_serviceAlertIdsByStopId, id,
+            serviceAlertIds);
+      }
+    }
+
+    if (!CollectionUtils.isEmpty(query.getRoutes())) {
+      for (RouteIdAndDirection route: query.getRoutes()) {
+        
+        if (route.direction != null) {
+          RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(
+              AgencyAndId.convertFromString(route.routeId), route.direction);
+          getServiceAlertIdsForKey(_serviceAlertIdsByRouteAndDirectionId,
+              lineAndDirectionRef, serviceAlertIds);
+        } else {
+          getServiceAlertIdsForKey(_serviceAlertIdsByRouteId, AgencyAndId.convertFromString(route.routeId),
+              serviceAlertIds);
+        }
+      }
+    }
+
     return getServiceAlertIdsAsObjects(serviceAlertIds);
   }
 
@@ -331,6 +373,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
         _serviceAlertIdsByTripId, AffectsTripKeyFactory.INSTANCE);
     updateReferences(existingServiceAlert, serviceAlert,
         _serviceAlertIdsByTripAndStopId, AffectsTripAndStopKeyFactory.INSTANCE);
+
   }
 
   private <T> void updateReferences(ServiceAlert existingServiceAlert,
@@ -380,24 +423,42 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private List<ServiceAlert> getServiceAlertIdsAsObjects(
       Collection<AgencyAndId> serviceAlertIds) {
+    return getServiceAlertIdsAsObjects(serviceAlertIds, -1);
+  }
+
+  private List<ServiceAlert> getServiceAlertIdsAsObjects(
+      Collection<AgencyAndId> serviceAlertIds, long time) {
     if (serviceAlertIds == null || serviceAlertIds.isEmpty())
       return Collections.emptyList();
     List<ServiceAlert> serviceAlerts = new ArrayList<ServiceAlert>(
         serviceAlertIds.size());
     for (AgencyAndId serviceAlertId : serviceAlertIds) {
       ServiceAlert serviceAlert = _serviceAlerts.get(serviceAlertId);
-      if (serviceAlert != null)
+      if (serviceAlert != null && filterByTime(serviceAlert, time))
         serviceAlerts.add(serviceAlert);
     }
     return serviceAlerts;
+  }
+
+  private boolean filterByTime(ServiceAlert serviceAlert, long time) {
+    if (time == -1 || serviceAlert.getPublicationWindowList().size() == 0)
+      return true;
+    for (TimeRange publicationWindow : serviceAlert.getPublicationWindowList()) {
+      if ((!publicationWindow.hasStart() || publicationWindow.getStart() <= time)
+          && (!publicationWindow.hasEnd() || publicationWindow.getEnd() >= time)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /****
    * Serialization
    ****/
 
-  private synchronized void loadServieAlerts() {
+  private synchronized void loadServiceAlerts() {
 
+    _log.info("Loading service alerts from bundle");
     File path = getServiceAlertsPath();
 
     if (path == null || !path.exists())

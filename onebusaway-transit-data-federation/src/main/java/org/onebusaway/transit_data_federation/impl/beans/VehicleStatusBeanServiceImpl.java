@@ -15,9 +15,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -40,8 +37,12 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 import org.onebusaway.transit_data_federation.services.realtime.BlockLocationService;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatus;
 import org.onebusaway.transit_data_federation.services.realtime.VehicleStatusService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
@@ -77,6 +78,12 @@ class VehicleStatusBeanServiceImpl implements VehicleStatusBeanService {
   public void setVehicleLocationListener(
       VehicleLocationListener vehicleLocationListener) {
     _vehicleLocationListener = vehicleLocationListener;
+  }
+
+  @Autowired
+  public void setBlockLocationService(
+      BlockLocationService blockLocationService) {
+      _blockLocationService = blockLocationService;
   }
 
   public VehicleStatusBean getVehicleForId(AgencyAndId vehicleId, long time) {

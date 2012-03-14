@@ -34,6 +34,7 @@ import net.sf.ehcache.Element;
 
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.cache.Cacheable;
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.calendar.LocalizedServiceId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.model.calendar.ServiceInterval;
@@ -90,6 +91,7 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
   }
 
   @PostConstruct
+  @Refreshable(dependsOn = RefreshableResources.CALENDAR_DATA)
   public void start() {
     cacheServiceDatesForServiceIds();
   }
@@ -404,6 +406,12 @@ public class ExtendedCalendarServiceImpl implements ExtendedCalendarService {
 
   private void cacheServiceDatesForServiceIds() {
 
+    if(_serviceDateRangeCache != null) {
+      _serviceDateRangeCache.removeAll();
+    }
+    
+    _serviceDatesByServiceIds.clear();
+    
     Set<ServiceIdActivation> allServiceIds = determineAllServiceIds();
 
     Date lowerBounds = null;
