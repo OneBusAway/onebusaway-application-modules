@@ -4,8 +4,17 @@
 
 $H$H ${currentVersion}
 
-* Fix problem with quickstart bundle.
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
+
+$H$H ${currentVersion}
+
+* Merge some changes from the OneBusAway NYC branch.
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.4/
+
+$H$H 1.0.3
+
+* Fix problem with quickstart bundle.
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.3/
 
 $H$H 1.0.2
 
