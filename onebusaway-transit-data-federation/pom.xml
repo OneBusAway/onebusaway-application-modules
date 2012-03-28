@@ -39,6 +39,7 @@
       <groupId>org.opentripplanner</groupId>
       <artifactId>opentripplanner-routing</artifactId>
       <version>${opentripplanner-version}</version>
+      <!-- See similar list in onebusaway-transit-data-federation-builder/pom.xml -->
       <exclusions>
         <exclusion>
           <groupId>hsqldb</groupId>
@@ -47,6 +48,18 @@
         <exclusion>
           <groupId>mysql</groupId>
           <artifactId>mysql-connector-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.xerial</groupId>
+          <artifactId>sqlite-jdbc</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+        </exclusion>        
+        <exclusion>
+          <groupId>org.geotools</groupId>
+          <artifactId>gt-geotiff</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
