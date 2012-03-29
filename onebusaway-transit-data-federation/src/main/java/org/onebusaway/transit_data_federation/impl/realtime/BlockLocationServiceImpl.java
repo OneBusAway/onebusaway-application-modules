@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 <inf71391@gmail.com>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +108,20 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   private int _blockInstanceMatchingWindow = 60 * 60 * 1000;
 
+  /**
+   * When true, we will interpolate the current location of a transit vehicle
+   * based on estimated schedule deviation information. If false, we will use
+   * the last known location of the bus as the position.
+   */
+  private boolean _locationInterpolation = true;
+
+  /**
+   * When true, we attempt to interpolate the current location of the vehicle
+   * given the most recent distance-along-block update. This parameter has been
+   * deprecated in favor of the more-general {@link #_locationInterpolation}
+   * parameter.
+   */
+  @Deprecated
   private boolean _distanceAlongBlockLocationInterpolation = false;
 
   /**
@@ -201,8 +216,25 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   /**
-   * @param distanceAlongBlockLocationInterpolation
+   * When true, we will interpolate the current location of a transit vehicle
+   * based on the last know location of the bus and the schedule deviation of
+   * the bus at the time. If false, we will use the last known location of the
+   * bus as the current location.
+   * 
+   * @param locationInterpolation
    */
+  public void setLocationInterpolation(boolean locationInterpolation) {
+    _locationInterpolation = locationInterpolation;
+  }
+
+  /**
+   * @param distanceAlongBlockLocationInterpolation
+   * 
+   * @deprecated in favor of the more general
+   *             {@link #setLocationInterpolation(boolean)} configuration
+   *             method.
+   */
+  @Deprecated
   public void setDistanceAlongBlockLocationInterpolation(
       boolean distanceAlongBlockLocationInterpolation) {
     _distanceAlongBlockLocationInterpolation = distanceAlongBlockLocationInterpolation;
@@ -646,6 +678,15 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     int scheduledTime = (int) ((targetTime - serviceDate) / 1000);
 
+    /**
+     * If location interpolation has been turned off, then we assume the vehicle
+     * is at its last known location, so we return that if it's been stored with
+     * the cache element.
+     */
+    if (!_locationInterpolation && scheduledBlockLocation != null) {
+      return scheduledBlockLocation;
+    }
+
     if (record.isScheduleDeviationSet()) {
 
       /**
@@ -670,7 +711,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     if (record.isDistanceAlongBlockSet()) {
 
-      if (_distanceAlongBlockLocationInterpolation
+      if ((_locationInterpolation || _distanceAlongBlockLocationInterpolation)
           && scheduledBlockLocation != null
           && scheduledBlockLocation.getDistanceAlongBlock() <= record.getDistanceAlongBlock()) {
 
