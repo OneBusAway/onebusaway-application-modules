@@ -128,12 +128,6 @@
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-wiki-integration-xwiki-macros</artifactId>
       <version>${wiki_integration_version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.python</groupId>
-          <artifactId>jython-standalone</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
