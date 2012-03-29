@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +45,12 @@ public class VehicleLocationCacheElement {
     return _record;
   }
 
+  /**
+   * The effective scheduled block location of the transit vehicle at the time
+   * of the vehicle location record.
+   * 
+   * @return the effective location, or null if unknown.
+   */
   public ScheduledBlockLocation getScheduledBlockLocation() {
     return _scheduledBlockLocation;
   }
