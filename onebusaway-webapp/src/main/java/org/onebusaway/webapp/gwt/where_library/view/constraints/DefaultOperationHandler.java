@@ -65,9 +65,9 @@ public class DefaultOperationHandler implements OperationHandler {
       OBAConfig config = OBAConfig.getConfig();
 
       boolean noDefaultServiceAera = !config.hasDefaultServiceArea();
-      boolean noUserLocation = !user.hasDefaultLocation()
+      boolean noUserLocation = user == null || !user.hasDefaultLocation()
           || user.getDefaultLocationName() == null;
-      boolean ask = user.isRememberPreferencesEnabled()
+      boolean ask = user != null && user.isRememberPreferencesEnabled()
           && askForDefaultSearchLocation;
 
       if (noDefaultServiceAera && noUserLocation && ask) {
