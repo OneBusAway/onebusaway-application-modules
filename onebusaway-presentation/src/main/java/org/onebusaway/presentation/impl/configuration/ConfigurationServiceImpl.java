@@ -39,12 +39,12 @@ class ConfigurationServiceImpl implements ConfigurationService {
   @Override
   @Cacheable
   public Map<String, Object> getConfiguration(
-      @CacheableArgument(cacheRefreshIndicator = true) boolean forceRefresh) {
+      @CacheableArgument(cacheRefreshIndicator = true) boolean forceRefresh, String contextPath) {
 
     Map<String, Object> config = new HashMap<String, Object>();
 
     for (ConfigurationSource source : _sources) {
-      Map<String, Object> sourceConfig = source.getConfiguration();
+      Map<String, Object> sourceConfig = source.getConfiguration(contextPath);
       config.putAll(sourceConfig);
     }
 

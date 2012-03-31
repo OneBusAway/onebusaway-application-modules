@@ -18,6 +18,9 @@ package org.onebusaway.presentation.impl.configuration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 import org.onebusaway.presentation.services.configuration.ConfigurationService;
@@ -52,8 +55,9 @@ public class ConfigAction extends ActionSupport {
   }
 
   @Override
-  public String execute() throws Exception {
-    _model = _configurationService.getConfiguration(_forceRefresh);
+  public String execute() throws Exception {    
+    HttpServletRequest request = ServletActionContext.getRequest();    
+    _model = _configurationService.getConfiguration(_forceRefresh, request.getContextPath());
     return SUCCESS;
   }
 }

@@ -22,7 +22,6 @@ import java.util.Map;
 import javax.servlet.ServletContext;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.presentation.impl.ServletLibrary;
 import org.onebusaway.presentation.services.ServiceAreaService;
 import org.onebusaway.presentation.services.configuration.ConfigurationSource;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -55,12 +54,11 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
   }
 
   @Override
-  public Map<String, Object> getConfiguration() {
+  public Map<String, Object> getConfiguration(String contextPath) {
 
     Map<String, Object> config = new HashMap<String, Object>();
     config.put("apiKey", "web");
 
-    String contextPath = ServletLibrary.getContextPath(_servletContext);
     config.put("baseUrl", contextPath);
     config.put("apiUrl", contextPath + "/api");
 

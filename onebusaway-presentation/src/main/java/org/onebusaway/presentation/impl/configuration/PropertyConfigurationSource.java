@@ -31,7 +31,7 @@ public class PropertyConfigurationSource implements ConfigurationSource {
   }
 
   @Override
-  public Map<String, Object> getConfiguration() {
+  public Map<String, Object> getConfiguration(String contextPath) {
 
     if (_properties == null || _properties.isEmpty())
       return Collections.emptyMap();
