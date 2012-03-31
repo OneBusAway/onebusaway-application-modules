@@ -29,7 +29,7 @@
   <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard.css')}"/>
   <style type="text/css">
 div.home-header {
-    background: url("<s:url namespace="/p" action="Index@Logo.png!attachment"/>") no-repeat scroll 100% bottom transparent;
+    background: url("<s:url namespace="/p" action="Index@Logo.png" method="attachment"/>") no-repeat scroll 100% bottom transparent;
 }
   </style>
   <link rel="icon" type="image/png" href="${oba:resource('/images/Bus.png')}"/>
