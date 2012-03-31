@@ -15,15 +15,25 @@
  */
 package org.onebusaway.quickstart.bootstrap;
 
+import java.io.IOException;
 import java.net.URL;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Parser;
 import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.bio.SocketConnector;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.ContextHandler.Context;
+import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.onebusaway.quickstart.BootstrapCommon;
 import org.onebusaway.quickstart.WebappCommon;
@@ -74,14 +84,17 @@ public class WebappBootstrapMain {
     server.setConnectors(new Connector[] {connector});
 
     WebAppContext context = new WebAppContext();
-    context.setServer(server);
     context.setContextPath("/");
-    context.setWelcomeFiles(new String[] {"index.action"});
+    // context.setWelcomeFiles(new String[] {"index.action"});
     context.setWar(warUrl.toExternalForm());
     // We store the command line object as a webapp context attribute so it can
     // be used by the context loader to inject additional beans as needed
     context.setAttribute(WebappCommon.COMMAND_LINE_CONTEXT_ATTRIBUTE, cli);
-    server.setHandler(context);
+
+    HandlerList handlers = new HandlerList();
+    handlers.setHandlers(new Handler[] {new WelcomeFileHandler(context), context});
+
+    server.setHandler(handlers);
 
     /**
      * We specify a Jetty override descriptor to inject additional definitions
@@ -148,5 +161,37 @@ public class WebappBootstrapMain {
     options.addOption(WebappCommon.ARG_GTFS_REALTIME_ALERTS_URL, true, "");
     options.addOption(WebappCommon.ARG_GTFS_REALTIME_REFRESH_INTERVAL, true, "");
     return options;
+  }
+
+  private static class WelcomeFileHandler extends AbstractHandler {
+
+    private final WebAppContext _context;
+
+    public WelcomeFileHandler(WebAppContext context) {
+      _context = context;
+    }
+
+    @Override
+    public void handle(String target, Request baseRequest,
+        HttpServletRequest request, HttpServletResponse response)
+        throws IOException, ServletException {
+
+      String[] welcomeFiles = _context.getWelcomeFiles();
+
+      if (welcomeFiles != null && target.endsWith("/")) {
+        for (String welcomeFile : welcomeFiles) {
+          String path = target;
+          path += welcomeFile;
+          Context context = _context.getServletContext();
+          URL resource = context.getResource(path);
+          if (resource != null) {
+            target = path;
+            baseRequest.setPathInfo(target);
+            _context.handle(target, baseRequest, request, response);
+            return;
+          }
+        }
+      }
+    }
   }
 }
