@@ -42,11 +42,6 @@ We provide a number of tools to make it easier to use public transit.
 
 [[image:Tool-MobileWeb.png>>Tools_MobileWeb]] Real-time arrival information optimized for <a href="../where/iphone/">mobile web</a> browsers and <a href="../where/text/">text-only</a> web browsers.
 </td>
-<td>
-=== Explore ===
-
-[[image:Tool-Explore.png>>../explore/onebusaway/]] The <a href="../explore/onebusaway/">Explore Tool</a> lets you search for nearby restaurants, businesses, parks, and other amenities that are easily accessible by public transit. 
-</td>
 </tr>
 </table>
 {{/html}}
