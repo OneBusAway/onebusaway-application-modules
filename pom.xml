@@ -469,7 +469,7 @@
                     <docletArtifact>
                       <groupId>org.onebusaway</groupId>
                       <artifactId>onebusaway-configuration-doclet</artifactId>
-                      <version>1.0.0</version>
+                      <version>1.0.1-SNAPSHOT</version>
                     </docletArtifact>
                     <useStandardDocletOptions>false</useStandardDocletOptions>
                     <additionalparam>-d ${project.build.directory}/site/oba-configs -annotationType org.onebusaway.container.ConfigurationParameter</additionalparam>
