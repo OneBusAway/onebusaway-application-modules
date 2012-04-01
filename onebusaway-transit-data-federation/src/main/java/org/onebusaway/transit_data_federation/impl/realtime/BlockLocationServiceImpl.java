@@ -37,6 +37,7 @@ import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
 import org.onebusaway.collections.Range;
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
@@ -201,6 +202,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * 
    * @param windowSize in seconds
    */
+  @ConfigurationParameter
   public void setBlockLocationRecordCacheWindowSize(int windowSize) {
     _blockLocationRecordCacheWindowSize = windowSize;
   }
@@ -211,6 +213,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * 
    * @param persistTripTimePredictions
    */
+  @ConfigurationParameter
   public void setPersistBlockLocationRecords(boolean persistBlockLocationRecords) {
     _persistBlockLocationRecords = persistBlockLocationRecords;
   }
@@ -223,6 +226,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * 
    * @param locationInterpolation
    */
+  @ConfigurationParameter
   public void setLocationInterpolation(boolean locationInterpolation) {
     _locationInterpolation = locationInterpolation;
   }

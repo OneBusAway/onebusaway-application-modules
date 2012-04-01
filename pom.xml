@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
@@ -454,6 +455,33 @@
                    -->
                 <excludePackageNames>com.google.gwt.user.client.ui</excludePackageNames>
               </configuration>
+              <reportSets>
+                <reportSet>
+                  <id>html</id>
+                  <reports>
+                    <report>javadoc</report>
+                  </reports>
+                </reportSet>
+                <reportSet>
+                  <id>doccheck</id>
+                  <configuration>
+                    <doclet>org.onebusaway.configuration_doclet.ConfigurationDoclet</doclet>
+                    <docletArtifact>
+                      <groupId>org.onebusaway</groupId>
+                      <artifactId>onebusaway-configuration-doclet</artifactId>
+                      <version>1.0.0</version>
+                    </docletArtifact>
+                    <useStandardDocletOptions>false</useStandardDocletOptions>
+                    <additionalparam>-d ${project.build.directory}/site/oba-configs -annotationType org.onebusaway.container.ConfigurationParameter</additionalparam>
+                    <destDir>oba-configs</destDir>
+                    <name>OBA Configs</name>
+                    <description>OBA Configuration documentation.</description>
+                  </configuration>
+                  <reports>
+                    <report>aggregate</report>
+                  </reports>
+                </reportSet>
+              </reportSets>
             </plugin>
           </reportPlugins>
         </configuration>

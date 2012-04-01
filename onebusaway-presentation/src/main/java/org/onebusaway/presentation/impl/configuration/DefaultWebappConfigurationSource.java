@@ -48,8 +48,11 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
   }
 
   /**
+   * The default Google Maps API key can only be used externally for the
+   * onebusaway.org domain. To use OneBusAway from another domain, you must
+   * specify your own Google Maps API key.
    * 
-   * @param googleMapsApiKey the Google Maps API access key
+   * @param googleMapsApiKey your Google Maps API access key
    */
   @ConfigurationParameter
   public void setGoogleMapsApiKey(String googleMapsApiKey) {

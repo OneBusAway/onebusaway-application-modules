@@ -60,6 +60,31 @@ and can be used to define beans and other resources that determine the configura
 The webapps look for `data-sources.xml` in the `WEB-INF/classes` directory of each webapp by default.  You can add the
 file to the war file directly or copy it into the exploded war directory structure.
 
+### Spring Configuration Example
+
+OneBusAway is powered by a number of Java classes that provide different pieces of functionality.  While we try to
+provide reasonable default behavior, you may wish to tweak OneBusAway at times.  Many options can be set using a
+`PropertyOverrideConfigurer` to override specific class properties.  Here is a quick example of the config you'd add
+to your `data-sources.xml` file:
+
+~~~
+<bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+  <property name="properties">
+    <props>
+      <prop key="cacheManager.cacheManagerName">org.onebusaway.webapp.cacheManager</prop>
+      <prop key="defaultWebappConfigurationSource.googleMapsApiKey">ABC</prop>
+      ...
+    </props>
+  </property>
+</bean>
+~~~
+
+Here, each `<prop/>` entry specifies a key and a value.  The key takes the form `objectName.propertyName` where
+`objectName` is a OneBusAway object and `propertyName` is a property of that object whose value you'd like to override.
+
+For the full list of documented configuration options, check out the
+[list of configuration parameters](../oba-configs/index.html) auto-generated from the OBA source code. 
+
 ### Tomcat and an external data-sources.xml
 
 As a Tomcat tip, you can override the location of the `data-sources.xml` to point to an external file instead, which is
