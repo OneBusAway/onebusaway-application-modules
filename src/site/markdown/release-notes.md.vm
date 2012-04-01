@@ -6,7 +6,23 @@ $H$H ${currentVersion}
 
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
 
-$H$H ${currentVersion}
+$H$H 1.0.5
+
+* Better computation of agency coverage area, using the actual routes > trips > stops to compute coverage.
+* Better display of agencies on agency map, expanding map to show agency bounds in addition to agency center point.
+* Bug fixes for quick-start webapp, mostly to deal with quirks of embedded Jetty webapp container.
+* Add 404 page-not-found behavior to the root onebusaway-webapp index action, since it's called by default if another
+  action can't be found for a URL.
+* Refactor ConfigurationService to accept the webapp context-path as a parameter.  Attempting to detect the
+  context-path automatically was proving to be a bit messy under different containers.
+* Change how dynamic namespace matching works for the wiki (/p/*) action. The new name-based matching method doesn't
+  require direct access to the underlying Struts ActionProxy and also gets rid of a ton of annoying log messages when
+  running under Jetty.
+* Add a configuration parameter to disable location interpolation in the BlockLocationServiceImpl.
+* Remove a number of unused dependencies to get the size of release binaries down a bit.  
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.5/
+
+$H$H 1.0.4
 
 * Merge some changes from the OneBusAway NYC branch.
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.4/
