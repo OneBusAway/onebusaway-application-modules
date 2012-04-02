@@ -146,16 +146,29 @@ public class TripProblemReportsAction extends ActionSupport {
       SyndEntry entry = new SyndEntryImpl();
 
       StringBuilder entryTitle = new StringBuilder();
-      entryTitle.append(RoutePresenter.getNameForRoute(trip));
-      entryTitle.append(" - ");
-      entryTitle.append(trip.getTripHeadsign());
-      entryTitle.append(" - ");
-      entryTitle.append(getText("StopNum", new String[] {stop.getCode()}));
-      entryTitle.append(" - ");
-      entryTitle.append(stop.getName());
-      if (stop.getDirection() != null)
-        entryTitle.append(" - ").append(
-            getText("bound", new String[] {stop.getDirection()}));
+      if (trip == null) {
+        entryTitle.append("trip_id=");
+        entryTitle.append(report.getTripId());
+        entryTitle.append(" (?)");
+      } else {
+        entryTitle.append(RoutePresenter.getNameForRoute(trip));
+        entryTitle.append(" - ");
+        entryTitle.append(trip.getTripHeadsign());
+      }
+      if (stop == null) {
+        entryTitle.append(" - stop_id=");
+        entryTitle.append(report.getStopId());
+        entryTitle.append(" (?)");
+      } else {
+        entryTitle.append(" - ");
+        entryTitle.append(getText("StopNum", new String[] {stop.getCode()}));
+        entryTitle.append(" - ");
+        entryTitle.append(stop.getName());
+        if (stop.getDirection() != null) {
+          entryTitle.append(" - ");
+          entryTitle.append(getText("bound", new String[] {stop.getDirection()}));
+        }
+      }
 
       StringBuilder entryUrl = new StringBuilder();
       entryUrl.append(baseUrl);

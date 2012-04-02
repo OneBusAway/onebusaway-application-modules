@@ -142,13 +142,17 @@ public class StopProblemReportsAction extends ActionSupport {
       SyndEntry entry = new SyndEntryImpl();
 
       StringBuilder entryTitle = new StringBuilder();
-      entryTitle.append(getText("StopNum"));
-      entryTitle.append(stop.getCode());
-      entryTitle.append(" - ");
-      entryTitle.append(stop.getName());
-      if (stop.getDirection() != null)
-        entryTitle.append(" - ").append(stop.getDirection()).append(" ").append(
-            getText("bound"));
+      if (stop == null) {
+        entryTitle.append("stopId=");
+        entryTitle.append(report.getStopId());
+        entryTitle.append(" (?)");
+      } else {
+        entryTitle.append(getText("StopNum", Arrays.asList(stop.getCode())));
+        entryTitle.append(" - ");
+        entryTitle.append(stop.getName());
+        if (stop.getDirection() != null)
+          entryTitle.append(" - ").append(getText("bound", Arrays.asList(stop.getDirection())));
+      }
 
       StringBuilder entryUrl = new StringBuilder();
       entryUrl.append(baseUrl);

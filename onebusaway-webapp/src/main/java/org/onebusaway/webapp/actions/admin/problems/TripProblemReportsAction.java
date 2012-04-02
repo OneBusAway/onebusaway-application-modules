@@ -57,7 +57,7 @@ public class TripProblemReportsAction extends ActionSupport implements
 
   private TripProblemReportBean _model = new TripProblemReportBean();
 
-  private List<VehicleLocationRecordBean> _vehicleLocationRecords;
+  private List<VehicleLocationRecordBean> _vehicleLocationRecords = Collections.emptyList();
 
   private int _minutesBefore = 20;
 
@@ -111,16 +111,17 @@ public class TripProblemReportsAction extends ActionSupport implements
 
     TripBean trip = _model.getTrip();
 
-    VehicleLocationRecordQueryBean query = new VehicleLocationRecordQueryBean();
-    query.setServiceDate(_model.getServiceDate());
-    if (trip != null)
-      query.setBlockId(trip.getBlockId());
-    query.setVehicleId(_model.getVehicleId());
-    query.setFromTime(timeFrom);
-    query.setToTime(timeTo);
-
-    ListBean<VehicleLocationRecordBean> records = _transitDataService.getVehicleLocationRecords(query);
-    _vehicleLocationRecords = records.getList();
+    if (_model.getVehicleId() != null) {
+      VehicleLocationRecordQueryBean query = new VehicleLocationRecordQueryBean();
+      query.setServiceDate(_model.getServiceDate());
+      if (trip != null)
+        query.setBlockId(trip.getBlockId());
+      query.setVehicleId(_model.getVehicleId());
+      query.setFromTime(timeFrom);
+      query.setToTime(timeTo);
+      ListBean<VehicleLocationRecordBean> records = _transitDataService.getVehicleLocationRecords(query);
+      _vehicleLocationRecords = records.getList();
+    }
 
     _labels = _transitDataService.getAllTripProblemReportLabels();
 
@@ -148,7 +149,7 @@ public class TripProblemReportsAction extends ActionSupport implements
   public Map<String, String> getStatusValues() {
     return ResourceBundleSupport.getLocaleMap(this, ProblemReportStatus.class);
   }
-  
+
   public List<String> getLabels() {
     return _labels;
   }

@@ -63,15 +63,25 @@
             <s:param name="vehicleId" value="vehicleId"/>          
           </s:url> 
           <s:a href="%{url}">
-            <oba:routeName value="trip"/> - <s:property value="trip.tripHeadsign" />
+            <s:if test="trip != null">
+                <oba:routeName value="trip"/> - <s:property value="trip.tripHeadsign" />
+            </s:if>
+            <s:else>
+                tripId=<s:property value="tripId"/>
+            </s:else>
           </s:a>
         </td>
     </tr>
     <tr>
         <td>Stop:</td>
         <td><s:a namespace="/where/standard" action="stop">
-          <s:param name="id" value="stop.id"/>
-          <s:component template="stop-name-snippet.jspx"><s:param name="stop" value="stop"/></s:component>
+          <s:param name="id" value="stopId"/>
+          <s:if test="stop != null">
+            <s:component template="stop-name-snippet.jspx"><s:param name="stop" value="stop"/></s:component>
+          </s:if>
+          <s:else>
+            stopId=<s:property value="stopId"/>
+          </s:else>
         </s:a></td>
     </tr>
     <s:if test="stopTime != null">

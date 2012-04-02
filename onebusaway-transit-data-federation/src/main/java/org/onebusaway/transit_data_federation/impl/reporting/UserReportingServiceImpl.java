@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.collections.tuple.T2;
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
@@ -163,11 +164,11 @@ class UserReportingServiceImpl implements UserReportingService {
 
     record.setUserComment(problem.getUserComment());
 
-    if (!Double.isNaN(problem.getUserLat()))
+    if (problem.getUserLat() != null && !Double.isNaN(problem.getUserLat()))
       record.setUserLat(problem.getUserLat());
-    if (!Double.isNaN(problem.getUserLon()))
+    if (problem.getUserLon() != null && !Double.isNaN(problem.getUserLon()))
       record.setUserLon(problem.getUserLon());
-    if (!Double.isNaN(problem.getUserLocationAccuracy()))
+    if (problem.getUserLocationAccuracy() != null && !Double.isNaN(problem.getUserLocationAccuracy()))
       record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
 
     record.setUserOnVehicle(problem.isUserOnVehicle());
@@ -394,8 +395,13 @@ class UserReportingServiceImpl implements UserReportingService {
     if (record.getUserLocationAccuracy() != null)
       bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
 
-    if (stopId != null)
-      bean.setStop(_stopBeanService.getStopForId(stopId));
+    if (stopId != null) {
+      try {
+        bean.setStop(_stopBeanService.getStopForId(stopId));
+      } catch (NoSuchStopServiceException ex) {
+
+      }
+    }
 
     return bean;
   }
@@ -431,10 +437,17 @@ class UserReportingServiceImpl implements UserReportingService {
     bean.setVehicleLat(record.getVehicleLat());
     bean.setVehicleLon(record.getVehicleLon());
 
-    if (stopId != null)
-      bean.setStop(_stopBeanService.getStopForId(stopId));
-    if (tripId != null)
+    if (stopId != null) {
+      try {
+        bean.setStop(_stopBeanService.getStopForId(stopId));
+      } catch (NoSuchStopServiceException ex) {
+
+      }
+    }
+
+    if (tripId != null) {
       bean.setTrip(_tripBeanService.getTripForId(tripId));
+    }
 
     if (tripId != null && stopId != null) {
       TripEntry trip = _graph.getTripEntryForId(tripId);
@@ -455,7 +468,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
         ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
-        if (instance != null) {          
+        if (instance != null) {
           StopTimeInstance sti = instance.getStopTimeInstance();
           StopTimeInstanceBean stopTimeBean = _stopTimeBeanService.getStopTimeInstanceAsBean(sti);
           bean.setStopTime(stopTimeBean);
