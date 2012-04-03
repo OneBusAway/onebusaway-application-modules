@@ -40,5 +40,17 @@
         <property name="overflowToDisk" value="false" />
         <property name="diskPersistent" value="false" />
     </bean>
+    
+    <!-- We want the ConfigurationService cache to reset everytime we restart the service -->
+    <bean id="configurationServiceCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
+        <property name="cacheManager" ref="cacheManager" />
+        <property name="cacheName" value="org.onebusaway.presentation.services.configuration.ConfigurationService.getConfiguration" />
+        <property name="maxElementsInMemory" value="2" />
+        <property name="eternal" value="false" />
+        <property name="timeToLive" value="0" />
+        <property name="timeToIdle" value="3600" />
+        <property name="overflowToDisk" value="false" />
+        <property name="diskPersistent" value="false" />
+    </bean>
 
 </beans>

@@ -95,17 +95,6 @@
     </property>
   </bean>
 
-  <bean id="configurationServiceCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
-    <property name="cacheManager" ref="cacheManager" />
-    <property name="cacheName" value="org.onebusaway.webapp.services.ConfigurationService.getConfiguration" />
-    <property name="maxElementsInMemory" value="2" />
-    <property name="eternal" value="false" />
-    <property name="timeToLive" value="3600" />
-    <property name="timeToIdle" value="3600" />
-    <property name="overflowToDisk" value="false" />
-    <property name="diskPersistent" value="false" />
-  </bean>
-
   <!-- Create a default API key for use by the webapp -->
   <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
     <property name="key" value="web" />
