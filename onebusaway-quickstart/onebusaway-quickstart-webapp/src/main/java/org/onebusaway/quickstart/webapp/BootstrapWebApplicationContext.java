@@ -18,6 +18,7 @@ package org.onebusaway.quickstart.webapp;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.ServletContext;
 
@@ -97,6 +98,13 @@ public class BootstrapWebApplicationContext extends XmlWebApplicationContext {
       beanDefinitions.put("gtfsRealtimeSource", bean.getBeanDefinition());
       System.out.println("=== GTFS REALTIME! ============================");
     }
+    
+    if (cli.hasOption("P")) {
+      Properties props = cli.getOptionProperties("P");
+      BeanDefinitionBuilder propertyOverrides = BeanDefinitionBuilder.genericBeanDefinition("org.onebusaway.container.spring.PropertyOverrideConfigurer");
+      propertyOverrides.addPropertyValue("properties", props);
+      beanDefinitions.put("myCustomPropertyOverrides",
+          propertyOverrides.getBeanDefinition());
+    }
   }
-
 }

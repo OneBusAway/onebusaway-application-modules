@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.Parser;
 import org.eclipse.jetty.server.Connector;
@@ -160,6 +161,13 @@ public class WebappBootstrapMain {
         true, "");
     options.addOption(WebappCommon.ARG_GTFS_REALTIME_ALERTS_URL, true, "");
     options.addOption(WebappCommon.ARG_GTFS_REALTIME_REFRESH_INTERVAL, true, "");
+    
+    Option pOption = new Option("P", "use value for given property");
+    pOption.setArgName("beanName.beanProperty=value");
+    pOption.setArgs(2);
+    pOption.setValueSeparator('=');
+    options.addOption(pOption);
+
     return options;
   }
 
