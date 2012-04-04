@@ -457,13 +457,14 @@
               </configuration>
               <reportSets>
                 <reportSet>
-                  <id>html</id>
+                  <id>main</id>
                   <reports>
+                    <report>aggregate</report>
                     <report>javadoc</report>
                   </reports>
                 </reportSet>
                 <reportSet>
-                  <id>doccheck</id>
+                  <id>configuration-doclet</id>
                   <configuration>
                     <doclet>org.onebusaway.configuration_doclet.ConfigurationDoclet</doclet>
                     <docletArtifact>
@@ -481,7 +482,7 @@
                     <report>aggregate</report>
                   </reports>
                 </reportSet>
-              </reportSets>
+              </reportSets>              
             </plugin>
           </reportPlugins>
         </configuration>
