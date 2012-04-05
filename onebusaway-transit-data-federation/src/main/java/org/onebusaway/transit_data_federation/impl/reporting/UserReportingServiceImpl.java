@@ -432,6 +432,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
     bean.setPredicted(record.isPredicted());
 
+    bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
     bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
     bean.setScheduleDeviation(record.getScheduleDeviation());
     bean.setVehicleLat(record.getVehicleLat());
