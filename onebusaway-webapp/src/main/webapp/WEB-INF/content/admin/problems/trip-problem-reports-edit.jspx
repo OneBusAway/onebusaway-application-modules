@@ -44,7 +44,38 @@
 
 <div id="tripProblemReport">
 
-<div id="tripProblemReportMap"><jsp:text></jsp:text></div>
+  <div id="mapPanel">
+    <div id="tripProblemReportMap"><jsp:text></jsp:text></div>
+    <div id="mapLegendLabel"><s:text name="Legend"/></div>
+    <table id="mapLegend">
+      <tbody>
+        <s:if test="stop != null">
+          <tr>          
+            <td><img src="${oba:resource('collection-entry:Map:Marker.png')}" /></td>
+            <td>Stop Location</td>
+          </tr>
+        </s:if>
+        <s:if test="vehicleLat != null and vehicleLon != null">
+          <tr>          
+            <td><img src="${oba:resource('collection-entry:Map:MapIcon-Bus-22.png')}" /></td>
+            <td>Vehicle Location</td>
+          </tr>
+        </s:if>
+        <s:if test="userLat != null and userLon != null">
+          <tr>          
+            <td><img src="${oba:resource('collection-entry:Map:PersonMarker.png')}" /></td>
+            <td>User Location</td>
+          </tr>
+        </s:if>
+        <s:if test="! vehicleLocationRecords.empty">
+          <tr>          
+            <td><img src="${oba:resource('collection-entry:Map:MapIcon-Bus-14.png')}" /></td>
+            <td>Vehicle Location Record</td>
+          </tr>
+        </s:if>
+      </tbody>
+    </table>
+  </div>
 
 <s:form action="trip-problem-reports!update">
 
@@ -73,6 +104,27 @@
         </td>
     </tr>
     <tr>
+        <td>Service Date:</td>
+        <td><oba:date value="serviceDate" format="yyyy-MM-dd" /> (<s:property value="serviceDate"/>)</td>
+    </tr>
+    <tr>
+        <td>Vehicle Id:</td>
+        <td><s:property value="vehicleId" /></td>
+    </tr>
+    <tr>
+        <td>Vehicle Location:</td>
+        <td><s:property value="vehicleLat" /><jsp:text>
+        </jsp:text><s:property value="vehicleLon" /></td>
+    </tr>
+    <tr>
+        <td>Predicted:</td>
+        <td><s:property value="predicted" /></td>
+    </tr>
+    <tr>
+        <td>Schedule Deviation:</td>
+        <td><s:property value="scheduleDeviation/60" />m</td>
+    </tr>
+    <tr>
         <td>Stop:</td>
         <td><s:a namespace="/where/standard" action="stop">
           <s:param name="id" value="stopId"/>
@@ -86,11 +138,11 @@
     </tr>
     <s:if test="stopTime != null">
     <tr>
-        <td>Arrival Time:</td>
+        <td>Stop Arrival Time:</td>
         <td><oba:date format="hh:mm aa" value="stopTime.arrivalTime"/></td>
     </tr>
     <tr>
-        <td>Departure Time:</td>
+        <td>Stop Departure Time:</td>
         <td><oba:date format="hh:mm aa" value="stopTime.departureTime"/></td>
     </tr>
     </s:if>
@@ -116,19 +168,7 @@
         </jsp:text><s:property value="userLon" /><jsp:text>
         </jsp:text><s:property value="userLocationAccuracy" /></td>
     </tr>
-    <tr>
-        <td>Vehicle Location:</td>
-        <td><s:property value="vehicleLat" /><jsp:text>
-        </jsp:text><s:property value="vehicleLon" /></td>
-    </tr>
-    <tr>
-        <td>Predicted:</td>
-        <td><s:property value="predicted" /></td>
-    </tr>
-    <tr>
-        <td>Schedule Deviation:</td>
-        <td><s:property value="scheduleDeviation/60" />m</td>
-    </tr>
+
     <s:select label="Status" name="status" list="statusValues" value="%{status}"/>
     <s:textfield name="label" label="%{getText('Label')}" value="%{label}"/>
     <s:submit value="Update"/>
