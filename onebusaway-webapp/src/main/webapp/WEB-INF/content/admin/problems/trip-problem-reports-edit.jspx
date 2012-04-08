@@ -199,6 +199,7 @@ jQuery("input#trip-problem-reports_label").autocomplete({
             <tr>
                 <td class="time">Time</td>
                 <td class="scheduleDeviation">Schedule Deviation</td>
+                <td class="location">Location</td>
             </tr>
         </thead>
         <tbody>
@@ -210,6 +211,10 @@ jQuery("input#trip-problem-reports_label").autocomplete({
                         <s:param value="scheduleDeviation/60"/>
                       </s:text>
                     </s:if></td>
+                    <td><s:if test="currentLocation != null">
+                      <s:property value="currentLocation.lat"/><jsp:text> </jsp:text><s:property value="currentLocation.lon"/>
+                    </s:if>
+                    </td>
                 </tr>
             </s:iterator>
         </tbody>
