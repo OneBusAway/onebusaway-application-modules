@@ -2,6 +2,7 @@
 <!--
 
     Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+    Copyright (C) 2012 Google, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -21,6 +22,9 @@
     <query name="numberOfUsers" read-only="true">
         SELECT count(*) FROM User
     </query>
+    <query name="numberOfStaleUsers" read-only="true">
+        SELECT count(*) FROM User user WHERE lastAccessTime &lt; :lastAccessTime
+    </query>    
     <query name="numberOfUserRoles" read-only="true">
         SELECT count(*) FROM UserRole
 	</query>

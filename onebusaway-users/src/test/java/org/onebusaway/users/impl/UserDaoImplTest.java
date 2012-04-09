@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +21,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -125,6 +127,42 @@ public class UserDaoImplTest {
     _dao.saveOrUpdateUser(userB);
 
     assertEquals(2, _dao.getNumberOfUsers());
+  }
+  
+  @Test
+  public void testGetNumberOfStaleUsers() {
+    
+    Calendar c = Calendar.getInstance();
+    c.add(Calendar.MONTH, -1);
+    Date oneMonth = c.getTime();
+    c.add(Calendar.MONTH, -1);
+    Date twoMonth = c.getTime();
+    c.add(Calendar.MONTH, -1);
+    Date threeMonth = c.getTime();
+
+    assertEquals(0, _dao.getNumberOfStaleUsers(oneMonth));
+
+    User userA = new User();
+    userA.setCreationTime(new Date());
+    userA.setLastAccessTime(twoMonth);
+    userA.setProperties(new UserPropertiesV2());
+
+    _dao.saveOrUpdateUser(userA);
+
+    assertEquals(1, _dao.getNumberOfStaleUsers(oneMonth));
+    assertEquals(0, _dao.getNumberOfStaleUsers(twoMonth));
+    assertEquals(0, _dao.getNumberOfStaleUsers(threeMonth));
+
+    User userB = new User();
+    userB.setCreationTime(new Date());
+    userB.setLastAccessTime(threeMonth);
+    userB.setProperties(new UserPropertiesV2());
+
+    _dao.saveOrUpdateUser(userB);
+
+    assertEquals(2, _dao.getNumberOfStaleUsers(oneMonth));
+    assertEquals(1, _dao.getNumberOfStaleUsers(twoMonth));
+    assertEquals(0, _dao.getNumberOfStaleUsers(threeMonth));
   }
 
   @Test

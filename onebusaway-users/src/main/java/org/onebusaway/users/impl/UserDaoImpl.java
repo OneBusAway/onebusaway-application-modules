@@ -81,6 +81,16 @@ class UserDaoImpl implements UserDao {
   }
   
   @Override
+  public long getNumberOfStaleUsers(Date lastAccessTime) {
+    List<?> values = _template.findByNamedQueryAndNamedParam("numberOfStaleUsers", "lastAccessTime", lastAccessTime);
+    if (values == null || values.size() == 0)
+      return 0;
+    Number v = (Number) values.get(0);
+    return v.intValue();
+
+  }
+  
+  @Override
   public List<Integer> getStaleUserIdsInRange(final Date lastAccessTime, final int firstResult, final int maxResults) {
     return _template.execute(new HibernateCallback<List<Integer>>() {
       @SuppressWarnings("unchecked")

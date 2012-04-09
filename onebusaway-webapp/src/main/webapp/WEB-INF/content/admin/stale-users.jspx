@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2012 Google, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Stale Users</title>
+</head>
+<body>
+
+<p>A user account is considered stale if it hasn't been accessed in more than a month.</p>
+
+<h2>Status</h2>
+
+<ul>
+  <li><span class="label">Number of stale users:</span> <s:property value="numberOfStaleUsers"/></li>
+  <li><span class="label">Currently deleting stale users:</span> <s:property value="deletingStaleUsers"/></li>
+</ul>
+
+<s:if test="! deletingStaleUsers">
+<p><s:a action="stale-users" method="start">Start Deleting Stale Users</s:a></p>
+</s:if>
+<s:else>
+<p><s:a action="stale-users" method="stop">Stop Deleting Stale Users</s:a></p>
+</s:else>
+
+</body>
+</html>
