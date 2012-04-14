@@ -80,6 +80,11 @@ table#mapLegend td:first-child {
 	text-align: right;	
 }
 
+#tripProblemReportTable td.warning {
+	font-weight: bold;
+	color: red;
+}
+
 #vehicleLocationRecords {
   margin-top: 1em;	
 }

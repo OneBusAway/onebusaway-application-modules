@@ -111,7 +111,7 @@ public class TripProblemReportsAction extends ActionSupport implements
 
     TripBean trip = _model.getTrip();
 
-    if (_model.getVehicleId() != null) {
+    if (_model.getVehicleId() != null || (_model.getTrip() != null && _model.getServiceDate() > 0)) {
       VehicleLocationRecordQueryBean query = new VehicleLocationRecordQueryBean();
       query.setServiceDate(_model.getServiceDate());
       if (trip != null)

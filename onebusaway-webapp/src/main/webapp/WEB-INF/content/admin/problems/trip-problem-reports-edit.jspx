@@ -118,7 +118,12 @@
     </tr>
     <tr>
         <td>Predicted:</td>
-        <td><s:property value="predicted" /></td>
+        <jsp:element name="td">
+          <jsp:attribute name="class">
+            <s:if test="! vehicleLocationRecords.empty and ! predicted">warning</s:if>
+          </jsp:attribute>
+          <s:property value="predicted" />
+        </jsp:element>
     </tr>
     <tr>
         <td>Schedule Deviation:</td>
@@ -201,6 +206,9 @@ jQuery("input#trip-problem-reports_label").autocomplete({
                 <td class="time">Time</td>
                 <td class="scheduleDeviation">Schedule Deviation</td>
                 <td class="location">Location</td>
+                <s:if test="! predicted">
+                  <td class="vehicle">Vehicle Id</td>
+                </s:if>
             </tr>
         </thead>
         <tbody>
@@ -217,6 +225,9 @@ jQuery("input#trip-problem-reports_label").autocomplete({
                       <s:property value="currentLocation.lat"/><jsp:text> </jsp:text><s:property value="currentLocation.lon"/>
                     </s:if>
                     </td>
+                    <s:if test="! predicted">
+                      <td><s:property value="vehicleId"/></td>
+                    </s:if>
                 </tr>
             </s:iterator>
         </tbody>
