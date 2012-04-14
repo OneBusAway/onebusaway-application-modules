@@ -160,4 +160,24 @@ public class VehicleLocationRecordBean implements Serializable {
   public void setStatus(String status) {
     this.status = status;
   }
+
+  /**
+   * All field values will be copied from the specified bean into our own bean.
+   * 
+   * @param bean values copied from this bean
+   */
+  public void copyFrom(VehicleLocationRecordBean bean) {
+    this.blockId = bean.blockId;
+    this.currentLocation = bean.currentLocation;
+    this.currentOrientation = bean.currentOrientation;
+    this.distanceAlongBlock = bean.distanceAlongBlock;
+    this.phase = bean.phase;
+    this.scheduleDeviation = bean.scheduleDeviation;
+    this.serviceDate = bean.serviceDate;
+    this.status = bean.status;
+    this.timeOfLocationUpdate = bean.timeOfLocationUpdate;
+    this.timeOfRecord = bean.timeOfRecord;
+    this.tripId = bean.vehicleId;
+    this.vehicleId = bean.vehicleId;
+  }
 }

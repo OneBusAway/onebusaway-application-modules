@@ -15,8 +15,11 @@
  */
 package org.onebusaway.webapp.actions.admin.debug;
 
+import java.util.Map;
+
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
+import org.apache.struts2.interceptor.SessionAware;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -27,16 +30,26 @@ import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 import com.opensymphony.xwork2.validator.annotations.Validations;
 
-@Results({@Result(type = "redirectAction", name = "submitSuccess", params = {
-    "actionName", "vehicle-location-record"})})
+@Results({
+    @Result(type = "redirectAction", name = "submitSuccess", params = {
+        "actionName", "vehicle-location-record", "m", "1"}),
+    @Result(type = "redirectAction", name = "resetSuccess", params = {
+        "actionName", "vehicle-location-record", "m", "2"})})
 public class VehicleLocationRecordAction extends ActionSupport implements
-    ModelDriven<VehicleLocationRecordBean> {
+    ModelDriven<VehicleLocationRecordBean>, SessionAware {
+
+  private static final String KEY_LAST_RECORD = VehicleLocationRecordAction.class.getName()
+      + ".lastRecord";
 
   private static final long serialVersionUID = 1L;
 
   private VehicleLocationRecordBean _model = new VehicleLocationRecordBean();
 
   private TransitDataService _transitDataService;
+
+  private Map<String, Object> _session;
+
+  private int _m = 0;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -48,9 +61,30 @@ public class VehicleLocationRecordAction extends ActionSupport implements
     return _model;
   }
 
+  @Override
+  public void setSession(Map<String, Object> session) {
+    _session = session;
+  }
+
+  public void setM(int m) {
+    _m = m;
+  }
+
   @SkipValidation
   @Override
   public String execute() {
+    VehicleLocationRecordBean lastRecord = (VehicleLocationRecordBean) _session.get(KEY_LAST_RECORD);
+    if (lastRecord != null) {
+      _model.copyFrom(lastRecord);
+    }
+    switch(_m) {
+      case 1:
+        addActionMessage("Record submitted!");
+        break;
+      case 2:
+        addActionMessage("Vehicle reset!");
+        break;
+    }
     return SUCCESS;
   }
 
@@ -65,13 +99,16 @@ public class VehicleLocationRecordAction extends ActionSupport implements
     _model.setVehicleId(clean(_model.getVehicleId()));
 
     _transitDataService.submitVehicleLocation(_model);
+
+    _session.put(KEY_LAST_RECORD, _model);
+
     return "submitSuccess";
   }
 
   @Validations(requiredStrings = {@RequiredStringValidator(fieldName = "vehicleId", key = "requiredField")})
   public String reset() {
     _transitDataService.resetVehicleLocation(_model.getVehicleId());
-    return "submitSuccess";
+    return "resetSuccess";
   }
 
   private String clean(String value) {
@@ -79,4 +116,5 @@ public class VehicleLocationRecordAction extends ActionSupport implements
       return null;
     return value;
   }
+
 }
