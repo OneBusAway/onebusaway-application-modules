@@ -33,7 +33,7 @@
   var data = {};
   data.tripProblemReport = <oba:json value="model"/>;
   data.vehicleLocationRecords = <oba:json value="vehicleLocationRecords"/>;
-  jQuery(document).ready(function() { oba_admin_problems_trip_problem_reports(data) } );
+  jQuery(document).ready(function() { oba_admin_problems_trip_problem_reports(data); } );
 </script>          
 </head>
 <body>
@@ -197,14 +197,16 @@ jQuery("input#trip-problem-reports_label").autocomplete({
     <table id="vehicleLocationRecordsTable">
         <thead class="darkHeader">
             <tr>
+                <td class="index">Index</td>
                 <td class="time">Time</td>
                 <td class="scheduleDeviation">Schedule Deviation</td>
                 <td class="location">Location</td>
             </tr>
         </thead>
         <tbody>
-            <s:iterator value="vehicleLocationRecords">
+            <s:iterator value="vehicleLocationRecords" status="it">
                 <tr>
+                    <td><s:property value="#it.index"/></td>
                     <td><oba:date timeStyle="short" value="timeOfRecord" /></td>
                     <td><s:if test="scheduleDeviationSet">
                       <s:text name="scheduleDeviationInMinutes">
