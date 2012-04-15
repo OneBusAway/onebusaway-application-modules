@@ -571,11 +571,11 @@ class TransitDataServiceImpl implements TransitDataService {
   @Override
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
       TripProblemReportQueryBean query) {
-    return getTripProblemReportSummaries(query, ETripProblemGroupBy.TRIP);
+    return getTripProblemReportSummariesByGrouping(query, ETripProblemGroupBy.TRIP);
   }
 
   @Override
-  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
+  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummariesByGrouping(
       TripProblemReportQueryBean query, ETripProblemGroupBy groupBy) {
     return _userReportingService.getTripProblemReportSummaries(query, groupBy);
   }

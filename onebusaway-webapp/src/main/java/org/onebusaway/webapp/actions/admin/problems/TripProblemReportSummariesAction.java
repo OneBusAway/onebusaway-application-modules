@@ -111,11 +111,11 @@ public class TripProblemReportSummariesAction extends ActionSupport {
     if (_status != null)
       query.setStatus(EProblemReportStatus.valueOf(_status.toUpperCase()));
 
-    ListBean<TripProblemReportSummaryBean> resultByTrip = _transitDataService.getTripProblemReportSummaries(
+    ListBean<TripProblemReportSummaryBean> resultByTrip = _transitDataService.getTripProblemReportSummariesByGrouping(
         query, ETripProblemGroupBy.TRIP);
     _summariesByTrip = resultByTrip.getList();
 
-    ListBean<TripProblemReportSummaryBean> resultByLabel = _transitDataService.getTripProblemReportSummaries(
+    ListBean<TripProblemReportSummaryBean> resultByLabel = _transitDataService.getTripProblemReportSummariesByGrouping(
         query, ETripProblemGroupBy.LABEL);
     _summariesByLabel = resultByLabel.getList();
 

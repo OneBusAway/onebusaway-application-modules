@@ -99,6 +99,12 @@ import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
  * flexibility in over-the-wire serialization for RPC and are separate from the
  * underlying representations in the datastore.
  * 
+ * Implementation Note: when adding methods to this interface, do not introduce
+ * multiple methods with the same name and different arguments, as this seems to
+ * confuse Hessian proxies of the interface. Additionally, each method must
+ * specify a @FederatedBy... annotation indicating how the method will be
+ * dispatched in a federated deployment.
+ * 
  * @author bdferris
  * 
  */
@@ -502,7 +508,7 @@ public interface TransitDataService extends FederatedService {
    * @return
    * 
    * @deprecated see
-   *             {@link #getTripProblemReportSummaries(TripProblemReportQueryBean, ETripProblemGroupBy)}
+   *             {@link #getTripProblemReportSummariesByGrouping(TripProblemReportQueryBean, ETripProblemGroupBy)}
    */
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   @Deprecated
@@ -516,7 +522,7 @@ public interface TransitDataService extends FederatedService {
    * @return
    */
   @FederatedByAnyEntityIdMethod(properties = {"tripId"}, agencyIdProperties = {"agencyId"})
-  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
+  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummariesByGrouping(
       TripProblemReportQueryBean query, ETripProblemGroupBy groupBy);
 
   @FederatedByAnyEntityIdMethod(properties = {"tripId"}, agencyIdProperties = {"agencyId"})

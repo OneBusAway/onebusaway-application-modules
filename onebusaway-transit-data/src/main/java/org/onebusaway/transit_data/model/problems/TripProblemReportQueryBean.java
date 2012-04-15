@@ -27,7 +27,7 @@ import org.onebusaway.transit_data.services.TransitDataService;
  * 
  * @author bdferris
  * @see TransitDataService#getTripProblemReports(TripProblemReportQueryBean)
- * @see TransitDataService#getTripProblemReportSummaries(TripProblemReportQueryBean,
+ * @see TransitDataService#getTripProblemReportSummariesByGrouping(TripProblemReportQueryBean,
  *      ETripProblemGroupBy)
  */
 @QueryBean
