@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
 import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportSummaryBean;
@@ -49,7 +50,7 @@ public interface UserReportingService {
   public void reportProblemWithTrip(TripProblemReportBean problem);
 
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
-      TripProblemReportQueryBean query);
+      TripProblemReportQueryBean query, ETripProblemGroupBy groupBy);
 
   public ListBean<TripProblemReportBean> getTripProblemReports(
       TripProblemReportQueryBean query);

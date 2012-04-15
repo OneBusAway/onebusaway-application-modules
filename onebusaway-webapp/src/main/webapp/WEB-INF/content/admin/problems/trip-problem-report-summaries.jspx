@@ -2,6 +2,7 @@
 <!--
 
     Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+    Copyright (C) 2012 Google, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -62,6 +63,8 @@
 
     <h2><oba:message key="TripProblemReports"/></h2>
     
+    <h3><oba:message key="GroupedByTrip"/></h3>
+    
     <table class="ProblemReportSummaries">
         <thead>
             <tr>
@@ -70,7 +73,7 @@
             </tr>
         </thead>
         <tbody>
-            <s:iterator value="summaries" status="rowstatus">
+            <s:iterator value="summariesByTrip" status="rowstatus">
                 <jsp:element name="tr">
                     <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
                     <td>
@@ -81,6 +84,36 @@
                             <oba:routeName value="trip"/>
                             <jsp:text> - </jsp:text>
                             <s:property value="trip.tripHeadsign"/>
+                        </s:a>
+                    </td>
+                    <td>
+                        <s:property value="count"/>
+                    </td>
+                </jsp:element>
+            </s:iterator>
+        </tbody>
+    </table>
+    
+    <h3><oba:message key="GroupedByLabel"/></h3>
+    
+    <table class="ProblemReportSummaries">
+        <thead>
+            <tr>
+                <td><oba:message key="Label"/></td>
+                <td><oba:message key="Count"/></td>
+            </tr>
+        </thead>
+        <tbody>
+            <s:iterator value="summariesByLabel" status="rowstatus">
+                <jsp:element name="tr">
+                    <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
+                    <td>
+                        <s:url var="url" action="trip-problem-reports">
+                            <s:param name="agencyId" value="agencyId" />
+                            <s:param name="label" value="label"/>
+                        </s:url>
+                        <s:a href="%{url}">
+                            <s:property value="label"/>
                         </s:a>
                     </td>
                     <td>

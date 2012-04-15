@@ -34,24 +34,7 @@
         AND p.time &lt; :timeTo
         AND p.status = :status
         GROUP BY p.stopId.id 
-    </query>
-    <query name="tripProblemReportSummaries" read-only="true">
-      SELECT p.tripId, count(*)
-        FROM TripProblemReportRecord p
-        WHERE p.tripId.agencyId = :agencyId
-        AND :timeFrom &lt;= p.time
-        AND p.time &lt; :timeTo
-        GROUP BY p.tripId.id 
-    </query>
-    <query name="tripProblemReportSummariesWithStatus" read-only="true">
-      SELECT p.tripId, count(*)
-        FROM TripProblemReportRecord p
-        WHERE p.tripId.agencyId = :agencyId
-        AND :timeFrom &lt;= p.time
-        AND p.time &lt; :timeTo
-        AND p.status = :status
-        GROUP BY p.tripId.id 
-    </query>    
+    </query>  
     <query name="stopProblemReports" read-only="true">
       SELECT p
         FROM StopProblemReportRecord p
@@ -67,21 +50,6 @@
         AND p.time &lt; :timeTo
         AND p.status = :status
     </query>
-    <query name="tripProblemReports" read-only="true">
-      SELECT p
-        FROM TripProblemReportRecord p
-        WHERE p.tripId.agencyId = :agencyId
-        AND :timeFrom &lt;= p.time
-        AND p.time &lt; :timeTo
-    </query>
-    <query name="tripProblemReportsWithStatus" read-only="true">
-      SELECT p
-        FROM TripProblemReportRecord p
-        WHERE p.tripId.agencyId = :agencyId
-        AND :timeFrom &lt;= p.time
-        AND p.time &lt; :timeTo
-        AND p.status = :status
-    </query>         
     <query name="allStopProblemReportsForStopId" read-only="true">
       SELECT p FROM StopProblemReportRecord p WHERE p.stopId = :stopId 
     </query>

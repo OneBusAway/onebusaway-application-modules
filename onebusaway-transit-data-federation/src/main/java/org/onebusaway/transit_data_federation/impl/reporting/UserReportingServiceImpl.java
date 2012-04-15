@@ -27,6 +27,8 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
+import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
+import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
 import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
@@ -168,7 +170,8 @@ class UserReportingServiceImpl implements UserReportingService {
       record.setUserLat(problem.getUserLat());
     if (problem.getUserLon() != null && !Double.isNaN(problem.getUserLon()))
       record.setUserLon(problem.getUserLon());
-    if (problem.getUserLocationAccuracy() != null && !Double.isNaN(problem.getUserLocationAccuracy()))
+    if (problem.getUserLocationAccuracy() != null
+        && !Double.isNaN(problem.getUserLocationAccuracy()))
       record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
 
     record.setUserOnVehicle(problem.isUserOnVehicle());
@@ -236,22 +239,37 @@ class UserReportingServiceImpl implements UserReportingService {
 
   @Override
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
-      TripProblemReportQueryBean query) {
+      TripProblemReportQueryBean query, ETripProblemGroupBy groupBy) {
 
-    List<T2<AgencyAndId, Integer>> records = _userReportingDao.getTripProblemReportSummaries(
-        query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
-        query.getStatus());
+    List<T2<Object, Integer>> records = _userReportingDao.getTripProblemReportSummaries(
+        query, groupBy);
 
     List<TripProblemReportSummaryBean> beans = new ArrayList<TripProblemReportSummaryBean>(
         records.size());
 
-    for (T2<AgencyAndId, Integer> record : records) {
-      AgencyAndId tripId = record.getFirst();
-      Integer count = record.getSecond();
+    for (T2<Object, Integer> record : records) {
+
       TripProblemReportSummaryBean bean = new TripProblemReportSummaryBean();
-      bean.setTrip(_tripBeanService.getTripForId(tripId));
-      bean.setStatus(query.getStatus());
-      bean.setCount(count);
+      bean.setCount(record.getSecond());
+
+      switch (groupBy) {
+        case TRIP: {
+          AgencyAndId tripId = (AgencyAndId) record.getFirst();
+          bean.setTrip(_tripBeanService.getTripForId(tripId));
+          break;
+        }
+        case STATUS: {
+          EProblemReportStatus status = (EProblemReportStatus) record.getFirst();
+          bean.setStatus(status);
+          break;
+        }
+        case LABEL: {
+          String label = (String) record.getFirst();
+          bean.setLabel(label);
+          break;
+        }
+      }
+
       beans.add(bean);
     }
 
@@ -272,9 +290,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
   public ListBean<TripProblemReportBean> getTripProblemReports(
       TripProblemReportQueryBean query) {
-    List<TripProblemReportRecord> records = _userReportingDao.getTripProblemReports(
-        query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
-        query.getStatus());
+    List<TripProblemReportRecord> records = _userReportingDao.getTripProblemReports(query);
     List<TripProblemReportBean> beans = new ArrayList<TripProblemReportBean>(
         records.size());
     for (TripProblemReportRecord record : records)

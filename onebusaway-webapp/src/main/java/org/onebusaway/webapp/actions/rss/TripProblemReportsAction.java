@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +60,8 @@ public class TripProblemReportsAction extends ActionSupport {
 
   private String _status;
 
+  private String _label;
+
   private SyndFeed _feed;
 
   @Autowired
@@ -81,6 +84,14 @@ public class TripProblemReportsAction extends ActionSupport {
 
   public void setStatus(String status) {
     _status = status;
+  }
+
+  public void setLabel(String label) {
+    _label = label;
+  }
+
+  public String getLabel() {
+    return _label;
   }
 
   public SyndFeed getFeed() {
@@ -106,6 +117,7 @@ public class TripProblemReportsAction extends ActionSupport {
     query.setTimeTo(timeTo);
     if (_status != null)
       query.setStatus(EProblemReportStatus.valueOf(_status));
+    query.setLabel(_label);
 
     ListBean<TripProblemReportBean> result = _transitDataService.getTripProblemReports(query);
     List<TripProblemReportBean> reports = result.getList();
@@ -172,7 +184,7 @@ public class TripProblemReportsAction extends ActionSupport {
 
       StringBuilder entryUrl = new StringBuilder();
       entryUrl.append(baseUrl);
-      entryUrl.append("/admin/problems/trip-problem-reports!edit.action?tripId=");
+      entryUrl.append("/admin/problems/trip-problem-report.action?tripId=");
       entryUrl.append(report.getTripId());
       entryUrl.append("&id=");
       entryUrl.append(report.getId());

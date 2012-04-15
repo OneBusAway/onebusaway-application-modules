@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +56,7 @@ import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
 import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
@@ -146,7 +148,7 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByAgencyIdMethod
   public ListBean<String> getRouteIdsForAgencyId(String agencyId);
-  
+
   /**
    * @param agencyId
    * @return the list of all routes for the specified agency id
@@ -380,7 +382,8 @@ public interface TransitDataService extends FederatedService {
   @FederatedByCoordinatePointsMethod(arguments = {0, 1}, propertyExpressions = {
       "location", "location"})
   public void reportProblemWithPlannedTrip(TransitLocationBean from,
-      TransitLocationBean to, long targetTime, ConstraintsBean constraints, PlannedTripProblemReportBean report);
+      TransitLocationBean to, long targetTime, ConstraintsBean constraints,
+      PlannedTripProblemReportBean report);
 
   @FederatedByBoundsMethod
   public ListBean<VertexBean> getStreetGraphForRegion(double latFrom,
@@ -440,7 +443,8 @@ public interface TransitDataService extends FederatedService {
   public ServiceAlertBean getServiceAlertForId(String situationId);
 
   @FederatedByAgencyIdMethod()
-  public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(String agencyId);
+  public ListBean<ServiceAlertBean> getAllServiceAlertsForAgencyId(
+      String agencyId);
 
   @FederatedByAgencyIdMethod()
   public void removeAllServiceAlertsForAgencyId(String agencyId);
@@ -492,15 +496,43 @@ public interface TransitDataService extends FederatedService {
   @FederatedByEntityIdMethod(propertyExpression = "tripId")
   public void reportProblemWithTrip(TripProblemReportBean problem);
 
+  /**
+   * 
+   * @param query
+   * @return
+   * 
+   * @deprecated see
+   *             {@link #getTripProblemReportSummaries(TripProblemReportQueryBean, ETripProblemGroupBy)}
+   */
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  @Deprecated
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
       TripProblemReportQueryBean query);
 
-  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  /**
+   * 
+   * @param query
+   * @param groupBy
+   * @return
+   */
+  @FederatedByAnyEntityIdMethod(properties = {"tripId"}, agencyIdProperties = {"agencyId"})
+  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
+      TripProblemReportQueryBean query, ETripProblemGroupBy groupBy);
+
+  @FederatedByAnyEntityIdMethod(properties = {"tripId"}, agencyIdProperties = {"agencyId"})
   public ListBean<TripProblemReportBean> getTripProblemReports(
       TripProblemReportQueryBean query);
 
+  /**
+   * 
+   * @param tripId
+   * @return
+   * 
+   * @deprecated see {@link #getTripProblemReports(TripProblemReportQueryBean)},
+   *             using {@link TripProblemReportQueryBean#getTripId()}.
+   */
   @FederatedByEntityIdMethod()
+  @Deprecated
   public List<TripProblemReportBean> getAllTripProblemReportsForTripId(
       String tripId);
 

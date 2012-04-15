@@ -20,6 +20,8 @@ import java.util.List;
 import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
+import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
+import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord;
 import org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord;
 
@@ -32,14 +34,14 @@ public interface UserReportingDao {
   public List<T2<AgencyAndId, Integer>> getStopProblemReportSummaries(
       String agencyId, long timeFrom, long timeTo, EProblemReportStatus status);
 
-  public List<T2<AgencyAndId, Integer>> getTripProblemReportSummaries(
-      String agencyId, long timeFrom, long timeTo, EProblemReportStatus status);
+  public List<T2<Object, Integer>> getTripProblemReportSummaries(
+      TripProblemReportQueryBean query, ETripProblemGroupBy groupBy);
 
   public List<StopProblemReportRecord> getStopProblemReports(String agencyId,
       long timeFrom, long timeTo, EProblemReportStatus status);
-  
-  public List<TripProblemReportRecord> getTripProblemReports(String agencyId,
-      long timeFrom, long timeTo, EProblemReportStatus status);
+
+  public List<TripProblemReportRecord> getTripProblemReports(
+      TripProblemReportQueryBean query);
 
   public List<StopProblemReportRecord> getAllStopProblemReportsForStopId(
       AgencyAndId stopId);

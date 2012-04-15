@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +17,7 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -25,6 +27,7 @@ import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 
 public class ReportProblemWithTripAction extends ApiActionSupport {
@@ -35,6 +38,8 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   private TransitDataService _service;
 
   private TripProblemReportBean _model = new TripProblemReportBean();
+
+  private long _time = System.currentTimeMillis();
 
   public ReportProblemWithTripAction() {
     super(2);
@@ -92,13 +97,18 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   public DefaultHttpHeaders create() throws IOException, ServiceException {
     return index();    
   }
+  
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
+  public void setTime(Date time) {
+    _time = time.getTime();
+  }
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {
 
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    _model.setTime(System.currentTimeMillis());
+    _model.setTime(_time);
     _model.setStatus(EProblemReportStatus.NEW);
     _service.reportProblemWithTrip(_model);
 

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +61,7 @@ import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
+import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
 import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
@@ -569,7 +571,13 @@ class TransitDataServiceImpl implements TransitDataService {
   @Override
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
       TripProblemReportQueryBean query) {
-    return _userReportingService.getTripProblemReportSummaries(query);
+    return getTripProblemReportSummaries(query, ETripProblemGroupBy.TRIP);
+  }
+
+  @Override
+  public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
+      TripProblemReportQueryBean query, ETripProblemGroupBy groupBy) {
+    return _userReportingService.getTripProblemReportSummaries(query, groupBy);
   }
 
   @Override
