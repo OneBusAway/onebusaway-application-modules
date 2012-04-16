@@ -78,7 +78,7 @@
     </table>
   </div>
 
-<s:form action="trip-problem-reports!update">
+<s:form action="trip-problem-report!update">
 
 <table id="tripProblemReportTable">
     <tr>
