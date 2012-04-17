@@ -34,6 +34,7 @@
   var data = {};
   data.tripProblemReport = <oba:json value="model"/>;
   data.vehicleLocationRecords = <oba:json value="vehicleLocationRecords"/>;
+  data.problemLabels = <oba:json value="labels" />;
   jQuery(document).ready(function() { oba_admin_problems_trip_problem_reports(data); } );
 </script>          
 </head>
@@ -183,12 +184,6 @@
 </table>
 
 </s:form>
-
-<script type="text/javascript">
-jQuery("input#trip-problem-reports_label").autocomplete({
-    source: <oba:json value="labels" />
-});
-</script>
 
 </div>
 

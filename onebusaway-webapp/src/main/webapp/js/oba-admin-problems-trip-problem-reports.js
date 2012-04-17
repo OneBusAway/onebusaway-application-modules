@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 function oba_admin_problems_trip_problem_reports(data) {
+	
+	var labelElement = jQuery("input#trip-problem-report_label");
+	labelElement.autocomplete({
+	    source: data.problemLabels
+	});
+
 	var mapElement = jQuery("#tripProblemReportMap");
 	var map = OBA.Maps.map(mapElement);
 	var infoWindow = new google.maps.InfoWindow();
