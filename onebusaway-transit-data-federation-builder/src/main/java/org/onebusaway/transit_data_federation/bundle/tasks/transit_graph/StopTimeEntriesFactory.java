@@ -88,7 +88,7 @@ public class StopTimeEntriesFactory {
   private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
     Collections.sort(stopTimes, new StopTimeComparator());
     
-    Boolean stopTimeWasModified = null;
+    boolean stopTimeWasModified = false;
     StopTime lastUnmodifiedStopTime = null;
     
     for(StopTime stopTime : stopTimes) {
