@@ -46,7 +46,7 @@ public interface BlockStatusBeanService {
    * @param query
    * @return the list of active blocks matching agency query criteria
    */
-  public ListBean<BlockStatusBean> getBlocksForAgency(String agencyId, long time);
+  public ListBean<BlockStatusBean> getBlocksForAgency(String agencyId, long timeFrom, long timeTo);
 
   /**
    * 
@@ -54,12 +54,12 @@ public interface BlockStatusBeanService {
    * @return the list of active blocks matching the route query criteria
    */
   public ListBean<BlockStatusBean> getBlocksForRoute(AgencyAndId routeId,
-      long time);
+      long timeFrom, long timeTo);
 
   /**
    * @param query
    * @return the list of active blocks matching the query criteria
    */
   public ListBean<BlockStatusBean> getBlocksForBounds(CoordinateBounds bounds,
-      long time);
+      long timeFrom, long timeTo);
 }

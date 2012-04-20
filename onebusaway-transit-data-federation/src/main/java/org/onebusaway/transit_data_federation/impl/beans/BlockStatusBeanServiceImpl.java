@@ -71,20 +71,20 @@ public class BlockStatusBeanServiceImpl implements BlockStatusBeanService {
   }
 
   @Override
-  public ListBean<BlockStatusBean> getBlocksForAgency(String agencyId, long time) {
-    return beans(_blockStatusService.getActiveBlocksForAgency(agencyId, time));
+  public ListBean<BlockStatusBean> getBlocksForAgency(String agencyId, long timeFrom, long timeTo) {
+    return beans(_blockStatusService.getActiveBlocksForAgency(agencyId, timeFrom, timeTo));
   }
 
   @Override
   public ListBean<BlockStatusBean> getBlocksForRoute(AgencyAndId routeId,
-      long time) {
-    return beans(_blockStatusService.getBlocksForRoute(routeId, time));
+      long timeFrom, long timeTo) {
+    return beans(_blockStatusService.getBlocksForRoute(routeId, timeFrom, timeTo));
   }
 
   @Override
   public ListBean<BlockStatusBean> getBlocksForBounds(CoordinateBounds bounds,
-      long time) {
-    return beans(_blockStatusService.getBlocksForBounds(bounds, time));
+      long timeFrom, long timeTo) {
+    return beans(_blockStatusService.getBlocksForBounds(bounds, timeFrom, timeTo));
   }
 
   /****

@@ -46,16 +46,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class BlockStatusServiceImpl implements BlockStatusService {
 
-  /**
-   * Catch late trips up to 90 minutes
-   */
-  private static final long TIME_BEFORE_WINDOW = 90 * 60 * 1000;
-
-  /**
-   * Catch early blocks up to 90 minutes
-   */
-  private static final long TIME_AFTER_WINDOW = 90 * 60 * 1000;
-
   private BlockCalendarService _blockCalendarService;
 
   private BlockLocationService _blockLocationService;
@@ -101,7 +91,7 @@ public class BlockStatusServiceImpl implements BlockStatusService {
 
     for (BlockInstance blockInstance : blockInstances) {
       List<BlockLocation> locations = new ArrayList<BlockLocation>();
-      computeLocations(blockInstance, vehicleId, time, locations);
+      computeLocations(blockInstance, vehicleId, time, time, locations);
       results.put(blockInstance, locations);
     }
 
@@ -118,41 +108,35 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   public List<BlockLocation> getAllActiveBlocks(long time) {
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksInTimeRange(
         time, time);
-    return getAsLocations(instances, time);
+    return getAsLocations(instances, time, time);
   }
 
   @Override
-  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long time) {
+  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long timeFrom, long timeTo) {
 
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForAgencyInTimeRange(
-        agencyId, time, time);
+        agencyId, timeFrom, timeTo);
 
-    return getAsLocations(instances, time);
+    return getAsLocations(instances, timeFrom, timeTo);
   }
 
   @Override
-  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time) {
-
-    long timeFrom = time - TIME_BEFORE_WINDOW;
-    long timeTo = time + TIME_AFTER_WINDOW;
+  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long timeFrom, long timeTo) {
 
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForRouteInTimeRange(
         routeId, timeFrom, timeTo);
 
-    return getAsLocations(instances, time);
+    return getAsLocations(instances, timeFrom, timeTo);
   }
 
   @Override
   public List<BlockLocation> getBlocksForBounds(CoordinateBounds bounds,
-      long time) {
-
-    long timeFrom = time - TIME_BEFORE_WINDOW;
-    long timeTo = time + TIME_AFTER_WINDOW;
+      long timeFrom, long timeTo) {
 
     List<BlockInstance> instances = _blockGeospatialService.getActiveScheduledBlocksPassingThroughBounds(
         bounds, timeFrom, timeTo);
 
-    List<BlockLocation> locations = getAsLocations(instances, time);
+    List<BlockLocation> locations = getAsLocations(instances, timeFrom, timeTo);
     List<BlockLocation> inRange = new ArrayList<BlockLocation>();
     for (BlockLocation location : locations) {
       CoordinatePoint p = location.getLocation();
@@ -214,10 +198,10 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   }
 
   private List<BlockLocation> getAsLocations(Iterable<BlockInstance> instances,
-      long time) {
+      long timeFrom, long timeTo) {
     List<BlockLocation> locations = new ArrayList<BlockLocation>();
     for (BlockInstance instance : instances)
-      computeLocations(instance, null, time, locations);
+      computeLocations(instance, null, timeFrom, timeTo, locations);
     return locations;
   }
 
@@ -229,12 +213,12 @@ public class BlockStatusServiceImpl implements BlockStatusService {
    * @param results
    */
   private void computeLocations(BlockInstance instance, AgencyAndId vehicleId,
-      long time, List<BlockLocation> results) {
+      long timeFrom, long timeTo, List<BlockLocation> results) {
 
     if (instance == null)
       return;
 
-    TargetTime target = new TargetTime(time, time);
+    TargetTime target = new TargetTime(timeFrom, timeTo);
 
     // Try real-time trips first
     List<BlockLocation> locations = _blockLocationService.getLocationsForBlockInstance(
@@ -256,8 +240,7 @@ public class BlockStatusServiceImpl implements BlockStatusService {
       // use scheduled trips
       if (vehicleId == null) {
         BlockLocation location = _blockLocationService.getScheduledLocationForBlockInstance(
-            instance, time);
-
+            instance, timeFrom + ((timeTo - timeFrom) / 2));
         if (location != null && location.isInService())
           results.add(location);
       }

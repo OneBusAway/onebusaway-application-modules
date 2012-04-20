@@ -71,7 +71,7 @@ public interface BlockStatusService {
    * @param time only blocks active at the specified time will be returned
    * @return the list of active blocks matching agency query criteria
    */
-  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long time);
+  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long timeFrom, long timeTo);
 
   /**
    * Returns all active blocks for the specified route, both with and without
@@ -81,7 +81,7 @@ public interface BlockStatusService {
    * @param time only blocks active at the specified time will be returned
    * @return the list of active blocks matching the route query criteria
    */
-  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time);
+  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long timeFrom, long timeTo);
 
   /**
    * 
@@ -97,5 +97,5 @@ public interface BlockStatusService {
    * @return the list of active blocks matching the query criteria
    */
   public List<BlockLocation> getBlocksForBounds(CoordinateBounds bounds,
-      long time);
+      long timeFrom, long timeTo);
 }

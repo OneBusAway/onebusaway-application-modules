@@ -191,7 +191,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
     List<BlockLocation> locations = _blockStatusService.getBlocksForBounds(
-        query.getBounds(), query.getTime());
+        query.getBounds(), query.getTime() - (query.getMinutesBefore() * 60 * 1000), query.getTime() + (query.getMinutesAfter() * 60 * 1000));
     return getBlockLocationsAsTripDetails(locations, query.getInclusion(),
         query.getTime());
   }
@@ -200,7 +200,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   public ListBean<TripDetailsBean> getTripsForRoute(TripsForRouteQueryBean query) {
     AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(query.getRouteId());
     List<BlockLocation> locations = _blockStatusService.getBlocksForRoute(
-        routeId, query.getTime());
+        routeId, query.getTime() - (query.getMinutesBefore() * 60 * 1000), query.getTime() + (query.getMinutesAfter() * 60 * 1000));
     return getBlockLocationsAsTripDetails(locations, query.getInclusion(),
         query.getTime());
   }
@@ -209,7 +209,7 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
   public ListBean<TripDetailsBean> getTripsForAgency(
       TripsForAgencyQueryBean query) {
     List<BlockLocation> locations = _blockStatusService.getActiveBlocksForAgency(
-        query.getAgencyId(), query.getTime());
+        query.getAgencyId(), query.getTime() - (query.getMinutesBefore() * 60 * 1000), query.getTime() + (query.getMinutesAfter() * 60 * 1000));
     return getBlockLocationsAsTripDetails(locations, query.getInclusion(),
         query.getTime());
   }
