@@ -91,7 +91,7 @@ public class BlockStatusServiceImpl implements BlockStatusService {
 
     for (BlockInstance blockInstance : blockInstances) {
       List<BlockLocation> locations = new ArrayList<BlockLocation>();
-      computeLocations(blockInstance, vehicleId, time, time, locations);
+      computeLocations(blockInstance, vehicleId, time, locations);
       results.put(blockInstance, locations);
     }
 
@@ -108,35 +108,35 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   public List<BlockLocation> getAllActiveBlocks(long time) {
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksInTimeRange(
         time, time);
-    return getAsLocations(instances, time, time);
+    return getAsLocations(instances, time);
   }
 
   @Override
-  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long timeFrom, long timeTo) {
+  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long time, int minBefore, int minAfter) {
 
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForAgencyInTimeRange(
-        agencyId, timeFrom, timeTo);
+        agencyId, time - (minBefore * 60 * 1000), time + (minAfter * 60 * 1000));
 
-    return getAsLocations(instances, timeFrom, timeTo);
+    return getAsLocations(instances, time);
   }
 
   @Override
-  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long timeFrom, long timeTo) {
+  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time, int minBefore, int minAfter) {
 
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForRouteInTimeRange(
-        routeId, timeFrom, timeTo);
+        routeId, time - (minBefore * 60 * 1000), time + (minAfter * 60 * 1000));
 
-    return getAsLocations(instances, timeFrom, timeTo);
+    return getAsLocations(instances, time);
   }
 
   @Override
   public List<BlockLocation> getBlocksForBounds(CoordinateBounds bounds,
-      long timeFrom, long timeTo) {
+      long time, int minBefore, int minAfter) {
 
     List<BlockInstance> instances = _blockGeospatialService.getActiveScheduledBlocksPassingThroughBounds(
-        bounds, timeFrom, timeTo);
+        bounds, time - (minBefore * 60 * 1000), time + (minAfter * 60 * 1000));
 
-    List<BlockLocation> locations = getAsLocations(instances, timeFrom, timeTo);
+    List<BlockLocation> locations = getAsLocations(instances, time);
     List<BlockLocation> inRange = new ArrayList<BlockLocation>();
     for (BlockLocation location : locations) {
       CoordinatePoint p = location.getLocation();
@@ -198,10 +198,10 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   }
 
   private List<BlockLocation> getAsLocations(Iterable<BlockInstance> instances,
-      long timeFrom, long timeTo) {
+      long time) {
     List<BlockLocation> locations = new ArrayList<BlockLocation>();
     for (BlockInstance instance : instances)
-      computeLocations(instance, null, timeFrom, timeTo, locations);
+      computeLocations(instance, null, time, locations);
     return locations;
   }
 
@@ -213,12 +213,12 @@ public class BlockStatusServiceImpl implements BlockStatusService {
    * @param results
    */
   private void computeLocations(BlockInstance instance, AgencyAndId vehicleId,
-      long timeFrom, long timeTo, List<BlockLocation> results) {
+      long time, List<BlockLocation> results) {
 
     if (instance == null)
       return;
 
-    TargetTime target = new TargetTime(timeFrom, timeTo);
+    TargetTime target = new TargetTime(time, time);
 
     // Try real-time trips first
     List<BlockLocation> locations = _blockLocationService.getLocationsForBlockInstance(
@@ -240,7 +240,7 @@ public class BlockStatusServiceImpl implements BlockStatusService {
       // use scheduled trips
       if (vehicleId == null) {
         BlockLocation location = _blockLocationService.getScheduledLocationForBlockInstance(
-            instance, timeFrom + ((timeTo - timeFrom) / 2));
+            instance, time);
         if (location != null && location.isInService())
           results.add(location);
       }
