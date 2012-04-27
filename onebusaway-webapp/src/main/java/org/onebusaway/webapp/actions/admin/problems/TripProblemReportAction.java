@@ -46,7 +46,7 @@ import com.opensymphony.xwork2.validator.annotations.Validations;
         "parse", "true"}),
     @Result(type = "redirectAction", name = "update", params = {
         "actionName", "trip-problem-report", "tripId", "${model.tripId}", "id",
-        "${model.id}", "parse", "true"})})
+        "${model.id}", "m", "1", "parse", "true"})})
 public class TripProblemReportAction extends ActionSupport implements
     ModelDriven<TripProblemReportBean> {
 
@@ -63,6 +63,8 @@ public class TripProblemReportAction extends ActionSupport implements
   private int _minutesAfter = 10;
 
   private List<String> _labels;
+
+  private int _m = 0;
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -81,6 +83,10 @@ public class TripProblemReportAction extends ActionSupport implements
   public void setMinutesAfter(int minutesAfter) {
     _minutesAfter = minutesAfter;
   }
+  
+  public void setM(int m) {
+    _m = m;
+  }
 
   public List<VehicleLocationRecordBean> getVehicleLocationRecords() {
     return _vehicleLocationRecords;
@@ -89,8 +95,11 @@ public class TripProblemReportAction extends ActionSupport implements
   @Validations(requiredFields = {@RequiredFieldValidator(fieldName = "model.id", message = "missing id")}, requiredStrings = {@RequiredStringValidator(fieldName = "model.tripId", message = "missing tripId")})
   @Override
   public String execute() {
+    long t1 = System.currentTimeMillis();
     _model = _transitDataService.getTripProblemReportForTripIdAndId(
         _model.getTripId(), _model.getId());
+    long t2 = System.currentTimeMillis();
+    System.out.println("getTripProblemReportForTripIdAndId=" + (t2-t1));
     if (_model == null)
       return ERROR;
 
@@ -109,15 +118,27 @@ public class TripProblemReportAction extends ActionSupport implements
       query.setVehicleId(_model.getVehicleId());
       query.setFromTime(timeFrom);
       query.setToTime(timeTo);
+      long t3 = System.currentTimeMillis();
       ListBean<VehicleLocationRecordBean> records = _transitDataService.getVehicleLocationRecords(query);
+      long t4 = System.currentTimeMillis();
+      System.out.println("getVehicleLocationRecords=" + (t4-t3));
       _vehicleLocationRecords = records.getList();
     }
 
+    long t5 = System.currentTimeMillis();
     _labels = _transitDataService.getAllTripProblemReportLabels();
+    long t6 = System.currentTimeMillis();
+    System.out.println("getAllTripProblemReportLabels=" + (t6-t5));
 
     // Deduplicate labels
     _labels = new ArrayList<String>(new HashSet<String>(_labels));
     Collections.sort(_labels);
+    
+    switch(_m) {
+      case 1:
+        addActionMessage("Report Updated!");
+        break;
+    }
 
     return SUCCESS;
   }

@@ -44,6 +44,8 @@
 
 <h2>Trip Problem Report</h2>
 
+<s:actionmessage />
+
 <div id="tripProblemReport">
 
   <div id="mapPanel">
