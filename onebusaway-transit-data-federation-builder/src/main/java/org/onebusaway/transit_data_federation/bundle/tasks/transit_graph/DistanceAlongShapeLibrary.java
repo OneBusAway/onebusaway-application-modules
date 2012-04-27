@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -126,7 +127,7 @@ public class DistanceAlongShapeLibrary {
    * on itself or other weird configurations, many of the potential assignments
    * are just local minimas that won't ultimately have much affect on the final
    * assignment if they don't overlap with the previous or next stop. To help
-   * reduce the set of possible assingments that we'll have to explore, we just
+   * reduce the set of possible assignments that we'll have to explore, we just
    * pick the best assignment and toss out the rest when the set of assignments
    * for a stop don't overlap with the assignments of the previous or next stop.
    * 
@@ -167,7 +168,7 @@ public class DistanceAlongShapeLibrary {
           continue;
       }
 
-      Collections.sort(points);
+      Collections.sort(points, PointAndIndex.DISTANCE_FROM_TARGET_COMPARATOR);
       while (points.size() > 1)
         points.remove(points.size() - 1);
     }
@@ -208,8 +209,6 @@ public class DistanceAlongShapeLibrary {
           projectedShapePoints, shapePointDistance, stopPoint, 0,
           projectedShapePoints.size());
 
-      Collections.sort(assignments);
-
       possibleAssignments.add(assignments);
     }
     return possibleAssignments;
@@ -224,28 +223,70 @@ public class DistanceAlongShapeLibrary {
     checkFirstAndLastStop(stopTimes, possibleAssignments, shapePoints,
         projection, projectedShapePoints);
 
-    List<PointAndIndex> currentAssignment = new ArrayList<PointAndIndex>(
-        possibleAssignments.size());
+    int startIndex = 0;
+    int assingmentCount = 1;
 
-    long count = 1;
-    for (List<PointAndIndex> possibleAssignment : possibleAssignments) {
-      count *= possibleAssignment.size();
-      if (count > _maximumNumberOfPotentialAssignments || count == 0) {
+    /**
+     * We iterate over each stop, examining its possible assignments. If we find
+     * a region of stops where the first and last stop have a single assignment
+     * but the stops in-between have multiple assignments, we compute the best
+     * assignments for that section. We also handle the edge-cases where the
+     * multiple potential assignments occur at the start or end of the route.
+     */
+    for (int index = 0; index < possibleAssignments.size(); index++) {
+      List<PointAndIndex> possibleAssignment = possibleAssignments.get(index);
+      int count = possibleAssignment.size();
+      if (count == 0) {
         constructErrorForPotentialAssignmentCount(shapePoints, stopTimes, count);
+      }
+
+      boolean hasRegion = index > startIndex;
+      boolean hasSingleAssignmentFollowingMultipleAssignments = count == 1
+          && assingmentCount > 1;
+      boolean hasMultipleAssignmentsAndLastPoint = count > 1
+          && index == possibleAssignments.size() - 1;
+
+      if (hasRegion
+          && (hasSingleAssignmentFollowingMultipleAssignments || hasMultipleAssignmentsAndLastPoint)) {
+
+        List<PointAndIndex> currentAssignment = new ArrayList<PointAndIndex>(
+            index - startIndex + 1);
+        Min<Assignment> bestAssignments = new Min<Assignment>();
+        recursivelyConstructAssignments(possibleAssignments, currentAssignment,
+            startIndex, startIndex, index + 1, bestAssignments);
+        if (bestAssignments.isEmpty()) {
+          constructError(shapePoints, stopTimes, possibleAssignments,
+              projection);
+        } else {
+          List<PointAndIndex> bestAssignment = bestAssignments.getMinElement().assigment;
+          for (int bestIndex = 0; bestIndex < bestAssignment.size(); bestIndex++) {
+            possibleAssignments.set(startIndex + bestIndex,
+                Arrays.asList(bestAssignment.get(bestIndex)));
+          }
+        }
+      }
+      if (count == 1) {
+        startIndex = index;
+        assingmentCount = 1;
+      } else {
+        assingmentCount *= count;
+        if (assingmentCount > _maximumNumberOfPotentialAssignments) {
+          constructErrorForPotentialAssignmentCount(shapePoints, stopTimes,
+              count);
+        }
       }
     }
 
-    Min<Assignment> bestAssignments = new Min<Assignment>();
-    recursivelyConstructAssignments(possibleAssignments, currentAssignment, 0,
-        bestAssignments);
-
-    if (bestAssignments.isEmpty()) {
-      constructError(shapePoints, stopTimes, possibleAssignments, projection);
+    List<PointAndIndex> bestAssignment = new ArrayList<PointAndIndex>();
+    for (List<PointAndIndex> possibleAssignment : possibleAssignments) {
+      if (possibleAssignment.size() != 1) {
+        throw new IllegalStateException(
+            "expected just one assignment at this point");
+      }
+      bestAssignment.add(possibleAssignment.get(0));
     }
 
-    Assignment bestAssignment = bestAssignments.getMinElement();
-
-    return bestAssignment.assigment;
+    return bestAssignment;
   }
 
   /**
@@ -326,12 +367,13 @@ public class DistanceAlongShapeLibrary {
 
   private void recursivelyConstructAssignments(
       List<List<PointAndIndex>> possibleAssignments,
-      List<PointAndIndex> currentAssignment, int i, Min<Assignment> best) {
+      List<PointAndIndex> currentAssignment, int index, int indexFrom,
+      int indexTo, Min<Assignment> best) {
 
     /**
      * If we've made it through ALL assignments, we have a valid assignment!
      */
-    if (i == possibleAssignments.size()) {
+    if (index == indexTo) {
 
       double score = 0;
       for (PointAndIndex p : currentAssignment)
@@ -342,14 +384,14 @@ public class DistanceAlongShapeLibrary {
       return;
     }
 
-    List<PointAndIndex> possibleAssignmentsForIndex = possibleAssignments.get(i);
+    List<PointAndIndex> possibleAssignmentsForIndex = possibleAssignments.get(index);
 
     List<PointAndIndex> validAssignments = new ArrayList<PointAndIndex>();
 
     double lastDistanceAlongShape = -1;
 
-    if (i > 0) {
-      PointAndIndex prev = currentAssignment.get(i - 1);
+    if (index > indexFrom) {
+      PointAndIndex prev = currentAssignment.get(index - 1 - indexFrom);
       lastDistanceAlongShape = prev.distanceAlongShape;
     }
 
@@ -374,7 +416,7 @@ public class DistanceAlongShapeLibrary {
       currentAssignment.add(validAssignment);
 
       recursivelyConstructAssignments(possibleAssignments, currentAssignment,
-          i + 1, best);
+          index + 1, indexFrom, indexTo, best);
 
       currentAssignment.remove(currentAssignment.size() - 1);
     }

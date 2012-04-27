@@ -22,7 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
+import org.onebusaway.geospatial.services.UTMLibrary;
+import org.onebusaway.geospatial.services.UTMProjection;
+import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.model.ShapePointsFactory;
 
 public class ShapePointsLibraryTest {
 
@@ -126,6 +131,37 @@ public class ShapePointsLibraryTest {
     pi = result.get(2);
     assertEquals(1.0, pi.point.getX(), 0.0);
     assertEquals(1.0, pi.point.getY(), 0.0);
+  }
+
+  @Test
+  public void test04() {
+
+    ShapePointsFactory factory = new ShapePointsFactory();
+    factory.addPoint(47.66851509562011, -122.29019398384474);
+    factory.addPoint(47.66486634286269, -122.29014033966445);
+    factory.addPoint(47.66486634286269, -122.29560131721877);
+    ShapePoints shapePoints = factory.create();
+
+    UTMProjection projection = UTMLibrary.getProjectionForPoint(
+        shapePoints.getLatForIndex(0), shapePoints.getLonForIndex(0));
+
+    ShapePointsLibrary spl = new ShapePointsLibrary();
+    List<XYPoint> projectedShapePoints = spl.getProjectedShapePoints(
+        shapePoints, projection);
+
+    XYPoint stopPoint = projection.forward(new CoordinatePoint(
+        47.664922340500475, -122.29066873484038));
+
+    double[] distanceAlongShape = {0.0, 405.7, 814.0};
+    List<PointAndIndex> assignments = spl.computePotentialAssignments(
+        projectedShapePoints, distanceAlongShape, stopPoint, 0, 3);
+    assertEquals(2, assignments.size());
+    PointAndIndex assignment = assignments.get(0);
+    assertEquals(398.9, assignment.distanceAlongShape, 0.1);
+    assertEquals(39.6, assignment.distanceFromTarget, 0.1);
+    assignment = assignments.get(1);
+    assertEquals(445.4, assignment.distanceAlongShape, 0.1);
+    assertEquals(6.2, assignment.distanceFromTarget, 0.1);
   }
 
   private XYPoint p(double x, double y) {

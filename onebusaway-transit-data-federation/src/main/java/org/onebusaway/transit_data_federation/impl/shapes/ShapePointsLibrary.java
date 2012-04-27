@@ -173,8 +173,6 @@ public class ShapePointsLibrary {
     if (localMins.isEmpty())
       localMins.addAll(min.getMinElements());
 
-    Collections.sort(localMins);
-
     return localMins;
   }
 }
