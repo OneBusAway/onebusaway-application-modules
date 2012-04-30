@@ -141,6 +141,15 @@ The primary configuration element sets your `bundlePath`, pointing to your [Tran
 In addition, you might optionally consider [changing the default database](database-configuration-guide.html) or
 [adding a real-time data source](realtime-configuration-guide.html).
 
+## Specific Confugration Guides
+
+For configuration details for each of user-interface components, see the specific configuration guides:
+
+* [API Config](api-webapp-configuration-guide.html)
+* [SMS Config](sms-webapp-configuration-guide.html)
+* [Phone Config](phone-webapp-configuration-guide.html)
+* [Web Config](webapp-configuration-guide.html)
+
 ## Configuring Webapps Independently
 
 As mentioned previously, there may be situations where you do not wish to use the `onebusaway-combined-webapp.war`, but
@@ -225,9 +234,3 @@ Each user interface webapp `data-sources.xml` should include these common entrie
 
 </beans>
 ~~~
-
-## Specific Installation Guides
-
-For specific installation and configuration details for each of the webapps, see the specific installation guides:
-
-* [onebusaway-webapp installation guide](webapp-installation-guide.html)
