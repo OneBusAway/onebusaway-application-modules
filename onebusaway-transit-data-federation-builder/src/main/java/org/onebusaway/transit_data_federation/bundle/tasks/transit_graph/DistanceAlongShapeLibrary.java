@@ -272,7 +272,7 @@ public class DistanceAlongShapeLibrary {
         assingmentCount *= count;
         if (assingmentCount > _maximumNumberOfPotentialAssignments) {
           constructErrorForPotentialAssignmentCount(shapePoints, stopTimes,
-              count);
+              assingmentCount);
         }
       }
     }
