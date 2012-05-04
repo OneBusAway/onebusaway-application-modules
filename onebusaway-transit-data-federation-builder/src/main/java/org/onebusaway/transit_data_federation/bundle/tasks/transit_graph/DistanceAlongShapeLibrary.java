@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.collections.Min;
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.XYPoint;
 import org.onebusaway.geospatial.services.UTMLibrary;
@@ -58,6 +59,18 @@ public class DistanceAlongShapeLibrary {
 
   private Set<AgencyAndId> _shapeIdsWeHavePrinted = new HashSet<AgencyAndId>();
 
+  /**
+   * When computing stop-to-shape matches, we will consider multiple potential
+   * matches for a stop if the shape passes by the multiple times, as is the
+   * case in a looped route, for example. A potential match from the stop to
+   * shape will be considered each time the shape is within the
+   * localMinimumThreshold distance of the stop, such that the shape is more
+   * than the localMinimumThreshold distance threshold from the stop in between
+   * the potential matches.
+   * 
+   * @param localMinimumThreshold distance in meters
+   */
+  @ConfigurationParameter
   public void setLocalMinimumThreshold(double localMinimumThreshold) {
     _shapePointsLibrary.setLocalMinimumThreshold(localMinimumThreshold);
   }
@@ -70,11 +83,25 @@ public class DistanceAlongShapeLibrary {
    * 
    * @param maxDistanceFromStopToShapePoint distance in meters
    */
+  @ConfigurationParameter
   public void setMaxDistanceFromStopToShapePoint(
       double maxDistanceFromStopToShapePoint) {
     _maxDistanceFromStopToShapePoint = maxDistanceFromStopToShapePoint;
   }
 
+  /**
+   * When computing stop-to-shape matches, the potential number of assignments
+   * for possible matches can grow so large that checking for the best
+   * assignment could take way too long. This is often the case when dealing
+   * with malformed shapes.
+   * 
+   * This parameter controls the maximum number of potential assignments we are
+   * willing to consider. If the number of potential assignments is higher than
+   * this number, we throw an exception.
+   * 
+   * @param maximumNumberOfPotentialAssignments
+   */
+  @ConfigurationParameter
   public void setMaximumNumberOfPotentialAssignment(
       int maximumNumberOfPotentialAssignments) {
     _maximumNumberOfPotentialAssignments = maximumNumberOfPotentialAssignments;
