@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<jsp:root version="1.2"
+	xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+    xmlns:s="/struts-tags"
+	xmlns:oba="/oba-tags"
+	xmlns:decorator="http://www.opensymphony.com/sitemesh/decorator">
+<jsp:directive.page contentType="text/html" />
+
+<head>
+  <title><decorator:title default="OneBusAway" /></title>
+  <link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-standard.css')}"/>
+  <style type="text/css">
+div.home-header {
+    background: url("<s:url namespace="/p" action="Index@Logo.png" method="attachment"/>") no-repeat scroll 100% bottom transparent;
+}
+  </style>
+  <link rel="icon" type="image/png" href="${oba:resource('/images/Bus.png')}"/>
+  <decorator:head />
+</head>
+
+<body>
+
+<div id="wrapper">
+<div id="container">
+
+<div id="header">
+
+<ul id="mainNav" class="tabs">
+
+<s:set var="uri">${pageContext.request.requestURI}</s:set>
+<s:set var="contextPath">${pageContext.request.contextPath}</s:set>
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <s:if test="#uri.startsWith(#contextPath + '/index') or #uri == #contextPath + '/'">current</s:if>
+  </jsp:attribute>
+  <a href="${pageContext.request.contextPath}/">Home</a>
+</jsp:element>
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <s:if test="#uri.startsWith(#contextPath + '/p/Tools')">current</s:if>
+  </jsp:attribute>
+  <a href="${pageContext.request.contextPath}/p/Tools.action">Tools</a>
+</jsp:element>
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <s:if test="#uri.startsWith(#contextPath + '/p/Research')">current</s:if>
+  </jsp:attribute>
+  <a href="http://onebusaway.org/p/Research.action">Research</a>
+</jsp:element>
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <s:if test="#uri.startsWith(#contextPath + '/p/ContactUs')">current</s:if>
+  </jsp:attribute>
+  <a href="http://onebusaway.org/p/ContactUs.action">Contact Us</a>
+</jsp:element>
+
+<jsp:element name="li">
+  <jsp:attribute name="class">
+    <s:if test="#uri.startsWith(#contextPath + '/user')">current</s:if>
+  </jsp:attribute>
+  <a href="${pageContext.request.contextPath}/user/index.action">Settings</a>
+</jsp:element>
+
+</ul>
+
+<a id="headerTitle" href="${pageContext.request.contextPath}/">OneBusAway</a>
+
+</div>
+
+<decorator:body />
+  
+</div>
+</div>
+
+</body>
+	
+</jsp:root>
