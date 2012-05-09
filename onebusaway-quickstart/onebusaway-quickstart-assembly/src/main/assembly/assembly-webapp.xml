@@ -46,8 +46,23 @@
   </dependencySets>
   <fileSets>
     <fileSet>
-      <directory>src/main/assembly/onebusaway-quickstart-webapp</directory>
-      <outputDirectory>/</outputDirectory>
+      <directory>src/main/assembly/onebusaway-quickstart-webapp/WEB-INF</directory>
+      <outputDirectory>/WEB-INF</outputDirectory>
     </fileSet>
+    <fileSet>
+      <includes>
+        <include>**.wiki</include>
+      </includes>
+      <directory>src/main/assembly/onebusaway-quickstart-webapp/wiki</directory>
+      <outputDirectory>/WEB-INF/classes/org/onebusaway/quickstart/wiki</outputDirectory>
+      <filtered>true</filtered>
+    </fileSet>
+    <fileSet>
+      <excludes>
+        <exclude>**.wiki</exclude>
+      </excludes>
+      <directory>src/main/assembly/onebusaway-quickstart-webapp/wiki</directory>
+      <outputDirectory>/WEB-INF/classes/org/onebusaway/quickstart/wiki</outputDirectory>
+    </fileSet>    
   </fileSets>  
 </assembly>
