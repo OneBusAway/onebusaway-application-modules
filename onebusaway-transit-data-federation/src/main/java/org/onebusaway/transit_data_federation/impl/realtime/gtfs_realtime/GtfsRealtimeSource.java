@@ -156,7 +156,7 @@ public class GtfsRealtimeSource {
     _alertsUrl = alertsUrl;
   }
 
-  public void setRefeshInterval(int refreshInterval) {
+  public void setRefreshInterval(int refreshInterval) {
     _refreshInterval = refreshInterval;
   }
 
@@ -192,8 +192,10 @@ public class GtfsRealtimeSource {
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
 
-    _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
-        new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
+    if (_refreshInterval > 0) {
+      _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
+          new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
+    }
   }
 
   @PreDestroy
@@ -202,6 +204,13 @@ public class GtfsRealtimeSource {
       _refreshTask.cancel(true);
       _refreshTask = null;
     }
+  }
+
+  public void refresh() throws IOException {
+    FeedMessage tripUpdates = readOrReturnDefault(_tripUpdatesUrl);
+    FeedMessage vehiclePositions = readOrReturnDefault(_vehiclePositionsUrl);
+    FeedMessage alerts = readOrReturnDefault(_alertsUrl);
+    handeUpdates(tripUpdates, vehiclePositions, alerts);
   }
 
   /****
@@ -337,14 +346,10 @@ public class GtfsRealtimeSource {
     @Override
     public void run() {
       try {
-        FeedMessage tripUpdates = readOrReturnDefault(_tripUpdatesUrl);
-        FeedMessage vehiclePositions = readOrReturnDefault(_vehiclePositionsUrl);
-        FeedMessage alerts = readOrReturnDefault(_alertsUrl);
-        handeUpdates(tripUpdates, vehiclePositions, alerts);
+        refresh();
       } catch (Throwable ex) {
         _log.warn("Error updating from GTFS-realtime data sources", ex);
       }
     }
   }
-
 }
