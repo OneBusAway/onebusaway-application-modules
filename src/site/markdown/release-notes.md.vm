@@ -4,6 +4,20 @@
 
 $H$H ${currentVersion}
 
+* New Features:
+    * Improve the usability of the trip problem report admin interface to assist in diagnosing tracking problems -
+      [issue](https://github.com/OneBusAway/onebusaway-application-modules/issues/5)
+    * Improved deployment and configuration documentation - [issue](https://github.com/OneBusAway/onebusaway-application-modules/issues/8)
+* Bug Fixes:
+    * More flexible support for stop-to-shape matching - [issue](https://github.com/OneBusAway/onebusaway-application-modules/issues/12)
+    * Add federated method dispatch for agency id / entity id argument mix -
+      [issue](https://github.com/OneBusAway/onebusaway-application-modules/issues/7)
+    * Fix to detect and remove duplicate stop times, so OBA logic to interpolate them can be invoked -
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/fc3388ed19e7a62bbd64fc0e7ff9d2d15d3b901b)
+    * Fix issue where stops are not properly grouped when all trips have the same direction_id value -
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/7d1b35d83a7634903c4961c5d146e06cd19e667e)
+    * Fix typo in setter for refreshInterval in GtfsRealtimeSource -
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/6671050f8c292cb71548e492e8f401985486dabd)
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
 
 $H$H 1.0.6
