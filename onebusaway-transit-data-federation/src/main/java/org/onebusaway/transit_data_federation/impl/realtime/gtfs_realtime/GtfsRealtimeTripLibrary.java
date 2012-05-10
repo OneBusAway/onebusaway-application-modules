@@ -182,6 +182,9 @@ class GtfsRealtimeTripLibrary {
     Map<BlockDescriptor, List<TripUpdate>> tripUpdatesByBlockDescriptor = new FactoryMap<BlockDescriptor, List<TripUpdate>>(
         new ArrayList<TripUpdate>());
 
+    int totalTrips = 0;
+    int unknownTrips = 0;
+
     for (FeedEntity entity : tripUpdates.getEntityList()) {
       TripUpdate tripUpdate = entity.getTripUpdate();
       if (tripUpdate == null) {
@@ -191,14 +194,21 @@ class GtfsRealtimeTripLibrary {
       TripDescriptor trip = tripUpdate.getTrip();
       BlockDescriptor blockDescriptor = getTripDescriptorAsBlockDescriptor(
           trip, true);
-      if (blockDescriptor == null)
+      totalTrips++;
+      if (blockDescriptor == null) {
+        unknownTrips++;
         continue;
+      }
 
       if (!hasDelayValue(tripUpdate)) {
         continue;
       }
 
       tripUpdatesByBlockDescriptor.get(blockDescriptor).add(tripUpdate);
+    }
+
+    if (unknownTrips > 0) {
+      _log.warn("unknown/total trips= {}/{}", unknownTrips, totalTrips);
     }
 
     return tripUpdatesByBlockDescriptor;
