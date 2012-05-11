@@ -48,5 +48,20 @@
       <directory>src/main/assembly/full</directory>
       <outputDirectory>/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <includes>
+        <include>**.wiki</include>
+      </includes>
+      <directory>src/main/assembly/full/wiki</directory>
+      <outputDirectory>/WEB-INF/classes/org/onebusaway/wiki</outputDirectory>
+      <filtered>true</filtered>
+    </fileSet>
+    <fileSet>
+      <excludes>
+        <exclude>**.wiki</exclude>
+      </excludes>
+      <directory>src/main/assembly/full/wiki</directory>
+      <outputDirectory>/WEB-INF/classes/org/onebusaway/wiki</outputDirectory>
+    </fileSet>     
   </fileSets>
 </assembly>

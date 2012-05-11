@@ -94,7 +94,7 @@ webapp:
 ~~~
 <Context path="onebusaway-webapp" docBase="path/to/onebusaway-webapp.war">
   <Parameter name="contextConfigLocation"
-            value="file:path/to/data-sources.xml classpath:org/onebusaway/webapp/application-context-webapp.xml"
+            value="classpath:application-context-webapp.xml file:path/to/data-sources.xml"
          override="false" />
 </Context>
 ~~~
