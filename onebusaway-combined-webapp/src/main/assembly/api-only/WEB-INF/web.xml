@@ -23,11 +23,7 @@
 
   <context-param>
     <param-name>contextConfigLocation</param-name>
-    <param-value>
-            classpath:data-sources.xml
-            classpath:org/onebusaway/api/application-context-webapp.xml
-            classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml
-        </param-value>
+    <param-value>classpath:application-context-webapp.xml classpath:data-sources.xml</param-value>
   </context-param>
     
   <!-- Filters -->

@@ -1,5 +1,7 @@
 # Downloading the Software
 
+Looking for a quick intro to using OneBusAway?  Be sure to check out the [Quick-Start Guide](guides/quickstart-guide.html).
+
 To build your [transit data bundle](guides/transit-data-bundle-guide.html), you will need:
 
 * [onebusaway-transit-data-federation-builder-${currentVersion}.jar](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation-builder&c=withAllDependencies&e=jar&v=${currentVersion}) 
@@ -20,4 +22,5 @@ Optionally, the individual component webapps that make up the OneBusAway applica
 * [onebusaway-sms-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-sms-webapp&e=war&v=${currentVersion}) - sms interface
 * [onebusaway-phone-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-phone-webapp&e=war&v=${currentVersion}) - phone (IVR) interface
 
-You might also consider one of the [OneBusAway Quick-Start Bundles](../../onebusaway-quickstart/current/), which bundle OneBusAway into a single war that's easier to deploy but doesn't offer as much customization. 
+Also, don't forget the [OneBusAway Quick-Start Bundles](guides/quickstart-guide.html), which bundle OneBusAway into a single war that's easier to deploy but doesn't offer as much customization.
+ 

@@ -99,18 +99,22 @@ webapp:
 </Context>
 ~~~
 
+For more info, see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html
+
 It's important to note that when you override contextConfigLocation in this way, you'll need to additionally import the
 `application-context-webapp.xml` for the webapp you are attempting to configure (it's normally included in the
 'contextConfigLocation' entry in web.xml for the webapp, but we lose it when we override).  The location of the webapp
 is dependent on the webapps you are using:
+
+* onebusaway-combined-webapp: classpath:application-context-webapp.xml
+
+If you are deploying the webapps individually, the locations are:
 
 * onebusaway-transit-data-federation-webapp: classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml
 * onebusaway-api-webapp: classpath:org/onebusaway/api/application-context-webapp.xml
 * onebusaway-phone-webapp: classpath:org/onebusaway/phone/application-context-webapp.xml
 * onebusaway-sms-webapp: classpath:org/onebusaway/sms/application-context-webapp.xml
 * onebusaway-webapp: classpath:org/onebusaway/webapp/application-context-webapp.xml
- 
-For more info, see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html
 
 ## Configuring the Combined Webapp
 
