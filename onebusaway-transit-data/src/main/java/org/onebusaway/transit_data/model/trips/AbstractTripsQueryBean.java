@@ -23,21 +23,41 @@ import org.onebusaway.transit_data.model.QueryBean;
 public abstract class AbstractTripsQueryBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
-
+  
   private long time = System.currentTimeMillis();
+  
+  private int minutesBefore = 90;
+  
+  private int minutesAfter = 90;
 
   private int maxCount = 0;
 
   private TripDetailsInclusionBean inclusion = new TripDetailsInclusionBean();
 
-  public long getTime() {
-    return time;
+  public void setMinutesBefore(int time) {
+    this.minutesBefore = time;
+  }
+
+  public void setMinutesAfter(int time) {
+    this.minutesAfter = time;
   }
 
   public void setTime(long time) {
     this.time = time;
   }
 
+  public long getTime() {
+    return time;
+  }
+
+  public int getMinutesBefore() {
+    return minutesBefore;
+  }
+
+  public int getMinutesAfter() {
+    return minutesAfter;
+  }
+  
   public int getMaxCount() {
     return maxCount;
   }
@@ -53,4 +73,5 @@ public abstract class AbstractTripsQueryBean implements Serializable {
   public void setInclusion(TripDetailsInclusionBean inclusion) {
     this.inclusion = inclusion;
   }
+
 }

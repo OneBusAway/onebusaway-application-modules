@@ -46,16 +46,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class BlockStatusServiceImpl implements BlockStatusService {
 
-  /**
-   * Catch late trips up to 90 minutes
-   */
-  private static final long TIME_BEFORE_WINDOW = 90 * 60 * 1000;
-
-  /**
-   * Catch early blocks up to 90 minutes
-   */
-  private static final long TIME_AFTER_WINDOW = 90 * 60 * 1000;
-
   private BlockCalendarService _blockCalendarService;
 
   private BlockLocationService _blockLocationService;
@@ -122,35 +112,29 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   }
 
   @Override
-  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long time) {
+  public List<BlockLocation> getActiveBlocksForAgency(String agencyId, long time, int minBefore, int minAfter) {
 
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForAgencyInTimeRange(
-        agencyId, time, time);
+        agencyId, time - (minBefore * 60 * 1000), time + (minAfter * 60 * 1000));
 
     return getAsLocations(instances, time);
   }
 
   @Override
-  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time) {
-
-    long timeFrom = time - TIME_BEFORE_WINDOW;
-    long timeTo = time + TIME_AFTER_WINDOW;
+  public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time, int minBefore, int minAfter) {
 
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForRouteInTimeRange(
-        routeId, timeFrom, timeTo);
+        routeId, time - (minBefore * 60 * 1000), time + (minAfter * 60 * 1000));
 
     return getAsLocations(instances, time);
   }
 
   @Override
   public List<BlockLocation> getBlocksForBounds(CoordinateBounds bounds,
-      long time) {
-
-    long timeFrom = time - TIME_BEFORE_WINDOW;
-    long timeTo = time + TIME_AFTER_WINDOW;
+      long time, int minBefore, int minAfter) {
 
     List<BlockInstance> instances = _blockGeospatialService.getActiveScheduledBlocksPassingThroughBounds(
-        bounds, timeFrom, timeTo);
+        bounds, time - (minBefore * 60 * 1000), time + (minAfter * 60 * 1000));
 
     List<BlockLocation> locations = getAsLocations(instances, time);
     List<BlockLocation> inRange = new ArrayList<BlockLocation>();
@@ -257,7 +241,6 @@ public class BlockStatusServiceImpl implements BlockStatusService {
       if (vehicleId == null) {
         BlockLocation location = _blockLocationService.getScheduledLocationForBlockInstance(
             instance, time);
-
         if (location != null && location.isInService())
           results.add(location);
       }
