@@ -65,20 +65,6 @@ import org.springframework.stereotype.Component;
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
-  /**
-   * This let's us capture trips that were scheduled to start 30 minutes before
-   * the left-most edge of the user's search window, but that might be running
-   * up to 30 minutes late.
-   */
-  static final int MINUTES_LATE_BUFFER = 30;
-
-  /**
-   * This let's us capture trips that were scheduled to start 10 minutes after
-   * the right-most edge of the user's search window, but that might be running
-   * up to 10 minutes early.
-   */
-  static final int MINUTES_EARLY_BUFFER = 10;
-
   private StopTimeService _stopTimeService;
 
   private BlockLocationService _blockLocationService;
@@ -112,8 +98,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       StopEntry stop, TargetTime targetTime, long fromTime, long toTime) {
 
     // We add a buffer before and after to catch late and early buses
-    Date fromTimeBuffered = new Date(fromTime - MINUTES_LATE_BUFFER * 60 * 1000);
-    Date toTimeBuffered = new Date(toTime + MINUTES_EARLY_BUFFER * 60 * 1000);
+    Date fromTimeBuffered = new Date(fromTime - _blockStatusService.getRunningLateWindow() * 1000);
+    Date toTimeBuffered = new Date(toTime + _blockStatusService.getRunningEarlyWindow() * 1000);
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
         stop, fromTimeBuffered, toTimeBuffered,
@@ -432,8 +418,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     int resultCount = query.getResultCount();
     boolean includePrivateService = query.isIncludePrivateService();
 
-    int runningEarlySlack = applyRealTime ? MINUTES_EARLY_BUFFER * 60 : 0;
-    int runningLateSlack = (applyRealTime ? MINUTES_LATE_BUFFER * 60 : 0)
+    int runningEarlySlack = applyRealTime ? _blockStatusService.getRunningEarlyWindow() : 0;
+    int runningLateSlack = (applyRealTime ? _blockStatusService.getRunningLateWindow() : 0)
         + lookaheadTime;
 
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getNextDeparturesBetweenStopPair(
@@ -456,8 +442,8 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     int resultCount = query.getResultCount();
     boolean includePrivateService = query.isIncludePrivateService();
 
-    int runningEarlySlack = applyRealTime ? MINUTES_EARLY_BUFFER * 60 : 0;
-    int runningLateSlack = applyRealTime ? MINUTES_LATE_BUFFER * 60 : 0;
+    int runningEarlySlack = applyRealTime ? _blockStatusService.getRunningEarlyWindow() : 0;
+    int runningLateSlack = applyRealTime ? _blockStatusService.getRunningLateWindow() : 0;
 
     List<Pair<StopTimeInstance>> pairs = _stopTimeService.getPreviousArrivalsBetweenStopPair(
         fromStop, toStop, tTo, runningEarlySlack, runningLateSlack,

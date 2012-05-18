@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -46,16 +47,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class BlockStatusServiceImpl implements BlockStatusService {
 
-  /**
-   * Catch late trips up to 90 minutes
-   */
-  private static final long TIME_BEFORE_WINDOW = 90 * 60 * 1000;
-
-  /**
-   * Catch early blocks up to 90 minutes
-   */
-  private static final long TIME_AFTER_WINDOW = 90 * 60 * 1000;
-
   private BlockCalendarService _blockCalendarService;
 
   private BlockLocationService _blockLocationService;
@@ -63,6 +54,28 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   private BlockGeospatialService _blockGeospatialService;
 
   private ExtendedCalendarService _extendedCalendarService;
+
+  /**
+   * When searching for blocks to apply real-time information, we will look back
+   * the specified number of seconds for vehicles that are potentially running
+   * late.
+   * 
+   * This let's us capture blocks that were scheduled to end X seconds before
+   * the left-most edge of the user's search window, but that might be running
+   * up to X seconds late.
+   */
+  private int _runningLateWindow = 30 * 60;
+
+  /**
+   * When searching for blocks to apply real-time information, we will look
+   * ahead the specified number of seconds for vehicles that are potentially
+   * running early.
+   * 
+   * This let's us capture trips that were scheduled to start X seconds after
+   * the right-most edge of the user's search window, but that might be running
+   * up to X seconds early.
+   */
+  private int _runningEarlyWindow = 10 * 60;
 
   @Autowired
   public void setActive(BlockCalendarService activeCalendarService) {
@@ -84,6 +97,38 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   public void setExtendedCalendarService(
       ExtendedCalendarService extendedCalendarSerivce) {
     _extendedCalendarService = extendedCalendarSerivce;
+  }
+
+  /**
+   * When searching for blocks to apply real-time information, we will look back
+   * the specified number of seconds for vehicles that are potentially running
+   * late.
+   * 
+   * @param runningLateWindowInSeconds
+   */
+  @ConfigurationParameter
+  public void setRunningLateWindow(int runningLateWindowInSeconds) {
+    _runningLateWindow = runningLateWindowInSeconds;
+  }
+
+  public int getRunningLateWindow() {
+    return _runningLateWindow;
+  }
+
+  /**
+   * When searching for blocks to apply real-time information, we will look
+   * ahead the specified number of seconds for vehicles that are potentially
+   * running early.
+   * 
+   * @param runningEarlyWindowInSeconds time in seconds
+   */
+  @ConfigurationParameter
+  public void setRunningEarlyWindow(int runningEarlyWindowInSeconds) {
+    _runningEarlyWindow = runningEarlyWindowInSeconds;
+  }
+
+  public int getRunningEarlyWindow() {
+    return _runningEarlyWindow;
   }
 
   /****
@@ -133,8 +178,8 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   @Override
   public List<BlockLocation> getBlocksForRoute(AgencyAndId routeId, long time) {
 
-    long timeFrom = time - TIME_BEFORE_WINDOW;
-    long timeTo = time + TIME_AFTER_WINDOW;
+    long timeFrom = time - _runningLateWindow * 1000;
+    long timeTo = time + _runningEarlyWindow * 1000;
 
     List<BlockInstance> instances = _blockCalendarService.getActiveBlocksForRouteInTimeRange(
         routeId, timeFrom, timeTo);
@@ -146,8 +191,8 @@ public class BlockStatusServiceImpl implements BlockStatusService {
   public List<BlockLocation> getBlocksForBounds(CoordinateBounds bounds,
       long time) {
 
-    long timeFrom = time - TIME_BEFORE_WINDOW;
-    long timeTo = time + TIME_AFTER_WINDOW;
+    long timeFrom = time - _runningLateWindow * 1000;
+    long timeTo = time + _runningEarlyWindow * 1000;
 
     List<BlockInstance> instances = _blockGeospatialService.getActiveScheduledBlocksPassingThroughBounds(
         bounds, timeFrom, timeTo);

@@ -34,6 +34,24 @@ import org.onebusaway.transit_data_federation.services.realtime.BlockLocation;
 public interface BlockStatusService {
 
   /**
+   * When searching for blocks to apply real-time information, we will look back
+   * the specified number of seconds for vehicles that are potentially running
+   * late.
+   * 
+   * @return time, in seconds
+   */
+  public int getRunningLateWindow();
+
+  /**
+   * When searching for blocks to apply real-time information, we will look
+   * ahead the specified number of seconds for vehicles that are potentially
+   * running early.
+   * 
+   * @return time, in seconds
+   */
+  public int getRunningEarlyWindow();
+
+  /**
    * @param blockId see {@link Trip#getBlockId()}
    * @param serviceDate the service date the block is operating under
    *          (Unix-time)
