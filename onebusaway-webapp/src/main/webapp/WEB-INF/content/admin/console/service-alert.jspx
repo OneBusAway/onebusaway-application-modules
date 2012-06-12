@@ -40,9 +40,8 @@
 <s:textfield label="Summary" name="summary" value="%{summary}"/>
 <s:textarea label="Description" name="description" value="%{description}" cols="80" rows="5"/>
 <s:select label="Reason" name="reason" headerKey="null" headerValue="Select Reason" list="reasonValues" value="%{reason}"/>
-<!-- <s:select label="Severity" name="severity" headerKey="null" headerValue="Select Severity" list="severityValues" value="%{severity}"/> -->
-<!-- <s:select label="Sensitivity" name="sensitivity" headerKey="null" headerValue="Select Sensitivity" list="sensitivityValues" value="%{sensitivity}"/> -->
-<s:textarea label="Raw" name="raw" value="%{raw}" cols="80" rows="10"/>
+<s:select label="Severity" name="severity" headerKey="null" headerValue="Select Severity" list="severityValues" value="%{severity}"/>
+<s:textarea label="Raw" name="raw" value="%{raw}" cols="80" rows="10" readonly="true"/>
 <s:hidden name="agencyId" value="%{agencyId}"/>
 <s:hidden name="id" value="%{id}"/>
 <s:if test="id != null">
@@ -52,6 +51,32 @@
     <s:submit value="%{getText('create')}"/>
 </s:else>
 </s:form>
+
+<s:iterator value="allAffects" status="it">
+  <s:form action="service-alert-affects!update">
+    <s:textfield label="Agency Id" name="agencyId" value="%{agencyId}"/>
+    <s:textfield label="Route Id" name="routeId" value="%{routeId}"/>
+    <s:textfield label="Direction Id" name="directionId" value="%{directionId}"/>
+    <s:textfield label="Trip Id" name="tripId" value="%{tripId}"/>
+    <s:textfield label="Stop Id" name="stopId" value="%{stopId}"/>
+    <s:hidden name="id" value="%{id}"/>
+    <s:hidden name="index" value="%{#it.index}"/>
+    <s:submit value="Update Affects Clause"/>
+  </s:form>
+  <s:url var="url" action="service-alert-affects!delete">
+    <s:param name="id" value="id"/>
+    <s:param name="index" value="#it.index"/>
+  </s:url>
+  <p><s:a href="%{url}">Delete Affects Clause</s:a></p>  
+</s:iterator>
+
+<s:if test="id != null">
+<s:url var="url" action="service-alert!addAffects">
+    <s:param name="id" value="id"/>
+    <s:param name="agencyId" value="agencyId"/>
+</s:url>
+<p><s:a href="%{url}">Add Affects Clause</s:a></p>
+</s:if>
 
 <s:if test="id != null">
 <s:url var="url" action="service-alert!delete">
