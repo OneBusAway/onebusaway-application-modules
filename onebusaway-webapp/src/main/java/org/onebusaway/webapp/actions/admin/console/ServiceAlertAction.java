@@ -147,10 +147,17 @@ public class ServiceAlertAction extends ActionSupport implements
 
     _model.setReason(string(_model.getReason()));
 
-    if (_model.getId() == null || _model.getId().trim().isEmpty())
+    if (_model.getId() == null || _model.getId().trim().isEmpty()) {
       _model = _transitDataService.createServiceAlert(_agencyId, _model);
-    else
+    }
+    else {
+      ServiceAlertBean existing = _transitDataService.getServiceAlertForId(_model.getId());
+      if (existing != null) {
+        // The updated service alert constructed from the POST won't include affects clauses.
+        _model.setAllAffects(existing.getAllAffects());
+      }
       _transitDataService.updateServiceAlert(_model);
+    }
 
     return "submitSuccess";
   }
