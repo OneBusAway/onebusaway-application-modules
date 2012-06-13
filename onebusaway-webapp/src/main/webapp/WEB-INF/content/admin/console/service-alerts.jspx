@@ -59,7 +59,7 @@
                 <s:param name="id" value="id" />
             </s:url>
             <li><s:a href="%{url}">
-                <s:property value="summary.value" />
+                <s:property value="summaries[0].value" />
             </s:a>
             </li>
         </s:iterator>
