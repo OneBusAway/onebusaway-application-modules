@@ -62,8 +62,8 @@ public class GtfsRealtimeSource {
   private static final ExtensionRegistry _registry = ExtensionRegistry.newInstance();
 
   static {
-    _registry.add(GtfsRealtimeOneBusAway.delay);
-    _registry.add(GtfsRealtimeOneBusAway.timestamp);
+    _registry.add(GtfsRealtimeOneBusAway.obaFeedEntity);
+    _registry.add(GtfsRealtimeOneBusAway.obaTripUpdate);
   }
 
   private AgencyService _agencyService;

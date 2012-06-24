@@ -37,8 +37,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.Position;
@@ -46,7 +44,10 @@ import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
+import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
+import com.google.transit.realtime.GtfsRealtimeOneBusAway;
+import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
 
 class GtfsRealtimeTripLibrary {
 
@@ -216,8 +217,11 @@ class GtfsRealtimeTripLibrary {
 
   private boolean hasDelayValue(TripUpdate tripUpdate) {
 
-    if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.delay)) {
-      return true;
+    if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
+      OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
+      if (obaTripUpdate.hasDelay()) {
+        return true;
+      }
     }
 
     if (tripUpdate.getStopTimeUpdateCount() == 0)
@@ -329,18 +333,21 @@ class GtfsRealtimeTripLibrary {
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
 
-          if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.delay)) {
-            /**
-             * TODO: Improved logic around picking the "best" schedule deviation
-             */
-            int delay = tripUpdate.getExtension(GtfsRealtimeOneBusAway.delay);
-            best.delta = 0;
-            best.isInPast = false;
-            best.scheduleDeviation = delay;
-          }
-
-          if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.timestamp)) {
-            best.timestamp = tripUpdate.getExtension(GtfsRealtimeOneBusAway.timestamp) * 1000;
+          if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
+            OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
+            if (obaTripUpdate.hasDelay()) {
+              /**
+               * TODO: Improved logic around picking the "best" schedule deviation
+               */
+              int delay = obaTripUpdate.getDelay();
+              best.delta = 0;
+              best.isInPast = false;
+              best.scheduleDeviation = delay;
+            }
+            
+            if (obaTripUpdate.hasTimestamp()) {
+              best.timestamp = obaTripUpdate.getTimestamp() * 1000;
+            }
           }
 
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
