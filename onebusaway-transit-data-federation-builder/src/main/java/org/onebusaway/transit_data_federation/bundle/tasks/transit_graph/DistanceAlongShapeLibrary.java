@@ -109,7 +109,7 @@ public class DistanceAlongShapeLibrary {
 
   public PointAndIndex[] getDistancesAlongShape(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes)
-      throws InvalidStopToShapeMappingException, StopIsTooFarFromShapeException {
+      throws DistanceAlongShapeException {
 
     PointAndIndex[] stopTimePoints = new PointAndIndex[stopTimes.size()];
 
@@ -204,10 +204,14 @@ public class DistanceAlongShapeLibrary {
   private void assignmentSanityCheck(ShapePoints shapePoints,
       List<StopTimeEntryImpl> stopTimes,
       List<List<PointAndIndex>> possibleAssignments)
-      throws StopIsTooFarFromShapeException {
+      throws DistanceAlongShapeException {
 
     int stIndex = 0;
     for (List<PointAndIndex> assignments : possibleAssignments) {
+      if (assignments.isEmpty()) {
+        StopTimeEntry stopTime = stopTimes.get(stIndex);
+        throw new InvalidStopToShapeMappingException(stopTime.getTrip());
+      }
       Min<PointAndIndex> m = new Min<PointAndIndex>();
       for (PointAndIndex pindex : assignments)
         m.add(pindex.distanceFromTarget, pindex);

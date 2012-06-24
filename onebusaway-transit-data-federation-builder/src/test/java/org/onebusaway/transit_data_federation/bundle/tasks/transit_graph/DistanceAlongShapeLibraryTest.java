@@ -27,8 +27,6 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.DistanceAlongShapeException;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.InvalidStopToShapeMappingException;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.StopIsTooFarFromShapeException;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
@@ -69,8 +67,7 @@ public class DistanceAlongShapeLibraryTest {
   }
 
   @Test
-  public void test02() throws IOException, InvalidStopToShapeMappingException,
-      StopIsTooFarFromShapeException {
+  public void test02() throws IOException, DistanceAlongShapeException {
     ShapePoints shapePoints = readShapePoints("shapes-02.txt");
     List<StopTimeEntryImpl> stopTimes = readStopTimes("stops-02.txt");
 
@@ -93,8 +90,7 @@ public class DistanceAlongShapeLibraryTest {
   }
 
   @Test
-  public void test03() throws IOException, InvalidStopToShapeMappingException,
-      StopIsTooFarFromShapeException {
+  public void test03() throws IOException, DistanceAlongShapeException {
 
     ShapePoints shapePoints = readShapePoints("shapes-03.txt");
     List<StopTimeEntryImpl> stopTimes = readStopTimes("stops-03.txt");
