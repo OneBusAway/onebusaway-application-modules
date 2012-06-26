@@ -156,8 +156,8 @@
     </tr>
     </s:if>
     <tr>
-        <td>Data:</td>
-        <td><s:property value="data" /></td>
+        <td>Code:</td>
+        <td><s:property value="code" /></td>
     </tr>
     <tr>
         <td>User Comment:</td>

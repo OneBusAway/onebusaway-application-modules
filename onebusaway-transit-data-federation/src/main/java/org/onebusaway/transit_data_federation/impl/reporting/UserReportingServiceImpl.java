@@ -121,7 +121,7 @@ class UserReportingServiceImpl implements UserReportingService {
       record.setStopId(AgencyAndIdLibrary.convertFromString(stopId));
 
     record.setTime(problem.getTime());
-    record.setData(problem.getData());
+    record.setCode(problem.getCode());
     record.setUserComment(problem.getUserComment());
 
     if (!Double.isNaN(problem.getUserLat()))
@@ -149,7 +149,7 @@ class UserReportingServiceImpl implements UserReportingService {
     BlockEntry block = trip.getBlock();
 
     TripProblemReportRecord record = new TripProblemReportRecord();
-    record.setData(problem.getData());
+    record.setCode(problem.getCode());
     record.setServiceDate(problem.getServiceDate());
 
     String vehicleId = problem.getVehicleId();
@@ -397,7 +397,7 @@ class UserReportingServiceImpl implements UserReportingService {
     AgencyAndId stopId = record.getStopId();
 
     StopProblemReportBean bean = new StopProblemReportBean();
-    bean.setData(record.getData());
+    bean.setCode(record.getCode());
     bean.setId(record.getId());
     bean.setStatus(record.getStatus());
     bean.setStopId(AgencyAndIdLibrary.convertToString(stopId));
@@ -429,7 +429,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
     TripProblemReportBean bean = new TripProblemReportBean();
 
-    bean.setData(record.getData());
+    bean.setCode(record.getCode());
     bean.setId(record.getId());
     bean.setServiceDate(record.getServiceDate());
     bean.setStatus(record.getStatus());

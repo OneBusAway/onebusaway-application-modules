@@ -19,6 +19,8 @@ package org.onebusaway.api.actions.api.where;
 import java.io.IOException;
 import java.util.Date;
 
+import net.sf.json.JSONObject;
+
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.exceptions.ServiceException;
@@ -45,11 +47,11 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     super(2);
   }
 
-  @RequiredStringValidator(message="requiredField.tripId")
+  @RequiredStringValidator(message = "requiredField.tripId")
   public void setTripId(String tripId) {
     _model.setTripId(tripId);
   }
-  
+
   public String getTripId() {
     return _model.getTripId();
   }
@@ -57,7 +59,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   public void setServiceDate(long serviceDate) {
     _model.setServiceDate(serviceDate);
   }
-  
+
   public void setVehicleId(String vehicleId) {
     _model.setVehicleId(vehicleId);
   }
@@ -66,8 +68,19 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setStopId(stopId);
   }
 
+  /**
+   * @deprecated use {@link #setCode(String)} instead
+   */
+  @Deprecated
   public void setData(String data) {
-    _model.setData(data);
+    JSONObject json = JSONObject.fromObject(data);
+    if (json.has("code")) {
+      _model.setCode(json.getString("code"));
+    }
+  }
+
+  public void setCode(String code) {
+    _model.setCode(code);
   }
 
   public void setUserComment(String comment) {
@@ -89,15 +102,15 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   public void setUserLon(double lon) {
     _model.setUserLon(lon);
   }
-  
+
   public void setUserLocationAccuracy(double userLocationAccuracy) {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
-  
+
   public DefaultHttpHeaders create() throws IOException, ServiceException {
-    return index();    
+    return index();
   }
-  
+
   @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
   public void setTime(Date time) {
     _time = time.getTime();

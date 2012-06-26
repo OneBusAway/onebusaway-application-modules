@@ -115,6 +115,8 @@ The current list of supported API methods.  Methods that are subject to changed 
 * [current-time](methods/current-time.html) - retrieve the current system time
 * [plan-trip](methods/plan-trip.html) - plan a trip <font color="red">BETA</font>
 * [register-alarm-for-arrival-and-departure-at-stop](methods/register-alarm-for-arrival-and-departure-at-stop.html) - register an alarm for an arrival-departure event
+* [report-problem-with-stop](methods/report-problem-with-stop.html) - submit a user-generated problem for a stop
+* [report-problem-with-trip](methods/report-problem-with-trip.html) - submit a user-generated problem for a trip
 * [route-ids-for-agency](methods/route-ids-for-agency.html) - get a list of all route ids for an agency
 * [route](methods/route.html) - get details for a specific route
 * [routes-for-agency](methods/routes-for-agency.html) - get a list of all routes for an agency
