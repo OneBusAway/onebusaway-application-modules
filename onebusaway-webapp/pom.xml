@@ -241,7 +241,7 @@
             </resource>
             <resource>
               <directory>target/gwt/LoginWidget</directory>
-              <targetPath />
+              <targetPath></targetPath>
             </resource>
             <resource>
               <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
