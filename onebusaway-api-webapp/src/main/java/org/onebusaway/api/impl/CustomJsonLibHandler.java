@@ -90,7 +90,7 @@ public class CustomJsonLibHandler implements ContentTypeHandler {
   }
 
   public String getContentType() {
-    return "text/javascript";
+    return "application/json";
   }
 
   public String getExtension() {
