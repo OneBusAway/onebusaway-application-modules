@@ -39,6 +39,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -49,6 +51,8 @@ import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 
 public class ServiceAlertsServiceImplTest {
@@ -110,6 +114,63 @@ public class ServiceAlertsServiceImplTest {
     assertTrue(alerts.contains(serviceAlert2));
   }
 
+  @Test
+  public void testGetServiceAlertsWithTime() {
+    String agencyId = "1";
+    
+    // No publication window
+    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
+    Affects.Builder builderForValue = Affects.newBuilder();
+    builderForValue.setAgencyId(agencyId);
+    builder1.addAffects(builderForValue );
+    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
+        agencyId);
+
+    // Open-ended publication window ends in the past, should get filtered out
+    ServiceAlert serviceAlert2 = addServiceAlertWithTimeRange(agencyId, 
+        createTimeRange(0, System.currentTimeMillis()));
+
+    // Closed publication window starts in future, should get filtered out
+    ServiceAlert serviceAlert3 = addServiceAlertWithTimeRange(agencyId,
+        createTimeRange(System.currentTimeMillis()+(60*60*1000), System.currentTimeMillis()+(60*60*1000*2)));
+
+    // Closed publication window contains time, should get included
+    ServiceAlert serviceAlert4 = addServiceAlertWithTimeRange(agencyId, 
+        createTimeRange(System.currentTimeMillis()-(60*60*1000), System.currentTimeMillis()+(60*60*1000)));
+
+    SituationQueryBean query = new SituationQueryBean();
+    query.setAgencyId(agencyId);
+    query.setTime(System.currentTimeMillis());
+    
+    List<ServiceAlert> alerts = _service.getServiceAlerts(query);
+    assertEquals(2, alerts.size());
+    assertTrue(alerts.contains(serviceAlert1));
+    assertTrue(!alerts.contains(serviceAlert2));
+    assertTrue(!alerts.contains(serviceAlert3));
+    assertTrue(alerts.contains(serviceAlert4));
+  }
+
+  private TimeRange createTimeRange(long start, long end) {
+    Builder timeRangeBuilder = TimeRange.newBuilder();
+    if (start != 0)
+      timeRangeBuilder.setStart(start);
+    if (end != 0)
+      timeRangeBuilder.setEnd(end);
+    TimeRange timeRange = timeRangeBuilder.build();
+    return timeRange;
+  }
+
+  private ServiceAlert addServiceAlertWithTimeRange(String agencyId, TimeRange timeRange) {
+    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
+    Affects.Builder builderForValue2 = Affects.newBuilder();
+    builderForValue2.setAgencyId(agencyId);
+    builder2.addAffects(builderForValue2 );
+    builder2.addPublicationWindow(timeRange );
+    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
+        agencyId);
+    return serviceAlert2;
+  }
+  
   @Test
   public void testGetServiceAlertsForFederatedAgencyId() {
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();
