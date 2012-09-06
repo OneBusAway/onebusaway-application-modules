@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.RouteIdAndDirection;
@@ -328,13 +329,47 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
         }
       }
     }
-
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
+    
+    List<ServiceAlert> alerts = getServiceAlertIdsAsObjects(serviceAlertIds);
+    
+    filterByTime(query, alerts);
+    
+    return alerts;
   }
 
   /****
    * Private Methods
    ****/
+
+  private void filterByTime(SituationQueryBean query, List<ServiceAlert> alerts) {
+    long queryTime = query.getTime();
+    if (queryTime != 0) {
+      Predicate predicate = new Predicate() {
+        private long queryTime;
+        @Override
+        public boolean evaluate(Object arg0) {
+          ServiceAlert alert = (ServiceAlert)arg0;
+          List<TimeRange> list = alert.getPublicationWindowList();
+          if (list.isEmpty()) {
+            return true;
+          }
+          // If we're inside *any* publication window, return true
+          for (TimeRange t: list) {
+            if ((t.getStart() <= queryTime) && (queryTime <= t.getEnd())) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        public Predicate init(long queryTime) {
+          this.queryTime = queryTime;
+          return this;
+        }
+      }.init(queryTime);
+      CollectionUtils.filter(alerts, predicate );
+    }
+  }
 
   private void updateReferences(ServiceAlert serviceAlert) {
     AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
