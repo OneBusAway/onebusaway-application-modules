@@ -64,6 +64,13 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsServiceImpl.class);
 
+  /**
+   * While a service alert affects clause ({@link Affects} or
+   * {@link SituationQueryBean.AffectsBean}) might specify any combination of
+   * agency, route, trip, stop, etc. in practice, we only support a couple of
+   * specific combinations for applying alerts. We enumerate those specific
+   * combinations here so that they can be identified in queries.
+   */
   private enum AffectsType {
     AGENCY, ROUTE, ROUTE_DIRECTION, ROUTE_STOP, ROUTE_DIRECTION_STOP, TRIP, TRIP_STOP, STOP, UNSUPPORTED
   }
@@ -298,7 +305,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
         case AGENCY: {
           /**
            * Note we are treating the query's agency ID as that of what the
-           * service alert affects, not the alert's agency ID.
+           * service alert affects, not the alert's federated agency ID.
            */
           getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId,
               affects.getAgencyId(), serviceAlertIds);
