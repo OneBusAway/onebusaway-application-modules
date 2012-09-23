@@ -91,9 +91,6 @@ public interface ServiceAlertsService {
   public List<ServiceAlert> getServiceAlertsForStopId(long time,
       AgencyAndId stopId);
   
-  public List<ServiceAlert> getServiceAlertsForStopIds(long time,
-      Iterable<AgencyAndId> stopIds);
-
   public List<ServiceAlert> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId);
