@@ -41,22 +41,7 @@ public class SituationQueryBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  // Asked Brian about time in developer list, he said:
-  // "Generally, I'd set it to now(). You can use it to query what service
-  // ids were active at some point in the past or future by changing the
-  // time value."
-  // http://groups.google.com/group/onebusaway-developers/msg/fb9b44cd9ba7bef4?hl=en
-  private long time;
-
   private List<AffectsBean> affects = new ArrayList<AffectsBean>();
-
-  public long getTime() {
-    return time;
-  }
-
-  public void setTime(long time) {
-    this.time = time;
-  }
 
   public List<AffectsBean> getAffects() {
     return affects;
