@@ -44,6 +44,25 @@ div#tripProblemReportMap {
 	height: 300px;
 }
 
+div#mapLegendLabel {
+	margin-top: 1em;
+	font-weight: bold;
+	border-bottom: 1px black solid;		
+	width: 400px;
+}
+
+table#mapLegend {
+	margin-top: 1em; 	
+}
+
+table#mapLegend td {
+	padding: 4px;
+}
+
+table#mapLegend td:first-child {
+	text-align: center;
+}
+
 #tripProblemReportTable {
 	position: absolute;
 	top: 0px;
@@ -59,6 +78,11 @@ div#tripProblemReportMap {
 #tripProblemReportTable td:first-child label {
 	font-weight: bold;
 	text-align: right;	
+}
+
+#tripProblemReportTable td.warning {
+	font-weight: bold;
+	color: red;
 }
 
 #vehicleLocationRecords {

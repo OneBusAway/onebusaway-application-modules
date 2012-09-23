@@ -49,7 +49,7 @@
 	  <div>
         <s:a href="%{agency.url}" cssStyle="font-weight: bold">
 		  <s:property value="agency.name" />
-		</s:a> (<s:a href="index.html#m(location)lat(%{lat})lon(%{lon})accuracy(4)"><oba:message key="agencies.ShowOnMap"/></s:a>)
+		</s:a> (<s:a href="index.action#m(location)lat(%{lat})lon(%{lon})accuracy(4)"><oba:message key="agencies.ShowOnMap"/></s:a>)
       </div>
 	</s:iterator>
 </div>

@@ -11,6 +11,9 @@ GTFS-realtime Arguments:
   -gtfsRealtimeAlertsUrl=url - indicate that GTFS-realtime alerts should be queried from the specified URL
   -gtfsRealtimeRefreshInterval=secs - indicate how often, in seconds, GTFS-realtime data should be polled (default=30)
   
+  -PobjectName.propertyName=value - override a OBA config setting, as described at:
+    http://developer.onebusaway.org/modules/onebusaway-application-modules/${project.version}/oba-configs/index.html
+  
 Running the webapp:
 
   In the simplest case, you run the webapp by pointing it at your previously-built transit data bundle

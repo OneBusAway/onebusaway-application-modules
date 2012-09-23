@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -45,8 +47,6 @@ import org.onebusaway.users.services.UserPropertiesService;
 import org.onebusaway.users.services.UserService;
 import org.onebusaway.users.services.internal.UserIndexRegistrationService;
 import org.onebusaway.users.services.internal.UserRegistration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.providers.encoding.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -54,8 +54,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class UserServiceImpl implements UserService {
-
-  private Logger _log = LoggerFactory.getLogger(UserServiceImpl.class);
 
   private UserDao _userDao;
 
@@ -70,6 +68,10 @@ public class UserServiceImpl implements UserService {
   private PasswordEncoder _passwordEncoder;
 
   private ExecutorService _executors;
+
+  private Object _deleteStaleUsersLock = new Object();
+
+  private Future<?> _deleteStaleUsersTask;
 
   @Autowired
   public void setUserDao(UserDao dao) {
@@ -443,10 +445,41 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void deleteStaleUsers() {
+    synchronized (_deleteStaleUsersLock) {
+      if (_deleteStaleUsersTask != null && !_deleteStaleUsersTask.isDone()) {
+        return;
+      }
+      Calendar c = Calendar.getInstance();
+      c.add(Calendar.MONTH, -1);
+      Date lastAccessTime = c.getTime();
+      _deleteStaleUsersTask = _executors.submit(new DeleteStaleUsersTask(
+          lastAccessTime));
+    }
+  }
+
+  @Override
+  public boolean isDeletingStaleUsers() {
+    synchronized (_deleteStaleUsersLock) {
+      return _deleteStaleUsersTask != null && !_deleteStaleUsersTask.isDone();
+    }
+  }
+
+  @Override
+  public void cancelDeleteStaleUsers() {
+    synchronized (_deleteStaleUsersLock) {
+      if (_deleteStaleUsersTask != null && !_deleteStaleUsersTask.isDone()) {
+        _deleteStaleUsersTask.cancel(true);
+        _deleteStaleUsersTask = null;
+      }
+    }
+  }
+
+  @Override
+  public long getNumberOfStaleUsers() {
     Calendar c = Calendar.getInstance();
     c.add(Calendar.MONTH, -1);
     Date lastAccessTime = c.getTime();
-    _executors.submit(new DeleteStaleUsersTask(lastAccessTime));
+    return _userDao.getNumberOfStaleUsers(lastAccessTime);
   }
 
   /****
@@ -484,18 +517,34 @@ public class UserServiceImpl implements UserService {
     return bean.getMinApiRequestInterval();
   }
 
-  private boolean deleteStaleUsers(Date lastAccessTime) {
+  /**
+   * Unfortunately, deleting a user is a somewhat complex operation, so we can
+   * do it in bulk (TODO: maybe someone can figure out a clever cascading bulk
+   * delete that plays well with all the caches / etc).
+   * 
+   * @param lastAccessTime
+   */
+  private void deleteStaleUsers(Date lastAccessTime) {
 
-    List<Integer> userIds = _userDao.getStaleUserIdsInRange(lastAccessTime, 0,
-        100);
+    while (true) {
+      List<Integer> userIds = _userDao.getStaleUserIdsInRange(lastAccessTime,
+          0, 100);
 
-    for (int userId : userIds) {
-      User user = _userDao.getUserForId(userId);
-      if (user != null)
-        _userDao.deleteUser(user);
+      if (userIds.isEmpty()) {
+        return;
+      }
+
+      for (int userId : userIds) {
+        if (Thread.interrupted() ) {
+          return;
+        }
+        User user = _userDao.getUserForId(userId);
+        if (user != null) {
+          _userDao.deleteUser(user);
+        }
+        Thread.yield();
+      }
     }
-
-    return !userIds.isEmpty();
   }
 
   private class DeleteStaleUsersTask implements Runnable {
@@ -508,10 +557,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void run() {
-      if (deleteStaleUsers(_lastAccessTime))
-        deleteStaleUsers();
-      else
-        _log.info("no more stale users to delete");
+      deleteStaleUsers(_lastAccessTime);
     }
   }
 }

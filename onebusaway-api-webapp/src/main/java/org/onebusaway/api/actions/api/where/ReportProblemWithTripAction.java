@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +17,9 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
+import java.util.Date;
+
+import net.sf.json.JSONObject;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -25,6 +29,7 @@ import org.onebusaway.transit_data.model.problems.TripProblemReportBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
 import com.opensymphony.xwork2.validator.annotations.RequiredStringValidator;
 
 public class ReportProblemWithTripAction extends ApiActionSupport {
@@ -36,15 +41,17 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
 
   private TripProblemReportBean _model = new TripProblemReportBean();
 
+  private long _time = System.currentTimeMillis();
+
   public ReportProblemWithTripAction() {
     super(2);
   }
 
-  @RequiredStringValidator(message="requiredField.tripId")
+  @RequiredStringValidator(message = "requiredField.tripId")
   public void setTripId(String tripId) {
     _model.setTripId(tripId);
   }
-  
+
   public String getTripId() {
     return _model.getTripId();
   }
@@ -52,7 +59,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   public void setServiceDate(long serviceDate) {
     _model.setServiceDate(serviceDate);
   }
-  
+
   public void setVehicleId(String vehicleId) {
     _model.setVehicleId(vehicleId);
   }
@@ -61,8 +68,19 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setStopId(stopId);
   }
 
+  /**
+   * @deprecated use {@link #setCode(String)} instead
+   */
+  @Deprecated
   public void setData(String data) {
-    _model.setData(data);
+    JSONObject json = JSONObject.fromObject(data);
+    if (json.has("code")) {
+      _model.setCode(json.getString("code"));
+    }
+  }
+
+  public void setCode(String code) {
+    _model.setCode(code);
   }
 
   public void setUserComment(String comment) {
@@ -84,13 +102,18 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   public void setUserLon(double lon) {
     _model.setUserLon(lon);
   }
-  
+
   public void setUserLocationAccuracy(double userLocationAccuracy) {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
-  
+
   public DefaultHttpHeaders create() throws IOException, ServiceException {
-    return index();    
+    return index();
+  }
+
+  @TypeConversion(converter = "org.onebusaway.presentation.impl.conversion.DateTimeConverter")
+  public void setTime(Date time) {
+    _time = time.getTime();
   }
 
   public DefaultHttpHeaders index() throws IOException, ServiceException {
@@ -98,7 +121,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     if (hasErrors())
       return setValidationErrorsResponse();
 
-    _model.setTime(System.currentTimeMillis());
+    _model.setTime(_time);
     _model.setStatus(EProblemReportStatus.NEW);
     _service.reportProblemWithTrip(_model);
 

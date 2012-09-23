@@ -19,12 +19,26 @@ import javax.servlet.ServletContext;
 
 public class ServletLibrary {
 
+  /**
+   * TODO(bdferris): This method of determining the context path is pretty
+   * hacky. See if we can refactor existing users of this method to do something
+   * different.
+   * 
+   * @param context
+   * @return
+   * @deprecated avoid using this if you can help it.
+   */
+  @Deprecated
   public static String getContextPath(ServletContext context) {
 
     // Get the context path without the request.
     String contextPath = "";
     try {
       String path = context.getResource("/").getPath();
+      if (path.contains("jetty")
+          && path.contains("onebusaway-quickstart-assembly")) {
+        return "";
+      }
       contextPath = path.substring(0, path.lastIndexOf("/"));
       contextPath = contextPath.substring(contextPath.lastIndexOf("/"));
       if (contextPath.equals("/localhost"))

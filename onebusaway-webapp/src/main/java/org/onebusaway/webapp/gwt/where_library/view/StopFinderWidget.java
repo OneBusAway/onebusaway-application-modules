@@ -23,6 +23,8 @@ import org.onebusaway.webapp.gwt.where_library.view.events.StopClickedHandler;
 import org.onebusaway.webapp.gwt.where_library.view.stops.TransitMapManager;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.maps.client.InfoWindow;
 import com.google.gwt.maps.client.InfoWindowContent;
@@ -105,8 +107,11 @@ public class StopFinderWidget extends Composite {
     
 
     // We delay initialization of the map
-    DeferredCommand.addCommand(new Command() {
+    Scheduler scheduler = Scheduler.get();
+    scheduler.scheduleDeferred(new ScheduledCommand() {
+      @Override
       public void execute() {
+      
         _map.checkResizeAndCenter();
         
         CoordinateBounds b = _config.getBounds();

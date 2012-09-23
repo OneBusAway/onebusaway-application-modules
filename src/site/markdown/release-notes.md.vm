@@ -6,7 +6,65 @@ $H$H ${currentVersion}
 
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
 
-$H$H ${currentVersion}
+$H$H 1.0.7
+
+* New Features:
+    * Improve the usability of the trip problem report admin interface to assist in diagnosing tracking problems -
+      [issue](https://github.com/OneBusAway/onebusaway-application-modules/issues/5)
+    * Improved deployment and configuration documentation - [issue](https://github.com/OneBusAway/onebusaway-application-modules/issues/8)
+* Bug Fixes:
+    * More flexible support for stop-to-shape matching - [issue](https://github.com/OneBusAway/onebusaway-application-modules/issues/12)
+    * Add federated method dispatch for agency id / entity id argument mix -
+      [issue](https://github.com/OneBusAway/onebusaway-application-modules/issues/7)
+    * Fix to detect and remove duplicate stop times, so OBA logic to interpolate them can be invoked -
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/fc3388ed19e7a62bbd64fc0e7ff9d2d15d3b901b)
+    * Fix issue where stops are not properly grouped when all trips have the same direction_id value -
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/7d1b35d83a7634903c4961c5d146e06cd19e667e)
+    * Fix typo in setter for refreshInterval in GtfsRealtimeSource -
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/6671050f8c292cb71548e492e8f401985486dabd)
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.7/
+
+$H$H 1.0.6
+
+* New Features:
+    * Add [@ConfigurationParameter](apidocs/org/onebusaway/container/ConfigurationParameter.html) annotation for marking
+      important OneBusAway bean configuration parameters.  Also add support for automatically generating
+      [documentation](oba-configs/index.html) for these parameters.
+    * Make the Google Maps API key a configurable parameter: `defaultWebappConfigurationSource.googleMapsApiKey`
+    * Allow such bean properties to be overriden from the command-line for the webapp quickstart with the same
+      -PbeanName.propertyName=value syntax used in the bundle builder command-line app.
+    * Add more content to the trip problem report page to make it easier to diagnose problems.
+    * Add a number of method for managing stale user accounts.
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/5fccc28658da7e2290ebf98c476d84fc655a1f51)  
+* Bug Fixes:
+    * A number of fixes for Trip and Stop Problem reporting to handle the situation when a report refers to a stop or
+      trip that is no longer loaded in the transit bundle. 
+    * Upgrade to struts 2.2.3.1, which hides those annoying GWT class exceptions on webapp startup.
+    * ConfigurationService config cache was not properly reset on application startup.
+    * In the VehicleLocationRecords API Action, the `vehicleId`, `fromTime`, and `toTime` parameters were not being
+      properly set for the action.
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/826b4bba2a67ec28f682b6431bd5965cd34fbe10)
+    * Make sure vehicleId is properly set when creating a TripProblemReportBean from a DB record.
+      [commit](https://github.com/OneBusAway/onebusaway-application-modules/commit/cbd1a132fcb5d518087afb9134b8580b37b9cad5)
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.6/
+
+$H$H 1.0.5
+
+* Better computation of agency coverage area, using the actual routes > trips > stops to compute coverage.
+* Better display of agencies on agency map, expanding map to show agency bounds in addition to agency center point.
+* Bug fixes for quick-start webapp, mostly to deal with quirks of embedded Jetty webapp container.
+* Add 404 page-not-found behavior to the root onebusaway-webapp index action, since it's called by default if another
+  action can't be found for a URL.
+* Refactor ConfigurationService to accept the webapp context-path as a parameter.  Attempting to detect the
+  context-path automatically was proving to be a bit messy under different containers.
+* Change how dynamic namespace matching works for the wiki (/p/*) action. The new name-based matching method doesn't
+  require direct access to the underlying Struts ActionProxy and also gets rid of a ton of annoying log messages when
+  running under Jetty.
+* Add a configuration parameter to disable location interpolation in the BlockLocationServiceImpl.
+* Remove a number of unused dependencies to get the size of release binaries down a bit.  
+* Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.5/
+
+$H$H 1.0.4
 
 * Merge some changes from the OneBusAway NYC branch.
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/1.0.4/

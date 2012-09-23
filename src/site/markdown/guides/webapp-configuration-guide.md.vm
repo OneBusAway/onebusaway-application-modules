@@ -1,4 +1,4 @@
-# onebusaway-webapp Configuration Guide
+# Web Configuration Guide
 
 This guide will instruct you on how to configure an instance of `onebusaway-webapp`.  These are specific configuration
 instructions, part of your larger [OneBusAway installation](installation-guide.html).  The `onebusaway-wepapp` powers
@@ -27,10 +27,10 @@ to your `data-sources.xml` config file:
     <property name="xwikiUrl" value="http://wiki.mydomain.org" />
 </bean>
 
-    <bean id="wikiRenderingService" class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl">
+<bean id="wikiRenderingService" class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl">
     <property name="wikiDocumentViewUrl" value="/p/%{documentName}.action" />
-    <property name="wikiDocumentEditUrl" value="http://wiki.mydomain.org/bin/edit/Main/%{documentName}" />
     <property name="wikiAttachmentUrl" value="http://wiki.mydomain.org/bin/download/Main/%{documentName}/%{attachmentName}" />
+    <property name="wikiDocumentEditUrl" value="http://wiki.mydomain.org/bin/edit/Main/%{documentName}" />
 </bean>
 ~~~
 

@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+    Copyright (C) 2012 Google, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+    <session-factory>
+
+        <!-- Database connection settings -->
+        <property name="connection.driver_class">org.hsqldb.jdbcDriver</property>
+        <property name="connection.url">jdbc:hsqldb:mem:org_onebusaway_temporary</property>
+        <property name="connection.username">sa</property>
+        <property name="connection.password"></property>
+
+        <!-- JDBC connection pool (use the built-in) -->
+        <property name="connection.pool_size">1</property>
+
+        <!-- SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.HSQLDialect</property>
+
+        <!-- Enable Hibernate's automatic session context management -->
+        <property name="current_session_context_class">thread</property>
+
+        <!-- Disable the second-level cache  -->
+        <property name="cache.provider_class">org.hibernate.cache.HashtableCacheProvider</property>
+
+        <!-- Echo all executed SQL to stdout -->
+        <property name="show_sql">false</property>
+
+        <!-- Drop and re-create the database schema on startup -->
+        <property name="hbm2ddl.auto">create</property>
+        
+        <mapping class="org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord"/>
+        <mapping class="org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory"/>
+        <mapping class="org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord"/>
+        <mapping class="org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord"/>
+        
+        <mapping resource="org/onebusaway/transit_data_federation/impl/realtime/BlockLocationRecordDaoImpl.hibernate.xml" />
+        <mapping resource="org/onebusaway/transit_data_federation/impl/reporting/UserReportingDaoImpl.hibernate.xml" />
+
+    </session-factory>
+
+</hibernate-configuration>

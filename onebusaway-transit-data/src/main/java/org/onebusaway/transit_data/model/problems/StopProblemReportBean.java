@@ -29,7 +29,13 @@ public class StopProblemReportBean implements Serializable {
 
   private String stopId;
 
+  /**
+   * @deprecated see {@link #code} instead
+   */
+  @Deprecated
   private String data;
+
+  private String code;
 
   private String userComment;
 
@@ -40,7 +46,7 @@ public class StopProblemReportBean implements Serializable {
   private double userLocationAccuracy;
 
   private EProblemReportStatus status;
-  
+
   private StopBean stop;
 
   public long getId() {
@@ -67,12 +73,22 @@ public class StopProblemReportBean implements Serializable {
     this.stopId = stopId;
   }
 
+  @Deprecated
   public String getData() {
     return data;
   }
 
+  @Deprecated
   public void setData(String data) {
     this.data = data;
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
   }
 
   public String getUserComment() {

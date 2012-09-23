@@ -22,10 +22,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.onebusaway.collections.tuple.T2;
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopTimeInstanceBean;
+import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
+import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
 import org.onebusaway.transit_data.model.problems.PlannedTripProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportBean;
 import org.onebusaway.transit_data.model.problems.StopProblemReportQueryBean;
@@ -118,7 +121,7 @@ class UserReportingServiceImpl implements UserReportingService {
       record.setStopId(AgencyAndIdLibrary.convertFromString(stopId));
 
     record.setTime(problem.getTime());
-    record.setData(problem.getData());
+    record.setCode(problem.getCode());
     record.setUserComment(problem.getUserComment());
 
     if (!Double.isNaN(problem.getUserLat()))
@@ -146,7 +149,7 @@ class UserReportingServiceImpl implements UserReportingService {
     BlockEntry block = trip.getBlock();
 
     TripProblemReportRecord record = new TripProblemReportRecord();
-    record.setData(problem.getData());
+    record.setCode(problem.getCode());
     record.setServiceDate(problem.getServiceDate());
 
     String vehicleId = problem.getVehicleId();
@@ -163,11 +166,12 @@ class UserReportingServiceImpl implements UserReportingService {
 
     record.setUserComment(problem.getUserComment());
 
-    if (!Double.isNaN(problem.getUserLat()))
+    if (problem.getUserLat() != null && !Double.isNaN(problem.getUserLat()))
       record.setUserLat(problem.getUserLat());
-    if (!Double.isNaN(problem.getUserLon()))
+    if (problem.getUserLon() != null && !Double.isNaN(problem.getUserLon()))
       record.setUserLon(problem.getUserLon());
-    if (!Double.isNaN(problem.getUserLocationAccuracy()))
+    if (problem.getUserLocationAccuracy() != null
+        && !Double.isNaN(problem.getUserLocationAccuracy()))
       record.setUserLocationAccuracy(problem.getUserLocationAccuracy());
 
     record.setUserOnVehicle(problem.isUserOnVehicle());
@@ -235,22 +239,37 @@ class UserReportingServiceImpl implements UserReportingService {
 
   @Override
   public ListBean<TripProblemReportSummaryBean> getTripProblemReportSummaries(
-      TripProblemReportQueryBean query) {
+      TripProblemReportQueryBean query, ETripProblemGroupBy groupBy) {
 
-    List<T2<AgencyAndId, Integer>> records = _userReportingDao.getTripProblemReportSummaries(
-        query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
-        query.getStatus());
+    List<T2<Object, Integer>> records = _userReportingDao.getTripProblemReportSummaries(
+        query, groupBy);
 
     List<TripProblemReportSummaryBean> beans = new ArrayList<TripProblemReportSummaryBean>(
         records.size());
 
-    for (T2<AgencyAndId, Integer> record : records) {
-      AgencyAndId tripId = record.getFirst();
-      Integer count = record.getSecond();
+    for (T2<Object, Integer> record : records) {
+
       TripProblemReportSummaryBean bean = new TripProblemReportSummaryBean();
-      bean.setTrip(_tripBeanService.getTripForId(tripId));
-      bean.setStatus(query.getStatus());
-      bean.setCount(count);
+      bean.setCount(record.getSecond());
+
+      switch (groupBy) {
+        case TRIP: {
+          AgencyAndId tripId = (AgencyAndId) record.getFirst();
+          bean.setTrip(_tripBeanService.getTripForId(tripId));
+          break;
+        }
+        case STATUS: {
+          EProblemReportStatus status = (EProblemReportStatus) record.getFirst();
+          bean.setStatus(status);
+          break;
+        }
+        case LABEL: {
+          String label = (String) record.getFirst();
+          bean.setLabel(label);
+          break;
+        }
+      }
+
       beans.add(bean);
     }
 
@@ -271,9 +290,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
   public ListBean<TripProblemReportBean> getTripProblemReports(
       TripProblemReportQueryBean query) {
-    List<TripProblemReportRecord> records = _userReportingDao.getTripProblemReports(
-        query.getAgencyId(), query.getTimeFrom(), query.getTimeTo(),
-        query.getStatus());
+    List<TripProblemReportRecord> records = _userReportingDao.getTripProblemReports(query);
     List<TripProblemReportBean> beans = new ArrayList<TripProblemReportBean>(
         records.size());
     for (TripProblemReportRecord record : records)
@@ -380,7 +397,7 @@ class UserReportingServiceImpl implements UserReportingService {
     AgencyAndId stopId = record.getStopId();
 
     StopProblemReportBean bean = new StopProblemReportBean();
-    bean.setData(record.getData());
+    bean.setCode(record.getCode());
     bean.setId(record.getId());
     bean.setStatus(record.getStatus());
     bean.setStopId(AgencyAndIdLibrary.convertToString(stopId));
@@ -394,8 +411,13 @@ class UserReportingServiceImpl implements UserReportingService {
     if (record.getUserLocationAccuracy() != null)
       bean.setUserLocationAccuracy(record.getUserLocationAccuracy());
 
-    if (stopId != null)
-      bean.setStop(_stopBeanService.getStopForId(stopId));
+    if (stopId != null) {
+      try {
+        bean.setStop(_stopBeanService.getStopForId(stopId));
+      } catch (NoSuchStopServiceException ex) {
+
+      }
+    }
 
     return bean;
   }
@@ -407,7 +429,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
     TripProblemReportBean bean = new TripProblemReportBean();
 
-    bean.setData(record.getData());
+    bean.setCode(record.getCode());
     bean.setId(record.getId());
     bean.setServiceDate(record.getServiceDate());
     bean.setStatus(record.getStatus());
@@ -426,15 +448,23 @@ class UserReportingServiceImpl implements UserReportingService {
 
     bean.setPredicted(record.isPredicted());
 
+    bean.setVehicleId(AgencyAndIdLibrary.convertToString(record.getVehicleId()));
     bean.setDistanceAlongBlock(record.getDistanceAlongBlock());
     bean.setScheduleDeviation(record.getScheduleDeviation());
     bean.setVehicleLat(record.getVehicleLat());
     bean.setVehicleLon(record.getVehicleLon());
 
-    if (stopId != null)
-      bean.setStop(_stopBeanService.getStopForId(stopId));
-    if (tripId != null)
+    if (stopId != null) {
+      try {
+        bean.setStop(_stopBeanService.getStopForId(stopId));
+      } catch (NoSuchStopServiceException ex) {
+
+      }
+    }
+
+    if (tripId != null) {
       bean.setTrip(_tripBeanService.getTripForId(tripId));
+    }
 
     if (tripId != null && stopId != null) {
       TripEntry trip = _graph.getTripEntryForId(tripId);
@@ -455,7 +485,7 @@ class UserReportingServiceImpl implements UserReportingService {
 
         ArrivalAndDepartureInstance instance = _arrivalAndDepartureService.getArrivalAndDepartureForStop(query);
 
-        if (instance != null) {          
+        if (instance != null) {
           StopTimeInstance sti = instance.getStopTimeInstance();
           StopTimeInstanceBean stopTimeBean = _stopTimeBeanService.getStopTimeInstanceAsBean(sti);
           bean.setStopTime(stopTimeBean);

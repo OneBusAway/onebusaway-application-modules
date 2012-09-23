@@ -24,33 +24,17 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-  <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl">
-    <property name="providers">
-      <list>
-        <bean class="org.onebusaway.users.impl.validation.SaltedPasswordValidationProviderV1Impl" />
-      </list>
-    </property>
-  </bean>
+  <import resource="classpath:org/onebusaway/api/application-context-webapp.xml" />
+  <import resource="classpath:org/onebusaway/phone/application-context-webapp.xml" />
+  <import resource="classpath:org/onebusaway/sms/application-context-webapp.xml" />
+  <import resource="classpath:org/onebusaway/webapp/application-context-webapp.xml" />
+  <import resource="classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml" />
 
   <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
     <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
     <property name="url" value="jdbc:hsqldb:file:${bundlePath}/org_onebusaway_transit_data" />
     <property name="username" value="sa" />
     <property name="password" value="" />
-  </bean>
-
-  <bean class="org.onebusaway.users.impl.CreateUserAction">
-    <property name="username" value="admin"/>
-    <property name="password" value="password"/>
-    <property name="admin" value="true"/>
-  </bean>
-  
-  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
-    <property name="key" value="TEST"/>
-  </bean>
-  
-  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
-    <property name="key" value="org.onebusaway.iphone"/>
   </bean>
 
   <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.impl.DatabaseCachingGeocoderImpl">
@@ -60,23 +44,14 @@
       </bean>
     </property>
   </bean>
-
+    
   <bean id="wikiDocumentService" class="org.onebusaway.wiki.file.ClasspathWikiDocumentServiceImpl">
-    <property name="packageRoot" value="org.onebusaway.quickstart.wiki" />
+    <property name="packageRoot" value="org.onebusaway.wiki" />
   </bean>
-
+  
   <bean id="wikiRenderingService" class="org.onebusaway.wiki.xwiki.impl.XWikiRenderingServiceImpl">
     <property name="wikiDocumentViewUrl" value="/p/%{documentName}.action" />
-    <property name="wikiDocumentEditUrl" value="http://wiki.onebusaway.org/bin/edit/Main/%{documentName}" />
     <property name="wikiAttachmentUrl" value="/p/%{documentName}@%{attachmentName}!attachment.action" />
   </bean>
   
-  <bean class="org.onebusaway.presentation.impl.configuration.PropertyConfigurationSource">
-    <property name="properties">
-      <props>
-        <prop key="webapp_template_override">/WEB-INF/custom-header.jspx</prop>
-      </props>
-    </property>
-  </bean>
-
 </beans>

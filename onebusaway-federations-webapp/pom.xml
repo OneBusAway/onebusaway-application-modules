@@ -3,7 +3,7 @@
     <parent>
         <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.8-SNAPSHOT</version>
     </parent>
     <artifactId>onebusaway-federations-webapp</artifactId>
     <packaging>war</packaging>

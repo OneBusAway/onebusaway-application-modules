@@ -16,7 +16,7 @@
 package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
-import java.sql.Date;
+import java.util.Date;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -43,8 +43,6 @@ public class VehicleLocationRecordsAction extends ApiActionSupport {
 
   private VehicleLocationRecordQueryBean _query = new VehicleLocationRecordQueryBean();
 
-  private String _vehicleId;
-
   public VehicleLocationRecordsAction() {
     super(V2);
   }
@@ -58,7 +56,7 @@ public class VehicleLocationRecordsAction extends ApiActionSupport {
   }
 
   public void setVehicleId(String vehicleId) {
-    _query.setVehicleId(_vehicleId);
+    _query.setVehicleId(vehicleId);
   }
 
   public void setServiceDate(long serviceDate) {

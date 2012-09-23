@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.xwork.StringEscapeUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.struts2.components.ContextBean;
 import org.apache.struts2.json.JSONException;
 import org.apache.struts2.json.JSONUtil;

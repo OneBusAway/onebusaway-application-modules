@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +27,24 @@ import org.onebusaway.users.model.UserRole;
 public interface UserDao {
 
   public int getNumberOfUsers();
-  
+
   public List<Integer> getAllUserIds();
 
   public List<Integer> getAllUserIdsInRange(int offset, int limit);
-  
-  public List<Integer> getStaleUserIdsInRange(Date lastAccessTime, int offset, int limit);
+
+  /**
+   * Count the number of users whose last access time (see
+   * {@link User#getLastAccessTime()}) is greater than the specified last access
+   * time.
+   * 
+   * @param lastAccessTime user accounts that have not been accessed since this
+   *          time are considered stale
+   * @return the number of stale user accounts
+   */
+  public long getNumberOfStaleUsers(Date lastAccessTime);
+
+  public List<Integer> getStaleUserIdsInRange(Date lastAccessTime, int offset,
+      int limit);
 
   public User getUserForId(int id);
 
@@ -58,7 +71,7 @@ public interface UserDao {
   public List<String> getUserIndexKeyValuesForKeyType(String keyType);
 
   public UserIndex getUserIndexForId(UserIndexKey key);
-  
+
   public void saveOrUpdateUserIndex(UserIndex userIndex);
 
   public void deleteUserIndex(UserIndex index);

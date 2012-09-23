@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.TimeZone;
 
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.StopTime;
@@ -77,6 +78,15 @@ public class TripEntriesFactory {
     _stopTimeEntriesFactory = stopTimeEntriesFactory;
   }
 
+  /**
+   * By default, we throw an exception when an invalid stop-to-shape mapping is
+   * found for a GTFS feed. Override that behavior by setting this parameter to
+   * false.
+   * 
+   * @param throwExceptionOnInvalidStopToShapeMappingException when true, an
+   *          exception is thrown on invalid stop-to-shape mappings
+   */
+  @ConfigurationParameter
   public void setThrowExceptionOnInvalidStopToShapeMappingException(
       boolean throwExceptionOnInvalidStopToShapeMappingException) {
     _throwExceptionOnInvalidStopToShapeMappingException = throwExceptionOnInvalidStopToShapeMappingException;

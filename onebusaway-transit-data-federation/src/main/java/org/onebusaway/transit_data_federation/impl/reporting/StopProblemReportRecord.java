@@ -49,7 +49,10 @@ public class StopProblemReportRecord implements Serializable {
       @AttributeOverride(name = "id", column = @Column(name = "stopId_id"))})
   private AgencyAndId stopId;
 
+  @Deprecated
   private String data;
+
+  private String code;
 
   private String userComment;
 
@@ -96,12 +99,22 @@ public class StopProblemReportRecord implements Serializable {
     this.stopId = stopId;
   }
 
+  @Deprecated
   public String getData() {
     return data;
   }
 
+  @Deprecated
   public void setData(String data) {
     this.data = data;
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
   }
 
   public String getUserComment() {

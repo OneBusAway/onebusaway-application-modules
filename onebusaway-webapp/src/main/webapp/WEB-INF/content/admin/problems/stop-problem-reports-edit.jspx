@@ -33,7 +33,7 @@
 <tr><td>Id:</td><td><s:property value="id"/></td></tr>
 <tr><td>Stop Id:</td><td><s:property value="stopId"/></td></tr>
 <tr><td>Time:</td><td><oba:date value="time" format="yyyy-MM-dd hh:mm aa"/></td></tr>
-<tr><td>Data:</td><td><s:property value="data"/></td></tr>
+<tr><td>Code:</td><td><s:property value="code"/></td></tr>
 <tr><td>User Comment:</td><td><s:property value="userComment"/></td></tr>
 <tr><td>User Location:</td><td><s:property value="userLat"/><jsp:text> </jsp:text><s:property value="userLon"/><jsp:text> </jsp:text><s:property value="userLocationAccuracy"/></td></tr>
 <tr><td>Status:</td><td><s:property value="status"/></td></tr>

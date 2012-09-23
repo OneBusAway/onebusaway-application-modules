@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +48,8 @@ public class FederatedServiceMethodInvocationHandlerFactory {
     FederatedByAnyEntityIdMethod byAnyEntityId = method.getAnnotation(FederatedByAnyEntityIdMethod.class);
     if (byAnyEntityId != null)
       return new FederatedByAnyEntityIdMethodInvocationHandlerImpl(method,
-          byAnyEntityId.argument(), byAnyEntityId.properties());
+          byAnyEntityId.argument(), byAnyEntityId.properties(),
+          byAnyEntityId.agencyIdProperties());
 
     FederatedByEntityIdMethod ann0 = method.getAnnotation(FederatedByEntityIdMethod.class);
     if (ann0 != null)

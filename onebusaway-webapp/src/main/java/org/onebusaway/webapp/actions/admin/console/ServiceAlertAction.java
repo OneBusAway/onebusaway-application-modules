@@ -26,6 +26,7 @@ import org.apache.struts2.convention.annotation.Results;
 import org.json.JSONException;
 import org.onebusaway.presentation.bundles.ResourceBundleSupport;
 import org.onebusaway.presentation.bundles.service_alerts.Reasons;
+import org.onebusaway.presentation.bundles.service_alerts.Severity;
 import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
@@ -76,7 +77,7 @@ public class ServiceAlertAction extends ActionSupport implements
 
   public void setSummary(String summary) {
     List<NaturalLanguageStringBean> summaries = _model.getSummaries();
-    if( summaries == null) {
+    if (summaries == null) {
       summaries = new ArrayList<NaturalLanguageStringBean>();
       _model.setSummaries(summaries);
     }
@@ -96,10 +97,10 @@ public class ServiceAlertAction extends ActionSupport implements
     NaturalLanguageStringBean nls = summaries.get(0);
     return nls.getValue();
   }
-  
+
   public void setDescription(String description) {
     List<NaturalLanguageStringBean> descriptions = _model.getDescriptions();
-    if( descriptions == null) {
+    if (descriptions == null) {
       descriptions = new ArrayList<NaturalLanguageStringBean>();
       _model.setDescriptions(descriptions);
     }
@@ -118,10 +119,6 @@ public class ServiceAlertAction extends ActionSupport implements
     }
     NaturalLanguageStringBean nls = descriptions.get(0);
     return nls.getValue();
-  }
-
-  public void setRaw(String raw) {
-    _raw = raw;
   }
 
   public String getRaw() {
@@ -150,17 +147,35 @@ public class ServiceAlertAction extends ActionSupport implements
 
     _model.setReason(string(_model.getReason()));
 
-    if (_raw != null && !_raw.trim().isEmpty()) {
-      ServiceAlertBean rawSituation = getStringAsRawSituation(_raw);
-      _model.setAllAffects(rawSituation.getAllAffects());
-      _model.setConsequences(rawSituation.getConsequences());
+    if (_model.getId() == null || _model.getId().trim().isEmpty()) {
+      _model = _transitDataService.createServiceAlert(_agencyId, _model);
+    }
+    else {
+      ServiceAlertBean existing = _transitDataService.getServiceAlertForId(_model.getId());
+      if (existing != null) {
+        // The updated service alert constructed from the POST won't include affects clauses.
+        _model.setAllAffects(existing.getAllAffects());
+      }
+      _transitDataService.updateServiceAlert(_model);
     }
 
-    if (_model.getId() == null || _model.getId().trim().isEmpty())
-      _model = _transitDataService.createServiceAlert(_agencyId, _model);
-    else
-      _transitDataService.updateServiceAlert(_model);
+    return "submitSuccess";
+  }
 
+  public String addAffects() {
+    if (_model.getId() == null) {
+      return INPUT;
+    }
+
+    _model = _transitDataService.getServiceAlertForId(_model.getId());
+
+    List<SituationAffectsBean> allAffects = _model.getAllAffects();
+    if (allAffects == null) {
+      allAffects = new ArrayList<SituationAffectsBean>();
+      _model.setAllAffects(allAffects);
+    }
+    allAffects.add(new SituationAffectsBean());
+    _transitDataService.updateServiceAlert(_model);
     return "submitSuccess";
   }
 
@@ -179,6 +194,10 @@ public class ServiceAlertAction extends ActionSupport implements
 
   public Map<String, String> getReasonValues() {
     return ResourceBundleSupport.getLocaleMap(this, Reasons.class);
+  }
+
+  public Map<String, String> getSeverityValues() {
+    return ResourceBundleSupport.getLocaleMap(this, Severity.class);
   }
 
   /****

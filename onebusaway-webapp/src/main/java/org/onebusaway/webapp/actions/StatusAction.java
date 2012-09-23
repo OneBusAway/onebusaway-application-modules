@@ -54,7 +54,7 @@ public class StatusAction extends ActionSupport {
   @Override
   public String execute() {
 
-    Map<String, Object> configuration = _configurationService.getConfiguration(_forceRefresh);
+    Map<String, Object> configuration = _configurationService.getConfiguration(_forceRefresh, ERROR);
     _model.putAll(configuration);
 
     try {

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +16,28 @@
  */
 package org.onebusaway.transit_data_federation.impl.reporting;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
 import org.onebusaway.collections.tuple.T2;
 import org.onebusaway.collections.tuple.Tuples;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
+import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
+import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate3.HibernateCallback;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.stereotype.Component;
 
@@ -81,30 +94,46 @@ class UserReportingDaoImpl implements UserReportingDao {
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<T2<AgencyAndId, Integer>> getTripProblemReportSummaries(
-      String agencyId, long timeFrom, long timeTo, EProblemReportStatus status) {
+  public List<T2<Object, Integer>> getTripProblemReportSummaries(
+      final TripProblemReportQueryBean query, final ETripProblemGroupBy groupBy) {
 
-    List<Object[]> records = null;
+    List<Object[]> rows = _template.executeFind(new HibernateCallback<List<Object[]>>() {
 
-    if (status == null) {
-      String[] names = {"agencyId", "timeFrom", "timeTo"};
-      Object[] values = {agencyId, timeFrom, timeTo};
-      records = _template.findByNamedQueryAndNamedParam(
-          "tripProblemReportSummaries", names, values);
-    } else {
-      String[] names = {"agencyId", "timeFrom", "timeTo", "status"};
-      Object[] values = {agencyId, timeFrom, timeTo, status};
-      records = _template.findByNamedQueryAndNamedParam(
-          "tripProblemReportSummariesWithStatus", names, values);
-    }
+      @Override
+      public List<Object[]> doInHibernate(Session session)
+          throws HibernateException, SQLException {
 
-    List<T2<AgencyAndId, Integer>> results = new ArrayList<T2<AgencyAndId, Integer>>(
-        records.size());
+        Criteria c = session.createCriteria(TripProblemReportRecord.class);
 
-    for (Object[] record : records) {
-      AgencyAndId tripId = (AgencyAndId) record[0];
-      Long count = (Long) record[1];
-      results.add(Tuples.tuple(tripId, count.intValue()));
+        ProjectionList projections = Projections.projectionList();
+        projections.add(Projections.rowCount());
+        switch (groupBy) {
+          case TRIP:
+            projections.add(Projections.groupProperty("tripId.agencyId"));
+            projections.add(Projections.groupProperty("tripId.id"));
+            break;
+          case STATUS:
+            projections.add(Projections.groupProperty("status"));
+            break;
+          case LABEL:
+            projections.add(Projections.groupProperty("label"));
+            break;
+        }
+        c.setProjection(projections);
+
+        addQueryToCriteria(query, c);
+
+        return c.list();
+      }
+    });
+
+    List<T2<Object, Integer>> results = new ArrayList<T2<Object, Integer>>(
+        rows.size());
+
+    for (Object[] row : rows) {
+      Integer count = (Integer) row[0];
+      Object key = getKeyForTripProblemReportSummariesRow(row, groupBy);
+      results.add(Tuples.tuple(key, count.intValue()));
     }
 
     return results;
@@ -128,20 +157,22 @@ class UserReportingDaoImpl implements UserReportingDao {
   }
 
   @SuppressWarnings("unchecked")
-  public List<TripProblemReportRecord> getTripProblemReports(String agencyId,
-      long timeFrom, long timeTo, EProblemReportStatus status) {
+  public List<TripProblemReportRecord> getTripProblemReports(
+      final TripProblemReportQueryBean query) {
 
-    if (status == null) {
-      String[] names = {"agencyId", "timeFrom", "timeTo"};
-      Object[] values = {agencyId, timeFrom, timeTo};
-      return _template.findByNamedQueryAndNamedParam("tripProblemReports",
-          names, values);
-    } else {
-      String[] names = {"agencyId", "timeFrom", "timeTo", "status"};
-      Object[] values = {agencyId, timeFrom, timeTo, status};
-      return _template.findByNamedQueryAndNamedParam(
-          "tripProblemReportsWithStatus", names, values);
-    }
+    return _template.executeFind(new HibernateCallback<List<TripProblemReportRecord>>() {
+
+      @Override
+      public List<TripProblemReportRecord> doInHibernate(Session session)
+          throws HibernateException, SQLException {
+
+        Criteria c = session.createCriteria(TripProblemReportRecord.class);
+        addQueryToCriteria(query, c);
+        c.addOrder(Order.asc("time"));
+        return c.list();
+      }
+
+    });
   }
 
   @SuppressWarnings("unchecked")
@@ -174,5 +205,40 @@ class UserReportingDaoImpl implements UserReportingDao {
   @Override
   public List<String> getAllTripProblemReportLabels() {
     return _template.findByNamedQuery("allTripProblemReportLabels");
+  }
+
+  private Object getKeyForTripProblemReportSummariesRow(Object[] row,
+      ETripProblemGroupBy groupBy) {
+    switch (groupBy) {
+      case TRIP:
+        return new AgencyAndId((String) row[1], (String) row[2]);
+      case STATUS:
+        return row[1];
+      case LABEL:
+        return row[1];
+    }
+    throw new IllegalStateException("unhandled grouping: " + groupBy);
+  }
+
+  private void addQueryToCriteria(TripProblemReportQueryBean query, Criteria c) {
+    if (query.getAgencyId() != null) {
+      c.add(Property.forName("tripId.agencyId").eq(query.getAgencyId()));
+    }
+    if (query.getTripId() != null) {
+      c.add(Property.forName("tripId").eq(
+          AgencyAndIdLibrary.convertFromString(query.getTripId())));
+    }
+    if (query.getTimeFrom() != 0) {
+      c.add(Property.forName("time").ge(query.getTimeFrom()));
+    }
+    if (query.getTimeTo() != 0) {
+      c.add(Property.forName("time").le(query.getTimeTo()));
+    }
+    if (query.getStatus() != null) {
+      c.add(Property.forName("status").eq(query.getStatus()));
+    }
+    if (query.getLabel() != null) {
+      c.add(Property.forName("label").eq(query.getLabel()));
+    }
   }
 }

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="onebusaway-application-modules">
   <body>
+    <links>
+      <item name="GitHub Project" href="http://github.com/OneBusAway/onebusaway-application-modules/" />
+    </links>  
     <menu name="Home">
       <item name="About" href="/index.html" />
       <item name="Downloads" href="/downloads.html"/>
@@ -18,14 +21,16 @@
       <item name="Quick-Start" href="/guides/quickstart-guide.html" />
       <item name="Installation" href="/guides/installation-guide.html" />
       <item name="Transit Data Bundle" href="/guides/transit-data-bundle-guide.html" />
-      <item name="Realtime Configuration" href="/guides/realtime-configuration-guide.html" />
-      <item name="API Webapp Installation" href="/guides/onebusaway-api-webapp-configuration-guide.html" />
-      <item name="Webapp Installation" href="/guides/onebusaway-webapp-configuration-guide.html" />
-      <item name="Database Configuration" href="/guides/database-configuration-guide.html" />
+      <item name="Realtime Config" href="/guides/realtime-configuration-guide.html" />
+      <item name="API Config" href="/guides/api-webapp-configuration-guide.html" />
+      <item name="SMS Config" href="/guides/sms-webapp-configuration-guide.html" />
+      <item name="Phone Config" href="/guides/phone-webapp-configuration-guide.html" />
+      <item name="Web Config" href="/guides/webapp-configuration-guide.html" />
+      <item name="Database Config" href="/guides/database-configuration-guide.html" />
       <item name="Troubleshooting" href="/guides/troubleshooting-guide.html" />
     </menu>
     <menu name="Development">
-      <item name="Developer Site" href="https://code.google.com/p/onebusaway/" />
+      <item name="GitHub Project" href="http://github.com/OneBusAway/onebusaway-application-modules/" />
     </menu>
     <menu ref="reports" />
     <menu ref="modules" />

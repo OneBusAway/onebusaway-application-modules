@@ -31,7 +31,10 @@ function oba_where_standard_agencies() {
 
 	    var marker = new google.maps.Marker(markerOptions);
 	    
-	    bounds.extend(point);
+	    var p1 = new google.maps.LatLng(awc.lat + awc.latSpan / 2, awc.lon + awc.lonSpan / 2);
+	    bounds.extend(p1);
+	    var p2 = new google.maps.LatLng(awc.lat - awc.latSpan / 2, awc.lon - awc.lonSpan / 2);
+	    bounds.extend(p2);
 	    
 	    var content = jQuery('.agencyInfoWindowTemplate').clone();
 	    content.find("h3>a").text(agency.name);

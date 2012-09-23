@@ -28,6 +28,8 @@ public class TripProblemReportSummaryBean implements
 
   private EProblemReportStatus status;
 
+  private String label;
+
   private int count;
 
   public TripBean getTrip() {
@@ -44,6 +46,14 @@ public class TripProblemReportSummaryBean implements
 
   public void setStatus(EProblemReportStatus status) {
     this.status = status;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   public int getCount() {

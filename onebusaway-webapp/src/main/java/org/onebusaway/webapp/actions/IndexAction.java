@@ -15,14 +15,34 @@
  */
 package org.onebusaway.webapp.actions;
 
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+
+import com.opensymphony.xwork2.ActionContext;
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.ActionProxy;
 import com.opensymphony.xwork2.ActionSupport;
 
+@Results({@Result(name = "404", type = "httpheader", params = {
+    "error", "404", "errorMessage", "resource not found"})})
 public class IndexAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
 
   @Override
   public String execute() throws Exception {
-    return super.execute();
+
+    ActionContext context = ActionContext.getContext();
+    ActionInvocation invocation = context.getActionInvocation();
+    ActionProxy proxy = invocation.getProxy();
+
+    String namespace = proxy.getNamespace();
+    String name = proxy.getActionName();
+
+    if (namespace.equals("/") && (name.equals("index") || name.equals(""))) {
+      return super.execute();
+    }
+
+    return "404";
   }
 }

@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.container.cache.Cacheable;
 import org.onebusaway.exceptions.NoSuchAgencyServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
@@ -31,8 +30,12 @@ import org.onebusaway.transit_data_federation.model.narrative.AgencyNarrative;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.narrative.NarrativeService;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,18 +79,25 @@ public class AgencyServiceImpl implements AgencyService {
     Map<String, CoordinatePoint> centersByAgencyId = new HashMap<String, CoordinatePoint>();
 
     for (AgencyEntry agency : _graph.getAllAgencies()) {
+      
+      StopsCenterOfMass centerOfMass = new StopsCenterOfMass();
 
-      List<StopEntry> stops = agency.getStops();
-
-      if (CollectionsLibrary.isEmpty(stops)) {
+      for( RouteCollectionEntry routeCollection : agency.getRouteCollections()) {
+        for( RouteEntry route : routeCollection.getChildren() ) {
+          for (TripEntry trip : route.getTrips() ) {
+            for( StopTimeEntry stopTime : trip.getStopTimes() ) {
+              StopEntry stop = stopTime.getStop();
+              centerOfMass.lats += stop.getStopLat();
+              centerOfMass.lons += stop.getStopLon();
+              centerOfMass.count++;
+            }
+          }
+        }
+      }
+      
+      if (centerOfMass.count == 0) {
         _log.warn("Agency has no service: " + agency);
       } else {
-        StopsCenterOfMass centerOfMass = new StopsCenterOfMass();
-        for (StopEntry stop : stops) {
-          centerOfMass.lats += stop.getStopLat();
-          centerOfMass.lons += stop.getStopLon();
-          centerOfMass.count++;
-        }
         double lat = centerOfMass.lats / centerOfMass.count;
         double lon = centerOfMass.lons / centerOfMass.count;
         centersByAgencyId.put(agency.getId(), new CoordinatePoint(lat, lon));
@@ -105,10 +115,18 @@ public class AgencyServiceImpl implements AgencyService {
     for (AgencyEntry agency : _graph.getAllAgencies()) {
 
       CoordinateBounds bounds = new CoordinateBounds();
-      List<StopEntry> stops = agency.getStops();
+      
+      for( RouteCollectionEntry routeCollection : agency.getRouteCollections()) {
+        for( RouteEntry route : routeCollection.getChildren() ) {
+          for (TripEntry trip : route.getTrips() ) {
+            for( StopTimeEntry stopTime : trip.getStopTimes() ) {
+              StopEntry stop = stopTime.getStop();
+              bounds.addPoint(stop.getStopLat(), stop.getStopLon());
+            }
+          }
+        }
+      }
 
-      for (StopEntry stop : stops)
-        bounds.addPoint(stop.getStopLat(), stop.getStopLon());
       boundsByAgencyId.put(agency.getId(), bounds);
     }
 

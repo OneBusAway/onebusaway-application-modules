@@ -126,3 +126,26 @@ td.TripPage-TimeColumn {
 .TripPage-ArrivalTime {
 	font-weight: bold;
 }
+
+.StopInfoWindow > .stopName {
+	font-size: 18px;
+}
+
+.StopInfoWindow > .stopCode {
+	font-size: 14px;
+}
+
+.StopInfoWindow > .stopDirection {
+	font-size: 14px;
+}
+
+.routesSubSection > .routeShortName {
+    border: 2px solid #000000;
+    float: left;
+    font-weight: bold;
+    margin-right: 5px;
+    margin-top: 5px;
+    padding: 2px;
+    text-align: center;
+    width: 25px;
+}

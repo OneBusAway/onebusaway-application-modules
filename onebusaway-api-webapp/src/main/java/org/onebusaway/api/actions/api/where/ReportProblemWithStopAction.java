@@ -17,6 +17,8 @@ package org.onebusaway.api.actions.api.where;
 
 import java.io.IOException;
 
+import net.sf.json.JSONObject;
+
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.exceptions.ServiceException;
@@ -40,17 +42,25 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
     super(2);
   }
 
-  @RequiredStringValidator(message="requiredField.stopId")
+  @RequiredStringValidator(message = "requiredField.stopId")
   public void setStopId(String stopId) {
     _model.setStopId(stopId);
   }
-  
+
   public String getStopId() {
     return _model.getStopId();
   }
 
+  @Deprecated
   public void setData(String data) {
-    _model.setData(data);
+    JSONObject json = JSONObject.fromObject(data);
+    if (json.has("code")) {
+      _model.setCode(json.getString("code"));
+    }
+  }
+
+  public void setCode(String code) {
+    _model.setCode(code);
   }
 
   public void setUserComment(String userComment) {

@@ -19,10 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinateBounds;
-import org.onebusaway.presentation.impl.ServletLibrary;
 import org.onebusaway.presentation.services.ServiceAreaService;
 import org.onebusaway.presentation.services.configuration.ConfigurationSource;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -35,9 +33,9 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
 
   private TransitDataService _transitDataService;
 
-  private ServletContext _servletContext;
-
   private ServiceAreaService _serviceAreaService;
+
+  private String _googleMapsApiKey = "ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g";
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
@@ -45,22 +43,28 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
   }
 
   @Autowired
-  public void setServletContext(ServletContext servletContext) {
-    _servletContext = servletContext;
-  }
-  
-  @Autowired
   public void setServiceAreaService(ServiceAreaService serviceAreaService) {
     _serviceAreaService = serviceAreaService;
   }
 
+  /**
+   * The default Google Maps API key can only be used externally for the
+   * onebusaway.org domain. To use OneBusAway from another domain, you must
+   * specify your own Google Maps API key.
+   * 
+   * @param googleMapsApiKey your Google Maps API access key
+   */
+  @ConfigurationParameter
+  public void setGoogleMapsApiKey(String googleMapsApiKey) {
+    _googleMapsApiKey = googleMapsApiKey;
+  }
+
   @Override
-  public Map<String, Object> getConfiguration() {
+  public Map<String, Object> getConfiguration(String contextPath) {
 
     Map<String, Object> config = new HashMap<String, Object>();
     config.put("apiKey", "web");
 
-    String contextPath = ServletLibrary.getContextPath(_servletContext);
     config.put("baseUrl", contextPath);
     config.put("apiUrl", contextPath + "/api");
 
@@ -69,10 +73,10 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
     CoordinateBounds bounds = new CoordinateBounds();
 
     for (AgencyWithCoverageBean awc : agenciesWithCoverage) {
-      
-      if( awc.getLatSpan() <= 0 || awc.getLonSpan() <= 0)
+
+      if (awc.getLatSpan() <= 0 || awc.getLonSpan() <= 0)
         continue;
-      
+
       bounds.addPoint(awc.getLat() + awc.getLatSpan() / 2,
           awc.getLon() + awc.getLonSpan() / 2);
       bounds.addPoint(awc.getLat() - awc.getLatSpan() / 2,
@@ -90,8 +94,10 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
       config.put("spanLat", bounds.getMaxLat() - bounds.getMinLat());
       config.put("spanLon", bounds.getMaxLon() - bounds.getMinLon());
     }
-    
-    config.put("hasDefaultServiceArea",_serviceAreaService.hasDefaultServiceArea());
+
+    config.put("hasDefaultServiceArea",
+        _serviceAreaService.hasDefaultServiceArea());
+    config.put("googleMapsApiKey", _googleMapsApiKey);
 
     return config;
   }

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +17,18 @@
 package org.onebusaway.users.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserIndex;
@@ -61,28 +65,28 @@ public class UserServiceImplTest {
     SecurityContext context = SecurityContextHolder.getContext();
     context.setAuthentication(null);
   }
-  
+
   @Test
   public void testGetNumberOfUsers() {
     Mockito.when(_userDao.getNumberOfUsers()).thenReturn(5);
-    assertEquals(5,_service.getNumberOfUsers());
+    assertEquals(5, _service.getNumberOfUsers());
     Mockito.verify(_userDao).getNumberOfUsers();
   }
-  
+
   @Test
   public void getAllUserIds() {
-    List<Integer> ids = Arrays.asList(1,2,3);
+    List<Integer> ids = Arrays.asList(1, 2, 3);
     Mockito.when(_userDao.getAllUserIds()).thenReturn(ids);
-    assertEquals(ids,_service.getAllUserIds());
+    assertEquals(ids, _service.getAllUserIds());
     Mockito.verify(_userDao).getAllUserIds();
   }
-  
+
   @Test
   public void getAllUserIdsForRange() {
-    List<Integer> ids = Arrays.asList(1,2,3);
-    Mockito.when(_userDao.getAllUserIdsInRange(0,3)).thenReturn(ids);
-    assertEquals(ids,_service.getAllUserIdsInRange(0,3));
-    Mockito.verify(_userDao).getAllUserIdsInRange(0,3);
+    List<Integer> ids = Arrays.asList(1, 2, 3);
+    Mockito.when(_userDao.getAllUserIdsInRange(0, 3)).thenReturn(ids);
+    assertEquals(ids, _service.getAllUserIdsInRange(0, 3));
+    Mockito.verify(_userDao).getAllUserIdsInRange(0, 3);
   }
 
   @Test
@@ -154,6 +158,37 @@ public class UserServiceImplTest {
     assertTrue(updated != null);
 
     Mockito.verify(userPropertiesService).mergeProperties(userB, userA);
+  }
+
+  @Test
+  public void testGetNumberOfStaleUsers() {
+    ArgumentCaptor<Date> captor = ArgumentCaptor.forClass(Date.class);
+    Mockito.when(_userDao.getNumberOfStaleUsers(captor.capture())).thenReturn(
+        10L);
+    assertEquals(10, _service.getNumberOfStaleUsers());
+    Date actual = captor.getValue();
+    Calendar c = Calendar.getInstance();
+    c.add(Calendar.MONTH, -1);
+    Date expected = c.getTime();
+    assertTrue(Math.abs(expected.getTime() - actual.getTime()) < 30 * 1000);
+  }
+
+  @Test
+  public void deleteStaleUsers() {
+    List<Integer> userIds = Arrays.asList(1, 2, 3);
+    Mockito.when(
+        _userDao.getStaleUserIdsInRange(Mockito.any(Date.class), Mockito.eq(0),
+            Mockito.eq(100))).thenReturn(userIds);
+    
+    _service.start();
+    
+    assertFalse(_service.isDeletingStaleUsers());
+    _service.deleteStaleUsers();
+    assertTrue(_service.isDeletingStaleUsers());
+    _service.cancelDeleteStaleUsers();
+    assertFalse(_service.isDeletingStaleUsers());
+    
+    _service.stop();
   }
 
   private User createUser(int userId) {

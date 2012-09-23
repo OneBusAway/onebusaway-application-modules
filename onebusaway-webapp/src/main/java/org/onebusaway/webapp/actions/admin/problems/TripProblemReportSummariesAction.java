@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +23,7 @@ import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.problems.EProblemReportStatus;
+import org.onebusaway.transit_data.model.problems.ETripProblemGroupBy;
 import org.onebusaway.transit_data.model.problems.TripProblemReportQueryBean;
 import org.onebusaway.transit_data.model.problems.TripProblemReportSummaryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
@@ -41,7 +43,9 @@ public class TripProblemReportSummariesAction extends ActionSupport {
 
   private List<AgencyWithCoverageBean> _agencies;
 
-  private List<TripProblemReportSummaryBean> _summaries;
+  private List<TripProblemReportSummaryBean> _summariesByTrip;
+
+  private List<TripProblemReportSummaryBean> _summariesByLabel;
 
   private String _status;
 
@@ -76,8 +80,12 @@ public class TripProblemReportSummariesAction extends ActionSupport {
     return _agencies;
   }
 
-  public List<TripProblemReportSummaryBean> getSummaries() {
-    return _summaries;
+  public List<TripProblemReportSummaryBean> getSummariesByTrip() {
+    return _summariesByTrip;
+  }
+
+  public List<TripProblemReportSummaryBean> getSummariesByLabel() {
+    return _summariesByLabel;
   }
 
   @SkipValidation
@@ -103,10 +111,16 @@ public class TripProblemReportSummariesAction extends ActionSupport {
     if (_status != null)
       query.setStatus(EProblemReportStatus.valueOf(_status.toUpperCase()));
 
-    ListBean<TripProblemReportSummaryBean> result = _transitDataService.getTripProblemReportSummaries(query);
-    _summaries = result.getList();
+    ListBean<TripProblemReportSummaryBean> resultByTrip = _transitDataService.getTripProblemReportSummariesByGrouping(
+        query, ETripProblemGroupBy.TRIP);
+    _summariesByTrip = resultByTrip.getList();
 
-    Collections.sort(_summaries);
+    ListBean<TripProblemReportSummaryBean> resultByLabel = _transitDataService.getTripProblemReportSummariesByGrouping(
+        query, ETripProblemGroupBy.LABEL);
+    _summariesByLabel = resultByLabel.getList();
+
+    Collections.sort(_summariesByTrip);
+    Collections.sort(_summariesByLabel);
 
     return SUCCESS;
   }

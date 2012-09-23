@@ -15,9 +15,13 @@
  */
 package org.onebusaway.transit_data_federation.impl.shapes;
 
+import java.util.Comparator;
+
 import org.onebusaway.geospatial.model.XYPoint;
 
-public class PointAndIndex implements Comparable<PointAndIndex> {
+public class PointAndIndex {
+  
+  public static final Comparator<PointAndIndex> DISTANCE_FROM_TARGET_COMPARATOR = new DistanceFromTargetComparator();
 
   public final XYPoint point;
   public final int index;
@@ -33,16 +37,21 @@ public class PointAndIndex implements Comparable<PointAndIndex> {
   }
 
   @Override
-  public int compareTo(PointAndIndex o) {
-    if (distanceAlongShape == o.distanceAlongShape)
-      return 0;
-    return distanceAlongShape < o.distanceAlongShape ? -1 : 1;
-  }
-
-  @Override
   public String toString() {
     return "xy=" + point.toString() + " index=" + index
         + " distanceFromTarget=" + distanceFromTarget + " distanceAlongShape="
         + distanceAlongShape;
+  }
+
+  public static class DistanceFromTargetComparator implements
+      Comparator<PointAndIndex> {
+
+    @Override
+    public int compare(PointAndIndex a, PointAndIndex b) {
+      if (a.distanceFromTarget == b.distanceFromTarget) {
+        return 0;
+      }
+      return a.distanceFromTarget < b.distanceFromTarget ? -1 : 1;
+    }
   }
 }

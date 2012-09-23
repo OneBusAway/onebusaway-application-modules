@@ -24,13 +24,8 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-  <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl">
-    <property name="providers">
-      <list>
-        <bean class="org.onebusaway.users.impl.validation.SaltedPasswordValidationProviderV1Impl" />
-      </list>
-    </property>
-  </bean>
+  <import resource="classpath:org/onebusaway/api/application-context-webapp.xml" />
+  <import resource="classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml" />
 
   <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
     <property name="driverClassName" value="org.hsqldb.jdbcDriver" />
@@ -38,27 +33,5 @@
     <property name="username" value="sa" />
     <property name="password" value="" />
   </bean>
-
-  <bean class="org.onebusaway.users.impl.CreateUserAction">
-    <property name="username" value="admin"/>
-    <property name="password" value="password"/>
-    <property name="admin" value="true"/>
-  </bean>
   
-  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
-    <property name="key" value="TEST"/>
-  </bean>
-  
-  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
-    <property name="key" value="org.onebusaway.iphone"/>
-  </bean>
-
-  <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.impl.DatabaseCachingGeocoderImpl">
-    <property name="geocoderService">
-      <bean class="org.onebusaway.geocoder.impl.YahooGeocoderImpl">
-        <property name="appId" value="J2dCEAHV34F.KMgAMef0GB9n8QWtnJtk1SP85RwbNpnnJa31biY36HT4IQjPGG.Z4Q--" />
-      </bean>
-    </property>
-  </bean>
-
 </beans>

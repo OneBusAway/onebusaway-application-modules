@@ -45,8 +45,11 @@ import org.onebusaway.realtime.api.EVehiclePhase;
  */
 @Entity
 @Table(name = "transit_data_block_location_records")
-@org.hibernate.annotations.Table(appliesTo = "transit_data_block_location_records", indexes = {@Index(name = "vehicle_and_time", columnNames = {
-    "vehicle_agencyId", "vehicle_id", "time"})})
+@org.hibernate.annotations.Table(appliesTo = "transit_data_block_location_records", indexes = {
+    @Index(name = "vehicle_and_time", columnNames = {
+        "vehicle_agencyId", "vehicle_id", "time"}),
+    @Index(name = "vehicle_and_serviceDate", columnNames = {
+        "vehicle_agencyId", "vehicle_id", "serviceDate"})})
 @org.hibernate.annotations.Entity(mutable = false)
 @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class BlockLocationRecord {
@@ -88,7 +91,7 @@ public class BlockLocationRecord {
 
   @Column(nullable = true)
   private final Double orientation;
-  
+
   @Embedded
   @AttributeOverrides({
       @AttributeOverride(name = "agencyId", column = @Column(name = "timepoint_agencyId", length = 50)),
@@ -216,7 +219,7 @@ public class BlockLocationRecord {
   public Double getDistanceAlongBlock() {
     return distanceAlongBlock;
   }
-  
+
   public Double getDistanceAlongTrip() {
     return distanceAlongTrip;
   }
@@ -300,7 +303,7 @@ public class BlockLocationRecord {
     private Double scheduleDeviation = null;
 
     private Double distanceAlongBlock = null;
-    
+
     private Double distanceAlongTrip = null;
 
     private Double locationLat = null;

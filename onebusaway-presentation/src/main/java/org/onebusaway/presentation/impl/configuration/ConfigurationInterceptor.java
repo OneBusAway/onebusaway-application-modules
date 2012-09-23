@@ -17,6 +17,9 @@ package org.onebusaway.presentation.impl.configuration;
 
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.onebusaway.presentation.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -46,7 +49,8 @@ public class ConfigurationInterceptor extends AbstractInterceptor {
     if (v != null)
       forceRefresh = Boolean.parseBoolean(v.toString());
 
-    Map<String, Object> configuration = _configurationService.getConfiguration(forceRefresh);
+    HttpServletRequest request = ServletActionContext.getRequest();
+    Map<String, Object> configuration = _configurationService.getConfiguration(forceRefresh, request.getContextPath());
 
     stack.setValue("#configuration", configuration);
 

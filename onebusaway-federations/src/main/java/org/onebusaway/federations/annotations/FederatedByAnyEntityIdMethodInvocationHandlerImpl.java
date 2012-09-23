@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,22 +41,21 @@ class FederatedByAnyEntityIdMethodInvocationHandlerImpl implements
 
   private final List<PropertyPathExpression> _expressions;
 
-  public FederatedByAnyEntityIdMethodInvocationHandlerImpl(Method method,
-      int argumentIndex, String[] properties) {
+  private final List<PropertyPathExpression> _agencyIdExpressions;
 
-    if (properties.length == 0)
+  public FederatedByAnyEntityIdMethodInvocationHandlerImpl(Method method,
+      int argumentIndex, String[] properties, String[] agencyIdProperties) {
+
+    if (properties.length == 0 && agencyIdProperties.length == 0) {
       throw new IllegalArgumentException(
           "you must specify at least one property expression");
+    }
 
     _argumentIndex = argumentIndex;
-    _expressions = new ArrayList<PropertyPathExpression>(properties.length);
+    _expressions = compileExpressions(method, argumentIndex, properties);
+    _agencyIdExpressions = compileExpressions(method, argumentIndex,
+        agencyIdProperties);
 
-    for (String property : properties) {
-      PropertyPathExpression expression = new PropertyPathExpression(property);
-      Class<?>[] parameterTypes = method.getParameterTypes();
-      expression.initialize(parameterTypes[argumentIndex]);
-      _expressions.add(expression);
-    }
   }
 
   public int getArgumentIndex() {
@@ -71,11 +71,30 @@ class FederatedByAnyEntityIdMethodInvocationHandlerImpl implements
     Set<String> agencyIds = new HashSet<String>();
     for (PropertyPathExpression expression : _expressions) {
       String entityId = (String) expression.invoke(target);
-      if( entityId != null)
+      if (entityId != null)
         agencyIds.add(AgencyIdSupport.getAgencyIdFromEntityId(entityId));
+    }
+    for (PropertyPathExpression expression : _agencyIdExpressions) {
+      String agencyId = (String) expression.invoke(target);
+      if (agencyId != null) {
+        agencyIds.add(agencyId);
+      }
     }
 
     FederatedService service = collection.getServiceForAgencyIds(agencyIds);
     return method.invoke(service, args);
+  }
+
+  private List<PropertyPathExpression> compileExpressions(Method method,
+      int argumentIndex, String[] properties) {
+    List<PropertyPathExpression> expressions = new ArrayList<PropertyPathExpression>(
+        properties.length);
+    for (String property : properties) {
+      PropertyPathExpression expression = new PropertyPathExpression(property);
+      Class<?>[] parameterTypes = method.getParameterTypes();
+      expression.initialize(parameterTypes[argumentIndex]);
+      expressions.add(expression);
+    }
+    return expressions;
   }
 }

@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 function oba_admin_problems_trip_problem_reports(data) {
+	
+	var labelElement = jQuery("input#trip-problem-report_label");
+	labelElement.autocomplete({
+	    source: data.problemLabels
+	});
+
 	var mapElement = jQuery("#tripProblemReportMap");
 	var map = OBA.Maps.map(mapElement);
 	var infoWindow = new google.maps.InfoWindow();
@@ -26,7 +32,7 @@ function oba_admin_problems_trip_problem_reports(data) {
 		if( report.userLat && report.userLon) {
 			var point = new google.maps.LatLng(report.userLat,report.userLon);
 			var url = OBA.Resources.Map['PersonMarker.png'];
-			var marker = new google.maps.Marker({position: point, map: map, icon: url});
+			new google.maps.Marker({position: point, map: map, icon: url});
 			
 			bounds.extend(point);
 		}
@@ -34,7 +40,7 @@ function oba_admin_problems_trip_problem_reports(data) {
 		if( report.vehicleLat && report.vehicleLon) {
 			var point = new google.maps.LatLng(report.vehicleLat,report.vehicleLon);
 			var url = OBA.Resources.Map['MapIcon-Bus-22.png'];
-			var marker = new google.maps.Marker({position: point, map: map, icon: url});
+			new google.maps.Marker({position: point, map: map, icon: url});
 			
 			bounds.extend(point);
 		}
@@ -42,7 +48,7 @@ function oba_admin_problems_trip_problem_reports(data) {
 		if ( report.stop ) {
 			var stop = report.stop;
 			var point = new google.maps.LatLng(stop.lat,stop.lon);
-			var marker = new google.maps.Marker({position: point, map: map});
+			new google.maps.Marker({position: point, map: map});
 			
 			bounds.extend(point);
 		}
@@ -50,9 +56,10 @@ function oba_admin_problems_trip_problem_reports(data) {
 	
 	if( data.vehicleLocationRecords ) {
 		var records = data.vehicleLocationRecords;
+		var rows = jQuery("#vehicleLocationRecordsTable tr");
 		for( var i=0; i<records.length; i++) {
-			
 			var record = records[i];
+			var row = rows.eq(i);
 			
 			if( record.currentLocation ) {
 
@@ -62,9 +69,9 @@ function oba_admin_problems_trip_problem_reports(data) {
 				var m = new google.maps.Marker({position: point, map: map, icon: url});
 
 				var handler = function(record,marker) {
-					var d = new Date(record.timeOfRecord);
+					var label = i + " @ " + row.find("td").eq(1).text(); 
 					return function() {						
-					    infoWindow.setContent('t=' + d.toTimeString() );
+					    infoWindow.setContent(label);
 						infoWindow.open(map,marker);
 					};
 				}(record,m);
@@ -72,10 +79,31 @@ function oba_admin_problems_trip_problem_reports(data) {
 				google.maps.event.addListener(m, 'click', handler);
 				
 				bounds.extend(point);
+
+				add_highlight_location_on_hover(row, map, point);
 			}
 		}
 	}
 	
 	if( ! bounds.isEmpty() )
 		map.fitBounds(bounds);
-};    
+};
+
+function add_highlight_location_on_hover(el, map, p) {
+	var selection_marker = null;
+	var on_hover_in = function(obj) {
+		on_hover_out();
+		var icon_url = OBA.Resources.Map['SelectionCircle36.png'];
+		var anchor = new google.maps.Point(18, 18);
+		var icon = new google.maps.MarkerImage(icon_url, null, null, anchor);
+		selection_marker = new google.maps.Marker({position: p, map: map, icon: icon, clickable: false});
+	};
+	var on_hover_out = function(obj) {
+		if (selection_marker != null) {
+			selection_marker.setMap(null);
+			selection_marker = null;
+		}
+	};
+	el.hover(on_hover_in, on_hover_out);
+
+};

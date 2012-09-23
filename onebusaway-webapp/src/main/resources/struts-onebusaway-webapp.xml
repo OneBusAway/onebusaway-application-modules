@@ -22,6 +22,8 @@
 <struts>
 
     <constant name="struts.custom.i18n.resources" value="org/onebusaway/presentation/presentation-messages" />
+    
+    <constant name="struts.patternMatcher" value="namedVariable"/>
 
     <bean type="org.apache.struts2.components.template.TemplateEngine" name="jspx" class="org.apache.struts2.components.template.JspTemplateEngine" />
 

@@ -37,7 +37,14 @@ public class TripProblemReportBean implements Serializable {
 
   private String stopId;
 
+  @Deprecated
   private String data;
+
+  /**
+   * A string code identifying the type of problem. There is flexibility here,
+   * but for a list of known codes, see
+   */
+  private String code;
 
   private String userComment;
 
@@ -68,7 +75,7 @@ public class TripProblemReportBean implements Serializable {
   private TripBean trip;
 
   private StopBean stop;
-  
+
   private StopTimeInstanceBean stopTime;
 
   public long getId() {
@@ -119,12 +126,22 @@ public class TripProblemReportBean implements Serializable {
     this.stopId = stopId;
   }
 
+  @Deprecated
   public String getData() {
     return data;
   }
 
+  @Deprecated
   public void setData(String data) {
     this.data = data;
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
   }
 
   public String getUserComment() {

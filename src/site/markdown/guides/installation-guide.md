@@ -60,6 +60,31 @@ and can be used to define beans and other resources that determine the configura
 The webapps look for `data-sources.xml` in the `WEB-INF/classes` directory of each webapp by default.  You can add the
 file to the war file directly or copy it into the exploded war directory structure.
 
+### Spring Configuration Example
+
+OneBusAway is powered by a number of Java classes that provide different pieces of functionality.  While we try to
+provide reasonable default behavior, you may wish to tweak OneBusAway at times.  Many options can be set using a
+`PropertyOverrideConfigurer` to override specific class properties.  Here is a quick example of the config you'd add
+to your `data-sources.xml` file:
+
+~~~
+<bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
+  <property name="properties">
+    <props>
+      <prop key="cacheManager.cacheManagerName">org.onebusaway.webapp.cacheManager</prop>
+      <prop key="defaultWebappConfigurationSource.googleMapsApiKey">ABC</prop>
+      ...
+    </props>
+  </property>
+</bean>
+~~~
+
+Here, each `<prop/>` entry specifies a key and a value.  The key takes the form `objectName.propertyName` where
+`objectName` is a OneBusAway object and `propertyName` is a property of that object whose value you'd like to override.
+
+For the full list of documented configuration options, check out the
+[list of configuration parameters](../oba-configs/index.html) auto-generated from the OBA source code. 
+
 ### Tomcat and an external data-sources.xml
 
 As a Tomcat tip, you can override the location of the `data-sources.xml` to point to an external file instead, which is
@@ -69,23 +94,27 @@ webapp:
 ~~~
 <Context path="onebusaway-webapp" docBase="path/to/onebusaway-webapp.war">
   <Parameter name="contextConfigLocation"
-            value="file:path/to/data-sources.xml classpath:org/onebusaway/webapp/application-context-webapp.xml"
+            value="classpath:application-context-webapp.xml file:path/to/data-sources.xml"
          override="false" />
 </Context>
 ~~~
+
+For more info, see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html
 
 It's important to note that when you override contextConfigLocation in this way, you'll need to additionally import the
 `application-context-webapp.xml` for the webapp you are attempting to configure (it's normally included in the
 'contextConfigLocation' entry in web.xml for the webapp, but we lose it when we override).  The location of the webapp
 is dependent on the webapps you are using:
 
+* onebusaway-combined-webapp: classpath:application-context-webapp.xml
+
+If you are deploying the webapps individually, the locations are:
+
 * onebusaway-transit-data-federation-webapp: classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml
 * onebusaway-api-webapp: classpath:org/onebusaway/api/application-context-webapp.xml
 * onebusaway-phone-webapp: classpath:org/onebusaway/phone/application-context-webapp.xml
 * onebusaway-sms-webapp: classpath:org/onebusaway/sms/application-context-webapp.xml
 * onebusaway-webapp: classpath:org/onebusaway/webapp/application-context-webapp.xml
- 
-For more info, see http://tomcat.apache.org/tomcat-5.5-doc/config/context.html
 
 ## Configuring the Combined Webapp
 
@@ -115,6 +144,15 @@ At minimum, you need to add the following entries to your `data-sources.xml` fil
 The primary configuration element sets your `bundlePath`, pointing to your [Transit Data Bundle](transit-data-bundle-guide.html).
 In addition, you might optionally consider [changing the default database](database-configuration-guide.html) or
 [adding a real-time data source](realtime-configuration-guide.html).
+
+## Specific Confugration Guides
+
+For configuration details for each of user-interface components, see the specific configuration guides:
+
+* [API Config](api-webapp-configuration-guide.html)
+* [SMS Config](sms-webapp-configuration-guide.html)
+* [Phone Config](phone-webapp-configuration-guide.html)
+* [Web Config](webapp-configuration-guide.html)
 
 ## Configuring Webapps Independently
 
@@ -200,9 +238,3 @@ Each user interface webapp `data-sources.xml` should include these common entrie
 
 </beans>
 ~~~
-
-## Specific Installation Guides
-
-For specific installation and configuration details for each of the webapps, see the specific installation guides:
-
-* [onebusaway-webapp installation guide](webapp-installation-guide.html)

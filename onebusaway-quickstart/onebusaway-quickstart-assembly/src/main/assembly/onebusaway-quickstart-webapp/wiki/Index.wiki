@@ -3,7 +3,7 @@
 
 <div class="page-header home-header">
 <h1>Where is your bus?</h1>
-<h2>Let's find out.  We provide easy access to real-time transit<br/>information for the Puget Sound region and beyond.</h2>
+<h2>Let's find out.  We provide tools to make it easy to access<br/>real-time transit information using open data sources.</h2>
 </div>
 
 <div class="column-row">
@@ -71,13 +71,17 @@
 </div>
 <div class="one-third column">
 
-=== Our Research ===
+=== Our Project ===
 
-<p><a href="explore/onebusaway/">[[image:Explore.png]]</a></p>
+<p>OneBusAway provides a collection of [[open-source tools>>https://github.com/OneBusAway/onebusaway/wiki/]] designed
+  to work with open transit data like [[GTFS>>https://developers.google.com/transit/gtfs/]] and
+  [[GTFS-realtime>>https://developers.google.com/transit/gtfs-realtime/]].  Our work is all open-source software, so
+  that others may reuse and build upon our efforts.</p> 
 
-<p>OneBusAway was started by students at the University of Washington, and it supports research on improving the usability of public transportation, such as the <a href="explore/onebusaway/">Explore Tool</a> shown above.  Check out our [[research page>>http://onebusaway.org/p/Research.action]] for more information.</p>
+<p>This is the [[**OBA Application Suite**>>https://github.com/OneBusAway/onebusaway-application-modules/wiki]],
+  which provides a variety of tools and interfaces for accessing real-time transit information.  For more info:</p> 
 
-<p>Our work is all [[open-source software>>http://code.google.com/p/onebusaway]], so that others may reuse and build upon our efforts.</p>
+[[**Check out the GitHub project page**>>https://github.com/OneBusAway/onebusaway-application-modules/wiki]]</p>
 
 </div>
 
@@ -88,8 +92,6 @@
 <div id="footer_content">
 * © University of Washington
 * [[Contact Us>>ContactUs]]
-* [[Privacy Policy>>PrivacyPolicy]]
-* [[Developer Resources>>DeveloperResources]]
 </div>
 </div>
 {{/html}}

@@ -32,10 +32,6 @@ import org.onebusaway.wiki.api.WikiRenderingService;
 import org.onebusaway.wiki.api.impl.WikiPageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.ActionContext;
-import com.opensymphony.xwork2.ActionInvocation;
-import com.opensymphony.xwork2.ActionProxy;
-
 @Results({
     @Result(location = "/WEB-INF/content/p/index.jspx"),
     @Result(name = "notFound", location = "/WEB-INF/content/p/index-notFound.jspx"),
@@ -43,7 +39,7 @@ import com.opensymphony.xwork2.ActionProxy;
         "contentType", "contentType"}),
     @Result(name = "404", type = "httpheader", params = {
         "error", "404", "errorMessage", "resource not found"})})
-@Namespace("/p/*")
+@Namespace("/p/{pageName}")
 public class IndexAction extends AbstractAction {
 
   private static final long serialVersionUID = 1L;
@@ -51,7 +47,11 @@ public class IndexAction extends AbstractAction {
   private WikiDocumentService _wikiDocumentService;
 
   private WikiRenderingService _wikiRenderingService;
+  
+  private String _namespace = "Main";
 
+  private String _pageName;
+  
   private boolean _forceRefresh = false;
 
   private WikiPage _page;
@@ -76,6 +76,14 @@ public class IndexAction extends AbstractAction {
   @Autowired
   public void setWikiRenderingService(WikiRenderingService wikiRenderingService) {
     _wikiRenderingService = wikiRenderingService;
+  }
+  
+  public void setNamespace(String namespace) {
+    _namespace = namespace;
+  }
+
+  public void setPageName(String pageName) {
+    _pageName = pageName;
   }
 
   public void setForceRefresh(boolean forceRefresh) {
@@ -122,12 +130,7 @@ public class IndexAction extends AbstractAction {
 
   public String attachment() throws Exception {
 
-    ActionContext context = ActionContext.getContext();
-    ActionInvocation invocation = context.getActionInvocation();
-    ActionProxy proxy = invocation.getProxy();
-
-    String namespace = "Main";
-    String name = proxy.getActionName();
+    String name = _pageName;
     int index = name.indexOf('@');
     if (index == -1)
       return INPUT;
@@ -135,7 +138,7 @@ public class IndexAction extends AbstractAction {
     name = name.substring(index + 1);
 
     WikiAttachmentContent content = _wikiDocumentService.getWikiAttachmentContent(
-        namespace, pageName, name, getLocale(), _forceRefresh);
+        _namespace, pageName, name, getLocale(), _forceRefresh);
 
     if (content == null)
       return "404";
@@ -167,16 +170,9 @@ public class IndexAction extends AbstractAction {
 
     if (_page == null) {
 
-      ActionContext context = ActionContext.getContext();
-      ActionInvocation invocation = context.getActionInvocation();
-      ActionProxy proxy = invocation.getProxy();
-
-      String namespace = "Main";
-      String name = proxy.getActionName();
-
       WikiPageImpl page = new WikiPageImpl();
-      page.setNamespace(namespace);
-      page.setName(name);
+      page.setNamespace(_namespace);
+      page.setName(_pageName);
       _page = page;
       _editLink = _wikiRenderingService.getEditLink(_page);
       return "notFound";
@@ -193,14 +189,7 @@ public class IndexAction extends AbstractAction {
     if (_page != null)
       return;
 
-    ActionContext context = ActionContext.getContext();
-    ActionInvocation invocation = context.getActionInvocation();
-    ActionProxy proxy = invocation.getProxy();
-
-    String namespace = "Main";
-    String name = proxy.getActionName();
-
-    _page = _wikiDocumentService.getWikiPage(namespace, name, getLocale(),
+    _page = _wikiDocumentService.getWikiPage(_namespace, _pageName, getLocale(),
         _forceRefresh);
   }
 

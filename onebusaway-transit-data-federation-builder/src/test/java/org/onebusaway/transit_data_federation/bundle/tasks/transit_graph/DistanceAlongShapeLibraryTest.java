@@ -27,8 +27,6 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.DistanceAlongShapeException;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.InvalidStopToShapeMappingException;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.StopIsTooFarFromShapeException;
 import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
@@ -69,8 +67,7 @@ public class DistanceAlongShapeLibraryTest {
   }
 
   @Test
-  public void test02() throws IOException, InvalidStopToShapeMappingException,
-      StopIsTooFarFromShapeException {
+  public void test02() throws IOException, DistanceAlongShapeException {
     ShapePoints shapePoints = readShapePoints("shapes-02.txt");
     List<StopTimeEntryImpl> stopTimes = readStopTimes("stops-02.txt");
 
@@ -90,6 +87,31 @@ public class DistanceAlongShapeLibraryTest {
 
     assertEquals(1151.1, points[3].distanceAlongShape, 0.1); // STOP D
     assertEquals(9, points[3].index);
+  }
+
+  @Test
+  public void test03() throws IOException, DistanceAlongShapeException {
+
+    ShapePoints shapePoints = readShapePoints("shapes-03.txt");
+    List<StopTimeEntryImpl> stopTimes = readStopTimes("stops-03.txt");
+
+    DistanceAlongShapeLibrary library = new DistanceAlongShapeLibrary();
+    PointAndIndex[] points = library.getDistancesAlongShape(shapePoints,
+        stopTimes);
+    assertEquals(5, points.length);
+
+    assertEquals(67.9, points[0].distanceAlongShape, 0.1); // STOP A
+    assertEquals(0, points[0].index);
+
+    assertEquals(446.0, points[1].distanceAlongShape, 0.1); // STOP B
+    assertEquals(1, points[1].index);
+
+    assertEquals(852.7, points[2].distanceAlongShape, 0.1); // STOP C
+    assertEquals(2, points[2].index);
+
+    assertEquals(1247.0, points[3].distanceAlongShape, 0.1); // STOP D
+    assertEquals(3, points[3].index);
+
   }
 
   private ShapePoints readShapePoints(String key) throws IOException {

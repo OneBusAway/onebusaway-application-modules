@@ -18,6 +18,9 @@ package org.onebusaway.webapp.impl;
 import java.util.Date;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.impl.service_alerts.SituationsPresentation;
 import org.onebusaway.presentation.services.configuration.ConfigurationService;
@@ -72,7 +75,8 @@ public class WebappArrivalsAndDeparturesModel extends
     if (_situations == null) {
       _situations = new SituationsPresentation();
 
-      Map<String, Object> config = _configurationService.getConfiguration(false);
+      HttpServletRequest request = ServletActionContext.getRequest();
+      Map<String, Object> config = _configurationService.getConfiguration(false, request.getContextPath());
       String key = (String) config.get("apiKey");
       if (key != null)
         _situations.setApiKey(key);

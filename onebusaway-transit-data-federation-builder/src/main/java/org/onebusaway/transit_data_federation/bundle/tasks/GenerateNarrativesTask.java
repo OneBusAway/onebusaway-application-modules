@@ -174,7 +174,7 @@ public class GenerateNarrativesTask implements Runnable {
       narrative.setPhone(deduplicate(agency.getPhone()));
       narrative.setTimezone(deduplicate(agency.getTimezone()));
       narrative.setUrl(deduplicate(agency.getUrl()));
-      
+
       String disclaimer = _modifications.getModificationForTypeAndId(
           AgencyNarrative.class, agency.getId(), "disclaimer");
       if (disclaimer != null)
@@ -255,7 +255,6 @@ public class GenerateNarrativesTask implements Runnable {
   }
 
   public void generateTripNarratives(NarrativeProviderImpl provider) {
-    int total = 0;
 
     int tripIndex = 0;
     Collection<Trip> trips = _gtfsDao.getAllTrips();
@@ -277,7 +276,6 @@ public class GenerateNarrativesTask implements Runnable {
         StopTimeNarrative stopTimeNarrative = getStopTimeNarrative(stopTime);
         provider.setNarrativeForStopTimeEntry(trip.getId(), stopTimeIndex++,
             stopTimeNarrative);
-        total++;
       }
     }
   }

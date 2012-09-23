@@ -1,0 +1,24 @@
+= Congratulations! =
+
+This is the default OneBusAway webapp.
+
+== How do I replace this page with my own content? ==
+
+You'll probably want to replace this default content with your own.  Internally, OneBusAway let's a developer specify the content of pages likes this using a document provider, a mechanism we call wiki integration, since you typically supply wiki-like documents.  The simplest integration method is to add the following entry to your `data-sources.xml` file:
+
+(% style="font-family: monospace; margin-bottom: 1em" %)
+{{{
+<bean id="wikiDocumentService" class="org.onebusaway.wiki.file.FileWikiDocumentServiceImpl">
+  <property name="documentDirectory" value="/path/to/some/directory" />
+</bean>
+}}}
+
+You can then create simple text files in your document directory, like `Index.wiki` (used to generate this page).  OneBusAway renders wiki content using [[XWiki Syntax>>http://platform.xwiki.org/xwiki/bin/view/Main/XWikiSyntax]] by default. 
+
+For more details, check out the [[Wiki Integration configuration guide>>${site_base_url}/onebusaway-application-modules/${project.version}/guides/webapp-configuration-guide.html#Wiki_Integration]] for complete details on how to configure your wiki. 
+
+
+
+
+
+

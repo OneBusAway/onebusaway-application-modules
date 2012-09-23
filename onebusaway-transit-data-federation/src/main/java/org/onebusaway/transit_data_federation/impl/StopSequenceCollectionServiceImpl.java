@@ -168,7 +168,7 @@ public class StopSequenceCollectionServiceImpl implements
 
     if (allSequencesHaveDirectionId) {
       Map<String, List<StopSequence>> result = groupStopSequencesByDirectionIds(sequences);
-      if (result.size() > 1)
+      if (result.size() > 0)
         return result;
     }
 

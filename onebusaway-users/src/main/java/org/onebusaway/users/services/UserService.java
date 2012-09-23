@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,4 +284,21 @@ public interface UserService {
    * more than a month ago.
    */
   public void deleteStaleUsers();
+
+  /**
+   * @return true if the task to delete stale users is currently running.
+   */
+  public boolean isDeletingStaleUsers();
+
+  /**
+   * Cancel the task to delete state users (started with
+   * {@link #deleteStaleUsers()}) if it is running.
+   */
+  public void cancelDeleteStaleUsers();
+
+  /**
+   * @return the number of user accounts that have not been accessed in the last
+   *         month
+   */
+  public long getNumberOfStaleUsers();
 }

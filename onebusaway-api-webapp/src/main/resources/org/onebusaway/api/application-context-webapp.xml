@@ -39,4 +39,13 @@
 
   <context:component-scan base-package="org.onebusaway.api.impl" />
   
+  <!-- Configure a default KeyValidationService instance -->
+  <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl">
+    <property name="providers">
+      <list>
+        <bean class="org.onebusaway.users.impl.validation.SaltedPasswordValidationProviderV1Impl" />
+      </list>
+    </property>
+  </bean>
+  
 </beans>

@@ -26,6 +26,8 @@
 
 <h1>Vehicle Location Record</h1>
 
+<s:actionmessage />
+
 <h2>Create a record:</h2>
 
 <s:form method="post" action="vehicle-location-record!submit">
