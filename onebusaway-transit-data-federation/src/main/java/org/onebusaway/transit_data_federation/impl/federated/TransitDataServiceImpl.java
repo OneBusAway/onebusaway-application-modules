@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
@@ -538,18 +537,8 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public ListBean<ServiceAlertBean> getServiceAlerts(SituationQueryBean query) {
-    if (!CollectionsLibrary.isEmpty(query.getStopIds())) {
-      List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
-      for (String stopId : query.getStopIds()) {
-        stopIds.add(AgencyAndIdLibrary.convertFromString(stopId));
-      }
-      List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlertsForStopIds(
-          query.getTime(), stopIds);
-      return new ListBean<ServiceAlertBean>(situations, false);
-    } else {
-      List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlerts(query);
-      return new ListBean<ServiceAlertBean>(situations, false);
-    }
+    List<ServiceAlertBean> situations = _serviceAlertsBeanService.getServiceAlerts(query);
+    return new ListBean<ServiceAlertBean>(situations, false);
   }
 
   @Override

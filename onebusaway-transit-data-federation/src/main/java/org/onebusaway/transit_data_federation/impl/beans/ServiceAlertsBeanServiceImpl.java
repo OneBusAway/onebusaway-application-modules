@@ -106,14 +106,6 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
   }
 
   @Override
-  public List<ServiceAlertBean> getServiceAlertsForStopIds(long time,
-      Iterable<AgencyAndId> stopIds) {
-    List<ServiceAlert> serviceAlerts = _serviceAlertsService.getServiceAlertsForStopIds(
-        time, stopIds);
-    return list(serviceAlerts);
-  }
-
-  @Override
   public List<ServiceAlertBean> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId) {

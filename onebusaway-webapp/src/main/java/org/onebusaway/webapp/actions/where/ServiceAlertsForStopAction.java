@@ -22,6 +22,7 @@ import org.apache.struts2.convention.annotation.Actions;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.AffectsBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -59,7 +60,11 @@ public class ServiceAlertsForStopAction extends ActionSupport {
       @Action(value = "/where/text/service-alerts-for-stop")})
   public String execute() {
     SituationQueryBean query = new SituationQueryBean();
-    query.setStopIds(_stopIds);
+    for (String stopId : _stopIds) {
+      AffectsBean affects = new SituationQueryBean.AffectsBean();
+      affects.setStopId(stopId);
+      query.getAffects().add(affects);
+    }
     ListBean<ServiceAlertBean> list = _transitDataService.getServiceAlerts(query);
     _situations = list.getList();
     return SUCCESS;
