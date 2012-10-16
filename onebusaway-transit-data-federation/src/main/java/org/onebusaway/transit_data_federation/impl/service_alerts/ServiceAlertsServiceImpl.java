@@ -58,15 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-//<<<<<<< HEAD
-//import org.apache.commons.collections.CollectionUtils;
-//import org.apache.commons.collections.Predicate;
-//import org.apache.commons.lang.StringUtils;
-//import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-////import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.RouteIdAndDirection;
-//import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
-//=======
-//>>>>>>> upstream/master
 
 @Component
 class ServiceAlertsServiceImpl implements ServiceAlertsService {
@@ -371,7 +362,9 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     
     List<ServiceAlert> alerts = getServiceAlertIdsAsObjects(serviceAlertIds);
     
-//    filterByTime(query, alerts);
+    // SituationQueryBean no longer supports filtering by time, but it might return, so leaving this code here
+    // for future reference.
+    //    filterByTime(query, alerts);
     
     return alerts;
   }
@@ -380,6 +373,8 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
    * Private Methods
    ****/
 
+  // SituationQUeryBean no longer supports filtering by time, but it might return, so leaving this code here
+  // for future reference.
 //  private void filterByTime(SituationQueryBean query, List<ServiceAlert> alerts) {
 //    long queryTime = query.getTime();
 //    if (queryTime != 0) {
