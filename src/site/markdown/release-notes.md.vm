@@ -6,6 +6,20 @@ $H$H ${currentVersion}
 
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
 
+$H$H 1.1.0
+
+* New Features:
+    * none
+* Bug Fixes:
+    * Issue [#14](https://github.com/OneBusAway/onebusaway-application-modules/issues/14)
+    * Issue [#11](https://github.com/OneBusAway/onebusaway-application-modules/issues/11)
+    * Issue [#15](https://github.com/OneBusAway/onebusaway-application-modules/issues/15)
+    * Issue [#16](https://github.com/OneBusAway/onebusaway-application-modules/issues/16)
+    * Issue [#17](https://github.com/OneBusAway/onebusaway-application-modules/issues/17)
+    * Issue [#18](https://github.com/OneBusAway/onebusaway-application-modules/issues/18)
+    * Issue [#19](https://github.com/OneBusAway/onebusaway-application-modules/issues/19)
+    * Issue [#24](https://github.com/OneBusAway/onebusaway-application-modules/issues/24)
+
 $H$H 1.0.7
 
 * New Features:
