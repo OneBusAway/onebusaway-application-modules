@@ -85,7 +85,7 @@
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
-      <version>1.1.1-SNAPSHOT</version>
+      <version>1.1.0</version>
     </dependency>    
 
     <!-- Library for accessing MyBus Data Stream -->
