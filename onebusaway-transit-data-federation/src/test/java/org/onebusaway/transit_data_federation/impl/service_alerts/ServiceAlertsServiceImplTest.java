@@ -1,7 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- * Copyright (C) 2011 Google, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,11 +33,14 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.AffectsBean;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -49,6 +51,8 @@ import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
 
 public class ServiceAlertsServiceImplTest {
@@ -108,6 +112,80 @@ public class ServiceAlertsServiceImplTest {
     assertEquals(2, alerts.size());
     assertTrue(alerts.contains(serviceAlert1));
     assertTrue(alerts.contains(serviceAlert2));
+  }
+
+  // Time is not supported by SituationQueryBean anymore, but leaving this code
+  // here (not as a test)
+  // for future reference.
+  // @Test
+  public void testGetServiceAlertsWithTime() {
+    String agencyId = "1";
+
+    // No publication window
+    ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
+    Affects.Builder builderForValue = Affects.newBuilder();
+    builderForValue.setAgencyId(agencyId);
+    builder1.addAffects(builderForValue);
+    ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
+        agencyId);
+
+    // Time is not supported by SituationQueryBean anymore, but leaving these
+    // here for future reference.
+    // Open-ended publication window ends in the past, should get filtered out
+    ServiceAlert serviceAlert2 = addServiceAlertWithTimeRange(agencyId,
+        createTimeRange(0, System.currentTimeMillis()));
+
+    // Closed publication window starts in future, should get filtered out
+    ServiceAlert serviceAlert3 = addServiceAlertWithTimeRange(
+        agencyId,
+        createTimeRange(System.currentTimeMillis() + (60 * 60 * 1000),
+            System.currentTimeMillis() + (60 * 60 * 1000 * 2)));
+
+    // Closed publication window contains time, should get included
+    ServiceAlert serviceAlert4 = addServiceAlertWithTimeRange(
+        agencyId,
+        createTimeRange(System.currentTimeMillis() - (60 * 60 * 1000),
+            System.currentTimeMillis() + (60 * 60 * 1000)));
+
+    SituationQueryBean query = new SituationQueryBean();
+    // query.setAgencyId(agencyId);
+
+    List<AffectsBean> affects = new ArrayList<AffectsBean>();
+    AffectsBean e = new AffectsBean();
+    e.setAgencyId(agencyId);
+    affects.add(e);
+    query.setAffects(affects);
+    // Time is not supported by SituationQueryBean anymore
+    // query.setTime(System.currentTimeMillis());
+
+    List<ServiceAlert> alerts = _service.getServiceAlerts(query);
+    assertEquals(2, alerts.size());
+    assertTrue(alerts.contains(serviceAlert1));
+    assertTrue(!alerts.contains(serviceAlert2));
+    assertTrue(!alerts.contains(serviceAlert3));
+    assertTrue(alerts.contains(serviceAlert4));
+  }
+
+  private TimeRange createTimeRange(long start, long end) {
+    Builder timeRangeBuilder = TimeRange.newBuilder();
+    if (start != 0)
+      timeRangeBuilder.setStart(start);
+    if (end != 0)
+      timeRangeBuilder.setEnd(end);
+    TimeRange timeRange = timeRangeBuilder.build();
+    return timeRange;
+  }
+
+  private ServiceAlert addServiceAlertWithTimeRange(String agencyId,
+      TimeRange timeRange) {
+    ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
+    Affects.Builder builderForValue2 = Affects.newBuilder();
+    builderForValue2.setAgencyId(agencyId);
+    builder2.addAffects(builderForValue2);
+    builder2.addPublicationWindow(timeRange);
+    ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
+        agencyId);
+    return serviceAlert2;
   }
 
   @Test
