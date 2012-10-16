@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import org.onebusaway.exceptions.ServiceException;
+
 /**
  * This factory can be used to examine a Method signature and create an
  * appropriate {@link FederatedServiceMethodInvocationHandler} based on method
@@ -92,6 +94,18 @@ public class FederatedServiceMethodInvocationHandlerFactory {
         expressions = new String[argumentIndices.length];
       return new FederatedByCoordinatePointsMethodInvocationHandlerImpl(method,
           argumentIndices, expressions);
+    }
+
+    FederatedByCustomMethod ann7 = method.getAnnotation(FederatedByCustomMethod.class);
+    if (ann7 != null) {
+      Class<? extends FederatedServiceMethodInvocationHandler> handlerClass = ann7.handler();
+      try {
+        return handlerClass.newInstance();
+      } catch (Exception ex) {
+        throw new ServiceException(
+            "error creating FederatedServiceMethodInvocationHandler of type "
+                + handlerClass, ex);
+      }
     }
 
     throw new IllegalArgumentException(

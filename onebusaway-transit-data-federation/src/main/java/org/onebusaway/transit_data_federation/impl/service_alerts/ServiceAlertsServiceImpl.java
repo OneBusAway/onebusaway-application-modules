@@ -39,6 +39,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
@@ -46,6 +47,7 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
@@ -56,17 +58,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.lang.StringUtils;
-import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.RouteIdAndDirection;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
+//<<<<<<< HEAD
+//import org.apache.commons.collections.CollectionUtils;
+//import org.apache.commons.collections.Predicate;
+//import org.apache.commons.lang.StringUtils;
+//import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+////import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.RouteIdAndDirection;
+//import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
+//=======
+//>>>>>>> upstream/master
 
 @Component
 class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private static Logger _log = LoggerFactory.getLogger(ServiceAlertsServiceImpl.class);
+
+  /**
+   * While a service alert affects clause ({@link Affects} or
+   * {@link SituationQueryBean.AffectsBean}) might specify any combination of
+   * agency, route, trip, stop, etc. in practice, we only support a couple of
+   * specific combinations for applying alerts. We enumerate those specific
+   * combinations here so that they can be identified in queries.
+   */
+  private enum AffectsType {
+    AGENCY, ROUTE, ROUTE_DIRECTION, ROUTE_STOP, ROUTE_DIRECTION_STOP, TRIP, TRIP_STOP, STOP, UNSUPPORTED
+  }
 
   private ConcurrentMap<AgencyAndId, ServiceAlert> _serviceAlerts = new ConcurrentHashMap<AgencyAndId, ServiceAlert>();
 
@@ -208,20 +224,6 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   @Override
-  public List<ServiceAlert> getServiceAlertsForStopIds(long time,
-      Iterable<AgencyAndId> stopIds) {
-    Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
-    for (AgencyAndId stopId : stopIds) {
-      getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId,
-          stopId.getAgencyId(), serviceAlertIds);
-      getServiceAlertIdsForKey(_serviceAlertIdsByStopId, stopId,
-          serviceAlertIds);
-    }
-    return getServiceAlertIdsAsObjects(serviceAlertIds);
-  }
-
-
-  @Override
   public List<ServiceAlert> getServiceAlertsForStopCall(long time,
       BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
       AgencyAndId vehicleId) {
@@ -276,8 +278,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   @Override
   public List<ServiceAlert> getServiceAlertsForVehicleJourney(long time,
-      BlockTripInstance blockTripInstance,
-      AgencyAndId vehicleId) {
+      BlockTripInstance blockTripInstance, AgencyAndId vehicleId) {
 
     BlockTripEntry blockTrip = blockTripInstance.getBlockTrip();
     TripEntry trip = blockTrip.getTrip();
@@ -300,39 +301,77 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   public List<ServiceAlert> getServiceAlerts(SituationQueryBean query) {
     Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 
-    // Note we are treating the query's agency ID as that of what the service
-    // alert affects, not the alert's agency ID.
-    if (!StringUtils.isEmpty(query.getAgencyId())) {
-      getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId, query.getAgencyId(),
-          serviceAlertIds);
-    }
+    for (SituationQueryBean.AffectsBean affects : query.getAffects()) {
 
-    if (!CollectionUtils.isEmpty(query.getStopIds())) {
-      for (String stopId : query.getStopIds()) {
-        AgencyAndId id = ServiceAlertLibrary.agencyAndId(ServiceAlertLibrary.id(AgencyAndId.convertFromString(stopId)));
-        getServiceAlertIdsForKey(_serviceAlertIdsByStopId, id,
-            serviceAlertIds);
-      }
-    }
+      AgencyAndId routeId = AgencyAndId.convertFromString(affects.getRouteId());
+      AgencyAndId tripId = AgencyAndId.convertFromString(affects.getTripId());
+      AgencyAndId stopId = AgencyAndId.convertFromString(affects.getStopId());
 
-    if (!CollectionUtils.isEmpty(query.getRoutes())) {
-      for (RouteIdAndDirection route: query.getRoutes()) {
-        
-        if (route.direction != null) {
-          RouteAndDirectionRef lineAndDirectionRef = new RouteAndDirectionRef(
-              AgencyAndId.convertFromString(route.routeId), route.direction);
-          getServiceAlertIdsForKey(_serviceAlertIdsByRouteAndDirectionId,
-              lineAndDirectionRef, serviceAlertIds);
-        } else {
-          getServiceAlertIdsForKey(_serviceAlertIdsByRouteId, AgencyAndId.convertFromString(route.routeId),
+      AffectsType type = getAffectsType(affects.getAgencyId(),
+          affects.getRouteId(), affects.getDirectionId(), affects.getTripId(),
+          affects.getStopId());
+      switch (type) {
+        case AGENCY: {
+          /**
+           * Note we are treating the query's agency ID as that of what the
+           * service alert affects, not the alert's federated agency ID.
+           */
+          getServiceAlertIdsForKey(_serviceAlertIdsByAgencyId,
+              affects.getAgencyId(), serviceAlertIds);
+          break;
+        }
+        case ROUTE: {
+
+          getServiceAlertIdsForKey(_serviceAlertIdsByRouteId, routeId,
               serviceAlertIds);
+          break;
+        }
+        case TRIP: {
+          getServiceAlertIdsForKey(_serviceAlertIdsByTripId, tripId,
+              serviceAlertIds);
+          break;
+        }
+        case STOP: {
+          getServiceAlertIdsForKey(_serviceAlertIdsByStopId, stopId,
+              serviceAlertIds);
+          break;
+        }
+        case ROUTE_DIRECTION: {
+          RouteAndDirectionRef routeAndDirectionRef = new RouteAndDirectionRef(
+              routeId, affects.getDirectionId());
+          getServiceAlertIdsForKey(_serviceAlertIdsByRouteAndDirectionId,
+              routeAndDirectionRef, serviceAlertIds);
+          break;
+        }
+        case ROUTE_DIRECTION_STOP: {
+          RouteDirectionAndStopCallRef ref = new RouteDirectionAndStopCallRef(
+              routeId, affects.getDirectionId(), stopId);
+          getServiceAlertIdsForKey(_serviceAlertIdsByRouteDirectionAndStopCall,
+              ref, serviceAlertIds);
+          break;
+        }
+        case ROUTE_STOP: {
+          RouteAndStopCallRef routeAndStopRef = new RouteAndStopCallRef(
+              routeId, stopId);
+          getServiceAlertIdsForKey(_serviceAlertIdsByRouteAndStop,
+              routeAndStopRef, serviceAlertIds);
+          break;
+        }
+        case TRIP_STOP: {
+          TripAndStopCallRef ref = new TripAndStopCallRef(tripId, stopId);
+          getServiceAlertIdsForKey(_serviceAlertIdsByTripAndStopId, ref,
+              serviceAlertIds);
+          break;
+        }
+        default: {
+          throw new RuntimeException("Unhandled type " + type);
         }
       }
     }
     
     List<ServiceAlert> alerts = getServiceAlertIdsAsObjects(serviceAlertIds);
     
-    filterByTime(query, alerts);
+//    filterByTime(query, alerts);
     
     return alerts;
   }
@@ -341,36 +380,36 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
    * Private Methods
    ****/
 
-  private void filterByTime(SituationQueryBean query, List<ServiceAlert> alerts) {
-    long queryTime = query.getTime();
-    if (queryTime != 0) {
-      Predicate predicate = new Predicate() {
-        private long queryTime;
-        @Override
-        public boolean evaluate(Object arg0) {
-          ServiceAlert alert = (ServiceAlert)arg0;
-          List<TimeRange> list = alert.getPublicationWindowList();
-          if (list.isEmpty()) {
-            return true;
-          }
-          // If we're inside *any* publication window, return true
-          for (TimeRange t: list) {
-            if ((t.getStart() <= queryTime) && (queryTime <= t.getEnd())) {
-              return true;
-            }
-          }
-          return false;
-        }
-
-        public Predicate init(long queryTime) {
-          this.queryTime = queryTime;
-          return this;
-        }
-      }.init(queryTime);
-      CollectionUtils.filter(alerts, predicate );
-    }
-  }
-
+//  private void filterByTime(SituationQueryBean query, List<ServiceAlert> alerts) {
+//    long queryTime = query.getTime();
+//    if (queryTime != 0) {
+//      Predicate predicate = new Predicate() {
+//        private long queryTime;
+//        @Override
+//        public boolean evaluate(Object arg0) {
+//          ServiceAlert alert = (ServiceAlert)arg0;
+//          List<TimeRange> list = alert.getPublicationWindowList();
+//          if (list.isEmpty()) {
+//            return true;
+//          }
+//          // If we're inside *any* publication window, return true
+//          for (TimeRange t: list) {
+//            if ((t.getStart() <= queryTime) && (queryTime <= t.getEnd())) {
+//              return true;
+//            }
+//          }
+//          return false;
+//        }
+//
+//        public Predicate init(long queryTime) {
+//          this.queryTime = queryTime;
+//          return this;
+//        }
+//      }.init(queryTime);
+//      CollectionUtils.filter(alerts, predicate );
+//    }
+//  }
+//
   private void updateReferences(ServiceAlert serviceAlert) {
     AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
     ServiceAlert existingServiceAlert = _serviceAlerts.put(id, serviceAlert);
@@ -485,6 +524,64 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
       }
     }
     return false;
+  }
+
+  private AffectsType getAffectsType(String agencyId, String routeId,
+      String directionId, String tripId, String stopId) {
+    int count = getNonNullCount(agencyId, routeId, directionId, tripId, stopId);
+    switch (count) {
+      case 0: {
+        _log.warn("no arguments specified in affects clause");
+        break;
+      }
+      case 1: {
+        if (agencyId != null) {
+          return AffectsType.AGENCY;
+        }
+        if (routeId != null) {
+          return AffectsType.ROUTE;
+        }
+        if (tripId != null) {
+          return AffectsType.TRIP;
+        }
+        if (stopId != null) {
+          return AffectsType.STOP;
+        }
+        break;
+      }
+      case 2: {
+        if (routeId != null && directionId != null) {
+          return AffectsType.ROUTE_DIRECTION;
+        }
+        if (routeId != null && stopId != null) {
+          return AffectsType.ROUTE_STOP;
+        }
+        if (tripId != null && stopId != null) {
+          return AffectsType.TRIP_STOP;
+        }
+        break;
+      }
+      case 3: {
+        if (routeId != null && directionId != null && stopId != null) {
+          return AffectsType.ROUTE_DIRECTION_STOP;
+        }
+        break;
+      }
+    }
+    _log.warn("unsupported affects clause: agencyId=" + agencyId + " routeId="
+        + routeId + " directionId=" + directionId + " tripId=" + tripId
+        + " stopId=" + stopId);
+    return AffectsType.UNSUPPORTED;
+  }
+
+  private int getNonNullCount(String... ids) {
+    int count = 0;
+    for (String id : ids) {
+      if (id != null) {
+        count++;
+      }
+    }
+    return count;
   }
 
   /****

@@ -29,6 +29,7 @@ import org.onebusaway.federations.annotations.FederatedByAnyEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByCoordinateBoundsMethod;
 import org.onebusaway.federations.annotations.FederatedByCoordinatePointsMethod;
+import org.onebusaway.federations.annotations.FederatedByCustomMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -70,6 +71,7 @@ import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBeanFederatedServiceMethodInvocationHandler;
 import org.onebusaway.transit_data.model.tripplanning.ConstraintsBean;
 import org.onebusaway.transit_data.model.tripplanning.ItinerariesBean;
 import org.onebusaway.transit_data.model.tripplanning.TransitLocationBean;
@@ -455,7 +457,7 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod()
   public void removeAllServiceAlertsForAgencyId(String agencyId);
 
-  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  @FederatedByCustomMethod(handler = SituationQueryBeanFederatedServiceMethodInvocationHandler.class)
   public ListBean<ServiceAlertBean> getServiceAlerts(SituationQueryBean query);
 
   /****

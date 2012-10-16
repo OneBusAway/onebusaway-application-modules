@@ -44,9 +44,6 @@ public interface ServiceAlertsBeanService {
   public List<ServiceAlertBean> getServiceAlertsForStopId(long time,
       AgencyAndId stopId);
 
-  public List<ServiceAlertBean> getServiceAlertsForStopIds(long time,
-      Iterable<AgencyAndId> stopIds);
-
   public List<ServiceAlertBean> getServiceAlerts(SituationQueryBean query);
 
   public List<ServiceAlertBean> getServiceAlertsForStopCall(long time,

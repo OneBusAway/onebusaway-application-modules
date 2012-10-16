@@ -1,18 +1,18 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org> Copyright (C) 2011
+ * Google, Inc.
  * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
@@ -34,13 +34,14 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.AffectsBean;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -114,34 +115,50 @@ public class ServiceAlertsServiceImplTest {
     assertTrue(alerts.contains(serviceAlert2));
   }
 
-  @Test
+  // Time is not supported by SituationQueryBean anymore, but leaving this code
+  // here (not as a test)
+  // for future reference.
+  // @Test
   public void testGetServiceAlertsWithTime() {
     String agencyId = "1";
-    
+
     // No publication window
     ServiceAlert.Builder builder1 = ServiceAlert.newBuilder();
     Affects.Builder builderForValue = Affects.newBuilder();
     builderForValue.setAgencyId(agencyId);
-    builder1.addAffects(builderForValue );
+    builder1.addAffects(builderForValue);
     ServiceAlert serviceAlert1 = _service.createOrUpdateServiceAlert(builder1,
         agencyId);
 
+    // Time is not supported by SituationQueryBean anymore, but leaving these
+    // here for future reference.
     // Open-ended publication window ends in the past, should get filtered out
-    ServiceAlert serviceAlert2 = addServiceAlertWithTimeRange(agencyId, 
+    ServiceAlert serviceAlert2 = addServiceAlertWithTimeRange(agencyId,
         createTimeRange(0, System.currentTimeMillis()));
 
     // Closed publication window starts in future, should get filtered out
-    ServiceAlert serviceAlert3 = addServiceAlertWithTimeRange(agencyId,
-        createTimeRange(System.currentTimeMillis()+(60*60*1000), System.currentTimeMillis()+(60*60*1000*2)));
+    ServiceAlert serviceAlert3 = addServiceAlertWithTimeRange(
+        agencyId,
+        createTimeRange(System.currentTimeMillis() + (60 * 60 * 1000),
+            System.currentTimeMillis() + (60 * 60 * 1000 * 2)));
 
     // Closed publication window contains time, should get included
-    ServiceAlert serviceAlert4 = addServiceAlertWithTimeRange(agencyId, 
-        createTimeRange(System.currentTimeMillis()-(60*60*1000), System.currentTimeMillis()+(60*60*1000)));
+    ServiceAlert serviceAlert4 = addServiceAlertWithTimeRange(
+        agencyId,
+        createTimeRange(System.currentTimeMillis() - (60 * 60 * 1000),
+            System.currentTimeMillis() + (60 * 60 * 1000)));
 
     SituationQueryBean query = new SituationQueryBean();
-    query.setAgencyId(agencyId);
-    query.setTime(System.currentTimeMillis());
-    
+    // query.setAgencyId(agencyId);
+
+    List<AffectsBean> affects = new ArrayList<AffectsBean>();
+    AffectsBean e = new AffectsBean();
+    e.setAgencyId(agencyId);
+    affects.add(e);
+    query.setAffects(affects);
+    // Time is not supported by SituationQueryBean anymore
+    // query.setTime(System.currentTimeMillis());
+
     List<ServiceAlert> alerts = _service.getServiceAlerts(query);
     assertEquals(2, alerts.size());
     assertTrue(alerts.contains(serviceAlert1));
@@ -160,17 +177,18 @@ public class ServiceAlertsServiceImplTest {
     return timeRange;
   }
 
-  private ServiceAlert addServiceAlertWithTimeRange(String agencyId, TimeRange timeRange) {
+  private ServiceAlert addServiceAlertWithTimeRange(String agencyId,
+      TimeRange timeRange) {
     ServiceAlert.Builder builder2 = ServiceAlert.newBuilder();
     Affects.Builder builderForValue2 = Affects.newBuilder();
     builderForValue2.setAgencyId(agencyId);
-    builder2.addAffects(builderForValue2 );
-    builder2.addPublicationWindow(timeRange );
+    builder2.addAffects(builderForValue2);
+    builder2.addPublicationWindow(timeRange);
     ServiceAlert serviceAlert2 = _service.createOrUpdateServiceAlert(builder2,
         agencyId);
     return serviceAlert2;
   }
-  
+
   @Test
   public void testGetServiceAlertsForFederatedAgencyId() {
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();

@@ -22,70 +22,85 @@ import java.util.List;
 
 import org.onebusaway.transit_data.model.QueryBean;
 
+/**
+ * A situation query has the following semantics. The semantics of specifying
+ * multiple ids within an {@link AffectsBean} is an AND relationship. As an
+ * example, specifying routeId + directionId indicates a match against alerts
+ * affecting the specified route and direction. By the same token, specifying
+ * tripId + stopId would indicate a match against alerts affecting the specified
+ * trip and stop. The semantics of specifying multiple AffectsBeans in the query
+ * is an OR relationship. To find an alert affecting any stop in a collection of
+ * stops, you'd create an {@link AffectsBean} for each stop with stopId set and
+ * add them all to the query.
+ * 
+ * @author bdferris
+ * 
+ */
 @QueryBean
 public class SituationQueryBean implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  // Not clear whether this is service alert agency ID or affects agency ID.
-  // Treating it as latter for now.
-  private String agencyId;
+  private List<AffectsBean> affects = new ArrayList<AffectsBean>();
 
-  private List<String> stopIds;
-
-  // Asked Brian about time in developer list, he said:
-  // "Generally, I'd set it to now(). You can use it to query what service
-  // ids were active at some point in the past or future by changing the
-  // time value."
-  // http://groups.google.com/group/onebusaway-developers/msg/fb9b44cd9ba7bef4?hl=en
-  private long time;
-
-  private List<RouteIdAndDirection> routes = new ArrayList<RouteIdAndDirection>();
-
-  public String getAgencyId() {
-    return agencyId;
+  public List<AffectsBean> getAffects() {
+    return affects;
   }
 
-  public void setAgencyId(String agencyId) {
-    this.agencyId = agencyId;
+  public void setAffects(List<AffectsBean> affects) {
+    this.affects = affects;
   }
 
-  public List<String> getStopIds() {
-    return stopIds;
-  }
+  public static class AffectsBean {
 
-  public void setStopIds(List<String> stopIds) {
-    this.stopIds = stopIds;
-  }
+    private String agencyId;
 
-  public long getTime() {
-    return time;
-  }
+    private String routeId;
 
-  public void setTime(long time) {
-    this.time = time;
-  }
+    private String directionId;
 
-  public List<RouteIdAndDirection> getRoutes() {
-    return this.routes;
-  }
+    private String tripId;
 
-  public void setRoutes(List<RouteIdAndDirection> routes) {
-    this.routes = routes;
-  }
+    private String stopId;
 
-  public void addRoute(String id, String direction) {
-    routes.add(new RouteIdAndDirection(id, direction));
-  }
-  
-  public class RouteIdAndDirection implements Serializable {
-    private static final long serialVersionUID = 1L;
-    public RouteIdAndDirection(String routeId, String direction) {
-      this.routeId = routeId;
-      this.direction = direction;
+    public String getAgencyId() {
+      return agencyId;
     }
-    public String routeId;
-    public String direction;
-  }
 
+    public void setAgencyId(String agencyId) {
+      this.agencyId = agencyId;
+    }
+
+    public String getRouteId() {
+      return routeId;
+    }
+
+    public void setRouteId(String routeId) {
+      this.routeId = routeId;
+    }
+
+    public String getDirectionId() {
+      return directionId;
+    }
+
+    public void setDirectionId(String directionId) {
+      this.directionId = directionId;
+    }
+
+    public String getTripId() {
+      return tripId;
+    }
+
+    public void setTripId(String tripId) {
+      this.tripId = tripId;
+    }
+
+    public String getStopId() {
+      return stopId;
+    }
+
+    public void setStopId(String stopId) {
+      this.stopId = stopId;
+    }
+  }
 }
