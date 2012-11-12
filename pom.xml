@@ -508,6 +508,7 @@
             <exclude>**/*.swf</exclude>
             <exclude>**/*.mp3</exclude>
             <exclude>**/*.wav</exclude>
+            <exclude>bin/**</exclude>
             <exclude>src/test/resources/**</exclude>
           </excludes>
         </configuration>

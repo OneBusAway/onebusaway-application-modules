@@ -51,9 +51,11 @@ public class SituationQueryBean implements Serializable {
     this.affects = affects;
   }
 
-  public static class AffectsBean {
+  public static class AffectsBean implements Serializable {
 
-    private String agencyId;
+	private static final long serialVersionUID = 1L;
+
+	private String agencyId;
 
     private String routeId;
 
