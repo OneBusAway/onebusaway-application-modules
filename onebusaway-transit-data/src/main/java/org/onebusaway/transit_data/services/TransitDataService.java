@@ -34,6 +34,7 @@ import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -81,6 +82,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
@@ -556,4 +558,20 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByAggregateMethod
   public List<String> getAllTripProblemReportLabels();
+  
+  /*
+   * Methods for OBANYC compatability
+   * 
+   */
+  
+   public String getActiveBundleId();
+
+   public List<TimepointPredictionRecord> getPredictionRecordsForTrip(TripStatusBean tripStatus);
+   
+   public Boolean routeHasUpcomingScheduledService(long time, String routeId, String directionId);
+
+   public Boolean stopHasUpcomingScheduledService(long time, String stopId, String routeId, String directionId);
+   
+   public List<String> getSearchSuggestions(String input);
+
 }
