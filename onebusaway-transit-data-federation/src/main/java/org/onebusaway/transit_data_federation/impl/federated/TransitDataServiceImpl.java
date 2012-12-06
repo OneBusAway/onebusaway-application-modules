@@ -182,9 +182,9 @@ class TransitDataServiceImpl implements TransitDataService {
   @Autowired
   private VehicleStatusBeanService _vehicleStatusBeanService;
   
-  @Autowired
+  /*@Autowired
   private PredictionIntegrationService _predictionIntegrationService;
-
+*/
   @Autowired
   private ScheduledServiceService _scheduledServiceService;
 
@@ -690,7 +690,8 @@ class TransitDataServiceImpl implements TransitDataService {
 
    @Override
    public List<TimepointPredictionRecord> getPredictionRecordsForTrip(TripStatusBean tripStatus) {
-     return _predictionIntegrationService.getPredictionsForTrip(tripStatus);
+     /*return _predictionIntegrationService.getPredictionsForTrip(tripStatus);*/
+       return new ArrayList<TimepointPredictionRecord>();
    }
    
    @Override
