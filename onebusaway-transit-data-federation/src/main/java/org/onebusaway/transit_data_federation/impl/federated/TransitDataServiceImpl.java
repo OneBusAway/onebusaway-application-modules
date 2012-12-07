@@ -720,7 +720,7 @@ class TransitDataServiceImpl implements TransitDataService {
    
    @Override
    public List<String> getSearchSuggestions(String input) {
-     List<String> result = this._bundleSearchService.getSuggestions(input);
+     List<String> result = _bundleSearchService.getSuggestions(input);
 
      return result;
    }
