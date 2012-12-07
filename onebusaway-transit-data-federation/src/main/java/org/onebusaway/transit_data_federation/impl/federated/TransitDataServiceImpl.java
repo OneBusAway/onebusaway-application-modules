@@ -54,6 +54,7 @@ import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.StopsWithArrivalsAndDeparturesBean;
+import org.onebusaway.transit_data.model.TripStopTimeBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
@@ -82,6 +83,7 @@ import org.onebusaway.transit_data.model.tripplanning.TransitShedConstraintsBean
 import org.onebusaway.transit_data.model.tripplanning.VertexBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
@@ -109,7 +111,6 @@ import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
-import org.onebusaway.transit_data_federation.services.predictions.PredictionIntegrationService;
 import org.onebusaway.transit_data_federation.services.realtime.CurrentVehicleEstimationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.schedule.ScheduledServiceService;
@@ -181,10 +182,7 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private VehicleStatusBeanService _vehicleStatusBeanService;
-  
-  /*@Autowired
-  private PredictionIntegrationService _predictionIntegrationService;
-*/
+    
   @Autowired
   private ScheduledServiceService _scheduledServiceService;
 
@@ -690,8 +688,24 @@ class TransitDataServiceImpl implements TransitDataService {
 
    @Override
    public List<TimepointPredictionRecord> getPredictionRecordsForTrip(TripStatusBean tripStatus) {
-     /*return _predictionIntegrationService.getPredictionsForTrip(tripStatus);*/
-       return new ArrayList<TimepointPredictionRecord>();
+     List<TimepointPredictionRecord> tprs = new ArrayList<TimepointPredictionRecord>();
+       
+     TripDetailsQueryBean tdqb = new TripDetailsQueryBean();
+     tdqb.setTripId(tripStatus.getActiveTrip().getId());
+     tdqb.setInclusion(new TripDetailsInclusionBean(true, true, true));
+     TripDetailsBean trip = getSingleTripDetails(tdqb);
+        
+     double scheduleDeviation = trip.getStatus().getScheduleDeviation();
+       
+     for (TripStopTimeBean stb: trip.getSchedule().getStopTimes()) {
+       TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+       tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(stb.getStop().getId()));
+       tpr.setTimepointScheduledTime(trip.getStatus().getServiceDate() + (stb.getArrivalTime() * 1000));
+       tpr.setTimepointPredictedTime(trip.getStatus().getServiceDate() + (int)(((double)stb.getArrivalTime() - scheduleDeviation) * 1000));
+       tprs.add(tpr);
+     }
+     
+     return tprs;
    }
    
    @Override
