@@ -56,10 +56,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     }
 
     @Override
-    public void setConfigurationValue(String component, String configurationItemKey, String value) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void setConfigurationValue(String component, String configurationItemKey, String value) {
+        configurationMap.put(configurationItemKey, value);
     }
 
+    public void setConfigurationValues(Map<String, String> configurationValues) {
+        configurationMap.putAll(configurationValues);
+    }
+    
     @Override
     public Map<String, String> getConfiguration() {
         return configurationMap;

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2011 Metropolitan Transportation Authority Licensed under the Apache License, Version 2.0 (the "License"); 
+    you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 
+    Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS 
+    IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language 
+    governing permissions and limitations under the License. -->
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" 
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+    
+    <!-- Configuration keys (and common defaults) may include:
+         display.googleMapsClientId
+         display.googleMapsSecretKey
+         display.bingMapsKey
+         display.useTimePredictions false
+         display.atStopThresholdInFeet 100
+         display.approachingThresholdInFeet 500
+         display.distanceAsStopsTresholdInFeet 2640
+         display.distanceAsStopsThresholdInStops 3
+         display.distanceAsStopsMaximumThresholdInFeet 2640
+         display.hideTimeout 300
+         display.previousTripFilterDistance 5.0
+         display.googleAdsClientId
+         display.staleTimeout 120
+         display.googleAnalyticsSiteId
+         display.obaApiExcludeGaKey OBANYC
+         display.mapCenterLat
+         display.mapCenterLon
+         display.mapZoom
+         display.stalledTimeout
+         -->
+     
+    <bean id="configurationServiceImpl" class="org.onebusaway.config_webapp.impl.ConfigurationServiceImpl">
+        <property name="configurationValues">
+            <map>
+                <entry key="display.useTimePredictions" value="true"/>
+            </map>
+        </property>
+    </bean>
+
+</beans>
