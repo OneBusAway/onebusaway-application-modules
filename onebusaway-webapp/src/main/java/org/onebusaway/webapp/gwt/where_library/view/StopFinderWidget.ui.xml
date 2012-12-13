@@ -146,15 +146,15 @@
                 <g:center>
                     <g:FlowPanel>
                         <g:FlowPanel addStyleNames="{style.searchPanel}">
-                            <g:Label>Search for stops:</g:Label>
+                            <g:Label>Search for stops or routes:</g:Label>
                             <g:FormPanel ui:field="_searchFormPanel">
                                 <g:FlowPanel>
                                     <g:TextBox ui:field="_searchTextBox" visibleLength="55" name="q" />
                                     <g:SubmitButton>Search</g:SubmitButton>
                                 </g:FlowPanel>
                             </g:FormPanel>
-                            <g:Label addStyleNames="{style.searchExample}">By address (ex. "3rd and pike") or route number (ex. "44" or
-                                "71").</g:Label>
+                            <g:Label addStyleNames="{style.searchExample}">By address (ex. "Florida Av and Hillsborough Av") or route number (ex. "5" or
+                                "96").</g:Label>
 
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="{style.linksPanel}" ui:field="_linksPanel">
