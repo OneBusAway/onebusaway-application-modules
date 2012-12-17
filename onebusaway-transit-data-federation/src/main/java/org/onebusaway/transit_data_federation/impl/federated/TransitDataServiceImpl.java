@@ -689,19 +689,21 @@ class TransitDataServiceImpl implements TransitDataService {
    @Override
    public List<TimepointPredictionRecord> getPredictionRecordsForTrip(TripStatusBean tripStatus) {
      List<TimepointPredictionRecord> tprs = new ArrayList<TimepointPredictionRecord>();
-       
+
      TripDetailsQueryBean tdqb = new TripDetailsQueryBean();
      tdqb.setTripId(tripStatus.getActiveTrip().getId());
+     tdqb.setServiceDate(tripStatus.getServiceDate());
+     tdqb.setTime(new Date().getTime());
      tdqb.setInclusion(new TripDetailsInclusionBean(true, true, true));
      TripDetailsBean trip = getSingleTripDetails(tdqb);
-        
-     double scheduleDeviation = trip.getStatus().getScheduleDeviation();
+
+     double scheduleDeviation = tripStatus.getScheduleDeviation();
        
      for (TripStopTimeBean stb: trip.getSchedule().getStopTimes()) {
        TimepointPredictionRecord tpr = new TimepointPredictionRecord();
        tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(stb.getStop().getId()));
        tpr.setTimepointScheduledTime(trip.getStatus().getServiceDate() + (stb.getArrivalTime() * 1000));
-       tpr.setTimepointPredictedTime(trip.getStatus().getServiceDate() + (int)(((double)stb.getArrivalTime() - scheduleDeviation) * 1000));
+       tpr.setTimepointPredictedTime(trip.getStatus().getServiceDate() + (int)(((double)stb.getArrivalTime() + scheduleDeviation) * 1000));
        tprs.add(tpr);
      }
      
