@@ -22,6 +22,7 @@ import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.config.CacheConfiguration;
+import net.sf.ehcache.config.PersistenceConfiguration;
 import net.sf.ehcache.config.TerracottaConfiguration;
 import net.sf.ehcache.constructs.blocking.BlockingCache;
 import net.sf.ehcache.constructs.blocking.CacheEntryFactory;
@@ -285,11 +286,19 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware,
     CacheConfiguration config = new CacheConfiguration(this.cacheName,
         this.maxElementsInMemory);
     config.setMemoryStoreEvictionPolicyFromObject(this.memoryStoreEvictionPolicy);
-    config.setOverflowToDisk(this.overflowToDisk);
+
     config.setEternal(this.eternal);
     config.setTimeToLiveSeconds(this.timeToLive);
     config.setTimeToIdleSeconds(this.timeToIdle);
-    config.setDiskPersistent(this.diskPersistent);
+    
+    PersistenceConfiguration pc = new PersistenceConfiguration();
+    if(this.diskPersistent) 	
+    	pc.strategy(PersistenceConfiguration.Strategy.LOCALRESTARTABLE);
+    else if(this.overflowToDisk) 
+    	pc.strategy(PersistenceConfiguration.Strategy.LOCALTEMPSWAP);
+    else
+    	pc.strategy(PersistenceConfiguration.Strategy.NONE);
+
     config.setDiskExpiryThreadIntervalSeconds(this.diskExpiryThreadIntervalSeconds);
     config.setMaxElementsOnDisk(this.maxElementsOnDisk);
 
