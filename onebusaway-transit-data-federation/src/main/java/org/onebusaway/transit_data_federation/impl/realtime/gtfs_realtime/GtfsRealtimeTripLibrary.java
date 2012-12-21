@@ -274,7 +274,7 @@ class GtfsRealtimeTripLibrary {
 
   private BlockDescriptor getTripDescriptorAsBlockDescriptor(
       TripDescriptor trip, boolean includeVehicleIds) {
-    if (!trip.hasTripId() || trip.hasRouteId()) {
+    if (!trip.hasTripId()) {
       return null;
     }
     TripEntry tripEntry = _entitySource.getTrip(trip.getTripId());
