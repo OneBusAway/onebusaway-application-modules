@@ -20,5 +20,5 @@
 
     <!--  Default Cache -->
     <!--  Lots of caches use this default so don't change it unless you know what you are doing -->
-    <defaultCache maxElementsInMemory="50" eternal="true" overflowToDisk="false" diskPersistent="false" />
+    <defaultCache maxElementsInMemory="10000" eternal="true" overflowToDisk="false" diskPersistent="false" />
 </ehcache>

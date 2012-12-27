@@ -71,13 +71,13 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware,
 
   private boolean eternal = false;
 
-  private int timeToLive = 120;
+  private int timeToLive = 60 * 5;
 
   private int timeToIdle = 120;
 
   private boolean diskPersistent = false;
 
-  private int diskExpiryThreadIntervalSeconds = 120;
+  private int diskExpiryThreadIntervalSeconds = 60 * 5;
 
   private boolean blocking = false;
 
@@ -162,7 +162,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware,
   /**
    * Set t he time in seconds to live for an element before it expires, i.e. the
    * maximum time between creation time and when an element expires. It is only
-   * used if the element is not eternal. Default is 120 seconds.
+   * used if the element is not eternal. Default is 300 seconds.
    */
   public void setTimeToLive(int timeToLive) {
     this.timeToLive = timeToLive;
@@ -187,7 +187,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware,
 
   /**
    * Set the number of seconds between runs of the disk expiry thread. The
-   * default is 120 seconds.
+   * default is 300 seconds.
    */
   public void setDiskExpiryThreadIntervalSeconds(
       int diskExpiryThreadIntervalSeconds) {
