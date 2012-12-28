@@ -235,10 +235,12 @@ class GtfsRealtimeTripLibrary {
     if (stopTimeUpdate.hasDeparture()) {
       StopTimeEvent departure = stopTimeUpdate.getDeparture();
       hasDelay |= departure.hasDelay();
+      hasDelay |= departure.hasTime();
     }
     if (stopTimeUpdate.hasArrival()) {
       StopTimeEvent arrival = stopTimeUpdate.getArrival();
       hasDelay |= arrival.hasDelay();
+      hasDelay |= arrival.hasTime();
     }
     return hasDelay;
   }
