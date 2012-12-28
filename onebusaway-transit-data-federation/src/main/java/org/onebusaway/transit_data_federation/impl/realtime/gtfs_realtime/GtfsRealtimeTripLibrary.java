@@ -189,7 +189,7 @@ class GtfsRealtimeTripLibrary {
     for (FeedEntity entity : tripUpdates.getEntityList()) {
       TripUpdate tripUpdate = entity.getTripUpdate();
       if (tripUpdate == null) {
-        _log.warn("epxected a FeedEntity with a TripUpdate");
+        _log.warn("expected a FeedEntity with a TripUpdate");
         continue;
       }
       TripDescriptor trip = tripUpdate.getTrip();
@@ -253,7 +253,7 @@ class GtfsRealtimeTripLibrary {
     for (FeedEntity entity : vehiclePositions.getEntityList()) {
       VehiclePosition vehiclePosition = entity.getVehicle();
       if (vehiclePosition == null) {
-        _log.warn("epxected a FeedEntity with a VehiclePosition");
+        _log.warn("expected a FeedEntity with a VehiclePosition");
         continue;
       }
       if (!(vehiclePosition.hasTrip() || vehiclePosition.hasPosition())) {
