@@ -15,12 +15,12 @@
  */
 package org.onebusaway.geospatial.services;
 
-import static org.apache.commons.math.util.FastMath.atan2;
-import static org.apache.commons.math.util.FastMath.cos;
-import static org.apache.commons.math.util.FastMath.sin;
-import static org.apache.commons.math.util.FastMath.sqrt;
-import static org.apache.commons.math.util.FastMath.toDegrees;
-import static org.apache.commons.math.util.FastMath.toRadians;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toDegrees;
+import static java.lang.Math.toRadians;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
