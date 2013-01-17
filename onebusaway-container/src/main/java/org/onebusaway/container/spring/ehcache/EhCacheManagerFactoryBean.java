@@ -75,6 +75,10 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>,
 
     // Independent CacheManager instance (the default).
     if (this.configuration != null) {
+       if (this.cacheManagerName != null) {
+    	   // ehcache enforces named instances, it will only allow one anonymous instance
+    	   this.configuration.setName(this.cacheManagerName);
+       }
       this.cacheManager = new CacheManager(this.configuration);
     } else if (this.configLocation != null) {
       this.cacheManager = new CacheManager(this.configLocation.getInputStream());
@@ -83,7 +87,12 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>,
     }
 
     if (this.cacheManagerName != null) {
+    	// this appears to have moved to the configuration instead
       this.cacheManager.setName(this.cacheManagerName);
+    }
+    
+    if (!this.cacheManager.isNamed()) {
+    	logger.error("cacheManager is not named, this may cause problems.  Please set cacheManagerName in your spring configuration");
     }
   }
 
