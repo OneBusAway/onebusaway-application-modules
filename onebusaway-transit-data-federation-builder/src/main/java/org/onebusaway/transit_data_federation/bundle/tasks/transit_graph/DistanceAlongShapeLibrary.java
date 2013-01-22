@@ -311,8 +311,22 @@ public class DistanceAlongShapeLibrary {
     List<PointAndIndex> bestAssignment = new ArrayList<PointAndIndex>();
     for (List<PointAndIndex> possibleAssignment : possibleAssignments) {
       if (possibleAssignment.size() != 1) {
-        throw new IllegalStateException(
-            "expected just one assignment at this point");
+        String msg = "expected just one assignment at this point, found "
+            + possibleAssignment.size() + "; " + "shapePoint="
+            + shapePoints.getShapeId() + ", " + "\npossibleAssignments=\n";
+        for (PointAndIndex pa : possibleAssignment) {
+          msg += "PointAndIndex(index=" + pa.index + ", point=" + pa.point
+              + ", distanceAlongShape=" + pa.distanceAlongShape
+              + ", distanceFromTarget=" + pa.distanceFromTarget + "), ";
+        }
+        msg += "\nstopTime=\n";
+        for (StopTimeEntryImpl st : stopTimes) {
+          msg += "StopTimeEntry(Stop(" + st.getStop().getId() + ":"
+              + st.getStop().getStopLat() + ", " + st.getStop().getStopLon()
+              + ")" + ", trip=" + st.getTrip().getId() + "), ";
+        }
+        _log.error(msg);
+        throw new IllegalStateException(msg);    	  
       }
       bestAssignment.add(possibleAssignment.get(0));
     }
