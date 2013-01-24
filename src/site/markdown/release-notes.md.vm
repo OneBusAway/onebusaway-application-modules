@@ -6,6 +6,14 @@ $H$H ${currentVersion}
 
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
 
+$H$H 1.1.7
+
+* New Features:
+    * none
+* Bug Fixes:
+    * More verbose exception message for a particular build failure
+    * Changes to cacheManager naming policy to support newer EHCache version
+
 $H$H 1.1.6
 
 * New Features:
