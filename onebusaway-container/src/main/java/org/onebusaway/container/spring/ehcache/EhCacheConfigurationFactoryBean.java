@@ -23,7 +23,7 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.config.Configuration;
 import net.sf.ehcache.config.ConfigurationFactory;
 import net.sf.ehcache.config.DiskStoreConfiguration;
-import net.sf.ehcache.config.TerracottaConfigConfiguration;
+import net.sf.ehcache.config.TerracottaClientConfiguration;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,7 +82,7 @@ public class EhCacheConfigurationFactoryBean implements FactoryBean<Configuratio
     }
     if (this.terracottaUrl != null) {
       logger.info("terracottaUrl=" + this.terracottaUrl);
-      TerracottaConfigConfiguration tcConfig = new TerracottaConfigConfiguration();
+      TerracottaClientConfiguration tcConfig = new TerracottaClientConfiguration();
       tcConfig.setUrl(this.terracottaUrl);
       configuration.addTerracottaConfig(tcConfig);
     }
