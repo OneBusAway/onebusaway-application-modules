@@ -685,7 +685,7 @@ class TransitDataServiceImpl implements TransitDataService {
 
    @Override
    public String getActiveBundleId() {
-     return null;
+     return "BUNDLE";
    }
 
    @Override
