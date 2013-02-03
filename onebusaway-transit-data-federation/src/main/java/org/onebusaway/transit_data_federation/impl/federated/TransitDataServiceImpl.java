@@ -709,5 +709,9 @@ class TransitDataServiceImpl implements TransitDataService {
 
      return result;
    }
-  
+   
+   @Override
+   public ListBean<String> getStopCodesForAgencyId(String agencyId) {
+       return _stopsBeanService.getStopCodesForAgencyId(agencyId);
+   }
 }

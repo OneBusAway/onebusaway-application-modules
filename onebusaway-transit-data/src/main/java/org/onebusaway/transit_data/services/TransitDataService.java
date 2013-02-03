@@ -574,4 +574,5 @@ public interface TransitDataService extends FederatedService {
    
    public List<String> getSearchSuggestions(String input);
 
+   public ListBean<String> getStopCodesForAgencyId(String agency);
 }
