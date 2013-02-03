@@ -42,7 +42,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (configurationMap.containsKey(configurationItemKey)) {
             return new Float(configurationMap.get(configurationItemKey));
         } else {
-            return new Float(defaultValue);
+            if (defaultValue != null) {
+                return new Float(defaultValue);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -51,7 +55,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         if (configurationMap.containsKey(configurationItemKey)) {
             return new Integer(configurationMap.get(configurationItemKey));
         } else {
-            return new Integer(defaultValue);
+            if (defaultValue != null) {
+                return new Integer(defaultValue);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -63,7 +71,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public void setConfigurationValues(Map<String, String> configurationValues) {
         configurationMap.putAll(configurationValues);
     }
-    
+
     @Override
     public Map<String, String> getConfiguration() {
         return configurationMap;
