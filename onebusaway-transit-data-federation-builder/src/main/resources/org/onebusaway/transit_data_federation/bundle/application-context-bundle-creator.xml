@@ -129,103 +129,11 @@
 
   <bean id="shapeGeospatialIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.ShapeGeospatialIndexTask" />
 
-  <!-- OTP Graph -->
-
-  <!-- This is not enabled by default, only enable if you want trip planning support -->
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="otp_graph" />
-    <property name="afterTaskName" value="shape_geospatial_index" />
-    <property name="taskBeanName">
-      <idref bean="otpGraphBuidlerTask" />
-    </property>
-    <property name="enabled" value="false" />
-  </bean>
-
-  <bean id="otpGraphBuidlerTask" class="org.opentripplanner.graph_builder.GraphBuilderTask">
-    <property name="graphBundle" ref="otpGraphBundle" />
-    <property name="graphBuilders">
-      <list>
-        <ref bean="osmBuilder" />
-      </list>
-    </property>
-    <property name="alwaysRebuild" value="true" />
-  </bean>
-
-  <bean id="osmBuilder" class="org.opentripplanner.graph_builder.impl.osm.OpenStreetMapGraphBuilderImpl">
-    <property name="provider" ref="osmProvider" />
-    <property name="defaultAccessPermissionsSource">
-      <bean class="org.opentripplanner.graph_builder.impl.osm.DefaultOSMStreetTraversalPermissionsSource" />
-    </property>
-  </bean>
-
-  <bean id="osmProvider" class="org.opentripplanner.graph_builder.impl.osm.RegionBasedOpenStreetMapProviderImpl">
-    <property name="regionsSource">
-      <bean class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsStopRegionsSourceImpl" />
-    </property>
-  </bean>
-
-  <!-- Stop Transfers -->
-
-  <!-- This is not enabled by default, only enable if you want trip planning support -->
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="stop_transfers" />
-    <property name="afterTaskName" value="otp_graph" />
-    <property name="task" ref="stopTransfersTask" />
-    <property name="enabled" value="false" />
-  </bean>
-
-  <bean id="stopTransfersTask" class="org.onebusaway.transit_data_federation.bundle.tasks.stop_transfers.StopTransfersTask" />
-
-  <!-- Transfer Patterns -->
-
-  <!-- This is not enabled by default, as it should really be run on a cluster -->
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="transfer_patterns" />
-    <property name="afterTaskNames" value="stop_transfers" />
-    <property name="task" ref="transferPatternsTask" />
-    <property name="enabled" value="false" />
-  </bean>
-
-  <bean id="transferPatternsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsTask" />
-
-  <!-- -->
-
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="transfer_patterns_hub_analysis" />
-    <property name="afterTaskNames" value="transfer_patterns" />
-    <property name="task" ref="transferPatternsHubAnalysisTask" />
-    <property name="enabled" value="false" />
-  </bean>
-
-  <bean id="transferPatternsHubAnalysisTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.TransferPatternsHubAnalysisTask" />
-
-  <!-- -->
-
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="serialized_transfer_patterns" />
-    <property name="afterTaskNames" value="transfer_patterns_hub_analysis" />
-    <property name="task" ref="serializedTransferPatternsTask" />
-    <property name="enabled" value="false" />
-  </bean>
-
-  <bean id="serializedTransferPatternsTask" class="org.onebusaway.transit_data_federation.bundle.tasks.transfer_pattern.SerializedTransferPatternsTask" />
-
-  <!-- Trip Planner Test Task -->
-
-  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
-    <property name="taskName" value="trip_planner_test_task" />
-    <property name="afterTaskName" value="serialized_transfer_patterns" />
-    <property name="task" ref="tripPlannerTestTask" />
-    <property name="enabled" value="false" />
-  </bean>
-
-  <bean id="tripPlannerTestTask" class="org.onebusaway.transit_data_federation.bundle.tasks.TripPlannerTestTask" />
-
   <!-- Block Location History -->
 
   <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="block_location_history" />
-    <property name="afterTaskName" value="trip_planner_test_task" />
+    <property name="afterTaskName" value="shape_geospatial_index" />
     <property name="task" ref="blockLocationHistoryTask" />
     <property name="enabled" value="false" />
   </bean>

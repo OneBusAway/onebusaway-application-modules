@@ -61,16 +61,6 @@ import org.onebusaway.api.model.transit.service_alerts.SituationConditionDetails
 import org.onebusaway.api.model.transit.service_alerts.SituationConsequenceV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.SituationV2Bean;
 import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.EdgeV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.GraphResultV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.ItinerariesV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.ItineraryV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.LegV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.LocationV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.MinTravelTimeToStopV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.StreetLegV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.TransitLegV2Bean;
-import org.onebusaway.api.model.transit.tripplanning.VertexV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
@@ -157,21 +147,6 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("timeRange", TimeRangeV2Bean.class);
 
     xstream.alias("VehicleLocation", VehicleLocation.class);
-
-    xstream.alias("itineraries", ItinerariesV2Bean.class);
-    xstream.alias("itinerary", ItineraryV2Bean.class);
-    xstream.alias("location", LocationV2Bean.class);
-    xstream.alias("leg", LegV2Bean.class);
-    xstream.alias("transitLeg", TransitLegV2Bean.class);
-    xstream.alias("streetLeg", StreetLegV2Bean.class);
-
-    xstream.alias("timeInterval", TimeIntervalV2.class);
-
-    xstream.alias("minTravelTimeToStop", MinTravelTimeToStopV2Bean.class);
-
-    xstream.alias("graphResult", GraphResultV2Bean.class);
-    xstream.alias("vertex", VertexV2Bean.class);
-    xstream.alias("edge", EdgeV2Bean.class);
 
     xstream.alias("currentVehicleEstimate", CurrentVehicleEstimateV2Bean.class);
     

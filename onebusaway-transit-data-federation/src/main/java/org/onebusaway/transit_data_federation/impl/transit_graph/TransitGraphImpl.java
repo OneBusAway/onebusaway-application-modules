@@ -37,7 +37,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollec
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.onebusaway.transit_data_federation.services.tripplanner.TripPlannerGraph;
+import org.onebusaway.transit_data_federation.model.transit_graph.TransitGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +45,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.index.ItemVisitor;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
-public class TransitGraphImpl implements Serializable, TripPlannerGraph {
+public class TransitGraphImpl implements Serializable, TransitGraph {
 
   private static final long serialVersionUID = 2L;
 
@@ -255,7 +255,7 @@ public class TransitGraphImpl implements Serializable, TripPlannerGraph {
   }
 
   /****
-   * {@link TripPlannerGraph} Interface
+   * {@link TransitGraph} Interface
    ****/
 
   public List<AgencyEntry> getAllAgencies() {

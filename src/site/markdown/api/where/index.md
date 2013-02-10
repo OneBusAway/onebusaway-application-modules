@@ -113,7 +113,6 @@ The current list of supported API methods.  Methods that are subject to changed 
 * [arrivals-and-departures-for-stop](methods/arrivals-and-departures-for-stop.html) - get current arrivals and departures for a stop
 * [cancel-alarm](methods/cancel-alarm.html) - cancel a registered alarm
 * [current-time](methods/current-time.html) - retrieve the current system time
-* [plan-trip](methods/plan-trip.html) - plan a trip <font color="red">BETA</font>
 * [register-alarm-for-arrival-and-departure-at-stop](methods/register-alarm-for-arrival-and-departure-at-stop.html) - register an alarm for an arrival-departure event
 * [report-problem-with-stop](methods/report-problem-with-stop.html) - submit a user-generated problem for a stop
 * [report-problem-with-trip](methods/report-problem-with-trip.html) - submit a user-generated problem for a trip
