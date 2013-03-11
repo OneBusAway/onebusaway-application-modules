@@ -75,7 +75,7 @@
                     <td>
                         <s:a action="stop-problem-reports">
                             <s:param name="stopId" value="stop.id"/>
-                            <s:text key="StopNum">
+                            <s:text name="StopNum">
                               <s:param value="stop.code"/>    
                             </s:text>
                             <jsp:text> - </jsp:text>
