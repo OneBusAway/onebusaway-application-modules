@@ -32,8 +32,12 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,6 +53,8 @@ public class BundleSearchServiceImpl implements BundleSearchService {
 
     @Autowired
     private TransitDataService _transitDataService = null;
+    @Autowired
+    private TransitGraphDao _transitGraphDao = null;
     
     private boolean _suggestStopCodes = false;
     
@@ -79,9 +85,12 @@ public class BundleSearchServiceImpl implements BundleSearchService {
                             generateInputsForString(agencyAndId.getId(), null);
                         }
                     } else {
-                        ListBean<String> stopCodes = _transitDataService.getStopCodesForAgencyId(agency);
-                        for (String stopCode : stopCodes.getList()) {
-                            generateInputsForString(stopCode, null);
+                        AgencyEntry agencyEntry = _transitGraphDao.getAgencyForId(agency);
+                        for (StopEntry stop : agencyEntry.getStops()) {
+                            StopBean stopBean = _transitDataService.getStop(stop.getId().toString());
+                            if (!stopBean.getCode().equals(stop.getId().getId())) {
+                                generateInputsForString(stopBean.getCode(), null);
+                            }
                         }
                     }
                 }

@@ -573,6 +573,4 @@ public interface TransitDataService extends FederatedService {
    public Boolean stopHasUpcomingScheduledService(long time, String stopId, String routeId, String directionId);
    
    public List<String> getSearchSuggestions(String input);
-
-   public ListBean<String> getStopCodesForAgencyId(String agency);
 }

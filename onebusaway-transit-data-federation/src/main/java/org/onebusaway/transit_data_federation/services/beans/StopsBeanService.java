@@ -49,6 +49,4 @@ public interface StopsBeanService {
    * @return the list of all stops for the specified agency
    */
   public ListBean<String> getStopsIdsForAgencyId(String agencyId);
-  
-  public ListBean<String> getStopCodesForAgencyId(String agencyId);
 }
