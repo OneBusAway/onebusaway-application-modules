@@ -41,6 +41,8 @@
         <property name="configurationValues">
             <map>
                 <entry key="display.useTimePredictions" value="true"/>
+                <entry key="display.useAgencyId" value="true"/>
+                <entry key="display.showAgencyNames" value="true"/>
             </map>
         </property>
     </bean>
