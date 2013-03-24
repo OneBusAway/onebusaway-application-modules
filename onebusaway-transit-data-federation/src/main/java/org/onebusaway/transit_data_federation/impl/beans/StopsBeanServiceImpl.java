@@ -70,8 +70,11 @@ class StopsBeanServiceImpl implements StopsBeanService {
   @Override
   public StopsBean getStops(SearchQueryBean queryBean) throws ServiceException {
     String query = queryBean.getQuery();
+    CoordinateBounds bounds = queryBean.getBounds();
     if (query == null)
       return getStopsByBounds(queryBean);
+    if (bounds == null)
+      return getStopsByQuery(queryBean);
     else
       return getStopsByBoundsAndQuery(queryBean);
   }
@@ -147,6 +150,36 @@ class StopsBeanServiceImpl implements StopsBeanService {
     return constructResult(stopBeans, limitExceeded);
   }
 
+  private StopsBean getStopsByQuery(SearchQueryBean queryBean)
+            throws ServiceException {
+
+        String query = queryBean.getQuery();
+        int maxCount = queryBean.getMaxCount();
+
+        SearchResult<AgencyAndId> stops;
+        try {
+            stops = _searchService.searchForStopsByCode(query, 10, MIN_SCORE);
+        } catch (ParseException e) {
+            throw new InvalidArgumentServiceException("query", "queryParseError");
+        } catch (IOException e) {
+            _log.error("error executing stop search: query=" + query, e);
+            e.printStackTrace();
+            throw new ServiceException();
+        }
+
+        List<StopBean> stopBeans = new ArrayList<StopBean>();
+
+        for (AgencyAndId aid : stops.getResults()) {
+            StopBean stopBean = _stopBeanService.getStopForId(aid);
+            stopBeans.add(stopBean);
+        }
+
+        boolean limitExceeded = BeanServiceSupport.checkLimitExceeded(stopBeans,
+                maxCount);
+
+        return constructResult(stopBeans, limitExceeded);
+  }
+
   @Override
   public ListBean<String> getStopsIdsForAgencyId(String agencyId) {
     AgencyEntry agency = _transitGraphDao.getAgencyForId(agencyId);
@@ -159,7 +192,7 @@ class StopsBeanServiceImpl implements StopsBeanService {
     }
     return new ListBean<String>(ids, false);
   }
-
+  
   private StopsBean constructResult(List<StopBean> stopBeans,
       boolean limitExceeded) {
 

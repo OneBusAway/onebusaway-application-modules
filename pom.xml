@@ -86,6 +86,7 @@
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
     <module>onebusaway-webapp</module>
+    <module>onebusaway-config-webapp</module>
   </modules>
   
   <!-- This is where we control the master dependency version used by all modules -->

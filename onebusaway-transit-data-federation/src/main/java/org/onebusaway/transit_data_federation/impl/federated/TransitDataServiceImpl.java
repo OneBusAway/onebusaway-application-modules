@@ -35,6 +35,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -83,6 +84,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
@@ -106,8 +108,11 @@ import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
+import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
+import org.onebusaway.transit_data_federation.services.predictions.PredictionIntegrationService;
 import org.onebusaway.transit_data_federation.services.realtime.CurrentVehicleEstimationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
+import org.onebusaway.transit_data_federation.services.schedule.ScheduledServiceService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -176,6 +181,15 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private VehicleStatusBeanService _vehicleStatusBeanService;
+    
+  @Autowired
+  private PredictionIntegrationService _predictionIntegrationService;
+  
+  @Autowired
+  private ScheduledServiceService _scheduledServiceService;
+
+  @Autowired
+  private BundleSearchService _bundleSearchService;
 
   /****
    * {@link TransitDataService} Interface
@@ -663,5 +677,36 @@ class TransitDataServiceImpl implements TransitDataService {
 
     return adQuery;
   }
+  
+  /*
+   * OBANYC compatability
+   * 
+   */
 
+   @Override
+   public String getActiveBundleId() {
+     return "BUNDLE";
+   }
+
+   @Override
+   public List<TimepointPredictionRecord> getPredictionRecordsForTrip(TripStatusBean tripStatus) {
+       return _predictionIntegrationService.getPredictionsForTrip(tripStatus);
+   }
+   
+   @Override
+   public Boolean routeHasUpcomingScheduledService(long time, String routeId, String directionId) {
+     return _scheduledServiceService.routeHasUpcomingScheduledService(time, routeId, directionId);
+   }
+
+   @Override
+   public Boolean stopHasUpcomingScheduledService(long time, String stopId, String routeId, String directionId){
+     return _scheduledServiceService.stopHasUpcomingScheduledService(time, stopId, routeId, directionId);
+   }
+   
+   @Override
+   public List<String> getSearchSuggestions(String input) {
+     List<String> result = _bundleSearchService.getSuggestions(input);
+
+     return result;
+   }
 }

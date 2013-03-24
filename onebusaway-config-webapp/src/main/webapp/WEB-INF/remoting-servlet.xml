@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <!-- <import resource="remoting-servlet-extra.xml" /> -->
+
+    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+      <property name="detectHandlersInAncestorContexts" value="true"/>
+    </bean>
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />
+
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
+    <bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter" />
+
+    <bean name="/configuration-service" class="org.springframework.remoting.caucho.HessianServiceExporter">
+        <property name="service" ref="configurationServiceImpl" />
+        <property name="serviceInterface" value="org.onebusaway.config_webapp.services.ConfigurationService" />
+    </bean>
+
+</beans>

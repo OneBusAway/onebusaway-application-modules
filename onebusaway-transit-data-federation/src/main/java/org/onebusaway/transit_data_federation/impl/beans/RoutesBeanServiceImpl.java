@@ -117,8 +117,10 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   @Override
   public RoutesBean getRoutesForQuery(SearchQueryBean query)
       throws ServiceException {
-    if (query.getQuery() != null)
+    if (query.getQuery() != null && query.getBounds() != null)
       return getRoutesWithRouteNameQuery(query);
+    else if (query.getBounds() == null)
+      return getRoutesWithoutBoundsQuery(query);
     else
       return getRoutesWithoutRouteNameQuery(query);
   }
@@ -198,12 +200,28 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
         routeBeans.add(routeBean);
       }
     }
-
+    
     boolean limitExceeded = BeanServiceSupport.checkLimitExceeded(routeBeans,
         query.getMaxCount());
 
     return constructResult(routeBeans, limitExceeded);
   }
+  
+  private RoutesBean getRoutesWithoutBoundsQuery(SearchQueryBean query)
+      throws ServiceException {
+      SearchResult<AgencyAndId> result = searchForRoutes(query);
+
+      List<RouteBean> routeBeans = new ArrayList<RouteBean>();
+      for (AgencyAndId id : result.getResults()) {
+          RouteBean routeBean = _routeBeanService.getRouteForId(id);
+          routeBeans.add(routeBean);
+      }
+    
+      boolean limitExceeded = BeanServiceSupport.checkLimitExceeded(routeBeans,
+          query.getMaxCount());
+
+      return constructResult(routeBeans, limitExceeded);    
+    }
 
   private SearchResult<AgencyAndId> searchForRoutes(SearchQueryBean query)
       throws ServiceException, InvalidArgumentServiceException {
