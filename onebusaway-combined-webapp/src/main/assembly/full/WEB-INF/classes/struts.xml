@@ -33,7 +33,7 @@
   <constant name="struts.convention.action.checkImplementsAction" value="false" />
   <constant name="struts.convention.default.parent.package" value="onebusaway-webapp-default" />
 
-  <constant name="struts.action.extension" value="action,xhtml,,xml,json,csv" />
+  <constant name="struts.action.extension" value="action,xhtml,,xml,json,csv,pb,pbtext" />
   <constant name="struts.action.excludePattern" value="/services/.*" />
 
   <bean type="com.opensymphony.xwork2.ActionProxyFactory" name="multi"
