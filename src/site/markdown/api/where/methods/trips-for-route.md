@@ -33,11 +33,14 @@ http://api.onebusaway.org/api/where/trips-for-route/1_44.xml?key=TEST
 * id - the id of the route, encoded directly in the url:
     * `http://api.onebusaway.org/api/where/trips-for-route/[ID GOES HERE].xml`
 * includeStatus - Can be true/false to determine whether full
-[`<tripStatus/>` elements](../elements/trip-status.html) with full real-time
-information are included in the `<status/>` section for each `<tripDetails/>`
-element.  Defaults to false.
+  [`<tripStatus/>` elements](../elements/trip-status.html) with full real-time
+  information are included in the `<status/>` section for each `<tripDetails/>`
+  element.  Defaults to false.
 * includeSchedules - Can be true/false to determine whether full `<schedule/>`
-elements are included in the `<tripDetails/>` element.  Defaults to false.
+  elements are included in the `<tripDetails/>` element.  Defaults to false.
+* time - by default, the method returns the status of the system right now.  However, the system
+  can also be queried at a specific time.  This can be useful for testing.  See [timestamps](../index.html#Timestamps)
+  for details on the format of the `time` parameter.
 
 ## Response
 
