@@ -35,6 +35,9 @@ http://api.onebusaway.org/api/where/trips-for-location.xml?key=TEST&lat=47.653&l
 * latSpan/lonSpan - Set the limits of the search bounding box
 * includeTrips - Can be true/false to determine whether full [`<trip/>` elements](../elements/trip.html) are included in the `<references/>` section.  Defaults to false.
 * includeSchedules - Can be true/false to determine whether full `<schedule/>` elements are included in the `<tripDetails/>` section.  Defaults to false.
+* time - by default, the method returns the status of the system right now.  However, the system
+  can also be queried at a specific time.  This can be useful for testing.  See [timestamps](../index.html#Timestamps)
+  for details on the format of the `time` parameter.
 
 ## Response
 

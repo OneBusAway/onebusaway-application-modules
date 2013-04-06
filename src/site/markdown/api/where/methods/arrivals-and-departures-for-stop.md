@@ -38,7 +38,10 @@ http://api.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_75403.xml
     * `http://api.onebusaway.org/api/where/arrivals-and-departures-for-stop/[ID GOES HERE].xml`
 * minutesBefore=n - include vehicles having arrived or departed in the previous n minutes (default=5)
 * minutesAfter=n - include vehicles arriving or departing in the next n minutes (default=35)
-* time=n - the time for which the schedule will be generated, as either ms since the unix epoch or of the form YYYY-MM-DD_HH-MM-SS (note this doesn't currently deal well with timezones).  The default query time is NOW.
+* time - by default, the method returns the status of the system right now.  However, the system
+  can also be queried at a specific time.  This can be useful for testing.  See [timestamps](../index.html#Timestamps)
+  for details on the format of the `time` parameter.
+
 
 ## Response
 
