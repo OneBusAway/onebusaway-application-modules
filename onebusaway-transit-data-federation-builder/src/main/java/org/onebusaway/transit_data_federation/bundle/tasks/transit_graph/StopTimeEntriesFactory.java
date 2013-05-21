@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2013 Kurt Raschke <kurt@kurtraschke.com>
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,6 +140,7 @@ public class StopTimeEntriesFactory {
 
       stopTimeEntry.setId(stopTime.getId());
       stopTimeEntry.setSequence(sequence);
+      stopTimeEntry.setOriginalSequence(stopTime.getStopSequence());
       stopTimeEntry.setDropOffType(stopTime.getDropOffType());
       stopTimeEntry.setPickupType(stopTime.getPickupType());
       stopTimeEntry.setStop(stopEntry);
