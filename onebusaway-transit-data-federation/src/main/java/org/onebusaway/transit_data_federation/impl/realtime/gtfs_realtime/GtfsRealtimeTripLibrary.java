@@ -391,11 +391,7 @@ class GtfsRealtimeTripLibrary {
     if (stopTimeUpdate.hasStopSequence()) {
       int stopSequence = stopTimeUpdate.getStopSequence();
 
-      Map<Integer, BlockStopTimeEntry> sequenceToStopTime = new HashMap<Integer, BlockStopTimeEntry>();
-
-      for (BlockStopTimeEntry e: stopTimes) {
-          sequenceToStopTime.put(e.getStopTime().getOriginalSequence(), e);
-      }
+      Map<Integer, BlockStopTimeEntry> sequenceToStopTime = MappingLibrary.mapToValue(stopTimes, "stopTime.originalSequence");
 
       if (sequenceToStopTime.containsKey(stopSequence)) {
         BlockStopTimeEntry blockStopTime = sequenceToStopTime.get(stopSequence);
