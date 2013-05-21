@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2013 Kurt Raschke <kurt@kurtraschke.com>
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,8 @@ public interface StopTimeEntry {
   public TripEntry getTrip();
 
   public int getSequence();
+
+  public int getOriginalSequence();
 
   public StopEntry getStop();
 
