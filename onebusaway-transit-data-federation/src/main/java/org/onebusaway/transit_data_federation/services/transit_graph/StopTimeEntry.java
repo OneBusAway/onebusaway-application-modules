@@ -24,7 +24,7 @@ public interface StopTimeEntry {
 
   public int getSequence();
 
-  public int getOriginalSequence();
+  public int getGtfsSequence();
 
   public StopEntry getStop();
 

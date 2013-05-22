@@ -140,7 +140,7 @@ public class StopTimeEntriesFactory {
 
       stopTimeEntry.setId(stopTime.getId());
       stopTimeEntry.setSequence(sequence);
-      stopTimeEntry.setOriginalSequence(stopTime.getStopSequence());
+      stopTimeEntry.setGtfsSequence(stopTime.getStopSequence());
       stopTimeEntry.setDropOffType(stopTime.getDropOffType());
       stopTimeEntry.setPickupType(stopTime.getPickupType());
       stopTimeEntry.setStop(stopEntry);

@@ -23,13 +23,13 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 
 public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
-  private static final long serialVersionUID = 6L;
+  private static final long serialVersionUID = 7L;
 
   private int _stopTimeId;
   private int _arrivalTime;
   private int _departureTime;
   private int _sequence;
-  private int _originalSequence;
+  private int _gtfsSequence;
   private int _dropOffType;
   private int _pickupType;
   private int _shapePointIndex = -1;
@@ -62,8 +62,8 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     _sequence = sequence;
   }
 
-  public void setOriginalSequence(int originalSequence) {
-    _originalSequence = originalSequence;
+  public void setGtfsSequence(int gtfsSequence) {
+    _gtfsSequence = gtfsSequence;
   }
 
   public void setDropOffType(int dropOffType) {
@@ -124,8 +124,8 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   }
 
   @Override
-  public int getOriginalSequence() {
-    return _originalSequence;
+  public int getGtfsSequence() {
+    return _gtfsSequence;
   }
 
   @Override
