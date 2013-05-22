@@ -22,8 +22,14 @@ public interface StopTimeEntry {
 
   public TripEntry getTrip();
 
+  /**
+   * @return stop sequence computed by OneBusAway
+   */
   public int getSequence();
 
+  /**
+   * @return stop sequence defined in GTFS
+   */
   public int getGtfsSequence();
 
   public StopEntry getStop();
