@@ -22,9 +22,9 @@
 <head>
 <title>Bookmark</title>
 <script type="text/javascript"                                  
-	src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=AIzaSyDaZriaQk2EEnilOwaNCJ28ZEFxZDmOdvA"><jsp:text></jsp:text></script>
+	src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=AIzaSyCAnK_n1DSXgreUEQ-dD6m253rSPK9Nw9o"><jsp:text></jsp:text></script>
 <script type="text/javascript"
-    src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;gwt=1&amp;key=AIzaSyDaZriaQk2EEnilOwaNCJ28ZEFxZDmOdvA"><jsp:text></jsp:text></script>
+    src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;gwt=1&amp;key=AIzaSyCAnK_n1DSXgreUEQ-dD6m253rSPK9Nw9o"><jsp:text></jsp:text></script>
         
 <script type="text/javascript"
 	src="org.onebusaway.webapp.gwt.BookmarkEditApplication.nocache.js"><jsp:text></jsp:text></script>

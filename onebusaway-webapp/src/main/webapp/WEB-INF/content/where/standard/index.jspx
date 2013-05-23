@@ -28,7 +28,7 @@
   <jsp:text></jsp:text>
 </jsp:element>
 <script type="text/javascript"
-    src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;gwt=1&amp;key=AIzaSyDaZriaQk2EEnilOwaNCJ28ZEFxZDmOdvA"><jsp:text></jsp:text></script>
+    src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;gwt=1&amp;key=AIzaSyCAnK_n1DSXgreUEQ-dD6m253rSPK9Nw9o"><jsp:text></jsp:text></script>
 <script type="text/javascript"
 	src="org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication.nocache.js"><jsp:text></jsp:text></script>
 <script type="text/javascript" src="${oba:url('/config.action')}"><jsp:text></jsp:text></script>    
