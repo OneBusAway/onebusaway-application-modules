@@ -48,6 +48,7 @@ import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 
 class GtfsRealtimeTripLibrary {
 
@@ -361,10 +362,13 @@ class GtfsRealtimeTripLibrary {
     int currentTime = (int) ((t - instance.getServiceDate()) / 1000);
     BestScheduleDeviation best = new BestScheduleDeviation();
 
+    List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
+
     for (BlockTripEntry blockTrip : blockTrips) {
       TripEntry trip = blockTrip.getTrip();
       AgencyAndId tripId = trip.getId();
       List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
+      
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
 
@@ -413,6 +417,12 @@ class GtfsRealtimeTripLibrary {
             if (currentArrivalTime >= 0) {
               updateBestScheduleDeviation(currentTime,
                   stopTime.getArrivalTime(), currentArrivalTime, best);
+              
+              long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
+              TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+              tpr.setTimepointId(stopTime.getStop().getId());
+              tpr.setTimepointPredictedTime(timepointPredictedTime);
+              timepointPredictions.add(tpr);
             }
             int currentDepartureTime = computeDepartureTime(stopTime,
                 stopTimeUpdate, instance.getServiceDate());
@@ -430,6 +440,7 @@ class GtfsRealtimeTripLibrary {
     if (best.timestamp != 0) {
       record.setTimeOfRecord(best.timestamp);
     }
+    record.setTimepointPredictions(timepointPredictions);
   }
 
   private BlockStopTimeEntry getBlockStopTimeForStopTimeUpdate(

@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockStatusService;
@@ -101,25 +102,44 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
       if (!activeBlock.isScheduleDeviationSet())
         continue;
 
-      // No matter what our active trip is, we let our current trip be the the
-      // trip of our next stop
+      TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
       BlockTripEntry activeBlockTrip = nextBlockStop.getTrip();
       TripEntry activeTrip = activeBlockTrip.getTrip();
-      StopTimeEntry nextStopTime = nextBlockStop.getStopTime();
-      StopEntry stop = nextStopTime.getStop();
-
-      TripUpdate.Builder tripUpdate = TripUpdate.newBuilder();
-
-      StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
-      stopTimeUpdate.setStopId(AgencyAndId.convertToString(stop.getId()));
-      stopTimeUpdate.setStopSequence(nextStopTime.getSequence());
-      stopTimeUpdate.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
-      tripUpdate.addStopTimeUpdate(stopTimeUpdate);
-
-      StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
-      stopTimeEvent.setDelay((int) activeBlock.getScheduleDeviation());
-      stopTimeUpdate.setDeparture(stopTimeEvent);
-
+      
+      if (activeBlock.getTimepointPredictions() != null && activeBlock.getTimepointPredictions().size() > 0) {
+        // If multiple stoptime predictions were originally obtained,
+        // pass them through as received
+        List<TimepointPredictionRecord> timepointPredictions = activeBlock.getTimepointPredictions();
+        
+        for (TimepointPredictionRecord tpr: timepointPredictions) {
+           StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
+           stopTimeUpdate.setStopId(AgencyAndId.convertToString(tpr.getTimepointId()));
+           stopTimeUpdate.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+      
+           StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
+           stopTimeEvent.setTime(tpr.getTimepointPredictedTime());
+           stopTimeUpdate.setArrival(stopTimeEvent);
+   
+           tripUpdate.addStopTimeUpdate(stopTimeUpdate); 
+        }
+      } else {
+        // No matter what our active trip is, we let our current trip be the the
+        // trip of our next stop
+        StopTimeEntry nextStopTime = nextBlockStop.getStopTime();
+        StopEntry stop = nextStopTime.getStop();
+      
+        StopTimeUpdate.Builder stopTimeUpdate = StopTimeUpdate.newBuilder();
+        stopTimeUpdate.setStopId(AgencyAndId.convertToString(stop.getId()));
+        stopTimeUpdate.setStopSequence(nextStopTime.getSequence());
+        stopTimeUpdate.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
+      
+        StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
+        stopTimeEvent.setDelay((int) activeBlock.getScheduleDeviation());
+        stopTimeUpdate.setDeparture(stopTimeEvent);
+   
+        tripUpdate.addStopTimeUpdate(stopTimeUpdate);
+      }
+      
       AgencyAndId routeId = activeTrip.getRouteCollection().getId();
       AgencyAndId tripId = activeTrip.getId();
       BlockInstance blockInstance = activeBlock.getBlockInstance();
