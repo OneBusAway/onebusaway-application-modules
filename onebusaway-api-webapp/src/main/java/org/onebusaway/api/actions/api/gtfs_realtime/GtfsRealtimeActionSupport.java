@@ -66,7 +66,7 @@ public abstract class GtfsRealtimeActionSupport extends ApiActionSupport {
     _time = time.getTime();
   }
 
-  public void setRemoveAgencyIsd(boolean removeAgencyIds) {
+  public void setRemoveAgencyIds(boolean removeAgencyIds) {
     _removeAgencyIds = removeAgencyIds;
   }
 
