@@ -2,8 +2,22 @@
 
 #set( $H = '#' ) ## When using velocity templating (a .vm file), the ## indicates a Velocity comment, which makes Markdown section headers tricky
 
+
+
 $H$H ${currentVersion}
 
+* New Features:
+    * spring parameter to turn off schedule deviation history
+    * support for GTFS-realtime export to onebusaway-api-webapp
+* Bug Fixes:
+    * Issue [#61](https://github.com/OneBusAway/onebusaway-application-modules/issues/61)
+    * Issue [#40](https://github.com/OneBusAway/onebusaway-application-modules/issues/40)
+    * Issue [#49](https://github.com/OneBusAway/onebusaway-application-modules/issues/49)
+    * Issue [#56](https://github.com/OneBusAway/onebusaway-application-modules/issues/56)
+    * Issue [#55](https://github.com/OneBusAway/onebusaway-application-modules/issues/55)
+    * Issue [#52](https://github.com/OneBusAway/onebusaway-application-modules/issues/52)
+    * Issue [#48](https://github.com/OneBusAway/onebusaway-application-modules/issues/48)
+    * Issue [#23](https://github.com/OneBusAway/onebusaway-application-modules/issues/23)
 * Full Documentation:  ${site_base_url}/onebusaway-application-modules/${currentVersion}/
 
 $H$H 1.1.7
