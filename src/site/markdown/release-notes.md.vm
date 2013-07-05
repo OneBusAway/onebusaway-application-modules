@@ -2,8 +2,6 @@
 
 #set( $H = '#' ) ## When using velocity templating (a .vm file), the ## indicates a Velocity comment, which makes Markdown section headers tricky
 
-
-
 $H$H ${currentVersion}
 
 * New Features:
