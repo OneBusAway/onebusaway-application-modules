@@ -6,7 +6,7 @@ Retrieve info for a specific route by id.
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/route/1_44.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/route/1_44.xml?key=TEST
 
 ## Sample Response
 
@@ -32,7 +32,7 @@ http://api.onebusaway.org/api/where/route/1_44.xml?key=TEST
 ## Request Parameters
 
 * `id` - the id of the route, encoded directly in the url
-    * `http://api.onebusaway.org/api/where/route/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/route/[ID GOES HERE].xml`
 
 ## Response
 

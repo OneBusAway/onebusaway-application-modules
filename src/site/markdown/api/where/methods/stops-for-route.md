@@ -6,7 +6,7 @@ Retrieve the set of stops serving a particular route, including groups by direct
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/stops-for-route/1_44.xml?key=TEST&version=2
+http://api.pugetsound.onebusaway.org/api/where/stops-for-route/1_44.xml?key=TEST&version=2
 
 ## Sample Response
 
@@ -58,7 +58,7 @@ http://api.onebusaway.org/api/where/stops-for-route/1_44.xml?key=TEST&version=2
 ## Request Parameters
 
 * `id` - The route id, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/stops-for-route/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/stops-for-route/[ID GOES HERE].xml`
 * includePolylines=true|false = Optional parameter that controls whether polyline elements are included in the response.  Defaults to true.
 
 ## Response

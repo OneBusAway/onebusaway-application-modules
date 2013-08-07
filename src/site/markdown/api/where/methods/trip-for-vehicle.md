@@ -6,7 +6,7 @@ Get extended trip details for a specific transit vehicle.  That is, given a vehi
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/trip-for-vehicle/1_4210.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/trip-for-vehicle/1_4210.xml?key=TEST
 
 ## Sample Response
 
@@ -33,7 +33,7 @@ http://api.onebusaway.org/api/where/trip-for-vehicle/1_4210.xml?key=TEST
 ## Request Parameters
 
 * id - the id of the vehicle, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/trip-for-vehicle/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/trip-for-vehicle/[ID GOES HERE].xml`
 * includeTrip - Can be true/false to determine whether full [`<trip/>` element](../elements/trip.html) is included in the `<references/>` section.  Defaults to false.
 * includeSchedule - Can be true/false to determine whether full `<schedule/>` element is included in the `<tripDetails/>` section.  Defaults to fale.
 * includeStatus - Can be true/false to determine whether the full `<status/>` element is include in the `<tripDetails/>` section.  Defaults to true.
