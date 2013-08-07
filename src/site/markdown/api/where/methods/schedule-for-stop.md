@@ -6,7 +6,7 @@ Retrieve the full schedule for a stop on a particular day
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/schedule-for-stop/1_75403.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/schedule-for-stop/1_75403.xml?key=TEST
 
 ## Sample Response
 
@@ -56,7 +56,7 @@ http://api.onebusaway.org/api/where/schedule-for-stop/1_75403.xml?key=TEST
 ## Request Parameters
 
 * id - encoded in the url directly, this specifies the stop id to request the schedule for
-	* `http://api.onebusaway.org/api/where/schedule-for-stop/[ID GOES HERE].xml`
+	* `http://api.pugetsound.onebusaway.org/api/where/schedule-for-stop/[ID GOES HERE].xml`
 * date - The date for which you want to request a schedule of the format YYYY-MM-DD (optional, defaults to current date)
 
 ## Response

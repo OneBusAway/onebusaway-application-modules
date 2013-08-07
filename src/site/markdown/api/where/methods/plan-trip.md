@@ -8,7 +8,7 @@ This method allows you to plan a trip using public transit between locations.  D
 
 ## Sample Request
 
-http://soak-api.onebusaway.org/api/where/plan-trip.xml?key=TEST&latFrom=47.669940&lonFrom=-122.387958&latTo=47.598941&lonTo=-122.331138&time=2011-01-31_12-48-00
+http://soak-api.pugetsound.onebusaway.org/api/where/plan-trip.xml?key=TEST&latFrom=47.669940&lonFrom=-122.387958&latTo=47.598941&lonTo=-122.331138&time=2011-01-31_12-48-00
 
 ## Sample Response
 

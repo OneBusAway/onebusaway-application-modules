@@ -6,7 +6,7 @@ Retrieve info for a specific stop by id
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/stop/1_75403.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/stop/1_75403.xml?key=TEST
 
 ## Sample Response
 
@@ -36,7 +36,7 @@ http://api.onebusaway.org/api/where/stop/1_75403.xml?key=TEST
 ## Request Parameters
 
 * `id` - the id of the requested stop, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/stop/[ID GOES HERE].xml` 
+    * `http://api.pugetsound.onebusaway.org/api/where/stop/[ID GOES HERE].xml` 
 
 ## Response
 

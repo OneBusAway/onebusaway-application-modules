@@ -6,7 +6,7 @@ Search for active trips for a specific route.
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/trips-for-route/1_44.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/trips-for-route/1_44.xml?key=TEST
 
 ## Sample Response
 
@@ -31,7 +31,7 @@ http://api.onebusaway.org/api/where/trips-for-route/1_44.xml?key=TEST
 ## Request Parameters
 
 * id - the id of the route, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/trips-for-route/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/trips-for-route/[ID GOES HERE].xml`
 * includeStatus - Can be true/false to determine whether full
   [`<tripStatus/>` elements](../elements/trip-status.html) with full real-time
   information are included in the `<status/>` section for each `<tripDetails/>`

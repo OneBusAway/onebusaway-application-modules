@@ -6,7 +6,7 @@ Search for active trips near a specific location.
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/trips-for-location.xml?key=TEST&lat=47.653&lon=-122.307&latSpan=0.008&lonSpan=0.008
+http://api.pugetsound.onebusaway.org/api/where/trips-for-location.xml?key=TEST&lat=47.653&lon=-122.307&latSpan=0.008&lonSpan=0.008
 
 ## Sample Response
 

@@ -6,7 +6,7 @@ Get info about a single arrival and departure for a stop
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/arrival-and-departure-for-stop/1_75403.xml?key=TEST&tripId=1_15551341&serviceDate=1291536000000&vehicleId=1_3521&stopSequence=42
+http://api.pugetsound.onebusaway.org/api/where/arrival-and-departure-for-stop/1_75403.xml?key=TEST&tripId=1_15551341&serviceDate=1291536000000&vehicleId=1_3521&stopSequence=42
 
 ## Sample Response
 
@@ -26,7 +26,7 @@ http://api.onebusaway.org/api/where/arrival-and-departure-for-stop/1_75403.xml?k
 ## Request Parameters
 
 * id - the stop id, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/arrival-and-departure-for-stop/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/arrival-and-departure-for-stop/[ID GOES HERE].xml`
 * tripId - the trip id of the arriving transit vehicle
 * serviceDate - the service date of the arriving transit vehicle
 * vehicleId - the vehicle id of the arriving transit vehicle (optional)
