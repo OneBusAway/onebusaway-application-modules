@@ -6,7 +6,7 @@ Retrieve the list of all routes for a particular agency by id
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/routes-for-agency/1.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/routes-for-agency/1.xml?key=TEST
 
 ## Sample Response
 
@@ -35,7 +35,7 @@ http://api.onebusaway.org/api/where/routes-for-agency/1.xml?key=TEST
 ## Request Parameters
 
 * id - the id of the agency, encoded in the url directly
-    * `http://api.onebusaway.org/api/where/routes-for-agency/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/routes-for-agency/[ID GOES HERE].xml`
 
 ## Response
 

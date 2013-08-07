@@ -6,7 +6,7 @@ Cancel a registered alarm.
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/cancel_alarm/1_00859082-9b9d-4f72-a89f-c4be0e2cf01a.xml
+http://api.pugetsound.onebusaway.org/api/where/cancel_alarm/1_00859082-9b9d-4f72-a89f-c4be0e2cf01a.xml
 
 ## Sample Response
 
@@ -23,6 +23,6 @@ http://api.onebusaway.org/api/where/cancel_alarm/1_00859082-9b9d-4f72-a89f-c4be0
 ## Request Parameters
 
 * id - the alarm id is encoded directly in the URL
-    * `http://api.onebusaway.org/api/where/cancel_alarm/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/cancel_alarm/[ID GOES HERE].xml`
 
 The alarm id is returned in the call to [register-alarm-for-arrival-and-departure-at-stop](register-alarm-for-arrival-and-departure-at-stop.html) api method.

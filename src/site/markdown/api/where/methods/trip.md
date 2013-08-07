@@ -6,7 +6,7 @@ Get details of a specific trip by id
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/trip/1_12540399.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/trip/1_12540399.xml?key=TEST
 
 ## Sample Response
 
@@ -32,7 +32,7 @@ http://api.onebusaway.org/api/where/trip/1_12540399.xml?key=TEST
 ## Request Parameters
 
 * id - the id of the trip, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/trip/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/trip/[ID GOES HERE].xml`
 
 ## Response
 

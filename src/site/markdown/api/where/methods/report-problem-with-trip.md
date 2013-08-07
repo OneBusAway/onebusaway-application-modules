@@ -9,7 +9,7 @@ problem reporting admin interface.
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/report-problem-with-trip/1_79430293.xml?key=TEST&serviceDate=1291536000000&vehicleId=1_3521&stopId=1_75403&code=vehicle_never_came
+http://api.pugetsound.onebusaway.org/api/where/report-problem-with-trip/1_79430293.xml?key=TEST&serviceDate=1291536000000&vehicleId=1_3521&stopId=1_75403&code=vehicle_never_came
 
 ## Sample Response
 
@@ -26,7 +26,7 @@ http://api.onebusaway.org/api/where/report-problem-with-trip/1_79430293.xml?key=
 ## Request Parameters
 
 * tripId - the trip id, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/report-problem-with-trip/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/report-problem-with-trip/[ID GOES HERE].xml`
 * serviceDate - the service date of the trip
 * vehicleId - the vehicle actively serving the trip
 * stopId - a stop id indicating the stop where the user is experiencing the problem 

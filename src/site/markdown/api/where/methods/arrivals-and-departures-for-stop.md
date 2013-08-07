@@ -6,7 +6,7 @@ Get current arrivals and departures for a stop identified by id
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_75403.xml?key=TEST
+http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_75403.xml?key=TEST
 
 ## Sample Response
 
@@ -35,7 +35,7 @@ http://api.onebusaway.org/api/where/arrivals-and-departures-for-stop/1_75403.xml
 ## Request Parameters
 
 * id - the stop id, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/arrivals-and-departures-for-stop/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/arrivals-and-departures-for-stop/[ID GOES HERE].xml`
 * minutesBefore=n - include vehicles having arrived or departed in the previous n minutes (default=5)
 * minutesAfter=n - include vehicles arriving or departing in the next n minutes (default=35)
 * time=n - the time for which the schedule will be generated, as either ms since the unix epoch or of the form YYYY-MM-DD_HH-MM-SS (note this doesn't currently deal well with timezones).  The default query time is NOW.
