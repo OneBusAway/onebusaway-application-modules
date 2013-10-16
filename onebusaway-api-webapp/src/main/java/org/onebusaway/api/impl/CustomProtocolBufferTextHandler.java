@@ -35,9 +35,11 @@ public class CustomProtocolBufferTextHandler implements ContentTypeHandler {
   public String fromObject(Object obj, String resultCode, Writer stream)
       throws IOException {
     ResponseBean response = (ResponseBean) obj;
-    if (response.getData() != null) {
+    if (response.getData() != null && response.getData() instanceof Message) {
       Message message = (Message) response.getData();
       stream.write(message.toString());
+    } else {
+      stream.write(response.getText());
     }
     return null;
   }

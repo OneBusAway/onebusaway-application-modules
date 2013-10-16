@@ -38,14 +38,18 @@ public class CustomProtocolBufferHandler implements ContentTypeHandler {
   public String fromObject(Object obj, String resultCode, Writer stream)
       throws IOException {
     ResponseBean response = (ResponseBean) obj;
-    Message message = (Message) response.getData();
-    /**
-     * Instead of writing to the output Writer, we write directly to the
-     * HttpServletResponse output stream. That way, we can avoid any weirdness
-     * with encoding the serialized protobuf to a String.
-     */
-    HttpServletResponse res = ServletActionContext.getResponse();
-    message.writeTo(res.getOutputStream());
+    if (response.getData() != null && response.getData() instanceof Message) {
+      Message message = (Message) response.getData();
+      /**
+       * Instead of writing to the output Writer, we write directly to the
+       * HttpServletResponse output stream. That way, we can avoid any weirdness
+       * with encoding the serialized protobuf to a String.
+       */
+      HttpServletResponse res = ServletActionContext.getResponse();
+      message.writeTo(res.getOutputStream());
+    } else {
+      stream.write(response.getText());
+    }
     return null;
   }
 

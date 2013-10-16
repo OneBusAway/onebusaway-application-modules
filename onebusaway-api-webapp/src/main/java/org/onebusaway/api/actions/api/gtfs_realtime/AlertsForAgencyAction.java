@@ -52,33 +52,37 @@ public class AlertsForAgencyAction extends GtfsRealtimeActionSupport {
       fillTranslations(serviceAlert.getDescriptions(),
           alert.getDescriptionTextBuilder());
 
-      for (TimeRangeBean range : serviceAlert.getActiveWindows()) {
-        TimeRange.Builder timeRange = alert.addActivePeriodBuilder();
-        if (range.getFrom() != 0) {
-          timeRange.setStart(range.getFrom() / 1000);
-        }
-        if (range.getTo() != 0) {
-          timeRange.setEnd(range.getTo() / 1000);
+      if (serviceAlert.getActiveWindows() != null) {
+        for (TimeRangeBean range : serviceAlert.getActiveWindows()) {
+          TimeRange.Builder timeRange = alert.addActivePeriodBuilder();
+          if (range.getFrom() != 0) {
+            timeRange.setStart(range.getFrom() / 1000);
+          }
+          if (range.getTo() != 0) {
+            timeRange.setEnd(range.getTo() / 1000);
+          }
         }
       }
 
-      for (SituationAffectsBean affects : serviceAlert.getAllAffects()) {
-        EntitySelector.Builder entitySelector = alert.addInformedEntityBuilder();
-        if (affects.getAgencyId() != null) {
-          entitySelector.setAgencyId(affects.getAgencyId());
+      if (serviceAlert.getAllAffects() != null) {
+        for (SituationAffectsBean affects : serviceAlert.getAllAffects()) {
+          EntitySelector.Builder entitySelector = alert.addInformedEntityBuilder();
+          if (affects.getAgencyId() != null) {
+            entitySelector.setAgencyId(affects.getAgencyId());
+          }
+          if (affects.getRouteId() != null) {
+            entitySelector.setRouteId(normalizeId(affects.getRouteId()));
+          }
+          if (affects.getTripId() != null) {
+            TripDescriptor.Builder trip = entitySelector.getTripBuilder();
+            trip.setTripId(normalizeId(affects.getTripId()));
+            entitySelector.setTrip(trip);
+          }
+          if (affects.getStopId() != null) {
+            entitySelector.setStopId(normalizeId(affects.getStopId()));
+          }
         }
-        if (affects.getRouteId() != null) {
-          entitySelector.setRouteId(normalizeId(affects.getRouteId()));
-        }
-        if (affects.getTripId() != null) {
-          TripDescriptor.Builder trip = entitySelector.getTripBuilder();
-          trip.setTripId(normalizeId(affects.getTripId()));
-          entitySelector.setTrip(trip);
-        }
-        if (affects.getStopId() != null) {
-          entitySelector.setStopId(normalizeId(affects.getStopId()));
-        }
-      }      
+      }
     }
   }
 
