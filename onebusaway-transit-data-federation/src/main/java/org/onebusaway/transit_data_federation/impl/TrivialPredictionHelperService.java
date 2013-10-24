@@ -20,11 +20,13 @@ import java.util.List;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.services.PredictionHelperService;
+import org.springframework.stereotype.Component;
 
 /**
  * Trivial implementation of the PredictionHelperService.  That is, it does nothing.
  *
  */
+@Component
 public class TrivialPredictionHelperService implements PredictionHelperService {
 
 	@Override

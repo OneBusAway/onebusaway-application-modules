@@ -18,11 +18,13 @@ package org.onebusaway.transit_data_federation.impl;
 import java.util.List;
 
 import org.onebusaway.transit_data_federation.services.ScheduleHelperService;
+import org.springframework.stereotype.Component;
 
 /**
  * Trivial implementation of the ScheduleHelperService.  That is, it does nothing.
  *
  */
+@Component
 public class TrivialSchedulerHelperService implements ScheduleHelperService {
 
 	@Override

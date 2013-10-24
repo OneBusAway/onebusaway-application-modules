@@ -16,7 +16,9 @@
 package org.onebusaway.transit_data_federation.impl.bundle;
 
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TrivialBundleManagementServiceImpl implements BundleManagementService {
 
 	@Override
