@@ -49,6 +49,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
@@ -148,13 +149,14 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
     Set<BlockTripIndex> blockIndices = new HashSet<BlockTripIndex>();
 
     for (StopEntry stop : stops) {
-      // TODO : we need to fix this
-      /*
-       * List<BlockStopTimeIndex> stopTimeIndices =
-       * _blockIndexService.getStopTimeIndicesForStop(stop); for
-       * (BlockStopTimeIndex stopTimeIndex : stopTimeIndices)
-       * blockIndices.add(stopTimeIndex.getBlockIndex());
-       */
+
+        List<BlockStopTimeIndex> stopTimeIndices = _blockIndexService.getStopTimeIndicesForStop(stop);
+        for (BlockStopTimeIndex stopTimeIndex : stopTimeIndices) {
+          for (BlockConfigurationEntry blockConfigurationEntry: stopTimeIndex.getBlockConfigs()) {
+            blockIndices.addAll(_blockIndexService.getBlockTripIndicesForBlock(blockConfigurationEntry.getBlock().getId()));
+          }
+        }
+       
     }
 
     List<BlockLayoverIndex> layoverIndices = Collections.emptyList();
