@@ -38,6 +38,24 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
   private TripEntryImpl _trip;
 
+  public StopTimeEntryImpl() {
+
+  }
+
+  public StopTimeEntryImpl(StopTimeEntryImpl ste) {
+    _stopTimeId = ste.getId();
+    _arrivalTime = ste.getArrivalTime();
+    _departureTime = ste.getDepartureTime();
+    _sequence = ste.getSequence();
+    _dropOffType = ste.getDropOffType();
+    _pickupType = ste.getPickupType();
+    _shapePointIndex = ste.getShapePointIndex();
+    _shapeDistTraveled = ste.getShapeDistTraveled();
+    _accumulatedSlackTime = ste.getAccumulatedSlackTime();
+    _stop = ste.getStop();
+    _trip = ste.getTrip();
+  }
+
   public void setId(int id) {
     _stopTimeId = id;
   }
@@ -49,7 +67,7 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   public void setDepartureTime(int departureTime) {
     _departureTime = departureTime;
   }
-  
+
   public StopTimeEntryImpl setTime(int time) {
     _arrivalTime = time;
     _departureTime = time;
@@ -93,10 +111,9 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
     _accumulatedSlackTime = accumulatedSlackTime;
   }
 
-  /****
+  /**
    * {@link StopTimeEntry} Interface
-   ****/
-
+   */
   @Override
   public int getId() {
     return _stopTimeId;
@@ -160,6 +177,6 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   @Override
   public String toString() {
     return "StopTimeEntryImpl(stop=" + _stop.getId() + " trip=" + _trip
-        + " arrival=" + _arrivalTime + " departure=" + _departureTime + ")";
+            + " arrival=" + _arrivalTime + " departure=" + _departureTime + ")";
   }
 }

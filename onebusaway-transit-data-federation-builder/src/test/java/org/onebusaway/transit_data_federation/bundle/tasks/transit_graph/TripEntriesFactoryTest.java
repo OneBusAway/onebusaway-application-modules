@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.route;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Route;
@@ -36,6 +38,7 @@ import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
 import org.onebusaway.gtfs.services.GtfsRelationalDao;
+import org.onebusaway.transit_data_federation.bundle.impl.HeuristicStopToShapeMatchingServiceImpl;
 import org.onebusaway.transit_data_federation.bundle.tasks.ShapePointHelper;
 import org.onebusaway.transit_data_federation.bundle.tasks.UniqueServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.RouteEntryImpl;
@@ -124,7 +127,9 @@ public class TripEntriesFactoryTest {
     factory.setUniqueService(new UniqueServiceImpl());
 
     StopTimeEntriesFactory stopTimeEntriesFactory = new StopTimeEntriesFactory();
-    stopTimeEntriesFactory.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    HeuristicStopToShapeMatchingServiceImpl ms = new HeuristicStopToShapeMatchingServiceImpl();
+    ms.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    stopTimeEntriesFactory.setStopToShapeMatchingService(ms);
 
     factory.setStopTimeEntriesFactory(stopTimeEntriesFactory);
 

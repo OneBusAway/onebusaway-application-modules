@@ -19,48 +19,39 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.DistanceAlongShapeException;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary.StopIsTooFarFromShapeException;
-import org.onebusaway.transit_data_federation.impl.shapes.PointAndIndex;
+import org.onebusaway.transit_data_federation.bundle.services.StopToShapeMatchingService;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.utility.InterpolationLibrary;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ListIterator;
+
+
 @Component
 public class StopTimeEntriesFactory {
 
-  private Logger _log = LoggerFactory.getLogger(StopTimeEntriesFactory.class);
+  private final Logger _log = LoggerFactory.getLogger(StopTimeEntriesFactory.class);
 
-  private DistanceAlongShapeLibrary _distanceAlongShapeLibrary;
-
-  private long _invalidStopToShapeMappingExceptionCount;
+  private StopToShapeMatchingService _matchingService;
 
   @Autowired
-  public void setDistanceAlongShapeLibrary(
-      DistanceAlongShapeLibrary distanceAlongShapeLibrary) {
-    _distanceAlongShapeLibrary = distanceAlongShapeLibrary;
-  }
-
-  public long getInvalidStopToShapeMappingExceptionCount() {
-    return _invalidStopToShapeMappingExceptionCount;
+  public void setStopToShapeMatchingService(StopToShapeMatchingService matchingService) {
+    _matchingService = matchingService;
   }
 
   public List<StopTimeEntryImpl> processStopTimes(TransitGraphImpl graph,
@@ -77,12 +68,49 @@ public class StopTimeEntriesFactory {
     for (StopTimeEntryImpl stopTime : stopTimeEntries)
       stopTime.setTrip(tripEntry);
 
-    ensureStopTimesHaveShapeDistanceTraveledSet(stopTimeEntries, shapePoints);
+    List<Double> stopTimeDistances = getStopTimeDistances(stopTimes);
 
+    ensureStopTimesHaveShapeDistanceTraveledSet(stopTimeEntries, shapePoints, stopTimeDistances);
     removeDuplicateStopTimes(stopTimes);
     ensureStopTimesHaveTimesSet(stopTimes, stopTimeEntries);
 
     return stopTimeEntries;
+  }
+
+  private List<Double> getStopTimeDistances(List<StopTime> stopTimes) {
+    List<Double> stopTimeDistances = new ArrayList<Double>(stopTimes.size());
+
+    boolean distancesNonZero = false;
+
+    for (StopTime st: stopTimes) {
+      if (st.isShapeDistTraveledSet()) {
+        stopTimeDistances.add(st.getShapeDistTraveled());
+
+        if (st.getShapeDistTraveled() > 0) {
+          distancesNonZero = true;
+        }
+
+      } else {
+        stopTimeDistances.add(0.0);
+      }
+    }
+
+    if (!distancesNonZero) {
+      return null;
+    }
+
+    ListIterator<Double> stdIterator = stopTimeDistances.listIterator();
+
+    while (stdIterator.hasNext())  {
+      Double thisValue = stdIterator.next();
+
+      if (stdIterator.hasNext() && (thisValue > stopTimeDistances.get(stdIterator.nextIndex()))) {
+        _log.warn("StopTime distance-along-shape went backwards: from " + thisValue + " to " + stopTimeDistances.get(stdIterator.nextIndex()));
+        return null;
+      }
+    }
+
+    return stopTimeDistances;
   }
 
   private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
@@ -153,62 +181,14 @@ public class StopTimeEntriesFactory {
   /**
    * We have to make sure shape distance traveled is set, even if we don't have
    * shape information
-   * 
+   *
    * @param stopTimes
    * @param shapePoints potentially null
+   * @param stopTimeDistances potentially null
    */
   private void ensureStopTimesHaveShapeDistanceTraveledSet(
-      List<StopTimeEntryImpl> stopTimes, ShapePoints shapePoints) {
-
-    boolean distanceTraveledSet = false;
-
-    // Do we have shape information?
-    if (shapePoints != null) {
-
-      try {
-        PointAndIndex[] stopTimePoints = _distanceAlongShapeLibrary.getDistancesAlongShape(
-            shapePoints, stopTimes);
-        for (int i = 0; i < stopTimePoints.length; i++) {
-          PointAndIndex pindex = stopTimePoints[i];
-          StopTimeEntryImpl stopTime = stopTimes.get(i);
-          stopTime.setShapePointIndex(pindex.index);
-          stopTime.setShapeDistTraveled(pindex.distanceAlongShape);
-        }
-
-        distanceTraveledSet = true;
-      } catch (StopIsTooFarFromShapeException ex) {
-        StopTimeEntry stopTime = ex.getStopTime();
-        TripEntry trip = stopTime.getTrip();
-        StopEntry stop = stopTime.getStop();
-        AgencyAndId shapeId = trip.getShapeId();
-        CoordinatePoint point = ex.getPoint();
-        PointAndIndex pindex = ex.getPointAndIndex();
-
-        _log.warn("Stop is too far from shape: trip=" + trip.getId() + " stop="
-            + stop.getId() + " stopLat=" + stop.getStopLat() + " stopLon="
-            + stop.getStopLon() + " shapeId=" + shapeId + " shapePoint="
-            + point + " index=" + pindex.index + " distance="
-            + pindex.distanceFromTarget);
-      } catch (DistanceAlongShapeException ex) {
-        _invalidStopToShapeMappingExceptionCount++;
-      }
-    }
-
-    if (!distanceTraveledSet) {
-
-      // Make do without
-      double d = 0;
-      StopTimeEntryImpl prev = null;
-      for (StopTimeEntryImpl stopTime : stopTimes) {
-        if (prev != null) {
-          CoordinatePoint from = prev.getStop().getStopLocation();
-          CoordinatePoint to = stopTime.getStop().getStopLocation();
-          d += SphericalGeometryLibrary.distance(from, to);
-        }
-        stopTime.setShapeDistTraveled(d);
-        prev = stopTime;
-      }
-    }
+      List<StopTimeEntryImpl> stopTimes, ShapePoints shapePoints, List<Double> stopTimeDistances) {
+    _matchingService.ensureStopTimesHaveShapeDistanceTraveledSet(stopTimes, shapePoints, stopTimeDistances);
   }
 
   private void ensureStopTimesHaveTimesSet(List<StopTime> stopTimes,
@@ -260,7 +240,7 @@ public class StopTimeEntriesFactory {
    * takes charge of interpolating the arrival and departure time for any
    * StopTime where they are missing. The interpolation is based on the distance
    * traveled along the current trip/block.
-   * 
+   *
    * @param stopTimes
    * @param distanceTraveled
    * @param arrivalTimes
@@ -326,9 +306,16 @@ public class StopTimeEntriesFactory {
         } else {
           for (int x = 0; x < stopTimes.size(); x++) {
             StopTime st = stopTimes.get(x);
-            System.err.println(x + " " + st.getId() + " " + arrivalTimes[x]
+            System.err.println(x + " " + st.getStop().getId() + " " + distanceTraveled[x] + " " + arrivalTimes[x]
                 + " " + departureTimes[x]);
           }
+
+          System.err.println("\n");
+
+          for (Map.Entry<Double, Integer> e: scheduleTimesByDistanceTraveled.entrySet()) {
+            System.err.println(e.getKey() + " " + e.getValue());
+          }
+
           throw new IllegalStateException(
               "arrival time is less than previous departure time for stop time with trip_id="
                   + stopTime.getTrip().getId() + " stop_sequence="
@@ -356,7 +343,7 @@ public class StopTimeEntriesFactory {
    * trip/block. For any StopTime that has either an arrival or a departure
    * time, we add it to the SortedMaps of arrival and departure times by
    * distance traveled.
-   * 
+   *
    * @param stopTimes
    * @param distances
    * @param arrivalTimesByDistanceTraveled

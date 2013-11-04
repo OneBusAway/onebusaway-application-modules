@@ -25,7 +25,7 @@ import java.io.Serializable;
 /**
  * A more memory efficient data structure for capturing a sequence of
  * {@link ShapePoint} objects
- * 
+ *
  * @author bdferris
  * @see ShapePoint
  */
@@ -40,6 +40,17 @@ public class ShapePoints implements Serializable {
   private double[] lons;
 
   private double[] distTraveled;
+
+  public ShapePoints() {
+
+  }
+
+  public ShapePoints(ShapePoints sp) {
+    shapeId = sp.getShapeId();
+    lats = sp.getLats().clone();
+    lons = sp.getLons().clone();
+    distTraveled = sp.getDistTraveled().clone();
+  }
 
   public int getSize() {
     return lats.length;
@@ -92,7 +103,7 @@ public class ShapePoints implements Serializable {
   public double getDistTraveledForIndex(int index) {
     return distTraveled[index];
   }
-  
+
   public CoordinatePoint getPointForIndex(int index) {
     return new CoordinatePoint(lats[index],lons[index]);
   }
@@ -115,7 +126,7 @@ public class ShapePoints implements Serializable {
       double curLat = lats[i];
       double curLon = lons[i];
       totalDistanceTraveled += SphericalGeometryLibrary.distance(prevLat,
-          prevLon, curLat, curLon);
+              prevLon, curLat, curLon);
       distTraveled[i] = totalDistanceTraveled;
       prevLat = curLat;
       prevLon = curLon;

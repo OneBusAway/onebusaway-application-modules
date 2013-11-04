@@ -132,6 +132,8 @@ public class DistanceAlongShapeLibrary {
     List<PointAndIndex> bestAssignment = computeBestAssignment(shapePoints,
         stopTimes, possibleAssignments, projection, projectedShapePoints);
 
+    double last = Double.NEGATIVE_INFINITY;
+    
     for (int i = 0; i < stopTimePoints.length; i++) {
       PointAndIndex pindex = bestAssignment.get(i);
       if (pindex.distanceAlongShape > maxDistanceTraveled) {
@@ -142,6 +144,11 @@ public class DistanceAlongShapeLibrary {
         double d = stopPoint.getDistance(point);
         pindex = new PointAndIndex(point, index, d, maxDistanceTraveled);
       }
+      
+      if (last > pindex.distanceAlongShape) {
+        constructError(shapePoints, stopTimes, possibleAssignments, projection);
+      }
+      last = pindex.distanceAlongShape;
       stopTimePoints[i] = pindex;
     }
     return stopTimePoints;
@@ -255,7 +262,7 @@ public class DistanceAlongShapeLibrary {
         projection, projectedShapePoints);
 
     int startIndex = 0;
-    int assingmentCount = 1;
+    int assignmentCount = 1;
 
     /**
      * We iterate over each stop, examining its possible assignments. If we find
@@ -273,7 +280,7 @@ public class DistanceAlongShapeLibrary {
 
       boolean hasRegion = index > startIndex;
       boolean hasSingleAssignmentFollowingMultipleAssignments = count == 1
-          && assingmentCount > 1;
+          && assignmentCount > 1;
       boolean hasMultipleAssignmentsAndLastPoint = count > 1
           && index == possibleAssignments.size() - 1;
 
@@ -298,12 +305,12 @@ public class DistanceAlongShapeLibrary {
       }
       if (count == 1) {
         startIndex = index;
-        assingmentCount = 1;
+        assignmentCount = 1;
       } else {
-        assingmentCount *= count;
-        if (assingmentCount > _maximumNumberOfPotentialAssignments) {
+        assignmentCount *= count;
+        if (assignmentCount > _maximumNumberOfPotentialAssignments) {
           constructErrorForPotentialAssignmentCount(shapePoints, stopTimes,
-              assingmentCount);
+              assignmentCount);
         }
       }
     }

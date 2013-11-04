@@ -16,6 +16,7 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import static org.junit.Assert.assertEquals;
+
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.aid;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
@@ -25,13 +26,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.model.Route;
 import org.onebusaway.gtfs.model.Stop;
 import org.onebusaway.gtfs.model.StopTime;
 import org.onebusaway.gtfs.model.Trip;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.DistanceAlongShapeLibrary;
-import org.onebusaway.transit_data_federation.bundle.tasks.transit_graph.StopTimeEntriesFactory;
+import org.onebusaway.transit_data_federation.bundle.impl.HeuristicStopToShapeMatchingServiceImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopTimeEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TransitGraphImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
@@ -97,7 +98,9 @@ public class StopTimeEntriesFactoryTest {
     stC.setTrip(trip);
 
     StopTimeEntriesFactory factory = new StopTimeEntriesFactory();
-    factory.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    HeuristicStopToShapeMatchingServiceImpl ms = new HeuristicStopToShapeMatchingServiceImpl();
+    ms.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    factory.setStopToShapeMatchingService(ms);
 
     List<StopTime> stopTimes = Arrays.asList(stA, stB, stC);
 
@@ -136,7 +139,7 @@ public class StopTimeEntriesFactoryTest {
     assertEquals(1484.5, entry.getShapeDistTraveled(), 0.1);
     assertEquals(5 * 60, entry.getSlackTime());
   }
-  
+
   @Test
   public void testThreeInARowDuplicateRemoval() {
 
@@ -206,7 +209,9 @@ public class StopTimeEntriesFactoryTest {
     stD.setTrip(trip);
 
     StopTimeEntriesFactory factory = new StopTimeEntriesFactory();
-    factory.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    HeuristicStopToShapeMatchingServiceImpl ms = new HeuristicStopToShapeMatchingServiceImpl();
+    ms.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    factory.setStopToShapeMatchingService(ms);
 
     List<StopTime> stopTimes = Arrays.asList(stA, stB, stC, stD);
 
@@ -255,7 +260,7 @@ public class StopTimeEntriesFactoryTest {
     assertEquals(60 * 5, entry.getSlackTime());
 
   }
-  
+
   @Test
   public void test() {
 
@@ -311,7 +316,9 @@ public class StopTimeEntriesFactoryTest {
     stC.setTrip(trip);
 
     StopTimeEntriesFactory factory = new StopTimeEntriesFactory();
-    factory.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    HeuristicStopToShapeMatchingServiceImpl ms = new HeuristicStopToShapeMatchingServiceImpl();
+    ms.setDistanceAlongShapeLibrary(new DistanceAlongShapeLibrary());
+    factory.setStopToShapeMatchingService(ms);
 
     List<StopTime> stopTimes = Arrays.asList(stA, stB, stC);
 
