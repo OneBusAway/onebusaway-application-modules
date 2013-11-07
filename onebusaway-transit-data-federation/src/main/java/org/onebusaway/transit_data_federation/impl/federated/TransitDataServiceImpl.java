@@ -35,6 +35,7 @@ import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -83,6 +84,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
@@ -91,6 +93,8 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureAlarmService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
+import org.onebusaway.transit_data_federation.services.PredictionHelperService;
+import org.onebusaway.transit_data_federation.services.ScheduleHelperService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
 import org.onebusaway.transit_data_federation.services.beans.ArrivalsAndDeparturesBeanService;
 import org.onebusaway.transit_data_federation.services.beans.BlockBeanService;
@@ -106,6 +110,7 @@ import org.onebusaway.transit_data_federation.services.beans.StopsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripBeanService;
 import org.onebusaway.transit_data_federation.services.beans.TripDetailsBeanService;
 import org.onebusaway.transit_data_federation.services.beans.VehicleStatusBeanService;
+import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.realtime.CurrentVehicleEstimationService;
 import org.onebusaway.transit_data_federation.services.reporting.UserReportingService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
@@ -176,7 +181,15 @@ class TransitDataServiceImpl implements TransitDataService {
 
   @Autowired
   private VehicleStatusBeanService _vehicleStatusBeanService;
+  
+  @Autowired
+  private BundleManagementService _bundleManagementService;
 
+  @Autowired
+  private PredictionHelperService _predictionHelperService;
+  
+  @Autowired
+  private ScheduleHelperService _scheduleHelperService;
   /****
    * {@link TransitDataService} Interface
    ****/
@@ -624,6 +637,36 @@ class TransitDataServiceImpl implements TransitDataService {
   @Override
   public List<String> getAllTripProblemReportLabels() {
     return _userReportingService.getAllTripProblemReportLabels();
+  }
+  
+
+  @Override
+  public String getActiveBundleId() {
+	  return _bundleManagementService.getActiveBundleId();
+  }
+
+  @Override
+  public List<TimepointPredictionRecord> getPredictionRecordsForTrip(
+		  String agencyId,
+		  TripStatusBean tripStatus) {
+	  return _predictionHelperService.getPredictionRecordsForTrip(agencyId, tripStatus);
+  }
+
+  @Override
+  public Boolean routeHasUpcomingScheduledService(String agencyId, long time, String routeId,
+		String directionId) {
+	  return _scheduleHelperService.routeHasUpcomingScheduledService(agencyId, time, routeId, directionId);
+  }
+
+  @Override
+  public Boolean stopHasUpcomingScheduledService(String agencyId, long time, String stopId,
+		String routeId, String directionId) {
+	  return _scheduleHelperService.stopHasUpcomingScheduledService(agencyId, time, stopId, routeId, directionId);
+  }
+
+  @Override
+  public List<String> getSearchSuggestions(String agencyId, String input) {
+	  return _scheduleHelperService.getSearchSuggestions(agencyId, input);
   }
 
   /****

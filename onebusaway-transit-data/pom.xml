@@ -22,7 +22,11 @@
             <artifactId>onebusaway-federations</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-realtime-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
