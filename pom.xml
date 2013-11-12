@@ -90,6 +90,7 @@
   
   <!-- This is where we control the master dependency version used by all modules -->
   <dependencyManagement>
+
     <dependencies>
 
       <dependency>
