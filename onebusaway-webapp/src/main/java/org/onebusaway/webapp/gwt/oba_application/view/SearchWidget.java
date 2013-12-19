@@ -231,7 +231,7 @@ public class SearchWidget extends FlowPanel {
     addressPanel.add(addressPanel2);
 
     SpanWidget addressExampleLabel1 = new SpanWidget(
-        "(ex. \"3rd and pike\" or ");
+        "(ex. \"Florida Av and Hillsborough Av\" or ");
     addressExampleLabel1.addStyleName(_css.SearchWidgetExampleLabel());
     addressPanel2.add(addressExampleLabel1);
 
