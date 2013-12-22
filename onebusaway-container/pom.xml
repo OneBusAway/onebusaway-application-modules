@@ -11,7 +11,7 @@
     <name>onebusaway-container</name>
 
     <properties>
-        <aspectj-version>1.5.4</aspectj-version>
+        <aspectj-version>1.7.3</aspectj-version>
     </properties>
 
     <dependencies>
