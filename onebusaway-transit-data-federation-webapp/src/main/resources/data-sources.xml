@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <bean id="dataSource"
+          class="org.springframework.jndi.JndiObjectFactoryBean">
+      <property name="jndiName"
+                value="java:comp/env/jdbc/soundDB"/>   
+      <property name="lookupOnStartup"
+                value="true"/>   
+      <property name="cache"
+                value="true"/>   
+      <property name="proxyInterface"
+                value="javax.sql.DataSource"/>   
+      <property name="resourceRef"
+                value="true" />
+    </bean>
+    
+    <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
+      <property name="order" value="-2" />
+      <property name="properties">
+          <props>
+              <prop key="bundlePath">/tmp/oba-st-bundle</prop>
+         </props>
+      </property>
+    </bean>
+</beans>
