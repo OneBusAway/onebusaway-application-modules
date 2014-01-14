@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Vehicle Location Record</title>
+</head>
+<body>
+
+<h1>Vehicle Location Record</h1>
+
+<s:actionmessage />
+
+<h2>Create a record:</h2>
+
+<s:form method="post" action="vehicle-location-record!submit">
+  <s:textfield name="vehicleId" value="%{vehicleId}" label="Vehicle Id"/>
+  <s:textfield name="blockId" value="%{blockId}" label="Block Id"/>
+  <s:textfield name="tripId" value="%{tripId}" label="Trip Id"/>
+  <s:textfield name="scheduleDeviation" value="%{scheduleDeviation}" label="Schedule Deviation" />
+  <s:textfield name="serviceDate" value="%{serviceDate}" label="Service Date"/>
+  <s:textfield name="timeOfRecord" value="%{timeOfRecord}" label="Time"/>
+  <s:submit name="submit" value="Submit"/>
+</s:form>
+
+<h2>Reset a vehicle:</h2>
+
+<s:form method="post" action="vehicle-location-record!reset">
+  <s:textfield name="vehicleId" value="%{vehicleId}" label="Vehicle Id"/>
+  <s:submit name="submit" value="Reset"/>
+</s:form>
+
+</body>
+</html>

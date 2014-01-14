@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	  xmlns:c="http://java.sun.com/jsp/jstl/core"
+	  xmlns:oba="/oba-tags"
+	  xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<s:set name="now" value="getNow()" />
+<head>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-stop.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-sign.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/where-sign-stop.css')}"/>
+<script type="text/javascript" src="${oba:url('/config.action')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/oba-where-sign-stop.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript">
+  jQuery(document).ready(oba_where_sign_stop);
+</script>    
+<jsp:element name="meta">
+    <jsp:attribute name="http-equiv">Refresh</jsp:attribute>
+    <jsp:attribute name="content"><s:property value="refresh"/></jsp:attribute>
+</jsp:element>
+<title>
+  <s:if test="title != null">
+    <s:property value="title" />
+  </s:if>
+  <s:else>
+    <s:component template="stops-title-head-snippet.jspx">
+      <s:param name="stops" value="result.stops"/>
+    </s:component>
+  </s:else>
+</title>
+</head>
+<body>
+
+<div id="container">
+
+<!-- The Arrivals Title Header -->
+<s:if test="showTitle">
+  <div class="stopNameHeader">
+  <h1>
+    <s:if test="title != null">
+      <s:property value="title" />
+    </s:if>
+    <s:else>
+      <s:component template="stops-title-head-snippet.jspx">
+        <s:param name="stops" value="result.stops"/>
+        <s:param name="delimiter" value="'&lt;br&gt;'"/>
+      </s:component>
+    </s:else>
+  </h1>
+  </div>
+</s:if>
+
+<!--  Alerts -->
+<s:component template="service-alerts-header-snippet.jspx">
+    <s:param name="situations" value="situations"/>
+</s:component>
+
+<!-- The Arrivals and Departures Table -->
+<s:component template="arrivals-and-departures-table-snippet.jspx">
+    <s:param name="arrivalsAndDepartures" value="result.arrivalsAndDepartures"/>
+    <s:param name="presentation" value="arrivalsAndDeparturesPresentation" />
+    <s:param name="excludeOrderLinks" value="true"/>
+    <s:param name="excludeTripLinks" value="true"/>    
+</s:component>
+
+</div>
+
+</body>
+</html>

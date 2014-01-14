@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE struts PUBLIC 
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+    <constant name="struts.custom.i18n.resources" value="org/onebusaway/presentation/presentation-messages" />
+    
+    <constant name="struts.patternMatcher" value="namedVariable"/>
+
+    <bean type="org.apache.struts2.components.template.TemplateEngine" name="jspx" class="org.apache.struts2.components.template.JspTemplateEngine" />
+
+    <package name="onebusaway-webapp-default" extends="struts-default">
+        
+        <result-types>
+          <result-type name="rome" class="org.onebusaway.webapp.actions.rss.RomeResult"/>
+          <result-type name="json" class="org.apache.struts2.json.JSONResult"/>
+        </result-types>
+        
+        <interceptors>
+            <interceptor name="cache-control" class="org.onebusaway.presentation.services.cachecontrol.CacheControlInterceptor" />
+            <interceptor name="configuration" class="org.onebusaway.presentation.impl.configuration.ConfigurationInterceptor" />
+            <interceptor name="is-setup" class="org.onebusaway.presentation.impl.users.IsSetupInterceptor" />
+            <interceptor name="current-user" class="org.onebusaway.presentation.impl.users.CurrentUserInterceptor" />            
+            <interceptor-stack name="onebusaway-webapp-stack">
+                <interceptor-ref name="cache-control"/>
+                <interceptor-ref name="defaultStack">
+                    <param name="modelDriven.refreshModelBeforeResult">true</param>
+                </interceptor-ref>
+                <interceptor-ref name="configuration"/>
+                <interceptor-ref name="is-setup" />
+                <interceptor-ref name="current-user" />
+            </interceptor-stack>
+        </interceptors>
+
+        <default-interceptor-ref name="onebusaway-webapp-stack" />
+
+        <global-results>
+            <result name="ServiceException">/WEB-INF/content/exception.jspx</result>
+            <result name="NoSuchStopServiceException">/WEB-INF/content/exception-noSuchStop.jspx</result>
+            <result name="NoSuchTripServiceException">/WEB-INF/content/exception-noSuchTrip.jspx</result>
+            <result name="InvalidArgumentServiceException">/WEB-INF/content/exception-invalidArgument.jspx</result>
+            <result name="OutOfServiceAreaServiceException">/WEB-INF/content/exception-outOfServiceArea.jspx</result>
+            <result name="MultipleServiceAreasServiceException">/WEB-INF/content/exception-multipleServiceAreas.jspx</result>
+            <result name="NoSuchAgencyServiceException">/WEB-INF/content/exception-noSuchAgency.jspx</result>
+            <result name="NotSetup" type="redirectAction">
+                <param name="namespace">/setup</param>
+                <param name="actionName">index</param>
+            </result>
+            <result name="AlreadySetup" type="redirectAction">
+                <param name="namespace">/</param>
+                <param name="actionName">index</param>
+            </result>
+            <result name="input">/WEB-INF/content/input.jspx</result>
+            
+        </global-results>
+
+        <global-exception-mappings>
+            <!-- <exception-mapping exception="org.onebusaway.exceptions.ServiceException" result="ServiceException" /> -->
+            <exception-mapping exception="org.onebusaway.exceptions.NoSuchStopServiceException"
+                result="NoSuchStopServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.NoSuchTripServiceException"
+                result="NoSuchTripServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.InvalidArgumentServiceException"
+                result="InvalidArgumentServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.OutOfServiceAreaServiceException"
+                result="OutOfServiceAreaServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.MultipleServiceAreasServiceException"
+                result="MultipleServiceAreasServiceException" />
+            <exception-mapping exception="org.onebusaway.exceptions.NoSuchAgencyServiceException"
+                result="NoSuchAgencyServiceException" />
+        </global-exception-mappings>
+
+    </package>
+
+</struts>

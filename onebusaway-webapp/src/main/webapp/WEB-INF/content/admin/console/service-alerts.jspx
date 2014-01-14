@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Service Alert</title>
+</head>
+<body>
+
+<p><s:a action="index">Back to the Console</s:a></p>
+
+<s:if test="agencyId == null">
+    <h2>Pick an agency:</h2>
+    <ul>
+        <s:iterator value="agencies">
+            <s:url var="url" action="service-alerts!agency">
+                <s:param name="agencyId" value="agency.id" />
+            </s:url>
+            <li><s:a href="%{url}">
+                <s:property value="agency.name" />
+            </s:a></li>
+        </s:iterator>
+    </ul>
+</s:if>
+<s:else>
+    <h3>Actions:</h3>
+    <ul>
+        <s:url var="url" action="service-alert">
+            <s:param name="agencyId" value="agencyId" />
+        </s:url>
+        <li><s:a href="%{url}">Create a Service Alert</s:a></li>
+        <s:url var="url" action="service-alerts!removeAllForAgency">
+            <s:param name="agencyId" value="agencyId" />
+        </s:url>
+        <li><s:a href="%{url}">Remove ALL Service Alerts</s:a></li>
+    </ul>
+    <h3>Service Alerts:</h3>
+    <ul>
+        <s:iterator value="situations">
+            <s:url var="url" action="service-alert">
+                <s:param name="id" value="id" />
+            </s:url>
+            <li><s:a href="%{url}">
+                <s:property value="summaries[0].value" />
+            </s:a>
+            </li>
+        </s:iterator>
+    </ul>
+</s:else>
+
+</body>
+</html>

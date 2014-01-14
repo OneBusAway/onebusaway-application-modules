@@ -1,0 +1,416 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@url bubbleLeftUrl getBubbleLeft;
+@url bubbleRightUrl getBubbleRight;
+
+html,body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: white;
+	font-family: Helvetica, sans-serif;
+	height: 100%;
+	overflow: hidden;
+	text-align: left;
+}
+
+img {
+	border: 0;
+}
+
+.ClearPanel {
+	clear: both;
+	height: 1px;
+}
+
+#content {
+	height: 100%;
+}
+
+.OneBusAway {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+}
+
+.OneBusAwayMapWrapper {
+	position: relative;
+	left: 25em;
+	margin-left: 0;
+	margin-right: 25em;
+}
+
+.OneBusAwayMap {
+	height: 100%;
+	width: 100%;
+}
+
+.OneBusAwayWrapper {
+	position: relative;	
+}
+
+.OneBusAwayResultsWrapper {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 25em;
+	overflow: auto;
+	z-index: 2;
+}
+
+.OneBusAwayResultsPanel {
+	margin: 1em;
+}
+
+.SearchWidget {
+	background-color: #CADFF4;
+	border-top: 3px solid #CCCCCC;
+	border-bottom: 3px solid #CCCCCC;
+	padding-top: 1em;
+	padding-bottom: 0;
+}
+
+.SearchWidgetSearchPanel {
+	height: 2.5em;
+}
+
+.SearchWidgetSearchPanel>div {
+	float: left;
+	margin-right: 0.75em;
+	width: 25em;
+	height: 2.5em;
+}
+
+.SearchWidgetSearchPanel > .SearchWidgetButtonPanel {
+	width: 8em;
+}
+
+.SearchWidgetLabel {
+	text-align: right;
+	width: 7em;
+	padding-right: 0.75em;
+}
+
+.SearchWidgetTextBoxPanel {
+	position: relative;
+	left: 7.75em;
+	top: -1.3em;
+	width: 17.25em;
+	text-align: right;
+}
+
+.SearchWidgetTextBox {
+	width: 98%;
+}
+
+.SearchWidgetTextBoxUsingLocation {
+	color: #770000;
+}
+
+.SearchWidgetExamplePanel {
+	position: relative;
+	left: 7.75em;
+	top: -1.3em;
+	width: 17.25em;
+}
+
+.SearchWidgetExampleLabel {
+	color: #777777;
+	font-size: 0.8em;
+}
+
+.SearchWidgetButtonPanel>button{
+	display: block;
+}
+	
+.SearchWidgetShowOptionsButton {
+	font-size: 0.8em;
+}
+
+.SearchWidgetOptionsPanel {
+	clear: both;
+	margin-top: 10px;
+}
+
+.SearchWidget table {
+	border-collapse: collapse;
+}
+
+.SearchWidgetOptionsGrid {
+	border-collapse: collapse;
+	padding: 0;
+}
+
+.SearchWidgetOptionsGridColumn0 {
+	width: 7em;
+	text-align: right;
+	padding-right: 0.75em;
+}
+
+.SearchWidgetOptionsGridColumn1 {
+	width: 17.25em;
+	text-align: left;
+	padding: 0;
+}
+
+.SearchWidgetOptionsGridColumn2 {
+	width: 7m;
+	text-align: right;
+	padding-right: 0.75em;
+}
+
+.SearchWidgetOptionsGridColumn3 {
+	width: 17.25em;
+	text-align: left;
+	padding: 0;
+}
+
+.SearchWidgetStartDateTextBox {
+	width: 5em;
+	margin-right: 0.5em;
+}
+
+.SearchWidgetStartTimeTextBox {
+	width: 5em;
+}
+
+.SearchWidgetTripTimeTextBox {
+	width: 11em;
+}
+
+.SearchWidgetTripLengthList{}
+
+.SearchWidgetSearchForPanel{}
+
+/*
+.gwtProgressBarshell {
+	margin-top: 10px;
+	border: 2px solid #CCCCCC;
+	background-color: #eeeeee;
+	height: 14pt;
+	width: 97%;
+}
+
+.gwtProgressBarshell .gwt-ProgressBar-bar {
+	background-color: rgb(87, 91, 175);
+}
+
+.gwtProgressBarshell .gwt-ProgressBar-text {
+	padding: 0px;
+	margin: 0px;
+	color: white;
+}
+*/
+
+/****
+ * Address Lookup
+ ****/
+.AddressLookup {
+	margin: 10px;
+	color: red;
+}
+
+.AddressLookupAddress {
+	margin-top: 10px;
+	color: black;
+}
+
+.AddressLookupPlacePanel{}
+.AddressLookupPlace{}
+.AddressLookupMultipleAddressesFound{}
+.AddressLookupNoAddressFound{}
+
+/****
+ * Results Filter
+ ****/
+.ResultsFilter {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	font-size: 0.8em;
+	text-align: center;
+}
+
+.ResultsFilterLabel {
+	font-weight: bold;
+}
+
+.ResultsFilterButton {
+	margin-left: 5px;
+}
+
+/****
+ * Results Table
+ ****/
+.ResultsTableWidget {
+	margin-left: 5px;
+}
+
+.ResultsTableWidgetTablePanel {
+	margin-top: 5px;
+}
+
+.ResultsTableWidgetResultsTable {
+	width: 100%;
+	border-collapse: collapse;
+	padding: 0;
+}
+
+.ResultsTableWidgetResultsTableHeaderRow {
+	color: red;
+	font-size: 0.8em;
+	font-weight: bold;
+}
+
+.ResultsTableWidgetResultsTableHeaderRowRating {
+	text-align: center;
+}
+
+.ResultsTableWidgetResultsTableHeaderRowDistance {
+	text-align: center;
+}
+
+.ResultsTableWidgetResultsTableLabelColumn {
+	text-align: center;
+	font-weight: bold;
+	font-size: 0.8em;
+	width: 5%;
+}
+
+.ResultsTableWidgetResultsTableNameColumn {
+	width: 60%;
+}
+
+.ResultsTableWidgetResultsTableRatingColumn {
+	width: 15%;
+	text-align: center;
+}
+
+.ResultsTableWidgetResultsTableTimeColumn {
+	width: 20%;
+	text-align: center;
+}
+
+.ResultsTableWidgetNavigationWidget {
+	font-size: 0.8em;
+	width: 100%;
+}
+
+.ResultsTableWidgetNavigationWidget td {
+	width: 33%;
+}
+
+.ResultsTableWidgetNavigationWidget .ItemCountPanel {
+	text-align: left;
+}
+
+.ResultsTableWidgetNavigationWidget .ItemCountPanel .ItemCount {
+	color: blue;
+}
+
+.ResultsTableWidgetNavigationWidget .PagesPanel {
+	text-align: center;
+}
+
+.ResultsTableWidgetNavigationWidget .PrevNextPanel {
+	text-align: right;
+}
+
+.ResultsTableWidgetMinimized {
+	background-color: #CADFF4;
+	border: 3px solid #CCCCCC;
+	margin-top: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 20px;
+	padding: 5px;
+	text-align: center;
+	font-weight: bold;
+}
+
+.OneBusAwayYelpPanel {
+	margin-top: 5px;
+	text-align: center;
+}
+
+.ActiveResult {
+	margin-left: 10px;
+	margin-top: 10px;
+}
+
+.OneBusAwayYelpLink{}
+.OneBusAwayMainMapPanel{}
+
+.ActiveResultNamePanel {
+	margin-bottom: 5px;
+}
+
+.ActiveResultName {
+	font-weight: bold;
+}
+
+.ActiveResultRatingPanel {
+	margin-top: 10px;
+}
+
+.ActiveResultTravelTime {
+	margin-top: 10px;
+}
+
+.ActiveResultDirectionsPanel {
+	margin-top: 10px;
+}
+
+.ActiveResultAddress{}
+.ActiveResultPhone{}
+.ActiveResultRatingImage{}
+.ActiveResultRatingImageSmall{}
+.ActiveResultDirections{}
+
+.TripPlanResultsTable {
+	margin-left: 5px;
+	margin-top: 5px;
+}
+
+.ColorGradientControl {
+  width: 200px;
+  background-color: white;
+  opacity: 0.75;
+  padding: 5px;
+  border: 1px solid black;
+}
+
+.ColorGradientControlLabelGrid {
+	font-weight: bold;
+	width: 100%;	
+}
+
+.ColorGradientControlLabelGridLeft {
+	text-align: left;
+}
+
+.ColorGradientControlLabelGridRight {
+	text-align: right;
+}
+
+.ColorGradientControlColorGrid {
+	width: 100%;
+	border-collapse: collapse;
+	padding: 0;
+	opacity: .66;
+}
+
+.CurrentPage{}
+.PageCount{}

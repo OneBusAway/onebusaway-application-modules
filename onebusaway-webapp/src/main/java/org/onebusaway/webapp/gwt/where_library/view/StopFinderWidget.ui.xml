@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+    <!-- RefineViewWidget.ui.xml -->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:my='urn:import:org.onebusaway.webapp.gwt.where_library.view'>
+
+    <ui:style type="org.onebusaway.webapp.gwt.where_library.view.StopFinderCssResource">
+
+        .searchExample {
+        color:gray;
+        font-size:75%;
+        margin-top:0.25em
+        }
+
+        .resultsPanel {
+        padding-top: 1em;
+        padding-left: 1em;
+        padding-right: 1em;
+        overflow:auto;
+        }
+
+        .searchPanel {
+        padding-top: 1.5em;
+        }
+        
+        .linksPanel {
+        position: relative;
+        top: -1em;
+        margin-right: 0.5em;
+        text-align: right;
+        }
+
+        .mapPanel {
+        height: 100%;
+        width: 100%;
+        }
+
+        .resultList {
+        margin-top: 1em;
+        }
+
+        .resultListHeader {
+        font-weight: bold;
+        }
+
+        .resultListWarning {
+        color: red;
+        }
+
+        .resultListPrimary {
+        font-size: 1.2em;
+        margin-bottom: 3em;
+        }
+
+        .resultListAdditional .resultListEntry {
+        margin-left:0.5em;
+        }
+
+        .resultListEntry {
+        margin-top: 1em;
+        }
+
+        .resultListEntryName {
+
+        }
+
+        .resultListEntryDescription {
+        margin-top: 0.3em;
+        font-size: 0.8em;
+        }
+
+        .resultListMoreInfoLink {
+        font-size: 0.8em;
+        margin-top: 1.5em;
+        margin-left: 0.625em;
+        }
+
+        .resultListClear a {
+        font-size: 0.8em;
+        color: red;
+        }
+        
+        .stopInfoWindowPanel {
+        font-size: 10pt;
+        text-align: left;
+        }
+
+        .stopInfoWindowRoutesPanel {
+        margin-top: 10px;
+        max-width: 228px;
+        overflow: auto;
+        }
+
+        .stopInfoWindowRoutesSubPanel {
+        overflow: auto;
+        }
+
+        .stopInfoWindowRouteShortNameEntry {
+        border: 2px solid #000000;
+        margin-top: 5px;
+        margin-right: 5px;
+        padding: 2px;
+        float: left;
+        width: 25px;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        }
+
+        .stopInfoWindowRouteLongNameEntry {
+        border: 2px solid #000000;
+        margin-top: 5px;
+        padding: 2px;
+        font-weight: bold;
+        text-align: center;
+        }
+
+        .stopInfoWindowRouteReallyLongNameEntry {
+        font-size: 0.8em;
+        }
+
+    </ui:style>
+
+    <g:DockLayoutPanel unit='EM'>
+        <g:north size='6'>
+            <g:DockLayoutPanel unit='EM'>
+                <g:west size='18'>
+                    <g:FlowPanel ui:field="_titlePanel" />
+                </g:west>
+                <g:center>
+                    <g:FlowPanel>
+                        <g:FlowPanel addStyleNames="{style.searchPanel}">
+                            <g:Label>Search for stops:</g:Label>
+                            <g:FormPanel ui:field="_searchFormPanel">
+                                <g:FlowPanel>
+                                    <g:TextBox ui:field="_searchTextBox" visibleLength="55" name="q" />
+                                    <g:SubmitButton>Search</g:SubmitButton>
+                                </g:FlowPanel>
+                            </g:FormPanel>
+                            <g:Label addStyleNames="{style.searchExample}">By address (ex. "3rd and pike") or route number (ex. "44" or
+                                "71").</g:Label>
+
+                        </g:FlowPanel>
+                        <g:FlowPanel addStyleNames="{style.linksPanel}" ui:field="_linksPanel">
+                            <g:Anchor href="#" ui:field="_currentLinkAnchor">Link to the current view</g:Anchor>
+                        </g:FlowPanel>
+                    </g:FlowPanel>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:north>
+
+        <g:west size='18'>
+            <g:FlowPanel ui:field="_resultsPanel" addStyleNames="{style.resultsPanel}" />
+        </g:west>
+
+        <g:center>
+            <my:MapWidgetComposite ui:field="_mapPanel" />
+        </g:center>
+    </g:DockLayoutPanel>
+
+</ui:UiBinder>

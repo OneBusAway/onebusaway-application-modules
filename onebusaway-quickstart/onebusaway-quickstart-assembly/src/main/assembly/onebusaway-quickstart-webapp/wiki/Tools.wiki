@@ -1,0 +1,47 @@
+We provide a number of tools to make it easier to use public transit.
+
+{{html wiki="true"}}
+<table id="tools_extended">
+<tr>
+<td>
+=== Web Interface ===
+
+[[image:Tool-Web.png>>../where/standard/]] A [[map-based web interface>>../where/standard/]] for finding stops, routes, and real-time arrival information.
+</td>
+<td>
+=== Phone Interface ===
+
+[[image:Tool-Phone.png>>Tools_Phone]] A [[touch-tone phone>>Tools_Phone]] interface for real-time arrival information.
+</td>
+<td>
+=== SMS Interface ===
+
+[[image:Tool-SMS.png>>Tools_SMS]] A [[text-messaging>>Tools_SMS]] interface for real-time arrival information. 
+</td>
+</tr>
+<tr>
+<td>
+=== iPhone Interface ===
+
+[[image:Tool-iPhone.png>>Tools_IPhone]] A [[native OneBusAway client>>Tools_IPhone]] for iPhones, with location-aware features. 
+</td>
+<td>
+=== Android Interface ===
+
+[[image:Tool-Android.png>>Tools_Android]] A [[native OneBusAway client>>Tools_Android]] for Android phones, with location-aware and notification features.
+</td>
+<td>
+=== Windows Phone 7 ===
+
+[[image:Tool-WindowsPhone7.png>>Tools_WindowsPhone7]] A [[native OneBusAway client>>Tools_WindowsPhone7]] for Windows Phone 7 phones.
+</td>
+</tr>
+<tr>
+<td>
+=== Mobile Web ===
+
+[[image:Tool-MobileWeb.png>>Tools_MobileWeb]] Real-time arrival information optimized for <a href="../where/iphone/">mobile web</a> browsers and <a href="../where/text/">text-only</a> web browsers.
+</td>
+</tr>
+</table>
+{{/html}}

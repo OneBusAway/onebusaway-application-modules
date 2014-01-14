@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Google, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!-- 
+  This is a maven-assembly-plugin component, which defines a number of common elements for an assembly descriptor.    
+-->
+<component xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/component/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/component/1.1.2 http://maven.apache.org/xsd/component-1.1.2.xsd">
+  <dependencySets>
+    <!--
+      The onebusaway-quickstart-bootstrap module contains the main entry point for the executable WAR.  As such, we
+      extract it directly into the root of the WAR, along with its dependencies.
+    -->
+    <dependencySet>
+      <includes>
+        <include>org.onebusaway:onebusaway-quickstart-bootstrap</include>
+      </includes>
+      <outputDirectory>/</outputDirectory>
+      <unpack>true</unpack>
+      <!-- 'useTransitiveFiltering' is the assembly way of saying 'include transitive dependencies' -->
+      <useTransitiveFiltering>true</useTransitiveFiltering>
+    </dependencySet>
+    <!--
+      The onebusaway-quickstart-mains module actually contains the main entry points for building a transit data
+      bundle or hosting an embedded Jetty instance.  We copy this module, along with its dependencies, into the
+      META-INF/bootstrap-lib directory, as unextracted JARs.  The onebusaway-quickstart-bootstrap module is responsible
+      for constructing an classpath that will include the JARs in META-INF/bootstrap-lib, such that the entry points
+      can be executed.
+     -->
+    <dependencySet>
+      <includes>
+        <include>org.onebusaway:onebusaway-quickstart-mains</include>
+      </includes>
+      <outputDirectory>/META-INF/bootstrap-lib</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
+    </dependencySet>
+    <!--
+      One of the two primary tasks of the executable war is building a transit data bundle by way of the
+      onebusaway-transit-data-federation-builder module.  We could put this module, and all it's dependencies, in
+      the /META-INF/bootstrap-lib directory, but many of those dependencies are duplicated by the
+      onebusaway-transit-data-federation-webapp WAR, which puts all its dependencies in /WEB-INF/lib.  To reduce the
+      size of the quickstart WAR, we instead copy the builder JAR into /WEB-INF/lib.  Note that this step doesn't
+      copy depedencies of the builder JAR.  That's handled in the next step.
+     -->
+    <dependencySet>
+      <includes>
+        <include>org.onebusaway:onebusaway-transit-data-federation-builder:jar</include>
+      </includes>
+      <outputDirectory>/WEB-INF/lib</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveFiltering>false</useTransitiveFiltering>
+    </dependencySet>
+    <!--
+      Here we copy the dependencies of onebusaway-transit-data-federation-builder into the /WEB-INF/lib directory.  As
+      noted above, many of these dependencies are duplicated by the onebusaway-transit-data-federation-webapp WAR, but
+      they'll just be overwritten when the WAR is copied in below.  Note that we are using the dependencies ZIP file
+      produced as a build artifact of the onebusaway-transit-data-federation-builder module.  When I attempted to use
+      the 'useTransitiveFiltering' feature of the Maven assembly plugin to copy in the dependencies directly, it got
+      the dependencies wrong.  Specifically, it included the incorrect version of 'onebusaway-gtfs'.  Normally,
+      any module that is a member of the 'onebusaway-application-modules' family has the version of 'onebusaway-gtfs'
+      hard-wired in the <dependencyManagement/> section of the parent pom.xml.  However, that over-ride seems to be
+      ignored when using the assembly plugin.  Thus, just to be safe, I use the dependencies produced from the
+      onebusaway-application-modules build.
+     -->
+    <dependencySet>
+      <includes>
+        <include>org.onebusaway:onebusaway-transit-data-federation-builder:zip:dependencies</include>
+      </includes>
+      <outputDirectory>/WEB-INF/lib</outputDirectory>
+      <unpack>true</unpack>
+      <unpackOptions>
+        <excludes>
+          <!--
+            Note that we exclude the commons-cli jar, since it's already included in the /META-INF/boostrap-lib
+            classpath.  Including it twice causes Java to load of two different versions, especially when running the
+            webapp, causing problems.  
+          -->
+          <exclude>commons-cli*.jar</exclude>
+        </excludes>
+      </unpackOptions>
+    </dependencySet>
+    <!--
+      We copy in a few extra dependencies into the /WEB-INF/lib directory, to be used by the webapp.  Specifically, we
+      include our custom extensions in onebusaway-quickstart-webappp.
+    -->
+    <dependencySet>
+      <includes>
+        <include>org.onebusaway:onebusaway-quickstart-webapp</include>
+      </includes>
+      <outputDirectory>/WEB-INF/lib</outputDirectory>
+      <unpack>false</unpack>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
+    </dependencySet>
+  </dependencySets>
+</component>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title><s:text name="ServiceAlert" /></title>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/admin.css')}"/>
+</head>
+<body>
+
+<s:if test="agencyId != null">
+<s:url var="url" action="service-alerts!agency">
+  <s:param name="agencyId" value="agencyId"/>
+</s:url>
+<p><s:a href="%{url}">Back to Agency Service Alerts</s:a></p>
+</s:if>
+<s:else>
+<p><s:a action="service-alerts">Back to Service Alerts</s:a></p>
+</s:else>
+
+<s:form action="service-alert!submit">
+<s:textfield label="Summary" name="summary" value="%{summary}"/>
+<s:textarea label="Description" name="description" value="%{description}" cols="80" rows="5"/>
+<s:select label="Reason" name="reason" headerKey="null" headerValue="Select Reason" list="reasonValues" value="%{reason}"/>
+<s:select label="Severity" name="severity" headerKey="null" headerValue="Select Severity" list="severityValues" value="%{severity}"/>
+<s:textarea label="Raw" name="raw" value="%{raw}" cols="80" rows="10" readonly="true"/>
+<s:hidden name="agencyId" value="%{agencyId}"/>
+<s:hidden name="id" value="%{id}"/>
+<s:if test="id != null">
+    <s:submit value="%{getText('update')}"/>
+</s:if>
+<s:else>
+    <s:submit value="%{getText('create')}"/>
+</s:else>
+</s:form>
+
+<s:iterator value="allAffects" status="it">
+  <s:form action="service-alert-affects!update">
+    <s:textfield label="Agency Id" name="agencyId" value="%{agencyId}"/>
+    <s:textfield label="Route Id" name="routeId" value="%{routeId}"/>
+    <s:textfield label="Direction Id" name="directionId" value="%{directionId}"/>
+    <s:textfield label="Trip Id" name="tripId" value="%{tripId}"/>
+    <s:textfield label="Stop Id" name="stopId" value="%{stopId}"/>
+    <s:hidden name="id" value="%{id}"/>
+    <s:hidden name="index" value="%{#it.index}"/>
+    <s:submit value="Update Affects Clause"/>
+  </s:form>
+  <s:url var="url" action="service-alert-affects!delete">
+    <s:param name="id" value="id"/>
+    <s:param name="index" value="#it.index"/>
+  </s:url>
+  <p><s:a href="%{url}">Delete Affects Clause</s:a></p>  
+</s:iterator>
+
+<s:if test="id != null">
+<s:url var="url" action="service-alert!addAffects">
+    <s:param name="id" value="id"/>
+    <s:param name="agencyId" value="agencyId"/>
+</s:url>
+<p><s:a href="%{url}">Add Affects Clause</s:a></p>
+</s:if>
+
+<s:if test="id != null">
+<s:url var="url" action="service-alert!delete">
+    <s:param name="id" value="id"/>
+    <s:param name="agencyId" value="agencyId"/>
+</s:url>
+<p><s:a href="%{url}">Delete</s:a></p>
+</s:if>
+
+</body>
+</html>

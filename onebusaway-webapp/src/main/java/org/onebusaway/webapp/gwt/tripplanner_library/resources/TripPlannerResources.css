@@ -1,0 +1,167 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@url bubbleLeftUrl getBubbleLeft;
+@url bubbleRightUrl getBubbleRight;
+
+.tinyInfoWindow {
+	height: 33px;
+	width: 150px;
+	margin-top: -33px;
+}
+
+.tinyInfoWindowLeftPanel {
+	background-image: bubbleLeftUrl;
+	height: 33px;
+	float: left;
+	padding-left: 16px;
+}
+
+.tinyInfoWindowRightPanel {
+	background-image: bubbleRightUrl;
+	height: 33px;
+	background-repeat: no-repeat;
+	width: 10px;
+	float: left;
+}
+
+.routeModeIcon {
+	margin-top: 3px;
+	margin-right: 3px;
+}
+
+.routeName {
+	margin-top: -5px;
+}
+
+.routeTinyInfoWindow {
+	
+}
+
+.tripPlan {
+	margin-top: 1em;
+}
+
+.tripPanelSummaryPanel {
+	color: grey;
+	border-bottom: 1px solid grey;	
+}
+
+.tripPanelSummaryTrip {
+	float: left;
+}
+
+.tripPanelSummaryTrip span {
+	font-weight: bold;	
+}
+
+.tripPanelSummaryDuration {
+	text-align: right;
+}
+
+.tripPanelVehiclePanel {
+	position: relative;
+	border-bottom: 1px solid grey;
+}
+
+.tripPanelVehiclePanelRow1 {
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.tripPanelVehiclePanelRow2 {
+	font-size: 0.9em;
+}
+
+.tripPanelVehiclePanelRow3 {
+	font-size: 0.8em;
+	color: grey;
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.tripPanelVehiclePanelRow4 {
+	font-size: 0.9em;
+	margin-bottom: 8px;
+}
+
+.tripPlanResultsTable {
+	
+}
+
+.tripPlanVehiclePanelA {
+	float: left;
+	margin-left: 25px;
+}
+
+.tripPlanVehiclePanelB {
+	margin-left: 100px;
+}
+
+.tripPanelVehiclePanelModeImage {
+	float: left;
+}
+
+.tripPanelVehiclePanelTitle {
+	margin-left: 25px;
+}
+
+.tripPlanVehiclePanelDepartureLabel {
+	
+}
+
+.tripPlanVehiclePanelDepartureTime {
+	font-weight: bold;
+}
+
+.tripPlanVehiclePanelInTransitLabel {
+
+}
+
+.tripPlanVehiclePanelInTransitTime {
+	
+}
+
+.tripPlanVehiclePanelArrivalLabel {
+	font-weight: bold;
+}
+
+.tripPlanVehiclePanelArrivalTime {
+	
+}
+
+.tripPanelWalkPanel {
+	border-bottom: 1px solid grey;
+}
+
+.tripPanelWalkPanelRow1 {
+	margin-top: 8px;
+	margin-bottom: 8px;
+}
+
+.tripPanelWalkPanelRow2 {
+	margin-top: 8px;
+	margin-bottom: 8px;
+	font-size: 0.9em;
+	margin-left: 25px;
+}
+
+.tripPanelWalkPanelModeImage {
+	float: left;
+}
+
+.tripPanelWalkPanelTitle {
+	margin-left: 25px;
+}

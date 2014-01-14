@@ -1,0 +1,6 @@
+(% style="float: right; margin-left: 2em; margin-bottom: 2em" %)
+image:Screenshot.png
+
+We have a Windows Phone 7 app!  Download the app from the [[Zune store>>http://redirect.zune.net/redirect?type=phoneApp&id=30dcbcc4-e3d0-df11-9eae-00237de2db9e&source=OneBusAwaySite]].
+
+By default, the app is configured to use the Puget Sound instance of OneBusAway, but you can point the app to use your quick-start instance as well.

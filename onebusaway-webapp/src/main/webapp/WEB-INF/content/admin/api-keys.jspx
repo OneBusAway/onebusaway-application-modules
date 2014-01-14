@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Api Keys</title>
+</head>
+<body>
+
+<p>
+<a href="index.action">Back to the Admin Panel</a>
+</p>
+
+<h2>Add/Edit a Key</h2>
+<s:form action="api-keys!saveOrUpdate" method="post">
+    <s:textfield name="apiKey" value="%{apiKey}" label="Api Key"/>
+    <s:textfield name="minApiRequestInterval" value="%{minApiRequestInterval}" label="Min Api Request Interval (ms)"/>
+    <s:submit/>
+</s:form>
+
+<p>Or <s:a action="api-keys!generate">generate a random key</s:a></p>
+
+<h2>Bulk Upload Keys</h2>
+<p>api_key,minApiRequestInterval_in_ms</p>
+<s:form action="api-keys!bulkSaveOrUpdate" enctype="multipart/form-data" method="post">
+	<s:textarea name="data" value="%{data}" label="From Text" cols="30"/>
+	<s:file name="file" label="From a File"/>
+    <s:submit/>
+</s:form>
+
+
+<h2>Api Keys</h2>
+<s:if test="apiKeys.empty">
+<p>No keys found.</p>
+</s:if>
+<s:else>
+  <ul>
+  <s:iterator value="apiKeys">
+    <s:url var="editUrl" action="api-keys!edit">
+        <s:param name="apiKey"><s:property value="top"/></s:param>
+    </s:url>
+    <s:url var="deleteUrl" action="api-keys!delete">
+        <s:param name="apiKey"><s:property value="top"/></s:param>
+    </s:url>
+    <li><s:property value="top"/> - <s:a href="%{#editUrl}">edit</s:a> - <s:a href="%{#deleteUrl}">delete</s:a></li>
+  </s:iterator>
+  </ul>
+</s:else>
+
+</body>
+</html>

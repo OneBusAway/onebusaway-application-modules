@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Bookmarks</title>
+</head>
+<body>
+
+<h2>Bookmarks</h2>
+
+<s:if test="bookmarks.empty">
+<p>You don't have any bookmarks saved.</p>
+</s:if>
+
+<s:iterator value="bookmarks">
+	<div class="bookmarkSection">
+		<h3><s:a href="bookmark.action?id=%{id}"><s:property value="getBookmarkName(top)"/></s:a></h3>
+		<ul>
+			<s:iterator value="stops">
+				<li><s:property value="name"/></li>
+			</s:iterator>
+			<s:if test="! routes.empty">
+				<li><s:iterator value="routes" status="status">
+				  <s:if test="#status.index &gt; 0"><jsp:text>, </jsp:text></s:if><oba:routeName/>
+				</s:iterator></li>
+			</s:if>
+		</ul>
+		<p><s:a href="bookmark-edit.action?id=%{id}">Edit</s:a> | <s:a href="bookmark-delete.action?id=%{id}">Delete</s:a></p>
+	</div>
+</s:iterator>
+
+<p>Want to add more bookmarks?  <a href="index.html">Search for stops</a> like you normally would and look for
+the "Add a bookmark link" at the bottom.</p>
+
+</body>
+</html>

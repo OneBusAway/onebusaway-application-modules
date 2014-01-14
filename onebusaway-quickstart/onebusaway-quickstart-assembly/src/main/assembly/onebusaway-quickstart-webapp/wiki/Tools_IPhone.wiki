@@ -1,0 +1,15 @@
+(% style="float: right; margin-left: 2em; margin-bottom: 2em" %)
+image:ScreenshotPrimary.png
+
+We have a native iPhone app.  By default, the app is configured to use the Puget Sound instance of OneBusAway, but you can point the app to use your quick-start instance as well.
+
+1. Download and install the [[OneBusAway iPhone app>>http://itunes.apple.com/us/app/onebusaway/id329380089?mt=8]] from the Apple app store.
+1. From within the app, select the "More..." tab.
+1. Select the "Settings" entry.
+1. Change the API Server name to match hostname and port of your OneBusAway instance.
+1. Make sure location services are enabled for the OneBusAway app.
+
+Of course, for this to work, you're iPhone will need to be on the same network as the machine running your OneBusAway instance.
+
+| image:iPhone01.png | image:iPhone02.png
+| image:iPhone03.png | image:iPhone04.png

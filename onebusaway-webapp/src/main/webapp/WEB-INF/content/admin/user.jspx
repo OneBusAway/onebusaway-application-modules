@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>User Info</title>
+</head>
+<body>
+
+<s:push value="model">
+
+<h2>User Info</h2>
+
+<div>
+<h4>Privacy Settings</h4>
+
+<p><span class="label">Current Settings:</span> <s:if
+    test="rememberPreferencesEnabled">Preferences <span
+        class="bold">ARE</span> saved</s:if> <s:else>Prefenences <span
+        class="bold">ARE NOT</span> saved</s:else></p>
+
+<h4>Default Search Location</h4>
+<p><span class="label">Default Search Location:</span> <s:if
+    test="hasDefaultLocation()">
+    <s:url var="url"
+        value="/where/standard/index.html#m(location)lat(%{defaultLocationLat})lon(%{defaultLocationLon})accuracy(5)" />
+    <s:a href="%{url}">
+        <s:property value="defaultLocationName" />
+    </s:a>
+</s:if> <s:else>Not Set</s:else></p>
+
+<h4>Bookmarked Stops</h4>
+<p>bookmarked stop ids: <s:property value="bookmarkedStopIds" /></p>
+
+<h4>Roles</h4>
+<ul>
+    <li><span class="label">anonymous:</span> <s:property
+        value="anonymous" /></li>
+    <s:url var="setAdminRoleUrl" action="set-admin-role">
+        <s:param name="userId" value="%{userId}"/>
+    </s:url>
+    <li><span class="label">admin:</span> <s:property value="admin" /><s:if test="! admin"><jsp:text> - </jsp:text><s:a href="%{setAdminRoleUrl}">make admin</s:a></s:if></li>
+    
+</ul>
+
+<h4>Indices</h4>
+<ul>
+    <s:iterator value="indices">
+        <li><s:property value="type" /> - <s:property
+            value="value" /><s:if test="type == 'username'"><jsp:text> </jsp:text><s:a action="user-for-index!changePassword" ><s:param name="type" value="type"/><s:param name="id" value="value"/>Change Password</s:a></s:if></li>
+    </s:iterator>
+</ul>
+</div>
+
+<h4>Actions</h4>
+<ul>
+    <s:url var="deleteUserUrl" action="delete-user">
+        <s:param name="userId" value="%{userId}"/>
+    </s:url>
+    <li><s:a href="%{deleteUserUrl}">Delete</s:a></li>
+</ul>
+
+</s:push>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+    Copyright (C) 2012 Google, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title><oba:message key="TripProblemReports"/></title>
+<s:if test="agencyId != null">
+  <s:url var="url" namespace="/rss" action="trip-problem-reports">
+    <s:param name="agencyId" value="agencyId"/>
+  </s:url>
+  <jsp:element name="link">
+    <jsp:attribute name="rel">alternate</jsp:attribute>
+    <jsp:attribute name="type">application/rss+xml</jsp:attribute>
+    <jsp:attribute name="title"><oba:message key="TripProblemReports"/> RSS</jsp:attribute>
+    <jsp:attribute name="href"><s:property value="#url"/></jsp:attribute>
+  </jsp:element>
+</s:if>
+
+</head>
+<body>
+
+<s:if test="agencyId == null">
+  <p><s:a namespace="/admin" action="index"><oba:message key="admin.BackToTheAdminConsole"/></s:a></p>
+</s:if>
+<s:else>
+  <p><s:a action="stop-problem-report-summaries"><oba:message key="admin.BackToTheAgencyList"/></s:a></p>
+</s:else>
+
+<s:if test="agencyId == null">
+    <h2><oba:message key="TripProblemReports"/></h2>
+    <h3><oba:message key="admin.PickAnAgency"/>:</h3>    
+    <ul>
+        <s:iterator value="agencies">
+            <s:url var="url" action="trip-problem-report-summaries!agency">
+                <s:param name="agencyId" value="agency.id" />
+            </s:url>
+            <li><s:a href="%{url}">
+                <s:property value="agency.name" />
+            </s:a></li>
+        </s:iterator>
+    </ul>
+</s:if>
+<s:else>
+
+    <h2><oba:message key="TripProblemReports"/></h2>
+    
+    <h3><oba:message key="GroupedByTrip"/></h3>
+    
+    <table class="ProblemReportSummaries">
+        <thead>
+            <tr>
+                <td><oba:message key="Trip"/></td>
+                <td><oba:message key="Count"/></td>
+            </tr>
+        </thead>
+        <tbody>
+            <s:iterator value="summariesByTrip" status="rowstatus">
+                <jsp:element name="tr">
+                    <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
+                    <td>
+                        <s:url var="url" action="trip-problem-reports">
+                            <s:param name="tripId" value="trip.id"/>
+                        </s:url>
+                        <s:a href="%{url}">
+                            <oba:routeName value="trip"/>
+                            <jsp:text> - </jsp:text>
+                            <s:property value="trip.tripHeadsign"/>
+                        </s:a>
+                    </td>
+                    <td>
+                        <s:property value="count"/>
+                    </td>
+                </jsp:element>
+            </s:iterator>
+        </tbody>
+    </table>
+    
+    <h3><oba:message key="GroupedByLabel"/></h3>
+    
+    <table class="ProblemReportSummaries">
+        <thead>
+            <tr>
+                <td><oba:message key="Label"/></td>
+                <td><oba:message key="Count"/></td>
+            </tr>
+        </thead>
+        <tbody>
+            <s:iterator value="summariesByLabel" status="rowstatus">
+                <jsp:element name="tr">
+                    <jsp:attribute name="class"><s:if test="#rowstatus.odd">odd</s:if><s:else>even</s:else></jsp:attribute>
+                    <td>
+                        <s:url var="url" action="trip-problem-reports">
+                            <s:param name="agencyId" value="agencyId" />
+                            <s:param name="label" value="label"/>
+                        </s:url>
+                        <s:a href="%{url}">
+                            <s:property value="label"/>
+                        </s:a>
+                    </td>
+                    <td>
+                        <s:property value="count"/>
+                    </td>
+                </jsp:element>
+            </s:iterator>
+        </tbody>
+    </table>
+</s:else>
+
+</body>
+</html>

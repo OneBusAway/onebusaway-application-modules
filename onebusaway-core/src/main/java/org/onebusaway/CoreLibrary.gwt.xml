@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!DOCTYPE document SYSTEM "http://google-web-toolkit.googlecode.com/svn/releases/1.5/distro-source/core/src/gwt-module.dtd">
+<module>
+    <!--
+        This is a GWT module descriptor that makes it possible to include a number of key classes from the
+        onebusaway-core module in GWT applications. Specifically, classes in the org.onebusaway.exceptions and
+        org.onebusaway.utility.collections packages are included. This necessarily the restricts the set of JVM classes
+        that can be referenced by these target classes as defined by the GWT compiler.
+    -->
+    <source path="exceptions" />
+    <source path="utility/collections" />
+</module>

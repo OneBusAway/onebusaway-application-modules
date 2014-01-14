@@ -1,0 +1,97 @@
+{{html wiki="true"}}
+<div id="content" class="index_content">
+
+<div class="page-header home-header">
+<h1>Where is your bus?</h1>
+<h2>Let's find out.  We provide tools to make it easy to access<br/>real-time transit information using open data sources.</h2>
+</div>
+
+<div class="column-row">
+
+<div class="one-third column">
+
+=== Our Goal ===
+
+<p>[[What is OneBusAway?  **Find out.**>>http://onebusaway.org/p/WhatIsOneBusAway.action]]</p>
+
+<p>We want to make it easier to use public transit by providing easy access to schedule and real-time arrival information for the buses and trains you ride every day.</p>
+
+<p>We provide:</p>
+
+* Real-time arrival information for your <a href="where/standard/agencies.action">transit agency</a>.
+* Easy access to information across a variety of devices.
+* Other cool transit tools.
+
+<p>Why? We're riders just like you and we don't like waiting for the bus any more than we have to.</p>
+</div>
+
+<div class="one-third column">
+
+=== Our Tools ===
+
+<p>[[Our tools>>Tools]] are available across  a number of interfaces:</p>
+
+<table id="tools">
+  <tr>
+    <td class="tool">
+      <div><a href="where/standard/">[[image:Tools@Tool-Web.png]]</a></div>
+      <div class="toolLabel"><a href="where/standard/">Web</a></div>
+    </td>
+    <td class="tool">
+      <div>[[image:Tools@Tool-Phone.png>>Tools_Phone]]</div>
+      <div class="toolLabel">[[Phone>>Tools_Phone]]</div>
+    </td>
+    <td class="tool">
+      <div>[[image:Tools@Tool-SMS.png>>Tools_SMS]]</div>
+      <div class="toolLabel">[[SMS>>Tools_SMS]]</div>
+    </td>
+  </tr>
+  <tr>
+    <td class="tool">
+      <div>[[image:Tools@Tool-iPhone.png>>Tools_IPhone]]</div>
+      <div class="toolLabel">[[iPhone>>Tools_IPhone]]</a></div>
+    </td>
+    <td class="tool">
+      <div>[[image:Tools@Tool-Android.png>>Tools_Android]]</div>
+      <div class="toolLabel">[[Android>>Tools_Android]]</div>
+    </td>
+    <td class="tool">
+      <div>[[image:Tools@Tool-WindowsPhone7.png>>Tools_WindowsPhone7]]</div>
+      <div class="toolLabel">[[WP7>>Tools_WindowsPhone7]]</div>
+    </td>
+  </tr>
+  <tr>
+    <td class="tool">
+      <div>[[image:Tools@Tool-MobileWeb.png>>Tools_MobileWeb]]</div>
+      <div class="toolLabel">[[Mobile>>Tools_MobileWeb]]</div>
+    </td>
+  </tr>
+</table>
+
+</div>
+<div class="one-third column">
+
+=== Our Project ===
+
+<p>OneBusAway provides a collection of [[open-source tools>>https://github.com/OneBusAway/onebusaway/wiki/]] designed
+  to work with open transit data like [[GTFS>>https://developers.google.com/transit/gtfs/]] and
+  [[GTFS-realtime>>https://developers.google.com/transit/gtfs-realtime/]].  Our work is all open-source software, so
+  that others may reuse and build upon our efforts.</p> 
+
+<p>This is the [[**OBA Application Suite**>>https://github.com/OneBusAway/onebusaway-application-modules/wiki]],
+  which provides a variety of tools and interfaces for accessing real-time transit information.  For more info:</p> 
+
+[[**Check out the GitHub project page**>>https://github.com/OneBusAway/onebusaway-application-modules/wiki]]</p>
+
+</div>
+
+</div>
+
+</div>
+<div id="footer">
+<div id="footer_content">
+* © University of Washington
+* [[Contact Us>>ContactUs]]
+</div>
+</div>
+{{/html}}

@@ -1,0 +1,26 @@
+# Downloading the Software
+
+Looking for a quick intro to using OneBusAway?  Be sure to check out the [Quick-Start Guide](guides/quickstart-guide.html).
+
+To build your [transit data bundle](guides/transit-data-bundle-guide.html), you will need:
+
+* [onebusaway-transit-data-federation-builder-${currentVersion}.jar](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation-builder&c=withAllDependencies&e=jar&v=${currentVersion}) 
+
+To run the OneBusAway combined webapp (includes web, api, sms, and phone functionality), you will need:
+
+* [onebusaway-combined-webapp-full-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-combined-webapp&e=war&c=full&v=${currentVersion})
+
+To run just the api webapp in stand-alone mode, you will need:
+
+* [onebusaway-combined-webapp-api-only-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-combined-webapp&e=war&c=api-only&v=${currentVersion})
+
+Optionally, the individual component webapps that make up the OneBusAway application suite can each be downloaded individually:
+
+* [onebusaway-transit-data-federation-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-transit-data-federation-webapp&e=war&v=${currentVersion}) - serve your transit data bundle
+* [onebusaway-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-webapp&e=war&v=${currentVersion}) - web interface
+* [onebusaway-api-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-api-webapp&e=war&v=${currentVersion}) - api interface
+* [onebusaway-sms-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-sms-webapp&e=war&v=${currentVersion}) - sms interface
+* [onebusaway-phone-webapp-${currentVersion}.war](http://nexus.onebusaway.org/service/local/artifact/maven/content?r=public&g=org.onebusaway&a=onebusaway-phone-webapp&e=war&v=${currentVersion}) - phone (IVR) interface
+
+Also, don't forget the [OneBusAway Quick-Start Bundles](guides/quickstart-guide.html), which bundle OneBusAway into a single war that's easier to deploy but doesn't offer as much customization.
+ 

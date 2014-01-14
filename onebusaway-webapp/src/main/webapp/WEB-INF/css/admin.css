@@ -1,0 +1,94 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+thead.darkHeader > tr {
+    background-color: #6D6E72;
+}
+
+thead.darkHeader > tr > td {
+    color: white;
+    font-weight: bold;
+    padding: 5px;
+}
+
+/****
+ *
+ ****/
+ 
+#service-alert_summary_value {
+	width: 639px;
+}
+
+/****
+ *
+ ****/
+
+#tripProblemReport {
+	position: relative;	
+}
+
+div#tripProblemReportMap {
+	width: 350px;
+	height: 300px;
+}
+
+div#mapLegendLabel {
+	margin-top: 1em;
+	font-weight: bold;
+	border-bottom: 1px black solid;		
+	width: 400px;
+}
+
+table#mapLegend {
+	margin-top: 1em; 	
+}
+
+table#mapLegend td {
+	padding: 4px;
+}
+
+table#mapLegend td:first-child {
+	text-align: center;
+}
+
+#tripProblemReportTable {
+	position: absolute;
+	top: 0px;
+	left: 360px;	
+}
+
+#tripProblemReportTable td:first-child {
+	font-weight: bold;
+	text-align: right;
+	padding-right: 1em;	
+}
+
+#tripProblemReportTable td:first-child label {
+	font-weight: bold;
+	text-align: right;	
+}
+
+#tripProblemReportTable td.warning {
+	font-weight: bold;
+	color: red;
+}
+
+#vehicleLocationRecords {
+  margin-top: 1em;	
+}
+
+#vehicleLocationRecordsTable td {
+	text-align: center;
+}

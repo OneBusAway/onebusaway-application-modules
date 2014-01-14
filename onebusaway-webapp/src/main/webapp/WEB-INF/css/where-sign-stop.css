@@ -1,0 +1,79 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#container {
+	margin-left: 1%;
+	margin-right: 1%;
+	width: 98%;
+}
+
+.stopNameHeader {
+	/*height: 50px;*/
+	padding-top: 10px;
+	padding-bottom: 20px;
+	padding-left: 80px;
+	margin-bottom: 20px;
+
+	background-image: oba-resource("/images/where/sign/AppIcon.png");
+	background-repeat: no-repeat;
+	background-position: 10px 10px;
+	background-color: #EEEEEE;
+	border-bottom: 4px solid #000000;
+}
+
+.stopNameHeader h1 {
+	font-size: 30pt;
+	font-weight: bold;
+}
+ 
+.arrivalsTable {
+	width: 100%;
+}
+
+.arrivalsTable tr {
+	border-bottom: 4px solid #aaaaaa;
+}
+
+.arrivalsHeader {
+	font-size: 20pt;
+}
+
+.arrivalsRow td {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+ 
+.arrivalsRouteEntry, .arrivalsStatusEntry {
+ 	font-size: 72pt;
+ 	font-weight: bold;	
+}
+
+.arrivalsRouteEntry, .arrivalsDescriptionEntry {
+	padding-right: 30px;
+}
+
+.arrivalsDestinationEntry {
+	font-size: 36pt;
+	font-weight: bold;
+}
+
+.arrivalsTimePanel {
+	font-size: 20pt;	
+}
+
+.arrivalsStatusEntry {
+	text-align: right;
+	padding-right: 20px;
+}

@@ -1,0 +1,14 @@
+# API Release Notes
+
+These release notes specifically document changes to the [OneBusAway RESTful API](index.html).
+
+#set( $H = '#' ) ## When using velocity templating (a .vm file), the ## indicates a Velocity comment, which makes Markdown section headers tricky
+
+$H$H ${currentVersion}
+
+* Full Documentation: ${site_base_url}/onebusaway-application-modules/${currentVersion}/api/where/
+
+$H$H 1.0.0
+
+* Initial Site Documentation
+* Full Documentation: ${site_base_url}/onebusaway-application-modules/1.0.0/api/where/

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+	xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>OneBusAway</title>
+<jsp:element name="script">
+  <jsp:attribute name="type">text/javascript</jsp:attribute>
+  <jsp:attribute name="src">http://maps.google.com/maps?file=api&amp;v=2&amp;key=<s:property value="#configuration.googleMapsApiKey"/></jsp:attribute>
+  <jsp:text></jsp:text>
+</jsp:element>
+<script type="text/javascript"
+    src="http://www.google.com/uds/api?file=uds.js&amp;v=1.0&amp;gwt=1&amp;key=ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g"><jsp:text></jsp:text></script>
+<script type="text/javascript"
+	src="org.onebusaway.webapp.gwt.WhereStopFinderStandardApplication.nocache.js"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:url('/config.action')}"><jsp:text></jsp:text></script>    
+</head>
+<body>
+<script type="text/javascript">
+var StopFinderConfig ={
+    BoundingElementId: 'page'   
+}
+</script>
+<div id="content"><jsp:text></jsp:text>
+</div>
+<iframe src="javascript:''" id="__gwt_historyFrame"
+	style="width: 0; height: 0; border: 0"><jsp:text></jsp:text></iframe>
+</body>
+</html>

@@ -1,0 +1,26 @@
+Usage:
+  -webapp [args] bundle                Start the webapp, powered by the transit data bundle
+
+GTFS-realtime Arguments:
+
+  The webapp can be configured to pull real-time transit information from a GTFS-realtime data-source with the following
+  command-line arguments:
+   
+  -gtfsRealtimeTripUpdatesUrl=url - indicate that GTFS-realtime trip updates should be queried from the specified URL        
+  -gtfsRealtimeVehiclePositionsUrl=url - indicate that GTFS-realtime vehicle positions should be queried from the specified URL
+  -gtfsRealtimeAlertsUrl=url - indicate that GTFS-realtime alerts should be queried from the specified URL
+  -gtfsRealtimeRefreshInterval=secs - indicate how often, in seconds, GTFS-realtime data should be polled (default=30)
+  
+  -PobjectName.propertyName=value - override a OBA config setting, as described at:
+    http://developer.onebusaway.org/modules/onebusaway-application-modules/${project.version}/oba-configs/index.html
+  
+Running the webapp:
+
+  In the simplest case, you run the webapp by pointing it at your previously-built transit data bundle
+
+    % java -Xmx1G -server -jar onebusaway-quickstart.war -webapp path/to/your/bundle
+
+  Check out the full documentation on-line at:
+
+    http://developer.onebusaway.org/modules/onebusaway-quickstart/${project.version}/index.html
+  

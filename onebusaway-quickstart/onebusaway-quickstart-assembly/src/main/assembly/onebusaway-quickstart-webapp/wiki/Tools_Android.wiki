@@ -1,0 +1,14 @@
+(% style="float: right; margin-left: 2em; margin-bottom: 2em" %)
+image:Screenshot.png
+
+We have a native Android app.  By default, the app is configured to use the Puget Sound instance of OneBusAway, but you can point the app to use your quick-start instance as well.
+
+1. Download and install the [[OneBusAway Android app>>https://play.google.com/store/apps/details?id=com.joulespersecond.seattlebusbot]] from the Google app store.
+1. From within the app, select the "Help" menu item.
+1. Select the "Preferences" entry.
+1. Change the API Server name to match hostname and port of your OneBusAway instance.
+
+Of course, for this to work, you're Android phone will need to be on the same network as the machine running your OneBusAway instance.
+
+| image:Phone01.png | image:Phone02.png
+| image:Phone03.png | image:Phone04.png

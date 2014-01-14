@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <bean id="userIndexAuthenticationFilter" class="org.onebusaway.users.impl.authentication.IndexedUserAuthenticationProcessorFilter">
+        <property name="defaultTargetUrl" value="/index.action" />
+        <property name="authenticationManager" ref="_authenticationManager" />
+        <property name="filterProcessesUrl" value="/userIndex_login" />
+        <sec:custom-filter after="AUTHENTICATION_PROCESSING_FILTER" />
+    </bean>
+
+    <bean id="everyLastLoginAuthenticationFilter" class="org.onebusaway.users.impl.authentication.EveryLastLoginAuthenticationProcessorFilter">
+        <property name="defaultTargetUrl" value="/index.action" />
+        <property name="authenticationManager" ref="_authenticationManager" />
+        <property name="filterProcessesUrl" value="/everylastlogin_login" />
+        <sec:custom-filter before="BASIC_PROCESSING_FILTER" />
+    </bean>
+
+    <bean id="indexedUserDetailsSaltSourceImpl" class="org.onebusaway.users.impl.authentication.IndexedUserDetailsSaltSourceImpl" />
+
+    <bean id="daoAuthenticationProvider" class="org.springframework.security.providers.dao.DaoAuthenticationProvider">
+        <property name="userDetailsService" ref="userDetailsServiceImpl" />
+        <property name="passwordEncoder" ref="passwordEncoderV1" />
+        <property name="saltSource" ref="indexedUserDetailsSaltSourceImpl" />
+        <sec:custom-authentication-provider />
+    </bean>
+
+    <bean id="defaultUserAuthenticationProvider" class="org.onebusaway.users.impl.authentication.DefaultUserAuthenticationProvider">
+        <sec:custom-authentication-provider />
+    </bean>
+
+    <bean id="openid_plugin" class="org.onebusaway.everylastlogin.server.OpenIdAuthenticationPlugin" />
+    <bean id="twitter_plugin" class="org.onebusaway.everylastlogin.server.TwitterAuthenticationPlugin" />
+    <bean id="facebook_plugin" class="org.onebusaway.everylastlogin.server.FacebookAuthenticationPlugin" />
+
+    <bean id="loginManager" class="org.onebusaway.everylastlogin.server.LoginManager">
+        <property name="plugins">
+            <map>
+                <entry key="openid" value-ref="openid_plugin" />
+                <entry key="twitter" value-ref="twitter_plugin" />
+                <entry key="facebook" value-ref="facebook_plugin" />
+            </map>
+        </property>
+    </bean>
+
+</beans>

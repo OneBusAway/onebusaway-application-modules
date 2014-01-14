@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+    Copyright (C) 2012 Google, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+    xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags"
+    xmlns:oba="/oba-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Trip Problem Report</title>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/jquery-ui.css')}"/>
+<link rel="stylesheet" type="text/css" media="all" href="${oba:resource('/WEB-INF/css/admin.css')}"/>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:url('/config.action')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('CommonResources')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/jquery-ui.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript" src="${oba:resource('/js/oba-admin-problems-trip-problem-reports.js')}"><jsp:text></jsp:text></script>
+<script type="text/javascript">
+  var data = {};
+  data.tripProblemReport = <oba:json value="model"/>;
+  data.vehicleLocationRecords = <oba:json value="vehicleLocationRecords"/>;
+  data.problemLabels = <oba:json value="labels" />;
+  jQuery(document).ready(function() { oba_admin_problems_trip_problem_reports(data); } );
+</script>          
+</head>
+<body>
+
+<p><a href="index.action">Back to the Admin Panel</a></p>
+
+<h2>Trip Problem Report</h2>
+
+<s:actionmessage />
+
+<div id="tripProblemReport">
+
+  <div id="mapPanel">
+    <div id="tripProblemReportMap"><jsp:text></jsp:text></div>
+    <div id="mapLegendLabel"><s:text name="Legend"/></div>
+    <table id="mapLegend">
+      <tbody>
+        <s:if test="stop != null">
+          <tr>          
+            <td><img src="${oba:resource('collection-entry:Map:Marker.png')}" /></td>
+            <td>Stop Location</td>
+          </tr>
+        </s:if>
+        <s:if test="vehicleLat != null and vehicleLon != null">
+          <tr>          
+            <td><img src="${oba:resource('collection-entry:Map:MapIcon-Bus-22.png')}" /></td>
+            <td>Vehicle Location</td>
+          </tr>
+        </s:if>
+        <s:if test="userLat != null and userLon != null">
+          <tr>          
+            <td><img src="${oba:resource('collection-entry:Map:PersonMarker.png')}" /></td>
+            <td>User Location</td>
+          </tr>
+        </s:if>
+        <s:if test="! vehicleLocationRecords.empty">
+          <tr>          
+            <td><img src="${oba:resource('collection-entry:Map:MapIcon-Bus-14.png')}" /></td>
+            <td>Vehicle Location Record</td>
+          </tr>
+        </s:if>
+      </tbody>
+    </table>
+  </div>
+
+<s:form action="trip-problem-report!update">
+
+<table id="tripProblemReportTable">
+    <tr>
+        <td>Time:</td>
+        <td><oba:date value="time" format="yyyy-MM-dd hh:mm aa" /></td>
+    </tr>
+    <tr>
+        <td>Trip:</td>
+        <td>
+          <s:url var="url" namespace="/where/standard" action="trip">
+            <s:param name="id" value="tripId"/>
+            <s:param name="serviceDate" value="serviceDate"/>
+            <s:param name="stopId" value="stop.id"/> 
+            <s:param name="vehicleId" value="vehicleId"/>          
+          </s:url> 
+          <s:a href="%{url}">
+            <s:if test="trip != null">
+                <oba:routeName value="trip"/> - <s:property value="trip.tripHeadsign" />
+            </s:if>
+            <s:else>
+                tripId=<s:property value="tripId"/>
+            </s:else>
+          </s:a>
+        </td>
+    </tr>
+    <tr>
+        <td>Service Date:</td>
+        <td><oba:date value="serviceDate" format="yyyy-MM-dd" /> (<s:property value="serviceDate"/>)</td>
+    </tr>
+    <tr>
+        <td>Vehicle Id:</td>
+        <td><s:property value="vehicleId" /></td>
+    </tr>
+    <tr>
+        <td>Vehicle Location:</td>
+        <td><s:property value="vehicleLat" /><jsp:text>
+        </jsp:text><s:property value="vehicleLon" /></td>
+    </tr>
+    <tr>
+        <td>Predicted:</td>
+        <jsp:element name="td">
+          <jsp:attribute name="class">
+            <s:if test="! vehicleLocationRecords.empty and ! predicted">warning</s:if>
+          </jsp:attribute>
+          <s:property value="predicted" />
+        </jsp:element>
+    </tr>
+    <tr>
+        <td>Schedule Deviation:</td>
+        <td><s:property value="scheduleDeviation/60" />m</td>
+    </tr>
+    <tr>
+        <td>Stop:</td>
+        <td><s:a namespace="/where/standard" action="stop">
+          <s:param name="id" value="stopId"/>
+          <s:if test="stop != null">
+            <s:component template="stop-name-snippet.jspx"><s:param name="stop" value="stop"/></s:component>
+          </s:if>
+          <s:else>
+            stopId=<s:property value="stopId"/>
+          </s:else>
+        </s:a></td>
+    </tr>
+    <s:if test="stopTime != null">
+    <tr>
+        <td>Stop Arrival Time:</td>
+        <td><oba:date format="hh:mm aa" value="stopTime.arrivalTime"/></td>
+    </tr>
+    <tr>
+        <td>Stop Departure Time:</td>
+        <td><oba:date format="hh:mm aa" value="stopTime.departureTime"/></td>
+    </tr>
+    </s:if>
+    <tr>
+        <td>Code:</td>
+        <td><s:property value="code" /></td>
+    </tr>
+    <tr>
+        <td>User Comment:</td>
+        <td><s:property value="userComment" /></td>
+    </tr>
+    <tr>
+        <td>User On Vehicle:</td>
+        <td><s:property value="userOnVehicle" /></td>
+    </tr>
+    <tr>
+        <td>User Vehicle Number:</td>
+        <td><s:property value="userVehicleNumber" /></td>
+    </tr>
+    <tr>
+        <td>User Location:</td>
+        <td><s:property value="userLat" /><jsp:text>
+        </jsp:text><s:property value="userLon" /><jsp:text>
+        </jsp:text><s:property value="userLocationAccuracy" /></td>
+    </tr>
+
+    <s:select label="Status" name="status" list="statusValues" value="%{status}"/>
+    <s:textfield name="label" label="%{getText('Label')}" value="%{label}"/>
+    <s:submit value="Update"/>
+    <s:hidden name="id" value="%{id}"/>
+    <s:hidden name="tripId" value="%{tripId}"/>
+</table>
+
+</s:form>
+
+</div>
+
+<div id="vehicleLocationRecords">
+
+<h3>Vehicle Location Records</h3>
+
+<s:if test="vehicleLocationRecords.empty">
+    <p>No vehicle location records found in range.</p>
+</s:if>
+<s:else>
+    <table id="vehicleLocationRecordsTable">
+        <thead class="darkHeader">
+            <tr>
+                <td class="index">Index</td>
+                <td class="time">Time</td>
+                <td class="scheduleDeviation">Schedule Deviation</td>
+                <td class="location">Location</td>
+                <s:if test="! predicted">
+                  <td class="vehicle">Vehicle Id</td>
+                </s:if>
+            </tr>
+        </thead>
+        <tbody>
+            <s:iterator value="vehicleLocationRecords" status="it">
+                <tr>
+                    <td><s:property value="#it.index"/></td>
+                    <td><oba:date timeStyle="short" value="timeOfRecord" /></td>
+                    <td><s:if test="scheduleDeviationSet">
+                      <s:text name="scheduleDeviationInMinutes">
+                        <s:param value="scheduleDeviation/60"/>
+                      </s:text>
+                    </s:if></td>
+                    <td><s:if test="currentLocation != null">
+                      <s:property value="currentLocation.lat"/><jsp:text> </jsp:text><s:property value="currentLocation.lon"/>
+                    </s:if>
+                    </td>
+                    <s:if test="! predicted">
+                      <td><s:property value="vehicleId"/></td>
+                    </s:if>
+                </tr>
+            </s:iterator>
+        </tbody>
+    </table>
+</s:else>
+
+</div>
+
+</body>
+</html>

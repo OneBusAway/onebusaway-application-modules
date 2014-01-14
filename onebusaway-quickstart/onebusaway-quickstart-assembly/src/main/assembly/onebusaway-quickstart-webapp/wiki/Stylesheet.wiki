@@ -1,0 +1,3 @@
+div.home-header {
+    background: url("http://localhost:8080/p/Index@Logo.png!attachment.action") no-repeat scroll 100% bottom transparent;
+}

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Federated Service Registry - Management Console</title>
+</head>
+<body>
+
+<h2>Registered Services</h2>
+<table id="services">
+    <tr>
+        <td>class</td>
+        <td>url</td>
+        <td>enabled</td>
+        <td>properties</td>
+        <td>swap</td>
+        <td>delete</td>
+    </tr>
+
+<c:forEach var="entry" items="${entries}" >
+    <tr>
+    	<td>${entry.serviceClass}</td>
+        <td><a href="${entry.serviceUrl}">${entry.serviceUrl}</a></td>
+        <td>${entry.enabled}</td>
+        <td>${entry.properties}</td>
+        <td><a href="set-service-status.action?url=${entry.serviceUrl}&amp;enabled=${! entry.enabled}">status</a></td>
+        <td><a href="delete-service.action?url=${entry.serviceUrl}">delete</a></td>
+    </tr>
+</c:forEach>
+    
+</table>
+
+<h2>Add a Service</h2>
+
+<form name="addServiceForm" action="add-service.action">
+
+<table>
+    <tr><td>url:</td><td><input type="text" name="url"/></td></tr>
+    <tr><td>class:</td><td><input type="text" name="serviceClass"/></td></tr>
+    <tr><td>properties:</td><td><input type="text" name="properties"/></td></tr>
+    <tr><td></td><td><input type="submit" name="submit" value="Add Service"/></td></tr>
+</table>
+     
+</form>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+== iPhone-Optimized Web Interface ==
+
+(% style="float:left; margin-right: 2em" %)[[image:iPhone.png>>../where/iphone/]]
+
+The [[iPhone-optimized web interface>>../where/iphone/]] also looks great on other devices, such as Blackberrys, Palm Pres, and other mobile devices with newer web browsers.
+
+== Text-Only Web Interface ==
+
+(% style="float:left; margin-right: 2em" %)[[image:Text.png>>../where/text/]]
+
+The [[text-only web interface>>../where/text/]] is optimized for mobile web browsers that work best with simple pages.
