@@ -28,19 +28,19 @@ import org.springframework.stereotype.Component;
 public class TrivialSchedulerHelperService implements ScheduleHelperService {
 
 	@Override
-	public Boolean routeHasUpcomingScheduledService(String agencyId, long time, String routeId,
+	public Boolean routeHasUpcomingScheduledService(long time, String routeId,
 			String directionId) {
 		return null;
 	}
 
 	@Override
-	public Boolean stopHasUpcomingScheduledService(String agencyId, long time, String stopId,
+	public Boolean stopHasUpcomingScheduledService(long time, String stopId,
 			String routeId, String directionId) {
 		return null;
 	}
 
 	@Override
-	public List<String> getSearchSuggestions(String agencyId, String input) {
+	public List<String> getSearchSuggestions(String input) {
 		return null;
 	}
 
