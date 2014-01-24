@@ -242,4 +242,14 @@
 
   <bean id="preCacheTask" class="org.onebusaway.transit_data_federation.bundle.tasks.PreCacheTask" />
 
+
+	<!-- GTFS Stats   -->
+	  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="gtfs_stats" />
+    <property name="afterTaskName" value="pre_cache" />
+    <property name="task" ref="gtfsStats" />
+  </bean>
+
+  <bean id="gtfsStats" class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsStatisticsTask" />
+	
 </beans>
