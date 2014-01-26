@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.conveyal.gtfs.GtfsStatistic;
 import com.conveyal.gtfs.GtfsStatistics;
 
 public class GtfsStatisticsTask implements Runnable {
@@ -56,23 +57,22 @@ public class GtfsStatisticsTask implements Runnable {
 		Collection<Agency> agencies = stats.getAllAgencies();
 		for (Agency agency:agencies) {
 			_log.info("processing stats for agency: " + agency.getId() + " (" + agency.getName() + ")");
-			csvLogger.logStat(agency.getId(), "route_count", stats.getRouteCount(agency.getId()));
-			csvLogger.logStat(agency.getId(), "trip_count", stats.getTripCount(agency.getId()));
-			csvLogger.logStat(agency.getId(),  "stop_count",  stats.getStopCount(agency.getId()));
-			csvLogger.logStat(agency.getId(), "stop_time_count", stats.getStopTimesCount(agency.getId()));
-			csvLogger.logStat(agency.getId(), "calendar_start_date", stats.getCalendarServiceRangeStart(agency.getId()));
-			csvLogger.logStat(agency.getId(), "calendar_end_date", stats.getCalendarServiceRangeEnd(agency.getId()));
+			csvLogger.logStat(agency.getId(), stats.getStatistic(agency));
 		}
 
 		// overall stats/totals
-		csvLogger.logStat(ALL, "route_count", stats.getRouteCount());
-		csvLogger.logStat(ALL, "trip_count", stats.getTripCount());
-		csvLogger.logStat(ALL,  "stop_count",  stats.getStopCount());
-		csvLogger.logStat(ALL, "stop_time_count", stats.getStopTimesCount());
-		csvLogger.logStat(ALL, "calendar_start_date", stats.getCalendarServiceRangeStart());
-		csvLogger.logStat(ALL, "calendar_end_date", stats.getCalendarServiceRangeEnd());
+		GtfsStatistic all = new GtfsStatistic();
+		Agency allAgency = new Agency();
+		allAgency.setId("ALL");
+		all.setAgency(allAgency);
+		all.setRouteCount(stats.getRouteCount());
+		all.setTripCount(stats.getTripCount());
+		all.setStopCount(stats.getStopCount());
+		all.setStopTimeCount(stats.getStopTimesCount());
+		all.setCalendarStartDate(stats.getCalendarServiceRangeStart());
+		all.setCalendarEndDate(stats.getCalendarServiceRangeEnd());
 
-		
+		csvLogger.logStat(allAgency.getId(), all);
 		
 		_log.info("cleaning up");
 		// cleanup

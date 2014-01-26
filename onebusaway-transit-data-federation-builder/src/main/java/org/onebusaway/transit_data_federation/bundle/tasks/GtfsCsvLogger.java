@@ -23,6 +23,8 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.conveyal.gtfs.GtfsStatistic;
+
 public class GtfsCsvLogger {
 
 	private Logger _log = LoggerFactory.getLogger(GtfsCsvLogger.class);
@@ -59,18 +61,12 @@ public class GtfsCsvLogger {
 		String fileName = "gtfs_stats.csv";  // do not include basepath
 		_log.info("creating file=" + fileName);
 		buff = new Buffer(fileName);
-		buff.stream.print("agency,stat,value\n");
+		buff.stream.print("agency,route_count,trip_count,stop_count,stop_times_count,calendar_start_date,calendar_end_date\n");
 	}
 	
-	public void logStat(String agency, String stat, Object value) {
-		if (value == null) {
-			buff.stream.print(sanitize(agency) + "," + sanitize(stat) + "," + null + "\n");
-		} else {
-			buff.stream.print(sanitize(agency) + "," + sanitize(stat) + "," + sanitize(value.toString()) + "\n");
-		}
-	}
 	
 	private String sanitize(String s) {
+		if (s == null) return null;
 		if (s.contains(",") || s.contains("\"")) {
 			s = "\"" + s.replace("\"", "\"\"") + "\"";
 		}
@@ -90,5 +86,22 @@ public class GtfsCsvLogger {
 			}
 			stream = new PrintStream(outputStream);
 		}
+	}
+
+	public void logStat(String id, GtfsStatistic s) {
+		buff.stream.print(s.getAgency().getId());
+		buff.stream.print(",");
+		buff.stream.print(s.getRouteCount());
+		buff.stream.print(",");
+		buff.stream.print(s.getTripCount());
+		buff.stream.print(",");
+		buff.stream.print(s.getStopCount());
+		buff.stream.print(",");
+		buff.stream.print(s.getStopTimeCount());
+		buff.stream.print(",");
+		buff.stream.print(s.getCalendarStartDate());
+		buff.stream.print(",");
+		buff.stream.print(s.getCalendarEndDate());
+		buff.stream.print("\n");
 	}
 }
