@@ -67,8 +67,25 @@ public class StopTimeEntriesFactory {
       List<StopTime> stopTimes, TripEntryImpl tripEntry, ShapePoints shapePoints) {
 
     // In case the list is unmodifiable
-    stopTimes = new ArrayList<StopTime>(stopTimes);
+    //stopTimes = new ArrayList<StopTime>(stopTimes);
+	ArrayList<StopTime> newStopTimes = new ArrayList<StopTime>(stopTimes.size());
+	
+	for (StopTime stopTime : stopTimes) {
+		if (stopTime != null && stopTime.getStop() != null 
+				&& stopTime.getStop().getId() != null) {
+			newStopTimes.add(stopTime);
+		} else {
+			_log.error("found stopTime without a stop id for tripEntry=" + tripEntry
+					+ "(" + (stopTime.getTrip() == null?"NuLl":stopTime.getTrip().getId()) +")"
+					+ "; stop=" + stopTime.getStopHeadsign() + ":" + stopTime.getArrivalTime() + ":"
+					+ stopTime.getDepartureTime() + ":" + stopTime.getRouteShortName()
+					+ "; route=" + (tripEntry.getRoute() == null?"NuLl":tripEntry.getRoute().getId())
+					+ "; blockId=" + (tripEntry.getBlock() == null?"NuLl":tripEntry.getBlock().getId())
+					+ "; stop=" + (stopTime.getStop() == null?"NuLl":stopTime.getId() + ":" + stopTime.getRouteShortName()));
+		}
+	}
 
+	stopTimes = newStopTimes;
     Collections.sort(stopTimes, new StopTimeComparator());
 
     List<StopTimeEntryImpl> stopTimeEntries = createInitialStopTimeEntries(
@@ -130,8 +147,20 @@ public class StopTimeEntriesFactory {
     int sequence = 0;
 
     for (StopTime stopTime : stopTimes) {
-
+      if (stopTime == null) {
+    	  _log.error("Found null stopTime in stopTime=" + stopTimes);
+    	  continue;
+      }
       Stop stop = stopTime.getStop();
+      if (stop == null) {
+    	  _log.error("Stop is null for stopTime" + stopTime.getId());
+    	  continue;
+      }
+      if (stop.getId() == null) {
+    	  _log.error("Stop id is null for stopTime" + stopTime + ", stop=" + stop);
+    	  continue;
+    	  
+      }
       AgencyAndId stopId = stop.getId();
       StopEntryImpl stopEntry = graph.getStopEntryForId(stopId);
 
