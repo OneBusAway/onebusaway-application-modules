@@ -23,7 +23,7 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.conveyal.gtfs.GtfsStatistic;
+import com.conveyal.gtfs.Statistic;
 
 public class GtfsCsvLogger {
 
@@ -88,7 +88,7 @@ public class GtfsCsvLogger {
 		}
 	}
 
-	public void logStat(String id, GtfsStatistic s) {
+	public void logStat(String id, Statistic s) {
 		buff.stream.print(s.getAgency().getId());
 		buff.stream.print(",");
 		buff.stream.print(s.getRouteCount());

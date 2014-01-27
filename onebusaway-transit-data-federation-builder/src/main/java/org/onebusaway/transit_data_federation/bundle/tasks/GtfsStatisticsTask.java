@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.conveyal.gtfs.GtfsStatistic;
+import com.conveyal.gtfs.Statistic;
 import com.conveyal.gtfs.GtfsStatistics;
 
 public class GtfsStatisticsTask implements Runnable {
@@ -61,7 +61,7 @@ public class GtfsStatisticsTask implements Runnable {
 		}
 
 		// overall stats/totals
-		GtfsStatistic all = new GtfsStatistic();
+		Statistic all = new Statistic();
 		Agency allAgency = new Agency();
 		allAgency.setId("ALL");
 		all.setAgency(allAgency);
