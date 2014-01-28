@@ -65,6 +65,7 @@
   <modules>
     <module>onebusaway-api-core</module>
     <module>onebusaway-api-webapp</module>
+    <module>onebusaway-bundle-loader</module>
     <module>onebusaway-combined-webapp</module>
     <module>onebusaway-container</module>
     <module>onebusaway-core</module>
@@ -73,7 +74,6 @@
     <module>onebusaway-geocoder</module>
     <module>onebusaway-geospatial</module>
     <module>onebusaway-gtfs-hibernate-spring</module>
-    <module>onebusaway-gtfs-loader</module>
     <module>onebusaway-gwt-common</module>
     <module>onebusaway-phone</module>
     <module>onebusaway-phone-webapp</module>

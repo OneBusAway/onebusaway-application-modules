@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.bundle_loader;
 
 import java.util.Date;
@@ -62,6 +77,19 @@ public class BundleStatistics implements BaseStatistics {
 		return stes.size();
 	}
 
+	@Override
+	public Date getCalendarDateStart() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Date getCalendarDateEnd() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 	@Override
 	public Date getCalendarServiceRangeStart() {
 		Date start = null;
@@ -174,6 +202,18 @@ public class BundleStatistics implements BaseStatistics {
 	}
 
 	@Override
+	public Date getCalendarDateStart(String agencyId) {
+		// TODO provide real impl
+		return getCalendarServiceRangeStart(agencyId);
+	}
+
+	@Override
+	public Date getCalendarDateEnd(String agencyId) {
+		// TODO provide real impl
+		return getCalendarServiceRangeEnd(agencyId);
+	}
+
+	@Override
 	public Statistic getStatistic(String agencyId) {
 		Statistic bs = new Statistic();
 		bs.setAgencyId(agencyId);
@@ -185,6 +225,5 @@ public class BundleStatistics implements BaseStatistics {
 		bs.setCalendarEndDate(getCalendarServiceRangeEnd(agencyId));
 		return bs;
 	}
-
 	
 }

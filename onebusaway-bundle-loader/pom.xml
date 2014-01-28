@@ -5,9 +5,9 @@
     <artifactId>onebusaway-application-modules</artifactId>
     <version>1.1.7</version>
   </parent>
-  <artifactId>onebusaway-gtfs-loader</artifactId>
+  <artifactId>onebusaway-bundle-loader</artifactId>
 
-  <name>onebusaway-gtfs-loader</name>
+  <name>onebusaway-bundle-loader</name>
 
   <dependencies>
 

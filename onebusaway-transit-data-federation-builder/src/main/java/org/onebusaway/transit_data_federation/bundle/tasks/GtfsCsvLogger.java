@@ -60,7 +60,7 @@ public class GtfsCsvLogger {
 	public void header() {
 		_log.info("creating file=" + _fileName);
 		buff = new Buffer(_fileName);
-		buff.stream.print("agency,route_count,trip_count,stop_count,stop_times_count,calendar_start_date,calendar_end_date\n");
+		buff.stream.print("agency,route_count,trip_count,stop_count,stop_times_count,calendar_service_start,calendar_service_end,calendar_start_date,calendar_end_date\n");
 	}
 	
 	
@@ -97,6 +97,10 @@ public class GtfsCsvLogger {
 		buff.stream.print(s.getStopCount());
 		buff.stream.print(",");
 		buff.stream.print(s.getStopTimeCount());
+		buff.stream.print(",");
+		buff.stream.print(s.getCalendarServiceStart());
+		buff.stream.print(",");
+		buff.stream.print(s.getCalendarServiceEnd());
 		buff.stream.print(",");
 		buff.stream.print(s.getCalendarStartDate());
 		buff.stream.print(",");
