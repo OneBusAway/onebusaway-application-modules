@@ -30,7 +30,7 @@ import com.conveyal.gtfs.GtfsStatistics;
 
 public class GtfsStatisticsTask implements Runnable {
 	private Logger _log = LoggerFactory.getLogger(GtfsStatisticsTask.class);
-	private static final String ALL = "TOTAL";
+	private static final String ALL_AGENCIES = "TOTAL";
 	private GtfsMutableRelationalDao _dao;
 	private FederatedTransitDataBundle _bundle;
 	
@@ -57,14 +57,14 @@ public class GtfsStatisticsTask implements Runnable {
 		Collection<Agency> agencies = stats.getAllAgencies();
 		for (Agency agency:agencies) {
 			_log.info("processing stats for agency: " + agency.getId() + " (" + agency.getName() + ")");
-			csvLogger.logStat(agency.getId(), stats.getStatistic(agency));
+			csvLogger.logStat(agency.getId(), stats.getStatistic(agency.getId()));
 		}
 
 		// overall stats/totals
 		Statistic all = new Statistic();
 		Agency allAgency = new Agency();
-		allAgency.setId("ALL");
-		all.setAgency(allAgency);
+		allAgency.setId(ALL_AGENCIES);
+		all.setAgencyId(ALL_AGENCIES);
 		all.setRouteCount(stats.getRouteCount());
 		all.setTripCount(stats.getTripCount());
 		all.setStopCount(stats.getStopCount());

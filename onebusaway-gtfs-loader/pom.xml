@@ -16,6 +16,17 @@
       <artifactId>onebusaway-transit-data-federation</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-transit-data-federation-builder</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+	<dependency>
+		<groupId>com.conveyal</groupId>
+		<artifactId>gtfs-validation-lib</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
 
     <dependency>
       <groupId>junit</groupId>

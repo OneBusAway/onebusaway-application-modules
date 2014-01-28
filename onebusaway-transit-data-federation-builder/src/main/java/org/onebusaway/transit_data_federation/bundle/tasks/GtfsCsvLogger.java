@@ -28,7 +28,7 @@ import com.conveyal.gtfs.Statistic;
 public class GtfsCsvLogger {
 
 	private Logger _log = LoggerFactory.getLogger(GtfsCsvLogger.class);
-
+	private String _fileName = "gtfs_stats.csv";
 	private File basePath;
 	private Buffer buff;
 
@@ -58,9 +58,8 @@ public class GtfsCsvLogger {
 	}
 
 	public void header() {
-		String fileName = "gtfs_stats.csv";  // do not include basepath
-		_log.info("creating file=" + fileName);
-		buff = new Buffer(fileName);
+		_log.info("creating file=" + _fileName);
+		buff = new Buffer(_fileName);
 		buff.stream.print("agency,route_count,trip_count,stop_count,stop_times_count,calendar_start_date,calendar_end_date\n");
 	}
 	
@@ -89,7 +88,7 @@ public class GtfsCsvLogger {
 	}
 
 	public void logStat(String id, Statistic s) {
-		buff.stream.print(s.getAgency().getId());
+		buff.stream.print(s.getAgencyId());
 		buff.stream.print(",");
 		buff.stream.print(s.getRouteCount());
 		buff.stream.print(",");
@@ -103,5 +102,10 @@ public class GtfsCsvLogger {
 		buff.stream.print(",");
 		buff.stream.print(s.getCalendarEndDate());
 		buff.stream.print("\n");
+	}
+
+	public void setFilename(String fileName) {
+		_fileName = fileName;
+		
 	}
 }
