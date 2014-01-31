@@ -16,23 +16,22 @@
 package org.onebusaway.transit_data_federation.bundle.tasks;
 
 import java.io.File;
-import java.util.Collection;
+import java.util.List;
 
-import org.onebusaway.gtfs.model.Agency;
 import org.onebusaway.gtfs.services.GtfsMutableRelationalDao;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.conveyal.gtfs.model.Statistic;
-import com.conveyal.gtfs.service.impl.GtfsStatisticsService;
+import com.conveyal.gtfs.model.DuplicateStops;
+import com.conveyal.gtfs.service.GtfsValidationService;
 
-public class GtfsStatisticsTask implements Runnable {
+public class GtfsValidationTask implements Runnable {
 	private Logger _log = LoggerFactory.getLogger(GtfsStatisticsTask.class);
-	private static final String ALL_AGENCIES = "TOTAL";
 	private GtfsMutableRelationalDao _dao;
 	private FederatedTransitDataBundle _bundle;
+	
 	
 	@Autowired
 	public void setGtfsDao(GtfsMutableRelationalDao dao) {
@@ -44,40 +43,24 @@ public class GtfsStatisticsTask implements Runnable {
 		_bundle = bundle;
 	}
 	
+	@Override
 	public void run() {
 		File basePath = _bundle.getPath();
-		_log.info("Starting GTFS stats to basePath=" + basePath);
-		GtfsStatisticsService service = new GtfsStatisticsService(_dao);
-		// create logger file
+		_log.info("Starting GTFS valdiation to basePath=" + basePath);
+		GtfsValidationService service = new GtfsValidationService(_dao);
+		List<DuplicateStops> duplicateStops = service.duplicateStops();
 		GtfsCsvLogger csvLogger = new GtfsCsvLogger();
 		csvLogger.setBasePath(basePath);
+		csvLogger.setFilename("gtfs_validation.csv");
 		csvLogger.open();
-		csvLogger.header();
-		
-		// per agency status
-		Collection<Agency> agencies = service.getAllAgencies();
-		for (Agency agency:agencies) {
-			_log.info("processing stats for agency: " + agency.getId() + " (" + agency.getName() + ")");
-			csvLogger.logStat(agency.getId(), service.getStatistic(agency.getId()));
+		csvLogger.addHeader("agency,stop_1,_stop2\n");
+		for (DuplicateStops ds : duplicateStops) {
+			String[] s = {ds.stop1.getId().getAgencyId(), ds.stop1.getId().toString(), ds.stop2.getId().toString()+"\n",};
+			csvLogger.log(s);
 		}
-
-		// overall stats/totals
-		Statistic all = new Statistic();
-		Agency allAgency = new Agency();
-		allAgency.setId(ALL_AGENCIES);
-		all.setAgencyId(ALL_AGENCIES);
-		all.setRouteCount(service.getRouteCount());
-		all.setTripCount(service.getTripCount());
-		all.setStopCount(service.getStopCount());
-		all.setStopTimeCount(service.getStopTimesCount());
-		all.setCalendarStartDate(service.getCalendarServiceRangeStart());
-		all.setCalendarEndDate(service.getCalendarServiceRangeEnd());
-
-		csvLogger.logStat(allAgency.getId(), all);
-		
-		_log.info("cleaning up");
-		// cleanup
 		csvLogger.close();
-		_log.info("exiting");
+		_log.info("Exiting");
 	}
+	
+	
 }

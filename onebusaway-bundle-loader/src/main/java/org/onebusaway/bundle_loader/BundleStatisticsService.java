@@ -29,13 +29,13 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
-import com.conveyal.gtfs.BaseStatistics;
-import com.conveyal.gtfs.Statistic;
+import com.conveyal.gtfs.model.Statistic;
+import com.conveyal.gtfs.service.StatisticsService;
 
 /**
  * Retrieves a base set of statistics from the bundle.
  */
-public class BundleStatistics implements BaseStatistics {
+public class BundleStatisticsService implements StatisticsService {
 
 	private TransitGraphDao _transitGraph = null;
 	private ExtendedCalendarService _calendarService = null;

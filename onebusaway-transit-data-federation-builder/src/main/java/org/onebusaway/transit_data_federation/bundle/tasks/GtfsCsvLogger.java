@@ -23,7 +23,7 @@ import java.io.PrintStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.conveyal.gtfs.Statistic;
+import com.conveyal.gtfs.model.Statistic;
 
 public class GtfsCsvLogger {
 
@@ -46,8 +46,6 @@ public class GtfsCsvLogger {
 		if (!basePath.exists()) {
 			basePath.mkdirs();
 		}
-		
-		header();
 	}
 	
 	public void close() {
@@ -62,7 +60,12 @@ public class GtfsCsvLogger {
 		buff = new Buffer(_fileName);
 		buff.stream.print("agency,route_count,trip_count,stop_count,stop_times_count,calendar_service_start,calendar_service_end,calendar_start_date,calendar_end_date\n");
 	}
-	
+
+	public void addHeader(String headerText) {
+		_log.info("creating file=" + _fileName);
+		buff = new Buffer(_fileName);
+		buff.stream.print(headerText);
+	}
 	
 	private String sanitize(String s) {
 		if (s == null) return null;
@@ -112,4 +115,15 @@ public class GtfsCsvLogger {
 		_fileName = fileName;
 		
 	}
+
+	public void log(String[] stringArray) {
+		int i = 0;
+		for (String s : stringArray) {
+			if (i != 0) buff.stream.print(",");
+			buff.stream.print(s);
+			i++;
+		}
+	}
+
+
 }

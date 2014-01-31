@@ -19,19 +19,16 @@ import java.io.File;
 import java.util.Collection;
 
 import org.onebusaway.gtfs.model.Agency;
-import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.bundle.tasks.GtfsCsvLogger;
 import org.onebusaway.transit_data_federation.services.ExtendedCalendarService;
-import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.conveyal.gtfs.Statistic;
+import com.conveyal.gtfs.model.Statistic;
 
 public class Client {
 
@@ -77,14 +74,14 @@ public class Client {
 		System.err.println("agencies=" + transitGraph.getAllAgencies());
 		// then run the bundle stats 
 		
-		BundleStatistics stats = new BundleStatistics();
+		BundleStatisticsService stats = new BundleStatisticsService();
 		stats.setTrasitGraphDao(transitGraph);
 		stats.setExtendedCalendarService(ecsi);
 		GtfsCsvLogger csvLogger = new GtfsCsvLogger();
 		csvLogger.setFilename("bundle-stats.csv");
 		csvLogger.setBasePath(bundleDirectory);
 		csvLogger.open();
-
+		csvLogger.header();
 		
 		// per agency status
 		Collection<AgencyEntry> agencies = transitGraph.getAllAgencies();

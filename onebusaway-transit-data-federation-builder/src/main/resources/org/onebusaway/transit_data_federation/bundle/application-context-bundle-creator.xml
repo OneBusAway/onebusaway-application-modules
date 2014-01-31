@@ -244,12 +244,20 @@
 
 
 	<!-- GTFS Stats   -->
-	  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="gtfs_stats" />
     <property name="afterTaskName" value="pre_cache" />
     <property name="task" ref="gtfsStats" />
   </bean>
 
   <bean id="gtfsStats" class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsStatisticsTask" />
+
+  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
+    <property name="taskName" value="gtfs_validation" />
+    <property name="afterTaskName" value="gtfs_stats" />
+    <property name="task" ref="gtfsValidation" />
+  </bean>
+
+  <bean id="gtfsValidation" class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsValidationTask" />
 	
 </beans>
