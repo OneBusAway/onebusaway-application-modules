@@ -67,22 +67,4 @@ public class MavenVersion {
 	public String getVersion() {
 		return version;
 	}
-	public void setCommit(String commit) {
-		this.commit = commit;
-	}
-	public void setIncremental(String incremental) {
-		this.incremental = incremental;
-	}
-	public void setMajor(String major) {
-		this.major = major;
-	}
-	public void setMinor(String minor) {
-		this.minor = minor;
-	}
-	public void setQualifier(String qualifier) {
-		this.qualifier = qualifier;
-	}
-	public void setVersion(String version) {
-		this.version = version;
-	}
 }
