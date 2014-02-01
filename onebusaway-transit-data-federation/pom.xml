@@ -119,4 +119,33 @@
 
   </dependencies>
 
+  <build>
+    <plugins>
+      <plugin>
+	<groupId>pl.project13.maven</groupId>
+	<artifactId>git-commit-id-plugin</artifactId>
+	<executions>
+	  <execution>
+	    <goals>
+	      <goal>revision</goal>
+	    </goals>
+	  </execution>
+	</executions>
+	<configuration>
+	  <verbose>false</verbose>
+	  <dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
+	</configuration>
+      </plugin>
+     <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <configuration>
+          <excludes combine.children="append">
+            <exclude>src/main/resources/git.properties</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>
