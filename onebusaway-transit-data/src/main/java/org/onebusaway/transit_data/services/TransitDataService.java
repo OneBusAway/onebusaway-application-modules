@@ -19,6 +19,7 @@ package org.onebusaway.transit_data.services;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
@@ -55,6 +56,8 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
+import org.onebusaway.transit_data.model.introspection.InstanceDetails;
+import org.onebusaway.transit_data.model.introspection.MavenVersion;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -593,4 +596,20 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod
   public List<String> getSearchSuggestions(String agencyId, String input);
 
+  /**
+   * Return version information for this OneBusAway instance.
+   * 
+   * @return MavenVersion containing this instance's version information.
+   */
+  @FederatedByAggregateMethod
+  public Map<String, MavenVersion> getMavenVersion();
+  
+  /**
+   * Return instance details for this OneBusAway instance.
+   * 
+   * @return InstanceDetails containing this instance's details.
+   */
+  @FederatedByAggregateMethod
+  public Map<String, InstanceDetails> getInstanceDetails();
+  
 }

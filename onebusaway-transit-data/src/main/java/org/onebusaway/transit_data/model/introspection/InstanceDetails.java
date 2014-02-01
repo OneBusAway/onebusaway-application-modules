@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.onebusaway.transit_data_federation.model.introspection;
+package org.onebusaway.transit_data.model.introspection;
 
 public class InstanceDetails {
 	private String instanceName;

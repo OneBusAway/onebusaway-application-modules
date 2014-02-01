@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.impl.federated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import java.util.Set;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
+import org.onebusaway.federations.annotations.FederatedByAggregateMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -58,6 +60,8 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
+import org.onebusaway.transit_data.model.introspection.InstanceDetails;
+import org.onebusaway.transit_data.model.introspection.MavenVersion;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -93,6 +97,7 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureAlarmService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
+import org.onebusaway.transit_data_federation.services.IntrospectionService;
 import org.onebusaway.transit_data_federation.services.PredictionHelperService;
 import org.onebusaway.transit_data_federation.services.ScheduleHelperService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
@@ -190,6 +195,10 @@ class TransitDataServiceImpl implements TransitDataService {
   
   @Autowired
   private ScheduleHelperService _scheduleHelperService;
+  
+  @Autowired
+  private IntrospectionService _introspectionService;
+  
   /****
    * {@link TransitDataService} Interface
    ****/
@@ -669,6 +678,19 @@ class TransitDataServiceImpl implements TransitDataService {
 	  return _scheduleHelperService.getSearchSuggestions(agencyId, input);
   }
 
+  @Override
+  public Map<String, MavenVersion> getMavenVersion() {
+	  return Collections.singletonMap(_introspectionService.getInstanceDetails().getInstanceName(),
+			  	_introspectionService.getMavenVersion());
+  }
+  
+  @Override
+  public Map<String, InstanceDetails> getInstanceDetails() {
+	  return Collections.singletonMap(_introspectionService.getInstanceDetails().getInstanceName(),
+			  	_introspectionService.getInstanceDetails());
+  }
+
+  
   /****
    * Private Methods
    ****/
@@ -706,5 +728,5 @@ class TransitDataServiceImpl implements TransitDataService {
 
     return adQuery;
   }
-
+  
 }

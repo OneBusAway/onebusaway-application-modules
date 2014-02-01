@@ -28,9 +28,9 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 
 import org.onebusaway.container.ConfigurationParameter;
-import org.onebusaway.transit_data_federation.model.introspection.InstanceDetails;
+import org.onebusaway.transit_data.model.introspection.InstanceDetails;
 import org.onebusaway.transit_data_federation.services.IntrospectionService;
-import org.onebusaway.transit_data_federation.model.introspection.MavenVersion;
+import org.onebusaway.transit_data.model.introspection.MavenVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,13 +47,40 @@ public class IntrospectionServiceImpl implements IntrospectionService {
 	private InstanceDetails _instanceDetails;
 	private String _instanceDetailsPropertyFile;
 
+	private String getHostname() {
+		String hostname = "unknown host";
+		try {
+			hostname = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			_log.warn("Couldn't determine hostname", e);
+		}
+
+		return hostname;
+	}
+
+	@Override
+	public InstanceDetails getInstanceDetails() {
+		return _instanceDetails;
+	}
+
+	@Override
+	public MavenVersion getMavenVersion() {
+		return _mavenVersion;
+	}
+
+	@ConfigurationParameter
+	public void setInstanceDetailsPropertyFile(
+			String instanceDetailsPropertyFile) {
+		_instanceDetailsPropertyFile = instanceDetailsPropertyFile;
+	}
+
 	@PostConstruct
 	public void start() {
 		final String GIT_PROPERTIES_FILE = "git.properties";
 		try {
 			Properties gitProperties = new Properties();
-			InputStream in = IntrospectionServiceImpl.class.getClassLoader().getResourceAsStream(
-					GIT_PROPERTIES_FILE);
+			InputStream in = IntrospectionServiceImpl.class.getClassLoader()
+					.getResourceAsStream(GIT_PROPERTIES_FILE);
 			gitProperties.load(in);
 
 			String version = gitProperties.getProperty("project.version");
@@ -97,33 +124,6 @@ public class IntrospectionServiceImpl implements IntrospectionService {
 					null, null);
 		}
 
-	}
-
-	private String getHostname() {
-		String hostname = "unknown host";
-		try {
-			hostname = InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			_log.warn("Couldn't determine hostname", e);
-		}
-
-		return hostname;
-	}
-
-	@ConfigurationParameter
-	public void setInstanceDetailsPropertyFile(
-			String instanceDetailsPropertyFile) {
-		_instanceDetailsPropertyFile = instanceDetailsPropertyFile;
-	}
-
-	@Override
-	public MavenVersion getMavenVersion() {
-		return _mavenVersion;
-	}
-
-	@Override
-	public InstanceDetails getInstanceDetails() {
-		return _instanceDetails;
 	}
 
 }

@@ -16,10 +16,10 @@
 
 package org.onebusaway.transit_data_federation.services;
 
-import org.onebusaway.transit_data_federation.model.introspection.InstanceDetails;
-import org.onebusaway.transit_data_federation.model.introspection.MavenVersion;
+import org.onebusaway.transit_data.model.introspection.InstanceDetails;
+import org.onebusaway.transit_data.model.introspection.MavenVersion;
 
 public interface IntrospectionService {
-	public MavenVersion getMavenVersion();
 	public InstanceDetails getInstanceDetails();
+	public MavenVersion getMavenVersion();
 }
