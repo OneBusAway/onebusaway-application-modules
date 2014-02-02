@@ -19,7 +19,9 @@ package org.onebusaway.api.impl;
 import org.apache.struts2.rest.handler.XStreamHandler;
 import org.onebusaway.api.actions.api.ValidationErrorBean;
 import org.onebusaway.api.model.GitRepositoryStateV2Bean;
+import org.onebusaway.api.model.InstanceDetailsV2Bean;
 import org.onebusaway.api.model.InstanceVersionsV2Bean;
+import org.onebusaway.api.model.InstancesV2Bean;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.TimeBean;
 import org.onebusaway.api.model.transit.AgencyV2Bean;
@@ -182,6 +184,9 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.alias("instanceVersions", InstanceVersionsV2Bean.class);
     xstream.alias("version", GitRepositoryStateV2Bean.class);
     //xstream.registerConverter(new NamedMapConverter(xstream.getMapper(), "instance", "name", String.class, null, GitRepositoryStateV2Bean.class, true, false, xstream.getConverterLookup()));
+    
+    xstream.alias("instances", InstancesV2Bean.class);
+    xstream.alias("instance", InstanceDetailsV2Bean.class);
     
     xstream.processAnnotations(VehicleMonitoringRequest.class);
     xstream.processAnnotations(VehicleMonitoringDetailLevel.class);
