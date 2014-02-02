@@ -30,7 +30,7 @@ import javax.annotation.PostConstruct;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.transit_data.model.introspection.InstanceDetails;
 import org.onebusaway.transit_data_federation.services.IntrospectionService;
-import org.onebusaway.transit_data.model.introspection.MavenVersion;
+import org.onebusaway.utility.GitRepositoryState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +42,10 @@ public class IntrospectionServiceImpl implements IntrospectionService {
 	private static Logger _log = LoggerFactory
 			.getLogger(IntrospectionServiceImpl.class);
 
-	private MavenVersion _mavenVersion;
 	@Autowired(required = false)
 	private InstanceDetails _instanceDetails;
+	@Autowired
+	private GitRepositoryState _gitRepositoryState;
 	private String _instanceDetailsPropertyFile;
 
 	private String getHostname() {
@@ -64,8 +65,8 @@ public class IntrospectionServiceImpl implements IntrospectionService {
 	}
 
 	@Override
-	public MavenVersion getMavenVersion() {
-		return _mavenVersion;
+	public GitRepositoryState getGitRepositoryState() {
+		return _gitRepositoryState;
 	}
 
 	@ConfigurationParameter
@@ -76,20 +77,6 @@ public class IntrospectionServiceImpl implements IntrospectionService {
 
 	@PostConstruct
 	public void start() {
-		final String GIT_PROPERTIES_FILE = "git.properties";
-		try {
-			Properties gitProperties = new Properties();
-			InputStream in = IntrospectionServiceImpl.class.getClassLoader()
-					.getResourceAsStream(GIT_PROPERTIES_FILE);
-			gitProperties.load(in);
-
-			String version = gitProperties.getProperty("project.version");
-			String commit = gitProperties.getProperty("git.commit.id");
-			_mavenVersion = new MavenVersion(version, commit);
-		} catch (Exception e) {
-			_log.error("Exception while processing Git properties file", e);
-		}
-
 		if (_instanceDetails == null && _instanceDetailsPropertyFile != null) {
 			InputStream in = null;
 			try {
@@ -120,7 +107,7 @@ public class IntrospectionServiceImpl implements IntrospectionService {
 			}
 		} else if (_instanceDetails == null) {
 			_instanceDetails = new InstanceDetails("OneBusAway on "
-					+ getHostname(), Locale.getDefault().toLanguageTag(), null,
+					+ getHostname(), Locale.getDefault().toLanguageTag(), "onebusaway@" + getHostname(),
 					null, null);
 		}
 

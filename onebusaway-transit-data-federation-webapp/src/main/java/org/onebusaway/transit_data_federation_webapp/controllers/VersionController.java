@@ -32,8 +32,8 @@ public class VersionController {
 	public ModelAndView index() {
 
 		ModelAndView mv = new ModelAndView("version.jspx");
-		mv.addObject("mavenVersion",
-				_introspectionService.getMavenVersion());
+		mv.addObject("gitRepositoryState",
+				_introspectionService.getGitRepositoryState());
 		return mv;
 	}
 }

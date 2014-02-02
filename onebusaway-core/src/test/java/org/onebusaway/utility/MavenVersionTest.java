@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package org.onebusaway.transit_data.model.introspection;
+package org.onebusaway.utility;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.onebusaway.utility.GitRepositoryState.MavenVersion;
 
 public class MavenVersionTest {
 
 	@Test
 	public void testWithQualifier() {
-		MavenVersion mv = new MavenVersion("1.1.12-SNAPSHOT", "");
+		MavenVersion mv = new MavenVersion("1.1.12-SNAPSHOT");
 
 		assertEquals("1", mv.getMajor());
 		assertEquals("1", mv.getMinor());
@@ -34,7 +35,7 @@ public class MavenVersionTest {
 
 	@Test
 	public void testWithoutQualifier() {
-		MavenVersion mv = new MavenVersion("1.1.11", "");
+		MavenVersion mv = new MavenVersion("1.1.11");
 
 		assertEquals("1", mv.getMajor());
 		assertEquals("1", mv.getMinor());

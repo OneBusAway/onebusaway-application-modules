@@ -30,7 +30,6 @@ import java.util.Set;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
-import org.onebusaway.federations.annotations.FederatedByAggregateMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
@@ -61,7 +60,6 @@ import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.introspection.InstanceDetails;
-import org.onebusaway.transit_data.model.introspection.MavenVersion;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -121,6 +119,7 @@ import org.onebusaway.transit_data_federation.services.reporting.UserReportingSe
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.utility.GitRepositoryState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -679,9 +678,9 @@ class TransitDataServiceImpl implements TransitDataService {
   }
 
   @Override
-  public Map<String, MavenVersion> getMavenVersion() {
+  public Map<String, GitRepositoryState> getGitRepositoryState() {
 	  return Collections.singletonMap(_introspectionService.getInstanceDetails().getInstanceName(),
-			  	_introspectionService.getMavenVersion());
+			  	_introspectionService.getGitRepositoryState());
   }
   
   @Override

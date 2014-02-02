@@ -57,7 +57,6 @@ import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.introspection.InstanceDetails;
-import org.onebusaway.transit_data.model.introspection.MavenVersion;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -89,6 +88,7 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
+import org.onebusaway.utility.GitRepositoryState;
 
 /**
  * The {@link TransitDataService} is the primary interface separating
@@ -599,10 +599,10 @@ public interface TransitDataService extends FederatedService {
   /**
    * Return version information for this OneBusAway instance.
    * 
-   * @return MavenVersion containing this instance's version information.
+   * @return GitRepositoryState containing this instance's version information.
    */
   @FederatedByAggregateMethod
-  public Map<String, MavenVersion> getMavenVersion();
+  public Map<String, GitRepositoryState> getGitRepositoryState();
   
   /**
    * Return instance details for this OneBusAway instance.

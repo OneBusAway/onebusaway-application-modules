@@ -27,28 +27,28 @@
 	<dl>
 		<dt>Version</dt>
 		<dd>
-			<c:out value="${mavenVersion.version}" />
+			<c:out value="${gitRepositoryState.version}" />
 		</dd>
 		<dt>Commit</dt>
 		<dd>
-			<c:out value="${mavenVersion.commit}" />
+			<c:out value="${gitRepositoryState.commitId}" />
 		</dd>
 		<dt>Major</dt>
 		<dd>
-			<c:out value="${mavenVersion.major}" />
+			<c:out value="${gitRepositoryState.parsedVersion.major}" />
 		</dd>
 		<dt>Minor</dt>
 		<dd>
-			<c:out value="${mavenVersion.minor}" />
+			<c:out value="${gitRepositoryState.parsedVersion.minor}" />
 		</dd>
 		<dt>Incremental</dt>
 		<dd>
-			<c:out value="${mavenVersion.incremental}" />
+			<c:out value="${gitRepositoryState.parsedVersion.incremental}" />
 		</dd>
-		<c:if test="${not empty mavenVersion.qualifier}">
+		<c:if test="${not empty gitRepositoryState.parsedVersion.qualifier}">
 			<dt>Qualifier</dt>
 			<dd>
-				<c:out value="${mavenVersion.qualifier}" />
+				<c:out value="${gitRepositoryState.parsedVersion.qualifier}" />
 			</dd>
 		</c:if>
 

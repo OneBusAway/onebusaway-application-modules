@@ -17,9 +17,9 @@
 package org.onebusaway.transit_data_federation.services;
 
 import org.onebusaway.transit_data.model.introspection.InstanceDetails;
-import org.onebusaway.transit_data.model.introspection.MavenVersion;
+import org.onebusaway.utility.GitRepositoryState;
 
 public interface IntrospectionService {
 	public InstanceDetails getInstanceDetails();
-	public MavenVersion getMavenVersion();
+	public GitRepositoryState getGitRepositoryState();
 }
