@@ -19,6 +19,7 @@ package org.onebusaway.transit_data_federation.impl.federated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,6 +59,7 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
+import org.onebusaway.transit_data.model.introspection.InstanceDetails;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -93,6 +95,7 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureAlarmService;
 import org.onebusaway.transit_data_federation.services.ArrivalAndDepartureQuery;
+import org.onebusaway.transit_data_federation.services.IntrospectionService;
 import org.onebusaway.transit_data_federation.services.PredictionHelperService;
 import org.onebusaway.transit_data_federation.services.ScheduleHelperService;
 import org.onebusaway.transit_data_federation.services.beans.AgencyBeanService;
@@ -116,6 +119,7 @@ import org.onebusaway.transit_data_federation.services.reporting.UserReportingSe
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.utility.GitRepositoryState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -190,6 +194,10 @@ class TransitDataServiceImpl implements TransitDataService {
   
   @Autowired
   private ScheduleHelperService _scheduleHelperService;
+  
+  @Autowired
+  private IntrospectionService _introspectionService;
+  
   /****
    * {@link TransitDataService} Interface
    ****/
@@ -669,6 +677,19 @@ class TransitDataServiceImpl implements TransitDataService {
 	  return _scheduleHelperService.getSearchSuggestions(agencyId, input);
   }
 
+  @Override
+  public Map<String, GitRepositoryState> getGitRepositoryState() {
+	  return Collections.singletonMap(_introspectionService.getInstanceDetails().getInstanceName(),
+			  	_introspectionService.getGitRepositoryState());
+  }
+  
+  @Override
+  public Map<String, InstanceDetails> getInstanceDetails() {
+	  return Collections.singletonMap(_introspectionService.getInstanceDetails().getInstanceName(),
+			  	_introspectionService.getInstanceDetails());
+  }
+
+  
   /****
    * Private Methods
    ****/
@@ -706,5 +727,5 @@ class TransitDataServiceImpl implements TransitDataService {
 
     return adQuery;
   }
-
+  
 }
