@@ -35,4 +35,4 @@ http://api.pugetsound.onebusaway.org/api/where/block/1_12540399.xml?key=TEST
 
 ## Response
 
-See details about the various properties of the [`<blockConfiguration/>` element](../elements/blockConfiguration.html).
+See details about the various properties of the [`<blockConfiguration/>` element](../elements/block-configuration.html).
