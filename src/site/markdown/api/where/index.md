@@ -156,7 +156,7 @@ See more discussion of [OneBusAwayRestApi_Version2 Version 2] of the api and how
 Many API methods return timestamps.  For the most part, a OneBusAway timestamp is a measure of the number of milliseconds
 since midnight, January 1, 1970 UTC.
 
-Many API methods also except a "time" parameter that can be used to query the API at a specific point in time (eg. list all
+Many API methods also accept a "time" parameter that can be used to query the API at a specific point in time (eg. list all
 active service alerts on a particular date).  The semantics of how the time parameter is used by the method is method-specific
 but the parameter is parsed in the same way.  You can specify time in two possible forms:
 
