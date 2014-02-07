@@ -22,11 +22,13 @@ import java.util.Map;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.TripStopTimesBean;
 import org.onebusaway.transit_data.model.schedule.FrequencyBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -311,6 +313,17 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
           time, activeTripInstance, blockLocation.getVehicleId());
       if (!situations.isEmpty())
         bean.setSituations(situations);
+    }
+
+    if (blockLocation.getTimepointPredictions() != null && blockLocation.getTimepointPredictions().size() > 0) {
+      List<TimepointPredictionBean> timepointPredictions = new ArrayList<TimepointPredictionBean>();
+      for (TimepointPredictionRecord tpr: blockLocation.getTimepointPredictions()) {
+        TimepointPredictionBean tpb = new TimepointPredictionBean();
+        tpb.setTimepointId(tpr.getTimepointId().toString());
+        tpb.setTimepointPredictedTime(tpr.getTimepointPredictedTime());
+        timepointPredictions.add(tpb);
+      }
+      bean.setTimepointPredictions(timepointPredictions);
     }
 
     return bean;

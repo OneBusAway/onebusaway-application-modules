@@ -16,9 +16,11 @@
  */
 package org.onebusaway.transit_data_federation.services.realtime;
 
+import java.util.List;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
@@ -97,6 +99,8 @@ public class BlockLocation {
   private ScheduleDeviationSamples scheduleDeviations = null;
 
   private AgencyAndId vehicleId;
+  
+  private List<TimepointPredictionRecord> timepointPredictions;
 
   public BlockLocation() {
 
@@ -436,6 +440,14 @@ public class BlockLocation {
 
   public void setVehicleId(AgencyAndId vehicleId) {
     this.vehicleId = vehicleId;
+  }
+
+  public List<TimepointPredictionRecord> getTimepointPredictions() {
+      return this.timepointPredictions;
+  }
+  
+  public void setTimepointPredictions(List<TimepointPredictionRecord> timepointPredictions) {
+      this.timepointPredictions = timepointPredictions;
   }
 
   @Override

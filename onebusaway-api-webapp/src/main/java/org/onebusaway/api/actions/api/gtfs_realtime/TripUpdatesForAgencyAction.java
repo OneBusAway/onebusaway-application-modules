@@ -27,6 +27,7 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
+import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 
 public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
@@ -58,15 +59,26 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       VehicleDescriptor.Builder vehicleDesc = tripUpdate.getVehicleBuilder();
       vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
 
-      StopBean nextStop = tripStatus.getNextStop();
-      if (nextStop != null) {
-        TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
-        stopTimeUpdate.setStopId(normalizeId(nextStop.getId()));
-        TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
-        departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
+      if (tripStatus.getTimepointPredictions() != null && tripStatus.getTimepointPredictions().size() > 0) {
+        for (TimepointPredictionBean timepointPrediction: tripStatus.getTimepointPredictions()) {
+          TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
+          stopTimeUpdate.setStopId(normalizeId(timepointPrediction.getTimepointId()));
+          TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
+          arrival.setTime(timepointPrediction.getTimepointPredictedTime());
+        }
+        
+        tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+      } else {
+        StopBean nextStop = tripStatus.getNextStop();
+        if (nextStop != null) {
+          TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
+          stopTimeUpdate.setStopId(normalizeId(nextStop.getId()));
+          TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
+          departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
+        }
+        
+        tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
       }
-
-      tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
     }
   }
 }
