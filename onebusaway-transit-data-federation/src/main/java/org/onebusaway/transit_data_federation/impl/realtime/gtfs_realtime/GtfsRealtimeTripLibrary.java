@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2013 Kurt Raschke <kurt@kurtraschke.com>
  * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -400,8 +401,11 @@ class GtfsRealtimeTripLibrary {
 
     if (stopTimeUpdate.hasStopSequence()) {
       int stopSequence = stopTimeUpdate.getStopSequence();
-      if (0 <= stopSequence && stopSequence < stopTimes.size()) {
-        BlockStopTimeEntry blockStopTime = stopTimes.get(stopSequence);
+
+      Map<Integer, BlockStopTimeEntry> sequenceToStopTime = MappingLibrary.mapToValue(stopTimes, "stopTime.gtfsSequence");
+
+      if (sequenceToStopTime.containsKey(stopSequence)) {
+        BlockStopTimeEntry blockStopTime = sequenceToStopTime.get(stopSequence);
         if (!stopTimeUpdate.hasStopId()) {
           return blockStopTime;
         }
@@ -413,7 +417,7 @@ class GtfsRealtimeTripLibrary {
         // match by stop id if possible
 
       } else {
-        _log.warn("StopTimeSequence is out of bounds: stopSequence="
+        _log.warn("StopTimeSequence not found: stopSequence="
             + stopSequence + " tripUpdate=\n" + tripUpdate);
       }
     }
