@@ -449,19 +449,21 @@ class GtfsRealtimeTripLibrary {
     long t = currentTime();
     if (stopTimeUpdate.hasArrival()) {
       StopTimeEvent arrival = stopTimeUpdate.getArrival();
+      if (arrival.hasTime()) {
+        return (int) (arrival.getTime() - serviceDate / 1000);
+      }
       if (arrival.hasDelay()) {
         return (int) ((t - serviceDate) / 1000 - arrival.getDelay());
       }
-      if (arrival.hasTime())
-        return (int) (arrival.getTime() - serviceDate / 1000);
     }
     if (stopTimeUpdate.hasDeparture()) {
       StopTimeEvent departure = stopTimeUpdate.getDeparture();
+      if (departure.hasTime()) {
+        return (int) (departure.getTime() - serviceDate / 1000);
+      }
       if (departure.hasDelay()) {
         return (int) ((t - serviceDate) / 1000 - departure.getDelay());
       }
-      if (departure.hasTime())
-        return (int) (departure.getTime() - serviceDate / 1000);
     }
     throw new IllegalStateException(
         "expected at least an arrival or departure time or delay for update: "
