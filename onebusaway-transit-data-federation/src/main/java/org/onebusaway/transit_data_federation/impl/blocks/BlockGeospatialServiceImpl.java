@@ -49,6 +49,7 @@ import org.onebusaway.transit_data_federation.services.blocks.BlockIndexService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockLayoverIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockSequenceIndex;
+import org.onebusaway.transit_data_federation.services.blocks.BlockStopTimeIndex;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.FrequencyBlockTripIndex;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
@@ -145,18 +146,29 @@ class BlockGeospatialServiceImpl implements BlockGeospatialService {
 
     List<StopEntry> stops = _transitGraphDao.getStopsByLocation(bounds);
 
-    Set<BlockTripIndex> blockIndices = new HashSet<BlockTripIndex>();
+    Set<AgencyAndId> blockIds = new HashSet<AgencyAndId>();
 
     for (StopEntry stop : stops) {
-      // TODO : we need to fix this
-      /*
-       * List<BlockStopTimeIndex> stopTimeIndices =
-       * _blockIndexService.getStopTimeIndicesForStop(stop); for
-       * (BlockStopTimeIndex stopTimeIndex : stopTimeIndices)
-       * blockIndices.add(stopTimeIndex.getBlockIndex());
-       */
+      List<BlockStopTimeIndex> stopTimeIndices = _blockIndexService.getStopTimeIndicesForStop(stop);
+      
+      Set<BlockConfigurationEntry> blockConfigs = new HashSet<BlockConfigurationEntry>();
+      
+      List<List<BlockConfigurationEntry>> blockConfigsList = MappingLibrary.map(stopTimeIndices, "blockConfigs");
+      
+      for (List<BlockConfigurationEntry> l: blockConfigsList) {
+        blockConfigs.addAll(l);
+      }
+     
+      List<AgencyAndId> stopBlockIds = MappingLibrary.map(blockConfigs, "block.id");
+      blockIds.addAll(stopBlockIds);      
     }
 
+    Set<BlockTripIndex> blockIndices = new HashSet<BlockTripIndex>();
+
+    for (AgencyAndId blockId: blockIds) {
+      blockIndices.addAll(_blockIndexService.getBlockTripIndicesForBlock(blockId));
+    }
+    
     List<BlockLayoverIndex> layoverIndices = Collections.emptyList();
     List<FrequencyBlockTripIndex> frequencyIndices = Collections.emptyList();
 

@@ -34,6 +34,7 @@ import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdsMethod;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.AgencyBean;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -81,6 +82,7 @@ import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
+import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
@@ -556,4 +558,39 @@ public interface TransitDataService extends FederatedService {
 
   @FederatedByAggregateMethod
   public List<String> getAllTripProblemReportLabels();
+  
+  /**
+   * Return an id for the currently loaded bundle.  Assumes bundle meta data is loaded.
+   * @return a string representing the current bundle.
+   */
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public String getActiveBundleId();
+
+  /**
+   * Retrieve a list of time predictions for the given trip as represented by the TripStatusBean.
+   * @param tripStatus the query parameters of the trip
+   * @return a list of TimepointPredictionRecords.
+   */
+  @FederatedByAgencyIdMethod
+  public List<TimepointPredictionRecord> getPredictionRecordsForTrip(String agencyId, TripStatusBean tripStatus);
+  
+  /**
+   * Check to see if scheduled service is expected.
+   */
+  @FederatedByAgencyIdMethod
+  public Boolean routeHasUpcomingScheduledService(String agencyId, long time, String routeId, String directionId);
+
+  /**
+   * Check to see if scheduled service is expected.
+   */
+  @FederatedByAgencyIdMethod
+  public Boolean stopHasUpcomingScheduledService(String agencyId, long time, String stopId, String routeId, String directionId);
+
+  /**
+   * Given search string input, match against GTFS route short names and return a list of 
+   * potential matches. 
+   */
+  @FederatedByAgencyIdMethod
+  public List<String> getSearchSuggestions(String agencyId, String input);
+
 }

@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.onebusaway</groupId>
         <artifactId>onebusaway-application-modules</artifactId>
-        <version>1.1.7</version>
+        <version>1.1.12-SNAPSHOT</version>
     </parent>
     <artifactId>onebusaway-transit-data</artifactId>
     <packaging>jar</packaging>
@@ -22,7 +22,11 @@
             <artifactId>onebusaway-federations</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-realtime-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

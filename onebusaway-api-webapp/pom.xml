@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.7</version>
+    <version>1.1.12-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-api-webapp</artifactId>
   <packaging>war</packaging>
@@ -34,6 +34,14 @@
       <artifactId>onebusaway-siri-api</artifactId>
       <version>1.0.0</version>
     </dependency>
+
+    <!-- For GTFS-realtime support -->
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-gtfs-realtime-api</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
 
     <!-- RMI-like service for wiring up services between VMs -->
     <dependency>
@@ -78,6 +86,11 @@
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
 
+<!--     <dependency> -->
+<!--       <groupId>org.slf4j</groupId> -->
+<!--       <artifactId>slf4j-log4j12</artifactId> -->
+<!--       <scope>test</scope> -->
+<!--     </dependency> -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -90,7 +103,11 @@
 		<artifactId>mysql-connector-java</artifactId>
 		<version>5.1.17</version>
 	</dependency>
-    
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

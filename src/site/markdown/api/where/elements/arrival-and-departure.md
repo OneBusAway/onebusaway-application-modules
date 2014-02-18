@@ -5,7 +5,7 @@
 The `<arrivalAndDeparture/>` element captures information about the arrival and departure of a transit vehicle at a transit stop.  The element is returned as a sub-element in the following api methods:
 
 * [arrivals-and-departures-for-stop](../methods/arrivals-and-departures-for-stop.html)
-* [arrival-and-departure-for-stop](../methods/arrrival-and-departure-for-stop.html)
+* [arrival-and-departure-for-stop](../methods/arrival-and-departure-for-stop.html)
 
 ## Example
 

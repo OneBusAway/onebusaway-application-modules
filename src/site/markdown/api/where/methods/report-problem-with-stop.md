@@ -9,7 +9,7 @@ problem reporting admin interface.
 
 ## Sample Request
 
-http://api.onebusaway.org/api/where/report-problem-with-stop/1_75403.xml?key=TEST&code=stop_name_wrong
+http://api.pugetsound.onebusaway.org/api/where/report-problem-with-stop/1_75403.xml?key=TEST&code=stop_name_wrong
 
 ## Sample Response
 
@@ -26,7 +26,7 @@ http://api.onebusaway.org/api/where/report-problem-with-stop/1_75403.xml?key=TES
 ## Request Parameters
 
 * stopId - the trip id, encoded directly in the url:
-    * `http://api.onebusaway.org/api/where/report-problem-with-stop/[ID GOES HERE].xml`
+    * `http://api.pugetsound.onebusaway.org/api/where/report-problem-with-stop/[ID GOES HERE].xml`
 * code - a string code identifying the nature of the problem
     * `stop_name_wrong` - the stop name in OneBusAway differs from the actual stop's name
     * `stop_number_wrong` - the stop number in OneBusAway differs from the actual stop's number

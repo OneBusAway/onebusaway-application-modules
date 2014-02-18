@@ -229,12 +229,12 @@ public class StopTimeEntriesFactory {
       double d = 0;
       StopTimeEntryImpl prev = null;
       for (StopTimeEntryImpl stopTime : stopTimes) {
-        stopTime.setShapeDistTraveled(d);
         if (prev != null) {
           CoordinatePoint from = prev.getStop().getStopLocation();
           CoordinatePoint to = stopTime.getStop().getStopLocation();
           d += SphericalGeometryLibrary.distance(from, to);
         }
+        stopTime.setShapeDistTraveled(d);
         prev = stopTime;
       }
     }

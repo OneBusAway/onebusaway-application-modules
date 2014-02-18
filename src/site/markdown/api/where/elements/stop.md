@@ -31,6 +31,7 @@ The following fields are optional:
 
 * direction
 * code
+* wheelchairBoarding
 
 The following values are supported for the `<wheelchairBoarding/>` element:
 

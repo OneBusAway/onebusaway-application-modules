@@ -140,6 +140,15 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
   public int getStopTimesWithPredictions() {
     return _stopTimesWithPredictions.intValue();
   }
+  
+  private boolean useScheduleDeviationHistory = true;
+  /**
+   * Optionally turn off schedule deviation history support.
+   * @param useScheduleDeviationHistory flag to use/disable deviation history
+   */
+  public void setScheduleDeviationHistory(boolean useScheduleDeviationHistory) {
+    this.useScheduleDeviationHistory = useScheduleDeviationHistory;
+  }
 
   /****
    * {@link ArrivalsAndDeparturesBeanService} Interface
@@ -215,6 +224,10 @@ public class ArrivalsAndDeparturesBeanServiceImpl implements
     applyBlockLocationToBean(instance, bean, time);
     applySituationsToBean(time, instance, bean);
 
+    if (!this.useScheduleDeviationHistory) {
+      return bean;
+    }
+    
     int step = 120;
 
     ScheduleDeviationHistogram histo = _realTimeHistoryService.getScheduleDeviationHistogramForArrivalAndDepartureInstance(
