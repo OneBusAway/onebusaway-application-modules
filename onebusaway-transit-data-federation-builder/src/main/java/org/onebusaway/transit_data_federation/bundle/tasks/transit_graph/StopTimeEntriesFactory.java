@@ -355,13 +355,16 @@ public class StopTimeEntriesFactory {
         } else {
           for (int x = 0; x < stopTimes.size(); x++) {
             StopTime st = stopTimes.get(x);
-            System.err.println(x + " " + st.getId() + " " + arrivalTimes[x]
-                + " " + departureTimes[x]);
+            final String msg = x + " " + st.getId() + " " + arrivalTimes[x]
+                + " " + departureTimes[x];
+            _log.error(msg);
+            System.err.println(msg);
           }
-          throw new IllegalStateException(
-              "arrival time is less than previous departure time for stop time with trip_id="
-                  + stopTime.getTrip().getId() + " stop_sequence="
-                  + stopTime.getStopSequence());
+          final String exceptionMessage = "arrival time is less than previous departure time for stop time with trip_id="
+              + stopTime.getTrip().getId() + " stop_sequence="
+              + stopTime.getStopSequence();
+          _log.error(exceptionMessage);
+            throw new IllegalStateException(exceptionMessage);
         }
       }
     }
