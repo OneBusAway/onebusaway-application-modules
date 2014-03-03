@@ -3,10 +3,9 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.7</version>
+        <version>1.1.12-st-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-bundle-loader</artifactId>
-  <version>1.1.12-st-SNAPSHOT</version>
   <name>onebusaway-bundle-loader</name>
 
   <dependencies>
