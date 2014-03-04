@@ -104,7 +104,7 @@
                         <containerId>tomcat5x</containerId>
                         <zipUrlInstaller>
                             <url>http://developer.onebusaway.org/dist/apache-tomcat-${tomcat-version}.zip</url>
-                            <installDir>${java.io.tmpdir}/cargo-installs</installDir>
+                            <installDir>${java.io.tmpdir}/cargo-installs-sound</installDir>
                         </zipUrlInstaller>
                     </container>
                     <!-- Don't wait around once the container has been started -->
