@@ -86,7 +86,6 @@ public class FederatedTransitDataBundleCreatorMain {
   private static final String ARG_OSM = "osm";
 
   public static void main(String[] args) throws Exception {
-    System.out.println(System.getProperties());
     FederatedTransitDataBundleCreatorMain main = new FederatedTransitDataBundleCreatorMain();
     main.run(args);
   }

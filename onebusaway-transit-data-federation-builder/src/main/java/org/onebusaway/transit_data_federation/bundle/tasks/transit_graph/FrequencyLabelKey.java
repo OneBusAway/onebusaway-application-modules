@@ -19,15 +19,24 @@ import java.util.List;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
 
-class FrequencyStopsLabelKey extends FrequencyRouteLabelKey {
+class FrequencyLabelKey {
+
+  private final AgencyAndId routeId;
+
+  private final AgencyAndId serviceId;
 
   private final List<AgencyAndId> stopIds;
 
-  public FrequencyStopsLabelKey(AgencyAndId routeId, AgencyAndId serviceId,
+  public FrequencyLabelKey(AgencyAndId routeId, AgencyAndId serviceId,
       List<AgencyAndId> stopIds) {
-    super(routeId, serviceId);
+    if (routeId == null)
+      throw new IllegalArgumentException();
+    if (serviceId == null)
+      throw new IllegalArgumentException();
     if (stopIds == null)
       throw new IllegalArgumentException();
+    this.routeId = routeId;
+    this.serviceId = serviceId;
     this.stopIds = stopIds;
   }
 
@@ -35,7 +44,8 @@ class FrequencyStopsLabelKey extends FrequencyRouteLabelKey {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + super.hashCode();
+    result = prime * result + routeId.hashCode();
+    result = prime * result + serviceId.hashCode();
     result = prime * result + stopIds.hashCode();
     return result;
   }
@@ -48,10 +58,21 @@ class FrequencyStopsLabelKey extends FrequencyRouteLabelKey {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    if (!super.equals(obj))
+    FrequencyLabelKey other = (FrequencyLabelKey) obj;
+    if (routeId == null) {
+      if (other.routeId != null)
+        return false;
+    } else if (!routeId.equals(other.routeId))
       return false;
-    FrequencyStopsLabelKey other = (FrequencyStopsLabelKey) obj;
-    if (!stopIds.equals(other.stopIds))
+    if (serviceId == null) {
+      if (other.serviceId != null)
+        return false;
+    } else if (!serviceId.equals(other.serviceId))
+      return false;
+    if (stopIds == null) {
+      if (other.stopIds != null)
+        return false;
+    } else if (!stopIds.equals(other.stopIds))
       return false;
     return true;
   }
