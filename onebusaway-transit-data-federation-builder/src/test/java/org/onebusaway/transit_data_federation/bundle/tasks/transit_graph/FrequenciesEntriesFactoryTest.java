@@ -153,7 +153,7 @@ public class FrequenciesEntriesFactoryTest {
     /**
      * We don't allow a mix of trips with exactTimes=0 and exactTimes=1
      */
-    freqB.setExactTimes(2);
+    freqB.setExactTimes(1);
 
     Mockito.when(_dao.getAllFrequencies()).thenReturn(
         Arrays.asList(freqA, freqB));
@@ -210,7 +210,7 @@ public class FrequenciesEntriesFactoryTest {
     frequency.setStartTime(time(7, 00));
     frequency.setEndTime(time(9, 00));
     frequency.setHeadwaySecs(600);
-    frequency.setExactTimes(2);
+    frequency.setExactTimes(1);
 
     Mockito.when(_dao.getAllFrequencies()).thenReturn(Arrays.asList(frequency));
 

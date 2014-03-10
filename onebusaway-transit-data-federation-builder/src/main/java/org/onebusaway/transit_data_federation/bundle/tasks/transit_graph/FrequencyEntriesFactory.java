@@ -157,7 +157,7 @@ public class FrequencyEntriesFactory {
       }
 
       frequencies.add(entry);
-    } else if (exactTimesValue == 2) {
+    } else if (exactTimesValue == 1) {
       TripEntry trip = graph.getTripEntryForId(tripId);
       FrequencyLabelKey frequencyLabelKey = getFrequencyLabelKeyForTrip(trip);
       List<FrequencyEntry> frequencyLabels = frequencyLabelsByKey.get(frequencyLabelKey);
