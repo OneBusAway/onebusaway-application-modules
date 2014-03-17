@@ -19,7 +19,6 @@ package org.onebusaway.api.actions.api.where;
 import java.io.IOException;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
