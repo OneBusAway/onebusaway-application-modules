@@ -15,11 +15,15 @@
  */
 package org.onebusaway.transit_data_federation.services.bundle;
 
+import org.onebusaway.transit_data.model.config.BundleMetadata;
+
 public interface BundleManagementService {
 
 	/**
 	 * Return the id of the currently loaded bundle from the bundle meta-data. 
 	 */
 	public String getActiveBundleId();
+
+  BundleMetadata getBundleMetadata();
 
 }

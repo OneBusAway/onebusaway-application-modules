@@ -58,6 +58,7 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
+import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -643,6 +644,11 @@ class TransitDataServiceImpl implements TransitDataService {
   @Override
   public String getActiveBundleId() {
 	  return _bundleManagementService.getActiveBundleId();
+  }
+  
+  @Override
+  public BundleMetadata getBundleMetadata() {
+    return _bundleManagementService.getBundleMetadata();
   }
 
   @Override

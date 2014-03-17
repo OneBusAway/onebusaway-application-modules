@@ -55,6 +55,7 @@ import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
+import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -86,7 +87,6 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
-
 /**
  * The {@link TransitDataService} is the primary interface separating
  * user-interface modules that access transit data from the data providers that
@@ -566,6 +566,9 @@ public interface TransitDataService extends FederatedService {
   @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
   public String getActiveBundleId();
 
+  @FederatedByAgencyIdMethod(propertyExpression = "agencyId")
+  public BundleMetadata getBundleMetadata();
+  
   /**
    * Retrieve a list of time predictions for the given trip as represented by the TripStatusBean.
    * @param tripStatus the query parameters of the trip
