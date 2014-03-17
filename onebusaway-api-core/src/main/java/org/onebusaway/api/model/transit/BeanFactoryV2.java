@@ -65,6 +65,7 @@ import org.onebusaway.transit_data.model.blocks.BlockConfigurationBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
+import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
@@ -170,6 +171,11 @@ public class BeanFactoryV2 {
     return entry(getStopsForRoute(result, includePolylines));
   }
 
+  public EntryWithReferencesBean<ConfigV2Bean> getResponse(
+      BundleMetadata result) {
+    return entry(getConfig(result));
+  }
+  
   public ListWithReferencesBean<AgencyWithCoverageV2Bean> getResponse(
       List<AgencyWithCoverageBean> beans) {
     List<AgencyWithCoverageV2Bean> list = new ArrayList<AgencyWithCoverageV2Bean>();
@@ -301,6 +307,15 @@ public class BeanFactoryV2 {
     return bean;
   }
 
+  public ConfigV2Bean getConfig(BundleMetadata meta) {
+    ConfigV2Bean bean = new ConfigV2Bean();
+    bean.setId(meta.getId());
+    bean.setName(meta.getName());
+    bean.setServiceDateFrom(meta.getServiceDateFrom());
+    bean.setServiceDateTo(meta.getServiceDateTo());
+    return bean;
+  }
+  
   public StopV2Bean getStop(StopBean stop) {
     StopV2Bean bean = new StopV2Bean();
     bean.setCode(stop.getCode());
