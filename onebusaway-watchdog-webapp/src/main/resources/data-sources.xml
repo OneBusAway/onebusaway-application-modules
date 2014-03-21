@@ -26,6 +26,14 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
         http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
+    <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
+      <property name="order" value="-2" />
+      <property name="properties">
+          <props>
+              <prop key="bundlePath">/tmp/oba-st-bundle</prop>
+         </props>
+      </property>
+    </bean>
 
     
 </beans>
