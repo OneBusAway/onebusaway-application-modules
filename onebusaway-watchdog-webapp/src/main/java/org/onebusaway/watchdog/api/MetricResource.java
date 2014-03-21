@@ -19,15 +19,47 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
+import org.onebusaway.transit_data.services.TransitDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Path("/metric")
 @Component
 public class MetricResource {
 
+  private static Logger _log = LoggerFactory.getLogger(MetricResource.class);
+  private TransitDataService _tds;
+  
+  @Autowired
+  public void setTransitDataService(TransitDataService tds) {
+    _tds = tds;
+  }
+  
   @Path("/ping")
   @GET
    public Response ping() {
+    try {
+    _tds.getAgenciesWithCoverage();
     return Response.ok("1").build();
+    } catch (Exception e) {
+      _log.error("ping broke", e);
+      return Response.serverError().build();
+    }
+    
    }
+  
+  
+  @Path("/agency-count")
+  @GET
+  public Response countAgencies() {
+    try {
+      int count = _tds.getAgenciesWithCoverage().size();
+      return Response.ok("" + count).build();
+    } catch (Exception e) {
+      _log.error("agency-count broke", e);
+      return Response.serverError().build();
+    }
+  }
 }

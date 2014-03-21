@@ -25,6 +25,8 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
+	<!--  jersey scan of public APIs  -->
     <context:component-scan base-package="org.onebusaway.watchdog.api" />
-
+	<!--  TDS support -->
+	<import resource="classpath:org/onebusaway/transit_data_federation/application-context.xml" />
 </beans>
