@@ -119,8 +119,9 @@ public class FrequencyEntriesFactory {
         applyFrequenciesToBlockTrips(tripsInBlock,
             frequenciesAlongBlockByTripId);
       } else if (!frequencyLabelsAlongBlockByTripId.isEmpty()) {
-
+        //FIXME: empty block is suspicious
       } else {
+        //FIXME: empty block is also suspicious
       }
     }
   }
