@@ -652,6 +652,8 @@ class StopTimeServiceImpl implements StopTimeService {
 
       InstanceState state = new InstanceState(serviceDate.getTime(), frequency);
 
+      frequencyBehavior = frequency.getExactTimes() == 0 ? EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED : EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED;
+
       switch (frequencyBehavior) {
 
         case INCLUDE_UNSPECIFIED: {

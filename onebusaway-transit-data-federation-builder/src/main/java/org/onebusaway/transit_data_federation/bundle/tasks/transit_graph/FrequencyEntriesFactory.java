@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.Frequency;
@@ -58,8 +57,6 @@ public class FrequencyEntriesFactory {
   public void processFrequencies(TransitGraphImpl graph) {
 
     Map<AgencyAndId, List<FrequencyEntry>> frequenciesByTripId = new HashMap<AgencyAndId, List<FrequencyEntry>>();
-    Map<FrequencyLabelKey, List<FrequencyEntry>> frequencyLabelsByKey = new FactoryMap<FrequencyLabelKey, List<FrequencyEntry>>(
-        new ArrayList<FrequencyEntry>());
 
     Collection<Frequency> allFrequencies = _gtfsDao.getAllFrequencies();
 
@@ -73,16 +70,13 @@ public class FrequencyEntriesFactory {
             + allFrequencies.size());
       frequencyIndex++;
 
-      processRawFrequency(graph, frequency, frequenciesByTripId,
-          frequencyLabelsByKey, exactTimesValueByTrip);
+      processRawFrequency(graph, frequency, frequenciesByTripId, exactTimesValueByTrip);
     }
 
     FrequencyComparator comparator = new FrequencyComparator();
     for (List<FrequencyEntry> list : frequenciesByTripId.values()) {
       Collections.sort(list, comparator);
     }
-
-    applyFrequencyLabelsToTrips(graph, frequencyLabelsByKey);
 
     int blockIndex = 0;
 
@@ -99,36 +93,24 @@ public class FrequencyEntriesFactory {
       List<TripEntryImpl> tripsInBlock = entry.getValue();
 
       Map<AgencyAndId, List<FrequencyEntry>> frequenciesAlongBlockByTripId = new HashMap<AgencyAndId, List<FrequencyEntry>>();
-      Map<AgencyAndId, FrequencyEntry> frequencyLabelsAlongBlockByTripId = new HashMap<AgencyAndId, FrequencyEntry>();
 
       for (TripEntryImpl trip : tripsInBlock) {
         List<FrequencyEntry> frequencies = frequenciesByTripId.get(trip.getId());
         if (frequencies != null) {
           frequenciesAlongBlockByTripId.put(trip.getId(), frequencies);
         }
-        if (trip.getFrequencyLabel() != null) {
-          frequencyLabelsAlongBlockByTripId.put(trip.getId(),
-              trip.getFrequencyLabel());
-        }
       }
 
       checkForInvalidFrequencyConfigurations(blockId, tripsInBlock,
-          frequenciesAlongBlockByTripId, frequencyLabelsAlongBlockByTripId);
+          frequenciesAlongBlockByTripId);
 
-      if (!frequenciesAlongBlockByTripId.isEmpty()) {
-        applyFrequenciesToBlockTrips(tripsInBlock,
+      applyFrequenciesToBlockTrips(tripsInBlock,
             frequenciesAlongBlockByTripId);
-      } else if (!frequencyLabelsAlongBlockByTripId.isEmpty()) {
-        //FIXME: empty block is suspicious
-      } else {
-        //FIXME: empty block is also suspicious
-      }
     }
   }
 
   private void processRawFrequency(TransitGraphImpl graph, Frequency frequency,
       Map<AgencyAndId, List<FrequencyEntry>> frequenciesByTripId,
-      Map<FrequencyLabelKey, List<FrequencyEntry>> frequencyLabelsByKey,
       Map<AgencyAndId, Integer> exactTimesValueByTrip) {
     AgencyAndId tripId = frequency.getTrip().getId();
 
@@ -147,9 +129,8 @@ public class FrequencyEntriesFactory {
     }
 
     FrequencyEntryImpl entry = new FrequencyEntryImpl(frequency.getStartTime(),
-        frequency.getEndTime(), frequency.getHeadwaySecs());
+        frequency.getEndTime(), frequency.getHeadwaySecs(), frequency.getExactTimes());
 
-    if (exactTimesValue == 0) {
       List<FrequencyEntry> frequencies = frequenciesByTripId.get(tripId);
 
       if (frequencies == null) {
@@ -158,25 +139,11 @@ public class FrequencyEntriesFactory {
       }
 
       frequencies.add(entry);
-    } else if (exactTimesValue == 1) {
-      TripEntry trip = graph.getTripEntryForId(tripId);
-      FrequencyLabelKey frequencyLabelKey = getFrequencyLabelKeyForTrip(trip);
-      List<FrequencyEntry> frequencyLabels = frequencyLabelsByKey.get(frequencyLabelKey);
-      frequencyLabels.add(entry);
-    }
   }
 
   private void checkForInvalidFrequencyConfigurations(AgencyAndId blockId,
       List<TripEntryImpl> tripsInBlock,
-      Map<AgencyAndId, List<FrequencyEntry>> frequenciesAlongBlockByTripId,
-      Map<AgencyAndId, FrequencyEntry> frequencyLabelsAlongBlockByTripId) {
-
-    if (!frequenciesAlongBlockByTripId.isEmpty()
-        && !frequencyLabelsAlongBlockByTripId.isEmpty()) {
-      throw new IllegalStateException(
-          "A block of trips cannot have trips with both normal Frequency entries and label Frequency entries: blockId="
-              + blockId);
-    }
+      Map<AgencyAndId, List<FrequencyEntry>> frequenciesAlongBlockByTripId) {
 
     if (!frequenciesAlongBlockByTripId.isEmpty()
         && frequenciesAlongBlockByTripId.size() < tripsInBlock.size()) {
@@ -198,51 +165,7 @@ public class FrequencyEntriesFactory {
       blockConfig.setFrequencies(frequencies);
     }
   }
-
-  private void applyFrequencyLabelsToTrips(TransitGraphImpl graph,
-      Map<FrequencyLabelKey, List<FrequencyEntry>> frequencyLabelsByKey) {
-
-    for (TripEntry trip : graph.getAllTrips()) {
-      List<FrequencyEntry> applicableFrequencyLabels = getApplicableFrequencyLabelsForTrip(
-          frequencyLabelsByKey, trip);
-      if (applicableFrequencyLabels.isEmpty()) {
-        continue;
-      } else if (applicableFrequencyLabels.size() > 1) {
-        throw new IllegalStateException(
-            "multiple applicable frequency labels for tripId=" + trip.getId());
-      }
-
-      FrequencyEntry frequencyLabel = applicableFrequencyLabels.get(0);
-      ((TripEntryImpl) trip).setFrequencyLabel(frequencyLabel);
-    }
-  }
-
-  private List<FrequencyEntry> getApplicableFrequencyLabelsForTrip(
-      Map<FrequencyLabelKey, List<FrequencyEntry>> frequencyLabelsByKey,
-      TripEntry trip) {
-
-    FrequencyLabelKey key = getFrequencyLabelKeyForTrip(trip);
-    List<FrequencyEntry> labels = frequencyLabelsByKey.get(key);
-    if (labels == null) {
-      return Collections.emptyList();
-    }
-    List<FrequencyEntry> applicableLabels = new ArrayList<FrequencyEntry>();
-    int startTime = trip.getStopTimes().get(0).getDepartureTime();
-    for (FrequencyEntry label : labels) {
-      if (label.getStartTime() <= startTime && startTime < label.getEndTime()) {
-        applicableLabels.add(label);
-      }
-    }
-    return applicableLabels;
-  }
-
-  private FrequencyLabelKey getFrequencyLabelKeyForTrip(TripEntry trip) {
-    AgencyAndId routeId = trip.getRoute().getId();
-    AgencyAndId serviceId = trip.getServiceId().getId();
-    List<AgencyAndId> stopIds = MappingLibrary.map(trip.getStopTimes(),
-        "stop.id");
-    return new FrequencyLabelKey(routeId, serviceId, stopIds);
-  }
+  
 
   private List<FrequencyEntry> computeBlockFrequencies(BlockEntryImpl block,
       List<BlockTripEntry> trips,
