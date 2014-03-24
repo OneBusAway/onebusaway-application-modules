@@ -85,13 +85,16 @@ class GtfsRealtimeTripLibrary {
   }
 
   /**
-   * Trip updates describe a trip which is undertaken by a vehicle (which is itself described in vehicle positions),
-   * but GTFS-realtime does not demand that the two messages be related to each other.  Where trip updates and
-   * vehicle positions both contain a vehicle ID, we use those vehicle IDs to join the messages together.
+   * Trip updates describe a trip which is undertaken by a vehicle (which is
+   * itself described in vehicle positions), but GTFS-realtime does not demand
+   * that the two messages be related to each other. Where trip updates and
+   * vehicle positions both contain a vehicle ID, we use those vehicle IDs to
+   * join the messages together.
    *
-   * Otherwise, where vehicle IDs are not provided, we join trip updates and vehicle positions based
-   * on trip descriptors. If multiple trip descriptors are provided for a block, they are all used,
-   * but cannot be mapped to vehicle positions.
+   * Otherwise, where vehicle IDs are not provided, we join trip updates and
+   * vehicle positions based on trip descriptors. If multiple trip descriptors
+   * are provided for a block, they are all used, but cannot be mapped to
+   * vehicle positions.
    *
    * @param tripUpdates
    * @param vehiclePositions
@@ -104,7 +107,7 @@ class GtfsRealtimeTripLibrary {
     Map<String, TripUpdate> tripUpdatesByVehicleId = new HashMap<String, TripUpdate>();
     Map<String, VehiclePosition> vehiclePositionsByVehicleId = new HashMap<String, VehiclePosition>();
 
-    ListMultimap<BlockDescriptor, TripUpdate> anonymousTripUpdatesByBlock = ArrayListMultimap.<BlockDescriptor, TripUpdate>create();
+    ListMultimap<BlockDescriptor, TripUpdate> anonymousTripUpdatesByBlock = ArrayListMultimap.<BlockDescriptor, TripUpdate> create();
     Map<BlockDescriptor, VehiclePosition> anonymousVehiclePositionsByBlock = new HashMap<BlockDescriptor, VehiclePosition>();
 
     Set<BlockDescriptor> badAnonymousVehiclePositions = new HashSet<BlockDescriptor>();
@@ -136,9 +139,10 @@ class GtfsRealtimeTripLibrary {
 
         }
       } else {
-        // Trip update does not have a vehicle ID - index by TripDescriptor
-        // (includes start date and time).
-
+        /*
+         * Trip update does not have a vehicle ID - index by TripDescriptor
+         * (includes start date and time).
+         */
         TripDescriptor td = tu.getTrip();
         BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(td);
 
@@ -181,8 +185,10 @@ class GtfsRealtimeTripLibrary {
 
         }
       } else if (vp.hasTrip()) {
-        // Vehicle position does not have vehicle ID but has
-        // TripDescriptor, so use that, but only if there is only one.
+        /*
+         * Vehicle position does not have vehicle ID but has TripDescriptor, so
+         * use that, but only if there is only one.
+         */
 
         TripDescriptor td = vp.getTrip();
         BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(td);
@@ -190,23 +196,31 @@ class GtfsRealtimeTripLibrary {
         if (!anonymousVehiclePositionsByBlock.containsKey(bd)) {
           anonymousVehiclePositionsByBlock.put(bd, vp);
         } else {
-          //When we have multiple VehiclePositions for a block but no way to uniquely distinguish them
-          //there is nothing useful or reasonable we can do with the data.
-          _log.warn("Multiple anonymous VehiclePositions for trip {}; giving up.",
+          /*
+           * When we have multiple VehiclePositions for a block but no way to
+           * uniquely distinguish them there is nothing useful or reasonable we
+           * can do with the data.
+           */
+          _log.warn(
+              "Multiple anonymous VehiclePositions for trip {}; giving up.",
               td.getTripId());
           badAnonymousVehiclePositions.add(bd);
         }
       } else {
-        // Pathological VehiclePosition contains no identifying information;
-        // skip.
+        /*
+         * Pathological VehiclePosition contains no identifying information;
+         * skip.
+         */
         continue;
       }
     }
 
-    for (BlockDescriptor bd: badAnonymousVehiclePositions) {
+    // Remove multiple vehicles where multiple anonymous vehicles are present in a block
+    for (BlockDescriptor bd : badAnonymousVehiclePositions) {
       anonymousVehiclePositionsByBlock.remove(bd);
     }
 
+    //Map updates by vehicle ID
     for (Map.Entry<String, TripUpdate> e : tripUpdatesByVehicleId.entrySet()) {
       CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
 
@@ -222,33 +236,46 @@ class GtfsRealtimeTripLibrary {
       updates.add(update);
     }
 
-
-    for (Entry<BlockDescriptor, Collection<TripUpdate>> e : anonymousTripUpdatesByBlock.asMap().entrySet()){
+    //Map anonymous updates by block descriptor
+    for (Entry<BlockDescriptor, Collection<TripUpdate>> e : anonymousTripUpdatesByBlock.asMap().entrySet()) {
       CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
 
       BlockDescriptor bd = e.getKey();
       update.block = bd;
       update.tripUpdates = new ArrayList<TripUpdate>(e.getValue());
 
-      if (update.tripUpdates.size() == 1 && anonymousVehiclePositionsByBlock.containsKey(bd)) {
+      if (update.tripUpdates.size() == 1
+          && anonymousVehiclePositionsByBlock.containsKey(bd)) {
         update.vehiclePosition = anonymousVehiclePositionsByBlock.get(bd);
       }
 
       updates.add(update);
     }
 
+    //Set vehicle ID in block if possible
     for (CombinedTripUpdatesAndVehiclePosition update : updates) {
-      if (update.vehiclePosition != null) {
-        VehiclePosition vp = update.vehiclePosition;
-        if (vp.hasVehicle() && vp.getVehicle().hasId()) {
-          update.block.setVehicleId(vp.getVehicle().getId());
+      String vehicleId = null;
+
+      for (TripUpdate tu : update.tripUpdates) {
+        if (tu.hasVehicle() && tu.getVehicle().hasId()) {
+          vehicleId = tu.getVehicle().getId();
+          break;
         }
+      }
+
+      if (vehicleId == null && update.vehiclePosition != null
+          && update.vehiclePosition.hasVehicle()
+          && update.vehiclePosition.getVehicle().hasId()) {
+        vehicleId = update.vehiclePosition.getVehicle().getId();
+      }
+
+      if (vehicleId != null) {
+        update.block.setVehicleId(vehicleId);
       }
     }
 
     return updates;
   }
-
 
   /**
    * The {@link VehicleLocationRecord} is guaranteed to have a
