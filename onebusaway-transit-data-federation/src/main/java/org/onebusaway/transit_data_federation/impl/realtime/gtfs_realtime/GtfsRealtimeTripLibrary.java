@@ -146,6 +146,10 @@ class GtfsRealtimeTripLibrary {
         TripDescriptor td = tu.getTrip();
         BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(td);
 
+        if (bd == null) {
+          continue;
+        }
+
         if (!anonymousTripUpdatesByBlock.containsKey(bd)) {
           anonymousTripUpdatesByBlock.put(bd, tu);
         } else {
@@ -193,6 +197,10 @@ class GtfsRealtimeTripLibrary {
         TripDescriptor td = vp.getTrip();
         BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(td);
 
+        if (bd == null) {
+          continue;
+        }
+
         if (!anonymousVehiclePositionsByBlock.containsKey(bd)) {
           anonymousVehiclePositionsByBlock.put(bd, vp);
         } else {
@@ -215,12 +223,13 @@ class GtfsRealtimeTripLibrary {
       }
     }
 
-    // Remove multiple vehicles where multiple anonymous vehicles are present in a block
+    // Remove multiple vehicles where multiple anonymous vehicles are present in
+    // a block
     for (BlockDescriptor bd : badAnonymousVehiclePositions) {
       anonymousVehiclePositionsByBlock.remove(bd);
     }
 
-    //Map updates by vehicle ID
+    // Map updates by vehicle ID
     for (Map.Entry<String, TripUpdate> e : tripUpdatesByVehicleId.entrySet()) {
       CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
 
@@ -236,7 +245,7 @@ class GtfsRealtimeTripLibrary {
       updates.add(update);
     }
 
-    //Map anonymous updates by block descriptor
+    // Map anonymous updates by block descriptor
     for (Entry<BlockDescriptor, Collection<TripUpdate>> e : anonymousTripUpdatesByBlock.asMap().entrySet()) {
       CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
 
@@ -252,7 +261,7 @@ class GtfsRealtimeTripLibrary {
       updates.add(update);
     }
 
-    //Set vehicle ID in block if possible
+    // Set vehicle ID in block if possible
     for (CombinedTripUpdatesAndVehiclePosition update : updates) {
       String vehicleId = null;
 
