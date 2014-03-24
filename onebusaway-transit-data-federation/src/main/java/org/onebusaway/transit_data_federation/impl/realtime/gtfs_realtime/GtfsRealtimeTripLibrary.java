@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2014 Kurt Raschke <kurt@kurtraschke.com>
  * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +16,6 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -34,9 +28,9 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.Position;
@@ -44,10 +38,22 @@ import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
-import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 class GtfsRealtimeTripLibrary {
 
@@ -78,56 +84,176 @@ class GtfsRealtimeTripLibrary {
     _currentTime = currentTime;
   }
 
+  /**
+   * Trip updates describe a trip which is undertaken by a vehicle (which is itself described in vehicle positions),
+   * but GTFS-realtime does not demand that the two messages be related to each other.  Where trip updates and
+   * vehicle positions both contain a vehicle ID, we use those vehicle IDs to join the messages together.
+   *
+   * Otherwise, where vehicle IDs are not provided, we join trip updates and vehicle positions based
+   * on trip descriptors. If multiple trip descriptors are provided for a block, they are all used,
+   * but cannot be mapped to vehicle positions.
+   *
+   * @param tripUpdates
+   * @param vehiclePositions
+   * @return
+   */
   public List<CombinedTripUpdatesAndVehiclePosition> groupTripUpdatesAndVehiclePositions(
-      FeedMessage tripUpdates, FeedMessage vehiclePositions) {
+      FeedMessage tripUpdateMessage, FeedMessage vehiclePositionsMessage) {
+    List<CombinedTripUpdatesAndVehiclePosition> updates = new ArrayList<CombinedTripUpdatesAndVehiclePosition>();
 
-    Map<BlockDescriptor, List<TripUpdate>> tripUpdatesByBlockDescriptor = getTripUpdatesByBlockDescriptor(tripUpdates);
-    boolean tripsIncludeVehicleIds = determineIfTripUpdatesIncludeVehicleIds(tripUpdatesByBlockDescriptor.keySet());
-    Map<BlockDescriptor, FeedEntity> vehiclePositionsByBlockDescriptor = getVehiclePositionsByBlockDescriptor(
-        vehiclePositions, tripsIncludeVehicleIds);
+    Map<String, TripUpdate> tripUpdatesByVehicleId = new HashMap<String, TripUpdate>();
+    Map<String, VehiclePosition> vehiclePositionsByVehicleId = new HashMap<String, VehiclePosition>();
 
-    List<CombinedTripUpdatesAndVehiclePosition> updates = new ArrayList<CombinedTripUpdatesAndVehiclePosition>(
-        tripUpdatesByBlockDescriptor.size());
+    ListMultimap<BlockDescriptor, TripUpdate> anonymousTripUpdatesByBlock = ArrayListMultimap.<BlockDescriptor, TripUpdate>create();
+    Map<BlockDescriptor, VehiclePosition> anonymousVehiclePositionsByBlock = new HashMap<BlockDescriptor, VehiclePosition>();
 
-    for (Map.Entry<BlockDescriptor, List<TripUpdate>> entry : tripUpdatesByBlockDescriptor.entrySet()) {
+    Set<BlockDescriptor> badAnonymousVehiclePositions = new HashSet<BlockDescriptor>();
 
-      CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
-      update.block = entry.getKey();
-      update.tripUpdates = entry.getValue();
+    for (FeedEntity fe : tripUpdateMessage.getEntityList()) {
+      if (!fe.hasTripUpdate()) {
+        continue;
+      }
 
-      FeedEntity vehiclePositionEntity = vehiclePositionsByBlockDescriptor.get(update.block);
-      if (vehiclePositionEntity != null) {
-        VehiclePosition vehiclePosition = vehiclePositionEntity.getVehicle();
-        update.vehiclePosition = vehiclePosition;
-        if (vehiclePosition.hasVehicle()) {
-          VehicleDescriptor vehicle = vehiclePosition.getVehicle();
-          if (vehicle.hasId()) {
-            update.block.setVehicleId(vehicle.getId());
+      TripUpdate tu = fe.getTripUpdate();
+
+      if (tu.hasVehicle() && tu.getVehicle().hasId()) {
+        // Trip update has a vehicle ID - index by vehicle ID
+        String vehicleId = tu.getVehicle().getId();
+
+        if (!tripUpdatesByVehicleId.containsKey(vehicleId)) {
+          tripUpdatesByVehicleId.put(vehicleId, tu);
+        } else {
+          _log.warn("Multiple TripUpdates for vehicle {}; taking newest.",
+              vehicleId);
+
+          TripUpdate otherUpdate = tripUpdatesByVehicleId.get(vehicleId);
+
+          long otherTimestamp = otherUpdate.getTimestamp();
+
+          if (tu.getTimestamp() > otherTimestamp) {
+            tripUpdatesByVehicleId.put(vehicleId, tu);
           }
+
+        }
+      } else {
+        // Trip update does not have a vehicle ID - index by TripDescriptor
+        // (includes start date and time).
+
+        TripDescriptor td = tu.getTrip();
+        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(td);
+
+        if (!anonymousTripUpdatesByBlock.containsKey(bd)) {
+          anonymousTripUpdatesByBlock.put(bd, tu);
+        } else {
+          _log.warn(
+              "Multiple anonymous TripUpdates for trip {}; will not map to VehiclePosition.",
+              td.getTripId());
+          anonymousTripUpdatesByBlock.put(bd, tu);
         }
       }
 
-      if (update.block.getVehicleId() == null) {
-        for (TripUpdate tripUpdate : update.tripUpdates) {
-          if (tripUpdate.hasVehicle()) {
-            VehicleDescriptor vehicle = tripUpdate.getVehicle();
-            if (vehicle.hasId()) {
-              update.block.setVehicleId(vehicle.getId());
-            }
+    }
+
+    for (FeedEntity fe : vehiclePositionsMessage.getEntityList()) {
+      if (!fe.hasVehicle()) {
+        continue;
+      }
+
+      VehiclePosition vp = fe.getVehicle();
+
+      if (vp.hasVehicle() && vp.getVehicle().hasId()) {
+        // Vehicle position has a vehicle ID - index by vehicle ID
+        String vehicleId = vp.getVehicle().getId();
+
+        if (!vehiclePositionsByVehicleId.containsKey(vehicleId)) {
+          vehiclePositionsByVehicleId.put(vehicleId, vp);
+        } else {
+          _log.warn("Multiple updates for vehicle {}; taking newest.",
+              vehicleId);
+
+          VehiclePosition otherUpdate = vehiclePositionsByVehicleId.get(vehicleId);
+
+          long otherTimestamp = otherUpdate.getTimestamp();
+
+          if (vp.getTimestamp() > otherTimestamp) {
+            vehiclePositionsByVehicleId.put(vehicleId, vp);
           }
+
         }
+      } else if (vp.hasTrip()) {
+        // Vehicle position does not have vehicle ID but has
+        // TripDescriptor, so use that, but only if there is only one.
+
+        TripDescriptor td = vp.getTrip();
+        BlockDescriptor bd = getTripDescriptorAsBlockDescriptor(td);
+
+        if (!anonymousVehiclePositionsByBlock.containsKey(bd)) {
+          anonymousVehiclePositionsByBlock.put(bd, vp);
+        } else {
+          //When we have multiple VehiclePositions for a block but no way to uniquely distinguish them
+          //there is nothing useful or reasonable we can do with the data.
+          _log.warn("Multiple anonymous VehiclePositions for trip {}; giving up.",
+              td.getTripId());
+          badAnonymousVehiclePositions.add(bd);
+        }
+      } else {
+        // Pathological VehiclePosition contains no identifying information;
+        // skip.
+        continue;
+      }
+    }
+
+    for (BlockDescriptor bd: badAnonymousVehiclePositions) {
+      anonymousVehiclePositionsByBlock.remove(bd);
+    }
+
+    for (Map.Entry<String, TripUpdate> e : tripUpdatesByVehicleId.entrySet()) {
+      CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
+
+      String vehicleId = e.getKey();
+      TripUpdate tu = e.getValue();
+      update.block = getTripDescriptorAsBlockDescriptor(tu.getTrip());
+      update.tripUpdates = Collections.singletonList(tu);
+
+      if (vehiclePositionsByVehicleId.containsKey(vehicleId)) {
+        update.vehiclePosition = vehiclePositionsByVehicleId.get(vehicleId);
       }
 
       updates.add(update);
     }
 
+
+    for (Entry<BlockDescriptor, Collection<TripUpdate>> e : anonymousTripUpdatesByBlock.asMap().entrySet()){
+      CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
+
+      BlockDescriptor bd = e.getKey();
+      update.block = bd;
+      update.tripUpdates = new ArrayList<TripUpdate>(e.getValue());
+
+      if (update.tripUpdates.size() == 1 && anonymousVehiclePositionsByBlock.containsKey(bd)) {
+        update.vehiclePosition = anonymousVehiclePositionsByBlock.get(bd);
+      }
+
+      updates.add(update);
+    }
+
+    for (CombinedTripUpdatesAndVehiclePosition update : updates) {
+      if (update.vehiclePosition != null) {
+        VehiclePosition vp = update.vehiclePosition;
+        if (vp.hasVehicle() && vp.getVehicle().hasId()) {
+          update.block.setVehicleId(vp.getVehicle().getId());
+        }
+      }
+    }
+
     return updates;
   }
 
+
   /**
-   * The {@link VehicleLocationRecord} is guarnateed to have a
+   * The {@link VehicleLocationRecord} is guaranteed to have a
    * {@link VehicleLocationRecord#getVehicleId()} value.
-   * 
+   *
    * @param update
    * @return
    */
@@ -161,121 +287,7 @@ class GtfsRealtimeTripLibrary {
     return record;
   }
 
-  /****
-   * 
-   ****/
-
-  private boolean determineIfTripUpdatesIncludeVehicleIds(
-      Collection<BlockDescriptor> blockDescriptors) {
-
-    int vehicleIdCount = 0;
-    for (BlockDescriptor blockDescriptor : blockDescriptors) {
-      if (blockDescriptor.getVehicleId() != null)
-        vehicleIdCount++;
-    }
-
-    return vehicleIdCount > blockDescriptors.size() / 2;
-  }
-
-  private Map<BlockDescriptor, List<TripUpdate>> getTripUpdatesByBlockDescriptor(
-      FeedMessage tripUpdates) {
-
-    Map<BlockDescriptor, List<TripUpdate>> tripUpdatesByBlockDescriptor = new FactoryMap<BlockDescriptor, List<TripUpdate>>(
-        new ArrayList<TripUpdate>());
-
-    int totalTrips = 0;
-    int unknownTrips = 0;
-
-    for (FeedEntity entity : tripUpdates.getEntityList()) {
-      TripUpdate tripUpdate = entity.getTripUpdate();
-      if (tripUpdate == null) {
-        _log.warn("expected a FeedEntity with a TripUpdate");
-        continue;
-      }
-      TripDescriptor trip = tripUpdate.getTrip();
-      BlockDescriptor blockDescriptor = getTripDescriptorAsBlockDescriptor(
-          trip, true);
-      totalTrips++;
-      if (blockDescriptor == null) {
-        unknownTrips++;
-        continue;
-      }
-
-      if (!hasDelayValue(tripUpdate)) {
-        continue;
-      }
-
-      tripUpdatesByBlockDescriptor.get(blockDescriptor).add(tripUpdate);
-    }
-
-    if (unknownTrips > 0) {
-      _log.warn("unknown/total trips= {}/{}", unknownTrips, totalTrips);
-    }
-
-    return tripUpdatesByBlockDescriptor;
-  }
-
-  private boolean hasDelayValue(TripUpdate tripUpdate) {
-
-    if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
-      OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
-      if (obaTripUpdate.hasDelay()) {
-        return true;
-      }
-    }
-
-    if (tripUpdate.getStopTimeUpdateCount() == 0)
-      return false;
-
-    StopTimeUpdate stopTimeUpdate = tripUpdate.getStopTimeUpdate(0);
-    if (!(stopTimeUpdate.hasArrival() || stopTimeUpdate.hasDeparture()))
-      return false;
-
-    boolean hasDelay = false;
-    if (stopTimeUpdate.hasDeparture()) {
-      StopTimeEvent departure = stopTimeUpdate.getDeparture();
-      hasDelay |= departure.hasDelay();
-      hasDelay |= departure.hasTime();
-    }
-    if (stopTimeUpdate.hasArrival()) {
-      StopTimeEvent arrival = stopTimeUpdate.getArrival();
-      hasDelay |= arrival.hasDelay();
-      hasDelay |= arrival.hasTime();
-    }
-    return hasDelay;
-  }
-
-  private Map<BlockDescriptor, FeedEntity> getVehiclePositionsByBlockDescriptor(
-      FeedMessage vehiclePositions, boolean includeVehicleIds) {
-
-    Map<BlockDescriptor, FeedEntity> vehiclePositionsByBlockDescriptor = new HashMap<BlockDescriptor, FeedEntity>();
-
-    for (FeedEntity entity : vehiclePositions.getEntityList()) {
-      VehiclePosition vehiclePosition = entity.getVehicle();
-      if (vehiclePosition == null) {
-        _log.warn("expected a FeedEntity with a VehiclePosition");
-        continue;
-      }
-      if (!(vehiclePosition.hasTrip() || vehiclePosition.hasPosition())) {
-        continue;
-      }
-      TripDescriptor trip = vehiclePosition.getTrip();
-      BlockDescriptor blockDescriptor = getTripDescriptorAsBlockDescriptor(
-          trip, includeVehicleIds);
-      if (blockDescriptor != null) {
-        FeedEntity existing = vehiclePositionsByBlockDescriptor.put(
-            blockDescriptor, entity);
-        if (existing != null) {
-          _log.warn("multiple updates found for trip: " + trip);
-        }
-      }
-    }
-
-    return vehiclePositionsByBlockDescriptor;
-  }
-
-  private BlockDescriptor getTripDescriptorAsBlockDescriptor(
-      TripDescriptor trip, boolean includeVehicleIds) {
+  private BlockDescriptor getTripDescriptorAsBlockDescriptor(TripDescriptor trip) {
     if (!trip.hasTripId()) {
       return null;
     }
@@ -346,7 +358,7 @@ class GtfsRealtimeTripLibrary {
               best.isInPast = false;
               best.scheduleDeviation = delay;
             }
-            
+
             if (obaTripUpdate.hasTimestamp()) {
               best.timestamp = obaTripUpdate.getTimestamp() * 1000;
             }

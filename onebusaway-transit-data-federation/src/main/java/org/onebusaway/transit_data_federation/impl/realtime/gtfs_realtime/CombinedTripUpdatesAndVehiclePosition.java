@@ -15,10 +15,10 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import java.util.List;
-
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
+
+import java.util.List;
 
 class CombinedTripUpdatesAndVehiclePosition implements
     Comparable<CombinedTripUpdatesAndVehiclePosition> {
@@ -31,5 +31,10 @@ class CombinedTripUpdatesAndVehiclePosition implements
   public int compareTo(CombinedTripUpdatesAndVehiclePosition o) {
     return block.getBlockEntry().getId().compareTo(
         o.block.getBlockEntry().getId());
+  }
+
+  @Override
+  public String toString() {
+    return "block=" + block.toString() + " tripUpdates=" + tripUpdates.toString() + ((vehiclePosition != null) ? " vehiclePosition=" + vehiclePosition.toString() : "");
   }
 }
