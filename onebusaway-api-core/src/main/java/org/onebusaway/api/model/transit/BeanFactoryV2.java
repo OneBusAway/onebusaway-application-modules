@@ -309,6 +309,7 @@ public class BeanFactoryV2 {
 
   public ConfigV2Bean getConfig(BundleMetadata meta) {
     ConfigV2Bean bean = new ConfigV2Bean();
+    if (meta == null) return bean;
     bean.setId(meta.getId());
     bean.setName(meta.getName());
     bean.setServiceDateFrom(meta.getServiceDateFrom());
