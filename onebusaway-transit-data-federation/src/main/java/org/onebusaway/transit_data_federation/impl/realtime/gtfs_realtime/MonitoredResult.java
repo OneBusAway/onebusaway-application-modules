@@ -25,26 +25,27 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 public class MonitoredResult {
 
   private List<String> _agencyIds = new ArrayList<String>();
-  private Set<String> _unknownTripIds = new HashSet<String>();
-  private Set<AgencyAndId> _invalidBlockIds = new HashSet<AgencyAndId>();
+  private Set<String> _unmatchedTripIds = new HashSet<String>();
+  private Set<String> _matchedTripIds = new HashSet<String>();
+  private Set<AgencyAndId> _unmatchedBlockIds = new HashSet<AgencyAndId>();
   private int _recordsTotal = 0;
   private long _lastUpdate = System.currentTimeMillis();
   
-  public void addUnknownTripId(String tripId) {
-    _unknownTripIds.add(tripId);
+  public void addUnmatchedTripId(String tripId) {
+    _unmatchedTripIds.add(tripId);
   }
 
-  public Set<String> getUnknownTripIds() {
-    return _unknownTripIds;
+  public Set<String> getUnmatchedTripIds() {
+    return _unmatchedTripIds;
   }
 
   
-  public void addInvalidBlockId(AgencyAndId id) {
-    _invalidBlockIds.add(id);
+  public void addUnmatchedBlockId(AgencyAndId id) {
+    _unmatchedBlockIds.add(id);
   }
 
-  public Set<AgencyAndId> getInvalidBlockIds() {
-    return _invalidBlockIds;
+  public Set<AgencyAndId> getUnmatchedBlockIds() {
+    return _unmatchedBlockIds;
   }
   
   void setRecordsTotal(int size) {
@@ -74,6 +75,18 @@ public class MonitoredResult {
   
   public long getLastUpdate() {
     return _lastUpdate;
+  }
+
+  public Set<String> getMatchedTripIds() {
+    return _matchedTripIds;
+  }
+
+  public void setMatchedTripIds(Set<String> allTripIds) {
+    this._matchedTripIds = allTripIds;
+  }
+
+  public void addMatchedTripId(String tripId) {
+    this._matchedTripIds.add(tripId);
   }
 
 

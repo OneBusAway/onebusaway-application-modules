@@ -52,6 +52,7 @@ import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 
@@ -245,21 +246,24 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private synchronized void handeUpdates(MonitoredResult result, FeedMessage tripUpdates,
       FeedMessage vehiclePositions, FeedMessage alerts) {
 
-    List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(
+    List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
         tripUpdates, vehiclePositions);
     result.setRecordsTotal(combinedUpdates.size());
-    handleCombinedUpdates(combinedUpdates);
+    handleCombinedUpdates(result, combinedUpdates);
     handleAlerts(alerts);
   }
 
-  private void handleCombinedUpdates(
+  private void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
 
     Set<AgencyAndId> seenVehicles = new HashSet<AgencyAndId>();
 
     for (CombinedTripUpdatesAndVehiclePosition update : updates) {
-      VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(update);
+      VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
       if (record != null) {
+        if (record.getTripId() != null) {
+          result.addUnmatchedTripId(record.getTripId().toString());
+        }
         AgencyAndId vehicleId = record.getVehicleId();
         seenVehicles.add(vehicleId);
         Date timestamp = new Date(record.getTimeOfRecord());
