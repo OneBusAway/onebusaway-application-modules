@@ -163,6 +163,15 @@ class GtfsRealtimeTripLibrary {
      */
     record.setVehicleId(record.getBlockId());
 
+    if (result != null) {
+      if (record.getTripId() != null) {
+        result.addMatchedTripId(record.getTripId().toString());
+      } else {
+        // we don't have a tripId, use the BlockId instead
+        result.addMatchedTripId(record.getBlockId().toString());
+      }
+    }
+    
     if (blockDescriptor.getVehicleId() != null) {
       String agencyId = record.getBlockId().getAgencyId();
       record.setVehicleId(new AgencyAndId(agencyId,
@@ -293,9 +302,12 @@ class GtfsRealtimeTripLibrary {
     TripEntry tripEntry = _entitySource.getTrip(trip.getTripId());
     if (tripEntry == null) {
       if (result != null) {
-        result.addUnknownTripId(trip.getTripId());
+        _log.debug("reporting unmatched trip with id=" + trip.getTripId());
+        result.addUnmatchedTripId(trip.getTripId());
+      } else {
+        _log.warn("no trip found with id=" + trip.getTripId());
       }
-      _log.warn("no trip found with id=" + trip.getTripId());
+      
       return null;
     }
     BlockEntry block = tripEntry.getBlock();
@@ -324,7 +336,7 @@ class GtfsRealtimeTripLibrary {
     }
     if (instances.isEmpty()) {
       if (result != null) {
-        result.addInvalidBlockId(block.getId());
+        result.addUnmatchedBlockId(block.getId());
       }
       _log.warn("could not find any active schedules instance for the specified block="
           + block.getId() + " tripUpdates=" + tripUpdates);

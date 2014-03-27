@@ -201,7 +201,7 @@ public class BlockStatusServiceImpl implements BlockStatusService {
     List<BlockLocation> inRange = new ArrayList<BlockLocation>();
     for (BlockLocation location : locations) {
       CoordinatePoint p = location.getLocation();
-      if (bounds.contains(p))
+      if (p != null && bounds.contains(p))
         inRange.add(location);
     }
 

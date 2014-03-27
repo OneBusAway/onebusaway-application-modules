@@ -17,17 +17,27 @@ package org.onebusaway.watchdog.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
+import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +49,7 @@ public class MetricResource {
   private TransitDataService _tds;
   private List<MonitoredDataSource> _dataSources = null;
   private ObjectMapper _mapper = new ObjectMapper();
+  
   @Autowired
   public void setTransitDataService(TransitDataService tds) {
     _tds = tds;
@@ -75,6 +86,23 @@ public class MetricResource {
     }
   }
   
+  @Path("/agency-id-list")
+  @GET
+  public Response getAgencyIdList() {
+    try {
+      
+      List<AgencyWithCoverageBean> agencyBeans = _tds.getAgenciesWithCoverage();
+      List<String> agencyIds = new ArrayList<String>();
+      for (AgencyWithCoverageBean agency : agencyBeans) {
+        agencyIds.add(agency.getAgency().getId());
+      }
+      return Response.ok(ok("agency-id-list", agencyIds)).build();
+    } catch (Exception e) {
+      _log.error("getAgencyCount broke", e);
+      return Response.ok(error("agency-id-list", e)).build();
+    }
+  }
+
   
   @Path("/realtime/{agencyId}/total-records")
   @GET
@@ -85,16 +113,7 @@ public class MetricResource {
         _log.error("no configured data sources");
         return Response.ok(error("total-records", "no configured data sources")).build();
       }
-      
-      for (MonitoredDataSource mds : _dataSources) {
-        MonitoredResult result = mds.getMonitoredResult();
-        if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            totalRecords += result.getRecordsTotal();
-          }
-        }
-      }
+      totalRecords = getTotalRecordCount(agencyId);
       return Response.ok(ok("total-records", totalRecords)).build();
     } catch (Exception e) {
       _log.error("getTotalRecords broke", e);
@@ -102,6 +121,7 @@ public class MetricResource {
     }
   }
   
+
   @Path("/realtime/{agencyId}/unmatched-trips")
   @GET
   public Response getUnmatchedTrips(@PathParam("agencyId") String agencyId) {
@@ -116,8 +136,9 @@ public class MetricResource {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
         for (String mAgencyId : result.getAgencyIds()) {
+          _log.debug("examining agency=" + mAgencyId + " with unmatched trips=" + result.getUnmatchedTripIds().size());
           if (agencyId.equals(mAgencyId)) {
-            unmatchedTrips += result.getUnknownTripIds().size();
+            unmatchedTrips += result.getUnmatchedTripIds().size();
           }
         }
       }
@@ -143,7 +164,7 @@ public class MetricResource {
         if (result == null) continue;
         for (String mAgencyId : result.getAgencyIds()) {
           if (agencyId.equals(mAgencyId)) {
-            unmatchedTripIds.addAll(result.getUnknownTripIds());
+            unmatchedTripIds.addAll(result.getUnmatchedTripIds());
           }
         }
       }
@@ -154,7 +175,101 @@ public class MetricResource {
     }
   }
 
+  @Path("/realtime/{agencyId}/schedule-realtime-trips-delta")
+  @GET
+  public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId,
+      @QueryParam(value="maxLat") final Double maxLat,
+      @QueryParam(value="maxLon") final Double maxLon,
+      @QueryParam(value="minLat") final Double minLat,
+      @QueryParam(value="minLon") final Double minLon) {
+    try {
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("schedule-realtime-trips-delta", "con configured data sources")).build();
+      }
+
+      int scheduleTrips = getScheduledTrips(agencyId, minLat, minLon, maxLat, maxLon);
+      int totalRecords = getTotalRecordCount(agencyId);
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips + ", totalRecords=" + totalRecords);
+      int delta = scheduleTrips - validRealtimeTrips;
+      return Response.ok(ok("schedule-realtime-trips-delta", delta)).build();
+    } catch (Exception e) {
+      _log.error("getUnmatchedTripIds broke", e);
+      return Response.ok(error("schedule-realtime-trips-delta", e)).build();
+    }
+  }
+
+  @Path("/realtime/{agencyId}/scheduled-trips")
+  @GET
+  public Response getScheduleTripCount(@PathParam("agencyId") String agencyId,
+      @QueryParam(value="maxLat") final Double maxLat,
+      @QueryParam(value="maxLon") final Double maxLon,
+      @QueryParam(value="minLat") final Double minLat,
+      @QueryParam(value="minLon") final Double minLon) {
+    try {
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("scheduled-trips", "con configured data sources")).build();
+      }
+
+      int scheduleTrips = getScheduledTrips(agencyId, minLat, minLon, maxLat, maxLon);
+      
+      return Response.ok(ok("scheduled-trips", scheduleTrips)).build();
+    } catch (Exception e) {
+      _log.error("getUnmatchedTripIds broke", e);
+      return Response.ok(error("scheduled-trips", e)).build();
+    }
+  }
   
+  @Path("/realtime/{agencyId}/matched-trips")
+  @GET
+  public Response getMatchedTripCount(@PathParam("agencyId") String agencyId,
+      @QueryParam(value="maxLat") final Double maxLat,
+      @QueryParam(value="maxLon") final Double maxLon,
+      @QueryParam(value="minLat") final Double minLat,
+      @QueryParam(value="minLon") final Double minLon) {
+    try {
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("matched-trips", "con configured data sources")).build();
+      }
+
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      return Response.ok(ok("matched-trips", validRealtimeTrips)).build();
+    } catch (Exception e) {
+      _log.error("getUnmatchedTripIds broke", e);
+      return Response.ok(error("matched-trips", e)).build();
+    }
+  }
+
+  
+  @Path("/realtime/{agencyId}/buses-in-service-percent")
+  @GET
+  public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId,
+      @QueryParam(value="maxLat") final Double maxLat,
+      @QueryParam(value="maxLon") final Double maxLon,
+      @QueryParam(value="minLat") final Double minLat,
+      @QueryParam(value="minLon") final Double minLon) {
+    try {
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("buses-in-service-percent", "con configured data sources")).build();
+      }
+
+      int scheduleTrips = getScheduledTrips(agencyId, minLat, minLon, maxLat, maxLon);
+      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+      double numerator = scheduleTrips - validRealtimeTrips;
+      _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips);
+      double percent = 100 - Math.abs((numerator / scheduleTrips) * 100);
+      return Response.ok(ok("buses-in-service-percent", percent)).build();
+    } catch (Exception e) {
+      _log.error("getUnmatchedTripIds broke", e);
+      return Response.ok(error("buses-in-service-percent", e)).build();
+    }
+  }
+
+
   @Path("/realtime/{agencyId}/last-update-delta")
   @GET
   public Response getLastUpdateDelta(@PathParam("agencyId") String agencyId) {
@@ -180,6 +295,65 @@ public class MetricResource {
       return Response.ok(error("last-update-delta", e)).build();
     }
   }
+  
+  private int getTotalRecordCount(String agencyId) throws Exception {
+    int totalRecords = 0;
+
+    for (MonitoredDataSource mds : _dataSources) {
+      MonitoredResult result = mds.getMonitoredResult();
+      if (result == null) continue;
+      for (String mAgencyId : result.getAgencyIds()) {
+        if (agencyId.equals(mAgencyId)) {
+          totalRecords += result.getRecordsTotal();
+        }
+      }
+    }
+    return totalRecords;
+  }
+  
+  private int getScheduledTrips(String agencyId, Double minLat, Double minLon, Double maxLat, Double maxLon) {
+    TripsForBoundsQueryBean query = new TripsForBoundsQueryBean();
+    CoordinateBounds maxBounds = new CoordinateBounds(minLat, minLon, maxLat, maxLon);
+    query.setBounds(maxBounds);
+    query.setTime(System.currentTimeMillis());
+    query.setMaxCount(Integer.MAX_VALUE);
+    
+    TripDetailsInclusionBean inclusion = query.getInclusion();
+    inclusion.setIncludeTripBean(true);
+    _log.debug(maxLat + ", " + maxLon + " -> " + minLat + ", " + minLon + "  :" + maxBounds.toString());
+    ListBean<TripDetailsBean> allTrips =  _tds.getTripsForBounds(query);
+    List<TripDetailsBean> agencyTrips = new ArrayList<TripDetailsBean>();
+    if (allTrips == null) {
+      return 0;
+    }
+
+    _log.debug("allTrips size=" + allTrips.getList().size());
+
+    for (TripDetailsBean trip : allTrips.getList()) {
+      if (trip.getTripId().startsWith(agencyId + "_")) {
+        agencyTrips.add(trip);
+      }
+    }
+    return agencyTrips.size();
+  }
+  
+  private List<String> getValidRealtimeTripIds(String agencyId) {
+    Set<String> tripIds = new HashSet<String>();
+
+    for (MonitoredDataSource mds : _dataSources) {
+      MonitoredResult result = mds.getMonitoredResult();
+      if (result == null) continue;
+      for (String tripId : result.getMatchedTripIds()) {
+        if (agencyId.equals(AgencyAndIdLibrary.convertFromString(tripId).getAgencyId())) {
+          tripIds.add(tripId);
+        }
+      }
+    }
+    List<String> prunedTripIds = new ArrayList<String>(tripIds.size());
+    prunedTripIds.addAll(tripIds);
+    return prunedTripIds;
+  }
+
   private String ok(String metricName, Object value) {
     Metric metric = new Metric();
     metric.setMetricName(metricName);
