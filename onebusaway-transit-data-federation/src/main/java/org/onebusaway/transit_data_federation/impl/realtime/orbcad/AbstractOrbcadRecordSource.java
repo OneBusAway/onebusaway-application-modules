@@ -404,9 +404,10 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
         BlockTripEntry activeTrip = location.getActiveTrip();
         if (activeTrip != null) {
           message.setTripId(activeTrip.getTrip().getId());
+          _currentResult.addMatchedTripId(activeTrip.getTrip().getId().toString());
         } else {
           _log.error("invalid trip for location=" + location);
-          _currentResult.addUnknownTripId(blockId.toString()); // this isn't exactly right
+          _currentResult.addUnmatchedTripId(blockId.toString()); // this isn't exactly right
         }
         // Are we at the start of the block?
         if (location.getDistanceAlongBlock() == 0) {
