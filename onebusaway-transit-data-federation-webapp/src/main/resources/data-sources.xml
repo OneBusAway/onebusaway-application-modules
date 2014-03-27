@@ -23,7 +23,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-              <prop key="bundlePath">/tmp/oba-st-bundle</prop>
+              <prop key="bundlePath">/var/lib/obanyc/oba-st-bundle</prop>
          </props>
       </property>
     </bean>
