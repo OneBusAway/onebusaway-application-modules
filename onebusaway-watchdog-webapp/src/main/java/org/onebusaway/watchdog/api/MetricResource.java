@@ -15,6 +15,7 @@
  */
 package org.onebusaway.watchdog.api;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,13 +24,13 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Path("/metric")
 public class MetricResource {
@@ -37,7 +38,7 @@ public class MetricResource {
   private static Logger _log = LoggerFactory.getLogger(MetricResource.class);
   private TransitDataService _tds;
   private List<MonitoredDataSource> _dataSources = null;
-  
+  private ObjectMapper _mapper = new ObjectMapper();
   @Autowired
   public void setTransitDataService(TransitDataService tds) {
     _tds = tds;
@@ -53,10 +54,10 @@ public class MetricResource {
    public Response ping() {
     try {
     _tds.getAgenciesWithCoverage();
-    return Response.ok("1").build();
+    return Response.ok(ok("ping", 1)).build();
     } catch (Exception e) {
       _log.error("ping broke", e);
-      return Response.serverError().build();
+      return Response.ok(error("ping", e)).build();
     }
     
    }
@@ -67,12 +68,13 @@ public class MetricResource {
   public Response getAgencyCount() {
     try {
       int count = _tds.getAgenciesWithCoverage().size();
-      return Response.ok("" + count).build();
+      return Response.ok(ok("agency-count", count)).build();
     } catch (Exception e) {
       _log.error("getAgencyCount broke", e);
-      return Response.serverError().build();
+      return Response.ok(error("agency-count", e)).build();
     }
   }
+  
   
   @Path("/realtime/{agencyId}/total-records")
   @GET
@@ -81,7 +83,7 @@ public class MetricResource {
       int totalRecords = 0;
       if (this._dataSources == null || this._dataSources.isEmpty()) {
         _log.error("no configured data sources");
-        return Response.serverError().build();
+        return Response.ok(error("total-records", "no configured data sources")).build();
       }
       
       for (MonitoredDataSource mds : _dataSources) {
@@ -93,10 +95,10 @@ public class MetricResource {
           }
         }
       }
-      return Response.ok("" + totalRecords).build();
+      return Response.ok(ok("total-records", totalRecords)).build();
     } catch (Exception e) {
       _log.error("getTotalRecords broke", e);
-      return Response.serverError().build();
+      return Response.ok(error("total-records", e)).build();
     }
   }
   
@@ -107,7 +109,7 @@ public class MetricResource {
       int unmatchedTrips = 0;
       if (this._dataSources == null || this._dataSources.isEmpty()) {
         _log.error("no configured data sources");
-        return Response.serverError().build();
+        return Response.ok(error("unmatched-trips", "no configured data sources")).build();
       }
       
       for (MonitoredDataSource mds : _dataSources) {
@@ -119,10 +121,10 @@ public class MetricResource {
           }
         }
       }
-      return Response.ok("" + unmatchedTrips).build();
+      return Response.ok(ok("unmatched-trips", unmatchedTrips)).build();
     } catch (Exception e) {
       _log.error("getUnmatchedTrips broke", e);
-      return Response.serverError().build();
+      return Response.ok(error("unmatched-trips", e)).build();
     }
   }
 
@@ -133,7 +135,7 @@ public class MetricResource {
       List<String> unmatchedTripIds = new ArrayList<String>();
       if (this._dataSources == null || this._dataSources.isEmpty()) {
         _log.error("no configured data sources");
-        return Response.serverError().build();
+        return Response.ok(error("unmatched-trip-ids", "con configured data sources")).build();
       }
       
       for (MonitoredDataSource mds : _dataSources) {
@@ -145,10 +147,10 @@ public class MetricResource {
           }
         }
       }
-      return Response.ok("" + unmatchedTripIds).build();
+      return Response.ok(ok("unmatched-trip-ids", unmatchedTripIds)).build();
     } catch (Exception e) {
       _log.error("getUnmatchedTripIds broke", e);
-      return Response.serverError().build();
+      return Response.ok(error("unmatched-trip-ids", e)).build();
     }
   }
 
@@ -160,7 +162,7 @@ public class MetricResource {
       long lastUpdate = 0;
       if (this._dataSources == null || this._dataSources.isEmpty()) {
         _log.error("no configured data sources");
-        return Response.serverError().build();
+        return Response.ok(error("last-update-delta", "no configured data sources")).build();
       }
       
       for (MonitoredDataSource mds : _dataSources) {
@@ -172,12 +174,52 @@ public class MetricResource {
           }
         }
       }
-      return Response.ok("" + (System.currentTimeMillis() - lastUpdate)/1000).build();
+      return Response.ok(ok("last-update-delta", (System.currentTimeMillis() - lastUpdate)/1000)).build();
     } catch (Exception e) {
       _log.error("getLastUpdateDelta broke", e);
-      return Response.serverError().build();
+      return Response.ok(error("last-update-delta", e)).build();
+    }
+  }
+  private String ok(String metricName, Object value) {
+    Metric metric = new Metric();
+    metric.setMetricName(metricName);
+    metric.setCurrentTimestamp(System.currentTimeMillis());
+    metric.setMetricValue(value);
+    metric.setResponse("SUCCESS");
+    
+    try {
+      return _mapper.writeValueAsString(metric);
+    } catch (IOException e) {
+      _log.error("metric serialization failed:" + e);
+      return "{response=\"ERROR\"}";
     }
   }
   
+  private String error(String metricName, Exception e) {
+    Metric metric = new Metric();
+    metric.setMetricName(metricName);
+    metric.setErrorMessage(e.toString());
+    metric.setResponse("ERROR");
+    try {
+      return _mapper.writeValueAsString(metric);
+    } catch (IOException ioe) {
+      _log.error("metric serialization failed:" + ioe);
+      return "{response=\"ERROR\"}";
+    }
+  }
+ 
+  private String error(String metricName, String errorMessage) {
+    Metric metric = new Metric();
+    metric.setMetricName(metricName);
+    metric.setErrorMessage(errorMessage);
+    metric.setResponse("ERROR");
+    try {
+      return _mapper.writeValueAsString(metric);
+    } catch (IOException e) {
+      _log.error("metric serialization failed:" + e);
+      return "{response=\"ERROR\"}";
+    }
+
+  }
   
 }
