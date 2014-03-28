@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
@@ -178,17 +179,17 @@ public class MetricResource {
   @Path("/realtime/{agencyId}/schedule-realtime-trips-delta")
   @GET
   public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId,
-      @QueryParam(value="maxLat") final Double maxLat,
-      @QueryParam(value="maxLon") final Double maxLon,
-      @QueryParam(value="minLat") final Double minLat,
-      @QueryParam(value="minLon") final Double minLon) {
+      @QueryParam(value="lat") final Double lat,
+      @QueryParam(value="lon") final Double lon,
+      @QueryParam(value="latSpan") final Double latSpan,
+      @QueryParam(value="lonSpan") final Double lonSpan) {
     try {
       if (this._dataSources == null || this._dataSources.isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("schedule-realtime-trips-delta", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId, minLat, minLon, maxLat, maxLon);
+      int scheduleTrips = getScheduledTrips(agencyId, lat, lon, latSpan, lonSpan);
       int totalRecords = getTotalRecordCount(agencyId);
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
       _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips + ", totalRecords=" + totalRecords);
@@ -203,17 +204,17 @@ public class MetricResource {
   @Path("/realtime/{agencyId}/scheduled-trips")
   @GET
   public Response getScheduleTripCount(@PathParam("agencyId") String agencyId,
-      @QueryParam(value="maxLat") final Double maxLat,
-      @QueryParam(value="maxLon") final Double maxLon,
-      @QueryParam(value="minLat") final Double minLat,
-      @QueryParam(value="minLon") final Double minLon) {
+      @QueryParam(value="lat") final Double lat,
+      @QueryParam(value="lon") final Double lon,
+      @QueryParam(value="latSpan") final Double latSpan,
+      @QueryParam(value="lonSpan") final Double lonSpan) {
     try {
       if (this._dataSources == null || this._dataSources.isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("scheduled-trips", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId, minLat, minLon, maxLat, maxLon);
+      int scheduleTrips = getScheduledTrips(agencyId, lat, lon, latSpan, lonSpan);
       
       return Response.ok(ok("scheduled-trips", scheduleTrips)).build();
     } catch (Exception e) {
@@ -224,11 +225,7 @@ public class MetricResource {
   
   @Path("/realtime/{agencyId}/matched-trips")
   @GET
-  public Response getMatchedTripCount(@PathParam("agencyId") String agencyId,
-      @QueryParam(value="maxLat") final Double maxLat,
-      @QueryParam(value="maxLon") final Double maxLon,
-      @QueryParam(value="minLat") final Double minLat,
-      @QueryParam(value="minLon") final Double minLon) {
+  public Response getMatchedTripCount(@PathParam("agencyId") String agencyId) {
     try {
       if (this._dataSources == null || this._dataSources.isEmpty()) {
         _log.error("no configured data sources");
@@ -247,17 +244,17 @@ public class MetricResource {
   @Path("/realtime/{agencyId}/buses-in-service-percent")
   @GET
   public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId,
-      @QueryParam(value="maxLat") final Double maxLat,
-      @QueryParam(value="maxLon") final Double maxLon,
-      @QueryParam(value="minLat") final Double minLat,
-      @QueryParam(value="minLon") final Double minLon) {
+      @QueryParam(value="lat") final Double lat,
+      @QueryParam(value="lon") final Double lon,
+      @QueryParam(value="latSpan") final Double latSpan,
+      @QueryParam(value="lonSpan") final Double lonSpan) {
     try {
       if (this._dataSources == null || this._dataSources.isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("buses-in-service-percent", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId, minLat, minLon, maxLat, maxLon);
+      int scheduleTrips = getScheduledTrips(agencyId, lat, lon, latSpan, lonSpan);
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
       double numerator = scheduleTrips - validRealtimeTrips;
       _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips);
@@ -311,16 +308,24 @@ public class MetricResource {
     return totalRecords;
   }
   
-  private int getScheduledTrips(String agencyId, Double minLat, Double minLon, Double maxLat, Double maxLon) {
+  private int getScheduledTrips(String agencyId, Double lat, Double lon, Double latSpan, Double lonSpan) {
     TripsForBoundsQueryBean query = new TripsForBoundsQueryBean();
-    CoordinateBounds maxBounds = new CoordinateBounds(minLat, minLon, maxLat, maxLon);
+    if (lat == null || lon == null || latSpan == null || lonSpan == null) {
+      _log.error("getScheduleTrips missing required coordinates:" 
+    + "lat=" + lat
+    + "latSpan=" + latSpan
+    + "lon=" + lon
+    + "lonSpan=" + lonSpan);
+      return -1;
+    }
+    CoordinateBounds maxBounds = SphericalGeometryLibrary.boundsFromLatLonSpan(lat, lon, latSpan, lonSpan);
     query.setBounds(maxBounds);
     query.setTime(System.currentTimeMillis());
     query.setMaxCount(Integer.MAX_VALUE);
     
     TripDetailsInclusionBean inclusion = query.getInclusion();
     inclusion.setIncludeTripBean(true);
-    _log.debug(maxLat + ", " + maxLon + " -> " + minLat + ", " + minLon + "  :" + maxBounds.toString());
+    _log.debug(lat + ", " + lon + " -> " + latSpan + ", " + lonSpan + "  :" + maxBounds.toString());
     ListBean<TripDetailsBean> allTrips =  _tds.getTripsForBounds(query);
     List<TripDetailsBean> agencyTrips = new ArrayList<TripDetailsBean>();
     if (allTrips == null) {
