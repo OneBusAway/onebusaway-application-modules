@@ -92,7 +92,7 @@ class GtfsRealtimeTripLibrary {
    * join the messages together.
    *
    * Otherwise, where vehicle IDs are not provided, we join trip updates and
-   * vehicle positions based on trip descriptors. If multiple trip descriptors
+   * vehicle positions based on trip descriptors. If multiple trip updates
    * are provided for a block, they are all used, but cannot be mapped to
    * vehicle positions.
    *
