@@ -25,13 +25,6 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -48,6 +41,14 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtimeConstants;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class GtfsRealtimeTripLibraryTest {
 
@@ -130,7 +131,7 @@ public class GtfsRealtimeTripLibraryTest {
     Collections.sort(groups);
 
     CombinedTripUpdatesAndVehiclePosition group = groups.get(0);
-    assertSame(blockA, group.block.getBlockEntry());
+    assertSame(blockA, group.block.getBlockInstance().getBlock().getBlock());
     assertEquals(2, group.tripUpdates.size());
     TripUpdate tripUpdate = group.tripUpdates.get(0);
     assertEquals("tripA", tripUpdate.getTrip().getTripId());
@@ -138,7 +139,7 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals("tripB", tripUpdate.getTrip().getTripId());
 
     group = groups.get(1);
-    assertSame(blockB, group.block.getBlockEntry());
+    assertSame(blockB, group.block.getBlockInstance().getBlock().getBlock());
     assertEquals(2, group.tripUpdates.size());
     tripUpdate = group.tripUpdates.get(0);
     assertEquals("tripC", tripUpdate.getTrip().getTripId());

@@ -15,15 +15,6 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
@@ -58,8 +49,18 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
@@ -530,6 +531,11 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     for (BlockLocation location : locations) {
 
+      if (sti.isFrequencyOffsetSpecified()
+          && ((blockInstance.getBlock().getDepartureTimeForIndex(0) + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
+        continue;
+      }
+
       ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
           sti, frequencyOffsetTime);
       applyBlockLocationToInstance(instance, location,
@@ -706,7 +712,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   /**
    * This method both sets the predicted arrival time for an instance, but also
    * updates the scheduled arrival time for a frequency-based instance
-   * 
+   *
    * @param instance
    * @param arrivalTime
    */
@@ -722,7 +728,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   /**
    * This method both sets the predicted departure time for an instance, but
    * also updates the scheduled departure time for a frequency-based instance
-   * 
+   *
    * @param instance
    * @param departureTime
    */
@@ -1083,10 +1089,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   /**
    * Constructs an {@link ArrivalAndDepartureTime} object for the specified
    * {@link BlockInstance} and {@link BlockStopTimeEntry}.
-   * 
+   *
    * For frequency-based trips, the calculation is a bit complicated.
-   * 
-   * 
+   *
+   *
    * @param blockInstance
    * @param blockStopTime
    * @param prevFrequencyTime

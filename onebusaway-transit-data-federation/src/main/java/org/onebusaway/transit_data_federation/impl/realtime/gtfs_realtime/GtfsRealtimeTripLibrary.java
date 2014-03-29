@@ -19,6 +19,8 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
+import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
@@ -45,9 +47,11 @@ import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -301,7 +305,7 @@ class GtfsRealtimeTripLibrary {
 
     BlockDescriptor blockDescriptor = update.block;
 
-    record.setBlockId(blockDescriptor.getBlockEntry().getId());
+    record.setBlockId(blockDescriptor.getBlockInstance().getBlock().getBlock().getId());
 
     applyTripUpdatesToRecord(blockDescriptor, update.tripUpdates, record);
 
@@ -327,52 +331,103 @@ class GtfsRealtimeTripLibrary {
     if (!trip.hasTripId()) {
       return null;
     }
+
     TripEntry tripEntry = _entitySource.getTrip(trip.getTripId());
     if (tripEntry == null) {
       _log.warn("no trip found with id=" + trip.getTripId());
       return null;
     }
-    BlockEntry block = tripEntry.getBlock();
-    BlockDescriptor blockDescriptor = new BlockDescriptor();
-    blockDescriptor.setBlockEntry(block);
-    if (trip.hasStartDate())
-      blockDescriptor.setStartDate(trip.getStartDate());
-    if (trip.hasStartTime())
-      blockDescriptor.setStartTime(trip.getStartTime());
 
+    ServiceDate serviceDate = null;
+    BlockInstance instance;
+
+    BlockEntry block = tripEntry.getBlock();
+
+    if (trip.hasStartDate()) {
+      try {
+        serviceDate = ServiceDate.parseString(trip.getStartDate());
+      } catch (ParseException ex) {
+        _log.warn("Could not parse service date " + trip.getStartDate(), ex);
+      }
+    }
+
+    if (serviceDate != null) {
+      instance = _blockCalendarService.getBlockInstance(block.getId(),
+          serviceDate.getAsDate().getTime());
+
+      if (instance == null) {
+        _log.warn("block " + block.getId() + " does not exist on service date "
+            + serviceDate);
+        return null;
+      }
+    } else {
+      long t = currentTime();
+      long timeFrom = t - 30 * 60 * 1000;
+      long timeTo = t + 30 * 60 * 1000;
+
+      List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
+          block.getId(), timeFrom, timeTo);
+
+      if (instances.isEmpty()) {
+        instances = _blockCalendarService.getClosestActiveBlocks(block.getId(),
+            t);
+      }
+
+      if (instances.isEmpty()) {
+        _log.warn("could not find any active instance for the specified block="
+            + block.getId() + " trip=" + trip);
+        return null;
+      }
+
+      instance = instances.get(0);
+    }
+
+    if (serviceDate == null) {
+      serviceDate = new ServiceDate(new Date(instance.getServiceDate()));
+    }
+
+    BlockDescriptor blockDescriptor = new BlockDescriptor();
+    blockDescriptor.setBlockInstance(instance);
+    blockDescriptor.setStartDate(serviceDate);
+    if (trip.hasStartTime()) {
+      int tripStartTime = StopTimeFieldMappingFactory.getStringAsSeconds(trip.getStartTime());
+      int blockStartTime = getBlockStartTimeForTripStartTime(instance,
+          tripEntry.getId(), tripStartTime);
+
+      blockDescriptor.setStartTime(blockStartTime);
+    }
     return blockDescriptor;
+  }
+
+  private int getBlockStartTimeForTripStartTime(BlockInstance instance,
+      AgencyAndId tripId, int tripStartTime) {
+    BlockConfigurationEntry block = instance.getBlock();
+
+    Map<AgencyAndId, BlockTripEntry> blockTripsById = MappingLibrary.mapToValue(
+        block.getTrips(), "trip.id");
+
+    int rawBlockStartTime = block.getDepartureTimeForIndex(0);
+
+    int rawTripStartTime = blockTripsById.get(tripId).getDepartureTimeForIndex(
+        0);
+
+    int adjustedBlockStartTime = rawBlockStartTime
+        + (tripStartTime - rawTripStartTime);
+
+    return adjustedBlockStartTime;
   }
 
   private void applyTripUpdatesToRecord(BlockDescriptor blockDescriptor,
       List<TripUpdate> tripUpdates, VehicleLocationRecord record) {
 
-    BlockEntry block = blockDescriptor.getBlockEntry();
-    long t = currentTime();
-    long timeFrom = t - 30 * 60 * 1000;
-    long timeTo = t + 30 * 60 * 1000;
+    BlockInstance instance = blockDescriptor.getBlockInstance();
 
-    List<BlockInstance> instances = _blockCalendarService.getActiveBlocks(
-        block.getId(), timeFrom, timeTo);
-    if (instances.isEmpty()) {
-      instances = _blockCalendarService.getClosestActiveBlocks(block.getId(), t);
-    }
-    if (instances.isEmpty()) {
-      _log.warn("could not find any active schedules instance for the specified block="
-          + block.getId() + " tripUpdates=" + tripUpdates);
-      return;
-    }
-
-    /**
-     * TODO: Eventually, use startDate and startTime to distinguish between
-     * different instances
-     */
-    BlockInstance instance = instances.get(0);
     BlockConfigurationEntry blockConfiguration = instance.getBlock();
     List<BlockTripEntry> blockTrips = blockConfiguration.getTrips();
-
     Map<String, List<TripUpdate>> tripUpdatesByTripId = MappingLibrary.mapToValueList(
         tripUpdates, "trip.tripId");
 
+    long t = currentTime();
     int currentTime = (int) ((t - instance.getServiceDate()) / 1000);
     BestScheduleDeviation best = new BestScheduleDeviation();
 
@@ -425,6 +480,9 @@ class GtfsRealtimeTripLibrary {
     }
 
     record.setServiceDate(instance.getServiceDate());
+    if (blockDescriptor.getStartTime() != null) {
+      record.setBlockStartTime(blockDescriptor.getStartTime());
+    }
     record.setScheduleDeviation(best.scheduleDeviation);
     if (best.timestamp != 0) {
       record.setTimeOfRecord(best.timestamp);
