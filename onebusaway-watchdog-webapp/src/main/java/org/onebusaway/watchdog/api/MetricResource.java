@@ -254,11 +254,11 @@ public class MetricResource {
         return Response.ok(error("buses-in-service-percent", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId, lat, lon, latSpan, lonSpan);
-      int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
-      double numerator = scheduleTrips - validRealtimeTrips;
+      double scheduleTrips = getScheduledTrips(agencyId, lat, lon, latSpan, lonSpan);
+      double validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+
       _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips);
-      double percent = 100 - Math.abs((numerator / scheduleTrips) * 100);
+      double percent = Math.abs((validRealtimeTrips / scheduleTrips) * 100);
       return Response.ok(ok("buses-in-service-percent", percent)).build();
     } catch (Exception e) {
       _log.error("getUnmatchedTripIds broke", e);
