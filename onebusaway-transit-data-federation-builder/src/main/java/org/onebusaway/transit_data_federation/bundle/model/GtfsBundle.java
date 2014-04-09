@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.onebusaway.gtfs.serialization.GtfsReader;
 import org.onebusaway.transit_data_federation.bundle.FederatedTransitDataBundleCreator;
 
 /**
