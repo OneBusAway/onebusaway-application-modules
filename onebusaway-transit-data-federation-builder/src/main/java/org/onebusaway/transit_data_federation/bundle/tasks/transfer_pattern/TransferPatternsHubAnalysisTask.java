@@ -82,7 +82,7 @@ public class TransferPatternsHubAnalysisTask implements Runnable {
       if (line.length() == 0)
         continue;
 
-      List<String> tokens = CSVLibrary.parse(line);
+      List<String> tokens = new CSVLibrary().parse(line);
       String index = tokens.get(0);
       String stopId = tokens.get(1);
       String parentIndex = null;
