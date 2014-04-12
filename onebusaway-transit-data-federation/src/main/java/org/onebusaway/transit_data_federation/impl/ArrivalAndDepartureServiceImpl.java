@@ -688,6 +688,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
      * departures here? Because they may have been artificially shifted for a
      * frequency-based method
      */
+
+    //TODO: review this change in 25354bad75 and figure out if it is the right way to do this.
+
     InstanceState state = instance.getStopTimeInstance().getState();
     ArrivalAndDepartureTime schedule = ArrivalAndDepartureTime.getScheduledTime(
         state, instance.getBlockStopTime());
