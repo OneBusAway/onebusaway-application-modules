@@ -47,6 +47,8 @@ import org.springframework.stereotype.Component;
 class ShapeGeospatialIndexTask implements Runnable {
 
   private static Logger _log = LoggerFactory.getLogger(ShapeGeospatialIndexTask.class);
+  private static double MIN_LAT_LON = 0.0;
+  private static double MAX_LAT_LON = 360.0;
 
   private TransitGraphDao _transitGraphDao;
 
@@ -119,9 +121,8 @@ class ShapeGeospatialIndexTask implements Runnable {
 
     CoordinateBounds fullBounds = new CoordinateBounds();
     for (StopEntry stop : _transitGraphDao.getAllStops()) {
-      if (stop.getStopLat() > 0.0001 && stop.getStopLon() > 0.0001
-          && stop.getStopLat() < 360.0 && stop.getStopLon() < 360.0) {
-        _log.info("stop[" + stop + "]=" + stop.getStopLat()  + ", " + stop.getStopLon());
+      if (stop.getStopLat() > MIN_LAT_LON && stop.getStopLon() > MIN_LAT_LON
+          && stop.getStopLat() < MAX_LAT_LON && stop.getStopLon() < MAX_LAT_LON) {
         fullBounds.addPoint(stop.getStopLat(), stop.getStopLon());
       } else {
         _log.error("rejecting stop " + stop + " for invalid (lat,lon)=" 
@@ -140,28 +141,15 @@ class ShapeGeospatialIndexTask implements Runnable {
 
     double latStep = gridCellExample.getMaxLat() - gridCellExample.getMinLat();
     double lonStep = gridCellExample.getMaxLon() - gridCellExample.getMinLon();
-    _log.info("generating shape point geospatial index for "  + getAllShapeIds().size() 
-        + " shapes with step(" + latStep + ", " + lonStep + ")");
-    
+
+    _log.info("generating shape point geospatial index...");
+
     Set<AgencyAndId> allShapeIds = getAllShapeIds();
-    int count = 0;
+
     for (AgencyAndId shapeId : allShapeIds) {
-      count++;
-      _log.info("examining " + count + " shapeId=" + shapeId);
 
-      if (latStep > 360.0 || lonStep > 360.0) {
-        _log.warn("invalid latStep,lonStep for shapeId=" + shapeId);
-        continue;
-      } else {
-        _log.warn("latStep,lonStep= " + latStep + ", " + lonStep);
-      }
-
-      
       ShapePoints shapePoints = _shapePointHelper.getShapePointsForShapeId(shapeId);
-      if (shapePoints.getSize() > 0)
-        _log.info("examining " + count + " shapeId=" + shapeId + " with " + shapePoints.getSize() 
-            + " entries and (" + shapePoints.getLatForIndex(0) + ", " + shapePoints.getLonForIndex(0) + ")");
-      
+
       for (int i = 0; i < shapePoints.getSize(); i++) {
 
         double lat = shapePoints.getLatForIndex(i);

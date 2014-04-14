@@ -29,20 +29,14 @@
 
     <bean id="userIndexAuthenticationFilter" class="org.onebusaway.users.impl.authentication.IndexedUserAuthenticationProcessorFilter">
 
-<!-- 
-        <property name="defaultTargetUrl" value="/index.action" />
- -->        
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/userIndex_login" />
-        <!-- <sec:custom-filter after="AUTHENTICATION_PROCESSING_FILTER" /> -->
     </bean>
 
     <bean id="everyLastLoginAuthenticationFilter" class="org.onebusaway.users.impl.authentication.EveryLastLoginAuthenticationProcessorFilter">
  		<constructor-arg><value>"/index.action"</value></constructor-arg>
-        <!-- <property name="defaultTargetUrl" value="/index.action" /> -->
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/everylastlogin_login" />
-        <!-- <sec:custom-filter before="BASIC_PROCESSING_FILTER" /> -->
     </bean>
 
 
@@ -50,7 +44,6 @@
         <property name="userDetailsService" ref="userDetailsServiceImpl" />
         <property name="passwordEncoder" ref="passwordEncoderV1" />
         <property name="saltSource" ref="indexedUserDetailsSaltSourceImpl" />
-        <!-- <sec:custom-authentication-provider /> -->
     </bean>
 
     <bean id="defaultUserAuthenticationProvider" class="org.onebusaway.users.impl.authentication.DefaultUserAuthenticationProvider">
