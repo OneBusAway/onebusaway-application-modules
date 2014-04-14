@@ -118,8 +118,16 @@ class ShapeGeospatialIndexTask implements Runnable {
         new HashSet<AgencyAndId>());
 
     CoordinateBounds fullBounds = new CoordinateBounds();
-    for (StopEntry stop : _transitGraphDao.getAllStops())
-      fullBounds.addPoint(stop.getStopLat(), stop.getStopLon());
+    for (StopEntry stop : _transitGraphDao.getAllStops()) {
+      if (stop.getStopLat() > 0.0001 && stop.getStopLon() > 0.0001
+          && stop.getStopLat() < 360.0 && stop.getStopLon() < 360.0) {
+        _log.info("stop[" + stop + "]=" + stop.getStopLat()  + ", " + stop.getStopLon());
+        fullBounds.addPoint(stop.getStopLat(), stop.getStopLon());
+      } else {
+        _log.error("rejecting stop " + stop + " for invalid (lat,lon)=" 
+            + stop.getStopLat() + ", " + stop.getStopLon());
+      }
+    }
 
     if (fullBounds.isEmpty()) {
       return Collections.emptyMap();
@@ -132,15 +140,28 @@ class ShapeGeospatialIndexTask implements Runnable {
 
     double latStep = gridCellExample.getMaxLat() - gridCellExample.getMinLat();
     double lonStep = gridCellExample.getMaxLon() - gridCellExample.getMinLon();
-
-    _log.info("generating shape point geospatial index...");
-
+    _log.info("generating shape point geospatial index for "  + getAllShapeIds().size() 
+        + " shapes with step(" + latStep + ", " + lonStep + ")");
+    
     Set<AgencyAndId> allShapeIds = getAllShapeIds();
-
+    int count = 0;
     for (AgencyAndId shapeId : allShapeIds) {
+      count++;
+      _log.info("examining " + count + " shapeId=" + shapeId);
 
+      if (latStep > 360.0 || lonStep > 360.0) {
+        _log.warn("invalid latStep,lonStep for shapeId=" + shapeId);
+        continue;
+      } else {
+        _log.warn("latStep,lonStep= " + latStep + ", " + lonStep);
+      }
+
+      
       ShapePoints shapePoints = _shapePointHelper.getShapePointsForShapeId(shapeId);
-
+      if (shapePoints.getSize() > 0)
+        _log.info("examining " + count + " shapeId=" + shapeId + " with " + shapePoints.getSize() 
+            + " entries and (" + shapePoints.getLatForIndex(0) + ", " + shapePoints.getLonForIndex(0) + ")");
+      
       for (int i = 0; i < shapePoints.getSize(); i++) {
 
         double lat = shapePoints.getLatForIndex(i);
