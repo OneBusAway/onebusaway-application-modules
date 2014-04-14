@@ -23,9 +23,9 @@ import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.IndexedUserDetailsService;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
-import org.springframework.security.ui.rememberme.TokenBasedRememberMeServices;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 public class AutoUserCurrentUserStrategyImpl extends CurrentUserStrategyImpl {
 
