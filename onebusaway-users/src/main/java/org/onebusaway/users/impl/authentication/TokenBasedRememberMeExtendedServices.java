@@ -18,8 +18,8 @@ package org.onebusaway.users.impl.authentication;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.ui.rememberme.TokenBasedRememberMeServices;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 /**
  * Extension of {@link TokenBasedRememberMeServices} that deals with the fact
