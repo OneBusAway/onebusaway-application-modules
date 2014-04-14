@@ -17,7 +17,7 @@ package org.onebusaway.users.services;
 
 import org.onebusaway.users.model.UserRole;
 
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Arrays;
 import java.util.Collections;
