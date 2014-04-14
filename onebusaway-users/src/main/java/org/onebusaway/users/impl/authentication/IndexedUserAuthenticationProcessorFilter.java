@@ -17,7 +17,8 @@ package org.onebusaway.users.impl.authentication;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.security.ui.webapp.AuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.AuthenticationProcessingFilter;
+
 
 public class IndexedUserAuthenticationProcessorFilter extends
     AuthenticationProcessingFilter {

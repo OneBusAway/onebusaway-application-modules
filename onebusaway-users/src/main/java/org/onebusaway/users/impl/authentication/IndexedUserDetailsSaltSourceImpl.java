@@ -16,8 +16,8 @@
 package org.onebusaway.users.impl.authentication;
 
 import org.onebusaway.users.model.IndexedUserDetails;
-import org.springframework.security.providers.dao.SaltSource;
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.authentication.dao.SaltSource;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public class IndexedUserDetailsSaltSourceImpl implements SaltSource {
 
