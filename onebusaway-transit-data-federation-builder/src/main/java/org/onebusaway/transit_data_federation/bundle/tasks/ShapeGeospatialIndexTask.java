@@ -47,7 +47,7 @@ import org.springframework.stereotype.Component;
 class ShapeGeospatialIndexTask implements Runnable {
 
   private static Logger _log = LoggerFactory.getLogger(ShapeGeospatialIndexTask.class);
-  private static double MIN_LAT_LON = 0.0;
+  private static double MIN_LAT_LON = -360.0;
   private static double MAX_LAT_LON = 360.0;
 
   private TransitGraphDao _transitGraphDao;
