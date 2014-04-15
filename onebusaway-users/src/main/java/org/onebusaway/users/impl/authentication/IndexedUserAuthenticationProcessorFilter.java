@@ -17,12 +17,15 @@ package org.onebusaway.users.impl.authentication;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationProcessingFilter;
 
 
 public class IndexedUserAuthenticationProcessorFilter extends
     AuthenticationProcessingFilter {
 
+
+  
   private String _indexTypeParameter = "j_indexType";
 
   public void setIndexTypeParameter(String indexTypeParameter) {

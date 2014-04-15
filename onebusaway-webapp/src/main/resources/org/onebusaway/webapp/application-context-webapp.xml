@@ -60,10 +60,6 @@
   <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
     <property name="properties">
       <props>
-        <prop key="userIndexAuthenticationFilter.defaultTargetUrl">/user/index.action</prop>
-        <prop key="userIndexAuthenticationFilter.authenticationFailureUrl">/login.action?failure=true</prop>
-        <prop key="everyLastLoginAuthenticationFilter.defaultTargetUrl">/user/index.action</prop>
-        <prop key="everyLastLoginAuthenticationFilter.authenticationFailureUrl">/login.action?failure=true</prop>
         <prop key="resourceServiceImpl.prefix">/resource.action?id=</prop>
       </props>
     </property>

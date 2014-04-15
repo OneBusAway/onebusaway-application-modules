@@ -27,16 +27,22 @@
 
    	<bean id="indexedUserDetailsSaltSourceImpl" class="org.onebusaway.users.impl.authentication.IndexedUserDetailsSaltSourceImpl" />
 
+    <bean id="loginAuthenticationFailureHandler" class="org.onebusaway.users.impl.authentication.LoginAuthenticationFailureHandler"/>
+    <bean id="loginAuthenticationSuccessHandler" class="org.onebusaway.users.impl.authentication.LoginAuthenticationSuccessHandler"/>
+    
     <bean id="userIndexAuthenticationFilter" class="org.onebusaway.users.impl.authentication.IndexedUserAuthenticationProcessorFilter">
-
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/userIndex_login" />
+        <property name="authenticationFailureHandler" ref="loginAuthenticationFailureHandler" />
+        <property name="authenticationSuccessHandler" ref="loginAuthenticationSuccessHandler" />
     </bean>
 
     <bean id="everyLastLoginAuthenticationFilter" class="org.onebusaway.users.impl.authentication.EveryLastLoginAuthenticationProcessorFilter">
  		<constructor-arg><value>"/index.action"</value></constructor-arg>
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/everylastlogin_login" />
+        <property name="authenticationFailureHandler" ref="loginAuthenticationFailureHandler" />
+        <property name="authenticationSuccessHandler" ref="loginAuthenticationSuccessHandler" />
     </bean>
 
 
@@ -47,7 +53,6 @@
     </bean>
 
     <bean id="defaultUserAuthenticationProvider" class="org.onebusaway.users.impl.authentication.DefaultUserAuthenticationProvider">
-        <!-- <sec:custom-authentication-provider /> -->
     </bean>
 
 	<sec:authentication-manager alias="authenticationManager">
