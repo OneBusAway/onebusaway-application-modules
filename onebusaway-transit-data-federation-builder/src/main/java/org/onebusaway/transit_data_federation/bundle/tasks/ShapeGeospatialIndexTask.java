@@ -47,6 +47,8 @@ import org.springframework.stereotype.Component;
 class ShapeGeospatialIndexTask implements Runnable {
 
   private static Logger _log = LoggerFactory.getLogger(ShapeGeospatialIndexTask.class);
+  private static double MIN_LAT_LON = 0.0;
+  private static double MAX_LAT_LON = 360.0;
 
   private TransitGraphDao _transitGraphDao;
 
@@ -118,8 +120,15 @@ class ShapeGeospatialIndexTask implements Runnable {
         new HashSet<AgencyAndId>());
 
     CoordinateBounds fullBounds = new CoordinateBounds();
-    for (StopEntry stop : _transitGraphDao.getAllStops())
-      fullBounds.addPoint(stop.getStopLat(), stop.getStopLon());
+    for (StopEntry stop : _transitGraphDao.getAllStops()) {
+      if (stop.getStopLat() > MIN_LAT_LON && stop.getStopLon() > MIN_LAT_LON
+          && stop.getStopLat() < MAX_LAT_LON && stop.getStopLon() < MAX_LAT_LON) {
+        fullBounds.addPoint(stop.getStopLat(), stop.getStopLon());
+      } else {
+        _log.error("rejecting stop " + stop + " for invalid (lat,lon)=" 
+            + stop.getStopLat() + ", " + stop.getStopLon());
+      }
+    }
 
     if (fullBounds.isEmpty()) {
       return Collections.emptyMap();

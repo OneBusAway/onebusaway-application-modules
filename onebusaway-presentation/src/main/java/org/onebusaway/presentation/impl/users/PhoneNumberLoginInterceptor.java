@@ -24,8 +24,8 @@ import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.services.IndexedUserDetailsService;
 import org.onebusaway.users.services.UserIndexTypes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.Authentication;
-import org.springframework.security.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
