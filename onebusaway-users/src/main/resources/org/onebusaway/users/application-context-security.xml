@@ -38,6 +38,7 @@
     </bean>
  
     <bean id="everyLastLoginAuthenticationFilter" class="org.onebusaway.users.impl.authentication.EveryLastLoginAuthenticationProcessorFilter">
+		<constructor-arg><value>/everylastlogin_login</value></constructor-arg>
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/everylastlogin_login" />
         <property name="authenticationFailureHandler" ref="loginAuthenticationFailureHandler" />
