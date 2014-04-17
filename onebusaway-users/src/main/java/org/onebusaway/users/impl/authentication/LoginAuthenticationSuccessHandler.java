@@ -44,13 +44,14 @@ public class LoginAuthenticationSuccessHandler implements
   public void onAuthenticationSuccess(HttpServletRequest request,
       HttpServletResponse response, Authentication success) throws IOException,
       ServletException {
-    _log.debug("redirecting to " + determineTargetUrl());
-    response.sendRedirect(determineTargetUrl());
+    response.sendRedirect(request.getContextPath() + determineTargetUrl());
   }
   
   protected  String determineTargetUrl() {
-    if (targetUrl == null)
+    if (targetUrl == null) {
       return DEFAULT_TARGET_URL;
+    }
+
     return targetUrl;
   }
 

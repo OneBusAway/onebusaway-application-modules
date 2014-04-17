@@ -36,9 +36,8 @@
         <property name="authenticationFailureHandler" ref="loginAuthenticationFailureHandler" />
         <property name="authenticationSuccessHandler" ref="loginAuthenticationSuccessHandler" />
     </bean>
-
+ 
     <bean id="everyLastLoginAuthenticationFilter" class="org.onebusaway.users.impl.authentication.EveryLastLoginAuthenticationProcessorFilter">
- 		<constructor-arg><value>"/index.action"</value></constructor-arg>
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="filterProcessesUrl" value="/everylastlogin_login" />
         <property name="authenticationFailureHandler" ref="loginAuthenticationFailureHandler" />
@@ -48,17 +47,34 @@
 
     <bean id="daoAuthenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
         <property name="userDetailsService" ref="userDetailsServiceImpl" />
-        <property name="passwordEncoder" ref="passwordEncoderV1" />
         <property name="saltSource" ref="indexedUserDetailsSaltSourceImpl" />
+        <property name="passwordEncoder" ref="passwordEncoderV1" />
     </bean>
 
     <bean id="defaultUserAuthenticationProvider" class="org.onebusaway.users.impl.authentication.DefaultUserAuthenticationProvider">
     </bean>
+    
+    <bean id="securityContextPersistenceFilter" class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+      <property name="forceEagerSessionCreation" value="false" />
+      <property name="securityContextRepository">
+      	<bean class="org.springframework.security.web.context.HttpSessionSecurityContextRepository">
+      		<property name="allowSessionCreation" value="false" />
+      	</bean>
+      </property>
+    </bean>
+    
+    <bean id="authenticationProcessingFilterEntryPoint" class="org.springframework.security.web.authentication.AuthenticationProcessingFilterEntryPoint">
+      <property name="loginFormUrl" value="/userIndex_login" />
+      <property name="forceHttps" value="false" />
+      <property name="useForward" value="true" />
+    </bean>
+ 
 
 	<sec:authentication-manager alias="authenticationManager">
-	  <sec:authentication-provider user-service-ref="userDetailsServiceImpl">
+	  <sec:authentication-provider ref="daoAuthenticationProvider">
 	  </sec:authentication-provider>
 	</sec:authentication-manager>
+
 
     <bean id="openid_plugin" class="org.onebusaway.everylastlogin.server.OpenIdAuthenticationPlugin" />
     <bean id="twitter_plugin" class="org.onebusaway.everylastlogin.server.TwitterAuthenticationPlugin" />

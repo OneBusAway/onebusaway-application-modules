@@ -64,6 +64,8 @@ public class LoginAuthenticationFailureHandler implements
         }
       }
     }
+
+    response.sendRedirect(request.getContextPath() + failureUrl);
   }
 
 }
