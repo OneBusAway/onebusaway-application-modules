@@ -82,7 +82,7 @@ public class JsonComponent extends ContextBean {
     if (json != null) {
 
       if (_escapeJavaScript) {
-        json = StringEscapeUtils.escapeJava(json);
+        json = StringEscapeUtils.escapeEcmaScript(json);
       }
 
       if (getVar() != null) {
