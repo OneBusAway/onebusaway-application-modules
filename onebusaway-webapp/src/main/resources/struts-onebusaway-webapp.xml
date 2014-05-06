@@ -42,7 +42,6 @@
             <interceptor-stack name="onebusaway-webapp-stack">
                 <interceptor-ref name="cache-control"/>
                 <interceptor-ref name="defaultStack">
-                    <param name="params.excludeParams">(.*\.|^|.*|\[('|"))(c|C)lass(\.|('|")]|\[).*,^dojo\..*,^struts\..*,^session\..*,^request\..*,^application\..*,^servlet(Request|Response)\..*,^parameters\..*,^action:.*,^method:.*</param>
                     <param name="modelDriven.refreshModelBeforeResult">true</param>
                 </interceptor-ref>
                 <interceptor-ref name="configuration"/>

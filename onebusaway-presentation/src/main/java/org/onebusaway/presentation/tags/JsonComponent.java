@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.struts2.components.ContextBean;
 import org.apache.struts2.json.JSONException;
 import org.apache.struts2.json.JSONUtil;
@@ -82,7 +82,7 @@ public class JsonComponent extends ContextBean {
     if (json != null) {
 
       if (_escapeJavaScript) {
-        json = StringEscapeUtils.escapeJavaScript(json);
+        json = StringEscapeUtils.escapeEcmaScript(json);
       }
 
       if (getVar() != null) {

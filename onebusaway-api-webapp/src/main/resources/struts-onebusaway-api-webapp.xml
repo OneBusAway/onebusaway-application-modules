@@ -50,9 +50,6 @@
                 <param name="maximumSize">10485760</param>
             </interceptor>
             <interceptor-stack name="restCustomStack">
-                <interceptor-ref name="defaultStack">
-                    <param name="params.excludeParams">(.*\.|^|.*|\[('|"))(c|C)lass(\.|('|")]|\[).*,^dojo\..*,^struts\..*,^session\..*,^request\..*,^application\..*,^servlet(Request|Response)\..*,^parameters\..*,^action:.*,^method:.*</param>
-                </interceptor-ref>
                 <interceptor-ref name="exception" />
                 <interceptor-ref name="alias" />
                 <interceptor-ref name="servletConfig" />

@@ -27,9 +27,7 @@
             <interceptor name="phone-number-login" class="org.onebusaway.presentation.impl.users.PhoneNumberLoginInterceptor" />
             <interceptor name="textmarks-session" class="org.onebusaway.sms.impl.TextmarksSessionInterceptor" />
             <interceptor-stack name="onebusaway-sms-webapp-stack">
-                <interceptor-ref name="defaultStack">
-                    <param name="params.excludeParams">(.*\.|^|.*|\[('|"))(c|C)lass(\.|('|")]|\[).*,^dojo\..*,^struts\..*,^session\..*,^request\..*,^application\..*,^servlet(Request|Response)\..*,^parameters\..*,^action:.*,^method:.*</param>
-                </interceptor-ref>
+                <interceptor-ref name="defaultStack" />
                 <interceptor-ref name="phone-number-login" />
                 <interceptor-ref name="textmarks-session" />
             </interceptor-stack>
