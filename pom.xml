@@ -16,7 +16,7 @@
 
   <!-- Common Software Dependency Versions -->
   <properties>
-    <struts-version>2.2.3.1</struts-version>
+    <struts-version>2.3.16.2</struts-version>
     <gwt-version>2.4.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
     <csv-entities-version>1.0.3</csv-entities-version>
@@ -382,7 +382,7 @@
                 <goal>test</goal>
               </goals>
               <configuration>
-                <skip>false</skip>
+                <skip>true</skip>
                 <excludes>
                   <exclude>none</exclude>
                 </excludes>
