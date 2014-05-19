@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 
 public class MonitoredResult {
@@ -30,6 +32,7 @@ public class MonitoredResult {
   private Set<String> _unmatchedStopIds = new HashSet<String>();
   private Set<String> _matchedStopIds = new HashSet<String>();
   private Set<AgencyAndId> _unmatchedBlockIds = new HashSet<AgencyAndId>();
+  private Set<CoordinatePoint> _allCoordinates = new HashSet<CoordinatePoint>();
   private int _recordsTotal = 0;
   private long _lastUpdate = System.currentTimeMillis();
   
@@ -106,5 +109,17 @@ public class MonitoredResult {
     this._matchedTripIds.add(tripId);
   }
 
+  public Set<CoordinatePoint> getAllCoordinates() {
+    return _allCoordinates;
+  }
 
+  public void addLatLon(float latitude, float longitude) {
+    CoordinatePoint cp = new CoordinatePoint(latitude, longitude);
+    _allCoordinates.add(cp);
+  }
+
+  public void addLatLon(double latitude, double longitude) {
+    CoordinatePoint cp = new CoordinatePoint(latitude, longitude);
+    _allCoordinates.add(cp);
+  }
 }

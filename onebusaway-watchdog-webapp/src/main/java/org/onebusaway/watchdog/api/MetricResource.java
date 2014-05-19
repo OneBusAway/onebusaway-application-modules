@@ -17,6 +17,7 @@ package org.onebusaway.watchdog.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,7 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ListBean;
@@ -99,7 +101,7 @@ public class MetricResource {
       }
       return Response.ok(ok("agency-id-list", agencyIds)).build();
     } catch (Exception e) {
-      _log.error("getAgencyCount broke", e);
+      _log.error("getAgencyIdList broke", e);
       return Response.ok(error("agency-id-list", e)).build();
     }
   }
@@ -230,7 +232,118 @@ public class MetricResource {
     }
   }
 
+  @Path("/realtime/{agencyId}/total-lat-lon-count")
+  @GET
+  public Response getTotalLatLonCount(@PathParam("agencyId") String agencyId) {
+    try {
+      List<CoordinatePoint> totalLatLons = new ArrayList<CoordinatePoint>();
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("total-lat-lon-count", "no configured data sources")).build();
+      }
+      
+      for (MonitoredDataSource mds : _dataSources) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            totalLatLons.addAll(result.getAllCoordinates());
+          }
+        }
+      }
+      return Response.ok(ok("total-lat-lon-count", totalLatLons.size())).build();
+    } catch (Exception e) {
+      _log.error("getTotalLatLonCount broke", e);
+      return Response.ok(error("total-lat-lon-count", e)).build();
+    }
+  }
+
   
+  @Path("/realtime/{agencyId}/invalid-lat-lon-count")
+  @GET
+  public Response getInvalidLatLonCount(@PathParam("agencyId") String agencyId) {
+    try {
+      List<CoordinatePoint> invalidLatLons = new ArrayList<CoordinatePoint>();
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("invalid-lat-lon-count", "no configured data sources")).build();
+      }
+      
+      for (MonitoredDataSource mds : _dataSources) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            invalidLatLons.addAll(findInvalidLatLon(agencyId, result.getAllCoordinates()));
+          }
+        }
+      }
+      return Response.ok(ok("invalid-lat-lon-count", invalidLatLons.size())).build();
+    } catch (Exception e) {
+      _log.error("getInvalidLatLonCount broke", e);
+      return Response.ok(error("invalid-lat-lon-count", e)).build();
+    }
+  }
+
+
+  @Path("/realtime/{agencyId}/invalid-lat-lons")
+  @GET
+  public Response getInvalidLatLons(@PathParam("agencyId") String agencyId) {
+    try {
+      List<CoordinatePoint> invalidLatLons = new ArrayList<CoordinatePoint>();
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("invalid-lat-lons", "no configured data sources")).build();
+      }
+      
+      for (MonitoredDataSource mds : _dataSources) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            invalidLatLons.addAll(findInvalidLatLon(agencyId, result.getAllCoordinates()));
+          }
+        }
+      }
+      return Response.ok(ok("invalid-lat-lons", invalidLatLons)).build();
+    } catch (Exception e) {
+      _log.error("getInvalidLatLons broke", e);
+      return Response.ok(error("invalid-lat-lons", e)).build();
+    }
+  }
+
+  
+  private Collection<CoordinatePoint> findInvalidLatLon(String agencyId,
+      Set<CoordinatePoint> coordinatePoints) {
+    List<CoordinatePoint> invalid = new ArrayList<CoordinatePoint>();
+    List<CoordinateBounds> bounds = _tds.getAgencyIdsWithCoverageArea().get(agencyId);
+    
+    // ensure we have a valid bounding box for requested agency
+    if (bounds == null || bounds.isEmpty()) {
+      _log.warn("no bounds configured for agency " + agencyId);
+      for (CoordinatePoint pt : coordinatePoints) {
+        invalid.add(pt);
+      }
+      return invalid;
+    }
+    
+    
+    for (CoordinateBounds bound : bounds) {
+      boolean found = false;
+      for (CoordinatePoint pt : coordinatePoints) {
+        // check if point is inside bounds
+        if (bound.contains(pt)) {
+          found = true;
+        }
+        if (!found) {
+          invalid.add(pt);
+        }
+      }
+    }
+    _log.debug("agency " + agencyId + " had " + invalid.size() + " invalid out of " + coordinatePoints.size());
+    return invalid;
+  }
+
   @Path("/realtime/{agencyId}/schedule-realtime-trips-delta")
   @GET
   public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId,
@@ -251,7 +364,7 @@ public class MetricResource {
       int delta = scheduleTrips - validRealtimeTrips;
       return Response.ok(ok("schedule-realtime-trips-delta", delta)).build();
     } catch (Exception e) {
-      _log.error("getUnmatchedTripIds broke", e);
+      _log.error("getScheduledRealtimeTripsDelta broke", e);
       return Response.ok(error("schedule-realtime-trips-delta", e)).build();
     }
   }
@@ -273,7 +386,7 @@ public class MetricResource {
       
       return Response.ok(ok("scheduled-trips", scheduleTrips)).build();
     } catch (Exception e) {
-      _log.error("getUnmatchedTripIds broke", e);
+      _log.error("getScheduleTripCount broke", e);
       return Response.ok(error("scheduled-trips", e)).build();
     }
   }
@@ -343,7 +456,7 @@ public class MetricResource {
       double percent = Math.abs((validRealtimeTrips / scheduleTrips) * 100);
       return Response.ok(ok("buses-in-service-percent", percent)).build();
     } catch (Exception e) {
-      _log.error("getUnmatchedTripIds broke", e);
+      _log.error("getBusesInServicePercent broke", e);
       return Response.ok(error("buses-in-service-percent", e)).build();
     }
   }

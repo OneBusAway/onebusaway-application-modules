@@ -155,7 +155,7 @@ class GtfsRealtimeTripLibrary {
     applyTripUpdatesToRecord(result, blockDescriptor, update.tripUpdates, record);
 
     if (update.vehiclePosition != null) {
-      applyVehiclePositionToRecord(update.vehiclePosition, record);
+      applyVehiclePositionToRecord(result, update.vehiclePosition, record);
     }
 
     /**
@@ -530,11 +530,13 @@ class GtfsRealtimeTripLibrary {
     }
   }
 
-  private void applyVehiclePositionToRecord(VehiclePosition vehiclePosition,
+  private void applyVehiclePositionToRecord(MonitoredResult result,
+      VehiclePosition vehiclePosition,
       VehicleLocationRecord record) {
     Position position = vehiclePosition.getPosition();
     record.setCurrentLocationLat(position.getLatitude());
     record.setCurrentLocationLon(position.getLongitude());
+    result.addLatLon(position.getLatitude(), position.getLongitude());
   }
 
   private long currentTime() {
