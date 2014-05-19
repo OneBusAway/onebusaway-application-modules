@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.watchdog.api;
+package org.onebusaway.watchdog.model;
 
 public class Metric implements java.io.Serializable {
   private long currentTimestamp;
