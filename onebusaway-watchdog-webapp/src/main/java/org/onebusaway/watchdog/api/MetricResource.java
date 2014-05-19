@@ -150,6 +150,34 @@ public class MetricResource {
     }
   }
 
+  @Path("/realtime/{agencyId}/unmatched-stops")
+  @GET
+  public Response getUnmatchedStops(@PathParam("agencyId") String agencyId) {
+    try {
+      int unmatchedStops = 0;
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("unmatched-stops", "no configured data sources")).build();
+      }
+      
+      for (MonitoredDataSource mds : _dataSources) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          _log.debug("examining agency=" + mAgencyId + " with unmatched stops=" + result.getUnmatchedStopIds().size());
+          if (agencyId.equals(mAgencyId)) {
+            unmatchedStops += result.getUnmatchedStopIds().size();
+          }
+        }
+      }
+      return Response.ok(ok("unmatched-stops", unmatchedStops)).build();
+    } catch (Exception e) {
+      _log.error("getUnmatchedStops broke", e);
+      return Response.ok(error("unmatched-stops", e)).build();
+    }
+  }
+
+  
   @Path("/realtime/{agencyId}/unmatched-trip-ids")
   @GET
   public Response getUnmatchedTripIds(@PathParam("agencyId") String agencyId) {
@@ -176,6 +204,33 @@ public class MetricResource {
     }
   }
 
+  @Path("/realtime/{agencyId}/unmatched-stop-ids")
+  @GET
+  public Response getUnmatchedStopIds(@PathParam("agencyId") String agencyId) {
+    try {
+      List<String> unmatchedStopIds = new ArrayList<String>();
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("unmatched-stop-ids", "con configured data sources")).build();
+      }
+      
+      for (MonitoredDataSource mds : _dataSources) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            unmatchedStopIds.addAll(result.getUnmatchedStopIds());
+          }
+        }
+      }
+      return Response.ok(ok("unmatched-stop-ids", unmatchedStopIds)).build();
+    } catch (Exception e) {
+      _log.error("getUnmatchedStopIds broke", e);
+      return Response.ok(error("unmatched-stop-ids", e)).build();
+    }
+  }
+
+  
   @Path("/realtime/{agencyId}/schedule-realtime-trips-delta")
   @GET
   public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId,
@@ -235,8 +290,35 @@ public class MetricResource {
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
       return Response.ok(ok("matched-trips", validRealtimeTrips)).build();
     } catch (Exception e) {
-      _log.error("getUnmatchedTripIds broke", e);
+      _log.error("getMatchedTripCount broke", e);
       return Response.ok(error("matched-trips", e)).build();
+    }
+  }
+
+  @Path("/realtime/{agencyId}/matched-stops")
+  @GET
+  public Response getMatchedStopCount(@PathParam("agencyId") String agencyId) {
+    List<String> matchedStopIds = new ArrayList<String>();
+    try {
+      if (this._dataSources == null || this._dataSources.isEmpty()) {
+        _log.error("no configured data sources");
+        return Response.ok(error("matched-stops", "con configured data sources")).build();
+      }
+
+      for (MonitoredDataSource mds : _dataSources) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            matchedStopIds.addAll(result.getMatchedStopIds());
+          }
+        }
+      }
+
+      return Response.ok(ok("matched-stops", matchedStopIds.size())).build();
+    } catch (Exception e) {
+      _log.error("getMatchedStopCount broke", e);
+      return Response.ok(error("matched-stops", e)).build();
     }
   }
 

@@ -27,6 +27,8 @@ public class MonitoredResult {
   private List<String> _agencyIds = new ArrayList<String>();
   private Set<String> _unmatchedTripIds = new HashSet<String>();
   private Set<String> _matchedTripIds = new HashSet<String>();
+  private Set<String> _unmatchedStopIds = new HashSet<String>();
+  private Set<String> _matchedStopIds = new HashSet<String>();
   private Set<AgencyAndId> _unmatchedBlockIds = new HashSet<AgencyAndId>();
   private int _recordsTotal = 0;
   private long _lastUpdate = System.currentTimeMillis();
@@ -39,6 +41,21 @@ public class MonitoredResult {
     return _unmatchedTripIds;
   }
 
+  public void addUnmatchedStopId(String stopId) {
+	  _unmatchedStopIds.add(stopId);
+  }
+  
+  public Set<String> getUnmatchedStopIds() {
+	  return _unmatchedStopIds;
+  }
+  
+  public void addMatchedStopId(String stopId) {
+	  _matchedStopIds.add(stopId);
+  }
+  
+  public Set<String> getMatchedStopIds() {
+	  return _matchedStopIds;
+  }
   
   public void addUnmatchedBlockId(AgencyAndId id) {
     _unmatchedBlockIds.add(id);

@@ -328,7 +328,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
     
     private void postHandleRefresh() {
-      _log.debug("" + _agencyIds + ": runningCount=" + _recordsTotal  + ", currentCount=" + _currentResult.getRecordsTotal());
+      _log.debug("" + _agencyIds + ": runningCount=" + _recordsTotal  + ", currentCount=" + _currentResult.getRecordsTotal() + " for agency " + _currentResult.getAgencyIds());
       if (_currentResult.getRecordsTotal() > 0) {
         // only consider it a successful update if we got some records
         // ftp impl may not have a new file to download

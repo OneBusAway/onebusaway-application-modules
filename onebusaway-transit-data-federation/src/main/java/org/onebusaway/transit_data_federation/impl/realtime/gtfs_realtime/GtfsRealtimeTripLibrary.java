@@ -229,7 +229,9 @@ class GtfsRealtimeTripLibrary {
     }
 
     if (unknownTrips > 0) {
-      _log.warn("unknown/total trips= {}/{}", unknownTrips, totalTrips);
+      _log.warn("unknown/total trips= {}/{} unknown/total stops= {}/{} for agency {}", 
+          unknownTrips, totalTrips, result.getUnmatchedStopIds().size(), 
+          (result.getUnmatchedStopIds().size() + result.getMatchedStopIds().size()), result.getAgencyIds());
     }
 
     return tripUpdatesByBlockDescriptor;
@@ -382,7 +384,7 @@ class GtfsRealtimeTripLibrary {
           }
 
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
-            BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(
+            BlockStopTimeEntry blockStopTime = getBlockStopTimeForStopTimeUpdate(result,
                 tripUpdate, stopTimeUpdate, blockTrip.getStopTimes(),
                 instance.getServiceDate());
             if (blockStopTime == null)
@@ -412,7 +414,7 @@ class GtfsRealtimeTripLibrary {
     }
   }
 
-  private BlockStopTimeEntry getBlockStopTimeForStopTimeUpdate(
+  private BlockStopTimeEntry getBlockStopTimeForStopTimeUpdate(MonitoredResult result,
       TripUpdate tripUpdate, StopTimeUpdate stopTimeUpdate,
       List<BlockStopTimeEntry> stopTimes, long serviceDate) {
 
@@ -421,18 +423,22 @@ class GtfsRealtimeTripLibrary {
       if (0 <= stopSequence && stopSequence < stopTimes.size()) {
         BlockStopTimeEntry blockStopTime = stopTimes.get(stopSequence);
         if (!stopTimeUpdate.hasStopId()) {
+        	result.addMatchedStopId(blockStopTime.getStopTime().getStop().getId().getId());
           return blockStopTime;
         }
         if (blockStopTime.getStopTime().getStop().getId().getId().equals(
             stopTimeUpdate.getStopId())) {
+          result.addMatchedStopId(blockStopTime.getStopTime().getStop().getId().getId());
           return blockStopTime;
         }
         // The stop sequence and stop id didn't match, so we fall through to
         // match by stop id if possible
+        // we do not log this as it still may match later
 
       } else {
         _log.warn("StopTimeSequence is out of bounds: stopSequence="
             + stopSequence + " tripUpdate=\n" + tripUpdate);
+        // sadly we can't report an invalid stop sequence -- we need a stopId
       }
     }
 
@@ -451,10 +457,12 @@ class GtfsRealtimeTripLibrary {
           bestMatches.add(arrivalDelta, blockStopTime);
         }
       }
-      if (!bestMatches.isEmpty())
+      if (!bestMatches.isEmpty()) {
+        result.addMatchedStopId(stopTimeUpdate.getStopId());
         return bestMatches.getMinElement();
+      }
     }
-
+    result.addUnmatchedStopId(stopTimeUpdate.getStopId());
     return null;
   }
 
