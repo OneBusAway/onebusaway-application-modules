@@ -229,9 +229,8 @@ class GtfsRealtimeTripLibrary {
     }
 
     if (unknownTrips > 0) {
-      _log.warn("unknown/total trips= {}/{} unknown/total stops= {}/{} for agency {}", 
-          unknownTrips, totalTrips, result.getUnmatchedStopIds().size(), 
-          (result.getUnmatchedStopIds().size() + result.getMatchedStopIds().size()), result.getAgencyIds());
+      _log.warn("unknown/total trips= {}/{}", 
+          unknownTrips, totalTrips);
     }
 
     return tripUpdatesByBlockDescriptor;
@@ -423,12 +422,16 @@ class GtfsRealtimeTripLibrary {
       if (0 <= stopSequence && stopSequence < stopTimes.size()) {
         BlockStopTimeEntry blockStopTime = stopTimes.get(stopSequence);
         if (!stopTimeUpdate.hasStopId()) {
-        	result.addMatchedStopId(blockStopTime.getStopTime().getStop().getId().getId());
+          if (result != null) {
+            result.addMatchedStopId(blockStopTime.getStopTime().getStop().getId().getId());
+          }
           return blockStopTime;
         }
         if (blockStopTime.getStopTime().getStop().getId().getId().equals(
             stopTimeUpdate.getStopId())) {
-          result.addMatchedStopId(blockStopTime.getStopTime().getStop().getId().getId());
+          if (result != null) {
+            result.addMatchedStopId(blockStopTime.getStopTime().getStop().getId().getId());
+          }
           return blockStopTime;
         }
         // The stop sequence and stop id didn't match, so we fall through to
@@ -464,7 +467,9 @@ class GtfsRealtimeTripLibrary {
         return bestMatches.getMinElement();
       }
     }
-    result.addUnmatchedStopId(stopTimeUpdate.getStopId());
+    if (result != null) {
+      result.addUnmatchedStopId(stopTimeUpdate.getStopId());
+    }
     return null;
   }
 
@@ -538,7 +543,9 @@ class GtfsRealtimeTripLibrary {
     Position position = vehiclePosition.getPosition();
     record.setCurrentLocationLat(position.getLatitude());
     record.setCurrentLocationLon(position.getLongitude());
-    result.addLatLon(position.getLatitude(), position.getLongitude());
+    if (result != null) {
+      result.addLatLon(position.getLatitude(), position.getLongitude());
+    }
   }
 
   private long currentTime() {
