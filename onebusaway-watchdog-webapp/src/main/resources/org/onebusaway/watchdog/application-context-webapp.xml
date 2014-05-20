@@ -29,4 +29,48 @@
     <context:component-scan base-package="org.onebusaway.watchdog.api" />
 	<!--  TDS support -->
 	<import resource="classpath:org/onebusaway/transit_data_federation/application-context.xml" />
+	
+	<!-- in datasources.xml define metricConfiguration -->
+	<!-- 
+	<bean id="metricConfiguration" class="org.onebusaway.watchdog.model.MetricConfiguration">
+		<property name="transitDataService" ref="transitDataServiceImpl"/>
+		<property name="monitoredDataSources">
+			<list>
+				<ref bean="a_avl" />
+				<ref bean="b_avl" />
+				<ref bean="c_avl" />
+			</list>
+		</property>
+	</bean>
+	 -->
+	
+	<bean id="rootResource" class="org.onebusaway.watchdog.api.RootResource">
+		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+
+	<bean id="realtimeAgencyResource" class="org.onebusaway.watchdog.api.realtime.AgencyResource">
+		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+	
+	<bean id="realtimeLocationResource" class="org.onebusaway.watchdog.api.realtime.LocationResource">
+		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+	
+	<bean id="realtimeStopResource" class="org.onebusaway.watchdog.api.realtime.StopResource">
+		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+	
+	<bean id="realtimeTripResource" class="org.onebusaway.watchdog.api.realtime.TripResource">
+		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+	
+	<bean id="scheduleAgencyResource" class="org.onebusaway.watchdog.api.schedule.AgencyResource">
+		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+	
+	<bean id="scheduledTripResource" class="org.onebusaway.watchdog.api.schedule.TripResource">
+		<property name="metricConfiguration" ref="metricConfiguration" />
+	</bean>
+	
+	
 </beans>
