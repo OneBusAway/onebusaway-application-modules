@@ -458,7 +458,9 @@ class GtfsRealtimeTripLibrary {
         }
       }
       if (!bestMatches.isEmpty()) {
-        result.addMatchedStopId(stopTimeUpdate.getStopId());
+        if (result != null) {
+          result.addMatchedStopId(stopTimeUpdate.getStopId());
+        }
         return bestMatches.getMinElement();
       }
     }
