@@ -65,7 +65,7 @@ public class TripResource extends MetricResource {
   }
   
   
-  @Path("/{agencyId}/trip/unmatched")
+  @Path("/{agencyId}/unmatched")
   @GET
   public Response getUnmatchedTrips(@PathParam("agencyId") String agencyId) {
     try {
@@ -94,7 +94,7 @@ public class TripResource extends MetricResource {
 
 
   
-  @Path("/realtime/{agencyId}/trip/unmatched-ids")
+  @Path("/{agencyId}/unmatched-ids")
   @GET
   public Response getUnmatchedTripIds(@PathParam("agencyId") String agencyId) {
     try {
@@ -152,6 +152,10 @@ public class TripResource extends MetricResource {
       }
 
       double scheduleTrips = getScheduledTrips(agencyId);
+      if (scheduleTrips < 1) {
+        // prevent NaN -- late night service may not have scheduled trips
+        return Response.ok(ok("buses-in-service-percent", 100.)).build();
+      }
       double validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
 
       _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips);
