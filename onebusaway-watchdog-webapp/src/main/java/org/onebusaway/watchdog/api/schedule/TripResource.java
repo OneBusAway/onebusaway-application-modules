@@ -39,7 +39,7 @@ public class TripResource extends MetricResource {
         return Response.ok(error("scheduled-trips", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId, lat, lon, latSpan, lonSpan);
+      int scheduleTrips = getScheduledTrips(agencyId);
       
       return Response.ok(ok("scheduled-trips", scheduleTrips)).build();
     } catch (Exception e) {

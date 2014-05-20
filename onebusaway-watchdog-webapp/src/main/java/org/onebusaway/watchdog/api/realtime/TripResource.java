@@ -21,10 +21,8 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
-import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.onebusaway.watchdog.api.MetricResource;
@@ -124,18 +122,14 @@ public class TripResource extends MetricResource {
 
   @Path("/{agencyId}/schedule-realtime-delta")
   @GET
-  public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId,
-      @QueryParam(value="lat") final Double lat,
-      @QueryParam(value="lon") final Double lon,
-      @QueryParam(value="latSpan") final Double latSpan,
-      @QueryParam(value="lonSpan") final Double lonSpan) {
+  public Response getScheduleRealtimeTripsDelta(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("schedule-realtime-trips-delta", "con configured data sources")).build();
       }
 
-      int scheduleTrips = getScheduledTrips(agencyId, lat, lon, latSpan, lonSpan);
+      int scheduleTrips = getScheduledTrips(agencyId);
       int totalRecords = getTotalRecordCount(agencyId);
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
       _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips + ", totalRecords=" + totalRecords);
@@ -150,18 +144,14 @@ public class TripResource extends MetricResource {
 
   @Path("/{agencyId}/buses-in-service-percent")
   @GET
-  public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId,
-      @QueryParam(value="lat") final Double lat,
-      @QueryParam(value="lon") final Double lon,
-      @QueryParam(value="latSpan") final Double latSpan,
-      @QueryParam(value="lonSpan") final Double lonSpan) {
+  public Response getBusesInServicePercent(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
         _log.error("no configured data sources");
         return Response.ok(error("buses-in-service-percent", "con configured data sources")).build();
       }
 
-      double scheduleTrips = getScheduledTrips(agencyId, lat, lon, latSpan, lonSpan);
+      double scheduleTrips = getScheduledTrips(agencyId);
       double validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
 
       _log.debug("agencytrips size=" + scheduleTrips + ", validRealtimeTrips=" + validRealtimeTrips);

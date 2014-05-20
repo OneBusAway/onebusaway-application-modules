@@ -83,35 +83,29 @@ public abstract class MetricResource {
     return totalRecords;
   }
   
-  protected int getScheduledTrips(String agencyId, Double lat, Double lon, Double latSpan, Double lonSpan) {
+  protected int getScheduledTrips(String agencyId) {
+    Set<TripDetailsBean> agencyTrips = new HashSet<TripDetailsBean>();
     TripsForBoundsQueryBean query = new TripsForBoundsQueryBean();
-    if (lat == null || lon == null || latSpan == null || lonSpan == null) {
-      _log.error("getScheduleTrips missing required coordinates:" 
-    + "lat=" + lat
-    + "latSpan=" + latSpan
-    + "lon=" + lon
-    + "lonSpan=" + lonSpan);
-      return -1;
-    }
-    CoordinateBounds maxBounds = SphericalGeometryLibrary.boundsFromLatLonSpan(lat, lon, latSpan, lonSpan);
-    query.setBounds(maxBounds);
-    query.setTime(System.currentTimeMillis());
-    query.setMaxCount(Integer.MAX_VALUE);
+    List<CoordinateBounds> allBounds = getTDS().getAgencyIdsWithCoverageArea().get(agencyId);
     
-    TripDetailsInclusionBean inclusion = query.getInclusion();
-    inclusion.setIncludeTripBean(true);
-    _log.debug(lat + ", " + lon + " -> " + latSpan + ", " + lonSpan + "  :" + maxBounds.toString());
-    ListBean<TripDetailsBean> allTrips =  getTDS().getTripsForBounds(query);
-    List<TripDetailsBean> agencyTrips = new ArrayList<TripDetailsBean>();
-    if (allTrips == null) {
-      return 0;
-    }
-
-    _log.debug("allTrips size=" + allTrips.getList().size());
-
-    for (TripDetailsBean trip : allTrips.getList()) {
-      if (trip.getTripId().startsWith(agencyId + "_")) {
-        agencyTrips.add(trip);
+    for (CoordinateBounds bounds : allBounds) {
+      query.setBounds(bounds);
+      query.setTime(System.currentTimeMillis());
+      query.setMaxCount(Integer.MAX_VALUE);
+      
+      TripDetailsInclusionBean inclusion = query.getInclusion();
+      inclusion.setIncludeTripBean(true);
+      ListBean<TripDetailsBean> allTrips =  getTDS().getTripsForBounds(query);
+      if (allTrips == null) {
+        continue;
+      }
+  
+      _log.debug("allTrips size=" + allTrips.getList().size());
+  
+      for (TripDetailsBean trip : allTrips.getList()) {
+        if (trip.getTripId().startsWith(agencyId + "_")) {
+          agencyTrips.add(trip);
+        }
       }
     }
     return agencyTrips.size();
