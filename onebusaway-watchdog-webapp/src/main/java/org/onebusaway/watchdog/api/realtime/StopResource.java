@@ -84,7 +84,7 @@ public class StopResource extends MetricResource {
     }
   }
 
-  @Path("/realtime/{agencyId}/unmatched-ids")
+  @Path("/{agencyId}/unmatched-ids")
   @GET
   public Response getUnmatchedStopIds(@PathParam("agencyId") String agencyId) {
     try {
