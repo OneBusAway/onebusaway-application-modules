@@ -16,6 +16,7 @@
 package org.onebusaway.api.model.transit;
 
 import java.io.Serializable;
+import java.util.Properties;
 
 public class ConfigV2Bean implements Serializable, HasId {
   
@@ -23,6 +24,8 @@ public class ConfigV2Bean implements Serializable, HasId {
   private String name;
   private String serviceDateFrom;
   private String serviceDateTo;
+  private Properties gitProperties;
+  
   public String getId() {
     return id;
   }
@@ -46,6 +49,12 @@ public class ConfigV2Bean implements Serializable, HasId {
   }
   public void setServiceDateTo(String serviceDateTo) {
     this.serviceDateTo = serviceDateTo;
+  }
+  public Properties getGitProperties() {
+    return gitProperties;
+  }
+  public void setGitProperties(Properties gitProperties) {
+    this.gitProperties = gitProperties;
   }
   
 
