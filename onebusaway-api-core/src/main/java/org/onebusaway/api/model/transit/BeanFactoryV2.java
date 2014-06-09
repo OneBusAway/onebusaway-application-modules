@@ -15,10 +15,13 @@
  */
 package org.onebusaway.api.model.transit;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
 
 import org.onebusaway.api.impl.MaxCountSupport;
@@ -309,6 +312,7 @@ public class BeanFactoryV2 {
 
   public ConfigV2Bean getConfig(BundleMetadata meta) {
     ConfigV2Bean bean = new ConfigV2Bean();
+    bean.setGitProperties(getGitProperties());
     if (meta == null) return bean;
     bean.setId(meta.getId());
     bean.setName(meta.getName());
@@ -1175,5 +1179,18 @@ public class BeanFactoryV2 {
     }
 
     return true;
+  }
+  
+  private Properties getGitProperties(){
+	  Properties properties = new Properties();
+	  try {
+		  InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
+		  if (inputStream != null) {
+			  properties.load(inputStream);
+		  }
+		  return properties;
+	  } catch (IOException ioe) {
+		  return null;
+	  }
   }
 }
