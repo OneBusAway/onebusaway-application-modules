@@ -85,6 +85,7 @@
     <module>onebusaway-transit-data-federation-builder</module>
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
+    <module>onebusaway-watchdog-webapp</module>
     <module>onebusaway-webapp</module>
   </modules>
   
