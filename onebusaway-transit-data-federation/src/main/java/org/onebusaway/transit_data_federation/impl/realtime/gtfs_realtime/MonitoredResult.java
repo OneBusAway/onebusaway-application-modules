@@ -34,7 +34,7 @@ public class MonitoredResult {
   private Set<AgencyAndId> _unmatchedBlockIds = new HashSet<AgencyAndId>();
   private Set<CoordinatePoint> _allCoordinates = new HashSet<CoordinatePoint>();
   private int _recordsTotal = 0;
-  private long _lastUpdate = System.currentTimeMillis();
+  private long _lastUpdate = 0; // we want the default to be very very old, to catch stale updates
   
   public void addUnmatchedTripId(String tripId) {
     _unmatchedTripIds.add(tripId);
@@ -97,6 +97,10 @@ public class MonitoredResult {
     return _lastUpdate;
   }
 
+  public void setLastUpdate(long updateTimeInMillis) {
+    _lastUpdate = updateTimeInMillis;
+  }
+  
   public Set<String> getMatchedTripIds() {
     return _matchedTripIds;
   }
