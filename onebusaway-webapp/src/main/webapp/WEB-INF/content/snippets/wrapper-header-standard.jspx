@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--
 
     Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
@@ -82,12 +83,14 @@
 </ul>
 
 <a id="headerTitle" href="${pageContext.request.contextPath}/">OneBusAway</a>
-
 </div>
 
 <decorator:body />
-  
+<div id="version" style="font-size:14px;color:darkgray;position:absolute;right:2em">
+	<s:property value="gitProperties.getProperty('git.commit.id.describe')" />
 </div>
+</div>
+
 </div>
 
 <div id="feedback">
@@ -98,15 +101,14 @@
 
 <!-- Google Analytics -->
 <script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+	var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+	document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
 </script>
 <script type="text/javascript">
-var pageTracker = _gat._getTracker("UA-2423527-7");
-pageTracker._initData();
-pageTracker._trackPageview();
+	var pageTracker = _gat._getTracker("UA-2423527-7");
+	pageTracker._initData();
+	pageTracker._trackPageview();
 </script>
-
 </body>
-	
+
 </jsp:root>

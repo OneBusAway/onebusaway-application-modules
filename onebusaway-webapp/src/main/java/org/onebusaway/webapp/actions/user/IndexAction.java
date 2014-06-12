@@ -15,9 +15,12 @@
  */
 package org.onebusaway.webapp.actions.user;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Actions;
@@ -34,10 +37,16 @@ public class IndexAction extends AbstractAction implements
   private static final long serialVersionUID = 1L;
 
   private IndexModel _model = new IndexModel();
+  
+  private Properties _gitProperties;
 
   @Override
   public IndexModel getModel() {
     return _model;
+  }
+  
+  public Properties getProperties() {
+    return _gitProperties;
   }
 
   @Override
@@ -61,6 +70,14 @@ public class IndexAction extends AbstractAction implements
 
     _model.setPhoneIndices(phoneIndices);
 
+	_gitProperties = new Properties();
+	try {
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
+		if (inputStream != null) {
+			_gitProperties.load(inputStream);
+		}
+	} catch (IOException ioe) {}
+	
     return SUCCESS;
   }
 }

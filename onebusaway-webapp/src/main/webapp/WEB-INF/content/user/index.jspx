@@ -53,7 +53,7 @@
 	
 	<p><span class="label">Current Settings:</span>
 	  <s:if test="rememberPreferencesEnabled">Preferences <span class="bold">ARE</span> saved</s:if>
-	  <s:else>Prefenences <span class="bold">ARE NOT</span> saved</s:else>
+	  <s:else>Preferences <span class="bold">ARE NOT</span> saved</s:else>
 	</p>
 	
 	<p>
