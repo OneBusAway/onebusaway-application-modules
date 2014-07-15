@@ -86,14 +86,12 @@ class StopTimeServiceImpl implements StopTimeService {
       AgencyAndId stopId, Date from, Date to) {
 
     StopEntry stopEntry = _graph.getStopEntryForId(stopId, true);
-    return getStopTimeInstancesInTimeRange(stopEntry, from, to,
-        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
+    return getStopTimeInstancesInTimeRange(stopEntry, from, to);
   }
 
   @Override
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
-      StopEntry stopEntry, Date from, Date to,
-      EFrequencyStopTimeBehavior frequencyBehavior) {
+      StopEntry stopEntry, Date from, Date to) {
 
     List<StopTimeInstance> stopTimeInstances = new ArrayList<StopTimeInstance>();
 
@@ -115,7 +113,7 @@ class StopTimeServiceImpl implements StopTimeService {
           index.getServiceIds(), index.getServiceInterval(), from, to);
       for (Date serviceDate : serviceDates) {
         getFrequenciesForStopAndServiceIdsAndTimeRange(index, serviceDate,
-            from, to, stopTimeInstances, frequencyBehavior);
+            from, to, stopTimeInstances);
       }
     }
 
@@ -629,8 +627,7 @@ class StopTimeServiceImpl implements StopTimeService {
 
   private List<Integer> getFrequenciesForStopAndServiceIdsAndTimeRange(
       FrequencyStopTripIndex index, Date serviceDate, Date from, Date to,
-      List<StopTimeInstance> stopTimeInstances,
-      EFrequencyStopTimeBehavior frequencyBehavior) {
+      List<StopTimeInstance> stopTimeInstances) {
 
     int relativeFrom = effectiveTime(serviceDate, from);
     int relativeTo = effectiveTime(serviceDate, to);
@@ -651,6 +648,8 @@ class StopTimeServiceImpl implements StopTimeService {
       FrequencyEntry frequency = entry.getFrequency();
 
       InstanceState state = new InstanceState(serviceDate.getTime(), frequency);
+
+      EFrequencyStopTimeBehavior frequencyBehavior = frequency.getExactTimes() == 0 ? EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED : EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED;
 
       switch (frequencyBehavior) {
 

@@ -54,12 +54,10 @@ public interface StopTimeService {
    * @param stopEntry
    * @param from
    * @param to
-   * @param frequencyBehavior how to handle frequency-based stop times
    * @return the set of active stop time instances in the specified time range
    */
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
-      StopEntry stopEntry, Date from, Date to,
-      EFrequencyStopTimeBehavior frequencyBehavior);
+      StopEntry stopEntry, Date from, Date to);
 
   public Range getDepartureForStopAndServiceDate(AgencyAndId stopId,
       ServiceDate serviceDate);
