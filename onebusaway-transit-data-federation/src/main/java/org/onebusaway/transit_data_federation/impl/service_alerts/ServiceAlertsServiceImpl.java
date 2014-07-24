@@ -24,16 +24,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -105,7 +111,19 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private FederatedTransitDataBundle _bundle;
 
-  private File _serviceAlertsPath;
+  private File _serviceAlertsPathOveride;
+  
+  private ScheduledExecutorService _executor;
+  
+  private ScheduledFuture<?> _refreshHandler;
+  
+  private int _refreshFrequency = 60; // seconds
+
+  private long _lastModified = 0;
+  
+  public void setRefreshFrequency(int frequency) {
+    _refreshFrequency = frequency;
+  }
 
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
@@ -113,12 +131,18 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   public void setServiceAlertsPath(File path) {
-    _serviceAlertsPath = path;
+    _serviceAlertsPathOveride = path;
   }
 
   @PostConstruct
   public void start() {
-    loadServiceAlerts();
+    if (_refreshFrequency > 0) {
+    _executor = Executors.newScheduledThreadPool(1);
+    _refreshHandler = _executor.scheduleAtFixedRate(
+        new RefreshHandler(), 0, _refreshFrequency, TimeUnit.SECONDS);
+    } else {
+      loadServiceAlerts();
+    }
   }
 
   @PreDestroy
@@ -126,6 +150,19 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
     saveServiceAlerts();
   }
 
+  public void clear() {
+    _log.info("clearing service alerts");
+    _serviceAlerts.clear();
+    _serviceAlertIdsByServiceAlertAgencyId.clear();
+    _serviceAlertIdsByAgencyId.clear();
+    _serviceAlertIdsByStopId.clear();
+    _serviceAlertIdsByRouteId.clear();
+    _serviceAlertIdsByRouteAndDirectionId.clear();
+    _serviceAlertIdsByRouteAndStop.clear();
+    _serviceAlertIdsByRouteDirectionAndStopCall.clear();
+    _serviceAlertIdsByTripId.clear();
+    _serviceAlertIdsByTripAndStopId.clear();
+  }
   /****
    * {@link ServiceAlertsService} Interface
    ****/
@@ -585,16 +622,18 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
   private synchronized void loadServiceAlerts() {
 
-    _log.info("Loading service alerts from bundle");
+    
     File path = getServiceAlertsPath();
 
     if (path == null || !path.exists())
       return;
 
+    _lastModified = path.lastModified();
+    _log.info("Loading service alerts from bundle with lastModfied " + new Date(_lastModified));
     InputStream in = null;
 
     try {
-
+      clear(); // clean out old service alerts
       in = new BufferedInputStream(new FileInputStream(path));
       ServiceAlertsCollection collection = ServiceAlertsCollection.parseFrom(in);
       for (ServiceAlert serviceAlert : collection.getServiceAlertsList())
@@ -626,9 +665,19 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
     OutputStream out = null;
     try {
-      out = new BufferedOutputStream(new FileOutputStream(path));
-      collection.writeTo(out);
-      out.close();
+      if (_serviceAlerts.size() > 0) {
+        out = new BufferedOutputStream(new FileOutputStream(path));
+        collection.writeTo(out);
+        out.close();
+      } else {
+        // if there are no serviceAlerts, we need to truncate file so changes are persisted
+        _log.debug("truncating file");
+        FileChannel outChan = new FileOutputStream(path).getChannel();
+        outChan.truncate(0);
+        outChan.close();
+      }
+      _lastModified = _bundle.getServiceAlertsPath().lastModified();
+      _log.info("saving service alerts with lastModifed " + new Date(_lastModified));
     } catch (Exception ex) {
       _log.error("error saving service alerts to path " + path, ex);
     } finally {
@@ -643,9 +692,22 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
   }
 
   private File getServiceAlertsPath() {
-    if (_serviceAlertsPath != null)
-      return _serviceAlertsPath;
+    if (_serviceAlertsPathOveride != null)
+      return _serviceAlertsPathOveride;
     return _bundle.getServiceAlertsPath();
   }
-
+  
+  private class RefreshHandler implements Runnable {
+    
+    @Override
+    public void run() {
+      if (getServiceAlertsPath() != null && getServiceAlertsPath().lastModified() > _lastModified) {
+        _log.info("refreshing ServiceAlerts.xml");
+        loadServiceAlerts();
+      } else {
+        _log.debug("ServiceAlerts.xml last modified " + new Date(getServiceAlertsPath().lastModified()));
+      }
+    }
+  }
+  
 }
