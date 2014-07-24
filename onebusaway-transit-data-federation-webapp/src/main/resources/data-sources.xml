@@ -8,7 +8,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
-                value="java:comp/env/jdbc/soundDB"/>   
+                value="java:comp/env/jdbc/appDB"/>   
       <property name="lookupOnStartup"
                 value="true"/>   
       <property name="cache"
@@ -26,5 +26,18 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
               <prop key="bundlePath">/var/lib/obanyc/oba-st-bundle</prop>
          </props>
       </property>
+    </bean>
+    
+    <bean id="restServiceClient" class="org.onebusaway.transit_data_federation.impl.bundle.RestServiceClientImpl" >
+      <constructor-arg type="java.lang.String" value="tdm.dev.obanyc.com"/>
+      <constructor-arg type="java.lang.Integer" value="80" />
+      <constructor-arg type="java.lang.String" value="/api/" />
+    </bean>
+    
+    <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
+	    <!-- <property name="bundleStoreRoot" value="${bundle.location}" />
+	    <property name="standaloneMode" value="${bundle.mode.standalone}" /> -->
+	    <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-sound-test/" />
+      <property name="standaloneMode" value="false" />
     </bean>
 </beans>
