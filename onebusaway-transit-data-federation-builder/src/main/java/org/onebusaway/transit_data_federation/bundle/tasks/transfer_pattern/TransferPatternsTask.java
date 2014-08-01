@@ -58,6 +58,7 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.StopScheduleService;
 import org.onebusaway.transit_data_federation.services.StopTimeService;
+import org.onebusaway.transit_data_federation.services.StopTimeService.EFrequencyStopTimeBehavior;
 import org.onebusaway.transit_data_federation.services.otp.OTPConfigurationService;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
@@ -461,7 +462,7 @@ public class TransferPatternsTask implements Runnable {
     long tTo = (long) interval.getMax();
 
     return _stopTimeService.getStopTimeInstancesInTimeRange(stop, new Date(
-        tFrom), new Date(tTo));
+        tFrom), new Date(tTo), EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
   }
 
   private void processTree(MultiShortestPathTree spt, StopEntry originStop,
