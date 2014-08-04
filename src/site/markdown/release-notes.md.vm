@@ -3,6 +3,14 @@
 #set( $H = '#' ) ## When using velocity templating (a .vm file), the ## indicates a Velocity comment, which makes Markdown section headers tricky
 
 $H$H ${currentVersion}
+* New Features/Bug Fixes:
+  * Java 7 support
+  * Issue [37](https://github.com/OneBusAway/onebusaway-application-modules/pull/37)
+  * Issue [34](https://github.com/OneBusAway/onebusaway-application-modules/pull/34)
+  * Issue [59](https://github.com/OneBusAway/onebusaway-application-modules/pull/59)
+  * Issue [89](https://github.com/OneBusAway/onebusaway-application-modules/pull/89)
+
+$H$H 1.1.11
 * New Features:
   * Merged OneBusAway Enterprise TransitDataService changes; see Issue 72 below.
 * Bug Fixes:
