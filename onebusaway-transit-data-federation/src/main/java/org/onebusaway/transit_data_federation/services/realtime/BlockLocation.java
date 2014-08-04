@@ -71,7 +71,11 @@ public class BlockLocation {
   private BlockStopTimeEntry nextStop;
 
   private int nextStopTimeOffset;
+  
+  private BlockStopTimeEntry previousStop;
 
+  private int previousStopTimeOffset;
+  
   private EVehiclePhase phase;
 
   private String status;
@@ -304,7 +308,23 @@ public class BlockLocation {
     this.nextStopTimeOffset = nextStopTimeOffset;
   }
 
-  public EVehiclePhase getPhase() {
+  public BlockStopTimeEntry getPreviousStop() {
+	return previousStop;
+}
+
+public void setPreviousStop(BlockStopTimeEntry previousStop) {
+	this.previousStop = previousStop;
+}
+
+public int getPreviousStopTimeOffset() {
+	return previousStopTimeOffset;
+}
+
+public void setPreviousStopTimeOffset(int previousStopTimeOffset) {
+	this.previousStopTimeOffset = previousStopTimeOffset;
+}
+
+public EVehiclePhase getPhase() {
     return phase;
   }
 
