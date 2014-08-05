@@ -3,6 +3,9 @@
 #set( $H = '#' ) ## When using velocity templating (a .vm file), the ## indicates a Velocity comment, which makes Markdown section headers tricky
 
 $H$H ${currentVersion}
+  * issue with deployment of 1.1.12 release.  Functionally equivalent.
+
+$H$H 1.1.12
 * New Features/Bug Fixes:
   * Java 7 support
   * Issue [37](https://github.com/OneBusAway/onebusaway-application-modules/pull/37)
