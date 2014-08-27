@@ -37,9 +37,9 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleStoreService;
-import org.onebusaway.transit_data_federation.services.bundle.RestServiceClient;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.util.HttpServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.Future;
+
 
 public class BundleManagementServiceImpl implements BundleManagementService {
 
@@ -92,7 +93,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   protected ServiceDate _currentServiceDate = null;
 
-  protected RestServiceClient _restApiLibrary;
+  protected HttpServiceClient _restApiLibrary;
 
   @Autowired
   protected TransitDataService _transitDataService;
@@ -110,7 +111,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   protected RefreshService _refreshService;
 
   @Autowired
-  public void set_restApiLibrary(RestServiceClient _restApiLibrary) {
+  public void set_restApiLibrary(HttpServiceClient _restApiLibrary) {
     this._restApiLibrary = _restApiLibrary;
   }
 
@@ -120,15 +121,28 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   }
 
   @PostConstruct
-  protected void setup() throws Exception {
-    if (_standaloneMode == true) {
-      _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
-    } else {
-      _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);
+  protected void setup() throws Exception {  
+    if(!_standaloneMode) {
+      _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);        
     }
-
-    discoverBundles();
-
+    else{
+      _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
+    }
+    
+    try{
+      discoverBundles();
+    }catch(Exception e){
+      _log.error("Unable to retreive Bundle List.");
+      if(!(_bundleStore instanceof LocalBundleStoreImpl)){
+        _log.info("Attempting to load local Bundle...");
+        _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
+        discoverBundles();
+      }
+      else{
+        throw e; 
+      }
+    }
+    
     refreshApplicableBundles();
     reevaluateBundleAssignment();
 
@@ -249,8 +263,15 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   public String getActiveBundleId() {
 
     if (_bundleConfigDao == null) {
-      _log.error("config error:  bundleConfigDao is null");
-      return null;
+      if(_currentBundleId == null){
+        _log.error("config error:  bundleConfigDao is null");
+        return null; 
+      }
+      else{
+        _log.warn("config error:  bundleConfigDao is null, returning currentBundleId value instead.");
+        _log.debug("Legacy Bundle most likely not detected");
+        return _currentBundleId;
+      } 
     }
 
     if (_bundleConfigDao.getBundleMetadata() == null) {
@@ -351,7 +372,12 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     _log.info("All inference processing threads have now exited--changing bundle...");
 
     // switch bundle files
-    File path = new File(_bundleRootPath, bundleId);
+    File path;
+    if(_bundleStore.isLegacyBundle()){
+      path = new File(_bundleRootPath);
+    }else{
+      path = new File(_bundleRootPath, bundleId);
+    }
     _bundle.setPath(path);
 
     try {

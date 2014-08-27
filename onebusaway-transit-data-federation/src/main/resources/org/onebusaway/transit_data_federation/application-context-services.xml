@@ -66,6 +66,8 @@
   <bean id="refreshServiceImpl" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
 
   <bean id="tripPlannerConstants" class="org.onebusaway.transit_data_federation.model.tripplanner.TripPlannerConstants" />
+  
+  <bean id="transitDataServiceTemplate" class="org.onebusaway.transit_data_federation.impl.federated.TransitDataServiceTemplateImpl" />
 
   <bean id="extendedCalendarServiceServiceDateRangeCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
     <property name="cacheManager" ref="cacheManager" />
@@ -84,7 +86,7 @@
   </bean>
 
   <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean">
-
+  
   </bean>
 
 </beans>

@@ -1,12 +1,26 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.onebusaway.transit_data_federation.impl.bundle;
 
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
-
-
 import org.onebusaway.transit_data_federation.model.bundle.BundleFileItem;
 import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
 import org.onebusaway.transit_data_federation.services.bundle.BundleStoreService;
-import org.onebusaway.transit_data_federation.services.bundle.RestServiceClient;
+import org.onebusaway.transit_data_federation.util.HttpServiceClient;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -39,9 +53,9 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 
 	private String _bundleRootPath = null;
 
-	private RestServiceClient _apiLibrary;
+	private HttpServiceClient _apiLibrary;
 
-	public HttpBundleStoreImpl(String bundleRootPath, RestServiceClient apiLibrary) {
+	public HttpBundleStoreImpl(String bundleRootPath, HttpServiceClient apiLibrary) throws Exception {
 		_bundleRootPath = bundleRootPath;
 		_apiLibrary = apiLibrary;
 	}
@@ -50,7 +64,7 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 		ArrayList<BundleItem> output = new ArrayList<BundleItem>();
 
 		_log.info("Getting current bundle list from Server...");	     
-		List<JsonObject> bundles = _apiLibrary.getItemsForRequest("bundle", "list");
+		List<JsonObject> bundles = _apiLibrary.getItemsForRequest("bundle","staged","list");
 
 		for(JsonObject itemToAdd : bundles) {
 			BundleItem item = new BundleItem();
@@ -190,7 +204,7 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 					int tries = _fileDownloadRetries;
 
 					while(tries > 0) {
-						URL fileDownloadUrl = _apiLibrary.buildUrl("bundle", bundle.getId(), "file", file.getFilename(), "get");
+						URL fileDownloadUrl = _apiLibrary.buildUrl("bundle","staged", bundle.getId(), "file", file.getFilename(), "get");
 
 						try {
 							downloadUrlToLocalPath(fileDownloadUrl, fileInBundlePath, file.getMd5());
@@ -223,5 +237,10 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 
 		return output;
 	}
+
+  @Override
+  public boolean isLegacyBundle() {
+    return false;
+  }
 
 }

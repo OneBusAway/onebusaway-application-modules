@@ -23,12 +23,13 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-              <prop key="bundlePath">/var/lib/obanyc/oba-st-bundle</prop>
+              <!-- <prop key="bundlePath">/var/lib/obanyc/oba-st-bundle</prop> -->
+              <prop key="bundlePath">/var/lib/obanyc/oba-sound-test/</prop>
          </props>
       </property>
     </bean>
     
-    <bean id="restServiceClient" class="org.onebusaway.transit_data_federation.impl.bundle.RestServiceClientImpl" >
+    <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="tdm.dev.obanyc.com"/>
       <constructor-arg type="java.lang.Integer" value="80" />
       <constructor-arg type="java.lang.String" value="/api/" />
