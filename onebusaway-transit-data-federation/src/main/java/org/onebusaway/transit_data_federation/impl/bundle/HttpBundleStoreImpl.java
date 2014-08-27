@@ -64,7 +64,7 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 		ArrayList<BundleItem> output = new ArrayList<BundleItem>();
 
 		_log.info("Getting current bundle list from Server...");	     
-		List<JsonObject> bundles = _apiLibrary.getItemsForRequest("bundle","staged","list");
+		List<JsonObject> bundles = _apiLibrary.getItemsForRequest("bundle",/*"staged",*/"list");
 
 		for(JsonObject itemToAdd : bundles) {
 			BundleItem item = new BundleItem();
@@ -204,7 +204,7 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 					int tries = _fileDownloadRetries;
 
 					while(tries > 0) {
-						URL fileDownloadUrl = _apiLibrary.buildUrl("bundle","staged", bundle.getId(), "file", file.getFilename(), "get");
+						URL fileDownloadUrl = _apiLibrary.buildUrl("bundle","deploy", bundle.getId(), "file", file.getFilename(), "get");
 
 						try {
 							downloadUrlToLocalPath(fileDownloadUrl, fileInBundlePath, file.getMd5());
