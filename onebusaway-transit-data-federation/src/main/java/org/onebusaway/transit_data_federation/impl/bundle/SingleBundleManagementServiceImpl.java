@@ -15,6 +15,7 @@
  */
 package org.onebusaway.transit_data_federation.impl.bundle;
 
+import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data_federation.impl.config.BundleConfigDao;
 import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
@@ -22,6 +23,8 @@ import org.onebusaway.transit_data_federation.services.bundle.BundleManagementSe
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -104,6 +107,66 @@ public class SingleBundleManagementServiceImpl implements
 
   // some kind of event notification system camsys setup?
   protected void timingHook() {
+  }
+
+  @Override
+  public String getBundleStoreRoot() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void setBundleStoreRoot(String path) throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setTime(Date time) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void setServiceDate(ServiceDate serviceDate) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public ServiceDate getServiceDate() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public void setStandaloneMode(boolean standalone) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public boolean getStandaloneMode() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public void discoverBundles() throws Exception {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void refreshApplicableBundles() {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void reevaluateBundleAssignment() throws Exception {
+    // TODO Auto-generated method stub
+    
   }
 
 }

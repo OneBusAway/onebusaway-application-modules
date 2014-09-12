@@ -16,6 +16,8 @@
 
 package org.onebusaway.transit_data_federation.impl.bundle;
 
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.model.bundle.BundleFileItem;
 import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
@@ -46,6 +48,8 @@ import java.util.List;
 public class HttpBundleStoreImpl implements BundleStoreService {
 
 	private static Logger _log = LoggerFactory.getLogger(HttpBundleStoreImpl.class);
+	
+	private static final DateTimeFormatter _updatedDateFormatter = ISODateTimeFormat.dateTimeNoMillis();
 
 	// number of times to retry downloading a file if the request fails.
 	private static final int _fileDownloadRetries = 2;
@@ -82,6 +86,12 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 					itemToAdd.get("service-date-from").getAsString().replace("-", "")));
 			item.setServiceDateTo(ServiceDate.parseString(
 					itemToAdd.get("service-date-to").getAsString().replace("-", "")));
+			
+			if(itemToAdd.get("created") != null)
+			  item.setCreated(_updatedDateFormatter.parseDateTime(itemToAdd.get("created").getAsString()));
+      
+			if(itemToAdd.get("updated") != null)
+			  item.setUpdated(_updatedDateFormatter.parseDateTime(itemToAdd.get("updated").getAsString()));
 
 
 			ArrayList<BundleFileItem> files = new ArrayList<BundleFileItem>();

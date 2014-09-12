@@ -251,5 +251,8 @@
   </bean>
 
   <bean id="gtfsStats" class="org.onebusaway.transit_data_federation.bundle.tasks.GtfsStatisticsTask" />
+  
+      
+  <!-- <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.SingleBundleManagementServiceImpl" /> -->
 
 </beans>
