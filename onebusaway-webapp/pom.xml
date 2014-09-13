@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.12-SNAPSHOT</version>
+    <version>1.1.14-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-webapp</artifactId>
   <packaging>war</packaging>
@@ -241,7 +241,7 @@
             </resource>
             <resource>
               <directory>target/gwt/LoginWidget</directory>
-              <targetPath></targetPath>
+              <targetPath />
             </resource>
             <resource>
               <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>

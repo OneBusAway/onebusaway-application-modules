@@ -112,6 +112,16 @@ public class StopTimeInstance {
     return _state.getServiceDate()
         + (_stopTime.getStopTime().getDepartureTime() + offset) * 1000;
   }
+  
+  public StopTimeInstance getPreviousStopTimeInstance() {
+    if (!_stopTime.hasPreviousStop())
+      return null;
+    /**
+     * TODO: Check for frequency offset overflow?
+     */
+    return new StopTimeInstance(_stopTime.getPreviousStop(), _state,
+        _frequencyOffset);
+  }
 
   public StopTimeInstance getNextStopTimeInstance() {
     if (!_stopTime.hasNextStop())

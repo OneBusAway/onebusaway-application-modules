@@ -52,10 +52,11 @@ import com.google.transit.realtime.GtfsRealtime.Alert;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedHeader;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtimeConstants;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 
-public class GtfsRealtimeSource {
+public class GtfsRealtimeSource implements MonitoredDataSource {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeSource.class);
 
@@ -111,6 +112,9 @@ public class GtfsRealtimeSource {
   private GtfsRealtimeTripLibrary _tripsLibrary;
 
   private GtfsRealtimeAlertLibrary _alertLibrary;
+  
+  private MonitoredResult _monitoredResult = new MonitoredResult();
+  
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -168,6 +172,18 @@ public class GtfsRealtimeSource {
     _agencyIds.addAll(agencyIds);
   }
 
+  public List<String> getAgencyIds() {
+    return _agencyIds;
+  }
+  
+  public void setMonitoredResult(MonitoredResult result) {
+    _monitoredResult = result;
+  }
+  
+  public MonitoredResult getMonitoredResult() {
+    return _monitoredResult;
+  }
+  
   @PostConstruct
   public void start() {
     if (_agencyIds.isEmpty()) {
@@ -210,7 +226,11 @@ public class GtfsRealtimeSource {
     FeedMessage tripUpdates = readOrReturnDefault(_tripUpdatesUrl);
     FeedMessage vehiclePositions = readOrReturnDefault(_vehiclePositionsUrl);
     FeedMessage alerts = readOrReturnDefault(_alertsUrl);
-    handeUpdates(tripUpdates, vehiclePositions, alerts);
+    MonitoredResult result = new MonitoredResult();
+    result.setAgencyIds(_agencyIds);
+    handeUpdates(result, tripUpdates, vehiclePositions, alerts);
+    // update reference in a thread safe manner
+    _monitoredResult = result;
   }
 
   /****
@@ -223,23 +243,27 @@ public class GtfsRealtimeSource {
    * @param vehiclePositions
    * @param alerts
    */
-  private synchronized void handeUpdates(FeedMessage tripUpdates,
+  private synchronized void handeUpdates(MonitoredResult result, FeedMessage tripUpdates,
       FeedMessage vehiclePositions, FeedMessage alerts) {
 
-    List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(
+    List<CombinedTripUpdatesAndVehiclePosition> combinedUpdates = _tripsLibrary.groupTripUpdatesAndVehiclePositions(result,
         tripUpdates, vehiclePositions);
-    handleCombinedUpdates(combinedUpdates);
+    result.setRecordsTotal(combinedUpdates.size());
+    handleCombinedUpdates(result, combinedUpdates);
     handleAlerts(alerts);
   }
 
-  private void handleCombinedUpdates(
+  private void handleCombinedUpdates(MonitoredResult result,
       List<CombinedTripUpdatesAndVehiclePosition> updates) {
 
     Set<AgencyAndId> seenVehicles = new HashSet<AgencyAndId>();
 
     for (CombinedTripUpdatesAndVehiclePosition update : updates) {
-      VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(update);
+      VehicleLocationRecord record = _tripsLibrary.createVehicleLocationRecordForUpdate(result, update);
       if (record != null) {
+        if (record.getTripId() != null) {
+          result.addUnmatchedTripId(record.getTripId().toString());
+        }
         AgencyAndId vehicleId = record.getVehicleId();
         seenVehicles.add(vehicleId);
         Date timestamp = new Date(record.getTimeOfRecord());

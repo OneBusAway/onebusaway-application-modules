@@ -59,7 +59,7 @@ public class MultiActionMapper extends DefaultActionMapper {
   public ActionMapping getMapping(HttpServletRequest request,
       ConfigurationManager configManager) {
 
-    String uri = getUri(request);
+    String uri = request.getRequestURI();
 
     for (Prefixed<ActionMapper> prefixedActionMapper : _prefixedActionMappers) {
 

@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.12-SNAPSHOT</version>
+  <version>1.1.14-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -16,7 +16,7 @@
 
   <!-- Common Software Dependency Versions -->
   <properties>
-    <struts-version>2.2.3.1</struts-version>
+    <struts-version>2.3.16.2</struts-version>
     <gwt-version>2.4.0</gwt-version>
     <spring-version>3.0.3.RELEASE</spring-version>
     <csv-entities-version>1.0.3</csv-entities-version>
@@ -85,6 +85,7 @@
     <module>onebusaway-transit-data-federation-builder</module>
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
+    <module>onebusaway-watchdog-webapp</module>
     <module>onebusaway-webapp</module>
   </modules>
   
@@ -119,7 +120,7 @@
       <dependency>
         <groupId>org.hsqldb</groupId>
         <artifactId>hsqldb</artifactId>
-        <version>2.2.8</version>
+        <version>2.3.2</version>
       </dependency>
 
       <dependency>

@@ -36,6 +36,8 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
+import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.ScheduledBlockLocation;
@@ -50,7 +52,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource("org.onebusaway.transit_data_federation.impl.realtime.orbcad:name=OrbcadRecordFtpSource")
-public abstract class AbstractOrbcadRecordSource {
+public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource {
 
   private static final int REFRESH_INTERVAL_IN_SECONDS = 30;
 
@@ -99,6 +101,8 @@ public abstract class AbstractOrbcadRecordSource {
   private transient int _recordsWithoutServiceDate = 0;
 
   private transient int _recordsValid = 0;
+  
+  private MonitoredResult _monitoredResult, _currentResult = new MonitoredResult();
 
   public void setRefreshInterval(int refreshIntervalInSeconds) {
     _refreshInterval = refreshIntervalInSeconds;
@@ -110,6 +114,10 @@ public abstract class AbstractOrbcadRecordSource {
 
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds = agencyIds;
+  }
+  
+  public List<String> getAgencyIds() {
+    return _agencyIds;
   }
 
   public void setBlockIdMappingFile(File blockIdMappingFile) {
@@ -133,6 +141,11 @@ public abstract class AbstractOrbcadRecordSource {
     _scheduledBlockLocationService = scheduledBlockLocationService;
   }
 
+  public MonitoredResult getMonitoredResult() {
+    return _monitoredResult;
+  }
+  
+  
   /****
    * JMX Attributes
    ***/
@@ -167,6 +180,8 @@ public abstract class AbstractOrbcadRecordSource {
     return _recordsValid;
   }
 
+  
+  
   /****
    * Setup and Teardown
    ****/
@@ -287,7 +302,9 @@ public abstract class AbstractOrbcadRecordSource {
 
         _log.debug("refresh requested");
 
+        preHandleRefresh();
         handleRefresh();
+        postHandleRefresh();
 
         try {
           _vehicleLocationListener.handleVehicleLocationRecords(_records);
@@ -304,6 +321,22 @@ public abstract class AbstractOrbcadRecordSource {
       }
     }
 
+    private void preHandleRefresh() {
+      _currentResult = new MonitoredResult();
+      _currentResult.setAgencyIds(_agencyIds);
+    }
+
+    
+    private void postHandleRefresh() {
+      _log.debug("" + _agencyIds + ": runningCount=" + _recordsTotal  + ", currentCount=" + _currentResult.getRecordsTotal());
+      if (_currentResult.getRecordsTotal() > 0) {
+        // only consider it a successful update if we got some records
+        // ftp impl may not have a new file to download
+        _monitoredResult = _currentResult;
+      }
+    }
+
+
   }
 
   protected class RecordHandler implements EntityHandler {
@@ -314,6 +347,8 @@ public abstract class AbstractOrbcadRecordSource {
       OrbcadRecord record = (OrbcadRecord) bean;
 
       _recordsTotal++;
+      _currentResult.addRecordTotal();
+      
 
       if (!record.hasScheduleDeviation()) {
         _recordsWithoutScheduleDeviation++;
@@ -367,9 +402,13 @@ public abstract class AbstractOrbcadRecordSource {
         message.setDistanceAlongBlock(location.getDistanceAlongBlock());
 
         BlockTripEntry activeTrip = location.getActiveTrip();
-        if (activeTrip != null)
+        if (activeTrip != null) {
           message.setTripId(activeTrip.getTrip().getId());
-
+          _currentResult.addMatchedTripId(activeTrip.getTrip().getId().toString());
+        } else {
+          _log.error("invalid trip for location=" + location);
+          _currentResult.addUnmatchedTripId(blockId.toString()); // this isn't exactly right
+        }
         // Are we at the start of the block?
         if (location.getDistanceAlongBlock() == 0) {
 
