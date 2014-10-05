@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -39,13 +40,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ListIterator;
-
-
 @Component
 public class StopTimeEntriesFactory {
 
-  private final Logger _log = LoggerFactory.getLogger(StopTimeEntriesFactory.class);
+  private Logger _log = LoggerFactory.getLogger(StopTimeEntriesFactory.class);
 
   private StopToShapeMatchingService _matchingService;
 
@@ -89,7 +87,6 @@ public class StopTimeEntriesFactory {
         if (st.getShapeDistTraveled() > 0) {
           distancesNonZero = true;
         }
-
       } else {
         stopTimeDistances.add(0.0);
       }
