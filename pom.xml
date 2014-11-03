@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.12-st-SNAPSHOT</version>
+  <version>1.1.14-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -42,14 +42,14 @@
     </repository>
     <repository>
       <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
+      <url>http://developer.onebusaway.org/content/groups/public/</url>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
       <id>public.onebusaway.org</id>
-      <url>http://nexus.onebusaway.org/content/groups/public/</url>
+      <url>http://developer.onebusaway.org/content/groups/public/</url>
     </pluginRepository>
   </pluginRepositories>
 

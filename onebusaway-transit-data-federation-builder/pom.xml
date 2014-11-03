@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway-application-modules</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.12-st-SNAPSHOT</version>
+    <version>1.1.14-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-transit-data-federation-builder</artifactId>
 
@@ -13,7 +13,7 @@
 	<repositories>
 		<repository>
 			<id>releases.onebusaway.org</id>
-			<url>http://nexus.onebusaway.org/content/repositories/releases/</url>
+			<url>http://developer.onebusaway.org/content/repositories/releases/</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>

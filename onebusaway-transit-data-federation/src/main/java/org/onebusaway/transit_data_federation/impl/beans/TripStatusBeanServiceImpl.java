@@ -291,6 +291,16 @@ public class TripStatusBeanServiceImpl implements TripDetailsBeanService {
       bean.setNextStopDistanceFromVehicle(blockLocation.getNextStop().getDistanceAlongBlock()
           - blockLocation.getDistanceAlongBlock());
     }
+    
+    BlockStopTimeEntry previousStop = blockLocation.getPreviousStop();
+    if (previousStop != null) {
+      StopTimeEntry stopTime = previousStop.getStopTime();
+      StopBean stopBean = _stopBeanService.getStopForId(stopTime.getStop().getId());
+      bean.setPreviousStop(stopBean);
+      bean.setPreviousStopTimeOffset(blockLocation.getPreviousStopTimeOffset());
+      bean.setPreviousStopDistanceFromVehicle(blockLocation.getPreviousStop().getDistanceAlongBlock()
+          - blockLocation.getDistanceAlongBlock());
+    }
 
     EVehiclePhase phase = blockLocation.getPhase();
     if (phase != null)
