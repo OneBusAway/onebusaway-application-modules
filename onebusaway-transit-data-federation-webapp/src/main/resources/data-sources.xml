@@ -35,7 +35,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     </bean>
     
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-	    <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-st-bundle" />
+	    <property name="bundleStoreRoot" value="${bundlePath}" />
       <property name="standaloneMode" value="true" />
     </bean>
 </beans>
