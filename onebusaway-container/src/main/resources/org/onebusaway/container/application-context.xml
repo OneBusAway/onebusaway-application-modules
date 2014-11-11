@@ -26,6 +26,8 @@
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
     <import resource="classpath:org/onebusaway/container/application-context-hibernate.xml"/>
+    <context:property-placeholder location="classpath:*.properties" />
+    <import resource="classpath:org/onebusaway/container/git-bean.xml" />
     
     <!-- JMX -->
     <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">

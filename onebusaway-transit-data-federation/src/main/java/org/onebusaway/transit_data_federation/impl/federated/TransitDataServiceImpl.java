@@ -17,8 +17,8 @@
 package org.onebusaway.transit_data_federation.impl.federated;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +52,7 @@ import org.onebusaway.transit_data.model.blocks.BlockBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.ScheduledBlockLocationBean;
 import org.onebusaway.transit_data.model.config.BundleMetadata;
+import org.onebusaway.transit_data.model.introspection.InstanceDetails;
 import org.onebusaway.transit_data.model.oba.LocalSearchResult;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.oba.TimedPlaceBean;
@@ -84,7 +85,7 @@ import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
-import org.onebusaway.transit_data_federation.services.bundle.TransitDataServiceTemplate;
+import org.onebusaway.utility.GitRepositoryState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -608,6 +609,14 @@ public class TransitDataServiceImpl implements TransitDataService {
   public List<String> getSearchSuggestions(String agencyId, String input) {
 	  return _transitDataService.getSearchSuggestions(agencyId, input);
   }
-
+  
+  @Override
+  public Map<String, GitRepositoryState> getGitRepositoryState() {
+	  return _transitDataService.getGitRepositoryState();
+  }
+  @Override 
+  public Map<String, InstanceDetails> getInstanceDetails() {
+	  return _transitDataService.getInstanceDetails();
+  }
 
 }

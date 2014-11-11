@@ -18,13 +18,19 @@ package org.onebusaway.api.model.transit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import org.onebusaway.api.impl.MaxCountSupport;
+import org.onebusaway.api.model.GitRepositoryStateV2Bean;
+import org.onebusaway.api.model.InstanceDetailsV2Bean;
+import org.onebusaway.api.model.InstanceVersionsV2Bean;
+import org.onebusaway.api.model.InstancesV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockStopTimeV2Bean;
@@ -69,6 +75,7 @@ import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
 import org.onebusaway.transit_data.model.config.BundleMetadata;
+import org.onebusaway.transit_data.model.introspection.InstanceDetails;
 import org.onebusaway.transit_data.model.oba.MinTravelTimeToStopsBean;
 import org.onebusaway.transit_data.model.realtime.CurrentVehicleEstimateBean;
 import org.onebusaway.transit_data.model.realtime.VehicleLocationRecordBean;
@@ -84,6 +91,7 @@ import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+import org.onebusaway.utility.GitRepositoryState;
 
 public class BeanFactoryV2 {
 
@@ -1094,6 +1102,94 @@ public class BeanFactoryV2 {
     return new CoordinatePoint(bean.getLat(), bean.getLon());
   }
 
+	public InstanceVersionsV2Bean getInstanceVersions(
+			Map<String, GitRepositoryState> instanceVersions,
+			GitRepositoryState apiVersion) {
+		
+		if (instanceVersions == null || apiVersion == null || instanceVersions.isEmpty()) {
+			return null;
+		}
+		
+		InstanceVersionsV2Bean bean = new InstanceVersionsV2Bean();
+	
+		Map<String, GitRepositoryStateV2Bean> instanceVersionBeans = new HashMap<String, GitRepositoryStateV2Bean>();
+	
+		for (Map.Entry<String, GitRepositoryState> instanceVersion : instanceVersions
+				.entrySet()) {
+			instanceVersionBeans.put(instanceVersion.getKey(),
+					getInstanceVersion(instanceVersion.getValue()));
+		}
+	
+		bean.setInstanceVersions(instanceVersionBeans);
+		bean.setApiVersion(getInstanceVersion(apiVersion));
+	
+		return bean;
+	}
+
+	private GitRepositoryStateV2Bean getInstanceVersion(GitRepositoryState state) {
+		if (state == null) {
+			return null;
+		}
+
+		GitRepositoryStateV2Bean bean = new GitRepositoryStateV2Bean();
+	
+		bean.setBranch(state.getBranch());
+		bean.setBuildTime(state.getBuildTime());
+		bean.setBuildUserEmail(state.getBuildUserEmail());
+		bean.setBuildUserName(state.getBuildUserName());
+		bean.setCommitId(state.getCommitId());
+		bean.setCommitIdAbbrev(state.getCommitIdAbbrev());
+		bean.setCommitMessageFull(state.getCommitMessageFull());
+		bean.setCommitMessageShort(state.getCommitMessageShort());
+		bean.setCommitTime(state.getCommitTime());
+		bean.setCommitUserEmail(state.getCommitUserEmail());
+		bean.setCommitUserName(state.getCommitUserName());
+		bean.setDescribe(state.getDescribe());
+		bean.setVersion(state.getVersion());
+		bean.setMajor(state.getParsedVersion().getMajor());
+		bean.setMinor(state.getParsedVersion().getMinor());
+		bean.setIncremental(state.getParsedVersion().getIncremental());
+		bean.setQualifier(state.getParsedVersion().getQualifier());
+	
+		return bean;
+	}
+	
+	public InstancesV2Bean getInstances(
+			Map<String, InstanceDetails> allInstanceDetails) {
+		if (allInstanceDetails == null || allInstanceDetails.isEmpty()) {
+			return null;
+		}
+		InstancesV2Bean bean = new InstancesV2Bean();
+
+		List<InstanceDetailsV2Bean> instanceDetailBeans = new ArrayList<InstanceDetailsV2Bean>();
+
+		for (InstanceDetails details : allInstanceDetails.values()) {
+			instanceDetailBeans.add(getInstanceDetails(details));
+		}
+
+		bean.setInstanceDetails(instanceDetailBeans);
+
+		return bean;
+	}
+	
+	private InstanceDetailsV2Bean getInstanceDetails(InstanceDetails details) {
+		if (details == null) {
+			return null;
+		}
+
+		InstanceDetailsV2Bean bean = new InstanceDetailsV2Bean();
+
+		bean.setInstanceName(details.getInstanceName());
+		bean.setLanguage(details.getLanguage());
+		bean.setContactEmail(details.getContactEmail());
+		bean.setTwitterUrl(details.getTwitterUrl());
+		bean.setFacebookUrl(details.getFacebookUrl());
+
+		return bean;
+	}
+
+  
+  
   /****
    * References Methods
    ****/
