@@ -56,7 +56,7 @@ public class BundleConfigDao {
     File path = _bundle.getBundleMetadataPath();
     
     
-    _log.error("looking for metadata file " + path);
+    _log.info("looking for metadata file " + path);
     if (path.exists()) {
       ObjectMapper mapper = new ObjectMapper();
       mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
