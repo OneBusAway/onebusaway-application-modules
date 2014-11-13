@@ -15,6 +15,7 @@
  */
 package org.onebusaway.bundle_loader;
 
+import java.awt.geom.Rectangle2D;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -224,6 +225,11 @@ public class BundleStatisticsService implements StatisticsService {
 		bs.setCalendarStartDate(getCalendarServiceRangeStart(agencyId));
 		bs.setCalendarEndDate(getCalendarServiceRangeEnd(agencyId));
 		return bs;
+	}
+	
+	@Override
+	public Rectangle2D getBounds () {
+	  return null;
 	}
 	
 }
