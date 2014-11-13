@@ -25,19 +25,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import org.onebusaway.container.refresh.Refreshable;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.services.calendar.CalendarService;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.watchdog.api.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
+
 
 @Path("/metric/schedule/agency")
 public class AgencyResource extends MetricResource {
@@ -55,6 +59,12 @@ public class AgencyResource extends MetricResource {
       _graph = graph;
     }
 
+  @PostConstruct
+  @Refreshable(dependsOn = RefreshableResources.CALENDAR_DATA)
+  public void start() {
+    _log.info("Need to clear agencyEndDateMap");
+    agencyEndDateMap.clear();
+  }
   
   @Path("/total")
   @GET
@@ -90,7 +100,8 @@ public class AgencyResource extends MetricResource {
   public Response getAgencyExpiryDateDelta(@PathParam("agencyId") String agencyId) {
 	  try {
 		 Date endDate = agencyEndDateMap.get(agencyId);
-		 if (endDate == null) {		  
+		 if (endDate == null) {
+			 _log.info("Service end date for agency " + agencyId + " not cached.  Reloading");
 			 List<TripEntry> trips = _graph.getAllTrips();
 			 Set<AgencyAndId> tripSvcIds = new HashSet<AgencyAndId>();
 			 for (TripEntry trip : trips) {
