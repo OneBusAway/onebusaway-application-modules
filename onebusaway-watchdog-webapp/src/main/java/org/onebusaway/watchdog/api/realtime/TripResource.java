@@ -166,6 +166,19 @@ public class TripResource extends MetricResource {
       return Response.ok(error("buses-in-service-percent", e)).build();
     }
   }
+  
+  @Path("/long-term-delta/matched")
+  @GET
+  public Response getLongTermDeltaMatched() {
+    int longTermDelta = getLongTermDeltaMatchedTrips();
+    return Response.ok(ok("long-term-delta-matched-trips", longTermDelta)).build();    
+  }
 
+  @Path("/long-term-delta/unmatched")
+  @GET
+  public Response getLongTermDeltaUnmatched() {
+    int longTermDelta = getLongTermDeltaUnmatchedTrips();
+    return Response.ok(ok("long-term-delta-unmatched-trips", longTermDelta)).build();    
+  }
 
 }
