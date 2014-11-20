@@ -598,8 +598,8 @@ public interface TransitDataService extends FederatedService {
    */
   @FederatedByAgencyIdMethod
   public List<String> getSearchSuggestions(String agencyId, String input);
-
-  /**
+/*
+  *//**
    * Return version information for this OneBusAway instance.
    * 
    * @return GitRepositoryState containing this instance's version information.

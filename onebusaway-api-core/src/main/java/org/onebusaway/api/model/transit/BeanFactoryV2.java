@@ -181,11 +181,6 @@ public class BeanFactoryV2 {
       StopsForRouteBean result, boolean includePolylines) {
     return entry(getStopsForRoute(result, includePolylines));
   }
-
-  public EntryWithReferencesBean<ConfigV2Bean> getResponse(
-      BundleMetadata result) {
-    return entry(getConfig(result));
-  }
   
   public ListWithReferencesBean<AgencyWithCoverageV2Bean> getResponse(
       List<AgencyWithCoverageBean> beans) {
@@ -315,17 +310,6 @@ public class BeanFactoryV2 {
     bean.setType(route.getType());
     bean.setUrl(route.getUrl());
 
-    return bean;
-  }
-
-  public ConfigV2Bean getConfig(BundleMetadata meta) {
-    ConfigV2Bean bean = new ConfigV2Bean();
-    bean.setGitProperties(getGitProperties());
-    if (meta == null) return bean;
-    bean.setId(meta.getId());
-    bean.setName(meta.getName());
-    bean.setServiceDateFrom(meta.getServiceDateFrom());
-    bean.setServiceDateTo(meta.getServiceDateTo());
     return bean;
   }
   
@@ -1101,10 +1085,13 @@ public class BeanFactoryV2 {
       return null;
     return new CoordinatePoint(bean.getLat(), bean.getLon());
   }
-
+  	
+  	
+  
 	public InstanceVersionsV2Bean getInstanceVersions(
 			Map<String, GitRepositoryState> instanceVersions,
-			GitRepositoryState apiVersion) {
+			GitRepositoryState apiVersion,
+			BundleMetadata meta) {
 		
 		if (instanceVersions == null || apiVersion == null || instanceVersions.isEmpty()) {
 			return null;
@@ -1117,16 +1104,20 @@ public class BeanFactoryV2 {
 		for (Map.Entry<String, GitRepositoryState> instanceVersion : instanceVersions
 				.entrySet()) {
 			instanceVersionBeans.put(instanceVersion.getKey(),
-					getInstanceVersion(instanceVersion.getValue()));
+					getInstanceVersion(instanceVersion.getValue(), meta));
 		}
-	
+		
 		bean.setInstanceVersions(instanceVersionBeans);
 		bean.setApiVersion(getInstanceVersion(apiVersion));
 	
 		return bean;
 	}
-
+	
 	private GitRepositoryStateV2Bean getInstanceVersion(GitRepositoryState state) {
+		return getInstanceVersion(state, null);
+	}
+
+	private GitRepositoryStateV2Bean getInstanceVersion(GitRepositoryState state, BundleMetadata meta) {
 		if (state == null) {
 			return null;
 		}
@@ -1150,7 +1141,14 @@ public class BeanFactoryV2 {
 		bean.setMinor(state.getParsedVersion().getMinor());
 		bean.setIncremental(state.getParsedVersion().getIncremental());
 		bean.setQualifier(state.getParsedVersion().getQualifier());
+		
+		if (meta == null) return bean;
 	
+	    /*bean.setBundleId(meta.getId());*/
+	    bean.setBundleName(meta.getName());
+	    bean.setBundleServiceDateFrom(meta.getServiceDateFrom());
+	    bean.setBundleServiceDateTo(meta.getServiceDateTo());
+		
 		return bean;
 	}
 	
@@ -1276,17 +1274,5 @@ public class BeanFactoryV2 {
 
     return true;
   }
-  
-  private Properties getGitProperties(){
-	  Properties properties = new Properties();
-	  try {
-		  InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
-		  if (inputStream != null) {
-			  properties.load(inputStream);
-		  }
-		  return properties;
-	  } catch (IOException ioe) {
-		  return null;
-	  }
-  }
+ 
 }

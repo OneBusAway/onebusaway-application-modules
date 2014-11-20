@@ -20,6 +20,7 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.utility.GitRepositoryHelper;
 import org.onebusaway.utility.GitRepositoryState;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,7 +33,6 @@ public class InstanceDetailsAction extends ApiActionSupport {
 	@Autowired
 	private TransitDataService _service;
 
-	@Autowired
 	private GitRepositoryState _repositoryState;
 
 	public InstanceDetailsAction() {
@@ -42,7 +42,11 @@ public class InstanceDetailsAction extends ApiActionSupport {
 	public DefaultHttpHeaders index() throws ServiceException {
 		if (hasErrors())
 			return setValidationErrorsResponse();
-
+		
+		if(_repositoryState == null){
+			_repositoryState = new GitRepositoryHelper().getGitRepositoryState();
+		}
+		
 		BeanFactoryV2 factory = getBeanFactoryV2();
 		return setOkResponse(factory.getInstances(_service.getInstanceDetails()));
 	}

@@ -30,6 +30,7 @@ import javax.annotation.PostConstruct;
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.transit_data.model.introspection.InstanceDetails;
 import org.onebusaway.transit_data_federation.services.IntrospectionService;
+import org.onebusaway.utility.GitRepositoryHelper;
 import org.onebusaway.utility.GitRepositoryState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class IntrospectionServiceImpl implements IntrospectionService {
 		return hostname;
 	}
 	
-	@Autowired
+	/*@Autowired(required = false)*/
 	private GitRepositoryState _gitRepositoryState;
 	
 	@Override
@@ -78,6 +79,10 @@ public class IntrospectionServiceImpl implements IntrospectionService {
 
 	@PostConstruct
 	public void start() {
+		if(_gitRepositoryState == null){
+			_gitRepositoryState = new GitRepositoryHelper().getGitRepositoryState();
+		}
+		
 		if (_instanceDetails == null && _instanceDetailsPropertyFile != null) {
 			InputStream in = null;
 			try {

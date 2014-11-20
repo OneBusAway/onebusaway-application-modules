@@ -16,28 +16,69 @@
 
 package org.onebusaway.utility;
 
+import java.io.Serializable;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class GitRepositoryState {
+public class GitRepositoryState implements Serializable {
 
+	private static final long serialVersionUID = 593030390723190029L;
+
+	private String branch;                  // =${git.branch}
+	private String buildTime;               // =${git.build.time}
+	private String buildUserEmail;          // =${git.build.user.email}
+	private String buildUserName;           // =${git.build.user.name}  
+	private String commitId;                // =${git.commit.id}
+	private String commitIdAbbrev;          // =${git.commit.id.abbrev}
+	private String commitMessageFull;       // =${git.commit.message.full}
+	private String commitMessageShort;      // =${git.commit.message.short}
+	private String commitTime;              // =${git.commit.time}
+	private String commitUserName;          // =${git.commit.user.name}
+	private String commitUserEmail;         // =${git.commit.user.email}
+	private String describe;                // =${git.commit.id.describe}
+	private String shortDescribe;           // =${git.commit.id.describe-short}
+	private String tags;                    // =${git.tags} // comma separated tag names
 	private String version;
-	private String branch;
-	private String describe;
-	private String commitId;
-	private String commitIdAbbrev;
-	private String buildUserName;
-	private String buildUserEmail;
-	private String buildTime;
-	private String commitUserName;
-	private String commitUserEmail;
-	private String commitMessageFull;
-	private String commitMessageShort;
-	private String commitTime;
-	private MavenVersion parsedVersion;
+	 
+	  MavenVersion parsedVersion;
+	  
+    public GitRepositoryState() {
+    }
+    
+    public GitRepositoryState(Properties properties)
+    {
+		this.branch = properties.get("git.branch").toString();
+		this.buildTime = properties.get("git.build.time").toString();
+		this.buildUserEmail = properties.get("git.build.user.email").toString();
+		this.buildUserName = properties.get("git.build.user.name").toString();
+		this.commitId = properties.get("git.commit.id").toString();
+		this.commitIdAbbrev = properties.get("git.commit.id.abbrev").toString();
+		this.commitMessageFull = properties.get("git.commit.message.full").toString();
+		this.commitMessageShort = properties.get("git.commit.message.short").toString();
+		this.commitTime = properties.get("git.commit.time").toString();
+		this.commitUserName = properties.get("git.commit.user.name").toString();
+		this.commitUserEmail = properties.get("git.commit.user.email").toString();
+		this.describe = properties.get("git.commit.id.describe").toString();
+		setVersion(properties.get("version").toString());
+    }
+    
+    public String getDetails() {
+    	return "{ " 
+    			+ "branch: " + branch + ", "
+    			+ "describe: " + describe + ", "
+    			+ "commitId: " + commitId + ", "
+    			+ "buildUserName: " + buildUserName + ", "
+    			+ "buildUserEmail: " + buildUserEmail + ", "
+    			+ "buildTime: " + buildTime + ", "
+    			+ "commitUserName: " + commitUserName + ", "
+    			+ "commitUserEmail: " + commitUserEmail + ", "
+    			+ "commitMessageShort: " + commitMessageShort + ", "
+    			+ "commitMessageFull: " + commitMessageFull + ","
+    			+ "commitTime: " + commitTime
+    			+ " }";
 
-	public GitRepositoryState() {
-	}
+    }
 
 	public String getVersion() {
 		return version;
@@ -150,49 +191,5 @@ public class GitRepositoryState {
 
 	public void setParsedVersion(MavenVersion parsedVersion) {
 		this.parsedVersion = parsedVersion;
-	}
-
-	public static class MavenVersion {
-		private String major;
-		private String minor;
-		private String incremental;
-		private String qualifier;
-
-		public String getMajor() {
-			return major;
-		}
-
-		public String getMinor() {
-			return minor;
-		}
-
-		public String getIncremental() {
-			return incremental;
-		}
-
-		public String getQualifier() {
-			return qualifier;
-		}
-
-		public MavenVersion(String version) {
-			// TODO: Would be cleaner with named capturing groups but they
-			// aren't supported until Java 7
-			final Pattern VERSION_PATTERN = Pattern
-					.compile("([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-(.*))?");
-
-			Matcher m = VERSION_PATTERN.matcher(version);
-
-			if (m.matches()) {
-				this.major = m.group(1);
-				this.minor = m.group(2);
-				this.incremental = m.group(3);
-				this.qualifier = m.group(4);
-			} else {
-				this.major = "";
-				this.minor = "";
-				this.incremental = "";
-				this.qualifier = "";
-			}
-		}
 	}
 }

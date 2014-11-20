@@ -197,8 +197,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   @Autowired
   private ScheduleHelperService _scheduleHelperService;
   
-  @Autowired
-  private IntrospectionService _introspectionService;
+
   
 
   /****
@@ -748,16 +747,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     // TODO Auto-generated method stub
     return null;
   }
-  //@Override
-  public Map<String, GitRepositoryState> getGitRepositoryState() {
-    return Collections.singletonMap(_introspectionService.getInstanceDetails().getInstanceName(),
-    _introspectionService.getGitRepositoryState());
-  }
-  //@Override 
-  public Map<String, InstanceDetails> getInstanceDetails() {
-    return Collections.singletonMap(_introspectionService.getInstanceDetails().getInstanceName(),
-    _introspectionService.getInstanceDetails());
-  }
+ 
 
   /****
    * Private Methods

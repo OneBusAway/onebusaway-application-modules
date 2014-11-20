@@ -39,6 +39,10 @@ public class GitRepositoryStateV2Bean implements Serializable {
 	private String minor;
 	private String incremental;
 	private String qualifier;
+	private String bundleName;
+	private String bundleId;
+	private String bundleServiceDateFrom;
+	private String bundleServiceDateTo;
 
 	public GitRepositoryStateV2Bean() {
 
@@ -111,6 +115,22 @@ public class GitRepositoryStateV2Bean implements Serializable {
 	public String getVersion() {
 		return version;
 	}
+	
+	public String getBundleName() {
+		return bundleName;
+	}
+
+	public String getBundleId() {
+		return bundleId;
+	}
+
+	public String getBundleServiceDateFrom() {
+		return bundleServiceDateFrom;
+	}
+
+	public String getBundleServiceDateTo() {
+		return bundleServiceDateTo;
+	}
 
 	public void setBranch(String branch) {
 		this.branch = branch;
@@ -178,6 +198,22 @@ public class GitRepositoryStateV2Bean implements Serializable {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+	
+	public void setBundleName(String bundleName) {
+		this.bundleName = bundleName;
+	}
+
+	public void setBundleId(String bundleId) {
+		this.bundleId = bundleId;
+	}
+
+	public void setBundleServiceDateFrom(String bundleServiceDateFrom) {
+		this.bundleServiceDateFrom = bundleServiceDateFrom;
+	}
+
+	public void setBundleServiceDateTo(String bundleServiceDateTo) {
+		this.bundleServiceDateTo = bundleServiceDateTo;
 	}
 
 }

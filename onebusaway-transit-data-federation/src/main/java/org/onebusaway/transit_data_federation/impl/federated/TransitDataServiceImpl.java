@@ -84,6 +84,7 @@ import org.onebusaway.transit_data.model.trips.TripsForAgencyQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.services.IntrospectionService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.utility.GitRepositoryState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,9 @@ public class TransitDataServiceImpl implements TransitDataService {
   
   @Autowired
   private TransitDataServiceTemplateImpl _transitDataService;
+  
+  @Autowired
+  private IntrospectionService _introspectionService;
   
   private BundleManagementService _bundleManagementService;
   
@@ -610,13 +614,17 @@ public class TransitDataServiceImpl implements TransitDataService {
 	  return _transitDataService.getSearchSuggestions(agencyId, input);
   }
   
-  @Override
   public Map<String, GitRepositoryState> getGitRepositoryState() {
-	  return _transitDataService.getGitRepositoryState();
+	  GitRepositoryState grs = _introspectionService.getGitRepositoryState();
+	  Map<String, GitRepositoryState> grsmap = Collections.singletonMap(
+			  _introspectionService.getInstanceDetails().getInstanceName(),grs);
+	  
+	  return grsmap;
   }
-  @Override 
+  
   public Map<String, InstanceDetails> getInstanceDetails() {
-	  return _transitDataService.getInstanceDetails();
+    return Collections.singletonMap(_introspectionService.getInstanceDetails().getInstanceName(),
+    _introspectionService.getInstanceDetails());
   }
 
 }

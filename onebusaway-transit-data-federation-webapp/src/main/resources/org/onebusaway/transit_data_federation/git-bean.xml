@@ -18,12 +18,10 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-	
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
     <bean name="gitRepositoryInformation" class="org.onebusaway.utility.GitRepositoryState">
-    	<!-- <property name="version" value="${project.version}" /> -->
+    	<property name="version" value="${project.version}" />
         <property name="branch" value="${git.branch}"/>
         <property name="describe" value="${git.commit.id.describe}"/>
         <property name="commitId" value="${git.commit.id}"/>
@@ -37,4 +35,6 @@
         <property name="commitUserName" value="${git.commit.user.name}"/>
         <property name="commitUserEmail" value="${git.commit.user.email}"/>
     </bean>
+    
+    
 </beans>

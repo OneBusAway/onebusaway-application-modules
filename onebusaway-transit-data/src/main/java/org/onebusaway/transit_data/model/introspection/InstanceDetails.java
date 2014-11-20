@@ -16,7 +16,9 @@
 
 package org.onebusaway.transit_data.model.introspection;
 
-public class InstanceDetails {
+import java.io.Serializable;
+
+public class InstanceDetails implements Serializable{
 	private String instanceName;
 	private String language;
 	private String contactEmail;
