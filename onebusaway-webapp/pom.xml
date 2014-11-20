@@ -134,6 +134,12 @@
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
     </dependency>
+    <!--  support mysql out of the box -->
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+		<version>5.1.17</version>
+	</dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -241,7 +247,7 @@
             </resource>
             <resource>
               <directory>target/gwt/LoginWidget</directory>
-              <targetPath />
+              <targetPath></targetPath>
             </resource>
             <resource>
               <directory>target/gwt/org.onebusaway.webapp.gwt.OneBusAwayStandardApplication</directory>
@@ -260,6 +266,42 @@
               <targetPath>where/standard</targetPath>
             </resource>
           </webResources>
+        </configuration>
+      </plugin>
+      <plugin>
+				<groupId>pl.project13.maven</groupId>
+				<artifactId>git-commit-id-plugin</artifactId>
+				<version>2.1.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>revision</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<prefix>git</prefix>
+					<dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
+					<verbose>true</verbose>
+					<skipPoms>false</skipPoms>
+					<generateGitPropertiesFile>false</generateGitPropertiesFile>
+					<generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+					<gitDescribe>
+						<skip>false</skip>
+						<always>true</always>
+						<abbrev>7</abbrev>
+						<dirty>-dirty</dirty>
+						<forceLongFormat>false</forceLongFormat>
+					</gitDescribe>
+				</configuration>
+				</plugin>
+	  <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <configuration>
+        <excludes combine.children="append">
+          <exclude>src/main/resources/git.properties</exclude>
+        </excludes>
         </configuration>
       </plugin>
     </plugins>

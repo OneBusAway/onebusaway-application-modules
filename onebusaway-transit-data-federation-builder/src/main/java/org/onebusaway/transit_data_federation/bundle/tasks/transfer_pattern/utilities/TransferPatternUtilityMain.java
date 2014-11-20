@@ -85,7 +85,7 @@ public class TransferPatternUtilityMain {
         if (line.length() == 0)
           continue;
 
-        List<String> tokens = CSVLibrary.parse(line);
+        List<String> tokens = new CSVLibrary().parse(line);
         String index = tokens.get(0);
         String stopId = tokens.get(1);
         String type = tokens.get(2);
@@ -207,7 +207,7 @@ public class TransferPatternUtilityMain {
     String line = null;
 
     while ((line = reader.readLine()) != null) {
-      List<String> tokens = CSVLibrary.parse(line);
+      List<String> tokens = new CSVLibrary().parse(line);
       String stopId = tokens.get(0);
       int depth = 0;
       if (tokens.size() > 1)

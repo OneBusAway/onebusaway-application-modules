@@ -29,22 +29,24 @@ import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsBean;
 import org.onebusaway.webapp.gwt.where_library.rpc.WebappServiceAsync;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+
+
 
 public class StopsForRegionServiceImplTest {
 
   private StopsForRegionServiceImpl _service;
 
-  // @BeforeClass
+  /*// @BeforeClass
   public static void setupClass() {
-    GWTMockLibrary.enable();
+   GWTMockLibrary.enable();
   }
 
   // @AfterClass
   public static void teardownClass() {
     GWTMockLibrary.disable();
-  }
+  }*/
 
   // @Before
   public void setup() {

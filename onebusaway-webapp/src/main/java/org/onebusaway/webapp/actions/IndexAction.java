@@ -15,6 +15,10 @@
  */
 package org.onebusaway.webapp.actions;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
 
@@ -28,7 +32,13 @@ import com.opensymphony.xwork2.ActionSupport;
 public class IndexAction extends ActionSupport {
 
   private static final long serialVersionUID = 1L;
+  
+  private Properties _gitProperties;
 
+  public Properties getGitProperties(){
+	return _gitProperties;
+  }
+  
   @Override
   public String execute() throws Exception {
 
@@ -43,6 +53,14 @@ public class IndexAction extends ActionSupport {
       return super.execute();
     }
 
+	_gitProperties = new Properties();
+	try {
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
+		if (inputStream != null) {
+			_gitProperties.load(inputStream);
+		}
+	} catch (IOException ioe) {}
+	  
     return "404";
   }
 }

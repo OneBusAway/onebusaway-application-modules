@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2014 Kurt Raschke <kurt@kurtraschke.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.impl.bundle;
 
-import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
-import org.springframework.stereotype.Component;
+package org.onebusaway.api.model;
 
-@Component
-public class TrivialBundleManagementServiceImpl implements BundleManagementService {
+import java.io.Serializable;
+import java.util.List;
 
-	@Override
-	public String getActiveBundleId() {
-		return null;
+public class InstancesV2Bean implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	private List<InstanceDetailsV2Bean> instanceDetails;
+
+	public InstancesV2Bean() {
+
+	}
+
+	public List<InstanceDetailsV2Bean> getInstanceDetails() {
+		return instanceDetails;
+	}
+
+	public void setInstanceDetails(List<InstanceDetailsV2Bean> instanceDetails) {
+		this.instanceDetails = instanceDetails;
 	}
 
 }

@@ -24,7 +24,7 @@
            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
-
+	
     <import resource="classpath:org/onebusaway/container/application-context-hibernate.xml"/>
     
     <!-- JMX -->

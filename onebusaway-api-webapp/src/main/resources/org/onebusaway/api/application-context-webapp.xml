@@ -47,5 +47,7 @@
       </list>
     </property>
   </bean>
-  
+  <bean id="createAPIKeyOnInitAction" class="org.onebusaway.users.impl.CreateApiKeyAction" 	>
+    	<property name="key" value="OBA" />
+  </bean>
 </beans>

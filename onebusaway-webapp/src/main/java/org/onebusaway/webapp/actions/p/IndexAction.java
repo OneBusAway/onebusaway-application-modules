@@ -16,8 +16,10 @@
 package org.onebusaway.webapp.actions.p;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Properties;
 
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.Result;
@@ -59,6 +61,8 @@ public class IndexAction extends AbstractAction {
   private String _renderedContent;
 
   private String _editLink;
+  
+  private Properties _gitProperties;
 
   /****
    * Members for Raw Result
@@ -100,6 +104,10 @@ public class IndexAction extends AbstractAction {
 
   public String getEditLink() {
     return _editLink;
+  }
+  
+  public Properties getGitProperties(){
+	return _gitProperties;
   }
 
   public boolean isAdmin() {
@@ -181,6 +189,13 @@ public class IndexAction extends AbstractAction {
     _renderedContent = _wikiRenderingService.renderPage(_page);
     _editLink = _wikiRenderingService.getEditLink(_page);
 
+	_gitProperties = new Properties();
+	try {
+		InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties");
+		if (inputStream != null) {
+			_gitProperties.load(inputStream);
+		}
+	} catch (IOException ioe) {}
     return SUCCESS;
   }
 

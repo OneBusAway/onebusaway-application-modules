@@ -147,6 +147,10 @@ public class FederatedTransitDataBundle {
   public File getCachePath() {
     return new File(_path, "cache");
   }
+  
+  public File getBundleMetadataPath() {
+    return new File(_path, "metadata.json");
+  }
 
   private String keyed(String value) {
     return keyed(value, true);

@@ -15,7 +15,7 @@
  */
 package org.onebusaway.users.model;
 
-import org.springframework.security.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface IndexedUserDetails extends UserDetails {
   public UserIndexKey getUserIndexKey();
