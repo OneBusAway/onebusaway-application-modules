@@ -33,12 +33,14 @@
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
 
   <bean id="bundle" class="org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle">
-    <property name="path" value="${bundlePath}" />
+  <!--  note bundle path is configured in data-sources.xml -->
+   <!--  <property name="path" value="${bundlePath}" /> -->
   </bean>
 
-  <bean id="otpGraphBundle" class="org.opentripplanner.model.GraphBundle">
+  <!--  TODO:  remove reference to otpGraph as they are really not used anymore -->
+  <!-- <bean id="otpGraphBundle" class="org.opentripplanner.model.GraphBundle">
     <property name="path" value="${bundlePath}" />
-  </bean>
+  </bean> -->
   
   <!-- Database Connection Configuration -->
   <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">

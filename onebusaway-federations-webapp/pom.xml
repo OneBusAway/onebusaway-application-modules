@@ -12,6 +12,7 @@
 
     <properties>
         <tomcat-version>5.5.29</tomcat-version>
+        <cargo.jvmargs>-Xmx2G -XX:MaxPermSize=256m</cargo.jvmargs>
     </properties>
 
     <dependencies>
@@ -95,6 +96,7 @@
                     <configuration>
                         <home>${project.build.directory}/tomcat5x/container</home>
                         <properties>
+                            <cargo.jvmargs>${cargo.jvmargs}</cargo.jvmargs>
                             <cargo.servlet.port>${org_onebusaway_test_port}</cargo.servlet.port>
                             <cargo.tomcat.ajp.port>${org_onebusaway_test_ajp_port}</cargo.tomcat.ajp.port>
                             <cargo.rmi.port>${org_onebusaway_test_rmi_port}</cargo.rmi.port>

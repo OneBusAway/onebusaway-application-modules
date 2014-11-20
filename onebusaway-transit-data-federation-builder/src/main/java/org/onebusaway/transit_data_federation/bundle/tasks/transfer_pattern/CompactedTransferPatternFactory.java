@@ -106,7 +106,7 @@ public class CompactedTransferPatternFactory {
       if (line.length() == 0)
         continue;
 
-      List<String> tokens = CSVLibrary.parse(line);
+      List<String> tokens = new CSVLibrary().parse(line);
 
       AgencyAndId stopId = AgencyAndIdLibrary.convertFromString(tokens.get(1));
       StopEntry stop = _dao.getStopEntryForId(stopId, true);

@@ -278,17 +278,22 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     Calendar c = Calendar.getInstance();
     c.add(Calendar.MINUTE, -15);
     Date staleRecordThreshold = c.getTime();
-
+    long newestUpdate = 0; 
     Iterator<Map.Entry<AgencyAndId, Date>> it = _lastVehicleUpdate.entrySet().iterator();
     while (it.hasNext()) {
       Map.Entry<AgencyAndId, Date> entry = it.next();
       AgencyAndId vehicleId = entry.getKey();
       Date lastUpdateTime = entry.getValue();
+      if (lastUpdateTime != null && lastUpdateTime.getTime() > newestUpdate) {
+        newestUpdate = lastUpdateTime.getTime();
+      }
       if (!seenVehicles.contains(vehicleId)
           && lastUpdateTime.before(staleRecordThreshold)) {
         it.remove();
       }
     }
+    // NOTE: this implies receiving stale updates is equivalent to not being updated at all
+    result.setLastUpdate(newestUpdate);
   }
 
   private void handleAlerts(FeedMessage alerts) {

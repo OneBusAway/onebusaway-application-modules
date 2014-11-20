@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2014 Kurt Raschke <kurt@kurtraschke.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.impl.bundle;
 
-import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
-import org.springframework.stereotype.Component;
+package org.onebusaway.transit_data_federation.services;
 
-@Component
-public class TrivialBundleManagementServiceImpl implements BundleManagementService {
+import org.onebusaway.transit_data.model.introspection.InstanceDetails;
+import org.onebusaway.utility.GitRepositoryState;
 
-	@Override
-	public String getActiveBundleId() {
-		return null;
-	}
+public interface IntrospectionService {
+  public InstanceDetails getInstanceDetails();
 
+  GitRepositoryState getGitRepositoryState();
 }
