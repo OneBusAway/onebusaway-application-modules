@@ -19,51 +19,51 @@ import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MavenVersion implements Serializable{
-	
-	private static final long serialVersionUID = 1L;
-	
-	private String major;
-	private String minor;
-	private String incremental;
-	private String qualifier;
+public class MavenVersion implements Serializable {
 
-	public String getMajor() {
-		return major;
-	}
+  private static final long serialVersionUID = 1L;
 
-	public String getMinor() {
-		return minor;
-	}
+  private String major;
+  private String minor;
+  private String incremental;
+  private String qualifier;
 
-	public String getIncremental() {
-		return incremental;
-	}
+  public String getMajor() {
+    return major;
+  }
 
-	public String getQualifier() {
-		return qualifier;
-	}
-	
-	public MavenVersion(){}
-	
-	public MavenVersion(String version) {
-		// TODO: Would be cleaner with named capturing groups but they
-		// aren't supported until Java 7
-		final Pattern VERSION_PATTERN = Pattern
-				.compile("([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-(.*))?");
+  public String getMinor() {
+    return minor;
+  }
 
-		Matcher m = VERSION_PATTERN.matcher(version);
+  public String getIncremental() {
+    return incremental;
+  }
 
-		if (m.matches()) {
-			this.major = m.group(1);
-			this.minor = m.group(2);
-			this.incremental = m.group(3);
-			this.qualifier = m.group(4);
-		} else {
-			this.major = "";
-			this.minor = "";
-			this.incremental = "";
-			this.qualifier = "";
-		}
-	}
+  public String getQualifier() {
+    return qualifier;
+  }
+
+  public MavenVersion() {
+  }
+
+  public MavenVersion(String version) {
+    // TODO: Would be cleaner with named capturing groups but they
+    // aren't supported until Java 7
+    final Pattern VERSION_PATTERN = Pattern.compile("([0-9]+)\\.([0-9]+)\\.([0-9]+)(?:-(.*))?");
+
+    Matcher m = VERSION_PATTERN.matcher(version);
+
+    if (m.matches()) {
+      this.major = m.group(1);
+      this.minor = m.group(2);
+      this.incremental = m.group(3);
+      this.qualifier = m.group(4);
+    } else {
+      this.major = "";
+      this.minor = "";
+      this.incremental = "";
+      this.qualifier = "";
+    }
+  }
 }

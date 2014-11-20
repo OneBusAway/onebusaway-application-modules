@@ -23,173 +23,166 @@ import java.util.regex.Pattern;
 
 public class GitRepositoryState implements Serializable {
 
-	private static final long serialVersionUID = 593030390723190029L;
+  private static final long serialVersionUID = 593030390723190029L;
 
-	private String branch;                  // =${git.branch}
-	private String buildTime;               // =${git.build.time}
-	private String buildUserEmail;          // =${git.build.user.email}
-	private String buildUserName;           // =${git.build.user.name}  
-	private String commitId;                // =${git.commit.id}
-	private String commitIdAbbrev;          // =${git.commit.id.abbrev}
-	private String commitMessageFull;       // =${git.commit.message.full}
-	private String commitMessageShort;      // =${git.commit.message.short}
-	private String commitTime;              // =${git.commit.time}
-	private String commitUserName;          // =${git.commit.user.name}
-	private String commitUserEmail;         // =${git.commit.user.email}
-	private String describe;                // =${git.commit.id.describe}
-	private String shortDescribe;           // =${git.commit.id.describe-short}
-	private String tags;                    // =${git.tags} // comma separated tag names
-	private String version;
-	 
-	  MavenVersion parsedVersion;
-	  
-    public GitRepositoryState() {
-    }
-    
-    public GitRepositoryState(Properties properties)
-    {
-		this.branch = properties.get("git.branch").toString();
-		this.buildTime = properties.get("git.build.time").toString();
-		this.buildUserEmail = properties.get("git.build.user.email").toString();
-		this.buildUserName = properties.get("git.build.user.name").toString();
-		this.commitId = properties.get("git.commit.id").toString();
-		this.commitIdAbbrev = properties.get("git.commit.id.abbrev").toString();
-		this.commitMessageFull = properties.get("git.commit.message.full").toString();
-		this.commitMessageShort = properties.get("git.commit.message.short").toString();
-		this.commitTime = properties.get("git.commit.time").toString();
-		this.commitUserName = properties.get("git.commit.user.name").toString();
-		this.commitUserEmail = properties.get("git.commit.user.email").toString();
-		this.describe = properties.get("git.commit.id.describe").toString();
-		setVersion(properties.get("version").toString());
-    }
-    
-    public String getDetails() {
-    	return "{ " 
-    			+ "branch: " + branch + ", "
-    			+ "describe: " + describe + ", "
-    			+ "commitId: " + commitId + ", "
-    			+ "buildUserName: " + buildUserName + ", "
-    			+ "buildUserEmail: " + buildUserEmail + ", "
-    			+ "buildTime: " + buildTime + ", "
-    			+ "commitUserName: " + commitUserName + ", "
-    			+ "commitUserEmail: " + commitUserEmail + ", "
-    			+ "commitMessageShort: " + commitMessageShort + ", "
-    			+ "commitMessageFull: " + commitMessageFull + ","
-    			+ "commitTime: " + commitTime
-    			+ " }";
+  private String branch; // =${git.branch}
+  private String buildTime; // =${git.build.time}
+  private String buildUserEmail; // =${git.build.user.email}
+  private String buildUserName; // =${git.build.user.name}
+  private String commitId; // =${git.commit.id}
+  private String commitIdAbbrev; // =${git.commit.id.abbrev}
+  private String commitMessageFull; // =${git.commit.message.full}
+  private String commitMessageShort; // =${git.commit.message.short}
+  private String commitTime; // =${git.commit.time}
+  private String commitUserName; // =${git.commit.user.name}
+  private String commitUserEmail; // =${git.commit.user.email}
+  private String describe; // =${git.commit.id.describe}
+  private String shortDescribe; // =${git.commit.id.describe-short}
+  private String tags; // =${git.tags} // comma separated tag names
+  private String version;
 
-    }
+  MavenVersion parsedVersion;
 
-	public String getVersion() {
-		return version;
-	}
+  public GitRepositoryState() {
+  }
 
-	public void setVersion(String version) {
-		this.version = version;
-		this.setParsedVersion(new MavenVersion(version));
-	}
+  public GitRepositoryState(Properties properties) {
+    this.branch = properties.get("git.branch").toString();
+    this.buildTime = properties.get("git.build.time").toString();
+    this.buildUserEmail = properties.get("git.build.user.email").toString();
+    this.buildUserName = properties.get("git.build.user.name").toString();
+    this.commitId = properties.get("git.commit.id").toString();
+    this.commitIdAbbrev = properties.get("git.commit.id.abbrev").toString();
+    this.commitMessageFull = properties.get("git.commit.message.full").toString();
+    this.commitMessageShort = properties.get("git.commit.message.short").toString();
+    this.commitTime = properties.get("git.commit.time").toString();
+    this.commitUserName = properties.get("git.commit.user.name").toString();
+    this.commitUserEmail = properties.get("git.commit.user.email").toString();
+    this.describe = properties.get("git.commit.id.describe").toString();
+    setVersion(properties.get("version").toString());
+  }
 
-	public String getBranch() {
-		return branch;
-	}
+  public String getDetails() {
+    return "{ " + "branch: " + branch + ", " + "describe: " + describe + ", "
+        + "commitId: " + commitId + ", " + "buildUserName: " + buildUserName
+        + ", " + "buildUserEmail: " + buildUserEmail + ", " + "buildTime: "
+        + buildTime + ", " + "commitUserName: " + commitUserName + ", "
+        + "commitUserEmail: " + commitUserEmail + ", " + "commitMessageShort: "
+        + commitMessageShort + ", " + "commitMessageFull: " + commitMessageFull
+        + "," + "commitTime: " + commitTime + " }";
 
-	public void setBranch(String branch) {
-		this.branch = branch;
-	}
+  }
 
-	public String getDescribe() {
-		return describe;
-	}
+  public String getVersion() {
+    return version;
+  }
 
-	public void setDescribe(String describe) {
-		this.describe = describe;
-	}
+  public void setVersion(String version) {
+    this.version = version;
+    this.setParsedVersion(new MavenVersion(version));
+  }
 
-	public String getCommitId() {
-		return commitId;
-	}
+  public String getBranch() {
+    return branch;
+  }
 
-	public void setCommitId(String commitId) {
-		this.commitId = commitId;
-	}
+  public void setBranch(String branch) {
+    this.branch = branch;
+  }
 
-	public String getCommitIdAbbrev() {
-		return commitIdAbbrev;
-	}
+  public String getDescribe() {
+    return describe;
+  }
 
-	public void setCommitIdAbbrev(String commitIdAbbrev) {
-		this.commitIdAbbrev = commitIdAbbrev;
-	}
+  public void setDescribe(String describe) {
+    this.describe = describe;
+  }
 
-	public String getBuildUserName() {
-		return buildUserName;
-	}
+  public String getCommitId() {
+    return commitId;
+  }
 
-	public void setBuildUserName(String buildUserName) {
-		this.buildUserName = buildUserName;
-	}
+  public void setCommitId(String commitId) {
+    this.commitId = commitId;
+  }
 
-	public String getBuildUserEmail() {
-		return buildUserEmail;
-	}
+  public String getCommitIdAbbrev() {
+    return commitIdAbbrev;
+  }
 
-	public void setBuildUserEmail(String buildUserEmail) {
-		this.buildUserEmail = buildUserEmail;
-	}
+  public void setCommitIdAbbrev(String commitIdAbbrev) {
+    this.commitIdAbbrev = commitIdAbbrev;
+  }
 
-	public String getBuildTime() {
-		return buildTime;
-	}
+  public String getBuildUserName() {
+    return buildUserName;
+  }
 
-	public void setBuildTime(String buildTime) {
-		this.buildTime = buildTime;
-	}
+  public void setBuildUserName(String buildUserName) {
+    this.buildUserName = buildUserName;
+  }
 
-	public String getCommitUserName() {
-		return commitUserName;
-	}
+  public String getBuildUserEmail() {
+    return buildUserEmail;
+  }
 
-	public void setCommitUserName(String commitUserName) {
-		this.commitUserName = commitUserName;
-	}
+  public void setBuildUserEmail(String buildUserEmail) {
+    this.buildUserEmail = buildUserEmail;
+  }
 
-	public String getCommitUserEmail() {
-		return commitUserEmail;
-	}
+  public String getBuildTime() {
+    return buildTime;
+  }
 
-	public void setCommitUserEmail(String commitUserEmail) {
-		this.commitUserEmail = commitUserEmail;
-	}
+  public void setBuildTime(String buildTime) {
+    this.buildTime = buildTime;
+  }
 
-	public String getCommitMessageFull() {
-		return commitMessageFull;
-	}
+  public String getCommitUserName() {
+    return commitUserName;
+  }
 
-	public void setCommitMessageFull(String commitMessageFull) {
-		this.commitMessageFull = commitMessageFull;
-	}
+  public void setCommitUserName(String commitUserName) {
+    this.commitUserName = commitUserName;
+  }
 
-	public String getCommitMessageShort() {
-		return commitMessageShort;
-	}
+  public String getCommitUserEmail() {
+    return commitUserEmail;
+  }
 
-	public void setCommitMessageShort(String commitMessageShort) {
-		this.commitMessageShort = commitMessageShort;
-	}
+  public void setCommitUserEmail(String commitUserEmail) {
+    this.commitUserEmail = commitUserEmail;
+  }
 
-	public String getCommitTime() {
-		return commitTime;
-	}
+  public String getCommitMessageFull() {
+    return commitMessageFull;
+  }
 
-	public void setCommitTime(String commitTime) {
-		this.commitTime = commitTime;
-	}
+  public void setCommitMessageFull(String commitMessageFull) {
+    this.commitMessageFull = commitMessageFull;
+  }
 
-	public MavenVersion getParsedVersion() {
-		return parsedVersion;
-	}
+  public String getCommitMessageShort() {
+    return commitMessageShort;
+  }
 
-	public void setParsedVersion(MavenVersion parsedVersion) {
-		this.parsedVersion = parsedVersion;
-	}
+  public void setCommitMessageShort(String commitMessageShort) {
+    this.commitMessageShort = commitMessageShort;
+  }
+
+  public String getCommitTime() {
+    return commitTime;
+  }
+
+  public void setCommitTime(String commitTime) {
+    this.commitTime = commitTime;
+  }
+
+  public MavenVersion getParsedVersion() {
+    return parsedVersion;
+  }
+
+  public void setParsedVersion(MavenVersion parsedVersion) {
+    this.parsedVersion = parsedVersion;
+  }
 }

@@ -19,43 +19,51 @@ import java.io.Serializable;
 import java.util.Properties;
 
 public class ConfigV2Bean implements Serializable, HasId {
-  
+
   private String id;
   private String name;
   private String serviceDateFrom;
   private String serviceDateTo;
   private Properties gitProperties;
-  
+
   public String getId() {
     return id;
   }
+
   public void setId(String id) {
     this.id = id;
   }
+
   public String getName() {
     return name;
   }
+
   public void setName(String name) {
     this.name = name;
   }
+
   public String getServiceDateFrom() {
     return serviceDateFrom;
   }
+
   public void setServiceDateFrom(String serviceDateFrom) {
     this.serviceDateFrom = serviceDateFrom;
   }
+
   public String getServiceDateTo() {
     return serviceDateTo;
   }
+
   public void setServiceDateTo(String serviceDateTo) {
     this.serviceDateTo = serviceDateTo;
   }
+
   public Properties getGitProperties() {
     return gitProperties;
   }
+
   public void setGitProperties(Properties gitProperties) {
     this.gitProperties = gitProperties;
   }
-  
 
 }

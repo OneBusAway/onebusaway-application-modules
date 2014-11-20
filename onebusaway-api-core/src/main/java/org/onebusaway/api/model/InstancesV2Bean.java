@@ -21,20 +21,20 @@ import java.util.List;
 
 public class InstancesV2Bean implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private List<InstanceDetailsV2Bean> instanceDetails;
+  private List<InstanceDetailsV2Bean> instanceDetails;
 
-	public InstancesV2Bean() {
+  public InstancesV2Bean() {
 
-	}
+  }
 
-	public List<InstanceDetailsV2Bean> getInstanceDetails() {
-		return instanceDetails;
-	}
+  public List<InstanceDetailsV2Bean> getInstanceDetails() {
+    return instanceDetails;
+  }
 
-	public void setInstanceDetails(List<InstanceDetailsV2Bean> instanceDetails) {
-		this.instanceDetails = instanceDetails;
-	}
+  public void setInstanceDetails(List<InstanceDetailsV2Bean> instanceDetails) {
+    this.instanceDetails = instanceDetails;
+  }
 
 }

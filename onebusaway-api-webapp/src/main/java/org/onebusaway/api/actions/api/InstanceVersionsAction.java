@@ -30,33 +30,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class InstanceVersionsAction extends ApiActionSupport {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private static final int V2 = 2;
+  private static final int V2 = 2;
 
-	@Autowired
-	private TransitDataService _service;
+  @Autowired
+  private TransitDataService _service;
 
-	private GitRepositoryState _repositoryState;
+  private GitRepositoryState _repositoryState;
 
-	public InstanceVersionsAction() {
-		super(V2);
-	}
+  public InstanceVersionsAction() {
+    super(V2);
+  }
 
-	public DefaultHttpHeaders index() throws ServiceException {
-		if (hasErrors())
-			return setValidationErrorsResponse();
-		
-		if(_repositoryState == null){
-			_repositoryState = new GitRepositoryHelper().getGitRepositoryState();
-		}
-		
-		BeanFactoryV2 factory = getBeanFactoryV2();
+  public DefaultHttpHeaders index() throws ServiceException {
+    if (hasErrors())
+      return setValidationErrorsResponse();
 
-		return setOkResponse(factory.getInstanceVersions(
-				_service.getGitRepositoryState(), 
-				_repositoryState, 
-				_service.getBundleMetadata()));
-	}
+    if (_repositoryState == null) {
+      _repositoryState = new GitRepositoryHelper().getGitRepositoryState();
+    }
+
+    BeanFactoryV2 factory = getBeanFactoryV2();
+
+    return setOkResponse(factory.getInstanceVersions(
+        _service.getGitRepositoryState(), _repositoryState,
+        _service.getBundleMetadata()));
+  }
 
 }

@@ -27,103 +27,103 @@ import com.conveyal.gtfs.model.Statistic;
 
 public class GtfsCsvLogger {
 
-	private Logger _log = LoggerFactory.getLogger(GtfsCsvLogger.class);
-	private String _fileName = "gtfs_stats.csv";
-	private File basePath;
-	private Buffer buff;
+  private Logger _log = LoggerFactory.getLogger(GtfsCsvLogger.class);
+  private String _fileName = "gtfs_stats.csv";
+  private File basePath;
+  private Buffer buff;
 
-	public void setBasePath(File path) {
-		this.basePath = path;
-	}
+  public void setBasePath(File path) {
+    this.basePath = path;
+  }
 
-	public void open() {
-		// integration tests may not have a path
-		if (basePath == null) {
-			basePath = new File(System.getProperty("java.io.tmpdir"));
-			_log.warn("GtfsCsvLogger initialized without path:  using "
-					+ basePath);
-		}
-		if (!basePath.exists()) {
-			basePath.mkdirs();
-		}
-	}
-	
-	public void close() {
-		if (buff != null) {
-			buff.stream.close();
-			buff = null;
-		}
-	}
+  public void open() {
+    // integration tests may not have a path
+    if (basePath == null) {
+      basePath = new File(System.getProperty("java.io.tmpdir"));
+      _log.warn("GtfsCsvLogger initialized without path:  using " + basePath);
+    }
+    if (!basePath.exists()) {
+      basePath.mkdirs();
+    }
+  }
 
-	public void header() {
-		_log.info("creating file=" + _fileName);
-		buff = new Buffer(_fileName);
-		buff.stream.print("agency,route_count,trip_count,stop_count,stop_times_count,calendar_service_start,calendar_service_end,calendar_start_date,calendar_end_date\n");
-	}
+  public void close() {
+    if (buff != null) {
+      buff.stream.close();
+      buff = null;
+    }
+  }
 
-	public void addHeader(String headerText) {
-		_log.info("creating file=" + _fileName);
-		buff = new Buffer(_fileName);
-		buff.stream.print(headerText);
-	}
-	
-	private String sanitize(String s) {
-		if (s == null) return null;
-		if (s.contains(",") || s.contains("\"")) {
-			s = "\"" + s.replace("\"", "\"\"") + "\"";
-		}
-		return s;
-	}
+  public void header() {
+    _log.info("creating file=" + _fileName);
+    buff = new Buffer(_fileName);
+    buff.stream.print("agency,route_count,trip_count,stop_count,stop_times_count,calendar_service_start,calendar_service_end,calendar_start_date,calendar_end_date\n");
+  }
 
-	private class Buffer {
-		PrintStream stream;
+  public void addHeader(String headerText) {
+    _log.info("creating file=" + _fileName);
+    buff = new Buffer(_fileName);
+    buff.stream.print(headerText);
+  }
 
-		Buffer(String file) {
-			FileOutputStream outputStream;
-			try {
-				outputStream = new FileOutputStream(new File(basePath/*parent directory*/, file/*filename*/),
-						true);
-			} catch (FileNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-			stream = new PrintStream(outputStream);
-		}
-	}
+  private String sanitize(String s) {
+    if (s == null)
+      return null;
+    if (s.contains(",") || s.contains("\"")) {
+      s = "\"" + s.replace("\"", "\"\"") + "\"";
+    }
+    return s;
+  }
 
-	public void logStat(String id, Statistic s) {
-		buff.stream.print(s.getAgencyId());
-		buff.stream.print(",");
-		buff.stream.print(s.getRouteCount());
-		buff.stream.print(",");
-		buff.stream.print(s.getTripCount());
-		buff.stream.print(",");
-		buff.stream.print(s.getStopCount());
-		buff.stream.print(",");
-		buff.stream.print(s.getStopTimeCount());
-		buff.stream.print(",");
-		buff.stream.print(s.getCalendarServiceStart());
-		buff.stream.print(",");
-		buff.stream.print(s.getCalendarServiceEnd());
-		buff.stream.print(",");
-		buff.stream.print(s.getCalendarStartDate());
-		buff.stream.print(",");
-		buff.stream.print(s.getCalendarEndDate());
-		buff.stream.print("\n");
-	}
+  private class Buffer {
+    PrintStream stream;
 
-	public void setFilename(String fileName) {
-		_fileName = fileName;
-		
-	}
+    Buffer(String file) {
+      FileOutputStream outputStream;
+      try {
+        outputStream = new FileOutputStream(new File(
+            basePath/* parent directory */, file/* filename */), true);
+      } catch (FileNotFoundException e) {
+        throw new RuntimeException(e);
+      }
+      stream = new PrintStream(outputStream);
+    }
+  }
 
-	public void log(String[] stringArray) {
-		int i = 0;
-		for (String s : stringArray) {
-			if (i != 0) buff.stream.print(",");
-			buff.stream.print(s);
-			i++;
-		}
-	}
+  public void logStat(String id, Statistic s) {
+    buff.stream.print(s.getAgencyId());
+    buff.stream.print(",");
+    buff.stream.print(s.getRouteCount());
+    buff.stream.print(",");
+    buff.stream.print(s.getTripCount());
+    buff.stream.print(",");
+    buff.stream.print(s.getStopCount());
+    buff.stream.print(",");
+    buff.stream.print(s.getStopTimeCount());
+    buff.stream.print(",");
+    buff.stream.print(s.getCalendarServiceStart());
+    buff.stream.print(",");
+    buff.stream.print(s.getCalendarServiceEnd());
+    buff.stream.print(",");
+    buff.stream.print(s.getCalendarStartDate());
+    buff.stream.print(",");
+    buff.stream.print(s.getCalendarEndDate());
+    buff.stream.print("\n");
+  }
 
+  public void setFilename(String fileName) {
+    _fileName = fileName;
+
+  }
+
+  public void log(String[] stringArray) {
+    int i = 0;
+    for (String s : stringArray) {
+      if (i != 0)
+        buff.stream.print(",");
+      buff.stream.print(s);
+      i++;
+    }
+  }
 
 }

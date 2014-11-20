@@ -20,200 +20,200 @@ import java.io.Serializable;
 
 public class GitRepositoryStateV2Bean implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private String version;
-	private String branch;
-	private String describe;
-	private String commitId;
-	private String commitIdAbbrev;
-	private String buildUserName;
-	private String buildUserEmail;
-	private String buildTime;
-	private String commitUserName;
-	private String commitUserEmail;
-	private String commitMessageFull;
-	private String commitMessageShort;
-	private String commitTime;
-	private String major;
-	private String minor;
-	private String incremental;
-	private String qualifier;
-	private String bundleName;
-	private String bundleId;
-	private String bundleServiceDateFrom;
-	private String bundleServiceDateTo;
+  private String version;
+  private String branch;
+  private String describe;
+  private String commitId;
+  private String commitIdAbbrev;
+  private String buildUserName;
+  private String buildUserEmail;
+  private String buildTime;
+  private String commitUserName;
+  private String commitUserEmail;
+  private String commitMessageFull;
+  private String commitMessageShort;
+  private String commitTime;
+  private String major;
+  private String minor;
+  private String incremental;
+  private String qualifier;
+  private String bundleName;
+  private String bundleId;
+  private String bundleServiceDateFrom;
+  private String bundleServiceDateTo;
 
-	public GitRepositoryStateV2Bean() {
+  public GitRepositoryStateV2Bean() {
 
-	}
+  }
 
-	public String getBranch() {
-		return branch;
-	}
+  public String getBranch() {
+    return branch;
+  }
 
-	public String getBuildTime() {
-		return buildTime;
-	}
+  public String getBuildTime() {
+    return buildTime;
+  }
 
-	public String getBuildUserEmail() {
-		return buildUserEmail;
-	}
+  public String getBuildUserEmail() {
+    return buildUserEmail;
+  }
 
-	public String getBuildUserName() {
-		return buildUserName;
-	}
+  public String getBuildUserName() {
+    return buildUserName;
+  }
 
-	public String getCommitId() {
-		return commitId;
-	}
+  public String getCommitId() {
+    return commitId;
+  }
 
-	public String getCommitIdAbbrev() {
-		return commitIdAbbrev;
-	}
+  public String getCommitIdAbbrev() {
+    return commitIdAbbrev;
+  }
 
-	public String getCommitMessageFull() {
-		return commitMessageFull;
-	}
+  public String getCommitMessageFull() {
+    return commitMessageFull;
+  }
 
-	public String getCommitMessageShort() {
-		return commitMessageShort;
-	}
+  public String getCommitMessageShort() {
+    return commitMessageShort;
+  }
 
-	public String getCommitTime() {
-		return commitTime;
-	}
+  public String getCommitTime() {
+    return commitTime;
+  }
 
-	public String getCommitUserEmail() {
-		return commitUserEmail;
-	}
+  public String getCommitUserEmail() {
+    return commitUserEmail;
+  }
 
-	public String getCommitUserName() {
-		return commitUserName;
-	}
+  public String getCommitUserName() {
+    return commitUserName;
+  }
 
-	public String getDescribe() {
-		return describe;
-	}
+  public String getDescribe() {
+    return describe;
+  }
 
-	public String getIncremental() {
-		return incremental;
-	}
+  public String getIncremental() {
+    return incremental;
+  }
 
-	public String getMajor() {
-		return major;
-	}
+  public String getMajor() {
+    return major;
+  }
 
-	public String getMinor() {
-		return minor;
-	}
+  public String getMinor() {
+    return minor;
+  }
 
-	public String getQualifier() {
-		return qualifier;
-	}
+  public String getQualifier() {
+    return qualifier;
+  }
 
-	public String getVersion() {
-		return version;
-	}
-	
-	public String getBundleName() {
-		return bundleName;
-	}
+  public String getVersion() {
+    return version;
+  }
 
-	public String getBundleId() {
-		return bundleId;
-	}
+  public String getBundleName() {
+    return bundleName;
+  }
 
-	public String getBundleServiceDateFrom() {
-		return bundleServiceDateFrom;
-	}
+  public String getBundleId() {
+    return bundleId;
+  }
 
-	public String getBundleServiceDateTo() {
-		return bundleServiceDateTo;
-	}
+  public String getBundleServiceDateFrom() {
+    return bundleServiceDateFrom;
+  }
 
-	public void setBranch(String branch) {
-		this.branch = branch;
-	}
+  public String getBundleServiceDateTo() {
+    return bundleServiceDateTo;
+  }
 
-	public void setBuildTime(String buildTime) {
-		this.buildTime = buildTime;
-	}
+  public void setBranch(String branch) {
+    this.branch = branch;
+  }
 
-	public void setBuildUserEmail(String buildUserEmail) {
-		this.buildUserEmail = buildUserEmail;
-	}
+  public void setBuildTime(String buildTime) {
+    this.buildTime = buildTime;
+  }
 
-	public void setBuildUserName(String buildUserName) {
-		this.buildUserName = buildUserName;
-	}
+  public void setBuildUserEmail(String buildUserEmail) {
+    this.buildUserEmail = buildUserEmail;
+  }
 
-	public void setCommitId(String commitId) {
-		this.commitId = commitId;
-	}
+  public void setBuildUserName(String buildUserName) {
+    this.buildUserName = buildUserName;
+  }
 
-	public void setCommitIdAbbrev(String commitIdAbbrev) {
-		this.commitIdAbbrev = commitIdAbbrev;
-	}
+  public void setCommitId(String commitId) {
+    this.commitId = commitId;
+  }
 
-	public void setCommitMessageFull(String commitMessageFull) {
-		this.commitMessageFull = commitMessageFull;
-	}
+  public void setCommitIdAbbrev(String commitIdAbbrev) {
+    this.commitIdAbbrev = commitIdAbbrev;
+  }
 
-	public void setCommitMessageShort(String commitMessageShort) {
-		this.commitMessageShort = commitMessageShort;
-	}
+  public void setCommitMessageFull(String commitMessageFull) {
+    this.commitMessageFull = commitMessageFull;
+  }
 
-	public void setCommitTime(String commitTime) {
-		this.commitTime = commitTime;
-	}
+  public void setCommitMessageShort(String commitMessageShort) {
+    this.commitMessageShort = commitMessageShort;
+  }
 
-	public void setCommitUserEmail(String commitUserEmail) {
-		this.commitUserEmail = commitUserEmail;
-	}
+  public void setCommitTime(String commitTime) {
+    this.commitTime = commitTime;
+  }
 
-	public void setCommitUserName(String commitUserName) {
-		this.commitUserName = commitUserName;
-	}
+  public void setCommitUserEmail(String commitUserEmail) {
+    this.commitUserEmail = commitUserEmail;
+  }
 
-	public void setDescribe(String describe) {
-		this.describe = describe;
-	}
+  public void setCommitUserName(String commitUserName) {
+    this.commitUserName = commitUserName;
+  }
 
-	public void setIncremental(String incremental) {
-		this.incremental = incremental;
-	}
+  public void setDescribe(String describe) {
+    this.describe = describe;
+  }
 
-	public void setMajor(String major) {
-		this.major = major;
-	}
+  public void setIncremental(String incremental) {
+    this.incremental = incremental;
+  }
 
-	public void setMinor(String minor) {
-		this.minor = minor;
-	}
+  public void setMajor(String major) {
+    this.major = major;
+  }
 
-	public void setQualifier(String qualifier) {
-		this.qualifier = qualifier;
-	}
+  public void setMinor(String minor) {
+    this.minor = minor;
+  }
 
-	public void setVersion(String version) {
-		this.version = version;
-	}
-	
-	public void setBundleName(String bundleName) {
-		this.bundleName = bundleName;
-	}
+  public void setQualifier(String qualifier) {
+    this.qualifier = qualifier;
+  }
 
-	public void setBundleId(String bundleId) {
-		this.bundleId = bundleId;
-	}
+  public void setVersion(String version) {
+    this.version = version;
+  }
 
-	public void setBundleServiceDateFrom(String bundleServiceDateFrom) {
-		this.bundleServiceDateFrom = bundleServiceDateFrom;
-	}
+  public void setBundleName(String bundleName) {
+    this.bundleName = bundleName;
+  }
 
-	public void setBundleServiceDateTo(String bundleServiceDateTo) {
-		this.bundleServiceDateTo = bundleServiceDateTo;
-	}
+  public void setBundleId(String bundleId) {
+    this.bundleId = bundleId;
+  }
+
+  public void setBundleServiceDateFrom(String bundleServiceDateFrom) {
+    this.bundleServiceDateFrom = bundleServiceDateFrom;
+  }
+
+  public void setBundleServiceDateTo(String bundleServiceDateTo) {
+    this.bundleServiceDateTo = bundleServiceDateTo;
+  }
 
 }

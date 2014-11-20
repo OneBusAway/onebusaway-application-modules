@@ -25,15 +25,15 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("/version.action")
 public class VersionController {
 
-	@Autowired
-	private IntrospectionService _introspectionService;
+  @Autowired
+  private IntrospectionService _introspectionService;
 
-	@RequestMapping()
-	public ModelAndView index() {
+  @RequestMapping()
+  public ModelAndView index() {
 
-		ModelAndView mv = new ModelAndView("version.jspx");
-		mv.addObject("gitRepositoryState",
-				_introspectionService.getGitRepositoryState());
-		return mv;
-	}
+    ModelAndView mv = new ModelAndView("version.jspx");
+    mv.addObject("gitRepositoryState",
+        _introspectionService.getGitRepositoryState());
+    return mv;
+  }
 }

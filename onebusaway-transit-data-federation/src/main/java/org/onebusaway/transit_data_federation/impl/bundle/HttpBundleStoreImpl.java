@@ -43,210 +43,219 @@ import java.util.List;
  * A bundle source backed by an External Web Server.
  * 
  * @author jmaki
- *
+ * 
  */
 public class HttpBundleStoreImpl implements BundleStoreService {
 
-	private static Logger _log = LoggerFactory.getLogger(HttpBundleStoreImpl.class);
-	
-	private static final DateTimeFormatter _updatedDateFormatter = ISODateTimeFormat.dateTimeNoMillis();
+  private static Logger _log = LoggerFactory.getLogger(HttpBundleStoreImpl.class);
 
-	// number of times to retry downloading a file if the request fails.
-	private static final int _fileDownloadRetries = 2;
+  private static final DateTimeFormatter _updatedDateFormatter = ISODateTimeFormat.dateTimeNoMillis();
 
+  // number of times to retry downloading a file if the request fails.
+  private static final int _fileDownloadRetries = 2;
 
-	private String _bundleRootPath = null;
+  private String _bundleRootPath = null;
 
-	private HttpServiceClient _apiLibrary;
+  private HttpServiceClient _apiLibrary;
 
-	public HttpBundleStoreImpl(String bundleRootPath, HttpServiceClient apiLibrary) throws Exception {
-		_bundleRootPath = bundleRootPath;
-		_apiLibrary = apiLibrary;
-	}
+  public HttpBundleStoreImpl(String bundleRootPath, HttpServiceClient apiLibrary)
+      throws Exception {
+    _bundleRootPath = bundleRootPath;
+    _apiLibrary = apiLibrary;
+  }
 
-	private List<BundleItem> getBundleListFromHttp() throws Exception {
-		ArrayList<BundleItem> output = new ArrayList<BundleItem>();
+  private List<BundleItem> getBundleListFromHttp() throws Exception {
+    ArrayList<BundleItem> output = new ArrayList<BundleItem>();
 
-		_log.info("Getting current bundle list from Server...");	     
-		List<JsonObject> bundles = _apiLibrary.getItemsForRequest("bundle",/*"staged",*/"list");
+    _log.info("Getting current bundle list from Server...");
+    List<JsonObject> bundles = _apiLibrary.getItemsForRequest("bundle",/*
+                                                                        * "staged",
+                                                                        */
+        "list");
 
-		for(JsonObject itemToAdd : bundles) {
-			BundleItem item = new BundleItem();
+    for (JsonObject itemToAdd : bundles) {
+      BundleItem item = new BundleItem();
 
-			item.setId(itemToAdd.get("id").getAsString());
-			item.setName(itemToAdd.get("name").getAsString());
+      item.setId(itemToAdd.get("id").getAsString());
+      item.setName(itemToAdd.get("name").getAsString());
 
-			/*ArrayList<String> applicableAgencyIds = new ArrayList<String>();
-			for(JsonElement _subitemToAdd : itemToAdd.get("applicable-agency-ids").getAsJsonArray()) {
-				String agencyIdToAdd = _subitemToAdd.getAsString();  
-				applicableAgencyIds.add(agencyIdToAdd);
-			}*/
+      item.setServiceDateFrom(ServiceDate.parseString(itemToAdd.get(
+          "service-date-from").getAsString().replace("-", "")));
+      item.setServiceDateTo(ServiceDate.parseString(itemToAdd.get(
+          "service-date-to").getAsString().replace("-", "")));
 
-			item.setServiceDateFrom(ServiceDate.parseString(
-					itemToAdd.get("service-date-from").getAsString().replace("-", "")));
-			item.setServiceDateTo(ServiceDate.parseString(
-					itemToAdd.get("service-date-to").getAsString().replace("-", "")));
-			
-			if(itemToAdd.get("created") != null)
-			  item.setCreated(_updatedDateFormatter.parseDateTime(itemToAdd.get("created").getAsString()));
-      
-			if(itemToAdd.get("updated") != null)
-			  item.setUpdated(_updatedDateFormatter.parseDateTime(itemToAdd.get("updated").getAsString()));
+      if (itemToAdd.get("created") != null)
+        item.setCreated(_updatedDateFormatter.parseDateTime(itemToAdd.get(
+            "created").getAsString()));
 
+      if (itemToAdd.get("updated") != null)
+        item.setUpdated(_updatedDateFormatter.parseDateTime(itemToAdd.get(
+            "updated").getAsString()));
 
-			ArrayList<BundleFileItem> files = new ArrayList<BundleFileItem>();
-			for(JsonElement _subitemToAdd : itemToAdd.get("files").getAsJsonArray()) {
-				JsonObject subitemToAdd = _subitemToAdd.getAsJsonObject();
+      ArrayList<BundleFileItem> files = new ArrayList<BundleFileItem>();
+      for (JsonElement _subitemToAdd : itemToAdd.get("files").getAsJsonArray()) {
+        JsonObject subitemToAdd = _subitemToAdd.getAsJsonObject();
 
-				BundleFileItem fileItemToAdd = new BundleFileItem();
-				fileItemToAdd.setFilename(subitemToAdd.get("filename").getAsString());
-				fileItemToAdd.setMd5(subitemToAdd.get("md5").getAsString());
-				files.add(fileItemToAdd);
-			}
-			item.setFiles(files);
+        BundleFileItem fileItemToAdd = new BundleFileItem();
+        fileItemToAdd.setFilename(subitemToAdd.get("filename").getAsString());
+        fileItemToAdd.setMd5(subitemToAdd.get("md5").getAsString());
+        files.add(fileItemToAdd);
+      }
+      item.setFiles(files);
 
-			output.add(item);
-		}
+      output.add(item);
+    }
 
-		_log.info("Found " + output.size() + " bundle(s) available from the Server.");
+    _log.info("Found " + output.size()
+        + " bundle(s) available from the Server.");
 
-		return output;
-	}
+    return output;
+  }
 
-	private void downloadUrlToLocalPath(URL url, File destFilename, String expectedMd5) throws Exception {	  
+  private void downloadUrlToLocalPath(URL url, File destFilename,
+      String expectedMd5) throws Exception {
 
-		try {
-			_log.info("Downloading bundle item from " + url + "...");
+    try {
+      _log.info("Downloading bundle item from " + url + "...");
 
-			File containerPath = destFilename.getParentFile();
-			if(!containerPath.exists() && !containerPath.mkdirs()) {
-				throw new Exception("Could not create parent directories for path " + destFilename);
-			}
+      File containerPath = destFilename.getParentFile();
+      if (!containerPath.exists() && !containerPath.mkdirs()) {
+        throw new Exception("Could not create parent directories for path "
+            + destFilename);
+      }
 
-			if(!destFilename.createNewFile()) {
-				throw new Exception("Could not create empty file at path " + destFilename);	      
-			}
+      if (!destFilename.createNewFile()) {
+        throw new Exception("Could not create empty file at path "
+            + destFilename);
+      }
 
-			// download file 
-			FileOutputStream out = new FileOutputStream(destFilename.getPath());
-			BufferedOutputStream bufferedOut = new BufferedOutputStream(out, 1024);
+      // download file
+      FileOutputStream out = new FileOutputStream(destFilename.getPath());
+      BufferedOutputStream bufferedOut = new BufferedOutputStream(out, 1024);
 
-			MessageDigest md5Hasher = MessageDigest.getInstance("MD5");
-			BufferedInputStream in = new java.io.BufferedInputStream(url.openStream());    
+      MessageDigest md5Hasher = MessageDigest.getInstance("MD5");
+      BufferedInputStream in = new java.io.BufferedInputStream(url.openStream());
 
-			byte data[] = new byte[1024];
-			while(true) {
-				int readBytes = in.read(data, 0, data.length);
-				if(readBytes < 0) {
-					break;
-				}
+      byte data[] = new byte[1024];
+      while (true) {
+        int readBytes = in.read(data, 0, data.length);
+        if (readBytes < 0) {
+          break;
+        }
 
-				md5Hasher.update(data, 0, readBytes);
-				bufferedOut.write(data, 0, readBytes);
-			}
+        md5Hasher.update(data, 0, readBytes);
+        bufferedOut.write(data, 0, readBytes);
+      }
 
-			bufferedOut.close();
-			out.close();
-			in.close();         
+      bufferedOut.close();
+      out.close();
+      in.close();
 
-			// check hash
-			byte messageDigest[] = md5Hasher.digest();
-			StringBuffer hexString = new StringBuffer();
-			for (int i=0;i<messageDigest.length;i++) {
-				String hex = Integer.toHexString(0xFF & messageDigest[i]); 
+      // check hash
+      byte messageDigest[] = md5Hasher.digest();
+      StringBuffer hexString = new StringBuffer();
+      for (int i = 0; i < messageDigest.length; i++) {
+        String hex = Integer.toHexString(0xFF & messageDigest[i]);
 
-				if(hex.length() == 1) {
-					hexString.append('0');
-				}
+        if (hex.length() == 1) {
+          hexString.append('0');
+        }
 
-				hexString.append(hex);
-			}
+        hexString.append(hex);
+      }
 
-			if(!hexString.toString().equals(expectedMd5)) {
-				throw new Exception("MD5 hash doesn't match.");
-			}	    
-		} catch(Exception e) {
-			if(!destFilename.delete()) {
-				if(destFilename.exists()) {
-					throw new Exception("Could not delete corrupted file " + destFilename);
-				}
-			}
-			throw e;
-		}
-	}
+      if (!hexString.toString().equals(expectedMd5)) {
+        throw new Exception("MD5 hash doesn't match.");
+      }
+    } catch (Exception e) {
+      if (!destFilename.delete()) {
+        if (destFilename.exists()) {
+          throw new Exception("Could not delete corrupted file " + destFilename);
+        }
+      }
+      throw e;
+    }
+  }
 
-	@Override
-	public List<BundleItem> getBundles() throws Exception {
+  @Override
+  public List<BundleItem> getBundles() throws Exception {
 
-		List<BundleItem> output = new ArrayList<BundleItem>();
+    List<BundleItem> output = new ArrayList<BundleItem>();
 
-		List<BundleItem> bundlesFromHttp = getBundleListFromHttp();
-		for(BundleItem bundle : bundlesFromHttp) {
-			boolean bundleIsValid = true;
+    List<BundleItem> bundlesFromHttp = getBundleListFromHttp();
+    for (BundleItem bundle : bundlesFromHttp) {
+      boolean bundleIsValid = true;
 
-			// ensure bundle path exists locally
-			File bundleRoot = new File(_bundleRootPath, bundle.getId());
+      // ensure bundle path exists locally
+      File bundleRoot = new File(_bundleRootPath, bundle.getId());
 
-			if(!bundleRoot.exists()) {
-				if(!bundleRoot.mkdirs())  {
-					throw new Exception("Creation of bundle root for " + bundle.getId() + " at " + bundleRoot + " failed.");
-				}
-			}
+      if (!bundleRoot.exists()) {
+        if (!bundleRoot.mkdirs()) {
+          throw new Exception("Creation of bundle root for " + bundle.getId()
+              + " at " + bundleRoot + " failed.");
+        }
+      }
 
-			for(BundleFileItem file : bundle.getFiles()) {
-				File fileInBundlePath = new File(bundleRoot, file.getFilename());
+      for (BundleFileItem file : bundle.getFiles()) {
+        File fileInBundlePath = new File(bundleRoot, file.getFilename());
 
-				// see if file already exists locally and matches its MD5
-				if(fileInBundlePath.exists()) {
-					if(!file.verifyMd5(fileInBundlePath)) {
-						_log.warn("File " + fileInBundlePath + " is corrupted; removing.");
+        // see if file already exists locally and matches its MD5
+        if (fileInBundlePath.exists()) {
+          if (!file.verifyMd5(fileInBundlePath)) {
+            _log.warn("File " + fileInBundlePath + " is corrupted; removing.");
 
-						if(!fileInBundlePath.delete()) {
-							_log.error("Could not remove corrupted file " + fileInBundlePath);
-							bundleIsValid = false;
-							break;
-						}
-					}
-				}
+            if (!fileInBundlePath.delete()) {
+              _log.error("Could not remove corrupted file " + fileInBundlePath);
+              bundleIsValid = false;
+              break;
+            }
+          }
+        }
 
-				// if the file is not there, or was removed above, try to download it again from the TDM.
-				if(!fileInBundlePath.exists()) {
-					int tries = _fileDownloadRetries;
+        // if the file is not there, or was removed above, try to download it
+        // again from the TDM.
+        if (!fileInBundlePath.exists()) {
+          int tries = _fileDownloadRetries;
 
-					while(tries > 0) {
-						URL fileDownloadUrl = _apiLibrary.buildUrl("bundle","deploy", bundle.getId(), "file", file.getFilename(), "get");
+          while (tries > 0) {
+            URL fileDownloadUrl = _apiLibrary.buildUrl("bundle", "deploy",
+                bundle.getId(), "file", file.getFilename(), "get");
 
-						try {
-							downloadUrlToLocalPath(fileDownloadUrl, fileInBundlePath, file.getMd5());
-						} catch(Exception e) {
-							tries--;
-							if(tries == 0) {
-								bundleIsValid = false;
-							}
+            try {
+              downloadUrlToLocalPath(fileDownloadUrl, fileInBundlePath,
+                  file.getMd5());
+            } catch (Exception e) {
+              tries--;
+              if (tries == 0) {
+                bundleIsValid = false;
+              }
 
-							_log.warn("Download of " + fileDownloadUrl + " failed (" + e.getMessage() + ");" + 
-									" retrying (retries left=" + tries + ")");
+              _log.warn("Download of " + fileDownloadUrl + " failed ("
+                  + e.getMessage() + ");" + " retrying (retries left=" + tries
+                  + ")");
 
-							continue;
-						}
+              continue;
+            }
 
-						// file was downloaded successfully--break out of retry loop
-						break;
-					}
-				}
-			} // for each file
+            // file was downloaded successfully--break out of retry loop
+            break;
+          }
+        }
+      } // for each file
 
-			if(bundleIsValid) {
-				_log.info("Bundle " + bundle.getId() + " files pass checksums; added to list of local bundles.");
-				output.add(bundle);
+      if (bundleIsValid) {
+        _log.info("Bundle " + bundle.getId()
+            + " files pass checksums; added to list of local bundles.");
+        output.add(bundle);
 
-			} else {
-				_log.warn("Bundle " + bundle.getId() + " files do NOT pass checksums; skipped.");
-			}
-		} // for each bundle
+      } else {
+        _log.warn("Bundle " + bundle.getId()
+            + " files do NOT pass checksums; skipped.");
+      }
+    } // for each bundle
 
-		return output;
-	}
+    return output;
+  }
 
   @Override
   public boolean isLegacyBundle() {

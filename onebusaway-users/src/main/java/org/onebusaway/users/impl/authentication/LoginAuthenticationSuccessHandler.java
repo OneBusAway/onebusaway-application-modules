@@ -30,24 +30,26 @@ public class LoginAuthenticationSuccessHandler implements
     AuthenticationSuccessHandler {
 
   private static Logger _log = LoggerFactory.getLogger(LoginAuthenticationSuccessHandler.class);
-  
+
   private static String DEFAULT_TARGET_URL = "/index.action";
   private String targetUrl;
+
   public void setTargetUrl(String targetUrl) {
     this.targetUrl = targetUrl;
   }
+
   public String getTargetUrl() {
     return targetUrl;
   }
-  
+
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request,
       HttpServletResponse response, Authentication success) throws IOException,
       ServletException {
     response.sendRedirect(request.getContextPath() + determineTargetUrl());
   }
-  
-  protected  String determineTargetUrl() {
+
+  protected String determineTargetUrl() {
     if (targetUrl == null) {
       return DEFAULT_TARGET_URL;
     }

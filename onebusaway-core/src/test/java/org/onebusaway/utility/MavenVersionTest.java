@@ -19,28 +19,27 @@ package org.onebusaway.utility;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.onebusaway.utility.GitRepositoryState.MavenVersion;
 
 public class MavenVersionTest {
 
-	@Test
-	public void testWithQualifier() {
-		MavenVersion mv = new MavenVersion("1.1.12-SNAPSHOT");
+  @Test
+  public void testWithQualifier() {
+    MavenVersion mv = new MavenVersion("1.1.12-SNAPSHOT");
 
-		assertEquals("1", mv.getMajor());
-		assertEquals("1", mv.getMinor());
-		assertEquals("12", mv.getIncremental());
-		assertEquals("SNAPSHOT", mv.getQualifier());
-	}
+    assertEquals("1", mv.getMajor());
+    assertEquals("1", mv.getMinor());
+    assertEquals("12", mv.getIncremental());
+    assertEquals("SNAPSHOT", mv.getQualifier());
+  }
 
-	@Test
-	public void testWithoutQualifier() {
-		MavenVersion mv = new MavenVersion("1.1.11");
+  @Test
+  public void testWithoutQualifier() {
+    MavenVersion mv = new MavenVersion("1.1.11");
 
-		assertEquals("1", mv.getMajor());
-		assertEquals("1", mv.getMinor());
-		assertEquals("11", mv.getIncremental());
-		assertNull(mv.getQualifier());
-	}
+    assertEquals("1", mv.getMajor());
+    assertEquals("1", mv.getMinor());
+    assertEquals("11", mv.getIncremental());
+    assertNull(mv.getQualifier());
+  }
 
 }

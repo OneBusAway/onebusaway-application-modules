@@ -23,27 +23,28 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BundleItem implements Serializable, Comparable<BundleItem>{
+public class BundleItem implements Serializable, Comparable<BundleItem> {
 
   private static final long serialVersionUID = 1L;
 
   private String id;
-  
+
   private String name;
-  
+
   private List<String> applicableAgencyIds;
-  
+
   private ServiceDate serviceDateFrom;
-  
+
   private ServiceDate serviceDateTo;
 
   private DateTime created;
-  
+
   private DateTime updated;
 
   private ArrayList<BundleFileItem> files;
- 
-  public BundleItem() {}
+
+  public BundleItem() {
+  }
 
   public String getId() {
     return id;
@@ -110,14 +111,14 @@ public class BundleItem implements Serializable, Comparable<BundleItem>{
   }
 
   public boolean isApplicableToDate(ServiceDate date) {
-    if(date.compareTo(serviceDateFrom) >= 0 && date.compareTo(serviceDateTo) <= 0) {
+    if (date.compareTo(serviceDateFrom) >= 0
+        && date.compareTo(serviceDateTo) <= 0) {
       return true;
     } else {
       return false;
     }
   }
-  
-  
+
   @Override
   public int compareTo(BundleItem otherBundle) {
     return this.getUpdated().compareTo(otherBundle.getUpdated());

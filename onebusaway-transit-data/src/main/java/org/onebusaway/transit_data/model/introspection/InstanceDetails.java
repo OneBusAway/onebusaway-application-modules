@@ -18,58 +18,59 @@ package org.onebusaway.transit_data.model.introspection;
 
 import java.io.Serializable;
 
-public class InstanceDetails implements Serializable{
-	private String instanceName;
-	private String language;
-	private String contactEmail;
-	private String twitterUrl;
-	private String facebookUrl;
+public class InstanceDetails implements Serializable {
+  private String instanceName;
+  private String language;
+  private String contactEmail;
+  private String twitterUrl;
+  private String facebookUrl;
 
-	public InstanceDetails(String instanceName, String language, String contactEmail, String twitterUrl, String facebookUrl) {
-		this.instanceName = instanceName;
-		this.language = language;
-		this.contactEmail = contactEmail;
-		this.twitterUrl = twitterUrl;
-		this.facebookUrl = facebookUrl;
-	}
-	
-	public String getInstanceName() {
-		return instanceName;
-	}
+  public InstanceDetails(String instanceName, String language,
+      String contactEmail, String twitterUrl, String facebookUrl) {
+    this.instanceName = instanceName;
+    this.language = language;
+    this.contactEmail = contactEmail;
+    this.twitterUrl = twitterUrl;
+    this.facebookUrl = facebookUrl;
+  }
 
-	public void setInstanceName(String instanceName) {
-		this.instanceName = instanceName;
-	}
+  public String getInstanceName() {
+    return instanceName;
+  }
 
-	public String getLanguage() {
-		return language;
-	}
+  public void setInstanceName(String instanceName) {
+    this.instanceName = instanceName;
+  }
 
-	public void setLanguage(String language) {
-		this.language = language;
-	}
+  public String getLanguage() {
+    return language;
+  }
 
-	public String getContactEmail() {
-		return contactEmail;
-	}
+  public void setLanguage(String language) {
+    this.language = language;
+  }
 
-	public void setContactEmail(String contactEmail) {
-		this.contactEmail = contactEmail;
-	}
+  public String getContactEmail() {
+    return contactEmail;
+  }
 
-	public String getTwitterUrl() {
-		return twitterUrl;
-	}
+  public void setContactEmail(String contactEmail) {
+    this.contactEmail = contactEmail;
+  }
 
-	public void setTwitterUrl(String twitterUrl) {
-		this.twitterUrl = twitterUrl;
-	}
+  public String getTwitterUrl() {
+    return twitterUrl;
+  }
 
-	public String getFacebookUrl() {
-		return facebookUrl;
-	}
+  public void setTwitterUrl(String twitterUrl) {
+    this.twitterUrl = twitterUrl;
+  }
 
-	public void setFacebookUrl(String facebookUrl) {
-		this.facebookUrl = facebookUrl;
-	}
+  public String getFacebookUrl() {
+    return facebookUrl;
+  }
+
+  public void setFacebookUrl(String facebookUrl) {
+    this.facebookUrl = facebookUrl;
+  }
 }

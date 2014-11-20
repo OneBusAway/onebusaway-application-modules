@@ -31,24 +31,27 @@ public class LoginAuthenticationFailureHandler implements
 
   private static String DEFAULT_FAILURE_URL = "/login.action?failure=true";
   private String failureUrl;
+
   public void setFailureUrl(String failureUrl) {
     this.failureUrl = failureUrl;
   }
+
   public String getFailureUrl() {
     return failureUrl;
   }
-  
-  protected String determineFailureUrl(HttpServletRequest request, AuthenticationException failed) {
+
+  protected String determineFailureUrl(HttpServletRequest request,
+      AuthenticationException failed) {
     if (failureUrl == null)
       return DEFAULT_FAILURE_URL;
     return failureUrl;
   }
-  
+
   @Override
   public void onAuthenticationFailure(HttpServletRequest request,
       HttpServletResponse response, AuthenticationException failed)
       throws IOException, ServletException {
-    
+
     String failureUrl = determineFailureUrl(request, failed);
     if (failed instanceof EveryLastLoginAuthenticationException) {
       EveryLastLoginAuthenticationException ex = (EveryLastLoginAuthenticationException) failed;

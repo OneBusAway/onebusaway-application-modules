@@ -9,40 +9,6 @@
 
 	<name>onebusaway-transit-data-federation-builder</name>
 
-
-	<repositories>
-		<repository>
-			<id>releases.onebusaway.org</id>
-			<url>http://developer.onebusaway.org/content/repositories/releases/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>releases.svn2.camsys.com</id>
-			<url>http://svn2.camsys.com/archiva/repository/releases/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>snapshots.svn2.camsys.com</id>
-			<url>http://svn2.camsys.com/archiva/repository/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-	
 	<dependencies>
 		<dependency>
 			<groupId>org.onebusaway</groupId>

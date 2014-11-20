@@ -31,93 +31,93 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public class HttpServiceClientImpl implements HttpServiceClient {
-	
-	private static Logger _log = LoggerFactory
-			.getLogger(HttpServiceClientImpl.class);
-	
-	private String _hostname = null;
 
-	private String _apiEndpointPath = "/api/";
+  private static Logger _log = LoggerFactory.getLogger(HttpServiceClientImpl.class);
 
-	private int _port = 80;
-	
-	private RestApiLibrary _restApiLibrary;
-	
-	public HttpServiceClientImpl(String protocol, String hostname, Integer port, String path) {
-		_hostname = hostname;
-		if (port != null) {
-			_port = port;
-		}
+  private String _hostname = null;
 
-		if (path != null) {
-			_apiEndpointPath = path;
-		}
+  private String _apiEndpointPath = "/api/";
 
-		_log.info("Rest Service hostname = " + _hostname);
+  private int _port = 80;
 
-		if (!StringUtils.isBlank(_hostname))
-			_restApiLibrary = new RestApiLibrary(protocol, _hostname, _port,
-					_apiEndpointPath);
-		else
-			_log.warn("No Rest URL given!");
-	}
-	
-	public HttpServiceClientImpl(String host, Integer port, String apiPrefix) {
-		this("http", host, port, apiPrefix);
-	}
-	
-	@Override
-	public URL buildUrl(String baseObject, String... params) throws Exception {
-		return _restApiLibrary.buildUrl(baseObject, params);
-	}
+  private RestApiLibrary _restApiLibrary;
 
-	@Override
-	public String log(String baseObject, String component, Integer priority,
-			String message) {
-		return _restApiLibrary.log(baseObject, component, priority, message);
-	}
+  public HttpServiceClientImpl(String protocol, String hostname, Integer port,
+      String path) {
+    _hostname = hostname;
+    if (port != null) {
+      _port = port;
+    }
 
-	@Override
-	public List<JsonObject> getItemsForRequest(String baseObject,
-			String... params) throws Exception {
-		if (_restApiLibrary == null)
-			return Collections.emptyList();
-		URL requestUrl = _restApiLibrary.buildUrl(baseObject, params);
-		_log.info("Requesting " + requestUrl);
+    if (path != null) {
+      _apiEndpointPath = path;
+    }
 
-		String responseJson = _restApiLibrary
-				.getContentsOfUrlAsString(requestUrl);
+    _log.info("Rest Service hostname = " + _hostname);
 
-		return _restApiLibrary.getJsonObjectsForString(responseJson);
-	}
+    if (!StringUtils.isBlank(_hostname))
+      _restApiLibrary = new RestApiLibrary(protocol, _hostname, _port,
+          _apiEndpointPath);
+    else
+      _log.warn("No Rest URL given!");
+  }
 
-	@Override
-	public List<Map<String, String>> getItems(String baseObject,
-			String... params) throws Exception {
-		if (_restApiLibrary == null)
-			return Collections.emptyList();
-		List<Map<String, String>> result = new ArrayList<Map<String, String>>();
-		List<JsonObject> items = getItemsForRequest(baseObject, params);
-		for (JsonObject item : items) {
-			Map<String, String> m = new HashMap<String, String>();
-			result.add(m);
-			for (Map.Entry<String, JsonElement> entry : item.entrySet()) {
-				m.put(entry.getKey(), entry.getValue().getAsString());
-			}
-		}
-		return result;
-	}
+  public HttpServiceClientImpl(String host, Integer port, String apiPrefix) {
+    this("http", host, port, apiPrefix);
+  }
 
-	@Override
-	public String getItem(String baseObject, String key) throws Exception {
-		List<Map<String, String>> items = getItems("config", "list");
-		if (items == null) return null;
-		for (Map<String, String> component : items) {
-			if (component.containsKey("key") && key.equals(component.get("key"))) {
-				return component.get("value");
-			}
-		}
-		return null;
-	}
+  @Override
+  public URL buildUrl(String baseObject, String... params) throws Exception {
+    return _restApiLibrary.buildUrl(baseObject, params);
+  }
+
+  @Override
+  public String log(String baseObject, String component, Integer priority,
+      String message) {
+    return _restApiLibrary.log(baseObject, component, priority, message);
+  }
+
+  @Override
+  public List<JsonObject> getItemsForRequest(String baseObject,
+      String... params) throws Exception {
+    if (_restApiLibrary == null)
+      return Collections.emptyList();
+    URL requestUrl = _restApiLibrary.buildUrl(baseObject, params);
+    _log.info("Requesting " + requestUrl);
+
+    String responseJson = _restApiLibrary.getContentsOfUrlAsString(requestUrl);
+
+    return _restApiLibrary.getJsonObjectsForString(responseJson);
+  }
+
+  @Override
+  public List<Map<String, String>> getItems(String baseObject, String... params)
+      throws Exception {
+    if (_restApiLibrary == null)
+      return Collections.emptyList();
+    List<Map<String, String>> result = new ArrayList<Map<String, String>>();
+    List<JsonObject> items = getItemsForRequest(baseObject, params);
+    for (JsonObject item : items) {
+      Map<String, String> m = new HashMap<String, String>();
+      result.add(m);
+      for (Map.Entry<String, JsonElement> entry : item.entrySet()) {
+        m.put(entry.getKey(), entry.getValue().getAsString());
+      }
+    }
+    return result;
+  }
+
+  @Override
+  public String getItem(String baseObject, String key) throws Exception {
+    List<Map<String, String>> items = getItems("config", "list");
+    if (items == null)
+      return null;
+    for (Map<String, String> component : items) {
+      if (component.containsKey("key") && key.equals(component.get("key"))) {
+        return component.get("value");
+      }
+    }
+    return null;
+  }
 
 }

@@ -21,30 +21,30 @@ import java.util.Map;
 
 public class InstanceVersionsV2Bean implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private Map<String, GitRepositoryStateV2Bean> instanceVersions;
-	private GitRepositoryStateV2Bean apiVersion;
+  private Map<String, GitRepositoryStateV2Bean> instanceVersions;
+  private GitRepositoryStateV2Bean apiVersion;
 
-	public InstanceVersionsV2Bean() {
+  public InstanceVersionsV2Bean() {
 
-	}
+  }
 
-	public Map<String, GitRepositoryStateV2Bean> getInstanceVersions() {
-		return instanceVersions;
-	}
+  public Map<String, GitRepositoryStateV2Bean> getInstanceVersions() {
+    return instanceVersions;
+  }
 
-	public void setInstanceVersions(
-			Map<String, GitRepositoryStateV2Bean> instanceVersions) {
-		this.instanceVersions = instanceVersions;
-	}
+  public void setInstanceVersions(
+      Map<String, GitRepositoryStateV2Bean> instanceVersions) {
+    this.instanceVersions = instanceVersions;
+  }
 
-	public GitRepositoryStateV2Bean getApiVersion() {
-		return apiVersion;
-	}
+  public GitRepositoryStateV2Bean getApiVersion() {
+    return apiVersion;
+  }
 
-	public void setApiVersion(GitRepositoryStateV2Bean apiVersion) {
-		this.apiVersion = apiVersion;
-	}
+  public void setApiVersion(GitRepositoryStateV2Bean apiVersion) {
+    this.apiVersion = apiVersion;
+  }
 
 }

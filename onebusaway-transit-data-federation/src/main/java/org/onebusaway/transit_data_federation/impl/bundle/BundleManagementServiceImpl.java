@@ -60,7 +60,6 @@ import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.Future;
 
-
 public class BundleManagementServiceImpl implements BundleManagementService {
 
   // how long to wait for inference threads to exit before forcefully stopping
@@ -70,8 +69,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   protected static final int MAX_EXPECTED_THREADS = 3000;
 
-  private static Logger _log = LoggerFactory
-      .getLogger(BundleManagementServiceImpl.class);
+  private static Logger _log = LoggerFactory.getLogger(BundleManagementServiceImpl.class);
 
   protected BundleConfigDao _bundleConfigDao;
 
@@ -121,28 +119,26 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   }
 
   @PostConstruct
-  protected void setup() throws Exception {  
-    if(!_standaloneMode) {
-      _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);        
-    }
-    else{
+  protected void setup() throws Exception {
+    if (!_standaloneMode) {
+      _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);
+    } else {
       _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
     }
-    
-    try{
+
+    try {
       discoverBundles();
-    }catch(Exception e){
+    } catch (Exception e) {
       _log.error("Unable to retreive Bundle List.");
-      if(!(_bundleStore instanceof LocalBundleStoreImpl)){
+      if (!(_bundleStore instanceof LocalBundleStoreImpl)) {
         _log.info("Attempting to load local Bundle...");
         _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
         discoverBundles();
-      }
-      else{
-        throw e; 
+      } else {
+        throw e;
       }
     }
-    
+
     refreshApplicableBundles();
     reevaluateBundleAssignment();
 
@@ -199,8 +195,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
         _applicableBundles.values());
     Collections.sort(bestBundleCandidates);
 
-    BundleItem bestBundle = bestBundleCandidates.get(bestBundleCandidates
-        .size() - 1);
+    BundleItem bestBundle = bestBundleCandidates.get(bestBundleCandidates.size() - 1);
     _log.info("Best bundle is " + bestBundle.getId());
 
     changeBundle(bestBundle.getId());
@@ -263,15 +258,14 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   public String getActiveBundleId() {
 
     if (_bundleConfigDao == null) {
-      if(_currentBundleId == null){
+      if (_currentBundleId == null) {
         _log.error("config error:  bundleConfigDao is null");
-        return null; 
-      }
-      else{
+        return null;
+      } else {
         _log.warn("config error:  bundleConfigDao is null, returning currentBundleId value instead.");
         _log.debug("Legacy Bundle most likely not detected");
         return _currentBundleId;
-      } 
+      }
     }
 
     if (_bundleConfigDao.getBundleMetadata() == null) {
@@ -373,9 +367,9 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
     // switch bundle files
     File path;
-    if(_bundleStore.isLegacyBundle()){
+    if (_bundleStore.isLegacyBundle()) {
       path = new File(_bundleRootPath);
-    }else{
+    } else {
       path = new File(_bundleRootPath, bundleId);
     }
     _bundle.setPath(path);
@@ -388,8 +382,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
       _refreshService.refresh(RefreshableResources.CALENDAR_DATA);
       _refreshService.refresh(RefreshableResources.ROUTE_COLLECTIONS_DATA);
-      _refreshService
-          .refresh(RefreshableResources.ROUTE_COLLECTION_SEARCH_DATA);
+      _refreshService.refresh(RefreshableResources.ROUTE_COLLECTION_SEARCH_DATA);
       _refreshService.refresh(RefreshableResources.STOP_SEARCH_DATA);
       _refreshService.refresh(RefreshableResources.WALK_PLANNER_GRAPH);
       _refreshService.refresh(RefreshableResources.BLOCK_INDEX_DATA);
@@ -459,20 +452,17 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
     // Rebuild cache
     try {
-      List<AgencyWithCoverageBean> agenciesWithCoverage = _transitDataService
-          .getAgenciesWithCoverage();
+      List<AgencyWithCoverageBean> agenciesWithCoverage = _transitDataService.getAgenciesWithCoverage();
 
       for (AgencyWithCoverageBean agencyWithCoverage : agenciesWithCoverage) {
         AgencyBean agency = agencyWithCoverage.getAgency();
 
-        ListBean<String> stopIds = _transitDataService
-            .getStopIdsForAgencyId(agency.getId());
+        ListBean<String> stopIds = _transitDataService.getStopIdsForAgencyId(agency.getId());
         for (String stopId : stopIds.getList()) {
           _transitDataService.getStop(stopId);
         }
 
-        ListBean<String> routeIds = _transitDataService
-            .getRouteIdsForAgencyId(agency.getId());
+        ListBean<String> routeIds = _transitDataService.getRouteIdsForAgencyId(agency.getId());
         for (String routeId : routeIds.getList()) {
           _transitDataService.getStopsForRoute(routeId);
         }
@@ -486,8 +476,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       }
 
       for (AgencyAndId shapeId : shapeIds) {
-        _transitDataService.getShapeForId(AgencyAndIdLibrary
-            .convertToString(shapeId));
+        _transitDataService.getShapeForId(AgencyAndIdLibrary.convertToString(shapeId));
       }
       _log.info("cache clearing complete!");
     } catch (Exception e) {

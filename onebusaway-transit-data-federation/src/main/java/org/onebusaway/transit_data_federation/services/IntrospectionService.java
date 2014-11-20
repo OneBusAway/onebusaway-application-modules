@@ -16,11 +16,11 @@
 
 package org.onebusaway.transit_data_federation.services;
 
-
 import org.onebusaway.transit_data.model.introspection.InstanceDetails;
 import org.onebusaway.utility.GitRepositoryState;
 
 public interface IntrospectionService {
-	public InstanceDetails getInstanceDetails();
-	GitRepositoryState getGitRepositoryState();
+  public InstanceDetails getInstanceDetails();
+
+  GitRepositoryState getGitRepositoryState();
 }

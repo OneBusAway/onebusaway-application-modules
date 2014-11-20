@@ -25,15 +25,14 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("/instance-details.action")
 public class InstanceDetailsController {
 
-	@Autowired
-	private IntrospectionService _introspectionService;
+  @Autowired
+  private IntrospectionService _introspectionService;
 
-	@RequestMapping()
-	public ModelAndView index() {
+  @RequestMapping()
+  public ModelAndView index() {
 
-		ModelAndView mv = new ModelAndView("instance-details.jspx");
-		mv.addObject("instanceDetails",
-				_introspectionService.getInstanceDetails());
-		return mv;
-	}
+    ModelAndView mv = new ModelAndView("instance-details.jspx");
+    mv.addObject("instanceDetails", _introspectionService.getInstanceDetails());
+    return mv;
+  }
 }

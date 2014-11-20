@@ -31,8 +31,7 @@ import java.util.concurrent.Future;
 public class SingleBundleManagementServiceImpl implements
     BundleManagementService {
 
-  private static Logger _log = LoggerFactory
-      .getLogger(BundleManagementServiceImpl.class);
+  private static Logger _log = LoggerFactory.getLogger(BundleManagementServiceImpl.class);
   private BundleConfigDao _bundleConfigDao;
 
   @Autowired
@@ -77,7 +76,7 @@ public class SingleBundleManagementServiceImpl implements
 
   @Override
   public boolean bundleWithIdExists(String bundleId) {
-    if(getActiveBundleId().equalsIgnoreCase(bundleId))
+    if (getActiveBundleId().equalsIgnoreCase(bundleId))
       return true;
     return false;
   }
@@ -118,19 +117,19 @@ public class SingleBundleManagementServiceImpl implements
   @Override
   public void setBundleStoreRoot(String path) throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void setTime(Date time) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void setServiceDate(ServiceDate serviceDate) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -142,7 +141,7 @@ public class SingleBundleManagementServiceImpl implements
   @Override
   public void setStandaloneMode(boolean standalone) {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
@@ -154,19 +153,19 @@ public class SingleBundleManagementServiceImpl implements
   @Override
   public void discoverBundles() throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void refreshApplicableBundles() {
     // TODO Auto-generated method stub
-    
+
   }
 
   @Override
   public void reevaluateBundleAssignment() throws Exception {
     // TODO Auto-generated method stub
-    
+
   }
 
 }

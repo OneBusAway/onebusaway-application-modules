@@ -33,23 +33,15 @@
 
   <repositories>
     <repository>
-      <id>releases-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/releases/</url> 
-    </repository>
-    <repository>
-      <id>snapshots-camsys-repo</id>
-      <url>http://developer.onebusaway.org/archiva/repository/snapshots/</url> 
-    </repository>
-    <repository>
       <id>public.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/content/groups/public/</url>
+      <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
       <id>public.onebusaway.org</id>
-      <url>http://developer.onebusaway.org/content/groups/public/</url>
+      <url>http://nexus.onebusaway.org/content/groups/public/</url>
     </pluginRepository>
   </pluginRepositories>
 
@@ -65,26 +57,15 @@
   </issueManagement>
 
   <distributionManagement>
-    <repository>
-      <id>releases-camsys-repo</id>
-      <name>OneBusAway Camsys Release Repo</name>
-      <url>http://developer.onebusaway.org/archiva/repository/releases/</url> 
-    </repository>
-    <snapshotRepository>
-      <id>snapshots-camsys-repo</id>
-      <name>OneBusAway Camsys Snapshot Repo</name>
-      <url>http://developer.onebusaway.org/archiva/repository/snapshots/</url> 
-    </snapshotRepository>
     <site>
       <id>${site_id}</id>
-      <url>${site_url}</url>
+      <url>${site_deployment_base}/onebusaway-application-modules/${project.version}</url>
     </site>
   </distributionManagement>
 
   <modules>
     <module>onebusaway-api-core</module>
     <module>onebusaway-api-webapp</module>
-    <module>onebusaway-bundle-loader</module>
     <module>onebusaway-combined-webapp</module>
     <module>onebusaway-container</module>
     <module>onebusaway-core</module>

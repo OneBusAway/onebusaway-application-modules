@@ -35,11 +35,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class BundleConfigDao {
   private static Logger _log = LoggerFactory.getLogger(BundleConfigDao.class);
-  
+
   private FederatedTransitDataBundle _bundle;
-  
+
   private BundleMetadata _meta;
-  
+
   @Autowired
   public void setBundle(FederatedTransitDataBundle bundle) {
     _bundle = bundle;
@@ -48,18 +48,18 @@ public class BundleConfigDao {
   public BundleMetadata getBundleMetadata() {
     return _meta;
   }
-  
+
   @PostConstruct
   @Refreshable(dependsOn = RefreshableResources.TRANSIT_GRAPH)
   public void setup() throws IOException, ClassNotFoundException {
     _meta = null;
     File path = _bundle.getBundleMetadataPath();
-    
-    
-    _log.error("looking for metadata file " + path);
+
+    _log.info("looking for metadata file " + path);
     if (path.exists()) {
       ObjectMapper mapper = new ObjectMapper();
-      mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      mapper.configure(
+          DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       BundleMetadata meta = null;
       try {
         meta = mapper.readValue(path, BundleMetadata.class);
@@ -69,7 +69,7 @@ public class BundleConfigDao {
       if (meta != null) {
         _meta = meta;
       }
-      
+
     } else {
       _log.error(" did not find metadata file " + path);
     }

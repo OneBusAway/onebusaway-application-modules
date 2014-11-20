@@ -20,52 +20,52 @@ import java.io.Serializable;
 
 public class InstanceDetailsV2Bean implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	private String instanceName;
-	private String language;
-	private String contactEmail;
-	private String twitterUrl;
-	private String facebookUrl;
+  private String instanceName;
+  private String language;
+  private String contactEmail;
+  private String twitterUrl;
+  private String facebookUrl;
 
-	public String getInstanceName() {
-		return instanceName;
-	}
+  public String getInstanceName() {
+    return instanceName;
+  }
 
-	public void setInstanceName(String instanceName) {
-		this.instanceName = instanceName;
-	}
+  public void setInstanceName(String instanceName) {
+    this.instanceName = instanceName;
+  }
 
-	public String getLanguage() {
-		return language;
-	}
+  public String getLanguage() {
+    return language;
+  }
 
-	public void setLanguage(String language) {
-		this.language = language;
-	}
+  public void setLanguage(String language) {
+    this.language = language;
+  }
 
-	public String getContactEmail() {
-		return contactEmail;
-	}
+  public String getContactEmail() {
+    return contactEmail;
+  }
 
-	public void setContactEmail(String contactEmail) {
-		this.contactEmail = contactEmail;
-	}
+  public void setContactEmail(String contactEmail) {
+    this.contactEmail = contactEmail;
+  }
 
-	public String getTwitterUrl() {
-		return twitterUrl;
-	}
+  public String getTwitterUrl() {
+    return twitterUrl;
+  }
 
-	public void setTwitterUrl(String twitterUrl) {
-		this.twitterUrl = twitterUrl;
-	}
+  public void setTwitterUrl(String twitterUrl) {
+    this.twitterUrl = twitterUrl;
+  }
 
-	public String getFacebookUrl() {
-		return facebookUrl;
-	}
+  public String getFacebookUrl() {
+    return facebookUrl;
+  }
 
-	public void setFacebookUrl(String facebookUrl) {
-		this.facebookUrl = facebookUrl;
-	}
+  public void setFacebookUrl(String facebookUrl) {
+    this.facebookUrl = facebookUrl;
+  }
 
 }

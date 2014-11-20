@@ -130,7 +130,7 @@
   <bean id="shapeGeospatialIndexTask" class="org.onebusaway.transit_data_federation.bundle.tasks.ShapeGeospatialIndexTask" />
 
   <!-- OTP Graph -->
-
+  <!--  TODO officially remove OTP Graph support as it isn't used -->
   <!-- This is not enabled by default, only enable if you want trip planning support -->
  <!--  <bean class="org.onebusaway.transit_data_federation.bundle.model.TaskDefinition">
     <property name="taskName" value="otp_graph" />

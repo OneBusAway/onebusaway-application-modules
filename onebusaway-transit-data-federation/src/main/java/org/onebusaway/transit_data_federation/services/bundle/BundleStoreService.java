@@ -23,13 +23,12 @@ import java.util.List;
  * Sources of bundles--local or Http-backed.
  * 
  * @author jmaki
- *
+ * 
  */
 public interface BundleStoreService {
-  
-  public List<BundleItem> getBundles() throws Exception;
-  
-  public boolean isLegacyBundle();
-  
-}
 
+  public List<BundleItem> getBundles() throws Exception;
+
+  public boolean isLegacyBundle();
+
+}

@@ -40,83 +40,80 @@ import org.springframework.stereotype.Component;
 @Component
 public class IntrospectionServiceImpl implements IntrospectionService {
 
-	private static Logger _log = LoggerFactory
-			.getLogger(IntrospectionServiceImpl.class);
+  private static Logger _log = LoggerFactory.getLogger(IntrospectionServiceImpl.class);
 
-	@Autowired(required = false)
-	private InstanceDetails _instanceDetails;
-	private String _instanceDetailsPropertyFile;
+  @Autowired(required = false)
+  private InstanceDetails _instanceDetails;
+  private String _instanceDetailsPropertyFile;
 
-	private String getHostname() {
-		String hostname = "unknown host";
-		try {
-			hostname = InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			_log.warn("Couldn't determine hostname", e);
-		}
+  private String getHostname() {
+    String hostname = "unknown host";
+    try {
+      hostname = InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      _log.warn("Couldn't determine hostname", e);
+    }
 
-		return hostname;
-	}
-	
-	/*@Autowired(required = false)*/
-	private GitRepositoryState _gitRepositoryState;
-	
-	@Override
-	public InstanceDetails getInstanceDetails() {
-		return _instanceDetails;
-	}
+    return hostname;
+  }
 
-	@Override
-	public GitRepositoryState getGitRepositoryState() {
-		return _gitRepositoryState;
-	}
+  /* @Autowired(required = false) */
+  private GitRepositoryState _gitRepositoryState;
 
-	@ConfigurationParameter
-	public void setInstanceDetailsPropertyFile(
-			String instanceDetailsPropertyFile) {
-		_instanceDetailsPropertyFile = instanceDetailsPropertyFile;
-	}
+  @Override
+  public InstanceDetails getInstanceDetails() {
+    return _instanceDetails;
+  }
 
-	@PostConstruct
-	public void start() {
-		if(_gitRepositoryState == null){
-			_gitRepositoryState = new GitRepositoryHelper().getGitRepositoryState();
-		}
-		
-		if (_instanceDetails == null && _instanceDetailsPropertyFile != null) {
-			InputStream in = null;
-			try {
-				Properties instanceDetails = new Properties();
-				in = new FileInputStream(new File(_instanceDetailsPropertyFile));
+  @Override
+  public GitRepositoryState getGitRepositoryState() {
+    return _gitRepositoryState;
+  }
 
-				instanceDetails.load(in);
+  @ConfigurationParameter
+  public void setInstanceDetailsPropertyFile(String instanceDetailsPropertyFile) {
+    _instanceDetailsPropertyFile = instanceDetailsPropertyFile;
+  }
 
-				_instanceDetails = new InstanceDetails(
-						instanceDetails.getProperty("oba.instanceName"),
-						instanceDetails.getProperty("oba.language"),
-						instanceDetails.getProperty("oba.contactEmail"),
-						instanceDetails.getProperty("oba.twitterUrl"),
-						instanceDetails.getProperty("oba.facebookUrl"));
+  @PostConstruct
+  public void start() {
+    if (_gitRepositoryState == null) {
+      _gitRepositoryState = new GitRepositoryHelper().getGitRepositoryState();
+    }
 
-			} catch (Exception e) {
-				_log.error(
-						"Exception while processing instance details property file",
-						e);
-			} finally {
-				if (in != null) {
-					try {
-						in.close();
-					} catch (IOException e) {
-						_log.warn("Exception while closing properties file", e);
-					}
-				}
-			}
-		} else if (_instanceDetails == null) {
-			_instanceDetails = new InstanceDetails("OneBusAway on "
-					+ getHostname(), Locale.getDefault().getLanguage(), "onebusaway@" + getHostname(),
-					null, null);
-		}
+    if (_instanceDetails == null && _instanceDetailsPropertyFile != null) {
+      InputStream in = null;
+      try {
+        Properties instanceDetails = new Properties();
+        in = new FileInputStream(new File(_instanceDetailsPropertyFile));
 
-	}
+        instanceDetails.load(in);
+
+        _instanceDetails = new InstanceDetails(
+            instanceDetails.getProperty("oba.instanceName"),
+            instanceDetails.getProperty("oba.language"),
+            instanceDetails.getProperty("oba.contactEmail"),
+            instanceDetails.getProperty("oba.twitterUrl"),
+            instanceDetails.getProperty("oba.facebookUrl"));
+
+      } catch (Exception e) {
+        _log.error("Exception while processing instance details property file",
+            e);
+      } finally {
+        if (in != null) {
+          try {
+            in.close();
+          } catch (IOException e) {
+            _log.warn("Exception while closing properties file", e);
+          }
+        }
+      }
+    } else if (_instanceDetails == null) {
+      _instanceDetails = new InstanceDetails("OneBusAway on " + getHostname(),
+          Locale.getDefault().getLanguage(), "onebusaway@" + getHostname(),
+          null, null);
+    }
+
+  }
 
 }

@@ -19,34 +19,42 @@ package org.onebusaway.transit_data.model.config;
 public class BundleMetadata implements java.io.Serializable {
 
   private static final long serialVersionUID = -7693328387231949115L;
-  
+
   private String id;
   private String name;
   private String serviceDateFrom;
   private String serviceDateTo;
+
   public String getId() {
     return id;
   }
+
   public void setId(String id) {
     this.id = id;
   }
+
   public String getName() {
     return name;
   }
+
   public void setName(String name) {
     this.name = name;
   }
+
   public String getServiceDateFrom() {
     return serviceDateFrom;
   }
+
   public void setServiceDateFrom(String serviceDateFrom) {
     this.serviceDateFrom = serviceDateFrom;
   }
+
   public String getServiceDateTo() {
     return serviceDateTo;
   }
+
   public void setServiceDateTo(String serviceDateTo) {
     this.serviceDateTo = serviceDateTo;
   }
-  
+
 }
