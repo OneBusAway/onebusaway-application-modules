@@ -43,15 +43,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class MetricResource {
 
   protected static Logger _log = LoggerFactory.getLogger(MetricResource.class);
-  private ScheduledExecutorService _scheduledExecutorService;
-  private ScheduledFuture<?> _refreshTask;
-  private LongTermAverages _longTermAverages;
-  private int _refreshInterval = 30;    // Interval in seconds for updating long term averages
+  //private ScheduledExecutorService _scheduledExecutorService;
+  //private ScheduledFuture<?> _refreshTask;
+  //private LongTermAverages _longTermAverages;
+  //private int _refreshInterval = 30;    // Interval in seconds for updating long term averages
 
   
   protected MetricConfiguration _configuration;
   protected ObjectMapper _mapper = new ObjectMapper();
   
+  /*
   static protected int longTermMatchedTrips = 0;  // The current rolling average for matched trips
   static protected int longTermUnmatchedTrips = 0;
   static protected int ROLLING_AVERAGE_COUNT = 10;// This is the number of recent updates included in the average. 
@@ -66,25 +67,26 @@ public abstract class MetricResource {
   static protected int earliestMatchedTripIdx = 0;// This indicates the earliest trip in the array and the one that will be replaced
                                                   // by a new trip count.
   static protected int earliestUnmatchedTripIdx = 0;
+*/
+  //public void setRefreshInterval(int refreshInterval) {
+  //  _refreshInterval = refreshInterval;
+  //}
 
-  public void setRefreshInterval(int refreshInterval) {
-    _refreshInterval = refreshInterval;
-  }
+  //@Autowired
+  //public void setLongTermAverages(
+	//	  LongTermAverages longTermAverages) {
+  //  _longTermAverages = longTermAverages;
+  //}
 
-  @Autowired
-  public void setLongTermAverages(
-		  LongTermAverages longTermAverages) {
-    _longTermAverages = longTermAverages;
-  }
-
-  @Autowired
-  public void setScheduledExecutorService(
-      ScheduledExecutorService scheduledExecutorService) {
-    _scheduledExecutorService = scheduledExecutorService;
-  }
+  //@Autowired
+  //public void setScheduledExecutorService(
+  //    ScheduledExecutorService scheduledExecutorService) {
+  //  _scheduledExecutorService = scheduledExecutorService;
+  //}
 
   @Autowired
   public void setMetricConfiguration(MetricConfiguration mc) {
+    _log.info("Setting MetricConfiguration: " + mc);
     _configuration = mc;
   }
   
@@ -93,16 +95,17 @@ public abstract class MetricResource {
   }
   
   protected TransitDataService getTDS() {
+    _log.info("Getting TDS, _configuration: " + _configuration);
     return _configuration.getTDS();
   }
   
-  protected int getLongTermMatchedTrips() {
-    return longTermMatchedTrips;
-  }
+  //protected int getLongTermMatchedTrips() {
+  //  return longTermMatchedTrips;
+  //}
 	  
-  protected int getLongTermUnmatchedTrips() {
-    return longTermUnmatchedTrips;
-  }
+  //protected int getLongTermUnmatchedTrips() {
+  //  return longTermUnmatchedTrips;
+  //}
 		  
   protected int getTotalRecordCount(String agencyId) throws Exception {
     int totalRecords = 0;
@@ -164,6 +167,7 @@ public abstract class MetricResource {
     return prunedTripIds;
   }
 
+  /*
   protected int getLongTermDeltaMatchedTrips() {
 	int totalMatchedTripIds = 0;
 	for (MonitoredDataSource mds : getDataSources()) {
@@ -183,6 +187,7 @@ public abstract class MetricResource {
 	_log.info("long term unmatched delta, current = " + totalUnmatchedTripIds + ", average = " + _longTermAverages.getUnmatchedTripsAvg());;	  
 	return totalUnmatchedTripIds - _longTermAverages.getUnmatchedTripsAvg();
   }
+  */
   
   protected String ok(String metricName, Object value) {
     Metric metric = new Metric();
@@ -226,6 +231,7 @@ public abstract class MetricResource {
 
   }
   
+  /*
   protected void updateLongTermMatchedTrips(int currentMatchedTrips) {
     int idx = currentMatchedTripCt < ROLLING_AVERAGE_COUNT ? currentMatchedTripCt++ : earliestMatchedTripIdx++;
     recentMatchedTrips[idx] = currentMatchedTrips;
@@ -251,5 +257,6 @@ public abstract class MetricResource {
     longTermUnmatchedTrips = sum / currentUnmatchedTripCt;
     return;
   }
+  */
 
 }
