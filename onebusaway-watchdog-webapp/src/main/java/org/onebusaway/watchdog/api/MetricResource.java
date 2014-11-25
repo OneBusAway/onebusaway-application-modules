@@ -95,7 +95,7 @@ public abstract class MetricResource {
   }
   
   protected TransitDataService getTDS() {
-    _log.info("Getting TDS, _configuration: " + _configuration);
+    //_log.info("Getting TDS, _configuration: " + _configuration);
     return _configuration.getTDS();
   }
   
@@ -165,6 +165,21 @@ public abstract class MetricResource {
     List<String> prunedTripIds = new ArrayList<String>(tripIds.size());
     prunedTripIds.addAll(tripIds);
     return prunedTripIds;
+  }
+
+  protected int getUnmatchedTripIdCt(String agencyId) {
+    int unmatchedTripCt = 0;
+
+    for (MonitoredDataSource mds : getDataSources()) {
+      MonitoredResult result = mds.getMonitoredResult();
+      if (result == null) continue;
+      for (String mAgencyId : result.getAgencyIds()) {
+        if (agencyId.equals(mAgencyId)) {
+          unmatchedTripCt += result.getUnmatchedTripIds().size();
+        }
+      }
+    }
+    return unmatchedTripCt;
   }
 
   /*
