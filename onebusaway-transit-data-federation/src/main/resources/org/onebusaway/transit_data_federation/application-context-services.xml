@@ -43,6 +43,7 @@
         <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord</value>
       </list>
     </property>
   </bean>
