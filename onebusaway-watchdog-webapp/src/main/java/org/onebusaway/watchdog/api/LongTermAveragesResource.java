@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.watchdog.api;
 
 import java.io.IOException;
@@ -16,6 +31,8 @@ import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
 import org.onebusaway.watchdog.model.MetricConfiguration;
+
+import cern.colt.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +61,13 @@ public class LongTermAveragesResource extends MetricResource {
 	                                                  // by a new trip count.
 	  static private Map<String, int[]> matchedTripAveragesByAgency = new HashMap<String, int[]>();
 	  static private Map<String, int[]> unmatchedTripAveragesByAgency = new HashMap<String, int[]>();
+	  static private Map<String, int[]> busesInServicePctByAgency = new HashMap<String, int[]>();
+	  static private Map<String, int[]> tripScheduleRealtimeDiffByAgency = new HashMap<String, int[]>();
+	  static private Map<String, int[]> tripTotalsByAgency = new HashMap<String, int[]>();
+	  static private Map<String, int[]> stopsMatchedByAgency = new HashMap<String, int[]>();
+	  static private Map<String, int[]> stopsUnmatchedByAgency = new HashMap<String, int[]>();
+	  //static private Map<String, int[]> tripScheduleRealtimeDiffByAgency = new HashMap<String, int[]>();
+	  
 	  
 	  public void setRefreshInterval(int refreshInterval) {
 		 _refreshInterval = refreshInterval;
@@ -57,14 +81,17 @@ public class LongTermAveragesResource extends MetricResource {
 		  int[] metricTotals = null;
 		  if (metricType.equals("matched-trips-average")) {
 			  metricTotals = matchedTripAveragesByAgency.get(agencyId);
-			  _log.info("matched by agency, agency: " + agencyId + ", totals: " + metricTotals);
+			  _log.info("matched by agency, agency: " + agencyId + ", totals: " + (metricTotals!=null?Arrays.toString(metricTotals):0));
 		  } else if (metricType.equals("unmatched-trips-average")) {
 			  metricTotals = unmatchedTripAveragesByAgency.get(agencyId);
-			  _log.info("unmatched by agency, agency: " + agencyId + ", totals: " + metricTotals);
+			  _log.info("unmatched by agency, agency: " + agencyId + ", totals: " + (metricTotals!=null?Arrays.toString(metricTotals):0));
+      } else if (metricType.equals("buses-in-service-pct")) {
+        metricTotals = busesInServicePctByAgency.get(agencyId);
+        _log.info("buses in service pct, agency: " + agencyId + ", totals: " + (metricTotals!=null?Arrays.toString(metricTotals):0));
 		  } else {
 			  return 0;
 		  }
-		  return calcAverage(metricTotals);
+		  return metricTotals != null ? calcAverage(metricTotals) : 0;
 	  }
 	  	  
 	  protected int getUnmatchedTripsAvg() {
@@ -79,6 +106,7 @@ public class LongTermAveragesResource extends MetricResource {
 	    for (String agencyId : agencyIds) {
 	      matchedTripAveragesByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
 	      unmatchedTripAveragesByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
+	      busesInServicePctByAgency.put(agencyId, new int[ROLLING_AVERAGE_COUNT]);
 	    }
 	    if (_refreshInterval > 0) {
 	      _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(new RefreshTask(), 0, _refreshInterval, TimeUnit.SECONDS);
@@ -128,36 +156,67 @@ public class LongTermAveragesResource extends MetricResource {
 		  }
 
 	  public void refresh() throws IOException {
-	    	int matchedTripCt = 0;
-	    	int unmatchedTripCt = 0;
+	    	int totalMatchedTripCt = 0;
+	    	int totalUnmatchedTripCt = 0;
+	    	int busesInServicePct = 0;
 	    	Map<String, Integer> matchedByAgency = new HashMap<String, Integer>();
 	    	Map<String, Integer> unmatchedByAgency = new HashMap<String, Integer>();
-		    for (MonitoredDataSource mds : getDataSources()) {
-		        MonitoredResult result = mds.getMonitoredResult();
-		        if (result == null) continue;
-		        matchedTripCt += result.getMatchedTripIds().size();
-		        unmatchedTripCt += result.getUnmatchedTripIds().size();
-		        for (String agencyId : result.getAgencyIds()) {
-		        	Integer matchedTrips = matchedByAgency.get(agencyId);
-		        	if (matchedTrips == null) {
-		        		matchedTrips = 0;
-		        	}
-			        matchedTrips += result.getMatchedTripIds().size();
-			        matchedByAgency.put(agencyId, matchedTrips);
-			        
-		        	Integer unmatchedTrips = unmatchedByAgency.get(agencyId);
-		        	if (unmatchedTrips == null) {
-		        		unmatchedTrips = 0;
-		        	}
-			        unmatchedTrips += result.getUnmatchedTripIds().size();
-			        unmatchedByAgency.put(agencyId, matchedTrips);
-		        }
-		    }
+	    	Map<String, Integer> busesInServiceByAgency = new HashMap<String, Integer>();
+	    	Map<String, Integer> totalTripsByAgency = new HashMap<String, Integer>();
+	    	Map<String, Integer> matchedStopsByAgency = new HashMap<String, Integer>();
+	    	Map<String, Integer> unmatchedStopsByAgency = new HashMap<String, Integer>();
+	    	Map<String, Integer> scheduleRealtimeDiffByAgency = new HashMap<String, Integer>();
+	    	// Get latest matched trip total by agency
+	    	for (String agencyId : agencyIds) {
+	    	  Integer matched = matchedByAgency.get(agencyId);
+	    	  if (matched == null) matched = 0;
+	    	  matched += getValidRealtimeTripIds(agencyId).size();
+	    	  totalMatchedTripCt += matched;
+	    	  matchedByAgency.put(agencyId, matched);
+	    	}
+	      // Get latest unmatched trip total by agency
+        for (String agencyId : agencyIds) {
+          Integer unmatched = unmatchedByAgency.get(agencyId);
+          if (unmatched == null) unmatched = 0;
+          unmatched += getUnmatchedTripIdCt(agencyId);
+          totalUnmatchedTripCt += unmatched;
+          //_log.info("agencyId: " + agencyId + ", unmatched: " + unmatched);
+          unmatchedByAgency.put(agencyId, unmatched);
+        }
+        _log.info("current unmatchedByAgency: " + unmatchedByAgency);
+        // Get latest buses in service percentage by agency
+        for (String agencyId : agencyIds) {
+          double scheduledTrips = getScheduledTrips(agencyId);
+          double validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
+          int percent = (int)(Math.round(scheduledTrips != 0 ? (validRealtimeTrips / scheduledTrips) * 100 : 999999));
+          busesInServiceByAgency.put(agencyId, percent);
+        }
+        // Get latest trip totals
+        for (String agencyId : agencyIds) {
+          //int totalRecords = getTotalRecordCount(agencyId);
+          //totalTripsByAgency.put(agencyId, totalRecords);
+        }       
+        // Get latest trip schedule-realtime diffs
+        for (String agencyId : agencyIds) {
+          int diff = 0;
+        }
+        // Get latest matched stops
+        for (String agencyId : agencyIds) {
+          int matched = 0;
+        }       
+        // Get latest unmatched stops
+        for (String agencyId : agencyIds) {
+          int unmatched = 0;
+        }
+        
         int idx = currentTripCt < ROLLING_AVERAGE_COUNT ? currentTripCt++ : earliestTripIdx++;
 		    updateTotals(matchedTripAveragesByAgency, matchedByAgency, idx);
 		    updateTotals(unmatchedTripAveragesByAgency, unmatchedByAgency, idx);
-		    updateLongTermMatchedTrips(matchedTripCt, idx);
-		    updateLongTermUnmatchedTrips(unmatchedTripCt, idx);
+		    updateTotals(busesInServicePctByAgency, busesInServiceByAgency, idx);
+		    updateTotals(tripTotalsByAgency, totalTripsByAgency, idx);
+		    
+		    updateLongTermMatchedTrips(totalMatchedTripCt, idx);
+		    updateLongTermUnmatchedTrips(totalUnmatchedTripCt, idx);
         earliestTripIdx %= ROLLING_AVERAGE_COUNT;
 		    _log.info("Averages updated: matched = " + matchedTripsAvg + ", unmatched = " + unmatchedTripsAvg );
 		  }
