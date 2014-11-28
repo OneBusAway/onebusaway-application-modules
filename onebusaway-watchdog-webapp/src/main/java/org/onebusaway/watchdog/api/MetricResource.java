@@ -17,6 +17,7 @@ package org.onebusaway.watchdog.api;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,8 +25,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jackson.map.ObjectMapper;
+
 import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
@@ -36,54 +41,17 @@ import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.Monito
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.watchdog.model.Metric;
 import org.onebusaway.watchdog.model.MetricConfiguration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class MetricResource {
 
-  protected static Logger _log = LoggerFactory.getLogger(MetricResource.class);
-  //private ScheduledExecutorService _scheduledExecutorService;
-  //private ScheduledFuture<?> _refreshTask;
-  //private LongTermAverages _longTermAverages;
-  //private int _refreshInterval = 30;    // Interval in seconds for updating long term averages
-
-  
+  protected static Logger _log = LoggerFactory.getLogger(MetricResource.class); 
   protected MetricConfiguration _configuration;
   protected ObjectMapper _mapper = new ObjectMapper();
   
-  /*
-  static protected int longTermMatchedTrips = 0;  // The current rolling average for matched trips
-  static protected int longTermUnmatchedTrips = 0;
-  static protected int ROLLING_AVERAGE_COUNT = 10;// This is the number of recent updates included in the average. 
-                                                  // From a System property so it can be configured for fine tuning.
-                                                  // Default = 10, assuming an update every 30 seconds, this would cover 5 minutes.
-                                                  // This will be the same for both Matched Trips and Unmatched Trips.
-  static protected int[] recentMatchedTrips = new int[ROLLING_AVERAGE_COUNT];  // Array containing the most recent trip counts
-  static protected int[] recentUnmatchedTrips = new int[ROLLING_AVERAGE_COUNT];
-  static protected int currentMatchedTripCt = 0;  // Number of trip counts in the array.  Only relevant when the process is
-                                                  // restarting and the number of trip counts is less than ROLLING_AVERAGE_COUNT.
-  static protected int currentUnmatchedTripCt = 0;
-  static protected int earliestMatchedTripIdx = 0;// This indicates the earliest trip in the array and the one that will be replaced
-                                                  // by a new trip count.
-  static protected int earliestUnmatchedTripIdx = 0;
-*/
-  //public void setRefreshInterval(int refreshInterval) {
-  //  _refreshInterval = refreshInterval;
-  //}
-
-  //@Autowired
-  //public void setLongTermAverages(
-	//	  LongTermAverages longTermAverages) {
-  //  _longTermAverages = longTermAverages;
-  //}
-
-  //@Autowired
-  //public void setScheduledExecutorService(
-  //    ScheduledExecutorService scheduledExecutorService) {
-  //  _scheduledExecutorService = scheduledExecutorService;
-  //}
-
   @Autowired
   public void setMetricConfiguration(MetricConfiguration mc) {
     _log.info("Setting MetricConfiguration: " + mc);
@@ -95,19 +63,10 @@ public abstract class MetricResource {
   }
   
   protected TransitDataService getTDS() {
-    //_log.info("Getting TDS, _configuration: " + _configuration);
     return _configuration.getTDS();
   }
-  
-  //protected int getLongTermMatchedTrips() {
-  //  return longTermMatchedTrips;
-  //}
-	  
-  //protected int getLongTermUnmatchedTrips() {
-  //  return longTermUnmatchedTrips;
-  //}
-		  
-  protected int getTotalRecordCount(String agencyId) throws Exception {
+  	  
+  protected int getTotalRecordCount(String agencyId) {
     int totalRecords = 0;
 
     for (MonitoredDataSource mds : getDataSources()) {
@@ -178,31 +137,105 @@ public abstract class MetricResource {
           unmatchedTripCt += result.getUnmatchedTripIds().size();
         }
       }
-    }
+    } 
     return unmatchedTripCt;
   }
+  
+  protected int getMatchedStopCt(String agencyId) {
+    List<String> matchedStopIds = new ArrayList<String>();
+    try {
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
 
-  /*
-  protected int getLongTermDeltaMatchedTrips() {
-	int totalMatchedTripIds = 0;
-	for (MonitoredDataSource mds : getDataSources()) {
-	  MonitoredResult result = mds.getMonitoredResult();
-	  totalMatchedTripIds += result.getMatchedTripIds().size();
-	}
-	_log.info("long term matched delta, current = " + totalMatchedTripIds + ", average = " + _longTermAverages.getMatchedTripsAvg());;
-	return totalMatchedTripIds - _longTermAverages.getMatchedTripsAvg();
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            matchedStopIds.addAll(result.getMatchedStopIds());
+          }
+        }
+      }
+      return matchedStopIds.size();
+    } catch (Exception e) {
+      _log.error("getMatchedStopCt broke", e);
+      return 0;
+    }
+  }
+ 
+  protected int getUnmatchedStopCt(String agencyId) {
+    int unmatchedStops = 0;
+    try {
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            unmatchedStops += result.getUnmatchedStopIds().size();
+          }
+        }
+      }
+      return unmatchedStops;
+    } catch (Exception e) {
+      _log.error("getUnmatchedStopCt broke", e);
+      return 0;
+    }
+  }
+ 
+  protected int getLocationTotal(String agencyId) {
+    int locations = 0;
+    try {
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            locations += result.getAllCoordinates().size();
+          }
+        }
+      }
+      return locations;
+    } catch (Exception e) {
+      _log.error("getLocationTotal broke", e);
+      return 0;
+    }
   }
   
-  protected int getLongTermDeltaUnmatchedTrips() {
-	int totalUnmatchedTripIds = 0;
-	for (MonitoredDataSource mds : getDataSources()) {
-	  MonitoredResult result = mds.getMonitoredResult();
-	  totalUnmatchedTripIds += result.getUnmatchedTripIds().size();
-	}
-	_log.info("long term unmatched delta, current = " + totalUnmatchedTripIds + ", average = " + _longTermAverages.getUnmatchedTripsAvg());;	  
-	return totalUnmatchedTripIds - _longTermAverages.getUnmatchedTripsAvg();
+  protected int getInvalidLocation(String agencyId) {
+    int locations = 0;
+    try {
+      if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
+        _log.error("no configured data sources");
+        return 0;
+      }
+      
+      for (MonitoredDataSource mds : getDataSources()) {
+        MonitoredResult result = mds.getMonitoredResult();
+        if (result == null) continue;
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            locations += findInvalidLatLon(agencyId, result.getAllCoordinates()).size();
+          }
+        }
+      }
+      return locations;
+    } catch (Exception e) {
+      _log.error("getInvalidLocation broke", e);
+      return 0;
+    }
   }
-  */
   
   protected String ok(String metricName, Object value) {
     Metric metric = new Metric();
@@ -246,32 +279,35 @@ public abstract class MetricResource {
 
   }
   
-  /*
-  protected void updateLongTermMatchedTrips(int currentMatchedTrips) {
-    int idx = currentMatchedTripCt < ROLLING_AVERAGE_COUNT ? currentMatchedTripCt++ : earliestMatchedTripIdx++;
-    recentMatchedTrips[idx] = currentMatchedTrips;
-    earliestMatchedTripIdx %= ROLLING_AVERAGE_COUNT;
-
-    int sum = 0;
-    for (int i : recentMatchedTrips) {
-      sum += i;
-    }  
-    longTermMatchedTrips = sum / currentMatchedTripCt;
-    return;
+  private Collection<CoordinatePoint> findInvalidLatLon(String agencyId,
+      Set<CoordinatePoint> coordinatePoints) {
+    List<CoordinatePoint> invalid = new ArrayList<CoordinatePoint>();
+    List<CoordinateBounds> bounds = getTDS().getAgencyIdsWithCoverageArea().get(agencyId);
+    
+    // ensure we have a valid bounding box for requested agency
+    if (bounds == null || bounds.isEmpty()) {
+      _log.warn("no bounds configured for agency " + agencyId);
+      for (CoordinatePoint pt : coordinatePoints) {
+        invalid.add(pt);
+      }
+      return invalid;
+    }
+    
+    
+    for (CoordinateBounds bound : bounds) {
+      boolean found = false;
+      for (CoordinatePoint pt : coordinatePoints) {
+        // check if point is inside bounds
+        if (bound.contains(pt)) {
+          found = true;
+        }
+        if (!found) {
+          invalid.add(pt);
+        }
+      }
+    }
+    _log.debug("agency " + agencyId + " had " + invalid.size() + " invalid out of " + coordinatePoints.size());
+    return invalid;
   }
-
-  protected void updateLongTermUnmatchedTrips(int currentUnmatchedTrips) {
-    int idx = currentUnmatchedTripCt < ROLLING_AVERAGE_COUNT ? currentUnmatchedTripCt++ : earliestUnmatchedTripIdx++;
-    recentUnmatchedTrips[idx] = currentUnmatchedTrips;
-    earliestUnmatchedTripIdx %= ROLLING_AVERAGE_COUNT;
-
-    int sum = 0;
-    for (int i : recentUnmatchedTrips) {
-      sum += i;
-    }  
-    longTermUnmatchedTrips = sum / currentUnmatchedTripCt;
-    return;
-  }
-  */
 
 }
