@@ -53,6 +53,11 @@ class RefreshServiceImpl implements RefreshService, BeanPostProcessor {
   @Override
   public Object postProcessBeforeInitialization(Object bean, String beanName)
       throws BeansException {
+    
+    // we additionally call postProcess as some proxied methods don't receive the 
+    // visitClass invocation below
+    visitClass(bean, bean.getClass());
+    
     return bean;
   }
 

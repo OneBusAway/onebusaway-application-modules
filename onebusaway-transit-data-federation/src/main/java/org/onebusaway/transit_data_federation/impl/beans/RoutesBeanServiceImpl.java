@@ -90,6 +90,7 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
 
   @Refreshable(dependsOn = { 
       RefreshableResources.ROUTE_COLLECTIONS_DATA, 
+      RefreshableResources.NARRATIVE_DATA,
       RefreshableResources.TRANSIT_GRAPH })
   @PostConstruct
   public void setup() {
