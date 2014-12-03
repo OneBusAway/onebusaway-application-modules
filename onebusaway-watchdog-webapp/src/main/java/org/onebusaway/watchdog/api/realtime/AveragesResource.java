@@ -55,7 +55,7 @@ public class AveragesResource extends LongTermAveragesResource {
       }
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
       int average = getAvgByAgency("matched-trips-average", agencyId);
-      int longTermDeltaPct =  average !=0 ? (int)(Math.round(((validRealtimeTrips - average)*100.0)/average)) : 999999;
+      int longTermDeltaPct =  average !=0 ? (int)(Math.round(((validRealtimeTrips - average)*100.0)/average)) : Integer.MAX_VALUE;
       _log.debug("current matched: " + validRealtimeTrips + ", average: " + average);
       return Response.ok(ok("long-term-delta-matched-trips-pct", longTermDeltaPct)).build();    
     } catch (Exception e) {
@@ -90,7 +90,7 @@ public class AveragesResource extends LongTermAveragesResource {
     try {
       int unmatchedTrips = getUnmatchedTripIdCt(agencyId);
       int average = getAvgByAgency("unmatched-trips-average", agencyId);
-      int longTermDeltaPct = average != 0 ? (int)(Math.round(((unmatchedTrips - average) * 100.0)/average)) : 999999;
+      int longTermDeltaPct = average != 0 ? (int)(Math.round(((unmatchedTrips - average) * 100.0)/average)) : Integer.MAX_VALUE;
       _log.debug("current unmatched: " + unmatchedTrips + ", average: " + average);
       return Response.ok(ok("unmatched-trips", longTermDeltaPct)).build();
     } catch (Exception e) {
@@ -110,7 +110,7 @@ public class AveragesResource extends LongTermAveragesResource {
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
       int percent = (int)Math.round((validRealtimeTrips * 100.0 / scheduledTrips));
       int average = getAvgByAgency("buses-in-service-pct", agencyId);
-      int longTermDeltaPct =  average !=0 ? (int)Math.round(((percent - average)*100.0)/average) : 999999;
+      int longTermDeltaPct =  average !=0 ? (int)Math.round(((percent - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("current pct in service: " + percent + ", average: " + average);
       return Response.ok(ok("long-term-delta-matched-trips-pct", longTermDeltaPct)).build();    
     } catch (Exception e) {
@@ -128,7 +128,7 @@ public class AveragesResource extends LongTermAveragesResource {
       } 
       int matched = getMatchedStopCt(agencyId);
       int average = getAvgByAgency("matched-stops", agencyId);
-      int percent = average !=0 ? (int)Math.round(((matched - average)*100.0)/average) : 999999;
+      int percent = average !=0 ? (int)Math.round(((matched - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("current matched stops: " + matched + ", average: " + average);
       return Response.ok(ok("matched-stops-pct", percent)).build();    
     } catch (Exception e) {
@@ -146,7 +146,7 @@ public class AveragesResource extends LongTermAveragesResource {
       } 
       int unmatched = getUnmatchedStopCt(agencyId);
       int average = getAvgByAgency("unmatched-stops", agencyId);
-      int percent = average !=0 ? (int)Math.round(((unmatched - average)*100.0)/average) : 999999;
+      int percent = average !=0 ? (int)Math.round(((unmatched - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("current unmatched stops: " + unmatched + ", average: " + average);
       return Response.ok(ok("unmatched-stops-pct", percent)).build();    
     } catch (Exception e) {
@@ -165,7 +165,7 @@ public class AveragesResource extends LongTermAveragesResource {
       } 
       int total = getTotalRecordCount(agencyId);
       int average = getAvgByAgency("trip-total", agencyId);
-      int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : 999999;
+      int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("trip-total: " + total + ", average: " + average);
       return Response.ok(ok("trip-total-pct", percent)).build();    
     } catch (Exception e) {
@@ -185,7 +185,7 @@ public class AveragesResource extends LongTermAveragesResource {
       int validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
       int diff = scheduledTrips - validRealtimeTrips;      
       int average = getAvgByAgency("trip-schedule-realtime-diff", agencyId);
-      int percent = average !=0 ? (int)Math.round(((diff - average)*100.0)/average) : 999999;
+      int percent = average !=0 ? (int)Math.round(((diff - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("trip-schedule-realtime-diff: " + diff + ", average: " + average);
       return Response.ok(ok("trip-schedule-realtime-diff-pct", percent)).build();    
     } catch (Exception e) {
@@ -203,7 +203,7 @@ public class AveragesResource extends LongTermAveragesResource {
       } 
       int total = getLocationTotal(agencyId);
       int average = getAvgByAgency("location-total", agencyId);
-      int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : 999999;
+      int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("location-total: " + total + ", average: " + average);
       return Response.ok(ok("location-total-pct", percent)).build();    
     } catch (Exception e) {
@@ -221,7 +221,7 @@ public class AveragesResource extends LongTermAveragesResource {
       } 
       int total = getInvalidLocation(agencyId);
       int average = getAvgByAgency("location-invalid-lat-lon", agencyId);
-      int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : 999999;
+      int percent = average !=0 ? (int)Math.round(((total - average)*100.0)/average) : Integer.MAX_VALUE;
       _log.debug("location-invalid-lat-lon: " + total + ", average: " + average);
       return Response.ok(ok("location-invalid-lat-lon-pct", percent)).build();    
     } catch (Exception e) {

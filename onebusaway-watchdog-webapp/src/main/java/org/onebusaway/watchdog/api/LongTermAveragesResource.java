@@ -211,7 +211,7 @@ public class LongTermAveragesResource extends MetricResource {
         for (String agencyId : agencyIds) {
           double scheduledTrips = getScheduledTrips(agencyId);
           double validRealtimeTrips = getValidRealtimeTripIds(agencyId).size();
-          int percent = (int)(Math.round(scheduledTrips != 0 ? (validRealtimeTrips / scheduledTrips) * 100 : 999999));
+          int percent = (int)(Math.round(scheduledTrips != 0 ? (validRealtimeTrips / scheduledTrips) * 100 : Integer.MAX_VALUE));
           busesInServiceByAgency.put(agencyId, percent);
         }
         // Get latest matched stops
