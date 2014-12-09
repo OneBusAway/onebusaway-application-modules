@@ -45,40 +45,50 @@
 <s:set var="uri">${pageContext.request.requestURI}</s:set>
 <s:set var="contextPath">${pageContext.request.contextPath}</s:set>
 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/index') or #uri == #contextPath + '/'">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/">Home</a>
-</jsp:element>
+<s:if test="!properties.getProperty('hide_home_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/index') or #uri == #contextPath + '/'">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/">Home</a>
+  </jsp:element>
+</s:if>
 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/p/Tools')">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/p/Tools.action">Tools</a>
-</jsp:element>
+<s:if test="!properties.getProperty('hide_tools_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/Tools')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/Tools.action">Tools</a>
+  </jsp:element>
+</s:if>
 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/p/Research')">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/p/Research.action">Research</a>
-</jsp:element>
+<s:if test="!properties.getProperty('hide_research_tab')">
+    <jsp:element name="li">
+      <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/Research')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/Research.action">Research</a>
+  </jsp:element>
+</s:if>
 
+<s:if test="!properties.getProperty('hide_contact_us_tab')">
 <jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/p/ContactUs')">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/p/ContactUs.action">Contact Us</a>
-</jsp:element>
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/p/ContactUs')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/p/ContactUs.action">Contact Us</a>
+  </jsp:element>
+</s:if>
 
-<jsp:element name="li">
-  <jsp:attribute name="class">
-    <s:if test="#uri.startsWith(#contextPath + '/user')">current</s:if>
-  </jsp:attribute>
-  <a href="${pageContext.request.contextPath}/user/index.action">Settings</a>
-</jsp:element>
+<s:if test="!properties.getProperty('hide_settings_tab')">
+  <jsp:element name="li">
+    <jsp:attribute name="class">
+      <s:if test="#uri.startsWith(#contextPath + '/user')">current</s:if>
+    </jsp:attribute>
+    <a href="${pageContext.request.contextPath}/user/index.action">Settings</a>
+  </jsp:element>
+</s:if>
 
 </ul>
 
@@ -87,7 +97,7 @@
 
 <decorator:body />
 <div id="version" style="font-size:14px;color:darkgray;position:absolute;right:2em">
-	<s:property value="gitProperties.getProperty('git.commit.id.describe')" />
+	<s:property value="properties.getProperty('git.commit.id.describe')" />
 </div>
 </div>
 
