@@ -132,6 +132,8 @@ public class DistanceAlongShapeLibrary {
     List<PointAndIndex> bestAssignment = computeBestAssignment(shapePoints,
         stopTimes, possibleAssignments, projection, projectedShapePoints);
 
+    double last = Double.NEGATIVE_INFINITY;
+    
     for (int i = 0; i < stopTimePoints.length; i++) {
       PointAndIndex pindex = bestAssignment.get(i);
       if (pindex.distanceAlongShape > maxDistanceTraveled) {
@@ -142,6 +144,11 @@ public class DistanceAlongShapeLibrary {
         double d = stopPoint.getDistance(point);
         pindex = new PointAndIndex(point, index, d, maxDistanceTraveled);
       }
+      
+      if (last > pindex.distanceAlongShape) {
+        constructError(shapePoints, stopTimes, possibleAssignments, projection);
+      }
+      last = pindex.distanceAlongShape;
       stopTimePoints[i] = pindex;
     }
     return stopTimePoints;
