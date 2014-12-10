@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.onebusaway</groupId>
             <artifactId>onebusaway-everylastlogin</artifactId>
-            <version>0.0.3-st-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
 
         <!-- Spring Security -->
