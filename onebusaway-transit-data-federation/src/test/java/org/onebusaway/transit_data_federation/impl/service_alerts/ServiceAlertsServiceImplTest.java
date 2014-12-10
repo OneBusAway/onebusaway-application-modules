@@ -36,8 +36,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean.AffectsBean;
@@ -54,20 +56,41 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 
-public class ServiceAlertsServiceImplTest {
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"classpath:service-alerts-data-sources.xml", 
+    "classpath:org/onebusaway/transit_data_federation/application-context-services.xml"})
+@TransactionConfiguration(transactionManager="transactionManager")
+@Transactional
+public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4SpringContextTests {
   private ServiceAlertsServiceImpl _service;
 
   private File _serviceAlertsPath;
+  private HibernateTemplate _template;
+
+  private SessionFactory _sessionFactory;
+  
+  @Autowired
+  public void setSessionFactory(SessionFactory sessionFactory) {
+    _sessionFactory = sessionFactory; 
+  }
 
   @Before
   public void setup() throws IOException {
     _service = new ServiceAlertsServiceImpl();
+    _service.setSessionFactory(_sessionFactory);
 
     _serviceAlertsPath = File.createTempFile("Test-", "-"
         + ServiceAlertsServiceImpl.class.getName() + ".pb2");
     _service.setServiceAlertsPath(_serviceAlertsPath);
+   assertTrue("we need a template to continue", _service.getHibernateTemplate() != null);
   }
 
   @Test
