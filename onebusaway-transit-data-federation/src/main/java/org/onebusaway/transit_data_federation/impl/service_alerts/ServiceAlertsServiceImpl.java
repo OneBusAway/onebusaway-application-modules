@@ -161,7 +161,8 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 		ServiceAlert serviceAlert = builder.build();
 		updateReferences(serviceAlert);
-		//saveServiceAlerts();
+		// for backwards compatability, we update the serialized bundle file
+		saveServiceAlerts();
 		saveDBServiceAlerts(serviceAlert);
 		return serviceAlert;
 	}
