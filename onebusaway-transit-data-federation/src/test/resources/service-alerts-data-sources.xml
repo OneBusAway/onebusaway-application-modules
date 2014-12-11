@@ -28,7 +28,8 @@
     </bean>
     
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-	    <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-st-bundle" />
+<!-- 	    <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-st-bundle" /> -->
+	    <property name="bundleStoreRoot" value="/tmp" />
       <property name="standaloneMode" value="true" />
     </bean>
 
