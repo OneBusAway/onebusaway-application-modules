@@ -214,7 +214,7 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 					int tries = _fileDownloadRetries;
 
 					while(tries > 0) {
-						URL fileDownloadUrl = _apiLibrary.buildUrl("bundle","deploy", bundle.getId(), "file", file.getFilename(), "get");
+						URL fileDownloadUrl = _apiLibrary.buildUrl("bundle","deploy", bundle.getName(), "file", file.getFilename(), "get");
 
 						try {
 							downloadUrlToLocalPath(fileDownloadUrl, fileInBundlePath, file.getMd5());
