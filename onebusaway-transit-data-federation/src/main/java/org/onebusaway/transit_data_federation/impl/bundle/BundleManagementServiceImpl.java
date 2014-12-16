@@ -176,7 +176,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
     for (BundleItem bundle : _allBundles) {
       if (bundle.isApplicableToDate(getServiceDate())) {
-        _log.info("Bundle " + bundle.getId()
+        _log.info("Bundle " + bundle.getName() + "(" + bundle.getId() + ")"
             + " is active for today; adding to list of active bundles.");
 
         _applicableBundles.put(bundle.getId(), bundle);
@@ -201,9 +201,9 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
     BundleItem bestBundle = bestBundleCandidates.get(bestBundleCandidates
         .size() - 1);
-    _log.info("Best bundle is " + bestBundle.getId());
+    _log.info("Best bundle is " + bestBundle.getName() + " (" + bestBundle.getId() + ")");
 
-    changeBundle(bestBundle.getId());
+    changeBundle(bestBundle.getId(), bestBundle.getName());
   }
 
   /********************
@@ -327,18 +327,23 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   @Override
   public void changeBundle(String bundleId) throws Exception {
+    changeBundle(bundleId, bundleId);
+  }
+  
+  public void changeBundle(String bundleId, String bundleName) throws Exception {
     if (bundleId == null || !_applicableBundles.containsKey(bundleId)) {
-      throw new Exception("Bundle " + bundleId
+      throw new Exception("Bundle " + bundleName
           + " is not valid or does not exist.");
     }
 
     if (bundleId.equals(_currentBundleId)) {
-      _log.info("Received command to change to " + bundleId
+      _log.info("Received command to change to " + bundleName
+          + " (" + bundleId + ")"
           + "; bundle is already active.");
       return;
     }
 
-    _log.info("Switching to bundle " + bundleId + "...");
+    _log.info("Switching to bundle " + bundleName + " (" + bundleId + ")...");
     _bundleIsReady = false;
 
     // wait until all inference processing threads have exited...
@@ -376,7 +381,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     if(_bundleStore.isLegacyBundle()){
       path = new File(_bundleRootPath);
     }else{
-      path = new File(_bundleRootPath, bundleId);
+      path = new File(_bundleRootPath, bundleName);
     }
     _bundle.setPath(path);
 
@@ -401,12 +406,12 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       _refreshService.refresh(RefreshableResources.NARRATIVE_DATA);
 
     } catch (Exception e) {
-      _log.error("Bundle " + bundleId
+      _log.error("Bundle " + bundleName + "(" + bundleId + ")"
           + " failed to load. Disabling for this session...");
       _applicableBundles.remove(bundleId);
       reevaluateBundleAssignment();
 
-      throw new Exception("Bundle " + bundleId
+      throw new Exception("Bundle " + bundleName + "(" +  bundleId + ")"
           + " loading exception. Root exception follows.", e);
     }
 
