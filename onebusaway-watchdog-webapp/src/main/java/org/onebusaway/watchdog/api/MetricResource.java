@@ -21,14 +21,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.map.ObjectMapper;
-
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.transit_data.model.ListBean;
@@ -41,7 +35,6 @@ import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.Monito
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.watchdog.model.Metric;
 import org.onebusaway.watchdog.model.MetricConfiguration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -310,4 +303,4 @@ public abstract class MetricResource {
     return invalid;
   }
 
-}
+  }

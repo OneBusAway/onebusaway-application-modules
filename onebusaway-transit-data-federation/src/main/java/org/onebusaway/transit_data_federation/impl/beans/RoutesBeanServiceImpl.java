@@ -96,6 +96,11 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   public void setup() {
     _stopTreesByRouteId.clear();
     
+    if (_graphDao.getAllStops().isEmpty()) {
+      _log.info("setup called with empty graph, exiting");
+      return;
+    }
+    
     for (StopEntry stop : _graphDao.getAllStops()) {
       Set<AgencyAndId> routeIds = _routeService.getRouteCollectionIdsForStop(stop.getId());
       for (AgencyAndId routeId : routeIds) {

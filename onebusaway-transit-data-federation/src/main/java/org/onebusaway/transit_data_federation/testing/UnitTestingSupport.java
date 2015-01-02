@@ -209,8 +209,8 @@ public class UnitTestingSupport {
   }
 
   public static FrequencyEntry frequency(int startTime, int endTime,
-      int headwaySecs) {
-    return new FrequencyEntryImpl(startTime, endTime, headwaySecs);
+      int headwaySecs, int exactTimes) {
+    return new FrequencyEntryImpl(startTime, endTime, headwaySecs, exactTimes);
   }
 
   public static BlockConfigurationEntry linkBlockTrips(BlockEntryImpl block,

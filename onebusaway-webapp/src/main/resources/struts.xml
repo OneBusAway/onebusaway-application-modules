@@ -28,5 +28,9 @@
   <constant name="struts.convention.action.checkImplementsAction" value="false" />
   <constant name="struts.action.excludePattern" value="/services/.*,/api/.*" />
   <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+<<<<<<< HEAD
+=======
+
+>>>>>>> refs/remotes/origin/frequency
   <include file="struts-onebusaway-webapp.xml"/>
 </struts>

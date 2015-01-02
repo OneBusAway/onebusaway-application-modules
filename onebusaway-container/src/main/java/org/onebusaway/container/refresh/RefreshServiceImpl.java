@@ -53,7 +53,6 @@ class RefreshServiceImpl implements RefreshService, BeanPostProcessor {
   @Override
   public Object postProcessBeforeInitialization(Object bean, String beanName)
       throws BeansException {
-    
     // we additionally call postProcess as some proxied methods don't receive the 
     // visitClass invocation below
     visitClass(bean, bean.getClass());
@@ -102,10 +101,26 @@ class RefreshServiceImpl implements RefreshService, BeanPostProcessor {
             _refreshMethodsByName.put(resourceName, pairs);
           }
 
-          pairs.add(new ObjectMethodPair(target, method));
+					// since we are called twice, prevent duplicates
+          if (!contains(pairs, target, method)) {
+            pairs.add(new ObjectMethodPair(target, method));
+          }
         }
       }
     }
+
+  }
+
+  private boolean contains(List<ObjectMethodPair> pairs, Object target,
+      Method method) {
+
+    for (ObjectMethodPair omp : pairs) {
+      if (omp.getObject().equals(target)
+          && omp.getMethod().equals(method)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private void invokePair(ObjectMethodPair pair) {

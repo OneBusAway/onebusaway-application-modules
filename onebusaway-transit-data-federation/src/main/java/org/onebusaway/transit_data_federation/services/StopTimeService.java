@@ -59,7 +59,7 @@ public interface StopTimeService {
    */
   public List<StopTimeInstance> getStopTimeInstancesInTimeRange(
       StopEntry stopEntry, Date from, Date to,
-      EFrequencyStopTimeBehavior frequencyBehavior);
+      EFrequencyStopTimeBehavior frequenceBehavior);
 
   public Range getDepartureForStopAndServiceDate(AgencyAndId stopId,
       ServiceDate serviceDate);
