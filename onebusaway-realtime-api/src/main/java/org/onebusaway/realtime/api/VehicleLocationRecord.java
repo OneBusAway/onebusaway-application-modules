@@ -15,18 +15,18 @@
  */
 package org.onebusaway.realtime.api;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.onebusaway.gtfs.model.AgencyAndId;
 
 /**
  * Vehicle location records are the key data structure for passing real-time
  * location data about a transit vehicle from an external data source into
  * OneBusAway. It tries to capture a variety of fields that might be present in
  * an AVL stream:
- *
+ * 
  * <ul>
  * <li>block id</li>
  * <li>trip id</li>
@@ -35,10 +35,10 @@ import java.util.List;
  * <li>schedule adherence</li>
  * <li>arrival data relative to a timepoint</li>
  * </ul>
- *
+ * 
  * Not all of these fields will necessarily be set by the AVL source, so we may
  * have to be flexible in how we process the data.
- *
+ * 
  * @author bdferris
  * @see VehicleLocationListener
  */
@@ -49,8 +49,6 @@ public class VehicleLocationRecord implements Serializable {
   private long serviceDate;
 
   private AgencyAndId blockId;
-
-  private int blockStartTime;
 
   private AgencyAndId tripId;
 
@@ -125,14 +123,6 @@ public class VehicleLocationRecord implements Serializable {
     this.blockId = blockId;
   }
 
-  public int getBlockStartTime() {
-    return blockStartTime;
-  }
-
-  public void setBlockStartTime(int blockStartTime) {
-    this.blockStartTime = blockStartTime;
-  }
-
   public AgencyAndId getTripId() {
     return tripId;
   }
@@ -150,7 +140,7 @@ public class VehicleLocationRecord implements Serializable {
   }
 
   /**
-   *
+   * 
    * @return time when the vehicle location record was made, in unix-time (ms)
    */
   public long getTimeOfRecord() {
@@ -158,7 +148,7 @@ public class VehicleLocationRecord implements Serializable {
   }
 
   /**
-   *
+   * 
    * @param timeOfRecord time when the vehicle location record was made, in
    *          unix-time (ms)
    */
@@ -167,7 +157,7 @@ public class VehicleLocationRecord implements Serializable {
   }
 
   /**
-   *
+   * 
    * @return time when the last vehicle location update made, in unix-time (ms)
    */
   public long getTimeOfLocationUpdate() {
@@ -186,7 +176,7 @@ public class VehicleLocationRecord implements Serializable {
   }
 
   /**
-   *
+   * 
    * @return schedule deviation, in seconds, (+deviation is late, -deviation is
    *         early)
    */
@@ -195,7 +185,7 @@ public class VehicleLocationRecord implements Serializable {
   }
 
   /**
-   *
+   * 
    * @param scheduleDeviation - in seconds (+deviation is late, -deviation is
    *          early)
    */
@@ -208,7 +198,7 @@ public class VehicleLocationRecord implements Serializable {
   }
 
   /**
-   *
+   * 
    * @return the distance traveled along the block in meters, or NaN if not set
    */
   public double getDistanceAlongBlock() {
@@ -216,7 +206,7 @@ public class VehicleLocationRecord implements Serializable {
   }
 
   /**
-   *
+   * 
    * @param distanceAlongBlock distance traveled along the block in meters, or
    *          NaN if not set
    */
@@ -313,5 +303,4 @@ public class VehicleLocationRecord implements Serializable {
       b.append(" status=").append(status);
     return b.toString();
   }
-
 }

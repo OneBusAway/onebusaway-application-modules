@@ -15,40 +15,39 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import org.onebusaway.gtfs.model.calendar.ServiceDate;
-import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
+import org.onebusaway.transit_data_federation.services.transit_graph.BlockEntry;
 
 class BlockDescriptor {
 
-  private BlockInstance blockInstance;
+  private BlockEntry blockEntry;
 
-  private ServiceDate startDate;
+  private String startDate;
 
-  private Integer startTime;
+  private String startTime;
 
   private String vehicleId;
 
-  public BlockInstance getBlockInstance() {
-    return blockInstance;
+  public BlockEntry getBlockEntry() {
+    return blockEntry;
   }
 
-  public void setBlockInstance(BlockInstance blockInstance) {
-    this.blockInstance = blockInstance;
+  public void setBlockEntry(BlockEntry blockEntry) {
+    this.blockEntry = blockEntry;
   }
 
-  public ServiceDate getStartDate() {
+  public String getStartDate() {
     return startDate;
   }
 
-  public void setStartDate(ServiceDate startDate) {
+  public void setStartDate(String startDate) {
     this.startDate = startDate;
   }
 
-  public Integer getStartTime() {
+  public String getStartTime() {
     return startTime;
   }
 
-  public void setStartTime(Integer startTime) {
+  public void setStartTime(String startTime) {
     this.startTime = startTime;
   }
 
@@ -65,7 +64,7 @@ class BlockDescriptor {
     final int prime = 31;
     int result = 1;
     result = prime * result
-        + ((blockInstance == null) ? 0 : blockInstance.hashCode());
+        + ((blockEntry == null) ? 0 : blockEntry.hashCode());
     result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
     result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
     result = prime * result + ((vehicleId == null) ? 0 : vehicleId.hashCode());
@@ -81,10 +80,10 @@ class BlockDescriptor {
     if (getClass() != obj.getClass())
       return false;
     BlockDescriptor other = (BlockDescriptor) obj;
-    if (blockInstance == null) {
-      if (other.blockInstance != null)
+    if (blockEntry == null) {
+      if (other.blockEntry != null)
         return false;
-    } else if (!blockInstance.equals(other.blockInstance))
+    } else if (!blockEntry.equals(other.blockEntry))
       return false;
     if (startDate == null) {
       if (other.startDate != null)
@@ -102,10 +101,5 @@ class BlockDescriptor {
     } else if (!vehicleId.equals(other.vehicleId))
       return false;
     return true;
-  }
-
-  @Override
-  public String toString() {
-    return blockInstance.toString();
   }
 }

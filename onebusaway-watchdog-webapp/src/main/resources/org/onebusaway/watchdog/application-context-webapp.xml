@@ -64,13 +64,10 @@
 		<property name="metricConfiguration" ref="metricConfiguration" />
 	</bean>
 	
-<<<<<<< HEAD
   <bean id="realtimeAveragesResource" class="org.onebusaway.watchdog.api.realtime.AveragesResource">
     <property name="metricConfiguration" ref="metricConfiguration" />
   </bean>
   
-=======
->>>>>>> refs/remotes/origin/frequency
 	<bean id="scheduleAgencyResource" class="org.onebusaway.watchdog.api.schedule.AgencyResource">
 		<property name="metricConfiguration" ref="metricConfiguration" />
 	</bean>

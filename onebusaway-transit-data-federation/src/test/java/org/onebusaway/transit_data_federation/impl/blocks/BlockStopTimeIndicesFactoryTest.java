@@ -253,8 +253,8 @@ public class BlockStopTimeIndicesFactoryTest {
     stopTime(0, stopA, tripA, 0, 10, 0);
     stopTime(0, stopB, tripA, 20, 20, 0);
 
-    FrequencyEntry freqA1 = frequency(time(6, 00), time(9, 00), 10, 0);
-    FrequencyEntry freqA2 = frequency(time(15, 00), time(18, 00), 10, 0);
+    FrequencyEntry freqA1 = frequency(time(6, 00), time(9, 00), 10);
+    FrequencyEntry freqA2 = frequency(time(15, 00), time(18, 00), 10);
     List<FrequencyEntry> freqsA = Arrays.asList(freqA1, freqA2);
 
     BlockConfigurationEntry bcA = linkBlockTrips(blockA, freqsA, tripA);
@@ -270,8 +270,8 @@ public class BlockStopTimeIndicesFactoryTest {
     stopTime(0, stopA, tripB, 20, 30, 0);
     stopTime(0, stopB, tripB, 50, 50, 0);
 
-    FrequencyEntry freqB1 = frequency(time(9, 00), time(15, 00), 20, 0);
-    FrequencyEntry freqB2 = frequency(time(18, 00), time(21, 00), 20, 0);
+    FrequencyEntry freqB1 = frequency(time(9, 00), time(15, 00), 20);
+    FrequencyEntry freqB2 = frequency(time(18, 00), time(21, 00), 20);
     List<FrequencyEntry> freqsB = Arrays.asList(freqB1, freqB2);
 
     BlockConfigurationEntry bcB = linkBlockTrips(blockB, freqsB, tripB);

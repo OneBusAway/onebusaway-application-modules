@@ -167,5 +167,36 @@ public class TripResource extends MetricResource {
     }
   }
   
+  /*
+  @Path("/{agencyId}/long-term-delta/matched-trips")
+  @GET
+  public Response getLongTermDeltaMatched() {
+    int totalMatchedTripIds = 0;
+    for (MonitoredDataSource mds : getDataSources()) {
+      MonitoredResult result = mds.getMonitoredResult();
+      totalMatchedTripIds += result.getMatchedTripIds().size();
+    }
+    _log.info("long term matched delta, current = " + totalMatchedTripIds + ", average = " + _longTermAverages.getMatchedTripsAvg());;
+    int longTermDelta =  totalMatchedTripIds - _longTermAverages.getAvgByAgency(matched-trips-average, agencyId);
+
+    return Response.ok(ok("long-term-delta-matched-trips", longTermDelta)).build();    
+  }
+  */
+
+  /*
+  @Path("/long-term-delta/matched-trips")
+  @GET
+  public Response getLongTermDeltaMatched() {
+    int longTermDelta = getLongTermDeltaMatchedTrips();
+    return Response.ok(ok("long-term-delta-matched-trips", longTermDelta)).build();    
+  }
+
+  @Path("/long-term-delta/unmatched-trips")
+  @GET
+  public Response getLongTermDeltaUnmatched() {
+    int longTermDelta = getLongTermDeltaUnmatchedTrips();
+    return Response.ok(ok("long-term-delta-unmatched-trips", longTermDelta)).build();    
+  }
+  */
 
 }

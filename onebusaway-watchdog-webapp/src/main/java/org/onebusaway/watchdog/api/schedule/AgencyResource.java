@@ -42,6 +42,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.watchdog.api.MetricResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+
 @Path("/metric/schedule/agency")
 public class AgencyResource extends MetricResource {
 	static Map<String, Date> agencyEndDateMap = new HashMap<String, Date>();
@@ -63,6 +64,35 @@ public class AgencyResource extends MetricResource {
   public void start() {
     _log.info("Need to clear agencyEndDateMap");
     agencyEndDateMap.clear();
+  }
+  
+  @Path("/total")
+  @GET
+  public Response getAgencyCount() {
+    try {
+      int count = getTDS().getAgenciesWithCoverage().size();
+      return Response.ok(ok("agency-count", count)).build();
+    } catch (Exception e) {
+      _log.error("getAgencyCount broke", e);
+      return Response.ok(error("agency-count", e)).build();
+    }
+  }
+  
+  @Path("/id-list")
+  @GET
+  public Response getAgencyIdList() {
+    try {
+      
+      List<AgencyWithCoverageBean> agencyBeans = getTDS().getAgenciesWithCoverage();
+      List<String> agencyIds = new ArrayList<String>();
+      for (AgencyWithCoverageBean agency : agencyBeans) {
+        agencyIds.add(agency.getAgency().getId());
+      }
+      return Response.ok(ok("agency-id-list", agencyIds)).build();
+    } catch (Exception e) {
+      _log.error("getAgencyIdList broke", e);
+      return Response.ok(error("agency-id-list", e)).build();
+    }
   }
   
   @Path("/{agencyId}/expiry-date-delta")
@@ -105,35 +135,4 @@ public class AgencyResource extends MetricResource {
 	      return Response.ok(error("agency-expiry-date-delta", e)).build();	  
 	  } 
   }
-
-
-  @Path("/total")
-  @GET
-  public Response getAgencyCount() {
-    try {
-      int count = getTDS().getAgenciesWithCoverage().size();
-      return Response.ok(ok("agency-count", count)).build();
-    } catch (Exception e) {
-      _log.error("getAgencyCount broke", e);
-      return Response.ok(error("agency-count", e)).build();
-    }
-  }
-  
-  @Path("/id-list")
-  @GET
-  public Response getAgencyIdList() {
-    try {
-      
-      List<AgencyWithCoverageBean> agencyBeans = getTDS().getAgenciesWithCoverage();
-      List<String> agencyIds = new ArrayList<String>();
-      for (AgencyWithCoverageBean agency : agencyBeans) {
-        agencyIds.add(agency.getAgency().getId());
-      }
-      return Response.ok(ok("agency-id-list", agencyIds)).build();
-    } catch (Exception e) {
-      _log.error("getAgencyIdList broke", e);
-      return Response.ok(error("agency-id-list", e)).build();
-    }
-  }
-
 }

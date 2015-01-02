@@ -462,7 +462,7 @@ public class TransferPatternsTask implements Runnable {
     long tTo = (long) interval.getMax();
 
     return _stopTimeService.getStopTimeInstancesInTimeRange(stop, new Date(
-        tFrom), new Date(tTo), EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
+        tFrom), new Date(tTo), EFrequencyStopTimeBehavior.INCLUDE_INTERPOLATED);
   }
 
   private void processTree(MultiShortestPathTree spt, StopEntry originStop,

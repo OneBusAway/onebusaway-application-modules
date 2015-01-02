@@ -27,8 +27,6 @@ public final class FrequencyBean implements Serializable {
 
   private int headway;
 
-  private int exactTimes;
-
   public long getStartTime() {
     return startTime;
   }
@@ -51,13 +49,5 @@ public final class FrequencyBean implements Serializable {
 
   public void setHeadway(int headway) {
     this.headway = headway;
-  }
-
-  public int getExactTimes() {
-    return exactTimes;
-  }
-
-  public void setExactTimes(int exact_times) {
-    this.exactTimes = exact_times;
   }
 }

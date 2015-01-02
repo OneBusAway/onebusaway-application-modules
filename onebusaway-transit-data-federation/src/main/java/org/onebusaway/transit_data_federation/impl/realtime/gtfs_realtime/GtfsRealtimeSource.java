@@ -223,7 +223,6 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
 
   public void refresh() throws IOException {
-	_log.info("refreshing " + _tripUpdatesUrl);
     FeedMessage tripUpdates = readOrReturnDefault(_tripUpdatesUrl);
     FeedMessage vehiclePositions = readOrReturnDefault(_vehiclePositionsUrl);
     FeedMessage alerts = readOrReturnDefault(_alertsUrl);

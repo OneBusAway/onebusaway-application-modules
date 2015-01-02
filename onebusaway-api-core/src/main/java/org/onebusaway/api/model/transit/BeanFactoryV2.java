@@ -15,7 +15,6 @@
  */
 package org.onebusaway.api.model.transit;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -254,7 +253,7 @@ public class BeanFactoryV2 {
   }
 
   /****
-   *
+   * 
    *****/
 
   public ListWithReferencesBean<String> getEntityIdsResponse(
@@ -268,7 +267,7 @@ public class BeanFactoryV2 {
   }
 
   /****
-   *
+   * 
    ***/
 
   public TimeIntervalV2 getTimeInterval(TimeIntervalBean interval) {
@@ -685,7 +684,7 @@ public class BeanFactoryV2 {
     /*
      * StopCalendarDaysBean days = stopSchedule.getCalendarDays();
      * bean.setTimeZone(days.getTimeZone());
-     *
+     * 
      * List<StopCalendarDayV2Bean> dayBeans = new
      * ArrayList<StopCalendarDayV2Bean>(); for (StopCalendarDayBean day :
      * days.getDays()) { StopCalendarDayV2Bean dayBean =
@@ -905,7 +904,6 @@ public class BeanFactoryV2 {
     bean.setStartTime(frequency.getStartTime());
     bean.setEndTime(frequency.getEndTime());
     bean.setHeadway(frequency.getHeadway());
-    bean.setExactTimes(frequency.getExactTimes());
     return bean;
   }
 
@@ -914,7 +912,6 @@ public class BeanFactoryV2 {
     bean.setStartTime(frequency.getStartTime());
     bean.setEndTime(frequency.getEndTime());
     bean.setHeadway(frequency.getHeadway());
-    bean.setExactTimes(frequency.getExactTimes());
     return bean;
   }
 

@@ -17,6 +17,22 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
@@ -48,7 +64,6 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,27 +71,11 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 /**
  * Implementation for {@link BlockLocationService}. Keeps a recent cache of
  * {@link BlockLocationRecord} records for current queries and can access
  * database persisted records for queries in the past.
- *
+ * 
  * @author bdferris
  * @see BlockLocationService
  */
@@ -200,7 +199,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   /**
    * Controls how far back in time we include records in the
    * {@link BlockLocationRecordCollection} for each active trip.
-   *
+   * 
    * @param windowSize in seconds
    */
   @ConfigurationParameter
@@ -211,7 +210,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   /**
    * Should we persist {@link BlockLocationRecord} records to an underlying
    * datastore. Useful if you wish to query trip status for historic analysis.
-   *
+   * 
    * @param persistTripTimePredictions
    */
   @ConfigurationParameter
@@ -224,7 +223,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
    * based on the last know location of the bus and the schedule deviation of
    * the bus at the time. If false, we will use the last known location of the
    * bus as the current location.
-   *
+   * 
    * @param locationInterpolation
    */
   @ConfigurationParameter
@@ -234,7 +233,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
   /**
    * @param distanceAlongBlockLocationInterpolation
-   *
+   * 
    * @deprecated in favor of the more general
    *             {@link #setLocationInterpolation(boolean)} configuration
    *             method.
@@ -464,7 +463,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   /**
    * We add the {@link BlockPositionRecord} to the local cache and persist it to
    * a back-end data-store if necessary
-   *
+   * 
    * @param scheduledBlockLocation TODO
    * @param samples
    */
@@ -500,7 +499,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
   }
 
   /**
-   *
+   * 
    * @param blockInstance
    * @param scheduledBlockLocation TODO
    * @param targetTime
@@ -534,7 +533,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
       }
 
-      location.setBlockStartTime(record.getBlockStartTime());
       location.setPredicted(true);
       location.setLastUpdateTime(record.getTimeOfRecord());
       location.setLastLocationUpdateTime(record.getTimeOfLocationUpdate());
@@ -599,10 +597,10 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
     /**
      * Will be null in the following cases:
-     *
+     * 
      * 1) When the effective schedule time is beyond the last scheduled stop
      * time for the block.
-     *
+     * 
      * 2) When the effective distance along block is outside the range of the
      * block's shape.
      */
@@ -1018,7 +1016,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       _vehicleId = vehicleId;
     }
 
-    @Override
     public List<VehicleLocationCacheElements> getRecordsFromCache() {
       VehicleLocationCacheElements elementsForVehicleId = _cache.getRecordForVehicleId(_vehicleId);
       if (elementsForVehicleId == null)
@@ -1026,7 +1023,6 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       return Arrays.asList(elementsForVehicleId);
     }
 
-    @Override
     public List<BlockLocationRecord> getRecordsFromDao(long fromTime,
         long toTime) {
       return _blockLocationRecordDao.getBlockLocationRecordsForVehicleAndTimeRange(
