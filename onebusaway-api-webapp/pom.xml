@@ -24,15 +24,26 @@
     </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-transit-data-federation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-presentation</artifactId>
       <version>${project.version}</version>
     </dependency>
-
+    
     <!-- This is the original SIRI API implementation that we hope to eventually move away from -->
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-siri-api</artifactId>
       <version>1.0.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-siri-core</artifactId>
+      <version>${onebusaway-siri-version}</version>
     </dependency>
 
     <!-- For GTFS-realtime support -->

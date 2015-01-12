@@ -36,4 +36,5 @@
   -->
   <constant name="struts.action.excludePattern" value="/"/>
   <include file="struts-onebusaway-api-webapp.xml"/>
+    
 </struts>
