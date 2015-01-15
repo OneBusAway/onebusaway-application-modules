@@ -26,7 +26,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEn
 
 /**
  * Vehicle position information for a particular block.
- * 
+ *
  * @author bdferris
  */
 public class BlockLocation {
@@ -41,6 +41,8 @@ public class BlockLocation {
    ****/
 
   private BlockInstance blockInstance;
+
+  private int blockStartTime;
 
   private BlockTripEntry activeTrip;
 
@@ -122,6 +124,14 @@ public class BlockLocation {
     this.blockInstance = instance;
   }
 
+  public int getBlockStartTime() {
+    return blockStartTime;
+  }
+
+  public void setBlockStartTime(int blockStartTime) {
+    this.blockStartTime = blockStartTime;
+  }
+
   /**
    * @return the active trip for the block
    */
@@ -134,7 +144,7 @@ public class BlockLocation {
   }
 
   /**
-   * 
+   *
    * @return the active trip instance for the block location
    */
   public BlockTripInstance getActiveTripInstance() {
@@ -161,7 +171,7 @@ public class BlockLocation {
   /**
    * If the trip is not in service (see {@link #isInService()}), this value will
    * be {@link Double#NaN}.
-   * 
+   *
    * @return the scheduled distance traveled along the shape of the block, in
    *         meters
    */
@@ -176,9 +186,9 @@ public class BlockLocation {
   /**
    * The effective schedule time measures the progress of the transit vehicle in
    * serving the underlying schedule.
-   * 
+   *
    * effectiveScheduleTime = currentTime - scheduleDeviation
-   * 
+   *
    * @return time, in seconds
    */
   public int getEffectiveScheduleTime() {
@@ -192,7 +202,7 @@ public class BlockLocation {
   /**
    * If the trip is non in service (see {@link #isInService()}, this value with
    * be false.
-   * 
+   *
    * @return
    */
   public boolean isDistanceAlongBlockSet() {
@@ -202,7 +212,7 @@ public class BlockLocation {
   /**
    * If the trip is not in service (see {@link #isInService()}), this value will
    * be {@link Double#NaN}. See {@link #isDistanceAlongBlockSet()}.
-   * 
+   *
    * @return the distance traveled along the shape of the block, in meters
    */
   public double getDistanceAlongBlock() {
@@ -242,7 +252,7 @@ public class BlockLocation {
   /**
    * The closest stop to the current position of the transit vehicle among the
    * stop times of the current trip.
-   * 
+   *
    * @return the closest stop time entry
    */
   public BlockStopTimeEntry getClosestStop() {
@@ -258,7 +268,7 @@ public class BlockLocation {
    * of the transit vehicle among the stop times of the current trip. If the
    * number is positive, the stop is coming up. If negative, the stop has
    * already been passed.
-   * 
+   *
    * @return time, in seconds
    */
   public int getClosestStopTimeOffset() {
@@ -267,7 +277,7 @@ public class BlockLocation {
 
   /**
    * See description in {@link #getClosestStopTimeOffset()}.
-   * 
+   *
    * @param closestStopTimeOffset the time offset from the closest stop, in
    *          seconds
    */
@@ -278,7 +288,7 @@ public class BlockLocation {
   /**
    * The next upcoming stop to the current position of the transit vehicle among
    * the stop times of the current trip.
-   * 
+   *
    * @return the next stop time entry
    */
   public BlockStopTimeEntry getNextStop() {
@@ -292,7 +302,7 @@ public class BlockLocation {
   /**
    * The time offset, in seconds, from the next stop to the current position of
    * the transit vehicle.
-   * 
+   *
    * @return time, in seconds
    */
   public int getNextStopTimeOffset() {
@@ -301,7 +311,7 @@ public class BlockLocation {
 
   /**
    * See {@link #getNextStopTimeOffset()}
-   * 
+   *
    * @param nextStopTimeOffset
    */
   public void setNextStopTimeOffset(int nextStopTimeOffset) {
@@ -343,7 +353,7 @@ public EVehiclePhase getPhase() {
   /**
    * If real-time data is available in any form (schedule deviation,
    * distanceAlongBlock, last known location) for this vehicle
-   * 
+   *
    * @return true if real-time is available
    */
   public boolean isPredicted() {
@@ -421,7 +431,7 @@ public EVehiclePhase getPhase() {
   /**
    * If no schedule deviation data is available, this value with be
    * {@link Double#NaN}.
-   * 
+   *
    * @return schedule deviation, in seconds, (+deviation is late, -deviation is
    *         early)
    */
@@ -430,7 +440,7 @@ public EVehiclePhase getPhase() {
   }
 
   /**
-   * 
+   *
    * @param scheduleDeviation schedule deviation, in seconds, (+deviation is
    *          late, -deviation is early)
    */

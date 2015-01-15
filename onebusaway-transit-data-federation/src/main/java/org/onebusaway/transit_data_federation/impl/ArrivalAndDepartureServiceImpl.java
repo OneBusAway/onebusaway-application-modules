@@ -15,15 +15,6 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
@@ -59,8 +50,18 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
@@ -102,8 +103,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     Date toTimeBuffered = new Date(toTime + _blockStatusService.getRunningEarlyWindow() * 1000);
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, fromTimeBuffered, toTimeBuffered,
-        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
+        stop, fromTimeBuffered, toTimeBuffered, EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
 
     long frequencyOffsetTime = Math.max(targetTime.getTargetTime(), fromTime);
 
@@ -134,8 +134,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       StopEntry stop, long currentTime, long fromTime, long toTime) {
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, new Date(fromTime), new Date(toTime),
-        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
+        stop, new Date(fromTime), new Date(toTime), EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
 
     List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
 
@@ -533,6 +532,11 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     for (BlockLocation location : locations) {
 
+      if (sti.isFrequencyOffsetSpecified()
+          && ((blockInstance.getBlock().getDepartureTimeForIndex(0) + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
+        continue;
+      }
+
       ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
           sti, frequencyOffsetTime);
       applyBlockLocationToInstance(instance, location,
@@ -685,6 +689,9 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
      * departures here? Because they may have been artificially shifted for a
      * frequency-based method
      */
+
+    //TODO: review this change in 25354bad75 and figure out if it is the right way to do this.
+
     InstanceState state = instance.getStopTimeInstance().getState();
     ArrivalAndDepartureTime schedule = ArrivalAndDepartureTime.getScheduledTime(
         state, instance.getBlockStopTime());
@@ -709,7 +716,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   /**
    * This method both sets the predicted arrival time for an instance, but also
    * updates the scheduled arrival time for a frequency-based instance
-   * 
+   *
    * @param instance
    * @param arrivalTime
    */
@@ -725,7 +732,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   /**
    * This method both sets the predicted departure time for an instance, but
    * also updates the scheduled departure time for a frequency-based instance
-   * 
+   *
    * @param instance
    * @param departureTime
    */
@@ -1086,10 +1093,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
   /**
    * Constructs an {@link ArrivalAndDepartureTime} object for the specified
    * {@link BlockInstance} and {@link BlockStopTimeEntry}.
-   * 
+   *
    * For frequency-based trips, the calculation is a bit complicated.
-   * 
-   * 
+   *
+   *
    * @param blockInstance
    * @param blockStopTime
    * @param prevFrequencyTime

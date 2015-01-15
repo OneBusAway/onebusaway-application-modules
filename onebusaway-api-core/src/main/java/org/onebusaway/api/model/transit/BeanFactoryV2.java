@@ -15,12 +15,6 @@
  */
 package org.onebusaway.api.model.transit;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
 import org.onebusaway.api.impl.MaxCountSupport;
 import org.onebusaway.api.model.transit.blocks.BlockConfigurationV2Bean;
 import org.onebusaway.api.model.transit.blocks.BlockInstanceV2Bean;
@@ -80,6 +74,12 @@ import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class BeanFactoryV2 {
 
@@ -244,7 +244,7 @@ public class BeanFactoryV2 {
   }
 
   /****
-   * 
+   *
    *****/
 
   public ListWithReferencesBean<String> getEntityIdsResponse(
@@ -258,7 +258,7 @@ public class BeanFactoryV2 {
   }
 
   /****
-   * 
+   *
    ***/
 
   public TimeIntervalV2 getTimeInterval(TimeIntervalBean interval) {
@@ -664,7 +664,7 @@ public class BeanFactoryV2 {
     /*
      * StopCalendarDaysBean days = stopSchedule.getCalendarDays();
      * bean.setTimeZone(days.getTimeZone());
-     * 
+     *
      * List<StopCalendarDayV2Bean> dayBeans = new
      * ArrayList<StopCalendarDayV2Bean>(); for (StopCalendarDayBean day :
      * days.getDays()) { StopCalendarDayV2Bean dayBean =
@@ -884,6 +884,7 @@ public class BeanFactoryV2 {
     bean.setStartTime(frequency.getStartTime());
     bean.setEndTime(frequency.getEndTime());
     bean.setHeadway(frequency.getHeadway());
+    bean.setExactTimes(frequency.getExactTimes());
     return bean;
   }
 
@@ -892,6 +893,7 @@ public class BeanFactoryV2 {
     bean.setStartTime(frequency.getStartTime());
     bean.setEndTime(frequency.getEndTime());
     bean.setHeadway(frequency.getHeadway());
+    bean.setExactTimes(frequency.getExactTimes());
     return bean;
   }
 
