@@ -15,6 +15,8 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
+import java.util.Map;
+
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
@@ -39,8 +41,12 @@ class GtfsRealtimeAlertLibrary {
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
   }
-
+  
   public ServiceAlert.Builder getAlertAsServiceAlert(AgencyAndId id, Alert alert) {
+	return getAlertAsServiceAlert(id, alert, null);
+  }
+
+  public ServiceAlert.Builder getAlertAsServiceAlert(AgencyAndId id, Alert alert, Map agencyIdMap) {
     ServiceAlert.Builder b = ServiceAlert.newBuilder();
     b.setCreationTime(System.currentTimeMillis());
     b.setModifiedTime(System.currentTimeMillis());
@@ -65,7 +71,7 @@ class GtfsRealtimeAlertLibrary {
       b.addConsequence(consequence);
     }
     for (EntitySelector selector : alert.getInformedEntityList()) {
-      Affects.Builder affects = getEntitySelectorAsAffects(selector);
+      Affects.Builder affects = getEntitySelectorAsAffects(selector, agencyIdMap);
       b.addAffects(affects);
     }
     if (alert.hasUrl())
@@ -73,10 +79,15 @@ class GtfsRealtimeAlertLibrary {
     return b;
   }
 
-  private Affects.Builder getEntitySelectorAsAffects(EntitySelector selector) {
+  private Affects.Builder getEntitySelectorAsAffects(EntitySelector selector, Map agencyIdMap) {
     Affects.Builder affects = Affects.newBuilder();
-    if (selector.hasAgencyId())
-      affects.setAgencyId(selector.getAgencyId());
+    if (selector.hasAgencyId()) {
+		String agencyId = selector.getAgencyId();
+		if (agencyIdMap != null && agencyIdMap.get(agencyId) != null) {
+			agencyId = (String) agencyIdMap.get(agencyId);
+		}
+		affects.setAgencyId(agencyId);
+	}
     if (selector.hasRouteId()) {
       Id routeId = _entitySource.getRouteId(selector.getRouteId());
       affects.setRouteId(routeId);
