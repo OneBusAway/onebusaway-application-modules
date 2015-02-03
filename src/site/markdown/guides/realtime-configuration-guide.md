@@ -34,6 +34,9 @@ are deploying a multi-agency instance of OneBusAway, you may also need to specif
 of the transit agency to associate the incoming GTFS-realtime data with.  This allows you to define multiple incoming
 GTFS-realtime data-sources from different agencies in the same system.
 
+You must provide both a TripUpdates feed and a VehiclePositions feed in order for OneBusAway to report vehicle positions.
+Without a TripUpdates feed OneBusAway will discard the vehicle positions.
+
 ## SIRI VM
 
 We support [SIRI](http://siri.org.uk/) out of the box, including support for vehicle monitoring (VM) and situation
