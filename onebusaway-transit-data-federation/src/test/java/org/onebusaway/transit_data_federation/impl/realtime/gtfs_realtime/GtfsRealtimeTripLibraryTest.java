@@ -158,6 +158,35 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals(blockB.getId(), record.getVehicleId());
   }
 
+  @Test
+  public void testCreateVehicleLocationRecordForUpdate_NoStopTimeUpdates() {
+    TripUpdate tripUpdate = TripUpdate.newBuilder()
+        .setTrip(TripDescriptor.newBuilder().setTripId("tripA"))
+        .setDelay(120)
+        .setTimestamp(123456789)
+        .build();
+
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+        serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.anyLong())).thenReturn(
+        Arrays.asList(blockInstanceA));
+
+    CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
+    update.block = new BlockDescriptor();
+    update.block.setBlockEntry(blockA);
+    update.tripUpdates = Arrays.asList(tripUpdate);
+
+    VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
+    assertEquals(123456789000L, record.getTimeOfRecord());
+    assertEquals(120, record.getScheduleDeviation(), 0.0);
+  }
+
   private FeedMessage.Builder createFeed() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();

@@ -394,7 +394,7 @@ class GtfsRealtimeTripLibrary {
             best.scheduleDeviation = tripUpdate.getDelay();
           }
           if (tripUpdate.hasTimestamp()) {
-            best.timestamp = tripUpdate.getTimestamp();
+            best.timestamp = tripUpdate.getTimestamp() * 1000;
           }
 
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {
