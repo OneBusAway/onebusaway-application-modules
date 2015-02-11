@@ -70,6 +70,8 @@ public class TripUpdatesForAgencyActionTest {
       TripStatusBean tripStatus = new TripStatusBean();
       vehicle.setTripStatus(tripStatus);
 
+      tripStatus.setScheduleDeviation(2 * 60);
+
       TripBean trip = new TripBean();
       trip.setId("1_t0");
       trip.setRoute(route);
@@ -88,6 +90,8 @@ public class TripUpdatesForAgencyActionTest {
 
       TripStatusBean tripStatus = new TripStatusBean();
       vehicle.setTripStatus(tripStatus);
+
+      tripStatus.setScheduleDeviation(3 * 60);
 
       TripBean trip = new TripBean();
       trip.setId("1_t1");
@@ -108,7 +112,7 @@ public class TripUpdatesForAgencyActionTest {
     _action.setTime(new Date(now));
 
     _action.show();
-    
+
     ResponseBean model = _action.getModel();
     FeedMessage feed = (FeedMessage) model.getData();
     assertEquals(now / 1000, feed.getHeader().getTimestamp());
@@ -122,6 +126,7 @@ public class TripUpdatesForAgencyActionTest {
       assertEquals("r1", tripUpdate.getTrip().getRouteId());
       assertEquals("v1", tripUpdate.getVehicle().getId());
       assertEquals(1234, tripUpdate.getTimestamp());
+      assertEquals(120, tripUpdate.getDelay());
       assertEquals(1, tripUpdate.getStopTimeUpdateCount());
       StopTimeUpdate stopTimeUpdate = tripUpdate.getStopTimeUpdate(0);
       assertEquals("s2", stopTimeUpdate.getStopId());
@@ -135,6 +140,7 @@ public class TripUpdatesForAgencyActionTest {
       assertEquals("r1", tripUpdate.getTrip().getRouteId());
       assertEquals("v2", tripUpdate.getVehicle().getId());
       assertEquals(5678, tripUpdate.getTimestamp());
+      assertEquals(180, tripUpdate.getDelay());
       assertEquals(1, tripUpdate.getStopTimeUpdateCount());
       StopTimeUpdate stopTimeUpdate = tripUpdate.getStopTimeUpdate(0);
       assertEquals("s3", stopTimeUpdate.getStopId());
