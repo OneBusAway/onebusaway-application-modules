@@ -52,6 +52,10 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
   public String getId() {
     return _model.getStopId();
   }
+  
+  public void setStopId(String stopId) {
+    setId(stopId);
+  }
 
   @Deprecated
   public void setData(String data) {

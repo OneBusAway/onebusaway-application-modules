@@ -53,6 +53,10 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   public void setId(String tripId) {
     _model.setTripId(tripId);
   }
+  
+  public void setTripId(String tripId) {
+    setId(tripId);
+  }
 
   public String getId() {
     return _model.getTripId();
