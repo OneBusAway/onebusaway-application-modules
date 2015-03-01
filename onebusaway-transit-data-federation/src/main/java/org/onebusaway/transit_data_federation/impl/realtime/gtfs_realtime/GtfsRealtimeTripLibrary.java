@@ -237,6 +237,10 @@ class GtfsRealtimeTripLibrary {
 
   private boolean hasDelayValue(TripUpdate tripUpdate) {
 
+    if (tripUpdate.hasDelay()) {
+      return true;
+    }
+
     if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
       OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
       if (obaTripUpdate.hasDelay()) {
