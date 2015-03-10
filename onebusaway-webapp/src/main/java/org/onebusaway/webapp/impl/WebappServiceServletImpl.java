@@ -151,7 +151,7 @@ public class WebappServiceServletImpl extends RemoteServiceServlet implements
   }
 
   /****
-   * 
+   *
    ****/
 
   /**
@@ -191,10 +191,6 @@ public class WebappServiceServletImpl extends RemoteServiceServlet implements
       servlet.log(message, null);
     } else {
 
-      // TODO : Hack for Nokia demo
-      // /Users/bdferris/Documents/Aptana%20Studio%20Workspace/nokia-hello-world/
-      if (modulePath.endsWith("nokia-hello-world/"))
-        modulePath = "/where/mobile/";
 
       if (!modulePath.startsWith(contextPath))
         modulePath = contextPath + modulePath;
