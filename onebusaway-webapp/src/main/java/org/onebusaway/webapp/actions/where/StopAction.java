@@ -146,9 +146,6 @@ public class StopAction extends AbstractWhereAction implements
 
     _model.process();
 
-    logUserInteraction("stopIds", _model.getStopIds(), "routeIds",
-        _model.getRouteFilter());
-
     return SUCCESS;
   }
 

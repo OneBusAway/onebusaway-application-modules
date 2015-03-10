@@ -70,8 +70,6 @@ public class RouteForNameAction extends AbstractAction {
     RoutesBean routesBean = _transitDataService.getRoutes(routesQuery);
     List<RouteBean> routes = routesBean.getRoutes();
     
-    logUserInteraction("route", _routeName);
-
     if (routes.size() == 0) {
       return "noRoutesFound";
     } else if (routes.size() == 1 ) {
