@@ -68,6 +68,8 @@ public class ArrivalsAndDeparturesForRouteAction extends AbstractAction {
 
     _model.setResult(m);
 
+    logUserInteraction("routeIds", routeIds);
+
     return SUCCESS;
   }
 

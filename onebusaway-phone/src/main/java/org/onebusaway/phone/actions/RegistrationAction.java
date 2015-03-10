@@ -31,6 +31,7 @@ public class RegistrationAction extends AbstractAction {
     
     @Override
     public String execute() {
+      logUserInteraction();
       if( ! _currentUserService.hasPhoneNumberRegistration() )
         return "complete";
       return SUCCESS;

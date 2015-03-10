@@ -66,6 +66,8 @@ public class StopForCodeAction extends AbstractAction {
 
     _stops = stopsBean.getStops();
 
+    logUserInteraction("query", _stopCode);
+
     if (_stops.size() == 0) {
       return "noStopsFound";
     } else if (_stops.size() == 1) {

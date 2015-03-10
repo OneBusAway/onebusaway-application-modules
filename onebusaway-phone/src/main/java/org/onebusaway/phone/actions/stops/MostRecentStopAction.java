@@ -40,6 +40,8 @@ public class MostRecentStopAction extends AbstractAction {
     if (_stopIds == null || _stopIds.isEmpty())
       return INPUT;
     
+    logUserInteraction("stopIds", _stopIds);
+
     return SUCCESS;
   }
 }

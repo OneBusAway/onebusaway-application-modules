@@ -45,6 +45,7 @@ public class GetBookmarksAction extends AbstractAction {
   @Override
   public String execute() throws Exception {
     _bookmarks = _bookmarkPresentationService.getBookmarksWithStops(_currentUser.getBookmarks());
+    logUserInteraction();
     return SUCCESS;
   }
 }
