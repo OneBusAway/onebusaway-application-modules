@@ -17,6 +17,7 @@
 package org.onebusaway.api.impl;
 
 import org.apache.struts2.rest.handler.XStreamHandler;
+
 import org.onebusaway.api.actions.api.ValidationErrorBean;
 import org.onebusaway.api.model.ResponseBean;
 import org.onebusaway.api.model.TimeBean;
@@ -38,7 +39,6 @@ import org.onebusaway.api.model.transit.StopScheduleV2Bean;
 import org.onebusaway.api.model.transit.StopV2Bean;
 import org.onebusaway.api.model.transit.StopWithArrivalsAndDeparturesV2Bean;
 import org.onebusaway.api.model.transit.StopsForRouteV2Bean;
-import org.onebusaway.api.model.transit.TimeIntervalV2;
 import org.onebusaway.api.model.transit.TripDetailsV2Bean;
 import org.onebusaway.api.model.transit.TripStopTimeV2Bean;
 import org.onebusaway.api.model.transit.TripV2Bean;
@@ -64,13 +64,6 @@ import org.onebusaway.api.model.transit.service_alerts.TimeRangeV2Bean;
 import org.onebusaway.api.model.where.ArrivalAndDepartureBeanV1;
 import org.onebusaway.geospatial.model.EncodedPolygonBean;
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
-import org.onebusaway.siri.model.ErrorMessage;
-import org.onebusaway.siri.model.MonitoredStopVisit;
-import org.onebusaway.siri.model.ServiceRequestContext;
-import org.onebusaway.siri.model.Siri;
-import org.onebusaway.siri.model.VehicleLocation;
-import org.onebusaway.siri.model.VehicleMonitoringDetailLevel;
-import org.onebusaway.siri.model.VehicleMonitoringRequest;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.RouteBean;
@@ -146,18 +139,10 @@ public class CustomXStreamHandler extends XStreamHandler {
 
     xstream.alias("timeRange", TimeRangeV2Bean.class);
 
-    xstream.alias("VehicleLocation", VehicleLocation.class);
-
     xstream.alias("currentVehicleEstimate", CurrentVehicleEstimateV2Bean.class);
     
     xstream.alias("registeredAlarm", RegisteredAlarmV2Bean.class);
 
-    xstream.processAnnotations(VehicleMonitoringRequest.class);
-    xstream.processAnnotations(VehicleMonitoringDetailLevel.class);
-    xstream.processAnnotations(ServiceRequestContext.class);
-    xstream.processAnnotations(Siri.class);
-    xstream.processAnnotations(ErrorMessage.class);
-    xstream.processAnnotations(MonitoredStopVisit.class);
     return xstream;
   }
 }
