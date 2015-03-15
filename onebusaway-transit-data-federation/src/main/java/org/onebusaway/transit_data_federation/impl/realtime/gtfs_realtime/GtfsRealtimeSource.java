@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -88,6 +89,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private URL _alertsUrl;
 
   private int _refreshInterval = 30;
+  
+  private String _headers = "";
   
   private Map _alertAgencyIdMap;
 
@@ -164,6 +167,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   public void setRefreshInterval(int refreshInterval) {
     _refreshInterval = refreshInterval;
+  }
+  
+  public void setHeaders(String headers){
+	  _headers = headers;
   }
   
   public void setAlertAgencyIdMap(Map alertAgencyIdMap) {
@@ -355,7 +362,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    * @throws IOException
    */
   private FeedMessage readFeedFromUrl(URL url) throws IOException {
-    InputStream in = url.openStream();
+   URLConnection urlConnection = url.openConnection();
+   setHeadersToUrlConnection(urlConnection);
+   InputStream in = urlConnection.getInputStream();
     try {
       return FeedMessage.parseFrom(in, _registry);
     } finally {
@@ -366,7 +375,27 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
     }
   }
-
+/**
+ * Set the headers to the urlConnection if any
+ * @param urlConnection
+ * @return, the urlConnection with the headers set
+ */
+  private void setHeadersToUrlConnection(URLConnection urlConnection)
+  {
+	  if(_headers!= null && _headers != "")
+	  {
+		  String[] headers = _headers.split(";");
+		  String headerCuts[];
+		  for(String header_value : headers)
+		  {
+			  headerCuts = header_value.split(":");
+			  if(headerCuts!= null && headerCuts.length == 2)
+			  {
+				  urlConnection.setRequestProperty(headerCuts[0], headerCuts[1]); 
+			  }
+		  }
+	  }
+  }
   /****
    *
    ****/
