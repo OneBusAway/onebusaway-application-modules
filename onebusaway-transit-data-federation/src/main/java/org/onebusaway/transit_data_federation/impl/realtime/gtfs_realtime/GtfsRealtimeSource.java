@@ -382,9 +382,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
  */
   private void setHeadersToUrlConnection(URLConnection urlConnection) {
    if(_headersMap != null) {
-		for(Map.Entry<String, String> headerEntry : _headersMap.entrySet()) {
-		  urlConnection.setRequestProperty(headerEntry.getKey(), headerEntry.getValue());
-		}
+	  for(Map.Entry<String, String> headerEntry : _headersMap.entrySet()) {
+	    urlConnection.setRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+	  }
 	}
   }
   /****
