@@ -169,7 +169,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _refreshInterval = refreshInterval;
   }
   
-  public void setHeadersMap(Map<String,String> headersMap){
+  public void setHeadersMap(Map<String,String> headersMap) {
 	  _headersMap = headersMap;
   }
   
@@ -380,15 +380,12 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
  * @param urlConnection
  * @return, the urlConnection with the headers set
  */
-  private void setHeadersToUrlConnection(URLConnection urlConnection)
-  {
-	  if(_headersMap!= null)
-	  {
-		  for(Map.Entry<String, String> headerEntry : _headersMap.entrySet())
-		  {
-			  urlConnection.setRequestProperty(headerEntry.getKey(), headerEntry.getValue());
-		  }
-	  }
+  private void setHeadersToUrlConnection(URLConnection urlConnection) {
+   if(_headersMap != null) {
+		for(Map.Entry<String, String> headerEntry : _headersMap.entrySet()) {
+		  urlConnection.setRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+		}
+	}
   }
   /****
    *
