@@ -57,10 +57,6 @@ public class VehicleMonitoringAction extends ApiActionSupport
   private static final long serialVersionUID = 1L;
   protected static Logger _log = LoggerFactory.getLogger(VehicleMonitoringAction.class);
   
-  private static final int V1 = 1;
-
-  private static final int V2 = 2;
-  
   private static final int V3 = 3;
 
 @Autowired
@@ -110,7 +106,6 @@ public class VehicleMonitoringAction extends ApiActionSupport
     List<String> agencyIds = new ArrayList<String>();
 
     String agencyId = _request.getParameter("OperatorRef");
-    System.out.println("OperatorRef: " + agencyId);
     
     if (agencyId != null) {
       agencyIds.add(agencyId);
@@ -172,7 +167,8 @@ public class VehicleMonitoringAction extends ApiActionSupport
       }
     }
     
-    String gaLabel = null;
+    @SuppressWarnings("unused")
+	String gaLabel = null;
     
     // *** CASE 1: single vehicle, ignore any other filters
     if (vehicleIds.size() > 0) {
@@ -205,10 +201,8 @@ public class VehicleMonitoringAction extends ApiActionSupport
         List<VehicleActivityStructure> activitiesForRoute = _realtimeService.getVehicleActivityForRoute(
             routeId.toString(), directionId, maximumOnwardCalls, currentTimestamp);
         if (activitiesForRoute != null) {
-          System.out.println("Size of vehicle activity for route: " + activitiesForRoute.size());
           activities.addAll(activitiesForRoute);
         }
-        else System.out.println("No vehicle activity reported for route.");
       }
       
       if (vehicleIds.size() > 0) {

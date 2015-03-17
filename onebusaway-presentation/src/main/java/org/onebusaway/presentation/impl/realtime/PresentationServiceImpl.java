@@ -22,7 +22,6 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,6 +55,11 @@ public class PresentationServiceImpl implements PresentationService {
    * NB: If you're hardcoding any return value here for testing, also see InferenceInputQueueListenerTask in the TDF package
    * to get the full lifecycle of predictions working.
    */
+  @Override
+  public Boolean useTimePredictionsIfAvailable() {
+	  return Boolean.parseBoolean("false");
+  }
+
   @Override
   public Boolean isInLayover(TripStatusBean statusBean) {
     if(statusBean != null) {
@@ -110,13 +114,13 @@ public class PresentationServiceImpl implements PresentationService {
 
     String r = "";
 
-	int atStopThresholdInFeet = 100;    
+	int atStopThresholdInFeet = 100; 
 
-	int approachingThresholdInFeet = 500;    
+	int approachingThresholdInFeet = 500;
 
-	int distanceAsStopsThresholdInFeet = 2640;    
+	int distanceAsStopsThresholdInFeet = 2640;
 
-	int distanceAsStopsThresholdInStops = 3;    
+	int distanceAsStopsThresholdInStops = 3;
 
 	int distanceAsStopsMaximumThresholdInFeet = 2640;
     
@@ -149,23 +153,22 @@ public class PresentationServiceImpl implements PresentationService {
     
     return r;
   }
- 
+  
   /**
    * Filter logic: these methods determine which buses are shown in different request contexts. By 
    * default, OBA reports all vehicles both scheduled and tracked, which one may or may not want.
    */
+  
   /***
    * These rules are common to vehicles coming to both SIRI SM and VM calls. 
    */
-  
   @Override
   public boolean include(TripStatusBean statusBean) {
-    System.out.println("in PresentationServiceImpl#include()");
     if(statusBean == null)
       return false;
 
     _log.debug(statusBean.getVehicleId() + " running through filter: ");
-    System.out.println(statusBean.getVehicleId() + " running through filter: ");
+    
     // hide non-realtime
     if(statusBean.isPredicted() == false) {
       _log.debug("  " + statusBean.getVehicleId() + " filtered out because is not realtime.");
@@ -205,7 +208,7 @@ public class PresentationServiceImpl implements PresentationService {
     }
     
     // old data that should be hidden
-    int expiredTimeout = 300;    
+    int expiredTimeout = 300;
 
     if (getTime() - statusBean.getLastUpdateTime() >= 1000 * expiredTimeout) {
       _log.debug("  " + statusBean.getVehicleId() + " filtered out because data is expired.");
@@ -218,7 +221,6 @@ public class PresentationServiceImpl implements PresentationService {
   /***
    * These rules are just for SIRI SM calls. 
    */
-  
   @Override
   public boolean include(ArrivalAndDepartureBean adBean, TripStatusBean status) {
     if(adBean == null || status == null)

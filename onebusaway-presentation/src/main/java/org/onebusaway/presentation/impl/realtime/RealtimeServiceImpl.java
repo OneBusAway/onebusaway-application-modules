@@ -117,25 +117,19 @@ public class RealtimeServiceImpl implements RealtimeService {
     List<VehicleActivityStructure> output = new ArrayList<VehicleActivityStructure>();
         
     ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId, currentTime);
-    System.out.println("Size of trips for route " + routeId + ": " + trips.getList().size());
     for(TripDetailsBean tripDetails : trips.getList()) {
-      System.out.println("tripId: " + tripDetails.getTripId());
       TripStatusBean tripStatus = tripDetails.getStatus();
-      //System.out.println("status: " + tripDetails.getTripId());
       
       // filter out interlined routes
       if(routeId != null && !tripDetails.getTrip().getRoute().getId().equals(routeId))
         continue;
-       System.out.println("past routeId check");
 
       // filtered out by user
       if(directionId != null && !tripDetails.getTrip().getDirectionId().equals(directionId))
         continue;
-       System.out.println("past directionId check");
       
       if(!_presentationService.include(tripDetails.getStatus()))
         continue;
-       System.out.println("past getStatus check");
         
       VehicleActivityStructure activity = new VehicleActivityStructure();
       activity.setRecordedAtTime(new Date(tripDetails.getStatus().getLastUpdateTime()));
