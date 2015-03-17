@@ -15,296 +15,342 @@
  */
 package org.onebusaway.api.actions.siri;
 
-import org.onebusaway.api.actions.OneBusAwayApiActionSupport;
-import org.onebusaway.siri.model.MonitoredVehicleJourney;
-import org.onebusaway.siri.model.ServiceDelivery;
-import org.onebusaway.siri.model.Siri;
-import org.onebusaway.siri.model.VehicleActivity;
-import org.onebusaway.siri.model.VehicleLocation;
-import org.onebusaway.siri.model.VehicleMonitoringDelivery;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.TripStopTimeBean;
-import org.onebusaway.transit_data.model.VehicleStatusBean;
-import org.onebusaway.transit_data.model.trips.TripBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
-import org.onebusaway.transit_data.model.trips.TripStatusBean;
-import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
-import org.onebusaway.transit_data.services.TransitDataService;
-
-import com.opensymphony.xwork2.ModelDriven;
-import com.opensymphony.xwork2.conversion.annotations.TypeConversion;
-
-import org.apache.struts2.interceptor.ServletRequestAware;
-import org.apache.struts2.rest.DefaultHttpHeaders;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
-/**
- * For a given vehicle or set of vehicles, returns the location. Can select
- * vehicles by id, trip, or route.
- */
-public class VehicleMonitoringAction extends OneBusAwayApiActionSupport
-    implements ModelDriven<Object>, ServletRequestAware {
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts2.interceptor.ServletRequestAware;
+import org.apache.struts2.interceptor.ServletResponseAware;
+import org.onebusaway.api.actions.api.ApiActionSupport;
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.transit_data.model.ListBean;
+import org.onebusaway.transit_data.model.VehicleStatusBean;
+import org.onebusaway.transit_data.services.TransitDataService;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
+import org.onebusaway.presentation.services.cachecontrol.CacheService;
+import org.onebusaway.presentation.services.realtime.RealtimeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import uk.org.siri.siri.ErrorDescriptionStructure;
+import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
+import uk.org.siri.siri.OtherErrorStructure;
+import uk.org.siri.siri.ServiceDelivery;
+import uk.org.siri.siri.ServiceDeliveryErrorConditionStructure;
+import uk.org.siri.siri.Siri;
+import uk.org.siri.siri.VehicleActivityStructure;
+import uk.org.siri.siri.VehicleMonitoringDeliveryStructure;
+
+public class VehicleMonitoringAction extends ApiActionSupport
+    implements ServletRequestAware, ServletResponseAware {
 
   private static final long serialVersionUID = 1L;
+  protected static Logger _log = LoggerFactory.getLogger(VehicleMonitoringAction.class);
+  
+  private static final int V1 = 1;
 
-  private Object _response;
-  private HttpServletRequest _request;
+  private static final int V2 = 2;
+  
+  private static final int V3 = 3;
+
+@Autowired
+  public TransitDataService _transitDataService;
 
   @Autowired
-  private TransitDataService _transitDataService;
+  private RealtimeService _realtimeService;
+  
+  private Siri _response;
+  
+  private String _cachedResponse = null;
 
-  private Date _time;
+  private ServiceAlertsHelper _serviceAlertsHelper = new ServiceAlertsHelper();
 
-  @TypeConversion(converter = "org.onebusaway.api.actions.siri.Iso8601DateTimeConverter")
-  public void setTime(Date time) {
-    _time = time;
+  HttpServletRequest _request;
+  
+  private HttpServletResponse _servletResponse;
+
+  // See urlrewrite.xml as to how this is set. Which means this action doesn't
+  // respect an HTTP Accept: header.
+  private String _type = "xml";
+
+  @Autowired
+  private CacheService<Integer, String> _cacheService;
+    
+  public VehicleMonitoringAction() {
+	    super(V3);
+	  }
+
+  public void setType(String type) {
+    _type = type;
   }
 
-  /**
-   * This is the default action, corresponding to a SIRI
-   * VehicleMonitoringRequest
-   * 
-   * @return
-   * @throws IOException
-   */
-  public DefaultHttpHeaders index() throws IOException {
+  //@Override
+  public String index() {
+
+    long currentTimestamp = getTime();
+    
+    _realtimeService.setTime(currentTimestamp);
+    
+    String directionId = _request.getParameter("DirectionRef");
+    
+    // We need to support the user providing no agency id which means 'all agencies'.
+    // So, this array will hold a single agency if the user provides it or all
+    // agencies if the user provides none. We'll iterate over them later while 
+    // querying for vehicles and routes
+    List<String> agencyIds = new ArrayList<String>();
 
     String agencyId = _request.getParameter("OperatorRef");
+    System.out.println("OperatorRef: " + agencyId);
+    
+    if (agencyId != null) {
+      agencyIds.add(agencyId);
+    } else {
+      Map<String,List<CoordinateBounds>> agencies = _transitDataService.getAgencyIdsWithCoverageArea();
+      agencyIds.addAll(agencies.keySet());
+    }
 
-    if (_time == null)
-      _time = new Date();
+    List<AgencyAndId> vehicleIds = new ArrayList<AgencyAndId>();
+    if (_request.getParameter("VehicleRef") != null) {
+      try {
+        // If the user included an agency id as part of the vehicle id, ignore any OperatorRef arg
+        // or lack of OperatorRef arg and just use the included one.
+        AgencyAndId vehicleId = AgencyAndIdLibrary.convertFromString(_request.getParameter("VehicleRef"));
+        vehicleIds.add(vehicleId);
+      } catch (Exception e) {
+        // The user didn't provide an agency id in the VehicleRef, so use our list of operator refs
+        for (String agency : agencyIds) {
+          AgencyAndId vehicleId = new AgencyAndId(agency, _request.getParameter("VehicleRef"));
+          vehicleIds.add(vehicleId);
+        }
+      }
+    }
+    
+    List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
+    String routeIdErrorString = "";
+    if (_request.getParameter("LineRef") != null) {
+      try {
+        // Same as above for vehicle id
+        AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(_request.getParameter("LineRef"));
+        if (isValidRoute(routeId)) {
+          routeIds.add(routeId);
+        } else {
+          routeIdErrorString += "No such route: " + routeId.toString() + ".";
+        }
+      } catch (Exception e) {
+        // Same as above for vehicle id
+        for (String agency : agencyIds) {
+          AgencyAndId routeId = new AgencyAndId(agency, _request.getParameter("LineRef"));
+          if (isValidRoute(routeId)) {
+            routeIds.add(routeId);
+          } else {
+            routeIdErrorString += "No such route: " + routeId.toString() + ". ";
+          }
+        }
+      }
+    }
 
     String detailLevel = _request.getParameter("VehicleMonitoringDetailLevel");
-    boolean onwardCalls = false;
-    if (detailLevel != null) {
-      onwardCalls = detailLevel.equals("calls");
-    }
 
-    String vehicleId = _request.getParameter("VehicleRef");
+    int maximumOnwardCalls = 0;
+    if (detailLevel != null && detailLevel.equals("calls")) {
+      maximumOnwardCalls = Integer.MAX_VALUE;
 
-    // single trip, by vehicle
-    if (vehicleId != null) {
-      String vehicleIdWithAgency = agencyId + "_" + vehicleId;
-      VehicleStatusBean vehicle = _transitDataService.getVehicleForAgency(
-          vehicleIdWithAgency, _time.getTime());
-      ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
-      if (vehicle != null) {
-        if (!(vehicle.getPhase().equals("DEADHEAD_AFTER")
-            || vehicle.getPhase().equals("DEADHEAD_BEFORE") || vehicle.getPhase().equals(
-            "DEADHEAD_DURING"))) {
-          activities.add(createActivity(vehicle, onwardCalls));
-        }
+      try {
+        maximumOnwardCalls = Integer.parseInt(_request.getParameter("MaximumNumberOfCallsOnwards"));
+      } catch (NumberFormatException e) {
+        maximumOnwardCalls = Integer.MAX_VALUE;
       }
-      _response = generateSiriResponse(_time, activities);
-      return new DefaultHttpHeaders();
     }
+    
+    String gaLabel = null;
+    
+    // *** CASE 1: single vehicle, ignore any other filters
+    if (vehicleIds.size() > 0) {
+      
+      gaLabel = _request.getParameter("VehicleRef");
+      
+      List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
+      
+      for (AgencyAndId vehicleId : vehicleIds) {
+        VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
+            vehicleId.toString(), maximumOnwardCalls, currentTimestamp);
 
-    String directionId = _request.getParameter("DirectionRef");
-
-    // by trip (may be more than one trip)
-    String tripId = _request.getParameter("VehicleJourneyRef");
-    if (tripId != null) {
-      TripBean tripBean = _transitDataService.getTrip(agencyId + "_" + tripId);
-      if (tripBean == null) {
-        throw new IllegalArgumentException("No such trip: " + tripId);
-      }
-      TripDetailsQueryBean query = new TripDetailsQueryBean();
-      query.setTripId(tripId);
-      ListBean<TripDetailsBean> trips = _transitDataService.getTripDetails(query);
-      ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
-      for (TripDetailsBean trip : trips.getList()) {
-        if (directionId != null
-            && !trip.getTrip().getDirectionId().equals(directionId)) {
-          continue;
-        }
-        if (trip.getStatus().isPredicted() == false) {
-          /* only show trips with realtime info */
-          continue;
-        }
-        VehicleActivity activity = createActivity(trip, onwardCalls);
         if (activity != null) {
           activities.add(activity);
         }
       }
-      _response = generateSiriResponse(_time, activities);
-      return new DefaultHttpHeaders();
-    }
+      
+      // No vehicle id validation, so we pass null for error
+      _response = generateSiriResponse(activities, null, null, currentTimestamp);
 
-    String routeId = _request.getParameter("LineRef");
-    // multiple trips by route
-    if (routeId != null) {
-      TripsForRouteQueryBean query = new TripsForRouteQueryBean();
-      query.setRouteId(agencyId + "_" + routeId);
-      query.setTime(_time.getTime());
-      ListBean<TripDetailsBean> trips = _transitDataService.getTripsForRoute(query);
-      ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
-      for (TripDetailsBean trip : trips.getList()) {
-        if (directionId != null
-            && !trip.getTrip().getDirectionId().equals(directionId)) {
-          continue;
+      // *** CASE 2: by route, using direction id, if provided
+    } else if (_request.getParameter("LineRef") != null) {
+      
+      gaLabel = _request.getParameter("LineRef");
+      
+      List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
+      
+      for (AgencyAndId routeId : routeIds) {
+        
+        List<VehicleActivityStructure> activitiesForRoute = _realtimeService.getVehicleActivityForRoute(
+            routeId.toString(), directionId, maximumOnwardCalls, currentTimestamp);
+        if (activitiesForRoute != null) {
+          System.out.println("Size of vehicle activity for route: " + activitiesForRoute.size());
+          activities.addAll(activitiesForRoute);
         }
-        if (trip.getStatus().isPredicted() == false) {
-          /* only show trips with realtime info */
-          continue;
-        }
-        VehicleActivity activity = createActivity(trip, onwardCalls);
-        if (activity != null) {
-          activities.add(activity);
-        }
+        else System.out.println("No vehicle activity reported for route.");
       }
-      _response = generateSiriResponse(_time, activities);
-      return new DefaultHttpHeaders();
-    }
+      
+      if (vehicleIds.size() > 0) {
+        List<VehicleActivityStructure> filteredActivities = new ArrayList<VehicleActivityStructure>();
 
-    /* All vehicles */
-    ListBean<VehicleStatusBean> vehicles = _transitDataService.getAllVehiclesForAgency(
-        agencyId, _time.getTime());
-    ArrayList<VehicleActivity> activities = new ArrayList<VehicleActivity>();
-    for (VehicleStatusBean v : vehicles.getList()) {
-      VehicleActivity activity = createActivity(v, onwardCalls);
-      if (activity != null) {
-        activities.add(activity);
-      }
-    }
-    _response = generateSiriResponse(_time, activities);
-    return new DefaultHttpHeaders();
-  }
+        for (VehicleActivityStructure activity : activities) {
+          MonitoredVehicleJourneyStructure journey = activity.getMonitoredVehicleJourney();
+          AgencyAndId thisVehicleId = AgencyAndIdLibrary.convertFromString(journey.getVehicleRef().getValue());
 
-  private VehicleActivity createActivity(VehicleStatusBean vehicleStatus,
-      boolean onwardCalls) {
+          // user filtering
+          if (!vehicleIds.contains(thisVehicleId))
+            continue;
 
-    if (vehicleStatus.getPhase().equals("DEADHEAD_AFTER")
-        || vehicleStatus.getPhase().equals("DEADHEAD_BEFORE")
-        || vehicleStatus.getPhase().equals("DEADHEAD_DURING")) {
-      return null;
-    }
-    VehicleActivity activity = new VehicleActivity();
-
-    Calendar time = Calendar.getInstance();
-    time.setTime(new Date(vehicleStatus.getLastUpdateTime()));
-
-    activity.RecordedAtTime = time;
-    TripBean tripBean = vehicleStatus.getTrip();
-    if (tripBean != null) {
-      TripDetailsQueryBean query = new TripDetailsQueryBean();
-      query.setTime(time.getTimeInMillis());
-      query.setTripId(tripBean.getId());
-      query.setVehicleId(vehicleStatus.getVehicleId());
-      query.getInclusion().setIncludeTripStatus(true);
-      TripStatusBean tripStatus = vehicleStatus.getTripStatus();
-      query.setServiceDate(tripStatus.getServiceDate());
-      TripDetailsBean tripDetails = _transitDataService.getSingleTripDetails(query);
-      activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(
-          tripDetails, new Date(tripStatus.getServiceDate()),
-          vehicleStatus.getVehicleId());
-
-      if (onwardCalls) {
-
-        List<TripStopTimeBean> stopTimes = tripDetails.getSchedule().getStopTimes();
-
-        long serviceDateMillis = tripStatus.getServiceDate();
-        double distance = tripStatus.getDistanceAlongTrip();
-        if (Double.isNaN(distance)) {
-          distance = tripStatus.getScheduledDistanceAlongTrip();
+          filteredActivities.add(activity);
         }
-        activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-            stopTimes, serviceDateMillis, distance, tripStatus.getNextStop());
+
+        activities = filteredActivities;
       }
+      
+      Exception error = null;
+      if (_request.getParameter("LineRef") != null && routeIds.size() == 0) {
+        error = new Exception(routeIdErrorString.trim());
+      }
+
+      _response = generateSiriResponse(activities, routeIds, error, currentTimestamp);
+      
+      // *** CASE 3: all vehicles
     } else {
-      activity.MonitoredVehicleJourney = new MonitoredVehicleJourney();
+      try {
+      gaLabel = "All Vehicles";
+      
+      int hashKey = _cacheService.hash(maximumOnwardCalls, agencyIds, _type);
+      
+      List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
+      if (!_cacheService.containsKey(hashKey)) {
+        for (String agency : agencyIds) {
+          ListBean<VehicleStatusBean> vehicles = _transitDataService.getAllVehiclesForAgency(
+              agency, currentTimestamp);
+
+          for (VehicleStatusBean v : vehicles.getList()) {
+            VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
+                v.getVehicleId(), maximumOnwardCalls, currentTimestamp);
+
+            if (activity != null) {
+              activities.add(activity);
+            }
+          }
+        }
+        // There is no input (route id) to validate, so pass null error
+        _response = generateSiriResponse(activities, null, null,
+            currentTimestamp);
+        _cacheService.store(hashKey, getVehicleMonitoring());
+      } else {
+        _cachedResponse = _cacheService.retrieve(hashKey);
+      }
+      } catch (Exception e) {
+        _log.error("vm all broke:", e);
+        throw new RuntimeException(e);
+      }
     }
-    activity.MonitoredVehicleJourney.Monitored = true;
+        
+    try {
+      this._servletResponse.getWriter().write(getVehicleMonitoring());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
-    activity.MonitoredVehicleJourney.VehicleRef = vehicleStatus.getVehicleId();
-
-    activity.MonitoredVehicleJourney.ProgressRate = SiriUtils.getProgressRateForStatus(vehicleStatus.getStatus());
-
-    VehicleLocation location = new VehicleLocation();
-    location.Latitude = vehicleStatus.getLocation().getLat();
-    location.Longitude = vehicleStatus.getLocation().getLon();
-
-    activity.MonitoredVehicleJourney.VehicleLocation = location;
-    return activity;
-  }
-
-  /** Generate a siri response for a set of VehicleActivities */
-  private Siri generateSiriResponse(Date time,
-      ArrayList<VehicleActivity> activities) {
-    Siri siri = new Siri();
-    siri.ServiceDelivery = new ServiceDelivery();
-    GregorianCalendar calendar = new GregorianCalendar();
-    calendar.setTime(time);
-    siri.ServiceDelivery.ResponseTimestamp = calendar;
-
-    siri.ServiceDelivery.VehicleMonitoringDelivery = new VehicleMonitoringDelivery();
-    siri.ServiceDelivery.VehicleMonitoringDelivery.ResponseTimestamp = siri.ServiceDelivery.ResponseTimestamp;
-
-    siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil = (Calendar) calendar.clone();
-    siri.ServiceDelivery.VehicleMonitoringDelivery.ValidUntil.add(
-        Calendar.MINUTE, 1);
-
-    siri.ServiceDelivery.VehicleMonitoringDelivery.deliveries = activities;
-    return siri;
+    return null;
   }
 
   /**
-   * Create a VehicleActivity for a given vehicle's trip.
+   * Generate a siri response for a set of VehicleActivities
+   * 
+   * @param routeId
    */
-  private VehicleActivity createActivity(TripDetailsBean trip,
-      boolean onwardCalls) {
-    VehicleActivity activity = new VehicleActivity();
-    TripStatusBean status = trip.getStatus();
-    if (status.getPhase().equals("DEADHEAD_AFTER")
-        || status.getPhase().equals("DEADHEAD_BEFORE")
-        || status.getPhase().equals("DEADHEAD_DURING")) {
-      return null;
+  
+  private Siri generateSiriResponse(List<VehicleActivityStructure> activities,
+      List<AgencyAndId> routeIds, Exception error, long currentTimestamp) {
+    
+    VehicleMonitoringDeliveryStructure vehicleMonitoringDelivery = new VehicleMonitoringDeliveryStructure();
+    vehicleMonitoringDelivery.setResponseTimestamp(new Date(currentTimestamp));
+    
+    ServiceDelivery serviceDelivery = new ServiceDelivery();
+    serviceDelivery.setResponseTimestamp(new Date(currentTimestamp));
+    serviceDelivery.getVehicleMonitoringDelivery().add(vehicleMonitoringDelivery);
+    
+    if (error != null) {
+      ServiceDeliveryErrorConditionStructure errorConditionStructure = new ServiceDeliveryErrorConditionStructure();
+      
+      ErrorDescriptionStructure errorDescriptionStructure = new ErrorDescriptionStructure();
+      errorDescriptionStructure.setValue(error.getMessage());
+      
+      OtherErrorStructure otherErrorStructure = new OtherErrorStructure();
+      otherErrorStructure.setErrorText(error.getMessage());
+      
+      errorConditionStructure.setDescription(errorDescriptionStructure);
+      errorConditionStructure.setOtherError(otherErrorStructure);
+      
+      vehicleMonitoringDelivery.setErrorCondition(errorConditionStructure);
+    } else {
+      Calendar gregorianCalendar = new GregorianCalendar();
+      gregorianCalendar.setTimeInMillis(currentTimestamp);
+      gregorianCalendar.add(Calendar.MINUTE, 1);
+      vehicleMonitoringDelivery.setValidUntil(gregorianCalendar.getTime());
+
+      vehicleMonitoringDelivery.getVehicleActivity().addAll(activities);
+
+      _serviceAlertsHelper.addSituationExchangeToServiceDelivery(serviceDelivery,
+          activities, _transitDataService, routeIds);
+      _serviceAlertsHelper.addGlobalServiceAlertsToServiceDelivery(serviceDelivery, _realtimeService);
     }
+    Siri siri = new Siri();
+    siri.setServiceDelivery(serviceDelivery);
 
-    Calendar time = Calendar.getInstance();
-    time.setTime(new Date(status.getLastUpdateTime()));
-
-    activity.RecordedAtTime = time;
-
-    activity.MonitoredVehicleJourney = SiriUtils.getMonitoredVehicleJourney(
-        trip, new Date(status.getServiceDate()), status.getVehicleId());
-    activity.MonitoredVehicleJourney.Monitored = true;
-    activity.MonitoredVehicleJourney.VehicleRef = status.getVehicleId();
-
-    activity.MonitoredVehicleJourney.ProgressRate = status.getStatus();
-
-    VehicleLocation location = new VehicleLocation();
-    location.Latitude = status.getLocation().getLat();
-    location.Longitude = status.getLocation().getLon();
-
-    activity.MonitoredVehicleJourney.VehicleLocation = location;
-
-    if (onwardCalls) {
-      List<TripStopTimeBean> stopTimes = trip.getSchedule().getStopTimes();
-
-      long serviceDateMillis = status.getServiceDate();
-      double distance = status.getDistanceAlongTrip();
-      if (Double.isNaN(distance)) {
-        distance = status.getScheduledDistanceAlongTrip();
-      }
-      activity.MonitoredVehicleJourney.OnwardCalls = SiriUtils.getOnwardCalls(
-          stopTimes, serviceDateMillis, distance, status.getNextStop());
+    return siri;
+  }
+  
+  private boolean isValidRoute(AgencyAndId routeId) {
+    if (routeId != null && routeId.hasValues() && this._transitDataService.getRouteForId(routeId.toString()) != null) {
+      return true;
     }
-
-    return activity;
+    return false;
   }
 
-  @Override
-  public Object getModel() {
-    return _response;
+  public String getVehicleMonitoring() {
+    if (_cachedResponse != null) {
+      // check the cache first
+      return _cachedResponse;
+    }
+    
+    try {
+      if (_type.equals("xml")) {
+        this._servletResponse.setContentType("application/xml");
+        return _realtimeService.getSiriXmlSerializer().getXml(_response);
+      } else {
+        this._servletResponse.setContentType("application/json");
+        return _realtimeService.getSiriJsonSerializer().getJson(_response,
+            _request.getParameter("callback"));
+      }
+    } catch (Exception e) {
+      return e.getMessage();
+    }
   }
 
   @Override
@@ -312,12 +358,13 @@ public class VehicleMonitoringAction extends OneBusAwayApiActionSupport
     this._request = request;
   }
 
-  public void setService(TransitDataService service) {
-    this._transitDataService = service;
+  @Override
+  public void setServletResponse(HttpServletResponse servletResponse) {
+    this._servletResponse = servletResponse;
   }
-
-  public TransitDataService getService() {
-    return _transitDataService;
+  
+  public HttpServletResponse getServletResponse(){
+    return _servletResponse;
   }
-
+  
 }
