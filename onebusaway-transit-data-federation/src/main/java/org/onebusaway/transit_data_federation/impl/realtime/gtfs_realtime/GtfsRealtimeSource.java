@@ -170,7 +170,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   }
   
   public void setHeadersMap(Map<String,String> headersMap) {
-	  _headersMap = headersMap;
+	_headersMap = headersMap;
   }
   
   public void setAlertAgencyIdMap(Map alertAgencyIdMap) {
@@ -381,8 +381,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
  * @return, the urlConnection with the headers set
  */
   private void setHeadersToUrlConnection(URLConnection urlConnection) {
-   if(_headersMap != null) {
-	  for(Map.Entry<String, String> headerEntry : _headersMap.entrySet()) {
+   if (_headersMap != null) {
+	  for (Map.Entry<String, String> headerEntry : _headersMap.entrySet()) {
 	    urlConnection.setRequestProperty(headerEntry.getKey(), headerEntry.getValue());
 	  }
 	}
