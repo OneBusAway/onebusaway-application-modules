@@ -185,11 +185,11 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 			boolean bundleIsValid = true;
 
 			// ensure bundle path exists locally
-			File bundleRoot = new File(_bundleRootPath, bundle.getId());
+			File bundleRoot = new File(_bundleRootPath, bundle.getName());
 
 			if(!bundleRoot.exists()) {
 				if(!bundleRoot.mkdirs())  {
-					throw new Exception("Creation of bundle root for " + bundle.getId() + " at " + bundleRoot + " failed.");
+					throw new Exception("Creation of bundle root for " + bundle.getName() + " at " + bundleRoot + " failed.");
 				}
 			}
 
@@ -237,11 +237,11 @@ public class HttpBundleStoreImpl implements BundleStoreService {
 			} // for each file
 
 			if(bundleIsValid) {
-				_log.info("Bundle " + bundle.getId() + " files pass checksums; added to list of local bundles.");
+				_log.info("Bundle " + bundle.getName() + " files pass checksums; added to list of local bundles.");
 				output.add(bundle);
 
 			} else {
-				_log.warn("Bundle " + bundle.getId() + " files do NOT pass checksums; skipped.");
+				_log.warn("Bundle " + bundle.getName() + " files do NOT pass checksums; skipped.");
 			}
 		} // for each bundle
 

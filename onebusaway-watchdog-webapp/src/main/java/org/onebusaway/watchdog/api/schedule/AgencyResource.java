@@ -48,7 +48,7 @@ public class AgencyResource extends MetricResource {
 	static Map<String, Date> agencyEndDateMap = new HashMap<String, Date>();
 	private CalendarService _calendarService;
 	private TransitGraphDao _graph; 
-	
+		
 	@Autowired
 	public void setCalendarService(CalendarService calendarService) {
 	  _calendarService = calendarService;
@@ -81,8 +81,7 @@ public class AgencyResource extends MetricResource {
   @Path("/id-list")
   @GET
   public Response getAgencyIdList() {
-    try {
-      
+    try {      
       List<AgencyWithCoverageBean> agencyBeans = getTDS().getAgenciesWithCoverage();
       List<String> agencyIds = new ArrayList<String>();
       for (AgencyWithCoverageBean agency : agencyBeans) {
@@ -120,14 +119,10 @@ public class AgencyResource extends MetricResource {
 			 
 			 endDate = serviceDateArray[serviceDateArray.length-1].getAsDate();
 			 agencyEndDateMap.put(agencyId, endDate);
-		 }
-		 Calendar today = Calendar.getInstance();
-		 today.set(Calendar.HOUR_OF_DAY, 0);
-		 today.set(Calendar.MINUTE, 0);
-		 today.set(Calendar.SECOND, 0);
-		 today.set(Calendar.MILLISECOND, 0);
-		 		 
-		 long delta = (endDate.getTime() - (today.getTimeInMillis())) / ((1000 * 60 * 60 * 24));
+		  }		 		 
+		  Calendar latestSvcDate = Calendar.getInstance();
+		  latestSvcDate.setTime(endDate);		 
+		  int delta = deltaInDays(Calendar.getInstance(), latestSvcDate);
 		 		 
 		  return Response.ok(ok("agency-expiry-date-delta",  delta)).build();
 	  } catch (Exception e) {
@@ -135,4 +130,15 @@ public class AgencyResource extends MetricResource {
 	      return Response.ok(error("agency-expiry-date-delta", e)).build();	  
 	  } 
   }
+  
+  private static int deltaInDays(Calendar startDate, Calendar endDate) {  
+    Calendar date = (Calendar) startDate.clone();  
+    int delta = 0;  
+    while (date.before(endDate)) {
+      date.add(Calendar.DAY_OF_MONTH, 1);  
+      delta++;
+    }  
+    return delta;  
+  }  
+  
 }

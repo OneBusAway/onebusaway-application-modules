@@ -50,6 +50,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class GenerateRouteCollectionSearchIndexTask implements Runnable {
 
+  public static final String[] ENGLISH_STOP_WORDS = {
+    "an", "and", "are", "as", "at", "be", "but", "by",
+    "for", "if", "in", "into", "is", "it",
+    "no", "not", "of", "on", "or", "such",
+    "that", "the", "their", "then", "there", "these",
+    "they", "this", "to", "was", "will", "with"
+  };
   private TransitGraphDao _transitGraphDao;
 
   private NarrativeService _narrativeService;
@@ -89,7 +96,7 @@ public class GenerateRouteCollectionSearchIndexTask implements Runnable {
 
   private void buildIndex() throws IOException, ParseException {
     IndexWriter writer = new IndexWriter(_bundle.getRouteSearchIndexPath(),
-        new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.LIMITED);
+        new StandardAnalyzer(ENGLISH_STOP_WORDS), true, IndexWriter.MaxFieldLength.LIMITED);
     for (RouteCollectionEntry routeCollection : _transitGraphDao.getAllRouteCollections()) {
       RouteCollectionNarrative narrative = _narrativeService.getRouteCollectionForId(routeCollection.getId());
       Document document = getRouteCollectionAsDocument(routeCollection,

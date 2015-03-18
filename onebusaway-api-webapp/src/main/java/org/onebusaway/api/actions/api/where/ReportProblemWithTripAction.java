@@ -36,6 +36,8 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
 
   private static final long serialVersionUID = 1L;
 
+  private static final int V2 = 2;
+
   @Autowired
   private TransitDataService _service;
 
@@ -48,11 +50,15 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
   }
 
   @RequiredStringValidator(message = "requiredField.tripId")
-  public void setTripId(String tripId) {
+  public void setId(String tripId) {
     _model.setTripId(tripId);
   }
+  
+  public void setTripId(String tripId) {
+    setId(tripId);
+  }
 
-  public String getTripId() {
+  public String getId() {
     return _model.getTripId();
   }
 
@@ -107,7 +113,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
 
-  public DefaultHttpHeaders create() throws IOException, ServiceException {
+  public DefaultHttpHeaders show() throws IOException, ServiceException {
     return index();
   }
 
@@ -120,6 +126,9 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
 
     if (hasErrors())
       return setValidationErrorsResponse();
+
+    if( ! isVersion(V2))
+      return setUnknownVersionResponse();
 
     _model.setTime(_time);
     _model.setStatus(EProblemReportStatus.NEW);
