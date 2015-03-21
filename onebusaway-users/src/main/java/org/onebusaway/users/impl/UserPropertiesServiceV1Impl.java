@@ -248,4 +248,10 @@ public class UserPropertiesServiceV1Impl implements UserPropertiesService {
       boolean isRead) {
     throw new UnsupportedOperationException();
   }
+  
+  @Override
+  public void updateApiKeyContactInfo(User user, String contactName, 
+      String contactCompany, String contactEmail, String contactDetails) {
+    throw new UnsupportedOperationException();
+  } 
 }

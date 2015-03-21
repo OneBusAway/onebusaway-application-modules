@@ -29,7 +29,7 @@ import org.onebusaway.users.model.User;
 import org.onebusaway.users.model.UserProperties;
 import org.onebusaway.users.model.properties.Bookmark;
 import org.onebusaway.users.model.properties.RouteFilter;
-import org.onebusaway.users.model.properties.UserPropertiesV2;
+import org.onebusaway.users.model.properties.UserPropertiesV3;
 import org.onebusaway.users.services.UserDao;
 import org.onebusaway.users.services.UserPropertiesMigration;
 import org.onebusaway.users.services.UserPropertiesService;
@@ -38,9 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class UserPropertiesServiceV2Impl implements UserPropertiesService {
+public class UserPropertiesServiceV3Impl implements UserPropertiesService {
 
-  private static Logger _log = LoggerFactory.getLogger(UserPropertiesServiceV2Impl.class);
+  private static Logger _log = LoggerFactory.getLogger(UserPropertiesServiceV3Impl.class);
 
   private UserDao _userDao;
 
@@ -67,13 +67,13 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
 
   @Override
   public Class<? extends UserProperties> getUserPropertiesType() {
-    return UserPropertiesV2.class;
+    return UserPropertiesV3.class;
   }
 
   @Override
   public UserBean getUserAsBean(User user, UserBean bean) {
 
-    UserPropertiesV2 properties = getProperties(user);
+    UserPropertiesV3 properties = getProperties(user);
 
     bean.setRememberPreferencesEnabled(properties.isRememberPreferencesEnabled());
 
@@ -83,6 +83,10 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
     bean.setDefaultLocationName(properties.getDefaultLocationName());
     bean.setDefaultLocationLat(properties.getDefaultLocationLat());
     bean.setDefaultLocationLon(properties.getDefaultLocationLon());
+    bean.setContactName(properties.getContactName());
+    bean.setContactCompany(properties.getContactCompany());
+    bean.setContactEmail(properties.getContactEmail());
+    bean.setContactDetails(properties.getContactDetails());
 
     List<String> stopIds = _lastSelectedStopService.getLastSelectedStopsForUser(user.getId());
     bean.setLastSelectedStopIds(stopIds);
@@ -115,7 +119,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   @Override
   public void setRememberUserPreferencesEnabled(User user,
       boolean rememberPreferencesEnabled) {
-    UserPropertiesV2 properties = getProperties(user);
+    UserPropertiesV3 properties = getProperties(user);
     properties.setRememberPreferencesEnabled(rememberPreferencesEnabled);
     if (!rememberPreferencesEnabled)
       properties.clear();
@@ -126,7 +130,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   public void setDefaultLocation(User user, String locationName, double lat,
       double lon) {
 
-    UserPropertiesV2 properties = getProperties(user);
+    UserPropertiesV3 properties = getProperties(user);
 
     if (!properties.isRememberPreferencesEnabled())
       return;
@@ -147,7 +151,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   public int addStopBookmark(User user, String name, List<String> stopIds,
       RouteFilter filter) {
 
-    UserPropertiesV2 properties = getProperties(user);
+    UserPropertiesV3 properties = getProperties(user);
 
     if (!properties.isRememberPreferencesEnabled())
       return -1;
@@ -168,7 +172,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   public void updateStopBookmark(User user, int id, String name,
       List<String> stopIds, RouteFilter routeFilter) {
 
-    UserPropertiesV2 properties = getProperties(user);
+    UserPropertiesV3 properties = getProperties(user);
 
     if (!properties.isRememberPreferencesEnabled())
       return;
@@ -188,14 +192,14 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
 
   @Override
   public void resetUser(User user) {
-    user.setProperties(new UserPropertiesV2());
+    user.setProperties(new UserPropertiesV3());
     _userDao.saveOrUpdateUser(user);
     _lastSelectedStopService.clearLastSelectedStopForUser(user.getId());
   }
 
   @Override
   public void deleteStopBookmarks(User user, int id) {
-    UserPropertiesV2 properties = getProperties(user);
+    UserPropertiesV3 properties = getProperties(user);
 
     // Why don't we have a check for stateless user here? If the user wants to
     // remove information, that's ok. Still not sure why this would be called
@@ -225,7 +229,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
 
   @Override
   public void authorizeApi(User user, long minApiRequestInterval) {
-    UserPropertiesV2 properties = getProperties(user);
+    UserPropertiesV3 properties = getProperties(user);
     properties.setMinApiRequestInterval(minApiRequestInterval);
     _userDao.saveOrUpdateUser(user);
   }
@@ -234,7 +238,7 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
   public void markServiceAlertAsRead(User user, String situationId, long time,
       boolean isRead) {
 
-    UserPropertiesV2 properties = getProperties(user);
+    UserPropertiesV3 properties = getProperties(user);
     Map<String, Long> readSituationIdsWithReadTime = properties.getReadSituationIdsWithReadTime();
 
     if (isRead) {
@@ -252,11 +256,19 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
         _userDao.saveOrUpdateUser(user);
     }
   }
-  
+
   @Override
   public void updateApiKeyContactInfo(User user, String contactName, 
       String contactCompany, String contactEmail, String contactDetails) {
-    throw new UnsupportedOperationException();
+    
+    UserPropertiesV3 properties = getProperties(user);
+    properties.setContactName(contactName);
+    properties.setContactCompany(contactCompany);
+    properties.setContactEmail(contactEmail);
+    properties.setContactDetails(contactDetails);  
+    
+    user.setProperties(properties);
+    _userDao.saveOrUpdateUser(user);
   } 
   
   @Override
@@ -268,17 +280,17 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
    * Private Methods
    ****/
 
-  private UserPropertiesV2 getProperties(User user) {
+  private UserPropertiesV3 getProperties(User user) {
     UserProperties props = user.getProperties();
-    UserPropertiesV2 v2 = _userPropertiesMigration.migrate(props,
-        UserPropertiesV2.class);
-    if (props != v2)
-      user.setProperties(v2);
-    return v2;
+    UserPropertiesV3 v3 = _userPropertiesMigration.migrate(props,
+        UserPropertiesV3.class);
+    if (props != v3)
+      user.setProperties(v3);
+    return v3;
   }
 
-  private void mergeProperties(UserPropertiesV2 sourceProps,
-      UserPropertiesV2 destProps) {
+  private void mergeProperties(UserPropertiesV3 sourceProps,
+      UserPropertiesV3 destProps) {
 
     if (!destProps.isRememberPreferencesEnabled())
       return;
@@ -293,6 +305,23 @@ public class UserPropertiesServiceV2Impl implements UserPropertiesService {
       destProps.setDefaultLocationLat(sourceProps.getDefaultLocationLat());
       destProps.setDefaultLocationLon(sourceProps.getDefaultLocationLon());
       destProps.setDefaultLocationName(sourceProps.getDefaultLocationName());
+    }
+    
+    // If any contact information exists for destProps, leave as is.
+    // If there is no contact info for destProps, copy from sourceProps.
+    if ((destProps.getContactName() == null 
+          || destProps.getContactName().isEmpty())
+        && (destProps.getContactCompany() == null 
+          || destProps.getContactCompany().isEmpty())
+        && (destProps.getContactEmail() == null 
+          || destProps.getContactEmail().isEmpty())
+        && (destProps.getContactDetails() == null 
+          || destProps.getContactDetails().isEmpty())
+        ) {
+      destProps.setContactName(sourceProps.getContactName());
+      destProps.setContactCompany(sourceProps.getContactCompany());
+      destProps.setContactEmail(sourceProps.getContactEmail());
+      destProps.setContactDetails(sourceProps.getContactDetails());
     }
 
     List<Bookmark> bookmarks = new ArrayList<Bookmark>();
