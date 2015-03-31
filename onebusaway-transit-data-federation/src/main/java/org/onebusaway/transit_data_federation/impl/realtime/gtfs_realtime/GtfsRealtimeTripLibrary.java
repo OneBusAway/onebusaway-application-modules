@@ -16,7 +16,18 @@
  */
 package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 
-import org.onebusaway.collections.FactoryMap;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import org.onebusaway.collections.MappingLibrary;
 import org.onebusaway.collections.Min;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -31,6 +42,8 @@ import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTi
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -44,21 +57,6 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 class GtfsRealtimeTripLibrary {
 
@@ -130,13 +128,13 @@ class GtfsRealtimeTripLibrary {
       TripUpdate tu = fe.getTripUpdate();
 
       if (tu.hasVehicle() && tu.getVehicle().hasId()) {
-        // Trip update has a vehicle ID - index by vehicle ID
-        String vehicleId = tu.getVehicle().getId();
+        // Trip update has a vehicle ID - index by vehicle ID and trip ID
+    	  String vehicleId = tu.getVehicle().getId() + "_" + tu.getTrip().getTripId();
 
         if (!tripUpdatesByVehicleId.containsKey(vehicleId)) {
           tripUpdatesByVehicleId.put(vehicleId, tu);
         } else {
-          _log.warn("Multiple TripUpdates for vehicle {}; taking newest.",
+          _log.warn("Multiple TripUpdates for vehicle and trip {}; taking newest.",
               vehicleId);
 
           TripUpdate otherUpdate = tripUpdatesByVehicleId.get(vehicleId);
@@ -243,7 +241,8 @@ class GtfsRealtimeTripLibrary {
     for (Map.Entry<String, TripUpdate> e : tripUpdatesByVehicleId.entrySet()) {
       CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
 
-      String vehicleId = e.getKey();
+      String[] tripUpdatesByVehicleIdKeys = e.getKey().split("_");
+      String vehicleId = tripUpdatesByVehicleIdKeys[0];
       TripUpdate tu = e.getValue();
       update.block = getTripDescriptorAsBlockDescriptor(result, tu.getTrip());
       update.tripUpdates = Collections.singletonList(tu);
