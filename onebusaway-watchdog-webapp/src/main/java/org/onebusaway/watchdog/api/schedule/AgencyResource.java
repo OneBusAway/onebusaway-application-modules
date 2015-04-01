@@ -117,8 +117,14 @@ public class AgencyResource extends MetricResource {
 			 ServiceDate[] serviceDateArray = serviceDates.toArray(new ServiceDate[serviceDates.size()]);
 			 Arrays.sort(serviceDateArray);
 			 
-			 endDate = serviceDateArray[serviceDateArray.length-1].getAsDate();
-			 agencyEndDateMap.put(agencyId, endDate);
+			 if (serviceDateArray.length > 0) {
+			   endDate = serviceDateArray[serviceDateArray.length-1].getAsDate();
+			   agencyEndDateMap.put(agencyId, endDate);
+			 } else {
+			   // set the end date to the epoch
+			   endDate = new Date(0l);
+			 }
+			 
 		  }		 		 
 		  Calendar latestSvcDate = Calendar.getInstance();
 		  latestSvcDate.setTime(endDate);		 

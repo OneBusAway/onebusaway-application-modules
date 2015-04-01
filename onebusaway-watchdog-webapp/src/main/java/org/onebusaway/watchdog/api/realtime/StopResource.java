@@ -44,9 +44,11 @@ public class StopResource extends MetricResource {
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String stopId : result.getMatchedStopIds()) {
-          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(stopId).getAgencyId())) {
-            matchedStopIds.add(stopId);
+        for (String mAgencyId : result.getAgencyIds()) {
+          if (agencyId.equals(mAgencyId)) {
+            for (String stopId : result.getMatchedStopIds()) {
+              matchedStopIds.add(stopId);
+            }
           }
         }                
       }
