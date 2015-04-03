@@ -29,8 +29,6 @@
 
     <context:component-scan base-package="org.onebusaway.presentation.impl" />
 
-    <import resource="classpath:org/onebusaway/users/application-context.xml" />
-
     <bean id="isInitialSetupRequiredCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
         <property name="cacheName" value="org.onebusaway.presentation.services.InitialSetupService.isInitialSetupRequired" />
