@@ -167,14 +167,8 @@ public class VehicleMonitoringAction extends ApiActionSupport
       }
     }
     
-    @SuppressWarnings("unused")
-	String gaLabel = null;
-    
     // *** CASE 1: single vehicle, ignore any other filters
     if (vehicleIds.size() > 0) {
-      
-      gaLabel = _request.getParameter("VehicleRef");
-      
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       
       for (AgencyAndId vehicleId : vehicleIds) {
@@ -191,8 +185,6 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
       // *** CASE 2: by route, using direction id, if provided
     } else if (_request.getParameter("LineRef") != null) {
-      
-      gaLabel = _request.getParameter("LineRef");
       
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();
       
@@ -232,8 +224,6 @@ public class VehicleMonitoringAction extends ApiActionSupport
       // *** CASE 3: all vehicles
     } else {
       try {
-      gaLabel = "All Vehicles";
-      
       int hashKey = _cacheService.hash(maximumOnwardCalls, agencyIds, _type);
       
       List<VehicleActivityStructure> activities = new ArrayList<VehicleActivityStructure>();

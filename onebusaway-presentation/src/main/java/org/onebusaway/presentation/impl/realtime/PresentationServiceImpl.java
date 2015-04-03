@@ -31,12 +31,47 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class PresentationServiceImpl implements PresentationService {
-  
 
   private static Logger _log = LoggerFactory.getLogger(PresentationServiceImpl.class);
 
   private Long _now = null;
+
+  private int _atStopThresholdInFeet;
+  private int _approachingThresholdInFeet;
+  private int _distanceAsStopsThresholdInFeet;
+  private int _distanceAsStopsThresholdInStops;
+  private int _distanceAsStopsMaximumThresholdInFeet;
+  private int _expiredTimeout;
+  private float _previousTripFilterDistanceMiles;
+
+  public void setAtStopThresholdInFeet(int atStopThresholdInFeet) {
+    _atStopThresholdInFeet = atStopThresholdInFeet;
+  }
+
+  public void setApproachingThresholdInFeet(int approachingThresholdInFeet) {
+    _approachingThresholdInFeet = approachingThresholdInFeet;
+  }
+
+  public void setDistanceAsStopsThresholdInFeet(int distanceAsStopsThresholdInFeet) {
+    _distanceAsStopsThresholdInFeet = distanceAsStopsThresholdInFeet;
+  }
+
+  public void setDistanceAsStopsThresholdInStops(int distanceAsStopsThresholdInStops) {
+    _distanceAsStopsThresholdInStops = distanceAsStopsThresholdInStops;
+  }
+
+  public void setDistanceAsStopsMaximumThresholdInFeet(int distanceAsStopsMaximumThresholdInFeet) {
+    _distanceAsStopsMaximumThresholdInFeet = distanceAsStopsMaximumThresholdInFeet;
+  }
   
+  public void setExpiredTimeout(int expiredTimeout) {
+    _expiredTimeout = expiredTimeout;
+  }
+  
+  public void setPreviousTripFilterDistanceMiles(int previousTripFilterDistanceMiles) {
+    _previousTripFilterDistanceMiles = previousTripFilterDistanceMiles;
+  }
+
   @Override
   public void setTime(long time) {
     _now = time;
@@ -47,17 +82,6 @@ public class PresentationServiceImpl implements PresentationService {
       return _now;
     else
       return System.currentTimeMillis();
-  }
-
-  /**
-   * Display time predictions if available from a third-party source. 
-   *  
-   * NB: If you're hardcoding any return value here for testing, also see InferenceInputQueueListenerTask in the TDF package
-   * to get the full lifecycle of predictions working.
-   */
-  @Override
-  public Boolean useTimePredictionsIfAvailable() {
-	  return Boolean.parseBoolean("false");
   }
 
   @Override
@@ -113,30 +137,20 @@ public class PresentationServiceImpl implements PresentationService {
       String oneStopWord, String multipleStopsWord, String oneMileWord, String multipleMilesWord, String awayWord) {
 
     String r = "";
-
-	int atStopThresholdInFeet = 100; 
-
-	int approachingThresholdInFeet = 500;
-
-	int distanceAsStopsThresholdInFeet = 2640;
-
-	int distanceAsStopsThresholdInStops = 3;
-
-	int distanceAsStopsMaximumThresholdInFeet = 2640;
     
     // meters->feet
     double feetAway = distances.getDistanceFromCall() * 3.2808399;
 
-    if(feetAway < atStopThresholdInFeet) {
+    if(feetAway < _atStopThresholdInFeet) {
       r = "at " + oneStopWord;
 
-    } else if(feetAway < approachingThresholdInFeet) {
+    } else if(feetAway < _approachingThresholdInFeet) {
       r = approachingText;
     
     } else {
-      if(feetAway <= distanceAsStopsMaximumThresholdInFeet && 
-          (distances.getStopsFromCall() <= distanceAsStopsThresholdInStops 
-          || feetAway <= distanceAsStopsThresholdInFeet)) {
+      if(feetAway <= _distanceAsStopsMaximumThresholdInFeet && 
+          (distances.getStopsFromCall() <= _distanceAsStopsThresholdInStops 
+          || feetAway <= _distanceAsStopsThresholdInFeet)) {
         
         if(distances.getStopsFromCall() == 0)
           r = "< 1 " + oneStopWord + " " + awayWord;
@@ -206,11 +220,8 @@ public class PresentationServiceImpl implements PresentationService {
       _log.debug("  " + statusBean.getVehicleId() + " filtered out because it is disabled.");
       return false;
     }
-    
-    // old data that should be hidden
-    int expiredTimeout = 300;
 
-    if (getTime() - statusBean.getLastUpdateTime() >= 1000 * expiredTimeout) {
+    if (getTime() - statusBean.getLastUpdateTime() >= 1000 * _expiredTimeout) {
       _log.debug("  " + statusBean.getVehicleId() + " filtered out because data is expired.");
       return false;
     }
@@ -248,10 +259,6 @@ public class PresentationServiceImpl implements PresentationService {
 		}
     	
     	// only buses that are on the same or previous trip as the a-d make it to this point:
-
-    	// filter out buses that are farther away than X from the terminal on the previous trip
-    	float previousTripFilterDistanceMiles = 5.0f;
-
     	if(activeTrip != null
           && !adTripBean.getId().equals(activeTrip.getId())) {
     		
@@ -260,7 +267,7 @@ public class PresentationServiceImpl implements PresentationService {
 
   	      double distanceFromTerminalMeters = totalDistanceAlongTrip - distanceAlongTrip;
 
-  	      if(distanceFromTerminalMeters > (previousTripFilterDistanceMiles * 1609)) {
+  	      if(distanceFromTerminalMeters > (_previousTripFilterDistanceMiles * 1609)) {
   	    	  _log.debug("  " + status.getVehicleId() + " filtered out due to distance from terminal on prev. trip");
 		      return false;
   	      }

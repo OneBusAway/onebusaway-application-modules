@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.impl.realtime.SiriSupport.OnwardCallsMode;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
@@ -96,7 +95,7 @@ public class RealtimeServiceImpl implements RealtimeService {
   @Override
   public PresentationService getPresentationService() {
     return _presentationService;
-  }  
+  }
 
   @Override
   public SiriJsonSerializer getSiriJsonSerializer() {

@@ -59,7 +59,6 @@ public class StopMonitoringAction extends ApiActionSupport
 
   @Autowired
   public TransitDataService _transitDataService;
-  //public NycTransitDataService _nycTransitDataService;
 
   @Autowired  
   private RealtimeService _realtimeService;

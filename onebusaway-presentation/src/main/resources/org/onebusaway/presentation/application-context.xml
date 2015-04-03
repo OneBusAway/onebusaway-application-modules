@@ -25,10 +25,21 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
-
     <import resource="classpath:org/onebusaway/users/application-context.xml" />
 
     <context:component-scan base-package="org.onebusaway.presentation.impl" />
+
+    <import resource="classpath:org/onebusaway/users/application-context.xml" />
+
+	<bean id="presentationService" class="org.onebusaway.presentation.impl.realtime.PresentationServiceImpl">
+        <property name="atStopThresholdInFeet" value="100" />
+        <property name="approachingThresholdInFeet" value="500" />
+        <property name="distanceAsStopsThresholdInFeet" value="2640" />
+        <property name="distanceAsStopsThresholdInStops" value="3" />
+        <property name="distanceAsStopsMaximumThresholdInFeet" value="2640" />
+        <property name="expiredTimeout" value="300" />
+        <property name="previousTripFilterDistance" value="5.0" />
+	</bean>
 
     <bean id="isInitialSetupRequiredCache" class="org.onebusaway.container.spring.ehcache.EhCacheFactoryBean">
         <property name="cacheManager" ref="cacheManager" />
