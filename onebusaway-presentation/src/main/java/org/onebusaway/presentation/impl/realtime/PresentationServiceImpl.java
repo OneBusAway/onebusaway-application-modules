@@ -15,6 +15,7 @@
  */
 package org.onebusaway.presentation.impl.realtime;
 
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
@@ -36,39 +37,46 @@ public class PresentationServiceImpl implements PresentationService {
 
   private Long _now = null;
 
-  private int _atStopThresholdInFeet;
-  private int _approachingThresholdInFeet;
-  private int _distanceAsStopsThresholdInFeet;
-  private int _distanceAsStopsThresholdInStops;
-  private int _distanceAsStopsMaximumThresholdInFeet;
-  private int _expiredTimeout;
-  private float _previousTripFilterDistanceMiles;
+  private int _atStopThresholdInFeet = 100;
+  private int _approachingThresholdInFeet = 500;
+  private int _distanceAsStopsThresholdInFeet = 2640;
+  private int _distanceAsStopsThresholdInStops = 3;
+  private int _distanceAsStopsMaximumThresholdInFeet = 2640;
+  private int _expiredTimeout = 300;
+  private float _previousTripFilterDistanceMiles = 5.0f;
 
+  @ConfigurationParameter
   public void setAtStopThresholdInFeet(int atStopThresholdInFeet) {
     _atStopThresholdInFeet = atStopThresholdInFeet;
   }
 
+  @ConfigurationParameter
   public void setApproachingThresholdInFeet(int approachingThresholdInFeet) {
     _approachingThresholdInFeet = approachingThresholdInFeet;
   }
 
+  @ConfigurationParameter
   public void setDistanceAsStopsThresholdInFeet(int distanceAsStopsThresholdInFeet) {
     _distanceAsStopsThresholdInFeet = distanceAsStopsThresholdInFeet;
   }
 
+  @ConfigurationParameter
   public void setDistanceAsStopsThresholdInStops(int distanceAsStopsThresholdInStops) {
     _distanceAsStopsThresholdInStops = distanceAsStopsThresholdInStops;
   }
 
+  @ConfigurationParameter
   public void setDistanceAsStopsMaximumThresholdInFeet(int distanceAsStopsMaximumThresholdInFeet) {
     _distanceAsStopsMaximumThresholdInFeet = distanceAsStopsMaximumThresholdInFeet;
   }
-  
+
+  @ConfigurationParameter
   public void setExpiredTimeout(int expiredTimeout) {
     _expiredTimeout = expiredTimeout;
   }
-  
-  public void setPreviousTripFilterDistanceMiles(int previousTripFilterDistanceMiles) {
+
+  @ConfigurationParameter
+  public void setPreviousTripFilterDistanceMiles(float previousTripFilterDistanceMiles) {
     _previousTripFilterDistanceMiles = previousTripFilterDistanceMiles;
   }
 
