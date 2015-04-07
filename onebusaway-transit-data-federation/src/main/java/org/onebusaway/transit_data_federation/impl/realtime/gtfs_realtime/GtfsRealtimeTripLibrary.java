@@ -23,6 +23,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.gtfs.serialization.mappings.StopTimeFieldMappingFactory;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
+import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockCalendarService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockConfigurationEntry;
@@ -59,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 
 class GtfsRealtimeTripLibrary {
 
@@ -67,6 +69,8 @@ class GtfsRealtimeTripLibrary {
   private GtfsRealtimeEntitySource _entitySource;
 
   private BlockCalendarService _blockCalendarService;
+
+  private AgencyService _agencyService;
 
   /**
    * This is primarily here to assist with unit testing.
@@ -79,6 +83,10 @@ class GtfsRealtimeTripLibrary {
 
   public void setBlockCalendarService(BlockCalendarService blockCalendarService) {
     _blockCalendarService = blockCalendarService;
+  }
+
+  public void setAgencyService(AgencyService agencyService) {
+    _agencyService = agencyService;
   }
 
   public long getCurrentTime() {
@@ -398,8 +406,9 @@ class GtfsRealtimeTripLibrary {
     }
     
     if (serviceDate != null) {
-    	instance = _blockCalendarService.getBlockInstance(block.getId(),
-    			serviceDate.getAsDate().getTime());
+        TimeZone atz = _agencyService.getTimeZoneForAgencyId(block.getId().getAgencyId());
+        instance = _blockCalendarService.getBlockInstance(block.getId(),
+                        serviceDate.getAsDate(atz).getTime());
     	if (instance == null) {
     		_log.warn("block " + block.getId() + " does not exist on service date "
     				+ serviceDate);

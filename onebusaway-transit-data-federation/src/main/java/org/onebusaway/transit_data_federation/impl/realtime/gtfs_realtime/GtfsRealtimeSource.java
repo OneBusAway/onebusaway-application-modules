@@ -210,6 +210,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary = new GtfsRealtimeTripLibrary();
     _tripsLibrary.setBlockCalendarService(_blockCalendarService);
     _tripsLibrary.setEntitySource(_entitySource);
+    _tripsLibrary.setAgencyService(_agencyService);
 
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
