@@ -50,6 +50,7 @@ import org.onebusaway.transit_data_federation.impl.transit_graph.TripEntryImpl;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.blocks.InstanceState;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
@@ -74,6 +75,7 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
 
   private File _serviceAlertsPath;
   private HibernateTemplate _template;
+  ServiceAlertsPersistenceDB _persister;
 
   private SessionFactory _sessionFactory;
   
@@ -84,13 +86,17 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
 
   @Before
   public void setup() throws IOException {
+    ServiceAlertsCache cache = new ServiceAlertsCacheInMemoryImpl();
     _service = new ServiceAlertsServiceImpl();
-    _service.setSessionFactory(_sessionFactory);
+    _service.setServiceAlertsCache(cache);
+    _persister = new ServiceAlertsPersistenceDB();
+    _service.setServiceAlertsPersistence(_persister);
+    _persister.setSessionFactory(_sessionFactory);
 
     _serviceAlertsPath = File.createTempFile("Test-", "-"
         + ServiceAlertsServiceImpl.class.getName() + ".pb2");
     _service.setServiceAlertsPath(_serviceAlertsPath);
-   assertTrue("we need a template to continue", _service.getHibernateTemplate() != null);
+   assertTrue("we need a template to continue", _persister.getHibernateTemplate() != null);
   }
 
   @Test
@@ -522,5 +528,155 @@ public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4Spr
         new AgencyAndId("1", "10020"));
     assertEquals(1, alerts.size());
     assertTrue(alerts.contains(serviceAlert2));
+  }
+  
+  @Test
+  public void testRefresh() {
+    
+    // ensure we have no records;
+    List<ServiceAlert> alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+    
+    ServiceAlerts.Id.Builder id = ServiceAlerts.Id.newBuilder();
+    id.setId("1");
+    id.setAgencyId("1");
+    
+    ServiceAlerts.Id.Builder sId = ServiceAlerts.Id.newBuilder();
+    sId.setId("1");
+    sId.setAgencyId("1");
+    
+    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
+    builder.setCreationTime(System.currentTimeMillis());
+    builder.setModifiedTime(System.currentTimeMillis());
+    builder.setId(id);
+    Affects.Builder affects = Affects.newBuilder();
+    affects.setAgencyId("1");
+    builder.addAffects(affects);
+    
+    ServiceAlert alert = builder.build();
+    ServiceAlertRecord record = new ServiceAlertRecord();
+    record.setServiceAlertId("72534cba-a327-49fb-ab6f-a38401cae501");
+    record.setAgencyId(ServiceAlertLibrary.agencyAndId(sId.build()));      
+    record.setServiceAlert(alert); 
+    _persister.getHibernateTemplate().saveOrUpdate(record);   
+
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+    
+    // wait for the database to refresh
+    try {
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    
+    // see the update
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(1, alerts.size());
+
+  }
+  
+  @Test
+  public void testAsyncDBUpdate() {
+    
+    // ensure we have no records;
+    List<ServiceAlert> alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+    
+    ServiceAlerts.Id.Builder id = ServiceAlerts.Id.newBuilder();
+    id.setId("1");
+    id.setAgencyId("1");
+    
+    ServiceAlerts.Id.Builder sId = ServiceAlerts.Id.newBuilder();
+    sId.setId("1");
+    sId.setAgencyId("1");
+    
+    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
+    builder.setCreationTime(System.currentTimeMillis());
+    builder.setModifiedTime(System.currentTimeMillis());
+    builder.setId(id);
+    Affects.Builder affects = Affects.newBuilder();
+    affects.setAgencyId("1");
+    builder.addAffects(affects);
+    
+    ServiceAlert alert = builder.build();
+    ServiceAlertRecord record = new ServiceAlertRecord();
+    record.setServiceAlertId("72534cba-a327-49fb-ab6f-a38401cae501");
+    record.setAgencyId(ServiceAlertLibrary.agencyAndId(sId.build()));      
+    record.setServiceAlert(alert); 
+    _persister.getHibernateTemplate().saveOrUpdate(record);   
+
+    // service should not have seen it
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+
+    // wait for the database to refresh
+    try {
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    // see the update
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(1, alerts.size());
+
+  }
+  
+  @Test
+  public void testAsyncDBDelete() {
+    
+    // ensure we have no records;
+    List<ServiceAlert> alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+    
+    ServiceAlerts.Id.Builder id = ServiceAlerts.Id.newBuilder();
+    id.setId("1");
+    id.setAgencyId("1");
+    
+    ServiceAlerts.Id.Builder sId = ServiceAlerts.Id.newBuilder();
+    sId.setId("1");
+    sId.setAgencyId("1");
+    
+    ServiceAlert.Builder builder = ServiceAlert.newBuilder();
+    builder.setCreationTime(System.currentTimeMillis());
+    builder.setModifiedTime(System.currentTimeMillis());
+    builder.setId(id);
+    Affects.Builder affects = Affects.newBuilder();
+    affects.setAgencyId("1");
+    builder.addAffects(affects);
+    
+    ServiceAlert alert = builder.build();
+    ServiceAlertRecord record = new ServiceAlertRecord();
+    record.setServiceAlertId("72534cba-a327-49fb-ab6f-a38401cae501");
+    record.setAgencyId(ServiceAlertLibrary.agencyAndId(sId.build()));      
+    record.setServiceAlert(alert); 
+    _persister.getHibernateTemplate().saveOrUpdate(record);   
+
+    // wait for the database to refresh
+    try {
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    // see the update
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(1, alerts.size());
+
+    // delete that record
+    _persister.getHibernateTemplate().delete(record);
+    // service should not have seen it yet
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(1, alerts.size());
+
+    // wait for the database to refresh
+    try {
+      Thread.sleep(1 * 1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    // now we see the update (a deletion)
+    alerts = _service.getAllServiceAlerts();
+    assertEquals(0, alerts.size());
+
   }
 }
