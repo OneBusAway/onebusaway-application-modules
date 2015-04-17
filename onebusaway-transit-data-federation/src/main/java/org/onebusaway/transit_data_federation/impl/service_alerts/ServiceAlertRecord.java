@@ -89,7 +89,7 @@ public class ServiceAlertRecord {
 
 	// the column is nullable for backwards comparability, but it will return 0 internally
 	@Column(nullable = true, name="last_modified")
-	private long lastModified = 0;
+	private Long lastModified = 0l;
 	
 	public String getServiceAlertId() {
 		return serviceAlertId;
@@ -133,6 +133,7 @@ public class ServiceAlertRecord {
 	}
 	
   public long getLastModified() {
+    if (lastModified == null) return 0;
     return lastModified;
   }
 
