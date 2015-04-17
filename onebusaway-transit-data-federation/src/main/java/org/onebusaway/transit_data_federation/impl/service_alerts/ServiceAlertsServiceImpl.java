@@ -586,9 +586,10 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 ****/
 
 	synchronized void loadServiceAlerts() {
-	  _log.debug("Loading service alerts from DB");
+	  
 	  _cache.clear(); //we need to clear the cache in case records were deleted
 		List<ServiceAlertRecord> alerts = _persister.getAlerts();
+		_log.debug("Loaded " + alerts.size() + " service alerts from DB");
 		try {			
 			for (ServiceAlertRecord serviceAlert : alerts)
 				updateReferences(serviceAlert.getServiceAlert());
