@@ -96,7 +96,6 @@ public class ServiceAlertRecord {
 	}
 
 	public void setServiceAlertId(String serviceAlertId) {
-	  if (!equals(this.serviceAlertId, serviceAlertId)) updateLastModified();
 		this.serviceAlertId = serviceAlertId;
 	}
 
@@ -105,7 +104,6 @@ public class ServiceAlertRecord {
 	}
 
 	public void setServiceAlert(ServiceAlert serviceAlert) {
-	  if (!equals(this.serviceAlert, serviceAlert)) updateLastModified();
 		this.serviceAlert = serviceAlert;
 	}
 
@@ -120,7 +118,6 @@ public class ServiceAlertRecord {
 	 * @param agencyId the agencyId to set
 	 */
 	public void setAgencyId(AgencyAndId agencyId) {
-	  if (!equals(this.agencyId, agencyId)) updateLastModified();
 		this.agencyId = agencyId;
 	}
 
@@ -137,29 +134,6 @@ public class ServiceAlertRecord {
     return lastModified;
   }
 
-  private void updateLastModified() {
-    lastModified = System.currentTimeMillis();
-  }
-
-  private boolean equals(String s1, String s2) {
-    if (s1 == null && s1 != s2)
-      return false;
-    return s1.equals(s2);
-  }
-
-  private boolean equals(ServiceAlert s1, ServiceAlert s2) {
-    if (s1 == null && s1 != s2)
-      return false;
-    return s1.equals(s2);
-  }
-
-  private boolean equals(AgencyAndId a1, AgencyAndId a2) {
-    if (a1 == null && a1 != a2)
-      return false;
-    return a1.equals(a2);
-  }
-
-  
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

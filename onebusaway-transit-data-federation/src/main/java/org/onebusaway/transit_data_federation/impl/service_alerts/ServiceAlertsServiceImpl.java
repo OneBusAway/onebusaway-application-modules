@@ -132,15 +132,16 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			builder.setId(id);
 		}
 
+		long lastModified = System.currentTimeMillis();
 		if (!builder.hasCreationTime())
-			builder.setCreationTime(System.currentTimeMillis());
-		builder.setModifiedTime(System.currentTimeMillis());
+			builder.setCreationTime(lastModified);
+		builder.setModifiedTime(lastModified);
 
 		ServiceAlert serviceAlert = builder.build();
 		updateReferences(serviceAlert);
 		// for backwards compatibility, we update the serialized bundle file
 		saveServiceAlerts();
-		saveDBServiceAlerts(serviceAlert);
+		saveDBServiceAlerts(serviceAlert, lastModified);
 		return serviceAlert;
 	}
 
@@ -629,7 +630,8 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	// this is admittedly slow performing, but it is only called on an update
 	// of a single service alert
-	private synchronized void saveDBServiceAlerts(ServiceAlert alert) {
+	private synchronized void saveDBServiceAlerts(ServiceAlert alert, Long lastModified) {
+		if (lastModified == null) lastModified = System.currentTimeMillis();
 		
 		AgencyAndId alertId = ServiceAlertLibrary.agencyAndId(alert.getId());
 		ServiceAlertRecord record = getServiceAlertRecordByAlertId(alert.getId().getId());
@@ -640,6 +642,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		record.setServiceAlertId(alertId.getId());
 		record.setAgencyId(ServiceAlertLibrary.agencyAndId(alert.getId()));			
 		record.setServiceAlert(alert);
+		record.setLastModified(lastModified); // we need to assume its changed, as we don't track the affects clause
     _log.info("Saving Service Alert to DataBase:" + alertId.getId());     
 
 		_persister.saveOrUpdate(record);
