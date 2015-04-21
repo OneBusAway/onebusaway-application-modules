@@ -62,7 +62,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     return _model.getTripId();
   }
 
-  public void setServiceDate(long serviceDate) {
+  public void setServiceDate(long serviceDate) {	   
     _model.setServiceDate(serviceDate);
   }
 
@@ -70,7 +70,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setVehicleId(vehicleId);
   }
 
-  public void setStopId(String stopId) {
+  public void setStopId(String stopId) {	
     _model.setStopId(stopId);
   }
 
@@ -89,7 +89,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setCode(code);
   }
 
-  public void setUserComment(String comment) {
+  public void setUserComment(String comment) {	  
     _model.setUserComment(comment);
   }
 
@@ -101,11 +101,11 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setUserVehicleNumber(vehicleNumber);
   }
 
-  public void setUserLat(double lat) {
+  public void setUserLat(double lat) {	 
     _model.setUserLat(lat);
   }
 
-  public void setUserLon(double lon) {
+  public void setUserLon(double lon) {	
     _model.setUserLon(lon);
   }
 
@@ -113,7 +113,7 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
 
-  public DefaultHttpHeaders show() throws IOException, ServiceException {
+  public DefaultHttpHeaders create() throws IOException, ServiceException {	  
     return index();
   }
 
