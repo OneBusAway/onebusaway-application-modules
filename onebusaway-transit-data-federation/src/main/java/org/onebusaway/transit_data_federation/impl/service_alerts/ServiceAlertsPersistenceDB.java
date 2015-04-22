@@ -40,6 +40,8 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
   private long lastModified = 0;
   
   private long lastRefresh = 0;
+  
+  private long rowCount = 0;
 
   
   @Autowired
@@ -84,12 +86,37 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
     if (dbLastModified > this.lastModified) {
       lastModified = dbLastModified;
       _log.debug("needsSync = true");
-      return true; // we updated
+      return true; // we are out of sync
     }
+    
+    // check to see if a record was deleted
+    long rowCount = getRowCount();
+    if (rowCount != this.rowCount) {
+      _log.info("rowCount changed from " + this.rowCount + " to " + rowCount);
+      this.rowCount = rowCount;
+      return true;
+    }
+    
     return false; // no updates necessary
   }
   
   
+  private long getRowCount() {
+    try {
+      return _template.execute(new HibernateCallback<Long>() {
+        @Override
+        public Long doInHibernate(Session session) throws HibernateException,
+            SQLException {
+          Query query = session.createQuery("SELECT count(lastModified) FROM ServiceAlertRecord serviceAlert");
+          return (Long) query.list().get(0);
+        }
+      });
+    } catch (Throwable t) {
+      _log.error("hibernate blew:", t);
+      return -1;
+    }
+  }
+
   @Override
   public List<ServiceAlertRecord> getAlerts() {
     return _template.execute(new HibernateCallback<List<ServiceAlertRecord>>() {
