@@ -53,6 +53,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
 
   @Override
   public void delete(ServiceAlertRecord existingServiceAlertRecord) {
+    _log.info("deleting " + (existingServiceAlertRecord==null?"NuLl":existingServiceAlertRecord.getServiceAlert().getId()));
     _template.delete(existingServiceAlertRecord);
   }
 

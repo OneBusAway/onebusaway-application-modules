@@ -162,6 +162,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			
 			//Now remove from the DataBase.
 			ServiceAlertRecord existingServiceAlertRecord = getServiceAlertRecordByAlertId(serviceAlertId.getId());
+			_log.info("deleting service alert " + serviceAlertId.getId());
 			if (existingServiceAlertRecord != null) {
 			  _persister.delete(existingServiceAlertRecord);
 				
