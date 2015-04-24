@@ -22,7 +22,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdate;
+import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 public class GtfsPersistorImpl implements GtfsPersistor {
   private static Logger _log = LoggerFactory.getLogger(GtfsPersistorImpl.class);
   
-  private ArrayBlockingQueue<TripUpdate> _messages = new ArrayBlockingQueue<TripUpdate>(100000);
+  private ArrayBlockingQueue<TripUpdateModel> _messages = new ArrayBlockingQueue<TripUpdateModel>(100000);
   
   
   private ThreadPoolTaskScheduler _taskScheduler;
@@ -80,7 +80,7 @@ public class GtfsPersistorImpl implements GtfsPersistor {
     
   }
   @Override
-  public void persist(TripUpdate record) {
+  public void persist(TripUpdateModel record) {
     boolean accepted =_messages.offer(record);
     if (!accepted) {
     _log.error("Local buffer full!  Clearing!  Dropping " + record.getId() + " record");
@@ -91,11 +91,11 @@ public class GtfsPersistorImpl implements GtfsPersistor {
     
     @Override
     public void run() {
-      List<TripUpdate> records = new ArrayList<TripUpdate>();
+      List<TripUpdateModel> records = new ArrayList<TripUpdateModel>();
       _messages.drainTo(records, _batchSize);
       _log.info("drained " + records.size() + " trip updates");
       try {
-        _dao.saveOrUpdate(records.toArray(new TripUpdate[0]));
+        _dao.saveOrUpdate(records.toArray(new TripUpdateModel[0]));
       } catch (Exception e) {
         _log.error("error persisting trip updates=", e);
       }

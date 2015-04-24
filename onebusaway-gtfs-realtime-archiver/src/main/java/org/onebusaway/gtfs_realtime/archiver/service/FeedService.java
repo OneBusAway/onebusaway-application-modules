@@ -17,12 +17,12 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.List;
 
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdate;
+import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
 public interface FeedService {
 
-  List<TripUpdate> readTripUpdates(FeedMessage tripUpdates);
+  List<TripUpdateModel> readTripUpdates(FeedMessage tripUpdates);
 
 }

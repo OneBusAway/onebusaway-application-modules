@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdate;
+import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class TripUpdateDaoImpl implements TripUpdateDao {
   
   @Transactional(rollbackFor = Throwable.class)
   @Override
-  public void saveOrUpdate(TripUpdate... array) {
+  public void saveOrUpdate(TripUpdateModel... array) {
     _template.saveOrUpdateAll(Arrays.asList(array));
     _template.flush();
     _template.clear();

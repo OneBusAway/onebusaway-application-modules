@@ -15,10 +15,10 @@
  */
 package org.onebusaway.gtfs_realtime.archiver.service;
 
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdate;
+import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 
 public interface TripUpdateDao {
 
-  void saveOrUpdate(TripUpdate... array);
+  void saveOrUpdate(TripUpdateModel... array);
 
 }

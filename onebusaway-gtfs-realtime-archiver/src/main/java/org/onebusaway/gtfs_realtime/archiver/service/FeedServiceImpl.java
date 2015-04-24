@@ -21,7 +21,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdate;
+import org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel;
+import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
+import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
 
 @Component
@@ -50,8 +52,8 @@ public class FeedServiceImpl implements FeedService {
   
   
   @Override
-  public List<TripUpdate> readTripUpdates(FeedMessage tripUpdates) {
-    List<TripUpdate> updates = new ArrayList<TripUpdate>();
+  public List<TripUpdateModel> readTripUpdates(FeedMessage tripUpdates) {
+    List<TripUpdateModel> updates = new ArrayList<TripUpdateModel>();
     if (tripUpdates == null) {
       _log.error("nothing to do!");
       return updates;
@@ -60,7 +62,7 @@ public class FeedServiceImpl implements FeedService {
     
     for (FeedEntity entity : entityList) {
       long timestamp = tripUpdates.getHeader().getTimestamp() * 1000;
-      TripUpdate tripUpdate = readTripUpdate(entity, timestamp);
+      TripUpdateModel tripUpdate = readTripUpdate(entity, timestamp);
       if (tripUpdate != null) {
         _persistor.persist(tripUpdate);
         updates.add(tripUpdate);
@@ -69,25 +71,19 @@ public class FeedServiceImpl implements FeedService {
     return updates;
   }
 
-  private long getStartOfDayInMillis() {
-    Calendar c = Calendar.getInstance();
-    c.set(Calendar.HOUR, 0);
-    c.set(Calendar.MINUTE, 0);
-    c.set(Calendar.SECOND, 0);
-    c.set(Calendar.MILLISECOND, 0);
-    
-    return c.getTimeInMillis();
-  }
-
-
-
-  private TripUpdate readTripUpdate(FeedEntity entity, long timestamp) {
+  private TripUpdateModel readTripUpdate(FeedEntity entity, long timestamp) {
     if (entity.hasTripUpdate()) {
-      TripUpdate tu = new TripUpdate();
+      TripUpdateModel tu = new TripUpdateModel();
       TripDescriptor t = entity.getTripUpdate().getTrip();
       tu.setTimestamp(new Date(timestamp));
-      tu.setTripId(t.getTripId());
-      tu.setTripStart(parseDate(t.getStartDate(), t.getStartTime()));
+      if (t.hasTripId())
+        tu.setTripId(t.getTripId());
+      if (t.hasRouteId()) {
+        tu.setRouteId(t.getRouteId());
+      }
+      if (t.hasStartDate() && t.hasStartTime()) {
+        tu.setTripStart(parseDate(t.getStartDate(), t.getStartTime()));
+      }
       tu.setScheduleRelationship(findRelationShip(t));
       VehicleDescriptor vehicle = entity.getTripUpdate().getVehicle();
       if (vehicle != null) {
@@ -95,10 +91,57 @@ public class FeedServiceImpl implements FeedService {
         tu.setVehicleLabel(vehicle.getLabel());
         tu.setVehicleLicensePlate(vehicle.getLicensePlate());
       }
+      
+      for (StopTimeUpdate stu : entity.getTripUpdate().getStopTimeUpdateList()) {
+        StopTimeUpdateModel stopTimeUpdate = readStopTimeUpdate(stu, tu.getScheduleRelationship());
+        if (stopTimeUpdate != null) {
+          stopTimeUpdate.setTripUpdateModel(tu);  // oh hibernate, why be difficult?
+          tu.addStopTimeUpdateModel(stopTimeUpdate);
+        }
+      }
+      
       return tu;
     }
     return null;
   }
+
+  private StopTimeUpdateModel readStopTimeUpdate(StopTimeUpdate stu, int scheduleRelationship) {
+    if (stu == null) return null;
+    StopTimeUpdateModel stum = new StopTimeUpdateModel();
+    if (stu.hasStopSequence()) {
+      stum.setStopSequence(stu.getStopSequence());
+    }
+    if (stu.hasStopId()) {
+      stum.setStopId(stu.getStopId());
+    }
+    if (stu.getArrival() != null) {
+      // flatten stop time event
+      if (stu.getArrival().hasDelay()) {
+        stum.setArrivalDelay(stu.getArrival().getDelay());
+      }
+      if (stu.getArrival().hasTime()) {
+        stum.setArrivalTime(new Date(stu.getArrival().getTime()*1000));
+      }
+      if (stu.getArrival().hasUncertainty()) {
+        stum.setArrivalUncertainty(stu.getArrival().getUncertainty());
+      }
+    }
+    if (stu.getDeparture() != null) {
+      if (stu.getDeparture().hasDelay()) {
+        stum.setDepartureDelay(stu.getDeparture().getDelay());
+      }
+      if (stu.getDeparture().hasTime()) {
+        stum.setDepartureTime(new Date(stu.getDeparture().getTime()*1000));
+      }
+      if (stu.getDeparture().hasUncertainty()) {
+        stum.setDepartureUncertainty(stu.getDeparture().getUncertainty());
+      }
+    }
+    stum.setScheduleRelationship(scheduleRelationship);
+    
+    return stum;
+  }
+
 
   private int findRelationShip(TripDescriptor t) {
     return t.getScheduleRelationship().getNumber();

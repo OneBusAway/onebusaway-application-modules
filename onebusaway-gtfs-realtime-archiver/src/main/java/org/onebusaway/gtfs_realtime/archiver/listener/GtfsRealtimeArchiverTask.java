@@ -27,7 +27,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.gtfs_realtime.archiver.model.EntityUpdate;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdate;
+import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.service.FeedService;
 import org.onebusaway.gtfs_realtime.archiver.service.GtfsPersistor;
 import org.slf4j.Logger;

@@ -17,10 +17,10 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.List;
 
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdate;
+import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 
 public interface GtfsPersistor {
 
-  void persist(TripUpdate tripUpdate);
+  void persist(TripUpdateModel tripUpdate);
 
 }

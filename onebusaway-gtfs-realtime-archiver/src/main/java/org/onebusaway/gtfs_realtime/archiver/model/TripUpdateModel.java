@@ -15,31 +15,37 @@
  */
 package org.onebusaway.gtfs_realtime.archiver.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 
 @Entity
 @Table(name="trip_update")
 @org.hibernate.annotations.Table(appliesTo ="trip_update", indexes = {
-    @Index(name = "trip_update_idx", columnNames = {
-        "id","trip_id","route_id","trip_start","schedule_relationship","vehicle_id","vehicle_label","vehicle_license_plate","timestamp"
-    })})
+    @Index(name = "tu_id_idx", columnNames = {"id"}),
+    @Index(name = "tu_trip_id_idx", columnNames = {"trip_id"}),
+    @Index(name = "tu_vehicle_id_idx", columnNames = {"vehicle_id"}),
+    @Index(name = "tu_timestamp_idx", columnNames = {"timestamp"})
+    })
 @org.hibernate.annotations.Entity(mutable = false)
 /**
  * Inspired by https://github.com/mattwigway/gtfsrdb
  * Represents an individual trip update.
  *
  */
-public class TripUpdate {
+public class TripUpdateModel {
 
   @Id
   @GeneratedValue
@@ -61,7 +67,11 @@ public class TripUpdate {
   private String vehicleLicensePlate;
   @Column(nullable = true, name="timestamp")
   private Date timestamp;
-  // todo stopTimeUpdates 
+  
+  @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "tripUpdate", fetch = FetchType.EAGER)
+  private List<StopTimeUpdateModel> stopTimeUpdates = new ArrayList<StopTimeUpdateModel>();
+  
+  
   public long getId() {
     return id;
   }
@@ -115,5 +125,16 @@ public class TripUpdate {
   }
   public void setTimestamp(Date timestamp) {
     this.timestamp = timestamp;
+  }
+  public List<StopTimeUpdateModel> getStopTimeUpdates() {
+    return stopTimeUpdates;
+  }
+  public void setStopTimeUpdates(List<StopTimeUpdateModel> updates) {
+    this.stopTimeUpdates = updates;
+  }
+  public void addStopTimeUpdateModel(StopTimeUpdateModel stopTimeUpdate) {
+    if (stopTimeUpdate != null) {
+      stopTimeUpdates.add(stopTimeUpdate);
+    }
   }
 }
