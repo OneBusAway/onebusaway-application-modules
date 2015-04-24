@@ -15,38 +15,30 @@
  */
 package org.onebusaway.gtfs_realtime.archiver.model;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name="trip_update")
-@org.hibernate.annotations.Table(appliesTo ="trip_update", indexes = {
-    @Index(name = "tu_id_idx", columnNames = {"id"}),
-    @Index(name = "tu_trip_id_idx", columnNames = {"trip_id"}),
-    @Index(name = "tu_route_id_idx", columnNames = {"route_id"}),
-    @Index(name = "tu_vehicle_id_idx", columnNames = {"vehicle_id"}),
-    @Index(name = "tu_timestamp_idx", columnNames = {"timestamp"})
+@Table(name="vehicle_position")
+@org.hibernate.annotations.Table(appliesTo ="vehicle_position", indexes = {
+    @Index(name = "vp_id_idx", columnNames = {"id"}),
+    @Index(name = "vp_trip_id_idx", columnNames = {"trip_id"}),
+    @Index(name = "vp_route_id_idx", columnNames = {"route_id"}),
+    @Index(name = "vp_vehicle_id_idx", columnNames = {"vehicle_id"}),
+    @Index(name = "vp_lat_idx", columnNames = {"lat"}),
+    @Index(name = "vp_lon_idx", columnNames = {"lon"}),
+    @Index(name = "vp_timestamp_idx", columnNames = {"timestamp"})
     })
 @org.hibernate.annotations.Entity(mutable = false)
-/**
- * Inspired by https://github.com/mattwigway/gtfsrdb
- * Represents an individual trip update.
- *
- */
-public class TripUpdateModel {
+
+public class VehiclePositionModel {
 
   @Id
   @GeneratedValue
@@ -55,24 +47,24 @@ public class TripUpdateModel {
   private String tripId;
   @Column(nullable = true, name="route_id", length = 10)
   private String routeId;
-  @Column(nullable = true, name="trip_start")
+  @Column(nullable = true, name="tripStart")
   private Date tripStart;
-  // see enum transit_realtime.TripDescriptor.ScheduleRelationship
-  @Column(nullable = false, name="schedule_relationship")
-  private int scheduleRelationship;
   @Column(nullable = true, name="vehicle_id", length = 10)
   private String vehicleId;
   @Column(nullable = true, name="vehicle_label", length = 15)
   private String vehicleLabel;
   @Column(nullable = true, name="vehicle_license_plate", length = 10)
   private String vehicleLicensePlate;
+  @Column(nullable = true, name="lat")
+  private Float lat;
+  @Column(nullable = true, name="lon")
+  private Float lon;
+  @Column(nullable = true, name="bearing")
+  private Float bearing;
+  @Column(nullable = true, name="speed")
+  private Float speed;
   @Column(nullable = true, name="timestamp")
   private Date timestamp;
-  
-  @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "tripUpdate", fetch = FetchType.EAGER)
-  private List<StopTimeUpdateModel> stopTimeUpdates = new ArrayList<StopTimeUpdateModel>();
-  
-  
   public long getId() {
     return id;
   }
@@ -97,12 +89,6 @@ public class TripUpdateModel {
   public void setTripStart(Date tripStart) {
     this.tripStart = tripStart;
   }
-  public int getScheduleRelationship() {
-    return scheduleRelationship;
-  }
-  public void setScheduleRelationship(int scheduleRelationship) {
-    this.scheduleRelationship = scheduleRelationship;
-  }
   public String getVehicleId() {
     return vehicleId;
   }
@@ -121,21 +107,38 @@ public class TripUpdateModel {
   public void setVehicleLicensePlate(String vehicleLicensePlate) {
     this.vehicleLicensePlate = vehicleLicensePlate;
   }
+  public Float getLat() {
+    return lat;
+  }
+  public void setLat(Float lat) {
+    this.lat = lat;
+  }
+  public Float getLon() {
+    return lon;
+  }
+  public void setLon(Float lon) {
+    this.lon = lon;
+  }
+  public Float getBearing() {
+    return bearing;
+  }
+  public void setBearing(Float bearing) {
+    this.bearing = bearing;
+  }
+  public Float getSpeed() {
+    return speed;
+  }
+  public void setSpeed(Float speed) {
+    this.speed = speed;
+  }
   public Date getTimestamp() {
     return timestamp;
   }
   public void setTimestamp(Date timestamp) {
     this.timestamp = timestamp;
   }
-  public List<StopTimeUpdateModel> getStopTimeUpdates() {
-    return stopTimeUpdates;
-  }
-  public void setStopTimeUpdates(List<StopTimeUpdateModel> updates) {
-    this.stopTimeUpdates = updates;
-  }
-  public void addStopTimeUpdateModel(StopTimeUpdateModel stopTimeUpdate) {
-    if (stopTimeUpdate != null) {
-      stopTimeUpdates.add(stopTimeUpdate);
-    }
+  
+  public String toString() {
+    return "{vehicleId=" + vehicleId + " (" + lat  + ", " + lon + ")" + " @" + timestamp + "}";
   }
 }

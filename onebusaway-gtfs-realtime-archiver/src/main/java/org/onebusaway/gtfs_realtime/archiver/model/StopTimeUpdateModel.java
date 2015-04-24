@@ -47,18 +47,18 @@ public class StopTimeUpdateModel {
   @Column(nullable = true, name="stop_id", length = 10)
   private String stopId;
   @Column(nullable = true, name="arrival_delay")
-  private int arrivalDelay;
+  private Integer arrivalDelay;
   @Column(nullable = true, name="arrival_time")
   private Date arrivalTime;
   @Column(nullable = true, name="arrival_uncertainty")
-  private int arrivalUncertainty;
+  private Integer arrivalUncertainty;
   @Column(nullable = true, name="departure_delay")
-  private int departureDelay;
+  private Integer departureDelay;
   @Column(nullable = true, name="departure_time")
   private Date departureTime;
   @Column(nullable = true, name="departure_uncertainty")
-  private int departureUncertainty;
-  @Column(nullable = true, name="schedule_realtionship")
+  private Integer departureUncertainty;
+  @Column(nullable = false, name="schedule_relationship")
   private int scheduleRelationship;
   @ManyToOne
   @JoinColumn(name="trip_update_id", nullable = false)
@@ -83,28 +83,28 @@ public class StopTimeUpdateModel {
   public void setStopId(String stopId) {
     this.stopId = stopId;
   }
-  public int getArrivalDelay() {
+  public Integer getArrivalDelay() {
     return arrivalDelay;
   }
-  public void setArrivalDelay(int arrivalDelay) {
+  public void setArrivalDelay(Integer arrivalDelay) {
     this.arrivalDelay = arrivalDelay;
   }
-  public int getArrivalUncertainty() {
+  public Integer getArrivalUncertainty() {
     return arrivalUncertainty;
   }
-  public void setArrivalUncertainty(int arrivalUncertainty) {
+  public void setArrivalUncertainty(Integer arrivalUncertainty) {
     this.arrivalUncertainty = arrivalUncertainty;
   }
-  public int getDepartureDelay() {
+  public Integer getDepartureDelay() {
     return departureDelay;
   }
-  public void setDepartureDelay(int departureDelay) {
+  public void setDepartureDelay(Integer departureDelay) {
     this.departureDelay = departureDelay;
   }
-  public int getDepartureUncertainty() {
+  public Integer getDepartureUncertainty() {
     return departureUncertainty;
   }
-  public void setDepartureUncertainty(int departureUncertainty) {
+  public void setDepartureUncertainty(Integer departureUncertainty) {
     this.departureUncertainty = departureUncertainty;
   }
   public int getScheduleRelationship() {

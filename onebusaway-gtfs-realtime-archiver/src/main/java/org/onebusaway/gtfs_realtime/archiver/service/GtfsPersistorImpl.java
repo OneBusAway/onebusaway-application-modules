@@ -23,6 +23,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
+import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,13 +37,14 @@ import org.springframework.stereotype.Component;
 public class GtfsPersistorImpl implements GtfsPersistor {
   private static Logger _log = LoggerFactory.getLogger(GtfsPersistorImpl.class);
   
-  private ArrayBlockingQueue<TripUpdateModel> _messages = new ArrayBlockingQueue<TripUpdateModel>(100000);
+  private ArrayBlockingQueue<TripUpdateModel> _tripUpdates = new ArrayBlockingQueue<TripUpdateModel>(100000);
+  private ArrayBlockingQueue<VehiclePositionModel> _vehiclePositions = new ArrayBlockingQueue<VehiclePositionModel>(100000);
   
   
   private ThreadPoolTaskScheduler _taskScheduler;
 
-  
-  private TripUpdateDao _dao;
+  private TripUpdateDao _tripUpdateDao;
+  private VehiclePositionDao _vehiclePositionDao;
   
   @Autowired
   public void setTaskScheduler(ThreadPoolTaskScheduler scheduler) {
@@ -51,9 +53,14 @@ public class GtfsPersistorImpl implements GtfsPersistor {
   
   @Autowired
   public void setTripUpdateDao(TripUpdateDao dao) {
-    _dao = dao;
+    _tripUpdateDao = dao;
   }
-  
+
+  @Autowired
+  public void setVehiclePositionDao(VehiclePositionDao dao) {
+    _vehiclePositionDao = dao;
+  }
+
   /**
    * number of inserts to batch together
    */
@@ -66,8 +73,11 @@ public class GtfsPersistorImpl implements GtfsPersistor {
   @PostConstruct
   public void start() {
     _log.info("starting!");
-    final SaveThread saveThread = new SaveThread();
-    _taskScheduler.scheduleWithFixedDelay(saveThread, 10 * 1000); // every 10 seconds
+    final TripUpdateThread tripUpdateThread = new TripUpdateThread();
+    _taskScheduler.scheduleWithFixedDelay(tripUpdateThread, 10 * 1000); // every 10 seconds
+    final VehiclePositionThread vehiclePositionThread = new VehiclePositionThread();
+    _taskScheduler.scheduleWithFixedDelay(vehiclePositionThread, 10 * 1000); // every 10 seconds;
+    
   }
   
   @PreDestroy
@@ -80,24 +90,47 @@ public class GtfsPersistorImpl implements GtfsPersistor {
     
   }
   @Override
-  public void persist(TripUpdateModel record) {
-    boolean accepted =_messages.offer(record);
+  public void persist(TripUpdateModel tripUpdate) {
+    boolean accepted =_tripUpdates.offer(tripUpdate);
     if (!accepted) {
-    _log.error("Local buffer full!  Clearing!  Dropping " + record.getId() + " record");
+    _log.error("Local trip update buffer full!  Clearing!  Dropping " + tripUpdate.getId() + " record");
     }
   }
 
-  private class SaveThread implements Runnable {
+  @Override
+  public void persist(VehiclePositionModel vehiclePosition) {
+    boolean accepted = _vehiclePositions.offer(vehiclePosition);
+    if (!accepted) {
+    _log.error("Local vehicle position buffer full!  Clearing!  Dropping " + vehiclePosition.getId() + " record");
+    }
+  }
+
+  private class TripUpdateThread implements Runnable {
     
     @Override
     public void run() {
       List<TripUpdateModel> records = new ArrayList<TripUpdateModel>();
-      _messages.drainTo(records, _batchSize);
+      _tripUpdates.drainTo(records, _batchSize);
       _log.info("drained " + records.size() + " trip updates");
       try {
-        _dao.saveOrUpdate(records.toArray(new TripUpdateModel[0]));
+        _tripUpdateDao.saveOrUpdate(records.toArray(new TripUpdateModel[0]));
       } catch (Exception e) {
         _log.error("error persisting trip updates=", e);
+      }
+    }
+  }
+
+  private class VehiclePositionThread implements Runnable {
+    
+    @Override
+    public void run() {
+      List<VehiclePositionModel> records = new ArrayList<VehiclePositionModel>();
+      _vehiclePositions.drainTo(records, _batchSize);
+      _log.info("drained " + records.size() + " vehicle positions");
+      try {
+        _vehiclePositionDao.saveOrUpdate(records.toArray(new VehiclePositionModel[0]));
+      } catch (Exception e) {
+        _log.error("error persisting vehiclePositions=", e);
       }
     }
   }

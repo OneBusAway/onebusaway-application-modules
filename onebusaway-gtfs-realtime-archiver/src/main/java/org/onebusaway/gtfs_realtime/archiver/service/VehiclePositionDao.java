@@ -13,22 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.model;
+package org.onebusaway.gtfs_realtime.archiver.service;
 
-import java.util.Date;
+import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 
-public class VehiclePosition {
+public interface VehiclePositionDao {
 
-  private long id;
-  private String tripId;
-  private String routeId;
-  private Date tripStart;
-  private String vehicleId;
-  private String vehicleLabel;
-  private String vehicleLicensePlate;
-  private double lat;
-  private double lon;
-  private double bearing;
-  private double speed;
-  private Date timestamp;
+  void saveOrUpdate(VehiclePositionModel... array);
+
 }

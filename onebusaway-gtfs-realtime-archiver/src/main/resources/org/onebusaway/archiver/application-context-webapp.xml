@@ -37,12 +37,33 @@
       <list>
         <value>org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel</value>
         <value>org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel</value>
+        <value>org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel</value>
       </list>
     </property>
   </bean>
-  
+  <alias name="dataSource" alias="mutableDataSource" />
+    
 
-	<bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean" />
-	<bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
+  <bean id="gtfsPersistorImpl" class="org.onebusaway.gtfs_realtime.archiver.service.GtfsPersistorImpl">
+    <property name="taskScheduler" ref="taskScheduler" />
+    <property name="tripUpdateDao" ref="tripUpdateDaoImpl" />
+    <property name="vehiclePositionDao" ref="vehiclePositionDaoImpl" />
+    <property name="batchSize" value="1000" />
+  </bean>
+
+  <bean id="tripUpdateDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.TripUpdateDaoImpl">
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+
+  <bean id="vehiclePositionDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.VehiclePositionDaoImpl">
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+  
+  <bean id="feedService" class="org.onebusaway.gtfs_realtime.archiver.service.FeedServiceImpl">
+	<property name="gtfsPersistor" ref="gtfsPersistorImpl" />   
+  </bean>
+
+  <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean" />
+  <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
 
 </beans>

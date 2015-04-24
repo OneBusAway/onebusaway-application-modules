@@ -18,23 +18,17 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 import java.util.Arrays;
 
 import org.hibernate.SessionFactory;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
+import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.hibernate3.HibernateTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Component
-/**
- * Database operations specific to the TripUpdate model. 
- *
- */
-public class TripUpdateDaoImpl implements TripUpdateDao {
+public class VehiclePositionDaoImpl implements VehiclePositionDao {
 
-  protected static Logger _log = LoggerFactory.getLogger(TripUpdateDaoImpl.class);
+  protected static Logger _log = LoggerFactory.getLogger(VehiclePositionDaoImpl.class);
   private HibernateTemplate _template;
   
   @Autowired
@@ -42,10 +36,10 @@ public class TripUpdateDaoImpl implements TripUpdateDao {
   public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }
-  
+
   @Transactional(rollbackFor = Throwable.class)
   @Override
-  public void saveOrUpdate(TripUpdateModel... array) {
+  public void saveOrUpdate(VehiclePositionModel... array) {
     _template.saveOrUpdateAll(Arrays.asList(array));
     _template.flush();
     _template.clear();

@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
+import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,11 @@ import org.springframework.stereotype.Component;
 
 import com.google.transit.realtime.GtfsRealtime.FeedEntity;
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.google.transit.realtime.GtfsRealtime.Position;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
+import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 
 @Component
 /**
@@ -59,9 +62,9 @@ public class FeedServiceImpl implements FeedService {
       return updates;
     }
     List<FeedEntity> entityList = tripUpdates.getEntityList();
+    long timestamp = tripUpdates.getHeader().getTimestamp() * 1000;
     
     for (FeedEntity entity : entityList) {
-      long timestamp = tripUpdates.getHeader().getTimestamp() * 1000;
       TripUpdateModel tripUpdate = readTripUpdate(entity, timestamp);
       if (tripUpdate != null) {
         _persistor.persist(tripUpdate);
@@ -95,7 +98,7 @@ public class FeedServiceImpl implements FeedService {
       for (StopTimeUpdate stu : entity.getTripUpdate().getStopTimeUpdateList()) {
         StopTimeUpdateModel stopTimeUpdate = readStopTimeUpdate(stu, tu.getScheduleRelationship());
         if (stopTimeUpdate != null) {
-          stopTimeUpdate.setTripUpdateModel(tu);  // oh hibernate, why be difficult?
+          stopTimeUpdate.setTripUpdateModel(tu);
           tu.addStopTimeUpdateModel(stopTimeUpdate);
         }
       }
@@ -152,6 +155,82 @@ public class FeedServiceImpl implements FeedService {
       _log.info("todo parseDate(" + startDate + "," + startTime + ")");
     }
     return null;
+  }
+
+
+  @Override
+  public List<VehiclePositionModel> readVehiclePositions(
+      FeedMessage vehiclePositions) {
+    List<VehiclePositionModel> models = new ArrayList<VehiclePositionModel>();
+    if (vehiclePositions == null) return models;
+    long timestamp = vehiclePositions.getHeader().getTimestamp() * 1000;
+    for (FeedEntity entity : vehiclePositions.getEntityList()) {
+      VehiclePositionModel vehiclePosition = readVehiclePosition(entity, timestamp);
+      if (vehiclePosition != null) {
+        models.add(vehiclePosition);
+        _persistor.persist(vehiclePosition);
+      }
+    }
+    return models;
+  }
+
+
+  private VehiclePositionModel readVehiclePosition(FeedEntity entity, long timestamp) {
+    if (entity == null) return null;
+    VehiclePositionModel vpm = new VehiclePositionModel();
+    if (entity.hasTripUpdate()) {
+      if (entity.getTripUpdate().hasTrip()) {
+        TripDescriptor td = entity.getTripUpdate().getTrip();
+        if (td.hasTripId()) {
+          vpm.setTripId(td.getTripId());
+        }
+        if (td.hasRouteId()) {
+          vpm.setRouteId(td.getRouteId());
+        }
+        if (td.hasStartDate() && td.hasStartTime()) {
+          this.parseDate(td.getStartDate(), td.getStartTime());
+        }
+      }
+    }
+    if (entity.hasVehicle()) {
+      if (entity.getVehicle().hasVehicle()) {
+        VehicleDescriptor vd = entity.getVehicle().getVehicle();
+        if (vd.hasId()) {
+          vpm.setVehicleId(vd.getId());
+        }
+        if (vd.hasLabel()) {
+          vpm.setVehicleLabel(vd.getLabel());
+        }
+        if (vd.hasLicensePlate()) {
+          vpm.setVehicleLicensePlate(vd.getLicensePlate());
+        }
+      }
+      if (entity.getVehicle().hasPosition()) {
+        Position p = entity.getVehicle().getPosition();
+        vpm.setLat(p.getLatitude());
+        vpm.setLon(p.getLongitude());
+        if (p.hasBearing()) {
+          vpm.setBearing(p.getBearing());
+        }
+        if (p.hasSpeed()) {
+          vpm.setSpeed(p.getSpeed());
+        }
+      }
+      if (entity.getVehicle().hasTrip()) {
+        if (vpm.getTripId() == null) {
+          if (entity.getVehicle().getTrip().hasTripId()) {
+            vpm.setTripId(entity.getVehicle().getTrip().getTripId());
+          }
+        }
+        if (vpm.getRouteId() == null) {
+          if (entity.getVehicle().getTrip().hasRouteId()) {
+          vpm.setRouteId(entity.getVehicle().getTrip().getRouteId());
+          }
+        }
+      }
+    }
+    vpm.setTimestamp(new Date(timestamp));
+    return vpm;
   }
 
 }

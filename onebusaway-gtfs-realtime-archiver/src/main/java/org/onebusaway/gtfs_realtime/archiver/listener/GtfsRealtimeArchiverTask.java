@@ -104,6 +104,15 @@ public class GtfsRealtimeArchiverTask {
   @PostConstruct
   public void start() {
     _log.info("starting");
+    if (_tripUpdatesUrl == null) {
+      _log.warn("no tripUpdatesUrl configured.  This is most likely a configuration issue");
+    }
+    if (_vehiclePositionsUrl == null) {
+      _log.warn("no vehiclePositionsUrl configured.  This is most likely a configuration issue");
+    }
+    if (_alertsUrl == null) {
+      _log.warn("no alertsUrl configured.");
+    }
     if (_refreshInterval > 0) {
       _log.info("scheduling executor for refresh=" + _refreshInterval);
       _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
@@ -127,6 +136,7 @@ public class GtfsRealtimeArchiverTask {
     FeedMessage alerts = readOrReturnDefault(_alertsUrl); // todo
     
     _feedService.readTripUpdates(tripUpdates);
+    _feedService.readVehiclePositions(vehiclePositions);
   }
   
   private FeedMessage readOrReturnDefault(URL url) throws IOException {
