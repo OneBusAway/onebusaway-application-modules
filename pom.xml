@@ -7,7 +7,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.13-st.2-SNAPSHOT</version>
+  <version>1.1.13-st.2</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -92,6 +92,7 @@
     <module>onebusaway-geocoder</module>
     <module>onebusaway-geospatial</module>
     <module>onebusaway-gtfs-hibernate-spring</module>
+    <module>onebusaway-gtfs-realtime-archiver</module>
     <module>onebusaway-gwt-common</module>
     <module>onebusaway-phone</module>
     <module>onebusaway-phone-webapp</module>
