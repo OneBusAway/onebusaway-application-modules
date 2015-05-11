@@ -25,7 +25,6 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
-
     <import resource="classpath:org/onebusaway/users/application-context.xml" />
 
     <context:component-scan base-package="org.onebusaway.presentation.impl" />

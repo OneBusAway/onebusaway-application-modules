@@ -237,6 +237,15 @@ public class FrequencyEntriesFactory {
 
   private FrequencyRouteLabelKey getFrequencyLabelKeyForTrip(
       Frequency frequency, TripEntry trip) {
+	  if (trip == null) {
+		  _log.warn("trip is null for frequency=" + frequency);
+		  return null;
+	  }
+	  if (trip.getRoute() == null) {
+		  _log.warn("route is null for trip frequency=" + frequency);
+		  return null;
+	  }
+		  
     AgencyAndId routeId = trip.getRoute().getId();
     AgencyAndId serviceId = trip.getServiceId().getId();
 

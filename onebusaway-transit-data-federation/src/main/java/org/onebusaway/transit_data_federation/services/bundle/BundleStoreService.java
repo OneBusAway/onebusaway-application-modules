@@ -13,17 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.impl.bundle;
+package org.onebusaway.transit_data_federation.services.bundle;
 
-import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
-import org.springframework.stereotype.Component;
+import org.onebusaway.transit_data_federation.model.bundle.BundleItem;
 
-@Component
-public class TrivialBundleManagementServiceImpl implements BundleManagementService {
+import java.util.List;
 
-	@Override
-	public String getActiveBundleId() {
-		return null;
-	}
-
+/**
+ * Sources of bundles--local or Http-backed.
+ * 
+ * @author jmaki
+ *
+ */
+public interface BundleStoreService {
+  
+  public List<BundleItem> getBundles() throws Exception;
+  
+  public boolean isLegacyBundle();
+  
 }
+

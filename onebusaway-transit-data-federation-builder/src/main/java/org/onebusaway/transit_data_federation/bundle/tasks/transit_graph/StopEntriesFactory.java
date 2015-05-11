@@ -76,6 +76,16 @@ public class StopEntriesFactory {
       ArrayList<StopEntry> stopEntries = entry.getValue();
       stopEntries.trimToSize();
       AgencyEntryImpl agency = graph.getAgencyForId(agencyId);
+      if (agency == null) {
+        String msg = null;
+        if (stopEntries.size() > 0) {
+          msg = "no agency found for agencyId=" + agencyId + " of stop entry " + stopEntries.get(0).getId();
+        } else {
+        msg = "no agency found for agencyId=" + agencyId + " of empty stop entry list.";
+        }
+        _log.error(msg);
+        throw new IllegalStateException(msg);
+      }
       agency.setStops(stopEntries);
     }
 

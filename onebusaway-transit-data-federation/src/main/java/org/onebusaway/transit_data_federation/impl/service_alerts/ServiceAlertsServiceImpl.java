@@ -68,20 +68,20 @@ import org.springframework.stereotype.Component;
 @Component
 class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
-  private static Logger _log = LoggerFactory.getLogger(ServiceAlertsServiceImpl.class);
+	private static Logger _log = LoggerFactory.getLogger(ServiceAlertsServiceImpl.class);
 
-  /**
-   * While a service alert affects clause ({@link Affects} or
-   * {@link SituationQueryBean.AffectsBean}) might specify any combination of
-   * agency, route, trip, stop, etc. in practice, we only support a couple of
-   * specific combinations for applying alerts. We enumerate those specific
-   * combinations here so that they can be identified in queries.
-   */
-  private enum AffectsType {
-    AGENCY, ROUTE, ROUTE_DIRECTION, ROUTE_STOP, ROUTE_DIRECTION_STOP, TRIP, TRIP_STOP, STOP, UNSUPPORTED
-  }
+	/**
+	 * While a service alert affects clause ({@link Affects} or
+	 * {@link SituationQueryBean.AffectsBean}) might specify any combination of
+	 * agency, route, trip, stop, etc. in practice, we only support a couple of
+	 * specific combinations for applying alerts. We enumerate those specific
+	 * combinations here so that they can be identified in queries.
+	 */
+	private enum AffectsType {
+		AGENCY, ROUTE, ROUTE_DIRECTION, ROUTE_STOP, ROUTE_DIRECTION_STOP, TRIP, TRIP_STOP, STOP, UNSUPPORTED
+	}
 
-  private ConcurrentMap<AgencyAndId, ServiceAlert> _serviceAlerts = new ConcurrentHashMap<AgencyAndId, ServiceAlert>();
+	private ConcurrentMap<AgencyAndId, ServiceAlert> _serviceAlerts = new ConcurrentHashMap<AgencyAndId, ServiceAlert>();  
 
   /**
    * This map groups service alert ids by the agency id in their

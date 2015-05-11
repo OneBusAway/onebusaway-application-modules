@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredResult;
+import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.watchdog.api.MetricResource;
 
 @Path("/metric/realtime/stop")
@@ -39,17 +40,17 @@ public class StopResource extends MetricResource {
         _log.error("no configured data sources");
         return Response.ok(error("matched-stops", "con configured data sources")).build();
       }
-
+      
       for (MonitoredDataSource mds : getDataSources()) {
         MonitoredResult result = mds.getMonitoredResult();
         if (result == null) continue;
-        for (String mAgencyId : result.getAgencyIds()) {
-          if (agencyId.equals(mAgencyId)) {
-            matchedStopIds.addAll(result.getMatchedStopIds());
+        for (String stopId : result.getMatchedStopIds()) {
+          if (agencyId.equals(AgencyAndIdLibrary.convertFromString(stopId).getAgencyId())) {
+            matchedStopIds.add(stopId);
           }
-        }
+        }                
       }
-
+      
       return Response.ok(ok("matched-stops", matchedStopIds.size())).build();
     } catch (Exception e) {
       _log.error("getMatchedStopCount broke", e);

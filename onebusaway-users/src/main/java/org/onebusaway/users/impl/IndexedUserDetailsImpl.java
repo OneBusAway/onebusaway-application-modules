@@ -22,12 +22,13 @@ import org.onebusaway.users.model.UserIndexKey;
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.StandardAuthoritiesService;
 
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Collection;
 import java.util.Set;
 
 public class IndexedUserDetailsImpl extends
-    org.springframework.security.userdetails.User implements IndexedUserDetails {
+    org.springframework.security.core.userdetails.User implements IndexedUserDetails {
 
   private static final long serialVersionUID = 2L;
 
@@ -81,7 +82,7 @@ public class IndexedUserDetailsImpl extends
   }
 
   private boolean hasAuthority(String authorityToCheck) {
-    GrantedAuthority[] authorities = getAuthorities();
+    Collection<GrantedAuthority> authorities = getAuthorities();
     for (GrantedAuthority authority : authorities) {
       if (authority.getAuthority().equals(authorityToCheck))
         return true;

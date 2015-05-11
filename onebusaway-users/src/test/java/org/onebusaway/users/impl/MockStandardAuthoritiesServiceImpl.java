@@ -17,7 +17,7 @@ package org.onebusaway.users.impl;
 
 import org.onebusaway.users.model.UserRole;
 import org.onebusaway.users.services.StandardAuthoritiesService;
-import org.springframework.security.GrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 
 public class MockStandardAuthoritiesServiceImpl implements
     StandardAuthoritiesService {

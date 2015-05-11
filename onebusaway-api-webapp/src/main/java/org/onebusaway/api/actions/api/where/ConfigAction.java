@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2012 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,54 +16,48 @@
  */
 package org.onebusaway.api.actions.api.where;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.api.actions.api.ApiActionSupport;
 import org.onebusaway.api.model.transit.BeanFactoryV2;
-import org.onebusaway.api.model.transit.RouteV2Bean;
-import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
-import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteBean;
+import org.onebusaway.exceptions.ServiceException;
+import org.onebusaway.transit_data.model.config.BundleMetadata;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class RoutesAction extends ApiActionSupport {
+public class ConfigAction extends ApiActionSupport {
 
-  private static final long serialVersionUID = 1L;
-
+  private static Logger _log = LoggerFactory.getLogger(ConfigAction.class);
   private static final int V2 = 2;
-
-  @Autowired
-  private TransitDataService _service;
-
-  public RoutesAction() {
+  
+  public ConfigAction() {
     super(V2);
   }
+  
+  public ConfigAction(int defaultVersion) {
+    super(defaultVersion);
+  }
 
-  public DefaultHttpHeaders index() {
-
+  private static final long serialVersionUID = 5104142427310052565L;
+  
+  @Autowired
+  private TransitDataService _service;
+  
+  public String getId() {
+    _log.error("in id!");
+    return _service.getActiveBundleId();
+  }
+  
+  public DefaultHttpHeaders index() throws IOException, ServiceException {
     if (hasErrors())
       return setValidationErrorsResponse();
-
-    if (!isVersion(V2))
-      return setUnknownVersionResponse();
-
+    BundleMetadata meta = _service.getBundleMetadata();
     BeanFactoryV2 factory = getBeanFactoryV2();
-    List<RouteV2Bean> beans = new ArrayList<RouteV2Bean>();
 
-    List<AgencyWithCoverageBean> agenciesWithCoverage = _service.getAgenciesWithCoverage();
-    for (AgencyWithCoverageBean agencyWithCoverage : agenciesWithCoverage)
-    {
-      String agencyId = agencyWithCoverage.getAgency().getId();
-      ListBean<RouteBean> routes = _service.getRoutesForAgencyId(agencyId);
+    return setOkResponse(factory.getResponse(meta));
 
-      for (RouteBean route : routes.getList())
-        beans.add(factory.getRoute(route));
-    }
-
-
-    return setOkResponse(factory.list(beans, false));
   }
 }
