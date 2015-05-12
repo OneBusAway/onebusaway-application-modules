@@ -13,8 +13,18 @@ function findUrls() {
 		type: "GET",
 		async: false,
 		success: function(data) {
+			var general = {};
+			var specific = {};
+			for (i = 0; i<data.length; i++) {
+				if (data[i].indexOf("{agencyId}") > -1) {
+					specific[i] = data[i];
+				} else {
+					general[i] = data[i];
+				}
+			}
+			buildGeneralTable(general)
 			for (i = 0; i < agencies.length; i++) {
-				buildTable(agencies[i], data);
+				buildAgencyTable(agencies[i], specific);
 			}
 			
 		},
@@ -38,7 +48,7 @@ function findAgencies() {
 	})
 }
 
-function callMetric(agency, index, path) {
+function callAgencyMetric(agency, index, path) {
 	jQuery.ajax({
 		url: "/onebusaway-watchdog-webapp/api" + path,
 		type: "GET",
@@ -53,24 +63,80 @@ function callMetric(agency, index, path) {
 	})
 }
 
+function callMetric(index, path) {
+	jQuery.ajax({
+		url: "/onebusaway-watchdog-webapp/api" + path,
+		type: "GET",
+		async: false,
+		success: function(data) {
+			metrics[index] = parseMetric(data);
+		},
+		error: function(error) {
+			console.log("callMetric exception:" + error);
+			return "error"
+		}
+	})
+}
+
+
 function parseMetric(metric) {
 	var obj = metric;
 	var value = obj["metricValue"];
-	if (value == undefined || value == null || value == "") {
-		return "empty";
+	if (value instanceof String && value.length > 40) {
+		value = value.substring(0, 40);
+		value = value + "...";
 	}
+	var MAX_LENGTH = 10;
+	if (value instanceof Array && value.length > MAX_LENGTH) {
+		var short = [];
+		for (var i = 0; i < MAX_LENGTH; i++) {
+			short[i] = value[i];
+		}
+		short[MAX_LENGTH] = "...";
+		return short;
+	}
+	if (value == 2147483647)
+		value = "NaN"
 	return value;
 }
 
-function buildTable(agency, data) {
+function formatLinkName(link) {
+	var last = link.lastIndexOf("/");
+	if (last > -1) {
+		if (link.indexOf("/stop/") > -1) {
+			return link.substring(last+1, last.length) + " (stops)";
+		}
+		if (link.indexOf("/trip/") > -1) {
+			return link.substring(last+1, last.length) + " (trips)";
+		}
+		return link.substring(last+1, last.length);
+	}
+	return link;
+}
+
+function buildGeneralTable(data) {
+	$('#metrics').append("<tr><td colspan='2'><b>General</b></td></tr>");
+	$.each(data, function(index, value) {
+		if (!(value == "/metric/list" || value == "/metric/list-uris" || value == "/metric/list-agencies")) {
+			metric = callMetric(index, value);
+			name = formatLinkName(value);
+			link = "/onebusaway-watchdog-webapp/api" + value;
+			$('#metrics').append("<tr><td><a href=\"" + link + "\">" + name + "</a></td><td>" + metrics[index] + "</td></tr>");
+		}
+	})
+}
+
+function buildAgencyTable(agency, data) {
 	$('#metrics').append("<tr><td colspan='2'><b>" + agency + "</b></td></tr>");
 	$.each(data, function(index, value) {
 		value = value.replace(/{agencyId}/g, agency);
-		if (value == "/metric/list" || value == "/metric/list-uris" || value == "/metric/list-agencies") {
-			$('#metrics').append("<tr><td>" + value + "</td><td>this</td></tr>");
+		metric = callAgencyMetric(agency, index, value);
+		name = formatLinkName(value);
+		link = "/onebusaway-watchdog-webapp/api" + value;
+		if (value.indexOf("invalid-lat-lons") > -1) {
+			$('#metrics').append("<tr><td><a href=\"" + link + "\">" + name + "</a></td><td>" + "..." + "</td></tr>");
 		} else {
-			metric = callMetric(agency, index, value);
-			$('#metrics').append("<tr><td>" + value + "</td><td>" + metrics[agency+"_"+index] + "</td></tr>");
+			$('#metrics').append("<tr><td><a href=\"" + link + "\">" + name + "</a></td><td>" + metrics[agency+"_"+index] + "</td></tr>");
 		}
 	})
 }

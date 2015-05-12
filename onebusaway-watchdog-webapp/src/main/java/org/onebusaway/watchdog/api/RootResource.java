@@ -16,6 +16,7 @@
 package org.onebusaway.watchdog.api;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -58,6 +59,7 @@ public class RootResource extends MetricResource {
       for (AgencyWithCoverageBean bean : agenciesWithCoverage) {
         agencyIds.add(bean.getAgency().getId());
       }
+      Collections.sort(agencyIds);
       RESTEndpointsDocumenter red = new RESTEndpointsDocumenter();
       List<Endpoint> endpoints = red.findRESTEndpoints("org.onebusaway.watchdog.api");
       String apiBasePath = System.getProperty("api.base.path");
@@ -105,6 +107,7 @@ public class RootResource extends MetricResource {
     for (AgencyWithCoverageBean bean : agenciesWithCoverage) {
       agencyIds.add(bean.getAgency().getId());
     }
+    Collections.sort(agencyIds);
     StringBuffer json = new StringBuffer();
     json.append("[");
     for (String agency : agencyIds) {
