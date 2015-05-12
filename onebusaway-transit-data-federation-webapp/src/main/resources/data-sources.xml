@@ -8,7 +8,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
-                value="java:comp/env/jdbc/soundDB"/>   
+                value="java:comp/env/jdbc/hartDB"/>   
       <property name="lookupOnStartup"
                 value="true"/>   
       <property name="cache"
@@ -19,11 +19,19 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
                 value="true" />
     </bean>
     
+  <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+    <property name="tripUpdatesUrl" value="http://realtime.prod.obahart.org:8088/trip-updates" />
+    <property name="vehiclePositionsUrl" value="http://realtime.prod.obahart.org:8088/vehicle-positions" />
+    <property name="refreshInterval" value="30" />
+    <property name="agencyId" value="Hillsborough Area Regional Transit" />
+  </bean>
+    
+    
     <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-              <prop key="bundlePath">/var/lib/obanyc/oba-st-bundle</prop>
+              <prop key="bundlePath">/var/lib/obanyc/oba-hart-bundle</prop>
          </props>
       </property>
     </bean>
@@ -35,7 +43,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     </bean>
     
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-	    <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-st-bundle" />
+	    <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-hart-bundle" />
       <property name="standaloneMode" value="true" />
     </bean>
 </beans>

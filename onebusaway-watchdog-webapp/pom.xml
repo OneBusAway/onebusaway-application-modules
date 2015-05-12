@@ -35,7 +35,11 @@
 			<artifactId>jersey-bundle</artifactId>
 			<version>1.10</version>
 		</dependency>
-
+	<dependency>
+		<groupId>org.apache.wink</groupId>
+		<artifactId>wink-common</artifactId>
+		<version>1.4</version>
+	</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -50,6 +54,11 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+			<version>1.1.2</version>
+		</dependency>				
 		<dependency>
 			<groupId>taglibs</groupId>
 			<artifactId>standard</artifactId>

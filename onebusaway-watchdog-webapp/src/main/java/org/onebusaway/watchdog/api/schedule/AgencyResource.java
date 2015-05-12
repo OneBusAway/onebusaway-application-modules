@@ -29,6 +29,7 @@ import javax.annotation.PostConstruct;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.container.refresh.Refreshable;
@@ -66,8 +67,9 @@ public class AgencyResource extends MetricResource {
     agencyEndDateMap.clear();
   }
   
-  @Path("/total")
+  @Path("total")
   @GET
+  @Produces("application/json")
   public Response getAgencyCount() {
     try {
       int count = getTDS().getAgenciesWithCoverage().size();
@@ -78,8 +80,9 @@ public class AgencyResource extends MetricResource {
     }
   }
   
-  @Path("/id-list")
+  @Path("id-list")
   @GET
+  @Produces("application/json")
   public Response getAgencyIdList() {
     try {      
       List<AgencyWithCoverageBean> agencyBeans = getTDS().getAgenciesWithCoverage();
@@ -94,8 +97,9 @@ public class AgencyResource extends MetricResource {
     }
   }
   
-  @Path("/{agencyId}/expiry-date-delta")
+  @Path("{agencyId}/expiry-date-delta")
   @GET
+  @Produces("application/json")
   public Response getAgencyExpiryDateDelta(@PathParam("agencyId") String agencyId) {
 	  try {
 		 Date endDate = agencyEndDateMap.get(agencyId);

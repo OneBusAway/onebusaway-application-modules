@@ -142,6 +142,9 @@ public class LongTermAveragesResource extends MetricResource {
 	      _refreshTask.cancel(true);
 	      _refreshTask = null;
 	    }
+	    if (_scheduledExecutorService != null) {
+	      _scheduledExecutorService.shutdown();
+	    }
 	  }
 
 	  @Autowired
