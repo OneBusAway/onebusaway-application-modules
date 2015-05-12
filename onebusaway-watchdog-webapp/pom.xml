@@ -82,6 +82,18 @@
 
 	</dependencies>
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.mycila.maven-license-plugin</groupId>
+				<artifactId>maven-license-plugin</artifactId>
+				<configuration>
+					<excludes combine.children="append">
+						<!-- JQuery Excludes -->
+						<exclude>**/jquery*.js</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>

@@ -37,12 +37,12 @@
   		<dependency>
     		<groupId>org.onebusaway</groupId>
     		<artifactId>onebusaway-gtfs</artifactId>
-    		<version>1.3.4-st</version>
+    		<version>1.3.5-st-SNAPSHOT</version>
   		</dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-gtfs-transformer</artifactId>
-			<version>1.3.4-st</version>
+			<version>1.3.5-st-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>onebusaway-gtfs</artifactId>
@@ -60,7 +60,7 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-gtfs-transformer-cli</artifactId>
-			<version>1.3.4-st</version>
+			<version>1.3.5-st-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

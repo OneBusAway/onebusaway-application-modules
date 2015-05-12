@@ -43,7 +43,7 @@ public class VehiclePositionModel {
   @Id
   @GeneratedValue
   private long id;
-  @Column(nullable = true, name="trip_id", length = 10)
+  @Column(nullable = true, name="trip_id", length = 20)
   private String tripId;
   @Column(nullable = true, name="route_id", length = 10)
   private String routeId;
