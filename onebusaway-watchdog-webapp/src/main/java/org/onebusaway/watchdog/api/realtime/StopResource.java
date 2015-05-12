@@ -21,6 +21,7 @@ import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.MonitoredDataSource;
@@ -31,8 +32,9 @@ import org.onebusaway.watchdog.api.MetricResource;
 @Path("/metric/realtime/stop")
 public class StopResource extends MetricResource {
 
-  @Path("/{agencyId}/matched")
+  @Path("{agencyId}/matched")
   @GET
+  @Produces("application/json")
   public Response getMatchedStopCount(@PathParam("agencyId") String agencyId) {
     List<String> matchedStopIds = new ArrayList<String>();
     try {
@@ -58,8 +60,9 @@ public class StopResource extends MetricResource {
     }
   }
 
-  @Path("/{agencyId}/unmatched")
+  @Path("{agencyId}/unmatched")
   @GET
+  @Produces("application/json")
   public Response getUnmatchedStops(@PathParam("agencyId") String agencyId) {
     try {
       int unmatchedStops = 0;
@@ -85,8 +88,9 @@ public class StopResource extends MetricResource {
     }
   }
 
-  @Path("/{agencyId}/unmatched-ids")
+  @Path("{agencyId}/unmatched-ids")
   @GET
+  @Produces("application/json")
   public Response getUnmatchedStopIds(@PathParam("agencyId") String agencyId) {
     try {
       List<String> unmatchedStopIds = new ArrayList<String>();

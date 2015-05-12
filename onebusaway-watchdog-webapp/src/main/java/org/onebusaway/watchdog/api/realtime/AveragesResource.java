@@ -22,12 +22,14 @@ import org.onebusaway.watchdog.api.LongTermAveragesResource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 @Path("/metric/realtime/delta")
 public class AveragesResource extends LongTermAveragesResource {
-  @Path("/{agencyId}/average-matched-trips")
+  @Path("{agencyId}/average-matched-trips")
   @GET
+  @Produces("application/json")
   public Response getLongTermDeltaMatched(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -45,8 +47,9 @@ public class AveragesResource extends LongTermAveragesResource {
     }
   }
 
-  @Path("/{agencyId}/average-matched-trips-pct")
+  @Path("{agencyId}/average-matched-trips-pct")
   @GET
+  @Produces("application/json")
   public Response getLongTermDeltaMatchedPct(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -64,8 +67,9 @@ public class AveragesResource extends LongTermAveragesResource {
     }
   }
 
-  @Path("/{agencyId}/average-unmatched-trips")
+  @Path("{agencyId}/average-unmatched-trips")
   @GET
+  @Produces("application/json")
   public Response getLongTermDeltaUnmatched(@PathParam("agencyId") String agencyId) {
     try {
       //int unmatchedTrips = 0;
@@ -84,8 +88,9 @@ public class AveragesResource extends LongTermAveragesResource {
     }
   }
   
-  @Path("/{agencyId}/average-unmatched-trips-pct")
+  @Path("{agencyId}/average-unmatched-trips-pct")
   @GET
+  @Produces("application/json")
   public Response getLongTermDeltaUnmatchedPct(@PathParam("agencyId") String agencyId) {
     try {
       int unmatchedTrips = getUnmatchedTripIdCt(agencyId);
@@ -98,8 +103,9 @@ public class AveragesResource extends LongTermAveragesResource {
       return Response.ok(error("unmatched-trips", e)).build();
     }
   }
-  @Path("/{agencyId}/buses-in-service-pct")
+  @Path("{agencyId}/buses-in-service-pct")
   @GET
+  @Produces("application/json")
   public Response getBusesInServicePct(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -118,8 +124,9 @@ public class AveragesResource extends LongTermAveragesResource {
       return Response.ok(error("buses-in-service-pct", e)).build();
     }
   }
-  @Path("/{agencyId}/matched-stops-pct")
+  @Path("{agencyId}/matched-stops-pct")
   @GET
+  @Produces("application/json")
   public Response getMatchedStops(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -136,8 +143,9 @@ public class AveragesResource extends LongTermAveragesResource {
       return Response.ok(error("matched-stops-pct", e)).build();
     }
   }
-  @Path("/{agencyId}/unmatched-stops-pct")
+  @Path("{agencyId}/unmatched-stops-pct")
   @GET
+  @Produces("application/json")
   public Response getUnmatchedStops(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -155,8 +163,9 @@ public class AveragesResource extends LongTermAveragesResource {
     }
   } 
   
-  @Path("/{agencyId}/trip-total-pct")
+  @Path("{agencyId}/trip-total-pct")
   @GET
+  @Produces("application/json")
   public Response getTripTotalPct(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -173,8 +182,9 @@ public class AveragesResource extends LongTermAveragesResource {
       return Response.ok(error("trip-total-pct", e)).build();
     }
   }
-  @Path("/{agencyId}/trip-schedule-realtime-diff-pct")
+  @Path("{agencyId}/trip-schedule-realtime-diff-pct")
   @GET
+  @Produces("application/json")
   public Response getTripScheduleRealtimeDiff(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -193,8 +203,9 @@ public class AveragesResource extends LongTermAveragesResource {
       return Response.ok(error("trip-schedule-realtime-diff-pct", e)).build();
     }
   }
-  @Path("/{agencyId}/location-total-pct")
+  @Path("{agencyId}/location-total-pct")
   @GET
+  @Produces("application/json")
   public Response getLocationTotalPct(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
@@ -211,8 +222,9 @@ public class AveragesResource extends LongTermAveragesResource {
       return Response.ok(error("location-total-pct", e)).build();
     }
   }
-  @Path("/{agencyId}/location-invalid-lat-lon-pct")
+  @Path("{agencyId}/location-invalid-lat-lon-pct")
   @GET
+  @Produces("application/json")
   public Response getLocationInvalidPct(@PathParam("agencyId") String agencyId) {
     try {
       if (this.getDataSources() == null || this.getDataSources().isEmpty()) {
