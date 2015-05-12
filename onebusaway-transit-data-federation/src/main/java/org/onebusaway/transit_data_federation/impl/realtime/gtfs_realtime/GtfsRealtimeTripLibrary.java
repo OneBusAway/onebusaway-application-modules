@@ -166,6 +166,9 @@ class GtfsRealtimeTripLibrary {
     if (result != null) {
       if (record.getTripId() != null) {
         result.addMatchedTripId(record.getTripId().toString());
+      } else if (record.getBlockId() != null) {
+        // here we take a matched block as if it were a trip
+        result.addMatchedTripId(record.getBlockId().toString());
       } else {
         // we don't have a tripId, use the BlockId instead
         result.addMatchedTripId(record.getBlockId().toString());
@@ -402,6 +405,9 @@ class GtfsRealtimeTripLibrary {
                   stopTime.getDepartureTime(), currentDepartureTime, best);
             }
           }
+          // here may be our one chance to set the trip id on the record
+          // instead we fall back to the blockId, as there may be multiple trips
+//          record.setTripId(tripId);      
         }
       }
     }

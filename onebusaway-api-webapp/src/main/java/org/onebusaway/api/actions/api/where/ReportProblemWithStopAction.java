@@ -85,7 +85,7 @@ public class ReportProblemWithStopAction extends ApiActionSupport {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
 
-  public DefaultHttpHeaders show() throws IOException, ServiceException {
+  public DefaultHttpHeaders create() throws IOException, ServiceException {
     return index();
   }
 

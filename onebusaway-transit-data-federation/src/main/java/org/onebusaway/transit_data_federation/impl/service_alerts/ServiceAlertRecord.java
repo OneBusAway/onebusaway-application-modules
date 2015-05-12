@@ -34,7 +34,7 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
  * real-time service alerts from different agencies on a particular route.
  * The record includes service alert data object with service alert id.
  * 
- * This class is mean for internal use.
+ * This class is meant for internal use.
  * 
  * @author ckhasnis 
  */
@@ -42,23 +42,34 @@ import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAle
 @Table(name = "transit_data_service_alerts_records")
 @org.hibernate.annotations.Table(appliesTo = "transit_data_service_alerts_records", indexes = {
 	    @Index(name = "service_alert_idx", columnNames = {
-	    		"id","service_alert_id", "service_alert"})})
+	    		"id","service_alert_id", "service_alert", "last_modified"})})
 	@org.hibernate.annotations.Entity(mutable = true)
 	@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
 
 public class ServiceAlertRecord {
 	
-	public ServiceAlertRecord(String serviceAlertId, ServiceAlert serviceAlert, AgencyAndId agencyId) {
+
+  public ServiceAlertRecord(String serviceAlertId, ServiceAlert serviceAlert, AgencyAndId agencyId, long lastModified) {
+    super();
+    this.serviceAlertId = serviceAlertId;
+    this.serviceAlert = serviceAlert;
+    this.agencyId = agencyId;
+    this.lastModified = lastModified;
+  }
+
+  public ServiceAlertRecord(String serviceAlertId, ServiceAlert serviceAlert, AgencyAndId agencyId) {
 		super();
 		this.serviceAlertId = serviceAlertId;
 		this.serviceAlert = serviceAlert;
-		this.agencytId = agencyId;
+		this.agencyId = agencyId;
+		this.lastModified = System.currentTimeMillis();
 	}
 	
 	public ServiceAlertRecord() {		
 		this.serviceAlertId = null;
 		this.serviceAlert = null;
-		this.agencytId = null;
+		this.agencyId = null;
+		this.lastModified = System.currentTimeMillis();
 	}
 
 	@Id
@@ -67,7 +78,7 @@ public class ServiceAlertRecord {
 	
 	@Column(nullable = false, name="agency_id", length = 255)
 	@Lob
-	private AgencyAndId agencytId;
+	private AgencyAndId agencyId;
 	
 	@Column(nullable = false, name="service_alert_id", length = 255)
 	private String serviceAlertId;
@@ -76,6 +87,10 @@ public class ServiceAlertRecord {
 	@Lob
 	private ServiceAlert serviceAlert;	
 
+	// the column is nullable for backwards comparability, but it will return 0 internally
+	@Column(nullable = true, name="last_modified")
+	private Long lastModified = 0l;
+	
 	public String getServiceAlertId() {
 		return serviceAlertId;
 	}
@@ -84,7 +99,7 @@ public class ServiceAlertRecord {
 		this.serviceAlertId = serviceAlertId;
 	}
 
-	public ServiceAlert getServiceAlert() {
+  public ServiceAlert getServiceAlert() {
 		return serviceAlert;
 	}
 
@@ -92,30 +107,39 @@ public class ServiceAlertRecord {
 		this.serviceAlert = serviceAlert;
 	}
 
-	/**
-	 * @return the agencytId
+  /**
+	 * @return the agencyId
 	 */
-	public AgencyAndId getAgencytId() {
-		return agencytId;
+	public AgencyAndId getAgencyId() {
+		return agencyId;
 	}
 
 	/**
-	 * @param agencytId the agencytId to set
+	 * @param agencyId the agencyId to set
 	 */
-	public void setAgencytId(AgencyAndId agencytId) {
-		this.agencytId = agencytId;
+	public void setAgencyId(AgencyAndId agencyId) {
+		this.agencyId = agencyId;
 	}
 
-	public int getId() {
+  public int getId() {
 		return id;
 	}
+
+	public void setLastModified(long lastModified) {
+	  this.lastModified = lastModified;
+	}
+	
+  public long getLastModified() {
+    if (lastModified == null) return 0;
+    return lastModified;
+  }
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "ServiceAlertRecord [id=" + id + ", agencytId=" + agencytId
+		return "ServiceAlertRecord [id=" + id + ", agencyId=" + agencyId
 				+ ", serviceAlertId=" + serviceAlertId + ", serviceAlert="
 				+ serviceAlert + "]";
 	}
@@ -128,7 +152,7 @@ public class ServiceAlertRecord {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((agencytId == null) ? 0 : agencytId.hashCode());
+				+ ((agencyId == null) ? 0 : agencyId.hashCode());
 		result = prime * result + id;
 		result = prime * result
 				+ ((serviceAlert == null) ? 0 : serviceAlert.hashCode());
@@ -149,10 +173,10 @@ public class ServiceAlertRecord {
 		if (getClass() != obj.getClass())
 			return false;
 		ServiceAlertRecord other = (ServiceAlertRecord) obj;
-		if (agencytId == null) {
-			if (other.agencytId != null)
+		if (agencyId == null) {
+			if (other.agencyId != null)
 				return false;
-		} else if (!agencytId.equals(other.agencytId))
+		} else if (!agencyId.equals(other.agencyId))
 			return false;
 		if (id != other.id)
 			return false;

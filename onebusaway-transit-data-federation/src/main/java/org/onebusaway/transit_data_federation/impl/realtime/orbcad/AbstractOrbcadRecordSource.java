@@ -102,6 +102,8 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
   private transient int _recordsValid = 0;
   
+  private transient long _latestUpdate = 0;
+  
   private MonitoredResult _monitoredResult, _currentResult = new MonitoredResult();
 
   public void setRefreshInterval(int refreshIntervalInSeconds) {
@@ -304,6 +306,7 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
         preHandleRefresh();
         handleRefresh();
+        _currentResult.setLastUpdate(_latestUpdate);
         postHandleRefresh();
 
         try {
@@ -376,6 +379,9 @@ public abstract class AbstractOrbcadRecordSource implements MonitoredDataSource 
 
       message.setServiceDate(blockInstance.getServiceDate());
       message.setTimeOfRecord(record.getTime() * 1000);
+      if (message.getTimeOfRecord() > _latestUpdate) {
+        _latestUpdate = message.getTimeOfRecord();
+      }
       message.setTimeOfLocationUpdate(message.getTimeOfRecord());
       
       // In Orbcad, +scheduleDeviation means the bus is early and -schedule
