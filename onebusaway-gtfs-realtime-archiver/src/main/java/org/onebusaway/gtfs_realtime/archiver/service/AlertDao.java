@@ -15,19 +15,10 @@
  */
 package org.onebusaway.gtfs_realtime.archiver.service;
 
-import java.util.List;
-
 import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
-import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+public interface AlertDao {
 
-public interface FeedService {
+  void saveOrUpdate(AlertModel... array);
 
-  List<TripUpdateModel> readTripUpdates(FeedMessage tripUpdates);
-
-  List<VehiclePositionModel> readVehiclePositions(FeedMessage vehiclePositions);
-
-  List<AlertModel> readAlerts(FeedMessage alerts);
 }

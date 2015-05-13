@@ -25,12 +25,17 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
-
+<!--
   <import resource="classpath:data-sources.xml" />
+
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
 
+  <import resource="classpath:org/onebusaway/container/application-context-hibernate.xml" />
+
+
   <context:component-scan base-package="org.onebusaway.gtfs_realtime.archiver" />
-  
+  -->
+<!--  
   <bean id="usersHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
     <property name="target" value="hibernateAnnotatedClasses" />
     <property name="values">
@@ -45,7 +50,7 @@
     </property>
   </bean>
   <alias name="dataSource" alias="mutableDataSource" />
-    
+-->
 
   <bean id="gtfsPersistorImpl" class="org.onebusaway.gtfs_realtime.archiver.service.GtfsPersistorImpl">
     <property name="taskScheduler" ref="taskScheduler" />
@@ -74,4 +79,15 @@
   <bean id="scheduledExecutorService" class="org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean" />
   <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
 
+    
+    <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    
+    
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    
+
 </beans>
+
+

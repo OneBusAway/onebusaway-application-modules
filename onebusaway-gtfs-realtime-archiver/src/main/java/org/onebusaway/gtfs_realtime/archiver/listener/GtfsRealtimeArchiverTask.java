@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.onebusaway.gtfs_realtime.archiver.model.EntityUpdate;
+import org.onebusaway.gtfs_realtime.archiver.model.EntitySelectorModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.service.FeedService;
 import org.onebusaway.gtfs_realtime.archiver.service.GtfsPersistor;
@@ -111,7 +111,7 @@ public class GtfsRealtimeArchiverTask {
       _log.warn("no vehiclePositionsUrl configured.  This is most likely a configuration issue");
     }
     if (_alertsUrl == null) {
-      _log.warn("no alertsUrl configured.");
+      _log.warn("no alertsUrl configured.  This is most likely a configuration issue");
     }
     if (_refreshInterval > 0) {
       _log.info("scheduling executor for refresh=" + _refreshInterval);
@@ -137,6 +137,7 @@ public class GtfsRealtimeArchiverTask {
     
     _feedService.readTripUpdates(tripUpdates);
     _feedService.readVehiclePositions(vehiclePositions);
+    _feedService.readAlerts(alerts);
   }
   
   private FeedMessage readOrReturnDefault(URL url) throws IOException {
