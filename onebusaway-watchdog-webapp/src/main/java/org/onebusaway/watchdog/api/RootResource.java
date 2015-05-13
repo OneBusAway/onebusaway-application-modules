@@ -48,32 +48,6 @@ public class RootResource extends MetricResource {
     
    }
 
-
-  @Path("list")
-  @GET
-  @Produces("application/json")
-   public Response list() {
-    try {
-      List<AgencyWithCoverageBean> agenciesWithCoverage = getTDS().getAgenciesWithCoverage();
-      List<String> agencyIds = new ArrayList<String>();
-      for (AgencyWithCoverageBean bean : agenciesWithCoverage) {
-        agencyIds.add(bean.getAgency().getId());
-      }
-      Collections.sort(agencyIds);
-      RESTEndpointsDocumenter red = new RESTEndpointsDocumenter();
-      List<Endpoint> endpoints = red.findRESTEndpoints("org.onebusaway.watchdog.api");
-      String apiBasePath = System.getProperty("api.base.path");
-      if (apiBasePath == null) {
-        apiBasePath = DEFAULT_API_PATH;
-      }
-      StringBuffer table = red.outputEndpointsTable(endpoints, agencyIds, apiBasePath);
-    return Response.ok(table.toString()).build();
-    } catch (Exception e) {
-      _log.error("ping broke", e);
-      return Response.ok(error("ping", e)).build();
-    }
-   }
-  
   @Path("list-uris")
   @GET
   @Produces("application/json")
