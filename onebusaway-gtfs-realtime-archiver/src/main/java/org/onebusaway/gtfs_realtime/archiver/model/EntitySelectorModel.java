@@ -21,6 +21,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
@@ -28,37 +30,65 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name="entity")
-@org.hibernate.annotations.Table(appliesTo ="entity", indexes = {
-    @Index(name = "entity_idx", columnNames = {
-        "id","agency_id","route_id","route_type","stop_id","trip_id","trip_route_id","trip_start","alert_id"
-    })})
+@Table(name="entity_selector")
+@org.hibernate.annotations.Table(appliesTo ="entity_selector", indexes = {
+    @Index(name = "es_id_idx", columnNames = {"id"}),
+    @Index(name = "es_agency_id_idx", columnNames = {"agency_id"}),
+    @Index(name = "es_route_id_idx", columnNames = {"route_id"}),
+    @Index(name = "es_stop_id_idx", columnNames = {"stop_id"}),
+    @Index(name = "es_trip_id_idx", columnNames = {"trip_id"}),
+    @Index(name = "es_trip_route_id_idx", columnNames = {"trip_route_id"}),
+    @Index(name = "es_alert_id_idx", columnNames = {"alert_id"})
+    })
 @org.hibernate.annotations.Entity(mutable = false)
-public class EntityUpdate {
-
-  public EntityUpdate() {
-    
-  }
+public class EntitySelectorModel {
+  
+  /* Sound Transit constants */
+  
+  private static final int AGENCY_ID_LENGTH = 15;
+  private static final int ROUTE_ID_LENGTH = 10;
+  private static final int STOP_ID_LENGTH = 10;
+  private static final int TRIP_ID_LENGTH = 10;
+  private static final int TRIP_ROUTE_ID_LENGTH = 10;
+  private static final int TRIP_START_TIME_LENGTH = 8;
+  private static final int TRIP_START_DATE_LENGTH = 10;
+  
+  
+  /* Test constants */
+  /*
+  private static final int AGENCY_ID_LENGTH = 15;
+  private static final int ROUTE_ID_LENGTH = 50;
+  private static final int STOP_ID_LENGTH = 50;
+  private static final int TRIP_ID_LENGTH = 100;
+  private static final int TRIP_ROUTE_ID_LENGTH = 50;
+  private static final int TRIP_START_TIME_LENGTH = 8;
+  private static final int TRIP_START_DATE_LENGTH = 10;
+  */
   
   @Id
   @GeneratedValue
   private long id;
-  @Column(nullable = true, name="agency_id", length = 15)
+  @Column(nullable = true, name="agency_id", length = AGENCY_ID_LENGTH)
   private String agencyId;
-  @Column(nullable = true, name="route_id", length = 10)
+  @Column(nullable = true, name="route_id", length = ROUTE_ID_LENGTH)
   private String routeId;
   @Column(nullable = true, name="route_type")
   private long routeType;
-  @Column(nullable = true, name="stop_id", length = 10)
+  @Column(nullable = true, name="stop_id", length = STOP_ID_LENGTH)
   private String stopId;
-  @Column(nullable = true, name="trip_id", length = 10)
+  @Column(nullable = true, name="trip_id", length = TRIP_ID_LENGTH)
   private String tripId;
-  @Column(nullable = true, name="trip_route_id", length = 10)
+  @Column(nullable = true, name="trip_route_id", length = TRIP_ROUTE_ID_LENGTH)
   private String tripRouteId;
-  @Column(nullable = true, name="agency_id", length = 15)
-  private Date tripStart;
-  @Column(nullable = true, name="alert_id")
-  private long alertId;
+  @Column(nullable = true, name="trip_start_time", length = TRIP_START_TIME_LENGTH)
+  private String tripStartTime;
+  @Column(nullable = true, name="trip_start_date", length = TRIP_START_DATE_LENGTH)
+  private String tripStartDate;
+  
+  @ManyToOne
+  @JoinColumn(nullable = false, name="alert_id")
+  private AlertModel alert;
+  
   
   public long getId() {
     return id;
@@ -102,17 +132,23 @@ public class EntityUpdate {
   public void setTripRouteId(String tripRouteId) {
     this.tripRouteId = tripRouteId;
   }
-  public Date getTripStart() {
-    return tripStart;
+  public String getTripStartTime() {
+    return tripStartTime;
   }
-  public void setTripStart(Date tripStart) {
-    this.tripStart = tripStart;
+  public void setTripStartTime(String tripStartTime) {
+    this.tripStartTime = tripStartTime;
   }
-  public long getAlertId() {
-    return alertId;
+  public String getTripStartDate() {
+    return tripStartDate;
   }
-  public void setAlertId(long alertId) {
-    this.alertId = alertId;
+  public void setTripStartDate(String tripStartDate) {
+    this.tripStartDate = tripStartDate;
+  }
+  public AlertModel getAlert() {
+    return alert;
+  }
+  public void setAlert(AlertModel alert) {
+    this.alert = alert;
   }
   
 }
