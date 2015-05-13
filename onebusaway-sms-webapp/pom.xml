@@ -5,7 +5,7 @@
     <parent>
         <artifactId>onebusaway-application-modules</artifactId>
         <groupId>org.onebusaway</groupId>
-        <version>1.1.13-st.3-SNAPSHOT</version>
+        <version>1.1.14-SNAPSHOT</version>
     </parent>
 
     <artifactId>onebusaway-sms-webapp</artifactId>

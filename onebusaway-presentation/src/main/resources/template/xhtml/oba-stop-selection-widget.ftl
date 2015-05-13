@@ -18,9 +18,9 @@
 <div class="StopSelectionWidgetTemplate" style="display: none">
   <div class="resultsPanel"></div>
   <div class="searchPanel">
-    <div>Search for stops:</div>
+    <div>Search for stops or routes:</div>
     <div><input class="SearchInput" type="text"/><input class="SearchButton" type="button" value="Search"/></div>
-    <div>By address (ex. "3rd and pike") or route number (ex. "44" or "71").</div>
+    <div>By address (ex. "Florida Av and Hillsborough Av") or route number (ex. "5" or "96").</div>
   </div>
   <div class="mapPanel">
     <div class="map"></div>

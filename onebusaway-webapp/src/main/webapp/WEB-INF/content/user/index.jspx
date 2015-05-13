@@ -21,7 +21,7 @@
 <head>
 <title>User Info</title>
   <script type="text/javascript"                                  
-          src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g"><jsp:text></jsp:text></script>
+          src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=AIzaSyCAnK_n1DSXgreUEQ-dD6m253rSPK9Nw9o"><jsp:text></jsp:text></script>
   <script type="text/javascript"
           src="org.onebusaway.webapp.gwt.SearchLocationLibrary.nocache.js"><jsp:text></jsp:text></script>
 
@@ -53,7 +53,7 @@
 	
 	<p><span class="label">Current Settings:</span>
 	  <s:if test="rememberPreferencesEnabled">Preferences <span class="bold">ARE</span> saved</s:if>
-	  <s:else>Preferences <span class="bold">ARE NOT</span> saved</s:else>
+	  <s:else>Prefenences <span class="bold">ARE NOT</span> saved</s:else>
 	</p>
 	
 	<p>

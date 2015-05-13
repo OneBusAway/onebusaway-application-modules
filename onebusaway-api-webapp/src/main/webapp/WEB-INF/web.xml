@@ -29,11 +29,23 @@
         </param-value>
   </context-param>
 
-	<!-- Filters -->
+  <!-- Filters -->
+  <filter>
+    <filter-name>UrlRewriteFilter</filter-name>
+    <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+<!--     <init-param> -->
+<!--     	<param-name>logLevel</param-name> -->
+<!--     	<param-value>TRACE</param-value> -->
+<!--     </init-param> -->
+  </filter>
   <filter>
     <filter-name>struts-prepare-and-execute</filter-name>
     <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
   </filter>
+  <filter-mapping>
+    <filter-name>UrlRewriteFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
   <filter-mapping>
     <filter-name>struts-prepare-and-execute</filter-name>
     <url-pattern>/*</url-pattern>

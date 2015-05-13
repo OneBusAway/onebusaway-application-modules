@@ -37,7 +37,9 @@
   <!-- -->
   <aop:aspectj-autoproxy />
 
-  <context:component-scan base-package="org.onebusaway.api.impl" />
+  <context:component-scan base-package="org.onebusaway.api.impl,org.onebusaway.presentation.impl.realtime,org.onebusaway.presentation.services.cachecontrol"/>
+  
+  <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
   
   <!-- Configure a default KeyValidationService instance -->
   <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl">

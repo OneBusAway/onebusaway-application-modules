@@ -127,6 +127,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
     assertEquals(300, position.getClosestStopTimeOffset());
+    assertNull(position.getPreviousStop());
     assertEquals(_stopTimeA, position.getNextStop());
     assertEquals(300, position.getNextStopTimeOffset());
     assertEquals(0.0, position.getDistanceAlongBlock(), 0.0);
@@ -172,6 +173,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
     assertEquals(60, position.getClosestStopTimeOffset());
+    assertNull(position.getPreviousStop());
     assertEquals(_stopTimeA, position.getNextStop());
     assertEquals(60, position.getNextStopTimeOffset());
     assertEquals(140.0, position.getDistanceAlongBlock(), 0.0);
@@ -188,6 +190,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
     assertEquals(60, position.getClosestStopTimeOffset());
+    assertNull(position.getPreviousStop());
     assertEquals(_stopTimeA, position.getNextStop());
     assertEquals(60, position.getNextStopTimeOffset());
     assertEquals(140.0, position.getDistanceAlongBlock(), 0.0);
@@ -208,6 +211,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
     assertEquals(0, position.getClosestStopTimeOffset());
+    assertNull(position.getPreviousStop());
     assertEquals(_stopTimeA, position.getNextStop());
     assertEquals(0, position.getNextStopTimeOffset());
     assertEquals(200.0, position.getDistanceAlongBlock(), 0.0);
@@ -224,6 +228,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
     assertEquals(0, position.getClosestStopTimeOffset());
+    assertNull(position.getPreviousStop());
     assertEquals(_stopTimeA, position.getNextStop());
     assertEquals(0, position.getNextStopTimeOffset());
     assertEquals(200.0, position.getDistanceAlongBlock(), 0.0);
@@ -244,6 +249,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
     assertEquals(-120, position.getClosestStopTimeOffset());
+    assertEquals(_stopTimeA, position.getPreviousStop());
     assertEquals(_stopTimeB, position.getNextStop());
     assertEquals(480, position.getNextStopTimeOffset());
     assertEquals(320.0, position.getDistanceAlongBlock(), 0.0);
@@ -260,6 +266,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeA, position.getClosestStop());
     assertEquals(-120, position.getClosestStopTimeOffset());
+    assertEquals(_stopTimeA, position.getPreviousStop());
     assertEquals(_stopTimeB, position.getNextStop());
     assertEquals(480, position.getNextStopTimeOffset());
     assertEquals(320.0, position.getDistanceAlongBlock(), 0.0);
@@ -280,6 +287,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeB, position.getClosestStop());
     assertEquals(120, position.getClosestStopTimeOffset());
+    assertEquals(_stopTimeA, position.getPreviousStop());
     assertEquals(_stopTimeB, position.getNextStop());
     assertEquals(120, position.getNextStopTimeOffset());
     assertEquals(680, position.getDistanceAlongBlock(), 0.0);
@@ -295,6 +303,7 @@ public class ScheduledBlockLocationServiceImplTest {
 
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeB, position.getClosestStop());
+    assertEquals(_stopTimeA, position.getPreviousStop());
     assertEquals(_stopTimeB, position.getNextStop());
     assertEquals(120, position.getNextStopTimeOffset());
     assertEquals(120, position.getClosestStopTimeOffset());
@@ -316,6 +325,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeB, position.getClosestStop());
     assertEquals(0, position.getClosestStopTimeOffset());
+    assertEquals(_stopTimeA, position.getPreviousStop());
     assertEquals(_stopTimeB, position.getNextStop());
     assertEquals(0, position.getNextStopTimeOffset());
     assertEquals(800, position.getDistanceAlongBlock(), 0.0);
@@ -335,6 +345,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripA, position.getActiveTrip());
     assertEquals(_stopTimeB, position.getClosestStop());
     assertEquals(-120, position.getClosestStopTimeOffset());
+    assertEquals(_stopTimeB, position.getPreviousStop());
     assertEquals(_stopTimeC, position.getNextStop());
     assertEquals(180, position.getNextStopTimeOffset());
     assertEquals(960, position.getDistanceAlongBlock(), 0.0);
@@ -354,6 +365,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripB, position.getActiveTrip());
     assertEquals(_stopTimeC, position.getClosestStop());
     assertEquals(120, position.getClosestStopTimeOffset());
+    assertEquals(_stopTimeB, position.getPreviousStop());
     assertEquals(_stopTimeC, position.getNextStop());
     assertEquals(120, position.getNextStopTimeOffset());
     assertEquals(1040, position.getDistanceAlongBlock(), 0.0);
@@ -371,6 +383,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripB, position.getActiveTrip());
     assertEquals(_stopTimeC, position.getClosestStop());
     assertEquals(0, position.getClosestStopTimeOffset());
+    assertEquals(_stopTimeB, position.getPreviousStop());
     assertEquals(_stopTimeC, position.getNextStop());
     assertEquals(0, position.getNextStopTimeOffset());
     assertEquals(1200, position.getDistanceAlongBlock(), 0.0);
@@ -395,6 +408,7 @@ public class ScheduledBlockLocationServiceImplTest {
     assertEquals(_tripB, position.getActiveTrip());
     assertEquals(_stopTimeC, position.getClosestStop());
     assertEquals(-225, position.getClosestStopTimeOffset());
+    assertNull(position.getPreviousStop());
     assertNull(position.getNextStop());
     assertEquals(0, position.getNextStopTimeOffset());
     assertEquals(1500, position.getDistanceAlongBlock(), 0.0);

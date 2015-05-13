@@ -15,7 +15,7 @@
     </bean>
     <!-- Specify our transit data source -->
     <bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-        <property name="serviceUrl" value="${tds.path}/remoting/transit-data-service" />
+        <property name="serviceUrl" value="http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp/remoting/transit-data-service" />
         <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
     </bean>
 

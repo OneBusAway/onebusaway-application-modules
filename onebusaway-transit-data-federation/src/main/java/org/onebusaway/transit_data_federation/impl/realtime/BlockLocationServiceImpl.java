@@ -616,6 +616,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     location.setClosestStopTimeOffset(scheduledLocation.getClosestStopTimeOffset());
     location.setNextStop(scheduledLocation.getNextStop());
     location.setNextStopTimeOffset(scheduledLocation.getNextStopTimeOffset());
+    location.setPreviousStop(scheduledLocation.getPreviousStop());
 
     return location;
   }
