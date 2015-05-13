@@ -17,6 +17,7 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.List;
 
+import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 
@@ -28,4 +29,5 @@ public interface FeedService {
 
   List<VehiclePositionModel> readVehiclePositions(FeedMessage vehiclePositions);
 
+  List<AlertModel> readAlerts(FeedMessage alerts);
 }

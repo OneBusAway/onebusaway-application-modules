@@ -17,6 +17,7 @@ package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.List;
 
+import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 
@@ -25,5 +26,6 @@ public interface GtfsPersistor {
   void persist(TripUpdateModel tripUpdate);
 
   void persist(VehiclePositionModel vehiclePosition);
-
+  
+  void persist(AlertModel alert);
 }

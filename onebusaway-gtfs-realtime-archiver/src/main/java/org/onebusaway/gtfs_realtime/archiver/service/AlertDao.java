@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.gtfs_realtime.archiver.model;
+package org.onebusaway.gtfs_realtime.archiver.service;
 
-public class Alert {
+import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
 
-  private long id;
-  private long start;
-  private long end;
-  private String cause;
-  private String effect;
-  private String url;
-  private String headerText;
-  private String descriptionText;
+public interface AlertDao {
+
+  void saveOrUpdate(AlertModel... array);
+
 }
