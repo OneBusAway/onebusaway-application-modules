@@ -9,13 +9,13 @@
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-              <prop key="tds.path">http://localhost:8181/onebusaway-transit-data-federation-webapp</prop>
+              <prop key="tds.path">http://localhost:8080/onebusaway-transit-data-federation-webapp</prop>
          </props>
       </property>
     </bean>
     <!-- Specify our transit data source -->
     <bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-        <property name="serviceUrl" value="http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp/remoting/transit-data-service" />
+        <property name="serviceUrl" value="http://localhost:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
         <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
     </bean>
 
@@ -25,7 +25,7 @@
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
-                value="java:comp/env/jdbc/soundDB"/>   
+                value="java:comp/env/jdbc/hartDB"/>   
       <property name="lookupOnStartup"
                 value="true"/>   
       <property name="cache"

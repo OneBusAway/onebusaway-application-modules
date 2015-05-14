@@ -31,39 +31,28 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-<<<<<<< Updated upstream
               <prop key="bundlePath">/var/lib/obanyc/oba-hart-bundle</prop>
-=======
-              <prop key="bundlePath">/var/lib/obanyc/no-such-dir</prop>
->>>>>>> Stashed changes
          </props>
       </property>
     </bean>
-    <bean id="wsf_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
-        <property name="tripUpdatesUrl" value="http://admin.staging.obast.org:9999/wsf/tripUpdates" />
-        <property name="vehiclePositionsUrl" value="http://admin.staging.obast.org:9999/wsf/vehiclePositions" />
-        <property name="refreshInterval" value="30"/>
-        <property name="agencyIds">
-                <list>
-                        <value>95</value>
-                </list>
-        </property>
+    
+  <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+    <property name="tripUpdatesUrl" value="http://realtime.prod.obahart.org:8088/trip-updates" />
+    <property name="vehiclePositionsUrl" value="http://realtime.prod.obahart.org:8088/vehicle-positions" />
+    <!-- Optionally set the refresh interval - how often we query the URLs, in seconds (default=30) -->
+    <property name="refreshInterval" value="60" />
+  </bean>
 
-</bean>
+
     
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
-      <constructor-arg type="java.lang.String" value="admin.staging.obast.org"/>
+      <constructor-arg type="java.lang.String" value="admin.staging.obahart.org"/>
       <constructor-arg type="java.lang.Integer" value="9999" />
       <constructor-arg type="java.lang.String" value="/api/" />
     </bean>
-<!--     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" > -->
-<!--       <constructor-arg type="java.lang.String" value="localhost"/> -->
-<!--       <constructor-arg type="java.lang.Integer" value="9999" /> -->
-<!--       <constructor-arg type="java.lang.String" value="/onebusaway-nyc-admin-webapp/api/" /> -->
-<!--     </bean> -->
     
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-      <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-st-bundle" />
-      <property name="standaloneMode" value="false" />
+      <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-hart-bundle" />
+      <property name="standaloneMode" value="true" />
     </bean>
 </beans>

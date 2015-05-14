@@ -44,6 +44,7 @@ public class PresentationServiceImpl implements PresentationService {
   private int _distanceAsStopsMaximumThresholdInFeet = 2640;
   private int _expiredTimeout = 300;
   private float _previousTripFilterDistanceMiles = 5.0f;
+  private boolean _includeRequiresPhase = false;
 
   @ConfigurationParameter
   public void setAtStopThresholdInFeet(int atStopThresholdInFeet) {
@@ -80,6 +81,16 @@ public class PresentationServiceImpl implements PresentationService {
     _previousTripFilterDistanceMiles = previousTripFilterDistanceMiles;
   }
 
+  @ConfigurationParameter
+  /**
+   * is phase required (IN_PROGRESS) for realtime data to be displayed?
+   * HINT:  NYC uses this, other tend not to.
+   * @param needsPhase
+   */
+  public void setIncludeRequiresPhase(boolean needsPhase) {
+    _includeRequiresPhase = needsPhase;
+  }
+  
   @Override
   public void setTime(long time) {
     _now = time;
@@ -197,8 +208,14 @@ public class PresentationServiceImpl implements PresentationService {
       return false;
     }
 
-    if(statusBean.getVehicleId() == null || statusBean.getPhase() == null) {
-      _log.debug("  " + statusBean.getVehicleId() + " filtered out because phase or vehicle id is null.");
+    if(statusBean.getVehicleId() == null ) {
+      _log.debug("  " + statusBean.getVehicleId() + " filtered out because vehicle id is null.");
+      return false;
+    }
+    
+    // onebusaway-application-modules does not use phase!
+    if (_includeRequiresPhase  && statusBean.getPhase() == null) {
+      _log.debug("  " + statusBean.getVehicleId() + " filtered out because phase is null.");
       return false;
     }
 
