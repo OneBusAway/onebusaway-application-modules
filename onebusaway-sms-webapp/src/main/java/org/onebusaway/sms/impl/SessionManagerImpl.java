@@ -130,7 +130,6 @@ public class SessionManagerImpl implements SessionManager {
   private class SessionCleanup implements Runnable {
 
     public void run() {
-      _log.error("running...");
       long minTime = System.currentTimeMillis() - _sessionTimeout * 1000;
 
       Iterator<ContextEntry> it = _contextEntriesByKey.values().iterator();
@@ -140,7 +139,6 @@ public class SessionManagerImpl implements SessionManager {
         if (!entry.isValidAfterAccessCheck(minTime))
           it.remove();
       }
-      _log.error("ran!");
     }
   }
 }
