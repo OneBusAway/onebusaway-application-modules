@@ -48,15 +48,19 @@ public abstract class CacheService<K, V> {
 
   String addr = "sessions-memcache:11211";
   MemcachedClient memcache;
-  boolean useMemcached;
+  protected boolean useMemcached = false;
 
   protected abstract void refreshCache();
 
   // proxy to the actual hashing algorithm
   public abstract K hash(Object... factors);
 
-  protected boolean _disabled;
+  protected boolean _disabled = false;
 
+  public void setUseMemcached(boolean useIt) {
+    this.useMemcached = useIt;
+  }
+  
   public synchronized void setDisabled(boolean disable) {
     this._disabled = disable;
   }
@@ -73,9 +77,10 @@ public abstract class CacheService<K, V> {
           TimeUnit.SECONDS).build();
       _log.info("done");
     }
-    if (memcache==null)
+    if (memcache==null && useMemcached)
     {
       try {
+        // TODO this appears to leak connections if addr does not exist
         memcache = new MemcachedClient(
             new BinaryConnectionFactory(),
             AddrUtil.getAddresses(addr));
@@ -154,8 +159,12 @@ public abstract class CacheService<K, V> {
   @PostConstruct
   private void startStatusTask() {
     if (_statusTask == null) {
-      _statusTask = _taskScheduler.scheduleWithFixedDelay(new StatusThread(),
-          STATUS_INTERVAL_MINUTES * 60 * 1000);
+      if (!_disabled) {
+        _statusTask = _taskScheduler.scheduleWithFixedDelay(new StatusThread(),
+            STATUS_INTERVAL_MINUTES * 60 * 1000);
+      } else {
+        this.logStatus();
+      }
     }
   }
 
