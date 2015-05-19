@@ -64,11 +64,9 @@ public class SessionManagerImpl implements SessionManager {
 
   @PostConstruct
   public void start() {
-    _log.error("starting...");
     _executor = Executors.newSingleThreadScheduledExecutor();
     _executor.scheduleAtFixedRate(new SessionCleanup(),
         _sessionReaperFrequency, _sessionReaperFrequency, TimeUnit.SECONDS);
-    _log.error("started!");
   }
 
   @PreDestroy

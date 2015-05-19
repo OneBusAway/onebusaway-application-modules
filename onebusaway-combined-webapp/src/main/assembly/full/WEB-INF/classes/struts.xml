@@ -44,7 +44,7 @@
   <constant name="struts.actionProxyFactory" value="multi" />
   <constant name="struts.mapper.class" value="multi" />
 
-  <constant name="org.onebusaway.presentation.impl.struts.MultiActionProxyFactory.mapping" value="/api=rest,/=struts" />
-  <constant name="org.onebusaway.presentation.impl.struts.MultiActionMapper.mapping" value="/api=rest,/=struts" />
+  <constant name="org.onebusaway.presentation.impl.struts.MultiActionProxyFactory.mapping" value="/siri=rest,/api=rest,/=struts" />
+  <constant name="org.onebusaway.presentation.impl.struts.MultiActionMapper.mapping" value="/siri=rest,/api=rest,/=struts" />
 
 </struts>

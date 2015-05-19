@@ -663,5 +663,4 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			return _serviceAlertsPath;
 		return _bundle.getServiceAlertsPath();
 	}
-
 }

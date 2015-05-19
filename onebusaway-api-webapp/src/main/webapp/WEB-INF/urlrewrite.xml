@@ -1,4 +1,5 @@
-<#--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
 
     Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
 
@@ -15,14 +16,17 @@
     limitations under the License.
 
 -->
-<div class="StopSelectionWidgetTemplate" style="display: none">
-  <div class="resultsPanel"></div>
-  <div class="searchPanel">
-    <div>Search for stops or routes:</div>
-    <div><input class="SearchInput" type="text"/><input class="SearchButton" type="button" value="Search"/></div>
-    <div>By address (ex. "3rd and pike") or route number (ex. "44" or "71").</div>
-  </div>
-  <div class="mapPanel">
-    <div class="map"></div>
-  </div>
-</div>
+<!--
+
+    Configuration file for UrlRewriteFilter
+    http://tuckey.org/urlrewrite/
+
+-->
+<urlrewrite use-query-string="true">
+
+    <rule>
+        <from>^/siri/([^.]*)\.(xml|json)(.*)$</from>
+        <to type="redirect" last="true">/onebusaway-api-webapp/siri/$1$3&amp;type=$2</to>
+    </rule>
+	
+</urlrewrite>

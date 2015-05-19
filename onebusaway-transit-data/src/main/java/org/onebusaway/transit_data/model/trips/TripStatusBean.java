@@ -67,6 +67,13 @@ public final class TripStatusBean implements Serializable {
   private int nextStopTimeOffset;
 
   private double nextStopDistanceFromVehicle;
+  
+  private StopBean previousStop;
+  
+  private int previousStopTimeOffset;
+  
+  private double previousStopDistanceFromVehicle;
+  
 
   /****
    * These are fields that we can supply only from real-time data
@@ -267,7 +274,32 @@ public final class TripStatusBean implements Serializable {
     this.nextStopDistanceFromVehicle = d;
   }
 
-  /**
+  public StopBean getPreviousStop() {
+	return previousStop;
+}
+
+public void setPreviousStop(StopBean previousStop) {
+	this.previousStop = previousStop;
+}
+
+public int getPreviousStopTimeOffset() {
+	return previousStopTimeOffset;
+}
+
+public void setPreviousStopTimeOffset(int previousStopTimeOffset) {
+	this.previousStopTimeOffset = previousStopTimeOffset;
+}
+
+public double getPreviousStopDistanceFromVehicle() {
+	return previousStopDistanceFromVehicle;
+}
+
+public void setPreviousStopDistanceFromVehicle(
+		double previousStopDistanceFromVehicle) {
+	this.previousStopDistanceFromVehicle = previousStopDistanceFromVehicle;
+}
+
+/**
    * @return true if there is an real-time data for this trip, whether
    *         prediction or location
    */

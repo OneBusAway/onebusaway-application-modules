@@ -86,6 +86,8 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   private BundleStoreService _bundleStore = null;
 
   protected boolean _standaloneMode = true;
+  
+  protected boolean _builderMode = false;
 
   protected boolean _bundleIsReady = false;
 
@@ -122,6 +124,12 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   @PostConstruct
   protected void setup() throws Exception {  
+    if (_builderMode) {
+      String bundleRoot = System.getProperty("bundle.root");
+      _log.info("builder mode:  using bundle.root of " + bundleRoot);
+      _bundleStore = new LocalBundleStoreImpl(bundleRoot);
+      return;
+    }
     if(!_standaloneMode) {
       _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);        
     }
@@ -255,6 +263,10 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     return _standaloneMode;
   }
 
+  public void setBuilderMode(boolean builderMode) {
+    _builderMode = builderMode;
+  }
+  
   /********************
    * Service Methods
    ********************/
@@ -310,7 +322,9 @@ public class BundleManagementServiceImpl implements BundleManagementService {
   // Can messages be processed using this bundle and current state?
   @Override
   public Boolean bundleIsReady() {
-    return _bundleIsReady;
+    if (!_builderMode)
+      return _bundleIsReady;
+    return true;
   }
 
   // register inference processing thread with the bundle manager--

@@ -9,7 +9,7 @@
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-              <prop key="tds.path">http://localhost:8181/onebusaway-transit-data-federation-webapp</prop>
+              <prop key="tds.path">http://localhost:8080/onebusaway-transit-data-federation-webapp</prop>
          </props>
       </property>
     </bean>

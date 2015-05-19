@@ -31,11 +31,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-<<<<<<< Updated upstream
-              <prop key="bundlePath">/var/lib/obanyc/oba-hart-bundle</prop>
-=======
               <prop key="bundlePath">/var/lib/obanyc/no-such-dir</prop>
->>>>>>> Stashed changes
          </props>
       </property>
     </bean>
