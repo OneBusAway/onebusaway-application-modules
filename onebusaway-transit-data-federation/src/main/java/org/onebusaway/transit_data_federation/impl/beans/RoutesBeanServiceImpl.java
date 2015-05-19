@@ -89,9 +89,8 @@ class RoutesBeanServiceImpl implements RoutesBeanService {
   private Map<AgencyAndId, STRtree> _stopTreesByRouteId = new HashMap<AgencyAndId, STRtree>();
 
   @Refreshable(dependsOn = { 
-      RefreshableResources.ROUTE_COLLECTIONS_DATA, 
-      RefreshableResources.NARRATIVE_DATA,
-      RefreshableResources.TRANSIT_GRAPH })
+      RefreshableResources.NARRATIVE_DATA
+      })
   @PostConstruct
   public void setup() {
     _stopTreesByRouteId.clear();
