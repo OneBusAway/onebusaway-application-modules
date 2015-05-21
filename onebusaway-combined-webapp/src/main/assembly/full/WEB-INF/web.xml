@@ -103,6 +103,16 @@
     <servlet-name>LoginServlet</servlet-name>
     <url-pattern>/services/login/*</url-pattern>
   </servlet-mapping>
+  <!--  we expose the TDS for twilio integration -->
+  <servlet>
+		<servlet-name>remoting</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<load-on-startup>6</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+		<servlet-name>remoting</servlet-name>
+		<url-pattern>/services/remoting/*</url-pattern>
+  </servlet-mapping>
 
     <!-- Welcome file lists -->
   <welcome-file-list>
