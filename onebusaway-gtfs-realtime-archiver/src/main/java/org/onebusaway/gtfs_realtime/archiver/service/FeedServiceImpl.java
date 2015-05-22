@@ -16,18 +16,20 @@
 package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.gtfs_realtime.archiver.listener.GtfsRealtimeEntitySource;
 import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
 import org.onebusaway.gtfs_realtime.archiver.model.EntitySelectorModel;
 import org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TimeRangeModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
+import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +45,6 @@ import com.google.transit.realtime.GtfsRealtime.TimeRange;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
-import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 
 @Component
 /**
@@ -62,18 +63,67 @@ public class FeedServiceImpl implements FeedService {
   }
   
   @Override
-  public List<TripUpdateModel> readTripUpdates(FeedMessage tripUpdates) {
+  public List<TripUpdateModel> readTripUpdates(FeedMessage tripUpdates, GtfsRealtimeEntitySource entitySource) {
     List<TripUpdateModel> updates = new ArrayList<TripUpdateModel>();
     if (tripUpdates == null) {
       _log.error("nothing to do!");
       return updates;
     }
     List<FeedEntity> entityList = tripUpdates.getEntityList();
-    long timestamp = tripUpdates.getHeader().getTimestamp() * 1000;
-    
+    long timestamp = tripUpdates.getHeader().getTimestamp() * 1000;    
     for (FeedEntity entity : entityList) {
       TripUpdateModel tripUpdate = readTripUpdate(entity, timestamp);
       if (tripUpdate != null) {
+        
+        // Prepend agency id to the trip id, route id, and stop id
+        // If there is only one agency for this feed, just use that
+        String agencyId = "";
+        if (entitySource.getAgencyIds().size() == 1) {
+          agencyId = entitySource.getAgencyIds().get(0);
+        } else {
+          // Look for the agency which has a match for this trip id
+          TripEntry trip = entitySource.getTrip(tripUpdate.getTripId()); 
+          if (trip == null) {   
+            _log.debug("No match found for trip: " + tripUpdate.getTripId());
+          } else {
+            tripUpdate.setTripId(trip.getId().toString());
+            agencyId = trip.getId().getAgencyId();           
+          }
+        }
+        
+        // Check route id
+        if (tripUpdate.getRouteId() != null && tripUpdate.getRouteId().length() > 0) {
+          String routeId = tripUpdate.getRouteId();
+          if (agencyId.length() > 0) {
+            tripUpdate.setRouteId(new AgencyAndId(agencyId, routeId).toString());
+          } else {    // Need to find agency for this routeId
+            AgencyAndId id = entitySource.getRouteId(routeId);
+            if (id == null) {
+              _log.debug("No match found for route: " + routeId);
+            } else {
+              tripUpdate.setRouteId(id.toString());
+              agencyId = id.getAgencyId();
+            }
+          }
+        }
+        
+        // Check stop id      
+        for (StopTimeUpdateModel stopTimeUpdate : tripUpdate.getStopTimeUpdates()) {
+          if (stopTimeUpdate.getStopId() != null && stopTimeUpdate.getStopId().length() > 0) {
+            String stopId = stopTimeUpdate.getStopId();
+            if (agencyId.length() > 0) {
+              stopTimeUpdate.setStopId(new AgencyAndId(agencyId, stopId).toString());
+            } else {    // Need to find agency for this stopId
+              AgencyAndId id = entitySource.getStopId(stopId);
+              if (id == null) {
+                _log.debug("No match found for entity selector stop: " + stopId);
+              } else {
+                stopTimeUpdate.setStopId(id.toString());
+                agencyId = id.getAgencyId();   
+              }
+            }
+          }                  
+        }   
         _persistor.persist(tripUpdate);
         updates.add(tripUpdate);
       }
@@ -109,7 +159,6 @@ public class FeedServiceImpl implements FeedService {
           tu.addStopTimeUpdateModel(stopTimeUpdate);
         }
       }
-      
       return tu;
     }
     return null;
@@ -167,20 +216,72 @@ public class FeedServiceImpl implements FeedService {
 
   @Override
   public List<VehiclePositionModel> readVehiclePositions(
-      FeedMessage vehiclePositions) {
+      FeedMessage vehiclePositions, GtfsRealtimeEntitySource entitySource) {
     List<VehiclePositionModel> models = new ArrayList<VehiclePositionModel>();
     if (vehiclePositions == null) return models;
     long timestamp = vehiclePositions.getHeader().getTimestamp() * 1000;
     for (FeedEntity entity : vehiclePositions.getEntityList()) {
       VehiclePositionModel vehiclePosition = readVehiclePosition(entity, timestamp);
       if (vehiclePosition != null) {
+        // Update VehiclePositionModel id fields to include agency id.
+        String agencyId = "";
+        if (entitySource.getAgencyIds().size() == 1) {
+          agencyId = entitySource.getAgencyIds().get(0);
+        }
+        // Check for tripId
+        if (vehiclePosition.getTripId() != null && !vehiclePosition.getTripId().isEmpty()) {
+          String tripId = vehiclePosition.getTripId();
+          if (agencyId.length() > 0) {
+            vehiclePosition.setTripId(new AgencyAndId(agencyId, tripId).toString());
+          } else {
+            TripEntry trip = entitySource.getTrip(vehiclePosition.getTripId());          
+            if (trip == null) {   
+              _log.debug("No match found for vehicle position trip: " + vehiclePosition.getTripId());
+              continue;   // If no match is found, throw it out.
+            } else {
+              vehiclePosition.setTripId(trip.getId().toString());
+              agencyId = trip.getId().getAgencyId();
+            }
+          }
+        }
+        
+        // Check for routeId
+        if (vehiclePosition.getRouteId() != null && !vehiclePosition.getRouteId().isEmpty()) {
+          String routeId = vehiclePosition.getRouteId();
+          if (agencyId.length() > 0) {
+            vehiclePosition.setRouteId(new AgencyAndId(agencyId, routeId).toString());
+          } else {    // Need to find agency for this routeId
+            AgencyAndId id = entitySource.getRouteId(routeId);
+            if (id == null) {
+              _log.debug("No match found for entity selector route: " + routeId);
+            } else {
+              vehiclePosition.setRouteId(id.toString());
+              agencyId = id.getAgencyId();
+            }
+          }
+        }
+        
+        // Check for stopId
+        if (vehiclePosition.getStopId() != null && !vehiclePosition.getStopId().isEmpty()) {
+          String stopId = vehiclePosition.getStopId();
+          if (agencyId.length() > 0) {
+            vehiclePosition.setStopId(new AgencyAndId(agencyId, stopId).toString());
+          } else {    // Need to find agency for this stopId
+            AgencyAndId id = entitySource.getStopId(stopId);
+            if (id == null) {
+              _log.debug("No match found for entity selector stop: " + stopId);
+            } else {
+              vehiclePosition.setStopId(id.toString());
+              agencyId = id.getAgencyId();
+            }
+          }
+        }
         models.add(vehiclePosition);
         _persistor.persist(vehiclePosition);
       }
     }
     return models;
   }
-
 
   private VehiclePositionModel readVehiclePosition(FeedEntity entity, long timestamp) {
     if (entity == null) return null;
@@ -236,12 +337,15 @@ public class FeedServiceImpl implements FeedService {
         }
       }
     }
+    if (entity.getVehicle().hasStopId()) {
+      vpm.setStopId(entity.getVehicle().getStopId());
+    }
     vpm.setTimestamp(new Date(timestamp));
     return vpm;
   }
   
   @Override
-  public List<AlertModel> readAlerts(FeedMessage alerts) {
+  public List<AlertModel> readAlerts(FeedMessage alerts, GtfsRealtimeEntitySource entitySource) {
     List<AlertModel> updates = new ArrayList<AlertModel>();
     if (alerts == null) {
       _log.error("nothing to do!");
@@ -252,9 +356,67 @@ public class FeedServiceImpl implements FeedService {
     for (FeedEntity entity : entityList) {
       AlertModel alert = readAlert(entity, timestamp);
       if (alert != null) {
+        // Update EntitySelectors to include the agency  
+        for (EntitySelectorModel esm : alert.getEntitySelectors()) {         
+          String agencyId = "";
+          if (entitySource.getAgencyIds().size() == 1) {
+            agencyId = entitySource.getAgencyIds().get(0);
+          } else if (esm.getAgencyId() != null && esm.getAgencyId().length() > 0) {
+            agencyId = esm.getAgencyId();         
+          } 
+          
+          // Check trip id
+          if (esm.getTripId() != null && esm.getTripId().length() > 0) {
+            String tripId = esm.getTripId();
+            if (agencyId.length() > 0) {
+              esm.setTripId(new AgencyAndId(agencyId, tripId).toString());
+            } else {    // Need to find agency for this tripId
+              TripEntry trip = entitySource.getTrip(tripId); 
+              if (trip == null) {   
+                _log.debug("No match found for entity selector trip: " + tripId);
+              } else {
+                esm.setTripId(trip.getId().toString());
+                agencyId = trip.getId().getAgencyId();
+              }
+            }            
+          }
+          
+          // Check route id          
+          if (esm.getRouteId() != null && esm.getRouteId().length() > 0) {
+            String routeId = esm.getRouteId();
+            if (agencyId.length() > 0) {
+              esm.setRouteId(new AgencyAndId(agencyId, routeId).toString());
+            } else {    // Need to find agency for this routeId
+              AgencyAndId id = entitySource.getRouteId(routeId);
+              if (id == null) {
+                _log.debug("No match found for entity selector route: " + routeId);
+              } else {
+                esm.setRouteId(id.toString());
+                agencyId = id.getAgencyId();
+              }
+            }
+          }
+           
+          // Check stop id
+          if (esm.getStopId() != null && esm.getStopId().length() > 0) {
+            String stopId = esm.getStopId();
+            if (agencyId.length() > 0) {
+              esm.setStopId(new AgencyAndId(agencyId, stopId).toString());
+            } else {    // Need to find agency for this stopId
+              AgencyAndId id = entitySource.getStopId(stopId);
+              if (id == null) {
+                _log.debug("No match found for entity selector stop: " + stopId);
+              } else {
+                esm.setStopId(id.toString());
+                agencyId = id.getAgencyId();   
+              }
+            }
+          }        
+        }      
         _persistor.persist(alert);
         updates.add(alert);
       }
+      
     }  
     return updates;
   }

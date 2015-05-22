@@ -25,7 +25,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -53,14 +52,14 @@ public class TripUpdateModel {
   private long id;
   @Column(nullable = true, name="trip_id", length = 20)
   private String tripId;
-  @Column(nullable = true, name="route_id", length = 10)
+  @Column(nullable = true, name="route_id", length = 20)
   private String routeId;
   @Column(nullable = true, name="trip_start")
   private Date tripStart;
   // see enum transit_realtime.TripDescriptor.ScheduleRelationship
   @Column(nullable = false, name="schedule_relationship")
   private int scheduleRelationship;
-  @Column(nullable = true, name="vehicle_id", length = 10)
+  @Column(nullable = true, name="vehicle_id", length = 20)
   private String vehicleId;
   @Column(nullable = true, name="vehicle_label", length = 15)
   private String vehicleLabel;
