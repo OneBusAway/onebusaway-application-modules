@@ -26,8 +26,14 @@
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
 
-  <import resource="classpath:data-sources.xml" />
+  <!--
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
+  -->
+
+  <import resource="classpath:data-sources.xml" />  
+  
+  <!--  TDS support -->
+  <import resource="classpath:org/onebusaway/transit_data_federation/application-context.xml" />
 
   <context:component-scan base-package="org.onebusaway.gtfs_realtime.archiver" />
   
@@ -41,11 +47,37 @@
         <value>org.onebusaway.gtfs_realtime.archiver.model.AlertModel</value>
         <value>org.onebusaway.gtfs_realtime.archiver.model.EntitySelectorModel</value>
         <value>org.onebusaway.gtfs_realtime.archiver.model.TimeRangeModel</value>
+        <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
+        <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord</value>
       </list>
     </property>
   </bean>
   <alias name="dataSource" alias="mutableDataSource" />
     
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+    <property name="annotatedClasses" ref="hibernateAnnotatedClasses"/>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.connection.pool_size">1</prop>
+				<prop key="hibernate.current_session_context_class">thread</prop>
+        <!--
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+        -->
+        <prop key="hibernate.cache.region.factory_class">org.onebusaway.container.spring.ehcache.EhCacheRegionFactory</prop>
+        
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+	      <prop key="hibernate.jdbc.batch_size">1000</prop>
+    		<prop key="hibernate.order_inserts">false</prop>
+        <prop key="hibernate.order_updates">false</prop>
+			</props>
+		</property>
+	</bean>
+  
 
   <bean id="gtfsPersistorImpl" class="org.onebusaway.gtfs_realtime.archiver.service.GtfsPersistorImpl">
     <property name="taskScheduler" ref="taskScheduler" />
