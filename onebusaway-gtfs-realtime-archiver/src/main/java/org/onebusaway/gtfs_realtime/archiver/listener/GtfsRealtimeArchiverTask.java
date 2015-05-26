@@ -48,7 +48,7 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
  * Entry point for archiving GTFS-realtime.  Configure one of these (via spring configuration) for
  * each of your GTFS realtime sources.
  */
-public class GtfsRealtimeArchiverTask implements ApplicationListener<ContextRefreshedEvent> {
+public class GtfsRealtimeArchiverTask {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeArchiverTask.class);
   
@@ -128,13 +128,6 @@ public class GtfsRealtimeArchiverTask implements ApplicationListener<ContextRefr
     return _agencyIds;
   }
   
-  @Override
-  public void onApplicationEvent(ContextRefreshedEvent event) {
-    // don't attempt to access tds until context is initialized
-    // TODO - get this working properly
-    _log.info("Context initialized");
-    this.initialized = true;  
-  }
 
   public void setInitialized(boolean isInitialized) {
     this.initialized = isInitialized;

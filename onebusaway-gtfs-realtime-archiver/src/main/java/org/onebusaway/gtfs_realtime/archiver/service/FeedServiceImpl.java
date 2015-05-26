@@ -92,7 +92,7 @@ public class FeedServiceImpl implements FeedService {
         }
         
         // Check route id
-        if (tripUpdate.getRouteId() != null && tripUpdate.getRouteId().length() > 0) {
+        if (StringUtils.isNotBlank(tripUpdate.getRouteId())) {
           String routeId = tripUpdate.getRouteId();
           if (agencyId.length() > 0) {
             tripUpdate.setRouteId(new AgencyAndId(agencyId, routeId).toString());
@@ -109,7 +109,7 @@ public class FeedServiceImpl implements FeedService {
         
         // Check stop id      
         for (StopTimeUpdateModel stopTimeUpdate : tripUpdate.getStopTimeUpdates()) {
-          if (stopTimeUpdate.getStopId() != null && stopTimeUpdate.getStopId().length() > 0) {
+          if (StringUtils.isNotBlank(stopTimeUpdate.getStopId())) {
             String stopId = stopTimeUpdate.getStopId();
             if (agencyId.length() > 0) {
               stopTimeUpdate.setStopId(new AgencyAndId(agencyId, stopId).toString());
@@ -119,7 +119,6 @@ public class FeedServiceImpl implements FeedService {
                 _log.debug("No match found for entity selector stop: " + stopId);
               } else {
                 stopTimeUpdate.setStopId(id.toString());
-                agencyId = id.getAgencyId();   
               }
             }
           }                  
@@ -213,7 +212,6 @@ public class FeedServiceImpl implements FeedService {
     return null;
   }
 
-
   @Override
   public List<VehiclePositionModel> readVehiclePositions(
       FeedMessage vehiclePositions, GtfsRealtimeEntitySource entitySource) {
@@ -229,7 +227,7 @@ public class FeedServiceImpl implements FeedService {
           agencyId = entitySource.getAgencyIds().get(0);
         }
         // Check for tripId
-        if (vehiclePosition.getTripId() != null && !vehiclePosition.getTripId().isEmpty()) {
+        if (StringUtils.isNotBlank(vehiclePosition.getTripId())) {
           String tripId = vehiclePosition.getTripId();
           if (agencyId.length() > 0) {
             vehiclePosition.setTripId(new AgencyAndId(agencyId, tripId).toString());
@@ -246,7 +244,7 @@ public class FeedServiceImpl implements FeedService {
         }
         
         // Check for routeId
-        if (vehiclePosition.getRouteId() != null && !vehiclePosition.getRouteId().isEmpty()) {
+        if (StringUtils.isNotBlank(vehiclePosition.getRouteId())) {
           String routeId = vehiclePosition.getRouteId();
           if (agencyId.length() > 0) {
             vehiclePosition.setRouteId(new AgencyAndId(agencyId, routeId).toString());
@@ -262,7 +260,7 @@ public class FeedServiceImpl implements FeedService {
         }
         
         // Check for stopId
-        if (vehiclePosition.getStopId() != null && !vehiclePosition.getStopId().isEmpty()) {
+        if (StringUtils.isNotBlank(vehiclePosition.getStopId())) {
           String stopId = vehiclePosition.getStopId();
           if (agencyId.length() > 0) {
             vehiclePosition.setStopId(new AgencyAndId(agencyId, stopId).toString());
@@ -272,7 +270,6 @@ public class FeedServiceImpl implements FeedService {
               _log.debug("No match found for entity selector stop: " + stopId);
             } else {
               vehiclePosition.setStopId(id.toString());
-              agencyId = id.getAgencyId();
             }
           }
         }
@@ -366,7 +363,7 @@ public class FeedServiceImpl implements FeedService {
           } 
           
           // Check trip id
-          if (esm.getTripId() != null && esm.getTripId().length() > 0) {
+          if (StringUtils.isNotBlank(esm.getTripId())) {            
             String tripId = esm.getTripId();
             if (agencyId.length() > 0) {
               esm.setTripId(new AgencyAndId(agencyId, tripId).toString());
@@ -381,8 +378,8 @@ public class FeedServiceImpl implements FeedService {
             }            
           }
           
-          // Check route id          
-          if (esm.getRouteId() != null && esm.getRouteId().length() > 0) {
+          // Check route id        
+          if (StringUtils.isNotBlank(esm.getRouteId())) {
             String routeId = esm.getRouteId();
             if (agencyId.length() > 0) {
               esm.setRouteId(new AgencyAndId(agencyId, routeId).toString());
@@ -398,7 +395,7 @@ public class FeedServiceImpl implements FeedService {
           }
            
           // Check stop id
-          if (esm.getStopId() != null && esm.getStopId().length() > 0) {
+          if (StringUtils.isNotBlank(esm.getStopId())) {
             String stopId = esm.getStopId();
             if (agencyId.length() > 0) {
               esm.setStopId(new AgencyAndId(agencyId, stopId).toString());
@@ -408,7 +405,6 @@ public class FeedServiceImpl implements FeedService {
                 _log.debug("No match found for entity selector stop: " + stopId);
               } else {
                 esm.setStopId(id.toString());
-                agencyId = id.getAgencyId();   
               }
             }
           }        
@@ -507,5 +503,4 @@ public class FeedServiceImpl implements FeedService {
     }
     return esm;
   }
-
 }

@@ -29,8 +29,6 @@
   <!--
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
   -->
-
-  <import resource="classpath:data-sources.xml" />  
   
   <!--  TDS support -->
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context.xml" />
@@ -64,11 +62,7 @@
 			<props>
 				<prop key="hibernate.connection.pool_size">1</prop>
 				<prop key="hibernate.current_session_context_class">thread</prop>
-        <!--
-				<prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
-        -->
-        <prop key="hibernate.cache.region.factory_class">org.onebusaway.container.spring.ehcache.EhCacheRegionFactory</prop>
-        
+        <prop key="hibernate.cache.region.factory_class">org.onebusaway.container.spring.ehcache.EhCacheRegionFactory</prop> 
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
 	      <prop key="hibernate.jdbc.batch_size">1000</prop>

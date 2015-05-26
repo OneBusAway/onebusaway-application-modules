@@ -92,10 +92,6 @@ public class GtfsRealtimeEntitySource {
     _log.debug("route not found with id \"{}\"", routeId);
     
     return null;  // If not found, just return null.
-    /*
-    AgencyAndId id = new AgencyAndId(_agencyIds.get(0), routeId);
-    return id;
-    */
   }
 
   public Id getTripId(String tripId) {
