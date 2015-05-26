@@ -41,6 +41,7 @@ import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,8 @@ import org.springframework.transaction.annotation.Transactional;
 @TransactionConfiguration(transactionManager="transactionManager")
 @Transactional
 public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContextTests {
+  private GtfsRealtimeEntitySource _entitySource;  
+  
   private static final long NOW = System.currentTimeMillis();
   private static final long DAY = 24 * 60 * 60 * 1000;
   private static final String TEST_1 = "Test Alert 1";
@@ -115,17 +118,10 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
 
   @Before
   public void setup() throws IOException {
-     _template = new HibernateTemplate(_sessionFactory);
+    _entitySource = Mockito.mock(GtfsRealtimeEntitySource.class);
+    _template = new HibernateTemplate(_sessionFactory);
   }
-  
-  // Dummy test until I can fix testReadAlerts 
-  @Test
-  public void testReadAlerts() {
-    assertEquals(1, 1);
-  }
-  
-  
-  /*
+    
   @Test
   public void testReadAlerts() {
     // Create GTFS Feed with service alerts
@@ -142,8 +138,8 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
     alerts.addEntity(alertEntityB);
     alerts.addEntity(alertEntityC);
     FeedMessage alert = alerts.build();
-    
-    _feedService.readAlerts(alert, GtfsRealtimeEntitySource entitySource);
+        
+    _feedService.readAlerts(alert, _entitySource);
     Collection<AlertModel> alertsFromDB = null;
     // Wait for 15 seconds to make sure GtfsPersistor has had time to run 
     // the AlertThread, which actually writes to the DB.
@@ -205,7 +201,7 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
         assertEquals(TIME_START_2, timeStart);
         assertEquals(TIME_END_2, timeEnd);
         assertEquals(AGENCY_2, agency);
-        assertEquals(ROUTE_2, route);
+        assertEquals(AGENCY_2 + "_" + ROUTE_2, route);    // Verify that agency has been prepended to route.
         assertEquals(STOP_2, stop);
       } else if (header.equals(TEST_3)) {
         assertEquals(TEST_3, header);
@@ -217,11 +213,11 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
         assertEquals(TIME_END_3, timeEnd);
         assertEquals(AGENCY_3, agency);
         assertEquals(ROUTE_3, route);
-        assertEquals(STOP_3, stop);
+        assertEquals(AGENCY_3 + "_" + STOP_3, stop);    // Verify that agency has been prepended to stop.
       }
     }
   }
-  */
+  
   
   private FeedEntity createAlert(String alertId, String header, String desc, Alert.Cause cause, 
       Alert.Effect effect, String url, long startTime, long endTime, String agency, String route, 
