@@ -28,6 +28,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 
 @Entity
@@ -48,7 +49,8 @@ import org.hibernate.annotations.Index;
 public class TripUpdateModel {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(generator = "increment")
+  @GenericGenerator(name = "increment", strategy = "increment")
   private long id;
   @Column(nullable = true, name="trip_id", length = 20)
   private String tripId;

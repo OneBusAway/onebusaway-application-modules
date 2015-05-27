@@ -27,6 +27,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 
 @Entity
@@ -43,7 +44,8 @@ public class TimeRangeModel {
   }
   
   @Id
-  @GeneratedValue
+  @GeneratedValue(generator = "increment")
+  @GenericGenerator(name = "increment", strategy = "increment")
   private long id;
   @Column(nullable = true, name="time_start")
   private long start;
