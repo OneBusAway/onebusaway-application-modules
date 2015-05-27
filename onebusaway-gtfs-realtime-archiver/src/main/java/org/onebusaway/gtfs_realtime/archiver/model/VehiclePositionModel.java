@@ -52,11 +52,11 @@ public class VehiclePositionModel {
   private String routeId;
   @Column(nullable = true, name="trip_start")
   private Date tripStart;
-  @Column(nullable = true, name="vehicle_id", length = 10)
+  @Column(nullable = true, name="vehicle_id", length = 20)
   private String vehicleId;
-  @Column(nullable = true, name="vehicle_label", length = 15)
+  @Column(nullable = true, name="vehicle_label", length = 20)
   private String vehicleLabel;
-  @Column(nullable = true, name="vehicle_license_plate", length = 10)
+  @Column(nullable = true, name="vehicle_license_plate", length = 15)
   private String vehicleLicensePlate;
   @Column(nullable = true, name="lat")
   private Float lat;
