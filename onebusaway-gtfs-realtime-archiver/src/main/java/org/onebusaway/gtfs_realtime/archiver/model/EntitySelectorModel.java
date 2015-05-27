@@ -46,10 +46,10 @@ public class EntitySelectorModel {
   /* Sound Transit constants */
   
   private static final int AGENCY_ID_LENGTH = 15;
-  private static final int ROUTE_ID_LENGTH = 10;
-  private static final int STOP_ID_LENGTH = 10;
-  private static final int TRIP_ID_LENGTH = 10;
-  private static final int TRIP_ROUTE_ID_LENGTH = 10;
+  private static final int ROUTE_ID_LENGTH = 20;
+  private static final int STOP_ID_LENGTH = 20;
+  private static final int TRIP_ID_LENGTH = 20;
+  private static final int TRIP_ROUTE_ID_LENGTH = 20;
   private static final int TRIP_START_TIME_LENGTH = 8;
   private static final int TRIP_START_DATE_LENGTH = 10;
   
