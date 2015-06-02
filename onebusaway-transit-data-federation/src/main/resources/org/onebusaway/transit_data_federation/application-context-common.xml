@@ -52,7 +52,7 @@
   <bean class="org.onebusaway.container.spring.PropertyOverrideConfigurer">
     <property name="properties">
       <props>
-        <prop key="ehCacheConfiguration.diskStorePath">${bundlePath}/cache</prop>
+        <prop key="ehCacheConfiguration.diskStorePath">/tmp/cache</prop>
       </props>
     </property>
     <property name="order" value="0" />
