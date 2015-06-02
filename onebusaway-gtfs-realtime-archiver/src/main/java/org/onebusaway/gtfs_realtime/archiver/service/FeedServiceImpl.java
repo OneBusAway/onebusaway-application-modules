@@ -74,20 +74,27 @@ public class FeedServiceImpl implements FeedService {
     for (FeedEntity entity : entityList) {
       TripUpdateModel tripUpdate = readTripUpdate(entity, timestamp);
       if (tripUpdate != null) {
-        
-        // Prepend agency id to the trip id, route id, and stop id
-        // If there is only one agency for this feed, just use that
         String agencyId = "";
+        // If there is only one agency for this feed, just use that
         if (entitySource.getAgencyIds().size() == 1) {
           agencyId = entitySource.getAgencyIds().get(0);
-        } else {
-          // Look for the agency which has a match for this trip id
-          TripEntry trip = entitySource.getTrip(tripUpdate.getTripId()); 
-          if (trip == null) {   
-            _log.debug("No match found for trip: " + tripUpdate.getTripId());
+        } 
+        
+        // Prepend agency id to the trip id, route id, and stop id
+        // Check trip_id
+        if (StringUtils.isNotBlank(tripUpdate.getTripId())) {
+          String tripId = tripUpdate.getTripId();
+          if (agencyId.length() > 0) {
+            tripUpdate.setTripId(new AgencyAndId(agencyId, tripId).toString());
           } else {
-            tripUpdate.setTripId(trip.getId().toString());
-            agencyId = trip.getId().getAgencyId();           
+            // Look for the agency which has a match for this trip id
+            TripEntry trip = entitySource.getTrip(tripUpdate.getTripId()); 
+            if (trip == null) {   
+              _log.debug("No match found for trip: " + tripUpdate.getTripId());
+            } else {
+              tripUpdate.setTripId(trip.getId().toString());
+              agencyId = trip.getId().getAgencyId();           
+            }
           }
         }
         
