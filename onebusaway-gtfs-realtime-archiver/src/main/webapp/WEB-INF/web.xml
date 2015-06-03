@@ -24,6 +24,7 @@
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>
+    		classpath:org/onebusaway/archiver/application-context-hibernate.xml
             classpath:org/onebusaway/archiver/application-context-webapp.xml
             classpath:data-sources.xml
         </param-value>
