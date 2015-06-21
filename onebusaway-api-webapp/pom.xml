@@ -14,6 +14,11 @@
 
     <dependency>
       <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-agency-metadata</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-api-core</artifactId>
       <version>${project.version}</version>
     </dependency>

@@ -15,51 +15,86 @@
  */
 package org.onebusaway.agency_metadata.service;
 
-import org.onebusaway.agency_metadata.model.AgencyMetadataModel;
+import org.onebusaway.agency_metadata.model.AgencyMetadata;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class AgencyMetadataServiceImpl implements AgencyMetadataService {
 
   @Autowired
   private AgencyMetadataDao _agencyMetadataDao;
 
   @Override
-  public List<AgencyMetadataModel> getAllAgencyMetadata() {
-    _agencyMetadataDao.getAllAgencyMetadata();
-    return null;
+  public void createAgencyMetadata(String gtfsId, String name, String shortName, String legacyId, 
+      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId) {
+    AgencyMetadata model = new AgencyMetadata();
+    model.setId(0L);      // Create a new record with generated id.
+    model.setGtfsId(gtfsId);
+    model.setName(name);
+    model.setShortName(shortName);
+    model.setLegacyId(legacyId);
+    model.setGtfsFeedUrl(gtfsFeedUrl);
+    model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
+    model.setBoundingBox(boundingBox);
+    model.setNtdId(ntdId);
+    
+    _agencyMetadataDao.saveOrUpdate(model);
   }
 
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForGtfsId(String gtfsId) {
-    _agencyMetadataDao.getAgencyMetadataForGtfsId(gtfsId);
-    return null;
+  public void updateAgencyMetadata(long id, String gtfsId, String name, String shortName, String legacyId, 
+      String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId) {
+    AgencyMetadata model = new AgencyMetadata();
+    model.setId(id);
+    model.setGtfsId(gtfsId);
+    model.setName(name);
+    model.setShortName(shortName);
+    model.setLegacyId(legacyId);
+    model.setGtfsFeedUrl(gtfsFeedUrl);
+    model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
+    model.setBoundingBox(boundingBox);
+    model.setNtdId(ntdId);
+    
+    _agencyMetadataDao.saveOrUpdate(model);
+  }
+  
+  @Override
+  public void delete(long id) {
+    _agencyMetadataDao.delete(id);
   }
 
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForName(String name) {
-    _agencyMetadataDao.getAgencyMetadataForName(name);
-    return null;
+  public List<AgencyMetadata> getAllAgencyMetadata() {
+     return _agencyMetadataDao.getAllAgencyMetadata();
   }
 
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForShortName(String shortName) {
-    _agencyMetadataDao.getAgencyMetadataForShortName(shortName);
-    return null;
+  public List<AgencyMetadata> getAgencyMetadataForGtfsId(String gtfsId) {
+    return _agencyMetadataDao.getAgencyMetadataForGtfsId(gtfsId);
   }
 
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForLegacyId(String legacyId) {
-    _agencyMetadataDao.getAgencyMetadataForLegacyId(legacyId);
-    return null;
+  public List<AgencyMetadata> getAgencyMetadataForName(String name) {
+    return _agencyMetadataDao.getAgencyMetadataForName(name);
   }
 
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForNtdId(String ntdId) {
-    _agencyMetadataDao.getAgencyMetadataForNtdId(ntdId);
-    return null;
+  public List<AgencyMetadata> getAgencyMetadataForShortName(String shortName) {
+    return _agencyMetadataDao.getAgencyMetadataForShortName(shortName);
+  }
+
+  @Override
+  public List<AgencyMetadata> getAgencyMetadataForLegacyId(String legacyId) {
+    return _agencyMetadataDao.getAgencyMetadataForLegacyId(legacyId);
+  }
+
+  @Override
+  public List<AgencyMetadata> getAgencyMetadataForNtdId(String ntdId) {
+    return _agencyMetadataDao.getAgencyMetadataForNtdId(ntdId);
   }
 
 }

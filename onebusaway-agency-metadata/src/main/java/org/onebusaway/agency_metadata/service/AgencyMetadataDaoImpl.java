@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.hibernate.SessionFactory;
 
-import org.onebusaway.agency_metadata.model.AgencyMetadataModel;
+import org.onebusaway.agency_metadata.model.AgencyMetadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,53 +41,60 @@ public class AgencyMetadataDaoImpl implements AgencyMetadataDao {
   private HibernateTemplate _template;
   
   @Autowired
-  @Qualifier("sessionFactory")
+  @Qualifier("agencyMetadataSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }
   
-  @Transactional(rollbackFor = Throwable.class)
+  //@Transactional(rollbackFor = Throwable.class)
   @Override
-  public void saveOrUpdate(AgencyMetadataModel metadata) {
-    _template.save(metadata);
+  public void saveOrUpdate(AgencyMetadata metadata) {
+    _log.info("updating: " + metadata.toString());
+    _template.saveOrUpdate(metadata);
   }
 
-  @Transactional(rollbackFor = Throwable.class)
+  //@Transactional(rollbackFor = Throwable.class)
   @Override
-  public void saveOrUpdate(AgencyMetadataModel... array) {
+  public void saveOrUpdate(AgencyMetadata... array) {
     _template.saveOrUpdateAll(Arrays.asList(array));
     _template.flush();
     _template.clear();
   }
 
   @Override
-  public List<AgencyMetadataModel> getAllAgencyMetadata() {
-    return _template.find("from AgencyMetadataModel");
+  public void delete(long id) {
+    List<AgencyMetadata> models = _template.findByNamedParam("from AgencyMetadata where id=:id", "id", id);
+    _template.delete(models.get(0));
   }
   
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForGtfsId(String gtfsId) {
-    return _template.findByNamedParam("from AgencyMetadataModel where gtfsId=:gtfsId", "gtfsId", gtfsId);
+  public List<AgencyMetadata> getAllAgencyMetadata() {
+    return _template.find("from AgencyMetadata");
   }
   
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForName(String name) {
-    return _template.findByNamedParam("from AgencyMetadataModel where name=:name", "name", name);
+  public List<AgencyMetadata> getAgencyMetadataForGtfsId(String gtfsId) {
+    return _template.findByNamedParam("from AgencyMetadata where gtfsId=:gtfsId", "gtfsId", gtfsId);
   }
   
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForShortName(String shortName) {
-    return _template.findByNamedParam("from AgencyMetadataModel where shortName=:shortName", "shortName", shortName);
+  public List<AgencyMetadata> getAgencyMetadataForName(String name) {
+    return _template.findByNamedParam("from AgencyMetadata where name=:name", "name", name);
   }
   
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForLegacyId(String legacyId) {
-    return _template.findByNamedParam("from AgencyMetadataModel where legacyId=:legacyId", "legacyId", legacyId);
+  public List<AgencyMetadata> getAgencyMetadataForShortName(String shortName) {
+    return _template.findByNamedParam("from AgencyMetadata where shortName=:shortName", "shortName", shortName);
+  }
+  
+  @Override
+  public List<AgencyMetadata> getAgencyMetadataForLegacyId(String legacyId) {
+    return _template.findByNamedParam("from AgencyMetadata where legacyId=:legacyId", "legacyId", legacyId);
   }
     
   @Override
-  public List<AgencyMetadataModel> getAgencyMetadataForNtdId(String ntdId) {
-    return _template.findByNamedParam("from AgencyMetadataModel where ntdId=:ntdId", "ntdId", ntdId);
+  public List<AgencyMetadata> getAgencyMetadataForNtdId(String ntdId) {
+    return _template.findByNamedParam("from AgencyMetadata where ntdId=:ntdId", "ntdId", ntdId);
   }
   
 }

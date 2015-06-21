@@ -15,26 +15,28 @@
  */
 package org.onebusaway.agency_metadata.service;
 
-import org.onebusaway.agency_metadata.model.AgencyMetadataModel;
+import org.onebusaway.agency_metadata.model.AgencyMetadata;
 
 import java.util.List;
 
 public interface AgencyMetadataDao {
 
-  void saveOrUpdate(AgencyMetadataModel metadata);
+  void saveOrUpdate(AgencyMetadata metadata);
 
-  void saveOrUpdate(AgencyMetadataModel... array);
+  void saveOrUpdate(AgencyMetadata... array);
+  
+  void delete(long id);
 
-  List<AgencyMetadataModel> getAllAgencyMetadata();
+  List<AgencyMetadata> getAllAgencyMetadata();
 
-  List<AgencyMetadataModel> getAgencyMetadataForGtfsId(String gtfsId);
+  List<AgencyMetadata> getAgencyMetadataForGtfsId(String gtfsId);
 
-  List<AgencyMetadataModel> getAgencyMetadataForName(String name);
+  List<AgencyMetadata> getAgencyMetadataForName(String name);
 
-  List<AgencyMetadataModel> getAgencyMetadataForShortName(String shortName);
+  List<AgencyMetadata> getAgencyMetadataForShortName(String shortName);
 
-  List<AgencyMetadataModel> getAgencyMetadataForLegacyId(String legacyId);
+  List<AgencyMetadata> getAgencyMetadataForLegacyId(String legacyId);
 
-  List<AgencyMetadataModel> getAgencyMetadataForNtdId(String ntdId);
+  List<AgencyMetadata> getAgencyMetadataForNtdId(String ntdId);
 
 }

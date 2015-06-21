@@ -31,7 +31,7 @@ import javax.persistence.Table;
     })
 @org.hibernate.annotations.Entity(mutable = false)
   
-public class AgencyMetadataModel {
+public class AgencyMetadata {
   
   /* Sound Transit constants */
   private static final int GTFS_ID_LENGTH = 20;
@@ -49,7 +49,7 @@ public class AgencyMetadataModel {
   @GeneratedValue(generator = "increment")
   @GenericGenerator(name = "increment", strategy = "increment")
   private long id;
-  @Column(nullable = false, name="gtfs_id", length = GTFS_ID_LENGTH)
+  @Column(nullable = true, name="gtfs_id", length = GTFS_ID_LENGTH)
   private String gtfsId;
   @Column(nullable = true, name="name", length = NAME_LENGTH)
   private String name;
@@ -65,11 +65,83 @@ public class AgencyMetadataModel {
   private String boundingBox;
   @Column(nullable = true, name="ntd_id", length = NTD_ID_LENGTH)
   private String ntdId;
-	
+  
+  public long getId() {
+    return id;
+  }
+
+  public void setId(long id) {
+    this.id = id;
+  }
+
+  public String getGtfsId() {
+    return gtfsId;
+  }
+
+  public void setGtfsId(String gtfsId) {
+    this.gtfsId = gtfsId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getShortName() {
+    return shortName;
+  }
+
+  public void setShortName(String shortName) {
+    this.shortName = shortName;
+  }
+
+  public String getLegacyId() {
+    return legacyId;
+  }
+
+  public void setLegacyId(String legacyId) {
+    this.legacyId = legacyId;
+  }
+
+  public String getGtfsFeedUrl() {
+    return gtfsFeedUrl;
+  }
+
+  public void setGtfsFeedUrl(String gtfsFeedUrl) {
+    this.gtfsFeedUrl = gtfsFeedUrl;
+  }
+
+  public String getGtfsRtFeedUrl() {
+    return gtfsRtFeedUrl;
+  }
+
+  public void setGtfsRtFeedUrl(String gtfsRtFeedUrl) {
+    this.gtfsRtFeedUrl = gtfsRtFeedUrl;
+  }
+
+  public String getBoundingBox() {
+    return boundingBox;
+  }
+
+  public void setBoundingBox(String boundingBox) {
+    this.boundingBox = boundingBox;
+  }
+
+  public String getNtdId() {
+    return ntdId;
+  }
+
+  public void setNtdId(String ntdId) {
+    this.ntdId = ntdId;
+  }
   
   public String toString() {
-    return "{AgencyMetadata={gtfsId:" + gtfsId + ",name:" + name + ",shortName:" 
-        + shortName + ",legacyId:" + legacyId + ",gtfsFeedUrl:" + gtfsFeedUrl
-        + ",ntdId:" + ntdId + "}}";
+    return "{AgencyMetadata={id:" + id + ",gtfsId:" + getGtfsId() + ",name:" + getName() + ",shortName:" 
+        + getShortName() + ",legacyId:" + getLegacyId() + ",gtfsFeedUrl:" + getGtfsFeedUrl()
+        + ",gtfsRtFeedUrl:" + getGtfsRtFeedUrl()+ ",ntdId:" + getNtdId() + "}}";
   }
+
 }

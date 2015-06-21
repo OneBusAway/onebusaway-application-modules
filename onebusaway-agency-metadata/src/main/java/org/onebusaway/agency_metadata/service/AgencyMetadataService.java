@@ -15,21 +15,30 @@
  */
 package org.onebusaway.agency_metadata.service;
 
-import org.onebusaway.agency_metadata.model.AgencyMetadataModel;
+import org.onebusaway.agency_metadata.model.AgencyMetadata;
 
 import java.util.List;
 
 public interface AgencyMetadataService {
-  List<AgencyMetadataModel> getAllAgencyMetadata();
+  
+  void createAgencyMetadata(String gtfs_id, String name, String short_name, String legacy_id, 
+      String gtfs_feed_url, String gtfs_rt_feed_url, String bounding_box, String ntd_id);
+  
+  void updateAgencyMetadata(long id, String gtfs_id, String name, String short_name, String legacy_id, 
+      String gtfs_feed_url, String gtfs_rt_feed_url, String bounding_box, String ntd_id);
+  
+  void delete(long id);
+  
+  List<AgencyMetadata> getAllAgencyMetadata();
 
-  List<AgencyMetadataModel> getAgencyMetadataForGtfsId(String gtfsId);
+  List<AgencyMetadata> getAgencyMetadataForGtfsId(String gtfsId);
 
-  List<AgencyMetadataModel> getAgencyMetadataForName(String name);
+  List<AgencyMetadata> getAgencyMetadataForName(String name);
 
-  List<AgencyMetadataModel> getAgencyMetadataForShortName(String shortName);
+  List<AgencyMetadata> getAgencyMetadataForShortName(String shortName);
 
-  List<AgencyMetadataModel> getAgencyMetadataForLegacyId(String legacyId);
+  List<AgencyMetadata> getAgencyMetadataForLegacyId(String legacyId);
 
-  List<AgencyMetadataModel> getAgencyMetadataForNtdId(String ntdId);
+  List<AgencyMetadata> getAgencyMetadataForNtdId(String ntdId);
 
 }

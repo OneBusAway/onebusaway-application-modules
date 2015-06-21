@@ -10,16 +10,20 @@
   <name>onebusaway-agency-metadata</name>
 
   <dependencies>
+    <!--
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-transit-data-federation</artifactId>
       <version>${project.version}</version>
     </dependency>
+    -->
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-container</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
+    
     <!--  spring issues begin -->
 <!--     		<dependency> -->
 <!-- 			<groupId>org.springframework</groupId> -->
