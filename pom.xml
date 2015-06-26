@@ -82,6 +82,7 @@
   </distributionManagement>
 
   <modules>
+    <module>onebusaway-agency-metadata</module>
     <module>onebusaway-api-core</module>
     <module>onebusaway-api-webapp</module>
     <module>onebusaway-combined-webapp</module>
