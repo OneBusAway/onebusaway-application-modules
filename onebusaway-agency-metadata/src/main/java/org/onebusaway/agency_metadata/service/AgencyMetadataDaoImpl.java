@@ -15,13 +15,12 @@
  */
 package org.onebusaway.agency_metadata.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,6 @@ public class AgencyMetadataDaoImpl implements AgencyMetadataDao {
   //@Transactional(rollbackFor = Throwable.class)
   @Override
   public void saveOrUpdate(AgencyMetadata metadata) {
-    _log.info("updating: " + metadata.toString());
     _template.saveOrUpdate(metadata);
   }
 
@@ -63,13 +61,21 @@ public class AgencyMetadataDaoImpl implements AgencyMetadataDao {
 
   @Override
   public void delete(long id) {
-    List<AgencyMetadata> models = _template.findByNamedParam("from AgencyMetadata where id=:id", "id", id);
+    List<AgencyMetadata> models = _template.findByNamedParam("from AgencyMetadata where id=:id", "id", Long.valueOf(id));
     _template.delete(models.get(0));
   }
   
   @Override
   public List<AgencyMetadata> getAllAgencyMetadata() {
     return _template.find("from AgencyMetadata");
+  }
+  
+  @Override
+  public List<AgencyMetadata> getAgencyMetadataForId(String id) {
+	AgencyMetadata model = (AgencyMetadata) _template.get(AgencyMetadata.class, Long.valueOf(id));
+	List<AgencyMetadata> metadata = new ArrayList<AgencyMetadata>();
+	metadata.add(model);
+	return metadata;
   }
   
   @Override

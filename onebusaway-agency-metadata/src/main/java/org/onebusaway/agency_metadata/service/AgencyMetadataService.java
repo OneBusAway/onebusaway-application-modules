@@ -31,6 +31,8 @@ public interface AgencyMetadataService {
   
   List<AgencyMetadata> getAllAgencyMetadata();
 
+  List<AgencyMetadata> getAgencyMetadataForId(String id);
+  
   List<AgencyMetadata> getAgencyMetadataForGtfsId(String gtfsId);
 
   List<AgencyMetadata> getAgencyMetadataForName(String name);

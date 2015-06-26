@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.api.actions.api.where;
+package org.onebusaway.api.actions.api.where.agency;
 
 import java.io.IOException;
 import java.util.List;
@@ -31,43 +31,39 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class AgencyMetadataListAction extends ApiActionSupport {
+public class ListAction extends ApiActionSupport {
 
-  private static Logger _log = LoggerFactory.getLogger(AgencyMetadataListAction.class);
-  private static final int V2 = 2;
-  
-  public AgencyMetadataListAction() {
-    super(V2);
-  }
-  
-  public AgencyMetadataListAction(int defaultVersion) {
-    super(defaultVersion);
-  }
+	  private static Logger _log = LoggerFactory.getLogger(ListAction.class);
+	  private static final int V2 = 2;
+	  
+	  public ListAction() {
+	    super(V2);
+	  }
+	  
+	  public ListAction(int defaultVersion) {
+	    super(defaultVersion);
+	  }
 
-  private static final long serialVersionUID = 1L;
-  
-  @Autowired
-  private TransitDataService _service;
-  
-  @Autowired
-  private AgencyMetadataService _agencyMetadataService;
+	  private static final long serialVersionUID = 1L;
+	  
+	  @Autowired
+	  private TransitDataService _service;
+	  
+	  @Autowired
+	  private AgencyMetadataService _agencyMetadataService;
 
-  public String getId() {
-    _log.error("in id!");
-    return _service.getActiveBundleId();
-  }
-  
-  public DefaultHttpHeaders index() throws IOException, ServiceException {
-    if (hasErrors())
-      return setValidationErrorsResponse();
-    BundleMetadata meta = _service.getBundleMetadata();
-    BeanFactoryV2 factory = getBeanFactoryV2();
+	  public String getId() {
+	    _log.error("in id!");
+	    return _service.getActiveBundleId();
+	  }
+	  
+	  public DefaultHttpHeaders index() throws IOException, ServiceException {
+	    if (hasErrors())
+	      return setValidationErrorsResponse();
 
-    //List<AgencyMetadata> agencyMetadata =  _agencyMetadataService.getAllAgencyMetadata();
-    
-    //return setOkResponse(factory.getResponse(meta));
-    return setOkResponse("Testing for AgencyMetadata support");
- //   return setOkResponse(agencyMetadata);
+	    List<AgencyMetadata> agencyMetadata =  _agencyMetadataService.getAllAgencyMetadata();
+	    
+	    return setOkResponse(agencyMetadata);
+	  }
 
-  }
 }

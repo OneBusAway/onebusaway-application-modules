@@ -29,7 +29,7 @@ import javax.persistence.Table;
 @org.hibernate.annotations.Table(appliesTo ="agency_metadata", indexes = {
     @Index(name = "agency_id_idx", columnNames = {"id"}),
     })
-@org.hibernate.annotations.Entity(mutable = false)
+@org.hibernate.annotations.Entity(mutable = true)
   
 public class AgencyMetadata {
   

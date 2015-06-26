@@ -16,7 +16,6 @@
 package org.onebusaway.agency_metadata.service;
 
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,16 +47,31 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
   @Override
   public void updateAgencyMetadata(long id, String gtfsId, String name, String shortName, String legacyId, 
       String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId) {
-    AgencyMetadata model = new AgencyMetadata();
-    model.setId(id);
-    model.setGtfsId(gtfsId);
-    model.setName(name);
-    model.setShortName(shortName);
-    model.setLegacyId(legacyId);
-    model.setGtfsFeedUrl(gtfsFeedUrl);
-    model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
-    model.setBoundingBox(boundingBox);
-    model.setNtdId(ntdId);
+	AgencyMetadata model = getAgencyMetadataForId(String.valueOf(id)).get(0);
+	if (gtfsId != null) {
+		model.setGtfsId(gtfsId);
+	}
+	if (name != null) {
+		model.setName(name);
+	}
+	if (shortName != null) {
+	    model.setShortName(shortName);
+	}
+	if (legacyId != null) {
+	    model.setLegacyId(legacyId);
+	}
+	if (gtfsFeedUrl != null) {
+	    model.setGtfsFeedUrl(gtfsFeedUrl);
+	}
+	if (gtfsRtFeedUrl != null) {
+	    model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
+	}
+	if (boundingBox != null) {
+	    model.setBoundingBox(boundingBox);
+	}
+	if (ntdId != null) {
+	    model.setNtdId(ntdId);
+	}
     
     _agencyMetadataDao.saveOrUpdate(model);
   }
@@ -70,6 +84,11 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
   @Override
   public List<AgencyMetadata> getAllAgencyMetadata() {
      return _agencyMetadataDao.getAllAgencyMetadata();
+  }
+
+  @Override
+  public List<AgencyMetadata> getAgencyMetadataForId(String id) {
+    return _agencyMetadataDao.getAgencyMetadataForId(id);
   }
 
   @Override
