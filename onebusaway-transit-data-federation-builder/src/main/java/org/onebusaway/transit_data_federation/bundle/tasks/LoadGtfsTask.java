@@ -25,6 +25,8 @@ public class LoadGtfsTask implements Runnable {
   private ApplicationContext _applicationContext;
   
   private GenericMutableDao _dao;
+  
+  private boolean _disableStopConsolidation = false;
 
   @Autowired
   public void setApplicationContext(ApplicationContext applicationContext) {
@@ -35,11 +37,17 @@ public class LoadGtfsTask implements Runnable {
   public void setDao(GenericMutableDao dao) {
     _dao = dao;
   }
+  
+  public void setDisableStopConsolidation(boolean disable) {
+    _disableStopConsolidation = disable;
+  }
 
   @Override
   public void run() {
     try {
-      GtfsReadingSupport.readGtfsIntoStore(_applicationContext, _dao);
+      
+      GtfsReadingSupport.readGtfsIntoStore(_applicationContext, _dao, _disableStopConsolidation);
+      
     } catch (Throwable ex) {
       throw new IllegalStateException("error loading gtfs", ex);
     }
