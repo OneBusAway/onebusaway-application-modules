@@ -115,6 +115,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private MonitoredResult _monitoredResult = new MonitoredResult();
   
+  private StopModificationStrategy _stopModificationStrategy = null;
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -148,6 +149,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _scheduledExecutorService = scheduledExecutorService;
   }
 
+  public void setStopModificationStrategy(StopModificationStrategy strategy) {
+    _stopModificationStrategy = strategy;
+  }
+
+  
   public void setTripUpdatesUrl(URL tripUpdatesUrl) {
     _tripUpdatesUrl = tripUpdatesUrl;
   }
@@ -204,6 +210,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary = new GtfsRealtimeTripLibrary();
     _tripsLibrary.setBlockCalendarService(_blockCalendarService);
     _tripsLibrary.setEntitySource(_entitySource);
+    if (_stopModificationStrategy != null) {
+      _tripsLibrary.setStopModificationStrategy(_stopModificationStrategy);
+    }
 
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);

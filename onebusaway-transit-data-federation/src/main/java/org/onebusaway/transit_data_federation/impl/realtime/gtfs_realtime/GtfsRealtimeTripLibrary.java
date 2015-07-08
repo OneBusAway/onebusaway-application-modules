@@ -62,6 +62,8 @@ class GtfsRealtimeTripLibrary {
    */
   private long _currentTime = 0;
 
+  private StopModificationStrategy _stopModificationStrategy = null;
+
   public void setEntitySource(GtfsRealtimeEntitySource entitySource) {
     _entitySource = entitySource;
   }
@@ -76,6 +78,10 @@ class GtfsRealtimeTripLibrary {
 
   public void setCurrentTime(long currentTime) {
     _currentTime = currentTime;
+  }
+  
+  public void setStopModificationStrategy(StopModificationStrategy strategy) {
+    _stopModificationStrategy = strategy;
   }
 
   public List<CombinedTripUpdatesAndVehiclePosition> groupTripUpdatesAndVehiclePositions(
@@ -433,8 +439,9 @@ class GtfsRealtimeTripLibrary {
           }
           return blockStopTime;
         }
+        String stopTimeUpdateStopId = convertStopId(stopTimeUpdate.getStopId());
         if (blockStopTime.getStopTime().getStop().getId().getId().equals(
-            stopTimeUpdate.getStopId())) {
+            stopTimeUpdateStopId)) {
           if (result != null) {
             result.addMatchedStopId(blockStopTime.getStopTime().getStop().getId().getId());
           }
@@ -453,7 +460,7 @@ class GtfsRealtimeTripLibrary {
 
     if (stopTimeUpdate.hasStopId()) {
       int time = getTimeForStopTimeUpdate(stopTimeUpdate, serviceDate);
-      String stopId = stopTimeUpdate.getStopId();
+      String stopId = convertStopId(stopTimeUpdate.getStopId());
       // There could be loops, meaning a stop could appear multiple times along
       // a trip. To get around this.
       Min<BlockStopTimeEntry> bestMatches = new Min<BlockStopTimeEntry>();
@@ -468,15 +475,23 @@ class GtfsRealtimeTripLibrary {
       }
       if (!bestMatches.isEmpty()) {
         if (result != null) {
-          result.addMatchedStopId(stopTimeUpdate.getStopId());
+          result.addMatchedStopId(convertStopId(stopId));
         }
         return bestMatches.getMinElement();
       }
     }
     if (result != null) {
-      result.addUnmatchedStopId(stopTimeUpdate.getStopId());
+      // if we are here, the stop did not fall on that block
+      result.addUnmatchedStopId(convertStopId(stopTimeUpdate.getStopId()));
     }
     return null;
+  }
+
+  private String convertStopId(String stopId) {
+    if (this._stopModificationStrategy == null) {
+      return stopId;
+    }
+    return _stopModificationStrategy.convertStopId(stopId);
   }
 
   private int getTimeForStopTimeUpdate(StopTimeUpdate stopTimeUpdate,
