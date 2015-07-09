@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- 0 or more renderer elements -->
+
+	<!-- 0 or more appender elements -->
+
+	<appender name="ROLL" class="org.apache.log4j.rolling.RollingFileAppender">
+		<rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+			<param name="FileNamePattern" value="/var/log/tomcat6/webapp.%d.log" />
+		</rollingPolicy>
+
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The log message pattern -->
+			<param name="ConversionPattern" value="%d{ISO8601} %-5p [%F:%L] : %m%n" />
+		</layout>
+	</appender>
+	
+	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
+		
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- The log message pattern -->
+			<param name="ConversionPattern" value="%d{ISO8601} %-5p [%F:%L] : %m%n" />
+		</layout>
+	</appender>
+
+	<!-- 0 or more logger/category elements -->
+	
+	<!-- 0 or 1 root elements -->
+
+	<root>
+		<priority value="info" />
+		<appender-ref ref="${log4j.appender}" />
+	</root>
+
+	<!-- 0 or 1 categoryFactory elements -->
+
+</log4j:configuration>
