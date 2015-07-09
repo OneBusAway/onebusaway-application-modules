@@ -39,7 +39,7 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 	
 	@Autowired
 	private TransitDataService _transitDataService;
-	
+
 	@Override
 	public List<TimepointPredictionRecord> getPredictionRecordsForTrip(String agencyId,
 			TripStatusBean tripStatus) {
@@ -55,8 +55,8 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 		records = new ArrayList<TimepointPredictionRecord>();
 		TimepointPredictionRecord tpr = new TimepointPredictionRecord();
 		tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(tripStatus.getNextStop().getId()));
-		tpr.setTimepointScheduledTime(tripStatus.getServiceDate() + tripStatus.getNextStopTimeOffset() *1000);
-		tpr.setTimepointPredictedTime((long) (tpr.getTimepointPredictedTime() + tripStatus.getScheduleDeviation()));
+		tpr.setTimepointScheduledTime(tripStatus.getLastUpdateTime() + tripStatus.getNextStopTimeOffset() * 1000);
+		tpr.setTimepointPredictedTime((long) (tpr.getTimepointScheduledTime() + tripStatus.getScheduleDeviation()));
 		
 		
 		records.add(tpr);
