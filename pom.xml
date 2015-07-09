@@ -87,6 +87,8 @@
     <module>onebusaway-combined-webapp</module>
     <module>onebusaway-container</module>
     <module>onebusaway-core</module>
+    <module>onebusaway-enterprise-acta-webapp</module>
+    <module>onebusaway-enterprise-webapp</module>
     <module>onebusaway-federations</module>
     <module>onebusaway-federations-webapp</module>
     <module>onebusaway-geocoder</module>
@@ -106,6 +108,7 @@
     <module>onebusaway-transit-data-federation-builder</module>
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
+    <module>onebusaway-util</module>
     <module>onebusaway-watchdog-webapp</module>
     <module>onebusaway-webapp</module>
   </modules>
