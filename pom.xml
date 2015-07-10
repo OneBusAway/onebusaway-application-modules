@@ -12,7 +12,7 @@
 
   <name>onebusaway-application-modules</name>
   <description>The core OneBusAway application suite.</description>
-  <url>https://github.com/OneBusAway/onebusaway-application-modules/wiki/</url>
+  <url>https://github.com/camsys/onebusaway-application-modules/wiki/</url>
 
   <!-- Common Software Dependency Versions -->
   <properties>
@@ -54,9 +54,9 @@
   </pluginRepositories>
 
   <scm>
-    <connection>scm:git:http://github.com/OneBusAway/onebusaway-application-modules.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/OneBusAway/onebusaway-application-modules.git</developerConnection>
-    <url>http://github.com/OneBusAway/onebusaway-application-modules</url>
+    <connection>scm:git:http://github.com/camsys/onebusaway-application-modules.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/camsys/onebusaway-application-modules.git</developerConnection>
+    <url>http://github.com/camsys/onebusaway-application-modules</url>
   </scm>
 
   <issueManagement>
