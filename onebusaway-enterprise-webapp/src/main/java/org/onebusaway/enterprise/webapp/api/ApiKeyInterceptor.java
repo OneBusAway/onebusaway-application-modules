@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.ServletActionContext;
-import org.onebusaway.nyc.presentation.service.realtime.RealtimeService;
+import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.users.services.ApiKeyPermissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

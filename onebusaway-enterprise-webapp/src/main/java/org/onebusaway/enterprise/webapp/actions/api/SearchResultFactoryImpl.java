@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.onebusaway.geospatial.model.EncodedPolylineBean;
-import org.onebusaway.nyc.geocoder.service.NycGeocoderResult;
-import org.onebusaway.nyc.presentation.model.SearchResult;
-import org.onebusaway.nyc.presentation.service.realtime.RealtimeService;
-import org.onebusaway.nyc.presentation.service.search.SearchResultFactory;
-import org.onebusaway.nyc.presentation.service.search.SearchService;
+import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
+import org.onebusaway.presentation.model.SearchResult;
+import org.onebusaway.presentation.services.realtime.RealtimeService;
+import org.onebusaway.presentation.services.search.SearchResultFactory;
+import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.enterprise.webapp.actions.api.model.GeocodeResult;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteAtStop;
@@ -168,7 +168,7 @@ public class SearchResultFactoryImpl implements SearchResultFactory {
   }
 
   @Override
-  public SearchResult getGeocoderResult(NycGeocoderResult geocodeResult, Set<RouteBean> routeBean) {
+  public SearchResult getGeocoderResult(EnterpriseGeocoderResult geocodeResult, Set<RouteBean> routeBean) {
     List<SearchResult> routesNearby = null;
     
     if(geocodeResult.isRegion()) {

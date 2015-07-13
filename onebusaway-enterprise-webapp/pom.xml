@@ -58,6 +58,11 @@
 			<artifactId>onebusaway-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.onebusaway</groupId>
+			<artifactId>onebusaway-geocoder</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<!-- Wiki Integration Support -->
 		<!-- XWiki depends on an old verion of beanutils that causes conflicts 

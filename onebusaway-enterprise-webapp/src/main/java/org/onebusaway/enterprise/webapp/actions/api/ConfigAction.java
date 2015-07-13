@@ -17,7 +17,7 @@ package org.onebusaway.enterprise.webapp.actions.api;
 
 
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.nyc.util.configuration.ConfigurationService;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 

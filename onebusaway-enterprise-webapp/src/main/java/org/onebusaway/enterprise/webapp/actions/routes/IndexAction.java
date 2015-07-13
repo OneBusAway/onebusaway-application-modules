@@ -19,8 +19,8 @@ package org.onebusaway.enterprise.webapp.actions.routes;
 import java.util.List;
 
 import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.nyc.presentation.service.routes.RouteListService;
-import org.onebusaway.nyc.util.configuration.ConfigurationService;
+import org.onebusaway.presentation.services.routes.RouteListService;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -1,6 +1,6 @@
 package org.onebusaway.enterprise.webapp.actions.api.model;
 
-import org.onebusaway.nyc.presentation.model.SearchResult;
+import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.transit_data.model.StopBean;
 
 import java.util.List;

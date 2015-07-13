@@ -2,7 +2,7 @@ package org.onebusaway.enterprise.webapp.actions.api.model;
 
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
-import org.onebusaway.nyc.presentation.model.SearchResult;
+import org.onebusaway.presentation.model.SearchResult;
 
 import java.util.List;
 

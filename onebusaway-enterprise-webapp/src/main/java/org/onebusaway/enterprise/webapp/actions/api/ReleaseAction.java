@@ -20,8 +20,8 @@ import java.io.IOException;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import org.onebusaway.nyc.util.git.GitRepositoryHelper;
-import org.onebusaway.nyc.util.model.GitRepositoryState;
+import org.onebusaway.util.git.GitRepositoryHelper;
+import org.onebusaway.util.git.GitRepositoryState;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 
 import org.slf4j.Logger;

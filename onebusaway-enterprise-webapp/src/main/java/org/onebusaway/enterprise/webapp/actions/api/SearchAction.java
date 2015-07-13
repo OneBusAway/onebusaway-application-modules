@@ -17,9 +17,9 @@ package org.onebusaway.enterprise.webapp.actions.api;
 
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
-import org.onebusaway.nyc.presentation.model.SearchResultCollection;
-import org.onebusaway.nyc.presentation.service.realtime.RealtimeService;
-import org.onebusaway.nyc.presentation.service.search.SearchService;
+import org.onebusaway.presentation.model.SearchResultCollection;
+import org.onebusaway.presentation.services.realtime.RealtimeService;
+import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
