@@ -138,6 +138,11 @@
 					<version>${project.version}</version>
 				</dependency>
 				<dependency>
+					<groupId>org.onebusaway</groupId>
+					<artifactId>onebusaway-geocoder</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+				<dependency>
 					<groupId>commons-beanutils</groupId>
 					<artifactId>commons-beanutils</artifactId>
 					<version>1.8.0</version>

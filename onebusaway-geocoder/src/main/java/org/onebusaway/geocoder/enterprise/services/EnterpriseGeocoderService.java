@@ -17,8 +17,6 @@ package org.onebusaway.geocoder.enterprise.services;
 
 import java.util.List;
 
-import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
-
 public interface EnterpriseGeocoderService {
 	public List<EnterpriseGeocoderResult> enterpriseGeocode(String location);
 }

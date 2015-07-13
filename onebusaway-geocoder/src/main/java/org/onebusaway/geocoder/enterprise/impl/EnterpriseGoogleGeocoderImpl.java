@@ -15,10 +15,10 @@
  */
 package org.onebusaway.geocoder.enterprise.impl;
 
-import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.onebusaway.geocoder.impl.GoogleAddressComponent;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geocoder.enterprise.model.EnterpriseGoogleGeocoderResult;
+import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
