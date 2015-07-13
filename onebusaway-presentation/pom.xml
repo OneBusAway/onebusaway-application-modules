@@ -32,6 +32,11 @@
             <artifactId>onebusaway-geocoder</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.onebusaway</groupId>
+            <artifactId>onebusaway-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 	    <dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-siri-core</artifactId>
