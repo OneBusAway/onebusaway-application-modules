@@ -18,7 +18,7 @@ package org.onebusaway.enterprise.webapp.actions.api;
 
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import java.util.List;
  * A service to expose certain TDM configuration values to the front-end
  * for handling there.
  */
-public class ConfigAction extends OneBusAwayNYCActionSupport {
+public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
 
   private static final long serialVersionUID = 1L;
 

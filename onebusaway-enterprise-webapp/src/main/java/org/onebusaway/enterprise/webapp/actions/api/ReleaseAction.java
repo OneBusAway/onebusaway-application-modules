@@ -22,7 +22,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import org.onebusaway.util.git.GitRepositoryHelper;
 import org.onebusaway.util.git.GitRepositoryState;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * Action for release (status)  page
  * 
  */
-public class ReleaseAction extends OneBusAwayNYCActionSupport {
+public class ReleaseAction extends OneBusAwayEnterpriseActionSupport {
 
   private static Logger _log = LoggerFactory.getLogger(ReleaseAction.class);
   private static final long serialVersionUID = 1L;

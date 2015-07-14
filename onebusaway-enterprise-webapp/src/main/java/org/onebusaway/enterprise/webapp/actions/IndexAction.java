@@ -31,7 +31,7 @@ import com.opensymphony.xwork2.ActionProxy;
  * Action for home page
  * 
  */
-public class IndexAction extends OneBusAwayNYCActionSupport {
+public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
   private static final long serialVersionUID = 1L;
 

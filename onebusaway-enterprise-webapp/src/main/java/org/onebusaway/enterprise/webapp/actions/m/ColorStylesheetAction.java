@@ -15,14 +15,14 @@
  */
 package org.onebusaway.enterprise.webapp.actions.m;
 
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ColorStylesheetAction extends OneBusAwayNYCActionSupport {
+public class ColorStylesheetAction extends OneBusAwayEnterpriseActionSupport {
 
   private static final long serialVersionUID = 1L;
 
