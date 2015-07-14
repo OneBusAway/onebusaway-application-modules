@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.realtime.api.EVehiclePhase;
 import org.onebusaway.realtime.api.VehicleLocationListener;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.services.blocks.BlockVehicleLocationListener;
@@ -69,7 +70,7 @@ class VehicleStatusServiceImpl implements VehicleLocationListener,
 
   @Override
   public void handleVehicleLocationRecord(VehicleLocationRecord record) {
-
+	  record.setPhase(EVehiclePhase.IN_PROGRESS);
     if (record.getTimeOfRecord() == 0)
       throw new IllegalArgumentException("you must specify a record time");
 
