@@ -22,12 +22,12 @@ import org.apache.struts2.convention.annotation.Result;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderService;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback", "root", "suggestions"})
-public class AutocompleteAction extends OneBusAwayEnterpriseActionSupport {
+public class AutocompleteAction extends OneBusAwayNYCActionSupport {
 
   private static final long serialVersionUID = 1L;
 

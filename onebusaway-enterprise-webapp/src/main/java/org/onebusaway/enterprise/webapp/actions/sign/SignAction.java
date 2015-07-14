@@ -15,13 +15,13 @@
  */
 package org.onebusaway.enterprise.webapp.actions.sign;
 
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 
 /**
  * Action for sign page
  * 
  */
-public class SignAction extends OneBusAwayEnterpriseActionSupport {
+public class SignAction extends OneBusAwayNYCActionSupport {
 
   private static final long serialVersionUID = 1L;
 

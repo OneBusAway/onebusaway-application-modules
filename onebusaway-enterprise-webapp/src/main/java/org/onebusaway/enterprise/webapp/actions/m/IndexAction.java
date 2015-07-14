@@ -31,7 +31,7 @@ import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.onebusaway.enterprise.webapp.actions.m.model.GeocodeResult;
 import org.onebusaway.enterprise.webapp.actions.m.model.RouteAtStop;
 import org.onebusaway.enterprise.webapp.actions.m.model.RouteResult;
@@ -40,7 +40,7 @@ import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class IndexAction extends OneBusAwayEnterpriseActionSupport {
+public class IndexAction extends OneBusAwayNYCActionSupport {
 
   private static final long serialVersionUID = 1L;
 

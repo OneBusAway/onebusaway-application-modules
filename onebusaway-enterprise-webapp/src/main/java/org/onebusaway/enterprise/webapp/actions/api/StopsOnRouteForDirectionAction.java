@@ -1,7 +1,7 @@
 package org.onebusaway.enterprise.webapp.actions.api;
 
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.onebusaway.enterprise.webapp.actions.api.model.StopOnRoute;
 import org.onebusaway.transit_data.model.NameBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -20,7 +20,7 @@ import java.util.Map;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback"})
-public class StopsOnRouteForDirectionAction extends OneBusAwayEnterpriseActionSupport {
+public class StopsOnRouteForDirectionAction extends OneBusAwayNYCActionSupport {
 
   private static final long serialVersionUID = 1L;
 

@@ -21,12 +21,12 @@ import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ParentPackage("json-default")
 @Result(type="json", params={"callbackParameter", "callback"})
-public class SearchAction extends OneBusAwayEnterpriseActionSupport {
+public class SearchAction extends OneBusAwayNYCActionSupport {
 
   private static final long serialVersionUID = 1L;
 

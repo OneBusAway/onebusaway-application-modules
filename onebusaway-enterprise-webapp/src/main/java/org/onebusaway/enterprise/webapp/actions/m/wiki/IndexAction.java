@@ -22,13 +22,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
 import org.apache.struts2.interceptor.ServletRequestAware;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.onebusaway.enterprise.webapp.actions.wiki.model.NycWikiPageWrapper;
 import org.onebusaway.wiki.api.WikiDocumentService;
 import org.onebusaway.wiki.api.WikiRenderingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class IndexAction extends OneBusAwayEnterpriseActionSupport implements
+public class IndexAction extends OneBusAwayNYCActionSupport implements
 		ServletRequestAware {
 
 	private static final long serialVersionUID = 1L;

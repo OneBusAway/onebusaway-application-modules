@@ -26,7 +26,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.onebusaway.transit_data.services.TransitDataService;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteAtStop;
 import org.onebusaway.enterprise.webapp.actions.api.model.RouteDirection;
 import org.onebusaway.enterprise.webapp.actions.api.model.StopResult;
@@ -44,7 +44,7 @@ import uk.org.siri.siri.ServiceDelivery;
 import uk.org.siri.siri.Siri;
 import uk.org.siri.siri.StopMonitoringDeliveryStructure;
 
-public class StopForIdAction extends OneBusAwayEnterpriseActionSupport {
+public class StopForIdAction extends OneBusAwayNYCActionSupport {
     
   private static final long serialVersionUID = 1L;
 
