@@ -113,6 +113,10 @@ public class ReportProblemWithTripAction extends ApiActionSupport {
     _model.setUserLocationAccuracy(userLocationAccuracy);
   }
 
+  public DefaultHttpHeaders show() throws IOException, ServiceException {   
+    return index();
+  }
+
   public DefaultHttpHeaders create() throws IOException, ServiceException {	  
     return index();
   }

@@ -27,6 +27,14 @@
   </context-param>
     
   <!-- Filters -->
+   <filter>
+    <filter-name>UrlRewriteFilter</filter-name>
+    <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+<!--     <init-param> -->
+<!--     	<param-name>logLevel</param-name> -->
+<!--     	<param-value>TRACE</param-value> -->
+<!--     </init-param> -->
+  </filter>
   <filter>
     <filter-name>springSecurityFilterChain</filter-name>
     <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
@@ -48,6 +56,10 @@
     <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsExecuteFilter</filter-class>
   </filter>
 
+  <filter-mapping>
+    <filter-name>UrlRewriteFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
   <filter-mapping>
     <filter-name>springSecurityFilterChain</filter-name>
     <url-pattern>/*</url-pattern>

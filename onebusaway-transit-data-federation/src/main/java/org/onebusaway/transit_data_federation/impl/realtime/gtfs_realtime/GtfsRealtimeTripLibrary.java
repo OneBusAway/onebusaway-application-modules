@@ -445,7 +445,7 @@ class GtfsRealtimeTripLibrary {
         // we do not log this as it still may match later
 
       } else {
-        _log.warn("StopTimeSequence is out of bounds: stopSequence="
+        _log.debug("StopTimeSequence is out of bounds: stopSequence="
             + stopSequence + " tripUpdate=\n" + tripUpdate);
         // sadly we can't report an invalid stop sequence -- we need a stopId
       }

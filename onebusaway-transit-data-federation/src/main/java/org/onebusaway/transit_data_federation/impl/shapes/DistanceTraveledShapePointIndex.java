@@ -51,7 +51,7 @@ public class DistanceTraveledShapePointIndex extends AbstractShapePointIndex {
     /**
      * Use index hints when available
      */
-    if (_fromIndex < 0 || _toIndex < 0)
+    if (_fromIndex < 0 || _toIndex < 0 || _fromIndex > _toIndex)
       index = Arrays.binarySearch(points.getDistTraveled(),
           _shapeDistanceTraveled);
     else
