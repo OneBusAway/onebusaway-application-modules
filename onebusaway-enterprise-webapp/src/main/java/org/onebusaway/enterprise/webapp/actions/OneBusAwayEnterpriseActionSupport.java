@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Abstract class that is currently being used to hang stub data methods onto
  */
-public abstract class OneBusAwayNYCActionSupport extends NextActionSupport {
+public abstract class OneBusAwayEnterpriseActionSupport extends NextActionSupport {
 
   private static final long serialVersionUID = 1L;
 

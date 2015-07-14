@@ -21,14 +21,14 @@ import java.util.List;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.presentation.services.routes.RouteListService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Action for route index page
  *
  */
-public class IndexAction extends OneBusAwayNYCActionSupport {
+public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
     private static final long serialVersionUID = 1L;
     @Autowired

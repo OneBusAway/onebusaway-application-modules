@@ -23,13 +23,13 @@ import java.util.regex.Pattern;
 import javax.servlet.jsp.JspException;
 
 import org.onebusaway.util.services.configuration.ConfigurationService;
-import org.onebusaway.enterprise.webapp.actions.OneBusAwayNYCActionSupport;
+import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.wiki.model.NycWikiPageWrapper;
 import org.onebusaway.wiki.api.WikiDocumentService;
 import org.onebusaway.wiki.api.WikiRenderingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class IndexAction extends OneBusAwayNYCActionSupport {
+public class IndexAction extends OneBusAwayEnterpriseActionSupport {
 
 	private static final long serialVersionUID = 1L;
 
