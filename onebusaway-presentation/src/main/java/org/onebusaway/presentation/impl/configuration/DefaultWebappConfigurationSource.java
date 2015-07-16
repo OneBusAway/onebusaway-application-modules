@@ -35,7 +35,8 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
 
   private ServiceAreaService _serviceAreaService;
 
-  private String _googleMapsApiKey = "AIzaSyCAnK_n1DSXgreUEQ-dD6m253rSPK9Nw9o";
+  private String _googleMapsApiKey = "ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g";
+
 
   @Autowired
   public void setTransitDataService(TransitDataService transitDataService) {
