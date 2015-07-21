@@ -38,7 +38,7 @@ public class AlertDaoImpl implements AlertDao {
   private HibernateTemplate _template;
   
   @Autowired
-  @Qualifier("sessionFactory")
+  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }

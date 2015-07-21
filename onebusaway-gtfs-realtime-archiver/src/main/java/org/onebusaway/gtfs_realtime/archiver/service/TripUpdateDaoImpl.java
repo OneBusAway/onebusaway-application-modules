@@ -38,7 +38,7 @@ public class TripUpdateDaoImpl implements TripUpdateDao {
   private HibernateTemplate _template;
   
   @Autowired
-  @Qualifier("sessionFactory")
+  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }

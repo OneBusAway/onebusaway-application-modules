@@ -25,26 +25,17 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
-
-  <!--
+  <import resource="classpath:data-sources.xml" />
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
-  -->
+  
   
   <!--  TDS support -->
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context.xml" />
-
-  <context:component-scan base-package="org.onebusaway.gtfs_realtime.archiver" />
   
   <bean id="usersHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
     <property name="target" value="hibernateAnnotatedClasses" />
     <property name="values">
       <list>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel</value>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel</value>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel</value>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.AlertModel</value>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.EntitySelectorModel</value>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.TimeRangeModel</value>
         <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
@@ -82,15 +73,15 @@
   </bean>
 
   <bean id="tripUpdateDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.TripUpdateDaoImpl">
-    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="sessionFactory" ref="gtfsRealtimeArchiveSessionFactory" />
   </bean>
 
   <bean id="vehiclePositionDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.VehiclePositionDaoImpl">
-    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="sessionFactory" ref="gtfsRealtimeArchiveSessionFactory" />
   </bean>
   
   <bean id="alertDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.AlertDaoImpl">
-    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="sessionFactory" ref="gtfsRealtimeArchiveSessionFactory" />
   </bean>
   
   <bean id="feedService" class="org.onebusaway.gtfs_realtime.archiver.service.FeedServiceImpl">
