@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +92,12 @@ public class InterpolationLibrary {
   }
 
   public static double interpolate(double[] keys, double[] values,
-      double target, EOutOfRangeStrategy outOfRangeStrategy) {
+	      double target, EOutOfRangeStrategy outOfRangeStrategy) {
+	  return interpolate(keys, values, target, outOfRangeStrategy, null);
+  }
+
+  public static double interpolate(double[] keys, double[] values,
+      double target, EOutOfRangeStrategy outOfRangeStrategy, EInRangeStrategy inRangeStrategy) {
 
     if (values.length == 0)
       throw new IndexOutOfBoundsException(OUT_OF_RANGE);
@@ -130,8 +136,17 @@ public class InterpolationLibrary {
       }
     }
 
-    return interpolatePair(keys[index - 1], values[index - 1], keys[index],
-        values[index], target);
+    if (inRangeStrategy == null) {
+    	inRangeStrategy = EInRangeStrategy.INTERPOLATE;
+    }
+
+    switch (inRangeStrategy) {
+    case PREVIOUS_VALUE:
+    	return values[index - 1];
+    default:
+    	return interpolatePair(keys[index - 1], values[index - 1], keys[index],
+    			values[index], target);
+    }
   }
 
   /**

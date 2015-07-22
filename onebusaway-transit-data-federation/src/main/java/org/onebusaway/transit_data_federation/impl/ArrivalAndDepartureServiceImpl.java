@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +58,10 @@ import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTimeInstance;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransfer;
 import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferService;
+import org.onebusaway.utility.EInRangeStrategy;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -656,7 +659,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       return (int) InterpolationLibrary.interpolate(
           scheduleDeviations.getScheduleTimes(),
           scheduleDeviations.getScheduleDeviationMus(), arrivalTime,
-          EOutOfRangeStrategy.LAST_VALUE);
+          EOutOfRangeStrategy.LAST_VALUE, EInRangeStrategy.PREVIOUS_VALUE);
     } else if (blockLocation.isScheduleDeviationSet()) {
       return (int) blockLocation.getScheduleDeviation();
     } else {
@@ -874,10 +877,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     double mu = InterpolationLibrary.interpolate(samples.getScheduleTimes(),
         samples.getScheduleDeviationMus(), stopTime.getArrivalTime(),
-        EOutOfRangeStrategy.LAST_VALUE);
+        EOutOfRangeStrategy.LAST_VALUE, EInRangeStrategy.INTERPOLATE);
     double sigma = InterpolationLibrary.interpolate(samples.getScheduleTimes(),
         samples.getScheduleDeviationSigmas(), stopTime.getArrivalTime(),
-        EOutOfRangeStrategy.LAST_VALUE);
+        EOutOfRangeStrategy.LAST_VALUE, EInRangeStrategy.INTERPOLATE);
 
     long from = (long) (instance.getScheduledArrivalTime() + (mu - sigma) * 1000);
     long to = (long) (instance.getScheduledArrivalTime() + (mu + sigma) * 1000);
@@ -904,10 +907,10 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
 
     double mu = InterpolationLibrary.interpolate(samples.getScheduleTimes(),
         samples.getScheduleDeviationMus(), stopTime.getDepartureTime(),
-        EOutOfRangeStrategy.LAST_VALUE);
+        EOutOfRangeStrategy.LAST_VALUE, EInRangeStrategy.INTERPOLATE);
     double sigma = InterpolationLibrary.interpolate(samples.getScheduleTimes(),
         samples.getScheduleDeviationSigmas(), stopTime.getDepartureTime(),
-        EOutOfRangeStrategy.LAST_VALUE);
+        EOutOfRangeStrategy.LAST_VALUE, EInRangeStrategy.INTERPOLATE);
 
     long from = (long) (instance.getScheduledDepartureTime() + (mu - sigma) * 1000);
     long to = (long) (instance.getScheduledDepartureTime() + (mu + sigma) * 1000);
