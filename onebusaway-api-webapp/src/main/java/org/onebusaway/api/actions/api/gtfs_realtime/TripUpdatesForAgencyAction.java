@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2013 Google, Inc.
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +32,7 @@ import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 
 public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
@@ -64,7 +65,14 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
           TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
           stopTimeUpdate.setStopId(normalizeId(timepointPrediction.getTimepointId()));
           TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
-          arrival.setTime(timepointPrediction.getTimepointPredictedTime());
+          if (timepointPrediction.getTimepointPredictedArrivalTime() != -1) {
+            arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime());
+          }
+  
+          TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
+          if (timepointPrediction.getTimepointPredictedDepartureTime() != -1) {
+            departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime());
+          }
         }
         
         tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);

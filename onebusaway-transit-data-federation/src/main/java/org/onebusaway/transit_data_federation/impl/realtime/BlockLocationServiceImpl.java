@@ -2,6 +2,7 @@
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 <inf71391@gmail.com>
  * Copyright (C) 2012 Google, Inc.
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -559,16 +560,28 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
         for (TimepointPredictionRecord tpr : timepointPredictions) {
           AgencyAndId stopId = tpr.getTimepointId();
-          long predictedTime = tpr.getTimepointPredictedTime();
+          long predictedTime;
+          if (tpr.getTimepointPredictedDepartureTime() != -1) {
+            predictedTime = tpr.getTimepointPredictedDepartureTime();
+          } else {
+            predictedTime = tpr.getTimepointPredictedArrivalTime();
+          }
           if (stopId == null || predictedTime == 0)
             continue;
 
           for (BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes()) {
             StopTimeEntry stopTime = blockStopTime.getStopTime();
             StopEntry stop = stopTime.getStop();
-            if (stopId.equals(stop.getId())) {
-              int arrivalTime = stopTime.getArrivalTime();
-              int deviation = (int) ((tpr.getTimepointPredictedTime() - blockInstance.getServiceDate()) / 1000 - arrivalTime);
+            // StopSequence equals to -1 when there is no stop sequence in the gtfs-rt
+            if (stopId.equals(stop.getId()) && stopTime.getTrip().getId().equals(tpr.getTripId()) &&
+               (tpr.getStopSequence() == -1 || stopTime.getSequence() == tpr.getStopSequence())) {
+              int arrivalTime;
+              if (tpr.getTimepointPredictedDepartureTime() != -1) {
+                arrivalTime = stopTime.getDepartureTime();
+              } else {
+                arrivalTime = stopTime.getArrivalTime();
+              }
+              int deviation = (int) ((predictedTime - blockInstance.getServiceDate()) / 1000 - arrivalTime);
               scheduleDeviations.put(arrivalTime, (double) deviation);
             }
           }
@@ -880,7 +893,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (TimepointPredictionRecord tpr : predictions) {
       builder.setTimepointId(tpr.getTimepointId());
       builder.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
-      builder.setTimepointPredictedTime(tpr.getTimepointPredictedTime());
+      builder.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());
+      builder.setTimepointPredictedDepartureTime(tpr.getTimepointPredictedDepartureTime());
       results.add(builder.create());
     }
     return results;
