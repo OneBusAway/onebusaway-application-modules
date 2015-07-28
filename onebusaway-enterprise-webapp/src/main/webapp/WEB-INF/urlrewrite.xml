@@ -74,7 +74,7 @@
      -->
     <rule>
         <from>^/api/siri/([^.]*)\.(xml|json)$</from>
-        <to last="true">/api/siri/$1.action?type=$2</to>
+        <to last="true">/onebusaway-api-webapp/siri/$1.action?type=$2</to>
     </rule>   
             
 	<!--
