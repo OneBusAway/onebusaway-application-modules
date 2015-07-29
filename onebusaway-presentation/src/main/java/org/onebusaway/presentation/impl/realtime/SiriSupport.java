@@ -97,7 +97,10 @@ public final class SiriSupport {
 
 		DirectionRefStructure directionRef = new DirectionRefStructure();
 		directionRef.setValue(framedJourneyTripBean.getDirectionId());
-		monitoredVehicleJourney.setDirectionRef(directionRef);
+		
+		// Check for Empty DirectionRef SOUND-1890
+		if(directionRef.getValue() != null)
+			monitoredVehicleJourney.setDirectionRef(directionRef);
 
 		NaturalLanguageStringStructure routeShortName = new NaturalLanguageStringStructure();
 		routeShortName.setValue(framedJourneyTripBean.getRoute().getShortName());
