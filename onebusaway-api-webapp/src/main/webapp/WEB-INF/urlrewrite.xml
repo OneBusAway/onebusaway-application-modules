@@ -22,7 +22,7 @@
     http://tuckey.org/urlrewrite/
 
 -->
-<urlrewrite use-query-string="true">
+<urlrewrite use-query-string="true" use-context="true">
 
     <rule>
 		<from>^(.*)/siri/([^.]*)\.(xml|json)(.*)$</from>
