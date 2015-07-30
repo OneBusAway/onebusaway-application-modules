@@ -22,7 +22,7 @@
     http://tuckey.org/urlrewrite/
 
 -->
-<urlrewrite>
+<urlrewrite >
 
 	<!--  
 		Redirect from URLs encoded in QR codes to the mobile page 
@@ -72,10 +72,15 @@
     <!-- 
     	API rules.
      -->
+    <!-- <rule use-query-string="true">
+        <from>^/api/siri/([^.]*)\.(xml|json)$</from>
+        <to last="true" type="redirect">/onebusaway-api-webapp/siri/$1?type=$2</to>
+    </rule>
+    
     <rule>
         <from>^/api/siri/([^.]*)\.(xml|json)$</from>
         <to last="true">/onebusaway-api-webapp/siri/$1.action?type=$2</to>
-    </rule>   
+    </rule>     -->
             
 	<!--
 		Remove action from URLs.
