@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway-quickstart</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.13-st.3</version>
+    <version>1.1.13-st.4-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-quickstart-assembly</artifactId>
   <packaging>pom</packaging>
