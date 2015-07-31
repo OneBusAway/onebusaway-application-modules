@@ -5,6 +5,71 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
+  <bean id="kcmStopModificationStrategy" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.KCMStopModificationStrategy" />
+
+    <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+      <property name="tripUpdatesUrl" value="http://data.onebusaway.org/cgi/trip-updates.sh" />
+      <property name="vehiclePositionsUrl" value="http://data.onebusaway.org/cgi/vehicle-positions.sh" />
+      <property name="refreshInterval" value="30"/>
+      <property name="agencyIds">
+                <list>
+                                <value>1</value>
+                                <value>40</value>
+                                <value>23</value>
+                                <value>KMD</value>
+                </list>
+       </property>
+       <property name="stopModificationStrategy" ref="kcmStopModificationStrategy" />
+    </bean>
+
+    <bean id="pierceFtp" class="org.onebusaway.transit_data_federation.impl.realtime.orbcad.FtpDataSource">
+        <property name="servername" value="ops.piercetransit.org" />
+        <property name="username" value="OneBusAway" />
+        <property name="password" value="0n3Bu$@w@y" />
+    </bean>
+
+    <bean id="pierce_transit_avl" class="org.onebusaway.transit_data_federation.impl.realtime.orbcad.OrbcadRecordFtpSource">
+        <property name="dataSource" ref="pierceFtp" />
+        <property name="dataDirectory" value="/orbcad" />
+        <property name="agencyIds">
+            <list>
+                <value>3</value>
+                <value>40</value>
+            </list>
+        </property>
+    </bean>
+
+<!--     <bean id="intercity_avl" class="org.onebusaway.transit_data_federation.impl.realtime.orbcad.OrbcadRecordHttpSource"> -->
+<!--         <property name="url" value="http://www.intercitytransit.com/rtacs/busdata.txt" /> -->
+<!--         <property name="agencyIds"> -->
+<!--             <list> -->
+<!--                 <value>19</value> -->
+<!--             </list> -->
+<!--         </property> -->
+<!--     </bean> -->
+<!--     <bean id="wsf_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
+<!--         <property name="tripUpdatesUrl" value="http://admin.staging.obast.org:9999/wsf/tripUpdates" /> -->
+<!--         <property name="vehiclePositionsUrl" value="http://admin.staging.obast.org:9999/wsf/vehiclePositions" /> -->
+<!--         <property name="refreshInterval" value="30"/> -->
+<!--         <property name="agencyIds"> -->
+<!--                 <list> -->
+<!--                         <value>95</value> -->
+<!--                 </list> -->
+<!--         </property> -->
+
+<!-- </bean> -->
+
+<!--     <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
+<!--       <property name="tripUpdatesUrl" value="http://STS-TRT-OBAADM:9999/wsf/tripUpdates" /> -->
+<!--       <property name="vehiclePositionsUrl" value="http://STS-TRT-OBAADM:9999/wsf/vehiclePositions" /> -->
+<!--       <property name="refreshInterval" value="60"/> -->
+<!--         <property name="agencyIds"> -->
+<!--             <list> -->
+<!--                 <value>95</value> -->
+<!--             </list> -->
+<!--         </property> -->
+<!--     </bean> -->
+
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
@@ -19,12 +84,12 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
                 value="true" />
     </bean>
     
-  <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
-    <property name="tripUpdatesUrl" value="http://realtime.prod.obahart.org:8088/trip-updates" />
-    <property name="vehiclePositionsUrl" value="http://realtime.prod.obahart.org:8088/vehicle-positions" />
-    <property name="refreshInterval" value="30" />
-    <property name="agencyId" value="Hillsborough Area Regional Transit" />
-  </bean>
+<!--   <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource"> -->
+<!--     <property name="tripUpdatesUrl" value="http://realtime.prod.obahart.org:8088/trip-updates" /> -->
+<!--     <property name="vehiclePositionsUrl" value="http://realtime.prod.obahart.org:8088/vehicle-positions" /> -->
+<!--     <property name="refreshInterval" value="30" /> -->
+<!--     <property name="agencyId" value="Hillsborough Area Regional Transit" /> -->
+<!--   </bean> -->
     
     
     <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
@@ -35,28 +100,17 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
          </props>
       </property>
     </bean>
-    <bean id="wsf_avl" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
-        <property name="tripUpdatesUrl" value="http://admin.staging.obast.org:9999/wsf/tripUpdates" />
-        <property name="vehiclePositionsUrl" value="http://admin.staging.obast.org:9999/wsf/vehiclePositions" />
-        <property name="refreshInterval" value="30"/>
-        <property name="agencyIds">
-                <list>
-                        <value>95</value>
-                </list>
-        </property>
-
-</bean>
     
-    <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
-      <constructor-arg type="java.lang.String" value="admin.staging.obast.org"/>
-      <constructor-arg type="java.lang.Integer" value="9999" />
-      <constructor-arg type="java.lang.String" value="/api/" />
-    </bean>
 <!--     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" > -->
-<!--       <constructor-arg type="java.lang.String" value="localhost"/> -->
+<!--       <constructor-arg type="java.lang.String" value="admin.staging.obast.org"/> -->
 <!--       <constructor-arg type="java.lang.Integer" value="9999" /> -->
-<!--       <constructor-arg type="java.lang.String" value="/onebusaway-nyc-admin-webapp/api/" /> -->
+<!--       <constructor-arg type="java.lang.String" value="/api/" /> -->
 <!--     </bean> -->
+    <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
+      <constructor-arg type="java.lang.String" value="localhost"/>
+      <constructor-arg type="java.lang.Integer" value="9999" />
+      <constructor-arg type="java.lang.String" value="/onebusaway-nyc-admin-webapp/api/" />
+    </bean>
     
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
       <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-st-bundle" />
