@@ -35,6 +35,7 @@ import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
 import org.onebusaway.transit_data.model.trips.TripBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsBean;
 import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
+import org.onebusaway.transit_data.model.trips.TripDetailsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripForVehicleQueryBean;
 import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
@@ -61,13 +62,15 @@ import uk.org.siri.siri.VehicleActivityStructure.MonitoredVehicleJourney;
 @Component
 public class RealtimeServiceImpl implements RealtimeService {
 
-  private TransitDataService _transitDataService;;
+  private TransitDataService _transitDataService;
 
   private PresentationService _presentationService;
   
   private SiriXmlSerializer _siriXmlSerializer = new SiriXmlSerializer();
 
   private SiriJsonSerializer _siriJsonSerializer = new SiriJsonSerializer();
+  
+  private static final long MILLISECONDS_IN_YEAR = 1000L * 60 * 60 * 24 * 365;
 
   private Long _now = null;
   
@@ -128,13 +131,21 @@ public class RealtimeServiceImpl implements RealtimeService {
       if(directionId != null && !tripDetails.getTrip().getDirectionId().equals(directionId))
         continue;
       
-      if(!_presentationService.include(tripDetails.getStatus()))
-        continue;
+      /*if(!_presentationService.include(tripDetails.getStatus()))
+        continue;*/
+      
+      long lastUpdatedTime = tripDetails.getStatus().getLastUpdateTime();
+      
+      if(!_presentationService.include(tripDetails.getStatus())){
+    	  lastUpdatedTime = getTime();
+      }
         
       VehicleActivityStructure activity = new VehicleActivityStructure();
-      activity.setRecordedAtTime(new Date(tripDetails.getStatus().getLastUpdateTime()));
+      
+      activity.setRecordedAtTime(new Date(lastUpdatedTime));
 
       List<TimepointPredictionRecord> timePredictionRecords = null;
+      
 	  timePredictionRecords = _transitDataService.getPredictionRecordsForTrip(AgencyAndId.convertFromString(routeId).getAgencyId(), tripDetails.getStatus());
       activity.setMonitoredVehicleJourney(new MonitoredVehicleJourney());  
       SiriSupport.fillMonitoredVehicleJourney(activity.getMonitoredVehicleJourney(), 
@@ -161,8 +172,8 @@ public class RealtimeServiceImpl implements RealtimeService {
   }
 
   @Override
-  public VehicleActivityStructure getVehicleActivityForVehicle(String vehicleId, int maximumOnwardCalls, long currentTime) {    
-  
+  public VehicleActivityStructure getVehicleActivityForVehicle(String vehicleId, int maximumOnwardCalls, long currentTime, String tripId) {    
+	  
 	TripForVehicleQueryBean query = new TripForVehicleQueryBean();
     query.setTime(new Date(currentTime));
     query.setVehicleId(vehicleId);
@@ -171,14 +182,28 @@ public class RealtimeServiceImpl implements RealtimeService {
     inclusion.setIncludeTripStatus(true);
     inclusion.setIncludeTripBean(true);
     query.setInclusion(inclusion);
-
+    
     TripDetailsBean tripDetailsForCurrentTrip = _transitDataService.getTripDetailsForVehicleAndTime(query);
-    if (tripDetailsForCurrentTrip != null) {
-      if(!_presentationService.include(tripDetailsForCurrentTrip.getStatus()))
-        return null;
-      
+    
+    if(tripDetailsForCurrentTrip == null){
+    	TripDetailsQueryBean detailsQuery = new TripDetailsQueryBean();
+    	detailsQuery.setTime(currentTime);
+    	detailsQuery.setTripId(tripId);
+    	tripDetailsForCurrentTrip = _transitDataService.getSingleTripDetails(detailsQuery);
+    }
+    
+    /* if (tripDetailsForCurrentTrip != null) {
+    if(!_presentationService.include(tripDetailsForCurrentTrip.getStatus()))
+      return null;*/
+    
+	  long lastUpdatedTime = tripDetailsForCurrentTrip.getStatus().getLastUpdateTime();
+	    
+	  if(tripDetailsForCurrentTrip != null && !_presentationService.include(tripDetailsForCurrentTrip.getStatus())){
+		  lastUpdatedTime = getTime();
+	  }
+    
       VehicleActivityStructure output = new VehicleActivityStructure();
-      output.setRecordedAtTime(new Date(tripDetailsForCurrentTrip.getStatus().getLastUpdateTime()));
+      output.setRecordedAtTime(new Date(lastUpdatedTime));
 
       List<TimepointPredictionRecord> timePredictionRecords = null;
       timePredictionRecords = _transitDataService.getPredictionRecordsForTrip(AgencyAndId.convertFromString(vehicleId).getAgencyId(), tripDetailsForCurrentTrip.getStatus());
@@ -190,9 +215,9 @@ public class RealtimeServiceImpl implements RealtimeService {
     	  timePredictionRecords, currentTime);
 
       return output;
-    }
+    //}
     
-    return null;
+    //return null;
   }
 
   @Override
@@ -206,8 +231,8 @@ public class RealtimeServiceImpl implements RealtimeService {
       if(statusBeanForCurrentTrip == null)
     	  continue;
 
-      if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
-          continue;
+      /*if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
+          continue;*/
 
       MonitoredStopVisitStructure stopVisit = new MonitoredStopVisitStructure();
       stopVisit.setRecordedAtTime(new Date(statusBeanForCurrentTrip.getLastUpdateTime()));
@@ -270,8 +295,8 @@ public class RealtimeServiceImpl implements RealtimeService {
 		  if(directionId != null && !tripDetails.getTrip().getDirectionId().equals(directionId))
 			  continue;
 
-		  if(!_presentationService.include(tripDetails.getStatus()))
-			  continue;
+		  /*if(!_presentationService.include(tripDetails.getStatus()))
+			  continue;*/
 
 		  return true;
 	  } 

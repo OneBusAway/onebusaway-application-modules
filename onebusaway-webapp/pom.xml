@@ -31,6 +31,12 @@
       <artifactId>onebusaway-presentation</artifactId>
       <version>${project.version}</version>
     </dependency>
+    
+    <dependency>
+      <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-util</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.onebusaway</groupId>
@@ -277,7 +283,7 @@
       <plugin>
 		<groupId>pl.project13.maven</groupId>
 		<artifactId>git-commit-id-plugin</artifactId>
-		<version>2.1.2</version>
+		<version>2.1.15</version>
 		<executions>
 		  <execution>
 		    <goals>

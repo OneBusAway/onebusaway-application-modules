@@ -18,15 +18,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       <property name="resourceRef"
                 value="true" />
     </bean>
-    
-  <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
-    <property name="tripUpdatesUrl" value="http://realtime.prod.obahart.org:8088/trip-updates" />
-    <property name="vehiclePositionsUrl" value="http://realtime.prod.obahart.org:8088/vehicle-positions" />
-    <property name="refreshInterval" value="30" />
-    <property name="agencyId" value="Hillsborough Area Regional Transit" />
-  </bean>
-    
-    
+
     <bean class="org.onebusaway.container.spring.SystemPropertyOverrideConfigurer">
       <property name="order" value="-2" />
       <property name="properties">
@@ -36,14 +28,13 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       </property>
     </bean>
     
-  <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+    <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
     <property name="tripUpdatesUrl" value="http://realtime.prod.obahart.org:8088/trip-updates" />
     <property name="vehiclePositionsUrl" value="http://realtime.prod.obahart.org:8088/vehicle-positions" />
-    <!-- Optionally set the refresh interval - how often we query the URLs, in seconds (default=30) -->
-    <property name="refreshInterval" value="60" />
-  </bean>
-
-
+    <property name="refreshInterval" value="30" />
+    <property name="agencyId" value="Hillsborough Area Regional Transit" />
+  	</bean>
+    
     
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="admin.staging.obahart.org"/>
@@ -52,7 +43,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     </bean>
     
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-      <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-hart-bundle" />
+      <property name="bundleStoreRoot" value="${bundlePath}" />
       <property name="standaloneMode" value="true" />
     </bean>
 </beans>

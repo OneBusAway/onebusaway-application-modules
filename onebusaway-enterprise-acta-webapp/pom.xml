@@ -15,6 +15,7 @@
   	<properties>
 		<branding-webapp>{project.name}</branding-webapp>
 		<jetty.version>6.1.26</jetty.version>
+		<xwiki.integration.version>0.0.2</xwiki.integration.version>
 	</properties>
 
 	<repositories>
@@ -172,6 +173,15 @@
 					<artifactId>JGoogleAnalyticsTracker</artifactId>
 					<version>1.2.2</version>
 				</dependency>
+				<dependency>
+			      <groupId>javax.servlet</groupId>
+			      <artifactId>jsp-api</artifactId>
+			      <scope>provided</scope>
+			    </dependency>
+			    <dependency>
+			      <groupId>javax.servlet</groupId>
+			      <artifactId>jstl</artifactId>
+			    </dependency>
 			</dependencies>
 		</profile>
 	</profiles>

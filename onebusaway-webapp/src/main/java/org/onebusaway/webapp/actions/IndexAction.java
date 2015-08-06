@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.Results;
-import org.onebusaway.presentation.services.configuration.ConfigurationService;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ActionContext;
@@ -69,7 +69,8 @@ public class IndexAction extends ActionSupport {
 	} catch (IOException ioe) {}
 	
 	HttpServletRequest request = ServletActionContext.getRequest();    
-	_properties.putAll(_configService.getConfiguration(false, request.getContextPath()));
+	//_properties.putAll(_configService.getConfiguration(false, request.getContextPath()));
+	_properties.putAll(_configService.getConfiguration());
 	
     if (namespace.equals("/") && (name.equals("index") || name.equals(""))) {
       return super.execute();

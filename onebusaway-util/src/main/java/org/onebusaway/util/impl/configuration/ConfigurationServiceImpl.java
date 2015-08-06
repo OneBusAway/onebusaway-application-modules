@@ -1,6 +1,5 @@
 package org.onebusaway.util.impl.configuration;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,11 +8,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.onebusaway.container.refresh.RefreshService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.onebusaway.util.services.configuration.ConfigurationServiceClient;

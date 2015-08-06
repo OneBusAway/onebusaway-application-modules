@@ -99,6 +99,9 @@ public class VehicleMonitoringAction extends ApiActionSupport
     
     String directionId = _request.getParameter("DirectionRef");
     
+    String tripId = _request.getParameter("TripId");
+    
+    
     // We need to support the user providing no agency id which means 'all agencies'.
     // So, this array will hold a single agency if the user provides it or all
     // agencies if the user provides none. We'll iterate over them later while 
@@ -173,7 +176,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
       
       for (AgencyAndId vehicleId : vehicleIds) {
         VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
-            vehicleId.toString(), maximumOnwardCalls, currentTimestamp);
+            vehicleId.toString(), maximumOnwardCalls, currentTimestamp, tripId);
 
         if (activity != null) {
           activities.add(activity);
@@ -234,7 +237,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
           for (VehicleStatusBean v : vehicles.getList()) {
             VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
-                v.getVehicleId(), maximumOnwardCalls, currentTimestamp);
+                v.getVehicleId(), maximumOnwardCalls, currentTimestamp, tripId);
 
             if (activity != null) {
               activities.add(activity);

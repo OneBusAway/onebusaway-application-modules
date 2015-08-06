@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2010 OpenPlans
+/** top
+ * Copyright (C) 201istance0 OpenPlans
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
@@ -72,13 +73,15 @@ public final class SiriSupport {
 	 * NOTE: The tripDetails bean here may not be for the trip the vehicle is currently on 
 	 * in the case of A-D for stop!
 	 */
+	@SuppressWarnings("unused")
 	public static void fillMonitoredVehicleJourney(MonitoredVehicleJourneyStructure monitoredVehicleJourney, 
 			TripBean framedJourneyTripBean, TripStatusBean currentVehicleTripStatus, StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
 			PresentationService presentationService, TransitDataService nycTransitDataService,
 			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, long responseTimestamp) {
+			
 		BlockInstanceBean blockInstance = 
 				nycTransitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
-
+		
 		List<BlockTripBean> blockTrips = blockInstance.getBlockConfiguration().getTrips();
 
 		if(monitoredCallStopBean == null) {
@@ -110,9 +113,23 @@ public final class SiriSupport {
 		NaturalLanguageStringStructure headsign = new NaturalLanguageStringStructure();
 		headsign.setValue(framedJourneyTripBean.getTripHeadsign());
 		monitoredVehicleJourney.setDestinationName(headsign);
-
+		
 		VehicleRefStructure vehicleRef = new VehicleRefStructure();
-		vehicleRef.setValue(currentVehicleTripStatus.getVehicleId());
+		
+		if(currentVehicleTripStatus.getVehicleId() == null){
+			String tripId = framedJourneyTripBean.getId();
+			String blockId = framedJourneyTripBean.getBlockId();
+			String directionId = framedJourneyTripBean.getDirectionId();
+			String vehicleIdHash = Integer.toString((tripId + blockId + directionId).hashCode());
+			String agencyName = tripId.split("_")[0];
+			String vehicleId = agencyName + "_" + vehicleIdHash;
+			
+			vehicleRef.setValue(vehicleId);
+		}
+		else{
+			vehicleRef.setValue(currentVehicleTripStatus.getVehicleId());
+		}
+		
 		monitoredVehicleJourney.setVehicleRef(vehicleRef);
 
 		monitoredVehicleJourney.setMonitored(currentVehicleTripStatus.isPredicted());
@@ -264,6 +281,7 @@ public final class SiriSupport {
 		String tripIdOfMonitoredCall = framedJourneyTripBean.getId();
 
 		monitoredVehicleJourney.setOnwardCalls(new OnwardCallsStructure());
+		
 
 		//////////
 
@@ -305,15 +323,36 @@ public final class SiriSupport {
 					continue;
 				}
 			}
-
+			
+			boolean foundMatch = false;
+			
 			HashMap<String, Integer> visitNumberForStopMap = new HashMap<String, Integer>();	   
 			for(BlockStopTimeBean stopTime : blockTrip.getBlockStopTimes()) {
 				int visitNumber = getVisitNumber(visitNumberForStopMap, stopTime.getStopTime().getStop());
-
+				
+				StopBean stop = stopTime.getStopTime().getStop();
+				double distanceOfCallAlongTrip = stopTime.getDistanceAlongBlock() - blockTrip.getDistanceAlongBlock();
+				double distanceOfVehicleFromCall = stopTime.getDistanceAlongBlock() - distanceOfVehicleAlongBlock;
+	
 				// block trip stops away--on this trip, only after we've passed the stop, 
 				// on future trips, count always.
 				if(currentVehicleTripStatus.getActiveTrip().getId().equals(blockTrip.getTrip().getId())) {
-					if(stopTime.getDistanceAlongBlock() >= distanceOfVehicleAlongBlock) {
+					// Check if realtime is not available
+					if(Double.isNaN(distanceOfVehicleAlongBlock)){
+						
+						if(stop.getId().equals(currentVehicleTripStatus.getNextStop().getId()))
+							foundMatch = true;
+						
+						if (foundMatch){
+							blockTripStopsAfterTheVehicle++;
+							/*transitDataService.getStopsWithArrivalsAndDepartures(stopIds, query)
+							distanceOfCallAlongTrip = stopTime.getDistanceAlongBlock();
+							distanceOfVehicleFromCall = currentVehicleTripStatus.getScheduledDistanceAlongTrip();*/
+						}
+						else
+							continue;					
+					}
+					else if(stopTime.getDistanceAlongBlock() >= distanceOfVehicleAlongBlock) {
 						blockTripStopsAfterTheVehicle++;
 					} else {
 						// stop is behind the bus--no need to go further
@@ -326,9 +365,9 @@ public final class SiriSupport {
 				}
 
 				monitoredVehicleJourney.getOnwardCalls().getOnwardCall().add(
-						getOnwardCallStructure(stopTime.getStopTime().getStop(), presentationService, 
-								stopTime.getDistanceAlongBlock() - blockTrip.getDistanceAlongBlock(), 
-								stopTime.getDistanceAlongBlock() - distanceOfVehicleAlongBlock, 
+						getOnwardCallStructure(stop, presentationService, 
+								distanceOfCallAlongTrip, 
+								distanceOfVehicleFromCall, 
 								visitNumber, blockTripStopsAfterTheVehicle - 1,
 								stopLevelPredictions.get(stopTime.getStopTime().getStop().getId()), responseTimestamp));
 
@@ -468,8 +507,8 @@ public final class SiriSupport {
 		df.setGroupingUsed(false);
 
 		distances.setStopsFromCall(index);
-		distances.setCallDistanceAlongRoute(Double.valueOf(df.format(distanceOfCallAlongTrip)));
-		distances.setDistanceFromCall(Double.valueOf(df.format(distanceOfVehicleFromCall)));
+		distances.setCallDistanceAlongRoute(NumberUtils.toDouble(df.format(distanceOfCallAlongTrip)));
+		distances.setDistanceFromCall(NumberUtils.toDouble(df.format(distanceOfVehicleFromCall)));
 		distances.setPresentableDistance(presentationService.getPresentableDistance(distances));
 
 		wrapper.setDistances(distances);
@@ -523,8 +562,8 @@ public final class SiriSupport {
 		df.setGroupingUsed(false);
 
 		distances.setStopsFromCall(index);
-		distances.setCallDistanceAlongRoute(Double.valueOf(df.format(distanceOfCallAlongTrip)));
-		distances.setDistanceFromCall(Double.valueOf(df.format(distanceOfVehicleFromCall)));
+		distances.setCallDistanceAlongRoute(NumberUtils.toDouble(df.format(distanceOfCallAlongTrip)));
+		distances.setDistanceFromCall(NumberUtils.toDouble(df.format(distanceOfVehicleFromCall)));		
 		distances.setPresentableDistance(presentationService.getPresentableDistance(distances));
 
 		wrapper.setDistances(distances);

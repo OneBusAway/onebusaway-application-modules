@@ -1,18 +1,9 @@
 package org.onebusaway.util.services.configuration;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.onebusaway.util.rest.RestApiLibrary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 public interface ConfigurationServiceClient {

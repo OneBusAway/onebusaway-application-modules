@@ -227,7 +227,9 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var orientation = activity.MonitoredVehicleJourney.Bearing;
 				var headsign = activity.MonitoredVehicleJourney.DestinationName;
 				var routeName = activity.MonitoredVehicleJourney.PublishedLineName;
-
+				
+				var tripId = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
+				
 				var vehicleId = activity.MonitoredVehicleJourney.VehicleRef;
 				var vehicleIdParts = vehicleId.split("_");
 				var vehicleIdWithoutAgency = vehicleIdParts[1];
@@ -254,7 +256,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			    		OBA.Config.analyticsFunction("Vehicle Marker Click", vehicleIdWithoutAgency);
 
 			    		OBA.Popups.showPopupWithContentFromRequest(map, this, OBA.Config.siriVMUrl + "&callback=?", 
-			    				{ OperatorRef: agencyId, VehicleRef: vehicleIdWithoutAgency, MaximumNumberOfCallsOnwards: "3", VehicleMonitoringDetailLevel: "calls" }, 
+			    				{ OperatorRef: agencyId, VehicleRef: vehicleIdWithoutAgency, MaximumNumberOfCallsOnwards: "3", VehicleMonitoringDetailLevel: "calls", TripId: tripId }, 
 			    				OBA.Popups.getVehicleContentForResponse, null);
 			    	});
 				}
