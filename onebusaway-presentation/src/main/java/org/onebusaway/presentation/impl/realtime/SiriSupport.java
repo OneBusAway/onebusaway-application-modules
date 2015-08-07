@@ -29,7 +29,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
+import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
+import org.onebusaway.transit_data.model.ArrivalsAndDeparturesQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
+import org.onebusaway.transit_data.model.StopWithArrivalsAndDeparturesBean;
 import org.onebusaway.transit_data.model.blocks.BlockInstanceBean;
 import org.onebusaway.transit_data.model.blocks.BlockStopTimeBean;
 import org.onebusaway.transit_data.model.blocks.BlockTripBean;
@@ -76,11 +79,11 @@ public final class SiriSupport {
 	@SuppressWarnings("unused")
 	public static void fillMonitoredVehicleJourney(MonitoredVehicleJourneyStructure monitoredVehicleJourney, 
 			TripBean framedJourneyTripBean, TripStatusBean currentVehicleTripStatus, StopBean monitoredCallStopBean, OnwardCallsMode onwardCallsMode,
-			PresentationService presentationService, TransitDataService nycTransitDataService,
+			PresentationService presentationService, TransitDataService transitDataService,
 			int maximumOnwardCalls, List<TimepointPredictionRecord> stopLevelPredictions, long responseTimestamp) {
 			
 		BlockInstanceBean blockInstance = 
-				nycTransitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
+				transitDataService.getBlockInstance(currentVehicleTripStatus.getActiveTrip().getBlockId(), currentVehicleTripStatus.getServiceDate());
 		
 		List<BlockTripBean> blockTrips = blockInstance.getBlockConfiguration().getTrips();
 
@@ -256,12 +259,12 @@ public final class SiriSupport {
 		// monitored call
 		if(!presentationService.isOnDetour(currentVehicleTripStatus))
 			fillMonitoredCall(monitoredVehicleJourney, blockInstance, currentVehicleTripStatus, monitoredCallStopBean, 
-				presentationService, nycTransitDataService, stopIdToPredictionRecordMap, responseTimestamp);
+				presentationService, transitDataService, stopIdToPredictionRecordMap, responseTimestamp);
 
 		// onward calls
 		if(!presentationService.isOnDetour(currentVehicleTripStatus))
 			fillOnwardCalls(monitoredVehicleJourney, blockInstance, framedJourneyTripBean, currentVehicleTripStatus, onwardCallsMode,
-				presentationService, nycTransitDataService, stopIdToPredictionRecordMap, maximumOnwardCalls, responseTimestamp);
+				presentationService, transitDataService, stopIdToPredictionRecordMap, maximumOnwardCalls, responseTimestamp);
 
 		// situations
 		fillSituations(monitoredVehicleJourney, currentVehicleTripStatus);
@@ -337,7 +340,8 @@ public final class SiriSupport {
 				// block trip stops away--on this trip, only after we've passed the stop, 
 				// on future trips, count always.
 				if(currentVehicleTripStatus.getActiveTrip().getId().equals(blockTrip.getTrip().getId())) {
-					// Check if realtime is not available
+					
+					// NO REALTIME DATA AVAILABLE
 					if(Double.isNaN(distanceOfVehicleAlongBlock)){
 						
 						if(stop.getId().equals(currentVehicleTripStatus.getNextStop().getId()))
@@ -345,9 +349,10 @@ public final class SiriSupport {
 						
 						if (foundMatch){
 							blockTripStopsAfterTheVehicle++;
-							/*transitDataService.getStopsWithArrivalsAndDepartures(stopIds, query)
-							distanceOfCallAlongTrip = stopTime.getDistanceAlongBlock();
-							distanceOfVehicleFromCall = currentVehicleTripStatus.getScheduledDistanceAlongTrip();*/
+							ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+							StopWithArrivalsAndDeparturesBean result = transitDataService.getStopWithArrivalsAndDepartures(stop.getId(), query);
+							distanceOfVehicleFromCall = result.getArrivalsAndDepartures().get(0).getDistanceFromStop();
+							responseTimestamp = result.getArrivalsAndDepartures().get(0).getScheduledArrivalTime();
 						}
 						else
 							continue;					
@@ -401,7 +406,14 @@ public final class SiriSupport {
 
 			if(!foundActiveTrip) {
 				if(tripStatus.getActiveTrip().getId().equals(blockTrip.getTrip().getId())) {
-					distanceOfVehicleAlongBlock += tripStatus.getDistanceAlongTrip();
+					
+					double distanceAlongTrip = tripStatus.getDistanceAlongTrip();
+					
+					if(Double.isNaN(distanceAlongTrip)){
+						//distanceAlongTrip = tripStatus.getScheduledDistanceAlongTrip();
+					}
+
+					distanceOfVehicleAlongBlock += distanceAlongTrip;
 
 					foundActiveTrip = true;
 				} else {

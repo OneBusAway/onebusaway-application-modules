@@ -198,7 +198,7 @@ public class RealtimeServiceImpl implements RealtimeService {
     
 	  long lastUpdatedTime = tripDetailsForCurrentTrip.getStatus().getLastUpdateTime();
 	    
-	  if(tripDetailsForCurrentTrip != null && !_presentationService.include(tripDetailsForCurrentTrip.getStatus())){
+	  if(!_presentationService.include(tripDetailsForCurrentTrip.getStatus())){
 		  lastUpdatedTime = getTime();
 	  }
     
@@ -233,9 +233,15 @@ public class RealtimeServiceImpl implements RealtimeService {
 
       /*if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
           continue;*/
+      
+      long lastUpdatedTime = statusBeanForCurrentTrip.getLastUpdateTime();
+      
+      if(!_presentationService.include(statusBeanForCurrentTrip)){
+		  lastUpdatedTime = getTime();
+	  }
 
       MonitoredStopVisitStructure stopVisit = new MonitoredStopVisitStructure();
-      stopVisit.setRecordedAtTime(new Date(statusBeanForCurrentTrip.getLastUpdateTime()));
+      stopVisit.setRecordedAtTime(new Date(lastUpdatedTime));
         
       List<TimepointPredictionRecord> timePredictionRecords = null;
       timePredictionRecords = createTimePredictionRecordsForStop(adBean, stopId);
