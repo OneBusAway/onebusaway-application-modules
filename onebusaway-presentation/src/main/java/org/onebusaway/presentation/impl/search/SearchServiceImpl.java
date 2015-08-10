@@ -370,7 +370,7 @@ public class SearchServiceImpl implements SearchService {
 
 		routeQuery = routeQuery.toUpperCase().trim();
 
-		if (routeQuery.length() < 2) {
+		if (routeQuery.length() < 1) {
 			return;
 		}
 

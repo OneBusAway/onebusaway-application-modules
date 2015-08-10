@@ -231,8 +231,8 @@ public class RealtimeServiceImpl implements RealtimeService {
       if(statusBeanForCurrentTrip == null)
     	  continue;
 
-      /*if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
-          continue;*/
+      if(/*!_presentationService.include(statusBeanForCurrentTrip) ||*/ !_presentationService.include(adBean, statusBeanForCurrentTrip))
+          continue;
       
       long lastUpdatedTime = statusBeanForCurrentTrip.getLastUpdateTime();
       

@@ -410,7 +410,7 @@ public final class SiriSupport {
 					double distanceAlongTrip = tripStatus.getDistanceAlongTrip();
 					
 					if(Double.isNaN(distanceAlongTrip)){
-						//distanceAlongTrip = tripStatus.getScheduledDistanceAlongTrip();
+						distanceAlongTrip = tripStatus.getScheduledDistanceAlongTrip();
 					}
 
 					distanceOfVehicleAlongBlock += distanceAlongTrip;
