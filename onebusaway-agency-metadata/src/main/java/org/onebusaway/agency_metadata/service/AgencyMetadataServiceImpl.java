@@ -16,6 +16,9 @@
 package org.onebusaway.agency_metadata.service;
 
 import org.onebusaway.agency_metadata.model.AgencyMetadata;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +27,25 @@ import java.util.List;
 @Component
 public class AgencyMetadataServiceImpl implements AgencyMetadataService {
 
+  protected static Logger _log = LoggerFactory.getLogger(AgencyMetadataServiceImpl.class);
+
+  // Regexes for validating Well Known Text format for bounding box Polygon
+  private static final String POINT = " *\\d+\\.\\d+ -\\d+\\.\\d+,";
+  private static final String LASTPOINT = " *\\d+\\.\\d+ -\\d+\\.\\d+";    // No trailing comma
+  private static final String POLYGON = "^POLYGON[ ?]\\(\\(" + POINT + POINT + POINT + POINT + LASTPOINT + "\\)\\)";
+
   @Autowired
   private AgencyMetadataDao _agencyMetadataDao;
 
   @Override
   public void createAgencyMetadata(String gtfsId, String name, String shortName, String legacyId, 
       String gtfsFeedUrl, String gtfsRtFeedUrl, String boundingBox, String ntdId) {
+
+    // Verify that boundingBox is a valid Well Known Text Polygon format for an agency bounding box.
+    if (!isValidBoundingBox(boundingBox)) {
+      boundingBox = null;
+    }
+
     AgencyMetadata model = new AgencyMetadata();
     model.setId(0L);      // Create a new record with generated id.
     model.setGtfsId(gtfsId);
@@ -65,6 +81,10 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
 	}
 	if (gtfsRtFeedUrl != null) {
 	    model.setGtfsRtFeedUrl(gtfsRtFeedUrl);
+	}
+	// Verify that boundingBox is a valid Well Known Text Polygon format for an agency bounding box.
+	if (!isValidBoundingBox(boundingBox)) {
+	  boundingBox = null;
 	}
 	if (boundingBox != null) {
 	    model.setBoundingBox(boundingBox);
@@ -116,4 +136,18 @@ public class AgencyMetadataServiceImpl implements AgencyMetadataService {
     return _agencyMetadataDao.getAgencyMetadataForNtdId(ntdId);
   }
 
+  /* Private functions */
+  private boolean isValidBoundingBox(String wkt) { 
+    _log.info("Validating: " + wkt);
+    if (wkt == null || wkt.length() == 0) {
+      return false;
+    }
+    if (!wkt.matches(POLYGON)) {
+      _log.info("Validation of POLYGON against " + POLYGON + " failed");
+      return false;
+    }
+    _log.info("Validation of POLYGON succeeded");
+    return true;
+  }
+  
 }
