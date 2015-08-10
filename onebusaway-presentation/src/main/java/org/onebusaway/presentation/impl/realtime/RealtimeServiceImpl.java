@@ -119,6 +119,7 @@ public class RealtimeServiceImpl implements RealtimeService {
   @Override
   public List<VehicleActivityStructure> getVehicleActivityForRoute(String routeId, String directionId, int maximumOnwardCalls, long currentTime) {
     List<VehicleActivityStructure> output = new ArrayList<VehicleActivityStructure>();
+    boolean hasRealtimeData = true;
         
     ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId, currentTime);
     for(TripDetailsBean tripDetails : trips.getList()) {
@@ -137,6 +138,7 @@ public class RealtimeServiceImpl implements RealtimeService {
       long lastUpdatedTime = tripDetails.getStatus().getLastUpdateTime();
       
       if(!_presentationService.include(tripDetails.getStatus())){
+    	  hasRealtimeData = false;
     	  lastUpdatedTime = getTime();
       }
         
@@ -151,7 +153,7 @@ public class RealtimeServiceImpl implements RealtimeService {
       SiriSupport.fillMonitoredVehicleJourney(activity.getMonitoredVehicleJourney(), 
           tripDetails.getTrip(), tripDetails.getStatus(), null, OnwardCallsMode.VEHICLE_MONITORING,
           _presentationService, _transitDataService, maximumOnwardCalls, 
-          timePredictionRecords, currentTime);
+          timePredictionRecords, hasRealtimeData, currentTime);
             
       output.add(activity);
     }
@@ -173,7 +175,8 @@ public class RealtimeServiceImpl implements RealtimeService {
 
   @Override
   public VehicleActivityStructure getVehicleActivityForVehicle(String vehicleId, int maximumOnwardCalls, long currentTime, String tripId) {    
-	  
+	boolean hasRealtimeData = true;
+	
 	TripForVehicleQueryBean query = new TripForVehicleQueryBean();
     query.setTime(new Date(currentTime));
     query.setVehicleId(vehicleId);
@@ -199,6 +202,7 @@ public class RealtimeServiceImpl implements RealtimeService {
 	  long lastUpdatedTime = tripDetailsForCurrentTrip.getStatus().getLastUpdateTime();
 	    
 	  if(!_presentationService.include(tripDetailsForCurrentTrip.getStatus())){
+		  hasRealtimeData = false;
 		  lastUpdatedTime = getTime();
 	  }
     
@@ -212,7 +216,7 @@ public class RealtimeServiceImpl implements RealtimeService {
       SiriSupport.fillMonitoredVehicleJourney(output.getMonitoredVehicleJourney(), 
     	  tripDetailsForCurrentTrip.getTrip(), tripDetailsForCurrentTrip.getStatus(), null, OnwardCallsMode.VEHICLE_MONITORING,
     	  _presentationService, _transitDataService, maximumOnwardCalls,
-    	  timePredictionRecords, currentTime);
+    	  timePredictionRecords, hasRealtimeData, currentTime);
 
       return output;
     //}
@@ -223,20 +227,25 @@ public class RealtimeServiceImpl implements RealtimeService {
   @Override
   public List<MonitoredStopVisitStructure> getMonitoredStopVisitsForStop(String stopId, int maximumOnwardCalls, long currentTime) {
     List<MonitoredStopVisitStructure> output = new ArrayList<MonitoredStopVisitStructure>();
-
+    boolean hasRealtimeData = true;
+    
     for (ArrivalAndDepartureBean adBean : getArrivalsAndDeparturesForStop(stopId, currentTime)) {
       TripStatusBean statusBeanForCurrentTrip = adBean.getTripStatus();
       TripBean tripBeanForAd = adBean.getTrip();
 
       if(statusBeanForCurrentTrip == null)
     	  continue;
-
-      if(/*!_presentationService.include(statusBeanForCurrentTrip) ||*/ !_presentationService.include(adBean, statusBeanForCurrentTrip))
+      
+      if(!_presentationService.include(adBean, statusBeanForCurrentTrip))
           continue;
       
+      /*if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
+          continue;*/
+
       long lastUpdatedTime = statusBeanForCurrentTrip.getLastUpdateTime();
       
       if(!_presentationService.include(statusBeanForCurrentTrip)){
+    	  hasRealtimeData = false;
 		  lastUpdatedTime = getTime();
 	  }
 
@@ -249,7 +258,7 @@ public class RealtimeServiceImpl implements RealtimeService {
       SiriSupport.fillMonitoredVehicleJourney(stopVisit.getMonitoredVehicleJourney(), 
     	  tripBeanForAd, statusBeanForCurrentTrip, adBean.getStop(), OnwardCallsMode.STOP_MONITORING,
     	  _presentationService, _transitDataService, maximumOnwardCalls,
-    	  timePredictionRecords, currentTime);
+    	  timePredictionRecords, hasRealtimeData, currentTime);
 
       output.add(stopVisit);
     }
