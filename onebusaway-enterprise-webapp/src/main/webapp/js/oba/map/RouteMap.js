@@ -150,7 +150,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			directionKey = "unknown";
 		}
 		
-		var icon = new google.maps.MarkerImage("img/stop/stop-" + directionKey + ".png",
+		var icon = new google.maps.MarkerImage("img/scheduled/stop/stop-" + directionKey + ".png",
 				new google.maps.Size(21, 21),
 				new google.maps.Point(0,0),
 				new google.maps.Point(10, 10));
@@ -267,7 +267,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 					orientationAngle = Math.floor(orientation / 5) * 5;
 				}
 					
-				var icon = new google.maps.MarkerImage("img/vehicle/vehicle-" + orientationAngle + ".png",
+				var icon = new google.maps.MarkerImage("img/realtime/vehicle/vehicle-" + orientationAngle + ".png",
 						new google.maps.Size(51, 51),
 						new google.maps.Point(0,0),
 						new google.maps.Point(25, 25));
@@ -418,7 +418,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				directionKey = "unknown";
 			}
 			
-			var highlightedIcon = new google.maps.MarkerImage("img/stop/stop-" + directionKey + "-active.png",
+			var highlightedIcon = new google.maps.MarkerImage("img/realtime/stop/stop-" + directionKey + "-active.png",
 					new google.maps.Size(21, 21),
 					new google.maps.Point(0,0),
 					new google.maps.Point(10, 10));
