@@ -127,12 +127,6 @@
 					<artifactId>onebusaway-realtime-api</artifactId>
 					<version>${project.version}</version>
 				</dependency>
-		
-				<!-- <dependency>
-					<groupId>org.onebusaway</groupId>
-					<artifactId>onebusaway-nyc-api-core</artifactId>
-					<version>2.9.0</version>
-				</dependency> -->
 				<dependency>
 					<groupId>org.onebusaway</groupId>
 					<artifactId>onebusaway-util</artifactId>

@@ -42,6 +42,8 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.siri.SiriDistanceExtension;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.org.siri.siri.BlockRefStructure;
 import uk.org.siri.siri.DataFrameRefStructure;
@@ -67,6 +69,8 @@ import uk.org.siri.siri.VehicleRefStructure;
 
 public final class SiriSupport {
 
+	private static Logger _log = LoggerFactory.getLogger(SiriSupport.class);
+	
 	public enum OnwardCallsMode {
 		VEHICLE_MONITORING,
 		STOP_MONITORING
@@ -349,10 +353,13 @@ public final class SiriSupport {
 						
 						if (foundMatch){
 							blockTripStopsAfterTheVehicle++;
-							ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
-							StopWithArrivalsAndDeparturesBean result = transitDataService.getStopWithArrivalsAndDepartures(stop.getId(), query);
-							distanceOfVehicleFromCall = result.getArrivalsAndDepartures().get(0).getDistanceFromStop();
-							responseTimestamp = result.getArrivalsAndDepartures().get(0).getScheduledArrivalTime();
+//							ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+//							query.setMinutesAfter(30);
+//							query.setMinutesBefore(0);
+//							query.setTime(System.currentTimeMillis());
+//							StopWithArrivalsAndDeparturesBean result = transitDataService.getStopWithArrivalsAndDepartures(stop.getId(), query);
+							// TODO!  We can't assume the first result is the correct result
+//							distanceOfVehicleFromCall = result.getArrivalsAndDepartures().get(0).getDistanceFromStop();
 						}
 						else
 							continue;					
@@ -375,7 +382,7 @@ public final class SiriSupport {
 								distanceOfVehicleFromCall, 
 								visitNumber, blockTripStopsAfterTheVehicle - 1,
 								stopLevelPredictions.get(stopTime.getStopTime().getStop().getId()),
-								hasRealtimeData, responseTimestamp));
+								hasRealtimeData, responseTimestamp, (currentVehicleTripStatus.getServiceDate() + stopTime.getStopTime().getArrivalTime() * 1000)));
 
 				onwardCallsAdded++;
 
@@ -460,7 +467,7 @@ public final class SiriSupport {
 										visitNumber, blockTripStopsAfterTheVehicle - 1,
 										stopLevelPredictions.get(stopTime.getStopTime().getStop().getId()),
 										hasRealtimeData,
-										responseTimestamp));
+										responseTimestamp, tripStatus.getServiceDate() + (stopTime.getStopTime().getArrivalTime() * 1000)));
 					}
 
 					// we found our monitored call--stop
@@ -489,7 +496,7 @@ public final class SiriSupport {
 	private static OnwardCallStructure getOnwardCallStructure(StopBean stopBean, 
 			PresentationService presentationService, 
 			double distanceOfCallAlongTrip, double distanceOfVehicleFromCall, int visitNumber, int index,
-			TimepointPredictionRecord prediction, boolean hasRealtimeData, long responseTimestamp) {
+			TimepointPredictionRecord prediction, boolean hasRealtimeData, long responseTimestamp, long scheduledArrivalTime) {
 
 		OnwardCallStructure onwardCallStructure = new OnwardCallStructure();
 		onwardCallStructure.setVisitNumber(BigInteger.valueOf(visitNumber));
@@ -512,8 +519,9 @@ public final class SiriSupport {
 			}
 		}
 		else if(!hasRealtimeData){
-			onwardCallStructure.setExpectedArrivalTime(new Date(responseTimestamp + 1000)); 
-			onwardCallStructure.setExpectedDepartureTime(new Date(responseTimestamp + 1000));
+			_log.warn("using arrival time of " + new Date(scheduledArrivalTime));
+			onwardCallStructure.setExpectedArrivalTime(new Date(scheduledArrivalTime)); 
+			onwardCallStructure.setExpectedDepartureTime(new Date(scheduledArrivalTime));
 		}
 
 		// siri extensions
@@ -540,7 +548,7 @@ public final class SiriSupport {
 	private static MonitoredCallStructure getMonitoredCallStructure(StopBean stopBean, 
 			PresentationService presentationService, 
 			double distanceOfCallAlongTrip, double distanceOfVehicleFromCall, int visitNumber, int index,
-			TimepointPredictionRecord prediction, boolean hasRealtimeData, long responseTimestamp) {
+			TimepointPredictionRecord prediction, boolean hasRealtimeData, long responseTimestamp, long scheduledArrivalTime) {
 
 		MonitoredCallStructure monitoredCallStructure = new MonitoredCallStructure();
 		monitoredCallStructure.setVisitNumber(BigInteger.valueOf(visitNumber));
@@ -562,19 +570,17 @@ public final class SiriSupport {
 				 * Add a second here to prevent negative values from showing up in the UI 
 				 * (actual precision of the value is 1 minute, so a second has little influence)
 				 */
-				if(!hasRealtimeData){
-					monitoredCallStructure.setExpectedArrivalTime(new Date(prediction.getTimepointScheduledTime()));
-					monitoredCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointScheduledTime()));
-				}
-				else{
-					monitoredCallStructure.setExpectedArrivalTime(new Date(responseTimestamp + 1000)); 
-					monitoredCallStructure.setExpectedDepartureTime(new Date(responseTimestamp + 1000));
-				}
+				monitoredCallStructure.setExpectedArrivalTime(new Date(responseTimestamp + 1000)); 
+				monitoredCallStructure.setExpectedDepartureTime(new Date(responseTimestamp + 1000));
 			} 
 			else {
 				monitoredCallStructure.setExpectedArrivalTime(new Date(prediction.getTimepointPredictedTime()));
 				monitoredCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedTime()));
 			}
+		}	else if(!hasRealtimeData){
+			_log.warn("using (2) arrival time of " + new Date(scheduledArrivalTime));
+			monitoredCallStructure.setExpectedArrivalTime(new Date(scheduledArrivalTime));
+			monitoredCallStructure.setExpectedDepartureTime(new Date(scheduledArrivalTime));
 		}
 		
 		// siri extensions

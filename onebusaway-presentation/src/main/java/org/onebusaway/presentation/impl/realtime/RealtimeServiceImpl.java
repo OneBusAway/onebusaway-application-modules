@@ -239,8 +239,9 @@ public class RealtimeServiceImpl implements RealtimeService {
       if(!_presentationService.include(adBean, statusBeanForCurrentTrip))
           continue;
       
-      /*if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
-          continue;*/
+      // TODO if showing static schedule data comment this out
+      if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
+          continue;
 
       long lastUpdatedTime = statusBeanForCurrentTrip.getLastUpdateTime();
       
