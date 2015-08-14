@@ -129,7 +129,7 @@
         <property name="wikiAttachmentUrl" ref="xwikiAttachmentUrlBean" />
     </bean>
     
-    <!-- <bean id="siriCacheService" class="org.onebusaway.nyc.presentation.service.cache.NycSiriCacheServiceImpl">
-    <property name="disabled" value="${siri.cache.disabled}" />
-    </bean> -->
+    <bean id="siriCacheService" class="org.onebusaway.presentation.services.cachecontrol.SiriCacheServiceImpl">
+    	<property name="disabled" value="${siri.cache.disabled}" />
+    </bean>
 </beans>
