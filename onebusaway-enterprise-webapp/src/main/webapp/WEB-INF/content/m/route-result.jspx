@@ -106,7 +106,7 @@
 									</a> 
 								</c:otherwise>
 							</c:choose>
-							<span id="${directionId}-${idWithoutAgency}" class="anchor">&amp;</span>
+							<span id="${directionId}-${idWithoutAgency}" class="anchor">&amp;nbsp</span>
 						</li>
 					</s:iterator>
 				</ul>

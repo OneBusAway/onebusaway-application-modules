@@ -208,7 +208,7 @@ public class SearchResultFactoryImpl extends AbstractSearchResultFactoryImpl imp
       // Keep track of service and no service per route. If at least one
       // direction per route meets some criteria, break because that route is handled.
       for (RouteDirection direction : routeAtStop.getDirections()) {
-        if (direction.getHasUpcomingScheduledService() == false && direction.getDistanceAways().isEmpty()) {
+        if (Boolean.FALSE.equals(direction.getHasUpcomingScheduledService()) && direction.getDistanceAways().isEmpty()) {
           routesWithNoScheduledService.add(routeAtStop);
           break;
         } else {

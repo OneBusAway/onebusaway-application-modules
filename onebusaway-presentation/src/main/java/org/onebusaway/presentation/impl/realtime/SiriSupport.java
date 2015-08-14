@@ -1,5 +1,5 @@
-/** top
- * Copyright (C) 201istance0 OpenPlans
+/**
+ * Copyright (C) 2010 OpenPlans
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
