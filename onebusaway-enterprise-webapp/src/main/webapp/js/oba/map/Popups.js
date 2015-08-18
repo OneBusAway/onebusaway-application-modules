@@ -223,8 +223,15 @@ OBA.Popups = (function() {
 		var vehicleIdParts = vehicleId.split("_");
 		var vehicleIdWithoutAgency = vehicleIdParts[1];
 		var routeName = activity.MonitoredVehicleJourney.LineRef;
+		var hasRealtime = activity.MonitoredVehicleJourney.Monitored
 
 		var html = '<div id="' + popupContainerId + '" class="popup">';
+		
+		// Don't show Vehicle Id if no Realtime data
+		if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
+			hasRealtime = false;
+			vehicleIdWithoutAgency = 'N/A';
+		}
 		
 		// header
 		html += '<div class="header vehicle">';
@@ -262,6 +269,12 @@ OBA.Popups = (function() {
 				&& typeof activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall !== 'undefined') {
 
 				html += '<p class="service">Next stops:</p>';
+				
+				// Alert if Realtime Data is unavailable
+				if(!hasRealtime){
+					html += '<div class="scheduleAlert"><p>Realtime data currently unavailable for this vehicle</p></div>';
+				}
+				
 				html += '<ul>';			
 
 				jQuery.each(activity.MonitoredVehicleJourney.OnwardCalls.OnwardCall, function(_, onwardCall) {
@@ -330,6 +343,7 @@ OBA.Popups = (function() {
 		var stopId = stopResult.id;
 		var stopIdParts = stopId.split("_");
 		var stopIdWithoutAgency = stopIdParts[1];
+		
 		
 		html += '<div class="header stop">';
 		html += '<p class="title">' + stopResult.name + '</p><p>';
@@ -446,11 +460,12 @@ OBA.Popups = (function() {
 
 			jQuery.each(routeAndDirectionWithArrivals, function(_, mvjs) {
 				var mvj = mvjs[0];
-
+				
 				html += '<ul>';
 
 				html += '<li class="route">';
 				html += '<a href="#' + stopIdWithoutAgency + '%20' + mvj.PublishedLineName + '"><span class="route-name">' + mvj.PublishedLineName + "</span>&nbsp;&nbsp; " + mvj.DestinationName + '</a>';
+				if(mvj.Monitored)
 				if (mvj.LineRef in alertData) {
 					html += ' <a id="alert-link|' + stopIdWithoutAgency + '|' + mvj.LineRef + '|' + mvj.PublishedLineName + '" class="alert-link" href="#">Alert</a>';
 				}
@@ -460,6 +475,8 @@ OBA.Popups = (function() {
 					if(_ >= maxObservationsToShow) {
 						return false;
 					}
+					
+					var hasRealtime = monitoredVehicleJourney.Monitored
 
 					if(typeof monitoredVehicleJourney.MonitoredCall !== 'undefined') {
 						var distance = monitoredVehicleJourney.MonitoredCall.Extensions.Distances.PresentableDistance;
@@ -474,7 +491,7 @@ OBA.Popups = (function() {
 
 						var wrapped = false;
 						if(typeof monitoredVehicleJourney.ProgressStatus !== 'undefined' 
-							&& monitoredVehicleJourney.ProgressStatus.indexOf("prevTrip") !== -1) {
+							&& monitoredVehicleJourney.ProgressStatus.indexOf("prevTrip") !== -1 && hasRealtime) {
 							wrapped = true;
 						}
 
@@ -488,6 +505,11 @@ OBA.Popups = (function() {
 						if(typeof monitoredVehicleJourney.ProgressRate !== 'undefined' 
 							&& monitoredVehicleJourney.ProgressRate === "noProgress") {
 							stalled = true;
+						}
+						
+						// Alert if Realtime data is unavailable
+						if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
+							distance += '<span class="scheduleAlert"><p>Using Schedule Data</p></span>';
 						}
 
 						// time mode

@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.presentation.impl.ArrivalsAndDeparturesModel;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.realtime.api.TimepointPredictionRecord;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -70,6 +73,7 @@ import uk.org.siri.siri.VehicleRefStructure;
 public final class SiriSupport {
 
 	private static Logger _log = LoggerFactory.getLogger(SiriSupport.class);
+
 	
 	public enum OnwardCallsMode {
 		VEHICLE_MONITORING,
@@ -310,7 +314,6 @@ public final class SiriSupport {
 			if(!foundActiveTrip) {
 				if(currentVehicleTripStatus.getActiveTrip().getId().equals(blockTrip.getTrip().getId())) {
 					distanceOfVehicleAlongBlock += currentVehicleTripStatus.getDistanceAlongTrip();
-
 					foundActiveTrip = true;
 				} else {
 					// a block trip's distance along block is the *beginning* of that block trip along the block
@@ -345,21 +348,20 @@ public final class SiriSupport {
 				// on future trips, count always.
 				if(currentVehicleTripStatus.getActiveTrip().getId().equals(blockTrip.getTrip().getId())) {
 					
-					// NO REALTIME DATA AVAILABLE
-					if(Double.isNaN(distanceOfVehicleAlongBlock)){
+					if(!hasRealtimeData){
 						
 						if(stop.getId().equals(currentVehicleTripStatus.getNextStop().getId()))
 							foundMatch = true;
 						
 						if (foundMatch){
 							blockTripStopsAfterTheVehicle++;
-//							ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
-//							query.setMinutesAfter(30);
-//							query.setMinutesBefore(0);
-//							query.setTime(System.currentTimeMillis());
-//							StopWithArrivalsAndDeparturesBean result = transitDataService.getStopWithArrivalsAndDepartures(stop.getId(), query);
+							ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
+							StopWithArrivalsAndDeparturesBean result = transitDataService.getStopWithArrivalsAndDepartures(stop.getId(), query);
 							// TODO!  We can't assume the first result is the correct result
-//							distanceOfVehicleFromCall = result.getArrivalsAndDepartures().get(0).getDistanceFromStop();
+							Collections.sort(result.getArrivalsAndDepartures(), new SortByTime());
+							ArrivalAndDepartureBean arrivalAndDeparture = result.getArrivalsAndDepartures().get(0);
+							distanceOfVehicleFromCall = arrivalAndDeparture.getDistanceFromStop();
+							//responseTimestamp = arrivalAndDeparture.getScheduledArrivalTime();
 						}
 						else
 							continue;					
@@ -417,7 +419,7 @@ public final class SiriSupport {
 					
 					double distanceAlongTrip = tripStatus.getDistanceAlongTrip();
 					
-					if(Double.isNaN(distanceAlongTrip)){
+					if(!hasRealtimeData){
 						distanceAlongTrip = tripStatus.getScheduledDistanceAlongTrip();
 					}
 
@@ -562,8 +564,12 @@ public final class SiriSupport {
 		monitoredCallStructure.setStopPointName(stopPoint);
 
 		if(prediction != null) {
+			if(!hasRealtimeData){
+				monitoredCallStructure.setExpectedArrivalTime(new Date(prediction.getTimepointScheduledTime()));
+				monitoredCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointScheduledTime()));
+			}
 			// do not allow predicted times to be less than ResponseTimestamp
-			if (prediction.getTimepointPredictedTime() < responseTimestamp) {
+			else if (prediction.getTimepointPredictedTime() < responseTimestamp) {
 				/*
 				 * monitoredCall has less precision than onwardCall (date vs. timestamp)
 				 * which results in a small amount of error when converting back to timestamp.
@@ -638,5 +644,13 @@ public final class SiriSupport {
 		}
 
 		return ProgressRateEnumeration.UNKNOWN;
+	}
+	
+	public static class SortByTime implements Comparator<ArrivalAndDepartureBean> {
+	    public int compare(ArrivalAndDepartureBean o1, ArrivalAndDepartureBean o2) {
+	      long a = o1.computeBestDepartureTime();
+	      long b = o2.computeBestDepartureTime();
+	      return a == b ? 0 : (a < b ? -1 : 1);
+	    }
 	}
 }
