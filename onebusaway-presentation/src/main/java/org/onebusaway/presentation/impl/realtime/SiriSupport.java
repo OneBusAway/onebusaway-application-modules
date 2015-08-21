@@ -584,7 +584,6 @@ public final class SiriSupport {
 				monitoredCallStructure.setExpectedDepartureTime(new Date(prediction.getTimepointPredictedTime()));
 			}
 		}	else if(!hasRealtimeData){
-			_log.warn("using (2) arrival time of " + new Date(scheduledArrivalTime));
 			monitoredCallStructure.setExpectedArrivalTime(new Date(scheduledArrivalTime));
 			monitoredCallStructure.setExpectedDepartureTime(new Date(scheduledArrivalTime));
 		}
