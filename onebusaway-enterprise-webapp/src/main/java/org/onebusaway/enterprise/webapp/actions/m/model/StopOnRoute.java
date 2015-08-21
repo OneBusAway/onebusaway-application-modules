@@ -16,9 +16,13 @@ public class StopOnRoute {
   
   private List<String> distanceAways;
   
-  public StopOnRoute(StopBean stop, List<String> distanceAways) {
+  private Boolean hasRealtime = true;
+  
+  public StopOnRoute(StopBean stop, List<String> distanceAways, Boolean hasRealtime) {
     this.stop = stop;
     this.distanceAways = distanceAways;
+    if(hasRealtime != null)
+    	this.hasRealtime = hasRealtime;
   }
   
   public String getId() {
@@ -36,5 +40,13 @@ public class StopOnRoute {
   public List<String> getDistanceAways() {
     return distanceAways;
   }
+
+public Boolean getHasRealtime() {
+	return hasRealtime;
+}
+
+public void setHasRealtime(Boolean hasRealtime) {
+	this.hasRealtime = hasRealtime;
+}
 
 }

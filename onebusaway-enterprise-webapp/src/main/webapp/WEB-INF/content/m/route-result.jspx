@@ -89,11 +89,22 @@
 											<s:property value="name" />
 										</a> 
 									</strong>
-									<ol class="arrivalsOnRoute">
-										<c:forEach var="distanceAway" items="${distanceAways}">
-											<li>${distanceAway}</li>
-										</c:forEach>
-									</ol>
+									<c:choose>
+										<c:when test="${!hasRealtime}">
+											<ol class="arrivalsOnRouteSchedule">
+												<c:forEach var="distanceAway" items="${distanceAways}">
+													<li>${distanceAway} <span class="scheduleAlert"> (Schedule Data)</span></li>
+												</c:forEach>
+											</ol>
+										</c:when>
+										<c:otherwise>
+											<ol class="arrivalsOnRoute">
+												<c:forEach var="distanceAway" items="${distanceAways}">
+													<li>${distanceAway}</li>
+												</c:forEach>
+											</ol>
+										</c:otherwise>		
+									</c:choose>	
 								</c:when>
 								<c:otherwise>
 									<s:url var="url" namespace="/m" action="index">
