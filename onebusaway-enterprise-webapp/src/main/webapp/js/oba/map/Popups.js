@@ -507,11 +507,15 @@ OBA.Popups = (function() {
 							stalled = true;
 						}
 						
+						var arrival = 'arrival';
+						
 						// Alert if Realtime data is unavailable
 						if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
-							distance += '<span class="scheduleAlert"><p>Using Schedule Data</p></span>';
+							distance += '<span class="scheduleAlert"><span class="not_bold"> (using schedule time)</span></span>';
+							arrival = 'arrival_schedule';
 						}
-
+						
+						
 						// time mode
 						if(timePrediction != null && stalled === false) {
 							if(wrapped === false) {
@@ -519,7 +523,7 @@ OBA.Popups = (function() {
 							}
 							
 							var lastClass = ((_ === maxObservationsToShow - 1 || _ === mvjs.length - 1) ? " last" : "");
-							html += '<li class="arrival' + lastClass + '">' + timePrediction + '</li>';
+							html += '<li class="' + arrival + lastClass + '">' + timePrediction + '</li>';
 
 						// distance mode
 						} else {
@@ -540,7 +544,7 @@ OBA.Popups = (function() {
 							}
 								
 							var lastClass = ((_ === maxObservationsToShow - 1 || _ === mvjs.length - 1) ? " last" : "");
-							html += '<li class="arrival' + lastClass + '">' + distance + '</li>';
+							html += '<li class="' + arrival + lastClass + '">' + distance + '</li>';
 						}
 					}
 				});
