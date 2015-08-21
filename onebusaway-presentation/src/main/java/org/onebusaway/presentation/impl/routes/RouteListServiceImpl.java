@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.onebusaway.presentation.impl.AgencyAndRouteComparator;
+import org.onebusaway.presentation.impl.RouteComparator;
 import org.onebusaway.presentation.services.routes.RouteListService;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.util.services.configuration.ConfigurationService;
@@ -63,33 +65,5 @@ public class RouteListServiceImpl implements RouteListService {
         Collections.sort(allRoutes, (getShowAgencyNames() ? new AgencyAndRouteComparator() : new RouteComparator()));
 
         return allRoutes;
-    }
-
-    public class AgencyAndRouteComparator implements Comparator<RouteBean> {
-
-        @Override
-        public int compare(RouteBean t, RouteBean t1) {
-            if (t.getAgency().getName().compareTo(t1.getAgency().getName()) == 0) {
-                if (t.getShortName() != null && t1.getShortName() != null) {
-                    return t.getShortName().compareTo(t1.getShortName());
-                } else {
-                    return t.getId().compareTo(t1.getId());
-                }
-            } else {
-                return t.getAgency().getName().compareTo(t1.getAgency().getName());
-            }
-        }
-    }
-
-    public class RouteComparator implements Comparator<RouteBean> {
-
-        @Override
-        public int compare(RouteBean t, RouteBean t1) {
-            if (t.getShortName() != null && t1.getShortName() != null) {
-                return t.getShortName().compareTo(t1.getShortName());
-            } else {
-                return t.getId().compareTo(t1.getId());
-            }
-        }
     }
 }
