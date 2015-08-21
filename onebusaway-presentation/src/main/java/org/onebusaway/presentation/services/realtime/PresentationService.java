@@ -38,9 +38,9 @@ public interface PresentationService {
   /* filter logic: */
 
   // for stops only
-  public boolean include(ArrivalAndDepartureBean adBean, TripStatusBean status);
+  public boolean include(TripStatusBean statusBeanForCurrentTrip);
 
   // for stops and vehicles
-  public boolean include(TripStatusBean statusBean);
+  boolean include(ArrivalAndDepartureBean adBean, TripStatusBean status);
 
 }
