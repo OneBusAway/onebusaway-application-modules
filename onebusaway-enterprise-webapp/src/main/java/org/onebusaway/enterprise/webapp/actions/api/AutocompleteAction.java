@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011 Metropolitan Transportation Authority
+ * Copyright (C) 2011 Metropolitan Transportation Authority
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -54,7 +54,7 @@ public class AutocompleteAction extends OneBusAwayEnterpriseActionSupport {
     
     suggestions = _transitDataService.getSearchSuggestions(null, _term.toLowerCase());
     
-    if (suggestions.size() == 0 && _term.length() > 2) {
+    if (suggestions != null && suggestions.size() == 0 && _term.length() > 2) {
     	List<EnterpriseGeocoderResult> geocoderResults = _geocoderService.enterpriseGeocode(_term);
     	if (geocoderResults.size() > 0) {
         	for (int i = 0; i < 10; i++) {

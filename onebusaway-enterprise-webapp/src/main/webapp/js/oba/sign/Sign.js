@@ -203,7 +203,7 @@ OBA.Sign = function() {
 					'<div class="name"><h1>' + stopInfo[stopId].name + '</h1></div>' + 
 					' <div class="stop-id"><h2>Stop #' + stopId.id + '</h2></div>' +
 				'</div>' + 
-				'<div class="arrivals"><table></table></div>' +
+				'<div class="arrivals"><div class="arrivals_scroller"><table></table></div></div>' +
 				'<div class="alerts"><div class="alerts_header"><h2>Service Change Notices</h2></div><div id="stop' + stopId.id + '" class="scroller"></div></div>' +
 			'</div>').addClass("slide");
 		
@@ -226,6 +226,17 @@ OBA.Sign = function() {
 			stopElement.find(".alerts").hide();
 			stopElement.find(".arrivals").width("100%");
 		} else {
+			// make sure we have a valid alert before showing
+			var found = false;
+			jQuery.each(applicableSituations, function(situationId, situation) {
+				if (typeof situation.Affects.VehicleJourneys != "undefined") {
+					if (journey.LineRef in routeInfo && jQuery.inArray(journey.LineRef, existingSigns) < 0) {
+						found = true;
+					}
+				}
+			});
+			if (!found) return;
+			
 			stopElement.find(".alerts").show();
 			stopElement.find(".arrivals").width("70%");
 
@@ -279,21 +290,46 @@ OBA.Sign = function() {
 				sign.appendTo(row);
 				
 				// name cell
+				var spanTxt = " Bus #" + vehicleInfo.vehicleId;
+				if (!vehicleInfo.monitored) {
+					spanTxt = "";
+				}
 				var vehicleIdSpan = jQuery("<span></span>")
-					.addClass("bus-id")
-					.text(" Bus #" + vehicleInfo.vehicleId);
-
+				.addClass("bus-id")
+				.text(spanTxt);
+			
 				jQuery('<td></td>')
 					.text(headsign)
 					.append(vehicleIdSpan)
 					.appendTo(row);
 			
-				// distance cell
-				jQuery('<td colspan="2"></td>')
-					.addClass("distance")
-					.text(vehicleInfo.distanceAway)
-					.appendTo(row);
-					
+				if (typeof vehicleInfo.timePrediction != 'undefined') {
+					// distance cell
+					if (vehicleInfo.monitored) {
+						jQuery('<td colspan="2"></td>')
+							.addClass("distance")
+							.text(vehicleInfo.timePrediction)
+							.appendTo(row);
+					} else {
+						var scheduledSpan = jQuery("<span></span>")
+						.addClass("bus-id")
+						.text("(scheduled) ");
+
+						jQuery('<td colspan="2"></td>')
+						.addClass("distance")
+						.text(vehicleInfo.timePrediction)
+						.prepend(scheduledSpan)
+						.appendTo(row);
+						
+					}
+				} else {
+				
+					// distance cell
+					jQuery('<td colspan="2"></td>')
+						.addClass("distance")
+						.text(vehicleInfo.distanceAway)
+						.appendTo(row);
+				}
 				tableBody.append(row);				
 			});
 			r++;
@@ -358,13 +394,14 @@ OBA.Sign = function() {
 		}
 
 		var stopElement = getNewElementForStop(stopId);
-
-		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, StopMonitoringDetailLevel: "normal" };
+		
+		var params = { OperatorRef: stopId.agency, MonitoringRef: stopId.id, StopMonitoringDetailLevel: "normal", MinimumStopVisitsPerLine: 3 };
 		jQuery.getJSON(obaApiBaseUrl + OBA.Config.siriSMUrl, params, function(json) {	
 			//updateTimestamp(OBA.Util.ISO8601StringToDate(json.Siri.ServiceDelivery.ResponseTimestamp));
 			//hideError();
 
 			var situationsById = {};
+			if (json == null) return;
 			if(typeof json.Siri.ServiceDelivery.SituationExchangeDelivery !== 'undefined' && json.Siri.ServiceDelivery.SituationExchangeDelivery.length > 0) {
 				jQuery.each(json.Siri.ServiceDelivery.SituationExchangeDelivery[0].Situations.PtSituationElement, function(_, situationElement) {
 					situationsById[situationElement.SituationNumber] = situationElement;
@@ -386,6 +423,7 @@ OBA.Sign = function() {
 				var routeIdWithoutAgency = routeIdParts[1];
 				
 				var headsign = journey.DestinationName;
+				var updateTimestampReference = OBA.Util.ISO8601StringToDate(json.Siri.ServiceDelivery.ResponseTimestamp).getTime();
 				if(typeof headsignToDistanceAways[headsign] === 'undefined') {
 					headsignToDistanceAways[headsign] = [];
 					r++;
@@ -401,6 +439,13 @@ OBA.Sign = function() {
 				vehicleInfo.distanceAway = journey.MonitoredCall.Extensions.Distances.PresentableDistance;
 				vehicleInfo.vehicleId = journey.VehicleRef.split("_")[1];
 				vehicleInfo.lineRef = journey.LineRef;
+				vehicleInfo.monitored = journey.Monitored;
+				if (typeof journey.MonitoredCall.ExpectedDepartureTime != 'undefined') {
+					//vehicleInfo.expectedDepartureTime = OBA.Util.ISO8601StringToDate(journey.MonitoredCall.ExpectedDepartureTime);
+					vehicleInfo.timePrediction = OBA.Util.getArrivalEstimateForISOString(
+							journey.MonitoredCall.ExpectedArrivalTime, 
+							updateTimestampReference);
+				}
 				
 				headsignToDistanceAways[headsign].push(vehicleInfo);
 			});
@@ -411,7 +456,7 @@ OBA.Sign = function() {
 			var oldContent = jQuery("#content");
 			
 			var newContent = jQuery('<div id="content"></div>');
-			stopElement.appendTo(newContent);
+				stopElement.appendTo(newContent);
 			jQuery("body").prepend(newContent);
 			
 			if (stopIdsToRequest.length < 2) {
@@ -452,6 +497,26 @@ OBA.Sign = function() {
 						customClass: 'alerts_body',
 						orientation: 'vertical',
 						pauseOnHover: false,
+						autoMode: 'loop',
+						frameRate: 20,
+						speed: 2
+					});
+				}
+				
+				var arrivalsHeight = 0;
+				var alerts = stopElement.find(".arrivals");
+				jQuery.each(alerts, function(_, arrival) {
+					arrivalsHeight += jQuery(arrival).height();
+				});
+
+				
+				if (arrivalsHeight < stopElement.find(".arrivals_scroller").height()) {
+					// scroll the arrivals
+					stopElement.find(".arrivals_scroller").simplyScroll({
+						customClass: 'arrivals_body',
+						orientation: 'vertical',
+						pauseOnHover: false,
+						autoMode: 'loop',
 						frameRate: 20,
 						speed: 2
 					});
