@@ -24,6 +24,9 @@ import java.util.SortedMap;
  * Generic methods to support interpolation of values against a sorted key-value
  * map given a new target key.
  * 
+ * Note that these interpolation methods do not conform to the GTFS-rt spec.  For GTFS-rt
+ * compliant interpolation/extrapolation, see {@link TransitInterpolationLibrary}.
+ * 
  * @author bdferris
  */
 public class InterpolationLibrary {

@@ -23,14 +23,15 @@ public enum EInRangeStrategy {
 
   /**
    * As long as two key-values are present in the map, we we will attempt to
-   * interpolate the value for a key that is outside the key range of the
+   * interpolate the value for a key that is inside the key range of the
    * key-value map. If only one key-value pair is present in the map, that value
    * will be used.
    */
   INTERPOLATE,
 
   /**
-   * Takes the closest value in the key-value map.
+   * Returns the value in the key-value map closest to the target value, where the
+   * index for the returned value is less than the index of the target value.
    */
   PREVIOUS_VALUE;
 }

@@ -16,15 +16,6 @@
  */
 package org.onebusaway.transit_data_federation.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.collections.FactoryMap;
 import org.onebusaway.collections.Min;
@@ -61,9 +52,19 @@ import org.onebusaway.transit_data_federation.services.tripplanner.StopTransferS
 import org.onebusaway.utility.EInRangeStrategy;
 import org.onebusaway.utility.EOutOfRangeStrategy;
 import org.onebusaway.utility.InterpolationLibrary;
+import org.onebusaway.utility.TransitInterpolationLibrary;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
@@ -643,27 +644,45 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     if (blockLocation.isScheduleDeviationSet()
         || blockLocation.areScheduleDeviationsSet()) {
 
-      int scheduleDeviation = getBestScheduleDeviation(instance, blockLocation);
-      setPredictedTimesFromScheduleDeviation(instance, blockLocation,
-          scheduleDeviation, targetTime);
+      Double scheduleDeviation = getBestScheduleDeviation(instance, blockLocation);
+      if (scheduleDeviation != null) {
+        setPredictedTimesFromScheduleDeviation(instance, blockLocation,
+            scheduleDeviation.intValue(), targetTime);
+      }
     }
   }
 
-  private int getBestScheduleDeviation(ArrivalAndDepartureInstance instance,
+  /**
+   * Returns the best schedule deviation for this stop, given the scheduleDeviations
+   * stored in blockLocation.  {@link TransitInterpolationLibrary} is used to find
+   * the best deviation, which interpolates/extrapolates values consistent with the 
+   * GTFS-realtime spec (https://developers.google.com/transit/gtfs-realtime/) when
+   * using the {@link EInRangeStrategy.PREVIOUS_VALUE} and {@link EOutOfRangeStrategy.LAST_VALUE}
+   * strategies.  null is returned if no real-time deviations were found and the scheduled 
+   * arrival time should be used.
+   * @param instance
+   * @param blockLocation
+   * @return the best deviation for this stop, or null if no real-time deviations were found
+   * and the scheduled arrival time should be used.
+   */
+  private Double getBestScheduleDeviation(ArrivalAndDepartureInstance instance,
       BlockLocation blockLocation) {
 
     ScheduleDeviationSamples scheduleDeviations = blockLocation.getScheduleDeviations();
 
     if (scheduleDeviations != null && !scheduleDeviations.isEmpty()) {
-      int arrivalTime = instance.getBlockStopTime().getStopTime().getArrivalTime();
-      return (int) InterpolationLibrary.interpolate(
+      // We currently use the scheduled arrival time of the stop as the search index
+      // This MUST be consistent with the index set in BlockLocationServiceImpl.getBlockLocation()
+      Integer arrivalTime = instance.getBlockStopTime().getStopTime().getArrivalTime();
+      // Determine which real-time deviation should be used for this stop, if any
+      return TransitInterpolationLibrary.interpolate(
           scheduleDeviations.getScheduleTimes(),
           scheduleDeviations.getScheduleDeviationMus(), arrivalTime,
           EOutOfRangeStrategy.LAST_VALUE, EInRangeStrategy.PREVIOUS_VALUE);
     } else if (blockLocation.isScheduleDeviationSet()) {
-      return (int) blockLocation.getScheduleDeviation();
+      return blockLocation.getScheduleDeviation();
     } else {
-      return 0;
+      return 0.0;
     }
   }
 
