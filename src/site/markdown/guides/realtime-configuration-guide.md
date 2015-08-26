@@ -5,7 +5,7 @@ information.
 
 ## GTFS-realtime
 
-We support [GTFS-realtime](http://code.google.com/transit/realtime/) out of the box, including support for trip updates,
+We support [GTFS-realtime](https://developers.google.com/transit/gtfs-realtime) out of the box, including support for trip updates,
 vehicle positions, and alerts.  To add support, create a
 [GtfsRealtimeSource](./apidocs/org/onebusaway/transit_data_federation/impl/realtime/gtfs_realtime/GtfsRealtimeSource.html)
 bean in your `data-sources.xml` file.  Then specify URLs for the three different types of GTFS-realtime data as
