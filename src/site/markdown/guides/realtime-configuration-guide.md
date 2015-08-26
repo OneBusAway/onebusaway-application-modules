@@ -81,16 +81,6 @@ bean in your `data-sources.xml` file.  Then specify the URL for your real-time d
 </bean>
 ~~~
 
-## MyBus
-
-Back in the day, OneBusAway supported just one kind of real-time data: the legacy MyBus system used by King County
-Metro.  If you want to relive the glory days (and the MyBus servers are still up), you can enable the MyBus real-time
-feed by adding the following bean to your `data-sources.xml` file:
-
-~~~
-<bean id="king_county_metro_avl" class="org.onebusaway.transit_data_federation.impl.realtime.mybus.TimepointPredictionServiceImpl" />
-~~~
-
 ## Custom Implementation
 
 Interested in adapting your own real-time system to OneBusAway?  The best option is to create an adapter between your system

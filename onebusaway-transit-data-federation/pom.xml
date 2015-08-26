@@ -57,13 +57,6 @@
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
       <version>1.2.0</version>
-    </dependency>    
-
-    <!-- Library for accessing MyBus Data Stream -->
-    <dependency>
-      <groupId>edu.washington.its</groupId>
-      <artifactId>sdd</artifactId>
-      <version>1.0.0</version>
     </dependency>
 
     <dependency>
