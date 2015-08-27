@@ -380,6 +380,11 @@ span.stop-id {
     font-weight: normal;
     color: #666;
 }
+span.scheduled_arrival_indicator {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: red;
+}
 td.distance {
     text-align: right;
     font-size: 1.2em;
@@ -453,6 +458,13 @@ div.stop-id {
 	margin-left: 0px;
 	background: rgb(50,50,50);
 	color: white;
+}
+
+.additional_stops {
+	font-size: 0.5em;
+	display: table-cell;
+	height: 50%;
+	float: right;
 }
 
 .arrivals_body .simply-scroll-clip {
