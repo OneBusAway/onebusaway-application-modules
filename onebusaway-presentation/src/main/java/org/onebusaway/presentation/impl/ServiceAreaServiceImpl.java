@@ -26,12 +26,16 @@ import org.onebusaway.presentation.services.DefaultSearchLocationService;
 import org.onebusaway.presentation.services.ServiceAreaService;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
 import org.onebusaway.transit_data.services.TransitDataService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceAreaServiceImpl implements ServiceAreaService {
 
+  private static Logger _log = LoggerFactory.getLogger(ServiceAreaServiceImpl.class);
+  
   private static final double DEFAULT_SEARCH_RADIUS = 20000;
 
   private TransitDataService _transitDataService;
@@ -80,21 +84,11 @@ public class ServiceAreaServiceImpl implements ServiceAreaService {
   public void setup() {
 
     if (_calculateDefaultBoundsFromAgencyCoverage) {
-      List<AgencyWithCoverageBean> agenciesWithCoverage = _transitDataService.getAgenciesWithCoverage();
-      CoordinateBounds bounds = new CoordinateBounds();
-
-      for (AgencyWithCoverageBean bean : agenciesWithCoverage) {
-        double lat = bean.getLat();
-        double lon = bean.getLon();
-        double latSpan = bean.getLatSpan() / 2;
-        double lonSpan = bean.getLonSpan() / 2;
-        bounds.addPoint(lat - latSpan, lon - lonSpan);
-        bounds.addPoint(lat + latSpan, lon + lonSpan);
-      }
-
-      if (!bounds.isEmpty())
-        _defaultBounds = bounds;
+      // the TDS may not be initialized at this point, perform work on thread
+      BackgroundThread bt = new BackgroundThread(_transitDataService, this);
+      new Thread(bt).start();
     }
+
   }
 
   /****
@@ -120,5 +114,37 @@ public class ServiceAreaServiceImpl implements ServiceAreaService {
     }
 
     return _defaultBounds;
+  }
+  
+  private static class BackgroundThread implements Runnable {
+
+    private TransitDataService _tds;
+    private ServiceAreaServiceImpl _sas;
+    public BackgroundThread(TransitDataService tds, ServiceAreaServiceImpl sas) {
+      _tds = tds;
+      _sas = sas;
+    }
+    @Override
+    public void run() {
+      
+      List<AgencyWithCoverageBean> agenciesWithCoverage = _tds.getAgenciesWithCoverage();
+      CoordinateBounds bounds = new CoordinateBounds();
+
+      for (AgencyWithCoverageBean bean : agenciesWithCoverage) {
+        double lat = bean.getLat();
+        double lon = bean.getLon();
+        double latSpan = bean.getLatSpan() / 2;
+        double lonSpan = bean.getLonSpan() / 2;
+        bounds.addPoint(lat - latSpan, lon - lonSpan);
+        bounds.addPoint(lat + latSpan, lon + lonSpan);
+      }
+
+      if (!bounds.isEmpty()) {
+        _log.info("setting default agency bounds to " + bounds);
+        _sas.setDefaultBounds(bounds);
+      }
+
+    }
+    
   }
 }
