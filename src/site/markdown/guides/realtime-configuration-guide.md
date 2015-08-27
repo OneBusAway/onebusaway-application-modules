@@ -61,9 +61,9 @@ your SIRI data-source.  Here is a full example:
 </bean>
 ~~~
 
-## ASC Orbital - Orbcad
+## Orbital/ACS/Xerox OrbCAD
 
-A number of agencies have ACS Orbital - Orbcad AVL systems.  Some agencies have configured the data-export option of
+A number of agencies have Orbital/ACS/Xerox OrbCAD AVL systems.  Some agencies have configured the data-export option of
 these systems to spit out a CSV file of vehicle locations and schedule deviations for all the vehicles in their fleet,
 which is then shared through a webserver.  OneBusAway supports data of this form.  To add support, create a
 [OrbcadRecordHttpSource](./apidocs/org/onebusaway/transit_data_federation/impl/realtime/orbcad/OrbcadRecordHttpSource.html)
