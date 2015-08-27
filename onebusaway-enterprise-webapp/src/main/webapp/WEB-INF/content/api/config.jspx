@@ -29,6 +29,7 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.mapCenterLon=<s:property value="mapCenterLon" default="null" />;
 	OBA.Config.mapZoom=<s:property value="mapZoom" default="null" />;
 	OBA.Config.shortCode='<s:text name="sms.shortcode" />';
+	OBA.Config.txtPrefix='<s:text name="sms.prefix" />';
 	OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
 
 	OBA.Config.siriSMUrl = "/onebusaway-api-webapp/siri/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
@@ -42,7 +43,7 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 				html += '<span class="header">While at the bus stop...</span>';
 				html += '<br/>';
 
-				html += 'Send stop code <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
+				html += 'Send ' + OBA.Config.txtPrefix + 'stop code <strong>' + query + '</strong> as a text to <strong>' + OBA.Config.shortCode + '</strong>';
 				html += '<br/>';
 				html += 'or check <a href="m/?q=' + query + '">this stop</a> on your smartphone.';
 

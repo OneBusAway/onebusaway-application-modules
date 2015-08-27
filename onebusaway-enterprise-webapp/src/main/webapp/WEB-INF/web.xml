@@ -31,17 +31,17 @@
 	<env-entry>
 	        <env-entry-name>xwikiUrl</env-entry-name>
 	        <env-entry-type>java.lang.String</env-entry-type>
-	        <env-entry-value>http://xwiki.dev.obanyc.com</env-entry-value>
+	        <env-entry-value>http://appelb.prod.obahart.org/xwiki</env-entry-value>
     </env-entry>
 	<env-entry>
 	        <env-entry-name>wikiDocumentEditUrl</env-entry-name>
 	        <env-entry-type>java.lang.String</env-entry-type>
-	        <env-entry-value>http://xwiki.dev.obanyc.com/bin/edit/%{namespace}/%{documentName}</env-entry-value>
+	        <env-entry-value>"http://appelb.prod.obahart.org/xwiki/bin/edit/Main/%{documentName}</env-entry-value>
     </env-entry>
 	<env-entry>
 	        <env-entry-name>wikiAttachmentUrl</env-entry-name>
 	        <env-entry-type>java.lang.String</env-entry-type>
-	        <env-entry-value>http://xwiki.dev.obanyc.com/bin/download/%{namespace}/%{documentName}/%{attachmentName}</env-entry-value>
+	        <env-entry-value>http://appelb.prod.obahart.org/xwiki/bin/download/Main/%{documentName}/%{attachmentName}</env-entry-value>
     </env-entry>
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
