@@ -17,13 +17,17 @@ package org.onebusaway.sms.impl;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.interceptor.SessionAware;
 import org.onebusaway.presentation.impl.users.XWorkRequestAttributes;
 import org.onebusaway.sms.services.SessionManager;
+import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import com.brsanthu.googleanalytics.EventHit;
+import com.brsanthu.googleanalytics.PageViewHit;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.AbstractInterceptor;
@@ -40,6 +44,9 @@ public class TextmarksSessionInterceptor extends AbstractInterceptor {
   public void setSessionManager(SessionManager sessionManager) {
     _sessionManager = sessionManager;
   }
+  
+  @Autowired
+  private GoogleAnalyticsServiceImpl _gaService;
 
   public void setPhoneNumberParameterName(String phoneNumberParameterName) {
     _phoneNumberParameterName = phoneNumberParameterName;
@@ -47,7 +54,9 @@ public class TextmarksSessionInterceptor extends AbstractInterceptor {
 
   @Override
   public String intercept(ActionInvocation invocation) throws Exception {
-
+	
+	processGoogleAnalytics();
+	
     ActionContext context = invocation.getInvocationContext();
     Map<String, Object> parameters = context.getParameters();
 
@@ -84,5 +93,13 @@ public class TextmarksSessionInterceptor extends AbstractInterceptor {
       RequestContextHolder.setRequestAttributes(originalAttributes);
       context.setSession(originalSession);
     }
+  }
+  
+  private void processGoogleAnalytics(){
+	  processGoogleAnalyticsPageView();
+  }
+  
+  private void processGoogleAnalyticsPageView(){
+	  _gaService.post(new PageViewHit());
   }
 }

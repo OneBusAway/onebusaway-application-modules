@@ -31,6 +31,7 @@
     <import resource="classpath:org/onebusaway/users/application-context.xml" />
     <import resource="classpath:org/onebusaway/geocoder/application-context.xml" />
     <import resource="classpath:org/onebusaway/presentation/application-context.xml" />
+    <import resource="classpath:org/onebusaway/util/application-context.xml" />
 
     <context:component-scan base-package="org.onebusaway.sms.impl" />
 
