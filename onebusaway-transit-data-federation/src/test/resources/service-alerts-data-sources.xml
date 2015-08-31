@@ -31,5 +31,5 @@
       <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-hart-bundle" />
       <property name="standaloneMode" value="true" />
     </bean>
-
+    <bean id="refreshService" class="org.onebusaway.container.refresh.RefreshServiceImpl" />
 </beans>
