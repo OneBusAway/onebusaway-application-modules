@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -47,12 +48,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class StopTimeEntriesFactory {
 
+  private static final boolean DEFAULT_LENIENT_MODE = false;
+  
+
   private Logger _log = LoggerFactory.getLogger(StopTimeEntriesFactory.class);
 
   private DistanceAlongShapeLibrary _distanceAlongShapeLibrary;
 
   private long _invalidStopToShapeMappingExceptionCount;
+  
+  private boolean isLenientArrivalDepartureTimes = DEFAULT_LENIENT_MODE;
 
+  /**
+   * set true if system should try to correct small errors in arrival/departure times
+   * @param isLenient
+   */
+  @ConfigurationParameter
+  public void setLenientArrivalDepartureTimes(boolean isLenient) {
+    isLenientArrivalDepartureTimes = isLenient;
+  }
+
+  
   @Autowired
   public void setDistanceAlongShapeLibrary(
       DistanceAlongShapeLibrary distanceAlongShapeLibrary) {
@@ -326,7 +342,7 @@ public class StopTimeEntriesFactory {
             scheduleTimesByDistanceTraveled, d);
         arrivalTime = t;
         departureTime = t;
-      }
+      } 
 
       departureTimes[i] = departureTime;
       arrivalTimes[i] = arrivalTime;
@@ -354,11 +370,19 @@ public class StopTimeEntriesFactory {
           arrivalTimes[i] = departureTimes[i - 1];
           if (departureTimes[i] < arrivalTimes[i])
             departureTimes[i] = arrivalTimes[i];
-        } else if (i > 0 && arrivalTimes[i] == departureTimes[i - 1]) { 
-        // we are at two stops at the same time -- perhaps its a precision error?
-          _log.warn("adding a second to arrival time of sequence " + stopTime.getStopSequence() +
-              " of trip " + stopTime.getTrip().getId() + " as it matched last departure time");
-          arrivalTimes[i] = arrivalTimes[i] + 1; // add a second to get us past
+        } else if (isLenientMode() && i > 0 && (arrivalTimes[i] < arrivalTimes[i - 1]) && (departureTimes[i] < departureTimes[i - 1])) { 
+          // recalculate the last two stops and hope for the best!
+          // we can correct small accuracy errors here 
+          int t0 =  (int) InterpolationLibrary.interpolate(
+              scheduleTimesByDistanceTraveled, distanceTraveled[i-1]);
+          int t1 = (int) InterpolationLibrary.interpolate(
+              scheduleTimesByDistanceTraveled, distanceTraveled[i]);
+
+          _log.warn("correcting arrival time of sequence " + (stopTime.getStopSequence()-1) + ", " + stopTime.getStopSequence() +
+              " of trip " + stopTime.getTrip().getId() + " as it was less than last departure time.  Arrival[" + (i-1) + "] " +
+              arrivalTimes[i-1] + " now "+ t0 + ", Arrival[" + i + "] " + arrivalTimes[i] + " now " + t1);
+          arrivalTimes[i-1] = departureTimes[i-1] = t0;
+          arrivalTimes[i] = departureTimes[i] = t1; 
       } else {
           for (int x = 0; x < stopTimes.size(); x++) {
             StopTime st = stopTimes.get(x);
@@ -367,14 +391,22 @@ public class StopTimeEntriesFactory {
             _log.error(msg);
             System.err.println(msg);
           }
-          final String exceptionMessage = "arrival time is less than previous departure time for stop time with trip_id="
+          final String exceptionMessage = "arrival time is less than previous departure time for stop time " +
+          " with isLenientArrivalDepartureTimes=" + this.isLenientArrivalDepartureTimes + " and trip_id="
               + stopTime.getTrip().getId() + " stop_sequence="
-              + stopTime.getStopSequence();
+              + stopTime.getStopSequence() + ", arrivalTime=" + arrivalTimes[i] + ", departureTime=" + departureTimes[i] +
+              (i>0?" arrivalTimes[" + (i-1) + "]=" + arrivalTimes[i-1] + ", departureTimes[" + (i-1) + "]=" + departureTimes[i-1]:" (i<1)");
           _log.error(exceptionMessage);
             throw new IllegalStateException(exceptionMessage);
         }
       }
     }
+  }
+
+  private boolean isLenientMode() {
+    if (Boolean.TRUE.equals(isLenientArrivalDepartureTimes))
+      return true;
+    return false;
   }
 
   private double[] getDistanceTraveledForStopTimes(
