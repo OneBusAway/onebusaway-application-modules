@@ -256,8 +256,8 @@ public final class SiriSupport {
 		}    
 		
 		Map<String, TimepointPredictionRecord> stopIdToPredictionRecordMap = new HashMap<String, TimepointPredictionRecord>();
-
-		// (build map of stop IDs to TPRs)
+		
+		// (build map of vehicle IDs to TPRs)
 		if(stopLevelPredictions != null) {
 			for(TimepointPredictionRecord tpr : stopLevelPredictions) {
 				stopIdToPredictionRecordMap.put(AgencyAndId.convertToString(tpr.getTimepointId()), tpr);
@@ -406,7 +406,7 @@ public final class SiriSupport {
 			Map<String, TimepointPredictionRecord> stopLevelPredictions, boolean hasRealtimeData, long responseTimestamp) {
 
 		List<BlockTripBean> blockTrips = blockInstance.getBlockConfiguration().getTrips();
-
+		
 		double distanceOfVehicleAlongBlock = 0;
 		int blockTripStopsAfterTheVehicle = 0;
 
@@ -458,16 +458,17 @@ public final class SiriSupport {
 				} else {
 					blockTripStopsAfterTheVehicle++;
 				}
-
+								
 				// monitored call
 				if(stopTime.getStopTime().getStop().getId().equals(monitoredCallStopBean.getId())) {    
-					if(!presentationService.isOnDetour(tripStatus)) {
+					if(!presentationService.isOnDetour(tripStatus)) {	
+						TimepointPredictionRecord prediction = stopLevelPredictions.get(monitoredVehicleJourney.getVehicleRef().getValue());
 						monitoredVehicleJourney.setMonitoredCall(
 								getMonitoredCallStructure(stopTime.getStopTime().getStop(), presentationService, 
 										stopTime.getDistanceAlongBlock() - blockTrip.getDistanceAlongBlock(), 
 										stopTime.getDistanceAlongBlock() - distanceOfVehicleAlongBlock, 
 										visitNumber, blockTripStopsAfterTheVehicle - 1,
-										stopLevelPredictions.get(stopTime.getStopTime().getStop().getId()),
+										prediction,
 										hasRealtimeData,
 										responseTimestamp, tripStatus.getServiceDate() + (stopTime.getStopTime().getArrivalTime() * 1000)));
 					}
@@ -521,7 +522,7 @@ public final class SiriSupport {
 			}
 		}
 		else if(!hasRealtimeData){
-			_log.warn("using arrival time of " + new Date(scheduledArrivalTime));
+			_log.debug("using arrival time of " + new Date(scheduledArrivalTime));
 			onwardCallStructure.setExpectedArrivalTime(new Date(scheduledArrivalTime)); 
 			onwardCallStructure.setExpectedDepartureTime(new Date(scheduledArrivalTime));
 		}
