@@ -384,6 +384,11 @@ small {
 	visibility: hidden;
 }
 
+.arrivalsOnRoute, .arrivalsOnRouteSchedule {
+	display: inline;
+	zoom: 1;  /* hasLayout fix for IE */
+}
+
 .arrivalsOnRoute li {
 	margin-left: 10px;
 	padding-left: 16px;
@@ -394,10 +399,16 @@ small {
 	display: inline;
 }
 
-.arrivalsOnRoute {
+.arrivalsOnRouteSchedule li {
+	margin-left: 10px;
+	padding-left: 16px;
+	background-image: url('img/schedule_bullet_bus.png');
+	background-repeat: no-repeat;
+	background-position: left center;
+	white-space: nowrap;
 	display: inline;
-	zoom: 1;  /* hasLayout fix for IE */
 }
+
 
 .arrivalsAtStop li {
 	margin-left: 10px;
@@ -407,6 +418,21 @@ small {
 	background-position: left top;
 	zoom: 1;   /* hasLayout fix for IE */
 	line-height: 1.2em;
+}
+
+.arrivalsAtStopSchedule li {
+	margin-left: 10px;
+	padding-left: 16px;
+	background-image: url('img/schedule_bullet_bus.png');
+	background-repeat: no-repeat;
+	background-position: left top;
+	zoom: 1;   /* hasLayout fix for IE */
+	line-height: 1.2em;
+}
+
+.scheduleAlert{
+	font-size: .9em; 
+	color: #ff0000;
 }
 
 .routeList a {

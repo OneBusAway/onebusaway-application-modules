@@ -282,11 +282,12 @@ OBA.Sidebar = function() {
 					expandAlerts = false;
 				}
 				
-	
+				var longName = routeResult.longName;
+				if (longName == null) longName = "";
 				// sidebar item
 				var titleBox = jQuery("<p></p>")
 								.addClass("name")
-								.text(routeResult.shortName + " " + routeResult.longName)
+								.text(routeResult.shortName + " " + longName)
 								.css("border-bottom", "5px solid #" + routeResult.color);
 				
 				var descriptionBox = jQuery("<p></p>")

@@ -15,6 +15,8 @@
  */
 package org.onebusaway.presentation.impl.realtime;
 
+import java.util.concurrent.TimeUnit;
+
 import org.onebusaway.container.ConfigurationParameter;
 import org.onebusaway.presentation.services.realtime.PresentationService;
 import org.onebusaway.transit_data.model.ArrivalAndDepartureBean;
@@ -202,10 +204,9 @@ public class PresentationServiceImpl implements PresentationService {
 
     _log.debug(statusBean.getVehicleId() + " running through filter: ");
     
-    // hide non-realtime
+    // always show non-realtime
     if(statusBean.isPredicted() == false) {
-      _log.debug("  " + statusBean.getVehicleId() + " filtered out because is not realtime.");
-      return false;
+      return true;
     }
 
     if(statusBean.getVehicleId() == null ) {
@@ -259,12 +260,18 @@ public class PresentationServiceImpl implements PresentationService {
    */
   @Override
   public boolean include(ArrivalAndDepartureBean adBean, TripStatusBean status) {
-    if(adBean == null || status == null)
-      return false;
+	  
+	// always show non-realtime
+    if(status.isPredicted() == false) {
+      return true;
+    }
+	  
+	if(adBean == null || status == null)
+	  return false;
     
     // hide buses that left the stop recently
     if(adBean.getDistanceFromStop() < 0)
-      return false;
+      return false;   
     
     // hide buses that are on detour from a-d queries
     if(isOnDetour(status))
@@ -349,7 +356,9 @@ public class PresentationServiceImpl implements PresentationService {
 	        _log.debug("  " + status.getVehicleId() + " filtered out due to at terminal/ratio");
 	        return false;
 	      }
-	    } else {
+	    } 
+	    
+	    else {
 	      // if the bus isn't serving the trip this arrival and departure is for, filter out--
 	      // since the bus is not in layover now.
 	      if (activeTrip != null

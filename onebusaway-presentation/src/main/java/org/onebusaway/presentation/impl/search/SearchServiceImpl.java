@@ -17,6 +17,7 @@ package org.onebusaway.presentation.impl.search;
 
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderService;
+import org.onebusaway.presentation.impl.RouteComparator;
 import org.onebusaway.presentation.model.SearchResult;
 import org.onebusaway.presentation.model.SearchResultCollection;
 import org.onebusaway.presentation.services.search.SearchResultFactory;
@@ -231,6 +232,8 @@ public class SearchServiceImpl implements SearchService {
 		queryBean.setMaxCount(100);
 
 		RoutesBean routes = _transitDataService.getRoutes(queryBean);
+		
+		Collections.sort(routes.getRoutes(), new RouteComparator());
 
 		SearchResultCollection results = new SearchResultCollection();
 

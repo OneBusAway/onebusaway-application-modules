@@ -150,7 +150,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			directionKey = "unknown";
 		}
 		
-		var icon = new google.maps.MarkerImage("img/scheduled/stop/stop-" + directionKey + ".png",
+		var icon = new google.maps.MarkerImage("img/realtime/stop/stop-" + directionKey + ".png",
 				new google.maps.Size(21, 21),
 				new google.maps.Point(0,0),
 				new google.maps.Point(10, 10));
@@ -227,6 +227,7 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var orientation = activity.MonitoredVehicleJourney.Bearing;
 				var headsign = activity.MonitoredVehicleJourney.DestinationName;
 				var routeName = activity.MonitoredVehicleJourney.PublishedLineName;
+				var hasRealtime = activity.MonitoredVehicleJourney.Monitored;
 				
 				var tripId = activity.MonitoredVehicleJourney.FramedVehicleJourneyRef.DatedVehicleJourneyRef;
 				
@@ -234,12 +235,13 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 				var vehicleIdParts = vehicleId.split("_");
 				var vehicleIdWithoutAgency = vehicleIdParts[1];
 				var marker = vehiclesById[vehicleId];
+				var markerImage = 'img/realtime/vehicle/vehicle-';
 				
 				// has route been removed while in the process of updating?
 				if(typeof vehiclesByRoute[routeId] === 'undefined') {
 					return false;
 				}
-				
+
 				// create marker if it doesn't exist				
 				if(typeof marker === 'undefined' || marker === null) {
 					var markerOptions = {
@@ -260,14 +262,19 @@ OBA.RouteMap = function(mapNode, initCallbackFn, serviceAlertCallbackFn) {
 			    				OBA.Popups.getVehicleContentForResponse, null);
 			    	});
 				}
-
+				
+				// change marker image depending on whether realtime data is available
+				if(typeof hasRealtime === 'undefined' || hasRealtime === null || hasRealtime == false){
+					markerImage = 'img/scheduled/vehicle/vehicle-';
+				}
+				
 				// icon
 				var orientationAngle = "unknown";
 				if(orientation !== null && orientation !== 'NaN') {
 					orientationAngle = Math.floor(orientation / 5) * 5;
 				}
 					
-				var icon = new google.maps.MarkerImage("img/realtime/vehicle/vehicle-" + orientationAngle + ".png",
+				var icon = new google.maps.MarkerImage(markerImage + orientationAngle + ".png",
 						new google.maps.Size(51, 51),
 						new google.maps.Point(0,0),
 						new google.maps.Point(25, 25));

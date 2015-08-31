@@ -121,6 +121,16 @@
 	background-repeat: no-repeat;
 }
 
+.popup ul li.arrival_schedule {
+	white-space: nowrap;
+	height: 16px;
+	font-weight: bold;
+	padding-left: 19px;
+	background: url("img/schedule_bullet_bus.png");
+	background-position: left top;
+	background-repeat: no-repeat;
+}
+
 .popup ul li.arrival .not_bold {
 	font-weight: normal;
 	white-space: nowrap;
@@ -219,7 +229,11 @@
 	color: rgb(100,100,100);
 }
 
-#bustime .popup a.alert-link {
+#bustime .popup .scheduleAlert {
+	color: rgb(225,0,0);
+}
+
+#bustime .popup a.alert-link{
 	color: rgb(225,0,0);
 	background: url("img/alert_icon.png");
 	background-position: 0 100%;
