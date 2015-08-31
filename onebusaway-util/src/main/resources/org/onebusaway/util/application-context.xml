@@ -45,4 +45,6 @@
     
     <bean id="loggingService" class="org.onebusaway.util.logging.impl.LoggingServiceImpl" />
     
+    <bean id="analyticsService" class="org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl" />
+    
 </beans>
