@@ -354,7 +354,12 @@ public class StopTimeEntriesFactory {
           arrivalTimes[i] = departureTimes[i - 1];
           if (departureTimes[i] < arrivalTimes[i])
             departureTimes[i] = arrivalTimes[i];
-        } else {
+        } else if (i > 0 && arrivalTimes[i] == departureTimes[i - 1]) { 
+        // we are at two stops at the same time -- perhaps its a precision error?
+          _log.warn("adding a second to arrival time of sequence " + stopTime.getStopSequence() +
+              " of trip " + stopTime.getTrip().getId() + " as it matched last departure time");
+          arrivalTimes[i] = arrivalTimes[i] + 1; // add a second to get us past
+      } else {
           for (int x = 0; x < stopTimes.size(); x++) {
             StopTime st = stopTimes.get(x);
             final String msg = x + " " + st.getId() + " " + arrivalTimes[x]
