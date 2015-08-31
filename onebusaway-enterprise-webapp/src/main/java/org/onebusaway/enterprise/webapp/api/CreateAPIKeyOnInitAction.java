@@ -24,7 +24,7 @@ import org.onebusaway.users.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Creates 'OBANYC' API key on context initialization if key creation is enabled
+ * Creates 'OBAKEY' API key on context initialization if key creation is enabled
  * by Maven profile. Used only in application context at this point.
  * 
  * @author abelsare

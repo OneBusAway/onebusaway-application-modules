@@ -52,7 +52,7 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
   }
   
   public String getObaApiKey() {
-    return _configurationService.getConfigurationValueAsString("display.obaApiKey", "OBANYC");    
+    return _configurationService.getConfigurationValueAsString("display.obaApiKey", "OBAKEY");    
   }
   
   public String getMapBounds() {
