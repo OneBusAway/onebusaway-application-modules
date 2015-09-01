@@ -205,57 +205,54 @@ public class PresentationServiceImpl implements PresentationService {
   public boolean include(TripStatusBean statusBean) {
     if(statusBean == null)
       return false;
+
+    // always show schedule
+    if(statusBean.isPredicted()) {
+    	_log.debug(statusBean.getVehicleId() + " running through filter: ");
+	    if(statusBean.getVehicleId() == null ) {
+	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because vehicle id is null.");
+	      return false;
+	    }
+
+	    if(Double.isNaN(statusBean.getDistanceAlongTrip())) {
+	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because D.A.T. is NaN.");
+	      return false;
+	    }
     
-    _log.debug(statusBean.getVehicleId() + " running through filter: ");
     
-    // always show non-realtime
-    if(statusBean.isPredicted() == false) {
-      return true;
+	    // onebusaway-application-modules does not use phase!
+	    if (_includeRequiresPhase  && statusBean.getPhase() == null) {
+	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because phase is null.");
+	      return false;
+	    }
+	    
+	    // TEMPORARY MTA THING FOR BX-RELEASE
+	    // hide buses that are on detour from a-d queries
+	    if(isOnDetour(statusBean))
+	      return false;
+	    
+	    // not in-service
+	    String phase = statusBean.getPhase();
+	    if(phase != null 
+	        && !phase.toUpperCase().equals("IN_PROGRESS")
+	        && !phase.toUpperCase().equals("LAYOVER_BEFORE") 
+	        && !phase.toUpperCase().equals("LAYOVER_DURING")) {
+	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because phase is not in progress.");      
+	      return false;
+	    }
+	
+	    // disabled
+	    String status = statusBean.getStatus();
+	    if(status != null && status.toUpperCase().equals("DISABLED")) {
+	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because it is disabled.");
+	      return false;
+	    }
+	
+	    if (getTime() - statusBean.getLastUpdateTime() >= 1000 * _expiredTimeout) {
+	      _log.debug("  " + statusBean.getVehicleId() + " filtered out because data is expired.");
+	      return false;
+	    }
     }
-
-    if(statusBean.getVehicleId() == null ) {
-      _log.debug("  " + statusBean.getVehicleId() + " filtered out because vehicle id is null.");
-      return false;
-    }
-    
-    // onebusaway-application-modules does not use phase!
-    if (_includeRequiresPhase  && statusBean.getPhase() == null) {
-      _log.debug("  " + statusBean.getVehicleId() + " filtered out because phase is null.");
-      return false;
-    }
-
-    if(Double.isNaN(statusBean.getDistanceAlongTrip())) {
-      _log.debug("  " + statusBean.getVehicleId() + " filtered out because D.A.T. is NaN.");
-      return false;
-    }
-
-    // TEMPORARY MTA THING FOR BX-RELEASE
-    // hide buses that are on detour from a-d queries
-    if(isOnDetour(statusBean))
-      return false;
-    
-    // not in-service
-    String phase = statusBean.getPhase();
-    if(phase != null 
-        && !phase.toUpperCase().equals("IN_PROGRESS")
-        && !phase.toUpperCase().equals("LAYOVER_BEFORE") 
-        && !phase.toUpperCase().equals("LAYOVER_DURING")) {
-      _log.debug("  " + statusBean.getVehicleId() + " filtered out because phase is not in progress.");      
-      return false;
-    }
-
-    // disabled
-    String status = statusBean.getStatus();
-    if(status != null && status.toUpperCase().equals("DISABLED")) {
-      _log.debug("  " + statusBean.getVehicleId() + " filtered out because it is disabled.");
-      return false;
-    }
-
-    if (getTime() - statusBean.getLastUpdateTime() >= 1000 * _expiredTimeout) {
-      _log.debug("  " + statusBean.getVehicleId() + " filtered out because data is expired.");
-      return false;
-    }
-
     return true;
   }
   
@@ -266,19 +263,18 @@ public class PresentationServiceImpl implements PresentationService {
   public boolean include(ArrivalAndDepartureBean adBean, TripStatusBean status) {
 	if(adBean == null || status == null)
 		return false;
-	  
-	// always show non-realtime
-    if(!status.isPredicted()) {
-    	
-	    // hide buses that left the stop recently
-	    if(adBean.getDistanceFromStop() < 0){
-	    	return false;   
-	    }
-	    
+	
+	if(status.isPredicted()) {
+		if(adBean.getPredictedArrivalTime() > 0 && adBean.getPredictedArrivalTime() < System.currentTimeMillis())
+			return false;
 	    // hide buses that are on detour from a-d queries
 	    if(isOnDetour(status))
 	      return false;
-    }
+	}
+	else{
+		if(adBean.getScheduledArrivalTime() > 0 && adBean.getScheduledArrivalTime() < System.currentTimeMillis())
+			return false;
+	}
    
     // wrap-around logic
     String phase = status.getPhase();
