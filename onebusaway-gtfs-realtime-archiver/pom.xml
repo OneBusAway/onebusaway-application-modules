@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.14-hart.4-SNAPSHOT</version>
+    <version>1.1.14-hart.5-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-gtfs-realtime-archiver</artifactId>
   <packaging>war</packaging>
