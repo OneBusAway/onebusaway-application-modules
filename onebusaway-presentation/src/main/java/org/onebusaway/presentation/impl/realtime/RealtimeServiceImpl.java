@@ -123,7 +123,6 @@ public class RealtimeServiceImpl implements RealtimeService {
   @Override
   public List<VehicleActivityStructure> getVehicleActivityForRoute(String routeId, String directionId, int maximumOnwardCalls, long currentTime) {
     List<VehicleActivityStructure> output = new ArrayList<VehicleActivityStructure>();
-    boolean hasRealtimeData = true;
         
     ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId, currentTime);
     for(TripDetailsBean tripDetails : trips.getList()) {
@@ -139,18 +138,16 @@ public class RealtimeServiceImpl implements RealtimeService {
       if(!_presentationService.include(tripDetails.getStatus()))
           continue;
       
-      long lastUpdatedTime = tripDetails.getStatus().getLastUpdateTime();
       
+      VehicleActivityStructure activity = new VehicleActivityStructure();
       // Check for Realtime Data
       if(!tripDetails.getStatus().isPredicted()){
-    	  hasRealtimeData = false;
-		  lastUpdatedTime = getTime();
+    	  activity.setRecordedAtTime(new Date(getTime()));
       }
-        
-      VehicleActivityStructure activity = new VehicleActivityStructure();
+      else{
+    	  activity.setRecordedAtTime(new Date(tripDetails.getStatus().getLastUpdateTime()));
+      }
       
-      activity.setRecordedAtTime(new Date(lastUpdatedTime));
-
       List<TimepointPredictionRecord> timePredictionRecords = null;
       
 	  timePredictionRecords = _transitDataService.getPredictionRecordsForTrip(AgencyAndId.convertFromString(routeId).getAgencyId(), tripDetails.getStatus());
@@ -159,7 +156,7 @@ public class RealtimeServiceImpl implements RealtimeService {
       SiriSupport.fillMonitoredVehicleJourney(activity.getMonitoredVehicleJourney(), 
           tripDetails.getTrip(), tripDetails.getStatus(), null, OnwardCallsMode.VEHICLE_MONITORING,
           _presentationService, _transitDataService, maximumOnwardCalls, 
-          timePredictionRecords, hasRealtimeData, currentTime);
+          timePredictionRecords, tripDetails.getStatus().isPredicted(), currentTime);
             
       output.add(activity);
     }
@@ -181,7 +178,6 @@ public class RealtimeServiceImpl implements RealtimeService {
 
   @Override
   public VehicleActivityStructure getVehicleActivityForVehicle(String vehicleId, int maximumOnwardCalls, long currentTime, String tripId) {    
-	boolean hasRealtimeData = true;
 	
 	TripForVehicleQueryBean query = new TripForVehicleQueryBean();
     query.setTime(new Date(currentTime));
@@ -204,16 +200,16 @@ public class RealtimeServiceImpl implements RealtimeService {
     if(!_presentationService.include(tripDetailsForCurrentTrip.getStatus()))
         return null;
     
-	long lastUpdatedTime = tripDetailsForCurrentTrip.getStatus().getLastUpdateTime();
-	  
-	if(!tripDetailsForCurrentTrip.getStatus().isPredicted()){
-		hasRealtimeData = false;
-		lastUpdatedTime = getTime();
-	}	
-    
-    VehicleActivityStructure output = new VehicleActivityStructure();
-    output.setRecordedAtTime(new Date(lastUpdatedTime));
 
+    VehicleActivityStructure output = new VehicleActivityStructure();
+    // Check for Realtime Data
+    if(!tripDetailsForCurrentTrip.getStatus().isPredicted()){
+    	output.setRecordedAtTime(new Date(getTime()));
+    }
+    else{
+    	output.setRecordedAtTime(new Date(tripDetailsForCurrentTrip.getStatus().getLastUpdateTime()));
+    }
+    
     List<TimepointPredictionRecord> timePredictionRecords = null;
     timePredictionRecords = _transitDataService.getPredictionRecordsForTrip(AgencyAndId.convertFromString(vehicleId).getAgencyId(), tripDetailsForCurrentTrip.getStatus());
       
@@ -221,15 +217,14 @@ public class RealtimeServiceImpl implements RealtimeService {
     SiriSupport.fillMonitoredVehicleJourney(output.getMonitoredVehicleJourney(), 
     		tripDetailsForCurrentTrip.getTrip(), tripDetailsForCurrentTrip.getStatus(), null, OnwardCallsMode.VEHICLE_MONITORING,
     		_presentationService, _transitDataService, maximumOnwardCalls,
-    		timePredictionRecords, hasRealtimeData, currentTime);
+    		timePredictionRecords, tripDetailsForCurrentTrip.getStatus().isPredicted(), currentTime);
 
       return output;
   }
 
   @Override
-  public synchronized List<MonitoredStopVisitStructure> getMonitoredStopVisitsForStop(String stopId, int maximumOnwardCalls, long currentTime) {
+  public List<MonitoredStopVisitStructure> getMonitoredStopVisitsForStop(String stopId, int maximumOnwardCalls, long currentTime) {
     List<MonitoredStopVisitStructure> output = new ArrayList<MonitoredStopVisitStructure>();
-    boolean hasRealtimeData = true;
     
     for (ArrivalAndDepartureBean adBean : getArrivalsAndDeparturesForStop(stopId, currentTime)) {
       
@@ -242,17 +237,17 @@ public class RealtimeServiceImpl implements RealtimeService {
       if(!_presentationService.include(statusBeanForCurrentTrip) || !_presentationService.include(adBean, statusBeanForCurrentTrip))
           continue;
       
-      long lastUpdatedTime = statusBeanForCurrentTrip.getLastUpdateTime();
       
+      MonitoredStopVisitStructure stopVisit = new MonitoredStopVisitStructure();
+     
       // Check for Realtime Data
       if(!statusBeanForCurrentTrip.isPredicted()){
-    	  hasRealtimeData = false;
-		  lastUpdatedTime = getTime();
+    	  stopVisit.setRecordedAtTime(new Date(getTime()));
       }
-
-      MonitoredStopVisitStructure stopVisit = new MonitoredStopVisitStructure();
-      stopVisit.setRecordedAtTime(new Date(lastUpdatedTime));
-        
+      else{
+    	  stopVisit.setRecordedAtTime(new Date(statusBeanForCurrentTrip.getLastUpdateTime()));
+      }
+  
       List<TimepointPredictionRecord> timePredictionRecords = null;
       timePredictionRecords = createTimePredictionRecordsForStop(adBean, stopId);
 
@@ -260,7 +255,7 @@ public class RealtimeServiceImpl implements RealtimeService {
       SiriSupport.fillMonitoredVehicleJourney(stopVisit.getMonitoredVehicleJourney(), 
     	  tripBeanForAd, statusBeanForCurrentTrip, adBean.getStop(), OnwardCallsMode.STOP_MONITORING,
     	  _presentationService, _transitDataService, maximumOnwardCalls,
-    	  timePredictionRecords, hasRealtimeData, currentTime);
+    	  timePredictionRecords, statusBeanForCurrentTrip.isPredicted(), currentTime);
      
       output.add(stopVisit);
     }

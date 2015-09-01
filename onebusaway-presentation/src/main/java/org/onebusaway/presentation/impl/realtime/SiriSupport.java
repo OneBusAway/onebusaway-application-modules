@@ -462,13 +462,12 @@ public final class SiriSupport {
 				// monitored call
 				if(stopTime.getStopTime().getStop().getId().equals(monitoredCallStopBean.getId())) {    
 					if(!presentationService.isOnDetour(tripStatus)) {	
-						TimepointPredictionRecord prediction = stopLevelPredictions.get(monitoredVehicleJourney.getVehicleRef().getValue());
-						monitoredVehicleJourney.setMonitoredCall(
+							monitoredVehicleJourney.setMonitoredCall(
 								getMonitoredCallStructure(stopTime.getStopTime().getStop(), presentationService, 
 										stopTime.getDistanceAlongBlock() - blockTrip.getDistanceAlongBlock(), 
 										stopTime.getDistanceAlongBlock() - distanceOfVehicleAlongBlock, 
 										visitNumber, blockTripStopsAfterTheVehicle - 1,
-										prediction,
+										stopLevelPredictions.get(monitoredVehicleJourney.getVehicleRef().getValue()),
 										hasRealtimeData,
 										responseTimestamp, tripStatus.getServiceDate() + (stopTime.getStopTime().getArrivalTime() * 1000)));
 					}
