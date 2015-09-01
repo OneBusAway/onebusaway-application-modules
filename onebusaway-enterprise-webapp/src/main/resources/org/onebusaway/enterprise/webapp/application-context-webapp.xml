@@ -54,7 +54,7 @@
     <bean id="createAPIKeyOnInitAction" class="org.onebusaway.enterprise.webapp.api.CreateAPIKeyOnInitAction" 
     	init-method="init">
     	<property name="createAPIKey" value="${create-apikey}" />
-    	<property name="key" value="OBAHART" />
+    	<property name="key" value="OBAKEY" />
     </bean>
 
     <bean id="createAPITestKeyOnInitAction" class="org.onebusaway.enterprise.webapp.api.CreateAPIKeyOnInitAction" 
