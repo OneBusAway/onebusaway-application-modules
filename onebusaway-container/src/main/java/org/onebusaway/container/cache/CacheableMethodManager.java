@@ -141,7 +141,7 @@ public class CacheableMethodManager {
     	  entry = new CacheEntry(keyFactory, valueSerializable, cache);
     	  if (_entries.containsKey(name)) {
     		  // another thread beat us here, discard
-    		  _log.warn("concurrent attempt to create cache =" + name);
+    		  _log.warn("concurrent attempt to create cache = " + name);
     	  } else {
     		  _entries.put(name, entry);
     	  }
