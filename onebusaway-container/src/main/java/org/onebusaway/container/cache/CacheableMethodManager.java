@@ -25,6 +25,8 @@ import net.sf.ehcache.Element;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Support class providing functionality for caching the output of arbitrary
@@ -40,6 +42,8 @@ import org.aspectj.lang.Signature;
  */
 public class CacheableMethodManager {
 
+  private static Logger _log = LoggerFactory.getLogger(CacheableMethodManager.class);
+  
   private ConcurrentHashMap<String, CacheEntry> _entries = new ConcurrentHashMap<String, CacheEntry>();
 
   private CacheManager _cacheManager;
@@ -133,10 +137,17 @@ public class CacheableMethodManager {
           _cacheManager.addCache(cache);
         }
       }
-      entry = new CacheEntry(keyFactory, valueSerializable, cache);
-      _entries.put(name, entry);
+      synchronized (_entries) {
+    	  entry = new CacheEntry(keyFactory, valueSerializable, cache);
+    	  if (_entries.containsKey(name)) {
+    		  // another thread beat us here, discard
+    		  _log.warn("concurrent attempt to create cache =" + name);
+    	  } else {
+    		  _entries.put(name, entry);
+    	  }
+      }
     }
-    return entry;
+    return _entries.get(name);
   }
 
   private boolean isValueSerializable(ProceedingJoinPoint pjp, Method method) {
