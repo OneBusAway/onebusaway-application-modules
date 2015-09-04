@@ -22,4 +22,6 @@ public interface FrequencyEntry {
   public int getEndTime();
 
   public int getHeadwaySecs();
+  
+  public int getExactTimes();
 }

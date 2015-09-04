@@ -533,6 +533,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
       }
 
+      location.setBlockStartTime(record.getBlockStartTime());
       location.setPredicted(true);
       location.setLastUpdateTime(record.getTimeOfRecord());
       location.setLastLocationUpdateTime(record.getTimeOfLocationUpdate());
@@ -1017,6 +1018,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       _vehicleId = vehicleId;
     }
 
+    @Override
     public List<VehicleLocationCacheElements> getRecordsFromCache() {
       VehicleLocationCacheElements elementsForVehicleId = _cache.getRecordForVehicleId(_vehicleId);
       if (elementsForVehicleId == null)
@@ -1024,6 +1026,7 @@ public class BlockLocationServiceImpl implements BlockLocationService,
       return Arrays.asList(elementsForVehicleId);
     }
 
+    @Override
     public List<BlockLocationRecord> getRecordsFromDao(long fromTime,
         long toTime) {
       return _blockLocationRecordDao.getBlockLocationRecordsForVehicleAndTimeRange(

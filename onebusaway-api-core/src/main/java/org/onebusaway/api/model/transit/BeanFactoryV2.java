@@ -904,6 +904,7 @@ public class BeanFactoryV2 {
     bean.setStartTime(frequency.getStartTime());
     bean.setEndTime(frequency.getEndTime());
     bean.setHeadway(frequency.getHeadway());
+    bean.setExactTimes(frequency.getExactTimes());
     return bean;
   }
 
@@ -912,6 +913,7 @@ public class BeanFactoryV2 {
     bean.setStartTime(frequency.getStartTime());
     bean.setEndTime(frequency.getEndTime());
     bean.setHeadway(frequency.getHeadway());
+    bean.setExactTimes(frequency.getExactTimes());
     return bean;
   }
 
