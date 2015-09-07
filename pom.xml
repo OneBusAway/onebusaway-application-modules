@@ -22,7 +22,6 @@
     <csv-entities-version>1.0.3</csv-entities-version>
     <gtfs-version>1.2.6</gtfs-version>
     <onebusaway-siri-version>1.0.4</onebusaway-siri-version>
-    <opentripplanner-version>0.4.1</opentripplanner-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
     <!--  These properties are primarily used in configuring joint integration tests -->
     <org_onebusaway_test_port>9900</org_onebusaway_test_port>
