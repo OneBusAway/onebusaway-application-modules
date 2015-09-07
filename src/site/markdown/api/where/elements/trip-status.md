@@ -2,7 +2,7 @@
 
 # The &lt;tripStatus/&gt; Element
 
-The `<tripStatus/>` element captures information about the current status of a transit vehicle serving a trip.  It is returned as a sub-element in a number of api calls.  For example:
+The `<tripStatus/>` element captures information about the current status of a transit vehicle serving a trip.  It is returned as a sub-element in a number of API calls.  For example:
 
 * [arrivals-and-departures-for-stop](../methods/arrivals-and-departures-for-stop.html)
 * Any method that returns a [`<tripDetails/>` element](trip-details.html).
@@ -48,9 +48,9 @@ The `<tripStatus/>` element captures information about the current status of a t
 ## Details
 
 * activeTripId - the trip id of the trip the vehicle is actively serving.  All trip-specific values will be in reference to this active trip
-* blockTripSequence - the index of the active trip into the sequence of trips for the active block.  Compare to `blockTripSequence` in the [OneBusAwayRestApi_ArrivalAndDepartureElementV2 arrivalAndDeparture element] to determine where the active block location is relative to an arrival-and-departure.
-* serviceDate - time, in ms since the unix epoch, of midnight for start of the service date for the trip. See the [Glossary#Service_Date glossary entry] for more info
-* frequency - information about [OneBusAwayRestApi_FrequencyElementV2 frequency based scheduling], if applicable to the trip - *OPTIONAL*
+* blockTripSequence - the index of the active trip into the sequence of trips for the active block.  Compare to `blockTripSequence` in the [`<arrivalAndDeparture/>` element](arrival-and-departure.html) to determine where the active block location is relative to an arrival-and-departure.
+* serviceDate - time, in ms since the unix epoch, of midnight for start of the service date for the trip.
+* frequency - information about [frequency based scheduling](frequency.html), if applicable to the trip - *OPTIONAL*
 * scheduledDistanceAlongTrip - the distance, in meters, the transit vehicle is scheduled to have progress along the active trip.  This is an optional value, and will only be present if the trip is in progress. *OPTIONAL*
 * totalDistanceAlongTrip - the total length of the trip, in meters
 * position - current position of the transit vehicle. This element is optional, and will only be present if the trip is actively running. If real-time arrival data is available, the position will take that into account, otherwise the position reflects the scheduled position of the vehicle. *OPTIONAL*
@@ -69,4 +69,4 @@ The `<tripStatus/>` element captures information about the current status of a t
 * distanceAlongTrip - the distance, in meters, the transit vehicle has progressed along the active trip.  This is an optional value that will only be present if the underlying AVL system supplies it and is potential extrapolated from the last known reading to the current time.
 * scheduleDeviation - if real-time arrival info is available, this lists the deviation from the schedule in seconds, where positive number indicates the trip is running late and negative indicates the trips is running early. If not real-time arrival info is available, this will be zero.
 * vehicleId - if real-time arrival info is available, this lists the id of the transit vehicle currently running the trip. *OPTIONAL*
-* situationIds - references to [OneBusAwayRestApi_SituationElementV2 situation elements], for active service alerts applicable to this trip. *OPTIONAL*
+* situationIds - references to [`<situation/>` elements](situation.html), for active service alerts applicable to this trip. *OPTIONAL*

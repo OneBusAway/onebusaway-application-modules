@@ -25,7 +25,7 @@ http://api.pugetsound.onebusaway.org/api/where/report-problem-with-stop/1_75403.
 
 ## Request Parameters
 
-* stopId - the trip id, encoded directly in the url:
+* stopId - the trip id, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/report-problem-with-stop/[ID GOES HERE].xml`
 * code - a string code identifying the nature of the problem
     * `stop_name_wrong` - the stop name in OneBusAway differs from the actual stop's name

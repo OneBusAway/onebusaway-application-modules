@@ -35,7 +35,7 @@ http://api.pugetsound.onebusaway.org/api/where/stop/1_75403.xml?key=TEST
 
 ## Request Parameters
 
-* `id` - the id of the requested stop, encoded directly in the url:
+* `id` - the id of the requested stop, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/stop/[ID GOES HERE].xml` 
 
 ## Response

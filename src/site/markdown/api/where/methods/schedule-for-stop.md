@@ -55,7 +55,7 @@ http://api.pugetsound.onebusaway.org/api/where/schedule-for-stop/1_75403.xml?key
 
 ## Request Parameters
 
-* id - encoded in the url directly, this specifies the stop id to request the schedule for
+* id - the stop id to request the schedule for, encoded directly in the URL:
 	* `http://api.pugetsound.onebusaway.org/api/where/schedule-for-stop/[ID GOES HERE].xml`
 * date - The date for which you want to request a schedule of the format YYYY-MM-DD (optional, defaults to current date)
 
@@ -72,7 +72,7 @@ Finally we get down to the unit of a stop time, as represented by the `<schedule
 * arrivalTime - time in milliseconds since the Unix epoch that the transit vehicle will arrive
 * departureTime - time in milliseconds since the Unix epoch that the transit vehicle will depart
 * tripId - the id for the trip of the scheduled transit vehicle
-* serviceId - the serviceId for the schedule trip (see the [http://code.google.com/transit/spec/transit_feed_specification.html GTFS spec] for more details
+* serviceId - the serviceId for the schedule trip (see the [GTFS spec](http://code.google.com/transit/spec/transit_feed_specification.html) for more details
 
 In addition to all the `<scheduleStopTime/>` elements, the response also contains `<stopCalendarDay/>` elements which list out all the days that a particular stop has service.  This element has the following properties:
 

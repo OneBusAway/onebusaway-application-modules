@@ -25,7 +25,7 @@ http://api.pugetsound.onebusaway.org/api/where/arrival-and-departure-for-stop/1_
 
 ## Request Parameters
 
-* id - the stop id, encoded directly in the url:
+* id - the stop id, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/arrival-and-departure-for-stop/[ID GOES HERE].xml`
 * tripId - the trip id of the arriving transit vehicle
 * serviceDate - the service date of the arriving transit vehicle
