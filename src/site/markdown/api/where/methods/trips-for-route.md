@@ -30,7 +30,7 @@ http://api.pugetsound.onebusaway.org/api/where/trips-for-route/1_44.xml?key=TEST
 
 ## Request Parameters
 
-* id - the id of the route, encoded directly in the url:
+* id - the id of the route, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/trips-for-route/[ID GOES HERE].xml`
 * includeStatus - Can be true/false to determine whether full
   [`<tripStatus/>` elements](../elements/trip-status.html) with full real-time

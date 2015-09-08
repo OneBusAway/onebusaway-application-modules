@@ -36,9 +36,9 @@ http://api.pugetsound.onebusaway.org/api/where/shape/1_40046045.xml?key=TEST
 
 ## Request Parameters
 
-* `id` - the shape id is included directly in the url path
+* `id` - the shape id, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/shape/[ID GOES HERE].xml`
 
 ## Response
 
-The path is returned as a `<shape/>` element with a points in the [http://code.google.com/apis/maps/documentation/polylinealgorithm.html encoded polyline format] defined for Google Maps.
+The path is returned as a `<shape/>` element with a points in the [encoded polyline format](http://code.google.com/apis/maps/documentation/polylinealgorithm.html) defined for Google Maps.

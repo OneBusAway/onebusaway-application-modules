@@ -4,7 +4,7 @@
 
 The `<tripDetails/>` element captures extended information about a particular
 trip, potentially including the trip instance information, schedule, status, and
-active service alert information.  It is returned as a sub-element in a number of api calls.  For example:
+active service alert information.  It is returned as a sub-element in a number of API calls.  For example:
 
 * [trip-details](../methods/trip-details.html)
 * [trip-for-vehicle](../methods/trip-for-vehicle.html)

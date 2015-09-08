@@ -136,7 +136,7 @@ The current list of supported API methods.  Methods that are subject to changed 
 
 ## Common Elements
 
-See more discussion of [OneBusAwayRestApi_Version2 Version 2] of the api and how element references have changed:
+See more discussion of Version 2 of the API and how element references have changed:
 
 * [agency](elements/agency.html)
 * [arrivalAndDeparture](elements/arrival-and-departure.html)

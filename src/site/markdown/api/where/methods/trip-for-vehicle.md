@@ -32,7 +32,7 @@ http://api.pugetsound.onebusaway.org/api/where/trip-for-vehicle/1_4210.xml?key=T
 
 ## Request Parameters
 
-* id - the id of the vehicle, encoded directly in the url:
+* id - the id of the vehicle, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/trip-for-vehicle/[ID GOES HERE].xml`
 * includeTrip - Can be true/false to determine whether full [`<trip/>` element](../elements/trip.html) is included in the `<references/>` section.  Defaults to false.
 * includeSchedule - Can be true/false to determine whether full `<schedule/>` element is included in the `<tripDetails/>` section.  Defaults to fale.

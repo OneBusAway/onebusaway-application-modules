@@ -4,15 +4,9 @@
 
 Real-time arrival information for public transit vehicles is one of the key pieces of information provided by OneBusAway, but it's only a part of the picture.  Information about cancellations, detours, and explanations for why a transit vehicle is delayed are critical details for riders.  While transit agencies have made some progress in publishing timely emails, SMS, and web notifications about service alert information, we think these approaches are generally too broad.  We want to provide targeted service alerts through OneBusAway that tell you service alert information for just the transit services you are actively using.
 
-Service alerts can encompass a lot of different scenarios, and while we eventually hope to support them all, we're starting a specific use-case: adverse weather reroutes.  Winter is rapidly approaching in the Pacific Northwest and the word on the street is that it's going to be a big snow year.  Snow and public transit generally make for a volatile mix, with local transit agencies having a difficult time communicating information about adverse weather reroutes and cancellations to riders where they need it most: waiting at a stop.
-
-There are a number of issues beyond the scope of this document that we won't address here: the need for GPS vehicle tracking and a better radio network in KCM, or stream-lined rider communication within the agency.
-
-Instead, we'll talk about extensions to the API to support service alert information and how those service alerts will be activated automatically.
-
 ## API Representation
 
-We introduce a new `<situation/>` element.  It's closely modeled on the PtSituation model from the SIRI Situation Exchange protocol (see http://www.kizoom.com/standards/siri/ for more details on the SIRI specification for exchanging real-time transit info).  Let's see an example:
+We introduce a new `<situation/>` element.  It's closely modeled on the PtSituation model from the [SIRI](http://user47094.vs.easily.co.uk/siri/) Situation Exchange schema.  Let's see an example:
 
     <situation>
       <id>1_1289972401385</id>
@@ -76,7 +70,7 @@ The `<situation/>` element can be broken up into a couple of relevant sections:
 The `<affects/>` element captures information about what transit entities are affected by a particular situation.  Right now it supports two sub-elements:
 
 * `stops` - transit stops
-* `vehicleJournerys` - transit vehicle journeys
+* `vehicleJourneys` - transit vehicle journeys
 
 The `<stops/>` element has `<stop>` sub-elements:
 
@@ -99,7 +93,7 @@ The `<vehicleJourneys/>` element has `<vehicleJourney/>` sub-elements:
 
 The `<vehicleJourney/>` element has the following properties:
 
-  * `lineId` - this is equivalent to a route id (I have good reasons for not calling it routeId that I'm happy to discuss offline)
+  * `lineId` - this is equivalent to a route id
   * `direction` - an optional direction id specifying the direction of travel
   * `calls` - optional elements specifying specific stops along the vehicle journey that are affected
 
@@ -152,7 +146,3 @@ If a situation affects a stop directly (as opposed to the routes serving that st
 ### Trip-Specific Situations
 
 If a situation affects a specific trip or a call (an arrival/departure) at a stop by a specific trip, it will appear in the `<situationIds/>` element of the `<arrivalsAndDepartures/>` element.
-
-## Automating Service Alerts
-
-Exposing service alerts in the !OneBusAway API is a good first step, but the service alerts are only as good as the data powering them.  We are actively working with King County Metro and Pierce Transit on an automated system to active adverse reroutes automatically as they are activated in each agency's own customer information systems.  More details on that as they become available.
