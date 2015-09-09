@@ -19,7 +19,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.onebusaway.collections.Range;
-import org.onebusaway.collections.tuple.Pair;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.gtfs.model.calendar.ServiceDate;
 import org.onebusaway.transit_data_federation.impl.blocks.BlockSequence;
@@ -39,7 +38,7 @@ public interface StopTimeService {
    * Determines the set of active stop time instances at a given stop, taking
    * into account information like active service dates, etc
    * 
-   * @param stopId the starget stop id
+   * @param stopId the target stop id
    * @param from
    * @param to
    * @return the set of active stop time instances in the specified time range
@@ -76,15 +75,6 @@ public interface StopTimeService {
    */
   public List<StopTimeInstance> getNextBlockSequenceDeparturesForStop(
       StopEntry stop, long time, boolean includePrivateSerivce);
-
-  public List<Pair<StopTimeInstance>> getNextDeparturesBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date fromTime,
-      int runningEarlySlack, int runningLateSlack, int resultCount,
-      boolean includePrivateService);
-
-  public List<Pair<StopTimeInstance>> getPreviousArrivalsBetweenStopPair(
-      StopEntry fromStop, StopEntry toStop, Date toTime, int runningEarlySlack,
-      int runningLateSlack, int resultCount, boolean includePrivateService);
 
   /**
    * When calculating frequency-based stop times, we have a couple different
