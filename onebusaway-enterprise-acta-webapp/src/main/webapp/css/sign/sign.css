@@ -391,6 +391,10 @@ td.distance {
     white-space: nowrap;
     padding: 0.2em 1em 0.2em 0;
 }
+td.additional_stops {
+	width: 75px;
+	padding: 0 0 0.1em 0;
+}
 p.alert {
 	display: block;
     color: white;
@@ -461,9 +465,9 @@ div.stop-id {
 }
 
 .additional_stops {
-	font-size: 0.5em;
+	font-size: 0.6em;
 	display: table-cell;
-	height: 50%;
+	height: 75%;
 	float: right;
 }
 

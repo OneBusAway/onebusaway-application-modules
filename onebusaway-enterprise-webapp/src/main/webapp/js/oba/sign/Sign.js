@@ -343,9 +343,14 @@ OBA.Sign = function() {
 
 				jQuery('<td></td>')
 				.addClass("distance")
-				.append(toEtaSpan(rowInfo.etas, rowInfo.monitored))
+				.append(rowInfo.etas[0])
 				.appendTo(row);
 
+				
+				jQuery('<td></td>')
+				.addClass("additional_stops")
+				.append(toEtaSpan1(rowInfo.etas, rowInfo.monitored))
+				.appendTo(row);
 				
 				tableBody.append(row);				
 		});
@@ -353,7 +358,7 @@ OBA.Sign = function() {
 		// no arrivals
 		if(r === 0) {
 			jQuery('<tr class="last">' + 
-					'<td colspan="3">' + 
+					'<td colspan="4">' + 
 						'No buses en-route to this stop. Please check back shortly for an update.</li>' +
 					'</td>' +
 				   '</tr>')
@@ -365,12 +370,8 @@ OBA.Sign = function() {
 		
 	}
 	
-	function toEtaSpan(etas, monitored) {
+	function toEtaSpan1(etas, monitored) {
 		var list = '<div class="prediction">';
-		if (etas.length > 0) {
-			list += etas[0];
-		}
-		list += '<span class="additional_stops">';
 		for (index = 1; index < etas.length; index++) {
 			if (index == 1) {
 				list = list + etas[index];
@@ -378,10 +379,11 @@ OBA.Sign = function() {
 				list = list + " / " + etas[index];
 			}
 		}
-		list += "</span></div>"
+		list += "</div>"
 		return list;
 	}
-	
+
+
 	function updateTimestamp(date) {
 		jQuery("#lastupdated")
 			.html("")
