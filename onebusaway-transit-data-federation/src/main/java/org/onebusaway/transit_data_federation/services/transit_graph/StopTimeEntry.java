@@ -77,4 +77,10 @@ public interface StopTimeEntry {
    * @return the accumulated slack time, in seconds
    */
   public int getAccumulatedSlackTime();
+  
+  /**
+   * 
+   * @return the total number of stops in this trip
+   */
+  public int getTotalStopsInTrip();
 }
