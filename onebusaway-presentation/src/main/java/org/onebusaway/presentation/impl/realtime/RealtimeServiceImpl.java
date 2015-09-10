@@ -197,7 +197,7 @@ public class RealtimeServiceImpl implements RealtimeService {
     	tripDetailsForCurrentTrip = _transitDataService.getSingleTripDetails(detailsQuery);
     }
     
-    if(!_presentationService.include(tripDetailsForCurrentTrip.getStatus()))
+    if(tripDetailsForCurrentTrip == null || !_presentationService.include(tripDetailsForCurrentTrip.getStatus()))
         return null;
     
 
