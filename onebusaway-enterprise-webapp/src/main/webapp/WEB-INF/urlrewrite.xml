@@ -38,6 +38,13 @@
 		<from>^/S/([0-9]+)$</from>
 		<to last="true">/m/index.action?q=$1</to>
 	</rule>
+	<rule>
+		<note>
+		  debug support for gtfs realtime.  Please disable for production
+		</note>
+		<from>^/debug(.*)</from>
+		<to last="true">debug.action$1</to>
+	</rule>
 
 	<!--
 		Mobile browser redirection.
