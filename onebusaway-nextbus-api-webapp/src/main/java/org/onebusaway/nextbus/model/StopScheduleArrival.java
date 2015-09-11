@@ -11,15 +11,18 @@ public class StopScheduleArrival {
 	private String routeId;
 	
 	@XStreamAlias("StartTime")
-	private Calendar startTime;
+	private String startTime;
 	
 	@XStreamAlias("EndTime")
-	private Calendar endTime;
+	private String endTime;
 	
 	@XStreamAlias("Time")
-	private Calendar time;
+	private String time;
 	
 	@XStreamAlias("DirectionNum")
+	private String directionNum;
+	
+	@XStreamAlias("TripDirectionText")
 	private String tripDirectionText;
 	
 	@XStreamAlias("TripHeadsign")
@@ -36,27 +39,27 @@ public class StopScheduleArrival {
 		this.routeId = routeId;
 	}
 
-	public Calendar getStartTime() {
+	public String getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(Calendar startTime) {
+	public void setStartTime(String startTime) {
 		this.startTime = startTime;
 	}
 
-	public Calendar getEndTime() {
+	public String getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(Calendar endTime) {
+	public void setEndTime(String endTime) {
 		this.endTime = endTime;
 	}
 
-	public Calendar getTime() {
+	public String getTime() {
 		return time;
 	}
 
-	public void setTime(Calendar time) {
+	public void setTime(String time) {
 		this.time = time;
 	}
 
@@ -82,5 +85,13 @@ public class StopScheduleArrival {
 
 	public void setTripId(String tripId) {
 		this.tripId = tripId;
+	}
+
+	public String getDirectionNum() {
+		return directionNum;
+	}
+
+	public void setDirectionNum(String directionNum) {
+		this.directionNum = directionNum;
 	}
 }

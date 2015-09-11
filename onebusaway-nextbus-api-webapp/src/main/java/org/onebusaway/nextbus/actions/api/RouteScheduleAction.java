@@ -45,7 +45,7 @@ public class RouteScheduleAction implements ModelDriven<RouteScheduleInfo> {
 	}
 	
 	public HttpHeaders index() {
-		return new DefaultHttpHeaders("success");
+		return new DefaultHttpHeaders();
 	}
 
 	@Override
@@ -55,26 +55,40 @@ public class RouteScheduleAction implements ModelDriven<RouteScheduleInfo> {
 		for(TripDetailsBean tripDetails : getTripDetails()){
 			Trip nextBusTrip = new Trip();
 			
-			
 			if(tripDetails.getTrip() != null){
 				nextBusTrip.setTripID(tripDetails.getTrip().getId());
 				nextBusTrip.setRouteId(tripDetails.getTrip().getRoute().getId());
 				nextBusTrip.setTripHeadsign(tripDetails.getTrip().getTripHeadsign());
 				nextBusTrip.setTripDirectionText(tripDetails.getTrip().getDirectionId());
-				
-				int stopSequence = 0;
-				
-				for(TripStopTimeBean tripStopTime : tripDetails.getSchedule().getStopTimes()){
-					StopTime nextBusStopTime = new StopTime();
-					nextBusStopTime.setStopId(tripStopTime.getStop().getId());
-					nextBusStopTime.setStopName(tripStopTime.getStop().getName());		
-					nextBusStopTime.setTime(sdf.format(new Date(tripDetails.getServiceDate() + (tripStopTime.getDepartureTime() * 1000))));
-					nextBusStopTime.setStopSeq(stopSequence);
-					stopSequence++;
+								
+				if(tripDetails.getSchedule().getStopTimes().size() >  0){
 					
-					nextBusTrip.getStopTimes().add(nextBusStopTime);				
+					// Set Start and End Times
+					nextBusTrip.setStartTime(sdf.format(new Date(tripDetails.getServiceDate() + 
+							(tripDetails.getSchedule().getStopTimes().get(0).getDepartureTime() * 1000))));
+					
+					if(tripDetails.getSchedule().getStopTimes().size() > 1 ){
+						nextBusTrip.setEndTime(sdf.format(new Date(tripDetails.getServiceDate() + 
+								(tripDetails.getSchedule().getStopTimes().get(
+										tripDetails.getSchedule().getStopTimes().size() - 1).getDepartureTime() * 1000)
+								)
+						));
+					}
+					else{
+						nextBusTrip.setEndTime(nextBusTrip.getStartTime());
+					}
+					
+					// Populate Stop Times
+					for(TripStopTimeBean tripStopTime : tripDetails.getSchedule().getStopTimes()){
+						StopTime nextBusStopTime = new StopTime();
+						nextBusStopTime.setStopId(tripStopTime.getStop().getId());
+						nextBusStopTime.setStopName(tripStopTime.getStop().getName());		
+						nextBusStopTime.setTime(sdf.format(new Date(tripDetails.getServiceDate() + (tripStopTime.getDepartureTime() * 1000))));
+						//nextBusStopTime.setStopSeq(stopSequence);
+
+						nextBusTrip.getStopTimes().add(nextBusStopTime);				
+					}
 				}
-				
 				if(tripDetails.getTrip().getDirectionId().equals("0"))
 					rsi.getDirection0().add(nextBusTrip);
 				else if (tripDetails.getTrip().getDirectionId().equals("1"))

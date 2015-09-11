@@ -20,6 +20,7 @@ package org.onebusaway.nextbus.impl;
 import org.apache.struts2.rest.handler.XStreamHandler;
 import org.onebusaway.nextbus.model.RouteScheduleInfo;
 import org.onebusaway.nextbus.model.Routes;
+import org.onebusaway.nextbus.model.StopScheduleInfo;
 import org.onebusaway.nextbus.model.StopsResp;
 
 import com.thoughtworks.xstream.XStream;
@@ -33,6 +34,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.processAnnotations(RouteScheduleInfo.class);
     xstream.processAnnotations(StopsResp.class);
     xstream.processAnnotations(Routes.class);
+    xstream.processAnnotations(StopScheduleInfo.class);
     
     /*xstream.alias("response", ResponseBean.class);
     xstream.alias("validationError", ValidationErrorBean.class);
