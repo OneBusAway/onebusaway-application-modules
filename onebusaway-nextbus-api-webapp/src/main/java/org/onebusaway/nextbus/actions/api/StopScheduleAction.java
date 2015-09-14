@@ -36,27 +36,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.opensymphony.xwork2.ModelDriven;
 import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
-public class StopScheduleAction implements ModelDriven<StopScheduleInfo> {
-	
-	@Autowired
-	private TransitDataService _service;
+public class StopScheduleAction extends Schedule implements ModelDriven<StopScheduleInfo> {
 	
 	private String stopId;
 	
 	private Date date;
-	
-	private SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd'T'HH:mm:ss");
-	
-	private static final int MINUTES_IN_DAY = 60 * 24;
-	
-	
-	public TransitDataService get_service() {
-		return _service;
-	}
-
-	public void set_service(TransitDataService _service) {
-		this._service = _service;
-	}
 	
 	public HttpHeaders index() {
 		return new DefaultHttpHeaders("success");
@@ -71,86 +55,31 @@ public class StopScheduleAction implements ModelDriven<StopScheduleInfo> {
 		query.setMinutesBefore(0);
 		query.setMinutesAfter(MINUTES_IN_DAY);
 		
-		StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _service.getStopWithArrivalsAndDepartures(stopId, query);
+		try{
+			StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures = _service.getStopWithArrivalsAndDepartures(stopId, query);
 		
-		for(ArrivalAndDepartureBean arrivalAndDepartureBean : stopWithArrivalsAndDepartures.getArrivalsAndDepartures()){
-			StopScheduleArrival stopScheduleArrival = new StopScheduleArrival();
-			
-			stopScheduleArrival.setTripId(arrivalAndDepartureBean.getTrip().getId());
-			stopScheduleArrival.setTripHeadsign(arrivalAndDepartureBean.getTripHeadsign());
-			stopScheduleArrival.setDirectionNum(arrivalAndDepartureBean.getTrip().getDirectionId());
-			stopScheduleArrival.setTime(sdf.format(new Date(arrivalAndDepartureBean.getScheduledArrivalTime())));
-			stopScheduleArrival.setRouteId(arrivalAndDepartureBean.getTrip().getRoute().getId());
-			
-			List<TripDetailsBean> tripDetailsList = getTripDetails(arrivalAndDepartureBean.getTrip().getRoute().getId(), getDate().getTime());
-			
-			for(TripDetailsBean tripDetails : tripDetailsList){
+			for(ArrivalAndDepartureBean arrivalAndDepartureBean : stopWithArrivalsAndDepartures.getArrivalsAndDepartures()){
+				StopScheduleArrival stopScheduleArrival = new StopScheduleArrival();
 				
-				if(tripDetails.getTripId() == arrivalAndDepartureBean.getTrip().getId() && tripDetails.getSchedule().getStopTimes().size() >  0){
-					stopScheduleArrival.setStartTime(sdf.format(new Date(tripDetails.getServiceDate() + 
-							(tripDetails.getSchedule().getStopTimes().get(0).getDepartureTime() * 1000))));
-					if(tripDetails.getSchedule().getStopTimes().size() > 1 ){
-						stopScheduleArrival.setEndTime(sdf.format(new Date(tripDetails.getServiceDate() + 
-								(tripDetails.getSchedule().getStopTimes().get(
-										tripDetails.getSchedule().getStopTimes().size() - 1).getDepartureTime() * 1000)
-								)
-						));
-					}
-					else{
-						stopScheduleArrival.setEndTime(stopScheduleArrival.getStartTime());
-					}
-				}
+				stopScheduleArrival.setTripId(arrivalAndDepartureBean.getTrip().getId());
+				stopScheduleArrival.setTripHeadsign(arrivalAndDepartureBean.getTrip().getTripHeadsign());
+				stopScheduleArrival.setDirectionNum(arrivalAndDepartureBean.getTrip().getDirectionId());
+				stopScheduleArrival.setTime(sdf.format(new Date(arrivalAndDepartureBean.getScheduledArrivalTime())));
+				stopScheduleArrival.setRouteId(arrivalAndDepartureBean.getTrip().getRoute().getId());
+				//stopScheduleArrival.setTripDirectionText();
 				
+				TripDetailsBean tripDetails = getTripDetails(arrivalAndDepartureBean.getTrip().getId(), getDate());
+				
+				stopScheduleArrival.setStartTime(getStartTime(tripDetails));
+				stopScheduleArrival.setStartTime(getEndTime(tripDetails));
+				
+				ssi.getScheduleArrivals().add(stopScheduleArrival);
 			}
-			
-			//stopScheduleArrival.setTripDirectionText();
-			
-			ssi.getScheduleArrivals().add(stopScheduleArrival);
 		}
-		
-		
-		/*StopScheduleBean stopSchedule = _service.getScheduleForStop(stopId, getDate());
-		
-		if(stopSchedule != null){
-			for(StopRouteScheduleBean stopRouteSchedule : stopSchedule.getRoutes()){
-				
-				for(int dir=0; dir<stopRouteSchedule.getDirections().size(); dir++){
-					for(StopTimeInstanceBean stopTimeInstance : stopRouteSchedule.getDirections().get(dir).getStopTimes()){
-							
-							StopScheduleArrival stopScheduleArrival = new StopScheduleArrival();
-							
-							stopScheduleArrival.setDirectionNum(dir);
-							stopScheduleArrival.setTripId(stopTimeInstance.getTripId());
-							stopScheduleArrival.setTripHeadsign(stopRouteSchedule.getDirections().get(dir).getTripHeadsign());
-							stopScheduleArrival.setTime(sdf.format(new Date(stopTimeInstance.getArrivalTime())));
-							stopScheduleArrival.setRouteId(stopRouteSchedule.getRoute().getId());
-							
-							//TripBean trip = _service.getTrip(stopTimeInstance.getTripId());
-							
-							TripDetailsQueryBean query = new TripDetailsQueryBean();
-							query.setTripId(stopTimeInstance.getTripId());
-							query.setServiceDate(getDate().getTime());
-							query.setTime(getDate().getTime());
-							
-							TripDetailsInclusionBean inclusionBean = new TripDetailsInclusionBean();
-							inclusionBean.setIncludeTripBean(true);
-							inclusionBean.setIncludeTripStatus(true);
-							
-							query.setInclusion(inclusionBean);
-							
-							
-							ListBean<TripDetailsBean> tripDetails = _service.getTripDetails(query);
-							
-							
-							//stopScheduleArrival.setTripDirectionText();
-							//stopScheduleArrival.setStartTime(stopTimeInstance.get);
-							//stopScheduleArrival.setEndTime(startTime);
-							
-							ssi.getScheduleArrivals().add(stopScheduleArrival);
-					}
-				}
-			}
-		}*/
+		catch(NoSuchStopServiceException nsse){
+			//TODO - Handle Exception
+		}
+	
 
 		return ssi;
 		
@@ -173,22 +102,6 @@ public class StopScheduleAction implements ModelDriven<StopScheduleInfo> {
 
 	public void setDate(Date date) {
 		this.date = date;
-	}
-	
-	private List<TripDetailsBean> getTripDetails(String routeId, long time){
-		TripsForRouteQueryBean tripRouteQuery = new TripsForRouteQueryBean();
-		tripRouteQuery.setTime(time);
-		tripRouteQuery.setRouteId(routeId);
-		
-		TripDetailsInclusionBean inclusionBean = new TripDetailsInclusionBean();
-		inclusionBean.setIncludeTripBean(true);
-		inclusionBean.setIncludeTripStatus(true);
-		
-		tripRouteQuery.setInclusion(inclusionBean);
-		
-		
-		ListBean<TripDetailsBean> tripDetails = _service.getTripsForRoute(tripRouteQuery);
-		return tripDetails.getList();
 	}
 
 }

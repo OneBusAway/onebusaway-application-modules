@@ -9,17 +9,26 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias("Trip")
 public class Trip {
-
-	@XStreamAlias("StartTime")
-	private String startTime;
+	
+	@XStreamAlias("DirectionNum")
+	private String directionNum;
 	
 	@XStreamAlias("EndTime")
 	private String endTime;
 	
+	@XStreamAlias("RouteID")
+	private String routeId;
+	
+	@XStreamAlias("StartTime")
+	private String startTime;
+
+	@XStreamAlias("StopTimes")
+	private List<StopTime> stopTimes = new ArrayList<StopTime>();
+	
 	@XStreamAlias("Time")
 	private String time;
 	
-	@XStreamAlias("DirectionNum")
+	@XStreamAlias("TripDirectionText")
 	private String tripDirectionText;
 	
 	@XStreamAlias("TripHeadsign")
@@ -27,14 +36,7 @@ public class Trip {
 	
 	@XStreamAlias("TripID")
 	private String tripId;
-	
-	@XStreamAlias("RouteID")
-	private String routeId;
-	
-	@XStreamAlias("StopTimes")
-	private List<StopTime> stopTimes = new ArrayList<StopTime>();
-	
-	
+
 	public String getStartTime() {
 		return startTime;
 	}
@@ -77,10 +79,16 @@ public class Trip {
 	public void setTripHeadsign(String tripHeadsign) {
 		this.tripHeadsign = tripHeadsign;
 	}
-	public String getTripID() {
+	public String getDirectionNum() {
+		return directionNum;
+	}
+	public void setDirectionNum(String directionNum) {
+		this.directionNum = directionNum;
+	}
+	public String getTripId() {
 		return tripId;
 	}
-	public void setTripID(String tripId) {
+	public void setTripId(String tripId) {
 		this.tripId = tripId;
 	}
 }
