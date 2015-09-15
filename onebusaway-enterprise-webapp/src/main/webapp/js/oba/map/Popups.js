@@ -74,6 +74,9 @@ OBA.Popups = (function() {
 					return;
 				}
 				
+				var preload_content = jQuery("#" + popupContainerId);
+				var scroll = preload_content.scrollTop();
+
 				infoWindow.setContent(contentFn(json, popupContainerId, marker, routeFilter));
 				
 				if(openBubble === true) {
@@ -97,6 +100,7 @@ OBA.Popups = (function() {
 					infoWindow.setContent(content.get(0));
 					infoWindow.open(map, marker);
 				}
+				content.scrollTop(scroll);
 			});
 		};
 		refreshFn(true);		
