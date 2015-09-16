@@ -1,25 +1,144 @@
 package org.onebusaway.nextbus.model;
 
-import com.thoughtworks.xstream.annotations.XStreamAlias;
+import java.util.ArrayList;
+import java.util.List;
 
-@XStreamAlias("Route")
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamImplicit;
+
+@XStreamAlias("route")
 public class Route {
-	@XStreamAlias("RouteID")
-	private String routeId;
+	@XStreamImplicit
+	private List<Stop> stops = new ArrayList<Stop>();
 	
-	@XStreamAlias("Name")
-	private String routeName;
+	@XStreamImplicit
+	private List<Direction> directions = new ArrayList<Direction>();
 	
-	public String getRouteId() {
-		return routeId;
+	@XStreamImplicit
+	private List<Path> paths = new ArrayList<Path>();
+	
+	@XStreamAsAttribute 
+	private String tag;
+	
+	@XStreamAsAttribute 
+	private String title;
+	
+	@XStreamAsAttribute 
+	private String shortTitle;
+	
+	@XStreamAsAttribute 
+	private String color;
+	
+	@XStreamAsAttribute 
+	private String oppositeColor;
+	
+	@XStreamAsAttribute 
+	private String latMin;
+	
+	@XStreamAsAttribute 
+	private String latMax;
+	
+	@XStreamAsAttribute 
+	private String lonMin;
+	
+	@XStreamAsAttribute 
+	private String lonMax;
+
+	public List<Stop> getStops() {
+		return stops;
 	}
-	public void setRouteId(String routeId) {
-		this.routeId = routeId;
+
+	public void setStops(List<Stop> stops) {
+		this.stops = stops;
 	}
-	public String getName() {
-		return routeName;
+
+	public List<Direction> getDirections() {
+		return directions;
 	}
-	public void setName(String routeName) {
-		this.routeName = routeName;
+
+	public void setDirections(List<Direction> directions) {
+		this.directions = directions;
 	}
+
+	public List<Path> getPaths() {
+		return paths;
+	}
+
+	public void setPaths(List<Path> paths) {
+		this.paths = paths;
+	}
+
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getShortTitle() {
+		return shortTitle;
+	}
+
+	public void setShortTitle(String shortTitle) {
+		this.shortTitle = shortTitle;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
+
+	public String getOppositeColor() {
+		return oppositeColor;
+	}
+
+	public void setOppositeColor(String oppositeColor) {
+		this.oppositeColor = oppositeColor;
+	}
+
+	public String getLatMin() {
+		return latMin;
+	}
+
+	public void setLatMin(String latMin) {
+		this.latMin = latMin;
+	}
+
+	public String getLatMax() {
+		return latMax;
+	}
+
+	public void setLatMax(String latMax) {
+		this.latMax = latMax;
+	}
+
+	public String getLonMin() {
+		return lonMin;
+	}
+
+	public void setLonMin(String lonMin) {
+		this.lonMin = lonMin;
+	}
+
+	public String getLonMax() {
+		return lonMax;
+	}
+
+	public void setLonMax(String lonMax) {
+		this.lonMax = lonMax;
+	}
+	
 }
