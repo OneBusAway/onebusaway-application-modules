@@ -18,13 +18,18 @@
 package org.onebusaway.nextbus.impl;
 
 import org.apache.struts2.rest.handler.XStreamHandler;
+import org.onebusaway.nextbus.impl.xstream.ValueConverter;
 import org.onebusaway.nextbus.model.Agency;
 import org.onebusaway.nextbus.model.Body;
+import org.onebusaway.nextbus.model.Message;
 import org.onebusaway.nextbus.model.Route;
 import org.onebusaway.nextbus.model.DisplayRoute;
 import org.onebusaway.nextbus.model.ScheduleRoute;
+import org.onebusaway.nextbus.model.Vehicle;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.collections.CollectionConverter;
+import com.thoughtworks.xstream.mapper.ClassAliasingMapper;
 
 public class CustomXStreamHandler extends XStreamHandler {
 
@@ -38,6 +43,19 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.processAnnotations(Route.class);
     xstream.processAnnotations(Agency.class);
     xstream.processAnnotations(ScheduleRoute.class);
+    xstream.processAnnotations(Vehicle.class);
+    xstream.processAnnotations(Message.class);
+    
+    ClassAliasingMapper mapper = new ClassAliasingMapper(xstream.getMapper());
+    mapper.addClassAlias("error", String.class);
+    
+    xstream.registerLocalConverter(
+		Vehicle.class,
+        "errors",
+        new CollectionConverter(mapper)
+    );
+    
+    xstream.alias("error", java.lang.String.class);
     
     
     return xstream;
