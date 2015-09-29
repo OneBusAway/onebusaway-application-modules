@@ -1,4 +1,4 @@
-package org.onebusaway.nextbus.model;
+package org.onebusaway.nextbus.model.nextbus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +14,8 @@ public class Body<T> {
 	@XStreamImplicit
 	private List<T> response = new ArrayList<T>();
 	
-	@XStreamAlias("errors")
-	private List<String> errors;
+	@XStreamImplicit
+	private List<BodyError> errors;
 
 	public List<T> getResponse() {
 		return response;
@@ -25,13 +25,13 @@ public class Body<T> {
 		this.response = response;
 	}
 	
-	public List<String> getErrors() {
+	public List<BodyError> getErrors() {
 		if(errors == null)
-			 errors = new ArrayList<String>();
+			 errors = new ArrayList<BodyError>();
 		return errors;
 	}
 
-	public void setErrors(List<String> errors) {
+	public void setErrors(List<BodyError> errors) {
 		this.errors = errors;
 	}
 }

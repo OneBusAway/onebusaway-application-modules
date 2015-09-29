@@ -7,7 +7,8 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.nextbus.model.Body;
+import org.onebusaway.nextbus.model.nextbus.Body;
+import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -98,7 +99,7 @@ public class NextBusApiBase {
 				if (this.isValidRoute(routeId)) {
 					routeIds.add(routeId);
 				} else {
-					body.getErrors().add("No such route: " + routeId.toString() + ".");
+					body.getErrors().add(new BodyError("Could not get route \"" + routeId.toString() +"\". One of the tags could be bad." ));
 				}
 			} catch (Exception e) {
 				for (String agency : agencyIds) {
@@ -106,13 +107,13 @@ public class NextBusApiBase {
 					if (this.isValidRoute(routeId)) {
 						routeIds.add(routeId);
 					} else {
-						body.getErrors().add("No such route: " + routeId.toString() + ". ");
+						body.getErrors().add(new BodyError("Could not get route \"" + routeId.toString() +"\". One of the tags could be bad." ));
 					}
 				}
 			}
 		}
 		else{
-			body.getErrors().add("You must provide a route id.");
+			body.getErrors().add(new BodyError("You must provide a route id."));
 
 		}
 		
@@ -129,7 +130,7 @@ public class NextBusApiBase {
 	        if (isValidStop(stopId)) {
 	          stopIds.add(stopId);
 	        } else {
-	        	body.getErrors().add("No such stop: " + stopId.toString() + ". ");
+	        	body.getErrors().add(new BodyError("No such stop: " + stopId.toString() + ". "));
 	        }
 	      } catch (Exception e) {
 	        // The user didn't provide an agency id in the MonitoringRef, so use our list of operator refs
@@ -138,13 +139,13 @@ public class NextBusApiBase {
 	          if (isValidStop(stopId)) {
 	            stopIds.add(stopId);
 	          } else {
-	        	  body.getErrors().add("No such stop: " + stopId.toString() + ". ");
+	        	  body.getErrors().add(new BodyError("No such stop: " + stopId.toString() + ". "));
 	          }
 	        }
 	      }
 	      
 	      if (stopIds.size() == 0) 
-	    	  body.getErrors().add("You must provide a StopId.");
+	    	  body.getErrors().add(new BodyError("You must provide a StopId."));
 	      }
 	}
 	  

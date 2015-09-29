@@ -18,14 +18,18 @@
 package org.onebusaway.nextbus.impl;
 
 import org.apache.struts2.rest.handler.XStreamHandler;
+import org.onebusaway.nextbus.impl.xstream.FalseConverter;
 import org.onebusaway.nextbus.impl.xstream.ValueConverter;
-import org.onebusaway.nextbus.model.Agency;
-import org.onebusaway.nextbus.model.Body;
-import org.onebusaway.nextbus.model.Message;
-import org.onebusaway.nextbus.model.Route;
-import org.onebusaway.nextbus.model.DisplayRoute;
-import org.onebusaway.nextbus.model.ScheduleRoute;
-import org.onebusaway.nextbus.model.Vehicle;
+import org.onebusaway.nextbus.model.nextbus.Agency;
+import org.onebusaway.nextbus.model.nextbus.Body;
+import org.onebusaway.nextbus.model.nextbus.DisplayRoute;
+import org.onebusaway.nextbus.model.nextbus.Message;
+import org.onebusaway.nextbus.model.nextbus.Route;
+import org.onebusaway.nextbus.model.nextbus.ScheduleRoute;
+import org.onebusaway.nextbus.model.nextbus.Vehicle;
+import org.onebusaway.nextbus.model.transiTime.Prediction;
+import org.onebusaway.nextbus.model.transiTime.Predictions;
+import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.collections.CollectionConverter;
@@ -45,6 +49,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.processAnnotations(ScheduleRoute.class);
     xstream.processAnnotations(Vehicle.class);
     xstream.processAnnotations(Message.class);
+    xstream.processAnnotations(Predictions.class);
     
     ClassAliasingMapper mapper = new ClassAliasingMapper(xstream.getMapper());
     mapper.addClassAlias("error", String.class);
@@ -54,6 +59,8 @@ public class CustomXStreamHandler extends XStreamHandler {
         "errors",
         new CollectionConverter(mapper)
     );
+    
+    /*xstream.registerLocalConverter(Prediction.class, "affectedByLayover", new FalseConverter());*/
     
     xstream.alias("error", java.lang.String.class);
     

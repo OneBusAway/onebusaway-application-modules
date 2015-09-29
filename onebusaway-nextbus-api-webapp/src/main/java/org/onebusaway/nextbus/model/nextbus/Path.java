@@ -1,4 +1,4 @@
-package org.onebusaway.nextbus.model;
+package org.onebusaway.nextbus.model.nextbus;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.apache.struts2.rest.HttpHeaders;
-import org.onebusaway.nextbus.model.Body;
-import org.onebusaway.nextbus.model.DisplayRoute;
+import org.onebusaway.nextbus.model.nextbus.Body;
+import org.onebusaway.nextbus.model.nextbus.DisplayRoute;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
