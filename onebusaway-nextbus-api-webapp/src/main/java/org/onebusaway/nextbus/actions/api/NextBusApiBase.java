@@ -1,5 +1,9 @@
 package org.onebusaway.nextbus.actions.api;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +11,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.gtfs.model.AgencyAndId;
+import org.onebusaway.nextbus.impl.util.ConfigurationUtil;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.transit_data.model.StopBean;
@@ -14,9 +19,20 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 public class NextBusApiBase {
 	@Autowired
 	protected TransitDataService _transitDataService;
+	
+	@Autowired
+	protected ConfigurationUtil _configUtil;
+	
+	public static final String PREDICTIONS_COMMAND = "predictions";
+  
+  public static final String REQUEST_TYPE = "json";
 	
 	protected boolean isValidRoute(AgencyAndId routeId) {
 	    if (routeId != null && routeId.hasValues() && this._transitDataService.getRouteForId(routeId.toString()) != null) {
@@ -148,6 +164,41 @@ public class NextBusApiBase {
 	    	  body.getErrors().add(new BodyError("You must provide a StopId."));
 	      }
 	}
+	
+	protected boolean isValidAgency(Body body, String agencyId){
+    if(agencyId == null ){
+      body.getErrors().add(new BodyError("agency parameter \"a\" must be specified in query string"));
+      return false;
+    }
+    if(_transitDataService.getAgency(agencyId) == null){
+      body.getErrors().add(new BodyError("Agency parameter \"a=" + agencyId + " is not valid."));
+      return false;
+    }
+    return true;
+  }
+	
+	protected String getServiceUrl(){
+    String host = _configUtil.getTransiTimeHost();
+    String port = _configUtil.getTransiTimePort();
+    String apiKey = _configUtil.getTransiTimeKey();
+    String serviceUrl = "http://" + host + ":" + port + "/api/v1/key/" + apiKey + "/agency/1/command/";
+    return serviceUrl;
+	}
+	
+	protected JsonObject getJsonObject(String uri) throws Exception {
+    URL url = new URL(uri);
+    HttpURLConnection request = (HttpURLConnection) url.openConnection();
+    request.connect();
+
+    // Convert to a JSON object to print data
+    JsonParser jp = new JsonParser(); // from gson
+    JsonElement root = jp.parse(new InputStreamReader(
+        (InputStream) request.getContent())); // Convert the input stream to a
+                                              // json element
+    JsonObject rootobj = root.getAsJsonObject(); // May be an array, may be an
+                                                 // object.
+    return rootobj;
+  }
 	  
 	
 }

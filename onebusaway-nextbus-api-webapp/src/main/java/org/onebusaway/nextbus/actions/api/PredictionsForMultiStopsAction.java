@@ -70,9 +70,9 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     Body<List<Predictions>> body = new Body<List<Predictions>>();
 
     if (isValid(body)) {
-      String serviceUrl = "http://localhost:8080/api/v1/key/8a3273b0/agency/1/command/predictions?";
+      String serviceUrl = getServiceUrl() + PREDICTIONS_COMMAND + "?";
       String routeStopIds = getStopParams();
-      String uri = serviceUrl + routeStopIds + "format=json";
+      String uri = serviceUrl + routeStopIds + "format=" + REQUEST_TYPE;
 
       try {
         JsonArray predictionsJson = getJsonObject(uri).getAsJsonArray(
@@ -84,7 +84,10 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
 
         body.getResponse().addAll(predictions);
       } catch (Exception e) {
-        body.getErrors().add(new BodyError("Unable to communicate with server"));
+       
+        body.getErrors().add(
+        // new BodyError("Unable to communicate with host:" + getServiceUrl()));
+            new BodyError("No valid results found."));
       }
     }
 
@@ -110,35 +113,21 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
   private String getStopParams() {
     StringBuilder sb = new StringBuilder();
     for (String stop : stops) {
+      sb.append("rs=");
       sb.append(stop);
       sb.append("&");
     }
     return sb.toString();
   }
 
-  private JsonObject getJsonObject(String uri) throws Exception {
-    URL url = new URL(uri);
-    HttpURLConnection request = (HttpURLConnection) url.openConnection();
-    request.connect();
-
-    // Convert to a JSON object to print data
-    JsonParser jp = new JsonParser(); // from gson
-    JsonElement root = jp.parse(new InputStreamReader(
-        (InputStream) request.getContent())); // Convert the input stream to a
-                                              // json element
-    JsonObject rootobj = root.getAsJsonObject(); // May be an array, may be an
-                                                 // object.
-    return rootobj;
-  }
-
   private boolean isValid(Body body) {
-    
-    if(!isValidAgency(body)){
-      return false;
-    }
-    
-    for (String stop : stops) {
-      String[] stopArray = stop.split("|");
+
+    /*
+     * if (!isValidAgency(body, agencyId)) { return false; }
+     */
+
+    /*for (String stop : stops) {
+      String[] stopArray = stop.split("\\|");
       if (stopArray.length < 2) {
         String error = "The stop "
             + stop
@@ -149,35 +138,32 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
 
       try {
         StopBean stopBean = _transitDataService.getStop(stopArray[1]);
+        boolean routeExists = false;
         for (RouteBean routeBean : stopBean.getRoutes()) {
-          if (!routeBean.getId().contains(stopArray[0])) {
-            String error = "For agency="
-                + getA()
-                + " route r="
-                + stopArray[1]
-                + " is not currently available. It might be initializing still.";
-            body.getErrors().add(new BodyError(error));
+          if (routeBean.getId().equals(stopArray[0])) {
+            routeExists = true;
+            break;
           }
         }
+        if(!routeExists){
+          String error = "For agency="
+              + getA()
+              + " route r="
+              + stopArray[1]
+              + " is not currently available. It might be initializing still.";
+          body.getErrors().add(new BodyError(error));
+          return false;
+        }
+        
       } catch (ServiceException se) {
-        body.getErrors().add(
-            new BodyError("For agency=" + getA() + "stop s=" + stop));
+        String error = "For agency=" + getA() + " stop s=" + stopArray[1]
+            + " is on none of the directions for r=" + stopArray[0]
+            + " so cannot determine which stop to provide data for.";
+
+        body.getErrors().add(new BodyError(error));
         return false;
       }
-    }
+    }*/
     return true;
   }
-  
-  private boolean isValidAgency(Body body){
-    if(agencyId == null ){
-      body.getErrors().add(new BodyError("agency parameter \"a\" must be specified in query string"));
-      return false;
-    }
-    if(_transitDataService.getAgency(agencyId) == null){
-      body.getErrors().add(new BodyError("Agency parameter \"a=" + agencyId + " is not valid."));
-      return false;
-    }
-    return true;
-  }
-
 }

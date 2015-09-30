@@ -3,14 +3,11 @@ package org.onebusaway.nextbus.actions.api;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
-
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
-
 import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
@@ -25,7 +22,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ModelDriven;
 
-public class PredictionsAction implements
+public class PredictionsAction extends NextBusApiBase implements
     ModelDriven<Body<List<Predictions>>> {
 
   private String agencyId = "";
@@ -63,9 +60,9 @@ public class PredictionsAction implements
   }
 
   public Body<List<Predictions>> getModel() {
-    String serviceUrl = "http://localhost:8080/api/v1/key/8a3273b0/agency/1/command/predictions?";
+    String serviceUrl = getServiceUrl() + PREDICTIONS_COMMAND + "?";
     String routeStop = "rs=" + routeTag + "|" + stopId;
-    String uri = serviceUrl + routeStop + "&format=json";
+    String uri = serviceUrl + routeStop + "&format=" + REQUEST_TYPE;
 
     Body<List<Predictions>> body = new Body<List<Predictions>>();
 
@@ -115,20 +112,4 @@ public class PredictionsAction implements
 
     return sb.toString();
   }
-
-  private JsonObject getJsonObject(String uri) throws Exception {
-    URL url = new URL(uri);
-    HttpURLConnection request = (HttpURLConnection) url.openConnection();
-    request.connect();
-
-    // Convert to a JSON object to print data
-    JsonParser jp = new JsonParser(); // from gson
-    JsonElement root = jp.parse(new InputStreamReader(
-        (InputStream) request.getContent())); // Convert the input stream to a
-                                              // json element
-    JsonObject rootobj = root.getAsJsonObject(); // May be an array, may be an
-                                                 // object.
-    return rootobj;
-  }
-
 }

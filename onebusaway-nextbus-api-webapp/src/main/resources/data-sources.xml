@@ -33,7 +33,13 @@
                 <prop key="cacheManager.cacheManagerName">org.onebusaway.nextbus_api_webapp.cacheManager</prop>
             </props>
         </property>
-    </bean>   
+    </bean>
+    
+    <bean id="configurationUtility" class="org.onebusaway.nextbus.impl.util.ConfigurationUtil">
+   		<property name="transiTimeHost" value="gtfsrt.dev.wmata.obaweb.org" />
+   		<property name="transiTimePort" value="8080" />
+   		<property name="transiTimeKey" value="8a3273b0" />
+   </bean>   
 
     <bean id="apiKeyValidationService" class="org.onebusaway.users.impl.validation.KeyValidationServiceImpl"/>
 </beans>

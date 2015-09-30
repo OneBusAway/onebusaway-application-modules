@@ -1,40 +1,18 @@
 package org.onebusaway.nextbus.actions.api;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.apache.struts2.rest.HttpHeaders;
-import org.onebusaway.geospatial.model.CoordinatePoint;
-import org.onebusaway.geospatial.model.EncodedPolylineBean;
-import org.onebusaway.geospatial.services.PolylineEncoder;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
-import org.onebusaway.nextbus.model.nextbus.Direction;
-import org.onebusaway.nextbus.model.nextbus.DisplayRoute;
-import org.onebusaway.nextbus.model.nextbus.DisplayStop;
 import org.onebusaway.nextbus.model.nextbus.Message;
 import org.onebusaway.nextbus.model.nextbus.MessageText;
-import org.onebusaway.nextbus.model.nextbus.Path;
-import org.onebusaway.nextbus.model.nextbus.Point;
-import org.onebusaway.nextbus.model.nextbus.Route;
-import org.onebusaway.nextbus.model.nextbus.Stop;
-import org.onebusaway.nextbus.model.nextbus.Vehicle;
 import org.onebusaway.transit_data.model.ListBean;
-import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.StopBean;
-import org.onebusaway.transit_data.model.StopGroupBean;
-import org.onebusaway.transit_data.model.StopGroupingBean;
-import org.onebusaway.transit_data.model.StopsForRouteBean;
 import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsBean;
-import org.onebusaway.transit_data.model.trips.TripDetailsInclusionBean;
-import org.onebusaway.transit_data.model.trips.TripStatusBean;
-import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 

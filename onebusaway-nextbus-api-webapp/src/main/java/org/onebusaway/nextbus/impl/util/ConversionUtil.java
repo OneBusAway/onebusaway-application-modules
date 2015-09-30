@@ -1,4 +1,4 @@
-package org.onebusaway.nextbus.impl;
+package org.onebusaway.nextbus.impl.util;
 
 import java.util.Date;
 import java.util.TimeZone;
