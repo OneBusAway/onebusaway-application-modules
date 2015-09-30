@@ -22,11 +22,34 @@
     http://tuckey.org/urlrewrite/
 
 -->
-<urlrewrite use-query-string="true" use-context="true">
-
+<urlrewrite use-query-string="true" use-context="false">
     <rule>
-        <from>^(.*)/siri/([^.]*)\.(xml|json)(.*)$</from>
-        <to type="redirect" last="true">$1/siri/$2$4&amp;type=$3</to>
+        <from>^(.*)service/publicXMLFeed\?command=agencyList&amp;(.*)$</from>
+        <to last="true">/api/agency-list.xml</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicXMLFeed\?command=routeList&amp;(.*)$</from>
+        <to last="true">/api/route-list.xml</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicXMLFeed\?command=routeConfig&amp;(.*)$</from>
+        <to last="true">/api/route-config.xml</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicXMLFeed\?command=predictions&amp;(.*)$</from>
+        <to last="true">/api/predictions.xml</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicXMLFeed\?command=predictionsForMultiStops&amp;(.*)$</from>
+        <to last="true">/api/predictions-for-multi-stops.xml</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicXMLFeed\?command=schedule&amp;(.*)$</from>
+        <to last="true">/api/schedule.xml</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicXMLFeed\?command=vehicleLocations&amp;(.*)$</from>
+        <to last="true">/api/vehicle-locations.xml</to>
     </rule>
 	
 </urlrewrite>
