@@ -22,34 +22,65 @@
     http://tuckey.org/urlrewrite/
 
 -->
-<urlrewrite use-query-string="true" use-context="false">
+<urlrewrite use-query-string="true" use-context="true">
+	<!-- XML Rewriter -->
     <rule>
-        <from>^(.*)service/publicXMLFeed\?command=agencyList&amp;(.*)$</from>
+        <from>^(.*)/service/publicXMLFeed\?command=agencyList(.*)$</from>
         <to last="true">/api/agency-list.xml</to>
     </rule>
     <rule>
-        <from>^(.*)/service/publicXMLFeed\?command=routeList&amp;(.*)$</from>
+        <from>^(.*)/service/publicXMLFeed\?command=routeList(.*)$</from>
         <to last="true">/api/route-list.xml</to>
     </rule>
     <rule>
-        <from>^(.*)/service/publicXMLFeed\?command=routeConfig&amp;(.*)$</from>
+        <from>^(.*)/service/publicXMLFeed\?command=routeConfig(.*)$</from>
         <to last="true">/api/route-config.xml</to>
     </rule>
     <rule>
-        <from>^(.*)/service/publicXMLFeed\?command=predictions&amp;(.*)$</from>
+        <from>^(.*)/service/publicXMLFeed\?command=predictions(.*)$</from>
         <to last="true">/api/predictions.xml</to>
     </rule>
     <rule>
-        <from>^(.*)/service/publicXMLFeed\?command=predictionsForMultiStops&amp;(.*)$</from>
+        <from>^(.*)/service/publicXMLFeed\?command=predictionsForMultiStops(.*)$</from>
         <to last="true">/api/predictions-for-multi-stops.xml</to>
     </rule>
     <rule>
-        <from>^(.*)/service/publicXMLFeed\?command=schedule&amp;(.*)$</from>
+        <from>^(.*)/service/publicXMLFeed\?command=schedule(.*)$</from>
         <to last="true">/api/schedule.xml</to>
     </rule>
     <rule>
-        <from>^(.*)/service/publicXMLFeed\?command=vehicleLocations&amp;(.*)$</from>
+        <from>^(.*)/service/publicXMLFeed\?command=vehicleLocations(.*)$</from>
         <to last="true">/api/vehicle-locations.xml</to>
+    </rule>
+    
+    <!-- Json Rewriter -->
+    <rule>
+        <from>^(.*)/service/publicJSONFeed\?command=agencyList(.*)$</from>
+        <to last="true">/api/agency-list.json</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicJSONFeed\?command=routeList(.*)$</from>
+        <to last="true">/api/route-list.json</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicJSONFeed\?command=routeConfig(.*)$</from>
+        <to last="true">/api/route-config.json</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicJSONFeed\?command=predictions(.*)$</from>
+        <to last="true">/api/predictions.json</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicJSONFeed\?command=predictionsForMultiStops(.*)$</from>
+        <to last="true">/api/predictions-for-multi-stops.json</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicJSONFeed\?command=schedule(.*)$</from>
+        <to last="true">/api/schedule.json</to>
+    </rule>
+    <rule>
+        <from>^(.*)/service/publicJSONFeed\?command=vehicleLocations(.*)$</from>
+        <to last="true">/api/vehicle-locations.json</to>
     </rule>
 	
 </urlrewrite>
