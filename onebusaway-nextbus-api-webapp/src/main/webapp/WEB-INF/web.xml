@@ -31,7 +31,7 @@
 			if you are having trouble using normal levels use sysout:DEBUG (default WARN) -->
 		<init-param>
 			<param-name>logLevel</param-name>
-			<param-value>TRACE</param-value>
+			<param-value>INFO</param-value>
 		</init-param>
 
 		<!-- set the amount of seconds the conf file will be checked for reload 
@@ -39,7 +39,7 @@
 			check, default -1) -->
 		<init-param>
 			<param-name>confReloadCheckInterval</param-name>
-			<param-value>0</param-value>
+			<param-value>-1</param-value>
 		</init-param>
 	</filter>
 	<filter>

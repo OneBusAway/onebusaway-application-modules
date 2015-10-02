@@ -8,11 +8,15 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -24,6 +28,8 @@ import com.opensymphony.xwork2.ModelDriven;
 
 public class PredictionsAction extends NextBusApiBase implements
     ModelDriven<Body<List<Predictions>>> {
+  
+  private static Logger _log = LoggerFactory.getLogger(PredictionsAction.class);
 
   private String agencyId = "";
 
@@ -60,23 +66,29 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   public Body<List<Predictions>> getModel() {
-    String serviceUrl = getServiceUrl() + PREDICTIONS_COMMAND + "?";
-    String routeStop = "rs=" + routeTag + "|" + stopId;
-    String uri = serviceUrl + routeStop + "&format=" + REQUEST_TYPE;
-
+    
     Body<List<Predictions>> body = new Body<List<Predictions>>();
+    List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
+    
+    if(isValid(body, stopIds)){
+      
+      String serviceUrl = getServiceUrl() + PREDICTIONS_COMMAND + "?";
+      String routeStop = "rs=" + routeTag + "|" + stopId;
+      String uri = serviceUrl + routeStop + "&format=" + REQUEST_TYPE;
 
-    try {
-      JsonArray predictionsJson = getJsonObject(uri).getAsJsonArray(
-          "predictions");
-      Type listType = new TypeToken<List<Predictions>>() {
-      }.getType();
-      List<List<Predictions>> predictions = new Gson().fromJson(
-          predictionsJson, listType);
-
-      body.getResponse().addAll(predictions);
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
+      try {
+        JsonArray predictionsJson = getJsonObject(uri).getAsJsonArray(
+            "predictions");
+        Type listType = new TypeToken<List<Predictions>>() {
+        }.getType();
+        List<List<Predictions>> predictions = new Gson().fromJson(
+            predictionsJson, listType);
+  
+        body.getResponse().addAll(predictions);
+      } catch (Exception e) {
+        
+        _log.error(e.getMessage());
+      }
     }
 
     return body;
@@ -111,5 +123,18 @@ public class PredictionsAction extends NextBusApiBase implements
     }
 
     return sb.toString();
+  }
+  
+  private boolean isValid(Body body, List<AgencyAndId> stopIds) {
+    if(!isValidAgency(body, agencyId))
+      return false;
+    
+    List<String> agencies = new ArrayList<String>();
+    agencies.add(agencyId);
+    
+    if(!processStopIds(stopId, stopIds, agencies, body))
+      return false;
+    
+    return true;
   }
 }
