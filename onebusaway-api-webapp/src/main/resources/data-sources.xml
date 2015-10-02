@@ -25,7 +25,7 @@
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
-                value="java:comp/env/jdbc/hartDB"/>   
+                value="java:comp/env/jdbc/appDB"/>   
       <property name="lookupOnStartup"
                 value="true"/>   
       <property name="cache"

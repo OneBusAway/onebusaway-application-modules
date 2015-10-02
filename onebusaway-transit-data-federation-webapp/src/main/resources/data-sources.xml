@@ -8,7 +8,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
-                value="java:comp/env/jdbc/hartDB"/>   
+                value="java:comp/env/jdbc/appDB"/>   
       <property name="lookupOnStartup"
                 value="true"/>   
       <property name="cache"
@@ -23,21 +23,21 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
       <property name="order" value="-2" />
       <property name="properties">
           <props>
-              <prop key="bundlePath">/var/lib/obanyc/oba-wmata-bundle</prop>
+              <prop key="bundlePath">/var/lib/oba/oba-bundle</prop>
          </props>
       </property>
     </bean>
     
     <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
-    <property name="tripUpdatesUrl" value="http://realtime.prod.obahart.org:8088/trip-updates" />
-    <property name="vehiclePositionsUrl" value="http://realtime.prod.obahart.org:8088/vehicle-positions" />
+    <property name="tripUpdatesUrl" value="http://realtime.prod:8088/trip-updates" />
+    <property name="vehiclePositionsUrl" value="http://realtime.prod:8088/vehicle-positions" />
     <property name="refreshInterval" value="30" />
-    <property name="agencyId" value="Hillsborough Area Regional Transit" />
+    <property name="agencyId" value="2" />
   	</bean>
     
     
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
-      <constructor-arg type="java.lang.String" value="admin.dev.wmata.obaweb.org"/>
+      <constructor-arg type="java.lang.String" value="admin"/>
       <constructor-arg type="java.lang.Integer" value="8080" />
       <constructor-arg type="java.lang.String" value="/api/" />
     </bean>

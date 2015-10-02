@@ -8,7 +8,7 @@
 
     <!-- Specify our transit data source -->
     <bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-        <property name="serviceUrl" value="http://localhost:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
+        <property name="serviceUrl" value="http://tds:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
         <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
     </bean>
     
@@ -16,7 +16,7 @@
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
-                value="java:comp/env/jdbc/hartDB"/>   
+                value="java:comp/env/jdbc/appDB"/>   
       <property name="lookupOnStartup"
                 value="true"/>   
       <property name="cache"
@@ -36,7 +36,7 @@
     </bean>
     
     <bean id="configurationUtility" class="org.onebusaway.nextbus.impl.util.ConfigurationUtil">
-   		<property name="transiTimeHost" value="gtfsrt.dev.wmata.obaweb.org" />
+   		<property name="transiTimeHost" value="gtfsrt" />
    		<property name="transiTimePort" value="8080" />
    		<property name="transiTimeKey" value="8a3273b0" />
    </bean>   
