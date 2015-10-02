@@ -42,8 +42,6 @@
         </result-types> -->
 
         <interceptors>
-            <!-- <interceptor name="applicationKey" class="org.onebusaway.nextbus.api.actions.api.ApiKeyInterceptor" /> -->
-           <!--  <interceptor name="obaException" class="org.onebusaway.nextbus.api.actions.api.ExceptionInterceptor" /> -->
             <interceptor name="stack" class="org.onebusaway.presentation.impl.StackInterceptor"/>
 
             <interceptor name="fileUploadBigger" class="org.apache.struts2.interceptor.FileUploadInterceptor">

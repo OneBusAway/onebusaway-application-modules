@@ -8,6 +8,7 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.apache.struts2.rest.HttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
+import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.nextbus.Message;
 import org.onebusaway.nextbus.model.nextbus.MessageText;
 import org.onebusaway.transit_data.model.ListBean;
@@ -58,10 +59,13 @@ public class MessagesAction extends NextBusApiBase implements ModelDriven<Body<M
 		
 		List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
 		
-		processRouteIds(getR(), routeIds, agencyIds, body);
-		
-		for(AgencyAndId routeId : routeIds){
-			body.getResponse().addAll(getMessagesForRoute(agencyId,routeId.toString()));
+		if(processRouteIds(routeId, routeIds, agencyIds, body)){
+			for(AgencyAndId routeId : routeIds){
+				body.getResponse().addAll(getMessagesForRoute(agencyId,routeId.toString()));
+			}
+		}
+		else{
+			body.getErrors().add(new BodyError("You must provide a route id."));
 		}
 	
 		return body;

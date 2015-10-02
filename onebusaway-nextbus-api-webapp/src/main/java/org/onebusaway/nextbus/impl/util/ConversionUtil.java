@@ -8,14 +8,17 @@ import org.joda.time.DateTimeZone;
 
 public class ConversionUtil {
 	
-	private static DateTimeZone timeZone = DateTimeZone.forID("America/New_York");
+	private static DateTimeZone timeZone = DateTimeZone.forID(TimeZone.getDefault().getID());
 	
-	public static Date convertLocalDateToDateTimezone( Date localDate, String tzone ) {
-		   TimeZone localTimeZone = TimeZone.getDefault();
+	public static Date convertLocalDateToDateTimezone( Date date, String tzone ) {
 		   TimeZone timezone = TimeZone.getTimeZone( tzone );
-		   long gmtMillis = localDate.getTime();
-		   long result = gmtMillis + timezone.getOffset( gmtMillis ) - localTimeZone.getOffset(gmtMillis);
+		   long gmtMillis = date.getTime();
+		   long result = gmtMillis + timezone.getOffset( gmtMillis );
 		   return new Date( result );
+	}
+	
+	public static Date convertLocalDateToDateTimezone( Date date) {
+		   return convertLocalDateToDateTimezone(date, TimeZone.getDefault().getID());
 	}
 	
 	public static double footToMeter(double foot){

@@ -16,6 +16,8 @@ public class Body<T> {
 	
 	@XStreamImplicit
 	private List<BodyError> errors;
+	
+	private LastTime lastTime;
 
 	public List<T> getResponse() {
 		return response;
@@ -33,5 +35,13 @@ public class Body<T> {
 
 	public void setErrors(List<BodyError> errors) {
 		this.errors = errors;
+	}
+
+	public LastTime getLastTime() {
+		return lastTime;
+	}
+
+	public void setLastTime(LastTime lastTime) {
+		this.lastTime = lastTime;
 	}
 }

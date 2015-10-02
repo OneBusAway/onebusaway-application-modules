@@ -13,7 +13,6 @@ public class BodyError {
     this.content = content;
   }
   
-  @XStreamAsAttribute
   @XStreamAlias("content")
   private String content;
   
@@ -35,6 +34,10 @@ public class BodyError {
 
   public void setShouldRetry(boolean shouldRetry) {
     this.shouldRetry = shouldRetry;
+  }
+  
+  public String toString(){
+	  return content;
   }
   
 

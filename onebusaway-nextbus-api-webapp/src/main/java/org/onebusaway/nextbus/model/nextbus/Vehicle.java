@@ -37,7 +37,7 @@ public class Vehicle {
 	private int heading;
 	
 	@XStreamAsAttribute
-	private Double speedKmHr;
+	private double speedKmHr;
 
 	public String getId() {
 		return id;
@@ -103,11 +103,11 @@ public class Vehicle {
 		this.heading = d;
 	}
 
-	public Double getSpeedKmHr() {
+	public double getSpeedKmHr() {
 		return speedKmHr;
 	}
 
-	public void setSpeedKmHr(Double speedKmHr) {
+	public void setSpeedKmHr(double speedKmHr) {
 		this.speedKmHr = speedKmHr;
 	}
 }

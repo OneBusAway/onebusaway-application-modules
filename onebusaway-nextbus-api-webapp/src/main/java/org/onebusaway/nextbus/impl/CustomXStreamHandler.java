@@ -18,8 +18,9 @@
 package org.onebusaway.nextbus.impl;
 
 import org.apache.struts2.rest.handler.XStreamHandler;
-import org.onebusaway.nextbus.impl.xstream.FalseConverter;
-import org.onebusaway.nextbus.impl.xstream.ValueConverter;
+import org.onebusaway.nextbus.impl.xstream.BodyErrorConverter;
+import org.onebusaway.nextbus.impl.xstream.DisplayStopConverter;
+import org.onebusaway.nextbus.impl.xstream.ScheduleStopConverter;
 import org.onebusaway.nextbus.model.nextbus.Agency;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.DisplayRoute;
@@ -27,13 +28,10 @@ import org.onebusaway.nextbus.model.nextbus.Message;
 import org.onebusaway.nextbus.model.nextbus.Route;
 import org.onebusaway.nextbus.model.nextbus.ScheduleRoute;
 import org.onebusaway.nextbus.model.nextbus.Vehicle;
-import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
-import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.collections.CollectionConverter;
-import com.thoughtworks.xstream.mapper.ClassAliasingMapper;
+
 
 public class CustomXStreamHandler extends XStreamHandler {
 
@@ -51,19 +49,9 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.processAnnotations(Message.class);
     xstream.processAnnotations(Predictions.class);
     
-    ClassAliasingMapper mapper = new ClassAliasingMapper(xstream.getMapper());
-    mapper.addClassAlias("error", String.class);
-    
-    xstream.registerLocalConverter(
-		Vehicle.class,
-        "errors",
-        new CollectionConverter(mapper)
-    );
-    
-    /*xstream.registerLocalConverter(Prediction.class, "affectedByLayover", new FalseConverter());*/
-    
-    xstream.alias("error", java.lang.String.class);
-    
+    xstream.registerConverter(new BodyErrorConverter());
+    xstream.registerConverter(new DisplayStopConverter());
+    xstream.registerConverter(new ScheduleStopConverter());
     
     return xstream;
   }
