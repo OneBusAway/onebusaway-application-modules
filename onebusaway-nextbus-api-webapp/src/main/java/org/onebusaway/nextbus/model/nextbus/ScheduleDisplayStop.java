@@ -19,21 +19,21 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 @XStreamAlias("stop")
-public class DisplayStop {
+public class ScheduleDisplayStop {
 	
 	@XStreamAsAttribute 
 	private String tag;
 	
 	private String value;
 	
-	public DisplayStop(){
+	public ScheduleDisplayStop(){
 	}
 	
-	public DisplayStop(String tag){
+	public ScheduleDisplayStop(String tag){
 		this.tag = tag;
 	}
 	
-	public DisplayStop(String tag, String value){
+	public ScheduleDisplayStop(String tag, String value){
 		this.tag = tag;
 		this.value = value;
 	}

@@ -15,8 +15,8 @@
  */
 package org.onebusaway.nextbus.model.transiTime;
 
-import org.onebusaway.nextbus.impl.xstream.FalseConverter;
-import org.onebusaway.nextbus.impl.xstream.RemoveEmptyConverter;
+import org.onebusaway.nextbus.impl.rest.xstream.FalseConverter;
+import org.onebusaway.nextbus.impl.rest.xstream.RemoveEmptyConverter;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;

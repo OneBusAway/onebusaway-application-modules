@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.nextbus.model.nextbus;
+package org.onebusaway.nextbus.model.transiTime;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
@@ -24,6 +24,7 @@ public class DisplayStop {
 	@XStreamAsAttribute 
 	private String tag;
 	
+	@XStreamAsAttribute 
 	private String value;
 	
 	public DisplayStop(){

@@ -59,7 +59,7 @@ public class VehicleLocationsAction extends NextBusApiBase implements
 	}
 
 	public void setA(String agencyId) {
-		this.agencyId = agencyId;
+		this.agencyId = getMappedAgency(agencyId);
 	}
 
 	public String getR() {
@@ -67,7 +67,7 @@ public class VehicleLocationsAction extends NextBusApiBase implements
 	}
 
 	public void setR(String routeId) {
-		this.routeId = routeId;
+		this.routeId = _routeCacheService.getRouteShortNameFromId(routeId);
 	}
 
 	public long getT() {
@@ -99,7 +99,7 @@ public class VehicleLocationsAction extends NextBusApiBase implements
 			if (routeIds.size() > 0) {
 				for (AgencyAndId routeId : routeIds) {
 					body.getResponse().addAll(
-							getVehiclesForRoute(routeId.toString(), time));
+							getVehiclesForRoute(routeId.toString(), getT()));
 				}
 
 			} else {

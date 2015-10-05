@@ -13,38 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.nextbus.impl.xstream;
+package org.onebusaway.nextbus.impl.rest.xstream;
 
 import org.onebusaway.nextbus.model.nextbus.BodyError;
-import org.onebusaway.nextbus.model.nextbus.DisplayStop;
 
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.SingleValueConverter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public class DisplayStopConverter implements Converter {
+public class BodyErrorConverter implements Converter {
 
 	public boolean canConvert(Class type) {
-		return type.equals(DisplayStop.class);
+		return type.equals(BodyError.class);
 	}
 
 	@Override
 	public void marshal(Object source, HierarchicalStreamWriter writer,
 			MarshallingContext context) {
-		DisplayStop stop = (DisplayStop) source;
-		writer.addAttribute("tag", stop.getTag());
-		writer.setValue(stop.getValue());
+		BodyError error = (BodyError) source;
+		writer.addAttribute("shouldRetry", Boolean.toString(error.isShouldRetry()));
+		writer.setValue(error.getContent());
 
 	}
 
 	@Override
 	public Object unmarshal(HierarchicalStreamReader reader,
 			UnmarshallingContext context) {
-		DisplayStop stop = new DisplayStop();
-		stop.setValue(reader.getValue());
-		stop.setTag(reader.getAttribute("tag"));
-		return stop;
+		BodyError error = new BodyError();
+		error.setContent(reader.getValue());
+		error.setShouldRetry(Boolean.parseBoolean(reader.getAttribute("shouldRetry")));
+		return error;
 	}
 }

@@ -45,7 +45,7 @@ public class RouteListAction extends NextBusApiBase implements
 	}
 
 	public void setA(String agencyId) {
-		this.agencyId = agencyId;
+		this.agencyId = getMappedAgency(agencyId);
 	}
 
 	public HttpHeaders index() {

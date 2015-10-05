@@ -15,20 +15,12 @@
  */
 package org.onebusaway.nextbus.actions.api;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.exceptions.ServiceException;
-import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
@@ -37,9 +29,6 @@ import org.onebusaway.transit_data.model.StopBean;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ModelDriven;
 
@@ -57,7 +46,7 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
   }
 
   public void setA(String agencyId) {
-    this.agencyId = agencyId;
+    this.agencyId = getMappedAgency(agencyId);
   }
 
   public Set<String> getStops() {
@@ -73,7 +62,7 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
   }
 
   public void setRouteTag(String routeTag) {
-    this.routeTag = routeTag;
+    this.routeTag = _routeCacheService.getRouteShortNameFromId(routeTag);
   }
 
   public DefaultHttpHeaders index() {
@@ -85,7 +74,8 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     Body<List<Predictions>> body = new Body<List<Predictions>>();
 
     if (isValid(body)) {
-      String serviceUrl = getServiceUrl() + PREDICTIONS_COMMAND + "?";
+      String serviceUrl = getServiceUrl() + agencyId + PREDICTIONS_COMMAND
+          + "?";
       String routeStopIds = getStopParams();
       String uri = serviceUrl + routeStopIds + "format=" + REQUEST_TYPE;
 
@@ -152,7 +142,8 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
         StopBean stopBean = _transitDataService.getStop(stopArray[1]);
         boolean routeExists = false;
         for (RouteBean routeBean : stopBean.getRoutes()) {
-          if (routeBean.getId().equals(stopArray[0])) {
+          if (routeBean.getId().equals(
+              _routeCacheService.getRouteShortNameFromId(stopArray[0]))) {
             routeExists = true;
             break;
           }

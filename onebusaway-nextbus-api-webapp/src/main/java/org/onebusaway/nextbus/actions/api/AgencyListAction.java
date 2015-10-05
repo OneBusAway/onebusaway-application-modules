@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.apache.struts2.rest.HttpHeaders;
+import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.nextbus.model.nextbus.Agency;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
@@ -26,7 +27,6 @@ import org.onebusaway.transit_data.services.TransitDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.ModelDriven;
-import com.opensymphony.xwork2.validator.annotations.RequiredFieldValidator;
 
 public class AgencyListAction implements ModelDriven<Body<Agency>> {
 

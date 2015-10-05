@@ -59,9 +59,8 @@ public class RouteConfigAction extends NextBusApiBase implements
 		return agencyId;
 	}
 
-	@RequiredFieldValidator
 	public void setA(String agencyId) {
-		this.agencyId = agencyId;
+		this.agencyId = getMappedAgency(agencyId);
 	}
 
 	public String getR() {
@@ -69,7 +68,7 @@ public class RouteConfigAction extends NextBusApiBase implements
 	}
 
 	public void setR(String routeId) {
-		this.routeId = routeId;
+		this.routeId = _routeCacheService.getRouteShortNameFromId(routeId);
 	}
 
 	public HttpHeaders index() {

@@ -25,7 +25,7 @@ import java.util.Map.Entry;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.apache.struts2.rest.HttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.nextbus.impl.DateUtil;
+import org.onebusaway.nextbus.impl.util.DateUtil;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.DisplayStop;
 import org.onebusaway.nextbus.model.nextbus.ScheduleRoute;
@@ -59,7 +59,7 @@ public class ScheduleAction extends NextBusApiBase implements ModelDriven<Body<S
 	
 
 	public void setA(String agencyId) {
-		this.agencyId = agencyId;
+		this.agencyId = getMappedAgency(agencyId);
 	}
 	
 	public String getR() {

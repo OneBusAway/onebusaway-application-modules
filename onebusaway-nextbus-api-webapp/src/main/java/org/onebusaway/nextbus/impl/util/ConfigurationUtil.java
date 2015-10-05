@@ -15,11 +15,15 @@
  */
 package org.onebusaway.nextbus.impl.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ConfigurationUtil {
   
   private String transiTimeHost = "localhost";
   private String transiTimePort = "8080";
   private String transiTimeKey = "8a3273b0";
+  private Map<String,String> agencyMapper = new HashMap<String,String>(1);
   
   public ConfigurationUtil(){}
   
@@ -45,6 +49,14 @@ public class ConfigurationUtil {
 
   public void setTransiTimeKey(String transiTimeKey) {
     this.transiTimeKey = transiTimeKey;
+  }
+
+  public Map<String,String> getAgencyMapper() {
+    return agencyMapper;
+  }
+
+  public void setAgencyMapper(Map<String,String> agencyMapper) {
+    this.agencyMapper = agencyMapper;
   }
 
   

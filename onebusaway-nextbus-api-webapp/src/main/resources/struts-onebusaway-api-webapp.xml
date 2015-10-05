@@ -23,8 +23,8 @@
 
     <constant name="struts.multipart.maxSize" value="10485760" />
 
-    <bean name="myXml" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.impl.CustomXStreamHandler" />
-    <bean name="myJson" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.impl.CustomJsonLibHandler" />
+    <bean name="myXml" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.impl.rest.handler.CustomXStreamHandler" />
+    <bean name="myJson" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.impl.rest.handler.CustomJsonLibHandler" />
     <!-- <bean name="myCsv" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.api.impl.CustomCsvHandler" />
     <bean name="myProtocolBuffer" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.api.impl.CustomProtocolBufferHandler" />
     <bean name="myProtocolBufferText" type="org.apache.struts2.rest.handler.ContentTypeHandler" class="org.onebusaway.nextbus.api.impl.CustomProtocolBufferTextHandler" /> -->

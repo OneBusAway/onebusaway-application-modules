@@ -13,47 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.nextbus.model.nextbus;
+package org.onebusaway.nextbus.model.transiTime;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
-@XStreamAlias("stop")
-public class DisplayStop {
+@XStreamAlias("tr")
+public class ScheduleTableRow {
+	@XStreamImplicit
+	private List<ScheduleStop> stops = new ArrayList<ScheduleStop>();
+
+	@XStreamAsAttribute
+	@XStreamAlias("blockID")
+	private String blockId;
 	
-	@XStreamAsAttribute 
-	private String tag;
-	
-	private String value;
-	
-	public DisplayStop(){
-	}
-	
-	public DisplayStop(String tag){
-		this.tag = tag;
-	}
-	
-	public DisplayStop(String tag, String value){
-		this.tag = tag;
-		this.value = value;
-	}
-	
-	public String getTag() {
-		return tag;
+	public ScheduleTableRow(String blockId){
+		this.blockId = blockId;
 	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
+	public List<ScheduleStop> getStops() {
+		return stops;
 	}
 
-	public String getValue() {
-		return value;
+	public void setStops(List<ScheduleStop> stops) {
+		this.stops = stops;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
+	public String getBlockId() {
+		return blockId;
 	}
 
-	
-
+	public void setBlockId(String blockId) {
+		this.blockId = blockId;
+	}
 }

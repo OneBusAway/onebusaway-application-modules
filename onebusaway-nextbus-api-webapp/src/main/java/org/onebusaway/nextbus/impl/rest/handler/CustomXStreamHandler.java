@@ -28,12 +28,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.nextbus.impl;
+package org.onebusaway.nextbus.impl.rest.handler;
 
 import org.apache.struts2.rest.handler.XStreamHandler;
-import org.onebusaway.nextbus.impl.xstream.BodyErrorConverter;
-import org.onebusaway.nextbus.impl.xstream.DisplayStopConverter;
-import org.onebusaway.nextbus.impl.xstream.ScheduleStopConverter;
+import org.onebusaway.nextbus.impl.rest.xstream.BodyErrorConverter;
+import org.onebusaway.nextbus.impl.rest.xstream.DisplayStopConverter;
+import org.onebusaway.nextbus.impl.rest.xstream.ScheduleStopConverter;
 import org.onebusaway.nextbus.model.nextbus.Agency;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.DisplayRoute;

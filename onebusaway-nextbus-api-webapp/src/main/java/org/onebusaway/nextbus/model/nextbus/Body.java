@@ -21,11 +21,15 @@ import java.util.List;
 import org.onebusaway.nextbus.impl.conversion.ListToStringConverter;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 @XStreamAlias("body")
 public class Body<T> {
+  
+  private static final String COPYRIGHT = "All data copyright WMATA Washington 2015"; 
+  
 	@XStreamImplicit
 	private List<T> response = new ArrayList<T>();
 	
@@ -33,6 +37,9 @@ public class Body<T> {
 	private List<BodyError> errors;
 	
 	private LastTime lastTime;
+	
+	@XStreamAsAttribute 
+	private String copyright = COPYRIGHT;
 
 	public List<T> getResponse() {
 		return response;
@@ -59,4 +66,12 @@ public class Body<T> {
 	public void setLastTime(LastTime lastTime) {
 		this.lastTime = lastTime;
 	}
+
+  public String getCopyright() {
+    return copyright;
+  }
+
+  public void setCopyright(String copyright) {
+    this.copyright = copyright;
+  }
 }
