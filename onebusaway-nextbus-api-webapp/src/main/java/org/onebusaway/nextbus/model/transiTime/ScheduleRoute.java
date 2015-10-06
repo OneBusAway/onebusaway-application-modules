@@ -26,79 +26,76 @@ import com.thoughtworks.xstream.annotations.XStreamImplicit;
 public class ScheduleRoute {
 	
 	@XStreamAsAttribute 
-	private String tag;
+	@XStreamAlias("tag")
+	private String routeId;
 	
-	@XStreamAsAttribute 
-	private String title;
+	@XStreamAsAttribute
+	@XStreamAlias("title")
+	private String routeName;
 	
-	@XStreamAsAttribute 
-	private String scheduleClass;
+	@XStreamAsAttribute
+	@XStreamAlias("serviceClass")
+	private String serviceName;
 	
-	@XStreamAsAttribute 
-	private String serviceClass;
-	
-	@XStreamAsAttribute 
-	private String direction;
+	@XStreamAsAttribute
+	@XStreamAlias("direction")
+	private String directionId;
 	
 	@XStreamAlias("header")
-	private List<DisplayStop> stops = new ArrayList<DisplayStop>();
+	private List<ScheduleHeader> stop = new ArrayList<ScheduleHeader>();
 	
 	@XStreamImplicit
-	private List<ScheduleTableRow> scheduleTableRow = new ArrayList<ScheduleTableRow>();
+	private List<ScheduleTableRow> timesForTrip = new ArrayList<ScheduleTableRow>();
 
-	public String getTag() {
-		return tag;
+	public List<ScheduleHeader> getStop() {
+		return stop;
 	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
+	public void setStops(List<ScheduleHeader> stops) {
+		this.stop = stop;
 	}
 
-	public String getTitle() {
-		return title;
+	public List<ScheduleTableRow> getTimesForTrip() {
+		return timesForTrip;
 	}
 
-	public void setTitle(String title) {
-		this.title = title;
+	public void setTimesForTrip(List<ScheduleTableRow> timesForTrip) {
+		this.timesForTrip = timesForTrip;
 	}
 
-	public String getScheduleClass() {
-		return scheduleClass;
+	public String getRouteId() {
+		return routeId;
 	}
 
-	public void setScheduleClass(String scheduleClass) {
-		this.scheduleClass = scheduleClass;
+	public void setRouteId(String routeId) {
+		this.routeId = routeId;
 	}
 
-	public String getServiceClass() {
-		return serviceClass;
+	public String getRouteName() {
+		return routeName;
 	}
 
-	public void setServiceClass(String serviceClass) {
-		this.serviceClass = serviceClass;
+	public void setRouteName(String routeName) {
+		this.routeName = routeName;
 	}
 
-	public String getDirection() {
-		return direction;
+	public String getServiceName() {
+		return serviceName;
 	}
 
-	public void setDirection(String direction) {
-		this.direction = direction;
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
 	}
 
-	public List<DisplayStop> getStops() {
-		return stops;
+	public String getDirectionId() {
+		return directionId;
 	}
 
-	public void setStops(List<DisplayStop> stops) {
-		this.stops = stops;
+	public void setDirectionId(String directionId) {
+		this.directionId = directionId;
 	}
 
-	public List<ScheduleTableRow> getScheduleTableRow() {
-		return scheduleTableRow;
-	}
-
-	public void setScheduleTableRow(List<ScheduleTableRow> scheduleTableRow) {
-		this.scheduleTableRow = scheduleTableRow;
+	public void setStop(List<ScheduleHeader> stop) {
+		this.stop = stop;
 	}
 }

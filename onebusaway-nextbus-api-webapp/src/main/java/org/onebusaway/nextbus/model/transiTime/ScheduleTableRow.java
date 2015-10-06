@@ -25,7 +25,7 @@ import com.thoughtworks.xstream.annotations.XStreamImplicit;
 @XStreamAlias("tr")
 public class ScheduleTableRow {
 	@XStreamImplicit
-	private List<ScheduleStop> stops = new ArrayList<ScheduleStop>();
+	private List<ScheduleStop> time = new ArrayList<ScheduleStop>();
 
 	@XStreamAsAttribute
 	@XStreamAlias("blockID")
@@ -35,12 +35,12 @@ public class ScheduleTableRow {
 		this.blockId = blockId;
 	}
 
-	public List<ScheduleStop> getStops() {
-		return stops;
+	public List<ScheduleStop> getTime() {
+		return time;
 	}
 
-	public void setStops(List<ScheduleStop> stops) {
-		this.stops = stops;
+	public void setTime(List<ScheduleStop> stops) {
+		this.time = time;
 	}
 
 	public String getBlockId() {

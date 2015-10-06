@@ -39,7 +39,7 @@ import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.DisplayRoute;
 import org.onebusaway.nextbus.model.nextbus.Message;
 import org.onebusaway.nextbus.model.nextbus.Route;
-import org.onebusaway.nextbus.model.nextbus.ScheduleRoute;
+import org.onebusaway.nextbus.model.transiTime.ScheduleRoute;
 import org.onebusaway.nextbus.model.nextbus.Vehicle;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 
@@ -61,6 +61,7 @@ public class CustomXStreamHandler extends XStreamHandler {
     xstream.processAnnotations(Vehicle.class);
     xstream.processAnnotations(Message.class);
     xstream.processAnnotations(Predictions.class);
+    xstream.processAnnotations(ScheduleRoute.class);
     
     xstream.registerConverter(new BodyErrorConverter());
     xstream.registerConverter(new DisplayStopConverter());

@@ -30,6 +30,7 @@ import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
+import org.onebusaway.nextbus.model.transiTime.ScheduleRoute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,16 +43,16 @@ import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ModelDriven;
 
 public class ScheduleHorizAction extends NextBusApiBase implements
-		ModelDriven<Body<List<Predictions>>> {
+		ModelDriven<Body<List<ScheduleRoute>>> {
 
 	private static Logger _log = LoggerFactory
 			.getLogger(ScheduleHorizAction.class);
 
-	private String agencyId = "";
+	private String agencyId;
 
-	private String stopId = "";
+	private String stopId;
 
-	private String routeId = "";
+	private String routeId;
 
 	public String getA() {
 		return agencyId;
@@ -65,7 +66,7 @@ public class ScheduleHorizAction extends NextBusApiBase implements
 		return routeId;
 	}
 
-	public void setRouteTag(String routeId) {
+	public void setR(String routeId) {
 		this.routeId = _routeCacheService.getRouteShortNameFromId(routeId);
 	}
 
@@ -73,27 +74,25 @@ public class ScheduleHorizAction extends NextBusApiBase implements
 		return new DefaultHttpHeaders("success");
 	}
 
-	public Body<List<Predictions>> getModel() {
+	public Body<List<ScheduleRoute>> getModel() {
 
-		Body<List<Predictions>> body = new Body<List<Predictions>>();
-		List<AgencyAndId> stopIds = new ArrayList<AgencyAndId>();
+		Body<List<ScheduleRoute>> body = new Body<List<ScheduleRoute>>();
+		List<AgencyAndId> routeIds = new ArrayList<AgencyAndId>();
 
-		if (isValid(body, stopIds)) {
+		if (isValid(body, routeIds)) {
 
 			String serviceUrl = getServiceUrl() + agencyId + SCHEDULE_COMMAND
 					+ "?";
-			String route = "r=" + routeId;
+			String route = "r=" + getIdNoAgency(routeId);
 			String uri = serviceUrl + route + "&format=" + REQUEST_TYPE;
 
 			try {
 				JsonArray scheduleJson = getJsonObject(uri).getAsJsonArray(
-						"scheduleHorizStops");
-				Type listType = new TypeToken<List<Predictions>>() {
+						"schedule");
+				Type listType = new TypeToken<List<ScheduleRoute>>() {
 				}.getType();
-				List<List<Predictions>> schedules = new Gson().fromJson(
+				List<List<ScheduleRoute>> schedules = new Gson().fromJson(
 						scheduleJson, listType);
-				
-				
 
 				body.getResponse().addAll(schedules);
 			} catch (Exception e) {

@@ -15,23 +15,36 @@
  */
 package org.onebusaway.nextbus.model.transiTime;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
-@XStreamAlias("header")
+@XStreamAlias("stop")
 public class ScheduleHeader {
-	@XStreamImplicit
-	private List<DisplayStop> stops = new ArrayList<DisplayStop>();
-
-	public List<DisplayStop> getStops() {
-		return stops;
+	
+	@XStreamAsAttribute 
+	@XStreamAlias("tag")
+	private String stopId;
+ 
+	@XStreamAlias("stopName")
+	private String stopName;
+	
+	public ScheduleHeader(){
 	}
 
-	public void setStops(List<DisplayStop> stops) {
-		this.stops = stops;
+	public String getStopId() {
+		return stopId;
 	}
+
+	public void setStopId(String stopId) {
+		this.stopId = stopId;
+	}
+
+	public String getStopName() {
+		return stopName;
+	}
+
+	public void setStopName(String stopName) {
+		this.stopName = stopName;
+	}
+
 }

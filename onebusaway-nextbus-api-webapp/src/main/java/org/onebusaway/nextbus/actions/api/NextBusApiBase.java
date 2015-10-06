@@ -55,7 +55,7 @@ public class NextBusApiBase {
 
   public static final String PREDICTIONS_COMMAND = "/command/predictions";
 
-  public static final String SCHEDULE_COMMAND = "/command/predictions";
+  public static final String SCHEDULE_COMMAND = "/command/scheduleHorizStops";
 
   public static final String REQUEST_TYPE = "json";
 

@@ -24,16 +24,13 @@ public class ScheduleStop {
 	
 	@XStreamAsAttribute 
 	private String tag;
+
+	@XStreamAsAttribute
+	@XStreamAlias("epochTime")
+	private long timeSecs;
 	
-	@XStreamAsAttribute 
-	private String value;
-	
-	@XStreamAsAttribute 
-	private long epochTime;
-	
-	@XStreamOmitField
-	private String stopName;
-	
+	private String timeStr;
+
 	public String getTag() {
 		return tag;
 	}
@@ -42,29 +39,22 @@ public class ScheduleStop {
 		this.tag = tag;
 	}
 
-	public long getEpochTime() {
-		return epochTime;
+	public long getTimeSecs() {
+		return timeSecs;
 	}
 
-	public void setEpochTime(long epochTime) {
-		this.epochTime = epochTime;
+	public void setTimeSecs(long timeSecs) {
+		this.timeSecs = timeSecs*1000;
 	}
 
 	public String getValue() {
-		return value;
+		return timeStr;
 	}
 
-	public void setValue(String value) {
-		this.value = value;
+	public void setValue(String timeStr) {
+		this.timeStr = timeStr;
 	}
 
-	public String getStopName() {
-		return stopName;
-	}
-
-	public void setStopName(String stopName) {
-		this.stopName = stopName;
-	}
 	
 	@Override
     public int hashCode() {
