@@ -83,16 +83,17 @@ public class PredictionsAction extends NextBusApiBase implements
 
       String serviceUrl = getServiceUrl() + agencyId + PREDICTIONS_COMMAND
           + "?";
-      
-      String routeStop="";
-      
-      for(AgencyAndId routeId : routeIds){
-        routeStop += "rs=" + getIdNoAgency(routeId.toString()) + "|" + getIdNoAgency(stopId) + "&";
+
+      String routeStop = "";
+
+      for (AgencyAndId routeId : routeIds) {
+        routeStop += "rs=" + getIdNoAgency(routeId.toString()) + "|"
+            + getIdNoAgency(stopId) + "&";
       }
       String uri = serviceUrl + routeStop + "format=" + REQUEST_TYPE;
 
       try {
-        
+
         JsonArray predictionsJson = getJsonObject(uri).getAsJsonArray(
             "predictions");
         Type listType = new TypeToken<List<Predictions>>() {
@@ -101,8 +102,7 @@ public class PredictionsAction extends NextBusApiBase implements
             predictionsJson, listType);
 
         body.getResponse().addAll(predictions);
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         body.getErrors().add(new BodyError("No valid results found."));
         _log.error(e.getMessage());
       }
@@ -123,14 +123,28 @@ public class PredictionsAction extends NextBusApiBase implements
     if (!processStopIds(stopId, stopIds, agencies, body))
       return false;
 
-    if (routeTag == null){
-      StopBean stopBean = _transitDataService.getStop(stopIds.get(0).toString());
+    StopBean stopBean = _transitDataService.getStop(stopIds.get(0).toString());
+
+    if (routeTag == null) {
       for (RouteBean routeBean : stopBean.getRoutes()) {
         routeIds.add(AgencyAndId.convertFromString(routeBean.getId()));
       }
-    }
-    else if(!processRouteIds(routeTag, routeIds, agencies, body)) { 
-      return false;
+    } else {
+      if (!processRouteIds(routeTag, routeIds, agencies, body))
+        return false;
+
+      boolean stopServesRoute = false;
+      for (RouteBean routeBean : stopBean.getRoutes()) {
+        if (routeIds.contains(AgencyAndId.convertFromString(routeBean.getId())))
+          stopServesRoute = true;
+      }
+      if (!stopServesRoute) {
+        body.getErrors().add(
+            new BodyError("For agency=" + agencyId + " route r=" + routeTag
+                + " is not currently available. It might be initializing still."));
+        return false;
+      }
+
     }
 
     return true;

@@ -16,6 +16,8 @@
 package org.onebusaway.nextbus.actions.api;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +40,8 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
   private String agencyId;
 
   private Set<String> stops;
+  
+  private Set<String> mappedStops = new HashSet<String>();
 
   private String routeTag;
 
@@ -115,7 +119,7 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
 
   private String getStopParams() {
     StringBuilder sb = new StringBuilder();
-    for (String stop : stops) {
+    for (String stop : mappedStops) {
       sb.append("rs=");
       sb.append(stop);
       sb.append("&");
@@ -128,6 +132,12 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     if (!isValidAgency(body, agencyId)) {
       return false;
     }
+    
+    if(stops == null){
+      body.getErrors().add(new BodyError("must specify \"stops\" parameter in query string"));
+      return false;
+    }
+    
     for (String stop : stops) {
       String[] stopArray = stop.split("\\|");
       if (stopArray.length < 2) {
@@ -149,11 +159,16 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
           }
         }
         if (!routeExists) {
-          String error = "For agency=" + getA() + " route r=" + stopArray[1]
+          String error = "For agency=" + getA() + " route r=" + stopArray[0]
               + " is not currently available. It might be initializing still.";
           body.getErrors().add(new BodyError(error));
           return false;
         }
+        String routeTag = getIdNoAgency(_tdsMappingService.getRouteIdFromShortName(stopArray[0]));
+        String routeStop = getIdNoAgency(_tdsMappingService.getStopIdFromStopCode(stopArray[1]));
+        
+        mappedStops.add(routeTag + "|" + routeStop);
+        
 
       } catch (ServiceException se) {
         String error = "For agency=" + getA() + " stop s=" + stopArray[1]

@@ -29,7 +29,7 @@ public class FalseConverter implements SingleValueConverter {
     if(booleanField == null || !booleanField){
       return null;
     }
-    return booleanField.toString();
+    return Boolean.toString(booleanField);
   }
 
   @Override

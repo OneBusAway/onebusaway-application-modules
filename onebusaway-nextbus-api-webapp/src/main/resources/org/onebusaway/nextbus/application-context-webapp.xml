@@ -60,7 +60,7 @@
 		<property name="transiTimeKey" value="8a3273b0" />
 		<property name="agencyMapper">
 			<map>
-				<entry key="WMATA" value="1" />
+				<entry key="2" value="1" />
 			</map>
 		</property>
 	</bean>

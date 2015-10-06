@@ -46,7 +46,7 @@ public class Prediction {
   private String dirTag;
   
   @XStreamAsAttribute
-  @XStreamAlias("block")
+  @XStreamAlias("vehicle")
   private String vehicle;
   
   @XStreamAsAttribute

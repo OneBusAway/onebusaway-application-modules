@@ -11,6 +11,10 @@
 
 	<name>onebusaway-nextbus-api-webapp</name>
 
+	<properties>
+		<log4j.appender>ROLL</log4j.appender>
+	</properties>
+
 	<dependencies>
 
 		<dependency>
@@ -97,6 +101,11 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>apache-log4j-extras</artifactId>
+			<version>1.1</version>
 		</dependency>
 
 		<dependency>
