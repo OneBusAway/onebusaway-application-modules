@@ -8,7 +8,7 @@
 
     <!-- Specify our transit data source -->
     <bean id="transitDataService" class="org.springframework.remoting.caucho.HessianProxyFactoryBean">
-       	<property name="serviceUrl" value="http://tds:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
+       	<property name="serviceUrl" value="http://localhost:8080/onebusaway-transit-data-federation-webapp/remoting/transit-data-service" />
         <property name="serviceInterface" value="org.onebusaway.transit_data.services.TransitDataService" />
     </bean>
     
@@ -35,6 +35,6 @@
         </property>
     </bean>
     
-    <bean id="routeCacheService" class="org.onebusaway.nextbus.impl.RouteCacheServiceImpl" />
+    <bean id="tdsMappingService" class="org.onebusaway.nextbus.impl.TdsMappingServiceImpl" />
    
 </beans>

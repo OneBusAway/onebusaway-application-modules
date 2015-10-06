@@ -16,9 +16,11 @@
 package org.onebusaway.nextbus.actions.api;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -33,7 +35,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.impl.util.ConfigurationUtil;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
-import org.onebusaway.nextbus.service.RouteCacheService;
+import org.onebusaway.nextbus.service.TdsMappingService;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
@@ -48,7 +50,7 @@ public class NextBusApiBase {
   protected TransitDataService _transitDataService;
   
   @Autowired
-  protected RouteCacheService _routeCacheService;
+  protected TdsMappingService _tdsMappingService;
 
   @Autowired
   protected ConfigurationUtil _configUtil;
@@ -299,7 +301,7 @@ public class NextBusApiBase {
     return serviceUrl;
   }
 
-  protected JsonObject getJsonObject(String uri) throws Exception {
+  protected JsonObject getJsonObject(String uri) throws MalformedURLException, IOException{
     URL url = new URL(uri);
     HttpURLConnection request = (HttpURLConnection) url.openConnection();
     request.connect();

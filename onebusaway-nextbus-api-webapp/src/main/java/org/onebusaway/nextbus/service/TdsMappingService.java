@@ -17,7 +17,9 @@ package org.onebusaway.nextbus.service;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public interface RouteCacheService {
+public interface TdsMappingService {
   ConcurrentHashMap<String, String> getRouteShortNameToRouteIdMap();
-  String getRouteShortNameFromId(String id);
+  ConcurrentHashMap<String, String> getStopCodeToStopIdMap();
+  String getRouteIdFromShortName(String id);
+  String getStopIdFromStopCode(String code);
 }

@@ -62,7 +62,7 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
   }
 
   public void setRouteTag(String routeTag) {
-    this.routeTag = _routeCacheService.getRouteShortNameFromId(routeTag);
+    this.routeTag = _tdsMappingService.getRouteIdFromShortName(routeTag);
   }
 
   public DefaultHttpHeaders index() {
@@ -139,11 +139,11 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
       }
 
       try {
-        StopBean stopBean = _transitDataService.getStop(stopArray[1]);
+        StopBean stopBean = _transitDataService.getStop(_tdsMappingService.getStopIdFromStopCode(stopArray[1]));
         boolean routeExists = false;
         for (RouteBean routeBean : stopBean.getRoutes()) {
           if (routeBean.getId().equals(
-              _routeCacheService.getRouteShortNameFromId(stopArray[0]))) {
+              _tdsMappingService.getRouteIdFromShortName(stopArray[0]))) {
             routeExists = true;
             break;
           }

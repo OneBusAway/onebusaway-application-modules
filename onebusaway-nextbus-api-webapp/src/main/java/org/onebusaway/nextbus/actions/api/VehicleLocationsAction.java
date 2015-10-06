@@ -67,7 +67,7 @@ public class VehicleLocationsAction extends NextBusApiBase implements
 	}
 
 	public void setR(String routeId) {
-		this.routeId = _routeCacheService.getRouteShortNameFromId(routeId);
+		this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
 	}
 
 	public long getT() {

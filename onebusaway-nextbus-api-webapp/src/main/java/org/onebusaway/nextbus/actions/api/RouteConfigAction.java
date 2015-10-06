@@ -68,7 +68,7 @@ public class RouteConfigAction extends NextBusApiBase implements
 	}
 
 	public void setR(String routeId) {
-		this.routeId = _routeCacheService.getRouteShortNameFromId(routeId);
+		this.routeId = _tdsMappingService.getRouteIdFromShortName(routeId);
 	}
 
 	public HttpHeaders index() {

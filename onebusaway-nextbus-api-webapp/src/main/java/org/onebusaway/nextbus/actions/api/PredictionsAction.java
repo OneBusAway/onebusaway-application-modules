@@ -22,6 +22,7 @@ import java.util.List;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.nextbus.model.nextbus.Body;
+import org.onebusaway.nextbus.model.nextbus.BodyError;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
@@ -57,7 +58,7 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   public void setStopId(String stopId) {
-    this.stopId = stopId;
+    this.stopId = _tdsMappingService.getStopIdFromStopCode(stopId);
   }
 
   public String getRouteTag() {
@@ -65,7 +66,7 @@ public class PredictionsAction extends NextBusApiBase implements
   }
 
   public void setRouteTag(String routeTag) {
-    this.routeTag = _routeCacheService.getRouteShortNameFromId(routeTag);
+    this.routeTag = _tdsMappingService.getRouteIdFromShortName(routeTag);
   }
 
   public DefaultHttpHeaders index() {
@@ -86,7 +87,7 @@ public class PredictionsAction extends NextBusApiBase implements
       String routeStop="";
       
       for(AgencyAndId routeId : routeIds){
-        routeStop += "rs=" + getIdNoAgency(routeId.toString()) + "|" + stopId + "&";
+        routeStop += "rs=" + getIdNoAgency(routeId.toString()) + "|" + getIdNoAgency(stopId) + "&";
       }
       String uri = serviceUrl + routeStop + "format=" + REQUEST_TYPE;
 
@@ -100,8 +101,9 @@ public class PredictionsAction extends NextBusApiBase implements
             predictionsJson, listType);
 
         body.getResponse().addAll(predictions);
-      } catch (Exception e) {
-
+      }
+      catch (Exception e) {
+        body.getErrors().add(new BodyError("No valid results found."));
         _log.error(e.getMessage());
       }
     }
