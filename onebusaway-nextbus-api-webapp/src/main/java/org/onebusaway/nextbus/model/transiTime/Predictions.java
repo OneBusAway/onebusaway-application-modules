@@ -18,10 +18,12 @@ package org.onebusaway.nextbus.model.transiTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.onebusaway.nextbus.impl.rest.xstream.CapitalizeConverter;
 import org.onebusaway.nextbus.model.nextbus.ScheduleTableRow;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 @XStreamAlias("predictions")
@@ -29,11 +31,11 @@ public class Predictions {
   
   @XStreamAsAttribute
   @XStreamAlias("routeTag")
-  private String routeId;
+  private String routeShortName;
   
   @XStreamAsAttribute
   @XStreamAlias("routeCode")
-  private String routeShortName;
+  private String routeId;
   
   @XStreamAsAttribute
   @XStreamAlias("routeTitle")
@@ -41,6 +43,7 @@ public class Predictions {
   
   @XStreamAsAttribute
   @XStreamAlias("stopTitle")
+  @XStreamConverter(CapitalizeConverter.class)
   private String stopName;
   
   @XStreamImplicit

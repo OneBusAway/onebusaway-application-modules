@@ -16,16 +16,25 @@
 package org.onebusaway.nextbus.model.transiTime;
 
 import java.util.List;
+
+import org.onebusaway.nextbus.impl.rest.xstream.CapitalizeConverter;
+
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
+import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 @XStreamAlias("direction")
 public class PredictionsDirection {
   
   @XStreamAsAttribute
   @XStreamAlias("title")
+  @XStreamConverter(CapitalizeConverter.class)
   private String headsign;
+  
+ @XStreamOmitField
+  private int dir;
   
   @XStreamImplicit
   private List<Prediction> pred;
@@ -46,6 +55,14 @@ public class PredictionsDirection {
 
   public void setHeadsign(String headsign) {
     this.headsign = headsign;
+  }
+
+  public int getDir() {
+    return dir;
+  }
+
+  public void setDir(int dir) {
+    this.dir = dir;
   }
 
 }

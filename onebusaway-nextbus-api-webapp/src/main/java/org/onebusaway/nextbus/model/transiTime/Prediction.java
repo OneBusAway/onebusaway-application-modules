@@ -42,8 +42,8 @@ public class Prediction {
   private boolean notYetDeparted;
   
   @XStreamAsAttribute
-  @XStreamAlias("isDeparture")
-  private String dirTag;
+  @XStreamAlias("dirTag")
+  private Integer dirTag;
   
   @XStreamAsAttribute
   @XStreamAlias("vehicle")
@@ -128,11 +128,11 @@ public class Prediction {
       this.scheduleBased = scheduleBased;
   }
 
-  public String getDirTag() {
+  public Integer getDirTag() {
     return dirTag;
   }
 
-  public void setDirTag(String dirTag) {
+  public void setDirTag(Integer dirTag) {
     this.dirTag = dirTag;
   }
 

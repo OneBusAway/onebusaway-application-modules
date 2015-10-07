@@ -21,11 +21,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.struts2.rest.DefaultHttpHeaders;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.nextbus.model.nextbus.Body;
 import org.onebusaway.nextbus.model.nextbus.BodyError;
+import org.onebusaway.nextbus.model.transiTime.Prediction;
 import org.onebusaway.nextbus.model.transiTime.Predictions;
+import org.onebusaway.nextbus.model.transiTime.PredictionsDirection;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.StopBean;
 
@@ -35,12 +38,12 @@ import com.google.gson.reflect.TypeToken;
 import com.opensymphony.xwork2.ModelDriven;
 
 public class PredictionsForMultiStopsAction extends NextBusApiBase implements
-    ModelDriven<Body<List<Predictions>>> {
+    ModelDriven<Body<Predictions>> {
 
   private String agencyId;
 
   private Set<String> stops;
-  
+
   private Set<String> mappedStops = new HashSet<String>();
 
   private String routeTag;
@@ -73,9 +76,9 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     return new DefaultHttpHeaders("success");
   }
 
-  public Body<List<Predictions>> getModel() {
+  public Body<Predictions> getModel() {
 
-    Body<List<Predictions>> body = new Body<List<Predictions>>();
+    Body<Predictions> body = new Body<Predictions>();
 
     if (isValid(body)) {
       String serviceUrl = getServiceUrl() + agencyId + PREDICTIONS_COMMAND
@@ -88,8 +91,11 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
             "predictions");
         Type listType = new TypeToken<List<Predictions>>() {
         }.getType();
-        List<List<Predictions>> predictions = new Gson().fromJson(
-            predictionsJson, listType);
+
+        List<Predictions> predictions = new Gson().fromJson(predictionsJson,
+            listType);
+        
+        modifyJSONObject(predictions);
 
         body.getResponse().addAll(predictions);
       } catch (Exception e) {
@@ -100,6 +106,16 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
 
     return body;
 
+  }
+  
+  private void modifyJSONObject(List<Predictions> predictions){
+    for (Predictions prediction : predictions) {
+      for (PredictionsDirection direction : prediction.getDest()) {
+        for (Prediction dirPrediction : direction.getPred()) {
+          dirPrediction.setDirTag(direction.getDir());
+        }
+      }
+    }
   }
 
   private String getStopIdParams() {
@@ -132,18 +148,19 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
     if (!isValidAgency(body, agencyId)) {
       return false;
     }
-    
-    if(stops == null){
-      body.getErrors().add(new BodyError("must specify \"stops\" parameter in query string"));
+
+    if (stops == null) {
+      body.getErrors().add(
+          new BodyError("must specify \"stops\" parameter in query string"));
       return false;
     }
-    
+
     for (String stop : stops) {
       String[] stopArray = stop.split("\\|");
       if (stopArray.length < 2) {
         String error = "The stop "
             + stop
-            + "was invalid because it did not contain a route, optional dir, and stop tag";
+            + " is invalid because it did not contain a route, optional dir, and stop tag";
         body.getErrors().add(new BodyError(error));
         return false;
       }
@@ -166,9 +183,8 @@ public class PredictionsForMultiStopsAction extends NextBusApiBase implements
         }
         String routeTag = getIdNoAgency(_tdsMappingService.getRouteIdFromShortName(stopArray[0]));
         String routeStop = getIdNoAgency(_tdsMappingService.getStopIdFromStopCode(stopArray[1]));
-        
+
         mappedStops.add(routeTag + "|" + routeStop);
-        
 
       } catch (ServiceException se) {
         String error = "For agency=" + getA() + " stop s=" + stopArray[1]
