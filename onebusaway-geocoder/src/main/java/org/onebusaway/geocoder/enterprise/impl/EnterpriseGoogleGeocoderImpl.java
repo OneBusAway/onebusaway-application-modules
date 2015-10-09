@@ -19,11 +19,13 @@ import org.onebusaway.geocoder.impl.GoogleAddressComponent;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geocoder.enterprise.model.EnterpriseGoogleGeocoderResult;
 import org.onebusaway.geocoder.enterprise.services.EnterpriseGeocoderResult;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -51,12 +53,11 @@ public class EnterpriseGoogleGeocoderImpl extends EnterpriseFilteredGeocoderBase
   
   private static final String GEOCODE_PATH = "/maps/api/geocode/xml";
   
-  private String key;
-  
-  private String id;
+  @Autowired
+  private ConfigurationService _configurationService;
   
   private boolean _sensor = false;
-
+  
   private CoordinateBounds _resultBiasingBounds = null;
   
   public void setSensor(boolean sensor) {
@@ -65,6 +66,10 @@ public class EnterpriseGoogleGeocoderImpl extends EnterpriseFilteredGeocoderBase
 
   public void setResultBiasingBounds(CoordinateBounds bounds) {
     _resultBiasingBounds = bounds;
+  }
+  
+  public void setConfiguration(ConfigurationService configurationService) {
+	  _configurationService = configurationService;
   }
   
   public List<EnterpriseGeocoderResult> enterpriseGeocode(String location) {
@@ -85,9 +90,10 @@ public class EnterpriseGoogleGeocoderImpl extends EnterpriseFilteredGeocoderBase
             _resultBiasingBounds.getMaxLon());
       }
 
-      String clientId = id; 
-               
-      String authKey = key;  
+      String clientId = 
+          _configurationService.getConfigurationValueAsString("display.googleMapsClientId", null);          
+      String authKey = 
+          _configurationService.getConfigurationValueAsString("display.googleMapsSecretKey", null);    
       
       if(clientId != null && authKey != null && !StringUtils.isEmpty(clientId) && !StringUtils.isEmpty(authKey)) {
         q.append("&client=").append(clientId);
@@ -175,19 +181,4 @@ public class EnterpriseGoogleGeocoderImpl extends EnterpriseFilteredGeocoderBase
     return digester;
   }
 
-	public String getKey() {
-		return key;
-	}
-	
-	public void setKey(String key) {
-		this.key = key;
-	}
-	
-	public String getId() {
-		return id;
-	}
-	
-	public void setId(String id) {
-		this.id = id;
-	}
 }
