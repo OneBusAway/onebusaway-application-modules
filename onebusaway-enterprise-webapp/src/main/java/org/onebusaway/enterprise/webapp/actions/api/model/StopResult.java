@@ -25,6 +25,10 @@ public class StopResult implements SearchResult {
 	public String getId() {
 		return stop.getId();
 	}
+	
+	public String getCode() {
+		return stop.getCode();
+	}
 
 	public String getName() {
 		return stop.getName();

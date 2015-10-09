@@ -28,6 +28,7 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.AgencyWithCoverageBean;
+import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data.model.RoutesBean;
 import org.onebusaway.transit_data.model.SearchQueryBean;
@@ -53,8 +54,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A class that constructs search results given a search result factory that is inferface specific.
- * We need to create interface-specific models to pass into the JSP for generation of HTML.
+ * A class that constructs search results given a search result factory that is
+ * inferface specific. We need to create interface-specific models to pass into
+ * the JSP for generation of HTML.
  * 
  * @author jmaki
  *
@@ -64,7 +66,8 @@ public class SearchServiceImpl implements SearchService {
 
 	// the pattern of what can be leftover after prefix/suffix matching for a
 	// route to be a "suggestion" for a given search
-	private static final Pattern leftOverMatchPattern = Pattern.compile("^([A-Z]|-)+$");
+	private static final Pattern leftOverMatchPattern = Pattern
+			.compile("^([A-Z]|-)+$");
 
 	// when querying for routes from a lat/lng, use this distance in meters
 	private static final double DISTANCE_TO_ROUTES = 600;
@@ -88,6 +91,8 @@ public class SearchServiceImpl implements SearchService {
 
 	private Map<String, RouteBean> _routeLongNameToRouteBeanMap = new HashMap<String, RouteBean>();
 
+	private Map<String, String> _stopCodeToStopIdMap = new HashMap<String, String>();
+
 	private String _bundleIdForCaches = null;
 
 	// we keep an internal cache of route short/long names because if we moved
@@ -102,30 +107,63 @@ public class SearchServiceImpl implements SearchService {
 	public void refreshCachesIfNecessary() {
 		String currentBundleId = _transitDataService.getActiveBundleId();
 
-		if ((_bundleIdForCaches != null && _bundleIdForCaches.equals(currentBundleId)) || currentBundleId == null) {
+		if ((_bundleIdForCaches != null && _bundleIdForCaches
+				.equals(currentBundleId)) || currentBundleId == null) {
 			return;
 		}
 
 		_routeShortNameToRouteBeanMap.clear();
 		_routeLongNameToRouteBeanMap.clear();
+		_stopCodeToStopIdMap.clear();
 
-		for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
-			for (RouteBean routeBean : _transitDataService.getRoutesForAgencyId(agency.getAgency().getId()).getList()) {
+		for (AgencyWithCoverageBean agency : _transitDataService
+				.getAgenciesWithCoverage()) {
+			for (RouteBean routeBean : _transitDataService
+					.getRoutesForAgencyId(agency.getAgency().getId()).getList()) {
 				if (routeBean.getShortName() != null)
-					_routeShortNameToRouteBeanMap.put(routeBean.getShortName().toUpperCase(), routeBean);
+					_routeShortNameToRouteBeanMap.put(routeBean.getShortName()
+							.toUpperCase(), routeBean);
 				if (routeBean.getLongName() != null)
-					_routeLongNameToRouteBeanMap.put(routeBean.getLongName(), routeBean);
+					_routeLongNameToRouteBeanMap.put(routeBean.getLongName(),
+							routeBean);
+			}
+
+			SearchQueryBean query = new SearchQueryBean();
+			query.setBounds(getAgencyBounds(agency));
+			query.setMaxCount(Integer.MAX_VALUE);
+
+			StopsBean stops = _transitDataService.getStops(query);
+			List<StopBean> stopsList = stops.getStops();
+
+			for (StopBean stop : stopsList) {
+				_stopCodeToStopIdMap.put(agency.getAgency().getId() + "_"
+						+ stop.getCode().toUpperCase(), stop.getId());
 			}
 		}
 
 		_bundleIdForCaches = currentBundleId;
 	}
 
+	private CoordinateBounds getAgencyBounds(AgencyWithCoverageBean agency) {
+		CoordinateBounds bounds = new CoordinateBounds();
+
+		double lat = agency.getLat();
+		double lon = agency.getLon();
+		double latSpan = agency.getLatSpan() / 2;
+		double lonSpan = agency.getLonSpan() / 2;
+		bounds.addPoint(lat - latSpan, lon - lonSpan);
+		bounds.addPoint(lat + latSpan, lon + lonSpan);
+
+		return bounds;
+	}
+
 	@Override
-	public SearchResultCollection findStopsNearPoint(Double latitude, Double longitude, SearchResultFactory resultFactory,
+	public SearchResultCollection findStopsNearPoint(Double latitude,
+			Double longitude, SearchResultFactory resultFactory,
 			Set<RouteBean> routeFilter) {
 
-		CoordinateBounds bounds = SphericalGeometryLibrary.bounds(latitude, longitude, DISTANCE_TO_STOPS);
+		CoordinateBounds bounds = SphericalGeometryLibrary.bounds(latitude,
+				longitude, DISTANCE_TO_STOPS);
 
 		SearchQueryBean queryBean = new SearchQueryBean();
 		queryBean.setType(SearchQueryBean.EQueryType.BOUNDS_OR_CLOSEST);
@@ -134,22 +172,27 @@ public class SearchServiceImpl implements SearchService {
 
 		StopsBean stops = _transitDataService.getStops(queryBean);
 
-		Collections.sort(stops.getStops(), new StopDistanceFromPointComparator(latitude, longitude));
+		Collections.sort(stops.getStops(), new StopDistanceFromPointComparator(
+				latitude, longitude));
 
 		// A list of stops that will go in our search results
 		List<StopBean> stopsForResults = new ArrayList<StopBean>();
 
-		// Keep track of which routes are already in our search results by direction
+		// Keep track of which routes are already in our search results by
+		// direction
 		Map<String, List<RouteBean>> routesByDirectionAlreadyInResults = new HashMap<String, List<RouteBean>>();
 
-		// Cache stops by route so we don't need to call the transit data service repeatedly for the same route
+		// Cache stops by route so we don't need to call the transit data
+		// service repeatedly for the same route
 		Map<String, StopsForRouteBean> stopsForRouteLookup = new HashMap<String, StopsForRouteBean>();
 
-		// Iterate through each stop and see if it adds additional routes for a direction to our final results.
+		// Iterate through each stop and see if it adds additional routes for a
+		// direction to our final results.
 		for (StopBean stopBean : stops.getStops()) {
 
-			// Get the stop bean that is actually inside this search result. We kept track of it earlier.
-			//StopBean stopBean = stopBeanBySearchResult.get(stopResult);
+			// Get the stop bean that is actually inside this search result. We
+			// kept track of it earlier.
+			// StopBean stopBean = stopBeanBySearchResult.get(stopResult);
 
 			// Record of routes by direction id for this stop
 			Map<String, List<RouteBean>> routesByDirection = new HashMap<String, List<RouteBean>>();
@@ -158,22 +201,28 @@ public class SearchServiceImpl implements SearchService {
 				// route is a route serving the current stopBeanForSearchResult
 
 				// Query for all stops on this route
-				StopsForRouteBean stopsForRoute = stopsForRouteLookup.get(route.getId());
+				StopsForRouteBean stopsForRoute = stopsForRouteLookup.get(route
+						.getId());
 				if (stopsForRoute == null) {
-					stopsForRoute = _transitDataService.getStopsForRoute(route.getId());
+					stopsForRoute = _transitDataService.getStopsForRoute(route
+							.getId());
 					stopsForRouteLookup.put(route.getId(), stopsForRoute);
 				}
 
-				// Get the groups of stops on this route. The id of each group corresponds to a GTFS direction id for this route.
-				for (StopGroupingBean stopGrouping : stopsForRoute.getStopGroupings()) {
+				// Get the groups of stops on this route. The id of each group
+				// corresponds to a GTFS direction id for this route.
+				for (StopGroupingBean stopGrouping : stopsForRoute
+						.getStopGroupings()) {
 					for (StopGroupBean stopGroup : stopGrouping.getStopGroups()) {
 
 						String directionId = stopGroup.getId();
 
-						// Check if the current stop is served in this direction. If so, record it.
+						// Check if the current stop is served in this
+						// direction. If so, record it.
 						if (stopGroup.getStopIds().contains(stopBean.getId())) {
 							if (!routesByDirection.containsKey(directionId)) {
-								routesByDirection.put(directionId, new ArrayList<RouteBean>());
+								routesByDirection.put(directionId,
+										new ArrayList<RouteBean>());
 							}
 							routesByDirection.get(directionId).add(route);
 						}
@@ -181,25 +230,35 @@ public class SearchServiceImpl implements SearchService {
 				}
 			}
 
-			// Iterate over routes binned by direction for this stop and compare to routes by direction already in our search results
+			// Iterate over routes binned by direction for this stop and compare
+			// to routes by direction already in our search results
 			boolean shouldAddStopToResults = false;
-			for (Map.Entry<String, List<RouteBean>> entry : routesByDirection.entrySet()) {
+			for (Map.Entry<String, List<RouteBean>> entry : routesByDirection
+					.entrySet()) {
 				String directionId = entry.getKey();
 				List<RouteBean> routesForThisDirection = entry.getValue();
 
 				if (!routesByDirectionAlreadyInResults.containsKey(directionId)) {
-					routesByDirectionAlreadyInResults.put(directionId, new ArrayList<RouteBean>());
+					routesByDirectionAlreadyInResults.put(directionId,
+							new ArrayList<RouteBean>());
 				}
 
 				@SuppressWarnings("unchecked")
-				List<RouteBean> additionalRoutes = ListUtils.subtract(routesForThisDirection, routesByDirectionAlreadyInResults.get(directionId));
+				List<RouteBean> additionalRoutes = ListUtils.subtract(
+						routesForThisDirection,
+						routesByDirectionAlreadyInResults.get(directionId));
 				if (additionalRoutes.size() > 0) {
-					// This stop is contributing new routes in this direction, so add these additional
-					// stops to our record of stops by direction already in search results and toggle
+					// This stop is contributing new routes in this direction,
+					// so add these additional
+					// stops to our record of stops by direction already in
+					// search results and toggle
 					// flag that tells to to add the stop to the search results.
-					routesByDirectionAlreadyInResults.get(directionId).addAll(additionalRoutes);
-					// We use this flag because we want to add new routes to our record potentially for each
-					// direction id, but we only want to add the stop to the search results once. It happens below.
+					routesByDirectionAlreadyInResults.get(directionId).addAll(
+							additionalRoutes);
+					// We use this flag because we want to add new routes to our
+					// record potentially for each
+					// direction id, but we only want to add the stop to the
+					// search results once. It happens below.
 					shouldAddStopToResults = true;
 				}
 			}
@@ -213,13 +272,15 @@ public class SearchServiceImpl implements SearchService {
 			}
 		}
 
-		// Create our search results object, iterate through our stops, create stop
+		// Create our search results object, iterate through our stops, create
+		// stop
 		// results from each of those stops, and add them to the search results.
 		SearchResultCollection results = new SearchResultCollection();
 		results.addRouteFilters(routeFilter);
 
 		for (StopBean stop : stopsForResults) {
-			SearchResult result = resultFactory.getStopResult(stop, routeFilter);
+			SearchResult result = resultFactory
+					.getStopResult(stop, routeFilter);
 			results.addMatch(result);
 		}
 
@@ -227,14 +288,15 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResultCollection findRoutesStoppingWithinRegion(CoordinateBounds bounds, SearchResultFactory resultFactory) {
+	public SearchResultCollection findRoutesStoppingWithinRegion(
+			CoordinateBounds bounds, SearchResultFactory resultFactory) {
 		SearchQueryBean queryBean = new SearchQueryBean();
 		queryBean.setType(SearchQueryBean.EQueryType.BOUNDS_OR_CLOSEST);
 		queryBean.setBounds(bounds);
 		queryBean.setMaxCount(100);
 
 		RoutesBean routes = _transitDataService.getRoutes(queryBean);
-		
+
 		Collections.sort(routes.getRoutes(), new RouteComparator());
 
 		SearchResultCollection results = new SearchResultCollection();
@@ -247,8 +309,10 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResultCollection findRoutesStoppingNearPoint(Double latitude, Double longitude, SearchResultFactory resultFactory) {
-		CoordinateBounds bounds = SphericalGeometryLibrary.bounds(latitude, longitude, DISTANCE_TO_ROUTES);
+	public SearchResultCollection findRoutesStoppingNearPoint(Double latitude,
+			Double longitude, SearchResultFactory resultFactory) {
+		CoordinateBounds bounds = SphericalGeometryLibrary.bounds(latitude,
+				longitude, DISTANCE_TO_ROUTES);
 
 		SearchQueryBean queryBean = new SearchQueryBean();
 		queryBean.setType(SearchQueryBean.EQueryType.BOUNDS_OR_CLOSEST);
@@ -257,7 +321,8 @@ public class SearchServiceImpl implements SearchService {
 
 		RoutesBean routes = _transitDataService.getRoutes(queryBean);
 
-		Collections.sort(routes.getRoutes(), new RouteDistanceFromPointComparator(latitude, longitude));
+		Collections.sort(routes.getRoutes(),
+				new RouteDistanceFromPointComparator(latitude, longitude));
 
 		SearchResultCollection results = new SearchResultCollection();
 
@@ -276,7 +341,8 @@ public class SearchServiceImpl implements SearchService {
 	}
 
 	@Override
-	public SearchResultCollection getSearchResults(String query, SearchResultFactory resultFactory) {
+	public SearchResultCollection getSearchResults(String query,
+			SearchResultFactory resultFactory) {
 		refreshCachesIfNecessary();
 
 		SearchResultCollection results = new SearchResultCollection();
@@ -331,15 +397,20 @@ public class SearchServiceImpl implements SearchService {
 				// it's a filter--
 				// so remove it from the normalized query sent to the geocoder
 				// or stop service
-				if ((lastItem != null && !_routeShortNameToRouteBeanMap.containsKey(lastItem))
-						|| (nextItem != null && !_routeShortNameToRouteBeanMap.containsKey(nextItem))) {
-					results.addRouteFilter(_routeShortNameToRouteBeanMap.get(token));
+				if ((lastItem != null && !_routeShortNameToRouteBeanMap
+						.containsKey(lastItem))
+						|| (nextItem != null && !_routeShortNameToRouteBeanMap
+								.containsKey(nextItem))) {
+					results.addRouteFilter(_routeShortNameToRouteBeanMap
+							.get(token));
 					continue;
 				}
 			} else {
-				// if the token is not a route and the next or last token is a valid stop id,
+				// if the token is not a route and the next or last token is a
+				// valid stop id,
 				// consider the token a bad filter and remove it from the query.
-				if ((lastItem != null && stopsForId(lastItem).size() > 0) || (nextItem != null && stopsForId(nextItem).size() > 0)) {
+				if ((lastItem != null && stopsForId(lastItem).size() > 0)
+						|| (nextItem != null && stopsForId(nextItem).size() > 0)) {
 					continue;
 				}
 			}
@@ -358,17 +429,20 @@ public class SearchServiceImpl implements SearchService {
 
 			normalizedQuery += token + " ";
 		}
-		
-		// If we parsed more than one route filter from the query, remove route filters
+
+		// If we parsed more than one route filter from the query, remove route
+		// filters
 		// because user interfaces don't support more than one route filter
-		if (results.getRouteFilter() != null && results.getRouteFilter().size() > 1) {
-		  results.getRouteFilter().clear();
+		if (results.getRouteFilter() != null
+				&& results.getRouteFilter().size() > 1) {
+			results.getRouteFilter().clear();
 		}
 
 		return normalizedQuery.trim();
 	}
 
-	private void tryAsRoute(SearchResultCollection results, String routeQuery, SearchResultFactory resultFactory) {
+	private void tryAsRoute(SearchResultCollection results, String routeQuery,
+			SearchResultFactory resultFactory) {
 		if (routeQuery == null || StringUtils.isEmpty(routeQuery)) {
 			return;
 		}
@@ -394,8 +468,10 @@ public class SearchServiceImpl implements SearchService {
 			Boolean leftOversAreDiscardable = matcher.find();
 
 			if (!routeQuery.equals(routeShortName)
-					&& ((routeShortName.startsWith(routeQuery) && leftOversAreDiscardable) || (routeShortName.endsWith(routeQuery) && leftOversAreDiscardable))) {
-				RouteBean routeBean = _routeShortNameToRouteBeanMap.get(routeShortName);
+					&& ((routeShortName.startsWith(routeQuery) && leftOversAreDiscardable) || (routeShortName
+							.endsWith(routeQuery) && leftOversAreDiscardable))) {
+				RouteBean routeBean = _routeShortNameToRouteBeanMap
+						.get(routeShortName);
 				results.addSuggestion(resultFactory.getRouteResult(routeBean));
 				continue;
 			}
@@ -403,8 +479,10 @@ public class SearchServiceImpl implements SearchService {
 
 		// long name matching
 		for (String routeLongName : _routeLongNameToRouteBeanMap.keySet()) {
-			if (routeLongName.contains(routeQuery + " ") || routeLongName.contains(" " + routeQuery)) {
-				RouteBean routeBean = _routeLongNameToRouteBeanMap.get(routeLongName);
+			if (routeLongName.contains(routeQuery + " ")
+					|| routeLongName.contains(" " + routeQuery)) {
+				RouteBean routeBean = _routeLongNameToRouteBeanMap
+						.get(routeLongName);
 				results.addSuggestion(resultFactory.getRouteResult(routeBean));
 				continue;
 			}
@@ -412,7 +490,8 @@ public class SearchServiceImpl implements SearchService {
 
 	}
 
-	private void tryAsStop(SearchResultCollection results, String stopQuery, SearchResultFactory resultFactory) {
+	private void tryAsStop(SearchResultCollection results, String stopQuery,
+			SearchResultFactory resultFactory) {
 		if (stopQuery == null || StringUtils.isEmpty(stopQuery)) {
 			return;
 		}
@@ -423,22 +502,28 @@ public class SearchServiceImpl implements SearchService {
 		List<StopBean> matches = stopsForId(stopQuery);
 
 		if (matches.size() == 1)
-			results.addMatch(resultFactory.getStopResult(matches.get(0), results.getRouteFilter()));
+			results.addMatch(resultFactory.getStopResult(matches.get(0),
+					results.getRouteFilter()));
 		else {
 			for (StopBean match : matches) {
-				results.addSuggestion(resultFactory.getStopResult(match, results.getRouteFilter()));
+				results.addSuggestion(resultFactory.getStopResult(match,
+						results.getRouteFilter()));
 			}
 		}
 	}
 
-	private void tryAsGeocode(SearchResultCollection results, String query, SearchResultFactory resultFactory) {
-		List<EnterpriseGeocoderResult> geocoderResults = _geocoderService.enterpriseGeocode(query);
+	private void tryAsGeocode(SearchResultCollection results, String query,
+			SearchResultFactory resultFactory) {
+		List<EnterpriseGeocoderResult> geocoderResults = _geocoderService
+				.enterpriseGeocode(query);
 
 		for (EnterpriseGeocoderResult result : geocoderResults) {
 			if (geocoderResults.size() == 1) {
-				results.addMatch(resultFactory.getGeocoderResult(result, results.getRouteFilter()));
+				results.addMatch(resultFactory.getGeocoderResult(result,
+						results.getRouteFilter()));
 			} else {
-				results.addSuggestion(resultFactory.getGeocoderResult(result, results.getRouteFilter()));
+				results.addSuggestion(resultFactory.getGeocoderResult(result,
+						results.getRouteFilter()));
 			}
 		}
 	}
@@ -446,23 +531,42 @@ public class SearchServiceImpl implements SearchService {
 	// Utility method for getting all known stops for an id with no agency
 	private List<StopBean> stopsForId(String id) {
 		List<StopBean> matches = new ArrayList<StopBean>();
-		for (AgencyWithCoverageBean agency : _transitDataService.getAgenciesWithCoverage()) {
-			AgencyAndId potentialStopId = new AgencyAndId(agency.getAgency().getId(), id);
+		for (AgencyWithCoverageBean agency : _transitDataService
+				.getAgenciesWithCoverage()) {
+			AgencyAndId potentialStopId = new AgencyAndId(agency.getAgency()
+					.getId(), id);
 
 			try {
-				StopBean potentialStop = _transitDataService.getStop(potentialStopId.toString());
+				StopBean potentialStop = _transitDataService
+						.getStop(potentialStopId.toString());
 
 				if (potentialStop != null) {
 					matches.add(potentialStop);
 				}
 			} catch (NoSuchStopServiceException ex) {
-				continue;
+				try {
+					StopBean potentialStop = _transitDataService
+							.getStop(getStopIdFromStopCode(potentialStopId.toString()));
+					if (potentialStop != null) {
+						matches.add(potentialStop);
+					}
+				} catch (NoSuchStopServiceException ex2) {
+					continue;
+				}
 			}
 		}
 		return matches;
 	}
 
-	private class StopDistanceFromPointComparator implements Comparator<StopBean> {
+	private String getStopIdFromStopCode(String code) {
+		if (code != null
+				&& _stopCodeToStopIdMap.containsKey(code.toUpperCase()))
+			return _stopCodeToStopIdMap.get(code.toUpperCase());
+		return code;
+	}
+
+	private class StopDistanceFromPointComparator implements
+			Comparator<StopBean> {
 
 		private double lat;
 		private double lon;
@@ -475,8 +579,10 @@ public class SearchServiceImpl implements SearchService {
 		@Override
 		public int compare(StopBean o1, StopBean o2) {
 
-			double d1 = SphericalGeometryLibrary.distanceFaster(this.lat, this.lon, o1.getLat(), o1.getLon());
-			double d2 = SphericalGeometryLibrary.distanceFaster(this.lat, this.lon, o2.getLat(), o2.getLon());
+			double d1 = SphericalGeometryLibrary.distanceFaster(this.lat,
+					this.lon, o1.getLat(), o1.getLon());
+			double d2 = SphericalGeometryLibrary.distanceFaster(this.lat,
+					this.lon, o2.getLat(), o2.getLon());
 
 			if (d1 < d2) {
 				return -1;
@@ -488,7 +594,8 @@ public class SearchServiceImpl implements SearchService {
 		}
 	}
 
-	private class RouteDistanceFromPointComparator implements Comparator<RouteBean> {
+	private class RouteDistanceFromPointComparator implements
+			Comparator<RouteBean> {
 
 		private double lat;
 		private double lon;
@@ -514,16 +621,19 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 		private Double getDistanceToNearestStopOnRoute(RouteBean route) {
-			StopsForRouteBean stopsBean = _transitDataService.getStopsForRoute(route.getId());
+			StopsForRouteBean stopsBean = _transitDataService
+					.getStopsForRoute(route.getId());
 
 			Double minDistanceToRoute = null;
 			for (StopBean stop : stopsBean.getStops()) {
-				Double distance = SphericalGeometryLibrary.distanceFaster(stop.getLat(), stop.getLon(), lat, lon);
+				Double distance = SphericalGeometryLibrary.distanceFaster(
+						stop.getLat(), stop.getLon(), lat, lon);
 				if (minDistanceToRoute == null) {
 					minDistanceToRoute = distance;
 					continue;
 				}
-				if (distance < minDistanceToRoute) minDistanceToRoute = distance;
+				if (distance < minDistanceToRoute)
+					minDistanceToRoute = distance;
 			}
 
 			return minDistanceToRoute;

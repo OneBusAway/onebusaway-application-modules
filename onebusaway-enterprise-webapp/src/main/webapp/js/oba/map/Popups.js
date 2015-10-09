@@ -347,11 +347,14 @@ OBA.Popups = (function() {
 		var stopId = stopResult.id;
 		var stopIdParts = stopId.split("_");
 		var stopIdWithoutAgency = stopIdParts[1];
+		var stopCode = stopResult.code;
 		
+		if(stopCode == null)
+			stopCode = stopId;
 		
 		html += '<div class="header stop">';
 		html += '<p class="title">' + stopResult.name + '</p><p>';
-		html += '<span class="type">Stopcode ' + stopIdWithoutAgency + '</span>';
+		html += '<span class="type">Stopcode ' + stopCode + '</span>';
 		
 		// update time across all arrivals
 		var updateTimestampReference = OBA.Util.ISO8601StringToDate(siri.Siri.ServiceDelivery.ResponseTimestamp).getTime();
