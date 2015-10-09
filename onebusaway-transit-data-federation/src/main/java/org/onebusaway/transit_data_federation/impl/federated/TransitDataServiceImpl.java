@@ -18,7 +18,6 @@ package org.onebusaway.transit_data_federation.impl.federated;
 
 import java.util.Collection;
 import java.util.Date;
-
 import java.util.List;
 import java.util.Map;
 
@@ -84,6 +83,7 @@ import org.onebusaway.transit_data.model.trips.TripsForBoundsQueryBean;
 import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
+import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
 import org.onebusaway.transit_data_federation.services.bundle.TransitDataServiceTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -97,6 +97,9 @@ public class TransitDataServiceImpl implements TransitDataService {
   private TransitDataServiceTemplateImpl _transitDataService;
   
   private BundleManagementService _bundleManagementService;
+  
+  @Autowired
+  private BundleSearchService _bundleSearchService;
   
   @Autowired
   public void set_bundleManagementService(
@@ -606,7 +609,8 @@ public class TransitDataServiceImpl implements TransitDataService {
 
   @Override
   public List<String> getSearchSuggestions(String agencyId, String input) {
-	  return _transitDataService.getSearchSuggestions(agencyId, input);
+	  List<String> result = this._bundleSearchService.getSuggestions(input);
+		return result;
   }
 
 
