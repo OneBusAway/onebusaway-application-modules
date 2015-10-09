@@ -94,7 +94,7 @@ public class RouteConfigAction extends NextBusApiBase implements
 				for (AgencyAndId routeId : routeIds) {
 					routeBeans.add(_transitDataService.getRouteForId(routeId.toString()));
 				}
-			} else {
+			} else if(routeId == null) {
 				routeBeans = _transitDataService.getRoutesForAgencyId(agencyId)
 						.getList();
 			}

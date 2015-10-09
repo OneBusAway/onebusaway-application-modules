@@ -48,7 +48,7 @@ import com.google.gson.JsonParser;
 public class NextBusApiBase {
   @Autowired
   protected TransitDataService _transitDataService;
-  
+
   @Autowired
   protected TdsMappingService _tdsMappingService;
 
@@ -139,7 +139,7 @@ public class NextBusApiBase {
   protected boolean isValidRoute(Body body, AgencyAndId routeId) {
     if (!isValidRoute(routeId)) {
       String routeIdStr = null;
-      if(routeId != null)
+      if (routeId != null)
         routeIdStr = routeId.toString();
       body.getErrors().add(
           new BodyError("Could not get route \"" + routeId
@@ -178,9 +178,8 @@ public class NextBusApiBase {
     if (routeVal != null) {
       try {
         AgencyAndId routeId = AgencyAndIdLibrary.convertFromString(routeVal);
-        if (this.isValidRoute(body, routeId)) {
+        if (this.isValidRoute(routeId))
           routeIds.add(routeId);
-        }
       } catch (IllegalStateException e) {
         for (String agency : agencyIds) {
           AgencyAndId routeId = new AgencyAndId(agency, routeVal);
@@ -188,13 +187,13 @@ public class NextBusApiBase {
             routeIds.add(routeId);
           }
         }
-        if (handleErrors && routeIds.size() == 0) {
-          body.getErrors().add(
-              new BodyError("Could not get route \"" + routeVal
-                  + "\". One of the tags could be bad."));
-        }
       }
-      return true;
+      if (handleErrors && routeIds.size() == 0) {
+        body.getErrors().add(
+            new BodyError("Could not get route \"" + routeVal
+                + "\". One of the tags could be bad."));
+        return false;
+      }
     } else {
       if (handleErrors) {
         body.getErrors().add(
@@ -203,6 +202,7 @@ public class NextBusApiBase {
       }
       return false;
     }
+    return true;
   }
 
   protected <E> boolean processRouteIds(String routeVal,
@@ -240,7 +240,8 @@ public class NextBusApiBase {
         }
         if (stopIds.size() == 0) {
           body.getErrors().add(
-              new BodyError("stopId \"" + stopIdVal + "\" is not a valid stop id integer"));
+              new BodyError("stopId \"" + stopIdVal
+                  + "\" is not a valid stop id integer"));
           return false;
         }
       }
@@ -301,7 +302,8 @@ public class NextBusApiBase {
     return serviceUrl;
   }
 
-  protected JsonObject getJsonObject(String uri) throws MalformedURLException, IOException{
+  protected JsonObject getJsonObject(String uri) throws MalformedURLException,
+      IOException {
     URL url = new URL(uri);
     HttpURLConnection request = (HttpURLConnection) url.openConnection();
     request.connect();
@@ -346,6 +348,5 @@ public class NextBusApiBase {
 
     return sb.toString();
   }
-  
 
 }
