@@ -19,9 +19,17 @@
 <head>
 <script type="text/javascript" src="/onebusaway-watchdog-webapp/js/lib/jquery.js">
 <!-- //prevent jspx minimization -->
+
+</script>
+<script type="text/javascript" src="/js/lib/jquery.js">
+<!-- //prevent jspx minimization -->
 	
 </script>
 <script type="text/javascript" src="/onebusaway-watchdog-webapp/js/metrics.js">
+<!-- //prevent jspx minimization -->
+	
+</script>
+<script type="text/javascript" src="/js/metrics.js">
 <!-- //prevent jspx minimization -->
 	
 </script>
