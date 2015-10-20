@@ -2,6 +2,7 @@
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 <inf71391@gmail.com>
  * Copyright (C) 2012 Google, Inc.
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +65,7 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -559,17 +561,33 @@ public class BlockLocationServiceImpl implements BlockLocationService,
 
         for (TimepointPredictionRecord tpr : timepointPredictions) {
           AgencyAndId stopId = tpr.getTimepointId();
-          long predictedTime = tpr.getTimepointPredictedTime();
+          long predictedTime;
+          if (tpr.getTimepointPredictedDepartureTime() != -1) {
+            predictedTime = tpr.getTimepointPredictedDepartureTime();
+          } else {
+            predictedTime = tpr.getTimepointPredictedArrivalTime();
+          }
           if (stopId == null || predictedTime == 0)
             continue;
 
           for (BlockStopTimeEntry blockStopTime : blockConfig.getStopTimes()) {
             StopTimeEntry stopTime = blockStopTime.getStopTime();
             StopEntry stop = stopTime.getStop();
-            if (stopId.equals(stop.getId())) {
-              int arrivalTime = stopTime.getArrivalTime();
-              int deviation = (int) ((tpr.getTimepointPredictedTime() - blockInstance.getServiceDate()) / 1000 - arrivalTime);
-              scheduleDeviations.put(arrivalTime, (double) deviation);
+            // StopSequence equals to -1 when there is no stop sequence in the GTFS-rt
+            if (stopId.equals(stop.getId()) && stopTime.getTrip().getId().equals(tpr.getTripId()) &&
+               (tpr.getStopSequence() == -1 || stopTime.getSequence() == tpr.getStopSequence())) {
+              int arrivalOrDepartureTime;
+              // We currently use the scheduled arrival time of the stop as the search index
+              // This MUST be consistent with the index search in ArrivalAndSepartureServiceImpl.getBestScheduleDeviation()
+              int index = stopTime.getArrivalTime();
+              if (tpr.getTimepointPredictedDepartureTime() != -1) {
+                // Prefer departure time, because if both exist departure deviations should be the ones propagated downstream
+                arrivalOrDepartureTime = stopTime.getDepartureTime();
+              } else {
+                arrivalOrDepartureTime = stopTime.getArrivalTime();
+              }
+              int deviation = (int) ((predictedTime - blockInstance.getServiceDate()) / 1000 - arrivalOrDepartureTime);
+              scheduleDeviations.put(index, (double) deviation);
             }
           }
         }
@@ -880,7 +898,8 @@ public class BlockLocationServiceImpl implements BlockLocationService,
     for (TimepointPredictionRecord tpr : predictions) {
       builder.setTimepointId(tpr.getTimepointId());
       builder.setTimepointScheduledTime(tpr.getTimepointScheduledTime());
-      builder.setTimepointPredictedTime(tpr.getTimepointPredictedTime());
+      builder.setTimepointPredictedArrivalTime(tpr.getTimepointPredictedArrivalTime());
+      builder.setTimepointPredictedDepartureTime(tpr.getTimepointPredictedDepartureTime());
       results.add(builder.create());
     }
     return results;

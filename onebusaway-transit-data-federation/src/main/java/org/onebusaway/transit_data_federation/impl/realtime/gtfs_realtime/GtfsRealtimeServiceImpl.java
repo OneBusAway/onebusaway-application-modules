@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,9 +117,17 @@ class GtfsRealtimeServiceImpl implements GtfsRealtimeService {
            stopTimeUpdate.setStopId(AgencyAndId.convertToString(tpr.getTimepointId()));
            stopTimeUpdate.setScheduleRelationship(com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED);
       
-           StopTimeEvent.Builder stopTimeEvent = StopTimeEvent.newBuilder();
-           stopTimeEvent.setTime(tpr.getTimepointPredictedTime());
-           stopTimeUpdate.setArrival(stopTimeEvent);
+           if (tpr.getTimepointPredictedArrivalTime() != -1) {
+             StopTimeEvent.Builder arrivalStopTimeEvent = StopTimeEvent.newBuilder();
+             arrivalStopTimeEvent.setTime(tpr.getTimepointPredictedArrivalTime());
+             stopTimeUpdate.setArrival(arrivalStopTimeEvent);
+           }
+   
+           if (tpr.getTimepointPredictedDepartureTime() != -1) {
+             StopTimeEvent.Builder departureStopTimeEvent = StopTimeEvent.newBuilder();
+             departureStopTimeEvent.setTime(tpr.getTimepointPredictedDepartureTime());
+             stopTimeUpdate.setDeparture(departureStopTimeEvent);
+           }
    
            tripUpdate.addStopTimeUpdate(stopTimeUpdate); 
         }

@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2013 Kurt Raschke <kurt@kurtraschke.com>
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +20,19 @@ import java.io.Serializable;
 
 public class TimepointPredictionBean implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private String timepointId;
 
+  private String tripId;
+  
+  private int stopSequence = -1;
+  
   private long timepointScheduledTime;
 
-  private long timepointPredictedTime;
+  private long timepointPredictedArrivalTime = -1;
+
+  private long timepointPredictedDepartureTime = -1;
 
   public TimepointPredictionBean() {
 
@@ -47,11 +54,36 @@ public class TimepointPredictionBean implements Serializable {
     this.timepointScheduledTime = timepointScheduledTime;
   }
 
-  public long getTimepointPredictedTime() {
-    return timepointPredictedTime;
+  public String getTripId() {
+	  return tripId;
   }
 
-  public void setTimepointPredictedTime(long timepointPredictedTime) {
-    this.timepointPredictedTime = timepointPredictedTime;
+  public void setTripId(String tripId) {
+	  this.tripId = tripId;
+  }
+
+  public int getStopSequence() {
+	  return stopSequence;
+  }
+
+  public void setStopSequence(int stopSequence) {
+	  this.stopSequence = stopSequence;
+  }
+
+  public long getTimepointPredictedArrivalTime() {
+	  return timepointPredictedArrivalTime;
+  }
+
+  public void setTimepointPredictedArrivalTime(long timepointPredictedArrivalTime) {
+	  this.timepointPredictedArrivalTime = timepointPredictedArrivalTime;
+  }
+
+  public long getTimepointPredictedDepartureTime() {
+	  return timepointPredictedDepartureTime;
+  }
+
+  public void setTimepointPredictedDepartureTime(
+		  long timepointPredictedDepartureTime) {
+	  this.timepointPredictedDepartureTime = timepointPredictedDepartureTime;
   }
 }

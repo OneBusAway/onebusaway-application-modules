@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,7 +304,7 @@ public class TimepointPredictionServiceImpl {
     if (_includeTimepointPredictionRecords) {
       TimepointPredictionRecord tpr = new TimepointPredictionRecord();
       tpr.setTimepointId(best.getTimepointId());
-      tpr.setTimepointPredictedTime(best.getTimepointPredictedTime());
+      tpr.setTimepointPredictedArrivalTime(best.getTimepointPredictedTime());
       tpr.setTimepointScheduledTime(best.getTimepointScheduledTime());
       r.setTimepointPredictions(Arrays.asList(tpr));
     }

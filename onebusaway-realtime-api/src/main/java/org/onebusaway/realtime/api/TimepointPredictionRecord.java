@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +22,22 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 
 public class TimepointPredictionRecord implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   /**
    * 
    */
   private AgencyAndId timepointId;
+  
+  private AgencyAndId tripId;
+  
+  private int stopSequence = -1;
 
   private long timepointScheduledTime;
 
-  private long timepointPredictedTime;
+  private long timepointPredictedArrivalTime = -1;
+
+  private long timepointPredictedDepartureTime = -1;
 
   public TimepointPredictionRecord() {
 
@@ -38,7 +45,10 @@ public class TimepointPredictionRecord implements Serializable {
 
   public TimepointPredictionRecord(TimepointPredictionRecord r) {
     this.timepointId = r.timepointId;
-    this.timepointPredictedTime = r.timepointPredictedTime;
+    this.tripId = r.tripId;
+    this.stopSequence = r.stopSequence;
+    this.timepointPredictedArrivalTime = r.timepointPredictedArrivalTime;
+    this.timepointPredictedDepartureTime = r.timepointPredictedDepartureTime;
     this.timepointScheduledTime = r.timepointScheduledTime;
   }
 
@@ -58,11 +68,36 @@ public class TimepointPredictionRecord implements Serializable {
     this.timepointScheduledTime = timepointScheduledTime;
   }
 
-  public long getTimepointPredictedTime() {
-    return timepointPredictedTime;
+  public AgencyAndId getTripId() {
+	  return tripId;
   }
 
-  public void setTimepointPredictedTime(long timepointPredictedTime) {
-    this.timepointPredictedTime = timepointPredictedTime;
+  public void setTripId(AgencyAndId tripId) {
+	  this.tripId = tripId;
+  }
+
+  public int getStopSequence() {
+	  return stopSequence;
+  }
+
+  public void setStopSequence(int stopSequence) {
+	  this.stopSequence = stopSequence;
+  }
+
+  public long getTimepointPredictedArrivalTime() {
+	  return timepointPredictedArrivalTime;
+  }
+
+  public void setTimepointPredictedArrivalTime(long timepointPredictedArrivalTime) {
+	  this.timepointPredictedArrivalTime = timepointPredictedArrivalTime;
+  }
+
+  public long getTimepointPredictedDepartureTime() {
+	  return timepointPredictedDepartureTime;
+  }
+
+  public void setTimepointPredictedDepartureTime(
+		  long timepointPredictedDepartureTime) {
+	  this.timepointPredictedDepartureTime = timepointPredictedDepartureTime;
   }
 }

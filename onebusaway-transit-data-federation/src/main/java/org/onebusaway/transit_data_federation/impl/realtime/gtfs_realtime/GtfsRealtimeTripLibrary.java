@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2013 Kurt Raschke <kurt@kurtraschke.com>
  * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -363,24 +364,40 @@ class GtfsRealtimeTripLibrary {
                 instance.getServiceDate());
             if (blockStopTime == null)
               continue;
+
             StopTimeEntry stopTime = blockStopTime.getStopTime();
+
+            TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+            tpr.setTimepointId(stopTime.getStop().getId());
+            tpr.setTripId(stopTime.getTrip().getId());
+            if (stopTimeUpdate.hasStopSequence()) {
+              tpr.setStopSequence(stopTimeUpdate.getStopSequence());
+            }
+
             int currentArrivalTime = computeArrivalTime(stopTime,
                 stopTimeUpdate, instance.getServiceDate());
+            int currentDepartureTime = computeDepartureTime(stopTime,
+                stopTimeUpdate, instance.getServiceDate());
+
             if (currentArrivalTime >= 0) {
               updateBestScheduleDeviation(currentTime,
                   stopTime.getArrivalTime(), currentArrivalTime, best);
-              
+
               long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
-              TimepointPredictionRecord tpr = new TimepointPredictionRecord();
-              tpr.setTimepointId(stopTime.getStop().getId());
-              tpr.setTimepointPredictedTime(timepointPredictedTime);
-              timepointPredictions.add(tpr);
-            }
-            int currentDepartureTime = computeDepartureTime(stopTime,
-                stopTimeUpdate, instance.getServiceDate());
+              tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
+            } 
+
             if (currentDepartureTime >= 0) {
               updateBestScheduleDeviation(currentTime,
                   stopTime.getDepartureTime(), currentDepartureTime, best);
+
+              long timepointPredictedTime = instance.getServiceDate() + (currentDepartureTime * 1000L);
+              tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
+            }
+
+            if (tpr.getTimepointPredictedArrivalTime() != -1 || 
+                tpr.getTimepointPredictedDepartureTime() != -1) {
+              timepointPredictions.add(tpr);
             }
           }
         }

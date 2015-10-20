@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-class ScheduledBlockLocationServiceImpl implements
+public class ScheduledBlockLocationServiceImpl implements
     ScheduledBlockLocationService {
 
   private ShapePointService _shapePointService;
