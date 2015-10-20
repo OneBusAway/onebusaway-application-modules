@@ -72,6 +72,8 @@ message ServiceAlert {
   optional Severity severity = 11;
   
   optional TranslatedString url = 12;
+
+  optional string source = 13;
 }
 
 

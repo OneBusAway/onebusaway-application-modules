@@ -16,36 +16,26 @@
  */
 package org.onebusaway.transit_data_federation.impl.beans;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.onebusaway.collections.CollectionsLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
-import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
-import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
+import org.onebusaway.transit_data.model.service_alerts.*;
 import org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLibrary;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.services.beans.ServiceAlertsBeanService;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
+import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.*;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
 import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
@@ -207,6 +197,8 @@ class ServiceAlertsBeanServiceImpl implements ServiceAlertsBeanService {
 
     situation.addAllAffects(getBeanAsAffects(bean));
     situation.addAllConsequence(getBeanAsConsequences(bean));
+
+    situation.setSource(bean.getSource());
 
     return situation;
   }

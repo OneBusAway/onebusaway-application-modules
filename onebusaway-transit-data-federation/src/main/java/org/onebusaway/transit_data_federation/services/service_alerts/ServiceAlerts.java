@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2011 Google, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6995 +19,7091 @@
 package org.onebusaway.transit_data_federation.services.service_alerts;
 
 public final class ServiceAlerts {
-  private ServiceAlerts() {}
-  public static void registerAllExtensions(
-      com.google.protobuf.ExtensionRegistry registry) {
-  }
-  public interface ServiceAlertsCollectionOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert serviceAlerts = 1;
-    java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> 
+    private ServiceAlerts() {}
+    public static void registerAllExtensions(
+            com.google.protobuf.ExtensionRegistry registry) {
+    }
+    public interface ServiceAlertsCollectionOrBuilder
+            extends com.google.protobuf.MessageOrBuilder {
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert serviceAlerts = 1;
+        java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert>
         getServiceAlertsList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert getServiceAlerts(int index);
-    int getServiceAlertsCount();
-    java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert getServiceAlerts(int index);
+        int getServiceAlertsCount();
+        java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder>
         getServiceAlertsOrBuilderList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder getServiceAlertsOrBuilder(
-        int index);
-  }
-  public static final class ServiceAlertsCollection extends
-      com.google.protobuf.GeneratedMessage
-      implements ServiceAlertsCollectionOrBuilder {
-    // Use ServiceAlertsCollection.newBuilder() to construct.
-    private ServiceAlertsCollection(Builder builder) {
-      super(builder);
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder getServiceAlertsOrBuilder(
+                int index);
     }
-    private ServiceAlertsCollection(boolean noInit) {}
-    
-    private static final ServiceAlertsCollection defaultInstance;
-    public static ServiceAlertsCollection getDefaultInstance() {
-      return defaultInstance;
-    }
-    
-    public ServiceAlertsCollection getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
+    public static final class ServiceAlertsCollection extends
+            com.google.protobuf.GeneratedMessage
+            implements ServiceAlertsCollectionOrBuilder {
+        // Use ServiceAlertsCollection.newBuilder() to construct.
+        private ServiceAlertsCollection(Builder builder) {
+            super(builder);
+        }
+        private ServiceAlertsCollection(boolean noInit) {}
+
+        private static final ServiceAlertsCollection defaultInstance;
+        public static ServiceAlertsCollection getDefaultInstance() {
+            return defaultInstance;
+        }
+
+        public ServiceAlertsCollection getDefaultInstanceForType() {
+            return defaultInstance;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_fieldAccessorTable;
-    }
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert serviceAlerts = 1;
-    public static final int SERVICEALERTS_FIELD_NUMBER = 1;
-    private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> serviceAlerts_;
-    public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> getServiceAlertsList() {
-      return serviceAlerts_;
-    }
-    public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder> 
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_fieldAccessorTable;
+        }
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert serviceAlerts = 1;
+        public static final int SERVICEALERTS_FIELD_NUMBER = 1;
+        private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> serviceAlerts_;
+        public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> getServiceAlertsList() {
+            return serviceAlerts_;
+        }
+        public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder>
         getServiceAlertsOrBuilderList() {
-      return serviceAlerts_;
-    }
-    public int getServiceAlertsCount() {
-      return serviceAlerts_.size();
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert getServiceAlerts(int index) {
-      return serviceAlerts_.get(index);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder getServiceAlertsOrBuilder(
-        int index) {
-      return serviceAlerts_.get(index);
-    }
-    
-    private void initFields() {
-      serviceAlerts_ = java.util.Collections.emptyList();
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      for (int i = 0; i < getServiceAlertsCount(); i++) {
-        if (!getServiceAlerts(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
+            return serviceAlerts_;
         }
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      for (int i = 0; i < serviceAlerts_.size(); i++) {
-        output.writeMessage(1, serviceAlerts_.get(i));
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      for (int i = 0; i < serviceAlerts_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, serviceAlerts_.get(i));
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-    
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollectionOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_fieldAccessorTable;
-      }
-      
-      // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getServiceAlertsFieldBuilder();
+        public int getServiceAlertsCount() {
+            return serviceAlerts_.size();
         }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        if (serviceAlertsBuilder_ == null) {
-          serviceAlerts_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          serviceAlertsBuilder_.clear();
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert getServiceAlerts(int index) {
+            return serviceAlerts_.get(index);
         }
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.getDescriptor();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection getDefaultInstanceForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.getDefaultInstance();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection build() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder getServiceAlertsOrBuilder(
+                int index) {
+            return serviceAlerts_.get(index);
         }
-        return result;
-      }
-      
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
+
+        private void initFields() {
+            serviceAlerts_ = java.util.Collections.emptyList();
         }
-        return result;
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection buildPartial() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection(this);
-        if (serviceAlertsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
-            serviceAlerts_ = java.util.Collections.unmodifiableList(serviceAlerts_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.serviceAlerts_ = serviceAlerts_;
-        } else {
-          result.serviceAlerts_ = serviceAlertsBuilder_.build();
-        }
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection) {
-          return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection other) {
-        if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.getDefaultInstance()) return this;
-        if (serviceAlertsBuilder_ == null) {
-          if (!other.serviceAlerts_.isEmpty()) {
-            if (serviceAlerts_.isEmpty()) {
-              serviceAlerts_ = other.serviceAlerts_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureServiceAlertsIsMutable();
-              serviceAlerts_.addAll(other.serviceAlerts_);
+        private byte memoizedIsInitialized = -1;
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized != -1) return isInitialized == 1;
+
+            for (int i = 0; i < getServiceAlertsCount(); i++) {
+                if (!getServiceAlerts(i).isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
             }
-            onChanged();
-          }
-        } else {
-          if (!other.serviceAlerts_.isEmpty()) {
-            if (serviceAlertsBuilder_.isEmpty()) {
-              serviceAlertsBuilder_.dispose();
-              serviceAlertsBuilder_ = null;
-              serviceAlerts_ = other.serviceAlerts_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              serviceAlertsBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getServiceAlertsFieldBuilder() : null;
-            } else {
-              serviceAlertsBuilder_.addAllMessages(other.serviceAlerts_);
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            getSerializedSize();
+            for (int i = 0; i < serviceAlerts_.size(); i++) {
+                output.writeMessage(1, serviceAlerts_.get(i));
             }
-          }
+            getUnknownFields().writeTo(output);
         }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        for (int i = 0; i < getServiceAlertsCount(); i++) {
-          if (!getServiceAlerts(i).isInitialized()) {
-            
-            return false;
-          }
+
+        private int memoizedSerializedSize = -1;
+        public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            for (int i = 0; i < serviceAlerts_.size(); i++) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(1, serviceAlerts_.get(i));
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
         }
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
+
+        private static final long serialVersionUID = 0L;
+        @java.lang.Override
+        protected java.lang.Object writeReplace()
+                throws java.io.ObjectStreamException {
+            return super.writeReplace();
+        }
+
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
+                byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseDelimitedFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
+                com.google.protobuf.CodedInputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+
+        public static Builder newBuilder() { return Builder.create(); }
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection prototype) {
+            return newBuilder().mergeFrom(prototype);
+        }
+        public Builder toBuilder() { return newBuilder(this); }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        public static final class Builder extends
+                com.google.protobuf.GeneratedMessage.Builder<Builder>
+                implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollectionOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor;
+            }
+
+            protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_fieldAccessorTable;
+            }
+
+            // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+                    getServiceAlertsFieldBuilder();
+                }
+            }
+            private static Builder create() {
+                return new Builder();
+            }
+
+            public Builder clear() {
+                super.clear();
+                if (serviceAlertsBuilder_ == null) {
+                    serviceAlerts_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000001);
+                } else {
+                    serviceAlertsBuilder_.clear();
+                }
                 return this;
-              }
-              break;
             }
-            case 10: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addServiceAlerts(subBuilder.buildPartial());
-              break;
+
+            public Builder clone() {
+                return create().mergeFrom(buildPartial());
             }
-          }
+
+            public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.getDescriptor();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection getDefaultInstanceForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.getDefaultInstance();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection build() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection buildParsed()
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(
+                            result).asInvalidProtocolBufferException();
+                }
+                return result;
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection buildPartial() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection(this);
+                int from_bitField0_ = bitField0_;
+                if (serviceAlertsBuilder_ == null) {
+                    if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                        serviceAlerts_ = java.util.Collections.unmodifiableList(serviceAlerts_);
+                        bitField0_ = (bitField0_ & ~0x00000001);
+                    }
+                    result.serviceAlerts_ = serviceAlerts_;
+                } else {
+                    result.serviceAlerts_ = serviceAlertsBuilder_.build();
+                }
+                onBuilt();
+                return result;
+            }
+
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection) {
+                    return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection)other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection other) {
+                if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.getDefaultInstance()) return this;
+                if (serviceAlertsBuilder_ == null) {
+                    if (!other.serviceAlerts_.isEmpty()) {
+                        if (serviceAlerts_.isEmpty()) {
+                            serviceAlerts_ = other.serviceAlerts_;
+                            bitField0_ = (bitField0_ & ~0x00000001);
+                        } else {
+                            ensureServiceAlertsIsMutable();
+                            serviceAlerts_.addAll(other.serviceAlerts_);
+                        }
+                        onChanged();
+                    }
+                } else {
+                    if (!other.serviceAlerts_.isEmpty()) {
+                        if (serviceAlertsBuilder_.isEmpty()) {
+                            serviceAlertsBuilder_.dispose();
+                            serviceAlertsBuilder_ = null;
+                            serviceAlerts_ = other.serviceAlerts_;
+                            bitField0_ = (bitField0_ & ~0x00000001);
+                            serviceAlertsBuilder_ =
+                                    com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                                            getServiceAlertsFieldBuilder() : null;
+                        } else {
+                            serviceAlertsBuilder_.addAllMessages(other.serviceAlerts_);
+                        }
+                    }
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                return this;
+            }
+
+            public final boolean isInitialized() {
+                for (int i = 0; i < getServiceAlertsCount(); i++) {
+                    if (!getServiceAlerts(i).isInitialized()) {
+
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                        com.google.protobuf.UnknownFieldSet.newBuilder(
+                                this.getUnknownFields());
+                while (true) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            this.setUnknownFields(unknownFields.build());
+                            onChanged();
+                            return this;
+                        default: {
+                            if (!parseUnknownField(input, unknownFields,
+                                    extensionRegistry, tag)) {
+                                this.setUnknownFields(unknownFields.build());
+                                onChanged();
+                                return this;
+                            }
+                            break;
+                        }
+                        case 10: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.newBuilder();
+                            input.readMessage(subBuilder, extensionRegistry);
+                            addServiceAlerts(subBuilder.buildPartial());
+                            break;
+                        }
+                    }
+                }
+            }
+
+            private int bitField0_;
+
+            // repeated .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert serviceAlerts = 1;
+            private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> serviceAlerts_ =
+                    java.util.Collections.emptyList();
+            private void ensureServiceAlertsIsMutable() {
+                if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+                    serviceAlerts_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert>(serviceAlerts_);
+                    bitField0_ |= 0x00000001;
+                }
+            }
+
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder> serviceAlertsBuilder_;
+
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> getServiceAlertsList() {
+                if (serviceAlertsBuilder_ == null) {
+                    return java.util.Collections.unmodifiableList(serviceAlerts_);
+                } else {
+                    return serviceAlertsBuilder_.getMessageList();
+                }
+            }
+            public int getServiceAlertsCount() {
+                if (serviceAlertsBuilder_ == null) {
+                    return serviceAlerts_.size();
+                } else {
+                    return serviceAlertsBuilder_.getCount();
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert getServiceAlerts(int index) {
+                if (serviceAlertsBuilder_ == null) {
+                    return serviceAlerts_.get(index);
+                } else {
+                    return serviceAlertsBuilder_.getMessage(index);
+                }
+            }
+            public Builder setServiceAlerts(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert value) {
+                if (serviceAlertsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureServiceAlertsIsMutable();
+                    serviceAlerts_.set(index, value);
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.setMessage(index, value);
+                }
+                return this;
+            }
+            public Builder setServiceAlerts(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder builderForValue) {
+                if (serviceAlertsBuilder_ == null) {
+                    ensureServiceAlertsIsMutable();
+                    serviceAlerts_.set(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.setMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addServiceAlerts(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert value) {
+                if (serviceAlertsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureServiceAlertsIsMutable();
+                    serviceAlerts_.add(value);
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.addMessage(value);
+                }
+                return this;
+            }
+            public Builder addServiceAlerts(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert value) {
+                if (serviceAlertsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureServiceAlertsIsMutable();
+                    serviceAlerts_.add(index, value);
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.addMessage(index, value);
+                }
+                return this;
+            }
+            public Builder addServiceAlerts(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder builderForValue) {
+                if (serviceAlertsBuilder_ == null) {
+                    ensureServiceAlertsIsMutable();
+                    serviceAlerts_.add(builderForValue.build());
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.addMessage(builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addServiceAlerts(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder builderForValue) {
+                if (serviceAlertsBuilder_ == null) {
+                    ensureServiceAlertsIsMutable();
+                    serviceAlerts_.add(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.addMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAllServiceAlerts(
+                    java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> values) {
+                if (serviceAlertsBuilder_ == null) {
+                    ensureServiceAlertsIsMutable();
+                    super.addAll(values, serviceAlerts_);
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.addAllMessages(values);
+                }
+                return this;
+            }
+            public Builder clearServiceAlerts() {
+                if (serviceAlertsBuilder_ == null) {
+                    serviceAlerts_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000001);
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.clear();
+                }
+                return this;
+            }
+            public Builder removeServiceAlerts(int index) {
+                if (serviceAlertsBuilder_ == null) {
+                    ensureServiceAlertsIsMutable();
+                    serviceAlerts_.remove(index);
+                    onChanged();
+                } else {
+                    serviceAlertsBuilder_.remove(index);
+                }
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder getServiceAlertsBuilder(
+                    int index) {
+                return getServiceAlertsFieldBuilder().getBuilder(index);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder getServiceAlertsOrBuilder(
+                    int index) {
+                if (serviceAlertsBuilder_ == null) {
+                    return serviceAlerts_.get(index);  } else {
+                    return serviceAlertsBuilder_.getMessageOrBuilder(index);
+                }
+            }
+            public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder>
+            getServiceAlertsOrBuilderList() {
+                if (serviceAlertsBuilder_ != null) {
+                    return serviceAlertsBuilder_.getMessageOrBuilderList();
+                } else {
+                    return java.util.Collections.unmodifiableList(serviceAlerts_);
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder addServiceAlertsBuilder() {
+                return getServiceAlertsFieldBuilder().addBuilder(
+                        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDefaultInstance());
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder addServiceAlertsBuilder(
+                    int index) {
+                return getServiceAlertsFieldBuilder().addBuilder(
+                        index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDefaultInstance());
+            }
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder>
+            getServiceAlertsBuilderList() {
+                return getServiceAlertsFieldBuilder().getBuilderList();
+            }
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder>
+            getServiceAlertsFieldBuilder() {
+                if (serviceAlertsBuilder_ == null) {
+                    serviceAlertsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder>(
+                            serviceAlerts_,
+                            ((bitField0_ & 0x00000001) == 0x00000001),
+                            getParentForChildren(),
+                            isClean());
+                    serviceAlerts_ = null;
+                }
+                return serviceAlertsBuilder_;
+            }
+
+            // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlertsCollection)
         }
-      }
-      
-      private int bitField0_;
-      
-      // repeated .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert serviceAlerts = 1;
-      private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> serviceAlerts_ =
-        java.util.Collections.emptyList();
-      private void ensureServiceAlertsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          serviceAlerts_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert>(serviceAlerts_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-      
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder> serviceAlertsBuilder_;
-      
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> getServiceAlertsList() {
-        if (serviceAlertsBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(serviceAlerts_);
-        } else {
-          return serviceAlertsBuilder_.getMessageList();
+
+        static {
+            defaultInstance = new ServiceAlertsCollection(true);
+            defaultInstance.initFields();
         }
-      }
-      public int getServiceAlertsCount() {
-        if (serviceAlertsBuilder_ == null) {
-          return serviceAlerts_.size();
-        } else {
-          return serviceAlertsBuilder_.getCount();
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert getServiceAlerts(int index) {
-        if (serviceAlertsBuilder_ == null) {
-          return serviceAlerts_.get(index);
-        } else {
-          return serviceAlertsBuilder_.getMessage(index);
-        }
-      }
-      public Builder setServiceAlerts(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert value) {
-        if (serviceAlertsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServiceAlertsIsMutable();
-          serviceAlerts_.set(index, value);
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      public Builder setServiceAlerts(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder builderForValue) {
-        if (serviceAlertsBuilder_ == null) {
-          ensureServiceAlertsIsMutable();
-          serviceAlerts_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addServiceAlerts(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert value) {
-        if (serviceAlertsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServiceAlertsIsMutable();
-          serviceAlerts_.add(value);
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      public Builder addServiceAlerts(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert value) {
-        if (serviceAlertsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureServiceAlertsIsMutable();
-          serviceAlerts_.add(index, value);
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      public Builder addServiceAlerts(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder builderForValue) {
-        if (serviceAlertsBuilder_ == null) {
-          ensureServiceAlertsIsMutable();
-          serviceAlerts_.add(builderForValue.build());
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addServiceAlerts(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder builderForValue) {
-        if (serviceAlertsBuilder_ == null) {
-          ensureServiceAlertsIsMutable();
-          serviceAlerts_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAllServiceAlerts(
-          java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert> values) {
-        if (serviceAlertsBuilder_ == null) {
-          ensureServiceAlertsIsMutable();
-          super.addAll(values, serviceAlerts_);
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      public Builder clearServiceAlerts() {
-        if (serviceAlertsBuilder_ == null) {
-          serviceAlerts_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.clear();
-        }
-        return this;
-      }
-      public Builder removeServiceAlerts(int index) {
-        if (serviceAlertsBuilder_ == null) {
-          ensureServiceAlertsIsMutable();
-          serviceAlerts_.remove(index);
-          onChanged();
-        } else {
-          serviceAlertsBuilder_.remove(index);
-        }
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder getServiceAlertsBuilder(
-          int index) {
-        return getServiceAlertsFieldBuilder().getBuilder(index);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder getServiceAlertsOrBuilder(
-          int index) {
-        if (serviceAlertsBuilder_ == null) {
-          return serviceAlerts_.get(index);  } else {
-          return serviceAlertsBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder> 
-           getServiceAlertsOrBuilderList() {
-        if (serviceAlertsBuilder_ != null) {
-          return serviceAlertsBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(serviceAlerts_);
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder addServiceAlertsBuilder() {
-        return getServiceAlertsFieldBuilder().addBuilder(
-            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDefaultInstance());
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder addServiceAlertsBuilder(
-          int index) {
-        return getServiceAlertsFieldBuilder().addBuilder(
-            index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDefaultInstance());
-      }
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder> 
-           getServiceAlertsBuilderList() {
-        return getServiceAlertsFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder> 
-          getServiceAlertsFieldBuilder() {
-        if (serviceAlertsBuilder_ == null) {
-          serviceAlertsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder>(
-                  serviceAlerts_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
-                  getParentForChildren(),
-                  isClean());
-          serviceAlerts_ = null;
-        }
-        return serviceAlertsBuilder_;
-      }
-      
-      // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlertsCollection)
+
+        // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlertsCollection)
     }
-    
-    static {
-      defaultInstance = new ServiceAlertsCollection(true);
-      defaultInstance.initFields();
-    }
-    
-    // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlertsCollection)
-  }
-  
-  public interface ServiceAlertOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // required .org_onebusaway_transit_data_federation_services_service_alerts.Id id = 1;
-    boolean hasId();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getId();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getIdOrBuilder();
-    
-    // required uint64 creationTime = 2;
-    boolean hasCreationTime();
-    long getCreationTime();
-    
-    // required uint64 modifiedTime = 3;
-    boolean hasModifiedTime();
-    long getModifiedTime();
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange activeWindow = 4;
-    java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> 
+
+    public interface ServiceAlertOrBuilder
+            extends com.google.protobuf.MessageOrBuilder {
+
+        // required .org_onebusaway_transit_data_federation_services_service_alerts.Id id = 1;
+        boolean hasId();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getId();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getIdOrBuilder();
+
+        // required uint64 creationTime = 2;
+        boolean hasCreationTime();
+        long getCreationTime();
+
+        // required uint64 modifiedTime = 3;
+        boolean hasModifiedTime();
+        long getModifiedTime();
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange activeWindow = 4;
+        java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange>
         getActiveWindowList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getActiveWindow(int index);
-    int getActiveWindowCount();
-    java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getActiveWindow(int index);
+        int getActiveWindowCount();
+        java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>
         getActiveWindowOrBuilderList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getActiveWindowOrBuilder(
-        int index);
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange publicationWindow = 5;
-    java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getActiveWindowOrBuilder(
+                int index);
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange publicationWindow = 5;
+        java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange>
         getPublicationWindowList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getPublicationWindow(int index);
-    int getPublicationWindowCount();
-    java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getPublicationWindow(int index);
+        int getPublicationWindowCount();
+        java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>
         getPublicationWindowOrBuilderList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getPublicationWindowOrBuilder(
-        int index);
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString summary = 6;
-    boolean hasSummary();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getSummary();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getSummaryOrBuilder();
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString description = 7;
-    boolean hasDescription();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getDescription();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getDescriptionOrBuilder();
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Cause cause = 8 [default = UNKNOWN_CAUSE];
-    boolean hasCause();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause getCause();
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Affects affects = 9;
-    java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getPublicationWindowOrBuilder(
+                int index);
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString summary = 6;
+        boolean hasSummary();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getSummary();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getSummaryOrBuilder();
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString description = 7;
+        boolean hasDescription();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getDescription();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getDescriptionOrBuilder();
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Cause cause = 8 [default = UNKNOWN_CAUSE];
+        boolean hasCause();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause getCause();
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Affects affects = 9;
+        java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects>
         getAffectsList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects getAffects(int index);
-    int getAffectsCount();
-    java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects getAffects(int index);
+        int getAffectsCount();
+        java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder>
         getAffectsOrBuilderList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder getAffectsOrBuilder(
-        int index);
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Consequence consequence = 10;
-    java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder getAffectsOrBuilder(
+                int index);
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Consequence consequence = 10;
+        java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence>
         getConsequenceList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence getConsequence(int index);
-    int getConsequenceCount();
-    java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence getConsequence(int index);
+        int getConsequenceCount();
+        java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder>
         getConsequenceOrBuilderList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder getConsequenceOrBuilder(
-        int index);
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Severity severity = 11;
-    boolean hasSeverity();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity getSeverity();
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString url = 12;
-    boolean hasUrl();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getUrl();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getUrlOrBuilder();
-  }
-  public static final class ServiceAlert extends
-      com.google.protobuf.GeneratedMessage
-      implements ServiceAlertOrBuilder {
-    // Use ServiceAlert.newBuilder() to construct.
-    private ServiceAlert(Builder builder) {
-      super(builder);
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder getConsequenceOrBuilder(
+                int index);
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Severity severity = 11;
+        boolean hasSeverity();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity getSeverity();
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString url = 12;
+        boolean hasUrl();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getUrl();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getUrlOrBuilder();
+
+        // optional string source = 13;
+        boolean hasSource();
+        String getSource();
     }
-    private ServiceAlert(boolean noInit) {}
-    
-    private static final ServiceAlert defaultInstance;
-    public static ServiceAlert getDefaultInstance() {
-      return defaultInstance;
-    }
-    
-    public ServiceAlert getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
+    public static final class ServiceAlert extends
+            com.google.protobuf.GeneratedMessage
+            implements ServiceAlertOrBuilder {
+        // Use ServiceAlert.newBuilder() to construct.
+        private ServiceAlert(Builder builder) {
+            super(builder);
+        }
+        private ServiceAlert(boolean noInit) {}
+
+        private static final ServiceAlert defaultInstance;
+        public static ServiceAlert getDefaultInstance() {
+            return defaultInstance;
+        }
+
+        public ServiceAlert getDefaultInstanceForType() {
+            return defaultInstance;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_fieldAccessorTable;
-    }
-    
-    public enum Cause
-        implements com.google.protobuf.ProtocolMessageEnum {
-      UNKNOWN_CAUSE(0, 1),
-      OTHER_CAUSE(1, 2),
-      TECHNICAL_PROBLEM(2, 3),
-      STRIKE(3, 4),
-      DEMONSTRATION(4, 5),
-      ACCIDENT(5, 6),
-      HOLIDAY(6, 7),
-      WEATHER(7, 8),
-      MAINTENANCE(8, 9),
-      CONSTRUCTION(9, 10),
-      POLICE_ACTIVITY(10, 11),
-      MEDICAL_EMERGENCY(11, 12),
-      ;
-      
-      public static final int UNKNOWN_CAUSE_VALUE = 1;
-      public static final int OTHER_CAUSE_VALUE = 2;
-      public static final int TECHNICAL_PROBLEM_VALUE = 3;
-      public static final int STRIKE_VALUE = 4;
-      public static final int DEMONSTRATION_VALUE = 5;
-      public static final int ACCIDENT_VALUE = 6;
-      public static final int HOLIDAY_VALUE = 7;
-      public static final int WEATHER_VALUE = 8;
-      public static final int MAINTENANCE_VALUE = 9;
-      public static final int CONSTRUCTION_VALUE = 10;
-      public static final int POLICE_ACTIVITY_VALUE = 11;
-      public static final int MEDICAL_EMERGENCY_VALUE = 12;
-      
-      
-      public final int getNumber() { return value; }
-      
-      public static Cause valueOf(int value) {
-        switch (value) {
-          case 1: return UNKNOWN_CAUSE;
-          case 2: return OTHER_CAUSE;
-          case 3: return TECHNICAL_PROBLEM;
-          case 4: return STRIKE;
-          case 5: return DEMONSTRATION;
-          case 6: return ACCIDENT;
-          case 7: return HOLIDAY;
-          case 8: return WEATHER;
-          case 9: return MAINTENANCE;
-          case 10: return CONSTRUCTION;
-          case 11: return POLICE_ACTIVITY;
-          case 12: return MEDICAL_EMERGENCY;
-          default: return null;
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_fieldAccessorTable;
         }
-      }
-      
-      public static com.google.protobuf.Internal.EnumLiteMap<Cause>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static com.google.protobuf.Internal.EnumLiteMap<Cause>
-          internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Cause>() {
-              public Cause findValueByNumber(int number) {
-                return Cause.valueOf(number);
-              }
+
+        public enum Cause
+                implements com.google.protobuf.ProtocolMessageEnum {
+            UNKNOWN_CAUSE(0, 1),
+            OTHER_CAUSE(1, 2),
+            TECHNICAL_PROBLEM(2, 3),
+            STRIKE(3, 4),
+            DEMONSTRATION(4, 5),
+            ACCIDENT(5, 6),
+            HOLIDAY(6, 7),
+            WEATHER(7, 8),
+            MAINTENANCE(8, 9),
+            CONSTRUCTION(9, 10),
+            POLICE_ACTIVITY(10, 11),
+            MEDICAL_EMERGENCY(11, 12),
+            ;
+
+            public static final int UNKNOWN_CAUSE_VALUE = 1;
+            public static final int OTHER_CAUSE_VALUE = 2;
+            public static final int TECHNICAL_PROBLEM_VALUE = 3;
+            public static final int STRIKE_VALUE = 4;
+            public static final int DEMONSTRATION_VALUE = 5;
+            public static final int ACCIDENT_VALUE = 6;
+            public static final int HOLIDAY_VALUE = 7;
+            public static final int WEATHER_VALUE = 8;
+            public static final int MAINTENANCE_VALUE = 9;
+            public static final int CONSTRUCTION_VALUE = 10;
+            public static final int POLICE_ACTIVITY_VALUE = 11;
+            public static final int MEDICAL_EMERGENCY_VALUE = 12;
+
+
+            public final int getNumber() { return value; }
+
+            public static Cause valueOf(int value) {
+                switch (value) {
+                    case 1: return UNKNOWN_CAUSE;
+                    case 2: return OTHER_CAUSE;
+                    case 3: return TECHNICAL_PROBLEM;
+                    case 4: return STRIKE;
+                    case 5: return DEMONSTRATION;
+                    case 6: return ACCIDENT;
+                    case 7: return HOLIDAY;
+                    case 8: return WEATHER;
+                    case 9: return MAINTENANCE;
+                    case 10: return CONSTRUCTION;
+                    case 11: return POLICE_ACTIVITY;
+                    case 12: return MEDICAL_EMERGENCY;
+                    default: return null;
+                }
+            }
+
+            public static com.google.protobuf.Internal.EnumLiteMap<Cause>
+            internalGetValueMap() {
+                return internalValueMap;
+            }
+            private static com.google.protobuf.Internal.EnumLiteMap<Cause>
+                    internalValueMap =
+                    new com.google.protobuf.Internal.EnumLiteMap<Cause>() {
+                        public Cause findValueByNumber(int number) {
+                            return Cause.valueOf(number);
+                        }
+                    };
+
+            public final com.google.protobuf.Descriptors.EnumValueDescriptor
+            getValueDescriptor() {
+                return getDescriptor().getValues().get(index);
+            }
+            public final com.google.protobuf.Descriptors.EnumDescriptor
+            getDescriptorForType() {
+                return getDescriptor();
+            }
+            public static final com.google.protobuf.Descriptors.EnumDescriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDescriptor().getEnumTypes().get(0);
+            }
+
+            private static final Cause[] VALUES = {
+                    UNKNOWN_CAUSE, OTHER_CAUSE, TECHNICAL_PROBLEM, STRIKE, DEMONSTRATION, ACCIDENT, HOLIDAY, WEATHER, MAINTENANCE, CONSTRUCTION, POLICE_ACTIVITY, MEDICAL_EMERGENCY,
             };
-      
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        return getDescriptor().getValues().get(index);
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDescriptor().getEnumTypes().get(0);
-      }
-      
-      private static final Cause[] VALUES = {
-        UNKNOWN_CAUSE, OTHER_CAUSE, TECHNICAL_PROBLEM, STRIKE, DEMONSTRATION, ACCIDENT, HOLIDAY, WEATHER, MAINTENANCE, CONSTRUCTION, POLICE_ACTIVITY, MEDICAL_EMERGENCY, 
-      };
-      
-      public static Cause valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
+
+            public static Cause valueOf(
+                    com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+                if (desc.getType() != getDescriptor()) {
+                    throw new java.lang.IllegalArgumentException(
+                            "EnumValueDescriptor is not for this type.");
+                }
+                return VALUES[desc.getIndex()];
+            }
+
+            private final int index;
+            private final int value;
+
+            private Cause(int index, int value) {
+                this.index = index;
+                this.value = value;
+            }
+
+            // @@protoc_insertion_point(enum_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Cause)
         }
-        return VALUES[desc.getIndex()];
-      }
-      
-      private final int index;
-      private final int value;
-      
-      private Cause(int index, int value) {
-        this.index = index;
-        this.value = value;
-      }
-      
-      // @@protoc_insertion_point(enum_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Cause)
-    }
-    
-    public enum Severity
-        implements com.google.protobuf.ProtocolMessageEnum {
-      NO_IMPACT(0, 1),
-      UNKNOWN(1, 2),
-      VERY_SLIGHT(2, 3),
-      SLIGHT(3, 4),
-      NORMAL(4, 5),
-      SEVERE(5, 6),
-      VERY_SEVERE(6, 7),
-      ;
-      
-      public static final int NO_IMPACT_VALUE = 1;
-      public static final int UNKNOWN_VALUE = 2;
-      public static final int VERY_SLIGHT_VALUE = 3;
-      public static final int SLIGHT_VALUE = 4;
-      public static final int NORMAL_VALUE = 5;
-      public static final int SEVERE_VALUE = 6;
-      public static final int VERY_SEVERE_VALUE = 7;
-      
-      
-      public final int getNumber() { return value; }
-      
-      public static Severity valueOf(int value) {
-        switch (value) {
-          case 1: return NO_IMPACT;
-          case 2: return UNKNOWN;
-          case 3: return VERY_SLIGHT;
-          case 4: return SLIGHT;
-          case 5: return NORMAL;
-          case 6: return SEVERE;
-          case 7: return VERY_SEVERE;
-          default: return null;
-        }
-      }
-      
-      public static com.google.protobuf.Internal.EnumLiteMap<Severity>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static com.google.protobuf.Internal.EnumLiteMap<Severity>
-          internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Severity>() {
-              public Severity findValueByNumber(int number) {
-                return Severity.valueOf(number);
-              }
+
+        public enum Severity
+                implements com.google.protobuf.ProtocolMessageEnum {
+            NO_IMPACT(0, 1),
+            UNKNOWN(1, 2),
+            VERY_SLIGHT(2, 3),
+            SLIGHT(3, 4),
+            NORMAL(4, 5),
+            SEVERE(5, 6),
+            VERY_SEVERE(6, 7),
+            ;
+
+            public static final int NO_IMPACT_VALUE = 1;
+            public static final int UNKNOWN_VALUE = 2;
+            public static final int VERY_SLIGHT_VALUE = 3;
+            public static final int SLIGHT_VALUE = 4;
+            public static final int NORMAL_VALUE = 5;
+            public static final int SEVERE_VALUE = 6;
+            public static final int VERY_SEVERE_VALUE = 7;
+
+
+            public final int getNumber() { return value; }
+
+            public static Severity valueOf(int value) {
+                switch (value) {
+                    case 1: return NO_IMPACT;
+                    case 2: return UNKNOWN;
+                    case 3: return VERY_SLIGHT;
+                    case 4: return SLIGHT;
+                    case 5: return NORMAL;
+                    case 6: return SEVERE;
+                    case 7: return VERY_SEVERE;
+                    default: return null;
+                }
+            }
+
+            public static com.google.protobuf.Internal.EnumLiteMap<Severity>
+            internalGetValueMap() {
+                return internalValueMap;
+            }
+            private static com.google.protobuf.Internal.EnumLiteMap<Severity>
+                    internalValueMap =
+                    new com.google.protobuf.Internal.EnumLiteMap<Severity>() {
+                        public Severity findValueByNumber(int number) {
+                            return Severity.valueOf(number);
+                        }
+                    };
+
+            public final com.google.protobuf.Descriptors.EnumValueDescriptor
+            getValueDescriptor() {
+                return getDescriptor().getValues().get(index);
+            }
+            public final com.google.protobuf.Descriptors.EnumDescriptor
+            getDescriptorForType() {
+                return getDescriptor();
+            }
+            public static final com.google.protobuf.Descriptors.EnumDescriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDescriptor().getEnumTypes().get(1);
+            }
+
+            private static final Severity[] VALUES = {
+                    NO_IMPACT, UNKNOWN, VERY_SLIGHT, SLIGHT, NORMAL, SEVERE, VERY_SEVERE,
             };
-      
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        return getDescriptor().getValues().get(index);
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDescriptor().getEnumTypes().get(1);
-      }
-      
-      private static final Severity[] VALUES = {
-        NO_IMPACT, UNKNOWN, VERY_SLIGHT, SLIGHT, NORMAL, SEVERE, VERY_SEVERE, 
-      };
-      
-      public static Severity valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
+
+            public static Severity valueOf(
+                    com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+                if (desc.getType() != getDescriptor()) {
+                    throw new java.lang.IllegalArgumentException(
+                            "EnumValueDescriptor is not for this type.");
+                }
+                return VALUES[desc.getIndex()];
+            }
+
+            private final int index;
+            private final int value;
+
+            private Severity(int index, int value) {
+                this.index = index;
+                this.value = value;
+            }
+
+            // @@protoc_insertion_point(enum_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Severity)
         }
-        return VALUES[desc.getIndex()];
-      }
-      
-      private final int index;
-      private final int value;
-      
-      private Severity(int index, int value) {
-        this.index = index;
-        this.value = value;
-      }
-      
-      // @@protoc_insertion_point(enum_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Severity)
-    }
-    
-    private int bitField0_;
-    // required .org_onebusaway_transit_data_federation_services_service_alerts.Id id = 1;
-    public static final int ID_FIELD_NUMBER = 1;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id id_;
-    public boolean hasId() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getId() {
-      return id_;
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getIdOrBuilder() {
-      return id_;
-    }
-    
-    // required uint64 creationTime = 2;
-    public static final int CREATIONTIME_FIELD_NUMBER = 2;
-    private long creationTime_;
-    public boolean hasCreationTime() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    public long getCreationTime() {
-      return creationTime_;
-    }
-    
-    // required uint64 modifiedTime = 3;
-    public static final int MODIFIEDTIME_FIELD_NUMBER = 3;
-    private long modifiedTime_;
-    public boolean hasModifiedTime() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    public long getModifiedTime() {
-      return modifiedTime_;
-    }
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange activeWindow = 4;
-    public static final int ACTIVEWINDOW_FIELD_NUMBER = 4;
-    private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> activeWindow_;
-    public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> getActiveWindowList() {
-      return activeWindow_;
-    }
-    public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> 
+
+        private int bitField0_;
+        // required .org_onebusaway_transit_data_federation_services_service_alerts.Id id = 1;
+        public static final int ID_FIELD_NUMBER = 1;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id id_;
+        public boolean hasId() {
+            return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getId() {
+            return id_;
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getIdOrBuilder() {
+            return id_;
+        }
+
+        // required uint64 creationTime = 2;
+        public static final int CREATIONTIME_FIELD_NUMBER = 2;
+        private long creationTime_;
+        public boolean hasCreationTime() {
+            return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        public long getCreationTime() {
+            return creationTime_;
+        }
+
+        // required uint64 modifiedTime = 3;
+        public static final int MODIFIEDTIME_FIELD_NUMBER = 3;
+        private long modifiedTime_;
+        public boolean hasModifiedTime() {
+            return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        public long getModifiedTime() {
+            return modifiedTime_;
+        }
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange activeWindow = 4;
+        public static final int ACTIVEWINDOW_FIELD_NUMBER = 4;
+        private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> activeWindow_;
+        public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> getActiveWindowList() {
+            return activeWindow_;
+        }
+        public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>
         getActiveWindowOrBuilderList() {
-      return activeWindow_;
-    }
-    public int getActiveWindowCount() {
-      return activeWindow_.size();
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getActiveWindow(int index) {
-      return activeWindow_.get(index);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getActiveWindowOrBuilder(
-        int index) {
-      return activeWindow_.get(index);
-    }
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange publicationWindow = 5;
-    public static final int PUBLICATIONWINDOW_FIELD_NUMBER = 5;
-    private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> publicationWindow_;
-    public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> getPublicationWindowList() {
-      return publicationWindow_;
-    }
-    public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> 
+            return activeWindow_;
+        }
+        public int getActiveWindowCount() {
+            return activeWindow_.size();
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getActiveWindow(int index) {
+            return activeWindow_.get(index);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getActiveWindowOrBuilder(
+                int index) {
+            return activeWindow_.get(index);
+        }
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange publicationWindow = 5;
+        public static final int PUBLICATIONWINDOW_FIELD_NUMBER = 5;
+        private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> publicationWindow_;
+        public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> getPublicationWindowList() {
+            return publicationWindow_;
+        }
+        public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>
         getPublicationWindowOrBuilderList() {
-      return publicationWindow_;
-    }
-    public int getPublicationWindowCount() {
-      return publicationWindow_.size();
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getPublicationWindow(int index) {
-      return publicationWindow_.get(index);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getPublicationWindowOrBuilder(
-        int index) {
-      return publicationWindow_.get(index);
-    }
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString summary = 6;
-    public static final int SUMMARY_FIELD_NUMBER = 6;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString summary_;
-    public boolean hasSummary() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getSummary() {
-      return summary_;
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getSummaryOrBuilder() {
-      return summary_;
-    }
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString description = 7;
-    public static final int DESCRIPTION_FIELD_NUMBER = 7;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString description_;
-    public boolean hasDescription() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getDescription() {
-      return description_;
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getDescriptionOrBuilder() {
-      return description_;
-    }
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Cause cause = 8 [default = UNKNOWN_CAUSE];
-    public static final int CAUSE_FIELD_NUMBER = 8;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause cause_;
-    public boolean hasCause() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause getCause() {
-      return cause_;
-    }
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Affects affects = 9;
-    public static final int AFFECTS_FIELD_NUMBER = 9;
-    private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> affects_;
-    public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> getAffectsList() {
-      return affects_;
-    }
-    public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder> 
+            return publicationWindow_;
+        }
+        public int getPublicationWindowCount() {
+            return publicationWindow_.size();
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getPublicationWindow(int index) {
+            return publicationWindow_.get(index);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getPublicationWindowOrBuilder(
+                int index) {
+            return publicationWindow_.get(index);
+        }
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString summary = 6;
+        public static final int SUMMARY_FIELD_NUMBER = 6;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString summary_;
+        public boolean hasSummary() {
+            return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getSummary() {
+            return summary_;
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getSummaryOrBuilder() {
+            return summary_;
+        }
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString description = 7;
+        public static final int DESCRIPTION_FIELD_NUMBER = 7;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString description_;
+        public boolean hasDescription() {
+            return ((bitField0_ & 0x00000010) == 0x00000010);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getDescription() {
+            return description_;
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getDescriptionOrBuilder() {
+            return description_;
+        }
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Cause cause = 8 [default = UNKNOWN_CAUSE];
+        public static final int CAUSE_FIELD_NUMBER = 8;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause cause_;
+        public boolean hasCause() {
+            return ((bitField0_ & 0x00000020) == 0x00000020);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause getCause() {
+            return cause_;
+        }
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Affects affects = 9;
+        public static final int AFFECTS_FIELD_NUMBER = 9;
+        private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> affects_;
+        public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> getAffectsList() {
+            return affects_;
+        }
+        public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder>
         getAffectsOrBuilderList() {
-      return affects_;
-    }
-    public int getAffectsCount() {
-      return affects_.size();
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects getAffects(int index) {
-      return affects_.get(index);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder getAffectsOrBuilder(
-        int index) {
-      return affects_.get(index);
-    }
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Consequence consequence = 10;
-    public static final int CONSEQUENCE_FIELD_NUMBER = 10;
-    private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> consequence_;
-    public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> getConsequenceList() {
-      return consequence_;
-    }
-    public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder> 
+            return affects_;
+        }
+        public int getAffectsCount() {
+            return affects_.size();
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects getAffects(int index) {
+            return affects_.get(index);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder getAffectsOrBuilder(
+                int index) {
+            return affects_.get(index);
+        }
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Consequence consequence = 10;
+        public static final int CONSEQUENCE_FIELD_NUMBER = 10;
+        private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> consequence_;
+        public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> getConsequenceList() {
+            return consequence_;
+        }
+        public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder>
         getConsequenceOrBuilderList() {
-      return consequence_;
-    }
-    public int getConsequenceCount() {
-      return consequence_.size();
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence getConsequence(int index) {
-      return consequence_.get(index);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder getConsequenceOrBuilder(
-        int index) {
-      return consequence_.get(index);
-    }
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Severity severity = 11;
-    public static final int SEVERITY_FIELD_NUMBER = 11;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity severity_;
-    public boolean hasSeverity() {
-      return ((bitField0_ & 0x00000040) == 0x00000040);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity getSeverity() {
-      return severity_;
-    }
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString url = 12;
-    public static final int URL_FIELD_NUMBER = 12;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString url_;
-    public boolean hasUrl() {
-      return ((bitField0_ & 0x00000080) == 0x00000080);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getUrl() {
-      return url_;
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getUrlOrBuilder() {
-      return url_;
-    }
-    
-    private void initFields() {
-      id_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      creationTime_ = 0L;
-      modifiedTime_ = 0L;
-      activeWindow_ = java.util.Collections.emptyList();
-      publicationWindow_ = java.util.Collections.emptyList();
-      summary_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-      description_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-      cause_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
-      affects_ = java.util.Collections.emptyList();
-      consequence_ = java.util.Collections.emptyList();
-      severity_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.NO_IMPACT;
-      url_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      if (!hasId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasCreationTime()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasModifiedTime()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!getId().isInitialized()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (hasSummary()) {
-        if (!getSummary().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
+            return consequence_;
         }
-      }
-      if (hasDescription()) {
-        if (!getDescription().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
+        public int getConsequenceCount() {
+            return consequence_.size();
         }
-      }
-      for (int i = 0; i < getAffectsCount(); i++) {
-        if (!getAffects(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence getConsequence(int index) {
+            return consequence_.get(index);
         }
-      }
-      for (int i = 0; i < getConsequenceCount(); i++) {
-        if (!getConsequence(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder getConsequenceOrBuilder(
+                int index) {
+            return consequence_.get(index);
         }
-      }
-      if (hasUrl()) {
-        if (!getUrl().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Severity severity = 11;
+        public static final int SEVERITY_FIELD_NUMBER = 11;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity severity_;
+        public boolean hasSeverity() {
+            return ((bitField0_ & 0x00000040) == 0x00000040);
         }
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeMessage(1, id_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeUInt64(2, creationTime_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeUInt64(3, modifiedTime_);
-      }
-      for (int i = 0; i < activeWindow_.size(); i++) {
-        output.writeMessage(4, activeWindow_.get(i));
-      }
-      for (int i = 0; i < publicationWindow_.size(); i++) {
-        output.writeMessage(5, publicationWindow_.get(i));
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeMessage(6, summary_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeMessage(7, description_);
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeEnum(8, cause_.getNumber());
-      }
-      for (int i = 0; i < affects_.size(); i++) {
-        output.writeMessage(9, affects_.get(i));
-      }
-      for (int i = 0; i < consequence_.size(); i++) {
-        output.writeMessage(10, consequence_.get(i));
-      }
-      if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        output.writeEnum(11, severity_.getNumber());
-      }
-      if (((bitField0_ & 0x00000080) == 0x00000080)) {
-        output.writeMessage(12, url_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, id_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(2, creationTime_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(3, modifiedTime_);
-      }
-      for (int i = 0; i < activeWindow_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, activeWindow_.get(i));
-      }
-      for (int i = 0; i < publicationWindow_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, publicationWindow_.get(i));
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(6, summary_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(7, description_);
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(8, cause_.getNumber());
-      }
-      for (int i = 0; i < affects_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(9, affects_.get(i));
-      }
-      for (int i = 0; i < consequence_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, consequence_.get(i));
-      }
-      if (((bitField0_ & 0x00000040) == 0x00000040)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(11, severity_.getNumber());
-      }
-      if (((bitField0_ & 0x00000080) == 0x00000080)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(12, url_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-    
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_fieldAccessorTable;
-      }
-      
-      // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getIdFieldBuilder();
-          getActiveWindowFieldBuilder();
-          getPublicationWindowFieldBuilder();
-          getSummaryFieldBuilder();
-          getDescriptionFieldBuilder();
-          getAffectsFieldBuilder();
-          getConsequenceFieldBuilder();
-          getUrlFieldBuilder();
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity getSeverity() {
+            return severity_;
         }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        if (idBuilder_ == null) {
-          id_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-        } else {
-          idBuilder_.clear();
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString url = 12;
+        public static final int URL_FIELD_NUMBER = 12;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString url_;
+        public boolean hasUrl() {
+            return ((bitField0_ & 0x00000080) == 0x00000080);
         }
-        bitField0_ = (bitField0_ & ~0x00000001);
-        creationTime_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        modifiedTime_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000004);
-        if (activeWindowBuilder_ == null) {
-          activeWindow_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
-        } else {
-          activeWindowBuilder_.clear();
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getUrl() {
+            return url_;
         }
-        if (publicationWindowBuilder_ == null) {
-          publicationWindow_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
-        } else {
-          publicationWindowBuilder_.clear();
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getUrlOrBuilder() {
+            return url_;
         }
-        if (summaryBuilder_ == null) {
-          summary_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-        } else {
-          summaryBuilder_.clear();
+
+        // optional string source = 13;
+        public static final int SOURCE_FIELD_NUMBER = 13;
+        private java.lang.Object source_;
+        public boolean hasSource() {
+            return ((bitField0_ & 0x00000100) == 0x00000100);
         }
-        bitField0_ = (bitField0_ & ~0x00000020);
-        if (descriptionBuilder_ == null) {
-          description_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-        } else {
-          descriptionBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000040);
-        cause_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
-        bitField0_ = (bitField0_ & ~0x00000080);
-        if (affectsBuilder_ == null) {
-          affects_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000100);
-        } else {
-          affectsBuilder_.clear();
-        }
-        if (consequenceBuilder_ == null) {
-          consequence_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000200);
-        } else {
-          consequenceBuilder_.clear();
-        }
-        severity_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.NO_IMPACT;
-        bitField0_ = (bitField0_ & ~0x00000400);
-        if (urlBuilder_ == null) {
-          url_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-        } else {
-          urlBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000800);
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDescriptor();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert getDefaultInstanceForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDefaultInstance();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert build() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-      
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert buildPartial() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        if (idBuilder_ == null) {
-          result.id_ = id_;
-        } else {
-          result.id_ = idBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.creationTime_ = creationTime_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.modifiedTime_ = modifiedTime_;
-        if (activeWindowBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
-            activeWindow_ = java.util.Collections.unmodifiableList(activeWindow_);
-            bitField0_ = (bitField0_ & ~0x00000008);
-          }
-          result.activeWindow_ = activeWindow_;
-        } else {
-          result.activeWindow_ = activeWindowBuilder_.build();
-        }
-        if (publicationWindowBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
-            publicationWindow_ = java.util.Collections.unmodifiableList(publicationWindow_);
-            bitField0_ = (bitField0_ & ~0x00000010);
-          }
-          result.publicationWindow_ = publicationWindow_;
-        } else {
-          result.publicationWindow_ = publicationWindowBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        if (summaryBuilder_ == null) {
-          result.summary_ = summary_;
-        } else {
-          result.summary_ = summaryBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        if (descriptionBuilder_ == null) {
-          result.description_ = description_;
-        } else {
-          result.description_ = descriptionBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        result.cause_ = cause_;
-        if (affectsBuilder_ == null) {
-          if (((bitField0_ & 0x00000100) == 0x00000100)) {
-            affects_ = java.util.Collections.unmodifiableList(affects_);
-            bitField0_ = (bitField0_ & ~0x00000100);
-          }
-          result.affects_ = affects_;
-        } else {
-          result.affects_ = affectsBuilder_.build();
-        }
-        if (consequenceBuilder_ == null) {
-          if (((bitField0_ & 0x00000200) == 0x00000200)) {
-            consequence_ = java.util.Collections.unmodifiableList(consequence_);
-            bitField0_ = (bitField0_ & ~0x00000200);
-          }
-          result.consequence_ = consequence_;
-        } else {
-          result.consequence_ = consequenceBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
-          to_bitField0_ |= 0x00000040;
-        }
-        result.severity_ = severity_;
-        if (((from_bitField0_ & 0x00000800) == 0x00000800)) {
-          to_bitField0_ |= 0x00000080;
-        }
-        if (urlBuilder_ == null) {
-          result.url_ = url_;
-        } else {
-          result.url_ = urlBuilder_.build();
-        }
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert) {
-          return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert other) {
-        if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDefaultInstance()) return this;
-        if (other.hasId()) {
-          mergeId(other.getId());
-        }
-        if (other.hasCreationTime()) {
-          setCreationTime(other.getCreationTime());
-        }
-        if (other.hasModifiedTime()) {
-          setModifiedTime(other.getModifiedTime());
-        }
-        if (activeWindowBuilder_ == null) {
-          if (!other.activeWindow_.isEmpty()) {
-            if (activeWindow_.isEmpty()) {
-              activeWindow_ = other.activeWindow_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+        public String getSource() {
+            java.lang.Object ref = source_;
+            if (ref instanceof String) {
+                return (String) ref;
             } else {
-              ensureActiveWindowIsMutable();
-              activeWindow_.addAll(other.activeWindow_);
+                com.google.protobuf.ByteString bs =
+                        (com.google.protobuf.ByteString) ref;
+                String s = bs.toStringUtf8();
+                if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                    source_ = s;
+                }
+                return s;
             }
-            onChanged();
-          }
-        } else {
-          if (!other.activeWindow_.isEmpty()) {
-            if (activeWindowBuilder_.isEmpty()) {
-              activeWindowBuilder_.dispose();
-              activeWindowBuilder_ = null;
-              activeWindow_ = other.activeWindow_;
-              bitField0_ = (bitField0_ & ~0x00000008);
-              activeWindowBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getActiveWindowFieldBuilder() : null;
+        }
+        private com.google.protobuf.ByteString getSourceBytes() {
+            java.lang.Object ref = source_;
+            if (ref instanceof String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                source_ = b;
+                return b;
             } else {
-              activeWindowBuilder_.addAllMessages(other.activeWindow_);
+                return (com.google.protobuf.ByteString) ref;
             }
-          }
         }
-        if (publicationWindowBuilder_ == null) {
-          if (!other.publicationWindow_.isEmpty()) {
-            if (publicationWindow_.isEmpty()) {
-              publicationWindow_ = other.publicationWindow_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+
+        private void initFields() {
+            id_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            creationTime_ = 0L;
+            modifiedTime_ = 0L;
+            activeWindow_ = java.util.Collections.emptyList();
+            publicationWindow_ = java.util.Collections.emptyList();
+            summary_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+            description_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+            cause_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
+            affects_ = java.util.Collections.emptyList();
+            consequence_ = java.util.Collections.emptyList();
+            severity_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.NO_IMPACT;
+            url_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+            source_ = "";
+        }
+        private byte memoizedIsInitialized = -1;
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized != -1) return isInitialized == 1;
+
+            if (!hasId()) {
+                memoizedIsInitialized = 0;
+                return false;
+            }
+            if (!hasCreationTime()) {
+                memoizedIsInitialized = 0;
+                return false;
+            }
+            if (!hasModifiedTime()) {
+                memoizedIsInitialized = 0;
+                return false;
+            }
+            if (!getId().isInitialized()) {
+                memoizedIsInitialized = 0;
+                return false;
+            }
+            if (hasSummary()) {
+                if (!getSummary().isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            if (hasDescription()) {
+                if (!getDescription().isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            for (int i = 0; i < getAffectsCount(); i++) {
+                if (!getAffects(i).isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            for (int i = 0; i < getConsequenceCount(); i++) {
+                if (!getConsequence(i).isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            if (hasUrl()) {
+                if (!getUrl().isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            getSerializedSize();
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                output.writeMessage(1, id_);
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                output.writeUInt64(2, creationTime_);
+            }
+            if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                output.writeUInt64(3, modifiedTime_);
+            }
+            for (int i = 0; i < activeWindow_.size(); i++) {
+                output.writeMessage(4, activeWindow_.get(i));
+            }
+            for (int i = 0; i < publicationWindow_.size(); i++) {
+                output.writeMessage(5, publicationWindow_.get(i));
+            }
+            if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                output.writeMessage(6, summary_);
+            }
+            if (((bitField0_ & 0x00000010) == 0x00000010)) {
+                output.writeMessage(7, description_);
+            }
+            if (((bitField0_ & 0x00000020) == 0x00000020)) {
+                output.writeEnum(8, cause_.getNumber());
+            }
+            for (int i = 0; i < affects_.size(); i++) {
+                output.writeMessage(9, affects_.get(i));
+            }
+            for (int i = 0; i < consequence_.size(); i++) {
+                output.writeMessage(10, consequence_.get(i));
+            }
+            if (((bitField0_ & 0x00000040) == 0x00000040)) {
+                output.writeEnum(11, severity_.getNumber());
+            }
+            if (((bitField0_ & 0x00000080) == 0x00000080)) {
+                output.writeMessage(12, url_);
+            }
+            if (((bitField0_ & 0x00000100) == 0x00000100)) {
+                output.writeBytes(13, getSourceBytes());
+            }
+            getUnknownFields().writeTo(output);
+        }
+
+        private int memoizedSerializedSize = -1;
+        public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(1, id_);
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeUInt64Size(2, creationTime_);
+            }
+            if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeUInt64Size(3, modifiedTime_);
+            }
+            for (int i = 0; i < activeWindow_.size(); i++) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(4, activeWindow_.get(i));
+            }
+            for (int i = 0; i < publicationWindow_.size(); i++) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(5, publicationWindow_.get(i));
+            }
+            if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(6, summary_);
+            }
+            if (((bitField0_ & 0x00000010) == 0x00000010)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(7, description_);
+            }
+            if (((bitField0_ & 0x00000020) == 0x00000020)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeEnumSize(8, cause_.getNumber());
+            }
+            for (int i = 0; i < affects_.size(); i++) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(9, affects_.get(i));
+            }
+            for (int i = 0; i < consequence_.size(); i++) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(10, consequence_.get(i));
+            }
+            if (((bitField0_ & 0x00000040) == 0x00000040)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeEnumSize(11, severity_.getNumber());
+            }
+            if (((bitField0_ & 0x00000080) == 0x00000080)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(12, url_);
+            }
+            if (((bitField0_ & 0x00000100) == 0x00000100)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeBytesSize(13, getSourceBytes());
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+        }
+
+        private static final long serialVersionUID = 0L;
+        @java.lang.Override
+        protected java.lang.Object writeReplace()
+                throws java.io.ObjectStreamException {
+            return super.writeReplace();
+        }
+
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
+                byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseDelimitedFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input)) {
+                return builder.buildParsed();
             } else {
-              ensurePublicationWindowIsMutable();
-              publicationWindow_.addAll(other.publicationWindow_);
+                return null;
             }
-            onChanged();
-          }
-        } else {
-          if (!other.publicationWindow_.isEmpty()) {
-            if (publicationWindowBuilder_.isEmpty()) {
-              publicationWindowBuilder_.dispose();
-              publicationWindowBuilder_ = null;
-              publicationWindow_ = other.publicationWindow_;
-              bitField0_ = (bitField0_ & ~0x00000010);
-              publicationWindowBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getPublicationWindowFieldBuilder() : null;
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+                return builder.buildParsed();
             } else {
-              publicationWindowBuilder_.addAllMessages(other.publicationWindow_);
+                return null;
             }
-          }
         }
-        if (other.hasSummary()) {
-          mergeSummary(other.getSummary());
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
+                com.google.protobuf.CodedInputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
         }
-        if (other.hasDescription()) {
-          mergeDescription(other.getDescription());
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
         }
-        if (other.hasCause()) {
-          setCause(other.getCause());
+
+        public static Builder newBuilder() { return Builder.create(); }
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert prototype) {
+            return newBuilder().mergeFrom(prototype);
         }
-        if (affectsBuilder_ == null) {
-          if (!other.affects_.isEmpty()) {
-            if (affects_.isEmpty()) {
-              affects_ = other.affects_;
-              bitField0_ = (bitField0_ & ~0x00000100);
-            } else {
-              ensureAffectsIsMutable();
-              affects_.addAll(other.affects_);
+        public Builder toBuilder() { return newBuilder(this); }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        public static final class Builder extends
+                com.google.protobuf.GeneratedMessage.Builder<Builder>
+                implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor;
             }
-            onChanged();
-          }
-        } else {
-          if (!other.affects_.isEmpty()) {
-            if (affectsBuilder_.isEmpty()) {
-              affectsBuilder_.dispose();
-              affectsBuilder_ = null;
-              affects_ = other.affects_;
-              bitField0_ = (bitField0_ & ~0x00000100);
-              affectsBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getAffectsFieldBuilder() : null;
-            } else {
-              affectsBuilder_.addAllMessages(other.affects_);
+
+            protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_fieldAccessorTable;
             }
-          }
-        }
-        if (consequenceBuilder_ == null) {
-          if (!other.consequence_.isEmpty()) {
-            if (consequence_.isEmpty()) {
-              consequence_ = other.consequence_;
-              bitField0_ = (bitField0_ & ~0x00000200);
-            } else {
-              ensureConsequenceIsMutable();
-              consequence_.addAll(other.consequence_);
+
+            // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
             }
-            onChanged();
-          }
-        } else {
-          if (!other.consequence_.isEmpty()) {
-            if (consequenceBuilder_.isEmpty()) {
-              consequenceBuilder_.dispose();
-              consequenceBuilder_ = null;
-              consequence_ = other.consequence_;
-              bitField0_ = (bitField0_ & ~0x00000200);
-              consequenceBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getConsequenceFieldBuilder() : null;
-            } else {
-              consequenceBuilder_.addAllMessages(other.consequence_);
+
+            private Builder(BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
             }
-          }
-        }
-        if (other.hasSeverity()) {
-          setSeverity(other.getSeverity());
-        }
-        if (other.hasUrl()) {
-          mergeUrl(other.getUrl());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        if (!hasId()) {
-          
-          return false;
-        }
-        if (!hasCreationTime()) {
-          
-          return false;
-        }
-        if (!hasModifiedTime()) {
-          
-          return false;
-        }
-        if (!getId().isInitialized()) {
-          
-          return false;
-        }
-        if (hasSummary()) {
-          if (!getSummary().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasDescription()) {
-          if (!getDescription().isInitialized()) {
-            
-            return false;
-          }
-        }
-        for (int i = 0; i < getAffectsCount(); i++) {
-          if (!getAffects(i).isInitialized()) {
-            
-            return false;
-          }
-        }
-        for (int i = 0; i < getConsequenceCount(); i++) {
-          if (!getConsequence(i).isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasUrl()) {
-          if (!getUrl().isInitialized()) {
-            
-            return false;
-          }
-        }
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+                    getIdFieldBuilder();
+                    getActiveWindowFieldBuilder();
+                    getPublicationWindowFieldBuilder();
+                    getSummaryFieldBuilder();
+                    getDescriptionFieldBuilder();
+                    getAffectsFieldBuilder();
+                    getConsequenceFieldBuilder();
+                    getUrlFieldBuilder();
+                }
+            }
+            private static Builder create() {
+                return new Builder();
+            }
+
+            public Builder clear() {
+                super.clear();
+                if (idBuilder_ == null) {
+                    id_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+                } else {
+                    idBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000001);
+                creationTime_ = 0L;
+                bitField0_ = (bitField0_ & ~0x00000002);
+                modifiedTime_ = 0L;
+                bitField0_ = (bitField0_ & ~0x00000004);
+                if (activeWindowBuilder_ == null) {
+                    activeWindow_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000008);
+                } else {
+                    activeWindowBuilder_.clear();
+                }
+                if (publicationWindowBuilder_ == null) {
+                    publicationWindow_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000010);
+                } else {
+                    publicationWindowBuilder_.clear();
+                }
+                if (summaryBuilder_ == null) {
+                    summary_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+                } else {
+                    summaryBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000020);
+                if (descriptionBuilder_ == null) {
+                    description_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+                } else {
+                    descriptionBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000040);
+                cause_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
+                bitField0_ = (bitField0_ & ~0x00000080);
+                if (affectsBuilder_ == null) {
+                    affects_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000100);
+                } else {
+                    affectsBuilder_.clear();
+                }
+                if (consequenceBuilder_ == null) {
+                    consequence_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000200);
+                } else {
+                    consequenceBuilder_.clear();
+                }
+                severity_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.NO_IMPACT;
+                bitField0_ = (bitField0_ & ~0x00000400);
+                if (urlBuilder_ == null) {
+                    url_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+                } else {
+                    urlBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000800);
+                source_ = "";
+                bitField0_ = (bitField0_ & ~0x00001000);
+                return this;
+            }
+
+            public Builder clone() {
+                return create().mergeFrom(buildPartial());
+            }
+
+            public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDescriptor();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert getDefaultInstanceForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDefaultInstance();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert build() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert buildParsed()
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(
+                            result).asInvalidProtocolBufferException();
+                }
+                return result;
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert buildPartial() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert(this);
+                int from_bitField0_ = bitField0_;
+                int to_bitField0_ = 0;
+                if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+                    to_bitField0_ |= 0x00000001;
+                }
+                if (idBuilder_ == null) {
+                    result.id_ = id_;
+                } else {
+                    result.id_ = idBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+                    to_bitField0_ |= 0x00000002;
+                }
+                result.creationTime_ = creationTime_;
+                if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+                    to_bitField0_ |= 0x00000004;
+                }
+                result.modifiedTime_ = modifiedTime_;
+                if (activeWindowBuilder_ == null) {
+                    if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                        activeWindow_ = java.util.Collections.unmodifiableList(activeWindow_);
+                        bitField0_ = (bitField0_ & ~0x00000008);
+                    }
+                    result.activeWindow_ = activeWindow_;
+                } else {
+                    result.activeWindow_ = activeWindowBuilder_.build();
+                }
+                if (publicationWindowBuilder_ == null) {
+                    if (((bitField0_ & 0x00000010) == 0x00000010)) {
+                        publicationWindow_ = java.util.Collections.unmodifiableList(publicationWindow_);
+                        bitField0_ = (bitField0_ & ~0x00000010);
+                    }
+                    result.publicationWindow_ = publicationWindow_;
+                } else {
+                    result.publicationWindow_ = publicationWindowBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+                    to_bitField0_ |= 0x00000008;
+                }
+                if (summaryBuilder_ == null) {
+                    result.summary_ = summary_;
+                } else {
+                    result.summary_ = summaryBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+                    to_bitField0_ |= 0x00000010;
+                }
+                if (descriptionBuilder_ == null) {
+                    result.description_ = description_;
+                } else {
+                    result.description_ = descriptionBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00000080) == 0x00000080)) {
+                    to_bitField0_ |= 0x00000020;
+                }
+                result.cause_ = cause_;
+                if (affectsBuilder_ == null) {
+                    if (((bitField0_ & 0x00000100) == 0x00000100)) {
+                        affects_ = java.util.Collections.unmodifiableList(affects_);
+                        bitField0_ = (bitField0_ & ~0x00000100);
+                    }
+                    result.affects_ = affects_;
+                } else {
+                    result.affects_ = affectsBuilder_.build();
+                }
+                if (consequenceBuilder_ == null) {
+                    if (((bitField0_ & 0x00000200) == 0x00000200)) {
+                        consequence_ = java.util.Collections.unmodifiableList(consequence_);
+                        bitField0_ = (bitField0_ & ~0x00000200);
+                    }
+                    result.consequence_ = consequence_;
+                } else {
+                    result.consequence_ = consequenceBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
+                    to_bitField0_ |= 0x00000040;
+                }
+                result.severity_ = severity_;
+                if (((from_bitField0_ & 0x00000800) == 0x00000800)) {
+                    to_bitField0_ |= 0x00000080;
+                }
+                if (urlBuilder_ == null) {
+                    result.url_ = url_;
+                } else {
+                    result.url_ = urlBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00001000) == 0x00001000)) {
+                    to_bitField0_ |= 0x00000100;
+                }
+                result.source_ = source_;
+                result.bitField0_ = to_bitField0_;
+                onBuilt();
+                return result;
+            }
+
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert) {
+                    return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert)other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert other) {
+                if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.getDefaultInstance()) return this;
+                if (other.hasId()) {
+                    mergeId(other.getId());
+                }
+                if (other.hasCreationTime()) {
+                    setCreationTime(other.getCreationTime());
+                }
+                if (other.hasModifiedTime()) {
+                    setModifiedTime(other.getModifiedTime());
+                }
+                if (activeWindowBuilder_ == null) {
+                    if (!other.activeWindow_.isEmpty()) {
+                        if (activeWindow_.isEmpty()) {
+                            activeWindow_ = other.activeWindow_;
+                            bitField0_ = (bitField0_ & ~0x00000008);
+                        } else {
+                            ensureActiveWindowIsMutable();
+                            activeWindow_.addAll(other.activeWindow_);
+                        }
+                        onChanged();
+                    }
+                } else {
+                    if (!other.activeWindow_.isEmpty()) {
+                        if (activeWindowBuilder_.isEmpty()) {
+                            activeWindowBuilder_.dispose();
+                            activeWindowBuilder_ = null;
+                            activeWindow_ = other.activeWindow_;
+                            bitField0_ = (bitField0_ & ~0x00000008);
+                            activeWindowBuilder_ =
+                                    com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                                            getActiveWindowFieldBuilder() : null;
+                        } else {
+                            activeWindowBuilder_.addAllMessages(other.activeWindow_);
+                        }
+                    }
+                }
+                if (publicationWindowBuilder_ == null) {
+                    if (!other.publicationWindow_.isEmpty()) {
+                        if (publicationWindow_.isEmpty()) {
+                            publicationWindow_ = other.publicationWindow_;
+                            bitField0_ = (bitField0_ & ~0x00000010);
+                        } else {
+                            ensurePublicationWindowIsMutable();
+                            publicationWindow_.addAll(other.publicationWindow_);
+                        }
+                        onChanged();
+                    }
+                } else {
+                    if (!other.publicationWindow_.isEmpty()) {
+                        if (publicationWindowBuilder_.isEmpty()) {
+                            publicationWindowBuilder_.dispose();
+                            publicationWindowBuilder_ = null;
+                            publicationWindow_ = other.publicationWindow_;
+                            bitField0_ = (bitField0_ & ~0x00000010);
+                            publicationWindowBuilder_ =
+                                    com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                                            getPublicationWindowFieldBuilder() : null;
+                        } else {
+                            publicationWindowBuilder_.addAllMessages(other.publicationWindow_);
+                        }
+                    }
+                }
+                if (other.hasSummary()) {
+                    mergeSummary(other.getSummary());
+                }
+                if (other.hasDescription()) {
+                    mergeDescription(other.getDescription());
+                }
+                if (other.hasCause()) {
+                    setCause(other.getCause());
+                }
+                if (affectsBuilder_ == null) {
+                    if (!other.affects_.isEmpty()) {
+                        if (affects_.isEmpty()) {
+                            affects_ = other.affects_;
+                            bitField0_ = (bitField0_ & ~0x00000100);
+                        } else {
+                            ensureAffectsIsMutable();
+                            affects_.addAll(other.affects_);
+                        }
+                        onChanged();
+                    }
+                } else {
+                    if (!other.affects_.isEmpty()) {
+                        if (affectsBuilder_.isEmpty()) {
+                            affectsBuilder_.dispose();
+                            affectsBuilder_ = null;
+                            affects_ = other.affects_;
+                            bitField0_ = (bitField0_ & ~0x00000100);
+                            affectsBuilder_ =
+                                    com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                                            getAffectsFieldBuilder() : null;
+                        } else {
+                            affectsBuilder_.addAllMessages(other.affects_);
+                        }
+                    }
+                }
+                if (consequenceBuilder_ == null) {
+                    if (!other.consequence_.isEmpty()) {
+                        if (consequence_.isEmpty()) {
+                            consequence_ = other.consequence_;
+                            bitField0_ = (bitField0_ & ~0x00000200);
+                        } else {
+                            ensureConsequenceIsMutable();
+                            consequence_.addAll(other.consequence_);
+                        }
+                        onChanged();
+                    }
+                } else {
+                    if (!other.consequence_.isEmpty()) {
+                        if (consequenceBuilder_.isEmpty()) {
+                            consequenceBuilder_.dispose();
+                            consequenceBuilder_ = null;
+                            consequence_ = other.consequence_;
+                            bitField0_ = (bitField0_ & ~0x00000200);
+                            consequenceBuilder_ =
+                                    com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                                            getConsequenceFieldBuilder() : null;
+                        } else {
+                            consequenceBuilder_.addAllMessages(other.consequence_);
+                        }
+                    }
+                }
+                if (other.hasSeverity()) {
+                    setSeverity(other.getSeverity());
+                }
+                if (other.hasUrl()) {
+                    mergeUrl(other.getUrl());
+                }
+                if (other.hasSource()) {
+                    setSource(other.getSource());
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                return this;
+            }
+
+            public final boolean isInitialized() {
+                if (!hasId()) {
+
+                    return false;
+                }
+                if (!hasCreationTime()) {
+
+                    return false;
+                }
+                if (!hasModifiedTime()) {
+
+                    return false;
+                }
+                if (!getId().isInitialized()) {
+
+                    return false;
+                }
+                if (hasSummary()) {
+                    if (!getSummary().isInitialized()) {
+
+                        return false;
+                    }
+                }
+                if (hasDescription()) {
+                    if (!getDescription().isInitialized()) {
+
+                        return false;
+                    }
+                }
+                for (int i = 0; i < getAffectsCount(); i++) {
+                    if (!getAffects(i).isInitialized()) {
+
+                        return false;
+                    }
+                }
+                for (int i = 0; i < getConsequenceCount(); i++) {
+                    if (!getConsequence(i).isInitialized()) {
+
+                        return false;
+                    }
+                }
+                if (hasUrl()) {
+                    if (!getUrl().isInitialized()) {
+
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                        com.google.protobuf.UnknownFieldSet.newBuilder(
+                                this.getUnknownFields());
+                while (true) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            this.setUnknownFields(unknownFields.build());
+                            onChanged();
+                            return this;
+                        default: {
+                            if (!parseUnknownField(input, unknownFields,
+                                    extensionRegistry, tag)) {
+                                this.setUnknownFields(unknownFields.build());
+                                onChanged();
+                                return this;
+                            }
+                            break;
+                        }
+                        case 10: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
+                            if (hasId()) {
+                                subBuilder.mergeFrom(getId());
+                            }
+                            input.readMessage(subBuilder, extensionRegistry);
+                            setId(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 16: {
+                            bitField0_ |= 0x00000002;
+                            creationTime_ = input.readUInt64();
+                            break;
+                        }
+                        case 24: {
+                            bitField0_ |= 0x00000004;
+                            modifiedTime_ = input.readUInt64();
+                            break;
+                        }
+                        case 34: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.newBuilder();
+                            input.readMessage(subBuilder, extensionRegistry);
+                            addActiveWindow(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 42: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.newBuilder();
+                            input.readMessage(subBuilder, extensionRegistry);
+                            addPublicationWindow(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 50: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder();
+                            if (hasSummary()) {
+                                subBuilder.mergeFrom(getSummary());
+                            }
+                            input.readMessage(subBuilder, extensionRegistry);
+                            setSummary(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 58: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder();
+                            if (hasDescription()) {
+                                subBuilder.mergeFrom(getDescription());
+                            }
+                            input.readMessage(subBuilder, extensionRegistry);
+                            setDescription(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 64: {
+                            int rawValue = input.readEnum();
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause value = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.valueOf(rawValue);
+                            if (value == null) {
+                                unknownFields.mergeVarintField(8, rawValue);
+                            } else {
+                                bitField0_ |= 0x00000080;
+                                cause_ = value;
+                            }
+                            break;
+                        }
+                        case 74: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.newBuilder();
+                            input.readMessage(subBuilder, extensionRegistry);
+                            addAffects(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 82: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.newBuilder();
+                            input.readMessage(subBuilder, extensionRegistry);
+                            addConsequence(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 88: {
+                            int rawValue = input.readEnum();
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity value = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.valueOf(rawValue);
+                            if (value == null) {
+                                unknownFields.mergeVarintField(11, rawValue);
+                            } else {
+                                bitField0_ |= 0x00000400;
+                                severity_ = value;
+                            }
+                            break;
+                        }
+                        case 98: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder();
+                            if (hasUrl()) {
+                                subBuilder.mergeFrom(getUrl());
+                            }
+                            input.readMessage(subBuilder, extensionRegistry);
+                            setUrl(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 106: {
+                            bitField0_ |= 0x00001000;
+                            source_ = input.readBytes();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            private int bitField0_;
+
+            // required .org_onebusaway_transit_data_federation_services_service_alerts.Id id = 1;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id id_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> idBuilder_;
+            public boolean hasId() {
+                return ((bitField0_ & 0x00000001) == 0x00000001);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getId() {
+                if (idBuilder_ == null) {
+                    return id_;
+                } else {
+                    return idBuilder_.getMessage();
+                }
+            }
+            public Builder setId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (idBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    id_ = value;
+                    onChanged();
+                } else {
+                    idBuilder_.setMessage(value);
+                }
+                bitField0_ |= 0x00000001;
+                return this;
+            }
+            public Builder setId(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
+                if (idBuilder_ == null) {
+                    id_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    idBuilder_.setMessage(builderForValue.build());
+                }
+                bitField0_ |= 0x00000001;
+                return this;
+            }
+            public Builder mergeId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (idBuilder_ == null) {
+                    if (((bitField0_ & 0x00000001) == 0x00000001) &&
+                            id_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) {
+                        id_ =
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder(id_).mergeFrom(value).buildPartial();
+                    } else {
+                        id_ = value;
+                    }
+                    onChanged();
+                } else {
+                    idBuilder_.mergeFrom(value);
+                }
+                bitField0_ |= 0x00000001;
+                return this;
+            }
+            public Builder clearId() {
+                if (idBuilder_ == null) {
+                    id_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+                    onChanged();
+                } else {
+                    idBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000001);
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getIdBuilder() {
+                bitField0_ |= 0x00000001;
+                onChanged();
+                return getIdFieldBuilder().getBuilder();
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getIdOrBuilder() {
+                if (idBuilder_ != null) {
+                    return idBuilder_.getMessageOrBuilder();
+                } else {
+                    return id_;
+                }
+            }
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>
+            getIdFieldBuilder() {
+                if (idBuilder_ == null) {
+                    idBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
+                            id_,
+                            getParentForChildren(),
+                            isClean());
+                    id_ = null;
+                }
+                return idBuilder_;
+            }
+
+            // required uint64 creationTime = 2;
+            private long creationTime_ ;
+            public boolean hasCreationTime() {
+                return ((bitField0_ & 0x00000002) == 0x00000002);
+            }
+            public long getCreationTime() {
+                return creationTime_;
+            }
+            public Builder setCreationTime(long value) {
+                bitField0_ |= 0x00000002;
+                creationTime_ = value;
                 onChanged();
                 return this;
-              }
-              break;
             }
-            case 10: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
-              if (hasId()) {
-                subBuilder.mergeFrom(getId());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setId(subBuilder.buildPartial());
-              break;
+            public Builder clearCreationTime() {
+                bitField0_ = (bitField0_ & ~0x00000002);
+                creationTime_ = 0L;
+                onChanged();
+                return this;
             }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              creationTime_ = input.readUInt64();
-              break;
+
+            // required uint64 modifiedTime = 3;
+            private long modifiedTime_ ;
+            public boolean hasModifiedTime() {
+                return ((bitField0_ & 0x00000004) == 0x00000004);
             }
-            case 24: {
-              bitField0_ |= 0x00000004;
-              modifiedTime_ = input.readUInt64();
-              break;
+            public long getModifiedTime() {
+                return modifiedTime_;
             }
-            case 34: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addActiveWindow(subBuilder.buildPartial());
-              break;
+            public Builder setModifiedTime(long value) {
+                bitField0_ |= 0x00000004;
+                modifiedTime_ = value;
+                onChanged();
+                return this;
             }
-            case 42: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addPublicationWindow(subBuilder.buildPartial());
-              break;
+            public Builder clearModifiedTime() {
+                bitField0_ = (bitField0_ & ~0x00000004);
+                modifiedTime_ = 0L;
+                onChanged();
+                return this;
             }
-            case 50: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder();
-              if (hasSummary()) {
-                subBuilder.mergeFrom(getSummary());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setSummary(subBuilder.buildPartial());
-              break;
+
+            // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange activeWindow = 4;
+            private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> activeWindow_ =
+                    java.util.Collections.emptyList();
+            private void ensureActiveWindowIsMutable() {
+                if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+                    activeWindow_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange>(activeWindow_);
+                    bitField0_ |= 0x00000008;
+                }
             }
-            case 58: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder();
-              if (hasDescription()) {
-                subBuilder.mergeFrom(getDescription());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setDescription(subBuilder.buildPartial());
-              break;
+
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> activeWindowBuilder_;
+
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> getActiveWindowList() {
+                if (activeWindowBuilder_ == null) {
+                    return java.util.Collections.unmodifiableList(activeWindow_);
+                } else {
+                    return activeWindowBuilder_.getMessageList();
+                }
             }
-            case 64: {
-              int rawValue = input.readEnum();
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause value = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(8, rawValue);
-              } else {
+            public int getActiveWindowCount() {
+                if (activeWindowBuilder_ == null) {
+                    return activeWindow_.size();
+                } else {
+                    return activeWindowBuilder_.getCount();
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getActiveWindow(int index) {
+                if (activeWindowBuilder_ == null) {
+                    return activeWindow_.get(index);
+                } else {
+                    return activeWindowBuilder_.getMessage(index);
+                }
+            }
+            public Builder setActiveWindow(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
+                if (activeWindowBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureActiveWindowIsMutable();
+                    activeWindow_.set(index, value);
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.setMessage(index, value);
+                }
+                return this;
+            }
+            public Builder setActiveWindow(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
+                if (activeWindowBuilder_ == null) {
+                    ensureActiveWindowIsMutable();
+                    activeWindow_.set(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.setMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addActiveWindow(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
+                if (activeWindowBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureActiveWindowIsMutable();
+                    activeWindow_.add(value);
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.addMessage(value);
+                }
+                return this;
+            }
+            public Builder addActiveWindow(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
+                if (activeWindowBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureActiveWindowIsMutable();
+                    activeWindow_.add(index, value);
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.addMessage(index, value);
+                }
+                return this;
+            }
+            public Builder addActiveWindow(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
+                if (activeWindowBuilder_ == null) {
+                    ensureActiveWindowIsMutable();
+                    activeWindow_.add(builderForValue.build());
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.addMessage(builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addActiveWindow(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
+                if (activeWindowBuilder_ == null) {
+                    ensureActiveWindowIsMutable();
+                    activeWindow_.add(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.addMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAllActiveWindow(
+                    java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> values) {
+                if (activeWindowBuilder_ == null) {
+                    ensureActiveWindowIsMutable();
+                    super.addAll(values, activeWindow_);
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.addAllMessages(values);
+                }
+                return this;
+            }
+            public Builder clearActiveWindow() {
+                if (activeWindowBuilder_ == null) {
+                    activeWindow_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000008);
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.clear();
+                }
+                return this;
+            }
+            public Builder removeActiveWindow(int index) {
+                if (activeWindowBuilder_ == null) {
+                    ensureActiveWindowIsMutable();
+                    activeWindow_.remove(index);
+                    onChanged();
+                } else {
+                    activeWindowBuilder_.remove(index);
+                }
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder getActiveWindowBuilder(
+                    int index) {
+                return getActiveWindowFieldBuilder().getBuilder(index);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getActiveWindowOrBuilder(
+                    int index) {
+                if (activeWindowBuilder_ == null) {
+                    return activeWindow_.get(index);  } else {
+                    return activeWindowBuilder_.getMessageOrBuilder(index);
+                }
+            }
+            public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>
+            getActiveWindowOrBuilderList() {
+                if (activeWindowBuilder_ != null) {
+                    return activeWindowBuilder_.getMessageOrBuilderList();
+                } else {
+                    return java.util.Collections.unmodifiableList(activeWindow_);
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder addActiveWindowBuilder() {
+                return getActiveWindowFieldBuilder().addBuilder(
+                        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance());
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder addActiveWindowBuilder(
+                    int index) {
+                return getActiveWindowFieldBuilder().addBuilder(
+                        index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance());
+            }
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder>
+            getActiveWindowBuilderList() {
+                return getActiveWindowFieldBuilder().getBuilderList();
+            }
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>
+            getActiveWindowFieldBuilder() {
+                if (activeWindowBuilder_ == null) {
+                    activeWindowBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>(
+                            activeWindow_,
+                            ((bitField0_ & 0x00000008) == 0x00000008),
+                            getParentForChildren(),
+                            isClean());
+                    activeWindow_ = null;
+                }
+                return activeWindowBuilder_;
+            }
+
+            // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange publicationWindow = 5;
+            private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> publicationWindow_ =
+                    java.util.Collections.emptyList();
+            private void ensurePublicationWindowIsMutable() {
+                if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+                    publicationWindow_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange>(publicationWindow_);
+                    bitField0_ |= 0x00000010;
+                }
+            }
+
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> publicationWindowBuilder_;
+
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> getPublicationWindowList() {
+                if (publicationWindowBuilder_ == null) {
+                    return java.util.Collections.unmodifiableList(publicationWindow_);
+                } else {
+                    return publicationWindowBuilder_.getMessageList();
+                }
+            }
+            public int getPublicationWindowCount() {
+                if (publicationWindowBuilder_ == null) {
+                    return publicationWindow_.size();
+                } else {
+                    return publicationWindowBuilder_.getCount();
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getPublicationWindow(int index) {
+                if (publicationWindowBuilder_ == null) {
+                    return publicationWindow_.get(index);
+                } else {
+                    return publicationWindowBuilder_.getMessage(index);
+                }
+            }
+            public Builder setPublicationWindow(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
+                if (publicationWindowBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensurePublicationWindowIsMutable();
+                    publicationWindow_.set(index, value);
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.setMessage(index, value);
+                }
+                return this;
+            }
+            public Builder setPublicationWindow(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
+                if (publicationWindowBuilder_ == null) {
+                    ensurePublicationWindowIsMutable();
+                    publicationWindow_.set(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.setMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addPublicationWindow(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
+                if (publicationWindowBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensurePublicationWindowIsMutable();
+                    publicationWindow_.add(value);
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.addMessage(value);
+                }
+                return this;
+            }
+            public Builder addPublicationWindow(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
+                if (publicationWindowBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensurePublicationWindowIsMutable();
+                    publicationWindow_.add(index, value);
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.addMessage(index, value);
+                }
+                return this;
+            }
+            public Builder addPublicationWindow(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
+                if (publicationWindowBuilder_ == null) {
+                    ensurePublicationWindowIsMutable();
+                    publicationWindow_.add(builderForValue.build());
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.addMessage(builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addPublicationWindow(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
+                if (publicationWindowBuilder_ == null) {
+                    ensurePublicationWindowIsMutable();
+                    publicationWindow_.add(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.addMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAllPublicationWindow(
+                    java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> values) {
+                if (publicationWindowBuilder_ == null) {
+                    ensurePublicationWindowIsMutable();
+                    super.addAll(values, publicationWindow_);
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.addAllMessages(values);
+                }
+                return this;
+            }
+            public Builder clearPublicationWindow() {
+                if (publicationWindowBuilder_ == null) {
+                    publicationWindow_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000010);
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.clear();
+                }
+                return this;
+            }
+            public Builder removePublicationWindow(int index) {
+                if (publicationWindowBuilder_ == null) {
+                    ensurePublicationWindowIsMutable();
+                    publicationWindow_.remove(index);
+                    onChanged();
+                } else {
+                    publicationWindowBuilder_.remove(index);
+                }
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder getPublicationWindowBuilder(
+                    int index) {
+                return getPublicationWindowFieldBuilder().getBuilder(index);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getPublicationWindowOrBuilder(
+                    int index) {
+                if (publicationWindowBuilder_ == null) {
+                    return publicationWindow_.get(index);  } else {
+                    return publicationWindowBuilder_.getMessageOrBuilder(index);
+                }
+            }
+            public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>
+            getPublicationWindowOrBuilderList() {
+                if (publicationWindowBuilder_ != null) {
+                    return publicationWindowBuilder_.getMessageOrBuilderList();
+                } else {
+                    return java.util.Collections.unmodifiableList(publicationWindow_);
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder addPublicationWindowBuilder() {
+                return getPublicationWindowFieldBuilder().addBuilder(
+                        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance());
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder addPublicationWindowBuilder(
+                    int index) {
+                return getPublicationWindowFieldBuilder().addBuilder(
+                        index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance());
+            }
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder>
+            getPublicationWindowBuilderList() {
+                return getPublicationWindowFieldBuilder().getBuilderList();
+            }
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>
+            getPublicationWindowFieldBuilder() {
+                if (publicationWindowBuilder_ == null) {
+                    publicationWindowBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>(
+                            publicationWindow_,
+                            ((bitField0_ & 0x00000010) == 0x00000010),
+                            getParentForChildren(),
+                            isClean());
+                    publicationWindow_ = null;
+                }
+                return publicationWindowBuilder_;
+            }
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString summary = 6;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString summary_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> summaryBuilder_;
+            public boolean hasSummary() {
+                return ((bitField0_ & 0x00000020) == 0x00000020);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getSummary() {
+                if (summaryBuilder_ == null) {
+                    return summary_;
+                } else {
+                    return summaryBuilder_.getMessage();
+                }
+            }
+            public Builder setSummary(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
+                if (summaryBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    summary_ = value;
+                    onChanged();
+                } else {
+                    summaryBuilder_.setMessage(value);
+                }
+                bitField0_ |= 0x00000020;
+                return this;
+            }
+            public Builder setSummary(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder builderForValue) {
+                if (summaryBuilder_ == null) {
+                    summary_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    summaryBuilder_.setMessage(builderForValue.build());
+                }
+                bitField0_ |= 0x00000020;
+                return this;
+            }
+            public Builder mergeSummary(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
+                if (summaryBuilder_ == null) {
+                    if (((bitField0_ & 0x00000020) == 0x00000020) &&
+                            summary_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance()) {
+                        summary_ =
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder(summary_).mergeFrom(value).buildPartial();
+                    } else {
+                        summary_ = value;
+                    }
+                    onChanged();
+                } else {
+                    summaryBuilder_.mergeFrom(value);
+                }
+                bitField0_ |= 0x00000020;
+                return this;
+            }
+            public Builder clearSummary() {
+                if (summaryBuilder_ == null) {
+                    summary_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+                    onChanged();
+                } else {
+                    summaryBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000020);
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder getSummaryBuilder() {
+                bitField0_ |= 0x00000020;
+                onChanged();
+                return getSummaryFieldBuilder().getBuilder();
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getSummaryOrBuilder() {
+                if (summaryBuilder_ != null) {
+                    return summaryBuilder_.getMessageOrBuilder();
+                } else {
+                    return summary_;
+                }
+            }
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>
+            getSummaryFieldBuilder() {
+                if (summaryBuilder_ == null) {
+                    summaryBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>(
+                            summary_,
+                            getParentForChildren(),
+                            isClean());
+                    summary_ = null;
+                }
+                return summaryBuilder_;
+            }
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString description = 7;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString description_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> descriptionBuilder_;
+            public boolean hasDescription() {
+                return ((bitField0_ & 0x00000040) == 0x00000040);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getDescription() {
+                if (descriptionBuilder_ == null) {
+                    return description_;
+                } else {
+                    return descriptionBuilder_.getMessage();
+                }
+            }
+            public Builder setDescription(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
+                if (descriptionBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    description_ = value;
+                    onChanged();
+                } else {
+                    descriptionBuilder_.setMessage(value);
+                }
+                bitField0_ |= 0x00000040;
+                return this;
+            }
+            public Builder setDescription(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder builderForValue) {
+                if (descriptionBuilder_ == null) {
+                    description_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    descriptionBuilder_.setMessage(builderForValue.build());
+                }
+                bitField0_ |= 0x00000040;
+                return this;
+            }
+            public Builder mergeDescription(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
+                if (descriptionBuilder_ == null) {
+                    if (((bitField0_ & 0x00000040) == 0x00000040) &&
+                            description_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance()) {
+                        description_ =
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder(description_).mergeFrom(value).buildPartial();
+                    } else {
+                        description_ = value;
+                    }
+                    onChanged();
+                } else {
+                    descriptionBuilder_.mergeFrom(value);
+                }
+                bitField0_ |= 0x00000040;
+                return this;
+            }
+            public Builder clearDescription() {
+                if (descriptionBuilder_ == null) {
+                    description_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+                    onChanged();
+                } else {
+                    descriptionBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000040);
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder getDescriptionBuilder() {
+                bitField0_ |= 0x00000040;
+                onChanged();
+                return getDescriptionFieldBuilder().getBuilder();
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getDescriptionOrBuilder() {
+                if (descriptionBuilder_ != null) {
+                    return descriptionBuilder_.getMessageOrBuilder();
+                } else {
+                    return description_;
+                }
+            }
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>
+            getDescriptionFieldBuilder() {
+                if (descriptionBuilder_ == null) {
+                    descriptionBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>(
+                            description_,
+                            getParentForChildren(),
+                            isClean());
+                    description_ = null;
+                }
+                return descriptionBuilder_;
+            }
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Cause cause = 8 [default = UNKNOWN_CAUSE];
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause cause_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
+            public boolean hasCause() {
+                return ((bitField0_ & 0x00000080) == 0x00000080);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause getCause() {
+                return cause_;
+            }
+            public Builder setCause(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
                 bitField0_ |= 0x00000080;
                 cause_ = value;
-              }
-              break;
+                onChanged();
+                return this;
             }
-            case 74: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addAffects(subBuilder.buildPartial());
-              break;
+            public Builder clearCause() {
+                bitField0_ = (bitField0_ & ~0x00000080);
+                cause_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
+                onChanged();
+                return this;
             }
-            case 82: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addConsequence(subBuilder.buildPartial());
-              break;
+
+            // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Affects affects = 9;
+            private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> affects_ =
+                    java.util.Collections.emptyList();
+            private void ensureAffectsIsMutable() {
+                if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+                    affects_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects>(affects_);
+                    bitField0_ |= 0x00000100;
+                }
             }
-            case 88: {
-              int rawValue = input.readEnum();
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity value = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(11, rawValue);
-              } else {
+
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder> affectsBuilder_;
+
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> getAffectsList() {
+                if (affectsBuilder_ == null) {
+                    return java.util.Collections.unmodifiableList(affects_);
+                } else {
+                    return affectsBuilder_.getMessageList();
+                }
+            }
+            public int getAffectsCount() {
+                if (affectsBuilder_ == null) {
+                    return affects_.size();
+                } else {
+                    return affectsBuilder_.getCount();
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects getAffects(int index) {
+                if (affectsBuilder_ == null) {
+                    return affects_.get(index);
+                } else {
+                    return affectsBuilder_.getMessage(index);
+                }
+            }
+            public Builder setAffects(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects value) {
+                if (affectsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureAffectsIsMutable();
+                    affects_.set(index, value);
+                    onChanged();
+                } else {
+                    affectsBuilder_.setMessage(index, value);
+                }
+                return this;
+            }
+            public Builder setAffects(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder builderForValue) {
+                if (affectsBuilder_ == null) {
+                    ensureAffectsIsMutable();
+                    affects_.set(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    affectsBuilder_.setMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAffects(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects value) {
+                if (affectsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureAffectsIsMutable();
+                    affects_.add(value);
+                    onChanged();
+                } else {
+                    affectsBuilder_.addMessage(value);
+                }
+                return this;
+            }
+            public Builder addAffects(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects value) {
+                if (affectsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureAffectsIsMutable();
+                    affects_.add(index, value);
+                    onChanged();
+                } else {
+                    affectsBuilder_.addMessage(index, value);
+                }
+                return this;
+            }
+            public Builder addAffects(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder builderForValue) {
+                if (affectsBuilder_ == null) {
+                    ensureAffectsIsMutable();
+                    affects_.add(builderForValue.build());
+                    onChanged();
+                } else {
+                    affectsBuilder_.addMessage(builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAffects(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder builderForValue) {
+                if (affectsBuilder_ == null) {
+                    ensureAffectsIsMutable();
+                    affects_.add(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    affectsBuilder_.addMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAllAffects(
+                    java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> values) {
+                if (affectsBuilder_ == null) {
+                    ensureAffectsIsMutable();
+                    super.addAll(values, affects_);
+                    onChanged();
+                } else {
+                    affectsBuilder_.addAllMessages(values);
+                }
+                return this;
+            }
+            public Builder clearAffects() {
+                if (affectsBuilder_ == null) {
+                    affects_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000100);
+                    onChanged();
+                } else {
+                    affectsBuilder_.clear();
+                }
+                return this;
+            }
+            public Builder removeAffects(int index) {
+                if (affectsBuilder_ == null) {
+                    ensureAffectsIsMutable();
+                    affects_.remove(index);
+                    onChanged();
+                } else {
+                    affectsBuilder_.remove(index);
+                }
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder getAffectsBuilder(
+                    int index) {
+                return getAffectsFieldBuilder().getBuilder(index);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder getAffectsOrBuilder(
+                    int index) {
+                if (affectsBuilder_ == null) {
+                    return affects_.get(index);  } else {
+                    return affectsBuilder_.getMessageOrBuilder(index);
+                }
+            }
+            public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder>
+            getAffectsOrBuilderList() {
+                if (affectsBuilder_ != null) {
+                    return affectsBuilder_.getMessageOrBuilderList();
+                } else {
+                    return java.util.Collections.unmodifiableList(affects_);
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder addAffectsBuilder() {
+                return getAffectsFieldBuilder().addBuilder(
+                        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDefaultInstance());
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder addAffectsBuilder(
+                    int index) {
+                return getAffectsFieldBuilder().addBuilder(
+                        index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDefaultInstance());
+            }
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder>
+            getAffectsBuilderList() {
+                return getAffectsFieldBuilder().getBuilderList();
+            }
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder>
+            getAffectsFieldBuilder() {
+                if (affectsBuilder_ == null) {
+                    affectsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder>(
+                            affects_,
+                            ((bitField0_ & 0x00000100) == 0x00000100),
+                            getParentForChildren(),
+                            isClean());
+                    affects_ = null;
+                }
+                return affectsBuilder_;
+            }
+
+            // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Consequence consequence = 10;
+            private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> consequence_ =
+                    java.util.Collections.emptyList();
+            private void ensureConsequenceIsMutable() {
+                if (!((bitField0_ & 0x00000200) == 0x00000200)) {
+                    consequence_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence>(consequence_);
+                    bitField0_ |= 0x00000200;
+                }
+            }
+
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder> consequenceBuilder_;
+
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> getConsequenceList() {
+                if (consequenceBuilder_ == null) {
+                    return java.util.Collections.unmodifiableList(consequence_);
+                } else {
+                    return consequenceBuilder_.getMessageList();
+                }
+            }
+            public int getConsequenceCount() {
+                if (consequenceBuilder_ == null) {
+                    return consequence_.size();
+                } else {
+                    return consequenceBuilder_.getCount();
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence getConsequence(int index) {
+                if (consequenceBuilder_ == null) {
+                    return consequence_.get(index);
+                } else {
+                    return consequenceBuilder_.getMessage(index);
+                }
+            }
+            public Builder setConsequence(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence value) {
+                if (consequenceBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureConsequenceIsMutable();
+                    consequence_.set(index, value);
+                    onChanged();
+                } else {
+                    consequenceBuilder_.setMessage(index, value);
+                }
+                return this;
+            }
+            public Builder setConsequence(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder builderForValue) {
+                if (consequenceBuilder_ == null) {
+                    ensureConsequenceIsMutable();
+                    consequence_.set(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    consequenceBuilder_.setMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addConsequence(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence value) {
+                if (consequenceBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureConsequenceIsMutable();
+                    consequence_.add(value);
+                    onChanged();
+                } else {
+                    consequenceBuilder_.addMessage(value);
+                }
+                return this;
+            }
+            public Builder addConsequence(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence value) {
+                if (consequenceBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureConsequenceIsMutable();
+                    consequence_.add(index, value);
+                    onChanged();
+                } else {
+                    consequenceBuilder_.addMessage(index, value);
+                }
+                return this;
+            }
+            public Builder addConsequence(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder builderForValue) {
+                if (consequenceBuilder_ == null) {
+                    ensureConsequenceIsMutable();
+                    consequence_.add(builderForValue.build());
+                    onChanged();
+                } else {
+                    consequenceBuilder_.addMessage(builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addConsequence(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder builderForValue) {
+                if (consequenceBuilder_ == null) {
+                    ensureConsequenceIsMutable();
+                    consequence_.add(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    consequenceBuilder_.addMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAllConsequence(
+                    java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> values) {
+                if (consequenceBuilder_ == null) {
+                    ensureConsequenceIsMutable();
+                    super.addAll(values, consequence_);
+                    onChanged();
+                } else {
+                    consequenceBuilder_.addAllMessages(values);
+                }
+                return this;
+            }
+            public Builder clearConsequence() {
+                if (consequenceBuilder_ == null) {
+                    consequence_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000200);
+                    onChanged();
+                } else {
+                    consequenceBuilder_.clear();
+                }
+                return this;
+            }
+            public Builder removeConsequence(int index) {
+                if (consequenceBuilder_ == null) {
+                    ensureConsequenceIsMutable();
+                    consequence_.remove(index);
+                    onChanged();
+                } else {
+                    consequenceBuilder_.remove(index);
+                }
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder getConsequenceBuilder(
+                    int index) {
+                return getConsequenceFieldBuilder().getBuilder(index);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder getConsequenceOrBuilder(
+                    int index) {
+                if (consequenceBuilder_ == null) {
+                    return consequence_.get(index);  } else {
+                    return consequenceBuilder_.getMessageOrBuilder(index);
+                }
+            }
+            public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder>
+            getConsequenceOrBuilderList() {
+                if (consequenceBuilder_ != null) {
+                    return consequenceBuilder_.getMessageOrBuilderList();
+                } else {
+                    return java.util.Collections.unmodifiableList(consequence_);
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder addConsequenceBuilder() {
+                return getConsequenceFieldBuilder().addBuilder(
+                        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDefaultInstance());
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder addConsequenceBuilder(
+                    int index) {
+                return getConsequenceFieldBuilder().addBuilder(
+                        index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDefaultInstance());
+            }
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder>
+            getConsequenceBuilderList() {
+                return getConsequenceFieldBuilder().getBuilderList();
+            }
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder>
+            getConsequenceFieldBuilder() {
+                if (consequenceBuilder_ == null) {
+                    consequenceBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder>(
+                            consequence_,
+                            ((bitField0_ & 0x00000200) == 0x00000200),
+                            getParentForChildren(),
+                            isClean());
+                    consequence_ = null;
+                }
+                return consequenceBuilder_;
+            }
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Severity severity = 11;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity severity_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.NO_IMPACT;
+            public boolean hasSeverity() {
+                return ((bitField0_ & 0x00000400) == 0x00000400);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity getSeverity() {
+                return severity_;
+            }
+            public Builder setSeverity(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
                 bitField0_ |= 0x00000400;
                 severity_ = value;
-              }
-              break;
-            }
-            case 98: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder();
-              if (hasUrl()) {
-                subBuilder.mergeFrom(getUrl());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setUrl(subBuilder.buildPartial());
-              break;
-            }
-          }
-        }
-      }
-      
-      private int bitField0_;
-      
-      // required .org_onebusaway_transit_data_federation_services_service_alerts.Id id = 1;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id id_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> idBuilder_;
-      public boolean hasId() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getId() {
-        if (idBuilder_ == null) {
-          return id_;
-        } else {
-          return idBuilder_.getMessage();
-        }
-      }
-      public Builder setId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (idBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          id_ = value;
-          onChanged();
-        } else {
-          idBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000001;
-        return this;
-      }
-      public Builder setId(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
-        if (idBuilder_ == null) {
-          id_ = builderForValue.build();
-          onChanged();
-        } else {
-          idBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000001;
-        return this;
-      }
-      public Builder mergeId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (idBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001) &&
-              id_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) {
-            id_ =
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder(id_).mergeFrom(value).buildPartial();
-          } else {
-            id_ = value;
-          }
-          onChanged();
-        } else {
-          idBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000001;
-        return this;
-      }
-      public Builder clearId() {
-        if (idBuilder_ == null) {
-          id_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-          onChanged();
-        } else {
-          idBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000001);
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getIdBuilder() {
-        bitField0_ |= 0x00000001;
-        onChanged();
-        return getIdFieldBuilder().getBuilder();
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getIdOrBuilder() {
-        if (idBuilder_ != null) {
-          return idBuilder_.getMessageOrBuilder();
-        } else {
-          return id_;
-        }
-      }
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> 
-          getIdFieldBuilder() {
-        if (idBuilder_ == null) {
-          idBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
-                  id_,
-                  getParentForChildren(),
-                  isClean());
-          id_ = null;
-        }
-        return idBuilder_;
-      }
-      
-      // required uint64 creationTime = 2;
-      private long creationTime_ ;
-      public boolean hasCreationTime() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      public long getCreationTime() {
-        return creationTime_;
-      }
-      public Builder setCreationTime(long value) {
-        bitField0_ |= 0x00000002;
-        creationTime_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearCreationTime() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        creationTime_ = 0L;
-        onChanged();
-        return this;
-      }
-      
-      // required uint64 modifiedTime = 3;
-      private long modifiedTime_ ;
-      public boolean hasModifiedTime() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      public long getModifiedTime() {
-        return modifiedTime_;
-      }
-      public Builder setModifiedTime(long value) {
-        bitField0_ |= 0x00000004;
-        modifiedTime_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearModifiedTime() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        modifiedTime_ = 0L;
-        onChanged();
-        return this;
-      }
-      
-      // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange activeWindow = 4;
-      private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> activeWindow_ =
-        java.util.Collections.emptyList();
-      private void ensureActiveWindowIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
-          activeWindow_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange>(activeWindow_);
-          bitField0_ |= 0x00000008;
-         }
-      }
-      
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> activeWindowBuilder_;
-      
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> getActiveWindowList() {
-        if (activeWindowBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(activeWindow_);
-        } else {
-          return activeWindowBuilder_.getMessageList();
-        }
-      }
-      public int getActiveWindowCount() {
-        if (activeWindowBuilder_ == null) {
-          return activeWindow_.size();
-        } else {
-          return activeWindowBuilder_.getCount();
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getActiveWindow(int index) {
-        if (activeWindowBuilder_ == null) {
-          return activeWindow_.get(index);
-        } else {
-          return activeWindowBuilder_.getMessage(index);
-        }
-      }
-      public Builder setActiveWindow(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
-        if (activeWindowBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureActiveWindowIsMutable();
-          activeWindow_.set(index, value);
-          onChanged();
-        } else {
-          activeWindowBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      public Builder setActiveWindow(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
-        if (activeWindowBuilder_ == null) {
-          ensureActiveWindowIsMutable();
-          activeWindow_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          activeWindowBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addActiveWindow(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
-        if (activeWindowBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureActiveWindowIsMutable();
-          activeWindow_.add(value);
-          onChanged();
-        } else {
-          activeWindowBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      public Builder addActiveWindow(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
-        if (activeWindowBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureActiveWindowIsMutable();
-          activeWindow_.add(index, value);
-          onChanged();
-        } else {
-          activeWindowBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      public Builder addActiveWindow(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
-        if (activeWindowBuilder_ == null) {
-          ensureActiveWindowIsMutable();
-          activeWindow_.add(builderForValue.build());
-          onChanged();
-        } else {
-          activeWindowBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addActiveWindow(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
-        if (activeWindowBuilder_ == null) {
-          ensureActiveWindowIsMutable();
-          activeWindow_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          activeWindowBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAllActiveWindow(
-          java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> values) {
-        if (activeWindowBuilder_ == null) {
-          ensureActiveWindowIsMutable();
-          super.addAll(values, activeWindow_);
-          onChanged();
-        } else {
-          activeWindowBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      public Builder clearActiveWindow() {
-        if (activeWindowBuilder_ == null) {
-          activeWindow_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
-          onChanged();
-        } else {
-          activeWindowBuilder_.clear();
-        }
-        return this;
-      }
-      public Builder removeActiveWindow(int index) {
-        if (activeWindowBuilder_ == null) {
-          ensureActiveWindowIsMutable();
-          activeWindow_.remove(index);
-          onChanged();
-        } else {
-          activeWindowBuilder_.remove(index);
-        }
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder getActiveWindowBuilder(
-          int index) {
-        return getActiveWindowFieldBuilder().getBuilder(index);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getActiveWindowOrBuilder(
-          int index) {
-        if (activeWindowBuilder_ == null) {
-          return activeWindow_.get(index);  } else {
-          return activeWindowBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> 
-           getActiveWindowOrBuilderList() {
-        if (activeWindowBuilder_ != null) {
-          return activeWindowBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(activeWindow_);
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder addActiveWindowBuilder() {
-        return getActiveWindowFieldBuilder().addBuilder(
-            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance());
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder addActiveWindowBuilder(
-          int index) {
-        return getActiveWindowFieldBuilder().addBuilder(
-            index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance());
-      }
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder> 
-           getActiveWindowBuilderList() {
-        return getActiveWindowFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> 
-          getActiveWindowFieldBuilder() {
-        if (activeWindowBuilder_ == null) {
-          activeWindowBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>(
-                  activeWindow_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
-                  getParentForChildren(),
-                  isClean());
-          activeWindow_ = null;
-        }
-        return activeWindowBuilder_;
-      }
-      
-      // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TimeRange publicationWindow = 5;
-      private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> publicationWindow_ =
-        java.util.Collections.emptyList();
-      private void ensurePublicationWindowIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
-          publicationWindow_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange>(publicationWindow_);
-          bitField0_ |= 0x00000010;
-         }
-      }
-      
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> publicationWindowBuilder_;
-      
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> getPublicationWindowList() {
-        if (publicationWindowBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(publicationWindow_);
-        } else {
-          return publicationWindowBuilder_.getMessageList();
-        }
-      }
-      public int getPublicationWindowCount() {
-        if (publicationWindowBuilder_ == null) {
-          return publicationWindow_.size();
-        } else {
-          return publicationWindowBuilder_.getCount();
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getPublicationWindow(int index) {
-        if (publicationWindowBuilder_ == null) {
-          return publicationWindow_.get(index);
-        } else {
-          return publicationWindowBuilder_.getMessage(index);
-        }
-      }
-      public Builder setPublicationWindow(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
-        if (publicationWindowBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensurePublicationWindowIsMutable();
-          publicationWindow_.set(index, value);
-          onChanged();
-        } else {
-          publicationWindowBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      public Builder setPublicationWindow(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
-        if (publicationWindowBuilder_ == null) {
-          ensurePublicationWindowIsMutable();
-          publicationWindow_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          publicationWindowBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addPublicationWindow(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
-        if (publicationWindowBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensurePublicationWindowIsMutable();
-          publicationWindow_.add(value);
-          onChanged();
-        } else {
-          publicationWindowBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      public Builder addPublicationWindow(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange value) {
-        if (publicationWindowBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensurePublicationWindowIsMutable();
-          publicationWindow_.add(index, value);
-          onChanged();
-        } else {
-          publicationWindowBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      public Builder addPublicationWindow(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
-        if (publicationWindowBuilder_ == null) {
-          ensurePublicationWindowIsMutable();
-          publicationWindow_.add(builderForValue.build());
-          onChanged();
-        } else {
-          publicationWindowBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addPublicationWindow(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder builderForValue) {
-        if (publicationWindowBuilder_ == null) {
-          ensurePublicationWindowIsMutable();
-          publicationWindow_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          publicationWindowBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAllPublicationWindow(
-          java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange> values) {
-        if (publicationWindowBuilder_ == null) {
-          ensurePublicationWindowIsMutable();
-          super.addAll(values, publicationWindow_);
-          onChanged();
-        } else {
-          publicationWindowBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      public Builder clearPublicationWindow() {
-        if (publicationWindowBuilder_ == null) {
-          publicationWindow_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
-          onChanged();
-        } else {
-          publicationWindowBuilder_.clear();
-        }
-        return this;
-      }
-      public Builder removePublicationWindow(int index) {
-        if (publicationWindowBuilder_ == null) {
-          ensurePublicationWindowIsMutable();
-          publicationWindow_.remove(index);
-          onChanged();
-        } else {
-          publicationWindowBuilder_.remove(index);
-        }
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder getPublicationWindowBuilder(
-          int index) {
-        return getPublicationWindowFieldBuilder().getBuilder(index);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder getPublicationWindowOrBuilder(
-          int index) {
-        if (publicationWindowBuilder_ == null) {
-          return publicationWindow_.get(index);  } else {
-          return publicationWindowBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> 
-           getPublicationWindowOrBuilderList() {
-        if (publicationWindowBuilder_ != null) {
-          return publicationWindowBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(publicationWindow_);
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder addPublicationWindowBuilder() {
-        return getPublicationWindowFieldBuilder().addBuilder(
-            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance());
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder addPublicationWindowBuilder(
-          int index) {
-        return getPublicationWindowFieldBuilder().addBuilder(
-            index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance());
-      }
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder> 
-           getPublicationWindowBuilderList() {
-        return getPublicationWindowFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder> 
-          getPublicationWindowFieldBuilder() {
-        if (publicationWindowBuilder_ == null) {
-          publicationWindowBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder>(
-                  publicationWindow_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
-                  getParentForChildren(),
-                  isClean());
-          publicationWindow_ = null;
-        }
-        return publicationWindowBuilder_;
-      }
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString summary = 6;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString summary_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> summaryBuilder_;
-      public boolean hasSummary() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getSummary() {
-        if (summaryBuilder_ == null) {
-          return summary_;
-        } else {
-          return summaryBuilder_.getMessage();
-        }
-      }
-      public Builder setSummary(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
-        if (summaryBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          summary_ = value;
-          onChanged();
-        } else {
-          summaryBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000020;
-        return this;
-      }
-      public Builder setSummary(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder builderForValue) {
-        if (summaryBuilder_ == null) {
-          summary_ = builderForValue.build();
-          onChanged();
-        } else {
-          summaryBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000020;
-        return this;
-      }
-      public Builder mergeSummary(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
-        if (summaryBuilder_ == null) {
-          if (((bitField0_ & 0x00000020) == 0x00000020) &&
-              summary_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance()) {
-            summary_ =
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder(summary_).mergeFrom(value).buildPartial();
-          } else {
-            summary_ = value;
-          }
-          onChanged();
-        } else {
-          summaryBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000020;
-        return this;
-      }
-      public Builder clearSummary() {
-        if (summaryBuilder_ == null) {
-          summary_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-          onChanged();
-        } else {
-          summaryBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000020);
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder getSummaryBuilder() {
-        bitField0_ |= 0x00000020;
-        onChanged();
-        return getSummaryFieldBuilder().getBuilder();
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getSummaryOrBuilder() {
-        if (summaryBuilder_ != null) {
-          return summaryBuilder_.getMessageOrBuilder();
-        } else {
-          return summary_;
-        }
-      }
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> 
-          getSummaryFieldBuilder() {
-        if (summaryBuilder_ == null) {
-          summaryBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>(
-                  summary_,
-                  getParentForChildren(),
-                  isClean());
-          summary_ = null;
-        }
-        return summaryBuilder_;
-      }
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString description = 7;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString description_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> descriptionBuilder_;
-      public boolean hasDescription() {
-        return ((bitField0_ & 0x00000040) == 0x00000040);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getDescription() {
-        if (descriptionBuilder_ == null) {
-          return description_;
-        } else {
-          return descriptionBuilder_.getMessage();
-        }
-      }
-      public Builder setDescription(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
-        if (descriptionBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          description_ = value;
-          onChanged();
-        } else {
-          descriptionBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      public Builder setDescription(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder builderForValue) {
-        if (descriptionBuilder_ == null) {
-          description_ = builderForValue.build();
-          onChanged();
-        } else {
-          descriptionBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      public Builder mergeDescription(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
-        if (descriptionBuilder_ == null) {
-          if (((bitField0_ & 0x00000040) == 0x00000040) &&
-              description_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance()) {
-            description_ =
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder(description_).mergeFrom(value).buildPartial();
-          } else {
-            description_ = value;
-          }
-          onChanged();
-        } else {
-          descriptionBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000040;
-        return this;
-      }
-      public Builder clearDescription() {
-        if (descriptionBuilder_ == null) {
-          description_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-          onChanged();
-        } else {
-          descriptionBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000040);
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder getDescriptionBuilder() {
-        bitField0_ |= 0x00000040;
-        onChanged();
-        return getDescriptionFieldBuilder().getBuilder();
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getDescriptionOrBuilder() {
-        if (descriptionBuilder_ != null) {
-          return descriptionBuilder_.getMessageOrBuilder();
-        } else {
-          return description_;
-        }
-      }
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> 
-          getDescriptionFieldBuilder() {
-        if (descriptionBuilder_ == null) {
-          descriptionBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>(
-                  description_,
-                  getParentForChildren(),
-                  isClean());
-          description_ = null;
-        }
-        return descriptionBuilder_;
-      }
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Cause cause = 8 [default = UNKNOWN_CAUSE];
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause cause_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
-      public boolean hasCause() {
-        return ((bitField0_ & 0x00000080) == 0x00000080);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause getCause() {
-        return cause_;
-      }
-      public Builder setCause(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000080;
-        cause_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearCause() {
-        bitField0_ = (bitField0_ & ~0x00000080);
-        cause_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Cause.UNKNOWN_CAUSE;
-        onChanged();
-        return this;
-      }
-      
-      // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Affects affects = 9;
-      private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> affects_ =
-        java.util.Collections.emptyList();
-      private void ensureAffectsIsMutable() {
-        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
-          affects_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects>(affects_);
-          bitField0_ |= 0x00000100;
-         }
-      }
-      
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder> affectsBuilder_;
-      
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> getAffectsList() {
-        if (affectsBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(affects_);
-        } else {
-          return affectsBuilder_.getMessageList();
-        }
-      }
-      public int getAffectsCount() {
-        if (affectsBuilder_ == null) {
-          return affects_.size();
-        } else {
-          return affectsBuilder_.getCount();
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects getAffects(int index) {
-        if (affectsBuilder_ == null) {
-          return affects_.get(index);
-        } else {
-          return affectsBuilder_.getMessage(index);
-        }
-      }
-      public Builder setAffects(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects value) {
-        if (affectsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureAffectsIsMutable();
-          affects_.set(index, value);
-          onChanged();
-        } else {
-          affectsBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      public Builder setAffects(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder builderForValue) {
-        if (affectsBuilder_ == null) {
-          ensureAffectsIsMutable();
-          affects_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          affectsBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAffects(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects value) {
-        if (affectsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureAffectsIsMutable();
-          affects_.add(value);
-          onChanged();
-        } else {
-          affectsBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      public Builder addAffects(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects value) {
-        if (affectsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureAffectsIsMutable();
-          affects_.add(index, value);
-          onChanged();
-        } else {
-          affectsBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      public Builder addAffects(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder builderForValue) {
-        if (affectsBuilder_ == null) {
-          ensureAffectsIsMutable();
-          affects_.add(builderForValue.build());
-          onChanged();
-        } else {
-          affectsBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAffects(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder builderForValue) {
-        if (affectsBuilder_ == null) {
-          ensureAffectsIsMutable();
-          affects_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          affectsBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAllAffects(
-          java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects> values) {
-        if (affectsBuilder_ == null) {
-          ensureAffectsIsMutable();
-          super.addAll(values, affects_);
-          onChanged();
-        } else {
-          affectsBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      public Builder clearAffects() {
-        if (affectsBuilder_ == null) {
-          affects_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000100);
-          onChanged();
-        } else {
-          affectsBuilder_.clear();
-        }
-        return this;
-      }
-      public Builder removeAffects(int index) {
-        if (affectsBuilder_ == null) {
-          ensureAffectsIsMutable();
-          affects_.remove(index);
-          onChanged();
-        } else {
-          affectsBuilder_.remove(index);
-        }
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder getAffectsBuilder(
-          int index) {
-        return getAffectsFieldBuilder().getBuilder(index);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder getAffectsOrBuilder(
-          int index) {
-        if (affectsBuilder_ == null) {
-          return affects_.get(index);  } else {
-          return affectsBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder> 
-           getAffectsOrBuilderList() {
-        if (affectsBuilder_ != null) {
-          return affectsBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(affects_);
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder addAffectsBuilder() {
-        return getAffectsFieldBuilder().addBuilder(
-            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDefaultInstance());
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder addAffectsBuilder(
-          int index) {
-        return getAffectsFieldBuilder().addBuilder(
-            index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDefaultInstance());
-      }
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder> 
-           getAffectsBuilderList() {
-        return getAffectsFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder> 
-          getAffectsFieldBuilder() {
-        if (affectsBuilder_ == null) {
-          affectsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder>(
-                  affects_,
-                  ((bitField0_ & 0x00000100) == 0x00000100),
-                  getParentForChildren(),
-                  isClean());
-          affects_ = null;
-        }
-        return affectsBuilder_;
-      }
-      
-      // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Consequence consequence = 10;
-      private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> consequence_ =
-        java.util.Collections.emptyList();
-      private void ensureConsequenceIsMutable() {
-        if (!((bitField0_ & 0x00000200) == 0x00000200)) {
-          consequence_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence>(consequence_);
-          bitField0_ |= 0x00000200;
-         }
-      }
-      
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder> consequenceBuilder_;
-      
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> getConsequenceList() {
-        if (consequenceBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(consequence_);
-        } else {
-          return consequenceBuilder_.getMessageList();
-        }
-      }
-      public int getConsequenceCount() {
-        if (consequenceBuilder_ == null) {
-          return consequence_.size();
-        } else {
-          return consequenceBuilder_.getCount();
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence getConsequence(int index) {
-        if (consequenceBuilder_ == null) {
-          return consequence_.get(index);
-        } else {
-          return consequenceBuilder_.getMessage(index);
-        }
-      }
-      public Builder setConsequence(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence value) {
-        if (consequenceBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureConsequenceIsMutable();
-          consequence_.set(index, value);
-          onChanged();
-        } else {
-          consequenceBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      public Builder setConsequence(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder builderForValue) {
-        if (consequenceBuilder_ == null) {
-          ensureConsequenceIsMutable();
-          consequence_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          consequenceBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addConsequence(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence value) {
-        if (consequenceBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureConsequenceIsMutable();
-          consequence_.add(value);
-          onChanged();
-        } else {
-          consequenceBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      public Builder addConsequence(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence value) {
-        if (consequenceBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureConsequenceIsMutable();
-          consequence_.add(index, value);
-          onChanged();
-        } else {
-          consequenceBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      public Builder addConsequence(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder builderForValue) {
-        if (consequenceBuilder_ == null) {
-          ensureConsequenceIsMutable();
-          consequence_.add(builderForValue.build());
-          onChanged();
-        } else {
-          consequenceBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addConsequence(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder builderForValue) {
-        if (consequenceBuilder_ == null) {
-          ensureConsequenceIsMutable();
-          consequence_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          consequenceBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAllConsequence(
-          java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence> values) {
-        if (consequenceBuilder_ == null) {
-          ensureConsequenceIsMutable();
-          super.addAll(values, consequence_);
-          onChanged();
-        } else {
-          consequenceBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      public Builder clearConsequence() {
-        if (consequenceBuilder_ == null) {
-          consequence_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000200);
-          onChanged();
-        } else {
-          consequenceBuilder_.clear();
-        }
-        return this;
-      }
-      public Builder removeConsequence(int index) {
-        if (consequenceBuilder_ == null) {
-          ensureConsequenceIsMutable();
-          consequence_.remove(index);
-          onChanged();
-        } else {
-          consequenceBuilder_.remove(index);
-        }
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder getConsequenceBuilder(
-          int index) {
-        return getConsequenceFieldBuilder().getBuilder(index);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder getConsequenceOrBuilder(
-          int index) {
-        if (consequenceBuilder_ == null) {
-          return consequence_.get(index);  } else {
-          return consequenceBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder> 
-           getConsequenceOrBuilderList() {
-        if (consequenceBuilder_ != null) {
-          return consequenceBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(consequence_);
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder addConsequenceBuilder() {
-        return getConsequenceFieldBuilder().addBuilder(
-            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDefaultInstance());
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder addConsequenceBuilder(
-          int index) {
-        return getConsequenceFieldBuilder().addBuilder(
-            index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDefaultInstance());
-      }
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder> 
-           getConsequenceBuilderList() {
-        return getConsequenceFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder> 
-          getConsequenceFieldBuilder() {
-        if (consequenceBuilder_ == null) {
-          consequenceBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder>(
-                  consequence_,
-                  ((bitField0_ & 0x00000200) == 0x00000200),
-                  getParentForChildren(),
-                  isClean());
-          consequence_ = null;
-        }
-        return consequenceBuilder_;
-      }
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert.Severity severity = 11;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity severity_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.NO_IMPACT;
-      public boolean hasSeverity() {
-        return ((bitField0_ & 0x00000400) == 0x00000400);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity getSeverity() {
-        return severity_;
-      }
-      public Builder setSeverity(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000400;
-        severity_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearSeverity() {
-        bitField0_ = (bitField0_ & ~0x00000400);
-        severity_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.NO_IMPACT;
-        onChanged();
-        return this;
-      }
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString url = 12;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString url_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> urlBuilder_;
-      public boolean hasUrl() {
-        return ((bitField0_ & 0x00000800) == 0x00000800);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getUrl() {
-        if (urlBuilder_ == null) {
-          return url_;
-        } else {
-          return urlBuilder_.getMessage();
-        }
-      }
-      public Builder setUrl(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
-        if (urlBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          url_ = value;
-          onChanged();
-        } else {
-          urlBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000800;
-        return this;
-      }
-      public Builder setUrl(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder builderForValue) {
-        if (urlBuilder_ == null) {
-          url_ = builderForValue.build();
-          onChanged();
-        } else {
-          urlBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000800;
-        return this;
-      }
-      public Builder mergeUrl(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
-        if (urlBuilder_ == null) {
-          if (((bitField0_ & 0x00000800) == 0x00000800) &&
-              url_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance()) {
-            url_ =
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder(url_).mergeFrom(value).buildPartial();
-          } else {
-            url_ = value;
-          }
-          onChanged();
-        } else {
-          urlBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000800;
-        return this;
-      }
-      public Builder clearUrl() {
-        if (urlBuilder_ == null) {
-          url_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-          onChanged();
-        } else {
-          urlBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000800);
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder getUrlBuilder() {
-        bitField0_ |= 0x00000800;
-        onChanged();
-        return getUrlFieldBuilder().getBuilder();
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getUrlOrBuilder() {
-        if (urlBuilder_ != null) {
-          return urlBuilder_.getMessageOrBuilder();
-        } else {
-          return url_;
-        }
-      }
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> 
-          getUrlFieldBuilder() {
-        if (urlBuilder_ == null) {
-          urlBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>(
-                  url_,
-                  getParentForChildren(),
-                  isClean());
-          url_ = null;
-        }
-        return urlBuilder_;
-      }
-      
-      // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert)
-    }
-    
-    static {
-      defaultInstance = new ServiceAlert(true);
-      defaultInstance.initFields();
-    }
-    
-    // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert)
-  }
-  
-  public interface AffectsOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // optional string agencyId = 1;
-    boolean hasAgencyId();
-    String getAgencyId();
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id routeId = 2;
-    boolean hasRouteId();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getRouteId();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getRouteIdOrBuilder();
-    
-    // optional string directionId = 3;
-    boolean hasDirectionId();
-    String getDirectionId();
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id tripId = 4;
-    boolean hasTripId();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getTripId();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getTripIdOrBuilder();
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id stopId = 5;
-    boolean hasStopId();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getStopId();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getStopIdOrBuilder();
-    
-    // optional string applicationId = 6;
-    boolean hasApplicationId();
-    String getApplicationId();
-  }
-  public static final class Affects extends
-      com.google.protobuf.GeneratedMessage
-      implements AffectsOrBuilder {
-    // Use Affects.newBuilder() to construct.
-    private Affects(Builder builder) {
-      super(builder);
-    }
-    private Affects(boolean noInit) {}
-    
-    private static final Affects defaultInstance;
-    public static Affects getDefaultInstance() {
-      return defaultInstance;
-    }
-    
-    public Affects getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_fieldAccessorTable;
-    }
-    
-    private int bitField0_;
-    // optional string agencyId = 1;
-    public static final int AGENCYID_FIELD_NUMBER = 1;
-    private java.lang.Object agencyId_;
-    public boolean hasAgencyId() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    public String getAgencyId() {
-      java.lang.Object ref = agencyId_;
-      if (ref instanceof String) {
-        return (String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
-        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-          agencyId_ = s;
-        }
-        return s;
-      }
-    }
-    private com.google.protobuf.ByteString getAgencyIdBytes() {
-      java.lang.Object ref = agencyId_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-        agencyId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id routeId = 2;
-    public static final int ROUTEID_FIELD_NUMBER = 2;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id routeId_;
-    public boolean hasRouteId() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getRouteId() {
-      return routeId_;
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getRouteIdOrBuilder() {
-      return routeId_;
-    }
-    
-    // optional string directionId = 3;
-    public static final int DIRECTIONID_FIELD_NUMBER = 3;
-    private java.lang.Object directionId_;
-    public boolean hasDirectionId() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    public String getDirectionId() {
-      java.lang.Object ref = directionId_;
-      if (ref instanceof String) {
-        return (String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
-        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-          directionId_ = s;
-        }
-        return s;
-      }
-    }
-    private com.google.protobuf.ByteString getDirectionIdBytes() {
-      java.lang.Object ref = directionId_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-        directionId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id tripId = 4;
-    public static final int TRIPID_FIELD_NUMBER = 4;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id tripId_;
-    public boolean hasTripId() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getTripId() {
-      return tripId_;
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getTripIdOrBuilder() {
-      return tripId_;
-    }
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id stopId = 5;
-    public static final int STOPID_FIELD_NUMBER = 5;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id stopId_;
-    public boolean hasStopId() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getStopId() {
-      return stopId_;
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getStopIdOrBuilder() {
-      return stopId_;
-    }
-    
-    // optional string applicationId = 6;
-    public static final int APPLICATIONID_FIELD_NUMBER = 6;
-    private java.lang.Object applicationId_;
-    public boolean hasApplicationId() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    public String getApplicationId() {
-      java.lang.Object ref = applicationId_;
-      if (ref instanceof String) {
-        return (String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
-        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-          applicationId_ = s;
-        }
-        return s;
-      }
-    }
-    private com.google.protobuf.ByteString getApplicationIdBytes() {
-      java.lang.Object ref = applicationId_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-        applicationId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    
-    private void initFields() {
-      agencyId_ = "";
-      routeId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      directionId_ = "";
-      tripId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      stopId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      applicationId_ = "";
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      if (hasRouteId()) {
-        if (!getRouteId().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
-      if (hasTripId()) {
-        if (!getTripId().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
-      if (hasStopId()) {
-        if (!getStopId().isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getAgencyIdBytes());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeMessage(2, routeId_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getDirectionIdBytes());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeMessage(4, tripId_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeMessage(5, stopId_);
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeBytes(6, getApplicationIdBytes());
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getAgencyIdBytes());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(2, routeId_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getDirectionIdBytes());
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, tripId_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, stopId_);
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(6, getApplicationIdBytes());
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-    
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_fieldAccessorTable;
-      }
-      
-      // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getRouteIdFieldBuilder();
-          getTripIdFieldBuilder();
-          getStopIdFieldBuilder();
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        agencyId_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
-        if (routeIdBuilder_ == null) {
-          routeId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-        } else {
-          routeIdBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000002);
-        directionId_ = "";
-        bitField0_ = (bitField0_ & ~0x00000004);
-        if (tripIdBuilder_ == null) {
-          tripId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-        } else {
-          tripIdBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
-        if (stopIdBuilder_ == null) {
-          stopId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-        } else {
-          stopIdBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000010);
-        applicationId_ = "";
-        bitField0_ = (bitField0_ & ~0x00000020);
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDescriptor();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects getDefaultInstanceForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDefaultInstance();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects build() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-      
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects buildPartial() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.agencyId_ = agencyId_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        if (routeIdBuilder_ == null) {
-          result.routeId_ = routeId_;
-        } else {
-          result.routeId_ = routeIdBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        result.directionId_ = directionId_;
-        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
-          to_bitField0_ |= 0x00000008;
-        }
-        if (tripIdBuilder_ == null) {
-          result.tripId_ = tripId_;
-        } else {
-          result.tripId_ = tripIdBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        if (stopIdBuilder_ == null) {
-          result.stopId_ = stopId_;
-        } else {
-          result.stopId_ = stopIdBuilder_.build();
-        }
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        result.applicationId_ = applicationId_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects) {
-          return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects other) {
-        if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDefaultInstance()) return this;
-        if (other.hasAgencyId()) {
-          setAgencyId(other.getAgencyId());
-        }
-        if (other.hasRouteId()) {
-          mergeRouteId(other.getRouteId());
-        }
-        if (other.hasDirectionId()) {
-          setDirectionId(other.getDirectionId());
-        }
-        if (other.hasTripId()) {
-          mergeTripId(other.getTripId());
-        }
-        if (other.hasStopId()) {
-          mergeStopId(other.getStopId());
-        }
-        if (other.hasApplicationId()) {
-          setApplicationId(other.getApplicationId());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        if (hasRouteId()) {
-          if (!getRouteId().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasTripId()) {
-          if (!getTripId().isInitialized()) {
-            
-            return false;
-          }
-        }
-        if (hasStopId()) {
-          if (!getStopId().isInitialized()) {
-            
-            return false;
-          }
-        }
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
                 onChanged();
                 return this;
-              }
-              break;
             }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              agencyId_ = input.readBytes();
-              break;
+            public Builder clearSeverity() {
+                bitField0_ = (bitField0_ & ~0x00000400);
+                severity_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Severity.NO_IMPACT;
+                onChanged();
+                return this;
             }
-            case 18: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
-              if (hasRouteId()) {
-                subBuilder.mergeFrom(getRouteId());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setRouteId(subBuilder.buildPartial());
-              break;
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString url = 12;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString url_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder> urlBuilder_;
+            public boolean hasUrl() {
+                return ((bitField0_ & 0x00000800) == 0x00000800);
             }
-            case 26: {
-              bitField0_ |= 0x00000004;
-              directionId_ = input.readBytes();
-              break;
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getUrl() {
+                if (urlBuilder_ == null) {
+                    return url_;
+                } else {
+                    return urlBuilder_.getMessage();
+                }
             }
-            case 34: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
-              if (hasTripId()) {
-                subBuilder.mergeFrom(getTripId());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setTripId(subBuilder.buildPartial());
-              break;
+            public Builder setUrl(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
+                if (urlBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    url_ = value;
+                    onChanged();
+                } else {
+                    urlBuilder_.setMessage(value);
+                }
+                bitField0_ |= 0x00000800;
+                return this;
             }
-            case 42: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
-              if (hasStopId()) {
-                subBuilder.mergeFrom(getStopId());
-              }
-              input.readMessage(subBuilder, extensionRegistry);
-              setStopId(subBuilder.buildPartial());
-              break;
+            public Builder setUrl(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder builderForValue) {
+                if (urlBuilder_ == null) {
+                    url_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    urlBuilder_.setMessage(builderForValue.build());
+                }
+                bitField0_ |= 0x00000800;
+                return this;
             }
-            case 50: {
-              bitField0_ |= 0x00000020;
-              applicationId_ = input.readBytes();
-              break;
+            public Builder mergeUrl(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString value) {
+                if (urlBuilder_ == null) {
+                    if (((bitField0_ & 0x00000800) == 0x00000800) &&
+                            url_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance()) {
+                        url_ =
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder(url_).mergeFrom(value).buildPartial();
+                    } else {
+                        url_ = value;
+                    }
+                    onChanged();
+                } else {
+                    urlBuilder_.mergeFrom(value);
+                }
+                bitField0_ |= 0x00000800;
+                return this;
             }
-          }
+            public Builder clearUrl() {
+                if (urlBuilder_ == null) {
+                    url_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+                    onChanged();
+                } else {
+                    urlBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000800);
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder getUrlBuilder() {
+                bitField0_ |= 0x00000800;
+                onChanged();
+                return getUrlFieldBuilder().getBuilder();
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder getUrlOrBuilder() {
+                if (urlBuilder_ != null) {
+                    return urlBuilder_.getMessageOrBuilder();
+                } else {
+                    return url_;
+                }
+            }
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>
+            getUrlFieldBuilder() {
+                if (urlBuilder_ == null) {
+                    urlBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder>(
+                            url_,
+                            getParentForChildren(),
+                            isClean());
+                    url_ = null;
+                }
+                return urlBuilder_;
+            }
+
+            // optional string source = 13;
+            private java.lang.Object source_ = "";
+            public boolean hasSource() {
+                return ((bitField0_ & 0x00001000) == 0x00001000);
+            }
+            public String getSource() {
+                java.lang.Object ref = source_;
+                if (!(ref instanceof String)) {
+                    String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                    source_ = s;
+                    return s;
+                } else {
+                    return (String) ref;
+                }
+            }
+            public Builder setSource(String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                bitField0_ |= 0x00001000;
+                source_ = value;
+                onChanged();
+                return this;
+            }
+            public Builder clearSource() {
+                bitField0_ = (bitField0_ & ~0x00001000);
+                source_ = getDefaultInstance().getSource();
+                onChanged();
+                return this;
+            }
+            void setSource(com.google.protobuf.ByteString value) {
+                bitField0_ |= 0x00001000;
+                source_ = value;
+                onChanged();
+            }
+
+            // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert)
         }
-      }
-      
-      private int bitField0_;
-      
-      // optional string agencyId = 1;
-      private java.lang.Object agencyId_ = "";
-      public boolean hasAgencyId() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      public String getAgencyId() {
-        java.lang.Object ref = agencyId_;
-        if (!(ref instanceof String)) {
-          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-          agencyId_ = s;
-          return s;
-        } else {
-          return (String) ref;
+
+        static {
+            defaultInstance = new ServiceAlert(true);
+            defaultInstance.initFields();
         }
-      }
-      public Builder setAgencyId(String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        agencyId_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearAgencyId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        agencyId_ = getDefaultInstance().getAgencyId();
-        onChanged();
-        return this;
-      }
-      void setAgencyId(com.google.protobuf.ByteString value) {
-        bitField0_ |= 0x00000001;
-        agencyId_ = value;
-        onChanged();
-      }
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id routeId = 2;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id routeId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> routeIdBuilder_;
-      public boolean hasRouteId() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getRouteId() {
-        if (routeIdBuilder_ == null) {
-          return routeId_;
-        } else {
-          return routeIdBuilder_.getMessage();
-        }
-      }
-      public Builder setRouteId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (routeIdBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          routeId_ = value;
-          onChanged();
-        } else {
-          routeIdBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000002;
-        return this;
-      }
-      public Builder setRouteId(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
-        if (routeIdBuilder_ == null) {
-          routeId_ = builderForValue.build();
-          onChanged();
-        } else {
-          routeIdBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000002;
-        return this;
-      }
-      public Builder mergeRouteId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (routeIdBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              routeId_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) {
-            routeId_ =
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder(routeId_).mergeFrom(value).buildPartial();
-          } else {
-            routeId_ = value;
-          }
-          onChanged();
-        } else {
-          routeIdBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000002;
-        return this;
-      }
-      public Builder clearRouteId() {
-        if (routeIdBuilder_ == null) {
-          routeId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-          onChanged();
-        } else {
-          routeIdBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000002);
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getRouteIdBuilder() {
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return getRouteIdFieldBuilder().getBuilder();
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getRouteIdOrBuilder() {
-        if (routeIdBuilder_ != null) {
-          return routeIdBuilder_.getMessageOrBuilder();
-        } else {
-          return routeId_;
-        }
-      }
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> 
-          getRouteIdFieldBuilder() {
-        if (routeIdBuilder_ == null) {
-          routeIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
-                  routeId_,
-                  getParentForChildren(),
-                  isClean());
-          routeId_ = null;
-        }
-        return routeIdBuilder_;
-      }
-      
-      // optional string directionId = 3;
-      private java.lang.Object directionId_ = "";
-      public boolean hasDirectionId() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      public String getDirectionId() {
-        java.lang.Object ref = directionId_;
-        if (!(ref instanceof String)) {
-          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-          directionId_ = s;
-          return s;
-        } else {
-          return (String) ref;
-        }
-      }
-      public Builder setDirectionId(String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000004;
-        directionId_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearDirectionId() {
-        bitField0_ = (bitField0_ & ~0x00000004);
-        directionId_ = getDefaultInstance().getDirectionId();
-        onChanged();
-        return this;
-      }
-      void setDirectionId(com.google.protobuf.ByteString value) {
-        bitField0_ |= 0x00000004;
-        directionId_ = value;
-        onChanged();
-      }
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id tripId = 4;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id tripId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> tripIdBuilder_;
-      public boolean hasTripId() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getTripId() {
-        if (tripIdBuilder_ == null) {
-          return tripId_;
-        } else {
-          return tripIdBuilder_.getMessage();
-        }
-      }
-      public Builder setTripId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (tripIdBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          tripId_ = value;
-          onChanged();
-        } else {
-          tripIdBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      public Builder setTripId(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
-        if (tripIdBuilder_ == null) {
-          tripId_ = builderForValue.build();
-          onChanged();
-        } else {
-          tripIdBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      public Builder mergeTripId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (tripIdBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
-              tripId_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) {
-            tripId_ =
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder(tripId_).mergeFrom(value).buildPartial();
-          } else {
-            tripId_ = value;
-          }
-          onChanged();
-        } else {
-          tripIdBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000008;
-        return this;
-      }
-      public Builder clearTripId() {
-        if (tripIdBuilder_ == null) {
-          tripId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-          onChanged();
-        } else {
-          tripIdBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000008);
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getTripIdBuilder() {
-        bitField0_ |= 0x00000008;
-        onChanged();
-        return getTripIdFieldBuilder().getBuilder();
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getTripIdOrBuilder() {
-        if (tripIdBuilder_ != null) {
-          return tripIdBuilder_.getMessageOrBuilder();
-        } else {
-          return tripId_;
-        }
-      }
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> 
-          getTripIdFieldBuilder() {
-        if (tripIdBuilder_ == null) {
-          tripIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
-                  tripId_,
-                  getParentForChildren(),
-                  isClean());
-          tripId_ = null;
-        }
-        return tripIdBuilder_;
-      }
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id stopId = 5;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id stopId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> stopIdBuilder_;
-      public boolean hasStopId() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getStopId() {
-        if (stopIdBuilder_ == null) {
-          return stopId_;
-        } else {
-          return stopIdBuilder_.getMessage();
-        }
-      }
-      public Builder setStopId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (stopIdBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          stopId_ = value;
-          onChanged();
-        } else {
-          stopIdBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000010;
-        return this;
-      }
-      public Builder setStopId(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
-        if (stopIdBuilder_ == null) {
-          stopId_ = builderForValue.build();
-          onChanged();
-        } else {
-          stopIdBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000010;
-        return this;
-      }
-      public Builder mergeStopId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (stopIdBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010) &&
-              stopId_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) {
-            stopId_ =
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder(stopId_).mergeFrom(value).buildPartial();
-          } else {
-            stopId_ = value;
-          }
-          onChanged();
-        } else {
-          stopIdBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000010;
-        return this;
-      }
-      public Builder clearStopId() {
-        if (stopIdBuilder_ == null) {
-          stopId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-          onChanged();
-        } else {
-          stopIdBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000010);
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getStopIdBuilder() {
-        bitField0_ |= 0x00000010;
-        onChanged();
-        return getStopIdFieldBuilder().getBuilder();
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getStopIdOrBuilder() {
-        if (stopIdBuilder_ != null) {
-          return stopIdBuilder_.getMessageOrBuilder();
-        } else {
-          return stopId_;
-        }
-      }
-      private com.google.protobuf.SingleFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> 
-          getStopIdFieldBuilder() {
-        if (stopIdBuilder_ == null) {
-          stopIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
-                  stopId_,
-                  getParentForChildren(),
-                  isClean());
-          stopId_ = null;
-        }
-        return stopIdBuilder_;
-      }
-      
-      // optional string applicationId = 6;
-      private java.lang.Object applicationId_ = "";
-      public boolean hasApplicationId() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
-      }
-      public String getApplicationId() {
-        java.lang.Object ref = applicationId_;
-        if (!(ref instanceof String)) {
-          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-          applicationId_ = s;
-          return s;
-        } else {
-          return (String) ref;
-        }
-      }
-      public Builder setApplicationId(String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000020;
-        applicationId_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearApplicationId() {
-        bitField0_ = (bitField0_ & ~0x00000020);
-        applicationId_ = getDefaultInstance().getApplicationId();
-        onChanged();
-        return this;
-      }
-      void setApplicationId(com.google.protobuf.ByteString value) {
-        bitField0_ |= 0x00000020;
-        applicationId_ = value;
-        onChanged();
-      }
-      
-      // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.Affects)
+
+        // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.ServiceAlert)
     }
-    
-    static {
-      defaultInstance = new Affects(true);
-      defaultInstance.initFields();
+
+    public interface AffectsOrBuilder
+            extends com.google.protobuf.MessageOrBuilder {
+
+        // optional string agencyId = 1;
+        boolean hasAgencyId();
+        String getAgencyId();
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id routeId = 2;
+        boolean hasRouteId();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getRouteId();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getRouteIdOrBuilder();
+
+        // optional string directionId = 3;
+        boolean hasDirectionId();
+        String getDirectionId();
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id tripId = 4;
+        boolean hasTripId();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getTripId();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getTripIdOrBuilder();
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id stopId = 5;
+        boolean hasStopId();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getStopId();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getStopIdOrBuilder();
+
+        // optional string applicationId = 6;
+        boolean hasApplicationId();
+        String getApplicationId();
     }
-    
-    // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.Affects)
-  }
-  
-  public interface ConsequenceOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.Consequence.Effect effect = 1;
-    boolean hasEffect();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect getEffect();
-    
-    // optional string detourPath = 2;
-    boolean hasDetourPath();
-    String getDetourPath();
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Id detourStopIds = 3;
-    java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> 
+    public static final class Affects extends
+            com.google.protobuf.GeneratedMessage
+            implements AffectsOrBuilder {
+        // Use Affects.newBuilder() to construct.
+        private Affects(Builder builder) {
+            super(builder);
+        }
+        private Affects(boolean noInit) {}
+
+        private static final Affects defaultInstance;
+        public static Affects getDefaultInstance() {
+            return defaultInstance;
+        }
+
+        public Affects getDefaultInstanceForType() {
+            return defaultInstance;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_fieldAccessorTable;
+        }
+
+        private int bitField0_;
+        // optional string agencyId = 1;
+        public static final int AGENCYID_FIELD_NUMBER = 1;
+        private java.lang.Object agencyId_;
+        public boolean hasAgencyId() {
+            return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        public String getAgencyId() {
+            java.lang.Object ref = agencyId_;
+            if (ref instanceof String) {
+                return (String) ref;
+            } else {
+                com.google.protobuf.ByteString bs =
+                        (com.google.protobuf.ByteString) ref;
+                String s = bs.toStringUtf8();
+                if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                    agencyId_ = s;
+                }
+                return s;
+            }
+        }
+        private com.google.protobuf.ByteString getAgencyIdBytes() {
+            java.lang.Object ref = agencyId_;
+            if (ref instanceof String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                agencyId_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id routeId = 2;
+        public static final int ROUTEID_FIELD_NUMBER = 2;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id routeId_;
+        public boolean hasRouteId() {
+            return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getRouteId() {
+            return routeId_;
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getRouteIdOrBuilder() {
+            return routeId_;
+        }
+
+        // optional string directionId = 3;
+        public static final int DIRECTIONID_FIELD_NUMBER = 3;
+        private java.lang.Object directionId_;
+        public boolean hasDirectionId() {
+            return ((bitField0_ & 0x00000004) == 0x00000004);
+        }
+        public String getDirectionId() {
+            java.lang.Object ref = directionId_;
+            if (ref instanceof String) {
+                return (String) ref;
+            } else {
+                com.google.protobuf.ByteString bs =
+                        (com.google.protobuf.ByteString) ref;
+                String s = bs.toStringUtf8();
+                if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                    directionId_ = s;
+                }
+                return s;
+            }
+        }
+        private com.google.protobuf.ByteString getDirectionIdBytes() {
+            java.lang.Object ref = directionId_;
+            if (ref instanceof String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                directionId_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id tripId = 4;
+        public static final int TRIPID_FIELD_NUMBER = 4;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id tripId_;
+        public boolean hasTripId() {
+            return ((bitField0_ & 0x00000008) == 0x00000008);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getTripId() {
+            return tripId_;
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getTripIdOrBuilder() {
+            return tripId_;
+        }
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id stopId = 5;
+        public static final int STOPID_FIELD_NUMBER = 5;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id stopId_;
+        public boolean hasStopId() {
+            return ((bitField0_ & 0x00000010) == 0x00000010);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getStopId() {
+            return stopId_;
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getStopIdOrBuilder() {
+            return stopId_;
+        }
+
+        // optional string applicationId = 6;
+        public static final int APPLICATIONID_FIELD_NUMBER = 6;
+        private java.lang.Object applicationId_;
+        public boolean hasApplicationId() {
+            return ((bitField0_ & 0x00000020) == 0x00000020);
+        }
+        public String getApplicationId() {
+            java.lang.Object ref = applicationId_;
+            if (ref instanceof String) {
+                return (String) ref;
+            } else {
+                com.google.protobuf.ByteString bs =
+                        (com.google.protobuf.ByteString) ref;
+                String s = bs.toStringUtf8();
+                if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                    applicationId_ = s;
+                }
+                return s;
+            }
+        }
+        private com.google.protobuf.ByteString getApplicationIdBytes() {
+            java.lang.Object ref = applicationId_;
+            if (ref instanceof String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                applicationId_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        private void initFields() {
+            agencyId_ = "";
+            routeId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            directionId_ = "";
+            tripId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            stopId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            applicationId_ = "";
+        }
+        private byte memoizedIsInitialized = -1;
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized != -1) return isInitialized == 1;
+
+            if (hasRouteId()) {
+                if (!getRouteId().isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            if (hasTripId()) {
+                if (!getTripId().isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            if (hasStopId()) {
+                if (!getStopId().isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            getSerializedSize();
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                output.writeBytes(1, getAgencyIdBytes());
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                output.writeMessage(2, routeId_);
+            }
+            if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                output.writeBytes(3, getDirectionIdBytes());
+            }
+            if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                output.writeMessage(4, tripId_);
+            }
+            if (((bitField0_ & 0x00000010) == 0x00000010)) {
+                output.writeMessage(5, stopId_);
+            }
+            if (((bitField0_ & 0x00000020) == 0x00000020)) {
+                output.writeBytes(6, getApplicationIdBytes());
+            }
+            getUnknownFields().writeTo(output);
+        }
+
+        private int memoizedSerializedSize = -1;
+        public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeBytesSize(1, getAgencyIdBytes());
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(2, routeId_);
+            }
+            if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeBytesSize(3, getDirectionIdBytes());
+            }
+            if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(4, tripId_);
+            }
+            if (((bitField0_ & 0x00000010) == 0x00000010)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(5, stopId_);
+            }
+            if (((bitField0_ & 0x00000020) == 0x00000020)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeBytesSize(6, getApplicationIdBytes());
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+        }
+
+        private static final long serialVersionUID = 0L;
+        @java.lang.Override
+        protected java.lang.Object writeReplace()
+                throws java.io.ObjectStreamException {
+            return super.writeReplace();
+        }
+
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
+                byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseDelimitedFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
+                com.google.protobuf.CodedInputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+
+        public static Builder newBuilder() { return Builder.create(); }
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects prototype) {
+            return newBuilder().mergeFrom(prototype);
+        }
+        public Builder toBuilder() { return newBuilder(this); }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        public static final class Builder extends
+                com.google.protobuf.GeneratedMessage.Builder<Builder>
+                implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.AffectsOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor;
+            }
+
+            protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_fieldAccessorTable;
+            }
+
+            // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+                    getRouteIdFieldBuilder();
+                    getTripIdFieldBuilder();
+                    getStopIdFieldBuilder();
+                }
+            }
+            private static Builder create() {
+                return new Builder();
+            }
+
+            public Builder clear() {
+                super.clear();
+                agencyId_ = "";
+                bitField0_ = (bitField0_ & ~0x00000001);
+                if (routeIdBuilder_ == null) {
+                    routeId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+                } else {
+                    routeIdBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000002);
+                directionId_ = "";
+                bitField0_ = (bitField0_ & ~0x00000004);
+                if (tripIdBuilder_ == null) {
+                    tripId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+                } else {
+                    tripIdBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000008);
+                if (stopIdBuilder_ == null) {
+                    stopId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+                } else {
+                    stopIdBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000010);
+                applicationId_ = "";
+                bitField0_ = (bitField0_ & ~0x00000020);
+                return this;
+            }
+
+            public Builder clone() {
+                return create().mergeFrom(buildPartial());
+            }
+
+            public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDescriptor();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects getDefaultInstanceForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDefaultInstance();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects build() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects buildParsed()
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(
+                            result).asInvalidProtocolBufferException();
+                }
+                return result;
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects buildPartial() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects(this);
+                int from_bitField0_ = bitField0_;
+                int to_bitField0_ = 0;
+                if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+                    to_bitField0_ |= 0x00000001;
+                }
+                result.agencyId_ = agencyId_;
+                if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+                    to_bitField0_ |= 0x00000002;
+                }
+                if (routeIdBuilder_ == null) {
+                    result.routeId_ = routeId_;
+                } else {
+                    result.routeId_ = routeIdBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+                    to_bitField0_ |= 0x00000004;
+                }
+                result.directionId_ = directionId_;
+                if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+                    to_bitField0_ |= 0x00000008;
+                }
+                if (tripIdBuilder_ == null) {
+                    result.tripId_ = tripId_;
+                } else {
+                    result.tripId_ = tripIdBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+                    to_bitField0_ |= 0x00000010;
+                }
+                if (stopIdBuilder_ == null) {
+                    result.stopId_ = stopId_;
+                } else {
+                    result.stopId_ = stopIdBuilder_.build();
+                }
+                if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+                    to_bitField0_ |= 0x00000020;
+                }
+                result.applicationId_ = applicationId_;
+                result.bitField0_ = to_bitField0_;
+                onBuilt();
+                return result;
+            }
+
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects) {
+                    return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects)other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects other) {
+                if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.getDefaultInstance()) return this;
+                if (other.hasAgencyId()) {
+                    setAgencyId(other.getAgencyId());
+                }
+                if (other.hasRouteId()) {
+                    mergeRouteId(other.getRouteId());
+                }
+                if (other.hasDirectionId()) {
+                    setDirectionId(other.getDirectionId());
+                }
+                if (other.hasTripId()) {
+                    mergeTripId(other.getTripId());
+                }
+                if (other.hasStopId()) {
+                    mergeStopId(other.getStopId());
+                }
+                if (other.hasApplicationId()) {
+                    setApplicationId(other.getApplicationId());
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                return this;
+            }
+
+            public final boolean isInitialized() {
+                if (hasRouteId()) {
+                    if (!getRouteId().isInitialized()) {
+
+                        return false;
+                    }
+                }
+                if (hasTripId()) {
+                    if (!getTripId().isInitialized()) {
+
+                        return false;
+                    }
+                }
+                if (hasStopId()) {
+                    if (!getStopId().isInitialized()) {
+
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                        com.google.protobuf.UnknownFieldSet.newBuilder(
+                                this.getUnknownFields());
+                while (true) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            this.setUnknownFields(unknownFields.build());
+                            onChanged();
+                            return this;
+                        default: {
+                            if (!parseUnknownField(input, unknownFields,
+                                    extensionRegistry, tag)) {
+                                this.setUnknownFields(unknownFields.build());
+                                onChanged();
+                                return this;
+                            }
+                            break;
+                        }
+                        case 10: {
+                            bitField0_ |= 0x00000001;
+                            agencyId_ = input.readBytes();
+                            break;
+                        }
+                        case 18: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
+                            if (hasRouteId()) {
+                                subBuilder.mergeFrom(getRouteId());
+                            }
+                            input.readMessage(subBuilder, extensionRegistry);
+                            setRouteId(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 26: {
+                            bitField0_ |= 0x00000004;
+                            directionId_ = input.readBytes();
+                            break;
+                        }
+                        case 34: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
+                            if (hasTripId()) {
+                                subBuilder.mergeFrom(getTripId());
+                            }
+                            input.readMessage(subBuilder, extensionRegistry);
+                            setTripId(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 42: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
+                            if (hasStopId()) {
+                                subBuilder.mergeFrom(getStopId());
+                            }
+                            input.readMessage(subBuilder, extensionRegistry);
+                            setStopId(subBuilder.buildPartial());
+                            break;
+                        }
+                        case 50: {
+                            bitField0_ |= 0x00000020;
+                            applicationId_ = input.readBytes();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            private int bitField0_;
+
+            // optional string agencyId = 1;
+            private java.lang.Object agencyId_ = "";
+            public boolean hasAgencyId() {
+                return ((bitField0_ & 0x00000001) == 0x00000001);
+            }
+            public String getAgencyId() {
+                java.lang.Object ref = agencyId_;
+                if (!(ref instanceof String)) {
+                    String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                    agencyId_ = s;
+                    return s;
+                } else {
+                    return (String) ref;
+                }
+            }
+            public Builder setAgencyId(String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                bitField0_ |= 0x00000001;
+                agencyId_ = value;
+                onChanged();
+                return this;
+            }
+            public Builder clearAgencyId() {
+                bitField0_ = (bitField0_ & ~0x00000001);
+                agencyId_ = getDefaultInstance().getAgencyId();
+                onChanged();
+                return this;
+            }
+            void setAgencyId(com.google.protobuf.ByteString value) {
+                bitField0_ |= 0x00000001;
+                agencyId_ = value;
+                onChanged();
+            }
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id routeId = 2;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id routeId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> routeIdBuilder_;
+            public boolean hasRouteId() {
+                return ((bitField0_ & 0x00000002) == 0x00000002);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getRouteId() {
+                if (routeIdBuilder_ == null) {
+                    return routeId_;
+                } else {
+                    return routeIdBuilder_.getMessage();
+                }
+            }
+            public Builder setRouteId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (routeIdBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    routeId_ = value;
+                    onChanged();
+                } else {
+                    routeIdBuilder_.setMessage(value);
+                }
+                bitField0_ |= 0x00000002;
+                return this;
+            }
+            public Builder setRouteId(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
+                if (routeIdBuilder_ == null) {
+                    routeId_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    routeIdBuilder_.setMessage(builderForValue.build());
+                }
+                bitField0_ |= 0x00000002;
+                return this;
+            }
+            public Builder mergeRouteId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (routeIdBuilder_ == null) {
+                    if (((bitField0_ & 0x00000002) == 0x00000002) &&
+                            routeId_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) {
+                        routeId_ =
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder(routeId_).mergeFrom(value).buildPartial();
+                    } else {
+                        routeId_ = value;
+                    }
+                    onChanged();
+                } else {
+                    routeIdBuilder_.mergeFrom(value);
+                }
+                bitField0_ |= 0x00000002;
+                return this;
+            }
+            public Builder clearRouteId() {
+                if (routeIdBuilder_ == null) {
+                    routeId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+                    onChanged();
+                } else {
+                    routeIdBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000002);
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getRouteIdBuilder() {
+                bitField0_ |= 0x00000002;
+                onChanged();
+                return getRouteIdFieldBuilder().getBuilder();
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getRouteIdOrBuilder() {
+                if (routeIdBuilder_ != null) {
+                    return routeIdBuilder_.getMessageOrBuilder();
+                } else {
+                    return routeId_;
+                }
+            }
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>
+            getRouteIdFieldBuilder() {
+                if (routeIdBuilder_ == null) {
+                    routeIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
+                            routeId_,
+                            getParentForChildren(),
+                            isClean());
+                    routeId_ = null;
+                }
+                return routeIdBuilder_;
+            }
+
+            // optional string directionId = 3;
+            private java.lang.Object directionId_ = "";
+            public boolean hasDirectionId() {
+                return ((bitField0_ & 0x00000004) == 0x00000004);
+            }
+            public String getDirectionId() {
+                java.lang.Object ref = directionId_;
+                if (!(ref instanceof String)) {
+                    String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                    directionId_ = s;
+                    return s;
+                } else {
+                    return (String) ref;
+                }
+            }
+            public Builder setDirectionId(String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                bitField0_ |= 0x00000004;
+                directionId_ = value;
+                onChanged();
+                return this;
+            }
+            public Builder clearDirectionId() {
+                bitField0_ = (bitField0_ & ~0x00000004);
+                directionId_ = getDefaultInstance().getDirectionId();
+                onChanged();
+                return this;
+            }
+            void setDirectionId(com.google.protobuf.ByteString value) {
+                bitField0_ |= 0x00000004;
+                directionId_ = value;
+                onChanged();
+            }
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id tripId = 4;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id tripId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> tripIdBuilder_;
+            public boolean hasTripId() {
+                return ((bitField0_ & 0x00000008) == 0x00000008);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getTripId() {
+                if (tripIdBuilder_ == null) {
+                    return tripId_;
+                } else {
+                    return tripIdBuilder_.getMessage();
+                }
+            }
+            public Builder setTripId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (tripIdBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    tripId_ = value;
+                    onChanged();
+                } else {
+                    tripIdBuilder_.setMessage(value);
+                }
+                bitField0_ |= 0x00000008;
+                return this;
+            }
+            public Builder setTripId(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
+                if (tripIdBuilder_ == null) {
+                    tripId_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    tripIdBuilder_.setMessage(builderForValue.build());
+                }
+                bitField0_ |= 0x00000008;
+                return this;
+            }
+            public Builder mergeTripId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (tripIdBuilder_ == null) {
+                    if (((bitField0_ & 0x00000008) == 0x00000008) &&
+                            tripId_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) {
+                        tripId_ =
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder(tripId_).mergeFrom(value).buildPartial();
+                    } else {
+                        tripId_ = value;
+                    }
+                    onChanged();
+                } else {
+                    tripIdBuilder_.mergeFrom(value);
+                }
+                bitField0_ |= 0x00000008;
+                return this;
+            }
+            public Builder clearTripId() {
+                if (tripIdBuilder_ == null) {
+                    tripId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+                    onChanged();
+                } else {
+                    tripIdBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000008);
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getTripIdBuilder() {
+                bitField0_ |= 0x00000008;
+                onChanged();
+                return getTripIdFieldBuilder().getBuilder();
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getTripIdOrBuilder() {
+                if (tripIdBuilder_ != null) {
+                    return tripIdBuilder_.getMessageOrBuilder();
+                } else {
+                    return tripId_;
+                }
+            }
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>
+            getTripIdFieldBuilder() {
+                if (tripIdBuilder_ == null) {
+                    tripIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
+                            tripId_,
+                            getParentForChildren(),
+                            isClean());
+                    tripId_ = null;
+                }
+                return tripIdBuilder_;
+            }
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.Id stopId = 5;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id stopId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> stopIdBuilder_;
+            public boolean hasStopId() {
+                return ((bitField0_ & 0x00000010) == 0x00000010);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getStopId() {
+                if (stopIdBuilder_ == null) {
+                    return stopId_;
+                } else {
+                    return stopIdBuilder_.getMessage();
+                }
+            }
+            public Builder setStopId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (stopIdBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    stopId_ = value;
+                    onChanged();
+                } else {
+                    stopIdBuilder_.setMessage(value);
+                }
+                bitField0_ |= 0x00000010;
+                return this;
+            }
+            public Builder setStopId(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
+                if (stopIdBuilder_ == null) {
+                    stopId_ = builderForValue.build();
+                    onChanged();
+                } else {
+                    stopIdBuilder_.setMessage(builderForValue.build());
+                }
+                bitField0_ |= 0x00000010;
+                return this;
+            }
+            public Builder mergeStopId(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (stopIdBuilder_ == null) {
+                    if (((bitField0_ & 0x00000010) == 0x00000010) &&
+                            stopId_ != org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) {
+                        stopId_ =
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder(stopId_).mergeFrom(value).buildPartial();
+                    } else {
+                        stopId_ = value;
+                    }
+                    onChanged();
+                } else {
+                    stopIdBuilder_.mergeFrom(value);
+                }
+                bitField0_ |= 0x00000010;
+                return this;
+            }
+            public Builder clearStopId() {
+                if (stopIdBuilder_ == null) {
+                    stopId_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+                    onChanged();
+                } else {
+                    stopIdBuilder_.clear();
+                }
+                bitField0_ = (bitField0_ & ~0x00000010);
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getStopIdBuilder() {
+                bitField0_ |= 0x00000010;
+                onChanged();
+                return getStopIdFieldBuilder().getBuilder();
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getStopIdOrBuilder() {
+                if (stopIdBuilder_ != null) {
+                    return stopIdBuilder_.getMessageOrBuilder();
+                } else {
+                    return stopId_;
+                }
+            }
+            private com.google.protobuf.SingleFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>
+            getStopIdFieldBuilder() {
+                if (stopIdBuilder_ == null) {
+                    stopIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
+                            stopId_,
+                            getParentForChildren(),
+                            isClean());
+                    stopId_ = null;
+                }
+                return stopIdBuilder_;
+            }
+
+            // optional string applicationId = 6;
+            private java.lang.Object applicationId_ = "";
+            public boolean hasApplicationId() {
+                return ((bitField0_ & 0x00000020) == 0x00000020);
+            }
+            public String getApplicationId() {
+                java.lang.Object ref = applicationId_;
+                if (!(ref instanceof String)) {
+                    String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                    applicationId_ = s;
+                    return s;
+                } else {
+                    return (String) ref;
+                }
+            }
+            public Builder setApplicationId(String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                bitField0_ |= 0x00000020;
+                applicationId_ = value;
+                onChanged();
+                return this;
+            }
+            public Builder clearApplicationId() {
+                bitField0_ = (bitField0_ & ~0x00000020);
+                applicationId_ = getDefaultInstance().getApplicationId();
+                onChanged();
+                return this;
+            }
+            void setApplicationId(com.google.protobuf.ByteString value) {
+                bitField0_ |= 0x00000020;
+                applicationId_ = value;
+                onChanged();
+            }
+
+            // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.Affects)
+        }
+
+        static {
+            defaultInstance = new Affects(true);
+            defaultInstance.initFields();
+        }
+
+        // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.Affects)
+    }
+
+    public interface ConsequenceOrBuilder
+            extends com.google.protobuf.MessageOrBuilder {
+
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.Consequence.Effect effect = 1;
+        boolean hasEffect();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect getEffect();
+
+        // optional string detourPath = 2;
+        boolean hasDetourPath();
+        String getDetourPath();
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Id detourStopIds = 3;
+        java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id>
         getDetourStopIdsList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getDetourStopIds(int index);
-    int getDetourStopIdsCount();
-    java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> 
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getDetourStopIds(int index);
+        int getDetourStopIdsCount();
+        java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>
         getDetourStopIdsOrBuilderList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getDetourStopIdsOrBuilder(
-        int index);
-  }
-  public static final class Consequence extends
-      com.google.protobuf.GeneratedMessage
-      implements ConsequenceOrBuilder {
-    // Use Consequence.newBuilder() to construct.
-    private Consequence(Builder builder) {
-      super(builder);
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getDetourStopIdsOrBuilder(
+                int index);
     }
-    private Consequence(boolean noInit) {}
-    
-    private static final Consequence defaultInstance;
-    public static Consequence getDefaultInstance() {
-      return defaultInstance;
-    }
-    
-    public Consequence getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
+    public static final class Consequence extends
+            com.google.protobuf.GeneratedMessage
+            implements ConsequenceOrBuilder {
+        // Use Consequence.newBuilder() to construct.
+        private Consequence(Builder builder) {
+            super(builder);
+        }
+        private Consequence(boolean noInit) {}
+
+        private static final Consequence defaultInstance;
+        public static Consequence getDefaultInstance() {
+            return defaultInstance;
+        }
+
+        public Consequence getDefaultInstanceForType() {
+            return defaultInstance;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_fieldAccessorTable;
-    }
-    
-    public enum Effect
-        implements com.google.protobuf.ProtocolMessageEnum {
-      NO_SERVICE(0, 1),
-      REDUCED_SERVICE(1, 2),
-      SIGNIFICANT_DELAYS(2, 3),
-      DETOUR(3, 4),
-      ADDITIONAL_SERVICE(4, 5),
-      MODIFIED_SERVICE(5, 6),
-      OTHER_EFFECT(6, 7),
-      UNKNOWN_EFFECT(7, 8),
-      STOP_MOVED(8, 9),
-      ;
-      
-      public static final int NO_SERVICE_VALUE = 1;
-      public static final int REDUCED_SERVICE_VALUE = 2;
-      public static final int SIGNIFICANT_DELAYS_VALUE = 3;
-      public static final int DETOUR_VALUE = 4;
-      public static final int ADDITIONAL_SERVICE_VALUE = 5;
-      public static final int MODIFIED_SERVICE_VALUE = 6;
-      public static final int OTHER_EFFECT_VALUE = 7;
-      public static final int UNKNOWN_EFFECT_VALUE = 8;
-      public static final int STOP_MOVED_VALUE = 9;
-      
-      
-      public final int getNumber() { return value; }
-      
-      public static Effect valueOf(int value) {
-        switch (value) {
-          case 1: return NO_SERVICE;
-          case 2: return REDUCED_SERVICE;
-          case 3: return SIGNIFICANT_DELAYS;
-          case 4: return DETOUR;
-          case 5: return ADDITIONAL_SERVICE;
-          case 6: return MODIFIED_SERVICE;
-          case 7: return OTHER_EFFECT;
-          case 8: return UNKNOWN_EFFECT;
-          case 9: return STOP_MOVED;
-          default: return null;
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_fieldAccessorTable;
         }
-      }
-      
-      public static com.google.protobuf.Internal.EnumLiteMap<Effect>
-          internalGetValueMap() {
-        return internalValueMap;
-      }
-      private static com.google.protobuf.Internal.EnumLiteMap<Effect>
-          internalValueMap =
-            new com.google.protobuf.Internal.EnumLiteMap<Effect>() {
-              public Effect findValueByNumber(int number) {
-                return Effect.valueOf(number);
-              }
+
+        public enum Effect
+                implements com.google.protobuf.ProtocolMessageEnum {
+            NO_SERVICE(0, 1),
+            REDUCED_SERVICE(1, 2),
+            SIGNIFICANT_DELAYS(2, 3),
+            DETOUR(3, 4),
+            ADDITIONAL_SERVICE(4, 5),
+            MODIFIED_SERVICE(5, 6),
+            OTHER_EFFECT(6, 7),
+            UNKNOWN_EFFECT(7, 8),
+            STOP_MOVED(8, 9),
+            ;
+
+            public static final int NO_SERVICE_VALUE = 1;
+            public static final int REDUCED_SERVICE_VALUE = 2;
+            public static final int SIGNIFICANT_DELAYS_VALUE = 3;
+            public static final int DETOUR_VALUE = 4;
+            public static final int ADDITIONAL_SERVICE_VALUE = 5;
+            public static final int MODIFIED_SERVICE_VALUE = 6;
+            public static final int OTHER_EFFECT_VALUE = 7;
+            public static final int UNKNOWN_EFFECT_VALUE = 8;
+            public static final int STOP_MOVED_VALUE = 9;
+
+
+            public final int getNumber() { return value; }
+
+            public static Effect valueOf(int value) {
+                switch (value) {
+                    case 1: return NO_SERVICE;
+                    case 2: return REDUCED_SERVICE;
+                    case 3: return SIGNIFICANT_DELAYS;
+                    case 4: return DETOUR;
+                    case 5: return ADDITIONAL_SERVICE;
+                    case 6: return MODIFIED_SERVICE;
+                    case 7: return OTHER_EFFECT;
+                    case 8: return UNKNOWN_EFFECT;
+                    case 9: return STOP_MOVED;
+                    default: return null;
+                }
+            }
+
+            public static com.google.protobuf.Internal.EnumLiteMap<Effect>
+            internalGetValueMap() {
+                return internalValueMap;
+            }
+            private static com.google.protobuf.Internal.EnumLiteMap<Effect>
+                    internalValueMap =
+                    new com.google.protobuf.Internal.EnumLiteMap<Effect>() {
+                        public Effect findValueByNumber(int number) {
+                            return Effect.valueOf(number);
+                        }
+                    };
+
+            public final com.google.protobuf.Descriptors.EnumValueDescriptor
+            getValueDescriptor() {
+                return getDescriptor().getValues().get(index);
+            }
+            public final com.google.protobuf.Descriptors.EnumDescriptor
+            getDescriptorForType() {
+                return getDescriptor();
+            }
+            public static final com.google.protobuf.Descriptors.EnumDescriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDescriptor().getEnumTypes().get(0);
+            }
+
+            private static final Effect[] VALUES = {
+                    NO_SERVICE, REDUCED_SERVICE, SIGNIFICANT_DELAYS, DETOUR, ADDITIONAL_SERVICE, MODIFIED_SERVICE, OTHER_EFFECT, UNKNOWN_EFFECT, STOP_MOVED,
             };
-      
-      public final com.google.protobuf.Descriptors.EnumValueDescriptor
-          getValueDescriptor() {
-        return getDescriptor().getValues().get(index);
-      }
-      public final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptorForType() {
-        return getDescriptor();
-      }
-      public static final com.google.protobuf.Descriptors.EnumDescriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDescriptor().getEnumTypes().get(0);
-      }
-      
-      private static final Effect[] VALUES = {
-        NO_SERVICE, REDUCED_SERVICE, SIGNIFICANT_DELAYS, DETOUR, ADDITIONAL_SERVICE, MODIFIED_SERVICE, OTHER_EFFECT, UNKNOWN_EFFECT, STOP_MOVED, 
-      };
-      
-      public static Effect valueOf(
-          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-        if (desc.getType() != getDescriptor()) {
-          throw new java.lang.IllegalArgumentException(
-            "EnumValueDescriptor is not for this type.");
+
+            public static Effect valueOf(
+                    com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+                if (desc.getType() != getDescriptor()) {
+                    throw new java.lang.IllegalArgumentException(
+                            "EnumValueDescriptor is not for this type.");
+                }
+                return VALUES[desc.getIndex()];
+            }
+
+            private final int index;
+            private final int value;
+
+            private Effect(int index, int value) {
+                this.index = index;
+                this.value = value;
+            }
+
+            // @@protoc_insertion_point(enum_scope:org_onebusaway_transit_data_federation_services_service_alerts.Consequence.Effect)
         }
-        return VALUES[desc.getIndex()];
-      }
-      
-      private final int index;
-      private final int value;
-      
-      private Effect(int index, int value) {
-        this.index = index;
-        this.value = value;
-      }
-      
-      // @@protoc_insertion_point(enum_scope:org_onebusaway_transit_data_federation_services_service_alerts.Consequence.Effect)
-    }
-    
-    private int bitField0_;
-    // optional .org_onebusaway_transit_data_federation_services_service_alerts.Consequence.Effect effect = 1;
-    public static final int EFFECT_FIELD_NUMBER = 1;
-    private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect effect_;
-    public boolean hasEffect() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect getEffect() {
-      return effect_;
-    }
-    
-    // optional string detourPath = 2;
-    public static final int DETOURPATH_FIELD_NUMBER = 2;
-    private java.lang.Object detourPath_;
-    public boolean hasDetourPath() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    public String getDetourPath() {
-      java.lang.Object ref = detourPath_;
-      if (ref instanceof String) {
-        return (String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
-        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-          detourPath_ = s;
+
+        private int bitField0_;
+        // optional .org_onebusaway_transit_data_federation_services_service_alerts.Consequence.Effect effect = 1;
+        public static final int EFFECT_FIELD_NUMBER = 1;
+        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect effect_;
+        public boolean hasEffect() {
+            return ((bitField0_ & 0x00000001) == 0x00000001);
         }
-        return s;
-      }
-    }
-    private com.google.protobuf.ByteString getDetourPathBytes() {
-      java.lang.Object ref = detourPath_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-        detourPath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Id detourStopIds = 3;
-    public static final int DETOURSTOPIDS_FIELD_NUMBER = 3;
-    private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> detourStopIds_;
-    public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> getDetourStopIdsList() {
-      return detourStopIds_;
-    }
-    public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> 
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect getEffect() {
+            return effect_;
+        }
+
+        // optional string detourPath = 2;
+        public static final int DETOURPATH_FIELD_NUMBER = 2;
+        private java.lang.Object detourPath_;
+        public boolean hasDetourPath() {
+            return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        public String getDetourPath() {
+            java.lang.Object ref = detourPath_;
+            if (ref instanceof String) {
+                return (String) ref;
+            } else {
+                com.google.protobuf.ByteString bs =
+                        (com.google.protobuf.ByteString) ref;
+                String s = bs.toStringUtf8();
+                if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                    detourPath_ = s;
+                }
+                return s;
+            }
+        }
+        private com.google.protobuf.ByteString getDetourPathBytes() {
+            java.lang.Object ref = detourPath_;
+            if (ref instanceof String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                detourPath_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Id detourStopIds = 3;
+        public static final int DETOURSTOPIDS_FIELD_NUMBER = 3;
+        private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> detourStopIds_;
+        public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> getDetourStopIdsList() {
+            return detourStopIds_;
+        }
+        public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>
         getDetourStopIdsOrBuilderList() {
-      return detourStopIds_;
-    }
-    public int getDetourStopIdsCount() {
-      return detourStopIds_.size();
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getDetourStopIds(int index) {
-      return detourStopIds_.get(index);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getDetourStopIdsOrBuilder(
-        int index) {
-      return detourStopIds_.get(index);
-    }
-    
-    private void initFields() {
-      effect_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.NO_SERVICE;
-      detourPath_ = "";
-      detourStopIds_ = java.util.Collections.emptyList();
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      for (int i = 0; i < getDetourStopIdsCount(); i++) {
-        if (!getDetourStopIds(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
+            return detourStopIds_;
         }
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeEnum(1, effect_.getNumber());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getDetourPathBytes());
-      }
-      for (int i = 0; i < detourStopIds_.size(); i++) {
-        output.writeMessage(3, detourStopIds_.get(i));
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(1, effect_.getNumber());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getDetourPathBytes());
-      }
-      for (int i = 0; i < detourStopIds_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, detourStopIds_.get(i));
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-    
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_fieldAccessorTable;
-      }
-      
-      // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getDetourStopIdsFieldBuilder();
+        public int getDetourStopIdsCount() {
+            return detourStopIds_.size();
         }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        effect_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.NO_SERVICE;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        detourPath_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
-        if (detourStopIdsBuilder_ == null) {
-          detourStopIds_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
-        } else {
-          detourStopIdsBuilder_.clear();
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getDetourStopIds(int index) {
+            return detourStopIds_.get(index);
         }
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDescriptor();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence getDefaultInstanceForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDefaultInstance();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence build() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getDetourStopIdsOrBuilder(
+                int index) {
+            return detourStopIds_.get(index);
         }
-        return result;
-      }
-      
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
+
+        private void initFields() {
+            effect_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.NO_SERVICE;
+            detourPath_ = "";
+            detourStopIds_ = java.util.Collections.emptyList();
         }
-        return result;
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence buildPartial() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.effect_ = effect_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.detourPath_ = detourPath_;
-        if (detourStopIdsBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004)) {
-            detourStopIds_ = java.util.Collections.unmodifiableList(detourStopIds_);
-            bitField0_ = (bitField0_ & ~0x00000004);
-          }
-          result.detourStopIds_ = detourStopIds_;
-        } else {
-          result.detourStopIds_ = detourStopIdsBuilder_.build();
-        }
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence) {
-          return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence other) {
-        if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDefaultInstance()) return this;
-        if (other.hasEffect()) {
-          setEffect(other.getEffect());
-        }
-        if (other.hasDetourPath()) {
-          setDetourPath(other.getDetourPath());
-        }
-        if (detourStopIdsBuilder_ == null) {
-          if (!other.detourStopIds_.isEmpty()) {
-            if (detourStopIds_.isEmpty()) {
-              detourStopIds_ = other.detourStopIds_;
-              bitField0_ = (bitField0_ & ~0x00000004);
-            } else {
-              ensureDetourStopIdsIsMutable();
-              detourStopIds_.addAll(other.detourStopIds_);
+        private byte memoizedIsInitialized = -1;
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized != -1) return isInitialized == 1;
+
+            for (int i = 0; i < getDetourStopIdsCount(); i++) {
+                if (!getDetourStopIds(i).isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
             }
-            onChanged();
-          }
-        } else {
-          if (!other.detourStopIds_.isEmpty()) {
-            if (detourStopIdsBuilder_.isEmpty()) {
-              detourStopIdsBuilder_.dispose();
-              detourStopIdsBuilder_ = null;
-              detourStopIds_ = other.detourStopIds_;
-              bitField0_ = (bitField0_ & ~0x00000004);
-              detourStopIdsBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getDetourStopIdsFieldBuilder() : null;
-            } else {
-              detourStopIdsBuilder_.addAllMessages(other.detourStopIds_);
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            getSerializedSize();
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                output.writeEnum(1, effect_.getNumber());
             }
-          }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                output.writeBytes(2, getDetourPathBytes());
+            }
+            for (int i = 0; i < detourStopIds_.size(); i++) {
+                output.writeMessage(3, detourStopIds_.get(i));
+            }
+            getUnknownFields().writeTo(output);
         }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        for (int i = 0; i < getDetourStopIdsCount(); i++) {
-          if (!getDetourStopIds(i).isInitialized()) {
-            
-            return false;
-          }
+
+        private int memoizedSerializedSize = -1;
+        public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeEnumSize(1, effect_.getNumber());
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeBytesSize(2, getDetourPathBytes());
+            }
+            for (int i = 0; i < detourStopIds_.size(); i++) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(3, detourStopIds_.get(i));
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
         }
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
+
+        private static final long serialVersionUID = 0L;
+        @java.lang.Override
+        protected java.lang.Object writeReplace()
+                throws java.io.ObjectStreamException {
+            return super.writeReplace();
+        }
+
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
+                byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseDelimitedFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
+                com.google.protobuf.CodedInputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+
+        public static Builder newBuilder() { return Builder.create(); }
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence prototype) {
+            return newBuilder().mergeFrom(prototype);
+        }
+        public Builder toBuilder() { return newBuilder(this); }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        public static final class Builder extends
+                com.google.protobuf.GeneratedMessage.Builder<Builder>
+                implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ConsequenceOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor;
+            }
+
+            protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_fieldAccessorTable;
+            }
+
+            // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+                    getDetourStopIdsFieldBuilder();
+                }
+            }
+            private static Builder create() {
+                return new Builder();
+            }
+
+            public Builder clear() {
+                super.clear();
+                effect_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.NO_SERVICE;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                detourPath_ = "";
+                bitField0_ = (bitField0_ & ~0x00000002);
+                if (detourStopIdsBuilder_ == null) {
+                    detourStopIds_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000004);
+                } else {
+                    detourStopIdsBuilder_.clear();
+                }
                 return this;
-              }
-              break;
             }
-            case 8: {
-              int rawValue = input.readEnum();
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect value = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.valueOf(rawValue);
-              if (value == null) {
-                unknownFields.mergeVarintField(1, rawValue);
-              } else {
+
+            public Builder clone() {
+                return create().mergeFrom(buildPartial());
+            }
+
+            public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDescriptor();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence getDefaultInstanceForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDefaultInstance();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence build() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence buildParsed()
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(
+                            result).asInvalidProtocolBufferException();
+                }
+                return result;
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence buildPartial() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence(this);
+                int from_bitField0_ = bitField0_;
+                int to_bitField0_ = 0;
+                if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+                    to_bitField0_ |= 0x00000001;
+                }
+                result.effect_ = effect_;
+                if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+                    to_bitField0_ |= 0x00000002;
+                }
+                result.detourPath_ = detourPath_;
+                if (detourStopIdsBuilder_ == null) {
+                    if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                        detourStopIds_ = java.util.Collections.unmodifiableList(detourStopIds_);
+                        bitField0_ = (bitField0_ & ~0x00000004);
+                    }
+                    result.detourStopIds_ = detourStopIds_;
+                } else {
+                    result.detourStopIds_ = detourStopIdsBuilder_.build();
+                }
+                result.bitField0_ = to_bitField0_;
+                onBuilt();
+                return result;
+            }
+
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence) {
+                    return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence)other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence other) {
+                if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.getDefaultInstance()) return this;
+                if (other.hasEffect()) {
+                    setEffect(other.getEffect());
+                }
+                if (other.hasDetourPath()) {
+                    setDetourPath(other.getDetourPath());
+                }
+                if (detourStopIdsBuilder_ == null) {
+                    if (!other.detourStopIds_.isEmpty()) {
+                        if (detourStopIds_.isEmpty()) {
+                            detourStopIds_ = other.detourStopIds_;
+                            bitField0_ = (bitField0_ & ~0x00000004);
+                        } else {
+                            ensureDetourStopIdsIsMutable();
+                            detourStopIds_.addAll(other.detourStopIds_);
+                        }
+                        onChanged();
+                    }
+                } else {
+                    if (!other.detourStopIds_.isEmpty()) {
+                        if (detourStopIdsBuilder_.isEmpty()) {
+                            detourStopIdsBuilder_.dispose();
+                            detourStopIdsBuilder_ = null;
+                            detourStopIds_ = other.detourStopIds_;
+                            bitField0_ = (bitField0_ & ~0x00000004);
+                            detourStopIdsBuilder_ =
+                                    com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                                            getDetourStopIdsFieldBuilder() : null;
+                        } else {
+                            detourStopIdsBuilder_.addAllMessages(other.detourStopIds_);
+                        }
+                    }
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                return this;
+            }
+
+            public final boolean isInitialized() {
+                for (int i = 0; i < getDetourStopIdsCount(); i++) {
+                    if (!getDetourStopIds(i).isInitialized()) {
+
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                        com.google.protobuf.UnknownFieldSet.newBuilder(
+                                this.getUnknownFields());
+                while (true) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            this.setUnknownFields(unknownFields.build());
+                            onChanged();
+                            return this;
+                        default: {
+                            if (!parseUnknownField(input, unknownFields,
+                                    extensionRegistry, tag)) {
+                                this.setUnknownFields(unknownFields.build());
+                                onChanged();
+                                return this;
+                            }
+                            break;
+                        }
+                        case 8: {
+                            int rawValue = input.readEnum();
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect value = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.valueOf(rawValue);
+                            if (value == null) {
+                                unknownFields.mergeVarintField(1, rawValue);
+                            } else {
+                                bitField0_ |= 0x00000001;
+                                effect_ = value;
+                            }
+                            break;
+                        }
+                        case 18: {
+                            bitField0_ |= 0x00000002;
+                            detourPath_ = input.readBytes();
+                            break;
+                        }
+                        case 26: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
+                            input.readMessage(subBuilder, extensionRegistry);
+                            addDetourStopIds(subBuilder.buildPartial());
+                            break;
+                        }
+                    }
+                }
+            }
+
+            private int bitField0_;
+
+            // optional .org_onebusaway_transit_data_federation_services_service_alerts.Consequence.Effect effect = 1;
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect effect_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.NO_SERVICE;
+            public boolean hasEffect() {
+                return ((bitField0_ & 0x00000001) == 0x00000001);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect getEffect() {
+                return effect_;
+            }
+            public Builder setEffect(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
                 bitField0_ |= 0x00000001;
                 effect_ = value;
-              }
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              detourPath_ = input.readBytes();
-              break;
-            }
-            case 26: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addDetourStopIds(subBuilder.buildPartial());
-              break;
-            }
-          }
-        }
-      }
-      
-      private int bitField0_;
-      
-      // optional .org_onebusaway_transit_data_federation_services_service_alerts.Consequence.Effect effect = 1;
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect effect_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.NO_SERVICE;
-      public boolean hasEffect() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect getEffect() {
-        return effect_;
-      }
-      public Builder setEffect(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        bitField0_ |= 0x00000001;
-        effect_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearEffect() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        effect_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.NO_SERVICE;
-        onChanged();
-        return this;
-      }
-      
-      // optional string detourPath = 2;
-      private java.lang.Object detourPath_ = "";
-      public boolean hasDetourPath() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      public String getDetourPath() {
-        java.lang.Object ref = detourPath_;
-        if (!(ref instanceof String)) {
-          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-          detourPath_ = s;
-          return s;
-        } else {
-          return (String) ref;
-        }
-      }
-      public Builder setDetourPath(String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        detourPath_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearDetourPath() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        detourPath_ = getDefaultInstance().getDetourPath();
-        onChanged();
-        return this;
-      }
-      void setDetourPath(com.google.protobuf.ByteString value) {
-        bitField0_ |= 0x00000002;
-        detourPath_ = value;
-        onChanged();
-      }
-      
-      // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Id detourStopIds = 3;
-      private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> detourStopIds_ =
-        java.util.Collections.emptyList();
-      private void ensureDetourStopIdsIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
-          detourStopIds_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id>(detourStopIds_);
-          bitField0_ |= 0x00000004;
-         }
-      }
-      
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> detourStopIdsBuilder_;
-      
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> getDetourStopIdsList() {
-        if (detourStopIdsBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(detourStopIds_);
-        } else {
-          return detourStopIdsBuilder_.getMessageList();
-        }
-      }
-      public int getDetourStopIdsCount() {
-        if (detourStopIdsBuilder_ == null) {
-          return detourStopIds_.size();
-        } else {
-          return detourStopIdsBuilder_.getCount();
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getDetourStopIds(int index) {
-        if (detourStopIdsBuilder_ == null) {
-          return detourStopIds_.get(index);
-        } else {
-          return detourStopIdsBuilder_.getMessage(index);
-        }
-      }
-      public Builder setDetourStopIds(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (detourStopIdsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureDetourStopIdsIsMutable();
-          detourStopIds_.set(index, value);
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      public Builder setDetourStopIds(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
-        if (detourStopIdsBuilder_ == null) {
-          ensureDetourStopIdsIsMutable();
-          detourStopIds_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addDetourStopIds(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (detourStopIdsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureDetourStopIdsIsMutable();
-          detourStopIds_.add(value);
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      public Builder addDetourStopIds(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
-        if (detourStopIdsBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureDetourStopIdsIsMutable();
-          detourStopIds_.add(index, value);
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      public Builder addDetourStopIds(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
-        if (detourStopIdsBuilder_ == null) {
-          ensureDetourStopIdsIsMutable();
-          detourStopIds_.add(builderForValue.build());
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addDetourStopIds(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
-        if (detourStopIdsBuilder_ == null) {
-          ensureDetourStopIdsIsMutable();
-          detourStopIds_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAllDetourStopIds(
-          java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> values) {
-        if (detourStopIdsBuilder_ == null) {
-          ensureDetourStopIdsIsMutable();
-          super.addAll(values, detourStopIds_);
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      public Builder clearDetourStopIds() {
-        if (detourStopIdsBuilder_ == null) {
-          detourStopIds_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.clear();
-        }
-        return this;
-      }
-      public Builder removeDetourStopIds(int index) {
-        if (detourStopIdsBuilder_ == null) {
-          ensureDetourStopIdsIsMutable();
-          detourStopIds_.remove(index);
-          onChanged();
-        } else {
-          detourStopIdsBuilder_.remove(index);
-        }
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getDetourStopIdsBuilder(
-          int index) {
-        return getDetourStopIdsFieldBuilder().getBuilder(index);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getDetourStopIdsOrBuilder(
-          int index) {
-        if (detourStopIdsBuilder_ == null) {
-          return detourStopIds_.get(index);  } else {
-          return detourStopIdsBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> 
-           getDetourStopIdsOrBuilderList() {
-        if (detourStopIdsBuilder_ != null) {
-          return detourStopIdsBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(detourStopIds_);
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder addDetourStopIdsBuilder() {
-        return getDetourStopIdsFieldBuilder().addBuilder(
-            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance());
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder addDetourStopIdsBuilder(
-          int index) {
-        return getDetourStopIdsFieldBuilder().addBuilder(
-            index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance());
-      }
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder> 
-           getDetourStopIdsBuilderList() {
-        return getDetourStopIdsFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> 
-          getDetourStopIdsFieldBuilder() {
-        if (detourStopIdsBuilder_ == null) {
-          detourStopIdsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
-                  detourStopIds_,
-                  ((bitField0_ & 0x00000004) == 0x00000004),
-                  getParentForChildren(),
-                  isClean());
-          detourStopIds_ = null;
-        }
-        return detourStopIdsBuilder_;
-      }
-      
-      // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.Consequence)
-    }
-    
-    static {
-      defaultInstance = new Consequence(true);
-      defaultInstance.initFields();
-    }
-    
-    // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.Consequence)
-  }
-  
-  public interface IdOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // required string agencyId = 1;
-    boolean hasAgencyId();
-    String getAgencyId();
-    
-    // required string id = 2;
-    boolean hasId();
-    String getId();
-  }
-  public static final class Id extends
-      com.google.protobuf.GeneratedMessage
-      implements IdOrBuilder {
-    // Use Id.newBuilder() to construct.
-    private Id(Builder builder) {
-      super(builder);
-    }
-    private Id(boolean noInit) {}
-    
-    private static final Id defaultInstance;
-    public static Id getDefaultInstance() {
-      return defaultInstance;
-    }
-    
-    public Id getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_fieldAccessorTable;
-    }
-    
-    private int bitField0_;
-    // required string agencyId = 1;
-    public static final int AGENCYID_FIELD_NUMBER = 1;
-    private java.lang.Object agencyId_;
-    public boolean hasAgencyId() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    public String getAgencyId() {
-      java.lang.Object ref = agencyId_;
-      if (ref instanceof String) {
-        return (String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
-        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-          agencyId_ = s;
-        }
-        return s;
-      }
-    }
-    private com.google.protobuf.ByteString getAgencyIdBytes() {
-      java.lang.Object ref = agencyId_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-        agencyId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    
-    // required string id = 2;
-    public static final int ID_FIELD_NUMBER = 2;
-    private java.lang.Object id_;
-    public boolean hasId() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    public String getId() {
-      java.lang.Object ref = id_;
-      if (ref instanceof String) {
-        return (String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        String s = bs.toStringUtf8();
-        if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-          id_ = s;
-        }
-        return s;
-      }
-    }
-    private com.google.protobuf.ByteString getIdBytes() {
-      java.lang.Object ref = id_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-        id_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    
-    private void initFields() {
-      agencyId_ = "";
-      id_ = "";
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      if (!hasAgencyId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasId()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getAgencyIdBytes());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getIdBytes());
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getAgencyIdBytes());
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getIdBytes());
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-    
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_fieldAccessorTable;
-      }
-      
-      // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        agencyId_ = "";
-        bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDescriptor();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getDefaultInstanceForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id build() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-      
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id buildPartial() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.agencyId_ = agencyId_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.id_ = id_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id) {
-          return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id other) {
-        if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) return this;
-        if (other.hasAgencyId()) {
-          setAgencyId(other.getAgencyId());
-        }
-        if (other.hasId()) {
-          setId(other.getId());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        if (!hasAgencyId()) {
-          
-          return false;
-        }
-        if (!hasId()) {
-          
-          return false;
-        }
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
                 onChanged();
                 return this;
-              }
-              break;
             }
-            case 10: {
-              bitField0_ |= 0x00000001;
-              agencyId_ = input.readBytes();
-              break;
-            }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              id_ = input.readBytes();
-              break;
-            }
-          }
-        }
-      }
-      
-      private int bitField0_;
-      
-      // required string agencyId = 1;
-      private java.lang.Object agencyId_ = "";
-      public boolean hasAgencyId() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      public String getAgencyId() {
-        java.lang.Object ref = agencyId_;
-        if (!(ref instanceof String)) {
-          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-          agencyId_ = s;
-          return s;
-        } else {
-          return (String) ref;
-        }
-      }
-      public Builder setAgencyId(String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-        agencyId_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearAgencyId() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        agencyId_ = getDefaultInstance().getAgencyId();
-        onChanged();
-        return this;
-      }
-      void setAgencyId(com.google.protobuf.ByteString value) {
-        bitField0_ |= 0x00000001;
-        agencyId_ = value;
-        onChanged();
-      }
-      
-      // required string id = 2;
-      private java.lang.Object id_ = "";
-      public boolean hasId() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      public String getId() {
-        java.lang.Object ref = id_;
-        if (!(ref instanceof String)) {
-          String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-          id_ = s;
-          return s;
-        } else {
-          return (String) ref;
-        }
-      }
-      public Builder setId(String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        id_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearId() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        id_ = getDefaultInstance().getId();
-        onChanged();
-        return this;
-      }
-      void setId(com.google.protobuf.ByteString value) {
-        bitField0_ |= 0x00000002;
-        id_ = value;
-        onChanged();
-      }
-      
-      // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.Id)
-    }
-    
-    static {
-      defaultInstance = new Id(true);
-      defaultInstance.initFields();
-    }
-    
-    // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.Id)
-  }
-  
-  public interface TimeRangeOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // optional uint64 start = 1;
-    boolean hasStart();
-    long getStart();
-    
-    // optional uint64 end = 2;
-    boolean hasEnd();
-    long getEnd();
-  }
-  public static final class TimeRange extends
-      com.google.protobuf.GeneratedMessage
-      implements TimeRangeOrBuilder {
-    // Use TimeRange.newBuilder() to construct.
-    private TimeRange(Builder builder) {
-      super(builder);
-    }
-    private TimeRange(boolean noInit) {}
-    
-    private static final TimeRange defaultInstance;
-    public static TimeRange getDefaultInstance() {
-      return defaultInstance;
-    }
-    
-    public TimeRange getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_fieldAccessorTable;
-    }
-    
-    private int bitField0_;
-    // optional uint64 start = 1;
-    public static final int START_FIELD_NUMBER = 1;
-    private long start_;
-    public boolean hasStart() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    public long getStart() {
-      return start_;
-    }
-    
-    // optional uint64 end = 2;
-    public static final int END_FIELD_NUMBER = 2;
-    private long end_;
-    public boolean hasEnd() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    public long getEnd() {
-      return end_;
-    }
-    
-    private void initFields() {
-      start_ = 0L;
-      end_ = 0L;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeUInt64(1, start_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeUInt64(2, end_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(1, start_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(2, end_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-    
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_fieldAccessorTable;
-      }
-      
-      // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        start_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        end_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDescriptor();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getDefaultInstanceForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange build() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-      
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange buildPartial() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.start_ = start_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.end_ = end_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange) {
-          return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange other) {
-        if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance()) return this;
-        if (other.hasStart()) {
-          setStart(other.getStart());
-        }
-        if (other.hasEnd()) {
-          setEnd(other.getEnd());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
+            public Builder clearEffect() {
+                bitField0_ = (bitField0_ & ~0x00000001);
+                effect_ = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Effect.NO_SERVICE;
                 onChanged();
                 return this;
-              }
-              break;
             }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              start_ = input.readUInt64();
-              break;
+
+            // optional string detourPath = 2;
+            private java.lang.Object detourPath_ = "";
+            public boolean hasDetourPath() {
+                return ((bitField0_ & 0x00000002) == 0x00000002);
             }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              end_ = input.readUInt64();
-              break;
-            }
-          }
-        }
-      }
-      
-      private int bitField0_;
-      
-      // optional uint64 start = 1;
-      private long start_ ;
-      public boolean hasStart() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      public long getStart() {
-        return start_;
-      }
-      public Builder setStart(long value) {
-        bitField0_ |= 0x00000001;
-        start_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearStart() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        start_ = 0L;
-        onChanged();
-        return this;
-      }
-      
-      // optional uint64 end = 2;
-      private long end_ ;
-      public boolean hasEnd() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      public long getEnd() {
-        return end_;
-      }
-      public Builder setEnd(long value) {
-        bitField0_ |= 0x00000002;
-        end_ = value;
-        onChanged();
-        return this;
-      }
-      public Builder clearEnd() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        end_ = 0L;
-        onChanged();
-        return this;
-      }
-      
-      // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.TimeRange)
-    }
-    
-    static {
-      defaultInstance = new TimeRange(true);
-      defaultInstance.initFields();
-    }
-    
-    // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.TimeRange)
-  }
-  
-  public interface TranslatedStringOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation translation = 1;
-    java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> 
-        getTranslationList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation getTranslation(int index);
-    int getTranslationCount();
-    java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder> 
-        getTranslationOrBuilderList();
-    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder getTranslationOrBuilder(
-        int index);
-  }
-  public static final class TranslatedString extends
-      com.google.protobuf.GeneratedMessage
-      implements TranslatedStringOrBuilder {
-    // Use TranslatedString.newBuilder() to construct.
-    private TranslatedString(Builder builder) {
-      super(builder);
-    }
-    private TranslatedString(boolean noInit) {}
-    
-    private static final TranslatedString defaultInstance;
-    public static TranslatedString getDefaultInstance() {
-      return defaultInstance;
-    }
-    
-    public TranslatedString getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-    
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor;
-    }
-    
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_fieldAccessorTable;
-    }
-    
-    public interface TranslationOrBuilder
-        extends com.google.protobuf.MessageOrBuilder {
-      
-      // required string text = 1;
-      boolean hasText();
-      String getText();
-      
-      // optional string language = 2;
-      boolean hasLanguage();
-      String getLanguage();
-    }
-    public static final class Translation extends
-        com.google.protobuf.GeneratedMessage
-        implements TranslationOrBuilder {
-      // Use Translation.newBuilder() to construct.
-      private Translation(Builder builder) {
-        super(builder);
-      }
-      private Translation(boolean noInit) {}
-      
-      private static final Translation defaultInstance;
-      public static Translation getDefaultInstance() {
-        return defaultInstance;
-      }
-      
-      public Translation getDefaultInstanceForType() {
-        return defaultInstance;
-      }
-      
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_fieldAccessorTable;
-      }
-      
-      private int bitField0_;
-      // required string text = 1;
-      public static final int TEXT_FIELD_NUMBER = 1;
-      private java.lang.Object text_;
-      public boolean hasText() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      public String getText() {
-        java.lang.Object ref = text_;
-        if (ref instanceof String) {
-          return (String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          String s = bs.toStringUtf8();
-          if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-            text_ = s;
-          }
-          return s;
-        }
-      }
-      private com.google.protobuf.ByteString getTextBytes() {
-        java.lang.Object ref = text_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-          text_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      
-      // optional string language = 2;
-      public static final int LANGUAGE_FIELD_NUMBER = 2;
-      private java.lang.Object language_;
-      public boolean hasLanguage() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      public String getLanguage() {
-        java.lang.Object ref = language_;
-        if (ref instanceof String) {
-          return (String) ref;
-        } else {
-          com.google.protobuf.ByteString bs = 
-              (com.google.protobuf.ByteString) ref;
-          String s = bs.toStringUtf8();
-          if (com.google.protobuf.Internal.isValidUtf8(bs)) {
-            language_ = s;
-          }
-          return s;
-        }
-      }
-      private com.google.protobuf.ByteString getLanguageBytes() {
-        java.lang.Object ref = language_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8((String) ref);
-          language_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      
-      private void initFields() {
-        text_ = "";
-        language_ = "";
-      }
-      private byte memoizedIsInitialized = -1;
-      public final boolean isInitialized() {
-        byte isInitialized = memoizedIsInitialized;
-        if (isInitialized != -1) return isInitialized == 1;
-        
-        if (!hasText()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-        memoizedIsInitialized = 1;
-        return true;
-      }
-      
-      public void writeTo(com.google.protobuf.CodedOutputStream output)
-                          throws java.io.IOException {
-        getSerializedSize();
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          output.writeBytes(1, getTextBytes());
-        }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          output.writeBytes(2, getLanguageBytes());
-        }
-        getUnknownFields().writeTo(output);
-      }
-      
-      private int memoizedSerializedSize = -1;
-      public int getSerializedSize() {
-        int size = memoizedSerializedSize;
-        if (size != -1) return size;
-      
-        size = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(1, getTextBytes());
-        }
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
-          size += com.google.protobuf.CodedOutputStream
-            .computeBytesSize(2, getLanguageBytes());
-        }
-        size += getUnknownFields().getSerializedSize();
-        memoizedSerializedSize = size;
-        return size;
-      }
-      
-      private static final long serialVersionUID = 0L;
-      @java.lang.Override
-      protected java.lang.Object writeReplace()
-          throws java.io.ObjectStreamException {
-        return super.writeReplace();
-      }
-      
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
-          com.google.protobuf.ByteString data)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
-          com.google.protobuf.ByteString data,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(byte[] data)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data).buildParsed();
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
-          byte[] data,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return newBuilder().mergeFrom(data, extensionRegistry)
-                 .buildParsed();
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(java.io.InputStream input)
-          throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
-          java.io.InputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseDelimitedFrom(java.io.InputStream input)
-          throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseDelimitedFrom(
-          java.io.InputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        Builder builder = newBuilder();
-        if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-          return builder.buildParsed();
-        } else {
-          return null;
-        }
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
-          com.google.protobuf.CodedInputStream input)
-          throws java.io.IOException {
-        return newBuilder().mergeFrom(input).buildParsed();
-      }
-      public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        return newBuilder().mergeFrom(input, extensionRegistry)
-                 .buildParsed();
-      }
-      
-      public static Builder newBuilder() { return Builder.create(); }
-      public Builder newBuilderForType() { return newBuilder(); }
-      public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation prototype) {
-        return newBuilder().mergeFrom(prototype);
-      }
-      public Builder toBuilder() { return newBuilder(this); }
-      
-      @java.lang.Override
-      protected Builder newBuilderForType(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        Builder builder = new Builder(parent);
-        return builder;
-      }
-      public static final class Builder extends
-          com.google.protobuf.GeneratedMessage.Builder<Builder>
-         implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder {
-        public static final com.google.protobuf.Descriptors.Descriptor
-            getDescriptor() {
-          return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor;
-        }
-        
-        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-            internalGetFieldAccessorTable() {
-          return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_fieldAccessorTable;
-        }
-        
-        // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.newBuilder()
-        private Builder() {
-          maybeForceBuilderInitialization();
-        }
-        
-        private Builder(BuilderParent parent) {
-          super(parent);
-          maybeForceBuilderInitialization();
-        }
-        private void maybeForceBuilderInitialization() {
-          if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          }
-        }
-        private static Builder create() {
-          return new Builder();
-        }
-        
-        public Builder clear() {
-          super.clear();
-          text_ = "";
-          bitField0_ = (bitField0_ & ~0x00000001);
-          language_ = "";
-          bitField0_ = (bitField0_ & ~0x00000002);
-          return this;
-        }
-        
-        public Builder clone() {
-          return create().mergeFrom(buildPartial());
-        }
-        
-        public com.google.protobuf.Descriptors.Descriptor
-            getDescriptorForType() {
-          return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDescriptor();
-        }
-        
-        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation getDefaultInstanceForType() {
-          return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDefaultInstance();
-        }
-        
-        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation build() {
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(result);
-          }
-          return result;
-        }
-        
-        private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation buildParsed()
-            throws com.google.protobuf.InvalidProtocolBufferException {
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation result = buildPartial();
-          if (!result.isInitialized()) {
-            throw newUninitializedMessageException(
-              result).asInvalidProtocolBufferException();
-          }
-          return result;
-        }
-        
-        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation buildPartial() {
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation(this);
-          int from_bitField0_ = bitField0_;
-          int to_bitField0_ = 0;
-          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-            to_bitField0_ |= 0x00000001;
-          }
-          result.text_ = text_;
-          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-            to_bitField0_ |= 0x00000002;
-          }
-          result.language_ = language_;
-          result.bitField0_ = to_bitField0_;
-          onBuilt();
-          return result;
-        }
-        
-        public Builder mergeFrom(com.google.protobuf.Message other) {
-          if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation) {
-            return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation)other);
-          } else {
-            super.mergeFrom(other);
-            return this;
-          }
-        }
-        
-        public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation other) {
-          if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDefaultInstance()) return this;
-          if (other.hasText()) {
-            setText(other.getText());
-          }
-          if (other.hasLanguage()) {
-            setLanguage(other.getLanguage());
-          }
-          this.mergeUnknownFields(other.getUnknownFields());
-          return this;
-        }
-        
-        public final boolean isInitialized() {
-          if (!hasText()) {
-            
-            return false;
-          }
-          return true;
-        }
-        
-        public Builder mergeFrom(
-            com.google.protobuf.CodedInputStream input,
-            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-            throws java.io.IOException {
-          com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-            com.google.protobuf.UnknownFieldSet.newBuilder(
-              this.getUnknownFields());
-          while (true) {
-            int tag = input.readTag();
-            switch (tag) {
-              case 0:
-                this.setUnknownFields(unknownFields.build());
-                onChanged();
-                return this;
-              default: {
-                if (!parseUnknownField(input, unknownFields,
-                                       extensionRegistry, tag)) {
-                  this.setUnknownFields(unknownFields.build());
-                  onChanged();
-                  return this;
+            public String getDetourPath() {
+                java.lang.Object ref = detourPath_;
+                if (!(ref instanceof String)) {
+                    String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                    detourPath_ = s;
+                    return s;
+                } else {
+                    return (String) ref;
                 }
-                break;
-              }
-              case 10: {
-                bitField0_ |= 0x00000001;
-                text_ = input.readBytes();
-                break;
-              }
-              case 18: {
+            }
+            public Builder setDetourPath(String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
                 bitField0_ |= 0x00000002;
-                language_ = input.readBytes();
-                break;
-              }
-            }
-          }
-        }
-        
-        private int bitField0_;
-        
-        // required string text = 1;
-        private java.lang.Object text_ = "";
-        public boolean hasText() {
-          return ((bitField0_ & 0x00000001) == 0x00000001);
-        }
-        public String getText() {
-          java.lang.Object ref = text_;
-          if (!(ref instanceof String)) {
-            String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-            text_ = s;
-            return s;
-          } else {
-            return (String) ref;
-          }
-        }
-        public Builder setText(String value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000001;
-          text_ = value;
-          onChanged();
-          return this;
-        }
-        public Builder clearText() {
-          bitField0_ = (bitField0_ & ~0x00000001);
-          text_ = getDefaultInstance().getText();
-          onChanged();
-          return this;
-        }
-        void setText(com.google.protobuf.ByteString value) {
-          bitField0_ |= 0x00000001;
-          text_ = value;
-          onChanged();
-        }
-        
-        // optional string language = 2;
-        private java.lang.Object language_ = "";
-        public boolean hasLanguage() {
-          return ((bitField0_ & 0x00000002) == 0x00000002);
-        }
-        public String getLanguage() {
-          java.lang.Object ref = language_;
-          if (!(ref instanceof String)) {
-            String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
-            language_ = s;
-            return s;
-          } else {
-            return (String) ref;
-          }
-        }
-        public Builder setLanguage(String value) {
-          if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-          language_ = value;
-          onChanged();
-          return this;
-        }
-        public Builder clearLanguage() {
-          bitField0_ = (bitField0_ & ~0x00000002);
-          language_ = getDefaultInstance().getLanguage();
-          onChanged();
-          return this;
-        }
-        void setLanguage(com.google.protobuf.ByteString value) {
-          bitField0_ |= 0x00000002;
-          language_ = value;
-          onChanged();
-        }
-        
-        // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation)
-      }
-      
-      static {
-        defaultInstance = new Translation(true);
-        defaultInstance.initFields();
-      }
-      
-      // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation)
-    }
-    
-    // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation translation = 1;
-    public static final int TRANSLATION_FIELD_NUMBER = 1;
-    private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> translation_;
-    public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> getTranslationList() {
-      return translation_;
-    }
-    public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder> 
-        getTranslationOrBuilderList() {
-      return translation_;
-    }
-    public int getTranslationCount() {
-      return translation_.size();
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation getTranslation(int index) {
-      return translation_.get(index);
-    }
-    public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder getTranslationOrBuilder(
-        int index) {
-      return translation_.get(index);
-    }
-    
-    private void initFields() {
-      translation_ = java.util.Collections.emptyList();
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-      
-      for (int i = 0; i < getTranslationCount(); i++) {
-        if (!getTranslation(i).isInitialized()) {
-          memoizedIsInitialized = 0;
-          return false;
-        }
-      }
-      memoizedIsInitialized = 1;
-      return true;
-    }
-    
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      for (int i = 0; i < translation_.size(); i++) {
-        output.writeMessage(1, translation_.get(i));
-      }
-      getUnknownFields().writeTo(output);
-    }
-    
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-    
-      size = 0;
-      for (int i = 0; i < translation_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, translation_.get(i));
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-    
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-    
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return newBuilder().mergeFrom(data, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      Builder builder = newBuilder();
-      if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
-        return builder.buildParsed();
-      } else {
-        return null;
-      }
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input).buildParsed();
-    }
-    public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return newBuilder().mergeFrom(input, extensionRegistry)
-               .buildParsed();
-    }
-    
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-    
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor;
-      }
-      
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_fieldAccessorTable;
-      }
-      
-      // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-      
-      private Builder(BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getTranslationFieldBuilder();
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-      
-      public Builder clear() {
-        super.clear();
-        if (translationBuilder_ == null) {
-          translation_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-        } else {
-          translationBuilder_.clear();
-        }
-        return this;
-      }
-      
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-      
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDescriptor();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getDefaultInstanceForType() {
-        return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString build() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-      
-      private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString buildParsed()
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(
-            result).asInvalidProtocolBufferException();
-        }
-        return result;
-      }
-      
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString buildPartial() {
-        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString(this);
-        if (translationBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
-            translation_ = java.util.Collections.unmodifiableList(translation_);
-            bitField0_ = (bitField0_ & ~0x00000001);
-          }
-          result.translation_ = translation_;
-        } else {
-          result.translation_ = translationBuilder_.build();
-        }
-        onBuilt();
-        return result;
-      }
-      
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString) {
-          return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-      
-      public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString other) {
-        if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance()) return this;
-        if (translationBuilder_ == null) {
-          if (!other.translation_.isEmpty()) {
-            if (translation_.isEmpty()) {
-              translation_ = other.translation_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-            } else {
-              ensureTranslationIsMutable();
-              translation_.addAll(other.translation_);
-            }
-            onChanged();
-          }
-        } else {
-          if (!other.translation_.isEmpty()) {
-            if (translationBuilder_.isEmpty()) {
-              translationBuilder_.dispose();
-              translationBuilder_ = null;
-              translation_ = other.translation_;
-              bitField0_ = (bitField0_ & ~0x00000001);
-              translationBuilder_ = 
-                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getTranslationFieldBuilder() : null;
-            } else {
-              translationBuilder_.addAllMessages(other.translation_);
-            }
-          }
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-      
-      public final boolean isInitialized() {
-        for (int i = 0; i < getTranslationCount(); i++) {
-          if (!getTranslation(i).isInitialized()) {
-            
-            return false;
-          }
-        }
-        return true;
-      }
-      
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder(
-            this.getUnknownFields());
-        while (true) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              this.setUnknownFields(unknownFields.build());
-              onChanged();
-              return this;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                this.setUnknownFields(unknownFields.build());
+                detourPath_ = value;
                 onChanged();
                 return this;
-              }
-              break;
             }
-            case 10: {
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.newBuilder();
-              input.readMessage(subBuilder, extensionRegistry);
-              addTranslation(subBuilder.buildPartial());
-              break;
+            public Builder clearDetourPath() {
+                bitField0_ = (bitField0_ & ~0x00000002);
+                detourPath_ = getDefaultInstance().getDetourPath();
+                onChanged();
+                return this;
             }
-          }
+            void setDetourPath(com.google.protobuf.ByteString value) {
+                bitField0_ |= 0x00000002;
+                detourPath_ = value;
+                onChanged();
+            }
+
+            // repeated .org_onebusaway_transit_data_federation_services_service_alerts.Id detourStopIds = 3;
+            private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> detourStopIds_ =
+                    java.util.Collections.emptyList();
+            private void ensureDetourStopIdsIsMutable() {
+                if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+                    detourStopIds_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id>(detourStopIds_);
+                    bitField0_ |= 0x00000004;
+                }
+            }
+
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder> detourStopIdsBuilder_;
+
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> getDetourStopIdsList() {
+                if (detourStopIdsBuilder_ == null) {
+                    return java.util.Collections.unmodifiableList(detourStopIds_);
+                } else {
+                    return detourStopIdsBuilder_.getMessageList();
+                }
+            }
+            public int getDetourStopIdsCount() {
+                if (detourStopIdsBuilder_ == null) {
+                    return detourStopIds_.size();
+                } else {
+                    return detourStopIdsBuilder_.getCount();
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getDetourStopIds(int index) {
+                if (detourStopIdsBuilder_ == null) {
+                    return detourStopIds_.get(index);
+                } else {
+                    return detourStopIdsBuilder_.getMessage(index);
+                }
+            }
+            public Builder setDetourStopIds(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (detourStopIdsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureDetourStopIdsIsMutable();
+                    detourStopIds_.set(index, value);
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.setMessage(index, value);
+                }
+                return this;
+            }
+            public Builder setDetourStopIds(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
+                if (detourStopIdsBuilder_ == null) {
+                    ensureDetourStopIdsIsMutable();
+                    detourStopIds_.set(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.setMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addDetourStopIds(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (detourStopIdsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureDetourStopIdsIsMutable();
+                    detourStopIds_.add(value);
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.addMessage(value);
+                }
+                return this;
+            }
+            public Builder addDetourStopIds(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id value) {
+                if (detourStopIdsBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureDetourStopIdsIsMutable();
+                    detourStopIds_.add(index, value);
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.addMessage(index, value);
+                }
+                return this;
+            }
+            public Builder addDetourStopIds(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
+                if (detourStopIdsBuilder_ == null) {
+                    ensureDetourStopIdsIsMutable();
+                    detourStopIds_.add(builderForValue.build());
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.addMessage(builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addDetourStopIds(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder builderForValue) {
+                if (detourStopIdsBuilder_ == null) {
+                    ensureDetourStopIdsIsMutable();
+                    detourStopIds_.add(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.addMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAllDetourStopIds(
+                    java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id> values) {
+                if (detourStopIdsBuilder_ == null) {
+                    ensureDetourStopIdsIsMutable();
+                    super.addAll(values, detourStopIds_);
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.addAllMessages(values);
+                }
+                return this;
+            }
+            public Builder clearDetourStopIds() {
+                if (detourStopIdsBuilder_ == null) {
+                    detourStopIds_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000004);
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.clear();
+                }
+                return this;
+            }
+            public Builder removeDetourStopIds(int index) {
+                if (detourStopIdsBuilder_ == null) {
+                    ensureDetourStopIdsIsMutable();
+                    detourStopIds_.remove(index);
+                    onChanged();
+                } else {
+                    detourStopIdsBuilder_.remove(index);
+                }
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder getDetourStopIdsBuilder(
+                    int index) {
+                return getDetourStopIdsFieldBuilder().getBuilder(index);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder getDetourStopIdsOrBuilder(
+                    int index) {
+                if (detourStopIdsBuilder_ == null) {
+                    return detourStopIds_.get(index);  } else {
+                    return detourStopIdsBuilder_.getMessageOrBuilder(index);
+                }
+            }
+            public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>
+            getDetourStopIdsOrBuilderList() {
+                if (detourStopIdsBuilder_ != null) {
+                    return detourStopIdsBuilder_.getMessageOrBuilderList();
+                } else {
+                    return java.util.Collections.unmodifiableList(detourStopIds_);
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder addDetourStopIdsBuilder() {
+                return getDetourStopIdsFieldBuilder().addBuilder(
+                        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance());
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder addDetourStopIdsBuilder(
+                    int index) {
+                return getDetourStopIdsFieldBuilder().addBuilder(
+                        index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance());
+            }
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder>
+            getDetourStopIdsBuilderList() {
+                return getDetourStopIdsFieldBuilder().getBuilderList();
+            }
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>
+            getDetourStopIdsFieldBuilder() {
+                if (detourStopIdsBuilder_ == null) {
+                    detourStopIdsBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder>(
+                            detourStopIds_,
+                            ((bitField0_ & 0x00000004) == 0x00000004),
+                            getParentForChildren(),
+                            isClean());
+                    detourStopIds_ = null;
+                }
+                return detourStopIdsBuilder_;
+            }
+
+            // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.Consequence)
         }
-      }
-      
-      private int bitField0_;
-      
-      // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation translation = 1;
-      private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> translation_ =
-        java.util.Collections.emptyList();
-      private void ensureTranslationIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          translation_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation>(translation_);
-          bitField0_ |= 0x00000001;
-         }
-      }
-      
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder> translationBuilder_;
-      
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> getTranslationList() {
-        if (translationBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(translation_);
-        } else {
-          return translationBuilder_.getMessageList();
+
+        static {
+            defaultInstance = new Consequence(true);
+            defaultInstance.initFields();
         }
-      }
-      public int getTranslationCount() {
-        if (translationBuilder_ == null) {
-          return translation_.size();
-        } else {
-          return translationBuilder_.getCount();
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation getTranslation(int index) {
-        if (translationBuilder_ == null) {
-          return translation_.get(index);
-        } else {
-          return translationBuilder_.getMessage(index);
-        }
-      }
-      public Builder setTranslation(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation value) {
-        if (translationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureTranslationIsMutable();
-          translation_.set(index, value);
-          onChanged();
-        } else {
-          translationBuilder_.setMessage(index, value);
-        }
-        return this;
-      }
-      public Builder setTranslation(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder builderForValue) {
-        if (translationBuilder_ == null) {
-          ensureTranslationIsMutable();
-          translation_.set(index, builderForValue.build());
-          onChanged();
-        } else {
-          translationBuilder_.setMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addTranslation(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation value) {
-        if (translationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureTranslationIsMutable();
-          translation_.add(value);
-          onChanged();
-        } else {
-          translationBuilder_.addMessage(value);
-        }
-        return this;
-      }
-      public Builder addTranslation(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation value) {
-        if (translationBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          ensureTranslationIsMutable();
-          translation_.add(index, value);
-          onChanged();
-        } else {
-          translationBuilder_.addMessage(index, value);
-        }
-        return this;
-      }
-      public Builder addTranslation(
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder builderForValue) {
-        if (translationBuilder_ == null) {
-          ensureTranslationIsMutable();
-          translation_.add(builderForValue.build());
-          onChanged();
-        } else {
-          translationBuilder_.addMessage(builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addTranslation(
-          int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder builderForValue) {
-        if (translationBuilder_ == null) {
-          ensureTranslationIsMutable();
-          translation_.add(index, builderForValue.build());
-          onChanged();
-        } else {
-          translationBuilder_.addMessage(index, builderForValue.build());
-        }
-        return this;
-      }
-      public Builder addAllTranslation(
-          java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> values) {
-        if (translationBuilder_ == null) {
-          ensureTranslationIsMutable();
-          super.addAll(values, translation_);
-          onChanged();
-        } else {
-          translationBuilder_.addAllMessages(values);
-        }
-        return this;
-      }
-      public Builder clearTranslation() {
-        if (translationBuilder_ == null) {
-          translation_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
-          onChanged();
-        } else {
-          translationBuilder_.clear();
-        }
-        return this;
-      }
-      public Builder removeTranslation(int index) {
-        if (translationBuilder_ == null) {
-          ensureTranslationIsMutable();
-          translation_.remove(index);
-          onChanged();
-        } else {
-          translationBuilder_.remove(index);
-        }
-        return this;
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder getTranslationBuilder(
-          int index) {
-        return getTranslationFieldBuilder().getBuilder(index);
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder getTranslationOrBuilder(
-          int index) {
-        if (translationBuilder_ == null) {
-          return translation_.get(index);  } else {
-          return translationBuilder_.getMessageOrBuilder(index);
-        }
-      }
-      public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder> 
-           getTranslationOrBuilderList() {
-        if (translationBuilder_ != null) {
-          return translationBuilder_.getMessageOrBuilderList();
-        } else {
-          return java.util.Collections.unmodifiableList(translation_);
-        }
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder addTranslationBuilder() {
-        return getTranslationFieldBuilder().addBuilder(
-            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDefaultInstance());
-      }
-      public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder addTranslationBuilder(
-          int index) {
-        return getTranslationFieldBuilder().addBuilder(
-            index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDefaultInstance());
-      }
-      public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder> 
-           getTranslationBuilderList() {
-        return getTranslationFieldBuilder().getBuilderList();
-      }
-      private com.google.protobuf.RepeatedFieldBuilder<
-          org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder> 
-          getTranslationFieldBuilder() {
-        if (translationBuilder_ == null) {
-          translationBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder>(
-                  translation_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
-                  getParentForChildren(),
-                  isClean());
-          translation_ = null;
-        }
-        return translationBuilder_;
-      }
-      
-      // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString)
+
+        // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.Consequence)
     }
-    
+
+    public interface IdOrBuilder
+            extends com.google.protobuf.MessageOrBuilder {
+
+        // required string agencyId = 1;
+        boolean hasAgencyId();
+        String getAgencyId();
+
+        // required string id = 2;
+        boolean hasId();
+        String getId();
+    }
+    public static final class Id extends
+            com.google.protobuf.GeneratedMessage
+            implements IdOrBuilder {
+        // Use Id.newBuilder() to construct.
+        private Id(Builder builder) {
+            super(builder);
+        }
+        private Id(boolean noInit) {}
+
+        private static final Id defaultInstance;
+        public static Id getDefaultInstance() {
+            return defaultInstance;
+        }
+
+        public Id getDefaultInstanceForType() {
+            return defaultInstance;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_fieldAccessorTable;
+        }
+
+        private int bitField0_;
+        // required string agencyId = 1;
+        public static final int AGENCYID_FIELD_NUMBER = 1;
+        private java.lang.Object agencyId_;
+        public boolean hasAgencyId() {
+            return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        public String getAgencyId() {
+            java.lang.Object ref = agencyId_;
+            if (ref instanceof String) {
+                return (String) ref;
+            } else {
+                com.google.protobuf.ByteString bs =
+                        (com.google.protobuf.ByteString) ref;
+                String s = bs.toStringUtf8();
+                if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                    agencyId_ = s;
+                }
+                return s;
+            }
+        }
+        private com.google.protobuf.ByteString getAgencyIdBytes() {
+            java.lang.Object ref = agencyId_;
+            if (ref instanceof String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                agencyId_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        // required string id = 2;
+        public static final int ID_FIELD_NUMBER = 2;
+        private java.lang.Object id_;
+        public boolean hasId() {
+            return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        public String getId() {
+            java.lang.Object ref = id_;
+            if (ref instanceof String) {
+                return (String) ref;
+            } else {
+                com.google.protobuf.ByteString bs =
+                        (com.google.protobuf.ByteString) ref;
+                String s = bs.toStringUtf8();
+                if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                    id_ = s;
+                }
+                return s;
+            }
+        }
+        private com.google.protobuf.ByteString getIdBytes() {
+            java.lang.Object ref = id_;
+            if (ref instanceof String) {
+                com.google.protobuf.ByteString b =
+                        com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                id_ = b;
+                return b;
+            } else {
+                return (com.google.protobuf.ByteString) ref;
+            }
+        }
+
+        private void initFields() {
+            agencyId_ = "";
+            id_ = "";
+        }
+        private byte memoizedIsInitialized = -1;
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized != -1) return isInitialized == 1;
+
+            if (!hasAgencyId()) {
+                memoizedIsInitialized = 0;
+                return false;
+            }
+            if (!hasId()) {
+                memoizedIsInitialized = 0;
+                return false;
+            }
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            getSerializedSize();
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                output.writeBytes(1, getAgencyIdBytes());
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                output.writeBytes(2, getIdBytes());
+            }
+            getUnknownFields().writeTo(output);
+        }
+
+        private int memoizedSerializedSize = -1;
+        public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeBytesSize(1, getAgencyIdBytes());
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeBytesSize(2, getIdBytes());
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+        }
+
+        private static final long serialVersionUID = 0L;
+        @java.lang.Override
+        protected java.lang.Object writeReplace()
+                throws java.io.ObjectStreamException {
+            return super.writeReplace();
+        }
+
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
+                byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseDelimitedFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
+                com.google.protobuf.CodedInputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+
+        public static Builder newBuilder() { return Builder.create(); }
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id prototype) {
+            return newBuilder().mergeFrom(prototype);
+        }
+        public Builder toBuilder() { return newBuilder(this); }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        public static final class Builder extends
+                com.google.protobuf.GeneratedMessage.Builder<Builder>
+                implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.IdOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor;
+            }
+
+            protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_fieldAccessorTable;
+            }
+
+            // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+                }
+            }
+            private static Builder create() {
+                return new Builder();
+            }
+
+            public Builder clear() {
+                super.clear();
+                agencyId_ = "";
+                bitField0_ = (bitField0_ & ~0x00000001);
+                id_ = "";
+                bitField0_ = (bitField0_ & ~0x00000002);
+                return this;
+            }
+
+            public Builder clone() {
+                return create().mergeFrom(buildPartial());
+            }
+
+            public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDescriptor();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id getDefaultInstanceForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id build() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id buildParsed()
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(
+                            result).asInvalidProtocolBufferException();
+                }
+                return result;
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id buildPartial() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id(this);
+                int from_bitField0_ = bitField0_;
+                int to_bitField0_ = 0;
+                if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+                    to_bitField0_ |= 0x00000001;
+                }
+                result.agencyId_ = agencyId_;
+                if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+                    to_bitField0_ |= 0x00000002;
+                }
+                result.id_ = id_;
+                result.bitField0_ = to_bitField0_;
+                onBuilt();
+                return result;
+            }
+
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id) {
+                    return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id)other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id other) {
+                if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.getDefaultInstance()) return this;
+                if (other.hasAgencyId()) {
+                    setAgencyId(other.getAgencyId());
+                }
+                if (other.hasId()) {
+                    setId(other.getId());
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                return this;
+            }
+
+            public final boolean isInitialized() {
+                if (!hasAgencyId()) {
+
+                    return false;
+                }
+                if (!hasId()) {
+
+                    return false;
+                }
+                return true;
+            }
+
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                        com.google.protobuf.UnknownFieldSet.newBuilder(
+                                this.getUnknownFields());
+                while (true) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            this.setUnknownFields(unknownFields.build());
+                            onChanged();
+                            return this;
+                        default: {
+                            if (!parseUnknownField(input, unknownFields,
+                                    extensionRegistry, tag)) {
+                                this.setUnknownFields(unknownFields.build());
+                                onChanged();
+                                return this;
+                            }
+                            break;
+                        }
+                        case 10: {
+                            bitField0_ |= 0x00000001;
+                            agencyId_ = input.readBytes();
+                            break;
+                        }
+                        case 18: {
+                            bitField0_ |= 0x00000002;
+                            id_ = input.readBytes();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            private int bitField0_;
+
+            // required string agencyId = 1;
+            private java.lang.Object agencyId_ = "";
+            public boolean hasAgencyId() {
+                return ((bitField0_ & 0x00000001) == 0x00000001);
+            }
+            public String getAgencyId() {
+                java.lang.Object ref = agencyId_;
+                if (!(ref instanceof String)) {
+                    String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                    agencyId_ = s;
+                    return s;
+                } else {
+                    return (String) ref;
+                }
+            }
+            public Builder setAgencyId(String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                bitField0_ |= 0x00000001;
+                agencyId_ = value;
+                onChanged();
+                return this;
+            }
+            public Builder clearAgencyId() {
+                bitField0_ = (bitField0_ & ~0x00000001);
+                agencyId_ = getDefaultInstance().getAgencyId();
+                onChanged();
+                return this;
+            }
+            void setAgencyId(com.google.protobuf.ByteString value) {
+                bitField0_ |= 0x00000001;
+                agencyId_ = value;
+                onChanged();
+            }
+
+            // required string id = 2;
+            private java.lang.Object id_ = "";
+            public boolean hasId() {
+                return ((bitField0_ & 0x00000002) == 0x00000002);
+            }
+            public String getId() {
+                java.lang.Object ref = id_;
+                if (!(ref instanceof String)) {
+                    String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                    id_ = s;
+                    return s;
+                } else {
+                    return (String) ref;
+                }
+            }
+            public Builder setId(String value) {
+                if (value == null) {
+                    throw new NullPointerException();
+                }
+                bitField0_ |= 0x00000002;
+                id_ = value;
+                onChanged();
+                return this;
+            }
+            public Builder clearId() {
+                bitField0_ = (bitField0_ & ~0x00000002);
+                id_ = getDefaultInstance().getId();
+                onChanged();
+                return this;
+            }
+            void setId(com.google.protobuf.ByteString value) {
+                bitField0_ |= 0x00000002;
+                id_ = value;
+                onChanged();
+            }
+
+            // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.Id)
+        }
+
+        static {
+            defaultInstance = new Id(true);
+            defaultInstance.initFields();
+        }
+
+        // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.Id)
+    }
+
+    public interface TimeRangeOrBuilder
+            extends com.google.protobuf.MessageOrBuilder {
+
+        // optional uint64 start = 1;
+        boolean hasStart();
+        long getStart();
+
+        // optional uint64 end = 2;
+        boolean hasEnd();
+        long getEnd();
+    }
+    public static final class TimeRange extends
+            com.google.protobuf.GeneratedMessage
+            implements TimeRangeOrBuilder {
+        // Use TimeRange.newBuilder() to construct.
+        private TimeRange(Builder builder) {
+            super(builder);
+        }
+        private TimeRange(boolean noInit) {}
+
+        private static final TimeRange defaultInstance;
+        public static TimeRange getDefaultInstance() {
+            return defaultInstance;
+        }
+
+        public TimeRange getDefaultInstanceForType() {
+            return defaultInstance;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_fieldAccessorTable;
+        }
+
+        private int bitField0_;
+        // optional uint64 start = 1;
+        public static final int START_FIELD_NUMBER = 1;
+        private long start_;
+        public boolean hasStart() {
+            return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        public long getStart() {
+            return start_;
+        }
+
+        // optional uint64 end = 2;
+        public static final int END_FIELD_NUMBER = 2;
+        private long end_;
+        public boolean hasEnd() {
+            return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        public long getEnd() {
+            return end_;
+        }
+
+        private void initFields() {
+            start_ = 0L;
+            end_ = 0L;
+        }
+        private byte memoizedIsInitialized = -1;
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized != -1) return isInitialized == 1;
+
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            getSerializedSize();
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                output.writeUInt64(1, start_);
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                output.writeUInt64(2, end_);
+            }
+            getUnknownFields().writeTo(output);
+        }
+
+        private int memoizedSerializedSize = -1;
+        public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeUInt64Size(1, start_);
+            }
+            if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeUInt64Size(2, end_);
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+        }
+
+        private static final long serialVersionUID = 0L;
+        @java.lang.Override
+        protected java.lang.Object writeReplace()
+                throws java.io.ObjectStreamException {
+            return super.writeReplace();
+        }
+
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
+                byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseDelimitedFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
+                com.google.protobuf.CodedInputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+
+        public static Builder newBuilder() { return Builder.create(); }
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange prototype) {
+            return newBuilder().mergeFrom(prototype);
+        }
+        public Builder toBuilder() { return newBuilder(this); }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        public static final class Builder extends
+                com.google.protobuf.GeneratedMessage.Builder<Builder>
+                implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRangeOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor;
+            }
+
+            protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_fieldAccessorTable;
+            }
+
+            // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+                }
+            }
+            private static Builder create() {
+                return new Builder();
+            }
+
+            public Builder clear() {
+                super.clear();
+                start_ = 0L;
+                bitField0_ = (bitField0_ & ~0x00000001);
+                end_ = 0L;
+                bitField0_ = (bitField0_ & ~0x00000002);
+                return this;
+            }
+
+            public Builder clone() {
+                return create().mergeFrom(buildPartial());
+            }
+
+            public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDescriptor();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange getDefaultInstanceForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange build() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange buildParsed()
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(
+                            result).asInvalidProtocolBufferException();
+                }
+                return result;
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange buildPartial() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange(this);
+                int from_bitField0_ = bitField0_;
+                int to_bitField0_ = 0;
+                if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+                    to_bitField0_ |= 0x00000001;
+                }
+                result.start_ = start_;
+                if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+                    to_bitField0_ |= 0x00000002;
+                }
+                result.end_ = end_;
+                result.bitField0_ = to_bitField0_;
+                onBuilt();
+                return result;
+            }
+
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange) {
+                    return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange)other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange other) {
+                if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.getDefaultInstance()) return this;
+                if (other.hasStart()) {
+                    setStart(other.getStart());
+                }
+                if (other.hasEnd()) {
+                    setEnd(other.getEnd());
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                return this;
+            }
+
+            public final boolean isInitialized() {
+                return true;
+            }
+
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                        com.google.protobuf.UnknownFieldSet.newBuilder(
+                                this.getUnknownFields());
+                while (true) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            this.setUnknownFields(unknownFields.build());
+                            onChanged();
+                            return this;
+                        default: {
+                            if (!parseUnknownField(input, unknownFields,
+                                    extensionRegistry, tag)) {
+                                this.setUnknownFields(unknownFields.build());
+                                onChanged();
+                                return this;
+                            }
+                            break;
+                        }
+                        case 8: {
+                            bitField0_ |= 0x00000001;
+                            start_ = input.readUInt64();
+                            break;
+                        }
+                        case 16: {
+                            bitField0_ |= 0x00000002;
+                            end_ = input.readUInt64();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            private int bitField0_;
+
+            // optional uint64 start = 1;
+            private long start_ ;
+            public boolean hasStart() {
+                return ((bitField0_ & 0x00000001) == 0x00000001);
+            }
+            public long getStart() {
+                return start_;
+            }
+            public Builder setStart(long value) {
+                bitField0_ |= 0x00000001;
+                start_ = value;
+                onChanged();
+                return this;
+            }
+            public Builder clearStart() {
+                bitField0_ = (bitField0_ & ~0x00000001);
+                start_ = 0L;
+                onChanged();
+                return this;
+            }
+
+            // optional uint64 end = 2;
+            private long end_ ;
+            public boolean hasEnd() {
+                return ((bitField0_ & 0x00000002) == 0x00000002);
+            }
+            public long getEnd() {
+                return end_;
+            }
+            public Builder setEnd(long value) {
+                bitField0_ |= 0x00000002;
+                end_ = value;
+                onChanged();
+                return this;
+            }
+            public Builder clearEnd() {
+                bitField0_ = (bitField0_ & ~0x00000002);
+                end_ = 0L;
+                onChanged();
+                return this;
+            }
+
+            // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.TimeRange)
+        }
+
+        static {
+            defaultInstance = new TimeRange(true);
+            defaultInstance.initFields();
+        }
+
+        // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.TimeRange)
+    }
+
+    public interface TranslatedStringOrBuilder
+            extends com.google.protobuf.MessageOrBuilder {
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation translation = 1;
+        java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation>
+        getTranslationList();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation getTranslation(int index);
+        int getTranslationCount();
+        java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder>
+        getTranslationOrBuilderList();
+        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder getTranslationOrBuilder(
+                int index);
+    }
+    public static final class TranslatedString extends
+            com.google.protobuf.GeneratedMessage
+            implements TranslatedStringOrBuilder {
+        // Use TranslatedString.newBuilder() to construct.
+        private TranslatedString(Builder builder) {
+            super(builder);
+        }
+        private TranslatedString(boolean noInit) {}
+
+        private static final TranslatedString defaultInstance;
+        public static TranslatedString getDefaultInstance() {
+            return defaultInstance;
+        }
+
+        public TranslatedString getDefaultInstanceForType() {
+            return defaultInstance;
+        }
+
+        public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor;
+        }
+
+        protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+            return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_fieldAccessorTable;
+        }
+
+        public interface TranslationOrBuilder
+                extends com.google.protobuf.MessageOrBuilder {
+
+            // required string text = 1;
+            boolean hasText();
+            String getText();
+
+            // optional string language = 2;
+            boolean hasLanguage();
+            String getLanguage();
+        }
+        public static final class Translation extends
+                com.google.protobuf.GeneratedMessage
+                implements TranslationOrBuilder {
+            // Use Translation.newBuilder() to construct.
+            private Translation(Builder builder) {
+                super(builder);
+            }
+            private Translation(boolean noInit) {}
+
+            private static final Translation defaultInstance;
+            public static Translation getDefaultInstance() {
+                return defaultInstance;
+            }
+
+            public Translation getDefaultInstanceForType() {
+                return defaultInstance;
+            }
+
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor;
+            }
+
+            protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_fieldAccessorTable;
+            }
+
+            private int bitField0_;
+            // required string text = 1;
+            public static final int TEXT_FIELD_NUMBER = 1;
+            private java.lang.Object text_;
+            public boolean hasText() {
+                return ((bitField0_ & 0x00000001) == 0x00000001);
+            }
+            public String getText() {
+                java.lang.Object ref = text_;
+                if (ref instanceof String) {
+                    return (String) ref;
+                } else {
+                    com.google.protobuf.ByteString bs =
+                            (com.google.protobuf.ByteString) ref;
+                    String s = bs.toStringUtf8();
+                    if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                        text_ = s;
+                    }
+                    return s;
+                }
+            }
+            private com.google.protobuf.ByteString getTextBytes() {
+                java.lang.Object ref = text_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                    text_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+
+            // optional string language = 2;
+            public static final int LANGUAGE_FIELD_NUMBER = 2;
+            private java.lang.Object language_;
+            public boolean hasLanguage() {
+                return ((bitField0_ & 0x00000002) == 0x00000002);
+            }
+            public String getLanguage() {
+                java.lang.Object ref = language_;
+                if (ref instanceof String) {
+                    return (String) ref;
+                } else {
+                    com.google.protobuf.ByteString bs =
+                            (com.google.protobuf.ByteString) ref;
+                    String s = bs.toStringUtf8();
+                    if (com.google.protobuf.Internal.isValidUtf8(bs)) {
+                        language_ = s;
+                    }
+                    return s;
+                }
+            }
+            private com.google.protobuf.ByteString getLanguageBytes() {
+                java.lang.Object ref = language_;
+                if (ref instanceof String) {
+                    com.google.protobuf.ByteString b =
+                            com.google.protobuf.ByteString.copyFromUtf8((String) ref);
+                    language_ = b;
+                    return b;
+                } else {
+                    return (com.google.protobuf.ByteString) ref;
+                }
+            }
+
+            private void initFields() {
+                text_ = "";
+                language_ = "";
+            }
+            private byte memoizedIsInitialized = -1;
+            public final boolean isInitialized() {
+                byte isInitialized = memoizedIsInitialized;
+                if (isInitialized != -1) return isInitialized == 1;
+
+                if (!hasText()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+                memoizedIsInitialized = 1;
+                return true;
+            }
+
+            public void writeTo(com.google.protobuf.CodedOutputStream output)
+                    throws java.io.IOException {
+                getSerializedSize();
+                if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                    output.writeBytes(1, getTextBytes());
+                }
+                if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                    output.writeBytes(2, getLanguageBytes());
+                }
+                getUnknownFields().writeTo(output);
+            }
+
+            private int memoizedSerializedSize = -1;
+            public int getSerializedSize() {
+                int size = memoizedSerializedSize;
+                if (size != -1) return size;
+
+                size = 0;
+                if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                    size += com.google.protobuf.CodedOutputStream
+                            .computeBytesSize(1, getTextBytes());
+                }
+                if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                    size += com.google.protobuf.CodedOutputStream
+                            .computeBytesSize(2, getLanguageBytes());
+                }
+                size += getUnknownFields().getSerializedSize();
+                memoizedSerializedSize = size;
+                return size;
+            }
+
+            private static final long serialVersionUID = 0L;
+            @java.lang.Override
+            protected java.lang.Object writeReplace()
+                    throws java.io.ObjectStreamException {
+                return super.writeReplace();
+            }
+
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
+                    com.google.protobuf.ByteString data)
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                return newBuilder().mergeFrom(data).buildParsed();
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
+                    com.google.protobuf.ByteString data,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                return newBuilder().mergeFrom(data, extensionRegistry)
+                        .buildParsed();
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(byte[] data)
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                return newBuilder().mergeFrom(data).buildParsed();
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
+                    byte[] data,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                return newBuilder().mergeFrom(data, extensionRegistry)
+                        .buildParsed();
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(java.io.InputStream input)
+                    throws java.io.IOException {
+                return newBuilder().mergeFrom(input).buildParsed();
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
+                    java.io.InputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                return newBuilder().mergeFrom(input, extensionRegistry)
+                        .buildParsed();
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseDelimitedFrom(java.io.InputStream input)
+                    throws java.io.IOException {
+                Builder builder = newBuilder();
+                if (builder.mergeDelimitedFrom(input)) {
+                    return builder.buildParsed();
+                } else {
+                    return null;
+                }
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseDelimitedFrom(
+                    java.io.InputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                Builder builder = newBuilder();
+                if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+                    return builder.buildParsed();
+                } else {
+                    return null;
+                }
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
+                    com.google.protobuf.CodedInputStream input)
+                    throws java.io.IOException {
+                return newBuilder().mergeFrom(input).buildParsed();
+            }
+            public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation parseFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                return newBuilder().mergeFrom(input, extensionRegistry)
+                        .buildParsed();
+            }
+
+            public static Builder newBuilder() { return Builder.create(); }
+            public Builder newBuilderForType() { return newBuilder(); }
+            public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation prototype) {
+                return newBuilder().mergeFrom(prototype);
+            }
+            public Builder toBuilder() { return newBuilder(this); }
+
+            @java.lang.Override
+            protected Builder newBuilderForType(
+                    com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+                Builder builder = new Builder(parent);
+                return builder;
+            }
+            public static final class Builder extends
+                    com.google.protobuf.GeneratedMessage.Builder<Builder>
+                    implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder {
+                public static final com.google.protobuf.Descriptors.Descriptor
+                getDescriptor() {
+                    return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor;
+                }
+
+                protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+                internalGetFieldAccessorTable() {
+                    return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_fieldAccessorTable;
+                }
+
+                // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.newBuilder()
+                private Builder() {
+                    maybeForceBuilderInitialization();
+                }
+
+                private Builder(BuilderParent parent) {
+                    super(parent);
+                    maybeForceBuilderInitialization();
+                }
+                private void maybeForceBuilderInitialization() {
+                    if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+                    }
+                }
+                private static Builder create() {
+                    return new Builder();
+                }
+
+                public Builder clear() {
+                    super.clear();
+                    text_ = "";
+                    bitField0_ = (bitField0_ & ~0x00000001);
+                    language_ = "";
+                    bitField0_ = (bitField0_ & ~0x00000002);
+                    return this;
+                }
+
+                public Builder clone() {
+                    return create().mergeFrom(buildPartial());
+                }
+
+                public com.google.protobuf.Descriptors.Descriptor
+                getDescriptorForType() {
+                    return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDescriptor();
+                }
+
+                public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation getDefaultInstanceForType() {
+                    return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDefaultInstance();
+                }
+
+                public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation build() {
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation result = buildPartial();
+                    if (!result.isInitialized()) {
+                        throw newUninitializedMessageException(result);
+                    }
+                    return result;
+                }
+
+                private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation buildParsed()
+                        throws com.google.protobuf.InvalidProtocolBufferException {
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation result = buildPartial();
+                    if (!result.isInitialized()) {
+                        throw newUninitializedMessageException(
+                                result).asInvalidProtocolBufferException();
+                    }
+                    return result;
+                }
+
+                public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation buildPartial() {
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation(this);
+                    int from_bitField0_ = bitField0_;
+                    int to_bitField0_ = 0;
+                    if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+                        to_bitField0_ |= 0x00000001;
+                    }
+                    result.text_ = text_;
+                    if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+                        to_bitField0_ |= 0x00000002;
+                    }
+                    result.language_ = language_;
+                    result.bitField0_ = to_bitField0_;
+                    onBuilt();
+                    return result;
+                }
+
+                public Builder mergeFrom(com.google.protobuf.Message other) {
+                    if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation) {
+                        return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation)other);
+                    } else {
+                        super.mergeFrom(other);
+                        return this;
+                    }
+                }
+
+                public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation other) {
+                    if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDefaultInstance()) return this;
+                    if (other.hasText()) {
+                        setText(other.getText());
+                    }
+                    if (other.hasLanguage()) {
+                        setLanguage(other.getLanguage());
+                    }
+                    this.mergeUnknownFields(other.getUnknownFields());
+                    return this;
+                }
+
+                public final boolean isInitialized() {
+                    if (!hasText()) {
+
+                        return false;
+                    }
+                    return true;
+                }
+
+                public Builder mergeFrom(
+                        com.google.protobuf.CodedInputStream input,
+                        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                        throws java.io.IOException {
+                    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                            com.google.protobuf.UnknownFieldSet.newBuilder(
+                                    this.getUnknownFields());
+                    while (true) {
+                        int tag = input.readTag();
+                        switch (tag) {
+                            case 0:
+                                this.setUnknownFields(unknownFields.build());
+                                onChanged();
+                                return this;
+                            default: {
+                                if (!parseUnknownField(input, unknownFields,
+                                        extensionRegistry, tag)) {
+                                    this.setUnknownFields(unknownFields.build());
+                                    onChanged();
+                                    return this;
+                                }
+                                break;
+                            }
+                            case 10: {
+                                bitField0_ |= 0x00000001;
+                                text_ = input.readBytes();
+                                break;
+                            }
+                            case 18: {
+                                bitField0_ |= 0x00000002;
+                                language_ = input.readBytes();
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                private int bitField0_;
+
+                // required string text = 1;
+                private java.lang.Object text_ = "";
+                public boolean hasText() {
+                    return ((bitField0_ & 0x00000001) == 0x00000001);
+                }
+                public String getText() {
+                    java.lang.Object ref = text_;
+                    if (!(ref instanceof String)) {
+                        String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                        text_ = s;
+                        return s;
+                    } else {
+                        return (String) ref;
+                    }
+                }
+                public Builder setText(String value) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    bitField0_ |= 0x00000001;
+                    text_ = value;
+                    onChanged();
+                    return this;
+                }
+                public Builder clearText() {
+                    bitField0_ = (bitField0_ & ~0x00000001);
+                    text_ = getDefaultInstance().getText();
+                    onChanged();
+                    return this;
+                }
+                void setText(com.google.protobuf.ByteString value) {
+                    bitField0_ |= 0x00000001;
+                    text_ = value;
+                    onChanged();
+                }
+
+                // optional string language = 2;
+                private java.lang.Object language_ = "";
+                public boolean hasLanguage() {
+                    return ((bitField0_ & 0x00000002) == 0x00000002);
+                }
+                public String getLanguage() {
+                    java.lang.Object ref = language_;
+                    if (!(ref instanceof String)) {
+                        String s = ((com.google.protobuf.ByteString) ref).toStringUtf8();
+                        language_ = s;
+                        return s;
+                    } else {
+                        return (String) ref;
+                    }
+                }
+                public Builder setLanguage(String value) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    bitField0_ |= 0x00000002;
+                    language_ = value;
+                    onChanged();
+                    return this;
+                }
+                public Builder clearLanguage() {
+                    bitField0_ = (bitField0_ & ~0x00000002);
+                    language_ = getDefaultInstance().getLanguage();
+                    onChanged();
+                    return this;
+                }
+                void setLanguage(com.google.protobuf.ByteString value) {
+                    bitField0_ |= 0x00000002;
+                    language_ = value;
+                    onChanged();
+                }
+
+                // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation)
+            }
+
+            static {
+                defaultInstance = new Translation(true);
+                defaultInstance.initFields();
+            }
+
+            // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation)
+        }
+
+        // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation translation = 1;
+        public static final int TRANSLATION_FIELD_NUMBER = 1;
+        private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> translation_;
+        public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> getTranslationList() {
+            return translation_;
+        }
+        public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder>
+        getTranslationOrBuilderList() {
+            return translation_;
+        }
+        public int getTranslationCount() {
+            return translation_.size();
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation getTranslation(int index) {
+            return translation_.get(index);
+        }
+        public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder getTranslationOrBuilder(
+                int index) {
+            return translation_.get(index);
+        }
+
+        private void initFields() {
+            translation_ = java.util.Collections.emptyList();
+        }
+        private byte memoizedIsInitialized = -1;
+        public final boolean isInitialized() {
+            byte isInitialized = memoizedIsInitialized;
+            if (isInitialized != -1) return isInitialized == 1;
+
+            for (int i = 0; i < getTranslationCount(); i++) {
+                if (!getTranslation(i).isInitialized()) {
+                    memoizedIsInitialized = 0;
+                    return false;
+                }
+            }
+            memoizedIsInitialized = 1;
+            return true;
+        }
+
+        public void writeTo(com.google.protobuf.CodedOutputStream output)
+                throws java.io.IOException {
+            getSerializedSize();
+            for (int i = 0; i < translation_.size(); i++) {
+                output.writeMessage(1, translation_.get(i));
+            }
+            getUnknownFields().writeTo(output);
+        }
+
+        private int memoizedSerializedSize = -1;
+        public int getSerializedSize() {
+            int size = memoizedSerializedSize;
+            if (size != -1) return size;
+
+            size = 0;
+            for (int i = 0; i < translation_.size(); i++) {
+                size += com.google.protobuf.CodedOutputStream
+                        .computeMessageSize(1, translation_.get(i));
+            }
+            size += getUnknownFields().getSerializedSize();
+            memoizedSerializedSize = size;
+            return size;
+        }
+
+        private static final long serialVersionUID = 0L;
+        @java.lang.Override
+        protected java.lang.Object writeReplace()
+                throws java.io.ObjectStreamException {
+            return super.writeReplace();
+        }
+
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
+                com.google.protobuf.ByteString data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
+                com.google.protobuf.ByteString data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(byte[] data)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
+                byte[] data,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws com.google.protobuf.InvalidProtocolBufferException {
+            return newBuilder().mergeFrom(data, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseDelimitedFrom(java.io.InputStream input)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseDelimitedFrom(
+                java.io.InputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            Builder builder = newBuilder();
+            if (builder.mergeDelimitedFrom(input, extensionRegistry)) {
+                return builder.buildParsed();
+            } else {
+                return null;
+            }
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
+                com.google.protobuf.CodedInputStream input)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input).buildParsed();
+        }
+        public static org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString parseFrom(
+                com.google.protobuf.CodedInputStream input,
+                com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                throws java.io.IOException {
+            return newBuilder().mergeFrom(input, extensionRegistry)
+                    .buildParsed();
+        }
+
+        public static Builder newBuilder() { return Builder.create(); }
+        public Builder newBuilderForType() { return newBuilder(); }
+        public static Builder newBuilder(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString prototype) {
+            return newBuilder().mergeFrom(prototype);
+        }
+        public Builder toBuilder() { return newBuilder(this); }
+
+        @java.lang.Override
+        protected Builder newBuilderForType(
+                com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+            Builder builder = new Builder(parent);
+            return builder;
+        }
+        public static final class Builder extends
+                com.google.protobuf.GeneratedMessage.Builder<Builder>
+                implements org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedStringOrBuilder {
+            public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor;
+            }
+
+            protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_fieldAccessorTable;
+            }
+
+            // Construct using org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.newBuilder()
+            private Builder() {
+                maybeForceBuilderInitialization();
+            }
+
+            private Builder(BuilderParent parent) {
+                super(parent);
+                maybeForceBuilderInitialization();
+            }
+            private void maybeForceBuilderInitialization() {
+                if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+                    getTranslationFieldBuilder();
+                }
+            }
+            private static Builder create() {
+                return new Builder();
+            }
+
+            public Builder clear() {
+                super.clear();
+                if (translationBuilder_ == null) {
+                    translation_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000001);
+                } else {
+                    translationBuilder_.clear();
+                }
+                return this;
+            }
+
+            public Builder clone() {
+                return create().mergeFrom(buildPartial());
+            }
+
+            public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDescriptor();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString getDefaultInstanceForType() {
+                return org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance();
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString build() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(result);
+                }
+                return result;
+            }
+
+            private org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString buildParsed()
+                    throws com.google.protobuf.InvalidProtocolBufferException {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString result = buildPartial();
+                if (!result.isInitialized()) {
+                    throw newUninitializedMessageException(
+                            result).asInvalidProtocolBufferException();
+                }
+                return result;
+            }
+
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString buildPartial() {
+                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString result = new org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString(this);
+                int from_bitField0_ = bitField0_;
+                if (translationBuilder_ == null) {
+                    if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                        translation_ = java.util.Collections.unmodifiableList(translation_);
+                        bitField0_ = (bitField0_ & ~0x00000001);
+                    }
+                    result.translation_ = translation_;
+                } else {
+                    result.translation_ = translationBuilder_.build();
+                }
+                onBuilt();
+                return result;
+            }
+
+            public Builder mergeFrom(com.google.protobuf.Message other) {
+                if (other instanceof org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString) {
+                    return mergeFrom((org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString)other);
+                } else {
+                    super.mergeFrom(other);
+                    return this;
+                }
+            }
+
+            public Builder mergeFrom(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString other) {
+                if (other == org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.getDefaultInstance()) return this;
+                if (translationBuilder_ == null) {
+                    if (!other.translation_.isEmpty()) {
+                        if (translation_.isEmpty()) {
+                            translation_ = other.translation_;
+                            bitField0_ = (bitField0_ & ~0x00000001);
+                        } else {
+                            ensureTranslationIsMutable();
+                            translation_.addAll(other.translation_);
+                        }
+                        onChanged();
+                    }
+                } else {
+                    if (!other.translation_.isEmpty()) {
+                        if (translationBuilder_.isEmpty()) {
+                            translationBuilder_.dispose();
+                            translationBuilder_ = null;
+                            translation_ = other.translation_;
+                            bitField0_ = (bitField0_ & ~0x00000001);
+                            translationBuilder_ =
+                                    com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                                            getTranslationFieldBuilder() : null;
+                        } else {
+                            translationBuilder_.addAllMessages(other.translation_);
+                        }
+                    }
+                }
+                this.mergeUnknownFields(other.getUnknownFields());
+                return this;
+            }
+
+            public final boolean isInitialized() {
+                for (int i = 0; i < getTranslationCount(); i++) {
+                    if (!getTranslation(i).isInitialized()) {
+
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            public Builder mergeFrom(
+                    com.google.protobuf.CodedInputStream input,
+                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+                    throws java.io.IOException {
+                com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+                        com.google.protobuf.UnknownFieldSet.newBuilder(
+                                this.getUnknownFields());
+                while (true) {
+                    int tag = input.readTag();
+                    switch (tag) {
+                        case 0:
+                            this.setUnknownFields(unknownFields.build());
+                            onChanged();
+                            return this;
+                        default: {
+                            if (!parseUnknownField(input, unknownFields,
+                                    extensionRegistry, tag)) {
+                                this.setUnknownFields(unknownFields.build());
+                                onChanged();
+                                return this;
+                            }
+                            break;
+                        }
+                        case 10: {
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder subBuilder = org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.newBuilder();
+                            input.readMessage(subBuilder, extensionRegistry);
+                            addTranslation(subBuilder.buildPartial());
+                            break;
+                        }
+                    }
+                }
+            }
+
+            private int bitField0_;
+
+            // repeated .org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString.Translation translation = 1;
+            private java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> translation_ =
+                    java.util.Collections.emptyList();
+            private void ensureTranslationIsMutable() {
+                if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+                    translation_ = new java.util.ArrayList<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation>(translation_);
+                    bitField0_ |= 0x00000001;
+                }
+            }
+
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder> translationBuilder_;
+
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> getTranslationList() {
+                if (translationBuilder_ == null) {
+                    return java.util.Collections.unmodifiableList(translation_);
+                } else {
+                    return translationBuilder_.getMessageList();
+                }
+            }
+            public int getTranslationCount() {
+                if (translationBuilder_ == null) {
+                    return translation_.size();
+                } else {
+                    return translationBuilder_.getCount();
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation getTranslation(int index) {
+                if (translationBuilder_ == null) {
+                    return translation_.get(index);
+                } else {
+                    return translationBuilder_.getMessage(index);
+                }
+            }
+            public Builder setTranslation(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation value) {
+                if (translationBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureTranslationIsMutable();
+                    translation_.set(index, value);
+                    onChanged();
+                } else {
+                    translationBuilder_.setMessage(index, value);
+                }
+                return this;
+            }
+            public Builder setTranslation(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder builderForValue) {
+                if (translationBuilder_ == null) {
+                    ensureTranslationIsMutable();
+                    translation_.set(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    translationBuilder_.setMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addTranslation(org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation value) {
+                if (translationBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureTranslationIsMutable();
+                    translation_.add(value);
+                    onChanged();
+                } else {
+                    translationBuilder_.addMessage(value);
+                }
+                return this;
+            }
+            public Builder addTranslation(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation value) {
+                if (translationBuilder_ == null) {
+                    if (value == null) {
+                        throw new NullPointerException();
+                    }
+                    ensureTranslationIsMutable();
+                    translation_.add(index, value);
+                    onChanged();
+                } else {
+                    translationBuilder_.addMessage(index, value);
+                }
+                return this;
+            }
+            public Builder addTranslation(
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder builderForValue) {
+                if (translationBuilder_ == null) {
+                    ensureTranslationIsMutable();
+                    translation_.add(builderForValue.build());
+                    onChanged();
+                } else {
+                    translationBuilder_.addMessage(builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addTranslation(
+                    int index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder builderForValue) {
+                if (translationBuilder_ == null) {
+                    ensureTranslationIsMutable();
+                    translation_.add(index, builderForValue.build());
+                    onChanged();
+                } else {
+                    translationBuilder_.addMessage(index, builderForValue.build());
+                }
+                return this;
+            }
+            public Builder addAllTranslation(
+                    java.lang.Iterable<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation> values) {
+                if (translationBuilder_ == null) {
+                    ensureTranslationIsMutable();
+                    super.addAll(values, translation_);
+                    onChanged();
+                } else {
+                    translationBuilder_.addAllMessages(values);
+                }
+                return this;
+            }
+            public Builder clearTranslation() {
+                if (translationBuilder_ == null) {
+                    translation_ = java.util.Collections.emptyList();
+                    bitField0_ = (bitField0_ & ~0x00000001);
+                    onChanged();
+                } else {
+                    translationBuilder_.clear();
+                }
+                return this;
+            }
+            public Builder removeTranslation(int index) {
+                if (translationBuilder_ == null) {
+                    ensureTranslationIsMutable();
+                    translation_.remove(index);
+                    onChanged();
+                } else {
+                    translationBuilder_.remove(index);
+                }
+                return this;
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder getTranslationBuilder(
+                    int index) {
+                return getTranslationFieldBuilder().getBuilder(index);
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder getTranslationOrBuilder(
+                    int index) {
+                if (translationBuilder_ == null) {
+                    return translation_.get(index);  } else {
+                    return translationBuilder_.getMessageOrBuilder(index);
+                }
+            }
+            public java.util.List<? extends org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder>
+            getTranslationOrBuilderList() {
+                if (translationBuilder_ != null) {
+                    return translationBuilder_.getMessageOrBuilderList();
+                } else {
+                    return java.util.Collections.unmodifiableList(translation_);
+                }
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder addTranslationBuilder() {
+                return getTranslationFieldBuilder().addBuilder(
+                        org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDefaultInstance());
+            }
+            public org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder addTranslationBuilder(
+                    int index) {
+                return getTranslationFieldBuilder().addBuilder(
+                        index, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.getDefaultInstance());
+            }
+            public java.util.List<org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder>
+            getTranslationBuilderList() {
+                return getTranslationFieldBuilder().getBuilderList();
+            }
+            private com.google.protobuf.RepeatedFieldBuilder<
+                    org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder>
+            getTranslationFieldBuilder() {
+                if (translationBuilder_ == null) {
+                    translationBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+                            org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder, org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.TranslationOrBuilder>(
+                            translation_,
+                            ((bitField0_ & 0x00000001) == 0x00000001),
+                            getParentForChildren(),
+                            isClean());
+                    translation_ = null;
+                }
+                return translationBuilder_;
+            }
+
+            // @@protoc_insertion_point(builder_scope:org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString)
+        }
+
+        static {
+            defaultInstance = new TranslatedString(true);
+            defaultInstance.initFields();
+        }
+
+        // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString)
+    }
+
+    private static com.google.protobuf.Descriptors.Descriptor
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor;
+    private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_fieldAccessorTable;
+    private static com.google.protobuf.Descriptors.Descriptor
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor;
+    private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_fieldAccessorTable;
+    private static com.google.protobuf.Descriptors.Descriptor
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor;
+    private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_fieldAccessorTable;
+    private static com.google.protobuf.Descriptors.Descriptor
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor;
+    private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_fieldAccessorTable;
+    private static com.google.protobuf.Descriptors.Descriptor
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor;
+    private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_fieldAccessorTable;
+    private static com.google.protobuf.Descriptors.Descriptor
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor;
+    private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_fieldAccessorTable;
+    private static com.google.protobuf.Descriptors.Descriptor
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor;
+    private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_fieldAccessorTable;
+    private static com.google.protobuf.Descriptors.Descriptor
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor;
+    private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_fieldAccessorTable;
+
+    public static com.google.protobuf.Descriptors.FileDescriptor
+    getDescriptor() {
+        return descriptor;
+    }
+    private static com.google.protobuf.Descriptors.FileDescriptor
+            descriptor;
     static {
-      defaultInstance = new TranslatedString(true);
-      defaultInstance.initFields();
+        java.lang.String[] descriptorData = {
+                "\n\024service-alerts.proto\022>org_onebusaway_t" +
+                        "ransit_data_federation_services_service_" +
+                        "alerts\"~\n\027ServiceAlertsCollection\022c\n\rser" +
+                        "viceAlerts\030\001 \003(\0132L.org_onebusaway_transi" +
+                        "t_data_federation_services_service_alert" +
+                        "s.ServiceAlert\"\352\n\n\014ServiceAlert\022N\n\002id\030\001 " +
+                        "\002(\0132B.org_onebusaway_transit_data_federa" +
+                        "tion_services_service_alerts.Id\022\024\n\014creat" +
+                        "ionTime\030\002 \002(\004\022\024\n\014modifiedTime\030\003 \002(\004\022_\n\014a" +
+                        "ctiveWindow\030\004 \003(\0132I.org_onebusaway_trans",
+                "it_data_federation_services_service_aler" +
+                        "ts.TimeRange\022d\n\021publicationWindow\030\005 \003(\0132" +
+                        "I.org_onebusaway_transit_data_federation" +
+                        "_services_service_alerts.TimeRange\022a\n\007su" +
+                        "mmary\030\006 \001(\0132P.org_onebusaway_transit_dat" +
+                        "a_federation_services_service_alerts.Tra" +
+                        "nslatedString\022e\n\013description\030\007 \001(\0132P.org" +
+                        "_onebusaway_transit_data_federation_serv" +
+                        "ices_service_alerts.TranslatedString\022p\n\005" +
+                        "cause\030\010 \001(\0162R.org_onebusaway_transit_dat",
+                "a_federation_services_service_alerts.Ser" +
+                        "viceAlert.Cause:\rUNKNOWN_CAUSE\022X\n\007affect" +
+                        "s\030\t \003(\0132G.org_onebusaway_transit_data_fe" +
+                        "deration_services_service_alerts.Affects" +
+                        "\022`\n\013consequence\030\n \003(\0132K.org_onebusaway_t" +
+                        "ransit_data_federation_services_service_" +
+                        "alerts.Consequence\022g\n\010severity\030\013 \001(\0162U.o" +
+                        "rg_onebusaway_transit_data_federation_se" +
+                        "rvices_service_alerts.ServiceAlert.Sever" +
+                        "ity\022]\n\003url\030\014 \001(\0132P.org_onebusaway_transi",
+                "t_data_federation_services_service_alert" +
+                        "s.TranslatedString\022\016\n\006source\030\r \001(\t\"\330\001\n\005C" +
+                        "ause\022\021\n\rUNKNOWN_CAUSE\020\001\022\017\n\013OTHER_CAUSE\020\002" +
+                        "\022\025\n\021TECHNICAL_PROBLEM\020\003\022\n\n\006STRIKE\020\004\022\021\n\rD" +
+                        "EMONSTRATION\020\005\022\014\n\010ACCIDENT\020\006\022\013\n\007HOLIDAY\020" +
+                        "\007\022\013\n\007WEATHER\020\010\022\017\n\013MAINTENANCE\020\t\022\020\n\014CONST" +
+                        "RUCTION\020\n\022\023\n\017POLICE_ACTIVITY\020\013\022\025\n\021MEDICA" +
+                        "L_EMERGENCY\020\014\"l\n\010Severity\022\r\n\tNO_IMPACT\020\001" +
+                        "\022\013\n\007UNKNOWN\020\002\022\017\n\013VERY_SLIGHT\020\003\022\n\n\006SLIGHT" +
+                        "\020\004\022\n\n\006NORMAL\020\005\022\n\n\006SEVERE\020\006\022\017\n\013VERY_SEVER",
+                "E\020\007\"\304\002\n\007Affects\022\020\n\010agencyId\030\001 \001(\t\022S\n\007rou" +
+                        "teId\030\002 \001(\0132B.org_onebusaway_transit_data" +
+                        "_federation_services_service_alerts.Id\022\023" +
+                        "\n\013directionId\030\003 \001(\t\022R\n\006tripId\030\004 \001(\0132B.or" +
+                        "g_onebusaway_transit_data_federation_ser" +
+                        "vices_service_alerts.Id\022R\n\006stopId\030\005 \001(\0132" +
+                        "B.org_onebusaway_transit_data_federation" +
+                        "_services_service_alerts.Id\022\025\n\rapplicati" +
+                        "onId\030\006 \001(\t\"\230\003\n\013Consequence\022b\n\006effect\030\001 \001" +
+                        "(\0162R.org_onebusaway_transit_data_federat",
+                "ion_services_service_alerts.Consequence." +
+                        "Effect\022\022\n\ndetourPath\030\002 \001(\t\022Y\n\rdetourStop" +
+                        "Ids\030\003 \003(\0132B.org_onebusaway_transit_data_" +
+                        "federation_services_service_alerts.Id\"\265\001" +
+                        "\n\006Effect\022\016\n\nNO_SERVICE\020\001\022\023\n\017REDUCED_SERV" +
+                        "ICE\020\002\022\026\n\022SIGNIFICANT_DELAYS\020\003\022\n\n\006DETOUR\020" +
+                        "\004\022\026\n\022ADDITIONAL_SERVICE\020\005\022\024\n\020MODIFIED_SE" +
+                        "RVICE\020\006\022\020\n\014OTHER_EFFECT\020\007\022\022\n\016UNKNOWN_EFF" +
+                        "ECT\020\010\022\016\n\nSTOP_MOVED\020\t\"\"\n\002Id\022\020\n\010agencyId\030" +
+                        "\001 \002(\t\022\n\n\002id\030\002 \002(\t\"\'\n\tTimeRange\022\r\n\005start\030",
+                "\001 \001(\004\022\013\n\003end\030\002 \001(\004\"\264\001\n\020TranslatedString\022" +
+                        "q\n\013translation\030\001 \003(\0132\\.org_onebusaway_tr" +
+                        "ansit_data_federation_services_service_a" +
+                        "lerts.TranslatedString.Translation\032-\n\013Tr" +
+                        "anslation\022\014\n\004text\030\001 \002(\t\022\020\n\010language\030\002 \001(" +
+                        "\tB@\n>org.onebusaway.transit_data_federat" +
+                        "ion.services.service_alerts"
+        };
+        com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+                new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+                    public com.google.protobuf.ExtensionRegistry assignDescriptors(
+                            com.google.protobuf.Descriptors.FileDescriptor root) {
+                        descriptor = root;
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor =
+                                getDescriptor().getMessageTypes().get(0);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_fieldAccessorTable = new
+                                com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor,
+                                new java.lang.String[] { "ServiceAlerts", },
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.class,
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.Builder.class);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor =
+                                getDescriptor().getMessageTypes().get(1);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_fieldAccessorTable = new
+                                com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor,
+                                new java.lang.String[] { "Id", "CreationTime", "ModifiedTime", "ActiveWindow", "PublicationWindow", "Summary", "Description", "Cause", "Affects", "Consequence", "Severity", "Url", "Source", },
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.class,
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder.class);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor =
+                                getDescriptor().getMessageTypes().get(2);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_fieldAccessorTable = new
+                                com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor,
+                                new java.lang.String[] { "AgencyId", "RouteId", "DirectionId", "TripId", "StopId", "ApplicationId", },
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.class,
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder.class);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor =
+                                getDescriptor().getMessageTypes().get(3);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_fieldAccessorTable = new
+                                com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor,
+                                new java.lang.String[] { "Effect", "DetourPath", "DetourStopIds", },
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.class,
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder.class);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor =
+                                getDescriptor().getMessageTypes().get(4);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_fieldAccessorTable = new
+                                com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor,
+                                new java.lang.String[] { "AgencyId", "Id", },
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.class,
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder.class);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor =
+                                getDescriptor().getMessageTypes().get(5);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_fieldAccessorTable = new
+                                com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor,
+                                new java.lang.String[] { "Start", "End", },
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.class,
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder.class);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor =
+                                getDescriptor().getMessageTypes().get(6);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_fieldAccessorTable = new
+                                com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor,
+                                new java.lang.String[] { "Translation", },
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.class,
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder.class);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor =
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor.getNestedTypes().get(0);
+                        internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_fieldAccessorTable = new
+                                com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+                                internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor,
+                                new java.lang.String[] { "Text", "Language", },
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.class,
+                                org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder.class);
+                        return null;
+                    }
+                };
+        com.google.protobuf.Descriptors.FileDescriptor
+                .internalBuildGeneratedFileFrom(descriptorData,
+                        new com.google.protobuf.Descriptors.FileDescriptor[] {
+                        }, assigner);
     }
-    
-    // @@protoc_insertion_point(class_scope:org_onebusaway_transit_data_federation_services_service_alerts.TranslatedString)
-  }
-  
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_fieldAccessorTable;
-  
-  public static com.google.protobuf.Descriptors.FileDescriptor
-      getDescriptor() {
-    return descriptor;
-  }
-  private static com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
-  static {
-    java.lang.String[] descriptorData = {
-      "\n\024service-alerts.proto\022>org_onebusaway_t" +
-      "ransit_data_federation_services_service_" +
-      "alerts\"~\n\027ServiceAlertsCollection\022c\n\rser" +
-      "viceAlerts\030\001 \003(\0132L.org_onebusaway_transi" +
-      "t_data_federation_services_service_alert" +
-      "s.ServiceAlert\"\332\n\n\014ServiceAlert\022N\n\002id\030\001 " +
-      "\002(\0132B.org_onebusaway_transit_data_federa" +
-      "tion_services_service_alerts.Id\022\024\n\014creat" +
-      "ionTime\030\002 \002(\004\022\024\n\014modifiedTime\030\003 \002(\004\022_\n\014a" +
-      "ctiveWindow\030\004 \003(\0132I.org_onebusaway_trans",
-      "it_data_federation_services_service_aler" +
-      "ts.TimeRange\022d\n\021publicationWindow\030\005 \003(\0132" +
-      "I.org_onebusaway_transit_data_federation" +
-      "_services_service_alerts.TimeRange\022a\n\007su" +
-      "mmary\030\006 \001(\0132P.org_onebusaway_transit_dat" +
-      "a_federation_services_service_alerts.Tra" +
-      "nslatedString\022e\n\013description\030\007 \001(\0132P.org" +
-      "_onebusaway_transit_data_federation_serv" +
-      "ices_service_alerts.TranslatedString\022p\n\005" +
-      "cause\030\010 \001(\0162R.org_onebusaway_transit_dat",
-      "a_federation_services_service_alerts.Ser" +
-      "viceAlert.Cause:\rUNKNOWN_CAUSE\022X\n\007affect" +
-      "s\030\t \003(\0132G.org_onebusaway_transit_data_fe" +
-      "deration_services_service_alerts.Affects" +
-      "\022`\n\013consequence\030\n \003(\0132K.org_onebusaway_t" +
-      "ransit_data_federation_services_service_" +
-      "alerts.Consequence\022g\n\010severity\030\013 \001(\0162U.o" +
-      "rg_onebusaway_transit_data_federation_se" +
-      "rvices_service_alerts.ServiceAlert.Sever" +
-      "ity\022]\n\003url\030\014 \001(\0132P.org_onebusaway_transi",
-      "t_data_federation_services_service_alert" +
-      "s.TranslatedString\"\330\001\n\005Cause\022\021\n\rUNKNOWN_" +
-      "CAUSE\020\001\022\017\n\013OTHER_CAUSE\020\002\022\025\n\021TECHNICAL_PR" +
-      "OBLEM\020\003\022\n\n\006STRIKE\020\004\022\021\n\rDEMONSTRATION\020\005\022\014" +
-      "\n\010ACCIDENT\020\006\022\013\n\007HOLIDAY\020\007\022\013\n\007WEATHER\020\010\022\017" +
-      "\n\013MAINTENANCE\020\t\022\020\n\014CONSTRUCTION\020\n\022\023\n\017POL" +
-      "ICE_ACTIVITY\020\013\022\025\n\021MEDICAL_EMERGENCY\020\014\"l\n" +
-      "\010Severity\022\r\n\tNO_IMPACT\020\001\022\013\n\007UNKNOWN\020\002\022\017\n" +
-      "\013VERY_SLIGHT\020\003\022\n\n\006SLIGHT\020\004\022\n\n\006NORMAL\020\005\022\n" +
-      "\n\006SEVERE\020\006\022\017\n\013VERY_SEVERE\020\007\"\304\002\n\007Affects\022",
-      "\020\n\010agencyId\030\001 \001(\t\022S\n\007routeId\030\002 \001(\0132B.org" +
-      "_onebusaway_transit_data_federation_serv" +
-      "ices_service_alerts.Id\022\023\n\013directionId\030\003 " +
-      "\001(\t\022R\n\006tripId\030\004 \001(\0132B.org_onebusaway_tra" +
-      "nsit_data_federation_services_service_al" +
-      "erts.Id\022R\n\006stopId\030\005 \001(\0132B.org_onebusaway" +
-      "_transit_data_federation_services_servic" +
-      "e_alerts.Id\022\025\n\rapplicationId\030\006 \001(\t\"\230\003\n\013C" +
-      "onsequence\022b\n\006effect\030\001 \001(\0162R.org_onebusa" +
-      "way_transit_data_federation_services_ser",
-      "vice_alerts.Consequence.Effect\022\022\n\ndetour" +
-      "Path\030\002 \001(\t\022Y\n\rdetourStopIds\030\003 \003(\0132B.org_" +
-      "onebusaway_transit_data_federation_servi" +
-      "ces_service_alerts.Id\"\265\001\n\006Effect\022\016\n\nNO_S" +
-      "ERVICE\020\001\022\023\n\017REDUCED_SERVICE\020\002\022\026\n\022SIGNIFI" +
-      "CANT_DELAYS\020\003\022\n\n\006DETOUR\020\004\022\026\n\022ADDITIONAL_" +
-      "SERVICE\020\005\022\024\n\020MODIFIED_SERVICE\020\006\022\020\n\014OTHER" +
-      "_EFFECT\020\007\022\022\n\016UNKNOWN_EFFECT\020\010\022\016\n\nSTOP_MO" +
-      "VED\020\t\"\"\n\002Id\022\020\n\010agencyId\030\001 \002(\t\022\n\n\002id\030\002 \002(" +
-      "\t\"\'\n\tTimeRange\022\r\n\005start\030\001 \001(\004\022\013\n\003end\030\002 \001",
-      "(\004\"\264\001\n\020TranslatedString\022q\n\013translation\030\001" +
-      " \003(\0132\\.org_onebusaway_transit_data_feder" +
-      "ation_services_service_alerts.Translated" +
-      "String.Translation\032-\n\013Translation\022\014\n\004tex" +
-      "t\030\001 \002(\t\022\020\n\010language\030\002 \001(\tB@\n>org.onebusa" +
-      "way.transit_data_federation.services.ser" +
-      "vice_alerts"
-    };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlertsCollection_descriptor,
-              new java.lang.String[] { "ServiceAlerts", },
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.class,
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection.Builder.class);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor =
-            getDescriptor().getMessageTypes().get(1);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_onebusaway_transit_data_federation_services_service_alerts_ServiceAlert_descriptor,
-              new java.lang.String[] { "Id", "CreationTime", "ModifiedTime", "ActiveWindow", "PublicationWindow", "Summary", "Description", "Cause", "Affects", "Consequence", "Severity", "Url", },
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.class,
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert.Builder.class);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor =
-            getDescriptor().getMessageTypes().get(2);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Affects_descriptor,
-              new java.lang.String[] { "AgencyId", "RouteId", "DirectionId", "TripId", "StopId", "ApplicationId", },
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.class,
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects.Builder.class);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor =
-            getDescriptor().getMessageTypes().get(3);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Consequence_descriptor,
-              new java.lang.String[] { "Effect", "DetourPath", "DetourStopIds", },
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.class,
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Consequence.Builder.class);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor =
-            getDescriptor().getMessageTypes().get(4);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_onebusaway_transit_data_federation_services_service_alerts_Id_descriptor,
-              new java.lang.String[] { "AgencyId", "Id", },
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.class,
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id.Builder.class);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor =
-            getDescriptor().getMessageTypes().get(5);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TimeRange_descriptor,
-              new java.lang.String[] { "Start", "End", },
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.class,
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange.Builder.class);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor =
-            getDescriptor().getMessageTypes().get(6);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor,
-              new java.lang.String[] { "Translation", },
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.class,
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Builder.class);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor =
-            internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_descriptor.getNestedTypes().get(0);
-          internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_org_onebusaway_transit_data_federation_services_service_alerts_TranslatedString_Translation_descriptor,
-              new java.lang.String[] { "Text", "Language", },
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.class,
-              org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TranslatedString.Translation.Builder.class);
-          return null;
-        }
-      };
-    com.google.protobuf.Descriptors.FileDescriptor
-      .internalBuildGeneratedFileFrom(descriptorData,
-        new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
-  }
-  
-  // @@protoc_insertion_point(outer_class_scope)
+
+    // @@protoc_insertion_point(outer_class_scope)
 }
