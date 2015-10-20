@@ -154,31 +154,4 @@
 
   </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-sources</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <tasks>
-                                <exec executable="protoc">
-                                    <arg value="--java_out=/Users/dbenoff/onebusaway-application-modules/onebusaway-transit-data-federation/src/main/resources/org/onebusaway/transit_data_federation/services/service_alerts" />
-                                    <arg value="--proto_path=/Users/dbenoff/onebusaway-application-modules/onebusaway-transit-data-federation/src/main/resources/org/onebusaway/transit_data_federation/services/service_alerts" />
-                                    <arg value="/Users/dbenoff/onebusaway-application-modules/onebusaway-transit-data-federation/src/main/resources/org/onebusaway/transit_data_federation/services/service_alerts/service-alerts.proto" />
-                                </exec>
-                            </tasks>
-                            <sourceRoot>target/generated-sources</sourceRoot>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>
