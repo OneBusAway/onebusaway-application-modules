@@ -17,8 +17,15 @@ package org.onebusaway.nextbus.model.transiTime;
 
 import java.util.List;
 
+import org.onebusaway.nextbus.impl.rest.jackson.CapitalizeSerializer;
 import org.onebusaway.nextbus.impl.rest.xstream.CapitalizeConverter;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
@@ -31,12 +38,16 @@ public class PredictionsDirection {
   @XStreamAsAttribute
   @XStreamAlias("title")
   @XStreamConverter(CapitalizeConverter.class)
+  @JsonProperty("title")
+  @JsonSerialize(using = CapitalizeSerializer.class)
   private String headsign;
   
- @XStreamOmitField
+  @XStreamOmitField
+  @JsonIgnore
   private int dir;
   
   @XStreamImplicit
+  @JsonProperty("prediction")
   private List<Prediction> pred;
 
   public PredictionsDirection(){}

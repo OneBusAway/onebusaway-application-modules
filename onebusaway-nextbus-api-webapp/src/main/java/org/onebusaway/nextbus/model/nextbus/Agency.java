@@ -30,10 +30,12 @@
  */
 package org.onebusaway.nextbus.model.nextbus;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 @XStreamAlias("agency")
+@JsonRootName("agency")
 public class Agency {
 	
 	@XStreamAsAttribute 

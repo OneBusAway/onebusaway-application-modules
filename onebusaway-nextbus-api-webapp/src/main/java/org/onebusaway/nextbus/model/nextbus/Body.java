@@ -18,29 +18,36 @@ package org.onebusaway.nextbus.model.nextbus;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.onebusaway.nextbus.impl.conversion.ListToStringConverter;
+import org.onebusaway.nextbus.impl.rest.jackson.BodySerializer;
+import org.onebusaway.nextbus.impl.rest.jackson.RequestSerializer;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
-import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 @XStreamAlias("body")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonSerialize(using = BodySerializer.class)
 public class Body<T> {
   
-  private static final String COPYRIGHT = "All data copyright WMATA Washington 2015"; 
+  private static final String COPYRIGHT = "All data copyright WMATA Washington 2015."; 
   
 	@XStreamImplicit
 	private List<T> response = new ArrayList<T>();
 	
+	@XStreamAsAttribute
+  private String copyright = COPYRIGHT;
+	
 	@XStreamImplicit
+	@JsonProperty("Error")
 	private List<BodyError> errors;
 	
 	private LastTime lastTime;
 	
-	@XStreamAsAttribute 
-	private String copyright = COPYRIGHT;
-
 	public List<T> getResponse() {
 		return response;
 	}
@@ -59,19 +66,19 @@ public class Body<T> {
 		this.errors = errors;
 	}
 
-	public LastTime getLastTime() {
-		return lastTime;
-	}
-
-	public void setLastTime(LastTime lastTime) {
-		this.lastTime = lastTime;
-	}
-
   public String getCopyright() {
     return copyright;
   }
 
   public void setCopyright(String copyright) {
     this.copyright = copyright;
+  }
+  
+  public LastTime getLastTime() {
+    return lastTime;
+  }
+
+  public void setLastTime(LastTime lastTime) {
+    this.lastTime = lastTime;
   }
 }

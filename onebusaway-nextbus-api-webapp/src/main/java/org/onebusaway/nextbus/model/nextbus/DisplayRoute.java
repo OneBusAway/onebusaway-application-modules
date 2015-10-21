@@ -15,10 +15,12 @@
  */
 package org.onebusaway.nextbus.model.nextbus;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 @XStreamAlias("route")
+@JsonRootName("route")
 public class DisplayRoute {
 	
 	@XStreamAsAttribute 

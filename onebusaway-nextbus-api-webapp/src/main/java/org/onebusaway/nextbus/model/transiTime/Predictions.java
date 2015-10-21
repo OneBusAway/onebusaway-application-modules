@@ -14,43 +14,67 @@
  * limitations under the License.
  */
 package org.onebusaway.nextbus.model.transiTime;
-
-import java.util.ArrayList;
 import java.util.List;
 
-import org.onebusaway.nextbus.impl.rest.xstream.CapitalizeConverter;
-import org.onebusaway.nextbus.model.nextbus.ScheduleTableRow;
+import javax.xml.bind.annotation.XmlRootElement;
 
+import org.onebusaway.nextbus.impl.rest.jackson.CapitalizeSerializer;
+import org.onebusaway.nextbus.impl.rest.xstream.CapitalizeConverter;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
+@JsonRootName("predictions")
 @XStreamAlias("predictions")
 public class Predictions {
   
   @XStreamAsAttribute
+  @XStreamAlias("agencyTitle")
+  @JsonProperty("agencyTitle")
+  private String agencyTitle;
+  
+  @XStreamAsAttribute
   @XStreamAlias("routeTag")
+  @JsonProperty("routeTag")
   private String routeShortName;
   
   @XStreamAsAttribute
   @XStreamAlias("routeCode")
+  @JsonProperty("routeCode")
   private String routeId;
   
   @XStreamAsAttribute
   @XStreamAlias("routeTitle")
+  @JsonProperty("routeTitle")
   private String routeName;
+  
+  @XStreamImplicit
+  @JsonProperty("direction")
+  private List<PredictionsDirection> dest;
   
   @XStreamAsAttribute
   @XStreamAlias("stopTitle")
   @XStreamConverter(CapitalizeConverter.class)
+  @JsonProperty("stopTitle")
+  @JsonSerialize(using = CapitalizeSerializer.class)
   private String stopName;
   
-  @XStreamImplicit
-  private List<PredictionsDirection> dest;
   
   public Predictions(){}
   
+  public String getAgencyTitle() {
+    return agencyTitle;
+  }
+
+  public void setAgencyTitle(String agencyTitle) {
+    this.agencyTitle = agencyTitle;
+  }
+
   public String getRouteId() {
     return routeId;
   }

@@ -18,11 +18,13 @@ package org.onebusaway.nextbus.model.nextbus;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 
 @XStreamAlias("route")
+@JsonRootName("route")
 public class ScheduleRoute {
 	
 	@XStreamAsAttribute 

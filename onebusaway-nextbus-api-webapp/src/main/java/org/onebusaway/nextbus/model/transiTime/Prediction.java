@@ -18,56 +18,74 @@ package org.onebusaway.nextbus.model.transiTime;
 import org.onebusaway.nextbus.impl.rest.xstream.FalseConverter;
 import org.onebusaway.nextbus.impl.rest.xstream.RemoveEmptyConverter;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 
 @XStreamAlias("prediction")
+@JsonRootName("prediction")
 public class Prediction {
   
   @XStreamAsAttribute
-  @XStreamAlias("seconds")
-  private int sec;
-  
-  @XStreamAsAttribute
-  @XStreamAlias("minutes")
-  private int min;
-  
-  @XStreamAsAttribute
-  @XStreamAlias("epochTime")
-  private long time;
-  
-  @XStreamAsAttribute
   @XStreamAlias("isDeparture")
+  @JsonProperty("isDeparture")
   private boolean notYetDeparted;
   
   @XStreamAsAttribute
-  @XStreamAlias("dirTag")
-  private Integer dirTag;
+  @XStreamAlias("minutes")
+  @JsonProperty("minutes")
+  private int min;
   
   @XStreamAsAttribute
-  @XStreamAlias("vehicle")
-  private String vehicle;
+  @XStreamAlias("seconds")
+  @JsonProperty("seconds")
+  private int sec;
   
   @XStreamAsAttribute
   @XStreamAlias("tripTag")
   @XStreamConverter(RemoveEmptyConverter.class)
+  @JsonProperty("tripTag")
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
   private String trip;
   
   @XStreamAsAttribute
-  @XStreamAlias("isScheduleBased")
-  @XStreamConverter(FalseConverter.class)
-  private Boolean scheduleBased;
+  @XStreamAlias("vehicle")
+  @JsonProperty("vehicle")
+  private String vehicle;
   
   @XStreamAsAttribute
   @XStreamAlias("affectedByLayover")
   @XStreamConverter(FalseConverter.class)
+  @JsonProperty("affectedByLayover")
+  @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private boolean affectedByLayover;
   
   @XStreamAsAttribute
+  @XStreamAlias("dirTag")
+  @JsonProperty("dirTag")
+  private Integer dirTag;
+  
+  @XStreamAsAttribute
+  @XStreamAlias("isScheduleBased")
+  @XStreamConverter(FalseConverter.class)
+  @JsonProperty("isScheduleBased")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  private Boolean scheduleBased;
+
+  @XStreamAsAttribute
   @XStreamAlias("delayed")
   @XStreamConverter(FalseConverter.class)
+  @JsonProperty("delayed")
+  @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private boolean delayed;
+  
+  @XStreamAsAttribute
+  @XStreamAlias("epochTime")
+  @JsonProperty("epochTime")
+  private long time;
   
   public Prediction(){}
 
@@ -88,7 +106,7 @@ public class Prediction {
   }
 
   public long getTime() {
-    return time;
+    return time * 1000; //Convert Epoch
   }
 
   public void setTime(long time) {

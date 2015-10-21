@@ -15,6 +15,7 @@
  */
 package org.onebusaway.nextbus.model.nextbus;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 

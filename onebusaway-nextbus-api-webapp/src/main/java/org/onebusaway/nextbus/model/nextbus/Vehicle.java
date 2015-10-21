@@ -19,12 +19,14 @@ import java.math.BigDecimal;
 
 import org.onebusaway.nextbus.impl.conversion.ListToStringConverter;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 @XStreamAlias("vehicle")
+@JsonRootName("vehicle")
 public class Vehicle {
 	
 	@XStreamAsAttribute 
