@@ -49,6 +49,7 @@ import org.springframework.stereotype.Component;
 public class StopTimeEntriesFactory {
 
   private static final boolean DEFAULT_LENIENT_MODE = false;
+  private static final boolean DEFAULT_TIMEPOINT_SUPPORT = false;
   
 
   private Logger _log = LoggerFactory.getLogger(StopTimeEntriesFactory.class);
@@ -58,6 +59,9 @@ public class StopTimeEntriesFactory {
   private long _invalidStopToShapeMappingExceptionCount;
   
   private boolean isLenientArrivalDepartureTimes = DEFAULT_LENIENT_MODE;
+
+  // OBA doesn't support time points very well -- so optionally remove them
+  private boolean removeTimePoints = !DEFAULT_TIMEPOINT_SUPPORT;
 
   /**
    * set true if system should try to correct small errors in arrival/departure times
@@ -104,6 +108,11 @@ public class StopTimeEntriesFactory {
 	stopTimes = newStopTimes;
     Collections.sort(stopTimes, new StopTimeComparator());
 
+    if (removeTimePoints) {
+    	_log.info("removing timepoints");
+    	stopTimes = removeTimePoints(stopTimes);
+    }
+    
     List<StopTimeEntryImpl> stopTimeEntries = createInitialStopTimeEntries(
         graph, stopTimes);
 
@@ -118,7 +127,20 @@ public class StopTimeEntriesFactory {
     return stopTimeEntries;
   }
 
-  private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
+  private List<StopTime> removeTimePoints(List<StopTime> stopTimes) {
+	  List<StopTime> results = new ArrayList<StopTime>(stopTimes.size());
+	  for (StopTime st : stopTimes) {
+		  if (st.getDropOffType() == 1 && st.getPickupType() == 1) {
+			  // we have a timepoint -- silently drop
+		  } else {
+			  results.add(st);
+		  }
+	  }
+	  return results;
+}
+
+
+private void removeDuplicateStopTimes(List<StopTime> stopTimes) {
     Collections.sort(stopTimes, new StopTimeComparator());
 
     boolean stopTimeWasModified = false;
