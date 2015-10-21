@@ -45,6 +45,8 @@ public class ServiceAlertBean implements Serializable {
 
   private ESeverity severity;
 
+  private String source = "OBA";
+
   public String getId() {
     return id;
   }
@@ -132,4 +134,13 @@ public class ServiceAlertBean implements Serializable {
   public void setSeverity(ESeverity severity) {
     this.severity = severity;
   }
+
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
+  }
+
 }
