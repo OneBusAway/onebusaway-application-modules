@@ -291,6 +291,10 @@ public class StopTimeEntriesFactory {
             - prevStopTimeEntry.getDepartureTime();
 
         if (duration < 0) {
+        	_log.error("Invalid duration of " + duration + " for stopTime " + stopTimeEntry.getId()
+        			+ " of " + stopTimeEntry.getArrivalTime() 
+        			+ " compared to previous stopTime departure " + prevStopTimeEntry.getId()
+        			+ " of " + prevStopTimeEntry.getDepartureTime());
           throw new IllegalStateException();
         }
       }
