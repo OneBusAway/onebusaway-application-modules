@@ -19,11 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onebusaway.nextbus.impl.rest.jackson.BodySerializer;
-import org.onebusaway.nextbus.impl.rest.jackson.RequestSerializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
