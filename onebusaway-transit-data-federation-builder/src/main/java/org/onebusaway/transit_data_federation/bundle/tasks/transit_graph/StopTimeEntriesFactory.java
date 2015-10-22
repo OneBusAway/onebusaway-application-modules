@@ -109,7 +109,6 @@ public class StopTimeEntriesFactory {
     Collections.sort(stopTimes, new StopTimeComparator());
 
     if (removeTimePoints) {
-    	_log.info("removing timepoints");
     	stopTimes = removeTimePoints(stopTimes);
     }
     
