@@ -5,6 +5,7 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
+<!-- 
   <bean id="kcmStopModificationStrategy" class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.KCMStopModificationStrategy" />
 
     <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
@@ -38,7 +39,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
             </list>
         </property>
     </bean>
-
+ -->
 <!--     <bean id="intercity_avl" class="org.onebusaway.transit_data_federation.impl.realtime.orbcad.OrbcadRecordHttpSource"> -->
 <!--         <property name="url" value="http://www.intercitytransit.com/rtacs/busdata.txt" /> -->
 <!--         <property name="agencyIds"> -->
@@ -73,7 +74,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
     <bean id="dataSource"
           class="org.springframework.jndi.JndiObjectFactoryBean">
       <property name="jndiName"
-                value="java:comp/env/jdbc/soundDB"/>   
+                value="java:comp/env/jdbc/appDB"/>   
       <property name="lookupOnStartup"
                 value="true"/>   
       <property name="cache"
@@ -106,14 +107,27 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 <!--       <constructor-arg type="java.lang.Integer" value="9999" /> -->
 <!--       <constructor-arg type="java.lang.String" value="/api/" /> -->
 <!--     </bean> -->
+
+
+   <bean class="org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeSource">
+    <property name="tripUpdatesUrl" value="http://gtfsrt.qa.wmata.obaweb.org:8080/api/v1/key/qa3273b0/agency/1/command/gtfs-rt/tripUpdates" />
+    <property name="vehiclePositionsUrl" value="http://gtfsrt.qa.wmata.obaweb.org:8080/api/v1/key/qa3273b0/agency/1/command/gtfs-rt/vehiclePositions" />
+    <property name="refreshInterval" value="30" />
+    <property name="agencyIds">
+        <list>
+                <value>1</value>
+        </list>
+        </property>
+        </bean>
+
     <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
       <constructor-arg type="java.lang.String" value="localhost"/>
       <constructor-arg type="java.lang.Integer" value="9999" />
-      <constructor-arg type="java.lang.String" value="/onebusaway-nyc-admin-webapp/api/" />
+      <constructor-arg type="java.lang.String" value="/onebusaway-admin-webapp/api/" />
     </bean>
     
     <bean id="bundleManagementService" class="org.onebusaway.transit_data_federation.impl.bundle.BundleManagementServiceImpl">
-      <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-st-bundle" />
+      <property name="bundleStoreRoot" value="/var/lib/obanyc/oba-wm-bundle" />
       <property name="standaloneMode" value="false" />
     </bean>
 </beans>

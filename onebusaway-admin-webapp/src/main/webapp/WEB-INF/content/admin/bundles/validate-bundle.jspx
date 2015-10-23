@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<s:url var="url" value="/css/admin.css" />
+<link rel="stylesheet" href="${url}" type="text/css" />
+
+<s:url var="url" value="/css/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<s:url var="url" value="/css/bundles.css" />
+<link rel="stylesheet" type="text/css" href="${url}">
+	<!-- //prevent jspx minimization -->
+</link>
+
+<s:url var="url" value="/js/lib/jquery.js" />
+<script type="text/javascript" src="${url}">
+	<!-- prevent jspx minimization -->
+	</script>
+<s:url var="url" value="/js/oba/bundles/bundle-validation.js" />
+<script type="text/javascript" src="${url}">
+	<!-- prevent jspx minimization -->
+	</script>
+</head>
+<body>
+	<div id="content">
+		<div id="text">
+			<h2>Validate Transit Data Bundle</h2>
+			<div class="validateBundle">
+				<p>Validate Transit Data Bundle will read the selected csv file and, based on that, 
+				generate API calls to either the staging or production environment to verify the 
+				validity of the current Transit Data Bundle for that environment.
+				</p>
+				<label for="csvFile">Select CSV file: </label>
+				<input type="file" id="csvFile"/>
+				<div id="environmentOptions">
+					<input type="radio" name="environmentOptions" value="staging" id="stagingEnv" checked="checked" /> 
+					<label for="stagingEnv" class="horizontalRadio">Staging</label> 
+					<input type="radio" name="environmentOptions" value="prod" id="productionEnv" /> 
+					<label for="productionEnv" class="horizontalRadio">Production</label>
+				</div>
+				<input type="button" disabled="true" id="validateBundleButton" value="Validate Bundle" />
+				<div id="processing" class="testPass" style="display: none;">
+					Processing your request...
+				</div>
+				<div id="resultsDiv">
+					<label class="resultsLabel">Validation results:</label>
+					<div id="bundleValidationSummary">
+					  <table id="bundleValidationResults" style="display: none;">
+						<tr>
+							<th>Line</th>
+							<th>Csv file line</th>
+							<th>result</th>
+							<th>Specific Test</th>
+							<th>Summary</th>
+							<th>Query Used</th>
+						</tr>
+					  </table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

@@ -152,6 +152,43 @@ public class FederatedTransitDataBundle {
     return new File(_path, "metadata.json");
   }
 
+  /* NYC specific additions */
+  public File getNonRevenueMoveLocationsPath() {
+    return new File(_path, "NonRevenueMoveLocations.obj");
+  }
+
+  public File getNonRevenueMovePath() {
+    return new File(_path, "NonRevenueMoves.obj");
+  }
+
+  public File getNonRevenueStopsPath() {
+    return new File(_path, "NonRevenueStops.obj");
+  }
+
+  public File getNotInServiceDSCs() {
+    return new File(_path, "NotInServiceDSCs.obj");
+  }
+
+  public File getTripsForDSCIndex() {
+    return new File(_path, "TripsForDSCIndices.obj");
+  }
+
+  public File getDSCForTripIndex() {
+    return new File(_path, "DSCForTripIndices.obj");
+  }
+
+  public File getBaseLocationsPath() {
+    return new File(_path, "BaseLocations.txt");
+  }
+
+  public File getTerminalLocationsPath() {
+    return new File(_path, "TerminalLocations.txt");
+  }
+
+  public File getTripRunDataPath() {
+    return new File(_path, "TripRunData.obj");
+  }
+  
   private String keyed(String value) {
     return keyed(value, true);
   }

@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.7</version>
+    <version>1.2.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
@@ -83,6 +83,7 @@
   </distributionManagement>
 
   <modules>
+    <module>onebusaway-admin-webapp</module>
     <module>onebusaway-agency-metadata</module>
     <module>onebusaway-api-core</module>
     <module>onebusaway-api-webapp</module>
