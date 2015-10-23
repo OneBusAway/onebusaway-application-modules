@@ -15,10 +15,7 @@
  */
 package org.onebusaway.watchdog.api;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -43,6 +40,8 @@ import org.apache.wink.common.annotations.Parent;
  * Explores the Java classes in a given package, looking for annotations 
  *  indicating REST endpoints. These are written to an HTML table, documenting
  *  basic information about all the known endpoints.
+ *
+ *  Borrowed from http://dalelane.co.uk/blog/?p=1871
  * 
  *  Borrowed from http://dalelane.co.uk/blog/?p=1871
  *

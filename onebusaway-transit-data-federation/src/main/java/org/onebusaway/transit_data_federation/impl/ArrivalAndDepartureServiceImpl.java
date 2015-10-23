@@ -102,8 +102,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
     Date toTimeBuffered = new Date(toTime + _blockStatusService.getRunningEarlyWindow() * 1000);
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, fromTimeBuffered, toTimeBuffered,
-        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
+        stop, fromTimeBuffered, toTimeBuffered, EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
 
     long frequencyOffsetTime = Math.max(targetTime.getTargetTime(), fromTime);
 
@@ -134,8 +133,7 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       StopEntry stop, long currentTime, long fromTime, long toTime) {
 
     List<StopTimeInstance> stis = _stopTimeService.getStopTimeInstancesInTimeRange(
-        stop, new Date(fromTime), new Date(toTime),
-        EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
+        stop, new Date(fromTime), new Date(toTime), EFrequencyStopTimeBehavior.INCLUDE_UNSPECIFIED);
 
     List<ArrivalAndDepartureInstance> instances = new ArrayList<ArrivalAndDepartureInstance>();
 
@@ -532,6 +530,11 @@ class ArrivalAndDepartureServiceImpl implements ArrivalAndDepartureService {
       List<BlockLocation> locations, List<ArrivalAndDepartureInstance> results) {
 
     for (BlockLocation location : locations) {
+
+      if (sti.isFrequencyOffsetSpecified()
+          && ((blockInstance.getBlock().getDepartureTimeForIndex(0) + sti.getFrequencyOffset()) != location.getBlockStartTime())) {
+        continue;
+      }
 
       ArrivalAndDepartureInstance instance = createArrivalAndDepartureForStopTimeInstance(
           sti, frequencyOffsetTime);

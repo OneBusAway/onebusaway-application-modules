@@ -43,6 +43,8 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.onebusaway.transit_data_federation.siri.SiriExtensionWrapper;
 import org.onebusaway.transit_data_federation.siri.SiriJsonSerializer;
 import org.onebusaway.transit_data_federation.siri.SiriXmlSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +70,10 @@ public class RealtimeServiceImpl implements RealtimeService {
   private SiriXmlSerializer _siriXmlSerializer = new SiriXmlSerializer();
 
   private SiriJsonSerializer _siriJsonSerializer = new SiriJsonSerializer();
+  
+  private static Logger _log = LoggerFactory.getLogger(PresentationServiceImpl.class);
+  
+  private static final long MILLISECONDS_IN_YEAR = 1000L * 60 * 60 * 24 * 365;
 
   private Long _now = null;
   
@@ -257,7 +263,7 @@ public class RealtimeServiceImpl implements RealtimeService {
   /**
    * Returns true if there are vehicles in service for given route+direction
    */
-  /*
+  
   @Override
   public boolean getVehiclesInServiceForRoute(String routeId, String directionId, long currentTime) {
 	  ListBean<TripDetailsBean> trips = getAllTripsForRoute(routeId, currentTime);
@@ -278,12 +284,12 @@ public class RealtimeServiceImpl implements RealtimeService {
 
 	  return false;
   }
-*/
+
   /**
    * Returns true if there are vehicles in service for given route+direction that will stop
    * at the indicated stop in the future.
    */
-  /*
+  
   @Override
   public boolean getVehiclesInServiceForStopAndRoute(String stopId, String routeId, long currentTime) {
 	  for (ArrivalAndDepartureBean adBean : getArrivalsAndDeparturesForStop(stopId, currentTime)) {
@@ -300,11 +306,11 @@ public class RealtimeServiceImpl implements RealtimeService {
 
 	  return false;
   }
- */ 
+  
   /**
    * SERVICE ALERTS METHODS
    */
-  /*
+  
   @Override
   public List<ServiceAlertBean> getServiceAlertsForRoute(String routeId) {
     return getServiceAlertsForRouteAndDirection(routeId, null); 
@@ -320,13 +326,13 @@ public class RealtimeServiceImpl implements RealtimeService {
     affects.setRouteId(routeId);
     if (directionId != null) {
       affects.setDirectionId(directionId);
-    } else { */
+    } else { 
       /*
        * TODO
        * The route index is not currently being populated correctly; query by route and direction,
        * and supply both directions if not present
        */
-  /*
+  
       SituationQueryBean.AffectsBean affects1 = new SituationQueryBean.AffectsBean();
       query.getAffects().add(affects1);
       affects1.setRouteId(routeId);
@@ -337,10 +343,10 @@ public class RealtimeServiceImpl implements RealtimeService {
       affects2.setDirectionId("1");
     }
     
-    ListBean<ServiceAlertBean> serviceAlerts = _nycTransitDataService.getServiceAlerts(query);
+    ListBean<ServiceAlertBean> serviceAlerts = _transitDataService.getServiceAlerts(query);
     return serviceAlerts.getList();
   }
-  */
+  
   @Override
   public List<ServiceAlertBean> getServiceAlertsGlobal() {
     SituationQueryBean query = new SituationQueryBean();
@@ -373,8 +379,8 @@ public class RealtimeServiceImpl implements RealtimeService {
   private List<ArrivalAndDepartureBean> getArrivalsAndDeparturesForStop(String stopId, long currentTime) {
     ArrivalsAndDeparturesQueryBean query = new ArrivalsAndDeparturesQueryBean();
     query.setTime(currentTime);
-    query.setMinutesBefore(5 * 60);
-    query.setMinutesAfter(5 * 60);
+    query.setMinutesBefore(5);
+    query.setMinutesAfter(65);
     
     StopWithArrivalsAndDeparturesBean stopWithArrivalsAndDepartures =
       _transitDataService.getStopWithArrivalsAndDepartures(stopId, query);

@@ -7,12 +7,12 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.13-st.5-SNAPSHOT</version>
+  <version>1.1.13-st.6-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
   <description>The core OneBusAway application suite.</description>
-  <url>https://github.com/OneBusAway/onebusaway-application-modules/wiki/</url>
+  <url>https://github.com/camsys/onebusaway-application-modules/wiki/</url>
 
   <!-- Common Software Dependency Versions -->
   <properties>
@@ -55,9 +55,9 @@
   </pluginRepositories>
 
   <scm>
-    <connection>scm:git:http://github.com/OneBusAway/onebusaway-application-modules.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/OneBusAway/onebusaway-application-modules.git</developerConnection>
-    <url>http://github.com/OneBusAway/onebusaway-application-modules</url>
+    <connection>scm:git:http://github.com/camsys/onebusaway-application-modules.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/camsys/onebusaway-application-modules.git</developerConnection>
+    <url>http://github.com/camsys/onebusaway-application-modules</url>
   </scm>
 
   <issueManagement>
@@ -89,6 +89,8 @@
     <module>onebusaway-combined-webapp</module>
     <module>onebusaway-container</module>
     <module>onebusaway-core</module>
+    <module>onebusaway-enterprise-acta-webapp</module>
+    <module>onebusaway-enterprise-webapp</module>
     <module>onebusaway-federations</module>
     <module>onebusaway-federations-webapp</module>
     <module>onebusaway-geocoder</module>
@@ -98,6 +100,7 @@
     <module>onebusaway-gwt-common</module>
     <module>onebusaway-phone</module>
     <module>onebusaway-phone-webapp</module>
+    <module>onebusaway-twilio-webapp</module>
     <module>onebusaway-presentation</module>
     <module>onebusaway-quickstart</module>
     <module>onebusaway-sms-webapp</module>
@@ -107,6 +110,7 @@
     <module>onebusaway-transit-data-federation-builder</module>
     <module>onebusaway-transit-data-federation-webapp</module>
     <module>onebusaway-users</module>
+    <module>onebusaway-util</module>
     <module>onebusaway-watchdog-webapp</module>
     <module>onebusaway-webapp</module>
   </modules>
@@ -352,7 +356,17 @@
         <version>1.8.0</version>
         <scope>test</scope>
       </dependency>
-    </dependencies>
+      <dependency>
+    	<groupId>com.brsanthu</groupId>
+    	<artifactId>google-analytics-java</artifactId>
+    	<version>1.1.2</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.httpcomponents</groupId>
+		<artifactId>httpclient</artifactId>
+		<version>4.3.5</version>
+	</dependency>
+ 	</dependencies>
   </dependencyManagement>
 
   <build>
@@ -411,7 +425,7 @@
                 <goal>test</goal>
               </goals>
               <configuration>
-                <skip>false</skip>
+                <skip>true</skip>
                 <excludes>
                   <exclude>none</exclude>
                 </excludes>

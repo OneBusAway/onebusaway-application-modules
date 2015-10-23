@@ -44,7 +44,7 @@ public interface RealtimeService {
 
   public List<MonitoredStopVisitStructure> getMonitoredStopVisitsForStop(String stopId, 
       int maximumOnwardCalls, long currentTime);  
-/*
+
   
   public boolean getVehiclesInServiceForRoute(String routeId, String directionId, long currentTime);
 
@@ -56,7 +56,7 @@ public interface RealtimeService {
 
   public List<ServiceAlertBean> getServiceAlertsForRouteAndDirection(
       String routeId, String directionId);
-  */
+  
   public List<ServiceAlertBean> getServiceAlertsGlobal();
     
 }

@@ -19,7 +19,7 @@ import java.net.InetAddress;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.onebusaway.presentation.services.configuration.ConfigurationService;
+import org.onebusaway.util.services.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class StatusAction extends ActionSupport {
   @Override
   public String execute() {
 
-    Map<String, Object> configuration = _configurationService.getConfiguration(_forceRefresh, ERROR);
+    Map<String, String> configuration = _configurationService.getConfiguration();
     _model.putAll(configuration);
 
     try {

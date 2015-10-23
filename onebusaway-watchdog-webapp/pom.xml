@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>1.1.13-st.5-SNAPSHOT</version>
+		<version>1.1.13-st.6-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-watchdog-webapp</artifactId>
 	<packaging>war</packaging>
@@ -58,12 +58,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>taglibs</groupId>
-			<artifactId>standard</artifactId>
-			<version>1.1.2</version>
-		</dependency>				
+		</dependency>			
 		<dependency>
 			<groupId>taglibs</groupId>
 			<artifactId>standard</artifactId>

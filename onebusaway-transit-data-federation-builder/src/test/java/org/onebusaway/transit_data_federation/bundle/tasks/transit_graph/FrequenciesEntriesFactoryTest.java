@@ -16,6 +16,10 @@
 package org.onebusaway.transit_data_federation.bundle.tasks.transit_graph;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.addStopTime;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
@@ -59,6 +63,10 @@ public class FrequenciesEntriesFactoryTest {
 
   private StopEntryImpl _stopA;
 
+  private StopEntryImpl _stopB;
+
+  private StopEntryImpl _stopC;
+
   @Before
   public void before() {
     _factory = new FrequencyEntriesFactory();
@@ -71,6 +79,8 @@ public class FrequenciesEntriesFactoryTest {
     _routeEntry = route("route");
     _lsid = lsid("serviceId");
     _stopA = stop("stopA");
+    _stopB = stop("stopB");
+    _stopC = stop("stopC");
   }
 
   @Test
@@ -78,7 +88,7 @@ public class FrequenciesEntriesFactoryTest {
 
     BlockEntryImpl block = block("block");
     TripEntryImpl tripEntryA = trip("trip").setRoute(_routeEntry).setServiceId(
-        _lsid).setBlock(block).setDirectionId("0");
+        _lsid).setBlock(block);
     _graph.putTripEntry(tripEntryA);
     addStopTime(tripEntryA, stopTime().setStop(_stopA).setTime(time(7, 00)));
 
@@ -93,12 +103,14 @@ public class FrequenciesEntriesFactoryTest {
     freqA.setStartTime(time(8, 00));
     freqA.setEndTime(time(10, 00));
     freqA.setHeadwaySecs(10 * 60);
+    freqA.setExactTimes(0);
 
     Frequency freqB = new Frequency();
     freqB.setTrip(trip);
     freqB.setStartTime(time(10, 00));
     freqB.setEndTime(time(12, 00));
     freqB.setHeadwaySecs(10 * 60);
+    freqB.setExactTimes(0);
 
     Mockito.when(_dao.getAllFrequencies()).thenReturn(
         Arrays.asList(freqA, freqB));
@@ -115,5 +127,53 @@ public class FrequenciesEntriesFactoryTest {
     assertEquals(freqA.getStartTime(), frequency.getStartTime());
     assertEquals(freqA.getEndTime(), frequency.getEndTime());
     assertEquals(freqA.getHeadwaySecs(), frequency.getHeadwaySecs());
+    assertEquals(freqA.getExactTimes(), frequency.getExactTimes());
+  }
+
+  @Test
+  public void testTripsWithMismatchedFrequencies() {
+
+    BlockEntryImpl block = block("block");
+    TripEntryImpl tripEntryA = trip("trip").setRoute(_routeEntry).setServiceId(
+        _lsid).setBlock(block);
+    _graph.putTripEntry(tripEntryA);
+    addStopTime(tripEntryA, stopTime().setStop(_stopA).setTime(time(7, 00)));
+
+    Trip trip = new Trip();
+    trip.setId(tripEntryA.getId());
+
+    Frequency freqA = new Frequency();
+    freqA.setTrip(trip);
+    freqA.setStartTime(time(8, 00));
+    freqA.setEndTime(time(10, 00));
+    freqA.setHeadwaySecs(10 * 60);
+    freqA.setExactTimes(0);
+
+    Frequency freqB = new Frequency();
+    freqB.setTrip(trip);
+    freqB.setStartTime(time(10, 00));
+    freqB.setEndTime(time(12, 00));
+    freqB.setHeadwaySecs(10 * 60);
+
+    /**
+     * We don't allow a mix of trips with exactTimes=0 and exactTimes=1
+     */
+    freqB.setExactTimes(1);
+
+    Mockito.when(_dao.getAllFrequencies()).thenReturn(
+        Arrays.asList(freqA, freqB));
+
+    _graph.initialize();
+
+    /****
+     * Actual Test
+     ****/
+
+    try {
+      _factory.processFrequencies(_graph);
+      fail();
+    } catch (IllegalStateException ex) {
+
+    }
   }
 }

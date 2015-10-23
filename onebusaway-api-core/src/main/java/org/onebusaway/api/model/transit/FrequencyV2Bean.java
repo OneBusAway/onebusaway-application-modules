@@ -27,6 +27,8 @@ public final class FrequencyV2Bean implements Serializable {
 
   private int headway;
 
+  private int exactTimes;
+
   public long getStartTime() {
     return startTime;
   }
@@ -49,5 +51,13 @@ public final class FrequencyV2Bean implements Serializable {
 
   public void setHeadway(int headwaySecs) {
     this.headway = headwaySecs;
+  }
+
+  public int getExactTimes() {
+    return exactTimes;
+  }
+
+  public void setExactTimes(int exact_times) {
+    this.exactTimes = exact_times;
   }
 }

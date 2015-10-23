@@ -134,7 +134,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       _bundleStore = new HttpBundleStoreImpl(_bundleRootPath, _restApiLibrary);        
     }
     else{
-      _bundleStore = new LocalBundleStoreImpl(_bundleRootPath);
+      _bundleStore = new LocalBundleStoreImpl(_bundleRootPath); 	
     }
     
     try{
@@ -273,7 +273,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 
   @Override
   public String getActiveBundleId() {
-
+	
     if (_bundleConfigDao == null) {
       if(_currentBundleId == null){
         _log.error("config error:  bundleConfigDao is null");
@@ -290,7 +290,7 @@ public class BundleManagementServiceImpl implements BundleManagementService {
       _log.error("data error:  getBundleMetadata is null");
       return null;
     }
-
+    
     return _bundleConfigDao.getBundleMetadata().getId();
   }
 

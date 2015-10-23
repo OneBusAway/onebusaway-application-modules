@@ -32,5 +32,4 @@
       <property name="standaloneMode" value="true" />
       <property name="builderMode" value="true" />      
     </bean>
-
 </beans>

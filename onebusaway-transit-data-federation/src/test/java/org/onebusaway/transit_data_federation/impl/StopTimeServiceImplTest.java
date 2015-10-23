@@ -503,7 +503,7 @@ public class StopTimeServiceImplTest {
     stopTime(4, toStop, tripF, time(10, 05), time(10, 05), 0.0);
 
     FrequencyEntry frequency = new FrequencyEntryImpl(time(10, 30),
-        time(11, 30), 10 * 60);
+        time(11, 30), 10 * 60, 0);
     List<FrequencyEntry> frequencies = Arrays.asList(frequency);
 
     BlockConfigurationEntry bcFreq = linkBlockTrips(block("bFreq"),

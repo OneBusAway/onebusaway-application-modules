@@ -32,6 +32,7 @@
 
   <import resource="classpath:org/onebusaway/agency_metadata/application-context.xml" />
   <import resource="classpath:org/onebusaway/users/application-context.xml" />
+  <import resource="classpath:org/onebusaway/util/application-context.xml" />
   <!-- This turns on automatic annotation configuration -->
   <context:annotation-config />
 
@@ -39,9 +40,7 @@
   <aop:aspectj-autoproxy />
 
   <context:component-scan base-package="org.onebusaway.api.impl,org.onebusaway.presentation.impl.realtime,org.onebusaway.presentation.services.cachecontrol,org.onebusaway.agency_metadata"/>
-  <!--
   <context:component-scan base-package="org.onebusaway.agency_metadata" />
-  -->
   
   <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler" />
   

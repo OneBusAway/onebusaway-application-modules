@@ -40,7 +40,18 @@ import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 
+import uk.org.siri.siri.ErrorDescriptionStructure;
+import uk.org.siri.siri.MonitoredStopVisitStructure;
+import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
+import uk.org.siri.siri.OtherErrorStructure;
+import uk.org.siri.siri.ServiceDelivery;
+import uk.org.siri.siri.ServiceDeliveryErrorConditionStructure;
+import uk.org.siri.siri.Siri;
+import uk.org.siri.siri.StopMonitoringDeliveryStructure;
+import com.brsanthu.googleanalytics.EventHit;
+import com.brsanthu.googleanalytics.PageViewHit;
 import uk.org.siri.siri.ErrorDescriptionStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
@@ -56,12 +67,19 @@ public class StopMonitoringAction extends ApiActionSupport
   private static final long serialVersionUID = 1L;
   
   private static final int V3 = 3;
+  
+  private static final String GA_EVENT_ACTION = "API Key Request";
+  
+  private static final String GA_EVENT_CATEGORY = "Stop Monitoring";
 
   @Autowired
   public TransitDataService _transitDataService;
 
   @Autowired  
   private RealtimeService _realtimeService;
+  
+  @Autowired
+  private GoogleAnalyticsServiceImpl _gaService;
   
   private Siri _response;
   
@@ -83,6 +101,8 @@ public class StopMonitoringAction extends ApiActionSupport
   }
 
   public DefaultHttpHeaders index() throws IOException {
+	
+	processGoogleAnalytics();
 
   	long responseTimestamp = getTime();
 
@@ -367,6 +387,23 @@ public class StopMonitoringAction extends ApiActionSupport
   
   public HttpServletResponse getServletResponse(){
     return _servletResponse;
+  }
+  
+  private void processGoogleAnalytics(){
+	  processGoogleAnalyticsPageView();
+	  processGoogleAnalyticsApiKeys();  
+  }
+  
+  private void processGoogleAnalyticsPageView(){
+	  _gaService.post(new PageViewHit());
+  }
+  
+  private void processGoogleAnalyticsApiKeys(){
+	  String apiKey = _request.getParameter("key"); 
+	  if(StringUtils.isBlank(apiKey))
+		  apiKey = "Key Information Unavailable";
+	  
+	  _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
   }
   
 }

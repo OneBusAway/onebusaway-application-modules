@@ -88,6 +88,8 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private URL _alertsUrl;
 
   private int _refreshInterval = 30;
+  
+  private Map _alertAgencyIdMap;
 
   private List<String> _agencyIds = new ArrayList<String>();
 
@@ -168,6 +170,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   public void setRefreshInterval(int refreshInterval) {
     _refreshInterval = refreshInterval;
+  }
+  
+  public void setAlertAgencyIdMap(Map alertAgencyIdMap) {
+	_alertAgencyIdMap = alertAgencyIdMap;
   }
 
   public void setAgencyId(String agencyId) {
@@ -303,6 +309,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
     result.setLastUpdate(newestUpdate);
+    _log.info("active vehicles=" + seenVehicles.size() + " for updates=" + updates.size());
   }
 
   private void handleAlerts(FeedMessage alerts) {
@@ -320,7 +327,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         _serviceAlertService.removeServiceAlert(id);
       } else {
         ServiceAlert.Builder serviceAlertBuilder = _alertLibrary.getAlertAsServiceAlert(
-            id, alert);
+            id, alert, _alertAgencyIdMap);
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
         ServiceAlert existingAlert = _alertsById.get(id);
         if (existingAlert == null || !existingAlert.equals(serviceAlert)) {

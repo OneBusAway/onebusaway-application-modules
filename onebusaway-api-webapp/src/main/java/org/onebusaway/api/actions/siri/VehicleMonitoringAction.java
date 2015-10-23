@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -35,12 +36,15 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.VehicleStatusBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 import org.onebusaway.presentation.impl.service_alerts.ServiceAlertsHelper;
 import org.onebusaway.presentation.services.cachecontrol.CacheService;
 import org.onebusaway.presentation.services.realtime.RealtimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.brsanthu.googleanalytics.EventHit;
 
 import uk.org.siri.siri.ErrorDescriptionStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
@@ -58,12 +62,19 @@ public class VehicleMonitoringAction extends ApiActionSupport
   protected static Logger _log = LoggerFactory.getLogger(VehicleMonitoringAction.class);
   
   private static final int V3 = 3;
+  
+  private static final String GA_EVENT_ACTION = "API Key Request";
+  
+  private static final String GA_EVENT_CATEGORY = "Vehicle Monitoring";
 
-@Autowired
+  @Autowired
   public TransitDataService _transitDataService;
 
   @Autowired
   private RealtimeService _realtimeService;
+  
+  @Autowired
+  private GoogleAnalyticsServiceImpl _gaService;
   
   private Siri _response;
   
@@ -92,6 +103,8 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
   //@Override
   public String index() {
+	  
+	processGoogleAnalyticsApiKeys();
 
     long currentTimestamp = getTime();
     
@@ -349,6 +362,14 @@ public class VehicleMonitoringAction extends ApiActionSupport
   
   public HttpServletResponse getServletResponse(){
     return _servletResponse;
+  }
+  
+  private void processGoogleAnalyticsApiKeys(){
+	  String apiKey = _request.getParameter("key"); 
+	  if(StringUtils.isBlank(apiKey))
+		  apiKey = "Key Information Unavailable";
+	  
+	  _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
   }
   
 }

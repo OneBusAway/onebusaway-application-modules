@@ -116,8 +116,8 @@
 </script>
 <script type="text/javascript">
 	var pageTracker = _gat._getTracker("UA-2423527-7");
-	pageTracker._initData();
-	pageTracker._trackPageview();
+pageTracker._initData();
+pageTracker._trackPageview();
 </script>
 </body>
 
