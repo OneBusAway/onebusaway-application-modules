@@ -23,31 +23,8 @@
      <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.0</version>
     </dependency>
-    <!--  spring issues begin -->
-<!--     		<dependency> -->
-<!-- 			<groupId>org.springframework</groupId> -->
-<!-- 			<artifactId>spring-webmvc</artifactId> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey</groupId> -->
-<!-- 			<artifactId>jersey-server</artifactId> -->
-<!-- 			<version>1.9.1</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey.contribs</groupId> -->
-<!-- 			<artifactId>jersey-spring</artifactId> -->
-<!-- 			<version>1.9.1</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey</groupId> -->
-<!-- 			<artifactId>jersey-bundle</artifactId> -->
-<!-- 			<version>1.10</version> -->
-<!-- 		</dependency> -->
-    
-    <!--  spring issues end -->
-    
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
