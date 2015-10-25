@@ -31,7 +31,7 @@
     <constant name="struts.ui.theme" value="simple"/>
     <constant name="struts.convention.action.suffix" value="Action" />
     <constant name="struts.convention.action.mapAllMatches" value="true" />
-    <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.nyc.webapp.actions" />
+    <constant name="struts.convention.package.locators.basePackage" value="org.onebusaway.webapp.actions" />
     <constant name="struts.convention.action.checkImplementsAction" value="false" />
     <constant name="struts.convention.default.parent.package" value="onebusaway-admin-webapp-default" />
     <constant name="struts.enable.DynamicMethodInvocation" value="true" />

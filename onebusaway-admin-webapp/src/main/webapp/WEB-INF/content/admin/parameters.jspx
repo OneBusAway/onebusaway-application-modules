@@ -192,7 +192,7 @@
 									<div id="obaApiKey" class="propertyHolder rightProperty">
 										<label class="propertyHeader">OBA API key</label>
 										<div class="propertyDescription">
-											<p>OBA API key (defaults in code to 'OBANYC' if no value specified here). This is the value the front-end AP
+											<p>OBA API key (defaults in code to 'OBAKEY' if no value specified here). This is the value the front-end AP
 											 calls use; the specified key must also be added to the system via the API key management API.</p>
 										</div>
 										<div>

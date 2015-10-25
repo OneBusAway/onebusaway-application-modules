@@ -260,9 +260,9 @@
 			<properties>
 				<tds.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
 				<vtms.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/obanyc/st_bundles</bundle.builtPath>
-				<bundle.stagedPath>/var/lib/obanyc/bundles/staged</bundle.stagedPath>
-				<bundle.deployPath>/var/lib/obanyc/activebundles</bundle.deployPath>
+				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
+				<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
+				<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 				<tdm.host>tdm</tdm.host><!-- assumes domain is set -->
 				<log4j.appender>ROLL</log4j.appender>
 			</properties>
@@ -281,9 +281,9 @@
 			<properties>
 				<tds.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
 				<vtms.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/obanyc/st_bundles</bundle.builtPath>
-        <bundle.stagedPath>/var/lib/obanyc/bundles/staged</bundle.stagedPath>
-        <bundle.deployPath>/var/lib/obanyc/activebundles</bundle.deployPath>
+				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
+        <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
+        <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 				<tdm.host>tdm.dev.obanyc.com</tdm.host>
 				<log4j.appender>stdout</log4j.appender>
 			</properties>
@@ -293,9 +293,9 @@
 			<properties>
 				<tds.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
 				<vtms.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/obanyc/st_bundles</bundle.builtPath>
-        <bundle.stagedPath>/var/lib/obanyc/bundles/staged</bundle.stagedPath>
-        <bundle.deployPath>/var/lib/obanyc/activebundles</bundle.deployPath>
+				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
+        <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
+        <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 				<tdm.host>localhost:8080/onebusaway-nyc-tdm-webapp</tdm.host>
 				<log4j.appender>stdout</log4j.appender>
 			</properties>
@@ -306,9 +306,9 @@
 			<properties>
 				<tds.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
 				<vtms.path>http://localhost:8080/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/obanyc/st_bundles</bundle.builtPath>
-        <bundle.stagedPath>/var/lib/obanyc/bundles/staged</bundle.stagedPath>
-        <bundle.deployPath>/var/lib/obanyc/activebundles</bundle.deployPath>
+				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
+        <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
+        <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 				<tdm.host>tdm.dev.obanyc.com</tdm.host>
 				<log4j.appender>stdout</log4j.appender>
 			</properties>
@@ -318,9 +318,9 @@
 			<properties>
 				<tds.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</tds.path>
 				<vtms.path>http://localhost:8081/onebusaway-nyc-vehicle-tracking-webapp</vtms.path>
-				<bundle.builtPath>/var/lib/obanyc/st_bundles</bundle.builtPath>
-        <bundle.stagedPath>/var/lib/obanyc/bundles/staged</bundle.stagedPath>
-        <bundle.deployPath>/var/lib/obanyc/activebundles</bundle.deployPath>
+				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
+        <bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
+        <bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
 				<tdm.host>tdm.dev.obanyc.com</tdm.host>
 				<log4j.appender>stdout</log4j.appender>
 			</properties>

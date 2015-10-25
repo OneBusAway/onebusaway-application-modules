@@ -458,17 +458,12 @@ public class BundleBuildingServiceImpl implements BundleBuildingService {
       BeanDefinitionBuilder bundle = BeanDefinitionBuilder.genericBeanDefinition(FederatedTransitDataBundle.class);
       bundle.addPropertyValue("path", outputPath);
       beans.put("bundle", bundle.getBeanDefinition());
-      
-      BeanDefinitionBuilder nycBundle = BeanDefinitionBuilder.genericBeanDefinition(FederatedTransitDataBundle.class);
-      nycBundle.addPropertyValue("path", outputPath);
-      beans.put("nycBundle", nycBundle.getBeanDefinition());
 
       BeanDefinitionBuilder outputDirectoryReference = BeanDefinitionBuilder.genericBeanDefinition(String.class);
       outputDirectoryReference.addPropertyValue("", response.getBundleOutputDirectory());
 
       
       // TODO move this to application-context-bunlde-admin.xml and have it look for config to turn on/off
-
       BeanDefinitionBuilder task = null;
       if (isStifTaskApplicable()) {
         addStifTask(beans, request, response);
