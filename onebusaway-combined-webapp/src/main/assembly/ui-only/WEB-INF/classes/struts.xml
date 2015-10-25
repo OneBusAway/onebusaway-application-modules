@@ -36,6 +36,8 @@
   <constant name="struts.action.extension" value="action,xhtml,,xml,json,csv,pb,pbtext" />
   <constant name="struts.action.excludePattern" value="/services/.*" />
   <constant name="struts.enable.DynamicMethodInvocation" value="true" />
+  
+  <constant name="struts.allowed.action.names" value="[a-zA-Z0-9._!@/\\-]*" />
 
   <bean type="com.opensymphony.xwork2.ActionProxyFactory" name="multi"
     class="org.onebusaway.presentation.impl.struts.MultiActionProxyFactory" />

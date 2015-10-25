@@ -25,7 +25,7 @@ http://api.pugetsound.onebusaway.org/api/where/report-problem-with-trip/1_794302
 
 ## Request Parameters
 
-* tripId - the trip id, encoded directly in the url:
+* tripId - the trip id, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/report-problem-with-trip/[ID GOES HERE].xml`
 * serviceDate - the service date of the trip
 * vehicleId - the vehicle actively serving the trip

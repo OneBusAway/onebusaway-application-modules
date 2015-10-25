@@ -381,6 +381,10 @@ class GtfsRealtimeTripLibrary {
 
   private boolean hasDelayValue(TripUpdate tripUpdate) {
 
+    if (tripUpdate.hasDelay()) {
+      return true;
+    }
+
     if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
       OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
       if (obaTripUpdate.hasDelay()) {
@@ -513,6 +517,10 @@ class GtfsRealtimeTripLibrary {
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
 
+          /**
+           * TODO: delete this code once all upstream systems have been
+           * migrated the new "delay" and "timestamp" fields.
+           */
           if (tripUpdate.hasExtension(GtfsRealtimeOneBusAway.obaTripUpdate)) {
             OneBusAwayTripUpdate obaTripUpdate = tripUpdate.getExtension(GtfsRealtimeOneBusAway.obaTripUpdate);
             if (obaTripUpdate.hasDelay()) {
@@ -528,6 +536,18 @@ class GtfsRealtimeTripLibrary {
             if (obaTripUpdate.hasTimestamp()) {
               best.timestamp = obaTripUpdate.getTimestamp() * 1000;
             }
+          }
+
+          if (tripUpdate.hasDelay()) {
+            /**
+             * TODO: Improved logic around picking the "best" schedule deviation
+             */
+            best.delta = 0;
+            best.isInPast = false;
+            best.scheduleDeviation = tripUpdate.getDelay();
+          }
+          if (tripUpdate.hasTimestamp()) {
+            best.timestamp = tripUpdate.getTimestamp() * 1000;
           }
 
           for (StopTimeUpdate stopTimeUpdate : tripUpdate.getStopTimeUpdateList()) {

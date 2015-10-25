@@ -31,12 +31,12 @@
 
     <!-- Filters -->
     <filter>
-        <filter-name>action2</filter-name>
-        <filter-class>org.apache.struts2.dispatcher.FilterDispatcher</filter-class>
+        <filter-name>struts-prepare-and-execute</filter-name>
+        <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>action2</filter-name>
-        <url-pattern>*.action</url-pattern>
+        <filter-name>struts-prepare-and-execute</filter-name>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 
     <!-- Listeners -->

@@ -67,6 +67,7 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       }
 
       tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+      tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
     }
   }
 }
