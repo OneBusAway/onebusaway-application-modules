@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +101,9 @@ public class BlockLocationRecord {
 
   private final long timepointScheduledTime;
 
-  private final long timepointPredictedTime;
+  private final long timepointPredictedArrivalTime;
+  
+  private final long timepointPredictedDepartureTime;
 
   /**
    * Custom Hibernate mapping so that the vehicle phase enum gets mapped to a
@@ -137,7 +140,8 @@ public class BlockLocationRecord {
     orientation = null;
     timepointId = null;
     timepointScheduledTime = 0;
-    timepointPredictedTime = 0;
+    timepointPredictedArrivalTime = -1;
+    timepointPredictedDepartureTime = -1;
     phase = null;
     status = null;
     vehicleId = null;
@@ -156,7 +160,8 @@ public class BlockLocationRecord {
     this.orientation = builder.orientation;
     this.timepointId = builder.timepointId;
     this.timepointScheduledTime = builder.timepointScheduledTime;
-    this.timepointPredictedTime = builder.timepointPredictedTime;
+    this.timepointPredictedArrivalTime = builder.timepointPredictedArrivalTime;
+    this.timepointPredictedDepartureTime = builder.timepointPredictedDepartureTime;
     this.phase = builder.phase;
     this.status = builder.status;
     this.vehicleId = builder.vehicleId;
@@ -261,8 +266,12 @@ public class BlockLocationRecord {
     return timepointScheduledTime;
   }
 
-  public long getTimepointPredictedTime() {
-    return timepointPredictedTime;
+  public long getTimepointPredictedArrivalTime() {
+    return timepointPredictedArrivalTime;
+  }
+
+  public long getTimepointPredictedDepartureTime() {
+    return timepointPredictedDepartureTime;
   }
 
   public EVehiclePhase getPhase() {
@@ -316,7 +325,9 @@ public class BlockLocationRecord {
 
     private long timepointScheduledTime;
 
-    private long timepointPredictedTime;
+    private long timepointPredictedArrivalTime;
+
+    private long timepointPredictedDepartureTime;
 
     private EVehiclePhase phase;
 
@@ -382,8 +393,12 @@ public class BlockLocationRecord {
       this.timepointScheduledTime = timepointScheduledTime;
     }
 
-    public void setTimepointPredictedTime(long timepointPredictedTime) {
-      this.timepointPredictedTime = timepointPredictedTime;
+    public void setTimepointPredictedArrivalTime(long timepointPredictedArrivalTime) {
+      this.timepointPredictedArrivalTime = timepointPredictedArrivalTime;
+    }
+
+    public void setTimepointPredictedDepartureTime(long timepointPredictedDepartureTime) {
+      this.timepointPredictedDepartureTime = timepointPredictedDepartureTime;
     }
 
     public void setPhase(EVehiclePhase phase) {

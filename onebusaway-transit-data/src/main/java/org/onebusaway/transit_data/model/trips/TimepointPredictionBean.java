@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2013 Kurt Raschke <kurt@kurtraschke.com>
  * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,49 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.realtime.api;
+package org.onebusaway.transit_data.model.trips;
 
 import java.io.Serializable;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-
-public class TimepointPredictionRecord implements Serializable {
+public class TimepointPredictionBean implements Serializable {
 
   private static final long serialVersionUID = 2L;
 
-  /**
-   * 
-   */
-  private AgencyAndId timepointId;
-  
-  private AgencyAndId tripId;
+  private String timepointId;
+
+  private String tripId;
   
   private int stopSequence = -1;
-
+  
   private long timepointScheduledTime;
 
   private long timepointPredictedArrivalTime = -1;
 
   private long timepointPredictedDepartureTime = -1;
 
-  public TimepointPredictionRecord() {
+  public TimepointPredictionBean() {
 
   }
 
-  public TimepointPredictionRecord(TimepointPredictionRecord r) {
-    this.timepointId = r.timepointId;
-    this.tripId = r.tripId;
-    this.stopSequence = r.stopSequence;
-    this.timepointPredictedArrivalTime = r.timepointPredictedArrivalTime;
-    this.timepointPredictedDepartureTime = r.timepointPredictedDepartureTime;
-    this.timepointScheduledTime = r.timepointScheduledTime;
-  }
-
-  public AgencyAndId getTimepointId() {
+  public String getTimepointId() {
     return timepointId;
   }
 
-  public void setTimepointId(AgencyAndId timepointId) {
+  public void setTimepointId(String timepointId) {
     this.timepointId = timepointId;
   }
 
@@ -68,11 +54,11 @@ public class TimepointPredictionRecord implements Serializable {
     this.timepointScheduledTime = timepointScheduledTime;
   }
 
-  public AgencyAndId getTripId() {
+  public String getTripId() {
 	  return tripId;
   }
 
-  public void setTripId(AgencyAndId tripId) {
+  public void setTripId(String tripId) {
 	  this.tripId = tripId;
   }
 
