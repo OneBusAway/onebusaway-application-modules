@@ -25,38 +25,63 @@
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
            http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
 
-
   <import resource="classpath:data-sources.xml" />
   <import resource="classpath:org/onebusaway/container/application-context.xml" />
-
-  <context:component-scan base-package="org.onebusaway.gtfs_realtime.archiver" />
+  
+  
+  <!--  TDS support -->
+  <import resource="classpath:org/onebusaway/transit_data_federation/application-context.xml" />
   
   <bean id="usersHibernateAnnotatedClasses" class="org.onebusaway.container.spring.ListBeanPostProcessor">
     <property name="target" value="hibernateAnnotatedClasses" />
     <property name="values">
       <list>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel</value>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.StopTimeUpdateModel</value>
-        <value>org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel</value>
+        <value>org.onebusaway.transit_data_federation.impl.realtime.BlockLocationRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.realtime.history.ScheduleDeviationHistory</value>
+        <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord</value>
       </list>
     </property>
   </bean>
   <alias name="dataSource" alias="mutableDataSource" />
     
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+    <property name="annotatedClasses" ref="hibernateAnnotatedClasses"/>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.connection.pool_size">1</prop>
+				<prop key="hibernate.current_session_context_class">thread</prop>
+        <prop key="hibernate.cache.region.factory_class">org.onebusaway.container.spring.ehcache.EhCacheRegionFactory</prop> 
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+	      <prop key="hibernate.jdbc.batch_size">1000</prop>
+    		<prop key="hibernate.order_inserts">false</prop>
+        <prop key="hibernate.order_updates">false</prop>
+			</props>
+		</property>
+	</bean>
+  
 
   <bean id="gtfsPersistorImpl" class="org.onebusaway.gtfs_realtime.archiver.service.GtfsPersistorImpl">
     <property name="taskScheduler" ref="taskScheduler" />
     <property name="tripUpdateDao" ref="tripUpdateDaoImpl" />
     <property name="vehiclePositionDao" ref="vehiclePositionDaoImpl" />
+    <property name="alertDao" ref="alertDaoImpl" />
     <property name="batchSize" value="1000" />
   </bean>
 
   <bean id="tripUpdateDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.TripUpdateDaoImpl">
-    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="sessionFactory" ref="gtfsRealtimeArchiveSessionFactory" />
   </bean>
 
   <bean id="vehiclePositionDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.VehiclePositionDaoImpl">
-    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="sessionFactory" ref="gtfsRealtimeArchiveSessionFactory" />
+  </bean>
+  
+  <bean id="alertDaoImpl" class="org.onebusaway.gtfs_realtime.archiver.service.AlertDaoImpl">
+    <property name="sessionFactory" ref="gtfsRealtimeArchiveSessionFactory" />
   </bean>
   
   <bean id="feedService" class="org.onebusaway.gtfs_realtime.archiver.service.FeedServiceImpl">

@@ -208,7 +208,6 @@ public class IndexAction extends AbstractAction {
 	} catch (IOException ioe) {}
 	
 	HttpServletRequest request = ServletActionContext.getRequest();    
-	//_properties.putAll(_configService.getConfiguration(false, request.getContextPath()));
 	_properties.putAll(_configService.getConfiguration());
 	
     return SUCCESS;

@@ -1,0 +1,104 @@
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+	<title>Admin Webapp</title>
+	<s:url var="url" value="/css/admin.css"/>
+	<link rel="stylesheet" type="text/css" href="${url}" />
+</head>
+<body>
+	<div id="content">
+		<div id="text">
+			<div id="indexContainer">
+				<s:if test="adminUser">
+					<h2>Welcome Admin</h2>
+				</s:if>
+				<s:else>
+					<h2>Welcome Operator</h2>
+				</s:else>
+				<ul id="indexList">
+					<s:if test="getConfig('showApiKey')">
+						<li>
+							<s:url var="url" action="api-key"/>
+							<s:a href="%{url}">Create API key</s:a>
+						</li>
+					</s:if>
+					<!-- Commented out until its fixed 
+					<li>
+						<s:url var="url" action="api-keys"/>
+						<s:a href="%{url}">Create API key (Legacy)</s:a>
+					</li>
+					-->
+					<s:if test="adminUser">
+    					<s:if test="getConfig('showManageUsers')">
+							<li>
+								<s:url var="url" action="manage-users" namespace="/admin/usermanagement"/>
+								<s:a href="%{url}">Manage Users</s:a>
+							</li>
+						</s:if>						
+    					<s:if test="getConfig('showBundleUtil')">						
+							<li>
+								<s:url var="url" action="manage-bundles" namespace="/admin/bundles"/>
+								<s:a href="%{url}">Transit Data Bundle Utility</s:a>
+							</li>
+						</s:if>						
+    					<s:if test="getConfig('showVehicleStatus')">						
+							<li>
+								<s:url var="url" action="vehicle-status" namespace="/admin/vehiclestatus"/>
+								<s:a href="%{url}">Vehicle Status Display Utility</s:a>
+							</li>
+						</s:if>						
+    					<s:if test="getConfig('showUpdateConfig')">
+							<li>
+								<s:url var="url" action="parameters" namespace="/admin"/>
+								<s:a href="%{url}">Configuration Parameters Utility</s:a>
+							</li>
+							<li>
+							<s:url var="url" action="deploy-config" namespace="/admin"/>
+							<s:a href="%{url}">Update Configuration Files</s:a>
+						</li>
+						</s:if>
+					</s:if>
+    					<s:if test="getConfig('showQrCode')">						
+							<li>
+							<s:url var="url" action="barcode"></s:url>
+							<s:a href="%{url}">QR Code Generation</s:a>
+							</li>
+						</s:if>
+    					<s:if test="getConfig('manageServiceAlerts')">						
+							<li>
+							<s:url var="url" action="service-alerts" namespace="/admin/servicealerts"></s:url>
+							<s:a href="%{url}">Manage Service Alerts</s:a>
+							</li>
+						</s:if>
+    					<s:if test="getConfig('validateTransitDataBundle')">						
+							<li>
+							<s:url var="url" action="validate-bundle" namespace="/admin/bundles"/>
+							<s:a href="%{url}">Validate Transit Data Bundle</s:a>
+							</li>
+						</s:if>
+								
+				</ul>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -25,9 +25,7 @@
         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
   <import resource="classpath:org/onebusaway/api/application-context-webapp.xml" />
-  <!-- 
   <import resource="classpath:org/onebusaway/phone/application-context-webapp.xml" />
-   -->
   <import resource="classpath:org/onebusaway/sms/application-context-webapp.xml" />
   <import resource="classpath:org/onebusaway/webapp/application-context-webapp.xml" />
   <import resource="classpath:org/onebusaway/transit_data_federation/application-context-webapp.xml" />

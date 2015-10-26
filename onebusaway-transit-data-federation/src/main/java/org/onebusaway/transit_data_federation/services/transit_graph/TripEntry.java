@@ -48,7 +48,7 @@ public interface TripEntry {
   /**
    * For trips that are operated with a fixed schedule, but marketed to riders
    * as headway-based service (by applying a {@link Frequency#getExactTimes()}
-   * override value of 2 in their frequencies.txt GTFS), we attach the
+   * override value of 1 in their frequencies.txt GTFS), we attach the
    * {@link FrequencyEntry} associated with this trip.
    * 
    * @return

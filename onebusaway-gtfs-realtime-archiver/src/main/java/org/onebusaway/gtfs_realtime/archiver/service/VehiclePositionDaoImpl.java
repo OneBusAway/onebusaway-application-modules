@@ -32,7 +32,7 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
   private HibernateTemplate _template;
   
   @Autowired
-  @Qualifier("sessionFactory")
+  @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }

@@ -18,6 +18,7 @@ package org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -88,6 +89,10 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private URL _alertsUrl;
 
   private int _refreshInterval = 30;
+  
+  private Map<String,String> _headersMap;
+  
+  private Map _alertAgencyIdMap;
 
   private List<String> _agencyIds = new ArrayList<String>();
 
@@ -115,6 +120,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   
   private MonitoredResult _monitoredResult = new MonitoredResult();
   
+  private StopModificationStrategy _stopModificationStrategy = null;
 
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
@@ -148,6 +154,11 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _scheduledExecutorService = scheduledExecutorService;
   }
 
+  public void setStopModificationStrategy(StopModificationStrategy strategy) {
+    _stopModificationStrategy = strategy;
+  }
+
+  
   public void setTripUpdatesUrl(URL tripUpdatesUrl) {
     _tripUpdatesUrl = tripUpdatesUrl;
   }
@@ -162,6 +173,14 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
 
   public void setRefreshInterval(int refreshInterval) {
     _refreshInterval = refreshInterval;
+  }
+  
+  public void setHeadersMap(Map<String,String> headersMap) {
+	_headersMap = headersMap;
+  }
+  
+  public void setAlertAgencyIdMap(Map alertAgencyIdMap) {
+	_alertAgencyIdMap = alertAgencyIdMap;
   }
 
   public void setAgencyId(String agencyId) {
@@ -204,6 +223,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     _tripsLibrary = new GtfsRealtimeTripLibrary();
     _tripsLibrary.setBlockCalendarService(_blockCalendarService);
     _tripsLibrary.setEntitySource(_entitySource);
+    if (_stopModificationStrategy != null) {
+      _tripsLibrary.setStopModificationStrategy(_stopModificationStrategy);
+    }
 
     _alertLibrary = new GtfsRealtimeAlertLibrary();
     _alertLibrary.setEntitySource(_entitySource);
@@ -294,6 +316,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
     }
     // NOTE: this implies receiving stale updates is equivalent to not being updated at all
     result.setLastUpdate(newestUpdate);
+    _log.info("active vehicles=" + seenVehicles.size() + " for updates=" + updates.size());
   }
 
   private void handleAlerts(FeedMessage alerts) {
@@ -311,7 +334,7 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
         _serviceAlertService.removeServiceAlert(id);
       } else {
         ServiceAlert.Builder serviceAlertBuilder = _alertLibrary.getAlertAsServiceAlert(
-            id, alert);
+            id, alert, _alertAgencyIdMap);
         ServiceAlert serviceAlert = serviceAlertBuilder.build();
         ServiceAlert existingAlert = _alertsById.get(id);
         if (existingAlert == null || !existingAlert.equals(serviceAlert)) {
@@ -354,7 +377,9 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
    * @throws IOException
    */
   private FeedMessage readFeedFromUrl(URL url) throws IOException {
-    InputStream in = url.openStream();
+   URLConnection urlConnection = url.openConnection();
+   setHeadersToUrlConnection(urlConnection);
+   InputStream in = urlConnection.getInputStream();
     try {
       return FeedMessage.parseFrom(in, _registry);
     } finally {
@@ -365,7 +390,18 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
       }
     }
   }
-
+/**
+ * Set the headers to the urlConnection if any
+ * @param urlConnection
+ * @return, the urlConnection with the headers set
+ */
+  private void setHeadersToUrlConnection(URLConnection urlConnection) {
+   if (_headersMap != null) {
+	  for (Map.Entry<String, String> headerEntry : _headersMap.entrySet()) {
+	    urlConnection.setRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+	  }
+	}
+  }
   /****
    *
    ****/

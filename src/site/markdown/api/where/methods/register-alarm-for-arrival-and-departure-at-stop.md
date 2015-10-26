@@ -2,7 +2,7 @@
 
 # Method: register-alarm-for-arrival-and-departure-at-stop
 
-Register an alarm for a single arrival and departure at a stop, with a callback url to be requested when the alarm is fired.
+Register an alarm for a single arrival and departure at a stop, with a callback URL to be requested when the alarm is fired.
 
 ## Sample Request
 
@@ -27,12 +27,12 @@ http://api.pugetsound.onebusaway.org/api/where/register-alarm-for-arrival-and-de
 
 ## Request Parameters
 
-* id, tripId, serviceDate, vehicleId, stopSequence - see discussion in [arrival-and-departure-for-stop api call](arrival-and-departure-for-stop.html) for discussion of how to specify a particular arrival or departure
-* url - callback url that will be requested when the alarm is fired
+* id, tripId, serviceDate, vehicleId, stopSequence - see discussion in [arrival-and-departure-for-stop](arrival-and-departure-for-stop.html) API method for discussion of how to specify a particular arrival or departure
+* url - callback URL that will be requested when the alarm is fired
 * alarmTimeOffset - time, in seconds, that controls how long before the arrival/departure the alarm will be fired.  Default is zero.
 * onArrival - set to true to indicate the alarm should be fired relative to vehicle arrival, false for departure.  The default is false for departure.
 
-We provide an arrival-departure alarm callback mechanism that allows you to register an alarm for an arrival or departure event and received a callback in the form of a GET request to a url you specify.
+We provide an arrival-departure alarm callback mechanism that allows you to register an alarm for an arrival or departure event and received a callback in the form of a GET request to a URL you specify.
 
 In order to specify an alarm for something like "5 minutes before a bus departs, we provide the `alarmTimeOffset` which specifies when the alarm should be fired relative to the actual arrival or departure event.  A value of 60 indicates that the alarm should be fired 60 seconds before, while a value of -30 would be fired 30 seconds after.
 
@@ -40,6 +40,6 @@ In order to specify an alarm for something like "5 minutes before a bus departs,
 
 ## Response
 
-The response is the alarm id.  Note that if you include `#ALARM_ID#` anywhere in your callback url, we will automatically replace it with the id of the alarm being fired.  This can be useful when you register multiple alarms and need to be able to distinguish between them.
+The response is the alarm id.  Note that if you include `#ALARM_ID#` anywhere in your callback URL, we will automatically replace it with the id of the alarm being fired.  This can be useful when you register multiple alarms and need to be able to distinguish between them.
 
-Also see the [cancel-alarm](cancel-alarm.html) api method, which also accepts the alarm id as an argument.
+Also see the [cancel-alarm](cancel-alarm.html) API method, which also accepts the alarm id as an argument.

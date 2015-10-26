@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<!-- <s:set name="theme" value="'xhtml'" scope="page" /> -->
+		<div class="tabHeader">
+			<label class="headerLabel">Upload Files</label>
+		</div>
+		<div id="uploadFiles">
+			<div>
+				<input type="button" id="uploadSelectedAgenciesButton" value="Upload Selected Agencies"/>
+				<input type="button" id="addAnotherAgencyButton" value="Add Another Agency"/>
+				<input type="button" id="removeSelectedAgenciesButton" value="Remove Selected Agencies"/>
+			</div>
+			<br/>
+			<div>
+				<table id="agency_data">
+					<tr>
+						<th><input type="checkbox"/></th>
+						<th>Agency</th>
+						<th>Type</th>
+						<th>Protocol</th>
+						<th class="agencyDataSource">URL/File</th>
+					</tr>
+					<tr>
+						<td><div><input type="checkbox" /></div></td>
+						<td><input type="text" class="agencyId" id="agencyId"/></td>
+						<td>
+							<select class="agencyDataSourceType" id="agencyDataSourceType">
+								<option value="gtfs">gtfs</option>
+								<option value="aux">aux</option>
+							</select>
+						</td>
+						<td>
+							<select class="agencyProtocol" id="agencyProtocol">
+								<option value="http">http</option>
+								<option value="ftp">ftp</option>
+								<option value="file">file</option>
+							</select>
+						</td>
+						<td><input type="text" class="agencyDataSource" id="agencyDataSource"/></td>
+					</tr>
+				</table>
+			</div>
+			<div class="submitForm">
+				<fieldset>
+					<s:url var="url" action="index.action" namespace="/admin" />
+					<a href="${url}" class="link">Cancel</a> 
+					<input type="button" id="upload_continue" value="Continue" class="submit_disabled" disabled="disabled"/>
+				</fieldset>
+			</div>
+		</div>
+</html>

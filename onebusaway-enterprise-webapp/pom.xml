@@ -47,12 +47,6 @@
 			<artifactId>onebusaway-realtime-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
-		<!-- <dependency>
-			<groupId>org.onebusaway</groupId>
-			<artifactId>onebusaway-nyc-api-core</artifactId>
-			<version>2.10.0-st-SNAPSHOT</version>
-		</dependency> -->
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-util</artifactId>
@@ -183,10 +177,10 @@
 		<profile>
 			<id>local-front-end</id>
 			<properties>
-				<tds.path>http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
-				<vtms.path>http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
-				<config.path>http://sms.dev.obanyc.com:8080/onebusaway-nyc-transit-data-federation-webapp</config.path>
-				<archive.path>http://archive.dev.obanyc.com/onebusaway-nyc-report-archive</archive.path>
+				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
+				<config.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</config.path>
+				<archive.path>http://localhost:8080/onebusaway-report-archive</archive.path>
 				<tdm.host>tdm.dev.obanyc.com</tdm.host>
 				<webapp.api.url />
 				<log4j.appender>stdout</log4j.appender>

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.onebusaway</groupId>
 		<artifactId>onebusaway-application-modules</artifactId>
-		<version>1.1.14-wmata.5-SNAPSHOT</version>
+		<version>1.1.15-cs-SNAPSHOT</version>
 	</parent>
 	<artifactId>onebusaway-nextbus-api-webapp</artifactId>
 	<packaging>war</packaging>
@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-gtfs-realtime-api</artifactId>
-			<version>1.1.1</version>
+			<version>${gtfs-api-version}</version>
 		</dependency>
 
 

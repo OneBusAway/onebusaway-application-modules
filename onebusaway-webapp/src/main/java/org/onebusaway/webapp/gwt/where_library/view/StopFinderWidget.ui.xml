@@ -153,8 +153,8 @@
                                     <g:SubmitButton>Search</g:SubmitButton>
                                 </g:FlowPanel>
                             </g:FormPanel>
-                            <g:Label addStyleNames="{style.searchExample}">By address (ex. "Florida Av and Hillsborough Av") or route number (ex. "5" or
-                                "96").</g:Label>
+                            <g:Label addStyleNames="{style.searchExample}">By address (ex. "3rd and pike") or route number (ex. "44" or
+                                "71").</g:Label>
 
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="{style.linksPanel}" ui:field="_linksPanel">

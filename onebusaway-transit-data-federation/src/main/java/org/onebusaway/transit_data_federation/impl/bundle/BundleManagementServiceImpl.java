@@ -276,19 +276,19 @@ public class BundleManagementServiceImpl implements BundleManagementService {
 	
     if (_bundleConfigDao == null) {
       if(_currentBundleId == null){
-        _log.error("config error:  bundleConfigDao and currentBundleId is null");
+        _log.error("config error:  bundleConfigDao is null");
+        return null; 
       }
       else{
         _log.warn("config error:  bundleConfigDao is null, returning currentBundleId value instead.");
-        _log.debug("Legacy Bundle most likely not detected"); 
-      }
-      
-      return _currentBundleId;
+        _log.debug("Legacy Bundle most likely not detected");
+        return _currentBundleId;
+      } 
     }
 
     if (_bundleConfigDao.getBundleMetadata() == null) {
-       _log.error("data error:  getBundleMetadata is null");
-  	   return Integer.toString((_bundleRootPath.hashCode()));
+      _log.error("data error:  getBundleMetadata is null");
+      return null;
     }
     
     return _bundleConfigDao.getBundleMetadata().getId();

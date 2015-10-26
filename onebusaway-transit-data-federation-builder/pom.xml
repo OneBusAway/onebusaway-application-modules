@@ -3,7 +3,7 @@
   <parent>
     <artifactId>onebusaway-application-modules</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.14-wmata.5-SNAPSHOT</version>
+    <version>1.1.15-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-transit-data-federation-builder</artifactId>
 
@@ -14,53 +14,29 @@
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-transit-data-federation</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>onebusaway-gtfs</artifactId>
-					<groupId>org.onebusaway</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-gtfs-hibernate-spring</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>onebusaway-gtfs</artifactId>
-					<groupId>org.onebusaway</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
-  		<dependency>
-    		<groupId>org.onebusaway</groupId>
-    		<artifactId>onebusaway-gtfs</artifactId>
-    		<version>1.3.5-st</version>
-  		</dependency>
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-gtfs-transformer</artifactId>
-			<version>1.3.5-st</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>onebusaway-gtfs</artifactId>
-					<groupId>org.onebusaway</groupId>
-				</exclusion>
-			</exclusions>
+			<version>${gtfs-version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.onebusaway</groupId>
   			<artifactId>onebusaway-csv-entities</artifactId>
-  			<version>1.1.3</version>
   		</dependency>
   
 		<dependency>
 			<groupId>org.onebusaway</groupId>
 			<artifactId>onebusaway-gtfs-transformer-cli</artifactId>
-			<version>1.3.5-st</version>
+			<version>${gtfs-version}</version>
 		</dependency>
 
 		<dependency>

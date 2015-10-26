@@ -22,8 +22,10 @@ import java.util.concurrent.ArrayBlockingQueue;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.onebusaway.gtfs_realtime.archiver.model.AlertModel;
 import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,12 +41,14 @@ public class GtfsPersistorImpl implements GtfsPersistor {
   
   private ArrayBlockingQueue<TripUpdateModel> _tripUpdates = new ArrayBlockingQueue<TripUpdateModel>(100000);
   private ArrayBlockingQueue<VehiclePositionModel> _vehiclePositions = new ArrayBlockingQueue<VehiclePositionModel>(100000);
+  private ArrayBlockingQueue<AlertModel> _alerts = new ArrayBlockingQueue<AlertModel>(100000);
   
   
   private ThreadPoolTaskScheduler _taskScheduler;
 
   private TripUpdateDao _tripUpdateDao;
   private VehiclePositionDao _vehiclePositionDao;
+  private AlertDao _alertDao;
   
   @Autowired
   public void setTaskScheduler(ThreadPoolTaskScheduler scheduler) {
@@ -59,6 +63,11 @@ public class GtfsPersistorImpl implements GtfsPersistor {
   @Autowired
   public void setVehiclePositionDao(VehiclePositionDao dao) {
     _vehiclePositionDao = dao;
+  }
+
+  @Autowired
+  public void setAlertDao(AlertDao dao) {
+    _alertDao = dao;
   }
 
   /**
@@ -77,6 +86,8 @@ public class GtfsPersistorImpl implements GtfsPersistor {
     _taskScheduler.scheduleWithFixedDelay(tripUpdateThread, 10 * 1000); // every 10 seconds
     final VehiclePositionThread vehiclePositionThread = new VehiclePositionThread();
     _taskScheduler.scheduleWithFixedDelay(vehiclePositionThread, 10 * 1000); // every 10 seconds;
+    final AlertThread alertThread = new AlertThread();
+    _taskScheduler.scheduleWithFixedDelay(alertThread, 10 * 1000); // every 10 seconds;
     
   }
   
@@ -102,6 +113,14 @@ public class GtfsPersistorImpl implements GtfsPersistor {
     boolean accepted = _vehiclePositions.offer(vehiclePosition);
     if (!accepted) {
     _log.error("Local vehicle position buffer full!  Clearing!  Dropping " + vehiclePosition.getId() + " record");
+    }
+  }
+
+  @Override
+  public void persist(AlertModel alert) {
+    boolean accepted = _alerts.offer(alert);
+    if (!accepted) {
+    _log.error("Local alert buffer full!  Clearing!  Dropping " + alert.getId() + " record");
     }
   }
 
@@ -131,6 +150,21 @@ public class GtfsPersistorImpl implements GtfsPersistor {
         _vehiclePositionDao.saveOrUpdate(records.toArray(new VehiclePositionModel[0]));
       } catch (Exception e) {
         _log.error("error persisting vehiclePositions=", e);
+      }
+    }
+  }
+  
+  private class AlertThread implements Runnable {
+    
+    @Override
+    public void run() {
+      List<AlertModel> records = new ArrayList<AlertModel>();
+      _alerts.drainTo(records, _batchSize);
+      _log.info("drained " + records.size() + " alerts");
+      try {
+        _alertDao.saveOrUpdate(records.toArray(new AlertModel[0]));
+      } catch (Exception e) {
+        _log.error("error persisting alerts=", e);
       }
     }
   }

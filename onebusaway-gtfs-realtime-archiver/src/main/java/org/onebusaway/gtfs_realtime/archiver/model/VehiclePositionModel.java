@@ -23,6 +23,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 
 @Entity
@@ -34,6 +35,7 @@ import org.hibernate.annotations.Index;
     @Index(name = "vp_vehicle_id_idx", columnNames = {"vehicle_id"}),
     @Index(name = "vp_lat_idx", columnNames = {"lat"}),
     @Index(name = "vp_lon_idx", columnNames = {"lon"}),
+    @Index(name = "vp_stop_id_idx", columnNames = {"stop_id"}),
     @Index(name = "vp_timestamp_idx", columnNames = {"timestamp"})
     })
 @org.hibernate.annotations.Entity(mutable = false)
@@ -41,19 +43,20 @@ import org.hibernate.annotations.Index;
 public class VehiclePositionModel {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(generator = "increment")
+  @GenericGenerator(name = "increment", strategy = "increment")
   private long id;
   @Column(nullable = true, name="trip_id", length = 20)
   private String tripId;
-  @Column(nullable = true, name="route_id", length = 10)
+  @Column(nullable = true, name="route_id", length = 20)
   private String routeId;
-  @Column(nullable = true, name="tripStart")
+  @Column(nullable = true, name="trip_start")
   private Date tripStart;
-  @Column(nullable = true, name="vehicle_id", length = 10)
+  @Column(nullable = true, name="vehicle_id", length = 20)
   private String vehicleId;
-  @Column(nullable = true, name="vehicle_label", length = 15)
+  @Column(nullable = true, name="vehicle_label", length = 20)
   private String vehicleLabel;
-  @Column(nullable = true, name="vehicle_license_plate", length = 10)
+  @Column(nullable = true, name="vehicle_license_plate", length = 15)
   private String vehicleLicensePlate;
   @Column(nullable = true, name="lat")
   private Float lat;
@@ -63,6 +66,8 @@ public class VehiclePositionModel {
   private Float bearing;
   @Column(nullable = true, name="speed")
   private Float speed;
+  @Column(nullable = true, name="stop_id", length = 20)
+  private String stopId;
   @Column(nullable = true, name="timestamp")
   private Date timestamp;
   public long getId() {
@@ -131,7 +136,13 @@ public class VehiclePositionModel {
   public void setSpeed(Float speed) {
     this.speed = speed;
   }
-  public Date getTimestamp() {
+  public String getStopId() {
+    return stopId;
+  }
+  public void setStopId(String stopId) {
+    this.stopId = stopId;
+  }
+ public Date getTimestamp() {
     return timestamp;
   }
   public void setTimestamp(Date timestamp) {

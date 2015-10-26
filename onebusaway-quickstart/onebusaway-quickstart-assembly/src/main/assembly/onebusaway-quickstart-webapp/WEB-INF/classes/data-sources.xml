@@ -19,6 +19,26 @@
     <property name="admin" value="true" />
   </bean>
 
+  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
+    <property name="key" value="TEST"/>
+  </bean>
+
+  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
+    <property name="key" value="org.onebusaway.iphone"/>
+  </bean>
+
+  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
+    <property name="key" value="v1_BktoDJ2gJlu6nLM6LsT9H8IUbWc=cGF1bGN3YXR0c0BnbWFpbC5jb20="/>
+  </bean>
+
+  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
+    <property name="key" value="v1_C5+aiesgg8DxpmG1yS2F/pj2zHk=c3BoZW5yeUBnbWFpbC5jb20=="/>
+  </bean>
+
+  <bean class="org.onebusaway.users.impl.CreateApiKeyAction">
+    <property name="key" value="693c0a55-9ef0-4302-8bc3-f9b2db93e124"/>
+  </bean>
+
   <bean id="externalGeocoderImpl" class="org.onebusaway.geocoder.impl.DatabaseCachingGeocoderImpl">
     <property name="geocoderService">
       <bean class="org.onebusaway.geocoder.impl.YahooGeocoderImpl">

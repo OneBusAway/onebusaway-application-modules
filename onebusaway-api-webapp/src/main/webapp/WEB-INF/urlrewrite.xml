@@ -25,7 +25,7 @@
 <urlrewrite use-query-string="true" use-context="true">
 
     <rule>
-        <from>^(.*)/siri/([^.]*)\.(xml|json)(.*)$</from>
+		<from>^(.*)/siri/([^.]*)\.(xml|json)(.*)$</from>
         <to type="redirect" last="true">$1/siri/$2$4&amp;type=$3</to>
     </rule>
 	

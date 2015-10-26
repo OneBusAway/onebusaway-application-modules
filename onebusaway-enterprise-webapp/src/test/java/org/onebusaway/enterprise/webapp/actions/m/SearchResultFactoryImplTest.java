@@ -1,6 +1,6 @@
 package org.onebusaway.enterprise.webapp.actions.m;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -82,8 +82,11 @@ public class SearchResultFactoryImplTest {
     Set<String> alerts = result.getServiceAlerts();
     assertEquals(2, alerts.size());
     String[] array = alerts.toArray(new String[] {});
-    assertEquals(TEST_DESCRIPTION, array[0]);
-    assertEquals(TEST_DESCRIPTION2, array[1]);
+    // array position is no longer guaranteed
+    boolean found0 = ((TEST_DESCRIPTION).equals(array[0])) || ((TEST_DESCRIPTION).equals(array[1]));
+    boolean found1 = ((TEST_DESCRIPTION2).equals(array[0])) || ((TEST_DESCRIPTION2).equals(array[1]));
+    assertTrue(found0);
+    assertTrue(found1);
     assertEquals("name not expected", ROUTE_ID, result.getId());
   }
 
@@ -128,8 +131,10 @@ public class SearchResultFactoryImplTest {
     Set<String> alerts = result.getAllRoutesAvailable().get(0).getServiceAlerts();
     assertEquals(2, alerts.size());
     String[] array = alerts.toArray(new String[] {});
-    assertEquals(TEST_DESCRIPTION, array[0]);
-    assertEquals(TEST_DESCRIPTION2, array[1]);
+    boolean found0 = ((TEST_DESCRIPTION).equals(array[0])) || ((TEST_DESCRIPTION).equals(array[1]));
+    boolean found1 = ((TEST_DESCRIPTION2).equals(array[0])) || ((TEST_DESCRIPTION2).equals(array[1]));
+    assertTrue(found0);
+    assertTrue(found1);
     assertEquals("name not expected", TEST_STOP_ID, result.getId());
   }
 

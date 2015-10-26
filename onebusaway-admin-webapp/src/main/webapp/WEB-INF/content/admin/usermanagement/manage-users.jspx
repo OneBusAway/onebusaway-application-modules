@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011 Metropolitan Transportation Authority
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not
+    use this file except in compliance with the License. You may obtain a copy of
+    the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations under
+    the License.
+
+-->
+
+<html xmlns:jsp="http://java.sun.com/JSP/Page"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:s="/struts-tags">
+<jsp:directive.page contentType="text/html" />
+<head>
+<title>Create, Update or Delete users/roles</title>
+
+<s:url var="url" value="/css/jquery-ui.css"/>
+<link rel="stylesheet" href="${url}" type="text/css"/>
+
+<s:url var="url" value="/css/user-management.css"/>
+<link rel="stylesheet" href="${url}" type="text/css"/>
+
+<s:url var="url" value="/js/lib/jquery.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+</script>
+
+<s:url var="url" value="/js/lib/jquery.ui.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+</script>
+
+<s:url var="url" value="/js/oba/user-management.js" />
+<script type="text/javascript" src="${url}">
+<!-- //prevent jspx minimization -->
+</script>
+
+</head>
+<body>
+	<div id="content">
+		<div id="text">
+			<h2>User Management Utility</h2>
+			<div id="container">
+				 <div id="search" class="ui-helper-clearfix">  
+					<label>Search by user name</label>
+					<input type="text" id="searchUser" />
+				 </div>
+				 <div id="createUser">	
+					<s:url var="url" value="/css/img/add-contact-icon.png" />
+					<img src="${url}" alt="Not Found" />
+					<a href="register-user.action" id="addUser">Create User</a>
+				</div>
+				<div class="clear" />
+				<div id="userDetails">
+				 	<table id="detailsTable" cellspacing="0">
+					 	<tr class="headerRow">
+							<th>User Details</th>
+						 	<th>Actions</th>
+					 	</tr>
+					 	<tr>
+						 	<td>
+							 	<div>
+								 	<label class="userLabel">User name: </label>
+								 	<label id="userName"></label>
+							 	</div>
+							 	<div>
+								 	<label class="userLabel">User role: </label>
+								 	<label id="userRole"></label>
+							 	</div>
+							 	</td>
+							 	<td>
+							 	<div id="actions">
+								 	<s:url var="url" value="/css/img/edit-4.png" />
+									<img src="${url}" alt="Not Found" id="edit" title="Edit User"/>
+								 	<s:url var="url" value="/css/img/edit-delete-7.png" />
+									<img src="${url}" alt="Not Found" id="deactivate" title="Deactivate User"/>
+							 	</div>
+						 	</td>
+					 	</tr>
+				 	</table>
+				 	<input type="hidden" id="userId" />
+				 </div>
+				 <div id="editUser">
+				 	<label id="editTitle">Edit User</label>
+				 	<div id="editName">
+				 		<label class="userLabel">User name: </label>
+				 		<label id="editUserName"></label>
+				 	</div>
+				 	<div id="editPassword">
+				 		<label class="userLabel">New Password:</label>
+				 		<input type="text" id="newPassword" />
+				 	</div>
+				 	<div id="editRole">
+				 		<label class="userLabel">New Role:</label>
+				 		<select name="Role" id="newRole">
+				 			<option value="ROLE_ADMINISTRATOR">ADMINISTRATOR</option>
+				 			<option value="ROLE_USER">OPERATOR</option>
+				 			<option value="ROLE_ANONYMOUS">ANONYMOUS</option>
+				 		</select>
+				 	</div>
+				 	<button id="editSubmit">Submit</button>
+				</div>
+				<div id="userResult">
+						<label id="result"></label>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

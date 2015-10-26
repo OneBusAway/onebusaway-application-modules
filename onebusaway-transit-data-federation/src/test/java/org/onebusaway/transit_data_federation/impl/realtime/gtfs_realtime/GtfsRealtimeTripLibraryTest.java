@@ -25,13 +25,6 @@ import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
 import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
 import org.onebusaway.realtime.api.VehicleLocationRecord;
 import org.onebusaway.transit_data_federation.impl.transit_graph.BlockEntryImpl;
 import org.onebusaway.transit_data_federation.impl.transit_graph.StopEntryImpl;
@@ -48,6 +41,14 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeEvent;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtimeConstants;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class GtfsRealtimeTripLibraryTest {
 
@@ -130,7 +131,7 @@ public class GtfsRealtimeTripLibraryTest {
     Collections.sort(groups);
 
     CombinedTripUpdatesAndVehiclePosition group = groups.get(0);
-    assertSame(blockA, group.block.getBlockEntry());
+    assertSame(blockA, group.block.getBlockInstance().getBlock().getBlock());
     assertEquals(2, group.tripUpdates.size());
     TripUpdate tripUpdate = group.tripUpdates.get(0);
     assertEquals("tripA", tripUpdate.getTrip().getTripId());
@@ -138,7 +139,7 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals("tripB", tripUpdate.getTrip().getTripId());
 
     group = groups.get(1);
-    assertSame(blockB, group.block.getBlockEntry());
+    assertSame(blockB, group.block.getBlockInstance().getBlock().getBlock());
     assertEquals(2, group.tripUpdates.size());
     tripUpdate = group.tripUpdates.get(0);
     assertEquals("tripC", tripUpdate.getTrip().getTripId());
@@ -156,6 +157,35 @@ public class GtfsRealtimeTripLibraryTest {
     assertEquals(30, record.getScheduleDeviation(), 0.0);
     assertEquals(0L, record.getServiceDate());
     assertEquals(blockB.getId(), record.getVehicleId());
+  }
+
+  @Test
+  public void testCreateVehicleLocationRecordForUpdate_NoStopTimeUpdates() {
+    TripUpdate tripUpdate = TripUpdate.newBuilder()
+        .setTrip(TripDescriptor.newBuilder().setTripId("tripA"))
+        .setDelay(120)
+        .setTimestamp(123456789)
+        .build();
+
+    TripEntryImpl tripA = trip("tripA");
+    stopTime(0, stop("stopA", 0, 0), tripA, time(7, 30), 0.0);
+    BlockEntryImpl blockA = block("blockA");
+    BlockConfigurationEntry blockConfigA = blockConfiguration(blockA,
+        serviceIds("s1"), tripA);
+    BlockInstance blockInstanceA = new BlockInstance(blockConfigA, 0L);
+    Mockito.when(
+        _blockCalendarService.getActiveBlocks(Mockito.eq(blockA.getId()),
+            Mockito.anyLong(), Mockito.anyLong())).thenReturn(
+        Arrays.asList(blockInstanceA));
+
+    CombinedTripUpdatesAndVehiclePosition update = new CombinedTripUpdatesAndVehiclePosition();
+    update.block = new BlockDescriptor();
+    update.block.setBlockInstance(blockInstanceA);
+    update.tripUpdates = Arrays.asList(tripUpdate);
+
+    VehicleLocationRecord record = _library.createVehicleLocationRecordForUpdate(update);
+    assertEquals(123456789000L, record.getTimeOfRecord());
+    assertEquals(120, record.getScheduleDeviation(), 0.0);
   }
 
   private FeedMessage.Builder createFeed() {

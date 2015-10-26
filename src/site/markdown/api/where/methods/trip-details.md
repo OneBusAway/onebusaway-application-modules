@@ -31,7 +31,7 @@ http://api.pugetsound.onebusaway.org/api/where/trip-details/1_12540399.xml?key=T
 
 ## Request Parameters
 
-* id - the id of the trip, encoded directly in the url:
+* id - the id of the trip, encoded directly in the URL:
     * `http://api.pugetsound.onebusaway.org/api/where/trip-details/[ID GOES HERE].xml`
 * serviceDate - the service date for the trip as unix-time in ms (optional).  Used to disambiguate different versions of the same trip.  See [Glossary#ServiceDate the glossary entry for service date].
 * includeTrip - Can be true/false to determine whether full [`<trip/>`](../elements/trip.html) element is included in the `<references/>` section.  Defaults to true.

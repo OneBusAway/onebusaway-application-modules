@@ -42,9 +42,16 @@ import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.onebusaway.util.impl.analytics.GoogleAnalyticsServiceImpl;
 
+import uk.org.siri.siri.ErrorDescriptionStructure;
+import uk.org.siri.siri.MonitoredStopVisitStructure;
+import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
+import uk.org.siri.siri.OtherErrorStructure;
+import uk.org.siri.siri.ServiceDelivery;
+import uk.org.siri.siri.ServiceDeliveryErrorConditionStructure;
+import uk.org.siri.siri.Siri;
+import uk.org.siri.siri.StopMonitoringDeliveryStructure;
 import com.brsanthu.googleanalytics.EventHit;
 import com.brsanthu.googleanalytics.PageViewHit;
-
 import uk.org.siri.siri.ErrorDescriptionStructure;
 import uk.org.siri.siri.MonitoredStopVisitStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
@@ -100,7 +107,7 @@ public class StopMonitoringAction extends ApiActionSupport
   	long responseTimestamp = getTime();
 
     _realtimeService.setTime(responseTimestamp);
-    
+
     String directionId = _request.getParameter("DirectionRef");
     
     // We need to support the user providing no agency id which means 'all agencies'.
@@ -398,5 +405,5 @@ public class StopMonitoringAction extends ApiActionSupport
 	  
 	  _gaService.post(new EventHit(GA_EVENT_CATEGORY, GA_EVENT_ACTION, apiKey, 1));
   }
-
+  
 }

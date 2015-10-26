@@ -3,11 +3,11 @@
   <parent>
     <artifactId>onebusaway</artifactId>
     <groupId>org.onebusaway</groupId>
-    <version>1.1.7</version>
+    <version>1.2.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>onebusaway-application-modules</artifactId>
-  <version>1.1.14-wmata.5-SNAPSHOT</version>
+  <version>1.1.15-cs-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>onebusaway-application-modules</name>
@@ -19,12 +19,14 @@
     <struts-version>2.3.16.2</struts-version>
     <gwt-version>2.4.0</gwt-version>
     <spring-version>3.0.5.RELEASE</spring-version>
-    <csv-entities-version>1.1.3</csv-entities-version>
-    <gtfs-version>1.3.5-st</gtfs-version>
+    <csv-entities-version>1.1.5-st</csv-entities-version>
+    <gtfs-version>1.3.5-SNAPSHOT</gtfs-version>
+    <gtfs-api-version>1.2.1-SNAPSHOT</gtfs-api-version>
     <onebusaway-siri-version>1.0.6</onebusaway-siri-version>
     <opentripplanner-version>0.4.1</opentripplanner-version>
     <wiki_integration_version>1.0.0</wiki_integration_version>
     <slf4j.version>1.7.5</slf4j.version>
+    <guava-version>16.0.1</guava-version>
     <!--  These properties are primarily used in configuring joint integration tests -->
     <org_onebusaway_test_port>9900</org_onebusaway_test_port>
     <org_onebusaway_test_ajp_port>9901</org_onebusaway_test_ajp_port>
@@ -82,6 +84,8 @@
   </distributionManagement>
 
   <modules>
+    <module>onebusaway-admin-webapp</module>
+    <module>onebusaway-agency-metadata</module>
     <module>onebusaway-api-core</module>
     <module>onebusaway-api-webapp</module>
     <module>onebusaway-combined-webapp</module>
@@ -338,6 +342,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava-version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.8.1</version>
@@ -454,6 +464,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
+	<version>3.3</version>
         <configuration>
           <reportPlugins>
             <plugin>

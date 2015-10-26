@@ -37,7 +37,7 @@ public interface RealtimeService {
   
   
   public VehicleActivityStructure getVehicleActivityForVehicle(String vehicleId, 
-      int maximumOnwardCalls, long currentTime, String tripId);
+      int maximumOnwardCalls, long currentTime);
   
   public List<VehicleActivityStructure> getVehicleActivityForRoute(String routeId, 
 	      String directionId, int maximumOnwardCalls, long currentTime);

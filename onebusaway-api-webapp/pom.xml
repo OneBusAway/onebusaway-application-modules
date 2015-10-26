@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.14-wmata.5-SNAPSHOT</version>
+    <version>1.1.15-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-api-webapp</artifactId>
   <packaging>war</packaging>
@@ -14,12 +14,12 @@
 
     <dependency>
       <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-api-core</artifactId>
+      <artifactId>onebusaway-agency-metadata</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.onebusaway</groupId>
-      <artifactId>onebusaway-transit-data</artifactId>
+      <artifactId>onebusaway-api-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -32,7 +32,7 @@
       <artifactId>onebusaway-presentation</artifactId>
       <version>${project.version}</version>
     </dependency>
-    
+
     <!-- This is the original SIRI API implementation that we hope to eventually move away from -->
     <dependency>
       <groupId>org.onebusaway</groupId>
@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
-      <version>1.1.1</version>
+      <version>${gtfs-api-version}</version>
     </dependency>
 
 
@@ -97,16 +97,18 @@
       <artifactId>slf4j-log4j12</artifactId>
     </dependency>
 
-<!--     <dependency> -->
-<!--       <groupId>org.slf4j</groupId> -->
-<!--       <artifactId>slf4j-log4j12</artifactId> -->
-<!--       <scope>test</scope> -->
-<!--     </dependency> -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+	<dependency>
+		<groupId>org.tuckey</groupId>
+		<artifactId>urlrewritefilter</artifactId>
+		<version>3.2.0</version>
+		<type>jar</type>
+		<scope>compile</scope>
+	</dependency>
     
     <!--  support mysql out of the box -->
 	<dependency>
@@ -119,7 +121,7 @@
       <artifactId>mockito-core</artifactId>
       <scope>test</scope>
     </dependency>
-	<dependency>
+   	<dependency>
 		<groupId>org.tuckey</groupId>
 		<artifactId>urlrewritefilter</artifactId>
 		<version>3.2.0</version>

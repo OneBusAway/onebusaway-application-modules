@@ -26,7 +26,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
 import org.onebusaway.api.actions.api.ApiActionSupport;
@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.brsanthu.googleanalytics.EventHit;
-import com.brsanthu.googleanalytics.PageViewHit;
 
 import uk.org.siri.siri.ErrorDescriptionStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
@@ -105,16 +104,13 @@ public class VehicleMonitoringAction extends ApiActionSupport
   //@Override
   public String index() {
 	  
-	processGoogleAnalytics();
+	processGoogleAnalyticsApiKeys();
 
     long currentTimestamp = getTime();
     
     _realtimeService.setTime(currentTimestamp);
     
     String directionId = _request.getParameter("DirectionRef");
-    
-    String tripId = _request.getParameter("TripId");
-    
     
     // We need to support the user providing no agency id which means 'all agencies'.
     // So, this array will hold a single agency if the user provides it or all
@@ -190,7 +186,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
       
       for (AgencyAndId vehicleId : vehicleIds) {
         VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
-            vehicleId.toString(), maximumOnwardCalls, currentTimestamp, tripId);
+            vehicleId.toString(), maximumOnwardCalls, currentTimestamp);
 
         if (activity != null) {
           activities.add(activity);
@@ -251,7 +247,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
           for (VehicleStatusBean v : vehicles.getList()) {
             VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
-                v.getVehicleId(), maximumOnwardCalls, currentTimestamp, tripId);
+                v.getVehicleId(), maximumOnwardCalls, currentTimestamp);
 
             if (activity != null) {
               activities.add(activity);
@@ -366,15 +362,6 @@ public class VehicleMonitoringAction extends ApiActionSupport
   
   public HttpServletResponse getServletResponse(){
     return _servletResponse;
-  }
-  
-  private void processGoogleAnalytics(){
-	  processGoogleAnalyticsPageView();
-	  processGoogleAnalyticsApiKeys();  
-  }
-  
-  private void processGoogleAnalyticsPageView(){
-	  _gaService.post(new PageViewHit());
   }
   
   private void processGoogleAnalyticsApiKeys(){

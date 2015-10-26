@@ -1,3 +1,18 @@
+/**
+ * Copyright (C) 2015 Cambridge Systematics, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.util.impl.configuration;
 
 import java.io.File;
@@ -27,7 +42,7 @@ public class ConfigurationServiceClientFileImpl implements
 	
 	private boolean isLocal = true;
 	
-	private String configFile = "/var/lib/obanyc/config.json";
+	private String configFile = "/var/lib/oba/config.json";
 	
 	public ConfigurationServiceClientFileImpl() {}
 	
@@ -114,7 +129,7 @@ public class ConfigurationServiceClientFileImpl implements
 		            });
 		        _config = o;
 		      } catch (Exception e) {
-		        _log.info("Failed to get an environment out of /var/lib/obanyc/config.json, continuing without it.");
+		        _log.info("Failed to get an environment out of /var/lib/oba/config.json, continuing without it.");
 		        
 		      }
 		      return _config;

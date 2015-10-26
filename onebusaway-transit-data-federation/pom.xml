@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.14-wmata.5-SNAPSHOT</version>
+    <version>1.1.15-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-transit-data-federation</artifactId>
   <packaging>jar</packaging>
@@ -97,7 +97,7 @@
     <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
-      <version>1.1.0</version>
+      <version>${gtfs-api-version}</version>
     </dependency>    
 
     <!-- Library for accessing MyBus Data Stream -->
@@ -111,6 +111,11 @@
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
       <version>2.4.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <dependency>
@@ -136,11 +141,6 @@
    		<type>jar</type>
    		<scope>compile</scope>
    </dependency>
-   <dependency>
- 	    <groupId>com.google.protobuf</groupId>
- 	    <artifactId>protobuf-java</artifactId>
- 	    <version>2.4.0a</version>
-  	</dependency>
 	 <dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>

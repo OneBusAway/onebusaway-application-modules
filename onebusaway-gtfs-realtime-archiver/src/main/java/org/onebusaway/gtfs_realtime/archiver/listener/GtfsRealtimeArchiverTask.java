@@ -18,6 +18,7 @@ package org.onebusaway.gtfs_realtime.archiver.listener;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -26,13 +27,15 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.onebusaway.gtfs_realtime.archiver.model.EntityUpdate;
-import org.onebusaway.gtfs_realtime.archiver.model.TripUpdateModel;
 import org.onebusaway.gtfs_realtime.archiver.service.FeedService;
-import org.onebusaway.gtfs_realtime.archiver.service.GtfsPersistor;
+import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import com.google.protobuf.ExtensionRegistry;
 import com.google.transit.realtime.GtfsRealtimeConstants;
@@ -57,6 +60,8 @@ public class GtfsRealtimeArchiverTask {
     _registry.add(GtfsRealtimeOneBusAway.obaTripUpdate);
   }
   
+  private TransitGraphDao _transitGraphDao;
+
   private ScheduledExecutorService _scheduledExecutorService;
 
   private ScheduledFuture<?> _refreshTask;
@@ -71,7 +76,17 @@ public class GtfsRealtimeArchiverTask {
 
   private int _refreshInterval = 30;
   
+  private List<String> _agencyIds = new ArrayList<String>();
   
+  private GtfsRealtimeEntitySource _entitySource;
+  
+  private boolean initialized = false;
+  
+@Autowired
+  public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
+    _transitGraphDao = transitGraphDao;
+  }
+
   @Autowired
   public void setScheduledExecutorService(
       ScheduledExecutorService scheduledExecutorService) {
@@ -101,9 +116,61 @@ public class GtfsRealtimeArchiverTask {
     _refreshInterval = refreshInterval;
   }
 
+  public void setAgencyId(String agencyId) {
+    _agencyIds.add(agencyId);
+  }
+
+  public void setAgencyIds(List<String> agencyIds) {
+    _agencyIds.addAll(agencyIds);
+  }
+
+  public List<String> getAgencyIds() {
+    return _agencyIds;
+  }
+  
+
+  public void setInitialized(boolean isInitialized) {
+    this.initialized = isInitialized;
+  }
+  
+  public boolean getInitialized() {
+    return this.initialized;
+  }
+
+  
   @PostConstruct
   public void start() {
-    _log.info("starting");
+    /*  TODO - get this initialized properly
+    while (!initialized) {
+      _log.info("Still waiting for context initialization");
+      try {
+        TimeUnit.SECONDS.sleep(10);
+      } catch (InterruptedException ex) {
+        // don't handle exception
+      }
+    }
+    */
+    if (_agencyIds.isEmpty()) {
+      _log.info("no agency ids specified for GtfsRealtimeSource");
+      
+      for (AgencyEntry agency : _transitGraphDao.getAllAgencies()) {
+        _agencyIds.add(agency.getId());
+      }
+      if (_agencyIds.size() > 3) {
+        _log.warn("The default agency id set is quite large (n="
+            + _agencyIds.size()
+            + ").  You might consider specifying the applicable agencies for your GtfsRealtimeSource.");
+      }
+    }
+    _log.info("Number of agencies: " + _agencyIds.size());
+    for (String agency : _agencyIds) {
+      _log.info("Agency id: " + agency);
+    }
+    
+    _entitySource = new GtfsRealtimeEntitySource();
+    _entitySource.setAgencyIds(_agencyIds);
+    _entitySource.setTransitGraphDao(_transitGraphDao);
+
     if (_tripUpdatesUrl == null) {
       _log.warn("no tripUpdatesUrl configured.  This is most likely a configuration issue");
     }
@@ -111,14 +178,13 @@ public class GtfsRealtimeArchiverTask {
       _log.warn("no vehiclePositionsUrl configured.  This is most likely a configuration issue");
     }
     if (_alertsUrl == null) {
-      _log.warn("no alertsUrl configured.");
+      _log.warn("no alertsUrl configured.  This is most likely a configuration issue");
     }
     if (_refreshInterval > 0) {
       _log.info("scheduling executor for refresh=" + _refreshInterval);
       _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
           new UpdateTask(), 0, _refreshInterval, TimeUnit.SECONDS);
     }
-
   }
   
   @PreDestroy
@@ -132,11 +198,12 @@ public class GtfsRealtimeArchiverTask {
   
   public void update() throws IOException {
     FeedMessage tripUpdates = readOrReturnDefault(_tripUpdatesUrl);
-    FeedMessage vehiclePositions = readOrReturnDefault(_vehiclePositionsUrl); // todo
-    FeedMessage alerts = readOrReturnDefault(_alertsUrl); // todo
+    FeedMessage vehiclePositions = readOrReturnDefault(_vehiclePositionsUrl);
+    FeedMessage alerts = readOrReturnDefault(_alertsUrl);
     
-    _feedService.readTripUpdates(tripUpdates);
-    _feedService.readVehiclePositions(vehiclePositions);
+    _feedService.readTripUpdates(tripUpdates, _entitySource);
+    _feedService.readVehiclePositions(vehiclePositions, _entitySource);
+    _feedService.readAlerts(alerts, _entitySource);
   }
   
   private FeedMessage readOrReturnDefault(URL url) throws IOException {

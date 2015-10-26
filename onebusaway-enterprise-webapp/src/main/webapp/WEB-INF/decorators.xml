@@ -24,6 +24,7 @@
 		<pattern>/js/*</pattern>
 		<pattern>/api/*</pattern>
 		<pattern>/sign/*</pattern>
+		<pattern>/debug*</pattern>
 	</excludes>
 
 	<decorator name="main" page="main.jspx">

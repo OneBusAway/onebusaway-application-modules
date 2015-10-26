@@ -49,8 +49,22 @@ public class GtfsReadingSupport {
    */
   public static void readGtfsIntoStore(ApplicationContext context,
       GenericMutableDao store) throws IOException {
+    readGtfsIntoStore(context, store, false);
+  }
+
+  /**
+   * Supplies a default entity schema factory to
+   * {@link #readGtfsIntoStore(ApplicationContext, GenericMutableDao, DefaultEntitySchemaFactory)}
+   * 
+   * @param context
+   * @param store
+   * @param disableStopConsolidation
+   * @throws IOException
+   */
+  public static void readGtfsIntoStore(ApplicationContext context,
+      GenericMutableDao store, boolean disableStopConsolidation) throws IOException {
     readGtfsIntoStore(context, store,
-        GtfsEntitySchemaFactory.createEntitySchemaFactory());
+        GtfsEntitySchemaFactory.createEntitySchemaFactory(), disableStopConsolidation);
   }
 
   /**
@@ -67,12 +81,31 @@ public class GtfsReadingSupport {
    */
   public static void readGtfsIntoStore(ApplicationContext context,
       GenericMutableDao store, DefaultEntitySchemaFactory factory)
+      throws IOException {  
+    readGtfsIntoStore(context, store, factory, false);
+  }
+
+  /**
+   * Read gtfs, as defined by {@link GtfsBundles} entries in the application
+   * context, into the specified data store. Gtfs will be read in quasi-paralle
+   * mode using {@link GtfsMultiReaderImpl}. Any
+   * {@link EntityReplacementStrategy} strategies defined in the application
+   * context will be applied as well.
+   * 
+   * @param context
+   * @param store
+   * @param factory
+   * @param disableStopConsolidation
+   * @throws IOException
+   */
+  public static void readGtfsIntoStore(ApplicationContext context,
+      GenericMutableDao store, DefaultEntitySchemaFactory factory, boolean disableStopConsolidation)
       throws IOException {
 
     GtfsMultiReaderImpl multiReader = new GtfsMultiReaderImpl();
     multiReader.setStore(store);
 
-    if (context.containsBean("entityReplacementStrategy")) {
+    if (!disableStopConsolidation && context.containsBean("entityReplacementStrategy")) {
       EntityReplacementStrategy strategy = (EntityReplacementStrategy) context.getBean("entityReplacementStrategy");
       multiReader.setEntityReplacementStrategy(strategy);
     }

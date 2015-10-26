@@ -1,0 +1,119 @@
+.tabHeader {
+	padding-top: 20px;
+	height: 30px;
+	background-color:#C0C0C0; 
+}
+
+.tabHeader .headerLabel {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+	font-size: 18px;
+	font: Times New Roman, Times, serif;
+}
+
+.adminLabel {
+	padding-bottom: 10px;
+	font-weight: bold;
+	font-size: 12px;
+}
+.directoryLabel {
+	margin-right: 50px;
+}
+
+#subheader {
+	padding-top: 20px;
+	margin-bottom: 10px;
+}
+
+#buttonbar {
+	width: 100%;
+	padding-left: 20px;
+}
+
+#buttonbar #spacer {
+	padding-left: 620px;
+	display: inline;
+	align: left;
+}
+#buttonbar #listButton {
+	padding-left: 20px;
+	display: inline;
+	align: right;
+}
+
+#deploypage_info {
+	display:none;
+}
+
+#content {
+	width: 940px;
+}
+
+#container {
+	height: 100%;
+}
+
+#wrap {
+	width: 100%;
+	padding-right: 20px;
+	height: 100%;
+	display: block;
+	margin:0 auto;
+	float: left;
+	
+
+}
+
+#depot {
+	width: 49%;
+	display: block;
+	align: left;
+	float: left;
+}
+
+#dsc {
+	width: 49%;
+	display: block;
+	align: left;
+	float: right;
+}
+
+#main {
+
+}
+
+.configHeader {
+	font-weight: bold;
+	font: Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	padding-top: 20px;
+	
+}
+
+#deployConfig #requestLabels {
+	padding-top : 20px;
+	padding-bottom: 10px;
+	display: none;
+}
+
+#deployConfig #deployContentsHolder {
+	border: solid 1px transparent;
+	width: 900px;
+	height: 50px;
+	overflow: none;
+}
+
+#deployContentsHolder #deployBox #deploying {
+	display: none;
+}
+
+#deployResultsHolder #deployResults #deployConfig_progress {
+	vertical-align: middle;
+	margin-right: 10px;
+}
+
+#deployResultsHolder #deployResults #deployConfig_resultList {
+	display: none;
+}
+

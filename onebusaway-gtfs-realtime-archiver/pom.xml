@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.onebusaway</groupId>
     <artifactId>onebusaway-application-modules</artifactId>
-    <version>1.1.14-wmata.5-SNAPSHOT</version>
+    <version>1.1.15-cs-SNAPSHOT</version>
   </parent>
   <artifactId>onebusaway-gtfs-realtime-archiver</artifactId>
   <packaging>war</packaging>
@@ -12,37 +12,19 @@
   <dependencies>
     <dependency>
       <groupId>org.onebusaway</groupId>
+      <artifactId>onebusaway-transit-data-federation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-container</artifactId>
       <version>${project.version}</version>
     </dependency>
      <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
-      <version>1.1.0</version>
+      <version>${gtfs-api-version}</version>
     </dependency>
-    <!--  spring issues begin -->
-<!--     		<dependency> -->
-<!-- 			<groupId>org.springframework</groupId> -->
-<!-- 			<artifactId>spring-webmvc</artifactId> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey</groupId> -->
-<!-- 			<artifactId>jersey-server</artifactId> -->
-<!-- 			<version>1.9.1</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey.contribs</groupId> -->
-<!-- 			<artifactId>jersey-spring</artifactId> -->
-<!-- 			<version>1.9.1</version> -->
-<!-- 		</dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.sun.jersey</groupId> -->
-<!-- 			<artifactId>jersey-bundle</artifactId> -->
-<!-- 			<version>1.10</version> -->
-<!-- 		</dependency> -->
-    
-    <!--  spring issues end -->
-    
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
@@ -73,6 +55,12 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>1.9.0-rc1</version>
       <scope>test</scope>
     </dependency>
     <!--  support mysql out of the box -->

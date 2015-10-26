@@ -69,7 +69,6 @@ public class IndexAction extends ActionSupport {
 	} catch (IOException ioe) {}
 	
 	HttpServletRequest request = ServletActionContext.getRequest();    
-	//_properties.putAll(_configService.getConfiguration(false, request.getContextPath()));
 	_properties.putAll(_configService.getConfiguration());
 	
     if (namespace.equals("/") && (name.equals("index") || name.equals(""))) {
