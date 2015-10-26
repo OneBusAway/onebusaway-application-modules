@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2014 Kurt Raschke <kurt@kurtraschke.com>
  * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +46,7 @@ import com.google.transit.realtime.GtfsRealtime.TripUpdate.StopTimeUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehiclePosition;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway;
 import com.google.transit.realtime.GtfsRealtimeOneBusAway.OneBusAwayTripUpdate;
+import org.onebusaway.realtime.api.TimepointPredictionRecord;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -510,10 +512,13 @@ class GtfsRealtimeTripLibrary {
     int currentTime = (int) ((t - instance.getServiceDate()) / 1000);
     BestScheduleDeviation best = new BestScheduleDeviation();
 
+    List<TimepointPredictionRecord> timepointPredictions = new ArrayList<TimepointPredictionRecord>();
+
     for (BlockTripEntry blockTrip : blockTrips) {
       TripEntry trip = blockTrip.getTrip();
       AgencyAndId tripId = trip.getId();
       List<TripUpdate> updatesForTrip = tripUpdatesByTripId.get(tripId.getId());
+      
       if (updatesForTrip != null) {
         for (TripUpdate tripUpdate : updatesForTrip) {
 
@@ -556,18 +561,40 @@ class GtfsRealtimeTripLibrary {
                 instance.getServiceDate());
             if (blockStopTime == null)
               continue;
+
             StopTimeEntry stopTime = blockStopTime.getStopTime();
+
+            TimepointPredictionRecord tpr = new TimepointPredictionRecord();
+            tpr.setTimepointId(stopTime.getStop().getId());
+            tpr.setTripId(stopTime.getTrip().getId());
+            if (stopTimeUpdate.hasStopSequence()) {
+              tpr.setStopSequence(stopTimeUpdate.getStopSequence());
+            }
+
             int currentArrivalTime = computeArrivalTime(stopTime,
                 stopTimeUpdate, instance.getServiceDate());
+            int currentDepartureTime = computeDepartureTime(stopTime,
+                stopTimeUpdate, instance.getServiceDate());
+
             if (currentArrivalTime >= 0) {
               updateBestScheduleDeviation(currentTime,
                   stopTime.getArrivalTime(), currentArrivalTime, best);
-            }
-            int currentDepartureTime = computeDepartureTime(stopTime,
-                stopTimeUpdate, instance.getServiceDate());
+
+              long timepointPredictedTime = instance.getServiceDate() + (currentArrivalTime * 1000L);
+              tpr.setTimepointPredictedArrivalTime(timepointPredictedTime);
+            } 
+
             if (currentDepartureTime >= 0) {
               updateBestScheduleDeviation(currentTime,
                   stopTime.getDepartureTime(), currentDepartureTime, best);
+
+              long timepointPredictedTime = instance.getServiceDate() + (currentDepartureTime * 1000L);
+              tpr.setTimepointPredictedDepartureTime(timepointPredictedTime);
+            }
+
+            if (tpr.getTimepointPredictedArrivalTime() != -1 || 
+                tpr.getTimepointPredictedDepartureTime() != -1) {
+              timepointPredictions.add(tpr);
             }
           }
         }
@@ -582,6 +609,7 @@ class GtfsRealtimeTripLibrary {
     if (best.timestamp != 0) {
       record.setTimeOfRecord(best.timestamp);
     }
+    record.setTimepointPredictions(timepointPredictions);
   }
 
   private BlockStopTimeEntry getBlockStopTimeForStopTimeUpdate(MonitoredResult result,
@@ -590,8 +618,11 @@ class GtfsRealtimeTripLibrary {
 
     if (stopTimeUpdate.hasStopSequence()) {
       int stopSequence = stopTimeUpdate.getStopSequence();
-      if (0 <= stopSequence && stopSequence < stopTimes.size()) {
-        BlockStopTimeEntry blockStopTime = stopTimes.get(stopSequence);
+
+      Map<Integer, BlockStopTimeEntry> sequenceToStopTime = MappingLibrary.mapToValue(stopTimes, "stopTime.gtfsSequence");
+
+      if (sequenceToStopTime.containsKey(stopSequence)) {
+        BlockStopTimeEntry blockStopTime = sequenceToStopTime.get(stopSequence);
         if (!stopTimeUpdate.hasStopId()) {
           if (result != null) {
             result.addMatchedStopId(blockStopTime.getStopTime().getStop().getId().getId());

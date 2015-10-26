@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2013 Google, Inc.
+ * Copyright (C) 2015 University of South Florida
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +28,11 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
 import com.google.transit.realtime.GtfsRealtime.TripUpdate;
 import com.google.transit.realtime.GtfsRealtime.VehicleDescriptor;
+import org.onebusaway.transit_data.model.trips.TimepointPredictionBean;
 
 public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   @Override
   protected void fillFeedMessage(FeedMessage.Builder feed, String agencyId,
@@ -58,16 +60,36 @@ public class TripUpdatesForAgencyAction extends GtfsRealtimeActionSupport {
       VehicleDescriptor.Builder vehicleDesc = tripUpdate.getVehicleBuilder();
       vehicleDesc.setId(normalizeId(vehicle.getVehicleId()));
 
-      StopBean nextStop = tripStatus.getNextStop();
-      if (nextStop != null) {
-        TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
-        stopTimeUpdate.setStopId(normalizeId(nextStop.getId()));
-        TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
-        departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
-      }
+      if (tripStatus.getTimepointPredictions() != null && tripStatus.getTimepointPredictions().size() > 0) {
+        for (TimepointPredictionBean timepointPrediction: tripStatus.getTimepointPredictions()) {
+          TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
+          stopTimeUpdate.setStopId(normalizeId(timepointPrediction.getTimepointId()));
+          TripUpdate.StopTimeEvent.Builder arrival = stopTimeUpdate.getArrivalBuilder();
+          if (timepointPrediction.getTimepointPredictedArrivalTime() != -1) {
+            arrival.setTime(timepointPrediction.getTimepointPredictedArrivalTime());
+          }
+  
+          TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
+          if (timepointPrediction.getTimepointPredictedDepartureTime() != -1) {
+            departure.setTime(timepointPrediction.getTimepointPredictedDepartureTime());
+          }
 
-      tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+	      
+        }
+        
+        tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
+      } else {
+        StopBean nextStop = tripStatus.getNextStop();
+        if (nextStop != null) {
+          TripUpdate.StopTimeUpdate.Builder stopTimeUpdate = tripUpdate.addStopTimeUpdateBuilder();
+          stopTimeUpdate.setStopId(normalizeId(nextStop.getId()));
+          TripUpdate.StopTimeEvent.Builder departure = stopTimeUpdate.getDepartureBuilder();
+          departure.setTime(timestamp / 1000 + tripStatus.getNextStopTimeOffset());
+        }
+        
+      }
       tripUpdate.setDelay((int) tripStatus.getScheduleDeviation());
+      tripUpdate.setTimestamp(vehicle.getLastUpdateTime() / 1000);
     }
   }
 }

@@ -29,6 +29,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.onebusaway.exceptions.NoSuchTripServiceException;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
@@ -778,6 +779,22 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
     adQuery.setTime(query.getTime());
 
     return adQuery;
+  }
+
+  protected void checkBounds(CoordinateBounds cb) {
+    if (cb == null) {
+      return;
+    }
+
+    Collection<CoordinateBounds> allAgencyBounds = _agencyService.getAgencyIdsAndCoverageAreas().values();
+
+    for (CoordinateBounds agencyBounds : allAgencyBounds) {
+      if (agencyBounds.intersects(cb)) {
+        return;
+      }
+    }
+
+    throw new OutOfServiceAreaServiceException();
   }
 
 

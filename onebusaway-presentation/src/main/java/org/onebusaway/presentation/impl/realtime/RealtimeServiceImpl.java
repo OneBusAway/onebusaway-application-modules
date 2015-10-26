@@ -251,7 +251,8 @@ public class RealtimeServiceImpl implements RealtimeService {
     TimepointPredictionRecord tpr = new TimepointPredictionRecord();
     tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(stopId));
     tpr.setTimepointScheduledTime(adBean.getScheduledArrivalTime());
-    tpr.setTimepointPredictedTime(adBean.getPredictedArrivalTime());
+    tpr.setTimepointPredictedArrivalTime(adBean.getPredictedArrivalTime());
+    tpr.setTimepointPredictedDepartureTime(adBean.getPredictedDepartureTime());
     tprs.add(tpr);
     return tprs;
   }

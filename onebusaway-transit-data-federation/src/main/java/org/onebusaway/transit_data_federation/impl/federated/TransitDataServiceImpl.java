@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2012 Google, Inc.
+ * Copyright (C) 2014 Kurt Raschke <kurt@kurtraschke.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.onebusaway.exceptions.ServiceException;
 import org.onebusaway.federations.annotations.FederatedByAgencyIdMethod;
 import org.onebusaway.federations.annotations.FederatedByEntityIdMethod;
@@ -84,12 +83,13 @@ import org.onebusaway.transit_data.model.trips.TripsForRouteQueryBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleManagementService;
 import org.onebusaway.transit_data_federation.services.bundle.BundleSearchService;
-import org.onebusaway.transit_data_federation.services.bundle.TransitDataServiceTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransitDataServiceImpl implements TransitDataService {
+public class TransitDataServiceImpl extends TransitDataServiceTemplateImpl implements TransitDataService {
   
   private static Logger _log = LoggerFactory.getLogger(TransitDataServiceImpl.class);
   
@@ -168,6 +168,7 @@ public class TransitDataServiceImpl implements TransitDataService {
   @Override
   public StopsBean getStops(SearchQueryBean query) throws ServiceException {
     blockUntilBundleIsReady();
+    checkBounds(query.getBounds());
     return _transitDataService.getStops(query);
   }
 
@@ -269,6 +270,7 @@ public class TransitDataServiceImpl implements TransitDataService {
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
     blockUntilBundleIsReady();
+    checkBounds(query.getBounds());
     return _transitDataService.getTripsForBounds(query);
   }
 
@@ -336,6 +338,7 @@ public class TransitDataServiceImpl implements TransitDataService {
   @Override
   public RoutesBean getRoutes(SearchQueryBean query) throws ServiceException {
     blockUntilBundleIsReady();
+    checkBounds(query.getBounds());
     return _transitDataService.getRoutes(query);
   }
 
@@ -613,5 +616,5 @@ public class TransitDataServiceImpl implements TransitDataService {
 		return result;
   }
 
-
+  
 }

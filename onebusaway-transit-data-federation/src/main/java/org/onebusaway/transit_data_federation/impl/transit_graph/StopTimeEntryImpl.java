@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2013 Kurt Raschke <kurt@kurtraschke.com>
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
  *
@@ -22,12 +23,13 @@ import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEnt
 
 public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
-  private static final long serialVersionUID = 5L;
+  private static final long serialVersionUID = 7L;
 
   private int _stopTimeId;
   private int _arrivalTime;
   private int _departureTime;
   private int _sequence;
+  private int _gtfsSequence;
   private int _dropOffType;
   private int _pickupType;
   private int _shapePointIndex = -1;
@@ -58,6 +60,10 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
 
   public void setSequence(int sequence) {
     _sequence = sequence;
+  }
+
+  public void setGtfsSequence(int gtfsSequence) {
+    _gtfsSequence = gtfsSequence;
   }
 
   public void setDropOffType(int dropOffType) {
@@ -115,6 +121,11 @@ public class StopTimeEntryImpl implements StopTimeEntry, Serializable {
   @Override
   public int getSequence() {
     return _sequence;
+  }
+
+  @Override
+  public int getGtfsSequence() {
+    return _gtfsSequence;
   }
 
   @Override

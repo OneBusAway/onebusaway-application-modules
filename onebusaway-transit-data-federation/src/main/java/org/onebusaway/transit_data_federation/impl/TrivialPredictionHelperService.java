@@ -56,7 +56,8 @@ public class TrivialPredictionHelperService implements PredictionHelperService {
 		TimepointPredictionRecord tpr = new TimepointPredictionRecord();
 		tpr.setTimepointId(AgencyAndIdLibrary.convertFromString(tripStatus.getNextStop().getId()));
 		tpr.setTimepointScheduledTime(tripStatus.getLastUpdateTime() + tripStatus.getNextStopTimeOffset() * 1000);
-		tpr.setTimepointPredictedTime((long) (tpr.getTimepointScheduledTime() + tripStatus.getScheduleDeviation()));
+		tpr.setTimepointPredictedArrivalTime((long) (tpr.getTimepointScheduledTime() + tripStatus.getScheduleDeviation()));
+		tpr.setTimepointPredictedDepartureTime((long) (tpr.getTimepointScheduledTime() + tripStatus.getScheduleDeviation()));
 		
 		
 		records.add(tpr);

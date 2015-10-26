@@ -1,4 +1,5 @@
 /**
+ * Copyright (C) 2013 Kurt Raschke
  * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,8 @@
 package org.onebusaway.transit_data_federation_webapp.controllers.gtfs_realtime;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.onebusaway.transit_data_federation.impl.realtime.gtfs_realtime.GtfsRealtimeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,20 +38,32 @@ public class GtfsRealtimeController {
   }
 
   @RequestMapping(value = "/gtfs-realtime/trip-updates.action")
-  public void tripUpdates(OutputStream out) throws IOException {
+  public void tripUpdates(ServletRequest request, HttpServletResponse response) throws IOException {
     FeedMessage tripUpdates = _gtfsRealtimeService.getTripUpdates();
-    tripUpdates.writeTo(out);
+    render(request, response, tripUpdates);
   }
 
   @RequestMapping(value = "/gtfs-realtime/vehicle-positions.action")
-  public void vehiclePositions(OutputStream out) throws IOException {
+  public void vehiclePositions(ServletRequest request, HttpServletResponse response) throws IOException {
     FeedMessage vehiclePositions = _gtfsRealtimeService.getVehiclePositions();
-    vehiclePositions.writeTo(out);
+    render(request, response, vehiclePositions);
   }
 
   @RequestMapping(value = "/gtfs-realtime/alerts.action")
-  public void alerts(OutputStream out) throws IOException {
+  public void alerts(ServletRequest request, HttpServletResponse response) throws IOException {
     FeedMessage alerts = _gtfsRealtimeService.getAlerts();
-    alerts.writeTo(out);
+    render(request, response, alerts);
   }
+
+  private void render(ServletRequest request, HttpServletResponse response,
+          FeedMessage message) throws IOException {
+    if (request.getParameter("debug") != null) {
+      response.setContentType("text/plain");
+      response.getWriter().write(message.toString());
+    } else {
+      response.setContentType("application/x-google-protobuf");
+      message.writeTo(response.getOutputStream());
+   }
+  }
+
 }
