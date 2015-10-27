@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.brsanthu.googleanalytics.EventHit;
+import com.brsanthu.googleanalytics.PageViewHit;
 
 import uk.org.siri.siri.ErrorDescriptionStructure;
 import uk.org.siri.siri.MonitoredVehicleJourneyStructure;
@@ -104,13 +105,16 @@ public class VehicleMonitoringAction extends ApiActionSupport
   //@Override
   public String index() {
 	  
-	processGoogleAnalyticsApiKeys();
+	processGoogleAnalytics();
 
     long currentTimestamp = getTime();
     
     _realtimeService.setTime(currentTimestamp);
     
     String directionId = _request.getParameter("DirectionRef");
+    
+    String tripId = _request.getParameter("TripId");
+    
     
     // We need to support the user providing no agency id which means 'all agencies'.
     // So, this array will hold a single agency if the user provides it or all
@@ -186,7 +190,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
       
       for (AgencyAndId vehicleId : vehicleIds) {
         VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
-            vehicleId.toString(), maximumOnwardCalls, currentTimestamp);
+            vehicleId.toString(), maximumOnwardCalls, currentTimestamp, tripId);
 
         if (activity != null) {
           activities.add(activity);
@@ -247,7 +251,7 @@ public class VehicleMonitoringAction extends ApiActionSupport
 
           for (VehicleStatusBean v : vehicles.getList()) {
             VehicleActivityStructure activity = _realtimeService.getVehicleActivityForVehicle(
-                v.getVehicleId(), maximumOnwardCalls, currentTimestamp);
+                v.getVehicleId(), maximumOnwardCalls, currentTimestamp, tripId);
 
             if (activity != null) {
               activities.add(activity);
@@ -362,6 +366,15 @@ public class VehicleMonitoringAction extends ApiActionSupport
   
   public HttpServletResponse getServletResponse(){
     return _servletResponse;
+  }
+  
+  private void processGoogleAnalytics(){
+	  processGoogleAnalyticsPageView();
+	  processGoogleAnalyticsApiKeys();  
+  }
+  
+  private void processGoogleAnalyticsPageView(){
+	  _gaService.post(new PageViewHit());
   }
   
   private void processGoogleAnalyticsApiKeys(){

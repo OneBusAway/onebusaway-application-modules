@@ -273,7 +273,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   //@Override
   public StopsBean getStops(SearchQueryBean query) throws ServiceException {
-    
+    checkBounds(query.getBounds());
     return _stopsBeanService.getStops(query);
   }
 
@@ -387,7 +387,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
   //@Override
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
-    
+    checkBounds(query.getBounds());
     return _tripDetailsBeanService.getTripsForBounds(query);
   }
 
@@ -461,7 +461,7 @@ public class TransitDataServiceTemplateImpl implements TransitDataServiceTemplat
 
   //@Override
   public RoutesBean getRoutes(SearchQueryBean query) throws ServiceException {
-    
+    checkBounds(query.getBounds());
     return _routesBeanService.getRoutesForQuery(query);
   }
 

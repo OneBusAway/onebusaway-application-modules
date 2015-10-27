@@ -89,7 +89,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransitDataServiceImpl extends TransitDataServiceTemplateImpl implements TransitDataService {
+public class TransitDataServiceImpl implements TransitDataService {
   
   private static Logger _log = LoggerFactory.getLogger(TransitDataServiceImpl.class);
   
@@ -168,7 +168,6 @@ public class TransitDataServiceImpl extends TransitDataServiceTemplateImpl imple
   @Override
   public StopsBean getStops(SearchQueryBean query) throws ServiceException {
     blockUntilBundleIsReady();
-    checkBounds(query.getBounds());
     return _transitDataService.getStops(query);
   }
 
@@ -270,7 +269,6 @@ public class TransitDataServiceImpl extends TransitDataServiceTemplateImpl imple
   public ListBean<TripDetailsBean> getTripsForBounds(
       TripsForBoundsQueryBean query) {
     blockUntilBundleIsReady();
-    checkBounds(query.getBounds());
     return _transitDataService.getTripsForBounds(query);
   }
 
@@ -338,7 +336,6 @@ public class TransitDataServiceImpl extends TransitDataServiceTemplateImpl imple
   @Override
   public RoutesBean getRoutes(SearchQueryBean query) throws ServiceException {
     blockUntilBundleIsReady();
-    checkBounds(query.getBounds());
     return _transitDataService.getRoutes(query);
   }
 

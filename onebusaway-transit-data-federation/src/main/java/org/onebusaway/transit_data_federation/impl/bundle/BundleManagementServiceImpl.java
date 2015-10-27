@@ -287,8 +287,8 @@ public class BundleManagementServiceImpl implements BundleManagementService {
     }
 
     if (_bundleConfigDao.getBundleMetadata() == null) {
-      _log.error("data error:  getBundleMetadata is null");
-      return null;
+       _log.error("data error:  getBundleMetadata is null");
+  	   return Integer.toString((_bundleRootPath.hashCode()));
     }
     
     return _bundleConfigDao.getBundleMetadata().getId();
