@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.ObjectExistsException;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -131,10 +132,18 @@ public class CacheableMethodManager {
         cache = createCache(pjp, name);
         if (cache == null) {
           if(!_cacheManager.cacheExists(name))
-        	  _cacheManager.addCache(name);
+            try {
+              _cacheManager.addCache(name);
+            } catch (ObjectExistsException oee) {
+              _log.error("Cache already exists: " + name);
+            }
           cache = _cacheManager.getCache(name);
         } else {
-          _cacheManager.addCache(cache);
+          try {
+            _cacheManager.addCache(cache);
+          } catch (ObjectExistsException oee) {
+            _log.error("Cache already exists: " + name);
+          }
         }
       }
       synchronized (_entries) {
