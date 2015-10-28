@@ -467,7 +467,7 @@ public final class SiriSupport {
 										stopTime.getDistanceAlongBlock() - blockTrip.getDistanceAlongBlock(), 
 										stopTime.getDistanceAlongBlock() - distanceOfVehicleAlongBlock, 
 										visitNumber, blockTripStopsAfterTheVehicle - 1,
-										stopLevelPredictions.get(monitoredVehicleJourney.getVehicleRef().getValue()),
+										stopLevelPredictions.get(monitoredCallStopBean.getId()),
 										hasRealtimeData,
 										responseTimestamp, tripStatus.getServiceDate() + (stopTime.getStopTime().getArrivalTime() * 1000)));
 					}
