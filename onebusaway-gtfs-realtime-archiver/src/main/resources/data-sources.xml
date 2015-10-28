@@ -52,7 +52,7 @@
                 value="true" />
     </bean>
 
-<!--  
+
   <bean id="kcm_gtfsRealtimeTask" class="org.onebusaway.gtfs_realtime.archiver.listener.GtfsRealtimeArchiverTask">
     <property name="scheduledExecutorService" ref="scheduledExecutorService" />
     <property name="feedService" ref="feedService" />
@@ -67,7 +67,7 @@
         <value>KMD</value>
       </list>
     </property>
-  </bean> -->
+  </bean>
 
 
   <bean id="gtfsRealtimeArchiveSessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
@@ -97,7 +97,7 @@
   </bean>
 
   <bean id="httpServiceClient" class="org.onebusaway.transit_data_federation.util.HttpServiceClientImpl" >
-    <constructor-arg type="java.lang.String" value="admin0000.staging.obast.org"/>
+    <constructor-arg type="java.lang.String" value="admin000.staging.obast.org"/>
     <constructor-arg type="java.lang.Integer" value="9998" />
     <constructor-arg type="java.lang.String" value="/api/" />
   </bean>

@@ -16,9 +16,12 @@
 package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.transaction.annotation.Transactional;
+
+import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 
 public class VehiclePositionDaoImpl implements VehiclePositionDao {
 
@@ -48,8 +53,28 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
   
   @Override
   public List<String> getAllVehicleIds() {
-	  // TODO: fix
-	  return  _template.find("select vehicle_id from vehicle_position group by vehicle_id;");
+	  //return  _template.find("select vehicleId from VehiclePositionModel group by vehicleId");
+	  
+	  // is this really preferred?
+	  
+	  DetachedCriteria criterion = DetachedCriteria.forClass(VehiclePositionModel.class);
+	  criterion.setProjection(Projections.property("vehicleId"));
+	  criterion.setProjection(Projections.groupProperty("vehicleId"));
+	  
+	  return _template.findByCriteria(criterion);
+	  
   }
 
+  public List<VehiclePositionModel> getVehiclePositions(String vehicleId, Date startDate, Date endDate) {
+	 String query = "from VehiclePositionModel where vehicleId=:vehicleId and timestamp >= :startDate and timestamp < :endDate";
+	 
+	 String[] names = {"vehicleId", "startDate", "endDate"};
+	 
+	 Object[] values = {vehicleId, startDate, endDate};
+	 
+	 List<VehiclePositionModel> results = _template.findByNamedParam(query, names, values);
+			 
+	 return results;
+  }
 }
+ 
