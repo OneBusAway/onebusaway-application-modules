@@ -32,7 +32,12 @@ import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
 import org.onebusaway.transit_data_federation.impl.RefreshableResources;
 import org.onebusaway.transit_data_federation.services.AgencyAndIdLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,13 +47,18 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class BundleSearchServiceImpl implements BundleSearchService {
+public class BundleSearchServiceImpl implements BundleSearchService, ApplicationListener {
 
 	@Autowired
 	private TransitDataService _transitDataService = null;
 
 	private Map<String,List<String>> suggestions = Collections.synchronizedMap(new HashMap<String, List<String>>());
 
+	private boolean _initialized = false;
+	
+	private static Logger _log = LoggerFactory
+      .getLogger(BundleSearchServiceImpl.class);
+	
 	@PostConstruct
 	@Refreshable(dependsOn = { 
 		      RefreshableResources.ROUTE_COLLECTIONS_DATA, 
@@ -57,6 +67,14 @@ public class BundleSearchServiceImpl implements BundleSearchService {
 		Runnable initThread = new Runnable() {
 			@Override
 			public void run() {
+			  while (!_initialized) {
+			    try {
+            Thread.sleep(1 * 1000);
+          } catch (InterruptedException e) {
+            return;
+          }
+			  }
+			  _log.info("building cache");
 				Map<String,List<String>> tmpSuggestions = Collections.synchronizedMap(new HashMap<String, List<String>>());
 				
 
@@ -75,6 +93,7 @@ public class BundleSearchServiceImpl implements BundleSearchService {
 					}
 				}
 				suggestions = tmpSuggestions;
+				_log.info("complete");
 			}
 		};
 
@@ -83,6 +102,7 @@ public class BundleSearchServiceImpl implements BundleSearchService {
 
 	private void generateInputsForString(Map<String,List<String>> tmpSuggestions, String string, String splitRegex) {
 		String[] parts;
+		if (string == null) return;
 		if (splitRegex != null)
 			parts = string.split(splitRegex);
 		else
@@ -111,4 +131,11 @@ public class BundleSearchServiceImpl implements BundleSearchService {
 			tmpSuggestions = tmpSuggestions.subList(0, 10);
 		return tmpSuggestions;
 	}
+
+  @Override
+  public void onApplicationEvent(ApplicationEvent event) {
+    if (event instanceof ContextRefreshedEvent) {
+      _initialized = true;
+    }
+  }
 }

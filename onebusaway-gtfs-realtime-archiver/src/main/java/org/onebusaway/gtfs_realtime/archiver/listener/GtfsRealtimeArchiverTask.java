@@ -30,10 +30,10 @@ import javax.annotation.PreDestroy;
 import org.onebusaway.gtfs_realtime.archiver.service.FeedService;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
@@ -48,7 +48,7 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
  * Entry point for archiving GTFS-realtime.  Configure one of these (via spring configuration) for
  * each of your GTFS realtime sources.
  */
-public class GtfsRealtimeArchiverTask {
+public class GtfsRealtimeArchiverTask implements ApplicationListener {
 
   private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeArchiverTask.class);
   
@@ -137,10 +137,7 @@ public class GtfsRealtimeArchiverTask {
     return this.initialized;
   }
 
-  
-  @PostConstruct
-  public void start() {
-    /*  TODO - get this initialized properly
+  private void init() {
     while (!initialized) {
       _log.info("Still waiting for context initialization");
       try {
@@ -149,7 +146,6 @@ public class GtfsRealtimeArchiverTask {
         // don't handle exception
       }
     }
-    */
     if (_agencyIds.isEmpty()) {
       _log.info("no agency ids specified for GtfsRealtimeSource");
       
@@ -185,6 +181,14 @@ public class GtfsRealtimeArchiverTask {
       _refreshTask = _scheduledExecutorService.scheduleAtFixedRate(
           new UpdateTask(), 0, _refreshInterval, TimeUnit.SECONDS);
     }
+    
+  }
+  
+  @PostConstruct
+  public void start() {
+    BackgroundInitTask bit = new BackgroundInitTask();
+    new Thread(bit).start();
+    _log.error("PostConstruct Complete");
   }
   
   @PreDestroy
@@ -247,6 +251,25 @@ public class GtfsRealtimeArchiverTask {
       } catch (Throwable ex) {
         _log.warn("Error updating from GTFS-realtime data sources", ex);
       }
+    }
+  }
+
+  private class BackgroundInitTask implements Runnable {
+    @Override
+    public void run() {
+      try {
+        init();
+      } catch (Throwable ex) {
+        _log.warn("Error initializing", ex);
+      }
+    }
+  }
+  
+
+  @Override
+  public void onApplicationEvent(ApplicationEvent event) {
+    if (event instanceof ContextRefreshedEvent) {
+      setInitialized(true);
     }
   }
 }
