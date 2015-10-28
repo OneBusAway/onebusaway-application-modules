@@ -16,6 +16,7 @@
 package org.onebusaway.gtfs_realtime.archiver.service;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
@@ -43,6 +44,12 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
     _template.saveOrUpdateAll(Arrays.asList(array));
     _template.flush();
     _template.clear();
+  }
+  
+  @Override
+  public List<String> getAllVehicleIds() {
+	  // TODO: fix
+	  return  _template.find("select vehicle_id from vehicle_position group by vehicle_id;");
   }
 
 }

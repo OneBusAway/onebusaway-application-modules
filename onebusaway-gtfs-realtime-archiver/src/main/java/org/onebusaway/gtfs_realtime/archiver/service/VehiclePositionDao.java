@@ -15,10 +15,13 @@
  */
 package org.onebusaway.gtfs_realtime.archiver.service;
 
+import java.util.List;
+
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 
 public interface VehiclePositionDao {
 
   void saveOrUpdate(VehiclePositionModel... array);
 
+  List<String> getAllVehicleIds();
 }
