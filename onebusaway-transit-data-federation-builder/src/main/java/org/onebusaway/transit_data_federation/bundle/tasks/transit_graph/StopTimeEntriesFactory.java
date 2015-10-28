@@ -75,8 +75,10 @@ public class StopTimeEntriesFactory {
     List<StopTimeEntryImpl> stopTimeEntries = createInitialStopTimeEntries(
         graph, stopTimes);
 
-    for (StopTimeEntryImpl stopTime : stopTimeEntries)
+    for (StopTimeEntryImpl stopTime : stopTimeEntries) {
       stopTime.setTrip(tripEntry);
+      stopTime.setTotalStopsInTrip(stopTimeEntries.size());
+    }
 
     ensureStopTimesHaveShapeDistanceTraveledSet(stopTimeEntries, shapePoints);
 

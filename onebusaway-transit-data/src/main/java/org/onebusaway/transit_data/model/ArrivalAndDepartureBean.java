@@ -25,7 +25,7 @@ import org.onebusaway.transit_data.model.trips.TripStatusBean;
 
 public class ArrivalAndDepartureBean extends ApplicationBean {
 
-  private static final long serialVersionUID = 3L;
+  private static final long serialVersionUID = 4L;
 
   private TripBean trip;
 
@@ -80,6 +80,8 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
   private List<ServiceAlertBean> situations;
 
   private HistogramBean scheduleDeviationHistogram;
+  
+  private int totalStopsInTrip;
 
   public TripBean getTrip() {
     return trip;
@@ -306,7 +308,15 @@ public class ArrivalAndDepartureBean extends ApplicationBean {
     this.scheduleDeviationHistogram = scheduleDeviationHistogram;
   }
 
-  public boolean hasPredictedArrivalTime() {
+  public int getTotalStopsInTrip() {
+	return totalStopsInTrip;
+}
+
+public void setTotalStopsInTrip(int totalStopsInTrip) {
+	this.totalStopsInTrip = totalStopsInTrip;
+}
+
+public boolean hasPredictedArrivalTime() {
     return this.predictedArrivalTime > 0;
   }
 

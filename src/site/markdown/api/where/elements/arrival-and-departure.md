@@ -38,7 +38,8 @@ The `<arrivalAndDeparture/>` element captures information about the arrival and 
 * tripId - the trip id for the arriving vehicle
 * serviceDate - time, in ms since the unix epoch, of midnight for start of the service date for the trip. See the [Glossary#Service_Date glossary entry] for more info
 * stopId - the stop id of the stop the vehicle is arriving at
-* stopSequence - the index of the stop into the sequence of stops that make up the trip for this arrival
+* stopSequence - the index of the stop into the sequence of stops that make up the trip for this arrival. This value is 0-indexed, and is generated internally by OneBusAway (it is not the GTFS stop_sequence). The first stop in the trip will always have stopSequence = 0, while the last stop in the trip will always have stopSequence = totalStopsInTrip - 1.
+* totalStopsInTrip - the total number of stops visited on the trip for this arrival. If the same stop is visited more than once in this trip, each visitation is counted towards the total.
 * blockTripSequence - the index of this arrival's trip into the sequence of trips for the active block.  Compare to `blockTripSequence` in the [OneBusAwayRestApi_TripStatusElementV2 tripStatus element] to determine where the arrival-and-departure is on the block in comparison to the active block location.
 * routeShortName - the route short name that potentially overrides the route short name in the referenced [`<route/>` element](route.html) - *OPTIONAL*
 * routeLongName - the route long name that potentially overrides the route long name in the referenced [`<route/>` element](route.html) - *OPTIONAL*
