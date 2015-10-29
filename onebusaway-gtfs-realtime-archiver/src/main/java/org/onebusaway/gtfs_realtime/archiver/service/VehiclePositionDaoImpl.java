@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Projections;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 import org.slf4j.Logger;
@@ -53,28 +54,26 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
   
   @Override
   public List<String> getAllVehicleIds() {
-	  //return  _template.find("select vehicleId from VehiclePositionModel group by vehicleId");
 	  
-	  // is this really preferred?
+    // select vehicleId from VehiclePositionModel group by vehicleId
 	  
-	  DetachedCriteria criterion = DetachedCriteria.forClass(VehiclePositionModel.class);
-	  criterion.setProjection(Projections.property("vehicleId"));
-	  criterion.setProjection(Projections.groupProperty("vehicleId"));
+	  DetachedCriteria criteria = DetachedCriteria.forClass(VehiclePositionModel.class)
+	      .setProjection(Projections.property("vehicleId"))
+	      .setProjection(Projections.groupProperty("vehicleId"));
 	  
-	  return _template.findByCriteria(criterion);
+	  return _template.findByCriteria(criteria);
 	  
   }
 
   public List<VehiclePositionModel> getVehiclePositions(String vehicleId, Date startDate, Date endDate) {
-	 String query = "from VehiclePositionModel where vehicleId=:vehicleId and timestamp >= :startDate and timestamp < :endDate";
 	 
-	 String[] names = {"vehicleId", "startDate", "endDate"};
-	 
-	 Object[] values = {vehicleId, startDate, endDate};
-	 
-	 List<VehiclePositionModel> results = _template.findByNamedParam(query, names, values);
-			 
-	 return results;
+    // from VehiclePositionModel where vehicleId=:vehicleId and timestamp >= :startDate and timestamp < :endDate
+    
+    DetachedCriteria criteria = DetachedCriteria.forClass(VehiclePositionModel.class)
+        .add(Restrictions.eq("vehicleId", vehicleId))
+        .add(Restrictions.between("timestamp", startDate, endDate));
+    
+    return _template.findByCriteria(criteria);
   }
 }
  

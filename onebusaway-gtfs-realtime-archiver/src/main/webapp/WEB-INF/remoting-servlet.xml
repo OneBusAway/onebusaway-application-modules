@@ -15,7 +15,7 @@ see http://spring.io/blog/2009/12/21/mvc-simplifications-in-spring-3-0/
     <context:component-scan base-package="org.onebusaway.gtfs_realtime.archiver.controller" />
 
 	<mvc:annotation-driven />
-
-
+	
+	<mvc:resources mapping="/resources/**" location="/resources/" />
 
 </beans>
