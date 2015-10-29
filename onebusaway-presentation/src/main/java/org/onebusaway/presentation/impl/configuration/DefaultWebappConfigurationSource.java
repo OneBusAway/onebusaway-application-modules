@@ -36,6 +36,8 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
   private ServiceAreaService _serviceAreaService;
 
   private String _googleMapsApiKey = "ABQIAAAA1R_R0bUhLYRwbQFpKHVowhR6ggDNEO1rwvdlk5egWeAHsl3o5xT2ki4Fn-LXLHIrJfb8VmKQeIMh5g";
+  
+  private String _googleAnalyticsAnalyticsKey = "UA-2423527-7";
 
 
   @Autowired
@@ -58,6 +60,11 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
   @ConfigurationParameter
   public void setGoogleMapsApiKey(String googleMapsApiKey) {
     _googleMapsApiKey = googleMapsApiKey;
+  }
+  
+  @ConfigurationParameter
+  public void setGoogleAnalyticsKey(String clientKey) {
+    _googleAnalyticsAnalyticsKey = clientKey;
   }
 
   @Override
@@ -99,7 +106,7 @@ public class DefaultWebappConfigurationSource implements ConfigurationSource {
     config.put("hasDefaultServiceArea",
         _serviceAreaService.hasDefaultServiceArea());
     config.put("googleMapsApiKey", _googleMapsApiKey);
-
+    config.put("tracker", _googleAnalyticsAnalyticsKey);
     return config;
   }
 

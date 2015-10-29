@@ -86,4 +86,8 @@ public class ConfigAction extends OneBusAwayEnterpriseActionSupport {
   public Integer getMapZoom() {
     return _configurationService.getConfigurationValueAsInteger("display.mapZoom", null);
   }
+  
+  public String getSiriBaseURL() {
+    return _configurationService.getConfigurationValueAsString("display.siriBaseUrl", "/onebusaway-api-webapp/siri");
+  }
 }
