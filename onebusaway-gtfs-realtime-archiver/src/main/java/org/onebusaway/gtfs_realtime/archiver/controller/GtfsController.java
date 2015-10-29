@@ -8,6 +8,7 @@ import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
 import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
@@ -33,22 +34,37 @@ public class GtfsController {
     _shapePointService = shapePointService;
   }
   
-  
-  // Get list of routes by agency
-  // AgencyAndId will be processed by Jackson to: {"agencyId":"<agency>","id":"<id>"}
-  @RequestMapping(value="/routes")
-  public @ResponseBody List<AgencyAndId> getRoutes() {
-    List<RouteEntry> routes = _transitGraphDao.getAllRoutes();
-   
-    ArrayList<AgencyAndId> routeNames = new ArrayList<AgencyAndId>();
+  @RequestMapping(value="/agency")
+  public @ResponseBody List<String> getAgencies() {
     
-    Iterator<RouteEntry> iter = routes.iterator();
-    while(iter.hasNext()) {
-      AgencyAndId id = iter.next().getId();
-      routeNames.add(id);
+    List<AgencyEntry> entries = _transitGraphDao.getAllAgencies();
+    ArrayList<String> agencies = new ArrayList<String>();
+    
+    for (AgencyEntry entry : entries) {
+      String id = entry.getId();
+      agencies.add(id);
     }
     
-    return routeNames;
+    return agencies;
+  }
+  
+  // Get list of routes by agency
+  @RequestMapping(value="/routes/{agencyId}")
+  public @ResponseBody List<String> getRoutesByAgency(@PathVariable String agencyId) {
+    
+    AgencyEntry agency = _transitGraphDao.getAgencyForId(agencyId);
+    List<RouteCollectionEntry> collections = agency.getRouteCollections();
+    
+    List<String> routes = new ArrayList<String>();
+    
+    for (RouteCollectionEntry entry : collections) {
+      for (RouteEntry route : entry.getChildren()) {
+        String id = route.getId().getId();
+        routes.add(id);
+      }
+    }
+    
+    return routes;
   }
   
   /* Expose shape points for route */

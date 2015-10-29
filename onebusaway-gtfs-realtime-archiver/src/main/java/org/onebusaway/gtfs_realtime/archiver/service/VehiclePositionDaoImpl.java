@@ -70,8 +70,13 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
     // from VehiclePositionModel where vehicleId=:vehicleId and timestamp >= :startDate and timestamp < :endDate
     
     DetachedCriteria criteria = DetachedCriteria.forClass(VehiclePositionModel.class)
-        .add(Restrictions.eq("vehicleId", vehicleId))
-        .add(Restrictions.between("timestamp", startDate, endDate));
+        .add(Restrictions.eq("vehicleId", vehicleId));
+    
+    if (startDate != null)
+      criteria.add(Restrictions.ge("timestamp", startDate));
+    
+    if (endDate != null)
+      criteria.add(Restrictions.le("timestamp", endDate));
     
     return _template.findByCriteria(criteria);
   }

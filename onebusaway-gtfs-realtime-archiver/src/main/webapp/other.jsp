@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <head>
- <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
- <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
- <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+ <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/leaflet.css" />
+ <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/jquery-ui.css" />
+ <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/jquery-ui-timepicker-addon.css" />
+ <script src="<%= request.getContextPath() %>/resources/javascript/leaflet.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/leafletRotatedMarker.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/jquery-2.1.4.min.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/jquery-ui.min.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/jquery-ui-timepicker-addon.js"></script>
   <style>
   body {
     padding: 0;
@@ -22,44 +27,48 @@
 	padding: 2%;
 	border: 2px solid black;
   }
+  
+  .datetime {
+    width: 60px;
+  }
+  
+  // rectangular markers. these can be deleted after triangles.
+  div.avlMarker {
+    background-color: #ff7800;
+    border-color: black;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    width:7px;
+    height:7px;
+  }
+  
+  div.avlTriangle {
+    width: 0px;
+    height: 0px;
+    border-bottom: 10px solid #ff7800;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent
+  }
+ 
   </style>
 </head>
 <body>
 <div id="map"></div>
 <div id="controls">
-  Routes: <select id="routes"></select> <br>
-  Vehicles: <select id="vehicles"></select> <br>
+
+<table>
+<tr><td>Agencies:</td><td><select id="agencies"></select></td></tr>
+<tr><td>Routes:</td><td><select id="routes"></select></td></tr>
+<tr><td>Vehicles:</td><td><select id="vehicles"></select></td></tr>
+<tr><td>Start time:</td><td><input type="text" id="startTime" class="datetime "/></td></tr>
+<tr><td>End time:</td><td><input type="text" id="endTime" class="datetime" /></td></tr>
+</table>
   
 </div>
 </body>
 <script>
 var contextPath = "<%= request.getContextPath() %>";
-
-var map = L.map('map').setView([51.505, -0.09], 13);
-L.control.scale({metric: false}).addTo(map);
-
-// Using transitime tile layer
-L.tileLayer('http://api.tiles.mapbox.com/v4/transitime.j1g5bb0j/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoidHJhbnNpdGltZSIsImEiOiJiYnNWMnBvIn0.5qdbXMUT1-d90cv1PAIWOQ', {
- attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> &amp; <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
- maxZoom: 19
-}).addTo(map);
-
-
-// Populate a select element with options from an endpoint
-// elem - querystring or DOM element to operate on
-// path - path of endpoint
-// mapfunc - if exists, run on each element in list to come up with option values
-function populateSelect(elem, path, map) {
-	$.getJSON(contextPath + path, function(data) {
-		var select = $(elem);
-		for (var i = 0; i < data.length; i++) {
-			var d = map ? map(data[i]) : data[i];
-			var option = $("<option />").attr("value", d).text(d);
-			select.append(option);
-		}
-	})
-}
-populateSelect("#vehicles", "/vehicleIds");
-populateSelect("#routes", "/routes", function(d) { return d.agencyId + "/" + d.id });
-
 </script>
+<script src="<%= request.getContextPath() %>/resources/javascript/map-utils.js"></script>
+<script src="<%= request.getContextPath() %>/resources/javascript/map.js"></script>

@@ -14,8 +14,7 @@ import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 
 @Controller
 public class VehiclePositionController {
-	
-	
+  
 	private VehiclePositionDao _vehiclePositionDao;
 	
 	@Autowired
@@ -32,10 +31,16 @@ public class VehiclePositionController {
 	@RequestMapping(value="/vehiclePositions")
 	public @ResponseBody List<VehiclePositionModel> getVehiclePositions(
 			@RequestParam(value="vehicleId") String vehicleId,
-			@RequestParam(value="startDate") long startDate,
-			@RequestParam(value="endDate") long endDate) {
+			@RequestParam(value="startDate", required=false, defaultValue="-1") long start,
+			@RequestParam(value="endDate", required=false, defaultValue="-1") long end) {
 		
-		return _vehiclePositionDao.getVehiclePositions(vehicleId, new Date(startDate), new Date(endDate));
+	  // Somewhat hacky way to handle no start date or end date
+	  // Use earliest (latest) possible Date objects. This way VehiclePositionDaoImpl
+	  // can use "between" in all cases.
+	  Date startDate = (start > 0) ? new Date(start) : null,
+	      endDate = (end > 0) ? new Date(end) : null;
+	  
+		return _vehiclePositionDao.getVehiclePositions(vehicleId, startDate, endDate);
 	}
 	
 }
