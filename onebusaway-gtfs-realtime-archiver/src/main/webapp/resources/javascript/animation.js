@@ -1,5 +1,6 @@
 // D3-style object to create and control an animation of the AVL
 // data for a particular vehicle.
+// map : map or group where animation will be added.
 // clock: DOM object where current time should be updated.
 // icon: Leaflet icon which will be animated.
 function avlAnimation(map, icon, clock) {

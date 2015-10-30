@@ -2,12 +2,13 @@
 <head>
  <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/leaflet.css" />
  <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/jquery-ui.css" />
- <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/jquery-ui-timepicker-addon.css" />
+ <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/jquery.datetimeentry.css" />
  <script src="<%= request.getContextPath() %>/resources/javascript/leaflet.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/leafletRotatedMarker.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/jquery-2.1.4.min.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/jquery-ui.min.js"></script>
- <script src="<%= request.getContextPath() %>/resources/javascript/jquery-ui-timepicker-addon.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/jquery.plugin.min.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/jquery.datetimeentry.min.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/animation.js"></script>
   <style>
   body {

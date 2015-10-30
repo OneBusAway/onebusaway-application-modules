@@ -46,12 +46,19 @@ $("#routes").on("change", function() {
 
 $("#vehicles").on("change", getVehiclePositions);
 
+$(".datetime")
+	.datetimeEntry({
+		spinnerImage: contextPath + "/resources/images/spinnerDefault.png",
+		datetimeFormat: "O/D/Y h:M"
+	})
+	.on("change", getVehiclePositions)
+
 function getVehiclePositions() {
-	
+
 	var vehicleId = $("#vehicles")[0].value;
 	var startTime = $("#startTime")[0].value;
 	var endTime = $("#endTime")[0].value;
-	
+
 	var path = contextPath + "/vehiclePositions?vehicleId=" + vehicleId;
 	
 	if (startTime != "")
@@ -68,11 +75,17 @@ function getVehiclePositions() {
 		var inputs = $(".datetime")
 		if(inputs.attr("disabled") == "disabled") {
 			inputs.attr("disabled", null)
-			inputs.datetimepicker({
-				minDate: new Date(data[0].timestamp),
-				maxDate: new Date(data[data.length-1].timestamp),
-				onClose: getVehiclePositions
+			
+			var minDate = new Date(data[0].timestamp),
+				maxDate = new Date(data[data.length-1].timestamp);
+			
+			inputs.datetimeEntry("option", {
+				minDatetime: minDate,
+				maxDatetime: maxDate
 			});
+			
+			$("#startTime").datetimeEntry("setDatetime", minDate);
+			$("#endTime").datetimeEntry("setDatetime", maxDate);
 		}
 		
 	});
