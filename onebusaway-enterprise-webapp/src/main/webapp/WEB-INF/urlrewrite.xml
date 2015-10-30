@@ -96,9 +96,9 @@
     <rule>
         <condition type="request-uri" operator="notequal">^.*_login$</condition>
         <condition type="request-uri" operator="notequal">^.*\.ico$</condition>
-        <condition type="request-uri" operator="notequal">^(/onebusaway-enterprise-.*-webapp){0,1}/img/.*$</condition>
-        <condition type="request-uri" operator="notequal">^(/onebusaway-enterprise-.*-webapp){0,1}/css/.*$</condition>
-        <condition type="request-uri" operator="notequal">^(/onebusaway-enterprise-.*-webapp){0,1}/js/.*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/img/.*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/css/.*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/js/.*$</condition>
         <condition type="request-uri" operator="notequal">^.*\.action$</condition>
         <from>^(.*?)(?:\;jsessionid=[^\?#]*)$</from>
         <to last="true">$1.action</to>
@@ -106,9 +106,9 @@
     <rule>
         <condition type="request-uri" operator="notequal">^.*_login$</condition>
         <condition type="request-uri" operator="notequal">^.*\.ico$</condition>
-        <condition type="request-uri" operator="notequal">^(/onebusaway-enterprise-.*-webapp){0,1}/img/.*$</condition>
-        <condition type="request-uri" operator="notequal">^(/onebusaway-enterprise-.*-webapp){0,1}/css/.*$</condition>
-        <condition type="request-uri" operator="notequal">^(/onebusaway-enterprise-.*-webapp){0,1}/js/.*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/img/.*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/css/.*$</condition>
+        <condition type="request-uri" operator="notequal">^(/.*enterprise.*){0,1}/js/.*$</condition>
         <condition type="request-uri" operator="notequal">^.*\.action\?(.*)$</condition>
         <from>^(.*?)(?:\;jsessionid=[^\?#]*)?(\?[^#]*)?(#.*)?$</from>
         <to last="true">$1.action$2$3</to>
