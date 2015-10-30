@@ -517,6 +517,9 @@ public class SearchServiceImpl implements SearchService {
 		List<EnterpriseGeocoderResult> geocoderResults = _geocoderService
 				.enterpriseGeocode(query);
 
+		// guard against misconfiguration
+		if (geocoderResults == null) return;
+		
 		for (EnterpriseGeocoderResult result : geocoderResults) {
 			if (geocoderResults.size() == 1) {
 				results.addMatch(resultFactory.getGeocoderResult(result,
