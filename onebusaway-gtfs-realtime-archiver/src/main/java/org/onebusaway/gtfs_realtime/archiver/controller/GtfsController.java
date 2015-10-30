@@ -3,9 +3,13 @@ package org.onebusaway.gtfs_realtime.archiver.controller;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.onebusaway.geospatial.model.CoordinateBounds;
+import org.onebusaway.geospatial.model.CoordinatePoint;
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data_federation.model.ShapePoints;
+import org.onebusaway.transit_data_federation.services.AgencyService;
 import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
@@ -23,6 +27,7 @@ public class GtfsController {
   
   private TransitGraphDao _transitGraphDao;
   private ShapePointService _shapePointService;
+  private AgencyService _agencyService;
   
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
@@ -34,18 +39,14 @@ public class GtfsController {
     _shapePointService = shapePointService;
   }
   
+  @Autowired
+  public void setAgencyService(AgencyService agencyService) {
+    _agencyService = agencyService;
+  }
+  
   @RequestMapping(value="/agency")
-  public @ResponseBody List<String> getAgencies() {
-    
-    List<AgencyEntry> entries = _transitGraphDao.getAllAgencies();
-    ArrayList<String> agencies = new ArrayList<String>();
-    
-    for (AgencyEntry entry : entries) {
-      String id = entry.getId();
-      agencies.add(id);
-    }
-    
-    return agencies;
+  public @ResponseBody Map<String, CoordinateBounds> getAgencies() {
+    return _agencyService.getAgencyIdsAndCoverageAreas();
   }
   
   // Get list of routes by agency

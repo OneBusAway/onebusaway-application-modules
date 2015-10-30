@@ -62,4 +62,12 @@ div.avlTriangle {
 #playback input {
   background: lightgrey;
 }
- 
+
+#playback input:hover {
+  border: 1px solid #CCC;
+  box-shadow: 1px 1px 5px #999
+}
+
+#playback input:active {
+  background: lightblue;
+}

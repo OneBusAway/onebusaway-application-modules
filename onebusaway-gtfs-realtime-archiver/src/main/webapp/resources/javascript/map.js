@@ -1,4 +1,4 @@
-var map = L.map('map').setView([51.505, -0.09], 13);
+var map = L.map('map')
 L.control.scale({metric: false}).addTo(map);
 
 // Using transitime tile layer
@@ -31,11 +31,35 @@ var routeOptions = {
  
 var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
 
-populateSelect("#vehicles", "/vehicleIds");
-populateSelect("#agencies", "/agency", function(evt) {
-	$("#routes option").remove();
-	populateSelect("#routes", "/routes/" + evt.target.value);
+
+// Fill agency dropdown from API
+$.getJSON(contextPath + "/agency", function(data) {
+	var select = $("#agencies");
+	
+	// create option item for each agency
+	for (agency in data) {
+		if (data.hasOwnProperty(agency)) {
+			var option = $("<option />").attr("value", agency).text(agency);
+			select.append(option);
+		} 
+	}
+	
+	select.on("change", function(evt) {	
+		// zoom to agency boundaries
+		var bdd = data[evt.target.value];
+		map.fitBounds([[bdd.minLat, bdd.minLon], [bdd.maxLat, bdd.maxLon]]);
+		
+		// populate routes dropdown
+		$("#routes option").remove();
+		populateSelect("#routes", "/routes/" + evt.target.value);
+	})
+	
+	// trigger change eventL: zoom to first agency.
+	select.change(); 
 });
+
+
+populateSelect("#vehicles", "/vehicleIds");
 
 $("#routes").on("change", function() {
 	var agency = $("#agencies")[0].value,
