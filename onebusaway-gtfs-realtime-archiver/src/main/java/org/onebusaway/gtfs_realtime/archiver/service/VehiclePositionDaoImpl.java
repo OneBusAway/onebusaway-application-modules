@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Projections;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
@@ -67,7 +68,8 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
 
   public List<VehiclePositionModel> getVehiclePositions(String vehicleId, Date startDate, Date endDate) {
 	 
-    // from VehiclePositionModel where vehicleId=:vehicleId and timestamp >= :startDate and timestamp < :endDate
+    // from VehiclePositionModel where vehicleId=:vehicleId and timestamp >= :startDate
+    //  and timestamp < :endDate order by timestamp
     
     DetachedCriteria criteria = DetachedCriteria.forClass(VehiclePositionModel.class)
         .add(Restrictions.eq("vehicleId", vehicleId));
@@ -77,6 +79,8 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
     
     if (endDate != null)
       criteria.add(Restrictions.le("timestamp", endDate));
+    
+    criteria.addOrder(Order.asc("timestamp"));
     
     return _template.findByCriteria(criteria);
   }

@@ -31,7 +31,6 @@ var routeOptions = {
  
 var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
 
-
 populateSelect("#vehicles", "/vehicleIds");
 populateSelect("#agencies", "/agency", function(evt) {
 	$("#routes option").remove();
@@ -45,26 +44,96 @@ $("#routes").on("change", function() {
 		.fail(function() { alert("No data found for this route."); });
 });
 
-$(".datetime").datetimepicker();
-
-$(".datetime").on("change", function(evt) {
-	evt.target.timeStamp = evt.timeStamp;
-	getVehiclePositions();
-})
-
 $("#vehicles").on("change", getVehiclePositions);
 
 function getVehiclePositions() {
-	var vehicleId = $("#vehicles")[0].value,
-		startTime = $("#startTime")[0].timeStamp,
-		endTime = $("#endTime")[0].timeStamp;
+	
+	var vehicleId = $("#vehicles")[0].value;
+	var startTime = $("#startTime")[0].value;
+	var endTime = $("#endTime")[0].value;
 	
 	var path = contextPath + "/vehiclePositions?vehicleId=" + vehicleId;
 	
-	if (startTime != undefined)
-		path += "&startTime=" + startTime;
-	if (endTime != undefined)
-		path += "&endTime=" + endTime;
+	if (startTime != "")
+		path += "&startDate=" + Date.parse(startTime);
+	if (endTime != "")
+		path += "&endDate=" + Date.parse(endTime);
+	
+	var xhr = $.getJSON(path, function(data) {
+		drawVehiclePositions(data);
+		prepareAnimation(data);
 		
-	$.getJSON(path, drawVehiclePositions);
+		/* Datetime inputs will be disabled until there is something to go there. */
+		/* Add in some limits. */
+		var inputs = $(".datetime")
+		if(inputs.attr("disabled") == "disabled") {
+			inputs.attr("disabled", null)
+			inputs.datetimepicker({
+				minDate: new Date(data[0].timestamp),
+				maxDate: new Date(data[data.length-1].timestamp),
+				onClose: getVehiclePositions
+			});
+		}
+		
+	});
 }
+
+/* Animation controls */
+
+var busIcon =  L.icon({
+    iconUrl:  contextPath + "/resources/images/bus.png", 
+    iconSize: [25,25]
+});
+var animate = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
+
+var playButton = contextPath + "/resources/images/media-playback-start.svg",
+pauseButton = contextPath + "/resources/images/media-playback-pause.svg";
+
+function prepareAnimation(avlData) {
+	
+	// Fade in playback buttons
+	$("#playbackContainer").animate({bottom: "5%"});
+
+	// Make sure buttons are in init state.
+	$("#playbackPlay").attr("src", playButton);
+	$("#playbackRate").text("1X");
+	
+	animate(avlData);
+
+}
+
+$("#playbackNext").on("click", function() {
+	animate.next();
+});
+
+$("#playbackPrev").on("click", function() {
+	animate.prev()
+})
+
+$("#playbackPlay").on("click", function() {
+	
+	if (!animate.paused()) {
+		animate.pause();
+		$("#playbackPlay").attr("src", playButton);
+	}
+	else { // need to start it
+		animate.start();
+		$("#playbackPlay").attr("src", pauseButton);
+	}
+	
+});
+
+$("#playbackFF").on("click", function() {
+	var rate = animate.rate()*2;
+	animate.rate(rate);
+	$("#playbackRate").text(rate + "X");
+});
+
+$("#playbackRew").on("click", function() {
+	var rate = animate.rate()/2;
+	animate.rate(rate);
+	$("#playbackRate").text(rate + "X");
+});
+
+
+

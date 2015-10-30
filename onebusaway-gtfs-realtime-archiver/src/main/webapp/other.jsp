@@ -8,6 +8,7 @@
  <script src="<%= request.getContextPath() %>/resources/javascript/jquery-2.1.4.min.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/jquery-ui.min.js"></script>
  <script src="<%= request.getContextPath() %>/resources/javascript/jquery-ui-timepicker-addon.js"></script>
+ <script src="<%= request.getContextPath() %>/resources/javascript/animation.js"></script>
   <style>
   body {
     padding: 0;
@@ -29,7 +30,7 @@
   }
   
   .datetime {
-    width: 60px;
+    width: 120px;
   }
   
   // rectangular markers. these can be deleted after triangles.
@@ -50,7 +51,28 @@
     border-left: 5px solid transparent;
     border-right: 5px solid transparent
   }
- 
+  
+  /* Playback menu */
+  #playbackContainer {
+    position: absolute;
+    left: 50%;
+    bottom: -50%; /* initially hidden */
+  }
+  #playback {
+    background: lightgrey;
+    position: relative;
+    left: -50%;
+    text-align: center;
+    border-radius: 25px;
+      padding: 2%;
+      font-family: monospace;
+      border: 2px solid black;
+  }
+  
+  #playback input {
+    background: lightgrey;
+  }
+   
   </style>
 </head>
 <body>
@@ -61,11 +83,24 @@
 <tr><td>Agencies:</td><td><select id="agencies"></select></td></tr>
 <tr><td>Routes:</td><td><select id="routes"></select></td></tr>
 <tr><td>Vehicles:</td><td><select id="vehicles"></select></td></tr>
-<tr><td>Start time:</td><td><input type="text" id="startTime" class="datetime "/></td></tr>
-<tr><td>End time:</td><td><input type="text" id="endTime" class="datetime" /></td></tr>
+<tr><td>Start time:</td><td><input type="text" id="startTime" class="datetime" disabled/></td></tr>
+<tr><td>End time:</td><td><input type="text" id="endTime" class="datetime" disabled /></td></tr>
 </table>
   
 </div>
+
+<div id="playbackContainer">
+  <div id="playback">
+    <input type="image" src="<%= request.getContextPath() %>/resources/images/media-seek-backward.svg" id="playbackPrev" />
+    <input type="image" src="<%= request.getContextPath() %>/resources/images/media-skip-backward.svg" id="playbackRew" />
+    <input type="image" src="<%= request.getContextPath() %>/resources/images/media-playback-start.svg" id="playbackPlay" />
+    <input type="image" src="<%= request.getContextPath() %>/resources/images/media-skip-forward.svg" id="playbackFF" /> 
+    <input type="image" src="<%= request.getContextPath() %>/resources/images/media-seek-forward.svg" id="playbackNext" /> <br>
+    <span id="playbackRate">1X</span> <br>
+    <span id="playbackTime">00:00:00</span>
+  </div>
+</div>
+
 </body>
 <script>
 var contextPath = "<%= request.getContextPath() %>";
