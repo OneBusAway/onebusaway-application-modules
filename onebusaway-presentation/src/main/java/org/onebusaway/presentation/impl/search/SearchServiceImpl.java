@@ -351,7 +351,8 @@ public class SearchServiceImpl implements SearchService {
 
 		tryAsRoute(results, normalizedQuery, resultFactory);
 
-		if (results.isEmpty() && StringUtils.isNumeric(normalizedQuery)) {
+		// only guess it as a stop if its numeric or has possible agency prefix
+		if (results.isEmpty() && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
 			tryAsStop(results, normalizedQuery, resultFactory);
 		}
 
@@ -534,6 +535,21 @@ public class SearchServiceImpl implements SearchService {
 	// Utility method for getting all known stops for an id with no agency
 	private List<StopBean> stopsForId(String id) {
 		List<StopBean> matches = new ArrayList<StopBean>();
+		
+		// accept agency denoted stops first!
+		if (id.contains("_")) {
+		  try {
+		    StopBean potentialStop = _transitDataService.getStop(id);
+		    if (potentialStop != null) {
+		      matches.add(potentialStop);
+		      // if an agency prefix was specified, don't continue searching
+		      return matches;
+		    }
+		  } catch (NoSuchStopServiceException ex) {
+		    
+		  }
+		}
+		
 		for (AgencyWithCoverageBean agency : _transitDataService
 				.getAgenciesWithCoverage()) {
 			AgencyAndId potentialStopId = new AgencyAndId(agency.getAgency()
