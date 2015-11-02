@@ -97,11 +97,15 @@ $(".datetime")
 		spinnerImage: contextPath + "/resources/images/spinnerDefault.png",
 		datetimeFormat: "O/D/Y h:M"
 	})
-	.on("change", getVehiclePositions)
+
+// set some sane defaults. startTime = now() - 30 min, endTime = now()
+$("#endTime").datetimeEntry("setDatetime", new Date());
+$("#startTime").datetimeEntry("setDatetime", new Date(Date.now() - 1800000)); // 30 min
+
+$(".datetime").on("change", getVehiclePositions)
 
 // Get the AVL positions from the API for a given vehicle, and draw on map.
 function getVehiclePositions() {
-
 	var vehicleId = $("#vehicles")[0].value;
 	var startTime = $("#startTime")[0].value;
 	var endTime = $("#endTime")[0].value;
@@ -116,25 +120,6 @@ function getVehiclePositions() {
 	var xhr = $.getJSON(path, function(data) {
 		drawVehiclePositions(data);
 		prepareAnimation(data);
-		
-		/* Datetime inputs will be disabled until there is something to go there. */
-		/* Add in some limits. */
-		var inputs = $(".datetime")
-		if(inputs.attr("disabled") == "disabled") {
-			inputs.attr("disabled", null)
-			
-			var minDate = new Date(data[0].timestamp),
-				maxDate = new Date(data[data.length-1].timestamp);
-			
-			inputs.datetimeEntry("option", {
-				minDatetime: minDate,
-				maxDatetime: maxDate
-			});
-			
-			$("#startTime").datetimeEntry("setDatetime", minDate);
-			$("#endTime").datetimeEntry("setDatetime", maxDate);
-		}
-		
 	});
 }
 

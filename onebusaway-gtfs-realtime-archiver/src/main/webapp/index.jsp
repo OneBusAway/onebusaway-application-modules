@@ -19,8 +19,8 @@
 <tr><td>Agencies:</td><td><select id="agencies"></select></td></tr>
 <tr><td>Routes:</td><td><select id="routes"></select></td></tr>
 <tr><td>Vehicles:</td><td><select id="vehicles"></select></td></tr>
-<tr><td>Start time:</td><td><input type="text" id="startTime" class="datetime" disabled/></td></tr>
-<tr><td>End time:</td><td><input type="text" id="endTime" class="datetime" disabled /></td></tr>
+<tr><td>Start time:</td><td><input type="text" id="startTime" class="datetime"/></td></tr>
+<tr><td>End time:</td><td><input type="text" id="endTime" class="datetime"/></td></tr>
 </table>
   
 </div>
