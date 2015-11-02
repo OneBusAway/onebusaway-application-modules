@@ -71,7 +71,13 @@ function drawVehiclePositions(data) {
 		var labels = ["Vehicle", "GPS Time", "Lat/Lon", "Speed", "Heading"],
 			keys = ["vehicleId", "time", "latlon", "speed", "bearing"];
 		
-		var content = $("")
+		var content = $("<table />").attr("class", "popupTable");
+		for (var i = 0; i < labels.length; i++) {
+			var row = $("<tr />")
+			var label = $("<td />")
+			label.attr("class", "popupTableLabel")
+			label.text(labels[i])
+		}
 	  	var content = "<table class='popupTable'>" 
 		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleId + "</td></tr>" 
 		+ "<tr><td class='popupTableLabel'>GPS Time:</td><td>" + avl.time + "</td></tr>" 
