@@ -36,9 +36,10 @@ import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
 
 public class VehiclePositionDaoImpl implements VehiclePositionDao {
 
-  protected static Logger _log = LoggerFactory.getLogger(VehiclePositionDaoImpl.class);
+  protected static Logger _log = LoggerFactory.getLogger(
+      VehiclePositionDaoImpl.class);
   private HibernateTemplate _template;
-  
+
   @Autowired
   @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
@@ -52,37 +53,40 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
     _template.flush();
     _template.clear();
   }
-  
+
   @Override
   public List<String> getAllVehicleIds() {
-	  
+
     // select vehicleId from VehiclePositionModel group by vehicleId
-	  
-	  DetachedCriteria criteria = DetachedCriteria.forClass(VehiclePositionModel.class)
-	      .setProjection(Projections.property("vehicleId"))
-	      .setProjection(Projections.groupProperty("vehicleId"));
-	  
-	  return _template.findByCriteria(criteria);
-	  
+
+    DetachedCriteria criteria = DetachedCriteria.forClass(
+        VehiclePositionModel.class).setProjection(
+            Projections.property("vehicleId")).setProjection(
+                Projections.groupProperty("vehicleId"));
+
+    return _template.findByCriteria(criteria);
+
   }
 
-  public List<VehiclePositionModel> getVehiclePositions(String vehicleId, Date startDate, Date endDate) {
-	 
-    // from VehiclePositionModel where vehicleId=:vehicleId and timestamp >= :startDate
-    //  and timestamp < :endDate order by timestamp
-    
-    DetachedCriteria criteria = DetachedCriteria.forClass(VehiclePositionModel.class)
-        .add(Restrictions.eq("vehicleId", vehicleId));
-    
+  public List<VehiclePositionModel> getVehiclePositions(String vehicleId,
+      Date startDate, Date endDate) {
+
+    // from VehiclePositionModel where vehicleId=:vehicleId and timestamp >=
+    // :startDate
+    // and timestamp < :endDate order by timestamp
+
+    DetachedCriteria criteria = DetachedCriteria.forClass(
+        VehiclePositionModel.class).add(
+            Restrictions.eq("vehicleId", vehicleId));
+
     if (startDate != null)
       criteria.add(Restrictions.ge("timestamp", startDate));
-    
+
     if (endDate != null)
       criteria.add(Restrictions.le("timestamp", endDate));
-    
+
     criteria.addOrder(Order.asc("timestamp"));
-    
+
     return _template.findByCriteria(criteria);
   }
 }
- 

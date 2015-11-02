@@ -25,85 +25,88 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class GtfsController {
-  
+
   private TransitGraphDao _transitGraphDao;
   private ShapePointService _shapePointService;
   private AgencyService _agencyService;
-  
+
   @Autowired
   public void setTransitGraphDao(TransitGraphDao transitGraphDao) {
     _transitGraphDao = transitGraphDao;
   }
-  
+
   @Autowired
   public void setShapePointService(ShapePointService shapePointService) {
     _shapePointService = shapePointService;
   }
-  
+
   @Autowired
   public void setAgencyService(AgencyService agencyService) {
     _agencyService = agencyService;
   }
-  
-  @RequestMapping(value="/agency")
+
+  @RequestMapping(value = "/agency")
   public @ResponseBody Map<String, CoordinateBounds> getAgencies() {
     return _agencyService.getAgencyIdsAndCoverageAreas();
   }
-  
+
   // Get list of routes by agency
-  @RequestMapping(value="/routes/{agencyId}")
-  public @ResponseBody List<String> getRoutesByAgency(@PathVariable String agencyId) {
-    
+  @RequestMapping(value = "/routes/{agencyId}")
+  public @ResponseBody List<String> getRoutesByAgency(
+      @PathVariable String agencyId) {
+
     AgencyEntry agency = _transitGraphDao.getAgencyForId(agencyId);
     List<RouteCollectionEntry> collections = agency.getRouteCollections();
-    
+
     List<String> routes = new ArrayList<String>();
-    
+
     for (RouteCollectionEntry entry : collections) {
       for (RouteEntry route : entry.getChildren()) {
         String id = route.getId().getId();
         routes.add(id);
       }
     }
-    
+
     return routes;
   }
-  
+
   /* Expose shape points for route */
-  @RequestMapping(value="/route/{agencyId}/{id}")
-  public @ResponseBody ShapePoints getRoute(@PathVariable String agencyId, @PathVariable String id) {
+  @RequestMapping(value = "/route/{agencyId}/{id}")
+  public @ResponseBody ShapePoints getRoute(@PathVariable String agencyId,
+      @PathVariable String id) {
     AgencyAndId routeId = new AgencyAndId(agencyId, id);
     RouteEntry route = _transitGraphDao.getRouteForId(routeId);
-   
+
     TripEntry trip = routeToTrip(route); // BAD - just uses first trip.
     AgencyAndId shapeId = trip.getShapeId();
-   
+
     return _shapePointService.getShapePointsForShapeId(shapeId);
   }
-  
-  @RequestMapping(value="/stops/{agencyId}/{id}")
-  public @ResponseBody List<CoordinatePoint> getStops(@PathVariable String agencyId, @PathVariable String id) {
-    
+
+  @RequestMapping(value = "/stops/{agencyId}/{id}")
+  public @ResponseBody List<CoordinatePoint> getStops(
+      @PathVariable String agencyId, @PathVariable String id) {
+
     AgencyAndId routeId = new AgencyAndId(agencyId, id);
     RouteEntry route = _transitGraphDao.getRouteForId(routeId);
-   
+
     TripEntry trip = routeToTrip(route);
     List<StopTimeEntry> stopTimes = trip.getStopTimes();
-    
+
     List<CoordinatePoint> points = new ArrayList<CoordinatePoint>();
-    
+
     for (StopTimeEntry entry : stopTimes) {
       StopEntry stop = entry.getStop();
       points.add(stop.getStopLocation());
     }
-    
+
     return points;
   }
-  
+
   // Get a trip given a route
   // Naive - uses first trip in route.
   private TripEntry routeToTrip(RouteEntry route) {
     return route.getTrips().get(0);
   }
-  
+
 }

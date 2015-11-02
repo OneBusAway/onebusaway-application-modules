@@ -29,20 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 /**
- * Database operations specific to the Alert model. 
+ * Database operations specific to the Alert model.
  *
  */
 public class AlertDaoImpl implements AlertDao {
 
   protected static Logger _log = LoggerFactory.getLogger(AlertDaoImpl.class);
   private HibernateTemplate _template;
-  
+
   @Autowired
   @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }
-  
+
   @Transactional(rollbackFor = Throwable.class)
   @Override
   public void saveOrUpdate(AlertModel... array) {

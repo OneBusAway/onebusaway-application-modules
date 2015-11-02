@@ -27,8 +27,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name="vehicle_position")
-@org.hibernate.annotations.Table(appliesTo ="vehicle_position", indexes = {
+@Table(name = "vehicle_position")
+@org.hibernate.annotations.Table(appliesTo = "vehicle_position", indexes = {
     @Index(name = "vp_id_idx", columnNames = {"id"}),
     @Index(name = "vp_trip_id_idx", columnNames = {"trip_id"}),
     @Index(name = "vp_route_id_idx", columnNames = {"route_id"}),
@@ -36,8 +36,7 @@ import org.hibernate.annotations.Index;
     @Index(name = "vp_lat_idx", columnNames = {"lat"}),
     @Index(name = "vp_lon_idx", columnNames = {"lon"}),
     @Index(name = "vp_stop_id_idx", columnNames = {"stop_id"}),
-    @Index(name = "vp_timestamp_idx", columnNames = {"timestamp"})
-    })
+    @Index(name = "vp_timestamp_idx", columnNames = {"timestamp"})})
 @org.hibernate.annotations.Entity(mutable = false)
 
 public class VehiclePositionModel {
@@ -46,110 +45,137 @@ public class VehiclePositionModel {
   @GeneratedValue(generator = "increment")
   @GenericGenerator(name = "increment", strategy = "increment")
   private long id;
-  @Column(nullable = true, name="trip_id", length = 20)
+  @Column(nullable = true, name = "trip_id", length = 20)
   private String tripId;
-  @Column(nullable = true, name="route_id", length = 20)
+  @Column(nullable = true, name = "route_id", length = 20)
   private String routeId;
-  @Column(nullable = true, name="trip_start")
+  @Column(nullable = true, name = "trip_start")
   private Date tripStart;
-  @Column(nullable = true, name="vehicle_id", length = 20)
+  @Column(nullable = true, name = "vehicle_id", length = 20)
   private String vehicleId;
-  @Column(nullable = true, name="vehicle_label", length = 20)
+  @Column(nullable = true, name = "vehicle_label", length = 20)
   private String vehicleLabel;
-  @Column(nullable = true, name="vehicle_license_plate", length = 15)
+  @Column(nullable = true, name = "vehicle_license_plate", length = 15)
   private String vehicleLicensePlate;
-  @Column(nullable = true, name="lat")
+  @Column(nullable = true, name = "lat")
   private Float lat;
-  @Column(nullable = true, name="lon")
+  @Column(nullable = true, name = "lon")
   private Float lon;
-  @Column(nullable = true, name="bearing")
+  @Column(nullable = true, name = "bearing")
   private Float bearing;
-  @Column(nullable = true, name="speed")
+  @Column(nullable = true, name = "speed")
   private Float speed;
-  @Column(nullable = true, name="stop_id", length = 20)
+  @Column(nullable = true, name = "stop_id", length = 20)
   private String stopId;
-  @Column(nullable = true, name="timestamp")
+  @Column(nullable = true, name = "timestamp")
   private Date timestamp;
+
   public long getId() {
     return id;
   }
+
   public void setId(long id) {
     this.id = id;
   }
+
   public String getTripId() {
     return tripId;
   }
+
   public void setTripId(String tripId) {
     this.tripId = tripId;
   }
+
   public String getRouteId() {
     return routeId;
   }
+
   public void setRouteId(String routeId) {
     this.routeId = routeId;
   }
+
   public Date getTripStart() {
     return tripStart;
   }
+
   public void setTripStart(Date tripStart) {
     this.tripStart = tripStart;
   }
+
   public String getVehicleId() {
     return vehicleId;
   }
+
   public void setVehicleId(String vehicleId) {
     this.vehicleId = vehicleId;
   }
+
   public String getVehicleLabel() {
     return vehicleLabel;
   }
+
   public void setVehicleLabel(String vehicleLabel) {
     this.vehicleLabel = vehicleLabel;
   }
+
   public String getVehicleLicensePlate() {
     return vehicleLicensePlate;
   }
+
   public void setVehicleLicensePlate(String vehicleLicensePlate) {
     this.vehicleLicensePlate = vehicleLicensePlate;
   }
+
   public Float getLat() {
     return lat;
   }
+
   public void setLat(Float lat) {
     this.lat = lat;
   }
+
   public Float getLon() {
     return lon;
   }
+
   public void setLon(Float lon) {
     this.lon = lon;
   }
+
   public Float getBearing() {
     return bearing;
   }
+
   public void setBearing(Float bearing) {
     this.bearing = bearing;
   }
+
   public Float getSpeed() {
     return speed;
   }
+
   public void setSpeed(Float speed) {
     this.speed = speed;
   }
+
   public String getStopId() {
     return stopId;
   }
+
   public void setStopId(String stopId) {
     this.stopId = stopId;
   }
- public Date getTimestamp() {
+
+  public Date getTimestamp() {
     return timestamp;
   }
+
   public void setTimestamp(Date timestamp) {
     this.timestamp = timestamp;
   }
-  
+
   public String toString() {
-    return "{vehicleId=" + vehicleId + " (" + lat  + ", " + lon + ")" + " @" + timestamp + "}";
+    return "{vehicleId=" + vehicleId + " (" + lat + ", " + lon + ")" + " @"
+        + timestamp + "}";
   }
 }

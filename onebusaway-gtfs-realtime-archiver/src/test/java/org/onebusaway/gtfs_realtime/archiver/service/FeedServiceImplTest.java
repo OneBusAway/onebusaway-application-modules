@@ -53,13 +53,15 @@ import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={"classpath:service-alerts-data-sources.xml", 
+@ContextConfiguration(locations = {
+    "classpath:service-alerts-data-sources.xml",
     "classpath:org/onebusaway/archiver/application-context-testing.xml"})
-@TransactionConfiguration(transactionManager="transactionManager")
+@TransactionConfiguration(transactionManager = "transactionManager")
 @Transactional
-public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContextTests {
-  private GtfsRealtimeEntitySource _entitySource;  
-  
+public class FeedServiceImplTest
+    extends AbstractTransactionalJUnit4SpringContextTests {
+  private GtfsRealtimeEntitySource _entitySource;
+
   private static final long NOW = System.currentTimeMillis();
   private static final long DAY = 24 * 60 * 60 * 1000;
   private static final String TEST_1 = "Test Alert 1";
@@ -79,10 +81,10 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
   private static final String URL_3 = "http://ThirdUrl.org";
   private static final long TIME_START_1 = NOW;
   private static final long TIME_START_2 = NOW - DAY;
-  private static final long TIME_START_3 = NOW - (DAY*2);
+  private static final long TIME_START_3 = NOW - (DAY * 2);
   private static final long TIME_END_1 = NOW + DAY;
-  private static final long TIME_END_2 = NOW + (DAY*2);
-  private static final long TIME_END_3 = NOW + (DAY*3);
+  private static final long TIME_END_2 = NOW + (DAY * 2);
+  private static final long TIME_END_3 = NOW + (DAY * 3);
   private static final String AGENCY_1 = "1";
   private static final String AGENCY_2 = "3";
   private static final String AGENCY_3 = "19";
@@ -92,28 +94,28 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
   private static final String STOP_1 = null;
   private static final String STOP_2 = null;
   private static final String STOP_3 = "402";
-  
+
   private static Logger _log = LoggerFactory.getLogger(FeedServiceImpl.class);
-  
+
   private FeedServiceImpl _feedService;
   private GtfsPersistor _persistor;
-  
+
   private SessionFactory _sessionFactory;
   private HibernateTemplate _template;
-  
+
   @Autowired
   public void setGtfsPersistor(GtfsPersistor persistor) {
     _persistor = persistor;
   }
-  
+
   @Autowired
   public void setFeedService(FeedServiceImpl feedService) {
     _feedService = feedService;
   }
-  
+
   @Autowired
   public void setSessionFactory(SessionFactory sessionFactory) {
-    _sessionFactory = sessionFactory; 
+    _sessionFactory = sessionFactory;
   }
 
   @Before
@@ -121,33 +123,33 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
     _entitySource = Mockito.mock(GtfsRealtimeEntitySource.class);
     _template = new HibernateTemplate(_sessionFactory);
   }
-    
+
   @Test
   public void testReadAlerts() {
     // Create GTFS Feed with service alerts
-    FeedEntity alertEntityA = createAlert("alertA", TEST_1, DESC_1, CAUSE_1, EFFECT_1, 
-        URL_1, TIME_START_1, TIME_END_1, AGENCY_1, ROUTE_1, STOP_1);
-    FeedEntity alertEntityB = createAlert("alertB", TEST_2, DESC_2, CAUSE_2, EFFECT_2, 
-        URL_2, TIME_START_2, TIME_END_2, AGENCY_2, ROUTE_2, STOP_2);
-    FeedEntity alertEntityC = createAlert("alertC", TEST_3, DESC_3, CAUSE_3, EFFECT_3, 
-        URL_3, TIME_START_3, TIME_END_3, AGENCY_3, ROUTE_3, STOP_3);
-    
+    FeedEntity alertEntityA = createAlert("alertA", TEST_1, DESC_1, CAUSE_1,
+        EFFECT_1, URL_1, TIME_START_1, TIME_END_1, AGENCY_1, ROUTE_1, STOP_1);
+    FeedEntity alertEntityB = createAlert("alertB", TEST_2, DESC_2, CAUSE_2,
+        EFFECT_2, URL_2, TIME_START_2, TIME_END_2, AGENCY_2, ROUTE_2, STOP_2);
+    FeedEntity alertEntityC = createAlert("alertC", TEST_3, DESC_3, CAUSE_3,
+        EFFECT_3, URL_3, TIME_START_3, TIME_END_3, AGENCY_3, ROUTE_3, STOP_3);
+
     // Create FeedMessage
     FeedMessage.Builder alerts = createFeed();
     alerts.addEntity(alertEntityA);
     alerts.addEntity(alertEntityB);
     alerts.addEntity(alertEntityC);
     FeedMessage alert = alerts.build();
-        
+
     _feedService.readAlerts(alert, _entitySource);
     Collection<AlertModel> alertsFromDB = null;
-    // Wait for 15 seconds to make sure GtfsPersistor has had time to run 
+    // Wait for 15 seconds to make sure GtfsPersistor has had time to run
     // the AlertThread, which actually writes to the DB.
     try {
       TimeUnit.SECONDS.sleep(15);
     } catch (Exception ignoredEx) {
     }
-    
+
     // Get data that was persisted to the database
     try {
       alertsFromDB = (Collection<AlertModel>) _template.find("from AlertModel");
@@ -155,7 +157,7 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
       ex.getMessage();
       _log.info("find failed: " + ex.getMessage());
     }
-    
+
     // Check persisted data against the original value.
     _log.info("results size: " + alertsFromDB.size());
     assertEquals(3, alertsFromDB.size());
@@ -201,7 +203,9 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
         assertEquals(TIME_START_2, timeStart);
         assertEquals(TIME_END_2, timeEnd);
         assertEquals(AGENCY_2, agency);
-        assertEquals(AGENCY_2 + "_" + ROUTE_2, route);    // Verify that agency has been prepended to route.
+        assertEquals(AGENCY_2 + "_" + ROUTE_2, route); // Verify that agency has
+                                                       // been prepended to
+                                                       // route.
         assertEquals(STOP_2, stop);
       } else if (header.equals(TEST_3)) {
         assertEquals(TEST_3, header);
@@ -213,63 +217,68 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
         assertEquals(TIME_END_3, timeEnd);
         assertEquals(AGENCY_3, agency);
         assertEquals(ROUTE_3, route);
-        assertEquals(AGENCY_3 + "_" + STOP_3, stop);    // Verify that agency has been prepended to stop.
+        assertEquals(AGENCY_3 + "_" + STOP_3, stop); // Verify that agency has
+                                                     // been prepended to stop.
       }
     }
   }
-  
-  
-  private FeedEntity createAlert(String alertId, String header, String desc, Alert.Cause cause, 
-      Alert.Effect effect, String url, long startTime, long endTime, String agency, String route, 
-      String stop) {
+
+  private FeedEntity createAlert(String alertId, String header, String desc,
+      Alert.Cause cause, Alert.Effect effect, String url, long startTime,
+      long endTime, String agency, String route, String stop) {
     Alert.Builder alertBldr = Alert.newBuilder();
-    
-    // Header  
-    Translation translation = Translation.newBuilder().setLanguage("en").setText(header).build();
-    TranslatedString trnStr = TranslatedString.newBuilder().addTranslation(translation).build();
+
+    // Header
+    Translation translation = Translation.newBuilder().setLanguage(
+        "en").setText(header).build();
+    TranslatedString trnStr = TranslatedString.newBuilder().addTranslation(
+        translation).build();
     alertBldr.setHeaderText(trnStr);
-        
+
     // Description
-    translation = Translation.newBuilder().setLanguage("en").setText(desc).build();
+    translation = Translation.newBuilder().setLanguage("en").setText(
+        desc).build();
     trnStr = TranslatedString.newBuilder().addTranslation(translation).build();
     alertBldr.setDescriptionText(trnStr);
-    
+
     // Cause
     alertBldr.setCause(cause);
-    
+
     // Effect
     alertBldr.setEffect(effect);
-    
+
     // URL
-    translation = Translation.newBuilder().setLanguage("en").setText(url).build();
+    translation = Translation.newBuilder().setLanguage("en").setText(
+        url).build();
     trnStr = TranslatedString.newBuilder().addTranslation(translation).build();
     alertBldr.setUrl(trnStr);
-   
+
     // Build TimeRangeEntity
     TimeRange timeRange = createTimeRange(startTime, endTime);
     alertBldr.addActivePeriod(timeRange);
-    
+
     // Build EntitySelectorEntity
     EntitySelector entitySelector = createEntitySelector(agency, route, stop);
     alertBldr.addInformedEntity(entitySelector);
-    
+
     FeedEntity.Builder alertEntity = FeedEntity.newBuilder();
     alertEntity.setId(alertId);
     alertEntity.setAlert(alertBldr.build());
     return alertEntity.build();
   }
-  
+
   private TimeRange createTimeRange(long startTime, long endTime) {
     TimeRange.Builder timeRange = TimeRange.newBuilder();
     timeRange.setStart(startTime);
     timeRange.setEnd(endTime);
-    return timeRange.build(); 
+    return timeRange.build();
   }
-  
-  private EntitySelector createEntitySelector(String agencyId, String route, String stop) {
+
+  private EntitySelector createEntitySelector(String agencyId, String route,
+      String stop) {
     EntitySelector.Builder entitySelector = EntitySelector.newBuilder();
     entitySelector.setAgencyId(agencyId);
-    if(route != null) {
+    if (route != null) {
       entitySelector.setRouteId(route);
     }
     if (stop != null) {
@@ -277,7 +286,7 @@ public class FeedServiceImplTest extends AbstractTransactionalJUnit4SpringContex
     }
     return entitySelector.build();
   }
-  
+
   private FeedMessage.Builder createFeed() {
     FeedMessage.Builder builder = FeedMessage.newBuilder();
     FeedHeader.Builder header = FeedHeader.newBuilder();

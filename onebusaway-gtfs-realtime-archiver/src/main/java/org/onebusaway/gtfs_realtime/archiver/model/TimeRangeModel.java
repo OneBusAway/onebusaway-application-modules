@@ -31,55 +31,60 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Index;
 
 @Entity
-@Table(name="time_range")
-@org.hibernate.annotations.Table(appliesTo ="time_range", indexes = {
+@Table(name = "time_range")
+@org.hibernate.annotations.Table(appliesTo = "time_range", indexes = {
     @Index(name = "tr_id_idx", columnNames = {"id"}),
-    @Index(name = "tr_alert_id_idx", columnNames = {"alert_id"})
-    })
+    @Index(name = "tr_alert_id_idx", columnNames = {"alert_id"})})
 @org.hibernate.annotations.Entity(mutable = false)
 public class TimeRangeModel {
 
   public TimeRangeModel() {
-    
+
   }
-  
+
   @Id
   @GeneratedValue(generator = "increment")
   @GenericGenerator(name = "increment", strategy = "increment")
   private long id;
-  @Column(nullable = true, name="time_start")
+  @Column(nullable = true, name = "time_start")
   private long start;
-  @Column(nullable = true, name="time_end")
+  @Column(nullable = true, name = "time_end")
   private long end;
-  
+
   @ManyToOne
-  @JoinColumn(nullable = false, name="alert_id")
+  @JoinColumn(nullable = false, name = "alert_id")
   private AlertModel alert;
-  
-  
+
   public long getId() {
     return id;
   }
+
   public void setId(long id) {
     this.id = id;
   }
+
   public long getStart() {
     return start;
   }
+
   public void setStart(long start) {
     this.start = start;
   }
+
   public long getEnd() {
     return end;
   }
+
   public void setEnd(long end) {
     this.end = end;
   }
+
   public AlertModel getAlert() {
     return alert;
   }
+
   public void setAlert(AlertModel alert) {
     this.alert = alert;
   }
-  
+
 }

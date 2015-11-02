@@ -29,20 +29,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 /**
- * Database operations specific to the TripUpdate model. 
+ * Database operations specific to the TripUpdate model.
  *
  */
 public class TripUpdateDaoImpl implements TripUpdateDao {
 
-  protected static Logger _log = LoggerFactory.getLogger(TripUpdateDaoImpl.class);
+  protected static Logger _log = LoggerFactory.getLogger(
+      TripUpdateDaoImpl.class);
   private HibernateTemplate _template;
-  
+
   @Autowired
   @Qualifier("gtfsRealtimeArchiveSessionFactory")
   public void setSessionFactory(SessionFactory sessionFactory) {
     _template = new HibernateTemplate(sessionFactory);
   }
-  
+
   @Transactional(rollbackFor = Throwable.class)
   @Override
   public void saveOrUpdate(TripUpdateModel... array) {

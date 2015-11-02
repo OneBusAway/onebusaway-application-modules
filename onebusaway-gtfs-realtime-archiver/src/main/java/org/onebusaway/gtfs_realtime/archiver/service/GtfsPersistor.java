@@ -26,6 +26,6 @@ public interface GtfsPersistor {
   void persist(TripUpdateModel tripUpdate);
 
   void persist(VehiclePositionModel vehiclePosition);
-  
+
   void persist(AlertModel alert);
 }

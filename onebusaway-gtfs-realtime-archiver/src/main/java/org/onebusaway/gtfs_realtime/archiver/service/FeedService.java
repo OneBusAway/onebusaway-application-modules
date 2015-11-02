@@ -26,9 +26,12 @@ import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
 public interface FeedService {
 
-  List<TripUpdateModel> readTripUpdates(FeedMessage tripUpdates, GtfsRealtimeEntitySource entitySource);
+  List<TripUpdateModel> readTripUpdates(FeedMessage tripUpdates,
+      GtfsRealtimeEntitySource entitySource);
 
-  List<VehiclePositionModel> readVehiclePositions(FeedMessage vehiclePositions, GtfsRealtimeEntitySource entitySource);
+  List<VehiclePositionModel> readVehiclePositions(FeedMessage vehiclePositions,
+      GtfsRealtimeEntitySource entitySource);
 
-  List<AlertModel> readAlerts(FeedMessage alerts, GtfsRealtimeEntitySource entitySource);
+  List<AlertModel> readAlerts(FeedMessage alerts,
+      GtfsRealtimeEntitySource entitySource);
 }

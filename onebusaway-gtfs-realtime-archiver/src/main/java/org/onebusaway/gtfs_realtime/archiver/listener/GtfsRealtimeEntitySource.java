@@ -30,7 +30,8 @@ import org.slf4j.LoggerFactory;
 
 public class GtfsRealtimeEntitySource {
 
-  private static final Logger _log = LoggerFactory.getLogger(GtfsRealtimeEntitySource.class);
+  private static final Logger _log = LoggerFactory.getLogger(
+      GtfsRealtimeEntitySource.class);
 
   private TransitGraphDao _transitGraphDao;
 
@@ -47,13 +48,13 @@ public class GtfsRealtimeEntitySource {
   public void setAgencyIds(List<String> agencyIds) {
     _agencyIds = agencyIds;
   }
-  /** 
+  /**
    * This class was copied from org/onebusaway/transit_data_federation/impl
-   * /realtime/gtfs_realtime/GtfsRealtimeEntitySource.java.  It was modified
-   * slightly, primarily the return values changed to AgencyAndId ids.  The
+   * /realtime/gtfs_realtime/GtfsRealtimeEntitySource.java. It was modified
+   * slightly, primarily the return values changed to AgencyAndId ids. The
    * documentation is from the original class.
    */
-  
+
   /**
    * Given a route id without an agency prefix, we attempt to find a
    * {@link RouteEntry} with the specified id by cycling through the set of
@@ -90,8 +91,8 @@ public class GtfsRealtimeEntitySource {
     }
 
     _log.debug("route not found with id \"{}\"", routeId);
-    
-    return null;  // If not found, just return null.
+
+    return null; // If not found, just return null.
   }
 
   public Id getTripId(String tripId) {
@@ -146,6 +147,6 @@ public class GtfsRealtimeEntitySource {
 
     _log.debug("stop not found with id \"{}\"", stopId);
 
-    return null;    // If not found, just return null.
+    return null; // If not found, just return null.
   }
 }

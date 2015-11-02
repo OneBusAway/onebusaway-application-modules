@@ -37,28 +37,30 @@ import org.springframework.stereotype.Component;
 
 @Component
 /**
- * Handles asynchronous persistence of the archiver models. 
+ * Handles asynchronous persistence of the archiver models.
  */
 public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
   private static Logger _log = LoggerFactory.getLogger(GtfsPersistorImpl.class);
-  
-  private ArrayBlockingQueue<TripUpdateModel> _tripUpdates = new ArrayBlockingQueue<TripUpdateModel>(100000);
-  private ArrayBlockingQueue<VehiclePositionModel> _vehiclePositions = new ArrayBlockingQueue<VehiclePositionModel>(100000);
-  private ArrayBlockingQueue<AlertModel> _alerts = new ArrayBlockingQueue<AlertModel>(100000);
-  
-  
+
+  private ArrayBlockingQueue<TripUpdateModel> _tripUpdates = new ArrayBlockingQueue<TripUpdateModel>(
+      100000);
+  private ArrayBlockingQueue<VehiclePositionModel> _vehiclePositions = new ArrayBlockingQueue<VehiclePositionModel>(
+      100000);
+  private ArrayBlockingQueue<AlertModel> _alerts = new ArrayBlockingQueue<AlertModel>(
+      100000);
+
   private ThreadPoolTaskScheduler _taskScheduler;
 
   private TripUpdateDao _tripUpdateDao;
   private VehiclePositionDao _vehiclePositionDao;
   private AlertDao _alertDao;
   private boolean initialized = false;
-  
+
   @Autowired
   public void setTaskScheduler(ThreadPoolTaskScheduler scheduler) {
     _taskScheduler = scheduler;
   }
-  
+
   @Autowired
   public void setTripUpdateDao(TripUpdateDao dao) {
     _tripUpdateDao = dao;
@@ -86,7 +88,7 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
   public void setInitialized(boolean isInitialized) {
     this.initialized = isInitialized;
   }
-  
+
   private void init() {
     while (!initialized) {
       _log.info("Still waiting for context initialization");
@@ -97,33 +99,40 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
       }
     }
     final TripUpdateThread tripUpdateThread = new TripUpdateThread();
-    _taskScheduler.scheduleWithFixedDelay(tripUpdateThread, 10 * 1000); // every 10 seconds
+    _taskScheduler.scheduleWithFixedDelay(tripUpdateThread, 10 * 1000); // every
+                                                                        // 10
+                                                                        // seconds
     final VehiclePositionThread vehiclePositionThread = new VehiclePositionThread();
-    _taskScheduler.scheduleWithFixedDelay(vehiclePositionThread, 10 * 1000); // every 10 seconds;
+    _taskScheduler.scheduleWithFixedDelay(vehiclePositionThread, 10 * 1000); // every
+                                                                             // 10
+                                                                             // seconds;
     final AlertThread alertThread = new AlertThread();
-    _taskScheduler.scheduleWithFixedDelay(alertThread, 10 * 1000); // every 10 seconds;
-    
+    _taskScheduler.scheduleWithFixedDelay(alertThread, 10 * 1000); // every 10
+                                                                   // seconds;
+
   }
-  
+
   @PostConstruct
   public void start() {
     BackgroundInitTask bit = new BackgroundInitTask();
     new Thread(bit).start();
   }
-  
+
   @PreDestroy
   public void stop() {
     if (_taskScheduler != null) {
       _taskScheduler.shutdown();
       _taskScheduler = null;
     }
-    
+
   }
+
   @Override
   public void persist(TripUpdateModel tripUpdate) {
-    boolean accepted =_tripUpdates.offer(tripUpdate);
+    boolean accepted = _tripUpdates.offer(tripUpdate);
     if (!accepted) {
-    _log.error("Local trip update buffer full!  Clearing!  Dropping " + tripUpdate.getId() + " record");
+      _log.error("Local trip update buffer full!  Clearing!  Dropping "
+          + tripUpdate.getId() + " record");
     }
   }
 
@@ -131,7 +140,8 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
   public void persist(VehiclePositionModel vehiclePosition) {
     boolean accepted = _vehiclePositions.offer(vehiclePosition);
     if (!accepted) {
-    _log.error("Local vehicle position buffer full!  Clearing!  Dropping " + vehiclePosition.getId() + " record");
+      _log.error("Local vehicle position buffer full!  Clearing!  Dropping "
+          + vehiclePosition.getId() + " record");
     }
   }
 
@@ -139,12 +149,13 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
   public void persist(AlertModel alert) {
     boolean accepted = _alerts.offer(alert);
     if (!accepted) {
-    _log.error("Local alert buffer full!  Clearing!  Dropping " + alert.getId() + " record");
+      _log.error("Local alert buffer full!  Clearing!  Dropping "
+          + alert.getId() + " record");
     }
   }
 
   private class TripUpdateThread implements Runnable {
-    
+
     @Override
     public void run() {
       List<TripUpdateModel> records = new ArrayList<TripUpdateModel>();
@@ -159,22 +170,23 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
   }
 
   private class VehiclePositionThread implements Runnable {
-    
+
     @Override
     public void run() {
       List<VehiclePositionModel> records = new ArrayList<VehiclePositionModel>();
       _vehiclePositions.drainTo(records, _batchSize);
       _log.info("drained " + records.size() + " vehicle positions");
       try {
-        _vehiclePositionDao.saveOrUpdate(records.toArray(new VehiclePositionModel[0]));
+        _vehiclePositionDao.saveOrUpdate(
+            records.toArray(new VehiclePositionModel[0]));
       } catch (Exception e) {
         _log.error("error persisting vehiclePositions=", e);
       }
     }
   }
-  
+
   private class AlertThread implements Runnable {
-    
+
     @Override
     public void run() {
       List<AlertModel> records = new ArrayList<AlertModel>();
@@ -198,13 +210,13 @@ public class GtfsPersistorImpl implements GtfsPersistor, ApplicationListener {
       }
     }
   }
-  
+
   @Override
   public void onApplicationEvent(ApplicationEvent event) {
     if (event instanceof ContextRefreshedEvent) {
       setInitialized(true);
     }
-    
+
   }
-  
+
 }
