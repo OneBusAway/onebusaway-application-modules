@@ -22,6 +22,7 @@ import java.util.List;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Projections;
 import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
@@ -57,34 +58,37 @@ public class VehiclePositionDaoImpl implements VehiclePositionDao {
   @Override
   public List<String> getAllVehicleIds() {
 
-    // select vehicleId from VehiclePositionModel group by vehicleId
+    // select distinct vehicleId from VehiclePositionModel
+
+    Projection prop = Projections.distinct(Projections.property("vehicleId"));
 
     DetachedCriteria criteria = DetachedCriteria.forClass(
-        VehiclePositionModel.class).setProjection(
-            Projections.property("vehicleId")).setProjection(
-                Projections.groupProperty("vehicleId"));
+        VehiclePositionModel.class).setProjection(prop);
 
     return _template.findByCriteria(criteria);
 
   }
 
+  // Get a list of vehicle positions given vehicle ID, start date, and end date
+  // If endDate is null choose now
+  // If startDate is null choose endDate - 1hr
   public List<VehiclePositionModel> getVehiclePositions(String vehicleId,
       Date startDate, Date endDate) {
 
+    if (endDate == null)
+      endDate = new Date();
+
+    if (startDate == null) // 1 hr = 3600000 millisec
+      startDate = new Date(endDate.getTime() - 3600000);
+
     // from VehiclePositionModel where vehicleId=:vehicleId and timestamp >=
-    // :startDate
-    // and timestamp < :endDate order by timestamp
+    // :startDate and timestamp < :endDate order by timestamp
 
     DetachedCriteria criteria = DetachedCriteria.forClass(
-        VehiclePositionModel.class).add(
-            Restrictions.eq("vehicleId", vehicleId));
+        VehiclePositionModel.class);
 
-    if (startDate != null)
-      criteria.add(Restrictions.ge("timestamp", startDate));
-
-    if (endDate != null)
-      criteria.add(Restrictions.le("timestamp", endDate));
-
+    criteria.add(Restrictions.eq("vehicleId", vehicleId));
+    criteria.add(Restrictions.between("timestamp", startDate, endDate));
     criteria.addOrder(Order.asc("timestamp"));
 
     return _template.findByCriteria(criteria);
