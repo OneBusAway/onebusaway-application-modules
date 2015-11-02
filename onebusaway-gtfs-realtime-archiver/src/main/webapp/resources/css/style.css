@@ -71,3 +71,7 @@ div.avlTriangle {
 #playback input:active {
   background: lightblue;
 }
+
+.popupTableLabel {
+  font-weight: bold;
+}

@@ -70,6 +70,7 @@ function drawVehiclePositions(data) {
 	data.forEach(function(avl) {
 		
 		avl.time = new Date(avl.timestamp).toTimeString();
+		avl.latlon = avl.lat + ", " + avl.lon
 		
 		var avlMarker = L.rotatedMarker(avl, {
 	          icon: L.divIcon({
@@ -80,16 +81,22 @@ function drawVehiclePositions(data) {
 	          angle: avl.bearing, // this doesn't actually seem to be used
 	          title: avl.time
 	      }).addTo(vehicleGroup);
-	  	
-		// TODO: make this not suck.
-	  	var content = "<table class='popupTable'>" 
-		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleId + "</td></tr>" 
-		+ "<tr><td class='popupTableLabel'>GPS Time:</td><td>" + avl.time + "</td></tr>" 
- 		+ "<tr><td class='popupTableLabel'>Lat/Lon:</td><td>" + avl.lat + ", " + avl.lon + "</td></tr>"
-  		+ "<tr><td class='popupTableLabel'>Speed:</td><td>" + avl.speed + " kph</td></tr>"
-  		+ "<tr><td class='popupTableLabel'>Heading:</td><td>" + avl.bearing + "</td></tr>"
-  		+ "</table>";
+		
+		
+		/* Create popup AVL information */
+		
+		var labels = ["Vehicle", "GPS Time", "Lat/Lon", "Speed", "Heading"],
+			keys = ["vehicleId", "time", "latlon", "speed", "bearing"];
+		
+		var content = $("<table />").attr("class", "popupTable");
+		
+		for (var i = 0; i < labels.length; i++) {
+			
+			var label = $("<td />").attr("class", "popupTableLabel").text(labels[i]);
+			var value = $("<td />").text(avl[keys[i]]);
+			content.append( $("<tr />").append(label, value) )
+		}
   		
-  		avlMarker.bindPopup(content);
+  		avlMarker.bindPopup(content[0]);
 	})
 }
