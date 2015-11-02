@@ -33,8 +33,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.hibernate3.HibernateTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.onebusaway.gtfs_realtime.archiver.model.VehiclePositionModel;
-
 public class VehiclePositionDaoImpl implements VehiclePositionDao {
 
   protected static Logger _log = LoggerFactory.getLogger(

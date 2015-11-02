@@ -89,8 +89,6 @@ $("#routes").on("change", function() {
 // Set up the `vehicle' dropdown menu
 populateSelect("#vehicles", "/vehicleIds");
 
-$("#vehicles").on("change", getVehiclePositions);
-
 // Datetime pickers come from a jquery plugin: http://keith-wood.name/datetimeEntry.html
 $(".datetime")
 	.datetimeEntry({
@@ -102,7 +100,8 @@ $(".datetime")
 $("#endTime").datetimeEntry("setDatetime", new Date());
 $("#startTime").datetimeEntry("setDatetime", new Date(Date.now() - 1800000)); // 30 min
 
-$(".datetime").on("change", getVehiclePositions)
+$("#submit").click(getVehiclePositions);
+
 
 // Get the AVL positions from the API for a given vehicle, and draw on map.
 function getVehiclePositions() {
@@ -117,7 +116,7 @@ function getVehiclePositions() {
 	if (endTime != "")
 		path += "&endDate=" + Date.parse(endTime);
 	
-	var xhr = $.getJSON(path, function(data) {
+	$.getJSON(path, function(data) {
 		drawVehiclePositions(data);
 		prepareAnimation(data);
 	});

@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.onebusaway</groupId>
@@ -20,7 +21,7 @@
       <artifactId>onebusaway-container</artifactId>
       <version>${project.version}</version>
     </dependency>
-     <dependency>
+    <dependency>
       <groupId>org.onebusaway</groupId>
       <artifactId>onebusaway-gtfs-realtime-api</artifactId>
       <version>${gtfs-api-version}</version>
@@ -63,34 +64,34 @@
       <version>1.9.0-rc1</version>
       <scope>test</scope>
     </dependency>
-    <!--  support mysql out of the box -->
+    <!-- support mysql out of the box -->
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
       <version>5.1.17</version>
     </dependency>
-    
+
     <!-- Web framework -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-webmvc</artifactId>
     </dependency>
-    
+
     <!-- Jackson JSON library, so web methods can return JSON -->
-	<dependency>
-	  <groupId>com.fasterxml.jackson.core</groupId>
-	  <artifactId>jackson-core</artifactId>
-	  <version>2.6.3</version>
-	</dependency>
-    
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.6.3</version>
+    </dependency>
+
   </dependencies>
-	
+
 
   <build>
     <resources>
       <resource>
-	<directory>src/main/resources</directory>
-	<filtering>true</filtering>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
       </resource>
     </resources>
   </build>

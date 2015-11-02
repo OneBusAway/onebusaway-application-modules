@@ -21,6 +21,7 @@
 <tr><td>Vehicles:</td><td><select id="vehicles"></select></td></tr>
 <tr><td>Start time:</td><td><input type="text" id="startTime" class="datetime"/></td></tr>
 <tr><td>End time:</td><td><input type="text" id="endTime" class="datetime"/></td></tr>
+<tr><td><input type="button" id="submit" value="Submit"></td></tr>
 </table>
   
 </div>
