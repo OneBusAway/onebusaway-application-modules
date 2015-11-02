@@ -77,15 +77,14 @@ function drawVehiclePositions(data) {
 			var label = $("<td />")
 			label.attr("class", "popupTableLabel")
 			label.text(labels[i])
+			var value = $("<td />")
+			value.text(avl[keys[i]]);
+			row.append(label)
+			row.append(value)
 		}
-	  	var content = "<table class='popupTable'>" 
-		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleId + "</td></tr>" 
-		+ "<tr><td class='popupTableLabel'>GPS Time:</td><td>" + avl.time + "</td></tr>" 
- 		+ "<tr><td class='popupTableLabel'>Lat/Lon:</td><td>" + avl.lat + ", " + avl.lon + "</td></tr>"
-  		+ "<tr><td class='popupTableLabel'>Speed:</td><td>" + avl.speed + " kph</td></tr>"
-  		+ "<tr><td class='popupTableLabel'>Heading:</td><td>" + avl.bearing + "</td></tr>"
-  		+ "</table>";
   		
-  		avlMarker.bindPopup(content);
+		console.log(content.html())
+		th()
+  		avlMarker.bindPopup(content.html());
 	})
 }
