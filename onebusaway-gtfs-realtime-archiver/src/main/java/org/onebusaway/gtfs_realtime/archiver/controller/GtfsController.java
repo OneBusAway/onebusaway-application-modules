@@ -1,7 +1,6 @@
 package org.onebusaway.gtfs_realtime.archiver.controller;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +13,8 @@ import org.onebusaway.transit_data_federation.services.shapes.ShapePointService;
 import org.onebusaway.transit_data_federation.services.transit_graph.AgencyEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteCollectionEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.RouteEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
 import org.onebusaway.transit_data_federation.services.transit_graph.TransitGraphDao;
 import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,13 +74,36 @@ public class GtfsController {
   public @ResponseBody ShapePoints getRoute(@PathVariable String agencyId, @PathVariable String id) {
     AgencyAndId routeId = new AgencyAndId(agencyId, id);
     RouteEntry route = _transitGraphDao.getRouteForId(routeId);
-    return getShapePointsForRoute(route);
+   
+    TripEntry trip = routeToTrip(route); // BAD - just uses first trip.
+    AgencyAndId shapeId = trip.getShapeId();
+   
+    return _shapePointService.getShapePointsForShapeId(shapeId);
   }
   
-  private ShapePoints getShapePointsForRoute(RouteEntry route) {
-    TripEntry trip = route.getTrips().get(0); // BAD - just uses first trip.
-    AgencyAndId shapeId = trip.getShapeId();
-    return _shapePointService.getShapePointsForShapeId(shapeId);
+  @RequestMapping(value="/stops/{agencyId}/{id}")
+  public @ResponseBody List<CoordinatePoint> getStops(@PathVariable String agencyId, @PathVariable String id) {
+    
+    AgencyAndId routeId = new AgencyAndId(agencyId, id);
+    RouteEntry route = _transitGraphDao.getRouteForId(routeId);
+   
+    TripEntry trip = routeToTrip(route);
+    List<StopTimeEntry> stopTimes = trip.getStopTimes();
+    
+    List<CoordinatePoint> points = new ArrayList<CoordinatePoint>();
+    
+    for (StopTimeEntry entry : stopTimes) {
+      StopEntry stop = entry.getStop();
+      points.add(stop.getStopLocation());
+    }
+    
+    return points;
+  }
+  
+  // Get a trip given a route
+  // Naive - uses first trip in route.
+  private TripEntry routeToTrip(RouteEntry route) {
+    return route.getTrips().get(0);
   }
   
 }

@@ -11,7 +11,9 @@ var vehicleGroup = L.layerGroup().addTo(map);
 var routeGroup = L.layerGroup().addTo(map);
 var animationGroup = L.layerGroup().addTo(map);
 
-/* For drawing the route and stops, taken from transitTime avlMap.jsp */
+/* Leaflet display options for drawing the route and stops,
+ * taken from transitTime avlMap.jsp */
+
 var routeOptions = {
 	color: '#00ee00',
 	weight: 4,
@@ -32,7 +34,7 @@ var routeOptions = {
 var routePolylineOptions = {clickable: false, color: "#00f", opacity: 0.5, weight: 4};
 
 
-// Fill agency dropdown from API
+// Fill agency dropdown menu from API
 $.getJSON(contextPath + "/agency", function(data) {
 	var select = $("#agencies");
 	
@@ -58,18 +60,23 @@ $.getJSON(contextPath + "/agency", function(data) {
 	select.change(); 
 });
 
-
-populateSelect("#vehicles", "/vehicleIds");
-
+// When a route is selected, draw a route polyline and circles for the stops.
 $("#routes").on("change", function() {
 	var agency = $("#agencies")[0].value,
 	route = $("#routes")[0].value;
+	
 	$.getJSON(contextPath + "/route/" + agency + "/" + route, drawRoute)
 		.fail(function() { alert("No data found for this route."); });
+	
+	$.getJSON(contextPath + "/stops/" + agency + "/" + route, drawStops);
 });
+
+// Set up the `vehicle' dropdown menu
+populateSelect("#vehicles", "/vehicleIds");
 
 $("#vehicles").on("change", getVehiclePositions);
 
+// Datetime pickers come from a jquery plugin: http://keith-wood.name/datetimeEntry.html
 $(".datetime")
 	.datetimeEntry({
 		spinnerImage: contextPath + "/resources/images/spinnerDefault.png",
@@ -77,6 +84,7 @@ $(".datetime")
 	})
 	.on("change", getVehiclePositions)
 
+// Get the AVL positions from the API for a given vehicle, and draw on map.
 function getVehiclePositions() {
 
 	var vehicleId = $("#vehicles")[0].value;
@@ -124,14 +132,15 @@ var busIcon =  L.icon({
 var animate = avlAnimation(animationGroup, busIcon, $("#playbackTime")[0]);
 
 var playButton = contextPath + "/resources/images/media-playback-start.svg",
-pauseButton = contextPath + "/resources/images/media-playback-pause.svg";
+	pauseButton = contextPath + "/resources/images/media-playback-pause.svg";
 
+// Given a list of AVL positions, initialize the animation object.
 function prepareAnimation(avlData) {
 	
 	// Fade in playback buttons
 	$("#playbackContainer").animate({bottom: "5%"});
 
-	// Make sure buttons are in init state.
+	// Make sure animation controls are in their initial state.
 	$("#playbackPlay").attr("src", playButton);
 	$("#playbackRate").text("1X");
 	
@@ -139,13 +148,9 @@ function prepareAnimation(avlData) {
 
 }
 
-$("#playbackNext").on("click", function() {
-	animate.next();
-});
+$("#playbackNext").on("click", animate.next);
 
-$("#playbackPrev").on("click", function() {
-	animate.prev()
-})
+$("#playbackPrev").on("click", animate.prev);
 
 $("#playbackPlay").on("click", function() {
 	

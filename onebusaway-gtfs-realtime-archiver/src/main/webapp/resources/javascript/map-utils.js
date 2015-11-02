@@ -1,8 +1,8 @@
 // Populate a select element with options from an endpoint
 // elem - querystring or DOM element to operate on
 // path - path of endpoint
-// mapfunc - if exists, run on each element in list to come up with option values
-function populateSelect(elem, path, onchange) {
+function populateSelect(elem, path) {
+	if (onchange) thunk()
 	$.getJSON(contextPath + path, function(data) {
 		var select = $(elem);
 		select.append("<option disabled selected />")
@@ -10,11 +10,11 @@ function populateSelect(elem, path, onchange) {
 			var option = $("<option />").attr("value", data[i]).text(data[i]);
 			select.append(option);
 		}
-		if (onchange)
-			select.on("change", onchange);
 	})
 }
 
+// Draw shape points for a route on the map.
+// data: object where data.lats is a list of latitudes and data.lons is a list of longitudes
 function drawRoute(data) {
 	routeGroup.clearLayers();
 	
@@ -33,6 +33,16 @@ function drawRoute(data) {
 	L.polyline(latLngs, routeOptions).addTo(routeGroup)
 }
 
+// stops: list of {lat, lng} objects
+// draw each stop as a circle on the map
+function drawStops(stops) {
+	stops.forEach(function(stop) {
+		L.circleMarker(stop, stopOptions).addTo(routeGroup);
+	});	
+}
+
+// data is a list of AVL objects. Each has {lat, lon, timestamp} fields.
+// draw AVL positions on the map.
 function drawVehiclePositions(data) {
 
 	// Since data is an array of objects each of which have a lat and lon
