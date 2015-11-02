@@ -66,25 +66,22 @@ function drawVehiclePositions(data) {
 	          angle: avl.bearing, // this doesn't actually seem to be used
 	          title: avl.time
 	      }).addTo(vehicleGroup);
-	  	
-		// TODO: make this JS.
+		
+		
+		/* Create popup AVL information */
+		
 		var labels = ["Vehicle", "GPS Time", "Lat/Lon", "Speed", "Heading"],
 			keys = ["vehicleId", "time", "latlon", "speed", "bearing"];
 		
 		var content = $("<table />").attr("class", "popupTable");
+		
 		for (var i = 0; i < labels.length; i++) {
-			var row = $("<tr />")
-			var label = $("<td />")
-			label.attr("class", "popupTableLabel")
-			label.text(labels[i])
-			var value = $("<td />")
-			value.text(avl[keys[i]]);
-			row.append(label)
-			row.append(value)
+			
+			var label = $("<td />").attr("class", "popupTableLabel").text(labels[i]);
+			var value = $("<td />").text(avl[keys[i]]);
+			content.append( $("<tr />").append(label, value) )
 		}
   		
-		console.log(content.html())
-		th()
-  		avlMarker.bindPopup(content.html());
+  		avlMarker.bindPopup(content[0]);
 	})
 }
