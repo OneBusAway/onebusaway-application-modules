@@ -34,9 +34,7 @@ public class VehiclePositionController {
 			@RequestParam(value="startDate", required=false, defaultValue="-1") long start,
 			@RequestParam(value="endDate", required=false, defaultValue="-1") long end) {
 		
-	  // Somewhat hacky way to handle no start date or end date
-	  // Use earliest (latest) possible Date objects. This way VehiclePositionDaoImpl
-	  // can use "between" in all cases.
+	  // startDate and endDate are null if not present in request params.
 	  Date startDate = (start > 0) ? new Date(start) : null,
 	      endDate = (end > 0) ? new Date(end) : null;
 	  

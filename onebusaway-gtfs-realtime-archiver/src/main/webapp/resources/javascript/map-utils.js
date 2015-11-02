@@ -55,6 +55,7 @@ function drawVehiclePositions(data) {
 	data.forEach(function(avl) {
 		
 		avl.time = new Date(avl.timestamp).toTimeString();
+		avl.latlon = avl.lat + ", " + avl.lon
 		
 		var avlMarker = L.rotatedMarker(avl, {
 	          icon: L.divIcon({
@@ -66,7 +67,11 @@ function drawVehiclePositions(data) {
 	          title: avl.time
 	      }).addTo(vehicleGroup);
 	  	
-		// TODO: make this not suck.
+		// TODO: make this JS.
+		var labels = ["Vehicle", "GPS Time", "Lat/Lon", "Speed", "Heading"],
+			keys = ["vehicleId", "time", "latlon", "speed", "bearing"];
+		
+		var content = $("")
 	  	var content = "<table class='popupTable'>" 
 		+ "<tr><td class='popupTableLabel'>Vehicle:</td><td>" + avl.vehicleId + "</td></tr>" 
 		+ "<tr><td class='popupTableLabel'>GPS Time:</td><td>" + avl.time + "</td></tr>" 
