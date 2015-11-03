@@ -32,8 +32,8 @@ if(typeof OBA !== 'undefined' &amp;&amp; typeof OBA.Config !== 'undefined') {
 	OBA.Config.txtPrefix='<s:text name="sms.prefix" />';
 	OBA.Config.signDefaultAgencyId='<s:text name="sign.default.agency.id" />';
 
-	OBA.Config.siriSMUrl = "/onebusaway-api-webapp/siri/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
-	OBA.Config.siriVMUrl = "/onebusaway-api-webapp/siri/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
+	OBA.Config.siriSMUrl = "<s:property value="siriBaseURL" />" + "/stop-monitoring.json?key=" + OBA.Config.obaApiKey;
+	OBA.Config.siriVMUrl = "<s:property value="siriBaseURL" />" + "/vehicle-monitoring.json?key=" + OBA.Config.obaApiKey;
 	
 	OBA.Config.infoBubbleFooterFunction = function(type, query) {
 			var html = '';

@@ -56,6 +56,8 @@ public class AutocompleteAction extends OneBusAwayEnterpriseActionSupport {
     
     if (suggestions != null && suggestions.size() == 0 && _term.length() > 2) {
     	List<EnterpriseGeocoderResult> geocoderResults = _geocoderService.enterpriseGeocode(_term);
+    	// guard against misconfiguration
+    	if (geocoderResults == null) return SUCCESS;
     	if (geocoderResults.size() > 0) {
         	for (int i = 0; i < 10; i++) {
         		suggestions.add(geocoderResults.get(i).getFormattedAddress());

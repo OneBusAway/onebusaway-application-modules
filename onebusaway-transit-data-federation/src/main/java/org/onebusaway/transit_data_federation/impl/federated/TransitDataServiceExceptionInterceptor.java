@@ -15,8 +15,8 @@
  */
 package org.onebusaway.transit_data_federation.impl.federated;
 
+import org.onebusaway.exceptions.NoSuchStopServiceException;
 import org.onebusaway.exceptions.ServiceException;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -38,7 +38,10 @@ public class TransitDataServiceExceptionInterceptor {
     } catch (ServiceException ex) {
       throw ex;
     } catch (Throwable ex) {
-      _log.error("error executing TransitDataService method", ex);
+      if (!(ex instanceof NoSuchStopServiceException)) {
+        // quiet the logs on no such stop service
+        _log.error("error executing TransitDataService method", ex);
+      }
       throw new ServiceException(ex);
     }
   }

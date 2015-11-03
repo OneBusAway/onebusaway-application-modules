@@ -24,6 +24,7 @@ import org.onebusaway.presentation.services.search.SearchResultFactory;
 import org.onebusaway.presentation.services.search.SearchService;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.exceptions.NoSuchStopServiceException;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.geospatial.services.SphericalGeometryLibrary;
 import org.onebusaway.gtfs.model.AgencyAndId;
@@ -88,6 +89,8 @@ public class SearchServiceImpl implements SearchService {
 	private TransitDataService _transitDataService;
 
 	private Map<String, RouteBean> _routeShortNameToRouteBeanMap = new HashMap<String, RouteBean>();
+	
+	private Map<String, RouteBean> _routeIdToRouteBeanMap = new HashMap<String, RouteBean>();
 
 	private Map<String, RouteBean> _routeLongNameToRouteBeanMap = new HashMap<String, RouteBean>();
 
@@ -113,6 +116,7 @@ public class SearchServiceImpl implements SearchService {
 		}
 
 		_routeShortNameToRouteBeanMap.clear();
+		_routeIdToRouteBeanMap.clear();
 		_routeLongNameToRouteBeanMap.clear();
 		_stopCodeToStopIdMap.clear();
 
@@ -126,6 +130,8 @@ public class SearchServiceImpl implements SearchService {
 				if (routeBean.getLongName() != null)
 					_routeLongNameToRouteBeanMap.put(routeBean.getLongName(),
 							routeBean);
+				
+				_routeIdToRouteBeanMap.put(routeBean.getId(), routeBean);
 			}
 
 			SearchQueryBean query = new SearchQueryBean();
@@ -290,16 +296,20 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchResultCollection findRoutesStoppingWithinRegion(
 			CoordinateBounds bounds, SearchResultFactory resultFactory) {
+	  SearchResultCollection results = new SearchResultCollection();
 		SearchQueryBean queryBean = new SearchQueryBean();
 		queryBean.setType(SearchQueryBean.EQueryType.BOUNDS_OR_CLOSEST);
 		queryBean.setBounds(bounds);
 		queryBean.setMaxCount(100);
 
-		RoutesBean routes = _transitDataService.getRoutes(queryBean);
-
+		RoutesBean routes = null;
+		try {
+		  routes = _transitDataService.getRoutes(queryBean);
+		} catch (OutOfServiceAreaServiceException e) {
+		  return results;
+		}
+		
 		Collections.sort(routes.getRoutes(), new RouteComparator());
-
-		SearchResultCollection results = new SearchResultCollection();
 
 		for (RouteBean route : routes.getRoutes()) {
 			results.addMatch(resultFactory.getRouteResultForRegion(route));
@@ -314,17 +324,23 @@ public class SearchServiceImpl implements SearchService {
 		CoordinateBounds bounds = SphericalGeometryLibrary.bounds(latitude,
 				longitude, DISTANCE_TO_ROUTES);
 
+		SearchResultCollection results = new SearchResultCollection();
 		SearchQueryBean queryBean = new SearchQueryBean();
 		queryBean.setType(SearchQueryBean.EQueryType.BOUNDS_OR_CLOSEST);
 		queryBean.setBounds(bounds);
 		queryBean.setMaxCount(100);
 
-		RoutesBean routes = _transitDataService.getRoutes(queryBean);
+		
+		RoutesBean routes = null;
+		try {
+		  routes = _transitDataService.getRoutes(queryBean);
+    } catch (OutOfServiceAreaServiceException e) {
+      return results;
+    }
 
 		Collections.sort(routes.getRoutes(),
 				new RouteDistanceFromPointComparator(latitude, longitude));
 
-		SearchResultCollection results = new SearchResultCollection();
 
 		for (RouteBean route : routes.getRoutes()) {
 
@@ -351,7 +367,8 @@ public class SearchServiceImpl implements SearchService {
 
 		tryAsRoute(results, normalizedQuery, resultFactory);
 
-		if (results.isEmpty() && StringUtils.isNumeric(normalizedQuery)) {
+		// only guess it as a stop if its numeric or has possible agency prefix
+		if (results.isEmpty() && (StringUtils.isNumeric(normalizedQuery) || normalizedQuery.contains("_")) ) {
 			tryAsStop(results, normalizedQuery, resultFactory);
 		}
 
@@ -453,6 +470,14 @@ public class SearchServiceImpl implements SearchService {
 			return;
 		}
 
+		// agency + route id matching (from direct links)
+    if (_routeIdToRouteBeanMap.get(routeQuery) != null) {
+      RouteBean routeBean = _routeIdToRouteBeanMap.get(routeQuery);
+      results.addMatch(resultFactory.getRouteResult(routeBean));
+      // if we've matched, assume no others
+      return;
+    }
+		
 		// short name matching
 		if (_routeShortNameToRouteBeanMap.get(routeQuery) != null) {
 			RouteBean routeBean = _routeShortNameToRouteBeanMap.get(routeQuery);
@@ -470,10 +495,14 @@ public class SearchServiceImpl implements SearchService {
 			if (!routeQuery.equals(routeShortName)
 					&& ((routeShortName.startsWith(routeQuery) && leftOversAreDiscardable) || (routeShortName
 							.endsWith(routeQuery) && leftOversAreDiscardable))) {
-				RouteBean routeBean = _routeShortNameToRouteBeanMap
-						.get(routeShortName);
-				results.addSuggestion(resultFactory.getRouteResult(routeBean));
-				continue;
+			  try {
+  			  RouteBean routeBean = _routeShortNameToRouteBeanMap
+  						.get(routeShortName);
+  				results.addSuggestion(resultFactory.getRouteResult(routeBean));
+  				continue;
+			  } catch (OutOfServiceAreaServiceException oosase) {
+			  }
+
 			}
 		}
 
@@ -481,10 +510,13 @@ public class SearchServiceImpl implements SearchService {
 		for (String routeLongName : _routeLongNameToRouteBeanMap.keySet()) {
 			if (routeLongName.contains(routeQuery + " ")
 					|| routeLongName.contains(" " + routeQuery)) {
-				RouteBean routeBean = _routeLongNameToRouteBeanMap
-						.get(routeLongName);
-				results.addSuggestion(resultFactory.getRouteResult(routeBean));
-				continue;
+			  try {
+  				RouteBean routeBean = _routeLongNameToRouteBeanMap
+  						.get(routeLongName);
+  				results.addSuggestion(resultFactory.getRouteResult(routeBean));
+  				continue;
+			  } catch (OutOfServiceAreaServiceException oosase) {
+			  }
 			}
 		}
 
@@ -517,6 +549,9 @@ public class SearchServiceImpl implements SearchService {
 		List<EnterpriseGeocoderResult> geocoderResults = _geocoderService
 				.enterpriseGeocode(query);
 
+		// guard against misconfiguration
+		if (geocoderResults == null) return;
+		
 		for (EnterpriseGeocoderResult result : geocoderResults) {
 			if (geocoderResults.size() == 1) {
 				results.addMatch(resultFactory.getGeocoderResult(result,
@@ -531,6 +566,21 @@ public class SearchServiceImpl implements SearchService {
 	// Utility method for getting all known stops for an id with no agency
 	private List<StopBean> stopsForId(String id) {
 		List<StopBean> matches = new ArrayList<StopBean>();
+		
+		// accept agency denoted stops first!
+		if (id.contains("_")) {
+		  try {
+		    StopBean potentialStop = _transitDataService.getStop(id);
+		    if (potentialStop != null) {
+		      matches.add(potentialStop);
+		      // if an agency prefix was specified, don't continue searching
+		      return matches;
+		    }
+		  } catch (NoSuchStopServiceException ex) {
+		    
+		  }
+		}
+		
 		for (AgencyWithCoverageBean agency : _transitDataService
 				.getAgenciesWithCoverage()) {
 			AgencyAndId potentialStopId = new AgencyAndId(agency.getAgency()

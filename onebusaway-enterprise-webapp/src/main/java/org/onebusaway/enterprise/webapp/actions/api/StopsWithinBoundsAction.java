@@ -19,12 +19,14 @@ import org.onebusaway.geospatial.model.CoordinateBounds;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.enterprise.webapp.actions.OneBusAwayEnterpriseActionSupport;
 import org.onebusaway.enterprise.webapp.actions.api.model.StopOnRoute;
+import org.onebusaway.exceptions.OutOfServiceAreaServiceException;
 import org.onebusaway.transit_data.model.SearchQueryBean;
 import org.onebusaway.transit_data.model.StopBean;
 import org.onebusaway.transit_data.model.StopsBean;
-
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -36,6 +38,9 @@ public class StopsWithinBoundsAction extends OneBusAwayEnterpriseActionSupport {
 
   private static final long serialVersionUID = 1L;
 
+  private static Logger _log = LoggerFactory
+      .getLogger(StopsWithinBoundsAction.class);
+  
   @Autowired
   private TransitDataService _transitDataService;
 
@@ -64,7 +69,13 @@ public class StopsWithinBoundsAction extends OneBusAwayEnterpriseActionSupport {
     queryBean.setBounds(_bounds);
     queryBean.setMaxCount(200);    
     
-    StopsBean stops = _transitDataService.getStops(queryBean);
+    StopsBean stops = null;
+    try {
+      stops = _transitDataService.getStops(queryBean);
+    } catch (OutOfServiceAreaServiceException e) {
+      _log.error(" invalid results: ", e);
+      return SUCCESS;
+    }
     
     for(StopBean stop : stops.getStops()) {
       _stops.add(new StopOnRoute(stop));
