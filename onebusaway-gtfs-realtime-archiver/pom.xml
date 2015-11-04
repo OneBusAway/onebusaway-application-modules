@@ -88,6 +88,22 @@
 
 
   <build>
+    <plugins>
+      <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <configuration>
+          <excludes combine.children="append">
+            <exclude>src/main/webapp/resources/images/**.svg</exclude>
+            <!-- Exlude non-CS plugins -->
+            <exclude>src/main/webapp/resources/javascript/jquery**.js</exclude>
+            <exclude>src/main/webapp/resources/javascript/leaflet**.js</exclude>
+            <exclude>src/main/webapp/resources/css/jquery**.css</exclude>
+            <exclude>src/main/webapp/resources/css/leaflet**.css</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
