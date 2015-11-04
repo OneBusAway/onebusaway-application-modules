@@ -95,7 +95,7 @@
         <configuration>
           <excludes combine.children="append">
             <exclude>src/main/webapp/resources/images/**.svg</exclude>
-            <!-- Exlude non-CS plugins -->
+            <!-- Exclude non-CS plugins -->
             <exclude>src/main/webapp/resources/javascript/jquery**.js</exclude>
             <exclude>src/main/webapp/resources/javascript/leaflet**.js</exclude>
             <exclude>src/main/webapp/resources/css/jquery**.css</exclude>
