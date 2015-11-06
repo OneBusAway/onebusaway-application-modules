@@ -67,8 +67,11 @@
   padding-top: 10px;
   padding-bottom: 10px;
   padding-left: 10px;
-  font-size: 18px;
-  font: Times New Roman, Times, serif;
+  /*font-size: 18px;
+  font: Times New Roman, Times, serif; */
+  font-size: 2em;
+  font-family: Arial Bold, Arial;
+  font-weight: 700;
 }
 
 .submitForm {
@@ -339,15 +342,15 @@
   font-size : 12px;
 }
 
-#uploadFiles #agency_data {
+/* #uploadFiles #agency_data {
   	border-collapse: collapse;
-}
+} */
 
-#uploadFiles #agency_data th, td {
+#uploadFiles #agency_data th, #uploadFiles #agency_data td {
   border: 1px solid black;
 }
 
-#uploadFiles #agency_data th,td {
+#uploadFiles #agency_data th, #uploadFiles #agency_data td {
   padding: 5px 10px;
 }
 
@@ -706,7 +709,7 @@
   	border-collapse: collapse;
 }
 
-#bundleValidationResults th, td {
+#bundleValidationResults th,  #bundleValidationResults td {
   border: 1px solid black;
 }
 .testPass {
@@ -714,5 +717,209 @@
 }
 .testFail {
   color: red
+}
+
+/* Styles added for new UI design */
+#Create p {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 32px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+#Create div {
+    padding-right: 1.5em;
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+    width: 90%;
+}
+
+#Create #newDatasetTableDiv {
+    padding-right: 1.5em;
+    padding-bottom: 1.5em;
+    padding-left: 1.5em;
+    max-width: 100%;	
+}
+
+#Create #existingDatasetTableDiv {
+    padding: 0px;
+    border: 1px solid gray;
+    max-width: 100%;	
+}
+
+#Create table {
+    padding-top: 2em;
+    padding-right: 2em;
+    padding-bottom: 2em;
+    padding-left: 2em;
+    border-spacing: .4em;
+    width: 100%;
+}
+
+#Create #createDataset {
+    border: 1px solid gray;
+}
+
+#Create table thead {
+	 border-bottom: 1px solid gray;
+}
+
+#Create table #createDataset tr td:first-child {
+	color: red;
+    max-width: 25em;
+}
+
+//#Create table #createDataset #newDirectoryButton {
+//	width: 100em;
+//}
+
+#Create .datasetDivHeader {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+    padding-bottom: .2em;
+    display: block;
+}
+
+#Create #datasetNameLabel {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 14px;
+}
+
+#Create #datasetNameNotes {
+    font-family: "Arial Regular","Arial";
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+
+#Create #directoryName {
+    width: 75%;
+}
+
+
+#Create div #existingDirBtnDiv {
+    border: 1px solid gray;
+    padding-top: 1em;
+    width: 90%;
+}
+
+#Create #existingDatasetDiv {
+    border-collapse:collapse
+}
+
+#Create #existingDataset {
+	padding-top: 1em;
+    padding-right: 0em;
+    padding-bottom: .5em;
+    padding-left: 0em;
+    border-bottom: 1px solid gray;
+    border-spacing: 0em;
+}
+
+#Create #existingDataset .copyDirectory {
+	color: blue;
+}
+
+#Create #existingDataset .copyDirectory:hover {
+	font-weight: bold;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+#Create #existingDataset #existingDirectoryButtonDiv {
+	padding-top: 1.5em;
+}
+
+#Create #datasetNameLabel {
+	float: left;
+	margin-right: 15px;
+}
+
+#Create th {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 13px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+}
+
+#Create #existingDataset th {
+	padding-bottom: .5em;
+}
+
+#Create input[type="button"] {
+    font-family: "Arial Regular","Arial";
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13px;
+    width: auto;
+    //color: #333;
+    text-align: center;
+    line-height: normal;
+    padding: .5em;
+}
+#Create input[type="button"]:hover {
+	cursor: pointer;
+}
+
+#Create table tr:first-child th {
+    border-spacing: 0;
+    border-bottom: 1px solid gray;
+}
+
+/* Modal dialog box for Copy on Choose tab */
+#copyPopupContents {
+	margin-top: 2em;
+	margin-left: 2.3em;
+}
+
+.ui-dialog > .ui-widget-header {
+	/*background: transparent;*/
+}
+
+.ui-dialog-content {
+	background-color: white;
+}
+
+#copyPopup p {
+    font-family: "Arial Bold","Arial";
+    font-weight: 700;
+    font-style: normal;
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+    line-height: normal;
+    padding-bottom:0;
+    padding-right: 5em;
+    display: block;
+}
+
+#copyPopup #destinationDirDiv {
+	margin-top: 2em;
+}
+
+#copyPopup #datasetNameLabel {
+	font-weight: bold;
+	padding-right: 1em;
+}
+
+#copyPopup #destinationDirectory {
+	width: 60%;
 }
 
