@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
+ * Copyright (C) 2015 University of South Florida (cagricetin@mail.usf.edu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +30,7 @@ import org.onebusaway.transit_data_federation.services.narrative.NarrativeServic
  */
 public final class AgencyNarrative implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
   private final String name;
 
@@ -40,6 +41,10 @@ public final class AgencyNarrative implements Serializable {
   private final String lang;
 
   private final String phone;
+  
+  private final String email;
+  
+  private final String fareUrl;
 
   private final String disclaimer;
 
@@ -60,6 +65,8 @@ public final class AgencyNarrative implements Serializable {
     this.lang = builder.lang;
     this.phone = builder.phone;
     this.disclaimer = builder.disclaimer;
+    this.email = builder.email;
+    this.fareUrl = builder.fareUrl;
     this.privateService = builder.privateService;
   }
 
@@ -82,9 +89,17 @@ public final class AgencyNarrative implements Serializable {
   public String getPhone() {
     return phone;
   }
+  
+  public String getEmail() {
+    return email;
+  }
 
   public String getDisclaimer() {
     return disclaimer;
+  }
+  
+  public String getFareUrl() {
+    return fareUrl;
   }
 
   /**
@@ -108,6 +123,10 @@ public final class AgencyNarrative implements Serializable {
     private String phone;
 
     private String disclaimer;
+    
+    private String email;
+    
+    private String fareUrl;
 
     private boolean privateService;
 
@@ -138,7 +157,15 @@ public final class AgencyNarrative implements Serializable {
     public void setDisclaimer(String disclaimer) {
       this.disclaimer = disclaimer;
     }
+    
+    public void setEmail(String email){
+      this.email = email;
+    }
 
+    public void setFareUrl(String fareUrl) {
+      this.fareUrl = fareUrl;
+    }
+    
     public void setPrivateService(boolean privateService) {
       this.privateService = privateService;
     }

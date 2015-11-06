@@ -1,6 +1,7 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
  * Copyright (C) 2011 Google, Inc.
+ * Copyright (C) 2015 University of South Florida (cagricetin@mail.usf.edu)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +52,8 @@ class AgencyBeanServiceImpl implements AgencyBeanService {
     bean.setUrl(agency.getUrl());
     bean.setDisclaimer(agency.getDisclaimer());
     bean.setPrivateService(agency.isPrivateService());
+    bean.setFareUrl(agency.getFareUrl());
+    bean.setEmail(agency.getEmail());
 
     return bean;
   }
