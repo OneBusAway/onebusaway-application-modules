@@ -17,7 +17,9 @@
 var timeout = null;
 var agencyMetadataAvailable = false;
 var agencyMetadata;		//For agency metadata
-
+var selectedDirectory = "";  //Selected on Choose tab, used by Upload tab
+var destinationDirectory = ""; //For "copy" on Choose tab, used by Upload tab
+ 
 jQuery(function() {
 	//Initialize tabs
 	jQuery("#tabs").tabs();
@@ -169,8 +171,30 @@ jQuery(function() {
 	jQuery("#deploy_continue").click(onDeployContinueClick);
 
 	// hookup ajax call to select
-	jQuery("#directoryButton").click(onSelectClick);
+	jQuery("#newDirectoryButton").click(onCreateDatasetClick);
 
+	// On choose tab, only one existing directory can be selected at a time
+	jQuery("#existingDataset tr input:checkbox").click(function () {
+		var state = $(this).prop("checked");
+		$(this).parent().parent().parent().find('input:checked').prop("checked", false);
+		$(this).prop("checked", state);
+		// If this item is selected, enable the "Add files..." button
+		if (state == true) {
+			//jQuery("#existingDirectoryButton").prop("enabled",true);
+			jQuery("#existingDirectoryButton").removeAttr("disabled").css("color", "#000");
+		} else {
+			jQuery("#existingDirectoryButton").attr("disabled", "disabled").css("color", "#999");
+		}
+	});
+	
+	// use an existing dataset
+	jQuery("#existingDirectoryButton").click(onExistingDatasetClick);
+	
+	// copy existing dataset to a new directory
+	jQuery(".copyDirectory").click(onCopyExistingDatasetClick);
+	
+	jQuery("#continueCopy").click(onContinueCopyClick);
+	
 	// upload bundle source data for selected agency
 	jQuery("#uploadSelectedAgenciesButton").click(onUploadSelectedAgenciesClick);
 
@@ -221,9 +245,9 @@ jQuery(function() {
 	//Enable or disable create/select button when user enters/removes directory name
 	//For a copy, a value must also be provided for the destination directory
 	//Using bind() with propertychange event as live() does not work in IE for unknown reasons
-	jQuery("#createDirectoryContents #directoryName").bind("input propertychange", function() {
-		var text = jQuery("#createDirectory #directoryName").val();
-		var copyDestText = jQuery("#createDirectory #destDirectoryName").val();
+	jQuery("#createDataset #directoryName").bind("input propertychange", function() {
+		var text = jQuery("#createDataset #directoryName").val();
+		//var copyDestText = jQuery("#createDirectory #destDirectoryName").val();
 		if (text.length > 0 && (!jQuery("#copy").is(":checked") || copyDestText.length > 0)) {
 			enableSelectButton();
 		} else {
@@ -255,6 +279,23 @@ jQuery(function() {
 	
 	//Retrieve transit agency metadata
 	getAgencyMetadata();
+	
+	// For "Copy" popup to specify a destination directory
+	$("#copyPopup").dialog({
+		autoOpen: false,
+		modal: true,
+		width: 'auto',
+		buttons: {
+			"Cancel": function() {
+				$(this).dialog("close");
+			},
+			"Continue": function() {
+				destinationDirectory = $("#destinationDirectory").val();
+				$(this).dialog("close");
+				onCopyDestinationSpecified();
+			}
+		}
+	});
 });
 
 function onCreateContinueClick() {
@@ -419,15 +460,60 @@ function showBundleInfo(bundleInfo){
 	setDivHtml(document.getElementById('buildBundle_resultList'), bundleObj.buildResponse.statusMessages);
 	showBuildFileList(bundleObj.buildResponse.buildOutputFiles, bundleObj.buildResponse.requestId);
 }
-function onSelectClick() {
-	var bundleDir = jQuery("#createDirectory #directoryName").val();
+
+function onCreateDatasetClick() {
+	selectedDirectory = jQuery("#createDataset #directoryName").val();
+	onSelectDataset("create");
+	var $tabs = jQuery("#tabs");
+	$tabs.tabs('select', 1);
+}
+
+function onExistingDatasetClick() {
+	var selectedCheckbox = jQuery("#Create #existingDataset").find("input:checked");
+	selectedDirectory = selectedCheckbox.closest("tr").find(".directoryName").text();	
+	onSelectDataset("existing");
+	var $tabs = jQuery("#tabs");
+	$tabs.tabs('select', 1);
+}
+
+function onCopyExistingDatasetClick() {
+	selectedDirectory = $(this).closest("tr").find(".directoryName").text();
+	var continueCopy = $("#copyPopup").dialog("open");
+}
+
+function onCopyDestinationSpecified() {
+	onSelectDataset("copy");
+	var $tabs = jQuery("#tabs");
+	$tabs.tabs('select', 1);
+}
+
+function onContinueCopyClick() {
+	destinationDirectory = $("#destinationDirectory").text();
+	alert('destination directory: ' + destinationDirectory);
+}
+
+function onSelectDataset(sourceDirectoryType) {
+	//var bundleDir = jQuery("#createDataset #directoryName").val();
+	//if (sourceDirectoryType == "existing") {
+	//	var selectedCheckbox = jQuery("#Create #existingDataset").find("input:checked");
+	//	bundleDir = selectedCheckbox.closest("tr").find(".directoryName").text();
+	//}
+	//if (sourceDirectoryType == "copy") {
+	//	bundleDir = selectedDirectory;
+	//}
+	//selectedDirectory = bundleDir; //Used by Upload tab
+	var bundleDir = selectedDirectory;
 	var actionName = "selectDirectory";
-	var copyDir = "";
+	if (sourceDirectoryType=="copy") {
+		actionName = "copyDirectory"
+	}
+	var copyDir = destinationDirectory;
 
 	// initially hide the Request Id label when picking a new bundle
 	jQuery("#prevalidate_id_label").hide();
 	
-	if (jQuery("#create").is(":checked")) {
+	//if (jQuery("#create").is(":checked")) {
+	if (sourceDirectoryType == "create") {
 		// Check for valid bundle directory name
 		var bundleNameCheck = /^[a-zA-Z0-9\.\_\-]+$/;
 		if (!bundleNameCheck.test(bundleDir)) {
@@ -441,11 +527,10 @@ function onSelectClick() {
 		actionName = "createDirectory";
 	}
 
-	if(jQuery("#copy").is(":checked")) {
-		copyDir = jQuery("#destDirectoryName").val();
-		actionName = "copyDirectory";
-	}
-
+	//if(jQuery("#copy").is(":checked")) {
+	//	copyDir = jQuery("#destDirectoryName").val();
+	//	actionName = "copyDirectory";
+	//}
 	jQuery.ajax({
 		url: "manage-bundles!" + actionName + ".action?ts=" +new Date().getTime(),
 		type: "GET",
@@ -456,7 +541,7 @@ function onSelectClick() {
 				disableSelectButton();
 				var status = response;
 				if (status != undefined) {
-					jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").show().css("display","block");
+					//jQuery("#createDirectory #createDirectoryContents #createDirectoryResult").show().css("display","block");
 					if(status.selected == true) {
 						jQuery("#createDirectoryResult #resultImage").attr("src", "../../css/img/dialog-accept-2.png");
 						jQuery("#createDirectoryMessage").text(status.message).css("color", "green");
@@ -490,6 +575,9 @@ function onSelectClick() {
 								insertAfterThis.after(newDirRow);
 							}
 						}			
+						if (sourceDirectoryType=="copy") {
+							selectedDirectory = copyDir;
+						}
 						enableBuildButton();
 						enableResetButton();
 					}					
@@ -526,7 +614,8 @@ function onSelectClick() {
 }
 
 function onUploadSelectedAgenciesClick() {
-	var bundleDir = jQuery("#createDirectory #directoryName").val();
+	//var bundleDir = jQuery("#createDirectory #directoryName").val();
+	var bundleDir = selectedDirectory;
 	var cleanedDirs = [];
 	$('#agency_data .agencySelected').each(function() {
 		$this = $(this)
@@ -692,11 +781,19 @@ function disableContinueButton(continueButton) {
 }
 
 function enableSelectButton() {
-	jQuery("#createDirectory #createDirectoryContents #directoryButton").removeAttr("disabled").css("color", "#000");
+	jQuery("#Create #createDataset #newDirectoryButton").removeAttr("disabled").css("color", "#000");
 }
 
 function disableSelectButton() {
-	jQuery("#createDirectory #createDirectoryContents #directoryButton").attr("disabled", "disabled").css("color", "#999");
+	jQuery("#Create #createDataset #newDirectoryButton").attr("disabled", "disabled").css("color", "#999");
+}
+
+function enableAddFilesButton() {
+	jQuery("#Create #createDataset #existingDirectoryButton").removeAttr("disabled").css("color", "#000");
+}
+
+function disableAddFilesButton() {
+	jQuery("#Create #createDataset #existingDirectoryButton").attr("disabled", "disabled").css("color", "#999");
 }
 
 function enableStageButton() {
