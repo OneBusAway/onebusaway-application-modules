@@ -15,6 +15,10 @@
  */
 package org.onebusaway.admin.service.server;
 
+import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+
 public interface WmataRssServiceAlertsService {
+
+  public FeedMessage getServlceAlertFeed();
 
 }

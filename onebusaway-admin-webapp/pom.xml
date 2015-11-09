@@ -326,8 +326,8 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<tds.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
-				<vtms.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
+				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
 				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
 				<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
 				<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>
