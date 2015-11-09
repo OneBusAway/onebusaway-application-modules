@@ -28,8 +28,8 @@ public class ServiceAlertLibrary {
 
   private static final Logger _log = LoggerFactory.getLogger(ServiceAlertLibrary.class);
 
-  public static final AgencyAndId agencyAndId(Id id) {
-    return new AgencyAndId(id.getAgencyId(), id.getId());
+  public static final AgencyAndId agencyAndId(String agencyId, String id) {
+    return new AgencyAndId(agencyId, id);
   }
 
   public static Id id(AgencyAndId id) {

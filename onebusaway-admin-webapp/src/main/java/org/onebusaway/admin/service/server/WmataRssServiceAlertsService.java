@@ -1,6 +1,5 @@
 /**
  * Copyright (C) 2011 Brian Ferris <bdferris@onebusaway.org>
- * Copyright (C) 2011 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onebusaway.transit_data_federation.impl.service_alerts;
+package org.onebusaway.admin.service.server;
 
-import java.util.HashSet;
-import java.util.Set;
-
-class AffectsServiceAlertAgencyKeyFactory implements AffectsKeyFactory<String> {
-
-  public static final AffectsServiceAlertAgencyKeyFactory INSTANCE = new AffectsServiceAlertAgencyKeyFactory();
-
-  @Override
-  public Set<String> getKeysForAffects(ServiceAlertRecord serviceAlert) {
-
-    Set<String> v = new HashSet<String>();
-    if( serviceAlert != null)
-      v.add(serviceAlert.getAgencyId());
-    return v;
-  }
+public interface WmataRssServiceAlertsService {
 
 }

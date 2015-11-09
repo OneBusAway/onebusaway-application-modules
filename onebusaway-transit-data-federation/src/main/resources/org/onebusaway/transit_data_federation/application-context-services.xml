@@ -44,6 +44,10 @@
         <value>org.onebusaway.transit_data_federation.impl.reporting.StopProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.reporting.TripProblemReportRecord</value>
         <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertRecord</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertLocalizedString</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertTimeRange</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertsSituationAffectsClause</value>
+        <value>org.onebusaway.transit_data_federation.impl.service_alerts.ServiceAlertSituationConsequenceClause</value>
       </list>
     </property>
   </bean>

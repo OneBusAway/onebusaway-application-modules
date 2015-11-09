@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/*
 package org.onebusaway.transit_data_federation.impl.beans;
 
 import static org.junit.Assert.assertEquals;
@@ -61,9 +62,11 @@ public class ServiceAlertsBeanServiceImplTest {
   @Test
   public void testCreateServiceAlert() {
 
-    /**
+    */
+/**
      * Construct the bean we'll use in the call to the service
-     */
+     *//*
+
     ServiceAlertBean bean = new ServiceAlertBean();
     bean.setActiveWindows(Arrays.asList(new TimeRangeBean(30, 40)));
     SituationAffectsBean affectsBean = new SituationAffectsBean();
@@ -91,10 +94,12 @@ public class ServiceAlertsBeanServiceImplTest {
     bean.setUrls(Arrays.asList(new NaturalLanguageStringBean(
         "http://somewhere", "en")));
 
-    /**
+    */
+/**
      * Construct the ServiceAlert.Builder that we'll return from the
      * ServiceAlertService mock when called by the bean service
-     */
+     *//*
+
     ServiceAlert.Builder builder = ServiceAlert.newBuilder();
     TimeRange.Builder trBuilder = TimeRange.newBuilder();
     trBuilder.setStart(30);
@@ -153,10 +158,12 @@ public class ServiceAlertsBeanServiceImplTest {
 
     assertNotSame(updated, bean);
 
-    /**
+    */
+/**
      * Verify that the conversion of the ServiceAlertBean into a
      * ServiceAlert.Builder looks right
-     */
+     *//*
+
     builder = captor.getValue();
     assertEquals(1, builder.getActiveWindowCount());
     TimeRange range = builder.getActiveWindow(0);
@@ -201,10 +208,12 @@ public class ServiceAlertsBeanServiceImplTest {
     assertEquals("en", url.getLanguage());
     assertEquals("http://somewhere", url.getText());
 
-    /**
+    */
+/**
      * Verify that the conversion from the ServiceAlert to ServiceAlertBean
      * looks good
-     */
+     *//*
+
     List<TimeRangeBean> windows = updated.getActiveWindows();
     assertEquals(1, windows.size());
     TimeRangeBean window = windows.get(0);
@@ -246,3 +255,4 @@ public class ServiceAlertsBeanServiceImplTest {
     assertEquals("http://somewhere/else/", nls.getValue());
   }
 }
+*/

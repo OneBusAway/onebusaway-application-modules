@@ -45,7 +45,7 @@ public class ServiceAlertBean implements Serializable {
 
   private ESeverity severity;
 
-  private String source = "OBA";
+  private String source;
 
   public String getId() {
     return id;

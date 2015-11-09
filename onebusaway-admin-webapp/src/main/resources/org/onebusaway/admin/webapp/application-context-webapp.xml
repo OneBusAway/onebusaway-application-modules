@@ -156,5 +156,7 @@
 	
 	  <bean id="configurationServiceClient" class="org.onebusaway.util.impl.configuration.ConfigurationServiceClientFileImpl" >
 	  </bean>
-  
+
+    <bean id="wmataRssServiceAlertsService" class="org.onebusaway.admin.service.server.impl.WmataRssServiceAlertsSerivceImpl" />
+
 </beans>
