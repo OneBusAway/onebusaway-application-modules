@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.transit.realtime.GtfsRealtime.FeedMessage;
 
-@Path("/alerts-from-rss/")
+@Path("/alerts-from-rss")
 @Component
 public class AlertsFromRssResource {
 
