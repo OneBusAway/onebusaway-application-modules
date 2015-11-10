@@ -57,6 +57,9 @@
                 <prop key="hibernate.generate_statistics">true</prop>
                 <prop key="hibernate.cache.use_structured_entries">true</prop>
                 <prop key="hibernate.jdbc.batch_size">1000</prop>
+                <prop key="default_batch_fetch_size">100</prop>  
+   				<prop key="hibernate.order_inserts">true</prop>  
+   				<prop key="hibernate.order_updates">true</prop>  
             </props>
         </property>
     </bean>
