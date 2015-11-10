@@ -41,6 +41,9 @@ public interface ConfigurationService {
   public Integer getConfigurationValueAsInteger(String configurationItemKey,
 	      Integer defaultValue);
   
+  public Double getConfigurationValueAsDouble(String configurationItemKey, 
+		  Double defaultValue);
+  
   /**
    * Set a value for the given configuration key as a string.
    * 
@@ -50,6 +53,8 @@ public interface ConfigurationService {
    */  
   public void setConfigurationValue(String component, String configurationItemKey, 
 		  String value) throws Exception;
+  
+  
   
   /**
    * Get a collection of all key value pairs stored in tdm_config.xml on TDM server
