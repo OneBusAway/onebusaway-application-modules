@@ -231,7 +231,7 @@ public class BundleResource implements ServletContextAware{
     } catch (Exception e) {
       _log.error("isTdm caugh e:", e);
     }
-    return isTdm;
+    return Boolean.TRUE.equals(isTdm);
   }
 
   @Override
