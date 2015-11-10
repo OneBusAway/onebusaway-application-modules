@@ -72,7 +72,11 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	@PostConstruct
 	public void start() {
-		loadServiceAlerts();
+	  try {
+	    loadServiceAlerts();
+	  } catch (Throwable t) {
+	    _log.error("issue loading service alerts: ", t);
+	  }
 	}
 
 	@PreDestroy
@@ -556,7 +560,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 				updateReferences(serviceAlert);
 
 		} catch (Exception ex) {
-			_log.error("error loading service alerts from DB " + ex.toString());
+			_log.error("error loading service alerts from DB ", ex);
 		}		
 	}
 

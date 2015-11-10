@@ -16,6 +16,26 @@
 
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.block;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.blockConfiguration;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.lsids;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.route;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.routeCollection;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.serviceIds;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stop;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.stopTime;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.time;
+import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.trip;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,17 +57,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
-
-import static junit.framework.Assert.assertSame;
-import static org.junit.Assert.*;
-import static org.onebusaway.transit_data_federation.testing.UnitTestingSupport.*;
-
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={"classpath:service-alerts-data-sources.xml"})
+@ContextConfiguration(locations={"classpath:service-alerts-data-sources.xml", 
+    "classpath:org/onebusaway/transit_data_federation/application-context-services.xml"})
 @TransactionConfiguration(transactionManager="transactionManager")
 @Transactional
 public class ServiceAlertsServiceImplTest extends AbstractTransactionalJUnit4SpringContextTests {

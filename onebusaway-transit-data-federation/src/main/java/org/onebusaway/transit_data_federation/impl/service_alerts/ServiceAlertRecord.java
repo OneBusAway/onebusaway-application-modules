@@ -15,14 +15,25 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.onebusaway.transit_data.model.service_alerts.ECause;
 import org.onebusaway.transit_data.model.service_alerts.ESeverity;
-
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A Service Alert record is a database-serializable record that captures the
@@ -31,7 +42,7 @@ import java.util.Set;
  * 
  * This class is meant for internal use.
  * 
- * @author ckhasnis 
+ * @author dbenoff 
  */
 @Entity
 @Table(name = "transit_data_service_alerts_records")
@@ -97,6 +108,7 @@ public class ServiceAlertRecord {
   @GeneratedValue
   private int id = 0;
 
+  @Column(nullable = false, name="service_alert_agency_id", length = 10)
   private String agencyId;
 
 	@Column(nullable = false, name="service_alert_id", length = 255)
@@ -105,9 +117,7 @@ public class ServiceAlertRecord {
   private Long creationTime = 0l;
 
   private Long modifiedTime = 0l;
-
-
-
+  
   public Long getModifiedTime() {
     return modifiedTime;
   }

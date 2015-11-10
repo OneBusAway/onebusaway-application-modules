@@ -494,22 +494,26 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   /**
    * 
    * @param url
-   * @return a {@link FeedMessage} constructed from the protocol buffer conent
+   * @return a {@link FeedMessage} constructed from the protocol buffer content
    *         of the specified url, or a default empty {@link FeedMessage} if the
    *         url is null
    * @throws IOException
    */
   private FeedMessage readOrReturnDefault(URL url) throws IOException {
     if (url == null) {
-      FeedMessage.Builder builder = FeedMessage.newBuilder();
-      FeedHeader.Builder header = FeedHeader.newBuilder();
-      header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
-      builder.setHeader(header);
-      return builder.build();
+      return getDefaultFeedMessage();
     }
     return readFeedFromUrl(url);
   }
 
+  private FeedMessage getDefaultFeedMessage() {
+    FeedMessage.Builder builder = FeedMessage.newBuilder();
+    FeedHeader.Builder header = FeedHeader.newBuilder();
+    header.setGtfsRealtimeVersion(GtfsRealtimeConstants.VERSION);
+    builder.setHeader(header);
+    return builder.build();
+  }
+  
   /**
    * 
    * @param url the {@link URL} to read from
@@ -520,12 +524,16 @@ public class GtfsRealtimeSource implements MonitoredDataSource {
   private FeedMessage readFeedFromUrl(URL url) throws IOException {
    URLConnection urlConnection = url.openConnection();
    setHeadersToUrlConnection(urlConnection);
-   InputStream in = urlConnection.getInputStream();
-    try {
-      return FeedMessage.parseFrom(in, _registry);
-    } finally {
+   InputStream in = null;
+   try {
+     in = urlConnection.getInputStream();
+     return FeedMessage.parseFrom(in, _registry);
+   } catch (IOException ex) {
+     _log.error("connection issue with url " + url);
+     return getDefaultFeedMessage();
+   } finally {
       try {
-        in.close();
+        if (in != null) in.close();
       } catch (IOException ex) {
         _log.error("error closing url stream " + url);
       }

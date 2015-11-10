@@ -18,6 +18,8 @@ package org.onebusaway.transit_data_federation.impl.service_alerts;
 
 import javax.persistence.*;
 
+import org.apache.commons.lang.StringUtils;
+
 @Entity
 @Table(name = "transit_data_service_alerts_situation_affects")
 public class ServiceAlertsSituationAffectsClause {
@@ -26,17 +28,22 @@ public class ServiceAlertsSituationAffectsClause {
   @GeneratedValue
   private int id = 0;
 
-  private String agencyId;
+  private String agencyId = null;
 
-  private String routeId;
+  @Column(nullable = true, name="route_id")
+  private String routeId = null;
 
-  private String directionId;
+  @Column(nullable = true, name="direction_id")
+  private String directionId = null;
+  
+  @Column(nullable = true, name="trip_id")
+  private String tripId = null;
 
-  private String tripId;
+  @Column(nullable = true, name="stop_id")
+  private String stopId = null;
 
-  private String stopId;
-
-  private String applicationId;
+  @Column(nullable = true, name="application_id")
+  private String applicationId = null;
 
   @ManyToOne
   private ServiceAlertRecord serviceAlertRecord;
@@ -50,6 +57,7 @@ public class ServiceAlertsSituationAffectsClause {
   }
 
   public String getAgencyId() {
+    if (StringUtils.isBlank(agencyId)) return null;
     return agencyId;
   }
 
@@ -58,6 +66,7 @@ public class ServiceAlertsSituationAffectsClause {
   }
 
   public String getRouteId() {
+    if (StringUtils.isBlank(routeId)) return null;
     return routeId;
   }
 
@@ -66,6 +75,7 @@ public class ServiceAlertsSituationAffectsClause {
   }
 
   public String getDirectionId() {
+    if (StringUtils.isBlank(directionId)) return null;
     return directionId;
   }
 
@@ -74,6 +84,7 @@ public class ServiceAlertsSituationAffectsClause {
   }
 
   public String getTripId() {
+    if (StringUtils.isBlank(tripId)) return null;
     return tripId;
   }
 
@@ -82,6 +93,7 @@ public class ServiceAlertsSituationAffectsClause {
   }
 
   public String getStopId() {
+    if (StringUtils.isBlank(stopId)) return null;
     return stopId;
   }
 
@@ -90,6 +102,7 @@ public class ServiceAlertsSituationAffectsClause {
   }
 
   public String getApplicationId() {
+    if (StringUtils.isBlank(applicationId)) return null;
     return applicationId;
   }
 

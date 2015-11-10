@@ -1,17 +1,38 @@
+/**
+ * Copyright (C) 2015 Cambridge Systematics, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.onebusaway.admin.service.server.impl;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.transit.realtime.GtfsRealtime.Alert;
-import com.google.transit.realtime.GtfsRealtime.EntitySelector;
-import com.google.transit.realtime.GtfsRealtime.FeedEntity;
-import com.google.transit.realtime.GtfsRealtime.FeedHeader;
-import com.google.transit.realtime.GtfsRealtime.FeedMessage;
-import com.google.transit.realtime.GtfsRealtime.TimeRange;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString;
-import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
-import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
-import com.google.transit.realtime.GtfsRealtimeConstants;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
@@ -20,10 +41,17 @@ import org.apache.http.HttpStatus;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
-import org.onebusaway.admin.service.server.WmataRssServiceAlertsService;
+import org.onebusaway.admin.service.server.RssServiceAlertsService;
+import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.ListBean;
 import org.onebusaway.transit_data.model.RouteBean;
-import org.onebusaway.transit_data.model.service_alerts.*;
+import org.onebusaway.transit_data.model.service_alerts.EEffect;
+import org.onebusaway.transit_data.model.service_alerts.ESeverity;
+import org.onebusaway.transit_data.model.service_alerts.NaturalLanguageStringBean;
+import org.onebusaway.transit_data.model.service_alerts.ServiceAlertBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationAffectsBean;
+import org.onebusaway.transit_data.model.service_alerts.SituationConsequenceBean;
+import org.onebusaway.transit_data.model.service_alerts.TimeRangeBean;
 import org.onebusaway.transit_data.services.TransitDataService;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts;
 import org.slf4j.Logger;
@@ -31,43 +59,74 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import com.google.transit.realtime.GtfsRealtime.Alert;
+import com.google.transit.realtime.GtfsRealtime.EntitySelector;
+import com.google.transit.realtime.GtfsRealtime.FeedEntity;
+import com.google.transit.realtime.GtfsRealtime.FeedHeader;
+import com.google.transit.realtime.GtfsRealtime.FeedMessage;
+import com.google.transit.realtime.GtfsRealtime.TimeRange;
+import com.google.transit.realtime.GtfsRealtime.TranslatedString;
+import com.google.transit.realtime.GtfsRealtime.TranslatedString.Translation;
+import com.google.transit.realtime.GtfsRealtime.TripDescriptor;
+import com.google.transit.realtime.GtfsRealtimeConstants;
 
 @Component
-class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
+public class RssServiceAlertsSerivceImpl implements RssServiceAlertsService {
 
-    private static Logger _log = LoggerFactory.getLogger(WmataRssServiceAlertsSerivceImpl.class);
+    private static Logger _log = LoggerFactory.getLogger(RssServiceAlertsSerivceImpl.class);
 
-    private String wmataAgencyId = "1"; //todo Externalize agency ID and urls
-    private String serviceStatusUrlString = "http://www.metroalerts.info/rss.aspx?bus";
-    private String serviceAdvisoryUrlString = "http://www.wmata.com/rider_tools/metro_service_status/feeds/bus_Advisories.xml";
-    private HttpClient httpClient = new HttpClient();
-    private SAXBuilder builder = new SAXBuilder();
-    private SimpleDateFormat sdf = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zzz");
+    private String _defaultAgencyId = null;
+    private String _serviceStatusUrlString = null;
+    private String _serviceAdvisoryUrlString = null;
+    private String _alertSource = "default";
+    private HttpClient _httpClient = new HttpClient();
+    private SAXBuilder _builder = new SAXBuilder();
+    private SimpleDateFormat _sdf = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss zzz");
     private ScheduledExecutorService _executor;
-    @Autowired
     private TransitDataService _transitDataService;
-    private Map<String, String> routeShortNameToRouteIdMap;
-    private Map<String, ServiceAlertBean> wmataAlertCache;
-    private ObjectMapper mapper = new ObjectMapper();
+    private Map<String, String> _routeShortNameToRouteIdMap;
+    private Map<String, ServiceAlertBean> _alertCache;
     private boolean _removeAgencyIds = true;
     private FeedMessage _feed = null;
 
+    @Autowired
+    public void setTransitDataService(TransitDataService tds) {
+      _transitDataService = tds;
+    }
+    
+    public void setDefaultAgencyId(String agencyId) {
+      this._defaultAgencyId = agencyId;
+    }
+    
+    public void setServiceStatusUrlString(String url) {
+      _serviceStatusUrlString = url;
+    }
+    
+    public void setServiceAdvisoryUrlString(String url) {
+      _serviceAdvisoryUrlString = url;
+    }
+    
+    public void setAlertSource(String source) {
+      _alertSource = source;
+    }
+    
+    public boolean isEnabled() {
+      return _serviceStatusUrlString != null && _serviceAdvisoryUrlString != null;
+    }
 
+    public String getAgencyId() {
+      if (_defaultAgencyId != null) return _defaultAgencyId;
+      // not configured, default to the first agency
+      return _transitDataService.getAgenciesWithCoverage().get(0).getAgency().getId();
+    }
+    
     @PostConstruct
     public void start() throws Exception {
         _executor = Executors.newSingleThreadScheduledExecutor();
+        // re-build internal route cache
         _executor.scheduleAtFixedRate(new RefreshDataTask(), 0, 1, TimeUnit.HOURS);
-        _executor.scheduleAtFixedRate(new PollWmataRssTask(), 0, 1, TimeUnit.MINUTES);
+        // poll feed
+        _executor.scheduleAtFixedRate(new PollRssTask(), 0, 5, TimeUnit.MINUTES);
     }
 
     @PreDestroy
@@ -82,14 +141,17 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
     }
     
     protected List<ServiceAlertBean> pollServiceAdvisoryRssFeed() throws Exception {
+      
         List<ServiceAlertBean> alerts = new ArrayList<ServiceAlertBean>();
-        HttpMethod httpget = new GetMethod(serviceAdvisoryUrlString);
-        int response = httpClient.executeMethod(httpget);
+        if (_serviceAdvisoryUrlString == null) return alerts;
+        
+        HttpMethod httpget = new GetMethod(_serviceAdvisoryUrlString);
+        int response = _httpClient.executeMethod(httpget);
         if (response != HttpStatus.SC_OK) {
-            throw new Exception("WMATA service status poll failed, returned status code: " + response);
+            throw new Exception("service status poll failed, returned status code: " + response);
         }
 
-        Document doc = builder.build(httpget.getResponseBodyAsStream());
+        Document doc = _builder.build(httpget.getResponseBodyAsStream());
 
         List<Element> elements = doc.getRootElement().getChild("channel").getChildren("item");
         String language = doc.getRootElement().getChild("channel").getChildText("language");
@@ -101,10 +163,10 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
             String description = itemElement.getChild("description").getValue();
             String pubDateString = itemElement.getChild("pubDate").getValue();
             String guid = itemElement.getChild("guid").getValue();
-            Date pubDate = sdf.parse(pubDateString);
+            Date pubDate = _sdf.parse(pubDateString);
             List<SituationAffectsBean> affectedRouteIds = getRouteIds(title);
             ServiceAlertBean serviceAlertBean = new ServiceAlertBean();
-            serviceAlertBean.setSource("WMATA");
+            serviceAlertBean.setSource(_alertSource);
             serviceAlertBean.setAllAffects(affectedRouteIds);
             serviceAlertBean.setSeverity(ESeverity.UNKNOWN);
             serviceAlertBean.setSummaries(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
@@ -114,7 +176,7 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
             serviceAlertBean.setConsequences(Arrays.asList(new SituationConsequenceBean[]{situationConsequenceBean}));
             serviceAlertBean.setCreationTime(pubDate.getTime());
             serviceAlertBean.setDescriptions(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
-            serviceAlertBean.setId(wmataAgencyId + "_" + guid);
+            serviceAlertBean.setId(new AgencyAndId(getAgencyId(), guid).toString());
             serviceAlertBean.setUrls(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(link, language)}));
             alerts.add(serviceAlertBean);
         }
@@ -122,14 +184,16 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
     }
 
     protected List<ServiceAlertBean>  pollServiceStatusRssFeed() throws Exception {
-        List<ServiceAlertBean> alerts = new ArrayList<ServiceAlertBean>();
-        HttpMethod httpget = new GetMethod(serviceStatusUrlString);
-        int response = httpClient.executeMethod(httpget);
+        List<ServiceAlertBean> alerts = new ArrayList<ServiceAlertBean>();  
+        if (_serviceStatusUrlString == null) return alerts;
+        
+        HttpMethod httpget = new GetMethod(_serviceStatusUrlString);
+        int response = _httpClient.executeMethod(httpget);
         if (response != HttpStatus.SC_OK) {
-            throw new Exception("WMATA service status poll failed, returned status code: " + response);
+            throw new Exception("service status poll failed, returned status code: " + response);
         }
 
-        Document doc = builder.build(httpget.getResponseBodyAsStream());
+        Document doc = _builder.build(httpget.getResponseBodyAsStream());
 
 
         List<Element> elements = doc.getRootElement().getChild("channel").getChildren("item");
@@ -140,10 +204,10 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
             String description = itemElement.getChild("description").getValue();
             String pubDateString = itemElement.getChild("pubDate").getValue();
             String guid = itemElement.getChild("guid").getValue();
-            Date pubDate = sdf.parse(pubDateString);
+            Date pubDate = _sdf.parse(pubDateString);
             List<SituationAffectsBean> affectedRouteIds = getRouteIds(title);
             ServiceAlertBean serviceAlertBean = new ServiceAlertBean();
-            serviceAlertBean.setSource("WMATA");
+            serviceAlertBean.setSource(_alertSource);
             serviceAlertBean.setAllAffects(affectedRouteIds);
             serviceAlertBean.setSeverity(ESeverity.UNKNOWN);
             serviceAlertBean.setSummaries(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
@@ -153,7 +217,7 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
             serviceAlertBean.setConsequences(Arrays.asList(new SituationConsequenceBean[]{situationConsequenceBean}));
             serviceAlertBean.setCreationTime(pubDate.getTime());
             serviceAlertBean.setDescriptions(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(description, language)}));
-            serviceAlertBean.setId(wmataAgencyId + "_" + guid);
+            serviceAlertBean.setId(new AgencyAndId(getAgencyId(), guid).toString());
             serviceAlertBean.setUrls(Arrays.asList(new NaturalLanguageStringBean[]{new NaturalLanguageStringBean(link, language)}));
             alerts.add(serviceAlertBean);
         }
@@ -166,10 +230,10 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
         for(int i = 0; i < routeShortNames.length; i++) {
             String routeShortName = routeShortNames[i];
             routeShortName = routeShortName.toUpperCase().trim();
-            String routeId = routeShortNameToRouteIdMap.get(routeShortName);
+            String routeId = _routeShortNameToRouteIdMap.get(routeShortName);
             if(routeId != null){
                 SituationAffectsBean situationAffectsBean = new SituationAffectsBean();
-                situationAffectsBean.setAgencyId(wmataAgencyId);
+                situationAffectsBean.setAgencyId(getAgencyId());
                 situationAffectsBean.setRouteId(routeId);
                 affectedRoutes.add(situationAffectsBean);
             }else{
@@ -179,21 +243,25 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
         return affectedRoutes;
     }
 
-    private class PollWmataRssTask implements Runnable {
+    private class PollRssTask implements Runnable {
 
 
         @Override
         public void run() {
             try {
-                if(routeShortNameToRouteIdMap == null)
+                if (!isEnabled()) {
+                    return;
+                }
+              
+                if(_routeShortNameToRouteIdMap == null)
                     return;
 
-                ListBean<ServiceAlertBean> currentObaAlerts = _transitDataService.getAllServiceAlertsForAgencyId(wmataAgencyId);
+                ListBean<ServiceAlertBean> currentObaAlerts = _transitDataService.getAllServiceAlertsForAgencyId(getAgencyId());
                 for(ServiceAlertBean serviceAlertBean : currentObaAlerts.getList()){
-                    if(!wmataAlertCache.keySet().contains(serviceAlertBean.getId())
+                    if(!_alertCache.keySet().contains(serviceAlertBean.getId())
                             && serviceAlertBean.getSource() != null
-                            && serviceAlertBean.getSource().equals("WMATA")){
-                        wmataAlertCache.put(serviceAlertBean.getId(), serviceAlertBean);
+                            && serviceAlertBean.getSource().equals(_alertSource)){
+                        _alertCache.put(serviceAlertBean.getId(), serviceAlertBean);
                     }
                 }
 
@@ -217,38 +285,32 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
                     currentRssAlertMap.put(alert.getId(), alert);
                 }
 
-                Iterator<String> cachedAlertsGuidIter = wmataAlertCache.keySet().iterator();
+                Iterator<String> cachedAlertsGuidIter = _alertCache.keySet().iterator();
                 //first, check for expired alerts and existing alerts that have been updated
                 while(cachedAlertsGuidIter.hasNext()){
                     String guid = cachedAlertsGuidIter.next();
                     if(!currentRssAlertMap.keySet().contains(guid)){
-                        _log.info("Removing expired WMATA alert with guid " + guid);
-                        // TODO
-//                        _transitDataService.removeServiceAlert(guid);
+                        _log.info("Removing expired alert with guid " + guid);
                         cachedAlertsGuidIter.remove();
                     }else{
-                        ServiceAlertBean currentAlert = wmataAlertCache.get(guid);
+                        ServiceAlertBean currentAlert = _alertCache.get(guid);
                         ServiceAlertBean rssAlert = currentRssAlertMap.get(guid);
                         if(rssAlert.getCreationTime() > currentAlert.getCreationTime()) {
-                            _log.info("Updating WMATA alert with guid " + guid);
-                            wmataAlertCache.put(guid, rssAlert);
-                            // TODO
-//                            _transitDataService.updateServiceAlert(rssAlert);
+                            _log.info("Updating alert with guid " + guid);
+                            _alertCache.put(guid, rssAlert);
                         }
                     }
                 }
 
                 //now create alerts for any new guids on the RSS feed
                 for(String currentRssGuid : currentRssAlertMap.keySet()){
-                    if(!wmataAlertCache.keySet().contains(currentRssGuid)){
-                        _log.info("Creating WMATA alert with guid " + currentRssGuid);
-                        // TODO
-//                        _transitDataService.createServiceAlert(wmataAgencyId, currentRssAlertMap.get(currentRssGuid));
-                        wmataAlertCache.put(currentRssGuid, currentRssAlertMap.get(currentRssGuid));
+                    if(!_alertCache.keySet().contains(currentRssGuid)){
+                        _log.info("Creating alert with guid " + currentRssGuid);
+                        _alertCache.put(currentRssGuid, currentRssAlertMap.get(currentRssGuid));
                     }
                 }
                 
-                updateAlerts(wmataAlertCache);
+                updateAlerts(_alertCache);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -273,10 +335,11 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
             alerts.add(beanEntry.getValue());
           }
           ListBean<ServiceAlertBean> alertsBean = new ListBean<ServiceAlertBean>();
-          toAlert(feedEntity, alertsBean);
+          alertsBean.setList(alerts);
+          fillAlert(feedEntity, alertsBean);
         }
 
-        private Alert toAlert(FeedMessage.Builder feed, ListBean<ServiceAlertBean> alerts) {
+        private void fillAlert(FeedMessage.Builder feed, ListBean<ServiceAlertBean> alerts) {
           for (ServiceAlertBean serviceAlert : alerts.getList()) {
             FeedEntity.Builder entity = feed.addEntityBuilder();
             entity.setId(Integer.toString(feed.getEntityCount()));
@@ -319,7 +382,6 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
               }
             }
           }
-          return null;
         }
     }
 
@@ -349,13 +411,13 @@ class WmataRssServiceAlertsSerivceImpl implements WmataRssServiceAlertsService {
         @Override
         public void run() {
             try {
-                ListBean<RouteBean> routes =  _transitDataService.getRoutesForAgencyId(wmataAgencyId);
+                ListBean<RouteBean> routes =  _transitDataService.getRoutesForAgencyId(getAgencyId());
                 Map<String, String> mutableRouteMap = new HashMap<String, String>();
                 for(RouteBean route : routes.getList()){
                     mutableRouteMap.put(route.getShortName().toUpperCase(), route.getId());
                 }
-                routeShortNameToRouteIdMap = Collections.unmodifiableMap(mutableRouteMap);
-                wmataAlertCache = new HashMap<String, ServiceAlertBean>();
+                _routeShortNameToRouteIdMap = Collections.unmodifiableMap(mutableRouteMap);
+                _alertCache = new HashMap<String, ServiceAlertBean>();
             } catch (Exception e) {
                 e.printStackTrace();
             }
