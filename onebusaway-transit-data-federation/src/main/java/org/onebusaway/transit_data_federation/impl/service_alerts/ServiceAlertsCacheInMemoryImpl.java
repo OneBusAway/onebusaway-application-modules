@@ -16,34 +16,24 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.springframework.stereotype.Component;
-
 @Component
 public class ServiceAlertsCacheInMemoryImpl implements ServiceAlertsCache {
 
   private final Semaphore _available = new Semaphore(1, true);
   
-  private ConcurrentMap<AgencyAndId, ServiceAlert> _serviceAlerts = new ConcurrentHashMap<AgencyAndId, ServiceAlert>();  
+  private ConcurrentMap<AgencyAndId, ServiceAlertRecord> _serviceAlerts = new ConcurrentHashMap<AgencyAndId, ServiceAlertRecord>();
 
-  /**
-   * This map groups service alert ids by the agency id in their
-   * {@link ServiceAlert#getId()} id.
-   */
   private ConcurrentMap<String, Set<AgencyAndId>> _serviceAlertIdsByServiceAlertAgencyId = new ConcurrentHashMap<String, Set<AgencyAndId>>();
 
-  /**
-   * This map groups service alert ids by any agency id mentioned in
-   * {@link Affects#getAgencyId()}.
-   */
   private ConcurrentMap<String, Set<AgencyAndId>> _serviceAlertIdsByAgencyId = new ConcurrentHashMap<String, Set<AgencyAndId>>();
 
   private ConcurrentMap<AgencyAndId, Set<AgencyAndId>> _serviceAlertIdsByStopId = new ConcurrentHashMap<AgencyAndId, Set<AgencyAndId>>();
@@ -83,7 +73,7 @@ public class ServiceAlertsCacheInMemoryImpl implements ServiceAlertsCache {
     }
   
   @Override
-  public Map<AgencyAndId, ServiceAlert> getServiceAlerts() {
+  public Map<AgencyAndId, ServiceAlertRecord> getServiceAlerts() {
     try {
       _available.acquire();
       return _serviceAlerts;
@@ -96,7 +86,7 @@ public class ServiceAlertsCacheInMemoryImpl implements ServiceAlertsCache {
   }
   
   @Override
-  public ServiceAlert removeServiceAlert(AgencyAndId serviceAlertId) {
+  public ServiceAlertRecord removeServiceAlert(AgencyAndId serviceAlertId) {
     try {
       _available.acquire();
       return _serviceAlerts.remove(serviceAlertId);
@@ -109,10 +99,10 @@ public class ServiceAlertsCacheInMemoryImpl implements ServiceAlertsCache {
   }
 
   @Override
-  public ServiceAlert putServiceAlert(AgencyAndId id, ServiceAlert serviceAlert) {
+  public ServiceAlertRecord putServiceAlert(AgencyAndId id, ServiceAlertRecord serviceAlert) {
     try {
       _available.acquire();
-      ServiceAlert existing = _serviceAlerts.get(id);
+      ServiceAlertRecord existing = _serviceAlerts.get(id);
       _serviceAlerts.put(id, serviceAlert);
       return existing;
     } catch (InterruptedException e) {

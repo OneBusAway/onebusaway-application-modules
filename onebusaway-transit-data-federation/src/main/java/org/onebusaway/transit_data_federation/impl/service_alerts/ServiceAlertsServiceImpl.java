@@ -16,44 +16,21 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.onebusaway.gtfs.model.AgencyAndId;
 import org.onebusaway.transit_data.model.service_alerts.SituationQueryBean;
-import org.onebusaway.transit_data_federation.services.FederatedTransitDataBundle;
 import org.onebusaway.transit_data_federation.services.blocks.BlockInstance;
 import org.onebusaway.transit_data_federation.services.blocks.BlockTripInstance;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Id;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlertsCollection;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.TimeRange;
 import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlertsService;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockStopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.BlockTripEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.StopTimeEntry;
-import org.onebusaway.transit_data_federation.services.transit_graph.TripEntry;
+import org.onebusaway.transit_data_federation.services.transit_graph.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.*;
 
 @Component
 class ServiceAlertsServiceImpl implements ServiceAlertsService {
@@ -74,10 +51,6 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	private ServiceAlertsCache _cache;
 	
 	private ServiceAlertsPersistence _persister;
-	
-	private FederatedTransitDataBundle _bundle;
-
-	private File _serviceAlertsPath;
 
 	@Autowired
 	public void setServiceAlertsCache(ServiceAlertsCache cache) {
@@ -96,19 +69,14 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	public ServiceAlertsPersistence getServiceAlertsPeristence() {
 	  return _persister;
 	}
-	
-	@Autowired
-	public void setBundle(FederatedTransitDataBundle bundle) {
-		_bundle = bundle;
-	}
 
-	public void setServiceAlertsPath(File path) {
-		_serviceAlertsPath = path;
-	}
-	
 	@PostConstruct
 	public void start() {
-		loadServiceAlerts();
+	  try {
+	    loadServiceAlerts();
+	  } catch (Throwable t) {
+	    _log.error("issue loading service alerts: ", t);
+	  }
 	}
 
 	@PreDestroy
@@ -121,28 +89,23 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	 ****/
 
 	@Override
-	public synchronized ServiceAlert createOrUpdateServiceAlert(
-			ServiceAlert.Builder builder, String defaultAgencyId) {
+	public synchronized ServiceAlertRecord createOrUpdateServiceAlert(
+      ServiceAlertRecord serviceAlertRecord) {
 
 	  if (_persister.needsSync()) this.loadServiceAlerts();
 	  
-		if (!builder.hasId()) {
+		if (serviceAlertRecord.getServiceAlertId() == null) {
 			UUID uuid = UUID.randomUUID();
-			Id id = ServiceAlertLibrary.id(defaultAgencyId, uuid.toString());
-			builder.setId(id);
+			serviceAlertRecord.setServiceAlertId(uuid.toString());
 		}
 
 		long lastModified = System.currentTimeMillis();
-		if (!builder.hasCreationTime())
-			builder.setCreationTime(lastModified);
-		builder.setModifiedTime(lastModified);
+		if (serviceAlertRecord.getCreationTime() < 1l)
+        serviceAlertRecord.setCreationTime(lastModified);
 
-		ServiceAlert serviceAlert = builder.build();
-		updateReferences(serviceAlert);
-		// for backwards compatibility, we update the serialized bundle file
-		saveServiceAlerts();
-		saveDBServiceAlerts(serviceAlert, lastModified);
-		return serviceAlert;
+		updateReferences(serviceAlertRecord);
+		saveDBServiceAlerts(serviceAlertRecord, lastModified);
+		return serviceAlertRecord;
 	}
 
 	@Override
@@ -154,14 +117,14 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	public synchronized void removeServiceAlerts(List<AgencyAndId> serviceAlertIds) {
 	  if (_persister.needsSync()) this.loadServiceAlerts();
 		for (AgencyAndId serviceAlertId : serviceAlertIds) {
-			ServiceAlert existingServiceAlert = _cache.removeServiceAlert(serviceAlertId);
+      ServiceAlertRecord existingServiceAlert = _cache.removeServiceAlert(serviceAlertId);
 
 			if (existingServiceAlert != null) {
 				updateReferences(existingServiceAlert, null);
 			}
 			
 			//Now remove from the DataBase.
-			ServiceAlertRecord existingServiceAlertRecord = getServiceAlertRecordByAlertId(serviceAlertId.getId());
+			ServiceAlertRecord existingServiceAlertRecord = getServiceAlertRecordByAlertId(serviceAlertId.getAgencyId(), serviceAlertId.getId());
 			_log.info("deleting service alert " + serviceAlertId.getId());
 			if (existingServiceAlertRecord != null) {
 			  _persister.delete(existingServiceAlertRecord);
@@ -179,26 +142,26 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 
 	@Override
-	public ServiceAlert getServiceAlertForId(AgencyAndId serviceAlertId) {
+	public ServiceAlertRecord getServiceAlertForId(AgencyAndId serviceAlertId) {
 	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		return _cache.getServiceAlerts().get(serviceAlertId);
 	}
 
 	@Override
-	public List<ServiceAlert> getAllServiceAlerts() {
+	public List<ServiceAlertRecord> getAllServiceAlerts() {
 	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
-		return new ArrayList<ServiceAlert>(_cache.getServiceAlerts().values());
+		return new ArrayList<ServiceAlertRecord>(_cache.getServiceAlerts().values());
 	}
 
 	@Override
-	public List<ServiceAlert> getServiceAlertsForFederatedAgencyId(String agencyId) {
+	public List<ServiceAlertRecord> getServiceAlertsForFederatedAgencyId(String agencyId) {
 	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		Set<AgencyAndId> serviceAlertIds = _cache.getServiceAlertIdsByServiceAlertAgencyId().get(agencyId);
 		return getServiceAlertIdsAsObjects(serviceAlertIds);
 	}
 
 	@Override
-	public List<ServiceAlert> getServiceAlertsForAgencyId(long time,
+	public List<ServiceAlertRecord> getServiceAlertsForAgencyId(long time,
 			String agencyId) {
 	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
@@ -208,7 +171,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 
 	@Override
-	public List<ServiceAlert> getServiceAlertsForStopId(long time,
+	public List<ServiceAlertRecord> getServiceAlertsForStopId(long time,
 			AgencyAndId stopId) {
 	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
@@ -219,7 +182,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 
 	@Override
-	public List<ServiceAlert> getServiceAlertsForStopCall(long time,
+	public List<ServiceAlertRecord> getServiceAlertsForStopCall(long time,
 			BlockInstance blockInstance, BlockStopTimeEntry blockStopTime,
 			AgencyAndId vehicleId) {
 	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
@@ -272,7 +235,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 
 	@Override
-	public List<ServiceAlert> getServiceAlertsForVehicleJourney(long time,
+	public List<ServiceAlertRecord> getServiceAlertsForVehicleJourney(long time,
 			BlockTripInstance blockTripInstance, AgencyAndId vehicleId) {
 	  if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		BlockTripEntry blockTrip = blockTripInstance.getBlockTrip();
@@ -293,7 +256,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	}
 
 	@Override
-	public List<ServiceAlert> getServiceAlerts(SituationQueryBean query) {
+	public List<ServiceAlertRecord> getServiceAlerts(SituationQueryBean query) {
 		Set<AgencyAndId> serviceAlertIds = new HashSet<AgencyAndId>();
 		if (_persister.cachedNeedsSync()) this.loadServiceAlerts();
 		for (SituationQueryBean.AffectsBean affects : query.getAffects()) {
@@ -364,7 +327,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			}
 		}
 
-		List<ServiceAlert> alerts = getServiceAlertIdsAsObjects(serviceAlertIds);
+		List<ServiceAlertRecord> alerts = getServiceAlertIdsAsObjects(serviceAlertIds);
 
 		// SituationQueryBean no longer supports filtering by time, but it might return, so leaving this code here
 		// for future reference.
@@ -373,7 +336,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		return alerts;
 	}
 
-	/****
+    /****
 	 * Private Methods
 	 ****/
 
@@ -409,14 +372,14 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 	//    }
 	//  }
 	//
-	private void updateReferences(ServiceAlert serviceAlert) {
-		AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
-		ServiceAlert existingServiceAlert = _cache.putServiceAlert(id, serviceAlert);
+	private void updateReferences(ServiceAlertRecord serviceAlert) {
+		AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
+    ServiceAlertRecord existingServiceAlert = _cache.putServiceAlert(id, serviceAlert);
 		updateReferences(existingServiceAlert, serviceAlert);
 	}
 
-	private void updateReferences(ServiceAlert existingServiceAlert,
-			ServiceAlert serviceAlert) {
+	private void updateReferences(ServiceAlertRecord existingServiceAlert,
+      ServiceAlertRecord serviceAlert) {
 
 		updateReferences(existingServiceAlert, serviceAlert,
 				_cache.getServiceAlertIdsByServiceAlertAgencyId(),
@@ -449,8 +412,8 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 
 	}
 
-	private <T> void updateReferences(ServiceAlert existingServiceAlert,
-			ServiceAlert serviceAlert, Map<T, Set<AgencyAndId>> map,
+	private <T> void updateReferences(ServiceAlertRecord existingServiceAlert,
+			ServiceAlertRecord serviceAlert, Map<T, Set<AgencyAndId>> map,
 			AffectsKeyFactory<T> affectsKeyFactory) {
 
 		Set<T> existingEffects = Collections.emptySet();
@@ -466,7 +429,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		for (T existingEffect : existingEffects) {
 			if (newEffects.contains(existingEffect))
 				continue;
-			AgencyAndId id = ServiceAlertLibrary.agencyAndId(existingServiceAlert.getId());
+			AgencyAndId id = ServiceAlertLibrary.agencyAndId(existingServiceAlert.getAgencyId(), existingServiceAlert.getServiceAlertId());
 			Set<AgencyAndId> ids = map.get(existingEffect);
 			ids.remove(id);
 			if (ids.isEmpty())
@@ -476,7 +439,7 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		for (T newEffect : newEffects) {
 			if (existingEffects.contains(newEffect))
 				continue;
-			AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getId());
+      AgencyAndId id = ServiceAlertLibrary.agencyAndId(serviceAlert.getAgencyId(), serviceAlert.getServiceAlertId());
 			Set<AgencyAndId> ids = map.get(newEffect);
 			if (ids == null) {
 				ids = new HashSet<AgencyAndId>();
@@ -494,31 +457,31 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 			matches.addAll(ids);
 	}
 
-	private List<ServiceAlert> getServiceAlertIdsAsObjects(
+	private List<ServiceAlertRecord> getServiceAlertIdsAsObjects(
 			Collection<AgencyAndId> serviceAlertIds) {
 		return getServiceAlertIdsAsObjects(serviceAlertIds, -1);
 	}
 
-	private List<ServiceAlert> getServiceAlertIdsAsObjects(
+	private List<ServiceAlertRecord> getServiceAlertIdsAsObjects(
 			Collection<AgencyAndId> serviceAlertIds, long time) {
 		if (serviceAlertIds == null || serviceAlertIds.isEmpty())
 			return Collections.emptyList();
-		List<ServiceAlert> serviceAlerts = new ArrayList<ServiceAlert>(
+		List<ServiceAlertRecord> serviceAlerts = new ArrayList<ServiceAlertRecord>(
 				serviceAlertIds.size());
 		for (AgencyAndId serviceAlertId : serviceAlertIds) {
-			ServiceAlert serviceAlert = _cache.getServiceAlerts().get(serviceAlertId);
+			ServiceAlertRecord serviceAlert = _cache.getServiceAlerts().get(serviceAlertId);
 			if (serviceAlert != null && filterByTime(serviceAlert, time))
 				serviceAlerts.add(serviceAlert);
 		}
 		return serviceAlerts;
 	}
 
-	private boolean filterByTime(ServiceAlert serviceAlert, long time) {
-		if (time == -1 || serviceAlert.getPublicationWindowList().size() == 0)
+	private boolean filterByTime(ServiceAlertRecord serviceAlert, long time) {
+		if (time == -1 || serviceAlert.getPublicationWindows().size() == 0)
 			return true;
-		for (TimeRange publicationWindow : serviceAlert.getPublicationWindowList()) {
-			if ((!publicationWindow.hasStart() || publicationWindow.getStart() <= time)
-					&& (!publicationWindow.hasEnd() || publicationWindow.getEnd() >= time)) {
+		for (ServiceAlertTimeRange publicationWindow : serviceAlert.getPublicationWindows()) {
+			if ((publicationWindow.getFromValue() == null || publicationWindow.getToValue() <= time)
+					&& (publicationWindow.getToValue() == null || publicationWindow.getToValue() >= time)) {
 				return true;
 			}
 		}
@@ -594,73 +557,31 @@ class ServiceAlertsServiceImpl implements ServiceAlertsService {
 		_log.debug("Loaded " + alerts.size() + " service alerts from DB");
 		try {			
 			for (ServiceAlertRecord serviceAlert : alerts)
-				updateReferences(serviceAlert.getServiceAlert());
+				updateReferences(serviceAlert);
 
 		} catch (Exception ex) {
-			_log.error("error loading service alerts from DB " + ex.toString());
+			_log.error("error loading service alerts from DB ", ex);
 		}		
-	}
-
-	private synchronized void saveServiceAlerts() {
-		File path = getServiceAlertsPath();
-
-		if (path == null)
-			return;
-
-		ServiceAlertsCollection.Builder builder = ServiceAlertsCollection.newBuilder();
-		builder.addAllServiceAlerts(_cache.getServiceAlerts().values());
-		ServiceAlertsCollection collection = builder.build();
-
-		OutputStream out = null;
-		try {
-			out = new BufferedOutputStream(new FileOutputStream(path));
-			collection.writeTo(out);
-			out.close();
-		} catch (Exception ex) {
-			_log.error("error saving service alerts to path " + path, ex);
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException ex) {
-					_log.error("error closing service output to path " + path, ex);
-				}
-			}
-		}
 	}
 
 	// this is admittedly slow performing, but it is only called on an update
 	// of a single service alert
-	private synchronized void saveDBServiceAlerts(ServiceAlert alert, Long lastModified) {
-		if (lastModified == null) lastModified = System.currentTimeMillis();
-		
-		AgencyAndId alertId = ServiceAlertLibrary.agencyAndId(alert.getId());
-		ServiceAlertRecord record = getServiceAlertRecordByAlertId(alert.getId().getId());
-		if(record == null) {
-			record = new ServiceAlertRecord(); 
-		}
-		
-		record.setServiceAlertId(alertId.getId());
-		record.setAgencyId(ServiceAlertLibrary.agencyAndId(alert.getId()));			
-		record.setServiceAlert(alert);
-		record.setLastModified(lastModified); // we need to assume its changed, as we don't track the affects clause
-    _log.info("Saving Service Alert to DataBase:" + alertId.getId());     
-
-		_persister.saveOrUpdate(record);
+	private synchronized void saveDBServiceAlerts(ServiceAlertRecord alert, Long lastModified) {
+        if (lastModified == null) lastModified = System.currentTimeMillis();
+        alert.setModifiedTime(lastModified); // we need to assume its changed, as we don't track the affects clause
+        ServiceAlertRecord persistedServiceAlertRecord = _persister.getServiceAlertRecordByAlertId(alert.getAgencyId(), alert.getServiceAlertId());
+        if(persistedServiceAlertRecord != null)
+            alert.setId(persistedServiceAlertRecord.getId());
+        _log.info("Saving Service Alert to DataBase:" + alert.getServiceAlertId());
+        _persister.saveOrUpdate(alert);
 	}
 
 	/**
 	 * Following method is looking into the database and pulling out the record related with the service ID passed.
-	 * @param id
 	 * @return
 	 */
-	private ServiceAlertRecord getServiceAlertRecordByAlertId(final String uuid) {
-	  return _persister.getServiceAlertRecordByAlertId(uuid);
+	private ServiceAlertRecord getServiceAlertRecordByAlertId(String agencyId, String serviceAlertId) {
+	  return _persister.getServiceAlertRecordByAlertId(agencyId, serviceAlertId);
 	}	
 
-	private File getServiceAlertsPath() {
-		if (_serviceAlertsPath != null)
-			return _serviceAlertsPath;
-		return _bundle.getServiceAlertsPath();
-	}
 }

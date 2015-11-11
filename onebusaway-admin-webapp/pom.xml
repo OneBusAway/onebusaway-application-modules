@@ -51,6 +51,11 @@
 		</repository>
 	</repositories>
 	<dependencies>
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom2</artifactId>
+            <version>2.0.5</version>
+        </dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
@@ -321,8 +326,8 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<tds.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</tds.path>
-				<vtms.path>http://localhost:8080/onebusaway-nyc-transit-data-federation-webapp</vtms.path>
+				<tds.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</tds.path>
+				<vtms.path>http://localhost:8080/onebusaway-transit-data-federation-webapp</vtms.path>
 				<bundle.builtPath>/var/lib/oba/bundles/builder</bundle.builtPath>
 				<bundle.stagedPath>/var/lib/oba/bundles/staged</bundle.stagedPath>
 				<bundle.deployPath>/var/lib/oba/bundles/active</bundle.deployPath>

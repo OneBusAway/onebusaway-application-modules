@@ -25,7 +25,7 @@ public interface ServiceAlertsPersistence {
 
   void saveOrUpdate(ServiceAlertRecord record);
 
-  ServiceAlertRecord getServiceAlertRecordByAlertId(String uuid);
+  ServiceAlertRecord getServiceAlertRecordByAlertId(String agencyId, String serviceAlertId);
 
   boolean needsSync();
 

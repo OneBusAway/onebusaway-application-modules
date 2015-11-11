@@ -16,12 +16,10 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.Affects;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 
 class AffectsTripAndStopKeyFactory implements
     AffectsKeyFactory<TripAndStopCallRef> {
@@ -29,16 +27,16 @@ class AffectsTripAndStopKeyFactory implements
   public static final AffectsTripAndStopKeyFactory INSTANCE = new AffectsTripAndStopKeyFactory();
 
   @Override
-  public Set<TripAndStopCallRef> getKeysForAffects(ServiceAlert serviceAlert) {
+  public Set<TripAndStopCallRef> getKeysForAffects(ServiceAlertRecord serviceAlert) {
 
     Set<TripAndStopCallRef> refs = new HashSet<TripAndStopCallRef>();
 
-    for (Affects affects : serviceAlert.getAffectsList()) {
-      if (affects.hasTripId()
-          && affects.hasStopId()
-          && !(affects.hasAgencyId() || affects.hasDirectionId() || affects.hasRouteId())) {
-        AgencyAndId tripId = ServiceAlertLibrary.agencyAndId(affects.getTripId());
-        AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getStopId());
+    for (ServiceAlertsSituationAffectsClause affects : serviceAlert.getAllAffects()) {
+      if (affects.getTripId() != null
+          && affects.getStopId() != null
+          && !(affects.getDirectionId() != null || affects.getRouteId() != null)) {
+        AgencyAndId tripId = ServiceAlertLibrary.agencyAndId(affects.getAgencyId(), affects.getTripId());
+        AgencyAndId stopId = ServiceAlertLibrary.agencyAndId(affects.getAgencyId(), affects.getStopId());
         TripAndStopCallRef ref = new TripAndStopCallRef(tripId, stopId);
         refs.add(ref);
       }

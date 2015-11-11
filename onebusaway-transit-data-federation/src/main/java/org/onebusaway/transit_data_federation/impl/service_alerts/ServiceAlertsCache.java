@@ -16,20 +16,20 @@
  */
 package org.onebusaway.transit_data_federation.impl.service_alerts;
 
+import org.onebusaway.gtfs.model.AgencyAndId;
+
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import org.onebusaway.gtfs.model.AgencyAndId;
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
 
 public interface ServiceAlertsCache {
   
   void clear();
-  Map<AgencyAndId, ServiceAlert> getServiceAlerts();
-  ServiceAlert removeServiceAlert(AgencyAndId serviceAlertId);
-  ServiceAlert putServiceAlert(AgencyAndId id, ServiceAlert serviceAlert);
+
+  Map<AgencyAndId, ServiceAlertRecord> getServiceAlerts();
+
+  ServiceAlertRecord removeServiceAlert(AgencyAndId serviceAlertId);
+
+  ServiceAlertRecord putServiceAlert(AgencyAndId id, ServiceAlertRecord serviceAlert);
   
   Map<String, Set<AgencyAndId>> getServiceAlertIdsByServiceAlertAgencyId();
 

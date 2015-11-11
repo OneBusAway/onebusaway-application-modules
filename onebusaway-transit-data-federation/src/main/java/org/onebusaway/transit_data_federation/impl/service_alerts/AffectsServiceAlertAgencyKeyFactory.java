@@ -19,18 +19,16 @@ package org.onebusaway.transit_data_federation.impl.service_alerts;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.onebusaway.transit_data_federation.services.service_alerts.ServiceAlerts.ServiceAlert;
-
 class AffectsServiceAlertAgencyKeyFactory implements AffectsKeyFactory<String> {
 
   public static final AffectsServiceAlertAgencyKeyFactory INSTANCE = new AffectsServiceAlertAgencyKeyFactory();
 
   @Override
-  public Set<String> getKeysForAffects(ServiceAlert serviceAlert) {
+  public Set<String> getKeysForAffects(ServiceAlertRecord serviceAlert) {
 
     Set<String> v = new HashSet<String>();
     if( serviceAlert != null)
-      v.add(serviceAlert.getId().getAgencyId());
+      v.add(serviceAlert.getAgencyId());
     return v;
   }
 

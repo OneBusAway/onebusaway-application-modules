@@ -81,7 +81,12 @@
 								<c:when test="${!empty distanceAways}">
 									<s:url var="url" namespace="/m" action="index">
 										<s:param name="q">
-											<s:property value="idWithoutAgency" />
+											<s:if test="%{useAgencyId == 'true'}">
+												<s:property value="id" />
+											</s:if>
+											<s:else>
+												<s:property value="idWithoutAgency" />
+											</s:else>
 										</s:param>
 									</s:url>
 									<strong>
@@ -109,7 +114,12 @@
 								<c:otherwise>
 									<s:url var="url" namespace="/m" action="index">
 										<s:param name="q">
-											<s:property value="idWithoutAgency" />
+											<s:if test="%{useAgencyId == "true"}">
+												<s:property value="id" />
+											</s:if>
+											<s:else>
+												<s:property value="idWithoutAgency" />
+											</s:else>
 										</s:param>
 									</s:url>
 									<a title="${name}" href="${url}">
@@ -117,7 +127,12 @@
 									</a> 
 								</c:otherwise>
 							</c:choose>
-							<span id="${directionId}-${idWithoutAgency}" class="anchor">&amp;nbsp</span>
+							<s:if test="%{useAgencyId == "true"}">
+								<span id="${directionId}-${id}" class="anchor">&amp;nbsp</span>
+							</s:if>
+							<s:else>
+								<span id="${directionId}-${idWithoutAgency}" class="anchor">&amp;nbsp</span>
+							</s:else>
 						</li>
 					</s:iterator>
 				</ul>

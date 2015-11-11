@@ -43,6 +43,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -384,6 +385,8 @@ public class SearchServiceImpl implements SearchService {
 			return null;
 		}
 
+		q = URLDecoder.decode(q);
+		
 		q = q.trim();
 
 		List<String> tokens = new ArrayList<String>();
@@ -428,7 +431,10 @@ public class SearchServiceImpl implements SearchService {
 				// consider the token a bad filter and remove it from the query.
 				if ((lastItem != null && stopsForId(lastItem).size() > 0)
 						|| (nextItem != null && stopsForId(nextItem).size() > 0)) {
-					continue;
+				  if (!token.contains("_")) {
+				    // if we have an agency Id, its probably a stop, don't discard
+				    continue;
+				  }
 				}
 			}
 
@@ -595,11 +601,15 @@ public class SearchServiceImpl implements SearchService {
 				}
 			} catch (NoSuchStopServiceException ex) {
 				try {
-					StopBean potentialStop = _transitDataService
-							.getStop(getStopIdFromStopCode(potentialStopId.toString()));
-					if (potentialStop != null) {
-						matches.add(potentialStop);
-					}
+				  if (matches.isEmpty()) {
+				    // this search is faulty if multi-agency based
+				    // skip if we have a match already
+  					StopBean potentialStop = _transitDataService
+  							.getStop(getStopIdFromStopCode(potentialStopId.toString()));
+  					if (potentialStop != null) {
+  						matches.add(potentialStop);
+  					}
+				  }
 				} catch (NoSuchStopServiceException ex2) {
 					continue;
 				}

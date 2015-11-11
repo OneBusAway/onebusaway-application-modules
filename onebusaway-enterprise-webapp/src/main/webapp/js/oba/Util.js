@@ -129,6 +129,12 @@ OBA.Util = (function() {
 				s += " ago";
 				return s;
 			}
+		},
+		displayStopId: function(s) {
+			if (OBA.Config.useAgencyId == 'true') {
+				return s;
+			}
+			return s.match(/\d*$/);
 		}
 	};
 })();

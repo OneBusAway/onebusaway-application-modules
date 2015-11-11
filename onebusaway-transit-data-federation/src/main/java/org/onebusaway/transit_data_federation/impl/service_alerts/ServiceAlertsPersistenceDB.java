@@ -55,7 +55,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
 
   @Override
   public void delete(ServiceAlertRecord existingServiceAlertRecord) {
-    _log.info("deleting " + (existingServiceAlertRecord==null?"NuLl":existingServiceAlertRecord.getServiceAlert().getId()));
+    _log.info("deleting " + (existingServiceAlertRecord==null?"NuLl":existingServiceAlertRecord.getServiceAlertId()));
     _template.delete(existingServiceAlertRecord);
   }
 
@@ -107,7 +107,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
         @Override
         public Long doInHibernate(Session session) throws HibernateException,
             SQLException {
-          Query query = session.createQuery("SELECT count(lastModified) FROM ServiceAlertRecord serviceAlert");
+          Query query = session.createQuery("SELECT count(serviceAlert) FROM ServiceAlertRecord serviceAlert");
           return (Long) query.list().get(0);
         }
       });
@@ -124,7 +124,9 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
       @Override
       public List<ServiceAlertRecord> doInHibernate(Session session)
           throws HibernateException, SQLException {
-        Query query = session.createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert");          
+        Query query = session.createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert " +
+                "left join fetch serviceAlert.consequences cs " +
+                "left join fetch cs.detourStopIds dsi ");
         return query.list();
       }
     });
@@ -132,17 +134,18 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
 
   @Override
   public void saveOrUpdate(ServiceAlertRecord record) {
-    _template.saveOrUpdate(record);   
+      _template.saveOrUpdate(record);
   }
 
   @Override
-  public ServiceAlertRecord getServiceAlertRecordByAlertId(final String uuid) {
+  public ServiceAlertRecord getServiceAlertRecordByAlertId(final String agencyId, final String serviceAlertId) {
     return _template.execute(new HibernateCallback<ServiceAlertRecord>() {      
       @Override
       public ServiceAlertRecord doInHibernate(Session session)
           throws HibernateException, SQLException {
-        Query query = session.createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert WHERE serviceAlertId = :serviceAlertId");
-        query.setString("serviceAlertId", uuid);
+        Query query = session.createQuery("SELECT serviceAlert FROM ServiceAlertRecord serviceAlert WHERE serviceAlertId = :serviceAlertId and agencyId = :agencyId");
+        query.setString("serviceAlertId", serviceAlertId);
+        query.setString("agencyId", agencyId);
         return (ServiceAlertRecord) query.uniqueResult();
       }
     });
@@ -155,7 +158,7 @@ public class ServiceAlertsPersistenceDB implements ServiceAlertsPersistence {
         @Override
         public Long doInHibernate(Session session) throws HibernateException,
             SQLException {
-          Query query = session.createQuery("SELECT max(lastModified) FROM ServiceAlertRecord serviceAlert");
+          Query query = session.createQuery("SELECT max(serviceAlert.modifiedTime) FROM ServiceAlertRecord serviceAlert");
           return (Long) query.list().get(0);
         }
       });
